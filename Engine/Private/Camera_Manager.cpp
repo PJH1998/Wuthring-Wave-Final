@@ -1,0 +1,237 @@
+#include "EnginePch.h"
+#include "Camera_Manager.h"
+
+#include "GameInstance.h"
+
+#include "Camera.h"
+
+CCamera_Manager::CCamera_Manager()
+    : m_pGameInstance { CGameInstance::GetInstance() }
+{
+    Safe_AddRef(m_pGameInstance);
+}
+
+HRESULT CCamera_Manager::Add_Camera(_uint iLevelID, const _wstring& strCameraTag, CCamera* pCamera)
+{
+    if (nullptr != Find_Camera(iLevelID, strCameraTag))
+        return E_FAIL;
+
+    m_Cameras[iLevelID].emplace(strCameraTag, pCamera);
+
+    return S_OK;
+}
+
+HRESULT CCamera_Manager::Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg)
+{
+    if (nullptr != Find_Camera(iLevelID, strCameraTag))
+        return E_FAIL;
+
+    CCamera* pCamera = static_cast<CCamera*>(m_pGameInstance->Clone_Prototype(iPrototypeLevelID, strPrototypeTag, PROTOTYPE::GAMEOBJECT, pArg));
+    if (nullptr == pCamera)
+        return E_FAIL;
+
+    m_Cameras[iLevelID].emplace(strCameraTag, pCamera);
+
+    return S_OK;
+}
+
+HRESULT CCamera_Manager::Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames)
+{
+    auto iter = m_CameraActions.find(strActionTag);
+    if (iter != m_CameraActions.end())
+        m_CameraActions.erase(iter);
+
+    vector<ACTIONFRAME> Actions;
+
+    for (size_t i = 0; i < ActionFrames.size(); ++i)
+    {
+        ACTIONFRAME ActionFrame = {};
+        memcpy(&ActionFrame, &ActionFrames[i], sizeof(ACTIONFRAME));
+        Actions.push_back(ActionFrame);
+    }
+
+    m_CameraActions.emplace(strActionTag, Actions);
+
+    return S_OK;
+}
+
+HRESULT CCamera_Manager::Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath)
+{
+    ifstream InputFile(pFilePath, ios::binary);
+    if (false == InputFile.is_open())
+        return E_FAIL;
+
+    _uint iNumActions = {};
+    InputFile.read(reinterpret_cast<_char*>(&iNumActions), sizeof(_uint));
+
+    vector<ACTIONFRAME> Actions;
+
+    for (_uint i = 0; i < iNumActions; ++i)
+    {
+        ACTIONFRAME ActionFrame = {};
+        InputFile.read(reinterpret_cast<_char*>(&ActionFrame), sizeof(ACTIONFRAME));
+        Actions.push_back(ActionFrame);
+    }
+
+    m_CameraActions.emplace(strActionTag, Actions);
+
+    InputFile.close();
+
+    return S_OK;
+}
+
+void CCamera_Manager::Play_Action(const _wstring& strActionTag)
+{
+    auto iter = m_CameraActions.find(strActionTag);
+    if (iter == m_CameraActions.end())
+        return;
+
+    m_strActionTag = strActionTag;
+    m_isPlayAction = true;
+    m_iActionIndex = 0;
+    m_fCurrentTrackPosition = 0.f;
+    Compute_Pre();
+}
+
+HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag)
+{
+    CCamera* pCamera = Find_Camera(iLevelID, strCameraTag);
+    if (nullptr == pCamera)
+        return E_FAIL;
+
+    Safe_Release(m_pMainCamera);
+    m_pMainCamera = pCamera;
+    Safe_AddRef(m_pMainCamera);
+
+    return S_OK;
+}
+
+void CCamera_Manager::Change_Distance(_float fDistance)
+{
+    if (nullptr == m_pMainCamera)
+        return;
+
+    m_pMainCamera->Set_Distance(fDistance);
+}
+
+void CCamera_Manager::Change_FixedDistance(_float fFixedDistance)
+{
+    if (nullptr == m_pMainCamera)
+        return;
+
+    m_pMainCamera->Set_FixedDistance(fFixedDistance);
+}
+
+HRESULT CCamera_Manager::Initialize(_uint iNumLevel)
+{
+    m_iNumLevel = iNumLevel;
+    m_Cameras = new CAMERA[m_iNumLevel];
+
+    return S_OK;
+}
+
+void CCamera_Manager::Update(_float fTimeDelta)
+{
+    if (nullptr == m_pMainCamera)
+        return;
+
+    if (false == m_isPlayAction)
+        m_pMainCamera->Update(fTimeDelta);
+    else
+        Compute_Action(fTimeDelta);
+
+    m_pMainCamera->Update_Matrix();
+}
+
+HRESULT CCamera_Manager::Clear_Resource(_uint iCurrentLevelID)
+{
+    for (auto& Pair : m_Cameras[iCurrentLevelID])
+        Safe_Release(Pair.second);
+    m_Cameras[iCurrentLevelID].clear();
+
+    return S_OK;
+}
+
+CCamera* CCamera_Manager::Find_Camera(_uint iLevelID, const _wstring& strCameraTag)
+{
+    if (m_iNumLevel <= iLevelID)
+        return nullptr;
+
+    auto iter = m_Cameras[iLevelID].find(strCameraTag);
+    if (iter == m_Cameras[iLevelID].end())
+        return nullptr;
+
+    return iter->second;
+}
+
+void CCamera_Manager::Compute_Action(_float fTimeDelta)
+{
+    _float fDuration = m_CameraActions[m_strActionTag][m_iActionIndex].fDuration;
+    m_fCurrentTrackPosition += fTimeDelta;
+    // 1개의 Action 완료
+    if (m_fCurrentTrackPosition > fDuration)
+    {
+        m_fCurrentTrackPosition = 0.f;
+        m_vPreQuaternion = m_CameraActions[m_strActionTag][m_iActionIndex].vRotation;
+        m_fPreDistance = m_CameraActions[m_strActionTag][m_iActionIndex].fDistance;
+        ++m_iActionIndex;
+        // Action End
+        if (m_iActionIndex >= m_CameraActions[m_strActionTag].size())
+        {
+            m_isPlayAction = false;
+            return;
+        }
+    }
+
+    _float4 vRightQuaternion = m_CameraActions[m_strActionTag][m_iActionIndex].vRotation;
+    _float fRightDistance = m_CameraActions[m_strActionTag][m_iActionIndex].fDistance;
+
+    _float fRatio = m_fCurrentTrackPosition / fDuration;
+
+    _vector vLerpQuaternion = XMQuaternionSlerp(XMLoadFloat4(&m_vPreQuaternion), XMLoadFloat4(&vRightQuaternion), fRatio);
+    _float fLerpDistance = m_fPreDistance + (fRightDistance - m_fPreDistance) * fRatio;
+
+    m_pMainCamera->Update_Action(vLerpQuaternion, fLerpDistance, fTimeDelta);
+}
+
+void CCamera_Manager::Compute_Pre()
+{
+    CTransform* pTransform = static_cast<CTransform*>(m_pMainCamera->Get_Component(TEXT("Com_Transform")));
+
+    _vector vScale = {};
+    _vector vRotation = {};
+    _vector vTranslation = {};
+    XMMatrixDecompose(&vScale, &vRotation, &vTranslation, pTransform->Get_WorldMatrix());
+
+    XMStoreFloat4(&m_vPreQuaternion, vRotation);
+    m_fPreDistance = m_pMainCamera->Get_Distance();
+}
+
+CCamera_Manager* CCamera_Manager::Create(_uint iNumLevel)
+{
+    CCamera_Manager* pInstance = new CCamera_Manager();
+
+    if (FAILED(pInstance->Initialize(iNumLevel)))
+    {
+        MSG_BOX("Failed to Create : Camera_Manager");
+        Safe_Release(pInstance);
+    }
+
+    return pInstance;
+}
+
+void CCamera_Manager::Free()
+{
+    __super::Free();
+
+    for (_uint i = 0; i < m_iNumLevel; ++i)
+    {
+        for (auto& Pair : m_Cameras[i])
+            Safe_Release(Pair.second);
+        m_Cameras[i].clear();
+    }
+    Safe_Delete_Array(m_Cameras);
+
+    Safe_Release(m_pMainCamera);
+    Safe_Release(m_pGameInstance);
+}

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="99. Define">
+      <UniqueIdentifier>{33db81df-3e0d-4b89-bd53-3bcb8a958724}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="98. Default">
+      <UniqueIdentifier>{24ceb924-7bd4-46df-a031-7ec25c6814f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. MainApp">
+      <UniqueIdentifier>{dfee8a35-7e4b-4005-b6c6-9699e443dd3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level">
+      <UniqueIdentifier>{b01b3566-51f1-4db6-a534-d28cad40c43f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Loader">
+      <UniqueIdentifier>{a3003ffb-35f7-4926-9b12-ec60ce604c61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Logo">
+      <UniqueIdentifier>{09ca92e8-84e4-4bae-b41a-cc0c3b381fd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\GamePlay">
+      <UniqueIdentifier>{d9c3f03c-a893-4b94-8763-b3c0352768d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Loading">
+      <UniqueIdentifier>{ea09dc8b-738b-4109-9807-a4235125cbc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="97. Event">
+      <UniqueIdentifier>{85395fa9-d5e3-4a77-b678-72151c522109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Loader\Logo">
+      <UniqueIdentifier>{df4cc516-d2e4-442f-8371-3c715762c7ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96. ShaderFiles">
+      <UniqueIdentifier>{b9d7925c-22c5-410d-8f88-cf03f8aae298}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Client.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MainApp.h">
+      <Filter>00. MainApp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ClientPch.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Client_Define.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Client_Enum.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader.h">
+      <Filter>01. Level\Loader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Logo.h">
+      <Filter>01. Level\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Loading.h">
+      <Filter>01. Level\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Event_Level.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader_Logo.h">
+      <Filter>01. Level\Loader\Logo</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Client.ico">
+      <Filter>98. Default</Filter>
+    </Image>
+    <Image Include="small.ico">
+      <Filter>98. Default</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Client.cpp">
+      <Filter>98. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MainApp.cpp">
+      <Filter>00. MainApp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ClientPch.cpp">
+      <Filter>99. Define</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader.cpp">
+      <Filter>01. Level\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Loading.cpp">
+      <Filter>01. Level\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Logo.cpp">
+      <Filter>01. Level\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader_Logo.cpp">
+      <Filter>01. Level\Loader\Logo</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Client.rc">
+      <Filter>98. Default</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>

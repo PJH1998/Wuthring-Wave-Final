@@ -1,0 +1,51 @@
+#pragma once
+#include "VIBuffer.h"
+
+NS_BEGIN(Engine)
+
+class CMesh final : public CVIBuffer
+{
+private:
+	explicit CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CMesh(const CMesh& Prototype);
+	virtual ~CMesh() = default;
+
+public:
+	_uint							Get_MaterialIndex() { return m_iMaterialIndex; }
+
+public:
+	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	virtual		HRESULT			Initialize_Clone(void* pArg);
+
+#ifdef _DEBUG
+	_bool							Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
+#endif
+
+public:
+	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
+
+private:
+	_uint							m_iMaterialIndex = {};
+	_uint							m_iNumBones = {};
+
+	vector<_uint>				m_BoneIndices;
+	_float4x4						m_BoneMatrices[g_iMaxNumBones] = {};
+
+	vector<_float4x4>			m_OffsetMatrices;
+
+#ifdef _DEBUG
+	vector<_float3>			m_VertexPositions;
+	vector<_uint>				m_Indices;
+#endif
+
+private:
+	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
+	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+
+public:
+	static		CMesh*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	virtual		CComponent*	Clone(void* pArg);
+	virtual		void				Free() override;
+};
+
+NS_END

@@ -1,0 +1,60 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# debug information files
+*.dwo
+
+.vs/
+Client/Default/x64/
+Client/Bin/Resource
+Client/Bin/Debug
+Client/Bin/Release
+Client/Bin/Sound
+Editor/Bin/Resource
+Editor/Bin/Debug
+Editor/Bin/Release
+Editor/Bin/dat
+Editor/Bin/json
+Editor/Public/assimp/
+Engine/Bin/
+Engine/Public/json.hpp
+Editor/Default/x64/
+Engine/Default/x64/
+EngineSDK/
+*.bat
