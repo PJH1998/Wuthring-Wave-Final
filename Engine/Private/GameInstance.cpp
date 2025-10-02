@@ -135,19 +135,15 @@ HRESULT CGameInstance::Draw()
 		return E_FAIL;
 	m_pRenderer->Render();
 
-#ifdef _DEBUG
-	//if (nullptr == m_pCollision_Manager)
-	//	return E_FAIL;
-	//m_pCollision_Manager->Render();
-#endif
-	
 	if (nullptr == m_pLevel_Manager)
 		return E_FAIL;
 	m_pLevel_Manager->Render();
 
+#ifdef _DEBUG
 	if (nullptr == m_pGUIManager)
 		return E_FAIL;
 	m_pGUIManager->Render();
+#endif
 
 	return S_OK;
 }
