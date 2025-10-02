@@ -52,7 +52,8 @@ Editor/Bin/Release
 Editor/Bin/dat
 Editor/Bin/json
 Editor/Public/assimp/
-Engine/Bin/
+Engine/Bin/Debug
+Engine/Bin/Release
 Engine/Public/json.hpp
 Editor/Default/x64/
 Engine/Default/x64/
