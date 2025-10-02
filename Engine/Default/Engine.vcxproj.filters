@@ -166,6 +166,9 @@
     <Filter Include="01. Utility\98. ImGui">
       <UniqueIdentifier>{5ff94d70-eadf-4f42-ad60-0cd46b072a91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\98. ImGui\Manager">
+      <UniqueIdentifier>{8766f0a1-46af-4d32-ac51-c2d08941ef08}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -333,6 +336,9 @@
     <ClInclude Include="..\Public\VIBuffer_Rect.h">
       <Filter>01. Utility\04. Component\VIBuffer\Rect</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GUIManager.h">
+      <Filter>01. Utility\98. ImGui\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -481,6 +487,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Rect.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Rect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GUIManager.cpp">
+      <Filter>01. Utility\98. ImGui\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

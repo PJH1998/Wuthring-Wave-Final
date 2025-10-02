@@ -32,11 +32,11 @@ HRESULT CRenderer::Initialize()
 
 	m_pVIBuffer = CVIBuffer_Rect::Create(m_pDevice, m_pContext);
 	if (nullptr == m_pVIBuffer)
-		return E_FAIL;
+		CRASH("Buffer Fail");
 
 	m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Engine_Shader_Deferred.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements);
 	if (nullptr == m_pShader)
-		return E_FAIL;
+		CRASH("Shader Fail");
 
 	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixScaling(m_iWinSizeX, m_iWinSizeY, 1.f));
 	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());

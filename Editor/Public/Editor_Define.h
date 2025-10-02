@@ -18,5 +18,4 @@ namespace Editor
 
 extern HWND			g_hWnd;
 extern HINSTANCE	g_hInst;
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 using namespace Editor;

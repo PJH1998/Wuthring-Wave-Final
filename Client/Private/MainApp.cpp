@@ -28,21 +28,8 @@ HRESULT CMainApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	// Setup Dear ImGui style
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(g_hWnd);
-	ImGui_ImplDX11_Init(m_pDevice, m_pContext);
+	// ImGui Context ¿¬µ¿
+	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	return S_OK;
 }
@@ -86,17 +73,12 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+	if (ImGui::Begin("Test"))
+	{
+		ImGui::Text("Hello");
+		ImGui::End();
+	}
 
-	DockSpaceId = ImGui::GetID("Test");
-	ImGui::DockSpaceOverViewport(DockSpaceId, ImGui::GetMainViewport(), 
-		ImGuiDockNodeFlags_PassthruCentralNode);
-
-	ImGui::Begin("Test", nullptr, ImGuiWindowFlags_None);
-	ImGui::Text("Hello");
-	ImGui::End();
 }
 
 HRESULT CMainApp::Render()
@@ -104,19 +86,7 @@ HRESULT CMainApp::Render()
 	_float4 vClearColor = _float4(0.f, 0.f, 1.f, 1.f);
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
-	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	{
-		ImGui::UpdatePlatformWindows();
-		ImGui::RenderPlatformWindowsDefault();
-	}
-
-	ImGui::EndFrame();
 	m_pGameInstance->Render_End();
-
-
 
 	return S_OK;
 }
@@ -143,10 +113,6 @@ CMainApp* CMainApp::Create()
 void CMainApp::Free()
 {
 	__super::Free();
-
-	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);

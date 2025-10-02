@@ -18,6 +18,7 @@
 #include "Light_Manager.h"
 #include "Picking.h"
 #include "Shadow.h"
+#include "GUIManager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -80,11 +81,16 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pShadow = CShadow::Create(static_cast<_float>(EngineDesc.iSizeX), static_cast<_float>(EngineDesc.iSizeY));
 	ASSERT_CRASH(m_pShadow);
 
+	m_pGUIManager = CGUIManager::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
+	ASSERT_CRASH(m_pGUIManager);
+
 	return S_OK;
 }
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pGUIManager->Update();
+
 	m_pPicking->Update();
 	m_pInput_Device->Update();
 
@@ -138,6 +144,10 @@ HRESULT CGameInstance::Draw()
 	if (nullptr == m_pLevel_Manager)
 		return E_FAIL;
 	m_pLevel_Manager->Render();
+
+	if (nullptr == m_pGUIManager)
+		return E_FAIL;
+	m_pGUIManager->Render();
 
 	return S_OK;
 }
@@ -455,6 +465,12 @@ void CGameInstance::Update_ShadowLight_Transform(const _fvector& vAt)
 }
 #pragma endregion
 
+#pragma region GUIMANAGER
+ImGuiContext* CGameInstance::Get_ImGuiContext()
+{
+	return m_pGUIManager->Get_ImGuiContext();
+}
+#pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
@@ -503,6 +519,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadow);
+	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);
 }

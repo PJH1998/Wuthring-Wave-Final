@@ -24,9 +24,6 @@ private:
 	LEVEL							m_eNextLevel = { LEVEL::END };
 	_bool							m_isLoad = { false };
 
-	// 임시
-	ImGuiIO						io = {};
-	ImGuiID						DockSpaceId = {};
 	// Frame 확인용
 	//_float							m_fMinute = {};
 	//_uint							m_iFrame = {};

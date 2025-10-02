@@ -163,6 +163,11 @@ public:
 	void						Update_ShadowLight_Transform(const _fvector& vAt);
 #pragma endregion
 
+#pragma region GUIMANAGER
+	ImGuiContext*		Get_ImGuiContext();
+#pragma endregion
+
+
 
 public:
 	HRESULT			Clear_Resource(_uint iLevelID);
@@ -187,6 +192,7 @@ private:
 	class CPipeLine*					m_pPipeLine = { nullptr };
 	class CPicking*						m_pPicking = { nullptr };
 	class CShadow*					m_pShadow = { nullptr };
+	class CGUIManager*			m_pGUIManager = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

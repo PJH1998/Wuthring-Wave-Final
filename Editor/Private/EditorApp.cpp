@@ -26,6 +26,9 @@ HRESULT CEditorApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
+	// ImGui Context ¿¬µ¿
+	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
+
 	return S_OK;
 }
 
@@ -58,6 +61,12 @@ void CEditorApp::Post_Update()
 void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
+
+	if (ImGui::Begin("Test"))
+	{
+		ImGui::Text("Hello");
+		ImGui::End();
+	}
 }
 
 HRESULT CEditorApp::Render()
