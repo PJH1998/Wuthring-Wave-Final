@@ -25,6 +25,12 @@ using namespace DirectX;
 #include "Json/json.hpp"
 using json = nlohmann::json;
 
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_dx11.h"
+#include "ImGui/imgui_impl_win32.h"
+#include "ImGui/ImGuiFileDialog.h"
+#include "ImGui/ImGuiFileDialogConfig.h"
+
 #include <vector>
 #include <list>
 #include <queue>
@@ -52,6 +58,8 @@ namespace Engine
 	const unsigned int g_iMaxWidth = 8192;
 	const unsigned int g_iMaxHeight = 4608;
 }
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"

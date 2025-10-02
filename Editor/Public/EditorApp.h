@@ -1,13 +1,13 @@
 #pragma once
 #include "Base.h"
 
-NS_BEGIN(Client)
+NS_BEGIN(Editor)
 
-class CMainApp final : public CBase
+class CEditorApp final : public CBase
 {
 private:
-	explicit CMainApp();
-	virtual ~CMainApp() = default;
+	explicit CEditorApp();
+	virtual ~CEditorApp() = default;
 
 public:
 	HRESULT			Initialize();
@@ -24,9 +24,6 @@ private:
 	LEVEL							m_eNextLevel = { LEVEL::END };
 	_bool							m_isLoad = { false };
 
-	// 임시
-	ImGuiIO						io = {};
-	ImGuiID						DockSpaceId = {};
 	// Frame 확인용
 	//_float							m_fMinute = {};
 	//_uint							m_iFrame = {};
@@ -35,7 +32,7 @@ private:
 	void			Start_Level();
 
 public:
-	static		CMainApp* Create();
+	static		CEditorApp* Create();
 	virtual		void			Free() override;
 };
 

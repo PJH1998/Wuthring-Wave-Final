@@ -157,11 +157,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    g_hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    RECT rc = { 0, 0, g_iWinSizeX, g_iWinSizeY };
-   //AdjustWindowRect(&rc, WS_POPUP, FALSE);
+   //AdjustWindowRect(&rc, WS_POPUP | WS_VISIBLE, FALSE);
    AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, 
 	   WS_OVERLAPPEDWINDOW,
+	   //WS_POPUP | WS_VISIBLE,
       CW_USEDEFAULT, 0, 
 	   rc.right - rc.left, rc.bottom - rc.top,
 	   nullptr, nullptr, hInstance, nullptr);
@@ -191,6 +192,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	// ImGui Key / Mouse 입력을 받기위한 핸들러
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		return true;
+
 	switch (message)
 	{
 	case WM_KEYDOWN:

@@ -163,6 +163,9 @@
     <Filter Include="97. ShaderFiles">
       <UniqueIdentifier>{3c1a1757-ec2f-4233-ac20-f775e9e61064}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\98. ImGui">
+      <UniqueIdentifier>{5ff94d70-eadf-4f42-ad60-0cd46b072a91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
