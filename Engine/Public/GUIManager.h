@@ -21,6 +21,10 @@ private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
+	ID3D11RenderTargetView*	m_pMainRTV = { nullptr };
+	ID3D11DepthStencilView*		m_pMainDSV = { nullptr };
+
+
 public:
 	static		CGUIManager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd);
 	virtual		void				Free() override;

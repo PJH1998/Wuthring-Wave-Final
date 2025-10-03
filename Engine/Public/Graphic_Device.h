@@ -10,6 +10,9 @@ private:
 	virtual ~CGraphic_Device() = default;
 
 public:
+	void				SetUp_RTV();
+
+public:
 	HRESULT			Initialize(HWND hWnd, WINMODE eMode, _uint iWinSizeX, _uint iWinSizeY, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext);
 
 	HRESULT			Clear_BackBuffer_View(const _float4* pClearColor);
@@ -18,12 +21,12 @@ public:
 
 private:
 	ID3D11Device*					m_pDevice = { nullptr };
-	ID3D11DeviceContext*		m_pContext = { nullptr };
+	ID3D11DeviceContext*			m_pContext = { nullptr };
 
 	IDXGISwapChain*				m_pSwapChain = { nullptr };
 
 	ID3D11RenderTargetView*	m_pBackBufferRTV = { nullptr };
-	ID3D11DepthStencilView*	m_pDepthStencilView = { nullptr };
+	ID3D11DepthStencilView*		m_pDepthStencilView = { nullptr };
 
 private:
 	HRESULT			Ready_SwapChain(HWND hWnd, WINMODE eMode, _uint iWinSizeX, _uint iWinSizeY);

@@ -73,12 +73,13 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	if (ImGui::Begin("Test"))
-	{
-		ImGui::Text("Hello");
-		ImGui::End();
-	}
+	ImGui::Begin("Test");
+	ImGui::Text("Hello");
+	ImGui::End();
 
+	ImGui::Begin("Test2");
+	ImGui::Text("Hello2");
+	ImGui::End();
 }
 
 HRESULT CMainApp::Render()

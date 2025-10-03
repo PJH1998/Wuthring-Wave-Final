@@ -26,19 +26,6 @@ vector g_vMtrlAmbient = { 0.7f, 0.7f, 0.7f, 0.f };
 vector g_vLightSpecular = 1.f;
 vector g_vMtrlSpecular = 1.f;
 
-//float g_fWeights[5] = { 0.06136, 0.24477, 0.38774, 0.24477, 0.06136 };
-//float g_fWeights[5] = { 0.24477, 0.51774, 0.82453, 0.51774, 0.24477 };
-
-//float g_fWeights[13] =
-//{
-//    0.0561, 0.1353, 0.278, 0.4868, 0.7261, 0.9231, 1.f, 0.9231, 0.7261, 0.4868, 0.278, 0.1353, 0.0561
-//};
-
-float g_fWeights[13] =
-{
-    0.020597f, 0.037981f, 0.062950f, 0.093995f, 0.127324f, 0.153170f, 0.163967f, 0.153170f, 0.127324f, 0.093995f, 0.062950f, 0.037981f, 0.020597f
-};
-
 float g_fWidth = 1920.f;
 float g_fHeight= 1080.f;
 
@@ -92,6 +79,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
+    // Default Combine
     vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
@@ -101,13 +89,6 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vector vSpecular = g_SpecularTexture.Sample(DefaultSampler, In.vTexcoord);
     
     Out.vColor = vDiffuse * vShade; //+vSpecular;
-    
-    // LUT 적용
-    int iIndex = Out.vColor.b / 0.0625f;
-    float2 vLUTuv = float2(iIndex + Out.vColor.r * 0.0625f, Out.vColor.g);
-    vector vLUT = g_LUTTexture.Sample(DefaultSampler, vLUTuv);
-    
-    Out.vColor.rgb = Out.vColor.rgb * (1 - g_fLUTIntensity) + vLUT.rgb * g_fLUTIntensity;
     
     // Shadow 적용
     vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
@@ -129,8 +110,8 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float2 vTexcood;
     //vTexcood.x = vShadowPos.x / vShadowPos.w * 0.5f + 0.5f;
-    vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     //vTexcood.y = vShadowPos.y / vShadowPos.w * -0.5f + 0.5f;
+    vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     vTexcood.y = vShadowPos.y * -0.5f + 0.5f;
     
     vector vLightDepth = g_LightDepthTexture.Sample(DefaultSampler, vTexcood);
@@ -151,27 +132,6 @@ PS_OUT_BACKBUFFER PS_BLUR_Y(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    vector vDistortion = g_DistortionTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float2 vDistortionOffset = float2(vDistortion.x, vDistortion.y);
-    if(0.f < length(vDistortionOffset))
-        vDistortionOffset = float2(vDistortionOffset.x * 2.f - 1.f, vDistortionOffset.y * -2.f + 1.f) * vDistortion.z;
-    
-    float2 vUV = In.vTexcoord + vDistortionOffset;
-    
-    vector vBackBuffer = g_BackBufferTexture.Sample(DefaultSampler, vUV);
-    
-    float fTexel = 1.f / g_fHeight;
-    
-    vector vBlur = 0.f;
-    for (int i = -6; i < 7; ++i)
-    {
-        float2 vTexcoord = float2(vUV.x, vUV.y + i * fTexel);
-        vBlur += g_BlurTexture.Sample(ClampSampler, vTexcoord) * g_fWeights[i + 6];
-    }
-    
-    Out.vColor = vBackBuffer + vBlur;
-    
     return Out;
 }
 

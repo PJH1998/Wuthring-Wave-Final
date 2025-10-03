@@ -61,14 +61,12 @@ void CGameObject::Late_Update(_float fTimeDelta)
 {
 }
 
-HRESULT CGameObject::Render()
+void CGameObject::Render()
 {
-	return S_OK;
 }
 
-HRESULT CGameObject::Render_Shadow()
+void CGameObject::Render_Shadow()
 {
-    return S_OK;
 }
 
 HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, const _wstring& strComponentTag, CComponent** ppOut, void* pArg)
@@ -87,20 +85,6 @@ HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strP
 	Safe_AddRef(pComponent);
 
 	return S_OK;
-}
-
-void CGameObject::Block(CNavigation* pNavigation)
-{
-	if (true == m_isBlock)
-	{
-		if (0.8f > m_vBlock.y)
-		{
-			_vector vMove = m_pTransformCom->Get_State(STATE::POSITION) - XMVectorSetW(XMLoadFloat3(&m_vPrePosition), 1.f);
-			m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vPrePosition), 1.f));
-			m_pTransformCom->Slide(vMove, XMLoadFloat3(&m_vBlock), pNavigation);
-		}
-		m_isBlock = false;
-	}
 }
 
 void CGameObject::Free()

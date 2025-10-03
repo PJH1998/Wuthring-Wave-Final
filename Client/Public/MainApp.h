@@ -24,6 +24,8 @@ private:
 	LEVEL							m_eNextLevel = { LEVEL::END };
 	_bool							m_isLoad = { false };
 
+	ImGuiID						m_iDockSpaceID = {};
+
 	// Frame È®ÀÎ¿ë
 	//_float							m_fMinute = {};
 	//_uint							m_iFrame = {};

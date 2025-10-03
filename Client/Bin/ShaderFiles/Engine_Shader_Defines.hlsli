@@ -1,102 +1,12 @@
-sampler DefaultSampler = sampler_state
-{
-    filter = min_mag_mip_linear;
-    AddressU = wrap;
-    AddressV = wrap;
-};
+#include "Engine_Shader_State.hlsli"
+#include "Engine_Shader_Function.hlsli"
 
-sampler PointSampler = sampler_state
-{
-    filter = min_mag_mip_point;
-    AddressU = wrap;
-    AddressV = wrap;
-};
-
-sampler ClampSampler = sampler_state
-{
-    filter = min_mag_mip_linear;
-    AddressU = clamp;
-    AddressV = clamp;
-};
-
-
-// Rasterize 
-RasterizerState RS_Default
-{
-    FillMode = solid;
-    CullMode = back;
-    FrontCounterClockwise = false;
-};
-
-RasterizerState RS_Wire
-{
-    FillMode = wireframe;
-    CullMode = back;
-    FrontCounterClockwise = false;
-};
-
-RasterizerState RS_Cull_None
-{
-    CullMode = none;
-};
-
-// Depth
-DepthStencilState DSS_Default
-{
-    DepthEnable = true;
-    DepthWriteMask = all;
-    DepthFunc = LESS_EQUAL;
-};
-
-DepthStencilState DSS_None
-{
-    DepthEnable = false;
-    DepthWriteMask = zero;
-};
-
-DepthStencilState DSS_NoneCompare
-{
-    DepthEnable = true;
-    DepthWriteMask = zero;
-    DepthFunc = LESS_EQUAL;
-};
-
-// Blend
-BlendState BS_Default
-{
-    BlendEnable[0] = false;
-};
-
-BlendState BS_Blend
-{
-    BlendEnable[0] = true;
-    BlendEnable[1] = true;
-
-    SrcBlend = ONE;
-    DestBlend = ONE;
-    BlendOp = Add;
-};
-
-BlendState BS_AlphaBlend
-{
-    BlendEnable[0] = true;
-    BlendEnable[1] = true;
-
-    SrcBlend = SRC_ALPHA;
-    DestBlend = INV_SRC_ALPHA;
-    BlendOp = Add;
-};
-
-BlendState BS_FXBlend
-{
-    BlendEnable[0] = true;
-    BlendEnable[1] = true;
-
-    SrcBlend = SRC_ALPHA;
-    DestBlend = DEST_ALPHA;
-    BlendOp = Add;
-};
-
+// Emissive효과를 넣을지 판단할 때 사용하는 RGB 계수
 float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
+// Emissive 최소치
 float g_fEmissiveThreshold = 0.6f;
-float g_fLUTIntensity = 0.2f;
+// Blur Weight
+float g_fWeights[13] =
+{
+    0.020597f, 0.037981f, 0.062950f, 0.093995f, 0.127324f, 0.153170f, 0.163967f, 0.153170f, 0.127324f, 0.093995f, 0.062950f, 0.037981f, 0.020597f
+};

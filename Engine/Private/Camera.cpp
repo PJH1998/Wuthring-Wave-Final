@@ -56,9 +56,8 @@ void CCamera::Late_Update(_float fTimeDelta)
 {
 }
 
-HRESULT CCamera::Render()
+void CCamera::Render()
 {
-	return S_OK;
 }
 
 void CCamera::Update_Matrix()

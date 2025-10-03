@@ -108,6 +108,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 }
+
 _float CGameInstance::Rand_Normal()
 {
 	return static_cast<_float>(rand()) / RAND_MAX;
@@ -122,26 +123,21 @@ _float CGameInstance::Rand(_float fMin, _float fMax)
 #pragma region GRAPHIC_DEVICE
 void CGameInstance::Render_Begin(const _float4* pClearColor)
 {
-	if (nullptr == m_pGraphic_Device)
-		return;
-
+	ASSERT_CRASH(m_pGraphic_Device);
 	m_pGraphic_Device->Clear_BackBuffer_View(pClearColor);
 	m_pGraphic_Device->Clear_DepthStencil_View();
 }
 
 HRESULT CGameInstance::Draw()
 {
-	if (nullptr == m_pRenderer)
-		return E_FAIL;
+	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
-	if (nullptr == m_pLevel_Manager)
-		return E_FAIL;
+	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
 
 #ifdef _DEBUG
-	if (nullptr == m_pGUIManager)
-		return E_FAIL;
+	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
 #endif
 
@@ -308,14 +304,6 @@ HRESULT CGameInstance::Render_RT(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObject)
 {
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
-}
-HRESULT CGameInstance::Add_LUT(const _wstring& strLUTTag, const _tchar* pFilePath)
-{
-    return m_pRenderer->Add_LUT(strLUTTag, pFilePath);
-}
-HRESULT CGameInstance::Change_LUT(const _wstring& strLUTTag)
-{
-    return m_pRenderer->Change_LUT(strLUTTag);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)

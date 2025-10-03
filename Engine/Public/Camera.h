@@ -34,7 +34,7 @@ public:
 	virtual		void				Update(_float fTimeDelta);
 	virtual		void				Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta);
 	virtual		void				Late_Update(_float fTimeDelta);
-	virtual		HRESULT			Render();
+	virtual		void				Render();
 
 	void							Update_Matrix();
 

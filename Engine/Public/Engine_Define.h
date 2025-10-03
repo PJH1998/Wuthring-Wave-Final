@@ -64,6 +64,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"
 #include "Engine_Struct.h"
+#include "Engine_Vertex.h"
 #include "Engine_Typedef.h"
 #include "Engine_Function.h"
 

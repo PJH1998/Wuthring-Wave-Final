@@ -339,6 +339,9 @@
     <ClInclude Include="..\Public\GUIManager.h">
       <Filter>01. Utility\98. ImGui\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Engine_Vertex.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -494,6 +497,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>

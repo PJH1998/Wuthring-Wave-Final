@@ -10,8 +10,6 @@ namespace Engine
 	enum class POINTS { A, B, C, END};
 	enum class LINE { AB, BC, CA, END };
 
-	enum class PREFABTYPE { OBJECT, LIGHT, SOUND, END };
-
 	enum class KEYSTATE { DOWN, PRESS, UP, END };
 	enum class MOUSEKEYSTATE { LB, RB, WB, END };
 	enum class MOUSEMOVESTATE { X, Y, WHEEL, END };
@@ -19,9 +17,7 @@ namespace Engine
 	enum class TEXTURETYPE { DIFFUSE, NORMAL, MASK, END };
 	enum class MODELTYPE { NONANIM, ANIM };
 	enum class PROTOTYPE { GAMEOBJECT, COMPONENT };
-	enum class RENDERGROUP { PRIORITY, SHADOW, NONBLEND, NONLIGHT, BLEND, EMISSIVE, DISTORTION, UI, FADE, END };
+	enum class RENDERGROUP { PRIORITY, SHADOW, NONBLEND, NONLIGHT, BLEND, UI, FADE, END };
 	enum class EVENT { STATIC, NONSTATIC, END};
-
-	enum class COLLIDER { AABB, OBB, SPHERE, END };
 }
 #endif // Engine_Enum_h__
