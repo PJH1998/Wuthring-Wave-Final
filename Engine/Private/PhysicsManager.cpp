@@ -5,6 +5,16 @@ CPhysicsManager::CPhysicsManager()
 {
 }
 
+BodyID CPhysicsManager::Register_Body(const BodyCreationSettings& BodySetting)
+{
+	Body* body = m_pPhysicsSystem->GetBodyInterface().CreateBody(BodySetting);
+	ASSERT_CRASH(body);
+
+	m_pPhysicsSystem->GetBodyInterface().AddBody(body->GetID(), EActivation::Activate);
+
+	return body->GetID();
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);
@@ -27,15 +37,6 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 void CPhysicsManager::Update(_float fTimeDelta)
 {
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
-
-	BodyInterface& bodyInterface = m_pPhysicsSystem->GetBodyInterface();
-
-	BodyIDVector BodyIDs;
-	m_pPhysicsSystem->GetBodies(BodyIDs);
-	for (BodyID bodyID : BodyIDs)
-	{
-		EBodyType type = bodyInterface.GetBodyType(bodyID);
-	}
 }
 
 void CPhysicsManager::SetUp_PhysicsSystem()

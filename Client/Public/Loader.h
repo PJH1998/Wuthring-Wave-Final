@@ -19,17 +19,17 @@ public:
 
 public:
 	HRESULT				Initialize();
-	virtual HRESULT	Loading() = 0;
+	virtual HRESULT		Loading() = 0;
 
 protected:
 	ID3D11Device*				m_pDevice = { nullptr };
-	ID3D11DeviceContext*	m_pContext = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*			m_pGameInstance = { nullptr };
 
 	_float							m_fProgress = {};
 
 	HANDLE						m_hThread = {};
-	CRITICAL_SECTION		m_CriticalSection = {};
+	CRITICAL_SECTION			m_CriticalSection = {};
 
 public:
 	virtual		void			Free() override;

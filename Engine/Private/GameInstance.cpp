@@ -402,6 +402,10 @@ void CGameInstance::SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer)
 {
 	m_pPhysicsManager->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
 }
+BodyID CGameInstance::Register_Body(const BodyCreationSettings& BodySetting)
+{
+	return m_pPhysicsManager->Register_Body(BodySetting);
+}
 #pragma endregion
 
 #pragma region PIPELINE

@@ -13,12 +13,12 @@ public:
 	HRESULT			Initialize();
 	void				Post_Update();						// 레벨 전환
 	void				Update(_float fTimeDelta);
-	HRESULT			Render();
+	void				Render();
 
 private:
-	class CGameInstance*	m_pGameInstance = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };
-	ID3D11DeviceContext*	m_pContext = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
 
 	_bool							m_isChangeLevel = { false };
 	LEVEL							m_eNextLevel = { LEVEL::END };
@@ -31,7 +31,9 @@ private:
 	//_uint							m_iFrame = {};
 
 private:
-	void			Start_Level();
+	void				SetUp_CollisionLayer();
+	void				Ready_Event();
+	void				Start_Level();
 
 public:
 	static		CMainApp* Create();

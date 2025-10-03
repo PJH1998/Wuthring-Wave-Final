@@ -10,6 +10,9 @@ CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Logo::Initialize()
 {
+	CRigidbody* pRigidBody = CRigidbody::Create(m_pDevice, m_pContext);
+	pRigidBody->Initialize_Clone(nullptr);
+
     return S_OK;
 }
 

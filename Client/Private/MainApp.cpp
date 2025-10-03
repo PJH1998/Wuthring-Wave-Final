@@ -5,6 +5,8 @@
 
 #include "Level_Loading.h"
 
+#include "Level_Logo.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -31,8 +33,13 @@ HRESULT CMainApp::Initialize()
 	// ImGui Context 연동
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
+	// Jolt Collision Layer SetUp
+	SetUp_CollisionLayer();
 	// Jolt PhysicsSystem SetUp
 	m_pGameInstance->SetUp_PhysicsSystem();
+
+	Ready_Event();
+	Start_Level();
 
 	return S_OK;
 }
@@ -57,15 +64,13 @@ void CMainApp::Post_Update()
 			switch (m_eNextLevel)
 			{
 			case LEVEL::LOGO:
-				// TODO
+				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::GAMEPLAY:
 				// TODO
 				break;
 			}
-
-			if (nullptr == pLevel)
-				return;
+			ASSERT_CRASH(pLevel);
 
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
 		}
@@ -76,6 +81,11 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
+	// ImGui Example
+	// Docking 기본 설정
+	ImGuiID DockingID = ImGui::GetID("Dock");
+	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
 	ImGui::Begin("Test");
 	ImGui::Text("Hello");
 	ImGui::End();
@@ -83,16 +93,30 @@ void CMainApp::Update(_float fTimeDelta)
 	ImGui::Begin("Test2");
 	ImGui::Text("Hello2");
 	ImGui::End();
+	// ============
 }
 
-HRESULT CMainApp::Render()
+void CMainApp::Render()
 {
 	_float4 vClearColor = _float4(0.f, 0.f, 1.f, 1.f);
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
 	m_pGameInstance->Render_End();
+}
 
-	return S_OK;
+void CMainApp::SetUp_CollisionLayer()
+{
+	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+}
+
+void CMainApp::Ready_Event()
+{
+	m_pGameInstance->Subscribe<CHANGE_LEVEL_EVENT>(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), [this](const CHANGE_LEVEL_EVENT& event) {
+			m_isChangeLevel = true;
+			m_eNextLevel = event.eNextLevel;
+			m_isLoad = event.isLoad;
+		});
 }
 
 void CMainApp::Start_Level()

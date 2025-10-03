@@ -36,6 +36,9 @@ public:
 		m_pObjectVsBPFilter->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
 	};
 
+	// Body »ý¼º
+	BodyID			Register_Body(const BodyCreationSettings& BodySetting);
+
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);

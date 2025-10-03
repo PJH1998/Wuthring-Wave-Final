@@ -178,6 +178,9 @@
     <Filter Include="01. Utility\97. Physics\Layer">
       <UniqueIdentifier>{d6cabcc6-7bc6-4408-abb3-c926ce1058eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\Rigidbody">
+      <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -357,6 +360,9 @@
     <ClInclude Include="..\Public\CollisionLayer.h">
       <Filter>01. Utility\97. Physics\Layer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Rigidbody.h">
+      <Filter>01. Utility\04. Component\Rigidbody</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -514,6 +520,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\CollisionLayer.cpp">
       <Filter>01. Utility\97. Physics\Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Rigidbody.cpp">
+      <Filter>01. Utility\04. Component\Rigidbody</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -9,6 +9,7 @@
 #include "VIBuffer_Cube.h"
 #include "Transform.h"
 #include "Navigation.h"
+#include "Rigidbody.h"
 // ==================
 
 NS_BEGIN(Engine)

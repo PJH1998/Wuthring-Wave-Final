@@ -38,7 +38,7 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
-    if (true == m_isFinished)
+    if (true == m_isFinished || true == m_pLoader->IsFinished())
     {
         CHANGE_LEVEL_EVENT event{ m_eNextLevel, false };
         m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
@@ -74,8 +74,7 @@ HRESULT CLevel_Loading::Ready_LoadingThread()
         break;
     }
 
-    if (nullptr == m_pLoader)
-        return E_FAIL;
+	ASSERT_CRASH(m_pLoader);
 
     return S_OK;
 }

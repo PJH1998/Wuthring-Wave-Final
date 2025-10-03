@@ -134,6 +134,7 @@ public:
 	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
 	void				SetUp_ObjectFilter(_uint iSrc, _uint iDst);
 	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
+	BodyID			Register_Body(const BodyCreationSettings& BodySetting);
 #pragma endregion
 
 

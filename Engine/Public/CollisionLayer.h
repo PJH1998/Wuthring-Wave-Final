@@ -1,9 +1,6 @@
 #pragma once
 #include "Base.h"
 
-#include "Jolt/Physics/Collision/ObjectLayer.h"
-#include "Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h"
-
 #ifdef new
 #undef new
 #endif
