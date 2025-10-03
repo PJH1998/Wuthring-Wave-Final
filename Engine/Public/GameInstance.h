@@ -129,6 +129,14 @@ public:
 	HRESULT		Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
+#pragma region PHYSICS_MANAGER
+	void				SetUp_PhysicsSystem();
+	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
+	void				SetUp_ObjectFilter(_uint iSrc, _uint iDst);
+	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
+#pragma endregion
+
+
 #pragma region EVENTBUS
 public:
 	template<typename TEvent>
@@ -188,6 +196,7 @@ private:
 	class CLight_Manager*			m_pLight_Manager = { nullptr };
 	class CCamera_Manager*		m_pCamera_Manager = { nullptr };
 	class CTimer_Manager*			m_pTimer_Manager = { nullptr };
+	class CPhysicsManager*		m_pPhysicsManager = { nullptr };
 	class CEventBus*					m_pEventBus = { nullptr };
 	class CPipeLine*					m_pPipeLine = { nullptr };
 	class CPicking*						m_pPicking = { nullptr };

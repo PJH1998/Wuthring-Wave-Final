@@ -19,5 +19,8 @@ namespace Engine
 	enum class PROTOTYPE { GAMEOBJECT, COMPONENT };
 	enum class RENDERGROUP { PRIORITY, SHADOW, NONBLEND, NONLIGHT, BLEND, UI, FADE, END };
 	enum class EVENT { STATIC, NONSTATIC, END};
+
+	// BroadPhase Layer
+	enum class BPLAYER { NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 }
 #endif // Engine_Enum_h__

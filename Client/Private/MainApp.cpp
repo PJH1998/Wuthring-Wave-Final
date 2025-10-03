@@ -31,6 +31,9 @@ HRESULT CMainApp::Initialize()
 	// ImGui Context ¿¬µ¿
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
+	// Jolt PhysicsSystem SetUp
+	m_pGameInstance->SetUp_PhysicsSystem();
+
 	return S_OK;
 }
 

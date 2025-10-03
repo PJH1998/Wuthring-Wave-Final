@@ -12,6 +12,7 @@
 #include "Target_Manager.h"
 #include "Renderer.h"
 #include "Timer_Manager.h"
+#include "PhysicsManager.h"
 #include "Camera_Manager.h"
 #include "EventBus.h"
 #include "PipeLine.h"
@@ -69,6 +70,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pTimer_Manager = CTimer_Manager::Create();
 	ASSERT_CRASH(m_pTimer_Manager);
 
+	m_pPhysicsManager = CPhysicsManager::Create(EngineDesc.iNumCollisionLayer);
+	ASSERT_CRASH(m_pPhysicsManager);
+
 	m_pEventBus = CEventBus::Create();
 	ASSERT_CRASH(m_pEventBus);
 
@@ -99,10 +103,9 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
-
-	//m_pCollision_Manager->Priority_Update();
 	m_pObject_Manager->Late_Update(fTimeDelta);
-	//m_pCollision_Manager->Update();
+
+	m_pPhysicsManager->Update(fTimeDelta);
 
 	m_pPooling_Manager->Update_Pooling();
 
@@ -382,6 +385,25 @@ HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 }
 #pragma endregion
 
+#pragma region PHYSICS_MANAGER
+void CGameInstance::SetUp_PhysicsSystem()
+{
+	m_pPhysicsManager->SetUp_PhysicsSystem();
+}
+void CGameInstance::SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer)
+{
+	m_pPhysicsManager->SetUp_ObjectToBP(iObjectLayer, iBPLayer);
+}
+void CGameInstance::SetUp_ObjectFilter(_uint iSrc, _uint iDst)
+{
+	m_pPhysicsManager->SetUp_ObjectFilter(iSrc, iDst);
+}
+void CGameInstance::SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer)
+{
+	m_pPhysicsManager->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
+}
+#pragma endregion
+
 #pragma region PIPELINE
 const _float4x4* CGameInstance::Get_TransformState_Float4x4(D3DTS eState) const
 {
@@ -498,6 +520,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
+	Safe_Release(m_pPhysicsManager);
 	Safe_Release(m_pCamera_Manager);
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
