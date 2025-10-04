@@ -1,10 +1,6 @@
 #pragma once
 #include "Base.h"
 
-#ifdef new
-#undef new
-#endif
-
 NS_BEGIN(Engine)
 
 class ENGINE_DLL CComponent abstract : public CBase

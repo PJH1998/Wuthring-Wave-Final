@@ -1,4 +1,4 @@
-#include "EnginePCH.h"
+#include "EnginePch.h"
 #include "Camera.h"
 
 #include "GameInstance.h"
@@ -75,13 +75,13 @@ void CCamera::Lerp_Distance(_float fTimeDelta)
 
 void CCamera::Key_Move(_float fTimeDelta)
 {
-	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+	if (m_pGameInstance->Get_DIKeyState(DIK_UP) == KEYSTATE::PRESS)
 		m_pTransformCom->Go_Straight(fTimeDelta);
-	if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+	if (m_pGameInstance->Get_DIKeyState(DIK_DOWN) == KEYSTATE::PRESS)
 		m_pTransformCom->Go_Backward(fTimeDelta);
-	if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+	if (m_pGameInstance->Get_DIKeyState(DIK_LEFT) == KEYSTATE::PRESS)
 		m_pTransformCom->Go_Left(fTimeDelta);
-	if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+	if (m_pGameInstance->Get_DIKeyState(DIK_RIGHT) == KEYSTATE::PRESS)
 		m_pTransformCom->Go_Right(fTimeDelta);
 }
 

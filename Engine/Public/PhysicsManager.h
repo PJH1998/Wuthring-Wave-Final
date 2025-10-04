@@ -2,6 +2,7 @@
 #include "Base.h"
 
 #include "CollisionLayer.h"
+#include "DebugRender.h"
 
 NS_BEGIN(JPH)
 class TempAllocator;
@@ -14,7 +15,7 @@ NS_BEGIN(Engine)
 class CPhysicsManager final : public CBase
 {
 private:
-	explicit CPhysicsManager();
+	explicit CPhysicsManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CPhysicsManager() = default;
 
 public:
@@ -37,17 +38,24 @@ public:
 	};
 
 	// Body »ý¼º
-	BodyID			Register_Body(const BodyCreationSettings& BodySetting);
+	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);
+#ifdef _DEBUG
+	void				Render();
+#endif
 
 
 private:
+	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
+
 	TempAllocator*		m_pAllocator = { nullptr };
 	JobSystem*			m_pJobSystem = { nullptr };
 	PhysicsSystem*		m_pPhysicsSystem = { nullptr };
+	ContactListener*	m_pContactListener = { nullptr };
 
 	PhysicsSettings		m_PhysicsSetting;
 
@@ -62,8 +70,13 @@ private:
 
 	_uint		m_iMaxJob = { thread::hardware_concurrency() };
 
+#ifdef _DEBUG
+	DebugRenderer*	m_pDebugRenderer = { nullptr };
+	BodyManager::DrawSettings m_DrawSetting;
+#endif
+
 public:
-	static CPhysicsManager* Create(_uint iNumObjectLayer);
+	static CPhysicsManager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumObjectLayer);
 	virtual void Free() override;
 };
 

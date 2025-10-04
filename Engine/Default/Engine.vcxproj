@@ -28,9 +28,11 @@
     <ClInclude Include="..\Public\Cell.h" />
     <ClInclude Include="..\Public\Channel.h" />
     <ClInclude Include="..\Public\Component.h" />
+    <ClInclude Include="..\Public\ContactListenerImpl.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
+    <ClInclude Include="..\Public\DebugRender.h" />
     <ClInclude Include="..\Public\EnginePch.h" />
     <ClInclude Include="..\Public\Engine_Define.h" />
     <ClInclude Include="..\Public\Engine_Enum.h" />
@@ -42,6 +44,7 @@
     <ClInclude Include="..\Public\Event.h" />
     <ClInclude Include="..\Public\EventBus.h" />
     <ClInclude Include="..\Public\Font_Manager.h" />
+    <ClInclude Include="..\Public\FreeCamera.h" />
     <ClInclude Include="..\Public\Frustrum.h" />
     <ClInclude Include="..\Public\GameInstance.h" />
     <ClInclude Include="..\Public\GameObject.h" />
@@ -90,9 +93,11 @@
     <ClCompile Include="..\Private\Cell.cpp" />
     <ClCompile Include="..\Private\Channel.cpp" />
     <ClCompile Include="..\Private\Component.cpp" />
+    <ClCompile Include="..\Private\ContactListenerImpl.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />
+    <ClCompile Include="..\Private\DebugRender.cpp" />
     <ClCompile Include="..\Private\EnginePch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -100,6 +105,7 @@
     <ClCompile Include="..\Private\Event.cpp" />
     <ClCompile Include="..\Private\EventBus.cpp" />
     <ClCompile Include="..\Private\Font_Manager.cpp" />
+    <ClCompile Include="..\Private\FreeCamera.cpp" />
     <ClCompile Include="..\Private\Frustrum.cpp" />
     <ClCompile Include="..\Private\GameInstance.cpp" />
     <ClCompile Include="..\Private\GameObject.cpp" />

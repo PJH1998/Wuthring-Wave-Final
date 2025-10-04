@@ -1,10 +1,6 @@
 #pragma once
 #include "Base.h"
 
-#ifdef new
-#undef new
-#endif
-
 NS_BEGIN(Engine)
 
 class BPLayer final : public BroadPhaseLayerInterface
@@ -42,6 +38,7 @@ public:
 
 	void			SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer)
 	{
+		ASSERT_CRASH(iObjectLayer < m_iNumObjectLayer && iBPLayer < ENUM_CLASS(BPLAYER::END));
 		m_ObjectToBroadPhase[iObjectLayer] = BroadPhaseLayer(iBPLayer);
 	}
 
@@ -74,6 +71,7 @@ public:
 
 	void			SetUp_ObjectFilter(_uint iSrc, _uint iDst)
 	{
+		ASSERT_CRASH(iSrc < m_iNumObjectLayer && iDst < m_iNumObjectLayer);
 		m_ObjectLayerFilter[iSrc][iDst] = true;
 		m_ObjectLayerFilter[iDst][iSrc] = true;
 	}
@@ -107,6 +105,7 @@ public:
 
 	void			SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer)
 	{
+		ASSERT_CRASH(iObjectLayer < m_iNumObjectLayer && iBPLayer < ENUM_CLASS(BPLAYER::END));
 		m_ObjectVsBPLayerFilter[iObjectLayer][iBPLayer] = true;
 	}
 

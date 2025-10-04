@@ -6,7 +6,7 @@ NS_BEGIN(Engine)
 class CCamera_Manager final : public CBase
 {
 private:
-	explicit CCamera_Manager();
+	explicit CCamera_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CCamera_Manager() = default;
 
 public:
@@ -28,7 +28,9 @@ public:
 	HRESULT			Clear_Resource(_uint iCurrentLevelID);
 
 private:
-	class CGameInstance*	m_pGameInstance = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
+	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
 
 	_uint							m_iNumLevel = {};
 	typedef map<const _wstring, class CCamera*> CAMERA;
@@ -45,14 +47,19 @@ private:
 	_float4						m_vPreQuaternion = {};
 	_float							m_fPreDistance = {};
 
+	class CCamera*				m_pFreeCamera = { nullptr };
+	_bool							m_isFree = { false };
+
 private:
 	class CCamera*		Find_Camera(_uint iLevelID, const _wstring& strCameraTag);
 
 	void					Compute_Action(_float fTimeDelta);
 	void					Compute_Pre();
 
+	void					Ready_FreeCamera();
+
 public:
-	static		CCamera_Manager*		Create(_uint iNumLevel);
+	static		CCamera_Manager*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumLevel);
 	virtual		void							Free();
 };
 

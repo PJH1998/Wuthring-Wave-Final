@@ -3,12 +3,15 @@
 
 #include "GameInstance.h"
 
-#include "Camera.h"
+#include "FreeCamera.h"
 
-CCamera_Manager::CCamera_Manager()
-    : m_pGameInstance { CGameInstance::GetInstance() }
+CCamera_Manager::CCamera_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+    : m_pGameInstance { CGameInstance::GetInstance() },
+	m_pDevice { pDevice }, m_pContext { pContext }
 {
     Safe_AddRef(m_pGameInstance);
+    Safe_AddRef(m_pDevice);
+    Safe_AddRef(m_pContext);
 }
 
 HRESULT CCamera_Manager::Add_Camera(_uint iLevelID, const _wstring& strCameraTag, CCamera* pCamera)
@@ -127,20 +130,30 @@ HRESULT CCamera_Manager::Initialize(_uint iNumLevel)
     m_iNumLevel = iNumLevel;
     m_Cameras = new CAMERA[m_iNumLevel];
 
+	Ready_FreeCamera();
+
     return S_OK;
 }
 
 void CCamera_Manager::Update(_float fTimeDelta)
 {
-    if (nullptr == m_pMainCamera)
-        return;
+	if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
+		m_isFree = !m_isFree;
 
-    if (false == m_isPlayAction)
-        m_pMainCamera->Update(fTimeDelta);
-    else
-        Compute_Action(fTimeDelta);
+	if (nullptr == m_pMainCamera || true == m_isFree)
+	{
+		m_pFreeCamera->Update(fTimeDelta);
+		m_pFreeCamera->Update_Matrix();
+	}
+	else
+	{
+		if (false == m_isPlayAction)
+			m_pMainCamera->Update(fTimeDelta);
+		else
+			Compute_Action(fTimeDelta);
 
-    m_pMainCamera->Update_Matrix();
+		m_pMainCamera->Update_Matrix();
+	}
 }
 
 HRESULT CCamera_Manager::Clear_Resource(_uint iCurrentLevelID)
@@ -207,9 +220,28 @@ void CCamera_Manager::Compute_Pre()
     m_fPreDistance = m_pMainCamera->Get_Distance();
 }
 
-CCamera_Manager* CCamera_Manager::Create(_uint iNumLevel)
+void CCamera_Manager::Ready_FreeCamera()
 {
-    CCamera_Manager* pInstance = new CCamera_Manager();
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 100000.f;
+	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+	CameraDesc.fSpeedPerSec = 1000.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	
+	m_pFreeCamera = CFreeCamera::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pFreeCamera);
+	if (FAILED(m_pFreeCamera->Initialize_Clone(&CameraDesc)))
+		CRASH("Free Camera");
+}
+
+CCamera_Manager* CCamera_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumLevel)
+{
+    CCamera_Manager* pInstance = new CCamera_Manager(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize(iNumLevel)))
     {
@@ -233,5 +265,9 @@ void CCamera_Manager::Free()
     Safe_Delete_Array(m_Cameras);
 
     Safe_Release(m_pMainCamera);
+    Safe_Release(m_pFreeCamera);
+
+    Safe_Release(m_pDevice);
+    Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 }

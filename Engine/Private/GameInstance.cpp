@@ -64,13 +64,13 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pLight_Manager = CLight_Manager::Create();
 	ASSERT_CRASH(m_pLight_Manager);
 
-	m_pCamera_Manager = CCamera_Manager::Create(EngineDesc.iNumLevel);
+	m_pCamera_Manager = CCamera_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pCamera_Manager);
 
 	m_pTimer_Manager = CTimer_Manager::Create();
 	ASSERT_CRASH(m_pTimer_Manager);
 
-	m_pPhysicsManager = CPhysicsManager::Create(EngineDesc.iNumCollisionLayer);
+	m_pPhysicsManager = CPhysicsManager::Create(*ppDevice, *ppContext, EngineDesc.iNumCollisionLayer);
 	ASSERT_CRASH(m_pPhysicsManager);
 
 	m_pEventBus = CEventBus::Create();
@@ -105,11 +105,11 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPipeLine->Update();
 	m_pObject_Manager->Late_Update(fTimeDelta);
 
-	m_pPhysicsManager->Update(fTimeDelta);
-
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
+
+	m_pPhysicsManager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -142,6 +142,8 @@ HRESULT CGameInstance::Draw()
 #ifdef _DEBUG
 	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
+	ASSERT_CRASH(m_pPhysicsManager);
+	m_pPhysicsManager->Render();
 #endif
 
 	return S_OK;
@@ -402,9 +404,9 @@ void CGameInstance::SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer)
 {
 	m_pPhysicsManager->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
 }
-BodyID CGameInstance::Register_Body(const BodyCreationSettings& BodySetting)
+Body* CGameInstance::Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut)
 {
-	return m_pPhysicsManager->Register_Body(BodySetting);
+	return m_pPhysicsManager->Register_Body(BodySetting, pOut);
 }
 #pragma endregion
 

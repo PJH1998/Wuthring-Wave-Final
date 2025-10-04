@@ -8,7 +8,7 @@ class ENGINE_DLL CGameObject abstract : public CBase
 {
 public:
 	typedef struct tagGameObjectDesc : public CTransform::TRANSFORM_DESC {
-		
+
 	}GAMEOBJECT_DESC;
 protected:
 	explicit CGameObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -16,9 +16,10 @@ protected:
 	virtual ~CGameObject() = default;
 
 public:
-	class CComponent*	Get_Component(const _wstring& strComponentTag);
+	class CComponent* Get_Component(const _wstring& strComponentTag);
 	_bool						IsActivate() { return m_isActivate; }
 	void						SetActivate(_bool isActivate) { m_isActivate = isActivate; }
+	_uint						Get_ID() { return m_iObjectID; }
 
 public:
 	virtual		HRESULT		Initialize_Prototype();
@@ -28,6 +29,9 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta);
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
+
+	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
+	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
@@ -41,6 +45,8 @@ protected:
 
 	// 활성화 관련 Bool 변수
 	_bool							m_isActivate = { true };
+	// Object ID
+	_uint							m_iObjectID = {};
 
 protected:
 	HRESULT						Add_Component(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, const _wstring& strComponentTag, CComponent** ppOut, void* pArg);

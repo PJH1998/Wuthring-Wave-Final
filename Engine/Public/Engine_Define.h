@@ -37,6 +37,7 @@ using json = nlohmann::json;
 // Jolt
 #define JPH_NAMESPACE JPH
 #include "Jolt/Jolt.h"
+#include "Jolt/RegisterTypes.h"
 #include "Jolt/Physics/PhysicsSystem.h"
 #include "Jolt/Physics/Body/BodyManager.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
@@ -84,25 +85,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Engine_Vertex.h"
 #include "Engine_Typedef.h"
 #include "Engine_Function.h"
-
-#define DIRECTINPUT_VERSION	0x0800
-#include <dinput.h>
-
-#pragma warning(disable : 4251)
-
-#ifdef _DEBUG
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
-#ifndef DBG_NEW
-
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ ) 
-#define new DBG_NEW 
-
-#endif
-#endif
 
 using namespace Engine;
 

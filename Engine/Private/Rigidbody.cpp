@@ -2,6 +2,7 @@
 #include "Rigidbody.h"
 
 #include "GameInstance.h"
+#include "GameObject.h"
 
 #include "Jolt/Physics/Collision/Shape/BoxShape.h"
 
@@ -22,24 +23,70 @@ HRESULT CRigidbody::Initialize_Prototype()
 
 HRESULT CRigidbody::Initialize_Clone(void* pArg)
 {
-	RefConst<Shape> BoxShape = new JPH::BoxShape(Vec3(5.f, 5.f, 5.f));
+	ASSERT_CRASH(pArg);
+
+	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
+	m_pOwner = pDesc->pOwner;
+
+	RefConst<Shape> BodyShape;
+
+	using namespace JPH;
+	switch (pDesc->eShape)
+	{
+	case SHAPE::SPHERE:
+	{
+
+		break;
+	}
+	case SHAPE::BOX:
+	{
+		BOXBODY_DESC* pBoxDesc = static_cast<BOXBODY_DESC*>(pDesc);
+		BodyShape = new BoxShape(Vec3(pBoxDesc->vExtent.x, pBoxDesc->vExtent.y, pBoxDesc->vExtent.z));
+		break;
+	}
+	case SHAPE::CAPSULE:
+	{
+
+		break;
+	}
+	case SHAPE::CONVEXHULL:
+	{
+
+		break;
+	}
+	case SHAPE::MESH:
+	{
+
+		break;
+	}
+	default:
+		CRASH("Shape Error");
+	}
 
 	BodyCreationSettings bodySetting(
-		BoxShape,					// Shape
-		Vec3(0.f, 0.f, 0.f),				// Position
-		Quat::sIdentity(),			// Quat
-		EMotionType::Dynamic,	// Motion Type
-		0								// Collision Layer
+		BodyShape,									// Shape
+		Vec3(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z),				// Position
+		Quat(pDesc->vQuat.x, pDesc->vQuat.y, pDesc->vQuat.z, pDesc->vQuat.w),	// Quat
+		pDesc->eType,								// Motion Type
+		ObjectLayer(pDesc->iLayer)				// Collision Layer
 	);
+	MassProperties mp;
+	mp.ScaleToMass(1.f);
 
-	m_BodyID = m_pGameInstance->Register_Body(bodySetting);
+	bodySetting.mMassPropertiesOverride = mp;
+	// 관성 (직접 설정한 질량 사용하는 세팅)
+	//bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+
+	// GameObject(Owner) -> UserData로 전달
+	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
+
+	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
 
 	return S_OK;
 }
 
 void CRigidbody::Update()
 {
-
 }
 
 CRigidbody* CRigidbody::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -71,4 +118,6 @@ CComponent* CRigidbody::Clone(void* pArg)
 void CRigidbody::Free()
 {
 	__super::Free();
+
+	m_pOwner = nullptr;
 }

@@ -23,7 +23,7 @@ public:
 	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
 
 #ifdef _DEBUG
-	_float*						Get_DistancePtr() { return &m_fFixedDistance; }
+	_float*							Get_DistancePtr() { return &m_fFixedDistance; }
 #endif // _DEBUG
 
 

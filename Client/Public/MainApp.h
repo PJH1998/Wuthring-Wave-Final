@@ -27,8 +27,9 @@ private:
 	ImGuiID						m_iDockSpaceID = {};
 
 	// Frame È®ÀÎ¿ë
-	//_float							m_fMinute = {};
-	//_uint							m_iFrame = {};
+	_float							m_fTimeAcc = {};
+	_uint							m_iCnt = {};
+	_uint							m_iFrame = {};
 
 private:
 	void				SetUp_CollisionLayer();

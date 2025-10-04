@@ -81,19 +81,25 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	// ImGui Example
 	// Docking 기본 설정
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
-	ImGui::Begin("Test");
-	ImGui::Text("Hello");
+	ImGui::Begin("Frame");
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "Frame : %d", m_iFrame);
+	ImGui::Text(szFrame);
 	ImGui::End();
 
-	ImGui::Begin("Test2");
-	ImGui::Text("Hello2");
-	ImGui::End();
-	// ============
+	m_fTimeAcc += fTimeDelta;
+	++m_iCnt;
+	if (m_fTimeAcc > 1.f)
+	{
+		m_fTimeAcc = 0.f;
+		m_iFrame = m_iCnt;
+		m_iCnt = 0;
+	}
+
 }
 
 void CMainApp::Render()
@@ -108,6 +114,14 @@ void CMainApp::SetUp_CollisionLayer()
 {
 	// Object To BroadPhase
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+
+	// Object VS Object
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+
+	// Object VS BroadPhase
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 }
 
 void CMainApp::Ready_Event()
