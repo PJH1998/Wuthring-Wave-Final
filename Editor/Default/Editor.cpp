@@ -79,8 +79,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			pEditorApp->Post_Update();
 			pEditorApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
-			if (FAILED(pEditorApp->Render()))
-				return FALSE;
+			pEditorApp->Render();
 
 			fTimeAcc = 0.f;
 		}

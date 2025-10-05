@@ -29,6 +29,14 @@ HRESULT CEditorApp::Initialize()
 	// ImGui Context ¿¬µ¿
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
+	// Jolt Collision Layer SetUp
+	SetUp_CollisionLayer();
+	// Jolt PhysicsSystem SetUp
+	m_pGameInstance->SetUp_PhysicsSystem();
+
+	Ready_Event();
+	//Start_Level();
+
 	return S_OK;
 }
 
@@ -69,14 +77,35 @@ void CEditorApp::Update(_float fTimeDelta)
 	}
 }
 
-HRESULT CEditorApp::Render()
+void CEditorApp::Render()
 {
 	_float4 vClearColor = _float4(0.f, 0.f, 1.f, 1.f);
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
 	m_pGameInstance->Render_End();
+}
 
-	return S_OK;
+void CEditorApp::SetUp_CollisionLayer()
+{
+	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+
+	// Object VS Object
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+
+	// Object VS BroadPhase
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+}
+
+void CEditorApp::Ready_Event()
+{
+	m_pGameInstance->Subscribe<CHANGE_LEVEL_EVENT>(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), [this](const CHANGE_LEVEL_EVENT& event) {
+			m_isChangeLevel = true;
+			m_eNextLevel = event.eNextLevel;
+			m_isLoad = event.isLoad;
+		});
 }
 
 void CEditorApp::Start_Level()
