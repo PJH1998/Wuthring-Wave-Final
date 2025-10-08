@@ -119,8 +119,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,8 +142,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -158,6 +158,7 @@
     <ClInclude Include="..\Public\Level_Map.h" />
     <ClInclude Include="..\Public\Level_Shader.h" />
     <ClInclude Include="..\Public\Level_UI.h" />
+    <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="..\Private\Level_Map.cpp" />
     <ClCompile Include="..\Private\Level_Shader.cpp" />
     <ClCompile Include="..\Private\Level_UI.cpp" />
+    <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

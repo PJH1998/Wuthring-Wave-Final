@@ -4,7 +4,10 @@
 #include <process.h>
 
 #include "Editor_Enum.h"
-//#include "Client_Struct.h"
+
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/Importer.hpp"
 
 #define GRAVITY 98.f
 
