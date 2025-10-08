@@ -1,5 +1,6 @@
 #include "EditorPch.h"
 #include "AnimationTool.h"
+#include "ModelLoader.h"
 
 #pragma region 기본 함수들
 CAnimationTool::CAnimationTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -12,7 +13,7 @@ CAnimationTool::CAnimationTool(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CAnimationTool::Initialize()
 {
-
+    m_pLoader = CModelLoader::Create();
     return S_OK;
 }
 
@@ -62,14 +63,13 @@ void CAnimationTool::Render_DebugWindow()
     // NoCollapse만 유지, 이동 가능하게
     ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoCollapse);
 
-
     _float3 camPos = {};
     //XMStoreFloat3(&camPos, m_pCameraTransformCom->Get_State(STATE::POSITION));
     //ImGui::Text("Camera Pos: (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
     // 현재 선택된 파일 타입 표시
-    const char* typeNames[] = { "SAVE_FBX", "LOAD_DAT", "EDIT_ANIMATION", "END"};
+    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "EDIT_ANIMATION", "END"};
     ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
 
     ImGui::End();
@@ -80,18 +80,12 @@ void CAnimationTool::Render_SelectMode()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("SAVE_FBX")) {
-            m_eMode = MODE::SAVE_FBX;
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("LOAD_DAT")) {
-            m_eMode = MODE::LOAD_DAT;
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("EDIT_ANIMATION")) {
-            m_eMode = MODE::EDIT_ANIMATION;
+        if (ImGui::BeginMenu("Mode"))
+        {
+            // MenuItem을 사용하면 더 깔끔한 메뉴를 만들 수 있습니다.
+            if (ImGui::MenuItem("Convert FBX to DAT")) { m_eMode = MODE::CONVERT_FBX_TO_DAT; }
+            if (ImGui::MenuItem("View DAT")) { m_eMode = MODE::VIEW_DAT; }
+            if (ImGui::MenuItem("Edit Animation")) { m_eMode = MODE::EDIT_ANIMATION; }
             ImGui::EndMenu();
         }
 
@@ -104,13 +98,27 @@ void CAnimationTool::Render_Menu()
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
     {
-        if (ImGui::BeginTabItem("Save_FBX"))
+        if (ImGui::BeginTabItem("Save_Load"))
+        {
+            if (ImGui::BeginTabBar("Save_Load", ImGuiTabBarFlags_None))
+            {
+                if (ImGui::BeginTabItem("Save_Load"))
+                {
+                    m_pLoader->Update();
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
+            }
+            ImGui::EndTabItem();
+        }
+
+       /* if (ImGui::BeginTabItem("Save_FBX"))
         {
             if (ImGui::BeginTabBar("Save_FBX", ImGuiTabBarFlags_None))
             {
                 if (ImGui::BeginTabItem("Save_FBX"))
                 {
-                    Render_SaveFBX();
+                    RenderUI_ConvertFbx();
                     ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
@@ -124,13 +132,13 @@ void CAnimationTool::Render_Menu()
             {
                 if (ImGui::BeginTabItem("Load_DAT"))
                 {
-                    Render_LoadDAT();
+                    RenderUI_ConvertFbx();
                     ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
             }
             ImGui::EndTabItem();
-        }
+        }*/
 
         if (ImGui::BeginTabItem("Edit_DAT"))
         {
@@ -138,7 +146,7 @@ void CAnimationTool::Render_Menu()
             {
                 if (ImGui::BeginTabItem("Edit_DAT"))
                 {
-                    Render_EditDAT();
+                    RenderUI_ViewDat();
                     ImGui::EndTabItem();
                 }
                 ImGui::EndTabBar();
@@ -151,19 +159,18 @@ void CAnimationTool::Render_Menu()
 
 }
 
-void CAnimationTool::Render_SaveFBX()
+void CAnimationTool::RenderUI_ConvertFbx()
 {
-    // 1. .json 파일을 읽어와서? FBX 파일을 DAT화 한다. => 대량
-
-    // 2. 직접 하나 선택해서 FBX 파일을 DAT화 한다. => 일부.
+    // 1. 직접 하나 선택해서 FBX 파일을 DAT화 한다. => 일부.
+    m_pLoader->Update();
 }
 
-void CAnimationTool::Render_LoadDAT()
+void CAnimationTool::RenderUI_ViewDat()
 {
 
 }
 
-void CAnimationTool::Render_EditDAT()
+void CAnimationTool::RenderUI_EditAnimation()
 {
 
 }
@@ -188,6 +195,7 @@ CAnimationTool* CAnimationTool::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 void CAnimationTool::Free()
 {
     CBase::Free();
+    Safe_Release(m_pLoader);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
 }

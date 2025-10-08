@@ -8,8 +8,8 @@ class CAnimationTool final : public CBase
 private:
 	enum class MODE
 	{
-		SAVE_FBX = 0, 
-		LOAD_DAT = 1, 
+		CONVERT_FBX_TO_DAT = 0, 
+		VIEW_DAT = 1, 
 		EDIT_ANIMATION = 2, // 애니메이션 수정. (Notify)?
 		END
 	};
@@ -23,6 +23,7 @@ private:
 #pragma region 기본 함수
 public:
 	HRESULT	Initialize();
+	void Update();
 	void Render();
 #pragma endregion
 
@@ -37,9 +38,9 @@ private:
 
 private:
 	// 2 Depth Menu
-	void Render_SaveFBX();
-	void Render_LoadDAT();
-	void Render_EditDAT();
+	void RenderUI_ConvertFbx();
+	void RenderUI_ViewDat();
+	void RenderUI_EditAnimation();
 
 private:
 	// 3 Depth Menu
@@ -53,6 +54,8 @@ private:
 	MODE m_eMode = { MODE::END };
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
+
+	class CModelLoader* m_pLoader = { nullptr };
 
 
 
