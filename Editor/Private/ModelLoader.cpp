@@ -149,7 +149,7 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 	strcpy_s(szAnimFilePath, szDirPath);
 	strcat_s(szAnimFilePath, "Animation/");
 	strcat_s(szAnimFilePath, szFileName);
-	strcat_s(szAnimFilePath, ".dat");
+	strcat_s(szAnimFilePath, "_Anim.dat");
 
 	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
 	if (!dir.empty() && !filesystem::exists(dir))

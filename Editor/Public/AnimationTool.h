@@ -22,7 +22,7 @@ private:
 
 #pragma region 扁夯 窃荐
 public:
-	HRESULT	Initialize();
+	HRESULT	Initialize(LEVEL eLevel);
 	void Update();
 	void Render();
 #pragma endregion
@@ -44,23 +44,25 @@ private:
 
 private:
 	// 3 Depth Menu
-	
-
-
-	
+	void LoadDat();
+	void RenderUI_Prototype();
 	
 
 private:
+	LEVEL m_eCurLevel = { LEVEL::END };
 	MODE m_eMode = { MODE::END };
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
-
+	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
+
+	list<string> m_ModelNames; // 积己等 Model Component甸.
+	list<string> m_ActorNames; // 积己等 GameObject甸.
 
 
 
 public:
-	static CAnimationTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CAnimationTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel);
 	virtual	void Free() override;
 };
 NS_END

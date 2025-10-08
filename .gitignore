@@ -40,6 +40,8 @@
 # debug information files
 *.dwo
 
+*.ini
+
 .vs/
 Client/Default/x64/
 Client/Bin/Debug/*

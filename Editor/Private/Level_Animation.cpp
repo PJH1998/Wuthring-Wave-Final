@@ -11,7 +11,7 @@ CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLevel_Animation::Initialize()
 {
-    m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext);
+    m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
     return S_OK;
 }

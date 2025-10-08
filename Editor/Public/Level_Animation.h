@@ -16,6 +16,7 @@ public:
 
 private:
 	class CAnimationTool* m_pAnimationTool = { nullptr };
+	LEVEL m_eCurLevel = { LEVEL::ANIMATION };
 
 public:
 	static		CLevel_Animation*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
