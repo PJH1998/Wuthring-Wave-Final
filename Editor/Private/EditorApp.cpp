@@ -78,8 +78,6 @@ void CEditorApp::Post_Update()
 		case LEVEL::UI:
 			pLevel = CLevel_UI::Create(m_pDevice, m_pContext);
 			break;
-		case LEVEL::UI:
-			break;
 		}
 
 		if (nullptr == pLevel)
@@ -94,7 +92,7 @@ void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	ImGui::Begin("Level")
+	ImGui::Begin("Level");
 
 
 	if (ImGui::Button("Shader", ImVec2(100.f, 50.f)))

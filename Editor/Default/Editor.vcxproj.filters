@@ -34,6 +34,9 @@
     <Filter Include="01. Level\UI">
       <UniqueIdentifier>{462d5121-ab97-4cd9-9f72-1383b46c5133}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props">
+      <UniqueIdentifier>{95123eb5-a89e-4ad2-943b-6e889793fe28}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -81,6 +84,9 @@
     <ClInclude Include="..\Public\Level_Map.h">
       <Filter>01. Level\Map</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>01. Level\UI\Temp Props</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -122,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Level_UI.cpp">
       <Filter>01. Level\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>01. Level\UI\Temp Props</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
