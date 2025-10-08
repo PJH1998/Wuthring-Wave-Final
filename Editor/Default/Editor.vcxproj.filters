@@ -87,6 +87,7 @@
     <ClInclude Include="..\Public\ModelLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -132,5 +133,6 @@
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp" />
   </ItemGroup>
 </Project>
