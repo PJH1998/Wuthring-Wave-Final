@@ -13,7 +13,8 @@ private:
 public:
 	const aiScene* Get_Scene() { return m_pAIScene; }
 public:
-	HRESULT		Initialize(MODELTYPE eType, const _char* pModelFilePath);
+	HRESULT		Initialize();
+	void			Update();
 
 	HRESULT		Save_Dat_NonAnim(const _char* pFileName);
 	HRESULT		Save_Dat_Anim(const _char* pFileName);
@@ -25,16 +26,31 @@ private:
 	const aiScene*		m_pAIScene = { nullptr };
 	Assimp::Importer	m_Importer = {};
 
+	_uint					m_iAnim = {};
 	MODELTYPE			m_eType = { MODELTYPE::NONANIM };
 
-	
+	_char					m_szReadPath[MAX_PATH] = {};
+	_char					m_szWritePath[MAX_PATH] = {};
+	_char					m_szFileName[MAX_PATH] = {};
+
+	_bool					m_isShowLoadFile = { false };
+	_bool					m_isShowSaveFile = { false };
+
+	// Info
+	_string				m_strModelName;
+
+private:
+	void					Load_File();
+	void					Save_File();
+
+	void					Show_Info();
 
 private:
 	HRESULT				Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType);
 	HRESULT				Save_Bone(ofstream& OutPut, const aiNode* pNode);
 
 public:
-	static		CModelLoader*	Create(MODELTYPE eType, const _char* pModelFilePath);
+	static		CModelLoader*		Create();
 	virtual		void					Free() override;
 };
 

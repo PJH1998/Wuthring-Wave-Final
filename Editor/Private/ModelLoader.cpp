@@ -5,28 +5,35 @@ CModelLoader::CModelLoader()
 {
 }
 
-HRESULT CModelLoader::Initialize(MODELTYPE eType, const _char* pModelFilePath)
+HRESULT CModelLoader::Initialize()
 {
-	if (nullptr == pModelFilePath)
-		return S_OK;
-
-	_char szFilePath[MAX_PATH] = "../Bin/Resource/FBX/";
-	strcat_s(szFilePath, pModelFilePath);
-	strcat_s(szFilePath, ".fbx");
-
-	m_eType = eType;
-
-	_uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
-	if (MODELTYPE::NONANIM == eType)
-		iFlag |= aiProcess_PreTransformVertices;
-	m_pAIScene = m_Importer.ReadFile(szFilePath, iFlag);
-	if (nullptr == m_pAIScene)
-	{
-		MSG_BOX("Model Load Fail");
-		return E_FAIL;
-	}
-	
 	return S_OK;
+}
+
+void CModelLoader::Update()
+{
+	ImGui::Begin("Model Load");
+
+	if (ImGui::RadioButton("NonAnim", m_iAnim == 0)) m_iAnim = 0;
+	if (ImGui::RadioButton("Anim", m_iAnim == 1)) m_iAnim = 1;
+	if (0 == m_iAnim) m_eType = MODELTYPE::NONANIM;
+	else m_eType = MODELTYPE::ANIM;
+
+	if (ImGui::Button("Load FBX"))
+		m_isShowLoadFile = !m_isShowLoadFile;
+	ImGui::SameLine();
+	if (ImGui::Button("Save Model"))
+		m_isShowSaveFile = !m_isShowSaveFile;
+
+	if(true == m_isShowLoadFile)
+		Load_File();
+	if (true == m_isShowSaveFile)
+		Save_File();
+
+	// Model Info
+	Show_Info();
+
+	ImGui::End();
 }
 
 HRESULT CModelLoader::Save_Dat_Anim(const _char* pFileName)
@@ -34,12 +41,7 @@ HRESULT CModelLoader::Save_Dat_Anim(const _char* pFileName)
 	if (nullptr == m_pAIScene)
 		return E_FAIL;
 
-	_char szBasePath[MAX_PATH] = "../Bin/dat/";
-	_char szExt[MAX_PATH] = ".dat";
-	strcat_s(szBasePath, pFileName);
-	strcat_s(szBasePath, szExt);
-
-	ofstream file(szBasePath, ios::binary);
+	ofstream file(pFileName, ios::binary);
 
 	if (false == file.is_open())
 	{
@@ -139,12 +141,21 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 	if (nullptr == m_pAIScene)
 		return E_FAIL;
 
-	_char szBasePath[MAX_PATH] = "../Bin/dat/Animation/";
-	_char szExt[MAX_PATH] = "_Anim.dat";
-	strcat_s(szBasePath, pFileName);
-	strcat_s(szBasePath, szExt);
+	_char szDirPath[MAX_PATH] = {};
+	_char szFileName[MAX_PATH] = {};
+	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
 
-	ofstream file(szBasePath, ios::binary);
+	_char szAnimFilePath[MAX_PATH] = {};
+	strcpy_s(szAnimFilePath, szDirPath);
+	strcat_s(szAnimFilePath, "Animation/");
+	strcat_s(szAnimFilePath, szFileName);
+	strcat_s(szAnimFilePath, ".dat");
+
+	filesystem::path dir = filesystem::path(szAnimFilePath).parent_path();
+	if (!dir.empty() && !filesystem::exists(dir))
+		filesystem::create_directories(dir);
+
+	ofstream file(szAnimFilePath, ios::binary);
 
 	if (false == file.is_open())
 	{
@@ -231,12 +242,7 @@ HRESULT CModelLoader::Save_Dat_NonAnim(const _char* pFileName)
 	if (nullptr == m_pAIScene)
 		return E_FAIL;
 
-	_char szBasePath[MAX_PATH] = "../Bin/dat/";
-	_char szExt[MAX_PATH] = ".dat";
-	strcat_s(szBasePath, pFileName);
-	strcat_s(szBasePath, szExt);
-
-	ofstream file(szBasePath, ios::binary);
+	ofstream file(pFileName, ios::binary);
 
 	if (false == file.is_open())
 	{
@@ -290,12 +296,21 @@ HRESULT CModelLoader::Save_Material(const _char* pFileName)
 	if (nullptr == m_pAIScene)
 		return E_FAIL;
 
-	_char szBasePath[MAX_PATH] = "../Bin/json/Material/";
-	_char szExt[MAX_PATH] = ".json";
-	strcat_s(szBasePath, pFileName);
-	strcat_s(szBasePath, szExt);
+	_char szDirPath[MAX_PATH] = {};
+	_char szFileName[MAX_PATH] = {};
+	_splitpath_s(pFileName, nullptr, 0, szDirPath, MAX_PATH, szFileName, MAX_PATH, nullptr, 0);
 
-	ofstream file(szBasePath);
+	_char szMatFilePath[MAX_PATH] = {};
+	strcpy_s(szMatFilePath, szDirPath);
+	strcat_s(szMatFilePath, "Mat/");
+	strcat_s(szMatFilePath, szFileName);
+	strcat_s(szMatFilePath, ".json");
+
+	filesystem::path dir = filesystem::path(szMatFilePath).parent_path();
+	if (!dir.empty() && !filesystem::exists(dir))
+		filesystem::create_directories(dir);
+
+	ofstream file(szMatFilePath);
 	if (false == file.is_open())
 	{
 		MSG_BOX("Material Save Fail");
@@ -319,6 +334,85 @@ HRESULT CModelLoader::Save_Material(const _char* pFileName)
 	file.close();
 
 	return S_OK;
+}
+
+void CModelLoader::Load_File()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("FBX File Load", "Import File", ".fbx", config);
+
+	if (ImGuiFileDialog::Instance()->Display("FBX File Load")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+			m_strModelName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+			_uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
+			if (MODELTYPE::NONANIM == m_eType)
+				iFlag |= aiProcess_PreTransformVertices;
+			m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
+			if (nullptr == m_pAIScene)
+			{
+				MSG_BOX("°æ·Î Àß¸øµÊ");
+				return;
+			}
+		}
+		ImGuiFileDialog::Instance()->Close();
+		m_isShowLoadFile = false;
+	}
+}
+
+void CModelLoader::Save_File()
+{
+	if (nullptr == m_pAIScene)
+		return;
+
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/";
+	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
+
+	if (ImGuiFileDialog::Instance()->Display("Save Model")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			if (MODELTYPE::NONANIM == m_eType)
+				Save_Dat_NonAnim(strFilePath.c_str());
+			else
+			{
+				Save_Dat_Anim(strFilePath.c_str());
+				Save_Animation(strFilePath.c_str());
+			}
+			Save_Material(strFilePath.c_str());
+		}
+		ImGuiFileDialog::Instance()->Close();
+		m_isShowSaveFile = false;
+	}
+}
+
+void CModelLoader::Show_Info()
+{
+	if (nullptr == m_pAIScene)
+		return;
+
+	_uint iNumMesh = m_pAIScene->mNumMeshes;
+	_uint iNumMat = m_pAIScene->mNumMaterials;
+	_uint iNumAnim = m_pAIScene->mNumAnimations;
+
+	_char szInfo[MAX_PATH] = {};
+	sprintf_s(szInfo, "Mesh : %d / Mat : %d / Anim : %d", iNumMesh, iNumMat, iNumAnim);
+
+	ImGui::PushID(1000);
+	ImGui::Text(m_strModelName.c_str());
+	ImGui::PopID();
+	ImGui::PushID(1001);
+	ImGui::Text(szInfo);
+	ImGui::PopID();
 }
 
 HRESULT CModelLoader::Save_Texture(json& MaterialData, const aiMaterial* pMaterial, aiTextureType eType)
@@ -363,11 +457,11 @@ HRESULT CModelLoader::Save_Bone(ofstream& OutPut, const aiNode* pNode)
 	return S_OK;
 }
 
-CModelLoader* CModelLoader::Create(MODELTYPE eType, const _char* pModelFilePath)
+CModelLoader* CModelLoader::Create()
 {
 	CModelLoader* pInstance = new CModelLoader();
 
-	if (FAILED(pInstance->Initialize(eType, pModelFilePath)))
+	if (FAILED(pInstance->Initialize()))
 	{
 		MSG_BOX("Failed to Create : ModelLoader");
 		Safe_Release(pInstance);
