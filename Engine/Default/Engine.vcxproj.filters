@@ -190,6 +190,9 @@
     <Filter Include="01. Utility\97. Physics\ContactListener">
       <UniqueIdentifier>{0109138b-fd29-442a-a5e7-51304fdc506e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\03. GameObject\UI">
+      <UniqueIdentifier>{6c4f0a80-08f5-4ff9-9569-6828dccffafc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -381,6 +384,9 @@
     <ClInclude Include="..\Public\ContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UIObject.h">
+      <Filter>01. Utility\03. GameObject\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -550,6 +556,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UIObject.cpp">
+      <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

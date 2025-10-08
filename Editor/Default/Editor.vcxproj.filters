@@ -40,6 +40,9 @@
     <Filter Include="02. ModelLoader">
       <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp Shader">
+      <UniqueIdentifier>{3f297cbf-d4f6-4260-a73f-e0e5fd999763}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -141,5 +144,10 @@
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
+      <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
