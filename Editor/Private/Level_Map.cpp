@@ -1,60 +1,56 @@
-#include"EditorPch.h"
-#include "Level_MapTool.h"
-#include"MapObject.h"
+#include "EditorPch.h"
+#include "Level_Map.h"
 
-CLevel_MapTool::CLevel_MapTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	:CLevel(pDevice,pContext)
+#include "Event_Level.h"
+
+CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+    : CLevel { pDevice, pContext }
 {
 }
 
-HRESULT CLevel_MapTool::Initialize()
+HRESULT CLevel_Map::Initialize()
 {
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
-	return S_OK;
+    return S_OK;
 }
 
-void CLevel_MapTool::Update(_float fTimeDelta)
+void CLevel_Map::Update(_float fTimeDelta)
 {
-    SetWindowText(g_hWnd, TEXT("MapTool"));
+    SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
     switch (m_eMenu)
     {
-    case Editor::CLevel_MapTool::MENU_OBJECT:
+    case Editor::CLevel_Map::MENU_OBJECT:
         Menu_Object();
         break;
 
-    case Editor::CLevel_MapTool::MENU_RANDSCAPE:
+    case Editor::CLevel_Map::MENU_RANDSCAPE:
         Menu_RandSacpe();
         break;
 
-    case Editor::CLevel_MapTool::MENU_LIGHT:
+    case Editor::CLevel_Map::MENU_LIGHT:
         Menu_Light();
         break;
     }
+}
 
-
-
+void CLevel_Map::Render()
+{
 
 }
 
-HRESULT CLevel_MapTool::Render()
+void CLevel_Map::Menu_Select()
 {
-	return S_OK;
-}
-
-void CLevel_MapTool::Menu_Select()
-{
-    ImGui::PushStyleVar();
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Ojbect")) {
             m_eMenu = MENU_OBJECT;
             ImGui::EndMenu();
         }
-        
+
         if (ImGui::BeginMenu("RandScape")) {
             m_eMenu = MENU_RANDSCAPE;
             ImGui::EndMenu();
@@ -69,13 +65,13 @@ void CLevel_MapTool::Menu_Select()
     }
 }
 
-void CLevel_MapTool::Menu_Object()
+void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
     ImGui::End();
 }
 
-void CLevel_MapTool::Menu_RandSacpe()
+void CLevel_Map::Menu_RandSacpe()
 {
     ImGui::Begin("Menu_RandScape");
 
@@ -105,38 +101,36 @@ void CLevel_MapTool::Menu_RandSacpe()
     ImGui::End();
 }
 
-void CLevel_MapTool::Menu_Light()
+void CLevel_Map::Menu_Light()
 {
     // 조명. 일단 Imgui에 List로 현재 내가 넣은 조명들 정보? 순서 띄우기. 버튼형식으로 누르면 그 조명에 대한 정보가 나오게.
-    // 라이트 오브젝트를 하나 만들어서 그 놈의 위치 정보를 조명으로. 조절할 수 있게. -> 라이트 객체가 현재 추가된 조명들 중에서 몇 번째 순서인지
-    // 각종 색상정보 및 세기, 디퓨즈 앰비언트 기타 등등 다 수정할 수 있게. -> 실시간 적용? or 버튼 누르면 적용. 되돌리기 기능도 있음 좋을듯
-    // 
-    //기즈모 달거면 조명에 달기. 
-
+       // 라이트 오브젝트를 하나 만들어서 그 놈의 위치 정보를 조명으로. 조절할 수 있게. -> 라이트 객체가 현재 추가된 조명들 중에서 몇 번째 순서인지
+       // 각종 색상정보 및 세기, 디퓨즈 앰비언트 기타 등등 다 수정할 수 있게. -> 실시간 적용? or 버튼 누르면 적용. 되돌리기 기능도 있음 좋을듯
+       // 
+       //기즈모 달거면 조명에 달기. 
 
 }
 
-HRESULT CLevel_MapTool::Ready_Static_Component()
+HRESULT CLevel_Map::Ready_Static_Component()
 {
-    /*m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP))
-    MapObject*/
     return S_OK;
 }
 
-CLevel_MapTool* CLevel_MapTool::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CLevel_MapTool* pInstance = new CLevel_MapTool(pDevice, pContext);
+    CLevel_Map* pInstance = new CLevel_Map(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize()))
     {
-        MSG_BOX("Failed to Create : Level_MapTool");
+        MSG_BOX("Failed to Create : Level_Map");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CLevel_MapTool::Free()
+void CLevel_Map::Free()
 {
-	__super::Free();
+    __super::Free();
+
 }

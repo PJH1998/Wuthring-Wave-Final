@@ -65,9 +65,8 @@ void CLevel_Logo::Update(_float fTimeDelta)
     //}
 }
 
-HRESULT CLevel_Logo::Render()
+void CLevel_Logo::Render()
 {
-    return S_OK;
 }
 
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
