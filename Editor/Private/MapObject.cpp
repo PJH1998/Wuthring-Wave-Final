@@ -27,6 +27,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Component()))
         return E_FAIL;
 
+    m_iShaderPassIndex = 0;
     return S_OK;
 }
 
@@ -50,10 +51,13 @@ void CMapObject::Render()
     Bind_Resources();
 
     m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-
+    
+    m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+    m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+    
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
-        m_pShaderCom->Begin(0);
+        m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
     }
@@ -62,6 +66,19 @@ void CMapObject::Render()
 void CMapObject::Render_Shadow()
 {
 
+}
+
+void CMapObject::Set_ImGuiOption()
+{
+    _float3 vScale = m_pTransformCom->Get_Scaled();
+    ImGui::InputFloat("Scale", &vScale.x);
+    ImGui::InputFloat("Scale", &vScale.y);
+    ImGui::InputFloat("Scale", &vScale.z);
+
+    //개인폴 때 이렇게 했다가 크기가 점점 작아졌었음. 주의
+    m_pTransformCom->Set_State(STATE::RIGHT, XMLoadFloat(&vScale.x));
+    m_pTransformCom->Set_State(STATE::UP, XMLoadFloat(&vScale.y));
+    m_pTransformCom->Set_State(STATE::LOOK, XMLoadFloat(&vScale.z));
 }
 
 HRESULT CMapObject::Ready_Component()
@@ -101,7 +118,7 @@ CGameObject* CMapObject::Clone(void* pArg)
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Failed to Cloned : MapObject");
+        MSG_BOX("Failed to Create : MapObject (Clone)");
         Safe_Release(pInstance);
     }
 

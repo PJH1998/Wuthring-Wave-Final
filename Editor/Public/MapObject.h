@@ -25,6 +25,8 @@ public:
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 
+	void Set_ImGuiOption();
+
 	HRESULT Ready_Component();
 
 	void Bind_Resources();
@@ -32,6 +34,12 @@ public:
 private:
 	class CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
+
+
+private:
+	_uint m_iShaderPassIndex = {};
+
+
 
 public:
 	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

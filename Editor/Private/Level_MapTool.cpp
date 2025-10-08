@@ -1,5 +1,6 @@
 #include"EditorPch.h"
 #include "Level_MapTool.h"
+#include"MapObject.h"
 
 CLevel_MapTool::CLevel_MapTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CLevel(pDevice,pContext)
@@ -28,6 +29,7 @@ void CLevel_MapTool::Update(_float fTimeDelta)
     case Editor::CLevel_MapTool::MENU_RANDSCAPE:
         Menu_RandSacpe();
         break;
+
     case Editor::CLevel_MapTool::MENU_LIGHT:
         Menu_Light();
         break;
@@ -45,6 +47,7 @@ HRESULT CLevel_MapTool::Render()
 
 void CLevel_MapTool::Menu_Select()
 {
+    ImGui::PushStyleVar();
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Ojbect")) {
@@ -115,6 +118,8 @@ void CLevel_MapTool::Menu_Light()
 
 HRESULT CLevel_MapTool::Ready_Static_Component()
 {
+    /*m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP))
+    MapObject*/
     return S_OK;
 }
 
