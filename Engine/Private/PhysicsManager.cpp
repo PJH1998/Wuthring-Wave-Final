@@ -82,8 +82,8 @@ void CPhysicsManager::SetUp_PhysicsSystem()
 	m_pPhysicsSystem->SetPhysicsSettings(m_PhysicsSetting);
 	m_pPhysicsSystem->SetContactListener(m_pContactListener);
 
-	//Vec3 vGravity = Vec3(0, -9.81f, 0);
-	Vec3 vGravity = Vec3(0, -5.81f, 0);
+	Vec3 vGravity = Vec3(0, -9.81f, 0);
+	//Vec3 vGravity = Vec3(0, -5.81f, 0);
 	m_pPhysicsSystem->SetGravity(vGravity);
 }
 
