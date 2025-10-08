@@ -24,7 +24,7 @@ private:
 
 private:
 	Menu m_eMenu = { END };
-
+	_uint m_iLevel = ENUM_CLASS(LEVEL::MAP);
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

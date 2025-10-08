@@ -2,6 +2,7 @@
 #include "Level_Map.h"
 
 #include "Event_Level.h"
+#include"MapObject.h"
 
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -113,6 +114,13 @@ void CLevel_Map::Menu_Light()
 
 HRESULT CLevel_Map::Ready_Static_Component()
 {
+    _matrix PreTransformMatrix = XMMatrixIdentity();
+    _float fSize = 0.001f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
+
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Test"), CMapObject::Create(m_pDevice, m_pContext));
     return S_OK;
 }
 
