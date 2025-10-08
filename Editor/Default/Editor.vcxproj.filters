@@ -37,6 +37,9 @@
     <Filter Include="02. ModelLoader">
       <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Particle">
+      <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -88,6 +91,9 @@
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>01. Level\Effect\Particle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -134,5 +140,8 @@
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>01. Level\Effect\Particle</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

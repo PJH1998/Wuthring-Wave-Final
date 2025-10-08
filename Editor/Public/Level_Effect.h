@@ -15,6 +15,9 @@ public:
 	virtual void			Render() override;
 
 private:
+	void Effect_MenuBar();
+
+	void Particle_Tab();
 	// Test
 
 public:

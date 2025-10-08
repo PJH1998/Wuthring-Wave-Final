@@ -160,6 +160,7 @@
     <ClInclude Include="..\Public\Level_UI.h" />
     <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
+    <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="..\Private\Level_UI.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
+    <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>
