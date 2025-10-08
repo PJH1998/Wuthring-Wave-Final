@@ -42,6 +42,7 @@
     <ClInclude Include="..\Public\Event_Level.h">
       <Filter>97. Event</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Level_MapTool.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -66,5 +67,6 @@
     <ClCompile Include="..\Private\EditorPch.cpp">
       <Filter>99. Define</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Level_MapTool.cpp" />
   </ItemGroup>
 </Project>

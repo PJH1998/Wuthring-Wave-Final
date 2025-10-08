@@ -2,6 +2,7 @@
 #include "EditorApp.h"
 
 #include "Event_Level.h"
+#include"Level_MapTool.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -25,7 +26,8 @@ HRESULT CEditorApp::Initialize()
 
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
-
+	m_isChangeLevel = true;
+	m_eNextLevel = LEVEL::MAP;
 	// ImGui Context ¿¬µ¿
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
@@ -48,6 +50,9 @@ void CEditorApp::Post_Update()
 		case LEVEL::ANIMATION:
 			// TODO
 			break;
+		case LEVEL::MAP:
+			pLevel = CLevel_MapTool::Create(m_pDevice, m_pContext);
+			break;
 		}
 
 		if (nullptr == pLevel)
@@ -62,11 +67,11 @@ void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	if (ImGui::Begin("Test"))
+	/*if (ImGui::Begin("Test"))
 	{
 		ImGui::Text("Hello");
 		ImGui::End();
-	}
+	}*/
 }
 
 HRESULT CEditorApp::Render()
