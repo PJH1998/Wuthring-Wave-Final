@@ -46,6 +46,12 @@ private:
 	// 3 Depth Menu
 	void LoadDat();
 	void RenderUI_Prototype();
+
+
+private:
+	// 4 Depth Menu
+	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
+	void Render_Model_Inspector();
 	
 
 private:
@@ -56,10 +62,23 @@ private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
 
-	list<string> m_ModelNames; // 생성된 Model Component들.
-	list<string> m_ActorNames; // 생성된 GameObject들.
+	// 아. ImGui string밖에 안됨.
+	list<_string> m_ModelNames; // 생성된 Model Component들. => .dat를 읽어와서 저장합니다.
+	list<_string> m_ActorNames; // 생성된 GameObject들.
+
+	_wstring m_wSelected_PrototypeModelTag = {};
+	_string m_Selected_PrototypeModelTag = {};
+
+	_float m_fEditorAlpha = { 1.f };
+	
 
 
+
+private:
+	// 헬퍼 함수
+	wstring StringToWstring(const std::string& str);
+
+	
 
 public:
 	static CAnimationTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel);
