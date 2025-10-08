@@ -37,6 +37,9 @@
     <Filter Include="01. Level\UI\Temp Props">
       <UniqueIdentifier>{95123eb5-a89e-4ad2-943b-6e889793fe28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. ModelLoader">
+      <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -87,6 +90,9 @@
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>01. Level\UI\Temp Props</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\ModelLoader.h">
+      <Filter>02. ModelLoader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -131,6 +137,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>01. Level\UI\Temp Props</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ModelLoader.cpp">
+      <Filter>02. ModelLoader</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

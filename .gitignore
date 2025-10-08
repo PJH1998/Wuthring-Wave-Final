@@ -30,7 +30,7 @@
 *.lai
 *.la
 *.a
-*.lib
+
 
 # Executables
 *.exe
@@ -42,26 +42,20 @@
 
 .vs/
 Client/Default/x64/
-Client/Bin/Resource
 Client/Bin/Debug/*
 !Client/Bin/Debug/fmod.dll
 Client/Bin/Release/*
 !Client/Bin/Release/fmod.dll
-Client/Bin/Sound
-Editor/Bin/Resource
+Client/Bin/Sound/*
 Editor/Bin/Debug/*
 !Editor/Bin/Debug/fmod.dll
+!Editor/Bin/Debug/assimp-vc143-mtd.dll
 Editor/Bin/Release/*
 !Editor/Bin/Release/fmod.dll
-Editor/Bin/dat
-Editor/Bin/json
-Editor/Public/assimp/
+!Editor/Bin/Release/assimp-vc143-mt.dll
 Engine/Bin/Debug
 Engine/Bin/Release
 Engine/Public/json.hpp
 Editor/Default/x64/
 Engine/Default/x64/
 EngineSDK/*
-!EngineSDK/Lib
-!EngineSDK/Lib/Debug/ImGuiLib_d.lib
-!EngineSDK/Lib/Release/ImGuiLib.lib
