@@ -15,7 +15,7 @@ public:
 	virtual void			Render() override;
 
 private:
-	// Test
+	class CAnimationTool* m_pAnimationTool = { nullptr };
 
 public:
 	static		CLevel_Animation*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

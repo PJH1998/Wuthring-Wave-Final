@@ -2,6 +2,7 @@
 #include "Level_Animation.h"
 
 #include "Event_Level.h"
+#include "AnimationTool.h"
 
 CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -10,6 +11,8 @@ CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLevel_Animation::Initialize()
 {
+    m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext);
+
     return S_OK;
 }
 
@@ -21,7 +24,7 @@ void CLevel_Animation::Update(_float fTimeDelta)
 
 void CLevel_Animation::Render()
 {
-
+    m_pAnimationTool->Render();
 }
 
 CLevel_Animation* CLevel_Animation::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -40,5 +43,6 @@ CLevel_Animation* CLevel_Animation::Create(ID3D11Device* pDevice, ID3D11DeviceCo
 void CLevel_Animation::Free()
 {
     __super::Free();
+    Safe_Release(m_pAnimationTool);
 
 }

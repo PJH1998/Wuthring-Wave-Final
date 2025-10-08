@@ -37,6 +37,9 @@
     <Filter Include="02. ModelLoader">
       <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Anim\Tool">
+      <UniqueIdentifier>{d8ed3759-af16-4f7e-8c12-1d7889d308f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -87,6 +90,9 @@
     <ClInclude Include="..\Public\ModelLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimationTool.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -131,6 +137,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimationTool.cpp">
+      <Filter>01. Level\Anim\Tool</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
