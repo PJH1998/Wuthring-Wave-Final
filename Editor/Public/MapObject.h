@@ -4,6 +4,7 @@
 
 NS_BEGIN(Engine)
 class CModel;
+class CModel_Instance;
 class CShader;
 NS_END
 
@@ -27,12 +28,13 @@ public:
 
 	void Set_ImGuiOption();
 
-	HRESULT Ready_Component();
+	HRESULT Ready_Component(void* pArg = nullptr);
 
 	void Bind_Resources();
 
 private:
-	class CModel* m_pModelCom = { nullptr };
+	//class CModel* m_pModelCom = { nullptr };
+	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
 

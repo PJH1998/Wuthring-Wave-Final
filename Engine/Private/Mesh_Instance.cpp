@@ -23,6 +23,7 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstre
     pVertices = new VTXMESH[m_iNumVertices];
     InputFile.read(reinterpret_cast<_char*>(&m_iNumIndices), sizeof(_uint));
     m_iNumIndices = m_iNumIndices * 3;
+    m_iNumIndexPerInstance = m_iNumIndices;
     pIndices = new _uint[m_iNumIndices];
     InputFile.read(reinterpret_cast<_char*>(&m_iMaterialIndex), sizeof(_uint));
 
@@ -104,10 +105,10 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 
     for (_uint i = 0; i < m_iNumInstance; ++i)
     {
-        memcpy(&pVBInstanceVertices->vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
-        memcpy(&pVBInstanceVertices->vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
-        memcpy(&pVBInstanceVertices->vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
-        memcpy(&pVBInstanceVertices->vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
+        memcpy(&pVBInstanceVertices[i].vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
+        memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
+        memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
+        memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
     }
 
     if (FAILED(__super::Initialize_Clone(pArg)))
