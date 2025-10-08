@@ -12,6 +12,8 @@ private:
 
 public:
 	_uint							Get_MaterialIndex() { return m_iMaterialIndex; }
+	const vector<_float3>&	Get_VerticesPos() { return m_VertexPositions; }
+	const vector<_uint>&		Get_Indices() { return m_Indices; }
 
 public:
 	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
@@ -33,14 +35,14 @@ private:
 
 	vector<_float4x4>			m_OffsetMatrices;
 
-#ifdef _DEBUG
-	vector<_float3>			m_VertexPositions;
+	// Mesh Shape¿ë Container
+	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
-#endif
 
 private:
 	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
 	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	HRESULT						Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile);
 
 public:
 	static		CMesh*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);

@@ -34,6 +34,12 @@
     <Filter Include="96. ShaderFiles">
       <UniqueIdentifier>{b9d7925c-22c5-410d-8f88-cf03f8aae298}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject">
+      <UniqueIdentifier>{ce527bd7-ea68-4c49-b058-42e71473eeb1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\Dummy">
+      <UniqueIdentifier>{ed07c1bd-b2ef-4167-a5d6-d28e30bdb8b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -75,6 +81,9 @@
     <ClInclude Include="..\Public\Loader_Logo.h">
       <Filter>01. Level\Loader\Logo</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Dummy.h">
+      <Filter>02. GameObject\Dummy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -105,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Loader_Logo.cpp">
       <Filter>01. Level\Loader\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Dummy.cpp">
+      <Filter>02. GameObject\Dummy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@ NS_BEGIN(Engine)
 class ENGINE_DLL CRigidbody final : public CComponent
 {
 public:
+#pragma region DESC
 	typedef struct tagRigidbodyDesc {
 		class CGameObject* pOwner = { nullptr };
 		SHAPE			eShape;
@@ -15,9 +16,27 @@ public:
 		_uint				iLayer;
 	}RIGIDBODY_DESC;
 
+	typedef struct tagSphereBodyDesc : public RIGIDBODY_DESC {
+		_float				fRadius; // ±¸ ¹ÝÁö¸§
+	}SPHEREBODY_DESC;
+
 	typedef struct tagBoxBodyDesc : public RIGIDBODY_DESC {
-		_float3			vExtent;
+		_float3			vExtent; // Box °¢ Ãà º° ¹ÝÁö¸§
 	}BOXBODY_DESC;
+
+	typedef struct tagCapsuleBodyDesc : public RIGIDBODY_DESC {
+		_float				fHeight; // Ä¸½¶ ¸öÅë ³ôÀÌ
+		_float				fRadius; // Ä¸½¶ ±¸ ºÎºÐ ¹ÝÁö¸§
+	}CAPSULEBODY_DESC;
+
+	typedef struct tagConvexHullBodyDesc : public RIGIDBODY_DESC {
+		class CModel* pModel = { nullptr };
+	}CONVEXHULLBODY_DESC;
+
+	typedef struct tagMeshBodyDesc : public RIGIDBODY_DESC {
+		class CModel* pModel = { nullptr };
+	}MESHBODY_DESC;
+#pragma endregion
 
 private:
 	explicit CRigidbody(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -27,27 +46,36 @@ private:
 public:
 	virtual		HRESULT			Initialize_Prototype()			override;
 	virtual		HRESULT			Initialize_Clone(void* pArg)	override;
-	void							Update();
+
+	void							Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta);
+	void							Sync_Rigidbody(class CTransform* pTransform);
 
 public:
-	void							AddForce(const _float3& vForce) { 
-		m_pBodyInterface->ActivateBody(m_pBody->GetID());
-		m_pBodyInterface->AddForce(m_pBody->GetID(), LoadVec3(vForce)); 
-		//m_pBodyInterface->AddImpulse(m_pBody->GetID(), LoadVec3(vForce)); 
-	}
-	void							OnGravity(_bool isGravity) { m_pBodyInterface->SetGravityFactor(m_pBody->GetID(), isGravity); }
+	void							Activate(_bool isActivate) { true == isActivate ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID); }
+	void							OnGravity(_bool isGravity) { m_pBodyInterface->SetGravityFactor(m_BodyID, isGravity); }
+
+	void							Force(const _float3& vForce) { m_pBodyInterface->AddForce(m_BodyID, LoadVec3(vForce)); }
+	void							Impulse(const _float3& vForce) { m_pBodyInterface->AddImpulse(m_BodyID, LoadVec3(vForce)); }
+
 
 private:
 	class CGameObject*		m_pOwner = { nullptr };
 	Body*							m_pBody = {nullptr};
+	BodyID						m_BodyID;
 	BodyInterface*				m_pBodyInterface = { nullptr };
 
 private:
-	Vec3 LoadVec3(const _float3& vVector)
-	{
-		Vec3 vVec3 = Vec3(vVector.x, vVector.y, vVector.z);
-		return vVec3;
-	}
+	Vec3 LoadVec3(const _float3& vVector){ return Vec3(vVector.x, vVector.y, vVector.z); }
+	Vec3 LoadVec3(const _fvector& vVector){ return Vec3(vVector.m128_f32[0], vVector.m128_f32[1], vVector.m128_f32[2]); }
+	Quat LoadQuat(const _float4& vQuat){ return Quat(vQuat.x, vQuat.y, vQuat.z, vQuat.w); }
+	Quat LoadQuat(const _fvector& vQuat){ return Quat(vQuat.m128_f32[0], vQuat.m128_f32[1], vQuat.m128_f32[2], vQuat.m128_f32[3]); }
+	
+	const JPH::Array<Vec3>				ConvertToArrayVec3(class CModel* pModel);
+	const JPH::Array<Float3>				ConvertToArrayFloat3(class CModel* pModel, _uint iIndex);
+	const JPH::Array<IndexedTriangle>	ConvertToArrayTri(class CModel* pModel, _uint iIndex);
+
+private:
+	void							Make_MeshShape(void* pArg);
 
 public:
 	static		CRigidbody*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
