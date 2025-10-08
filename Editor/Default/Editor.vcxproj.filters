@@ -13,6 +13,12 @@
     <Filter Include="97. Event">
       <UniqueIdentifier>{04d5f5cd-8ded-487c-b94c-5faa3bd733f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="00. EditorApp\UI">
+      <UniqueIdentifier>{f237a5a2-23a6-44ba-8971-28906852d698}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="00. EditorApp\UI\Temp_Props">
+      <UniqueIdentifier>{74f196f7-2bec-4a72-81a8-8d67880cf745}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -42,6 +48,12 @@
     <ClInclude Include="..\Public\Event_Level.h">
       <Filter>97. Event</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Level_Editor_UI.h">
+      <Filter>00. EditorApp\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>00. EditorApp\UI\Temp_Props</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -65,6 +77,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\EditorPch.cpp">
       <Filter>99. Define</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Level_Editor_UI.cpp">
+      <Filter>00. EditorApp\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>00. EditorApp\UI\Temp_Props</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

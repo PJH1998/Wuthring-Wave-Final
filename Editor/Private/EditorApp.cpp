@@ -56,6 +56,8 @@ void CEditorApp::Post_Update()
 		case LEVEL::ANIMATION:
 			// TODO
 			break;
+		case LEVEL::UI:
+			break;
 		}
 
 		if (nullptr == pLevel)
@@ -70,11 +72,11 @@ void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	if (ImGui::Begin("Test"))
-	{
-		ImGui::Text("Hello");
-		ImGui::End();
-	}
+	ImGui::Begin("Test");
+
+	ImGui::Text("Hello");
+
+	ImGui::End();
 }
 
 void CEditorApp::Render()
