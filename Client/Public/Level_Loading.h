@@ -11,9 +11,9 @@ private:
 	virtual ~CLevel_Loading() = default;
 
 public:
-	virtual HRESULT	Initialize(LEVEL eNextLevel);
+	virtual HRESULT		Initialize(LEVEL eNextLevel);
 	virtual void			Update(_float fTimeDelta) override;
-	virtual HRESULT	Render() override;
+	virtual void			Render() override;
 
 private:
 	CLoader*				m_pLoader = { nullptr };

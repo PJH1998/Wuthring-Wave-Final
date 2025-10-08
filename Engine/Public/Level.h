@@ -11,9 +11,9 @@ protected:
 	virtual ~CLevel() = default;
 
 public:
-	virtual HRESULT	Initialize();
+	virtual HRESULT		Initialize();
 	virtual void			Update(_float fTimeDelta);
-	virtual HRESULT	Render();
+	virtual void			Render();
 
 protected:
 	ID3D11Device*				m_pDevice = { nullptr };

@@ -38,7 +38,8 @@ HRESULT CLevel_Manager::Render()
 {
     if (nullptr == m_pCurrentLevel)
         return S_OK;
-    return m_pCurrentLevel->Render();
+    m_pCurrentLevel->Render();
+	return S_OK;
 }
 
 HRESULT CLevel_Manager::Clear_Resources()

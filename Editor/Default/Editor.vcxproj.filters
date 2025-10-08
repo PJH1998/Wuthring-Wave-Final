@@ -13,11 +13,26 @@
     <Filter Include="97. Event">
       <UniqueIdentifier>{04d5f5cd-8ded-487c-b94c-5faa3bd733f4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="00. EditorApp\UI">
-      <UniqueIdentifier>{f237a5a2-23a6-44ba-8971-28906852d698}</UniqueIdentifier>
+    <Filter Include="01. Level">
+      <UniqueIdentifier>{f5a1beda-663b-4398-9fe1-e8db78d82c7b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="00. EditorApp\UI\Temp_Props">
-      <UniqueIdentifier>{74f196f7-2bec-4a72-81a8-8d67880cf745}</UniqueIdentifier>
+    <Filter Include="01. Level\Edit">
+      <UniqueIdentifier>{79d0f649-1e9f-4bdd-9f15-13a2469a8d43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Shader">
+      <UniqueIdentifier>{b0e8ae58-0f4b-4c6a-8b3a-e3a210f41ef7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Anim">
+      <UniqueIdentifier>{5ccec3df-c8e5-4e2a-baab-db745f007daa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect">
+      <UniqueIdentifier>{f4aa0a89-a2f3-4990-b59a-18bc03fb3cfe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Map">
+      <UniqueIdentifier>{c6148559-fc43-4b25-b1d8-64c1351feab2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\UI">
+      <UniqueIdentifier>{462d5121-ab97-4cd9-9f72-1383b46c5133}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -48,11 +63,23 @@
     <ClInclude Include="..\Public\Event_Level.h">
       <Filter>97. Event</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Level_Editor_UI.h">
-      <Filter>00. EditorApp\UI</Filter>
+    <ClInclude Include="..\Public\Level_Edit.h">
+      <Filter>01. Level\Edit</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Custom_UI.h">
-      <Filter>00. EditorApp\UI\Temp_Props</Filter>
+    <ClInclude Include="..\Public\Level_UI.h">
+      <Filter>01. Level\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Shader.h">
+      <Filter>01. Level\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Animation.h">
+      <Filter>01. Level\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Effect.h">
+      <Filter>01. Level\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Map.h">
+      <Filter>01. Level\Map</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -78,11 +105,23 @@
     <ClCompile Include="..\Private\EditorPch.cpp">
       <Filter>99. Define</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Level_Editor_UI.cpp">
-      <Filter>00. EditorApp\UI</Filter>
+    <ClCompile Include="..\Private\Level_Edit.cpp">
+      <Filter>01. Level\Edit</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Custom_UI.cpp">
-      <Filter>00. EditorApp\UI\Temp_Props</Filter>
+    <ClCompile Include="..\Private\Level_Shader.cpp">
+      <Filter>01. Level\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Animation.cpp">
+      <Filter>01. Level\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Effect.cpp">
+      <Filter>01. Level\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Map.cpp">
+      <Filter>01. Level\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_UI.cpp">
+      <Filter>01. Level\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

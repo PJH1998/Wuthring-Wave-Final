@@ -45,9 +45,8 @@ void CLevel_Loading::Update(_float fTimeDelta)
     }
 }
 
-HRESULT CLevel_Loading::Render()
+void CLevel_Loading::Render()
 {
-    return S_OK;
 }
 
 HRESULT CLevel_Loading::Ready_Prototype()

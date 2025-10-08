@@ -515,7 +515,6 @@ HRESULT CGameInstance::Clear_Memory()
 
 void CGameInstance::Release_Engine()
 {
-	Release();
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
@@ -535,6 +534,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);
+	Release();
 }
 
 void CGameInstance::Free()

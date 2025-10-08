@@ -110,7 +110,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Safe_Release(pMainApp);
 	Safe_Release(pGameInstance);
 
-
 	return (int)msg.wParam;
 }
 
@@ -203,14 +202,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_ESCAPE:
 			PostQuitMessage(0);
+			break;
 		}
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		return 0;
+		break;
 	case WM_CLOSE:
 		PostQuitMessage(0);
-		return 0;
+		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

@@ -10,9 +10,9 @@ private:
 	virtual ~CLevel_Logo() = default;
 
 public:
-	virtual HRESULT	Initialize() override;
+	virtual HRESULT		Initialize() override;
 	virtual void			Update(_float fTimeDelta) override;
-	virtual HRESULT	Render() override;
+	virtual void			Render() override;
 
 private:
 	// Test
