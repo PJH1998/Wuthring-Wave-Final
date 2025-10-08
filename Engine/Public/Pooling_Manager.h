@@ -18,7 +18,9 @@ public:
 
 private:
 	class CGameInstance*			m_pGameInstance = { nullptr };
+	// Pooling 대기
 	map<const _wstring, queue<class CGameObject*>>			m_PoolingObjects;
+	// 활성화된 Object
 	map<const _wstring, list<class CGameObject*>>				m_ActiveObjects;
 
 

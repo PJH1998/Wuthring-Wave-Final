@@ -13,7 +13,7 @@ public:
 	HRESULT			Initialize();
 	void				Post_Update();						// 레벨 전환
 	void				Update(_float fTimeDelta);
-	HRESULT			Render();
+	void				Render();
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
@@ -24,12 +24,10 @@ private:
 	LEVEL							m_eNextLevel = { LEVEL::END };
 	_bool							m_isLoad = { false };
 
-	// Frame 확인용
-	//_float							m_fMinute = {};
-	//_uint							m_iFrame = {};
-
 private:
-	void			Start_Level();
+	void				SetUp_CollisionLayer();
+	void				Ready_Event();
+	void				Start_Level();
 
 public:
 	static		CEditorApp* Create();

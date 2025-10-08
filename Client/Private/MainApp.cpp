@@ -5,6 +5,8 @@
 
 #include "Level_Loading.h"
 
+#include "Level_Logo.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -31,6 +33,14 @@ HRESULT CMainApp::Initialize()
 	// ImGui Context 연동
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
+	// Jolt Collision Layer SetUp
+	SetUp_CollisionLayer();
+	// Jolt PhysicsSystem SetUp
+	m_pGameInstance->SetUp_PhysicsSystem();
+
+	Ready_Event();
+	Start_Level();
+
 	return S_OK;
 }
 
@@ -54,15 +64,13 @@ void CMainApp::Post_Update()
 			switch (m_eNextLevel)
 			{
 			case LEVEL::LOGO:
-				// TODO
+				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::GAMEPLAY:
 				// TODO
 				break;
 			}
-
-			if (nullptr == pLevel)
-				return;
+			ASSERT_CRASH(pLevel);
 
 			m_pGameInstance->Open_Level(ENUM_CLASS(m_eNextLevel), pLevel);
 		}
@@ -73,22 +81,56 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	if (ImGui::Begin("Test"))
+	// Docking 기본 설정
+	ImGuiID DockingID = ImGui::GetID("Dock");
+	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
+	ImGui::Begin("Frame");
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "Frame : %d", m_iFrame);
+	ImGui::Text(szFrame);
+	ImGui::End();
+
+	m_fTimeAcc += fTimeDelta;
+	++m_iCnt;
+	if (m_fTimeAcc > 1.f)
 	{
-		ImGui::Text("Hello");
-		ImGui::End();
+		m_fTimeAcc = 0.f;
+		m_iFrame = m_iCnt;
+		m_iCnt = 0;
 	}
 
 }
 
-HRESULT CMainApp::Render()
+void CMainApp::Render()
 {
 	_float4 vClearColor = _float4(0.f, 0.f, 1.f, 1.f);
 	m_pGameInstance->Render_Begin(&vClearColor);
 	m_pGameInstance->Draw();
 	m_pGameInstance->Render_End();
+}
 
-	return S_OK;
+void CMainApp::SetUp_CollisionLayer()
+{
+	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+
+	// Object VS Object
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+
+	// Object VS BroadPhase
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+}
+
+void CMainApp::Ready_Event()
+{
+	m_pGameInstance->Subscribe<CHANGE_LEVEL_EVENT>(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), [this](const CHANGE_LEVEL_EVENT& event) {
+			m_isChangeLevel = true;
+			m_eNextLevel = event.eNextLevel;
+			m_isLoad = event.isLoad;
+		});
 }
 
 void CMainApp::Start_Level()

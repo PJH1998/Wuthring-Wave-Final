@@ -101,8 +101,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		{
 			pMainApp->Post_Update();
 			pMainApp->Update(pGameInstance->Get_TimeDelta(TEXT("Timer_60")));
-			if (FAILED(pMainApp->Render()))
-				return FALSE;
+			pMainApp->Render();
 
 			fTimeAcc = 0.f;
 		}

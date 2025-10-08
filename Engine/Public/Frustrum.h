@@ -14,7 +14,7 @@ public:
 	void							Update();
 
 private:
-	class CGameInstance*	m_pGameInstance = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
 
 public:
 	static		CFrustrum*		Create();

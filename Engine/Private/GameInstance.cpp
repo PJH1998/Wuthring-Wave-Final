@@ -12,6 +12,7 @@
 #include "Target_Manager.h"
 #include "Renderer.h"
 #include "Timer_Manager.h"
+#include "PhysicsManager.h"
 #include "Camera_Manager.h"
 #include "EventBus.h"
 #include "PipeLine.h"
@@ -63,11 +64,14 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pLight_Manager = CLight_Manager::Create();
 	ASSERT_CRASH(m_pLight_Manager);
 
-	m_pCamera_Manager = CCamera_Manager::Create(EngineDesc.iNumLevel);
+	m_pCamera_Manager = CCamera_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pCamera_Manager);
 
 	m_pTimer_Manager = CTimer_Manager::Create();
 	ASSERT_CRASH(m_pTimer_Manager);
+
+	m_pPhysicsManager = CPhysicsManager::Create(*ppDevice, *ppContext, EngineDesc.iNumCollisionLayer);
+	ASSERT_CRASH(m_pPhysicsManager);
 
 	m_pEventBus = CEventBus::Create();
 	ASSERT_CRASH(m_pEventBus);
@@ -99,15 +103,15 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
-
-	//m_pCollision_Manager->Priority_Update();
 	m_pObject_Manager->Late_Update(fTimeDelta);
-	//m_pCollision_Manager->Update();
 
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
+
+	m_pPhysicsManager->Update(fTimeDelta);
 }
+
 _float CGameInstance::Rand_Normal()
 {
 	return static_cast<_float>(rand()) / RAND_MAX;
@@ -122,27 +126,24 @@ _float CGameInstance::Rand(_float fMin, _float fMax)
 #pragma region GRAPHIC_DEVICE
 void CGameInstance::Render_Begin(const _float4* pClearColor)
 {
-	if (nullptr == m_pGraphic_Device)
-		return;
-
+	ASSERT_CRASH(m_pGraphic_Device);
 	m_pGraphic_Device->Clear_BackBuffer_View(pClearColor);
 	m_pGraphic_Device->Clear_DepthStencil_View();
 }
 
 HRESULT CGameInstance::Draw()
 {
-	if (nullptr == m_pRenderer)
-		return E_FAIL;
+	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
-	if (nullptr == m_pLevel_Manager)
-		return E_FAIL;
+	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
 
 #ifdef _DEBUG
-	if (nullptr == m_pGUIManager)
-		return E_FAIL;
+	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
+	ASSERT_CRASH(m_pPhysicsManager);
+	m_pPhysicsManager->Render();
 #endif
 
 	return S_OK;
@@ -309,14 +310,6 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 {
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
-HRESULT CGameInstance::Add_LUT(const _wstring& strLUTTag, const _tchar* pFilePath)
-{
-    return m_pRenderer->Add_LUT(strLUTTag, pFilePath);
-}
-HRESULT CGameInstance::Change_LUT(const _wstring& strLUTTag)
-{
-    return m_pRenderer->Change_LUT(strLUTTag);
-}
 #ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
@@ -391,6 +384,29 @@ void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRat
 HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 {
 	return m_pTimer_Manager->Add_Timer(strTimerTag);
+}
+#pragma endregion
+
+#pragma region PHYSICS_MANAGER
+void CGameInstance::SetUp_PhysicsSystem()
+{
+	m_pPhysicsManager->SetUp_PhysicsSystem();
+}
+void CGameInstance::SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer)
+{
+	m_pPhysicsManager->SetUp_ObjectToBP(iObjectLayer, iBPLayer);
+}
+void CGameInstance::SetUp_ObjectFilter(_uint iSrc, _uint iDst)
+{
+	m_pPhysicsManager->SetUp_ObjectFilter(iSrc, iDst);
+}
+void CGameInstance::SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer)
+{
+	m_pPhysicsManager->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
+}
+Body* CGameInstance::Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut)
+{
+	return m_pPhysicsManager->Register_Body(BodySetting, pOut);
 }
 #pragma endregion
 
@@ -510,6 +526,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
+	Safe_Release(m_pPhysicsManager);
 	Safe_Release(m_pCamera_Manager);
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);

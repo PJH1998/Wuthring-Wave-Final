@@ -44,7 +44,7 @@ public:
 
 public:
 	void			Scale(_float3 vScale);		// vScale 값으로 크기 조정
-	void			Scaling(_float3 vScale);	// vScale 값만큼 배율 조정
+	void			Scaling(_float3 vScale);		// vScale 값만큼 배율 조정
 
 	void			Go_Straight(_float fTimeDelta);
 	void			Go_Backward(_float fTimeDelta);

@@ -14,6 +14,12 @@ public:
 	virtual void			Update(_float fTimeDelta) override;
 	virtual HRESULT	Render() override;
 
+private:
+	// Test
+	Engine::CRigidbody*		m_pRigidbody1 = { nullptr };
+	Engine::CRigidbody*		m_pRigidbody2 = { nullptr };
+	Engine::CRigidbody*		m_pRigidbody3 = { nullptr };
+
 public:
 	static		CLevel_Logo*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

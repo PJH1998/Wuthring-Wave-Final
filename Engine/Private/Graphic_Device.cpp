@@ -80,7 +80,7 @@ HRESULT CGraphic_Device::Present()
     if (nullptr == m_pSwapChain)
         return E_FAIL;
 
-    return m_pSwapChain->Present(0, 0);
+    return m_pSwapChain->Present(1, 0);
 }
 
 HRESULT CGraphic_Device::Ready_SwapChain(HWND hWnd, WINMODE eMode, _uint iWinSizeX, _uint iWinSizeY)
@@ -104,7 +104,7 @@ HRESULT CGraphic_Device::Ready_SwapChain(HWND hWnd, WINMODE eMode, _uint iWinSiz
     SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 
     SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    SwapChainDesc.BufferCount = 1;
+    SwapChainDesc.BufferCount = 2;
 
     SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
     SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;

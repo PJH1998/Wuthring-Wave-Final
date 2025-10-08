@@ -1,0 +1,76 @@
+#include "EnginePch.h"
+#include "FreeCamera.h"
+
+#include "GameInstance.h"
+
+CFreeCamera::CFreeCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	: CCamera { pDevice, pContext }
+{
+}
+
+CFreeCamera::CFreeCamera(const CFreeCamera& Prototype)
+	: CCamera { Prototype }
+{
+}
+
+HRESULT CFreeCamera::Initialize_Prototype()
+{
+	return S_OK;
+}
+
+HRESULT CFreeCamera::Initialize_Clone(void* pArg)
+{
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+void CFreeCamera::Priority_Update(_float fTimeDelta)
+{
+}
+
+void CFreeCamera::Update(_float fTimeDelta)
+{
+	__super::Key_Move(fTimeDelta);
+	__super::Mouse_Move_Up();
+}
+
+void CFreeCamera::Late_Update(_float fTimeDelta)
+{
+}
+
+void CFreeCamera::Render()
+{
+}
+
+CFreeCamera* CFreeCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+{
+	CFreeCamera* pInstance = new CFreeCamera(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize_Prototype()))
+	{
+		MSG_BOX("Failed to Create : FreeCamera");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
+CGameObject* CFreeCamera::Clone(void* pArg)
+{
+	CFreeCamera* pClone = new CFreeCamera(*this);
+
+	if (FAILED(pClone->Initialize_Clone(pArg)))
+	{
+		MSG_BOX("Failed to Create : FreeCamera (Clone)");
+		Safe_Release(pClone);
+	}
+
+	return pClone;
+}
+
+void CFreeCamera::Free()
+{
+	__super::Free();
+}

@@ -169,6 +169,27 @@
     <Filter Include="01. Utility\98. ImGui\Manager">
       <UniqueIdentifier>{8766f0a1-46af-4d32-ac51-c2d08941ef08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\97. Physics">
+      <UniqueIdentifier>{63ca056b-fc6b-4bfb-9809-d6247a08c688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\97. Physics\Manager">
+      <UniqueIdentifier>{9bcd8bcd-cb52-4f74-97c5-624a3e494e85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\97. Physics\Layer">
+      <UniqueIdentifier>{d6cabcc6-7bc6-4408-abb3-c926ce1058eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Rigidbody">
+      <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\97. Physics\DebugRender">
+      <UniqueIdentifier>{d33959ee-f5a6-480b-94ec-95df486464f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\13. Camera\Free">
+      <UniqueIdentifier>{008dded6-0fd7-41e4-a2ea-986994dd7637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\97. Physics\ContactListener">
+      <UniqueIdentifier>{0109138b-fd29-442a-a5e7-51304fdc506e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -339,6 +360,27 @@
     <ClInclude Include="..\Public\GUIManager.h">
       <Filter>01. Utility\98. ImGui\Manager</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Engine_Vertex.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PhysicsManager.h">
+      <Filter>01. Utility\97. Physics\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CollisionLayer.h">
+      <Filter>01. Utility\97. Physics\Layer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Rigidbody.h">
+      <Filter>01. Utility\04. Component\Rigidbody</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\DebugRender.h">
+      <Filter>01. Utility\97. Physics\DebugRender</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\FreeCamera.h">
+      <Filter>01. Utility\13. Camera\Free</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ContactListenerImpl.h">
+      <Filter>01. Utility\97. Physics\ContactListener</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -491,9 +533,33 @@
     <ClCompile Include="..\Private\GUIManager.cpp">
       <Filter>01. Utility\98. ImGui\Manager</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\PhysicsManager.cpp">
+      <Filter>01. Utility\97. Physics\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CollisionLayer.cpp">
+      <Filter>01. Utility\97. Physics\Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Rigidbody.cpp">
+      <Filter>01. Utility\04. Component\Rigidbody</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\DebugRender.cpp">
+      <Filter>01. Utility\97. Physics\DebugRender</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\FreeCamera.cpp">
+      <Filter>01. Utility\13. Camera\Free</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ContactListenerImpl.cpp">
+      <Filter>01. Utility\97. Physics\ContactListener</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>

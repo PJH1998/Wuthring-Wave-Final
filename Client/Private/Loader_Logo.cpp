@@ -32,6 +32,8 @@ HRESULT CLoader_Logo::Loading()
     if (FAILED(Load_Object()))
         return E_FAIL;
 
+	m_fProgress = 100.f;
+
     SetWindowText(g_hWnd, TEXT("Loading ¿Ï·á"));
 
     LeaveCriticalSection(&m_CriticalSection);

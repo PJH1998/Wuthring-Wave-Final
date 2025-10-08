@@ -19,17 +19,35 @@
 #include "DirectXTK/Effects.h"
 using namespace DirectX;
 
+// Fmod
 #include "Fmod/fmod.hpp"
 #define FMOD_CHANNEL_MAX 32
 
+// Json
 #include "Json/json.hpp"
 using json = nlohmann::json;
 
+// ImGui
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_dx11.h"
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/ImGuiFileDialog.h"
 #include "ImGui/ImGuiFileDialogConfig.h"
+
+// Jolt
+#define JPH_NAMESPACE JPH
+#include "Jolt/Jolt.h"
+#include "Jolt/RegisterTypes.h"
+#include "Jolt/Physics/PhysicsSystem.h"
+#include "Jolt/Physics/Body/BodyManager.h"
+#include "Jolt/Physics/Body/BodyInterface.h"
+#include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Core/Factory.h"
+#include "Jolt/Core/JobSystemThreadPool.h"
+#include "Jolt/Core/JobSystemSingleThreaded.h"
+#include "Jolt/Core/TempAllocator.h"
+#include "Jolt/Physics/Collision/CollisionDispatch.h"
+using namespace JPH;
 
 #include <vector>
 #include <list>
@@ -64,27 +82,9 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"
 #include "Engine_Struct.h"
+#include "Engine_Vertex.h"
 #include "Engine_Typedef.h"
 #include "Engine_Function.h"
-
-#define DIRECTINPUT_VERSION	0x0800
-#include <dinput.h>
-
-#pragma warning(disable : 4251)
-
-#ifdef _DEBUG
-
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-
-#ifndef DBG_NEW
-
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ ) 
-#define new DBG_NEW 
-
-#endif
-#endif
 
 using namespace Engine;
 

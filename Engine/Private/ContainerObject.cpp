@@ -40,9 +40,8 @@ void CContainerObject::Late_Update(_float fTimeDelta)
 {
 }
 
-HRESULT CContainerObject::Render()
+void CContainerObject::Render()
 {
-    return S_OK;
 }
 
 HRESULT CContainerObject::Add_PartObject(const _wstring& strPartObjectName, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg)

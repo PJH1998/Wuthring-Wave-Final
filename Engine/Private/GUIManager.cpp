@@ -2,7 +2,7 @@
 #include "GUIManager.h"
 
 CGUIManager::CGUIManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: m_pDevice { pDevice }, m_pContext { pContext }
+	: m_pDevice { pDevice }, m_pContext{ pContext }
 {
 	Safe_AddRef(m_pDevice);
 	Safe_AddRef(m_pContext);
@@ -17,10 +17,17 @@ HRESULT CGUIManager::Initialize(HWND hWnd)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
+	
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	}
+	
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX11_Init(m_pDevice, m_pContext);
@@ -39,6 +46,8 @@ void CGUIManager::Render()
 {
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	
+	m_pContext->OMGetRenderTargets(1, &m_pMainRTV, &m_pMainDSV);
 
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -46,6 +55,13 @@ void CGUIManager::Render()
 		ImGui::UpdatePlatformWindows();
 		ImGui::RenderPlatformWindowsDefault();
 	}
+
+	m_pContext->OMSetRenderTargets(1, &m_pMainRTV, m_pMainDSV);
+
+	Safe_Release(m_pMainRTV);
+	Safe_Release(m_pMainDSV);
+	m_pMainRTV = nullptr;
+	m_pMainDSV = nullptr;
 }
 
 CGUIManager* CGUIManager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd)
@@ -68,6 +84,9 @@ void CGUIManager::Free()
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
+	Safe_Release(m_pMainRTV);
+	Safe_Release(m_pMainDSV);
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
