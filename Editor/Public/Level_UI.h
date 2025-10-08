@@ -15,7 +15,8 @@ public:
 	virtual void			Render() override;
 
 private:
-	// Test
+
+	vector<class CCustom_UI*> m_vecCustomUIs = {};
 
 public:
 	static		CLevel_UI*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
