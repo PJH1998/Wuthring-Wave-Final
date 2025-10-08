@@ -2,8 +2,7 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
-class CModel_Instance :
-    public CComponent
+class CModel_Instance : public CComponent
 {
 private:
 	explicit CModel_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

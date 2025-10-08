@@ -119,8 +119,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,7 +142,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -151,8 +152,14 @@
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
-    <ClInclude Include="..\Public\Level_MapTool.h" />
+    <ClInclude Include="..\Public\Level_Animation.h" />
+    <ClInclude Include="..\Public\Level_Edit.h" />
+    <ClInclude Include="..\Public\Level_Effect.h" />
+    <ClInclude Include="..\Public\Level_Map.h" />
+    <ClInclude Include="..\Public\Level_Shader.h" />
+    <ClInclude Include="..\Public\Level_UI.h" />
     <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -164,8 +171,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Private\Level_MapTool.cpp" />
+    <ClCompile Include="..\Private\Level_Animation.cpp" />
+    <ClCompile Include="..\Private\Level_Edit.cpp" />
+    <ClCompile Include="..\Private\Level_Effect.cpp" />
+    <ClCompile Include="..\Private\Level_Map.cpp" />
+    <ClCompile Include="..\Private\Level_Shader.cpp" />
+    <ClCompile Include="..\Private\Level_UI.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

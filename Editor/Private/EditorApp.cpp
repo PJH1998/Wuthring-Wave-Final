@@ -2,7 +2,13 @@
 #include "EditorApp.h"
 
 #include "Event_Level.h"
-#include"Level_MapTool.h"
+
+#include "Level_Edit.h"
+#include "Level_Shader.h"
+#include "Level_Animation.h"
+#include "Level_Effect.h"
+#include "Level_Map.h"
+#include "Level_UI.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -26,8 +32,7 @@ HRESULT CEditorApp::Initialize()
 
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
-	m_isChangeLevel = true;
-	m_eNextLevel = LEVEL::MAP;
+
 	// ImGui Context ¿¬µ¿
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
@@ -37,7 +42,7 @@ HRESULT CEditorApp::Initialize()
 	m_pGameInstance->SetUp_PhysicsSystem();
 
 	Ready_Event();
-	//Start_Level();
+	Start_Level();
 
 	return S_OK;
 }
@@ -55,11 +60,23 @@ void CEditorApp::Post_Update()
 
 		switch (m_eNextLevel)
 		{
+		case LEVEL::EDIT:
+			pLevel = CLevel_Edit::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::SHADER:
+			pLevel = CLevel_Shader::Create(m_pDevice, m_pContext);
+			break;
 		case LEVEL::ANIMATION:
-			// TODO
+			pLevel = CLevel_Animation::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::EFFECT:
+			pLevel = CLevel_Effect::Create(m_pDevice, m_pContext);
 			break;
 		case LEVEL::MAP:
-			pLevel = CLevel_MapTool::Create(m_pDevice, m_pContext);
+			pLevel = CLevel_Map::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::UI:
+			pLevel = CLevel_UI::Create(m_pDevice, m_pContext);
 			break;
 		}
 
@@ -75,11 +92,42 @@ void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	/*if (ImGui::Begin("Test"))
+	if (ImGui::Begin("Level"))
 	{
-		ImGui::Text("Hello");
+		if (ImGui::Button("Shader", ImVec2(100.f, 50.f)))
+		{
+			CHANGE_LEVEL_EVENT event{ LEVEL::SHADER, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		}
+		if (ImGui::Button("Animation", ImVec2(100.f, 50.f)))
+		{
+			CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		}
+		if (ImGui::Button("Effect", ImVec2(100.f, 50.f)))
+		{
+			CHANGE_LEVEL_EVENT event{ LEVEL::EFFECT, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		}
+		if (ImGui::Button("Map", ImVec2(100.f, 50.f)))
+		{
+			CHANGE_LEVEL_EVENT event{ LEVEL::MAP, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		}
+		if (ImGui::Button("UI", ImVec2(100.f, 50.f)))
+		{
+			CHANGE_LEVEL_EVENT event{ LEVEL::UI, true };
+			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+		}
+
 		ImGui::End();
-	}*/
+	}
+
+	//if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
+	//{
+	//	CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
+	//	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	//}
 }
 
 void CEditorApp::Render()
@@ -115,7 +163,7 @@ void CEditorApp::Ready_Event()
 
 void CEditorApp::Start_Level()
 {
-	CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
+	CHANGE_LEVEL_EVENT event{ LEVEL::EDIT, true };
 	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
 }
 
