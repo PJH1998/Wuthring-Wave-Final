@@ -16,6 +16,7 @@ public:
 
 private:
 	// Test
+	class CModelLoader*	m_pLoader = { nullptr };
 
 public:
 	static		CLevel_Edit*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
