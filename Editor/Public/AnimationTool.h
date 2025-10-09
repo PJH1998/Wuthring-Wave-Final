@@ -9,8 +9,9 @@ private:
 	enum class MODE
 	{
 		CONVERT_FBX_TO_DAT = 0, 
-		VIEW_DAT = 1, 
-		EDIT_ANIMATION = 2, // 애니메이션 수정. (Notify)?
+		LOAD_DAT = 1, 
+		CREATE_ACTOR = 2,
+		EDIT_ANIMATION = 3, // 애니메이션 수정. (Notify)?
 		END
 	};
 
@@ -32,7 +33,6 @@ private:
 	// 1 Depth Menu
 	void Render_Editor();
 	void Render_DebugWindow();
-	void Render_SelectMode();
 	void Render_Menu();
 
 
@@ -45,13 +45,13 @@ private:
 private:
 	// 3 Depth Menu
 	void LoadDat();
-	void RenderUI_Prototype();
-
+	void RenderUI_ModelPrototype();
+	void RenderUI_AnimationList();
 
 private:
 	// 4 Depth Menu
 	void Render_Model_Detail();
-	void Render_AnimActor_Detail();
+	void Render_Animation_Detail();
 
 	
 	
@@ -72,18 +72,22 @@ private:
 	ANIMATIONACTORS m_AnimationActors;
 
 	// 생성한 객체에 대한 동적제어를 어떻게할까?
-
-
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
 	_wstring m_wSelected_AnimActorTag = {};
 	_string m_Selected_AnimActorTag = {};
 
-	_float m_fEditorAlpha = { 1.f };
+
+private:
+	_string m_Selected_AnimationTag = {};
+	_float m_fTrackPosition = {};
+	_float m_fDuration = {};
+
 	
-
-
+	
+private:
+	_float m_fEditorAlpha = { 1.f };
 
 private:
 	// 헬퍼 함수

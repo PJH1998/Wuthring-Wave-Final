@@ -76,29 +76,41 @@ void CAnimationTool::Render_DebugWindow()
     ImGui::Text("Camera Pos: (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
+
     // 현재 선택된 파일 타입 표시
-    /*const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "EDIT_ANIMATION", "END"};
-    ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);*/
+    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "NONE"};
+    ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
+
+    switch (m_eMode)
+    {
+    case MODE::CREATE_ACTOR:
+    {
+        if (!m_Selected_PrototypeModelTag.empty())
+            ImGui::Text("Select Model : %s", m_Selected_PrototypeModelTag.c_str());
+        else
+            ImGui::Text("Select Model : None");
+    }
+        break;
+    case MODE::EDIT_ANIMATION:
+    {
+        if (!m_Selected_AnimActorTag.empty())
+            ImGui::Text("Select Actor : %s", m_Selected_AnimActorTag.c_str());
+        else
+            ImGui::Text("Select Actor : None");
+
+        if(!m_Selected_AnimationTag.empty())
+            ImGui::Text("Select Animation : %s", m_Selected_AnimationTag.c_str());
+        else
+            ImGui::Text("Select Model : None");
+    }
+        break;
+    default:
+        break;
+    }
 
     ImGui::End();
 }
 
-// Mode 지정.
-void CAnimationTool::Render_SelectMode()
-{
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("Mode"))
-        {
-            if (ImGui::MenuItem("Convert FBX to DAT")) { m_eMode = MODE::CONVERT_FBX_TO_DAT; }
-            if (ImGui::MenuItem("View DAT")) { m_eMode = MODE::VIEW_DAT; }
-            if (ImGui::MenuItem("Edit Animation")) { m_eMode = MODE::EDIT_ANIMATION; }
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
-    }
-}
 
 void CAnimationTool::Render_Menu()
 {
@@ -109,24 +121,32 @@ void CAnimationTool::Render_Menu()
         {
             m_pLoader->Update();
             ImGui::EndTabItem();
+
+            m_eMode = MODE::CONVERT_FBX_TO_DAT;
         }
 
         if (ImGui::BeginTabItem("Load_DAT"))
         {
             LoadDat();
             ImGui::EndTabItem();
+
+            m_eMode = MODE::LOAD_DAT;
         }
 
         if (ImGui::BeginTabItem("Create_Actor"))
         {
             RenderUI_CreateActor();
             ImGui::EndTabItem();
+
+            m_eMode = MODE::CREATE_ACTOR;
         }
 
         if (ImGui::BeginTabItem("Edit Animation"))
         {
             RenderUI_EditAnimation();
             ImGui::EndTabItem();
+
+            m_eMode = MODE::EDIT_ANIMATION;
         }
 
         ImGui::EndTabBar();
@@ -150,7 +170,7 @@ void CAnimationTool::RenderUI_CreateActor()
         if (ImGui::BeginTabItem("Model"))
         {
             // 2. 현재 생성된 프로토타입 목록을 보여주기.
-            RenderUI_Prototype();
+            RenderUI_ModelPrototype();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -175,6 +195,7 @@ void CAnimationTool::RenderUI_EditAnimation()
         if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
+            // 선택 정보저장.
             m_Selected_AnimActorTag = actorName;
             m_wSelected_AnimActorTag = StringToWstring(actorName);
         }
@@ -184,7 +205,7 @@ void CAnimationTool::RenderUI_EditAnimation()
     // 애니메이션 목록창까지는 같은 자식 개체로 생성.
     ImGui::SameLine();
     if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
-        Render_AnimActor_Detail();
+        RenderUI_AnimationList();
 }
 
 void CAnimationTool::LoadDat()
@@ -252,7 +273,7 @@ void CAnimationTool::LoadDat()
 
 }
 
-void CAnimationTool::RenderUI_Prototype()
+void CAnimationTool::RenderUI_ModelPrototype()
 {
     // 1. 생성된 Prototype 목록들을 확인하기.
     _wstring objTag = {};
@@ -282,11 +303,39 @@ void CAnimationTool::RenderUI_Prototype()
     
 }
 
+void CAnimationTool::RenderUI_AnimationList()
+{
+    ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
+
+    // 1. Animation 목록.
+    static int iSelectedIndex = -1;
+    _uint id = 0;
+
+    for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+    {
+        if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
+        {
+            iSelectedIndex = id;
+            // 현재 선택한 애니메이션 이름 저장.
+            m_Selected_AnimationTag = animName;
+
+            // 선택될때만 저장.
+            m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
+            m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
+        }
+    }
+    ImGui::EndChild();
+
+    // 2. 선택한 Animation Detail 처리를 위한 기능 추가.
+    Render_Animation_Detail();
+}
+
+
 void CAnimationTool::Render_Model_Detail()
 {
     ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
 
-    static float fPosition[3] = { 0.f, 0.f, 0.f };
+    static float fPosition[3] = { 0.f, 180.f, -100.f };
     ImGui::InputFloat3("Position", fPosition);
 
     static float fRotation[3] = { 0.f, 0.f, 0.f };
@@ -369,10 +418,45 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::EndChild();
 }
 
-void CAnimationTool::Render_AnimActor_Detail()
+void CAnimationTool::Render_Animation_Detail()
 {
+    // 1. 선택한 애니메이션에 대한 디테일한 정보를 가져오기.
+    
+    // 1. 현재 TrackPosition 저장.
+    if (!m_Selected_AnimationTag.empty())
+        m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
+
+
+    // 2. TrackBar 조절 UI 만들기?
+    _float minTrackPos = 0.f;
+    _float maxTrackPos = m_fDuration;
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f); // 아래에 고정?
+    ImVec2 windowSize = ImVec2(600.f, 50.f);
+
+    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+    ImGui::Begin("TrackPosition", nullptr, ImGuiWindowFlags_NoCollapse);
+
+    ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos);
+
+    // 설정된 TrackPosition을 전달합니다.
+    if(!m_Selected_AnimationTag.empty())
+        m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_Selected_AnimationTag, m_fTrackPosition);
+
+    ImGui::End();
+    //m_AnimationActors
+
+    // 3. Animation Event 기능?
+
+
+
+    // 3.
 
 }
+
 
 
 #pragma endregion

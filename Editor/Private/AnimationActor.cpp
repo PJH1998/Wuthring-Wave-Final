@@ -31,11 +31,11 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
     
-   /* _float3 vRadian = { 
+    _float3 vRadian = { 
         XMConvertToRadians(pDesc->vRotation.x),
         XMConvertToRadians(pDesc->vRotation.y),
         XMConvertToRadians(pDesc->vRotation.z) };
-    m_pTransformCom->Quaternion(vRadian);*/
+    m_pTransformCom->Quaternion(vRadian);
 
 
     if (FAILED(Ready_Components(pDesc)))
@@ -44,7 +44,8 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[1];
+    // Default는 0번 애니메이션 실행.
+    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
 }
@@ -98,15 +99,35 @@ void CAnimationActor::Render_Shadow()
 
 }
 
+#ifdef _DEBUG
 const vector<_string>& CAnimationActor::Get_AnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_AnimationNames();
 }
 
+_float* CAnimationActor::Get_TrackPositionPtr(const _string& strAnimName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_TrackPositionPtr(strAnimName);
+}
+
+_float CAnimationActor::Get_Duration(const _string& strAnimName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_Duration(strAnimName);
+}
+
+void CAnimationActor::Set_TrackPosition(const _string& strAnimName, _float fTrackPosition)
+{
+    ASSERT_CRASH(m_pModelCom);
+    m_pModelCom->Set_TrackPosition(strAnimName, fTrackPosition);
+}
+#endif
+
+// 1. 행렬 
 void CAnimationActor::Bind_Resources()
 {
-    // 1. 행렬 
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
 
@@ -115,8 +136,6 @@ void CAnimationActor::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
-
-    
 }
 
 HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
@@ -128,7 +147,6 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
         CRASH("Failed Ready_ComShader");
         return E_FAIL;
     }
-        
 
     // Model
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strModelTag,

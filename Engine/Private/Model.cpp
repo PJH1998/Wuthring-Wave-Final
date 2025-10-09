@@ -101,6 +101,10 @@ _float CModel::Get_Duration(const _string& strAnimName)
 {
 	return m_Animations[strAnimName]->Get_Duration();
 }
+void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
+{
+	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
+}
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)

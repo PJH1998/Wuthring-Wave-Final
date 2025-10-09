@@ -19,6 +19,8 @@ CAnimation::CAnimation(const CAnimation& Prototype)
 
 	for (auto& pChannel : m_Channels)
 		Safe_AddRef(pChannel);
+
+	
 }
 
 void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
@@ -61,6 +63,7 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	}
 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
+	
 
 	return S_OK;
 }
@@ -101,10 +104,14 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 	while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 		m_Notifies[m_iNotifyIndex++].Func();
 
+
+
 	for (size_t i = 0; i < m_iNumChannels; ++i)
 	{
 		m_Channels[i]->Update_TransformationMatrix_All(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
 	}
+
+	
 
 	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
