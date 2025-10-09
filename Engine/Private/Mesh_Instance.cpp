@@ -117,15 +117,48 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-//HRESULT CMesh_Instance::Render()
-//{
-//    return S_OK;
-//}
-//
-//HRESULT CMesh_Instance::Bind_Resources()
-//{
-//    return S_OK;
-//}
+#ifdef _DEBUG
+_bool CMesh_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
+{
+    //인스턴싱일 때 몇번 째인지 알아야함.
+
+    _float fMin = FLT_MAX;
+    for (size_t i = 0; i < m_Indices.size() - 2; i += 3)
+    {
+        _float3 vPos[3] = {
+            m_VertexPositions[m_Indices[i]],
+            m_VertexPositions[m_Indices[i + 1]],
+            m_VertexPositions[m_Indices[i + 2]],
+        };
+        _float fDistance = {};
+        if (true == TriangleTests::Intersects(vRayPos, vRayDir,
+            XMVectorSetW(XMLoadFloat3(&vPos[0]), 1.f),
+            XMVectorSetW(XMLoadFloat3(&vPos[1]), 1.f),
+            XMVectorSetW(XMLoadFloat3(&vPos[2]), 1.f), fDistance))
+        {
+            if (fMin > fDistance)
+                fMin = fDistance;
+        }
+    }
+    if (fMin < FLT_MAX)
+    {
+        *pDistance = fMin;
+        return true;
+    }
+
+    return false;
+}
+
+void CMesh_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
+{
+    D3D11_MAPPED_SUBRESOURCE SubResource{};
+        
+    m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+    VTXINSTANCE_MESH* pVertices = static_cast<VTXINSTANCE_MESH*>(SubResource.pData);
+    memcpy(&pVertices[iNumInstance], &fMatrix, sizeof(_float4x4));
+    m_pContext->Unmap(m_pVBInstance, 0);
+}
+#endif
 
 CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile)
 {

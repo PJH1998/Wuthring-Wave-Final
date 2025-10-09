@@ -14,3 +14,9 @@ typedef struct tagLoadingEnd : public CEvent
 	_bool isFinish;
 	tagLoadingEnd(_bool _isFinish) : isFinish{ _isFinish } {};
 }LOADING_END_EVENT;
+
+typedef struct tagMapObjectPick : public CEvent
+{
+	class CMapObject* pObject = { nullptr };
+	tagMapObjectPick(class CMapObject* _pObject) : pObject(_pObject) {};
+}MAP_PICK;

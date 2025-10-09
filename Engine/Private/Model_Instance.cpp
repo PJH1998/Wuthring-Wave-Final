@@ -35,7 +35,7 @@ void CModel_Instance::Register_Notify(const _string& strFilePath, const vector<f
 
 HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
-    m_eType = MODELTYPE::NONANIM;
+    m_eType = eType;
 	
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
 
@@ -74,11 +74,31 @@ HRESULT CModel_Instance::Render(_uint iMeshIndex)
 	m_Meshes[iMeshIndex]->Render();
 	return S_OK;
 }
-
+#ifdef _DEBUG
 _bool CModel_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
 {
-    return _bool();
+	_float fMin = FLT_MAX;
+	for (_uint i = 0; i < m_iNumMeshes; ++i)
+	{
+		_float fDistance = {};
+		if (true == m_Meshes[i]->Is_Picked(vRayPos, vRayDir, &fDistance) && fMin > fDistance)
+			fMin = fDistance;
+	}
+
+	if (fMin < FLT_MAX)
+	{
+		*pDistance = fMin;
+		return true;
+	}
+
+	return false;
 }
+void CModel_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
+{
+	for (auto& pMesh : m_Meshes)
+		pMesh->Change_InstanceInfo(iNumInstance, fMatrix);
+}
+#endif
 
 HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
 {
@@ -158,7 +178,7 @@ CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 	CModel_Instance* pInstance = new CModel_Instance(pDevice, pContext);
 
 	//임시. 나중에 애님 모델도 메쉬 인스턴싱이 필요할 경우 대비 없애진 않음.
-	MODELTYPE eType = MODELTYPE::NONANIM;
+	MODELTYPE eType = MODELTYPE::MAP;
 
 	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath)))
 	{

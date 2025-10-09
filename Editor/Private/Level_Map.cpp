@@ -5,6 +5,7 @@
 #include"Model_Instance.h"
 #include"MapObject.h"
 #include"Mesh_Instance.h"
+#include"Event_Level.h"
 
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -16,6 +17,8 @@ HRESULT CLevel_Map::Initialize()
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
+    ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
+    Ready_Event();
     return S_OK;
 }
 
@@ -71,6 +74,10 @@ void CLevel_Map::Menu_Select()
 void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
+
+    if (m_pPickedObject)
+        m_pPickedObject->Set_ImGuiOption();
+
     ImGui::End();
 }
 
@@ -142,6 +149,13 @@ HRESULT CLevel_Map::Ready_Static_Component()
     return S_OK;
 }
 
+void CLevel_Map::Ready_Event()
+{
+    m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
+        m_pPickedObject = event.pObject;
+        });
+}
+
 CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CLevel_Map* pInstance = new CLevel_Map(pDevice, pContext);
@@ -158,5 +172,5 @@ CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 void CLevel_Map::Free()
 {
     __super::Free();
-
+    m_pPickedObject = nullptr;
 }

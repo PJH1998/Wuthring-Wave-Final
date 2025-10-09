@@ -105,6 +105,23 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     return Out;
 }
 
+PS_OUT_LIGHT PS_MAIN_TEST(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    Out.vDiffuse = float4(0.f, 0.f, 0.f, 1.f);
+    
+    //if (Out.vDiffuse.a < 0.1f)
+    //    discard;
+    
+    Out.vNormal = In.vNormal * 0.5f + 0.5f;
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -116,5 +133,15 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL();
+    }
+    pass Test // 1
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_TEST();
     }
 }

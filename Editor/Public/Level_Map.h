@@ -21,10 +21,11 @@ public:
 	void Menu_Light();
 private:
 	HRESULT Ready_Static_Component();
-
+	void Ready_Event();
 private:
 	Menu m_eMenu = { END };
 	_uint m_iLevel = ENUM_CLASS(LEVEL::MAP);
+	class CMapObject* m_pPickedObject = { nullptr };
 
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

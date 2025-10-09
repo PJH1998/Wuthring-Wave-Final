@@ -40,8 +40,10 @@ private:
 
 private:
 	_uint m_iShaderPassIndex = {};
-
-
+	_uint m_iNumInstance = {};
+	_uint m_iPickedInstance = {};
+	_float4x4* m_pInstanceMatrix = { nullptr };
+	_float4* m_pRotation = { nullptr };
 
 public:
 	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
