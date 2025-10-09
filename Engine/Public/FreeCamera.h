@@ -18,6 +18,9 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta);
 	virtual		void				Render();
 
+private:
+	_float							m_fSpeed = {};
+
 public:
 	static		CFreeCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject*	Clone(void* pArg) override;

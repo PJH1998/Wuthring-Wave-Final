@@ -10,8 +10,7 @@ private:
 	virtual ~CLoader_Logo() = default;
 
 public:
-	HRESULT				Initialize();
-	virtual HRESULT	Loading();
+	virtual		HRESULT		Initialize() override;
 
 private:
 	HRESULT				Load_Texture();

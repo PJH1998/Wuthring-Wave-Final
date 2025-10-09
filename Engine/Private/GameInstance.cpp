@@ -262,6 +262,14 @@ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const 
 {
 	return m_pPooling_Manager->Spawn_PoolingObject(strPoolingTag, WorldMatrix, pArg);
 }
+void CGameInstance::Add_Work(function<void()> Work)
+{
+	m_pPooling_Manager->Add_Work(Work);
+}
+_bool CGameInstance::IsWorkFinish()
+{
+	return m_pPooling_Manager->IsWorkFinish();
+}
 #pragma endregion
 
 #pragma region TARGET_MANAGER

@@ -10,6 +10,17 @@ CPooling_Manager::CPooling_Manager()
     Safe_AddRef(m_pGameInstance);
 }
 
+HRESULT CPooling_Manager::Initialize()
+{
+	m_iNumThread = thread::hardware_concurrency();
+	m_Threads.reserve(m_iNumThread);
+
+	for (_uint i = 0; i < m_iNumThread; ++i)
+		m_Threads.emplace_back([this]() { this->Work_Thread(); });
+
+	return S_OK;
+}
+
 HRESULT CPooling_Manager::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
 {
     auto iter = m_PoolingObjects.find(strPoolingTag);
@@ -78,9 +89,47 @@ void CPooling_Manager::Update_Pooling()
 	}
 }
 
+void CPooling_Manager::Add_Work(function<void()> Work)
+{
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_Works.push(Work);
+	}
+	m_CV.notify_one();
+}
+
+void CPooling_Manager::Work_Thread()
+{
+	while (true)
+	{
+		unique_lock<mutex> lock(m_Mutex);
+		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
+
+		// Client 종료 시, Thread 모두 종료
+		if (true == m_isAllStop)
+			return;
+
+		function<void()> Work = move(m_Works.front());
+		m_Works.pop();
+		lock.unlock();
+
+		m_iLiveWork.fetch_add(1);
+		Work();
+		m_iLiveWork.fetch_sub(1);
+	}
+}
+
 CPooling_Manager* CPooling_Manager::Create()
 {
-    return new CPooling_Manager();
+	CPooling_Manager* pInstance = new CPooling_Manager();
+
+	if (FAILED(pInstance->Initialize()))
+	{
+		MSG_BOX("Failed to Create : Pooling_Manager");
+		Safe_Release(pInstance);
+	}
+
+    return pInstance;
 }
 
 void CPooling_Manager::Free()
@@ -104,6 +153,11 @@ void CPooling_Manager::Free()
 		Pair.second.clear();
 	}
 	m_ActiveObjects.clear();
+
+	m_isAllStop = true;
+	m_CV.notify_all();
+	for (auto& Thread : m_Threads)
+		Thread.join();
 
     Safe_Release(m_pGameInstance);
 }

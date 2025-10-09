@@ -14,12 +14,11 @@ protected:
 	virtual ~CLoader() = default;
 
 public:
-	_bool		IsFinished() { return m_fProgress >= 100.f; }
+	//_bool		IsFinished() { return m_fProgress >= 100.f; }
 	_float		Get_Progress() { return m_fProgress; }
 
 public:
-	HRESULT				Initialize();
-	virtual HRESULT		Loading() = 0;
+	virtual			HRESULT		Initialize() { return S_OK; };
 
 protected:
 	ID3D11Device*				m_pDevice = { nullptr };
@@ -28,8 +27,10 @@ protected:
 
 	_float							m_fProgress = {};
 
-	HANDLE						m_hThread = {};
-	CRITICAL_SECTION			m_CriticalSection = {};
+	mutex							m_Mutex;
+
+protected:
+	void					Complete_Load();
 
 public:
 	virtual		void			Free() override;
