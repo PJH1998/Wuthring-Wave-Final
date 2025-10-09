@@ -227,7 +227,8 @@ _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta,
 			Clear_Animation(strAnimationName);
 			return true;
 		}
-		*pTrackPosition = fTrackPosition;
+		if(nullptr != pTrackPosition)
+			*pTrackPosition = fTrackPosition;
 
 		// Root Node Translation Á¶Á¤
 		if (true == isRootMotion)

@@ -190,6 +190,15 @@
     <Filter Include="01. Utility\97. Physics\ContactListener">
       <UniqueIdentifier>{0109138b-fd29-442a-a5e7-51304fdc506e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance">
+      <UniqueIdentifier>{afafc0ea-df60-420a-8440-f88be064ca29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Model_Instance">
+      <UniqueIdentifier>{333e4a5a-933b-4322-932f-4aa070c2bfba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Model_Instance\Mesh">
+      <UniqueIdentifier>{28741f9e-a3d0-4e7d-9f7b-a0fd4621de24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -381,9 +390,15 @@
     <ClInclude Include="..\Public\ContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Instance.h" />
-    <ClInclude Include="..\Public\Mesh_Instance.h" />
-    <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\Public\VIBuffer_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Model_Instance.h">
+      <Filter>01. Utility\04. Component\Model_Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -554,9 +569,15 @@
     <ClCompile Include="..\Private\ContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
-    <ClCompile Include="..\Private\Mesh_Instance.cpp" />
-    <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Instance.cpp">
+      <Filter>01. Utility\04. Component\Model_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Instance.cpp">
+      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
