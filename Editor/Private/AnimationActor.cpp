@@ -1,6 +1,7 @@
 #include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
+#include "MapObject.h"
 
 CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
@@ -27,7 +28,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
     m_iShaderPath = pDesc->iShaderPath;
 
-    _fvector vPos = XMLoadFloat3(&pDesc->vPostion);
+    _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPostion), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
     
@@ -44,7 +45,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
+    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[1];
 
     return S_OK;
 }
@@ -57,7 +58,7 @@ void CAnimationActor::Priority_Update(_float fTimeDelta)
 void CAnimationActor::Update(_float fTimeDelta)
 {
     CContainerObject::Update(fTimeDelta);
-    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition);
+    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -100,6 +101,7 @@ void CAnimationActor::Render_Shadow()
 
 void CAnimationActor::Bind_Resources()
 {
+    // 1. За·Д 
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
 

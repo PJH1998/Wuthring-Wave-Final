@@ -15,7 +15,8 @@ HRESULT CLevel_Animation::Initialize()
 
     /* 임시 쉐이더 추가. */
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+            , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
     {
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;

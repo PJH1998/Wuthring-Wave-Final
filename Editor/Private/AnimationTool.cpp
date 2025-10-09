@@ -197,10 +197,9 @@ void CAnimationTool::LoadDat()
                 return;
             }
 
-            _uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
-
             _matrix		PreTransformMatrix = XMMatrixIdentity();
-            PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XM_PI);
+            _float fSize = 0.1f;
+            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
             wStrModelName = StringToWstring(strModelName);
 
@@ -299,6 +298,8 @@ void CAnimationTool::Render_Model_Inspector()
     if (ImGui::Button("Create Instance"))
     {
         CAnimationActor::ANIMATION_ACTOR_DESC Desc{};
+        Desc.fSpeedPerSec = fSpeedPerSec;
+        Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
         Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh"); // 일단 하드코딩..
         Desc.iShaderPath = iShaderPath;
