@@ -88,8 +88,9 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 
     // ksta : 아래 둘은 차라리 UI에디터 진입할때 만드는게 맞는거같은데.. 일단은 임시로.
     // 셰이더 프로토타입화
+    // "../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXNORTEX::Elements, VTXNORTEX::iNumElements))))
+        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The shader may have already been loaded.\n");
 
     // VIBuffer_Rect 프로토타입화
