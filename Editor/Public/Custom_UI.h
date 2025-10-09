@@ -36,15 +36,21 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
+public:
+	CUSTOM_UI_DESC			Get_UIDesc()	{ return m_tUIDesc; }
+
 private:
 	HRESULT					Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
+	HRESULT					Bind_Description(void* pArg);
 
 private:
 	CShader*				m_pShaderCom				= { nullptr };
 	CVIBuffer_Rect*			m_pVIBufferCom				= { nullptr };
 
 	CTexture*				m_pTextureCom				= {};
+
+	CUSTOM_UI_DESC			m_tUIDesc					= {};
 
 	// 현재 사용중일 텍스쳐 정보, texcoord 값, 나인섹터 기준점 등의 정보.. 필요할수도 있음
 
@@ -56,3 +62,16 @@ public:
 };
 
 NS_END
+
+
+
+
+
+inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
+{
+	j = {
+		{ "strFilePath", _string(d.strFilePath.begin(), d.strFilePath.end()) },
+		{ "strFileName", _string(d.strFileName.begin(), d.strFileName.end()) },
+		{ "iNumFiles", d.iNumFiles }
+	};
+}

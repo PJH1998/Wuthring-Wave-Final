@@ -26,6 +26,8 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
     Ready_Prototypes(pArg);
     Ready_Components(pArg);
+    
+    Bind_Description(pArg);
 
     __super::Begin();
 
@@ -79,9 +81,9 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 
     const   _wstring    strFilePath = pDesc->strFilePath;
     const   _wstring	strFileName = pDesc->strFileName;
-    const   _uint       iNumFiles = pDesc->iNumFiles;
+    const   _uint       iNumFiles   = pDesc->iNumFiles;
 
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::UI);
+    const   _uint       iDestLevel  = ENUM_CLASS(LEVEL::UI);
 
     // 텍스쳐 프로토타입화
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
@@ -100,7 +102,7 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _wstring	    strFileName = pDesc->strFileName;
     const _uint         iNumFiles   = pDesc->iNumFiles;
 
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::UI);
+    const   _uint       iDestLevel  = ENUM_CLASS(LEVEL::UI);
 
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Texture_Custom_" + strFileName),
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
@@ -115,6 +117,18 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
         return E_FAIL;
 
 	return S_OK;
+}
+
+HRESULT CCustom_UI::Bind_Description(void* pArg)
+{
+    ASSERT_CRASH(pArg);
+    CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
+
+    m_tUIDesc.strFilePath = pDesc->strFilePath;
+    m_tUIDesc.strFileName = pDesc->strFileName;
+    m_tUIDesc.iNumFiles   = pDesc->iNumFiles;
+
+    return S_OK;
 }
 
 CCustom_UI* CCustom_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

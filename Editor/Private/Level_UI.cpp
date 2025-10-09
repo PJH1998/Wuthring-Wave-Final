@@ -7,6 +7,7 @@
 #include "GameObject.h"
 
 
+
 // 임시로 여기에 매크로로..
 #define         STR2WSTR(str)                                   _wstring(str.begin(), str.end())
 #define         WSTR2STR(wstr)                                  _string(wstr.begin(), wstr.end())
@@ -124,7 +125,10 @@ void CLevel_UI::Update(_float fTimeDelta)
     Update_LoadWindow();
 
     Update_Hierarchy();
+    
     Update_Inspector();
+    Update_AnimEditor();
+
 }
 
 void CLevel_UI::Render()
@@ -165,18 +169,27 @@ void CLevel_UI::Update_LoadWindow()
     {
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
         {
-            string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
+            _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
 
             strFilePath = STR2WSTR(filePath);
             strFileName = STR2WSTR(fileName);
+
+
+            // 상대경로
+            _tchar curPath[256] = {};
+            _wgetcwd(curPath, 256);
+            filesystem::path basePath = curPath;
+            filesystem::path targetPath = filePath;
+            filesystem::path relativePath = filesystem::relative(targetPath, basePath);
+
 
             CCustom_UI::CUSTOM_UI_DESC tCustomUIDesc = {};
             tCustomUIDesc.fSizeX = 100;
             tCustomUIDesc.fSizeY = 100;
             tCustomUIDesc.fX = g_iWinSizeX / 2.f;
             tCustomUIDesc.fY = g_iWinSizeY / 2.f;
-            tCustomUIDesc.strFilePath = strFilePath;
+            tCustomUIDesc.strFilePath = relativePath.wstring();
             tCustomUIDesc.strFileName = strFileName;
 
             // 생성 후 로컬 컨테이너에 추가
@@ -194,6 +207,30 @@ void CLevel_UI::Update_LoadWindow()
         ImGuiFileDialog::Instance()->Close();
     }
     // End ==============================
+
+    ImGui::End();
+}
+
+void CLevel_UI::Update_Hierarchy()
+{
+    // ============================== 
+    // 유사 하이어라키 창, 로드된 객체 선택 가능하도록
+    // ============================== 
+
+
+    ImGui::Begin("Hierarchy");
+
+    static _int iSelected = -1;
+
+    for (_uint i = 0; i < m_vecCustomUIs.size(); i++)
+    {
+        // 오브젝트 갯수만큼 목록화, 클릭 시 해당 객체를 선택된 객체로
+        if (ImGui::Selectable(WSTR2STR(m_vecCustomUIs[i].strObjName).c_str(), iSelected == i))
+        {
+            m_pCurObj = m_vecCustomUIs[i].pCustomUI;
+        }
+    }
+
 
     ImGui::End();
 }
@@ -220,9 +257,9 @@ void CLevel_UI::Update_Inspector()
 
     if (isOn_TransformCom)
     {
-        static _float3 vSelectedObjPos = {};
-        static _float3 vSelectedObjRot = {};
-        static _float3 vSelectedObjSca = {};
+        //static _float3 vSelectedObjPos = {};      // changed to m_vCurObjPos
+        //static _float3 vSelectedObjRot = {};      // changed to m_vCurObjRot
+        //static _float3 vSelectedObjSca = {};      // changed to m_vCurObjSca
 
         if (m_pPreObj != m_pCurObj)
         {
@@ -238,9 +275,9 @@ void CLevel_UI::Update_Inspector()
             XMStoreFloat3(&vStoreObjScale, vXMObjScale);
 
             // 대입하여 보여줌
-            vSelectedObjPos = vStoreObjPosition;
-            vSelectedObjRot = vStoreObjRotation;
-            vSelectedObjSca = vStoreObjScale;
+            m_vCurObjPos = vStoreObjPosition;
+            m_vCurObjRot = vStoreObjRotation;
+            m_vCurObjSca = vStoreObjScale;
         }
         
 
@@ -248,14 +285,14 @@ void CLevel_UI::Update_Inspector()
         {
             if (ImGui::BeginMenu("Reset Menu"))
             {
-                if (ImGui::MenuItem("Reset Position"))  { vSelectedObjPos = { 0.f, 0.f, 0.f }; }
-                if (ImGui::MenuItem("Reset Rotation"))  { vSelectedObjRot = { 0.f, 0.f, 0.f }; }
-                if (ImGui::MenuItem("Reset Scale"))     { vSelectedObjSca = { 100.f, 100.f, 1.f }; }
+                if (ImGui::MenuItem("Reset Position"))  { m_vCurObjPos = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Rotation"))  { m_vCurObjRot = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { 100.f, 100.f, 1.f }; }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Reset Transform")) {
-                    vSelectedObjPos = { 0.f, 0.f, 0.f };
-                    vSelectedObjRot = { 0.f, 0.f, 0.f };
-                    vSelectedObjSca = { 1.f, 1.f, 1.f };
+                    m_vCurObjPos = { 0.f, 0.f, 0.f };
+                    m_vCurObjRot = { 0.f, 0.f, 0.f };
+                    m_vCurObjSca = { 1.f, 1.f, 1.f };
                 }
                 ImGui::EndMenu();
             }
@@ -265,31 +302,31 @@ void CLevel_UI::Update_Inspector()
 
             // Position Ctrl
             ImGui::Text("Position");
-            ImGui::DragFloat("X##pos", &vSelectedObjPos.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##pos", &vSelectedObjPos.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##pos", &vSelectedObjPos.z, 1.f);
+            ImGui::DragFloat("X##pos", &m_vCurObjPos.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##pos", &m_vCurObjPos.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##pos", &m_vCurObjPos.z, 1.f);
             ImGui::Separator();
 
             // Rotation Ctrl
             ImGui::Text("Rotation");
-            ImGui::DragFloat("X##rot", &vSelectedObjRot.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##rot", &vSelectedObjRot.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##rot", &vSelectedObjRot.z, 1.f);
+            ImGui::DragFloat("X##rot", &m_vCurObjRot.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##rot", &m_vCurObjRot.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##rot", &m_vCurObjRot.z, 1.f);
             ImGui::Separator();
 
             // Scale Ctrl
             ImGui::Text("Scale");
-            ImGui::DragFloat("X##sca", &vSelectedObjSca.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##sca", &vSelectedObjSca.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##sca", &vSelectedObjSca.z, 1.f);
+            ImGui::DragFloat("X##sca", &m_vCurObjSca.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##sca", &m_vCurObjSca.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##sca", &m_vCurObjSca.z, 1.f);
             ImGui::Separator();
 
             ImGui::PopItemWidth();
         }
 
-        _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&vSelectedObjPos));
-        _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(vSelectedObjRot.x), TO_RAD(vSelectedObjRot.y), TO_RAD(vSelectedObjRot.z));
-        _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&vSelectedObjSca));
+        _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&m_vCurObjPos));
+        _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(m_vCurObjRot.x), TO_RAD(m_vCurObjRot.y), TO_RAD(m_vCurObjRot.z));
+        _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vCurObjSca));
 
         _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
 
@@ -299,10 +336,101 @@ void CLevel_UI::Update_Inspector()
 
 #pragma endregion
 
+#pragma region [Other] AnimEdit Toggle
+
+    if (ImGui::CollapsingHeader("Animation Editor"))
+    {
+        if (ImGui::Button("Open Anim Editor", ImVec2(200.f, 20.f)))
+            m_isOn_AnimEdit = !m_isOn_AnimEdit;
+    }
+
+#pragma endregion
+
+
 #pragma region [Other] Value I/O
 
+    // ksta : 이거 이 창에서 분리해야 할 듯
+    if (ImGui::CollapsingHeader("Save / Load"))
+    {
+        const ImVec2 buttonSize = { 100.f, 20.f };
 
+        ImGui::Text("..Current UI Info");
+        if (ImGui::Button("Save##InfoSave", buttonSize))
+        {
+            UI_InfoOutputDesc tCurUIInfoDesc = {};
 
+            tCurUIInfoDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+            tCurUIInfoDesc.vPos = m_vCurObjPos;
+            tCurUIInfoDesc.vRot = m_vCurObjRot;
+            tCurUIInfoDesc.vSca = m_vCurObjSca;
+
+            json jUIInfoData = {};
+            to_json(jUIInfoData, tCurUIInfoDesc);
+
+            ofstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json"); // 나중에 여럿 저장 되도록..
+            file << jUIInfoData.dump(4);
+            file.close();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load##InfoLoad", buttonSize))
+        {
+            CCustom_UI::CUSTOM_UI_DESC tLoadUIInfoDesc = {};
+
+            // Output 용이라서 vPos vRot 이런게 무의미하게 날아가는듯
+            // 이걸 그냥 Transform에 다이렉트로?
+            ifstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json");
+            json jUIInfoData = {};
+            if (file.is_open()) {
+                file >> jUIInfoData;
+            }
+
+            tLoadUIInfoDesc.iNumFiles        = jUIInfoData["tUIDesc"]["iNumFiles"];
+            _string strFileName = jUIInfoData["tUIDesc"]["strFileName"].get<string>();
+            tLoadUIInfoDesc.strFileName      = STR2WSTR(strFileName);
+            _string strFilePath = jUIInfoData["tUIDesc"]["strFilePath"].get<string>();
+            tLoadUIInfoDesc.strFilePath      = STR2WSTR(strFilePath);
+
+            _float3 vPos = {jUIInfoData["vPos"][0], jUIInfoData["vPos"][1], jUIInfoData["vPos"][2]};    m_vCurObjPos = vPos;
+            _float3 vRot = {jUIInfoData["vRot"][0], jUIInfoData["vRot"][1], jUIInfoData["vRot"][2]};    m_vCurObjRot = vRot;
+            _float3 vSca = {jUIInfoData["vSca"][0], jUIInfoData["vSca"][1], jUIInfoData["vSca"][2]};    m_vCurObjSca = vSca;
+
+            CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
+            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
+                CRASH(Failed to add Custom_UI gameobject.);
+
+            HIERARCHY_OBJ_DESC tObjDesc = { };
+            tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
+            tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.strFileName);
+
+            _matrix matScale = XMMatrixScaling(vSca.x, vSca.y, vSca.z);
+            _matrix matRotX = XMMatrixRotationX(TO_RAD(vRot.x));
+            _matrix matRotY = XMMatrixRotationY(TO_RAD(vRot.y));
+            _matrix matRotZ = XMMatrixRotationZ(TO_RAD(vRot.z));
+            _matrix matRot = matRotZ * matRotY * matRotX;
+            _matrix matTrans = XMMatrixTranslation(vPos.x, vPos.y, vPos.z);
+
+            _matrix matWorld = matScale * matRot * matTrans;
+            static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+                        
+
+            m_vecCustomUIs.push_back(tObjDesc);
+            m_pCurObj = pCustomObj;
+        }
+
+        ImGui::Separator();
+
+        ImGui::Text("..Current Anim");
+        if (ImGui::Button("Save##AnimSave", buttonSize))
+        {
+
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load##AnimLoad", buttonSize))
+        {
+
+        }
+
+    }
 
 #pragma endregion
 
@@ -310,31 +438,23 @@ void CLevel_UI::Update_Inspector()
     ImGui::End();
 
 
-    //
-    // 그리고 해당 정보를 외부파일로 빼고 불러올 수 있도록?
-    //
 
 }
 
-void CLevel_UI::Update_Hierarchy()
+void CLevel_UI::Update_AnimEditor()
 {
-    // ============================== 
-    // 유사 하이어라키 창, 로드된 객체 선택 가능하도록
-    // ============================== 
+    if (!m_pCurObj ||
+        !m_isOn_AnimEdit)
+        return;
 
 
-    ImGui::Begin("Hierarchy");
 
-    static _int iSelected = -1;
+    ImGui::Begin("Animation Editor");
 
-    for (_uint i = 0; i < m_vecCustomUIs.size(); i++)
-    {
-        // 오브젝트 갯수만큼 목록화, 클릭 시 해당 객체를 선택된 객체로
-        if (ImGui::Selectable(WSTR2STR(m_vecCustomUIs[i].strObjName).c_str(), iSelected == i))
-        {
-            m_pCurObj = m_vecCustomUIs[i].pCustomUI;
-        }
-    }
+
+
+
+
 
 
     ImGui::End();
