@@ -199,6 +199,9 @@
     <Filter Include="01. Utility\04. Component\Model_Instance\Mesh">
       <UniqueIdentifier>{28741f9e-a3d0-4e7d-9f7b-a0fd4621de24}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\05. Pooling\Thread">
+      <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
