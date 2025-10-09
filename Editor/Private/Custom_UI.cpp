@@ -27,6 +27,8 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
     Ready_Prototypes(pArg);
     Ready_Components(pArg);
 
+    __super::Begin();
+
 	return S_OK;
 }
 
@@ -49,7 +51,7 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    __super::Begin();
+    //__super::Begin();
 
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH(Binding_Matrix_Failed);
@@ -63,7 +65,7 @@ void CCustom_UI::Render()
         CRASH(Binding_Shader_Failed);
 
 
-    m_pShaderCom->Begin(0); // AlphaPass
+    m_pShaderCom->Begin(2); // AlphaPass
 
     m_pVIBufferCom->Bind_Resources();
 
@@ -85,19 +87,6 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
         CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
-
-    // ksta : 아래 둘은 차라리 UI에디터 진입할때 만드는게 맞는거같은데.. 일단은 임시로.
-    // 셰이더 프로토타입화
-    // "../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"
-    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The shader may have already been loaded.\n");
-
-    // VIBuffer_Rect 프로토타입화
-    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
-        CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The vibuffer may have already been loaded.\n");
-
 
     return S_OK;
 }

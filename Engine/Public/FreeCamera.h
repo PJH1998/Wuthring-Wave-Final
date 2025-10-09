@@ -3,7 +3,7 @@
 
 NS_BEGIN(Engine)
 
-class CFreeCamera final : public CCamera
+class ENGINE_DLL CFreeCamera final : public CCamera
 {
 private:
 	explicit CFreeCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -325,6 +325,7 @@ const LIGHT_DESC* CGameInstance::Get_LightDesc(const _wstring& strLightTag)
 }
 HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc)
 {
+
 	return m_pLight_Manager->Add_Light(strLightTag, LightDesc);
 }
 HRESULT	CGameInstance::SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType)

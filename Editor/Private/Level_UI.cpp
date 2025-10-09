@@ -4,12 +4,22 @@
 #include "Event_Level.h"
 #include "Custom_UI.h"
 #include "FreeCamera.h"
+#include "GameObject.h"
+
 
 // 임시로 여기에 매크로로..
-#define         STR2WSTR(str)           _wstring(str.begin(), str.end())
-#define         STR_ONLYFILENAME(str)   std::filesystem::path(str).stem().string();
+#define         STR2WSTR(str)                                   _wstring(str.begin(), str.end())
+#define         WSTR2STR(wstr)                                  _string(wstr.begin(), wstr.end())
+#define         STR_ONLYFILENAME(str)                           std::filesystem::path(str).stem().string();
 
+#define			TO_RAD(DEGREE)									XMConvertToRadians(DEGREE)
+#define			TO_DEG(RADIAN)									XMConvertToDegrees(RADIAN)
 
+#define			IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// 이상 and 미만
+
+#define			ROT_TO_QUAT(ROT_X, ROT_Y, ROT_Z)				XMQuaternionRotationRollPitchYaw(ROT_X, ROT_Y, ROT_Z)
+#define			MAT_TO_ROT(FLOAT4X4)							_float3{TO_DEG(asin(-FLOAT4X4._32)), TO_DEG(atan2(FLOAT4X4._31, FLOAT4X4._33)), TO_DEG(atan2(FLOAT4X4._12, FLOAT4X4._22))}
+#define			QUAT_TO_MAT(QUAT)								XMMatrixRotationQuaternion(QUAT)
 
 
 
@@ -20,14 +30,28 @@ CLevel_UI::CLevel_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_UI::Initialize()
 {
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::UI);
+
     // ==============================
     // * Add Prototypes
     // ==============================
-    
+
     // Custom UI
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom",
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_Custom",
         CCustom_UI::Create(m_pDevice, m_pContext))))
         CRASH(Failed to add Custom_UI prototype.);
+
+    // Shader
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The shader may have already been loaded.\n");
+
+    // VIBuffer_Rect
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
+        CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The vibuffer may have already been loaded.\n");
+
+
 
     // FreeCamera
     //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Camera_Free",
@@ -38,6 +62,7 @@ HRESULT CLevel_UI::Initialize()
     // * Add GameObjects
     // ==============================
     
+
     // FreeCamera
     //CFreeCamera::CAMERA_DESC	CameraDesc{};
     //
@@ -50,9 +75,26 @@ HRESULT CLevel_UI::Initialize()
     //CameraDesc.fRotationPerSec = XMConvertToRadians(90.0f);
     //CameraDesc.fMouseSensor = .2f;
     //
-    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), TEXT("Prototype_GameObject_Camera_Free"),
+    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, TEXT("Prototype_GameObject_Camera_Free"),
     //    ENUM_CLASS(LEVEL::UI), L"Layer_Camera", &CameraDesc)))
     //    return E_FAIL;
+
+
+    //CCamera::CAMERA_DESC CameraDesc = {};
+    //CameraDesc.fFovy = XMConvertToRadians(60.f);
+    //CameraDesc.fNear = 0.1f;
+    //CameraDesc.fFar = 100000.f;
+    //CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+    //CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+    //CameraDesc.fSpeedPerSec = 1000.f;
+    //CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    //CameraDesc.fMouseSensor = 0.004f;
+    //
+    //CFreeCamera* pFreeCamera = CFreeCamera::Create(m_pDevice, m_pContext);
+    //ASSERT_CRASH(pFreeCamera);
+    //if (FAILED(pFreeCamera->Initialize_Clone(&CameraDesc)))
+    //    CRASH("Free Camera");
+    //m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_Camera", pFreeCamera);
 
 
     // ==============================
@@ -75,21 +117,44 @@ HRESULT CLevel_UI::Initialize()
 void CLevel_UI::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("UI"));
-    const _wstring strLayerTag = L"Layer_UI_Custom";
+
+    m_pPreObj = m_pCurObj;
+
+    Update_Picking();
+    Update_LoadWindow();
+
+    Update_Hierarchy();
+    Update_Inspector();
+}
+
+void CLevel_UI::Render()
+{
+}
+
+void CLevel_UI::Update_Picking()
+{
+    // 피킹 선택..?
+
+}
+
+void CLevel_UI::Update_LoadWindow()
+{
+    // ============================== 
+    // 이미지 로드해서 UI객체로 추가하는 창
+    // ============================== 
 
 
-	ImGui::Begin("Editor Window..");
-
+    ImGui::Begin("Editor");
 
     // ===== [Button] Load Image =====
-	if (ImGui::Button("Load Image..", ImVec2(100.f, 50.f)))
-	{
-		IGFD::FileDialogConfig config;
+    if (ImGui::Button("Load Image..", ImVec2(100.f, 50.f)))
+    {
+        IGFD::FileDialogConfig config;
 
-		config.path = "../../Client/Bin/Resource/UI/";
-		config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
-		ImGuiFileDialog::Instance()->OpenDialog("UI_Image_Load","Select Image",	".png,.jpg,.dds,.tga", config);
-	}
+        config.path = "../../Client/Bin/Resource/UI/";
+        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+        ImGuiFileDialog::Instance()->OpenDialog("UI_Image_Load", "Select Image", ".png,.jpg,.dds,.tga", config);
+    }
     // End ==============================
 
 
@@ -114,25 +179,165 @@ void CLevel_UI::Update(_float fTimeDelta)
             tCustomUIDesc.strFilePath = strFilePath;
             tCustomUIDesc.strFileName = strFileName;
 
-            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom",
-                ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", &tCustomUIDesc)))
+            // 생성 후 로컬 컨테이너에 추가
+            CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
+            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
                 CRASH(Failed to add Custom_UI gameobject.);
+
+            HIERARCHY_OBJ_DESC tObjDesc = { };
+            tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
+            tObjDesc.strObjName = STR2WSTR(fileName);
+
+            m_vecCustomUIs.push_back(tObjDesc);
+            m_pCurObj = pCustomObj;
         }
         ImGuiFileDialog::Instance()->Close();
     }
-
-    // 게임오브젝트 찾아와서 로컬 컨테이너에 push_back..을 어떻게할까
-    
     // End ==============================
 
-
-
-	ImGui::End();
+    ImGui::End();
 }
 
-void CLevel_UI::Render()
+void CLevel_UI::Update_Inspector()
 {
+    // ============================== 
+    // 유사 인스펙터 창, 컴포넌트 조작 가능하도록
+    // ============================== 
+
+
+
+    if (m_pCurObj == nullptr)
+        return;
+
+    // 선택중인 오브젝트 값 불러와서 Transform 수정 가능하도록
+
+    ImGui::Begin("Inspector");
     
+#pragma region [Component] Transform
+
+    CTransform* pTargetTransform = dynamic_cast<CTransform*>(m_pCurObj->Get_Component(L"Com_Transform"));
+    _bool   isOn_TransformCom = pTargetTransform != nullptr;
+
+    if (isOn_TransformCom)
+    {
+        static _float3 vSelectedObjPos = {};
+        static _float3 vSelectedObjRot = {};
+        static _float3 vSelectedObjSca = {};
+
+        if (m_pPreObj != m_pCurObj)
+        {
+            _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
+            _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
+            XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, pTargetTransform->Get_WorldMatrix());
+
+            _float4x4	matStoreObjQuaternion = {};	// 쿼터니언
+            XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
+
+            XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
+            vStoreObjRotation = MAT_TO_ROT(matStoreObjQuaternion);
+            XMStoreFloat3(&vStoreObjScale, vXMObjScale);
+
+            // 대입하여 보여줌
+            vSelectedObjPos = vStoreObjPosition;
+            vSelectedObjRot = vStoreObjRotation;
+            vSelectedObjSca = vStoreObjScale;
+        }
+        
+
+        if (ImGui::CollapsingHeader("Transform"))
+        {
+            if (ImGui::BeginMenu("Reset Menu"))
+            {
+                if (ImGui::MenuItem("Reset Position"))  { vSelectedObjPos = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Rotation"))  { vSelectedObjRot = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Scale"))     { vSelectedObjSca = { 100.f, 100.f, 1.f }; }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Transform")) {
+                    vSelectedObjPos = { 0.f, 0.f, 0.f };
+                    vSelectedObjRot = { 0.f, 0.f, 0.f };
+                    vSelectedObjSca = { 1.f, 1.f, 1.f };
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::Separator();
+
+            ImGui::PushItemWidth(60);
+
+            // Position Ctrl
+            ImGui::Text("Position");
+            ImGui::DragFloat("X##pos", &vSelectedObjPos.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##pos", &vSelectedObjPos.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##pos", &vSelectedObjPos.z, 1.f);
+            ImGui::Separator();
+
+            // Rotation Ctrl
+            ImGui::Text("Rotation");
+            ImGui::DragFloat("X##rot", &vSelectedObjRot.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##rot", &vSelectedObjRot.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##rot", &vSelectedObjRot.z, 1.f);
+            ImGui::Separator();
+
+            // Scale Ctrl
+            ImGui::Text("Scale");
+            ImGui::DragFloat("X##sca", &vSelectedObjSca.x, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Y##sca", &vSelectedObjSca.y, 1.f);   ImGui::SameLine();
+            ImGui::DragFloat("Z##sca", &vSelectedObjSca.z, 1.f);
+            ImGui::Separator();
+
+            ImGui::PopItemWidth();
+        }
+
+        _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&vSelectedObjPos));
+        _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(vSelectedObjRot.x), TO_RAD(vSelectedObjRot.y), TO_RAD(vSelectedObjRot.z));
+        _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&vSelectedObjSca));
+
+        _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
+
+        // UI 내의 Begin 때문에 적용 안되는듯. 임시로 비활성화함
+        pTargetTransform->Set_WorldMatrix(matXMEditResult);
+    }
+
+#pragma endregion
+
+#pragma region [Other] Value I/O
+
+
+
+
+#pragma endregion
+
+    
+    ImGui::End();
+
+
+    //
+    // 그리고 해당 정보를 외부파일로 빼고 불러올 수 있도록?
+    //
+
+}
+
+void CLevel_UI::Update_Hierarchy()
+{
+    // ============================== 
+    // 유사 하이어라키 창, 로드된 객체 선택 가능하도록
+    // ============================== 
+
+
+    ImGui::Begin("Hierarchy");
+
+    static _int iSelected = -1;
+
+    for (_uint i = 0; i < m_vecCustomUIs.size(); i++)
+    {
+        // 오브젝트 갯수만큼 목록화, 클릭 시 해당 객체를 선택된 객체로
+        if (ImGui::Selectable(WSTR2STR(m_vecCustomUIs[i].strObjName).c_str(), iSelected == i))
+        {
+            m_pCurObj = m_vecCustomUIs[i].pCustomUI;
+        }
+    }
+
+
+    ImGui::End();
 }
 
 CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
