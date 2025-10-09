@@ -75,10 +75,12 @@ HRESULT CModel_Instance::Render(_uint iMeshIndex)
 	return S_OK;
 }
 
+#ifdef _DEBUG
 _bool CModel_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
 {
     return _bool();
 }
+#endif
 
 HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex)
 {

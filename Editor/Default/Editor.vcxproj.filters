@@ -43,6 +43,15 @@
     <Filter Include="01. Level\Anim\Tool">
       <UniqueIdentifier>{d85a380d-6291-4d80-82cd-144b8717416c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor">
+      <UniqueIdentifier>{9c95090d-76d9-420a-9c10-93a9be039151}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Anim">
+      <UniqueIdentifier>{9619ec0a-9481-4a6d-841b-d15795f22a0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject">
+      <UniqueIdentifier>{37459326-e791-4800-8124-a7fc6a5fbe15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -87,18 +96,20 @@
     <ClInclude Include="..\Public\ModelLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\EditorApp.h">
       <Filter>00. EditorApp</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\AnimationActor.h">
-      <Filter>03. GameObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Animation.h">
       <Filter>01. Level\Anim</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AnimationTool.h">
       <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AnimationActor.h">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -142,15 +153,17 @@
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject.cpp" />
-    <ClCompile Include="..\Private\AnimationActor.cpp">
-      <Filter>03. GameObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Level_Animation.cpp">
       <Filter>01. Level\Anim</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AnimationTool.cpp">
       <Filter>01. Level\Anim\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimationActor.cpp">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
