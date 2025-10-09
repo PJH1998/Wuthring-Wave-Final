@@ -1,5 +1,6 @@
 #include"Editorpch.h"
 #include "MapObject.h"
+#include "AnimationActor.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice,pContext)
@@ -10,6 +11,7 @@ CMapObject::CMapObject(const CMapObject& Prototype)
     :CGameObject(Prototype)
 {
 }
+
 
 HRESULT CMapObject::Initialize_Prototype()
 {

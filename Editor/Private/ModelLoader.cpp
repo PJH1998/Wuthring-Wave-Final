@@ -340,7 +340,7 @@ void CModelLoader::Load_File()
 {
 	IGFD::FileDialogConfig config;
 
-	config.path = "../../Client/Bin/Resource/";
+	config.path = "../../Editor/Bin/Resource/";
 	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
 	ImGuiFileDialog::Instance()->OpenDialog("FBX File Load", "Import File", ".fbx", config);

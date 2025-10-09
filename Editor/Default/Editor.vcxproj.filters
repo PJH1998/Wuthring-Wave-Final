@@ -22,9 +22,6 @@
     <Filter Include="01. Level\Shader">
       <UniqueIdentifier>{b0e8ae58-0f4b-4c6a-8b3a-e3a210f41ef7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\Anim">
-      <UniqueIdentifier>{5ccec3df-c8e5-4e2a-baab-db745f007daa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Level\Effect">
       <UniqueIdentifier>{f4aa0a89-a2f3-4990-b59a-18bc03fb3cfe}</UniqueIdentifier>
     </Filter>
@@ -36,6 +33,15 @@
     </Filter>
     <Filter Include="02. ModelLoader">
       <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject">
+      <UniqueIdentifier>{de0fe91c-5209-4722-8a86-e489175325f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Anim">
+      <UniqueIdentifier>{9b7ad361-c799-4838-a5fd-daa9fca538a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Anim\Tool">
+      <UniqueIdentifier>{d85a380d-6291-4d80-82cd-144b8717416c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -50,9 +56,6 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>98. Default</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\EditorApp.h">
-      <Filter>00. EditorApp</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Editor_Define.h">
       <Filter>99. Define</Filter>
@@ -75,9 +78,6 @@
     <ClInclude Include="..\Public\Level_Shader.h">
       <Filter>01. Level\Shader</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Level_Animation.h">
-      <Filter>01. Level\Anim</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Level_Effect.h">
       <Filter>01. Level\Effect</Filter>
     </ClInclude>
@@ -88,6 +88,18 @@
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\EditorApp.h">
+      <Filter>00. EditorApp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AnimationActor.h">
+      <Filter>03. GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Animation.h">
+      <Filter>01. Level\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AnimationTool.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -118,9 +130,6 @@
     <ClCompile Include="..\Private\Level_Shader.cpp">
       <Filter>01. Level\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Level_Animation.cpp">
-      <Filter>01. Level\Anim</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Level_Effect.cpp">
       <Filter>01. Level\Effect</Filter>
     </ClCompile>
@@ -134,5 +143,14 @@
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\AnimationActor.cpp">
+      <Filter>03. GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Animation.cpp">
+      <Filter>01. Level\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimationTool.cpp">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
