@@ -31,8 +31,17 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
-
 	virtual void Render_Shadow() override;
+
+
+#ifdef _DEBUG
+public:
+	const vector<_string>& Get_AnimationNames() const;
+#endif // _DEBUG
+
+
+	
+
 
 private:
 	LEVEL m_eCurLevel = {LEVEL::END};

@@ -90,7 +90,6 @@ void CAnimationTool::Render_SelectMode()
     {
         if (ImGui::BeginMenu("Mode"))
         {
-            // MenuItem을 사용하면 더 깔끔한 메뉴를 만들 수 있습니다.
             if (ImGui::MenuItem("Convert FBX to DAT")) { m_eMode = MODE::CONVERT_FBX_TO_DAT; }
             if (ImGui::MenuItem("View DAT")) { m_eMode = MODE::VIEW_DAT; }
             if (ImGui::MenuItem("Edit Animation")) { m_eMode = MODE::EDIT_ANIMATION; }
@@ -118,11 +117,18 @@ void CAnimationTool::Render_Menu()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Model_DAT"))
+        if (ImGui::BeginTabItem("Create_Actor"))
         {
-            RenderUI_ViewDat();
+            RenderUI_CreateActor();
             ImGui::EndTabItem();
         }
+
+        if (ImGui::BeginTabItem("Edit Animation"))
+        {
+            RenderUI_EditAnimation();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 
@@ -134,11 +140,10 @@ void CAnimationTool::RenderUI_ConvertFbx()
     m_pLoader->Update();
 }
 
-void CAnimationTool::RenderUI_ViewDat()
+void CAnimationTool::RenderUI_CreateActor()
 {
     // 1. 선택한 Dat 파일을 Load하기. => Prototype 생성.
     // 우선. GameObject를 새로 만들고 Prototype 등록.
-
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Prototype", tab_bar_flags))
     {
@@ -151,13 +156,35 @@ void CAnimationTool::RenderUI_ViewDat()
         ImGui::EndTabBar();
     }
     
-    
-   
 }
 
 void CAnimationTool::RenderUI_EditAnimation()
 {
+    // 1. 선택된 객체의 애니메이션 전체 목록을 확인하고 애니메이션에 대한 작업을 진행.
+     // 1. 생성된 Prototype 목록들을 확인하기.
+    _wstring objTag = {};
+    _wstring modelTag = {};
 
+    ImGui::BeginChild("left pane", ImVec2(500, 0), true);
+
+    static int iSelectedIndex = -1;
+    _uint id = 0;
+
+    for (auto& actorName : m_ActorNames)
+    {
+        if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
+        {
+            iSelectedIndex = id;
+            m_Selected_AnimActorTag = actorName;
+            m_wSelected_AnimActorTag = StringToWstring(actorName);
+        }
+    }
+    ImGui::EndChild();
+
+    // 애니메이션 목록창까지는 같은 자식 개체로 생성.
+    ImGui::SameLine();
+    if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
+        Render_AnimActor_Detail();
 }
 
 void CAnimationTool::LoadDat()
@@ -179,7 +206,13 @@ void CAnimationTool::LoadDat()
 
     ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
 
-    if (ImGuiFileDialog::Instance()->Display("DAT File Load")) {
+    ImVec2 vMinSize = ImVec2(600, 400);  // 최소 크기
+    ImVec2 vMaxSize = ImVec2(800, 400); // 최대 크기
+
+    if (ImGuiFileDialog::Instance()->Display(
+        "DAT File Load", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize)) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
             strModelPath = ImGuiFileDialog::Instance()->GetCurrentFileName();
@@ -210,6 +243,7 @@ void CAnimationTool::LoadDat()
                 MSG_BOX("경로 잘못되었거나, 중복 생성.");
                 return;
             }
+
             // 3. 생성이 완료되었으면 m_ModelNames에 추가. 
             m_ModelNames.emplace_back(strModelName);
         }
@@ -221,12 +255,10 @@ void CAnimationTool::LoadDat()
 void CAnimationTool::RenderUI_Prototype()
 {
     // 1. 생성된 Prototype 목록들을 확인하기.
-
     _wstring objTag = {};
     _wstring modelTag = {};
 
     ImGui::BeginChild("left pane", ImVec2(500, 0), true);
-
 
     static int iSelectedIndex = -1;
     _uint id = 0;
@@ -240,40 +272,19 @@ void CAnimationTool::RenderUI_Prototype()
             m_wSelected_PrototypeModelTag = StringToWstring(modelName);
         }
     }
-
     ImGui::EndChild();
 
-    // 다음 위젯을 같은 줄에 그리도록 설정합니다.
     ImGui::SameLine();
 
     if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
-        Render_Model_Inspector();
+        Render_Model_Detail();
 
     
 }
 
-HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
-{
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , strPrototypeName
-        , CModel::Create(m_pDevice, m_pContext, eType, PreTransformMatrix, pFilePath))))
-        return E_FAIL;
-
-    return S_OK;
-}
-
-void CAnimationTool::Render_Model_Inspector()
+void CAnimationTool::Render_Model_Detail()
 {
     ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
-    //ImGuiIO& io = ImGui::GetIO();
-
-    // 오른쪽 위 위치 계산 (창 크기 300x250 고려)
-    //ImVec2 vPos = ImVec2(g_iWinSizeX - g_iWinSizeX * 0.25f, 0.f); // 오른쪽에서 310픽셀, 위에서 10픽셀
-    //ImGui::SetNextWindowPos(vPos, ImGuiCond_Always);
-    //ImGui::SetNextWindowSize(ImVec2(g_iWinSizeX * 0.25f, g_iWinSizeY), ImGuiCond_Once);
-
-    //ImGui::Begin("AnimationActor_Transform");
-    //ImGui::Text(m_Selected_PrototypeModelTag.c_str());
 
     static float fPosition[3] = { 0.f, 0.f, 0.f };
     ImGui::InputFloat3("Position", fPosition);
@@ -314,7 +325,6 @@ void CAnimationTool::Render_Model_Inspector()
         // 마지막 모델 이름만 잘라내기.
         size_t last_dot_pos = m_wSelected_PrototypeModelTag.find_last_of('_');
         if (last_dot_pos != std::string::npos) {
-            // 마지막 _ 위치로부터 생성.
             wstrObjTag += m_wSelected_PrototypeModelTag.substr(last_dot_pos + 1, m_wSelected_PrototypeModelTag.size());
         }
         else
@@ -334,17 +344,34 @@ void CAnimationTool::Render_Model_Inspector()
         }
 
         // 2. 생성한 Prototype Clone
+        CAnimationActor* pActor = dynamic_cast<CAnimationActor*>(
+            m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel)
+            , wstrObjTag, PROTOTYPE::GAMEOBJECT, &Desc));
+        ASSERT_CRASH(pActor);
+
+
+        // 3. 생성한 객체 레이어에 추가
         if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
-            , wstrObjTag
-            , ENUM_CLASS(m_eCurLevel),TEXT("Layer_Actor"), &Desc)))
+            , TEXT("Layer_Actor"), pActor)))
         {
-            MSG_BOX("Animation Actor Clone 생성 실패");
+            MSG_BOX("Animation Actor 추가. 생성 실패");
             return;
         }
+
+        // 4. 생성이 완료되었으면 관리할 수 있게 해야함. 생성할 때 저장.
+
+        m_ActorNames.emplace_back(WstringToString(wstrObjTag));
+        m_AnimationActors.emplace(wstrObjTag, pActor);
+
+        
     }
 
     ImGui::EndChild();
-    //ImGui::End();
+}
+
+void CAnimationTool::Render_AnimActor_Detail()
+{
+
 }
 
 
@@ -368,6 +395,33 @@ wstring CAnimationTool::StringToWstring(const std::string& str)
 
     return wstr;
 }
+
+string CAnimationTool::WstringToString(const std::wstring& wstr)
+{
+    if (wstr.empty())
+        return "";
+
+    int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+    if (len == 0)
+        return "";
+
+    std::string str(len - 1, 0);  // -1로 null terminator 제외
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], len, NULL, NULL);
+
+    return str;
+}
+
+
+HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
+{
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , strPrototypeName
+        , CModel::Create(m_pDevice, m_pContext, eType, PreTransformMatrix, pFilePath))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
 
 CAnimationTool* CAnimationTool::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel)
 {

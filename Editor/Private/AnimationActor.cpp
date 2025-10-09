@@ -1,7 +1,6 @@
 #include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
-#include "MapObject.h"
 
 CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
@@ -99,6 +98,12 @@ void CAnimationActor::Render_Shadow()
 
 }
 
+const vector<_string>& CAnimationActor::Get_AnimationNames() const
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_AnimationNames();
+}
+
 void CAnimationActor::Bind_Resources()
 {
     // 1. За·Д 
@@ -110,6 +115,8 @@ void CAnimationActor::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
+
+    
 }
 
 HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
@@ -123,7 +130,7 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
     }
         
 
-    // Model =>
+    // Model
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strModelTag,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
     {
@@ -163,4 +170,8 @@ CAnimationActor* CAnimationActor::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 
 void CAnimationActor::Free()
 {
+    CContainerObject::Free();
+    Safe_Release(m_pModelCom);
+    Safe_Release(m_pShaderCom);
+
 }

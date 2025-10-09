@@ -345,7 +345,13 @@ void CModelLoader::Load_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("FBX File Load", "Import File", ".fbx", config);
 
-	if (ImGuiFileDialog::Instance()->Display("FBX File Load")) {
+	ImVec2 vMinSize = ImVec2(600, 400);  // 최소 크기
+	ImVec2 vMaxSize = ImVec2(800, 400); // 최대 크기
+
+	if (ImGuiFileDialog::Instance()->Display(
+		"FBX File Load", ImGuiWindowFlags_NoCollapse
+		, vMinSize
+		, vMaxSize)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			m_strModelName = ImGuiFileDialog::Instance()->GetCurrentFileName();
@@ -377,7 +383,14 @@ void CModelLoader::Save_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
 
-	if (ImGuiFileDialog::Instance()->Display("Save Model")) {
+	ImVec2 vMinSize = ImVec2(600, 400);  // 최소 크기
+	ImVec2 vMaxSize = ImVec2(800, 400); // 최대 크기
+
+	if (ImGuiFileDialog::Instance()->Display("Save Model"
+		, ImGuiWindowFlags_NoCollapse
+		, vMinSize
+		, vMaxSize
+	)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
 

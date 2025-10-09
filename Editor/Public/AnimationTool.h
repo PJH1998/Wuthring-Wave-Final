@@ -39,7 +39,7 @@ private:
 private:
 	// 2 Depth Menu
 	void RenderUI_ConvertFbx();
-	void RenderUI_ViewDat();
+	void RenderUI_CreateActor();
 	void RenderUI_EditAnimation();
 
 private:
@@ -50,8 +50,10 @@ private:
 
 private:
 	// 4 Depth Menu
-	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
-	void Render_Model_Inspector();
+	void Render_Model_Detail();
+	void Render_AnimActor_Detail();
+
+	
 	
 
 private:
@@ -62,12 +64,21 @@ private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
 
-	// 아. ImGui string밖에 안됨.
-	list<_string> m_ModelNames; // 생성된 Model Component들. => .dat를 읽어와서 저장합니다.
-	list<_string> m_ActorNames; // 생성된 GameObject들.
+	// Prototype에 저장하고 이름만 가져옵니다.
+	list<_string> m_ModelNames; // 모델 컴포넌트 
+	list<_string> m_ActorNames; // 실 생성 객체. 
+
+	typedef map<const _wstring, class CAnimationActor*> ANIMATIONACTORS;
+	ANIMATIONACTORS m_AnimationActors;
+
+	// 생성한 객체에 대한 동적제어를 어떻게할까?
+
 
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
+
+	_wstring m_wSelected_AnimActorTag = {};
+	_string m_Selected_AnimActorTag = {};
 
 	_float m_fEditorAlpha = { 1.f };
 	
@@ -77,6 +88,8 @@ private:
 private:
 	// 헬퍼 함수
 	wstring StringToWstring(const std::string& str);
+	string WstringToString(const std::wstring& wstr);
+	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	
 
