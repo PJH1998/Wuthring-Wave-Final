@@ -2,6 +2,7 @@
 #include "AnimationTool.h"
 #include "ModelLoader.h"
 #include "AnimationActor.h"
+#include "AnimNotifyTool.h"
 
 
 #pragma region 기본 함수들
@@ -22,6 +23,8 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
     // 1. FBX 파일을 Dat화 해주는 Loader 생성.
     m_pLoader = CModelLoader::Create();
 
+    // 2. Animation Notify를 등록 및 관리하는 클래스
+    m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
    
 
     return S_OK;
@@ -117,7 +120,7 @@ void CAnimationTool::Render_Menu()
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
     {
-        if (ImGui::BeginTabItem("Save_LoadFBX"))
+        if (ImGui::BeginTabItem("ConvertFBX"))
         {
             m_pLoader->Update();
             ImGui::EndTabItem();
@@ -125,7 +128,7 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::CONVERT_FBX_TO_DAT;
         }
 
-        if (ImGui::BeginTabItem("Load_DAT"))
+        if (ImGui::BeginTabItem("LoadDAT"))
         {
             LoadDat();
             ImGui::EndTabItem();
@@ -133,7 +136,7 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::LOAD_DAT;
         }
 
-        if (ImGui::BeginTabItem("Create_Actor"))
+        if (ImGui::BeginTabItem("CreateActor"))
         {
             RenderUI_CreateActor();
             ImGui::EndTabItem();
@@ -141,7 +144,7 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::CREATE_ACTOR;
         }
 
-        if (ImGui::BeginTabItem("Edit Animation"))
+        if (ImGui::BeginTabItem("EditAnimation"))
         {
             RenderUI_EditAnimation();
             ImGui::EndTabItem();
@@ -178,9 +181,9 @@ void CAnimationTool::RenderUI_CreateActor()
     
 }
 
+//선택된 객체의 애니메이션 전체 목록을 확인하고 애니메이션에 대한 작업을 진행.
 void CAnimationTool::RenderUI_EditAnimation()
 {
-    // 1. 선택된 객체의 애니메이션 전체 목록을 확인하고 애니메이션에 대한 작업을 진행.
      // 1. 생성된 Prototype 목록들을 확인하기.
     _wstring objTag = {};
     _wstring modelTag = {};
@@ -220,13 +223,17 @@ void CAnimationTool::LoadDat()
     // 2. ImGui에서 파일을 오픈해서 해당 파일을 이용해서 Prototype Model 동적으로 생성
     CModel* pModelCom = { nullptr };
 
-    IGFD::FileDialogConfig config;
 
-    config.path = "../../Client/Bin/Resource/";
-    config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+    if (ImGui::Button("Load DAT File"))
+    {
+        IGFD::FileDialogConfig config;
 
-    ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
+        config.path = "../../Client/Bin/Resource/";
+        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
+        ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
+    }
+  
     ImVec2 vMinSize = ImVec2(600, 400);  // 최소 크기
     ImVec2 vMaxSize = ImVec2(800, 400); // 최대 크기
 
@@ -418,10 +425,9 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::EndChild();
 }
 
+// 선택한 애니메이션에 대한 디테일한 정보를 가져오기.
 void CAnimationTool::Render_Animation_Detail()
 {
-    // 1. 선택한 애니메이션에 대한 디테일한 정보를 가져오기.
-    
     // 1. 현재 TrackPosition 저장.
     if (!m_Selected_AnimationTag.empty())
         m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
@@ -447,14 +453,12 @@ void CAnimationTool::Render_Animation_Detail()
         m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_Selected_AnimationTag, m_fTrackPosition);
 
     ImGui::End();
-    //m_AnimationActors
 
-    // 3. Animation Event 기능?
+    // 3. Animation Notify 기능을 추가. 
 
-
-
-    // 3.
-
+    ASSERT_CRASH(m_pAnimNotifyTool);
+    m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, m_fDuration);
+    m_pAnimNotifyTool->Render();
 }
 
 
@@ -513,7 +517,7 @@ CAnimationTool* CAnimationTool::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 
     if (FAILED(pInstance->Initialize(eLevel)))
     {
-        MSG_BOX("Failed to Create : Level_Animation");
+        MSG_BOX("Failed to Create : CAnimationTool");
         Safe_Release(pInstance);
     }
 
@@ -524,9 +528,12 @@ void CAnimationTool::Free()
 {
     CBase::Free();
     Safe_Release(m_pLoader);
+    Safe_Release(m_pAnimNotifyTool);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
+
+    
 
     m_ModelNames.clear();
     m_ActorNames.clear();

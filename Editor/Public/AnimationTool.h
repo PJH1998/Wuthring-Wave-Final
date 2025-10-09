@@ -6,7 +6,7 @@ NS_BEGIN(Editor)
 class CAnimationTool final : public CBase
 {
 private:
-	enum class MODE
+	enum class MODE : _uint
 	{
 		CONVERT_FBX_TO_DAT = 0, 
 		LOAD_DAT = 1, 
@@ -63,6 +63,7 @@ private:
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
+	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
 
 	// Prototype에 저장하고 이름만 가져옵니다.
 	list<_string> m_ModelNames; // 모델 컴포넌트 
@@ -83,8 +84,6 @@ private:
 	_string m_Selected_AnimationTag = {};
 	_float m_fTrackPosition = {};
 	_float m_fDuration = {};
-
-	
 	
 private:
 	_float m_fEditorAlpha = { 1.f };

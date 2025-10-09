@@ -111,6 +111,9 @@
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotifyTool.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -164,6 +167,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimNotifyTool.cpp">
+      <Filter>01. Level\Anim\Tool</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
