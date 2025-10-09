@@ -56,6 +56,9 @@ using namespace JPH;
 #include <map>
 #include <algorithm>
 #include <functional>
+#include <mutex>
+#include <thread>
+#include <atomic>
 #include <string>
 #include <unordered_map>
 #include <ctime>

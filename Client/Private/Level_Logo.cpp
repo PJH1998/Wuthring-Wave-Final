@@ -38,8 +38,8 @@ HRESULT CLevel_Logo::Initialize()
 	//m_pRigidbody3 = CRigidbody::Create(m_pDevice, m_pContext);
 	//m_pRigidbody3->Initialize_Clone(&BoxBodyDesc2);
 
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
-	//	CRASH("Dummy");
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
+		CRASH("Dummy");
 
 	//Safe_Release(pRigidBody);
 	
