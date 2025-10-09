@@ -32,6 +32,10 @@ public:
 	_matrix	Get_WorldMatrix_Inv() { return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix)); }
 	void		Set_WorldMatrix(const _fmatrix& Matrix) { XMStoreFloat4x4(&m_WorldMatrix, Matrix); }
 
+#ifdef _DEBUG
+	void			Change_Speed(_float fSpeed) { m_fSpeedPerSec = fSpeed; }
+#endif
+
 private:
 	explicit CTransform(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CTransform(const CTransform& Prototype) = default;

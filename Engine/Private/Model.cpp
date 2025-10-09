@@ -36,6 +36,10 @@ CModel::CModel(const CModel& Prototype)
 
 	for (auto& Pair : Prototype.m_Animations)
 		m_Animations.emplace(Pair.first, Pair.second->Clone());
+	
+#ifdef _DEBUG
+	m_AnimationNames = Prototype.m_AnimationNames;
+#endif
 }
 
 void CModel::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavigation, _float fTimeDelta)
@@ -154,7 +158,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_RootMatrix = XMMatrixIdentity();
-
+	
     return S_OK;
 }
 
@@ -223,7 +227,8 @@ _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta,
 			Clear_Animation(strAnimationName);
 			return true;
 		}
-		*pTrackPosition = fTrackPosition;
+		if(nullptr != pTrackPosition)
+			*pTrackPosition = fTrackPosition;
 
 		// Root Node Translation Á¶Á¤
 		if (true == isRootMotion)
