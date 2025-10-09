@@ -108,9 +108,10 @@
     <ClInclude Include="..\Public\AnimationActor.h">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject.h">
+    <ClInclude Include="..\Public\MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -162,8 +163,9 @@
     <ClCompile Include="..\Private\AnimationActor.cpp">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject.cpp">
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp" />
   </ItemGroup>
 </Project>

@@ -17,6 +17,22 @@ typedef struct tagLoadingEnd : public CEvent
 
 typedef struct tagMapObjectPick : public CEvent
 {
-	class CMapObject* pObject = { nullptr };
-	tagMapObjectPick(class CMapObject* _pObject) : pObject(_pObject) {};
+	void* pObject = { nullptr };
+	tagMapObjectPick(void* _pObject) : pObject(_pObject) {};
 }MAP_PICK;
+
+typedef struct tagMapCreate: public CEvent
+{
+	_char ModelName[MAX_PATH];
+	void* pObject = { nullptr };
+	tagMapCreate(_char* _ModelName, void* _pObject) : pObject(_pObject)
+	{
+		strcpy_s(ModelName, _ModelName);
+	};
+}MAP_CREATE;
+
+typedef struct tagMapSave : public CEvent
+{
+	ofstream& File;
+	tagMapSave(ofstream& _File) :File(_File){};
+}MAP_SAVE;

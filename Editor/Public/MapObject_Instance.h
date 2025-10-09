@@ -4,17 +4,18 @@
 
 NS_BEGIN(Engine)
 class CModel;
+class CModel_Instance;
 class CShader;
 NS_END
 
 
 NS_BEGIN(Editor)
-class CMapObject : public CGameObject
+class CMapObject_Instance : public CGameObject
 {
 private:
-	CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CMapObject(const CMapObject& Prototype);
-	virtual ~CMapObject() = default;
+	CMapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CMapObject_Instance(const CMapObject_Instance& Prototype);
+	virtual ~CMapObject_Instance() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype();
@@ -32,25 +33,22 @@ public:
 	void Bind_Resources();
 
 private:
-	CModel* m_pModelCom = { nullptr };
+	//class CModel* m_pModelCom = { nullptr };
+	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
 
 private:
-#ifdef _DEBUG
-	_char m_ModelName[MAX_PATH];
-#endif
-
 	_uint m_iShaderPassIndex = {};
-	_float3 m_vScale = {};
-	_float3 m_vRotation= {};
-	_float3 m_vTranslation = {};
+	_uint m_iNumInstance = {};
+	_uint m_iPickedInstance = {};
+	_float4x4* m_pInstanceMatrix = { nullptr };
+	_float4* m_pRotation = { nullptr };
+	_float4* m_pScale= { nullptr };
+	_float4* m_pTranslation = { nullptr };
 
-	_float3 m_vNewScale = {};
-	_float3 m_vNewRotation = {};
-	_float3 m_vNewTranslation = {};
 public:
-	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CMapObject_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
 	virtual void Free()override;
 
