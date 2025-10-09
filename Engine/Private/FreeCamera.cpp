@@ -34,6 +34,17 @@ void CFreeCamera::Update(_float fTimeDelta)
 {
 	__super::Key_Move(fTimeDelta);
 	__super::Mouse_Move_Up();
+
+#ifdef _DEBUG
+	ImGui::Begin("Camera Speed");
+
+	ImGui::InputFloat("##", &m_fSpeed);
+
+	if (ImGui::Button("Apply", ImVec2(50.f, 20.f)))
+		m_pTransformCom->Change_Speed(m_fSpeed);
+
+	ImGui::End();
+#endif
 }
 
 void CFreeCamera::Late_Update(_float fTimeDelta)
