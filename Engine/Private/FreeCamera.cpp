@@ -33,7 +33,8 @@ void CFreeCamera::Priority_Update(_float fTimeDelta)
 void CFreeCamera::Update(_float fTimeDelta)
 {
 	__super::Key_Move(fTimeDelta);
-	__super::Mouse_Move_Up();
+	if (m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::PRESS)
+		__super::Mouse_Move_Up();
 }
 
 void CFreeCamera::Late_Update(_float fTimeDelta)

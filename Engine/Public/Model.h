@@ -13,11 +13,13 @@ private:
 public:
 	_uint								Get_NumMesh() { return m_iNumMeshes; }
 	void								Sync_RootNode(class CTransform* pOwnerTransform, class CNavigation* pOwnerNavigation, _float fTimeDelta);
-	const _float4x4*				Get_BoneMatrixPtr(const _char* pBoneName);
+	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
+	const vector<_float3>&		Get_VerticesPos(_uint iIndex);
+	const vector<_uint>&			Get_Indices(_uint iIndex);
 
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
-	_float*							Get_TrackPositionPtr(const _string& strAnimName);
+	_float*								Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
 #endif
 
@@ -44,7 +46,7 @@ private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
 	_uint									m_iNumMeshes = {};
-	vector<class CMesh*>			m_Meshes;
+	vector<class CMesh*>				m_Meshes;
 
 	_uint									m_iNumMaterials = {};
 	vector<class CMeshMaterial*>	m_Materials;

@@ -87,10 +87,10 @@ void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, con
 	}
 	else
 	{
-#ifdef _DEBUG
-		while (m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
-			--*pCurrentFrameIndex;
-#endif // _DEBUG
+//#ifdef _DEBUG => 애니메이션 트랙포지션 조절용 => 블렌더기능
+//		while (m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
+//			--*pCurrentFrameIndex;
+//#endif // _DEBUG
 
 		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
 			++*pCurrentFrameIndex;

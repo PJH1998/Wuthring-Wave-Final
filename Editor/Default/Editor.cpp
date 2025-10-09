@@ -183,6 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_ESCAPE:
 			PostQuitMessage(0);
+			break;
 		}
 		break;
 	case WM_DESTROY:
@@ -190,7 +191,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CLOSE:
 		PostQuitMessage(0);
-		return 0;
+		break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

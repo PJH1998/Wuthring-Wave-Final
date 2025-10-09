@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Default\Engine.vcxproj", "{A7A2C70F-9253-45AF-96DB-935BCD0A924A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Default\Editor.vcxproj", "{226A92DC-5977-4F0F-AB2D-E3F971DE74EF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A7A2C70F-9253-45AF-96DB-935BCD0A924A} = {A7A2C70F-9253-45AF-96DB-935BCD0A924A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,5 +47,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {615DA721-C483-4765-AFFD-341226F617F6}
 	EndGlobalSection
 EndGlobal
