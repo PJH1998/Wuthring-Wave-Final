@@ -77,6 +77,20 @@ const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 	return (*iter)->Get_CombinedTransformationMatrix();
 }
 
+const vector<_float3>& CModel::Get_VerticesPos(_uint iIndex)
+{
+	if (iIndex >= m_iNumMeshes)
+		CRASH("Mesh Index Error");
+	return m_Meshes[iIndex]->Get_VerticesPos();
+}
+
+const vector<_uint>& CModel::Get_Indices(_uint iIndex)
+{
+	if (iIndex >= m_iNumMeshes)
+		CRASH("Mesh Index Error");
+	return m_Meshes[iIndex]->Get_Indices();
+}
+
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
 {

@@ -1,6 +1,8 @@
 #include "ClientPch.h"
 #include "Loader_Logo.h"
 
+#include "Dummy.h"
+
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
 {
@@ -48,6 +50,11 @@ HRESULT CLoader_Logo::Load_Texture()
 
 HRESULT CLoader_Logo::Load_Model()
 {
+	_fmatrix PreMatrix = XMMatrixScaling(0.001f, 0.001f, 0.001f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Dummy"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreMatrix, "../Bin/Resource/Dummy/Wolf/Wolf.dat"))))
+		return E_FAIL;
+
     return S_OK;
 }
 
@@ -58,6 +65,10 @@ HRESULT CLoader_Logo::Load_Shader()
 
 HRESULT CLoader_Logo::Load_Object()
 {
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"),
+		CDummy::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
+
     return S_OK;
 }
 

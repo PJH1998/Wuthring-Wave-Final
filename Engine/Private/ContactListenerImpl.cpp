@@ -21,14 +21,10 @@ void CContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBod
 	CGameObject* pSrc = reinterpret_cast<CGameObject*>(inBody1.GetUserData());
 	CGameObject* pDst = reinterpret_cast<CGameObject*>(inBody2.GetUserData());
 
-	if (nullptr == pSrc || nullptr == pDst)
-		return;
-
-	ASSERT_CRASH(pSrc);
-	ASSERT_CRASH(pDst);
-
-	pSrc->OnCollide_Enter(inBody2.GetObjectLayer(), pDst, inManifold);
-	pDst->OnCollide_Enter(inBody1.GetObjectLayer(), pSrc, inManifold);
+	if(nullptr != pSrc)
+		pSrc->OnCollide_Enter(inBody2.GetObjectLayer(), pDst, inManifold);
+	if(nullptr != pDst)
+		pDst->OnCollide_Enter(inBody1.GetObjectLayer(), pSrc, inManifold);
 }
 
 void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
@@ -36,14 +32,10 @@ void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& i
 	CGameObject* pSrc = reinterpret_cast<CGameObject*>(inBody1.GetUserData());
 	CGameObject* pDst = reinterpret_cast<CGameObject*>(inBody2.GetUserData());
 
-	if (nullptr == pSrc || nullptr == pDst)
-		return;
-
-	ASSERT_CRASH(pSrc);
-	ASSERT_CRASH(pDst);
-
-	pSrc->OnCollide_OnGoing(inBody2.GetObjectLayer(), pDst, inManifold);
-	pDst->OnCollide_OnGoing(inBody1.GetObjectLayer(), pSrc, inManifold);
+	if (nullptr != pSrc)
+		pSrc->OnCollide_OnGoing(inBody2.GetObjectLayer(), pDst, inManifold);
+	if (nullptr != pDst)
+		pDst->OnCollide_OnGoing(inBody1.GetObjectLayer(), pSrc, inManifold);
 }
 
 void CContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
