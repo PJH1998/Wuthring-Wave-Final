@@ -34,7 +34,7 @@ private:
 	_uint m_iLevel = ENUM_CLASS(LEVEL::MAP);
 	class CMapObject* m_pPickedObject = { nullptr };
 	class CMapObject_Instance* m_pPickedInstanceObject = { nullptr };
-	unordered_map<string, CGameObject*> m_SaveObjects;
+	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 
 
 

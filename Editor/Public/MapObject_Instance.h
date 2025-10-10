@@ -12,6 +12,12 @@ NS_END
 NS_BEGIN(Editor)
 class CMapObject_Instance : public CGameObject
 {
+public:
+	typedef struct tagMapLoad
+	{
+		_char ModelName[MAX_PATH] = {};
+		_float4x4* WorldMatrix = { nullptr };
+	}MAP_LOAD;
 private:
 	CMapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CMapObject_Instance(const CMapObject_Instance& Prototype);

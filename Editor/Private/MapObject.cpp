@@ -25,12 +25,16 @@ HRESULT CMapObject::Initialize_Prototype()
 
 HRESULT CMapObject::Initialize_Clone(void* pArg)
 {
+    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
+
+    strcpy_s(m_ModelName, pDesc->ModelName);
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
 
+    m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
     _vector vScale, vRotation, vTranslation;
 
@@ -41,12 +45,11 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
     m_vNewScale = m_vScale;
     m_vRotation = m_vNewRotation = _float3(0.f, 0.f, 0.f);
     m_vTranslation = m_vNewTranslation;
-    m_iShaderPassIndex = 0;
+    m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
     
     //ImGui에서 저장 누를 때 모델 이름별로 이 모델은 어디다 저장할지 선택하게?
 #ifdef _DEBUG
-    strcpy_s(m_ModelName, static_cast<_char*>(pArg));
 
     //진짜 마음에 안듦. 나중에 물어보고 수정할것
 
@@ -55,11 +58,14 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
     _char Tag[MAX_PATH] = "NonInteraction";
     MAP_CREATE event(Tag, this);
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
+
     m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
-        _matrix WorldMatrix = m_pTransformCom->Get_WorldMatrix();
+        event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+        _float4x4 WorldMatrix;
+        XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
         });
 
@@ -90,9 +96,6 @@ void CMapObject::Late_Update(_float fTimeDelta)
 void CMapObject::Render()
 {
     Bind_Resources();
-
-    //m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-    
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
@@ -182,8 +185,12 @@ void CMapObject::Set_ImGuiOption()
 HRESULT CMapObject::Ready_Component(void* pArg)
 {
     //이 부분 나중에 .Dat로드할때 데이터화 시켜서 로드 시킬것.
+    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+    _tchar Name[MAX_PATH] = {};
+    MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
+    lstrcat(Model, Name);
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom),nullptr)))
         return E_FAIL;
 
@@ -232,4 +239,5 @@ void CMapObject::Free()
     __super::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+    m_pGameInstance->Unscribe();
 }
