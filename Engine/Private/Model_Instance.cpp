@@ -123,7 +123,7 @@ HRESULT CModel_Instance::Ready_Mesh(ifstream& InputFile)
 
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMesh_Instance* pMesh = CMesh_Instance::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile);
+		CMesh_Instance* pMesh = CMesh_Instance::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, m_MinPos, m_MaxPos);
 
 		if (nullptr == pMesh)
 			return E_FAIL;

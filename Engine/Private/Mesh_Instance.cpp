@@ -11,7 +11,7 @@ CMesh_Instance::CMesh_Instance(const CMesh_Instance& Prototype)
 {
 }
 
-HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile)
+HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
     VTXMESH* pVertices = { nullptr };
     _uint* pIndices = { nullptr };
@@ -33,6 +33,14 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstre
     for (size_t i = 0; i < m_iNumVertices; ++i)
     {
         XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+        MaxPos[0] = max(pVertices[i].vPosition.x, MaxPos[0]);
+        MaxPos[1] = max(pVertices[i].vPosition.y, MaxPos[1]);
+        MaxPos[2] = max(pVertices[i].vPosition.z, MaxPos[2]);
+        
+        MinPos[0] = min(pVertices[i].vPosition.x, MinPos[0]);
+        MinPos[1] = min(pVertices[i].vPosition.y, MinPos[1]);
+        MinPos[2] = min(pVertices[i].vPosition.z, MinPos[2]);
+
         XMStoreFloat3(&pVertices[i].vNormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vNormal), PreTransformMatrix));
         XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
         XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
@@ -41,6 +49,12 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstre
 #endif
     }
 
+    _float Test =MaxPos[0];
+   _float Test1 =      MaxPos[1];
+   _float Test2 =      MaxPos[2];    
+   _float Test3 =      MinPos[0];
+   _float Test4 =      MinPos[1];
+   _float Test5 =      MinPos[2];
     D3D11_BUFFER_DESC   VBDesc = {};
     VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -160,11 +174,11 @@ void CMesh_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
 }
 #endif
 
-CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile)
+CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile,_float* MinPos, _float* MaxPos)
 {
     CMesh_Instance* pInstance = new CMesh_Instance(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, InputFile)))
+    if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, InputFile,MinPos,MaxPos)))
     {
         MSG_BOX("Failed to Create : Mesh_Instance");
         Safe_Release(pInstance);

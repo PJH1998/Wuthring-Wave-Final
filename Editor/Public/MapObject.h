@@ -43,7 +43,7 @@ private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
-
+	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
 private:
 #ifdef _DEBUG
 	_char m_ModelName[MAX_PATH];

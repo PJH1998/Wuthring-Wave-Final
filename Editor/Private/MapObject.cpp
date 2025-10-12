@@ -166,12 +166,36 @@ void CMapObject::Set_ImGuiOption()
         m_pTransformCom->Set_WorldMatrix(PickedMatrix);
     }
 
+
+
+
     ImGuiID ShaderId = ImGui::GetID("ShaderPass");
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+    ImGui::Text("ShaderPass");
+
     for (_uint i = 0; i<m_pShaderCom->Get_PassCount(); ++i)
     {
         if (ImGui::Button(m_pShaderCom->Get_PassName(i))) {
             m_iShaderPassIndex = i;
+        }
+    }
+    ImGui::EndChildFrame();
+
+    ImGui::SameLine();
+    ShaderId = ImGui::GetID("Test");
+    ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+    ImGui::Text("LOD");
+    _char LOD_Index[10] = {};
+
+    for (_uint i = 0; i < 4; ++i)
+    {
+        if (m_pModelComArray[i] == nullptr)
+            continue;
+
+        sprintf_s(LOD_Index, "LOD%d", i);
+        if (ImGui::Button(LOD_Index))
+        {
+            m_pModelCom = m_pModelComArray[i];
         }
     }
     ImGui::EndChildFrame();
@@ -193,6 +217,21 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom),nullptr)))
         return E_FAIL;
+
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+        TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
+        return E_FAIL;
+    
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
+        TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
+        return E_FAIL;
+
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+        TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
+        return E_FAIL;
+    /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+        TEXT("Com_Model_LOD3"), reinterpret_cast<CComponent**>(&m_pModelComArray[3]), nullptr)))
+        return E_FAIL;*/
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -239,5 +278,9 @@ void CMapObject::Free()
     __super::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+
+    for (auto& pModel : m_pModelComArray)
+        Safe_Release(pModel);
+
     m_pGameInstance->Unscribe();
 }

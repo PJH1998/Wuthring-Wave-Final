@@ -18,7 +18,9 @@ private:
 	CMesh_Instance() = default;
 
 public:
-	virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile);
+	
+		//virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile);
+	virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
 	virtual HRESULT		Initialize_Clone(void* pArg);
 	//virtual HRESULT		Render();
 
@@ -41,7 +43,9 @@ private:
 #endif
 
 public:
-	static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	
+		//static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
 	virtual CComponent* Clone(void* pArg)override;
 	virtual void Free()override;
 };

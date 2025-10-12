@@ -40,6 +40,8 @@ private:
 	vector<class CMeshMaterial*>	m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
+	_float m_MinPos[3] = { FLT_MAX,FLT_MAX ,FLT_MAX };
+	_float m_MaxPos[3] = { FLT_MIN ,FLT_MIN ,FLT_MIN };
 
 private:
 	HRESULT							Ready_Mesh(ifstream& InputFile);
