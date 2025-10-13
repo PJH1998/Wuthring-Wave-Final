@@ -31,8 +31,14 @@
     <Filter Include="01. Level\UI">
       <UniqueIdentifier>{462d5121-ab97-4cd9-9f72-1383b46c5133}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props">
+      <UniqueIdentifier>{95123eb5-a89e-4ad2-943b-6e889793fe28}</UniqueIdentifier>
+    </Filter>
     <Filter Include="02. ModelLoader">
       <UniqueIdentifier>{db7fc10f-8c21-4931-995b-434b4bf0263d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp Shader">
+      <UniqueIdentifier>{d637f06b-45b4-4721-88ec-ab3eea943955}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject">
       <UniqueIdentifier>{de0fe91c-5209-4722-8a86-e489175325f8}</UniqueIdentifier>
@@ -92,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\Level_Map.h">
       <Filter>01. Level\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>01. Level\UI\Temp Props</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ModelLoader.h">
       <Filter>02. ModelLoader</Filter>
@@ -153,6 +162,9 @@
     <ClCompile Include="..\Private\Level_UI.cpp">
       <Filter>01. Level\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>01. Level\UI\Temp Props</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
@@ -171,5 +183,10 @@
     <ClCompile Include="..\Private\AnimNotifyTool.cpp">
       <Filter>01. Level\Anim\Tool</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
+      <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

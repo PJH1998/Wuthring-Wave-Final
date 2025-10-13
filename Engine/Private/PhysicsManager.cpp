@@ -54,6 +54,9 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 #ifdef _DEBUG
 	m_pDebugRenderer = new CDebugRender(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pDebugRenderer);
+
+	m_DrawSetting.mDrawShape = true;
+	m_DrawSetting.mDrawShapeWireframe = true;
 #endif
 
 	return S_OK;

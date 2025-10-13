@@ -76,6 +76,8 @@ HRESULT CLevel_Loading::Ready_LoadingThread()
 
 	ASSERT_CRASH(m_pLoader);
 
+	this_thread::sleep_for(chrono::seconds(1));
+
     return S_OK;
 }
 

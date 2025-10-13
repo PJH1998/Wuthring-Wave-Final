@@ -92,36 +92,37 @@ void CEditorApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	if (ImGui::Begin("Level"))
-	{
-		if (ImGui::Button("Shader", ImVec2(100.f, 50.f)))
-		{
-			CHANGE_LEVEL_EVENT event{ LEVEL::SHADER, true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		}
-		if (ImGui::Button("Animation", ImVec2(100.f, 50.f)))
-		{
-			CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		}
-		if (ImGui::Button("Effect", ImVec2(100.f, 50.f)))
-		{
-			CHANGE_LEVEL_EVENT event{ LEVEL::EFFECT, true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		}
-		if (ImGui::Button("Map", ImVec2(100.f, 50.f)))
-		{
-			CHANGE_LEVEL_EVENT event{ LEVEL::MAP, true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		}
-		if (ImGui::Button("UI", ImVec2(100.f, 50.f)))
-		{
-			CHANGE_LEVEL_EVENT event{ LEVEL::UI, true };
-			m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-		}
+	ImGui::Begin("Level");
 
-		ImGui::End();
+
+	if (ImGui::Button("Shader", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::SHADER, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
+	if (ImGui::Button("Animation", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (ImGui::Button("Effect", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::EFFECT, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (ImGui::Button("Map", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::MAP, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (ImGui::Button("UI", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::UI, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+
+	
+	ImGui::End();
 
 	//if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
 	//{

@@ -136,7 +136,9 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
 
 	m_pGameInstance->Add_Work([=]() {
-			ifstream InputFile(pFilePath, ios::binary);
+			_char szFilePath[MAX_PATH] = {};
+			strcmp(szFilePath, pFilePath);
+			ifstream InputFile(szFilePath, ios::binary);
 			if (false == InputFile.is_open())
 			{
 				MSG_BOX("Failed Open : Model");
@@ -148,12 +150,12 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 				if (FAILED(Ready_Bone(InputFile, -1)))
 					return E_FAIL;
 
-				if (FAILED(Ready_Animation(pFilePath)))
+				if (FAILED(Ready_Animation(szFilePath)))
 					return E_FAIL;
 			}
 			if (FAILED(Ready_Mesh(InputFile)))
 				return E_FAIL;
-			if (FAILED(Ready_Material(pFilePath)))
+			if (FAILED(Ready_Material(szFilePath)))
 				return E_FAIL;
 			InputFile.close();
 
