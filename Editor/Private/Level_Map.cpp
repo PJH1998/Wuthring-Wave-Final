@@ -2,7 +2,10 @@
 #include "Level_Map.h"
 
 #include "Event_Level.h"
+#include"Model_Instance.h"
 #include"MapObject.h"
+#include"Mesh_Instance.h"
+#include"MapObject_Instance.h"
 
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -11,14 +14,20 @@ CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Map::Initialize()
 {
+    Ready_Event();
+
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
+    //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
     return S_OK;
 }
 
 void CLevel_Map::Update(_float fTimeDelta)
 {
+    m_fNearDistance = FLT_MAX;
+    m_fNearDistance_Instance = FLT_MAX;
+
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
@@ -35,6 +44,11 @@ void CLevel_Map::Update(_float fTimeDelta)
     case Editor::CLevel_Map::MENU_LIGHT:
         Menu_Light();
         break;
+
+    case Editor::CLevel_Map::MENU_SAVELOAD:
+        Menu_Save_Load();
+        break;
+
     }
 }
 
@@ -47,21 +61,21 @@ void CLevel_Map::Menu_Select()
 {
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("Ojbect")) {
+        if (ImGui::MenuItem("Ojbect")) {
             m_eMenu = MENU_OBJECT;
-            ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("RandScape")) {
+        if (ImGui::MenuItem("RandScape")) {
             m_eMenu = MENU_RANDSCAPE;
-            ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Light")) {
+        if (ImGui::MenuItem("Light")) {
             m_eMenu = MENU_LIGHT;
-            ImGui::EndMenu();
         }
 
+        if(ImGui::MenuItem("Save & Load")) {
+            m_eMenu = MENU_SAVELOAD;
+        }
         ImGui::EndMainMenuBar();
     }
 }
@@ -69,12 +83,21 @@ void CLevel_Map::Menu_Select()
 void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
+
+    //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
+
+    if (m_pPickedObject)
+        m_pPickedObject->Set_ImGuiOption();
+
     ImGui::End();
 }
 
 void CLevel_Map::Menu_RandSacpe()
 {
     ImGui::Begin("Menu_RandScape");
+
+    if (m_pPickedInstanceObject)
+        m_pPickedInstanceObject->Set_ImGuiOption();
 
     //풀떼기들은 플레이어랑 가까이 있을 때 플레이어를 중점으로 옆으로 누움. 누운 상태로 바람에 흔들림.
     //플레이어랑 거의 겹친 풀떼기들은 Clip되는듯. 안보임.
@@ -112,16 +135,230 @@ void CLevel_Map::Menu_Light()
 
 }
 
+void CLevel_Map::Menu_Save_Load()
+{
+    IGFD::FileDialogConfig config;
+
+    config.path = "../../Client/Bin/Resource/";
+    config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+    static _char exportText[128] = ""; // 입력 저장용 버퍼
+    ImGui::InputText("파일 이름", exportText, IM_ARRAYSIZE(exportText));
+
+    if (ImGui::BeginMenu("Save"))
+    {
+        for (auto& Pair : m_SaveObjects)
+            if (ImGui::MenuItem(Pair.first.c_str()))
+            {
+                string MapName = config.path;
+                MapName += exportText;
+                MapName += "_";
+                MapName += Pair.first;
+                MapName += ".dat";
+                ofstream File(MapName, ios::binary);
+
+                MAP_SAVE event(File);
+                m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
+                File.close();
+            }
+        //상호작용할 객체들 따로, 인스턴싱 객체들 따로, 일반 맵 따로.
+
+        ImGui::EndMenu();
+    }
+    ImGui::MenuItem("Load", nullptr, &m_LoadMenu);
+    if (m_LoadMenu)
+    {
+
+        ImGuiFileDialog::Instance()->OpenDialog("Map File Load", "Import File", ".dat", config);
+
+        if (ImGuiFileDialog::Instance()->Display("Map File Load")) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                _string ModelPath;
+                ModelPath+= config.path;
+                
+                _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+                ModelPath+= ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+                ifstream File(ModelPath, ios::binary);
+                //ifstream File(strFilePath, ios::binary);
+
+                if (!File.is_open())
+                {
+                    MSG_BOX("Load Failed");
+                }
+
+                _uint NameLength;
+
+                _matrix PreTransformMatrix = XMMatrixIdentity();
+                _float fSize = 0.001f;
+                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
+
+                CMapObject::MAP_LOAD Desc{};
+
+                while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+                {
+                    File.read(Desc.ModelName, NameLength);
+                    
+                    File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+                    _float4x4 Matrix = {};
+                    File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+                    Desc.WorldMatrix = &Matrix;
+
+                    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+                    _tchar Name[MAX_PATH] = {};
+                    MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
+                    lstrcat(Model, Name);
+
+                    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/";
+                    strcat_s(ModelPath, Desc.ModelName);
+                    strcat_s(ModelPath, "/");
+                    strcat_s(ModelPath, Desc.ModelName);
+                    strcat_s(ModelPath, ".dat");
+
+                    //m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                    //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
+
+                    _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
+                    lstrcat(PrototypeObject, Name);
+
+                    //m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
+                    //    CMapObject::Create(m_pDevice, m_pContext));
+
+                    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
+                        , m_iLevel, TEXT("Layer_Test"), &Desc);
+
+                }
+                File.close();
+                //레이어나 오브젝트매니저 전체 순회가능한 함수 생기면 변경 고려 해볼것.
+
+
+
+                //LOD를 카메라 거리 기반으로 하지 말고, 모델의 최소 최대 픽셀로 큐브를 만들었을 때 그 큐브가
+                //현재 화면을 기준으로 픽셀을 얼마나 많이 차지하고 있나로 LOD 단계 구별하기. => 스크린 픽셀 사이즈 기법
+                //LOD 모델은 상태머신을 갈아끼우듯 LOD 단계에 따라 바꾸기. => 어차피 모델의 크기는 변하지 않음. 디테일이 달라짐.
+                m_LoadMenu = !m_LoadMenu;
+            }
+        }
+    }
+}
+
 HRESULT CLevel_Map::Ready_Static_Component()
 {
     _matrix PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
 
-    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+    //일반 모델
+    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
-    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Test"), CMapObject::Create(m_pDevice, m_pContext));
+    //인스턴스 모델
+    
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
+        CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test_Instance"),
+        CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Test/Test.dat"));
+
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test"),
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test/Test.dat"));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test1"),
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
+        CMapObject_Instance::Create(m_pDevice, m_pContext));
+
+    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf"),
+    //    CMapObject::Create(m_pDevice, m_pContext));
+
+    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test"),
+    //    CMapObject::Create(m_pDevice, m_pContext));
+
+
+
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
+     CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
+
+    //VTXMESHINSTANCE
+    
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1"),
+        CMapObject::Create(m_pDevice, m_pContext));
+
+
+    //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
+    //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
+
+    //큐브 안에 모델 찍기 / 월드 최대 크기 안에 찍어야한다.
+    //일단 텍스쳐 없이 모델만 로드해놓기 세이브 & 로드.
+    
+    CMapObject::MAP_LOAD Desc{};
+    CMapObject_Instance::MAP_LOAD InstanceDesc{};
+    _float4x4 DefaultMatrix{};
+    XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
+    InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
+
+    strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf")
+        , m_iLevel, TEXT("Layer_Test"), &InstanceDesc);
+
+    /*strcpy_s(Desc.ModelName, "Wolf");
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf")
+        , m_iLevel, TEXT("Layer_Test"), Desc.ModelName);*/
+
+    /*strcpy_s(Desc.ModelName, "Test");
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test")
+        , m_iLevel, TEXT("Layer_Test"), &Desc.ModelName);*/
+
+    strcpy_s(Desc.ModelName, "Test1");
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
+        , m_iLevel, TEXT("Layer_Test"), &Desc);
+
     return S_OK;
+}
+
+void CLevel_Map::Ready_Event()
+{
+    m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
+
+        switch (m_eMenu)
+        {
+        case Editor::CLevel_Map::MENU_OBJECT:
+        {
+            if (event.fDistance <= m_fNearDistance)
+            {
+                m_fNearDistance = event.fDistance;
+                    m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+            }
+        }
+        break;
+
+        case Editor::CLevel_Map::MENU_RANDSCAPE:
+            if (event.fDistance <= m_fNearDistance_Instance)
+            {
+                m_fNearDistance_Instance = event.fDistance;
+                    m_pPickedInstanceObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+            }
+            break;
+
+        case Editor::CLevel_Map::MENU_LIGHT:
+            int a = 0;
+            break;
+        }
+        });
+
+    m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
+        CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
+        m_SaveObjects[event.ModelName].push_back(pObject);
+        Safe_AddRef(pObject);
+        });
 }
 
 CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -140,5 +377,16 @@ CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 void CLevel_Map::Free()
 {
     __super::Free();
+    m_pPickedObject = nullptr;
+    m_pPickedInstanceObject = nullptr;
+    m_pGameInstance->Unscribe();
 
+    for (auto& Pair : m_SaveObjects)
+    {
+        for (auto& pGameObject : Pair.second)
+            Safe_Release(pGameObject);
+        Pair.second.clear();
+    }
+    
+    m_SaveObjects.clear();
 }

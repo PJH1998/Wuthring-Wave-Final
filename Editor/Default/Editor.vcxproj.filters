@@ -123,10 +123,13 @@
     <ClInclude Include="..\Public\AnimNotifyTool.h">
       <Filter>01. Level\Anim\Tool</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\Particle.h">
       <Filter>01. Level\Effect\Particle</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
@@ -186,6 +189,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AnimNotifyTool.cpp">
       <Filter>01. Level\Anim\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>

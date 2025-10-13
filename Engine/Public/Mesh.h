@@ -5,6 +5,7 @@ NS_BEGIN(Engine)
 
 class CMesh final : public CVIBuffer
 {
+	enum CORNER { LTN, RTN, RBN, LBN, LTF, RTF, RBF, LBF, END};
 private:
 	explicit CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMesh(const CMesh& Prototype);
@@ -38,7 +39,7 @@ private:
 	// Mesh Shape¿ë Container
 	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
-
+	BoundingBox					m_Cube = {};
 private:
 	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
 	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
