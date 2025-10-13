@@ -25,6 +25,9 @@ HRESULT CLevel_Map::Initialize()
 
 void CLevel_Map::Update(_float fTimeDelta)
 {
+    m_fNearDistance = FLT_MAX;
+    m_fNearDistance_Instance = FLT_MAX;
+
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
@@ -275,8 +278,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
     //    CMapObject::Create(m_pDevice, m_pContext));
 
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1"),
-        CMapObject::Create(m_pDevice, m_pContext));
 
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
@@ -287,6 +288,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //VTXMESHINSTANCE
     
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1"),
+        CMapObject::Create(m_pDevice, m_pContext));
+
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
@@ -322,11 +326,33 @@ HRESULT CLevel_Map::Ready_Static_Component()
 void CLevel_Map::Ready_Event()
 {
     m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
-        if (CMapObject* pObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject)))
-            m_pPickedObject = pObject;
-        else if (CMapObject_Instance* pObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject)))
-            m_pPickedInstanceObject = pObject;
+
+        switch (m_eMenu)
+        {
+        case Editor::CLevel_Map::MENU_OBJECT:
+        {
+            if (event.fDistance <= m_fNearDistance)
+            {
+                m_fNearDistance = event.fDistance;
+                    m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+            }
+        }
+        break;
+
+        case Editor::CLevel_Map::MENU_RANDSCAPE:
+            if (event.fDistance <= m_fNearDistance_Instance)
+            {
+                m_fNearDistance_Instance = event.fDistance;
+                    m_pPickedInstanceObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+            }
+            break;
+
+        case Editor::CLevel_Map::MENU_LIGHT:
+            int a = 0;
+            break;
+        }
         });
+
     m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
         m_SaveObjects[event.ModelName].push_back(pObject);

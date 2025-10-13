@@ -30,11 +30,11 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     strcpy_s(m_ModelName, pDesc->ModelName);
+    m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
 
-    m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
     _vector vScale, vRotation, vTranslation;
 
@@ -71,20 +71,40 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 
 #endif
+
+
+
+    //CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+//BoxBodyDesc.eShape = SHAPE::BOX;
+//BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
+//BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
+//BoxBodyDesc.eType = EMotionType::Dynamic;
+//BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+//
+//m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
+//m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+//
     return S_OK;
 }
 
 void CMapObject::Priority_Update(_float fTimeDelta)
 {
-
+    /*if(m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::MAP),TEXT("Model_Pick"))*/
 }
 
 void CMapObject::Update(_float fTimeDelta)
 {
     if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
     {
-        MAP_PICK event(this);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+        _float fDistance = {};
+
+        //if (m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
+        {
+            MAP_PICK event(this, fDistance);
+            
+            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+        }
     }
 }
 
@@ -166,9 +186,6 @@ void CMapObject::Set_ImGuiOption()
         m_pTransformCom->Set_WorldMatrix(PickedMatrix);
     }
 
-
-
-
     ImGuiID ShaderId = ImGui::GetID("ShaderPass");
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
     ImGui::Text("ShaderPass");
@@ -229,6 +246,7 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
         return E_FAIL;
+
     /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model_LOD3"), reinterpret_cast<CComponent**>(&m_pModelComArray[3]), nullptr)))
         return E_FAIL;*/
@@ -236,6 +254,17 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
+
+    //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    //RigidbodyDesc.eShape = SHAPE::MESH;
+    //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    //RigidbodyDesc.eType = EMotionType::Static;
+    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+    //RigidbodyDesc.pModel = m_pModelCom;
+
+    //Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+    //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
 
     return S_OK;
 }
@@ -278,7 +307,7 @@ void CMapObject::Free()
     __super::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
-
+    Safe_Release(m_pRigidbodyCom);
     for (auto& pModel : m_pModelComArray)
         Safe_Release(pModel);
 

@@ -46,8 +46,13 @@ void CMapObject_Instance::Update(_float fTimeDelta)
 {
     if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
     {
-        MAP_PICK event(this);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+        _float fDistance = {};
+
+        //if (m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
+        {
+            MAP_PICK event(this, fDistance);
+            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+        }
     }
 }
 

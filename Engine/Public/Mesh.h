@@ -5,6 +5,7 @@ NS_BEGIN(Engine)
 
 class CMesh final : public CVIBuffer
 {
+	enum CORNER { LTN, RTN, RBN, LBN, LTF, RTF, RBF, LBF, END};
 private:
 	explicit CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMesh(const CMesh& Prototype);

@@ -4,6 +4,8 @@
 #include "Bone.h"
 #include "Shader.h"
 
+#include"VIBuffer_Cube.h"
+
 CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CVIBuffer { pDevice, pContext }
 {
@@ -257,16 +259,45 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 	InputFile.read(reinterpret_cast<_char*>(pVertices), sizeof(VTXMESH) * m_iNumVertices);
 	InputFile.read(reinterpret_cast<_char*>(pIndices), sizeof(_uint) * m_iNumIndices);
 
+    _float3 MinPos = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
+    _float3 MaxPos = _float3(FLT_MIN, FLT_MIN, FLT_MIN);
+
 	for (size_t i = 0; i < m_iNumVertices; ++i)
 	{
 		XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+
 		XMStoreFloat3(&pVertices[i].vNormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vNormal), PreTransformMatrix));
 		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
 		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
 
 		// Mesh Shape¿ë Container
 		m_VertexPositions.push_back(pVertices[i].vPosition);
+        MaxPos.x = max(pVertices[i].vPosition.x, MaxPos.x);
+        MaxPos.y = max(pVertices[i].vPosition.y, MaxPos.y);
+        MaxPos.z = max(pVertices[i].vPosition.z, MaxPos.z);
+
+        MinPos.x = min(pVertices[i].vPosition.x, MinPos.x);
+        MinPos.y = min(pVertices[i].vPosition.y, MinPos.y);
+        MinPos.z = min(pVertices[i].vPosition.z, MinPos.z);
 	}
+
+    _float3 vCorner[CORNER::END];
+
+    vCorner[LTN] = _float3(MinPos.x, MaxPos.y, MinPos.z);
+    
+    vCorner[RTN] = _float3(MaxPos.x, MaxPos.y, MinPos.z);
+    
+    vCorner[RBN] = _float3(MaxPos.x, MinPos.y, MinPos.z);
+    
+    vCorner[LBN] = _float3(MinPos.x, MinPos.y, MinPos.z);
+    
+    vCorner[LTF] = _float3(MinPos.x, MaxPos.y, MaxPos.z);
+    
+    vCorner[RTF] = _float3(MaxPos.x, MaxPos.y, MaxPos.z);
+    
+    vCorner[RBF] = _float3(MaxPos.x, MinPos.y, MaxPos.z);
+    
+    vCorner[LBF] = _float3(MinPos.x, MinPos.y, MaxPos.z);
 
 	m_iVertexStride = sizeof(VTXMESH);
 	m_iNumVertexBuffers = 1;

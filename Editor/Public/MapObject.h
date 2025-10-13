@@ -5,6 +5,7 @@
 NS_BEGIN(Engine)
 class CModel;
 class CShader;
+class CRigidbody;
 NS_END
 
 
@@ -44,6 +45,7 @@ private:
 	class CShader* m_pShaderCom = { nullptr };
 
 	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
+	CRigidbody* m_pRigidbodyCom = { nullptr };
 private:
 #ifdef _DEBUG
 	_char m_ModelName[MAX_PATH];

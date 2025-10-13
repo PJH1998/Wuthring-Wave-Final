@@ -35,7 +35,8 @@ private:
 	class CMapObject* m_pPickedObject = { nullptr };
 	class CMapObject_Instance* m_pPickedInstanceObject = { nullptr };
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
-
+	_float m_fNearDistance= { FLT_MAX };
+	_float m_fNearDistance_Instance = {FLT_MAX};
 
 
 	_bool m_LoadMenu = { false };

@@ -18,7 +18,8 @@ typedef struct tagLoadingEnd : public CEvent
 typedef struct tagMapObjectPick : public CEvent
 {
 	void* pObject = { nullptr };
-	tagMapObjectPick(void* _pObject) : pObject(_pObject) {};
+	_float fDistance;
+	tagMapObjectPick(void* _pObject, _float _fDistance) : pObject(_pObject), fDistance(_fDistance) {};
 }MAP_PICK;
 
 typedef struct tagMapCreate: public CEvent
