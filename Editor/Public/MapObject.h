@@ -6,6 +6,7 @@ NS_BEGIN(Engine)
 class CModel;
 class CShader;
 class CRigidbody;
+class CTexture;
 NS_END
 
 
@@ -46,6 +47,8 @@ private:
 
 	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
+	vector<CTexture*> m_pDiffuseTextureCom;
+	vector<CTexture*> m_pNormalTextureCom;
 private:
 #ifdef _DEBUG
 	_char m_ModelName[MAX_PATH];
@@ -62,9 +65,16 @@ private:
 
 	_bool m_IsTest = { false };
 	_bool m_IsLoaded = { false };
-
+	_bool m_MakeJson = { false };
+	
 	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
 	vector<_string> m_DiffuseTextureName;
+	vector<_string> m_NormalTextureName;
+	
+	_string m_SelectedDiffuse= {};
+	_string m_SelectedNormal= {};
+
+	_uint m_iSelectedMesh={};
 public:
 	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

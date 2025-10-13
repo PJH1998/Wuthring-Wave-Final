@@ -71,19 +71,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 
 #endif
-
-
-    //
-    //    CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
-    //BoxBodyDesc.eShape = SHAPE::BOX;
-    //BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
-    //BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
-    //BoxBodyDesc.eType = EMotionType::Dynamic;
-    //BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-    //
-    //m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
-    //m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
-
+    m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
+    m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
     return S_OK;
 }
 
@@ -119,7 +108,13 @@ void CMapObject::Render()
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+        //m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+        if (m_pDiffuseTextureCom[i])
+            m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
+        if (m_pNormalTextureCom[i])
+            m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture");
+
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
@@ -218,38 +213,50 @@ void CMapObject::Set_ImGuiOption()
     ImGui::EndChildFrame();
 
     if (ImGui::Button("Set Texture"))
-    {
-
         m_IsTest = !m_IsTest;
-    }
 
     _string Test1 = ImGuiFileDialog::Instance()->GetCurrentPath();
     if (m_IsTest)
     {
+
         IGFD::FileDialogConfig config;
 
-        //C:\Users\dnheu\Downloads\FModel\Output\Exports\Client\Content\Aki\Scene\Assets\Levels\LiNaXiTa\XunYouTianGuo\Array\Tex
-            //config.path = "../../Client/Bin/Resource/";
-        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/XunYouTianGuo/Array/Tex";
+        //C:\Users\dnheu\source\repos
+        config.path = "C:/Users/dnheu/source/repos";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
-        ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", ".png", config);
+        ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", ".txt", config);
 
         if (ImGuiFileDialog::Instance()->Display("Texture File Load")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
-                for (const auto& entry : filesystem::directory_iterator(strFolderPath)) {
+                for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
                     if (entry.is_regular_file()) {
-                        if (entry.path().extension() == ".png") {
-                            {
-                                string fileName = entry.path().filename().string();
-                                m_DiffuseTextureName.push_back(fileName);
+                        if (entry.path().string().find("_D_") != std::string::npos)
+                        {
+                            if (entry.path().extension() == ".png") {
+                                {
+                                    string fileName = entry.path().filename().string();
+                                    //m_DiffuseTextureName.push_back(fileName);
+                                    m_DiffuseTextureName.push_back(entry.path().string());
+                                }
+                            }
+                        }
+                        else if (entry.path().string().find("_N_") != std::string::npos)
+                        {
+                            if (entry.path().extension() == ".png") {
+                                {
+                                    string fileName = entry.path().filename().string();
+                                    //m_NormalTextureName.push_back(fileName);
+                                    m_NormalTextureName.push_back(entry.path().string());
+                                }
                             }
                         }
                     }
                 }
                 m_IsLoaded = true;
                 m_IsTest = !m_IsTest;
+                ImGuiFileDialog::Instance()->Close();
             }
         }
     }
@@ -258,21 +265,192 @@ void CMapObject::Set_ImGuiOption()
     {
         ImGui::Begin("Texture Change");
 
-        if (ImGui::BeginCombo("Diffuse", "?"))
-        {
-            for (_uint i = 0; i < m_DiffuseTextureName.size(); ++i)
-            {
-                if (ImGui::Button(m_DiffuseTextureName[i].c_str()))
-                {
+        _char LOD_Index[10] = {};
 
-                    //최종 폴더 경로.
-                    m_ModelName;
-                    ofstream;
-                    json MatJson;
+        if (ImGui::BeginCombo("Meshes", "?"))
+        {
+            for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+            {
+                sprintf_s(LOD_Index, "Mesh : %d", i);
+                if (ImGui::Selectable(LOD_Index))
+                {
+                    m_iSelectedMesh = i;
                 }
             }
             ImGui::EndCombo();
         }
+
+        if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuse.c_str()))
+        {
+            for (_uint i = 0; i < m_DiffuseTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_DiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+                if (ImGui::Selectable(FileName))
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedDiffuse = m_DiffuseTextureName[i];
+
+
+                    _wstring Test(m_SelectedDiffuse.begin(), m_SelectedDiffuse.end());
+                    if (m_pDiffuseTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pDiffuseTextureCom[m_iSelectedMesh]);
+
+                    m_pDiffuseTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    ImGui::Image((ImTextureID)m_pDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::BeginCombo("Normal", m_SelectedNormal.c_str()))
+        {
+
+            for (_uint i = 0; i < m_NormalTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_NormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                if (ImGui::Selectable(FileName))
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedNormal = m_NormalTextureName[i].c_str();
+
+                    //W스트링으로 바꿔.
+                    _wstring Test(m_SelectedNormal.begin(), m_SelectedNormal.end());
+                    if (m_pNormalTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);
+
+                    m_pNormalTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    ImGui::Image((ImTextureID)m_pNormalTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::Button("Make_Json"))
+            m_MakeJson = !m_MakeJson;
+
+        if(m_MakeJson)
+        {
+            //최종 폴더 경로.
+
+            IGFD::FileDialogConfig config;
+
+            config.path = "../../Client/";
+            config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+            ImGuiFileDialog::Instance()->OpenDialog("why", "Test", ".dat", config);
+
+            if (ImGuiFileDialog::Instance()->Display("why")) {
+                if (ImGuiFileDialog::Instance()->IsOk()) {
+                    _string strFolderName = ImGuiFileDialog::Instance()->GetCurrentPath();
+                    _string strTexturePath = {};
+                    strFolderName += "/Mat/";
+                    strTexturePath = strFolderName;
+                    strFolderName += m_ModelName;
+                    strFolderName += "_Test.json";
+                    
+#pragma region Json 저장
+                    m_ModelName;
+                    ofstream File(strFolderName);
+                    json TotalJson;
+
+                    m_MakeJson = !m_MakeJson;
+#pragma endregion
+
+#pragma region 텍스쳐 복사
+                    strTexturePath += "/Tex/";
+                    filesystem::create_directories(strTexturePath);
+                    for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+                    {
+                        _char FileDrive[MAX_PATH] = {};
+                        _char FileDir[MAX_PATH] = {};
+                        _char DiffuseFileName[MAX_PATH] = {};
+                        _char NormalFileName[MAX_PATH] = {};
+                        _char FileExt[MAX_PATH] = {};
+
+                        _splitpath_s(m_DiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                        _splitpath_s(m_NormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
+
+                        /*json MaterialArray;
+                        json Material;
+
+                        MaterialArray = TotalJson["Materials"] = json::array();
+                        
+                        json FileNameArray;
+                        FileNameArray["FileName"] = json::array();
+
+                        FileNameArray["FileName"].push_back(DiffuseFileName);
+
+                        Material["Diffuse"] = FileNameArray;
+                        Material["Diffuse"]["TextureCnt"] = 1;
+                        MaterialArray.push_back(Material);
+
+                        TotalJson.dump(4);
+
+                        File << TotalJson;*/
+
+                        json Totaljson;
+                        Totaljson["NumMaterial"] = m_pModelCom->Get_NumMesh();
+                        Totaljson["Mateirals"] = json::array();
+
+                        json MaterialData;
+
+                        json DiffuseData;
+
+                        DiffuseData["TextureCnt"] = 1;
+                        DiffuseData["FileName"] = json::array();
+
+                        _char DiffuseName[MAX_PATH] = {};
+                        strcat_s(DiffuseName, DiffuseFileName);
+                        strcat_s(DiffuseName, FileExt);
+
+                        DiffuseData["FileName"].push_back(DiffuseName);
+
+                        MaterialData["Diffuse"] = DiffuseData;
+
+                        json NormalData;
+
+                        NormalData["TextureCnt"] = 1;
+                        NormalData["FileName"] = json::array();
+
+                        _char NormalName[MAX_PATH] = {};
+                        strcat_s(NormalName, NormalFileName);
+                        strcat_s(NormalName, FileExt);
+
+                        NormalData["FileName"].push_back(NormalName);
+
+                        MaterialData["Normal"] = NormalData;
+
+                        Totaljson["Mateirals"].push_back(MaterialData);
+
+                        File << Totaljson.dump(4);
+
+                        filesystem::copy_file(m_DiffuseTextureName[i], strTexturePath + DiffuseFileName+ FileExt, filesystem::copy_options::overwrite_existing);
+                        filesystem::copy_file(m_NormalTextureName[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                    }
+                    File.close();
+#pragma endregion
+                }
+            }
+            int a = 0;
+        }
+        ImGui::Begin("Textures");
+
+        if (m_pDiffuseTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        if (m_pNormalTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pNormalTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        ImGui::End();
         ImGui::End();
     }
     //LOD가 총 4단계로 나뉘어져있는데 이거 어떻게 할 건지 생각.
@@ -280,6 +458,7 @@ void CMapObject::Set_ImGuiOption()
     //=> 인스턴싱한 메쉬들은 각 매트릭스마다 비교해서 메쉬 뭐 쓸지 결정해야할듯?
 
 }
+
 
 HRESULT CMapObject::Ready_Component(void* pArg)
 {
@@ -368,6 +547,15 @@ void CMapObject::Free()
     Safe_Release(m_pRigidbodyCom);
     for (auto& pModel : m_pModelComArray)
         Safe_Release(pModel);
+
+    for (auto& pTexture : m_pDiffuseTextureCom)
+        if (pTexture)
+            Safe_Release(pTexture);
+    
+    for (auto& pTexture : m_pNormalTextureCom)
+        if (pTexture)
+            Safe_Release(pTexture);
+
 
     m_pGameInstance->Unscribe();
 }
