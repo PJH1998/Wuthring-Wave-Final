@@ -337,7 +337,7 @@ void CLevel_UI::Update_SaveLoad()
 
     ImGui::Text("..Current Anim");
 
-    _char szAnimName[256] = {};
+    static _char szAnimName[256] = {};
     ImGui::Text("[Save] Anim Name");
     ImGui::InputText("##Anim Name", szAnimName, 256);
 
@@ -362,6 +362,7 @@ void CLevel_UI::Update_SaveLoad()
         file << jUIAnimData.dump(4);
         file.close();
 
+        memset(szAnimName, 0, sizeof(szAnimName));
     }
     ImGui::SameLine();
     if (ImGui::Button("Load##AnimLoad", buttonSize))
