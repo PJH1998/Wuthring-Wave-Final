@@ -408,6 +408,9 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotifyDefine.h">
+      <Filter>01. Utility\04. Component\Model\Animation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">

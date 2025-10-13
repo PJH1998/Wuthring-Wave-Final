@@ -72,6 +72,9 @@ private:
 	typedef map<const _wstring, class CAnimationActor*> ANIMATIONACTORS;
 	ANIMATIONACTORS m_AnimationActors;
 
+	typedef map<const _wstring, const _string> MODELPATHS;
+	MODELPATHS	m_ModelDatPaths;
+
 	// 생성한 객체에 대한 동적제어를 어떻게할까?
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
@@ -85,6 +88,7 @@ private:
 	_float m_fTrackPosition = {};
 	_float m_fDuration = {};
 	_bool m_IsVisibleNotify = { false };
+	_bool m_IsPlayAnimation = { true };
 	
 private:
 	_float m_fEditorAlpha = { 1.f };

@@ -101,6 +101,8 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 		return true;
 	}
 
+	// Notfiy 현재 인덱스가 size를 넘지 않고, TrackPosition이 Notify에 해당한다면? 
+	// Notify에 해당하는 함수를 실행하라.
 	while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 		m_Notifies[m_iNotifyIndex++].Func();
 

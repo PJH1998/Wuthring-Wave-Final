@@ -37,6 +37,9 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
+    // Model의 Dat Folder Path
+    m_strModelDatPath = pDesc->strModelDatPath;
+
 
     if (FAILED(Ready_Components(pDesc)))
     {
@@ -58,7 +61,11 @@ void CAnimationActor::Priority_Update(_float fTimeDelta)
 void CAnimationActor::Update(_float fTimeDelta)
 {
     CContainerObject::Update(fTimeDelta);
-    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
+    m_fTimeDelta = fTimeDelta;
+
+    if (m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -118,10 +125,37 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-void CAnimationActor::Set_TrackPosition(const _string& strAnimName, _float fTrackPosition)
+// Notify에서 사용할 현재 선택된 애니메이션 이름
+const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
-    m_pModelCom->Set_TrackPosition(strAnimName, fTrackPosition);
+    return m_strCurrentAnimation;
+}
+
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 TrackPosition
+const _float CAnimationActor::Get_CurrentAnimationDuration() const
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_Duration(m_strCurrentAnimation);
+}
+
+
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
+
+void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
+{
+    ASSERT_CRASH(m_pModelCom);
+    // 어차피 현재거 설정하니까 매개변수로 가져올 필요가 없을 듯.
+    m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
+
+    // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
+    if (!m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
+
+}
+void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
+{
+    m_IsPlayAnimation = IsPlay;
 }
 #endif
 

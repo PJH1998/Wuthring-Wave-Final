@@ -37,8 +37,10 @@ void CAnimationTool::Render()
     // Animation Notify가 Visible 상태라면?
     if (m_IsVisibleNotify)
     {
+        // 저장 시 모델 Tag로 저장할 때 Folder만 저장할까?
+        _string strModelDatPath = m_ModelDatPaths[m_wSelected_PrototypeModelTag];
         ASSERT_CRASH(m_pAnimNotifyTool);
-        m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, m_fDuration);
+        m_pAnimNotifyTool->Process_Notify(m_Selected_AnimationTag, strModelDatPath, m_fDuration);
         m_pAnimNotifyTool->Render();
     }
         
@@ -84,7 +86,6 @@ void CAnimationTool::Render_DebugWindow()
 
     _float4 camPos = {};
     camPos = *m_pGameInstance->Get_CamPos();
-    //XMStoreFloat3(&camPos, m_pCameraTransformCom->Get_State(STATE::POSITION));
     ImGui::Text("Camera Pos: (%.2f, %.2f, %.2f)", camPos.x, camPos.y, camPos.z);
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
@@ -282,6 +283,7 @@ void CAnimationTool::LoadDat()
             }
 
             // 3. 생성이 완료되었으면 m_ModelNames에 추가. 
+            m_ModelDatPaths.emplace(wStrModelName, strFilePath);
             m_ModelNames.emplace_back(strModelName);
         }
         ImGuiFileDialog::Instance()->Close();
@@ -338,6 +340,16 @@ void CAnimationTool::RenderUI_AnimationList()
             // 선택될때만 저장.
             m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
             m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
+
+            // Animation Tool이 켜져있는 상태로 NotifyTool을 작업할 예정이므로
+            // Animation이 변경될때마다? => NotifyTool에 해당 정보를 전달해주어야합니다. NotifyTool이 켜져있다면?
+            if (m_IsVisibleNotify)
+            {
+                m_pAnimNotifyTool->Process_Notify(m_Selected_AnimActorTag, "", m_fDuration);
+                // 그리고 Animation이 바뀌면 현재 설정된 Notify 정보를 날려야한다.
+                m_pAnimNotifyTool->Clear();
+            }
+                
         }
     }
     ImGui::EndChild();
@@ -360,10 +372,10 @@ void CAnimationTool::Render_Model_Detail()
     static float fScale[3] = { 1.f, 1.f, 1.f };
     ImGui::InputFloat3("Scale", fScale);
 
-    static float fSpeedPerSec = {};
+    static float fSpeedPerSec = { 10.f };
     ImGui::InputFloat("Speed", &fSpeedPerSec);
 
-    static float fRotationPerSec = {};
+    static float fRotationPerSec = { 90.f };
     ImGui::InputFloat("RotationSpeed", &fRotationPerSec);
 
     static unsigned int iShaderPath = {};
@@ -424,9 +436,11 @@ void CAnimationTool::Render_Model_Detail()
         }
 
         // 4. 생성이 완료되었으면 관리할 수 있게 해야함. 생성할 때 저장.
-
         m_ActorNames.emplace_back(WstringToString(wstrObjTag));
+
+        Safe_AddRef(pActor);
         m_AnimationActors.emplace(wstrObjTag, pActor);
+        
 
         
     }
@@ -448,21 +462,51 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f); // 아래에 고정?
-    ImVec2 windowSize = ImVec2(600.f, 80.f);
+    ImVec2 windowSize = ImVec2(600.f, 120.f);
     
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
     
     ImGui::Begin("Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
 
-    ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos);
+    if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
+    {
+        // 설정된 TrackPosition을 전달합니다.
+        if (!m_Selected_AnimationTag.empty())
+            m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
+    }
 
-    // 설정된 TrackPosition을 전달합니다.
-    if(!m_Selected_AnimationTag.empty())
-        m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_Selected_AnimationTag, m_fTrackPosition);
+    _bool IsChanged = { false };
+    
+    if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_SPACE))
+    {
+        IsChanged = true;
+        m_IsPlayAnimation = !m_IsPlayAnimation;
+    }
+        
+
+    if (ImGui::Button("Stop"))
+    {
+        IsChanged = true;
+        m_IsPlayAnimation = false;
+    }
+        
+
+    ImGui::SameLine();
+    if (ImGui::Button("Play"))
+    {
+        IsChanged = true;
+        m_IsPlayAnimation = true;
+    }
+
+    if (IsChanged)
+        m_AnimationActors[m_wSelected_AnimActorTag]->Set_PlayAnimation(m_IsPlayAnimation);
 
     if (ImGui::Button("Notify Visible"))
         m_IsVisibleNotify = !m_IsVisibleNotify;
+
+
+    
 
     ImGui::End();
 }
@@ -539,9 +583,14 @@ void CAnimationTool::Free()
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 
-    
+    for (auto& pair : m_AnimationActors)
+        Safe_Release(pair.second);
+    m_AnimationActors.clear();
 
+    m_ModelDatPaths.clear();
+    
     m_ModelNames.clear();
     m_ActorNames.clear();
+    
 }
 
