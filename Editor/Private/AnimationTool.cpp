@@ -33,6 +33,15 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 void CAnimationTool::Render()
 {
     Render_Editor();
+    
+    // Animation Notify가 Visible 상태라면?
+    if (m_IsVisibleNotify)
+    {
+        ASSERT_CRASH(m_pAnimNotifyTool);
+        m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, m_fDuration);
+        m_pAnimNotifyTool->Render();
+    }
+        
 }
 
 void CAnimationTool::Render_Editor()
@@ -358,8 +367,8 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::InputFloat("RotationSpeed", &fRotationPerSec);
 
     static unsigned int iShaderPath = {};
-    static const unsigned int min_val = 0;
-    static const unsigned int max_val = 1;
+    static const unsigned int min_val = static_cast<_uint>(SHADER_ANIMPATH::DEFAULT_NORMAL);
+    static const unsigned int max_val = static_cast<_uint>(SHADER_ANIMPATH::NORMAL_TEXTURE);
     ImGui::SliderScalar("Shader Path", ImGuiDataType_U32, &iShaderPath, &min_val, &max_val);
 
     if (ImGui::Button("Create Instance"))
@@ -439,12 +448,12 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f); // 아래에 고정?
-    ImVec2 windowSize = ImVec2(600.f, 50.f);
-
+    ImVec2 windowSize = ImVec2(600.f, 80.f);
+    
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
-
-    ImGui::Begin("TrackPosition", nullptr, ImGuiWindowFlags_NoCollapse);
+    
+    ImGui::Begin("Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
 
     ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos);
 
@@ -452,13 +461,10 @@ void CAnimationTool::Render_Animation_Detail()
     if(!m_Selected_AnimationTag.empty())
         m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_Selected_AnimationTag, m_fTrackPosition);
 
+    if (ImGui::Button("Notify Visible"))
+        m_IsVisibleNotify = !m_IsVisibleNotify;
+
     ImGui::End();
-
-    // 3. Animation Notify 기능을 추가. 
-
-    ASSERT_CRASH(m_pAnimNotifyTool);
-    m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, m_fDuration);
-    m_pAnimNotifyTool->Render();
 }
 
 

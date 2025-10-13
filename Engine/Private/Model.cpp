@@ -137,7 +137,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 
 	m_pGameInstance->Add_Work([=]() {
 			_char szFilePath[MAX_PATH] = {};
-			strcmp(szFilePath, pFilePath);
+			strcpy_s(szFilePath, pFilePath);
 			ifstream InputFile(szFilePath, ios::binary);
 			if (false == InputFile.is_open())
 			{

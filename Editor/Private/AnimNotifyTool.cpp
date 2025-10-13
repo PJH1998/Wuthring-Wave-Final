@@ -22,9 +22,6 @@ HRESULT CAnimNotifyTool::Initialize(LEVEL eLevel)
         return E_FAIL;
     }
 
-    // Test
-    //m_pGameInstance->Play_Sound(TEXT("Augusta_Attack01"), 0, 0.3f);
-
 	return S_OK;
 }
 

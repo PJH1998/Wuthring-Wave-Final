@@ -19,7 +19,6 @@ public:
 		_float3 vScale = {};
 
 		// 무기도 장착 가능하게?..
-		
 	}ANIMATION_ACTOR_DESC;
 
 private:
@@ -46,9 +45,6 @@ public:
 	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
 	void Set_TrackPosition(const _string& strAnimName, _float fTrackPosition);
 #endif // _DEBUG
-
-
-	
 
 
 private:

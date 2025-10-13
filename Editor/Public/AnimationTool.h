@@ -84,6 +84,7 @@ private:
 	_string m_Selected_AnimationTag = {};
 	_float m_fTrackPosition = {};
 	_float m_fDuration = {};
+	_bool m_IsVisibleNotify = { false };
 	
 private:
 	_float m_fEditorAlpha = { 1.f };
