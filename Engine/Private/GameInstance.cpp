@@ -420,10 +420,12 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
+#ifdef _DEBUG
 void CGameInstance::DrawShape(const Shape* pShape)
 {
 	m_pPhysicsManager->DrawShape(pShape);
 }
+#endif
 #pragma endregion
 
 #pragma region PIPELINE
