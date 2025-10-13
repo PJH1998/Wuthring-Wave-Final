@@ -53,7 +53,7 @@ private:
 
 	_uint m_iShaderPassIndex = {};
 	_float3 m_vScale = {};
-	_float3 m_vRotation= {};
+	_float3 m_vRotation = {};
 	_float3 m_vTranslation = {};
 
 	_float3 m_vNewScale = {};
@@ -62,7 +62,7 @@ private:
 
 	_bool m_IsTest = { false };
 	_bool m_IsLoaded = { false };
-	
+
 	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
 	vector<_string> m_DiffuseTextureName;
 public:

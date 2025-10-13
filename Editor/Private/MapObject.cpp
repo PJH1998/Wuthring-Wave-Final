@@ -6,7 +6,7 @@
 #include "AnimationActor.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CGameObject(pDevice,pContext)
+    :CGameObject(pDevice, pContext)
 {
 }
 
@@ -47,7 +47,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
     m_vTranslation = m_vNewTranslation;
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
-    
+
     //ImGui에서 저장 누를 때 모델 이름별로 이 모델은 어디다 저장할지 선택하게?
 #ifdef _DEBUG
 
@@ -73,16 +73,16 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 #endif
 
 
-//
-//    CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
-//BoxBodyDesc.eShape = SHAPE::BOX;
-//BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
-//BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
-//BoxBodyDesc.eType = EMotionType::Dynamic;
-//BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-//
-//m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
-//m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+    //
+    //    CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+    //BoxBodyDesc.eShape = SHAPE::BOX;
+    //BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
+    //BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
+    //BoxBodyDesc.eType = EMotionType::Dynamic;
+    //BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+    //
+    //m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
+    //m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
 
     return S_OK;
 }
@@ -102,7 +102,7 @@ void CMapObject::Update(_float fTimeDelta)
         //if (m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
         {
             MAP_PICK event(this, fDistance);
-            
+
             m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
         }
     }
@@ -119,7 +119,7 @@ void CMapObject::Render()
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture",i,TEXTURETYPE::DIFFUSE);
+        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
@@ -145,19 +145,19 @@ void CMapObject::Set_ImGuiOption()
         ImGui::InputFloat("U", &m_vNewScale.y, 0.1f, 0.1f); ImGui::SameLine();
         ImGui::InputFloat("L", &m_vNewScale.z, 0.1f, 0.1f);
 
-    }                                                   
+    }
 
     ImGui::Text("Turn_Quaternion");
     {
         //로테이션이 계속 업데이트 되어서 값이 초기화됨.
         ImGui::PushItemWidth(90.0f);
         //_float4 DegreeRotation = m_pRotation[m_iPickedInstance];
-        
+
         //디그리 각도로 0도에서 360도까지.
 
-        ImGui::InputFloat("Yaw",    &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Picth",  &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Roll",   &m_vNewRotation.z, 0.1f, 0.1f);
+        ImGui::InputFloat("Yaw", &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
+        ImGui::InputFloat("Picth", &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
+        ImGui::InputFloat("Roll", &m_vNewRotation.z, 0.1f, 0.1f);
 
     }
 
@@ -173,7 +173,7 @@ void CMapObject::Set_ImGuiOption()
     }
     ImGui::PopItemWidth();
 
-    
+
     if (ImGui::Button("OK"))
     {
         Scale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vNewScale));
@@ -190,7 +190,7 @@ void CMapObject::Set_ImGuiOption()
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
     ImGui::Text("ShaderPass");
 
-    for (_uint i = 0; i<m_pShaderCom->Get_PassCount(); ++i)
+    for (_uint i = 0; i < m_pShaderCom->Get_PassCount(); ++i)
     {
         if (ImGui::Button(m_pShaderCom->Get_PassName(i))) {
             m_iShaderPassIndex = i;
@@ -220,7 +220,7 @@ void CMapObject::Set_ImGuiOption()
     if (ImGui::Button("Set Texture"))
     {
 
-                m_IsTest = !m_IsTest;
+        m_IsTest = !m_IsTest;
     }
 
     _string Test1 = ImGuiFileDialog::Instance()->GetCurrentPath();
@@ -228,14 +228,16 @@ void CMapObject::Set_ImGuiOption()
     {
         IGFD::FileDialogConfig config;
 
-        config.path = "../../Client/Bin/Resource/";
+        //C:\Users\dnheu\Downloads\FModel\Output\Exports\Client\Content\Aki\Scene\Assets\Levels\LiNaXiTa\XunYouTianGuo\Array\Tex
+            //config.path = "../../Client/Bin/Resource/";
+        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/XunYouTianGuo/Array/Tex";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", ".png", config);
 
         if (ImGuiFileDialog::Instance()->Display("Texture File Load")) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
-                _string strFolderPath= ImGuiFileDialog::Instance()->GetCurrentPath();
+                _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 for (const auto& entry : filesystem::directory_iterator(strFolderPath)) {
                     if (entry.is_regular_file()) {
                         if (entry.path().extension() == ".png") {
@@ -262,7 +264,7 @@ void CMapObject::Set_ImGuiOption()
             {
                 if (ImGui::Button(m_DiffuseTextureName[i].c_str()))
                 {
-                    
+
                     //최종 폴더 경로.
                     m_ModelName;
                     ofstream;
@@ -288,13 +290,13 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     lstrcat(Model, Name);
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom),nullptr)))
+        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
         return E_FAIL;
-    
+
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
         TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
         return E_FAIL;
