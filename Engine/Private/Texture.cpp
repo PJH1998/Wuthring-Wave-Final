@@ -81,6 +81,14 @@ HRESULT CTexture::Bind_Shader_Resource(CShader* pShader, const _char* pConstantN
 	return pShader->Bind_Textures(pConstantName, &m_SRVs.front(), m_iNumTextures);
 }
 
+ID3D11ShaderResourceView* CTexture::Get_SRV(_uint iIndex)
+{
+    if (iIndex >= m_SRVs.size())
+    return nullptr;
+
+    return m_SRVs[iIndex];
+}
+
 CTexture* CTexture::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath, _uint iNumTexture)
 {
     CTexture* pInstance = new CTexture(pDevice, pContext);
