@@ -41,6 +41,10 @@ HRESULT CEditorApp::Initialize()
 	// Jolt PhysicsSystem SetUp
 	m_pGameInstance->SetUp_PhysicsSystem();
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		CRigidbody::Create(m_pDevice, m_pContext))))
+		CRASH("Rigidbody");
+
 	Ready_Event();
 	Start_Level();
 
@@ -142,6 +146,7 @@ void CEditorApp::Render()
 void CEditorApp::SetUp_CollisionLayer()
 {
 	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 

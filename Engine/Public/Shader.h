@@ -21,6 +21,13 @@ public:
 	HRESULT					Bind_Texture(const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
 	HRESULT					Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceView** ppSRV, _uint iNumTextures);
 	HRESULT					Bind_Value(const _char* pConstantName, const void* pValue, _uint iLength);
+
+#ifdef _DEBUG
+	//이름 어떻게 갖고오지
+	_uint					Get_PassCount() { return m_iNumPasses; }
+	const char*				Get_PassName(_uint iNumPass);
+#endif
+
 private:
 	ID3DX11Effect*						m_pEffect = { nullptr };
 	vector<ID3D11InputLayout*>	m_InputLayouts;

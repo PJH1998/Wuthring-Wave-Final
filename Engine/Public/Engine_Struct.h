@@ -73,6 +73,7 @@ namespace Engine
 		_float3	vPositions[3];
 		_uint		iType;
 	}CELL;
+
 }
 
 

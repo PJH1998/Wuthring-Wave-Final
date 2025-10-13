@@ -135,6 +135,10 @@ public:
 	void				SetUp_ObjectFilter(_uint iSrc, _uint iDst);
 	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
+	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+#ifdef _DEBUG
+	void				DrawShape(const Shape* pShape);
+#endif
 #pragma endregion
 
 

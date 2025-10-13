@@ -21,6 +21,11 @@ HRESULT CVIBuffer_Instance::Initialize_Prototype()
     return S_OK;
 }
 
+HRESULT CVIBuffer_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
+{
+	return S_OK;;
+}
+
 HRESULT CVIBuffer_Instance::Initialize_Clone(void* pArg)
 {
 	D3D11_SUBRESOURCE_DATA InitialDesc;
@@ -30,7 +35,7 @@ HRESULT CVIBuffer_Instance::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	return S_OK;
-}
+}	
 
 HRESULT CVIBuffer_Instance::Bind_Resources()
 {

@@ -14,6 +14,7 @@ public:
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		EMotionType	eType;
 		_uint				iLayer;
+		_bool				isCharacter = { false };
 	}RIGIDBODY_DESC;
 
 	typedef struct tagSphereBodyDesc : public RIGIDBODY_DESC {
@@ -46,6 +47,7 @@ private:
 public:
 	virtual		HRESULT			Initialize_Prototype()			override;
 	virtual		HRESULT			Initialize_Clone(void* pArg)	override;
+	virtual		HRESULT			Render() override;
 
 	void							Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta);
 	void							Sync_Rigidbody(class CTransform* pTransform);
@@ -57,6 +59,7 @@ public:
 	void							Force(const _float3& vForce) { m_pBodyInterface->AddForce(m_BodyID, LoadVec3(vForce)); }
 	void							Impulse(const _float3& vForce) { m_pBodyInterface->AddImpulse(m_BodyID, LoadVec3(vForce)); }
 
+	_bool							IsLand(_float3* pNormalOut = nullptr);
 
 private:
 	class CGameObject*		m_pOwner = { nullptr };
@@ -64,21 +67,27 @@ private:
 	BodyID						m_BodyID;
 	BodyInterface*				m_pBodyInterface = { nullptr };
 
+	Character*					m_pCharacter = { nullptr };
+	//Ref<Character>			m_pCharacter = { nullptr };
+
 private:
 	Vec3 LoadVec3(const _float3& vVector){ return Vec3(vVector.x, vVector.y, vVector.z); }
 	Vec3 LoadVec3(const _fvector& vVector){ return Vec3(vVector.m128_f32[0], vVector.m128_f32[1], vVector.m128_f32[2]); }
 	Quat LoadQuat(const _float4& vQuat){ return Quat(vQuat.x, vQuat.y, vQuat.z, vQuat.w); }
 	Quat LoadQuat(const _fvector& vQuat){ return Quat(vQuat.m128_f32[0], vQuat.m128_f32[1], vQuat.m128_f32[2], vQuat.m128_f32[3]); }
 	
-	const JPH::Array<Vec3>				ConvertToArrayVec3(class CModel* pModel);
+	const JPH::Array<Vec3>					ConvertToArrayVec3(class CModel* pModel);
 	const JPH::Array<Float3>				ConvertToArrayFloat3(class CModel* pModel, _uint iIndex);
 	const JPH::Array<IndexedTriangle>	ConvertToArrayTri(class CModel* pModel, _uint iIndex);
 
 private:
 	void							Make_MeshShape(void* pArg);
 
+	void							Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape);
+	void							Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape);
+
 public:
-	static		CRigidbody*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CRigidbody*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CComponent*	Clone(void* pArg) override;
 	virtual		void				Free() override;
 };
