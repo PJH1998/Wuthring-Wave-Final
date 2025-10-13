@@ -19,7 +19,7 @@ HRESULT CLevel_Map::Initialize()
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
-    ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
+    //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
     return S_OK;
 }
 
@@ -232,6 +232,7 @@ void CLevel_Map::Menu_Save_Load()
                 //LOD를 카메라 거리 기반으로 하지 말고, 모델의 최소 최대 픽셀로 큐브를 만들었을 때 그 큐브가
                 //현재 화면을 기준으로 픽셀을 얼마나 많이 차지하고 있나로 LOD 단계 구별하기. => 스크린 픽셀 사이즈 기법
                 //LOD 모델은 상태머신을 갈아끼우듯 LOD 단계에 따라 바꾸기. => 어차피 모델의 크기는 변하지 않음. 디테일이 달라짐.
+                m_LoadMenu = !m_LoadMenu;
             }
         }
     }
