@@ -131,32 +131,26 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	m_eType = eType;
 	XMStoreFloat4x4(&m_PreTransformMatrix, PreTransformMatrix);
 
-	m_pGameInstance->Add_Work([=]() {
-			_char szFilePath[MAX_PATH] = {};
-			strcmp(szFilePath, pFilePath);
-			ifstream InputFile(szFilePath, ios::binary);
-			if (false == InputFile.is_open())
-			{
-				MSG_BOX("Failed Open : Model");
-				return E_FAIL;
-			}
+	ifstream InputFile(pFilePath, ios::binary);
+	if (false == InputFile.is_open())
+	{
+		MSG_BOX("Failed Open : Model");
+		return E_FAIL;
+	}
 
-			if (MODELTYPE::ANIM == m_eType)
-			{
-				if (FAILED(Ready_Bone(InputFile, -1)))
-					return E_FAIL;
+	if (MODELTYPE::ANIM == m_eType)
+	{
+		if (FAILED(Ready_Bone(InputFile, -1)))
+			return E_FAIL;
 
-				if (FAILED(Ready_Animation(szFilePath)))
-					return E_FAIL;
-			}
-			if (FAILED(Ready_Mesh(InputFile)))
-				return E_FAIL;
-			if (FAILED(Ready_Material(szFilePath)))
-				return E_FAIL;
-			InputFile.close();
-
-			cout << "Model Load End" << endl;
-		});
+		if (FAILED(Ready_Animation(pFilePath)))
+			return E_FAIL;
+	}
+	if (FAILED(Ready_Mesh(InputFile)))
+		return E_FAIL;
+	if (FAILED(Ready_Material(pFilePath)))
+		return E_FAIL;
+	InputFile.close();
 
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
