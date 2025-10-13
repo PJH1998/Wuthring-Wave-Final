@@ -38,8 +38,9 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
-    if (true == m_isFinished || true == m_pLoader->IsFinished())
+    if (true == m_isFinished || true == m_pGameInstance->IsWorkFinish())
     {
+		cout << "Loading End" << endl;
         CHANGE_LEVEL_EVENT event{ m_eNextLevel, false };
         m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
     }
@@ -75,31 +76,13 @@ HRESULT CLevel_Loading::Ready_LoadingThread()
 
 	ASSERT_CRASH(m_pLoader);
 
+	this_thread::sleep_for(chrono::seconds(1));
+
     return S_OK;
 }
 
 HRESULT CLevel_Loading::Ready_GameObject()
 {
-    //// BackGroud
-    //CUIObject::UIOBJECT_DESC UIObjectDesc = {};
-    //UIObjectDesc.fX = g_iWinSizeX >> 1;
-    //UIObjectDesc.fY = g_iWinSizeY >> 1;
-    //UIObjectDesc.fSizeX = g_iWinSizeX;
-    //UIObjectDesc.fSizeY = g_iWinSizeY;
-    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOADING), TEXT("Prototype_GameObject_BackGround"),
-    //    ENUM_CLASS(LEVEL::LOADING), TEXT("Layer_BackGround"), &UIObjectDesc)))
-    //    return E_FAIL;
-	//
-    //// LoadingBar
-    //CUIObject::UIOBJECT_DESC LoadingBarDesc = {};
-    //LoadingBarDesc.fX = g_iWinSizeX >> 1;
-    //LoadingBarDesc.fY = g_iWinSizeY - 50;
-    //LoadingBarDesc.fSizeX = g_iWinSizeX - 20.f;
-    //LoadingBarDesc.fSizeY = 20.f;
-    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOADING), TEXT("Prototype_GameObject_LoadingBar"),
-    //    ENUM_CLASS(LEVEL::LOADING), TEXT("Layer_BackGround"), &LoadingBarDesc)))
-    //    return E_FAIL;
-
     return S_OK;
 }
 

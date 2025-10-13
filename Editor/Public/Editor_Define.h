@@ -17,13 +17,10 @@ namespace Editor
 	const unsigned int		g_iWinSizeX = 1920;
 	const unsigned int		g_iWinSizeY = 1080;
 	const unsigned int		g_iFrame = 250;
-
-
-    
 }
 
 
 
 extern HWND			g_hWnd;
-extern HINSTANCE	g_hInst;
+extern HINSTANCE		g_hInst;
 using namespace Editor;

@@ -190,6 +190,9 @@
     <Filter Include="01. Utility\97. Physics\ContactListener">
       <UniqueIdentifier>{0109138b-fd29-442a-a5e7-51304fdc506e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\03. GameObject\UI">
+      <UniqueIdentifier>{6c4f0a80-08f5-4ff9-9569-6828dccffafc}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance">
       <UniqueIdentifier>{afafc0ea-df60-420a-8440-f88be064ca29}</UniqueIdentifier>
     </Filter>
@@ -198,6 +201,9 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\Model_Instance\Mesh">
       <UniqueIdentifier>{28741f9e-a3d0-4e7d-9f7b-a0fd4621de24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\05. Pooling\Thread">
+      <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -390,6 +396,9 @@
     <ClInclude Include="..\Public\ContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UIObject.h">
+      <Filter>01. Utility\03. GameObject\UI</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClInclude>
@@ -568,6 +577,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UIObject.cpp">
+      <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
