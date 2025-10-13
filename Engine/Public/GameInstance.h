@@ -77,6 +77,8 @@ public:
 #pragma region POOLING_MANAGER
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
+	void			Add_Work(function<void()> Work);
+	_bool			IsWorkFinish();
 #pragma endregion
 
 #pragma region TARGET_MANAGER
@@ -97,8 +99,6 @@ public:
 #pragma region RENDERER
 public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	HRESULT		Add_LUT(const _wstring& strLUTTag, const _tchar* pFilePath);
-	HRESULT		Change_LUT(const _wstring& strLUTTag);
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 #endif

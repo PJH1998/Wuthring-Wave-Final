@@ -32,10 +32,12 @@ void CDummy::Priority_Update(_float fTimeDelta)
 
 void CDummy::Update(_float fTimeDelta)
 {
+	m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
 {
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CDummy::Render()
@@ -48,6 +50,7 @@ void CDummy::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		m_pShaderCom->Begin(0);
 		
 		m_pModelCom->Render(i);
@@ -57,22 +60,22 @@ void CDummy::Render()
 void CDummy::Ready_Component()
 {
 	// Com_Shader
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"), 
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"), 
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
 
 	// Com_Model
-	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Dummy"),
+	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Augusta"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr);
 
 	// Com_Rigidbody
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	RigidbodyDesc.vPos = _float3(0.f, 0.f, 0.f);
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.pModel = m_pModelCom;
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	//RigidbodyDesc.eShape = SHAPE::MESH;
+	//RigidbodyDesc.vPos = _float3(0.f, 0.f, 0.f);
+	//RigidbodyDesc.eType = EMotionType::Static;
+	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	//RigidbodyDesc.pModel = m_pModelCom;
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 }
 
 CDummy* CDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
