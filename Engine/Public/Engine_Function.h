@@ -1,6 +1,8 @@
 #ifndef Engine_Function_h__
 #define Engine_Function_h__
 
+#include <string>
+
 #include "Engine_Typedef.h"
 
 namespace Engine
@@ -55,6 +57,35 @@ namespace Engine
 		}
 
 		return dwRefCnt;
+	}
+
+	_wstring StringToWString(const _string& str)
+	{
+		_int iLength = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
+		if (0 == iLength)
+			return L"";
+
+		_wstring wstr(iLength, 0);
+		MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], iLength);
+
+		if (!wstr.empty() && wstr.back() == L'\0')
+			wstr.pop_back();
+		return wstr;
+	}
+
+	_string WStringToString(const _wstring& wstr)
+	{
+		if (wstr.empty())
+			return "";
+
+		_int iLength = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+		if (0 == iLength)
+			return "";
+
+		_string str(iLength - 1, 0);
+		WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], iLength, nullptr, nullptr);
+
+		return str;
 	}
 }
 
