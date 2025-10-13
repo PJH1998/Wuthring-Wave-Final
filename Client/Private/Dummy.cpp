@@ -22,6 +22,7 @@ HRESULT CDummy::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	Ready_Component();
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 
 	return S_OK;
 }
@@ -32,7 +33,7 @@ void CDummy::Priority_Update(_float fTimeDelta)
 
 void CDummy::Update(_float fTimeDelta)
 {
-	m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
+	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
@@ -50,32 +51,44 @@ void CDummy::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+		//m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		m_pShaderCom->Begin(0);
 		
 		m_pModelCom->Render(i);
 	}
+
+#ifdef _DEBUG
+	//m_pRigidbodyCom->Render();
+#endif
 }
 
 void CDummy::Ready_Component()
 {
 	// Com_Shader
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"), 
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"), 
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
 
 	// Com_Model
-	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Augusta"),
+	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Wolf"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr);
 
 	// Com_Rigidbody
 	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 	//RigidbodyDesc.eShape = SHAPE::MESH;
-	//RigidbodyDesc.vPos = _float3(0.f, 0.f, 0.f);
+	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	//RigidbodyDesc.eType = EMotionType::Static;
 	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 	//RigidbodyDesc.pModel = m_pModelCom;
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	CRigidbody::CAPSULEBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eShape = SHAPE::CAPSULE;
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.fHeight = 10.f;
+	RigidbodyDesc.fRadius = 20.f;
+	RigidbodyDesc.isCharacter = true;
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 }
 
 CDummy* CDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

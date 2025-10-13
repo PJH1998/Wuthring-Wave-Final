@@ -13,6 +13,8 @@ public:
 	virtual ~CDebugRender();
 
 public:
+	void					Begin();
+	void					End();
 	virtual		void		DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor) override;
 	virtual		void		DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight) override;
 

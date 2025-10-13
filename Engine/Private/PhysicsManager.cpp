@@ -22,6 +22,11 @@ Body* CPhysicsManager::Register_Body(const BodyCreationSettings& BodySetting, Bo
 	return body;
 }
 
+Character* CPhysicsManager::Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+{
+	return new Character(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);
@@ -56,7 +61,7 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	ASSERT_CRASH(m_pDebugRenderer);
 
 	m_DrawSetting.mDrawShape = true;
-	m_DrawSetting.mDrawShapeWireframe = true;
+	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
 	return S_OK;
@@ -70,7 +75,15 @@ void CPhysicsManager::Update(_float fTimeDelta)
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
+	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
 	m_pPhysicsSystem->DrawBodies(m_DrawSetting, m_pDebugRenderer);
+	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
+}
+void CPhysicsManager::DrawShape(const Shape* pShape)
+{
+	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
+	pShape->Draw(m_pDebugRenderer, RMat44::sIdentity(), Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
+	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
 #endif
 

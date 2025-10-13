@@ -12,15 +12,15 @@ HRESULT CLevel_Logo::Initialize()
 {
 	// Rigidbody Sample
 
-	//CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
-	//BoxBodyDesc.eShape = SHAPE::BOX;
-	//BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
-	//BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
-	//BoxBodyDesc.eType = EMotionType::Dynamic;
-	//BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//
-	//m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
-	//m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+	BoxBodyDesc.eShape = SHAPE::BOX;
+	BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
+	BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
+	BoxBodyDesc.eType = EMotionType::Dynamic;
+	BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	
+	m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
+	m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
 	//
 	//CRigidbody::BOXBODY_DESC BoxBodyDesc2 = {};
 	//BoxBodyDesc2.eShape = SHAPE::BOX;
@@ -87,7 +87,7 @@ void CLevel_Logo::Free()
 {
     __super::Free();
 
-	//Safe_Release(m_pRigidbody1);
+	Safe_Release(m_pRigidbody1);
 	//Safe_Release(m_pRigidbody2);
 	//Safe_Release(m_pRigidbody3);
 }

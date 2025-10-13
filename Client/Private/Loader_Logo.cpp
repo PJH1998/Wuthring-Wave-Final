@@ -33,6 +33,10 @@ HRESULT CLoader_Logo::Load_Model()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreMatrix, "../Bin/Resource/Player/Augusta/Aogusta.dat"))))
 		return E_FAIL;
 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Wolf"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreMatrix, "../Bin/Resource/Dummy/Wolf/Wolf.dat"))))
+		return E_FAIL;
+
 	cout << "Model" << endl;
 
     return S_OK;
