@@ -175,6 +175,7 @@ void CLevel_Map::Menu_Save_Load()
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 _string ModelPath;
                 ModelPath+= config.path;
+                
                 _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
                 ModelPath+= ImGuiFileDialog::Instance()->GetCurrentFileName();
 

@@ -38,6 +38,7 @@ private:
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
 
+	
 
 	_bool m_LoadMenu = { false };
 public:

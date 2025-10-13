@@ -59,6 +59,12 @@ private:
 	_float3 m_vNewScale = {};
 	_float3 m_vNewRotation = {};
 	_float3 m_vNewTranslation = {};
+
+	_bool m_IsTest = { false };
+	_bool m_IsLoaded = { false };
+	
+	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
+	vector<_string> m_DiffuseTextureName;
 public:
 	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

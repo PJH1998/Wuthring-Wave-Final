@@ -15,6 +15,7 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions },
     m_Indices { Prototype.m_Indices }
+    ,m_Cube{Prototype.m_Cube}
 {
 }
 
@@ -298,6 +299,9 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
     vCorner[RBF] = _float3(MaxPos.x, MinPos.y, MaxPos.z);
     
     vCorner[LBF] = _float3(MinPos.x, MinPos.y, MaxPos.z);
+
+    m_Cube.Center = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
+    m_Cube.Extents = _float3((MaxPos.x - m_Cube.Center.x), (MaxPos.y - m_Cube.Center.y) , (MaxPos.z - m_Cube.Center.z));
 
 	m_iVertexStride = sizeof(VTXMESH);
 	m_iNumVertexBuffers = 1;

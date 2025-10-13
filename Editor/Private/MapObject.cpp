@@ -73,8 +73,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 #endif
 
 
-
-    //CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+//
+//    CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
 //BoxBodyDesc.eShape = SHAPE::BOX;
 //BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
 //BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
@@ -83,7 +83,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 //
 //m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
 //m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
-//
+
     return S_OK;
 }
 
@@ -217,6 +217,62 @@ void CMapObject::Set_ImGuiOption()
     }
     ImGui::EndChildFrame();
 
+    if (ImGui::Button("Set Texture"))
+    {
+
+                m_IsTest = !m_IsTest;
+    }
+
+    _string Test1 = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (m_IsTest)
+    {
+        IGFD::FileDialogConfig config;
+
+        config.path = "../../Client/Bin/Resource/";
+        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+        ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", ".png", config);
+
+        if (ImGuiFileDialog::Instance()->Display("Texture File Load")) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                _string strFolderPath= ImGuiFileDialog::Instance()->GetCurrentPath();
+                for (const auto& entry : filesystem::directory_iterator(strFolderPath)) {
+                    if (entry.is_regular_file()) {
+                        if (entry.path().extension() == ".png") {
+                            {
+                                string fileName = entry.path().filename().string();
+                                m_DiffuseTextureName.push_back(fileName);
+                            }
+                        }
+                    }
+                }
+                m_IsLoaded = true;
+                m_IsTest = !m_IsTest;
+            }
+        }
+    }
+
+    if (m_IsLoaded)
+    {
+        ImGui::Begin("Texture Change");
+
+        if (ImGui::BeginCombo("Diffuse", "?"))
+        {
+            for (_uint i = 0; i < m_DiffuseTextureName.size(); ++i)
+            {
+                if (ImGui::Button(m_DiffuseTextureName[i].c_str()))
+                {
+                    
+                    //최종 폴더 경로.
+                    m_ModelName;
+                    ofstream;
+                    json MatJson;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::End();
+    }
     //LOD가 총 4단계로 나뉘어져있는데 이거 어떻게 할 건지 생각.
     //제일 간단한 방법 => 쿼드트리에서 크기에 비례해서 렌더할 때 모델 갈아끼기.
     //=> 인스턴싱한 메쉬들은 각 매트릭스마다 비교해서 메쉬 뭐 쓸지 결정해야할듯?
@@ -255,15 +311,15 @@ HRESULT CMapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    //RigidbodyDesc.eShape = SHAPE::MESH;
-    //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    //RigidbodyDesc.eType = EMotionType::Static;
-    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    //RigidbodyDesc.pModel = m_pModelCom;
+    CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    RigidbodyDesc.eShape = SHAPE::MESH;
+    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    RigidbodyDesc.eType = EMotionType::Static;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+    RigidbodyDesc.pModel = m_pModelCom;
 
-    //Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-    //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
 
     return S_OK;
