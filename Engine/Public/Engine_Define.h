@@ -43,6 +43,7 @@ using json = nlohmann::json;
 #include "Jolt/Physics/Body/BodyManager.h"
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
+#include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Core/Factory.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Core/JobSystemSingleThreaded.h"

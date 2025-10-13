@@ -39,17 +39,20 @@ public:
 
 	// Body 持失
 	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
+	// Character 持失
+	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);
 #ifdef _DEBUG
 	void				Render();
+	void				DrawShape(const Shape* pShape);
 #endif
 
 
 private:
-	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
 	TempAllocator*		m_pAllocator = { nullptr };

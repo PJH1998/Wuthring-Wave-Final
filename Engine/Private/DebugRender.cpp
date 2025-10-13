@@ -37,6 +37,23 @@ CDebugRender::~CDebugRender()
 	Safe_Release(m_pGameInstance);
 }
 
+void CDebugRender::Begin()
+{
+	m_pEffect->SetWorld(XMMatrixIdentity());
+	m_pEffect->SetView(m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW));
+	m_pEffect->SetProjection(m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
+
+	m_pContext->IASetInputLayout(m_pInputLayout);
+	m_pEffect->Apply(m_pContext);
+
+	m_pBatch->Begin();
+}
+
+void CDebugRender::End()
+{
+	m_pBatch->End();
+}
+
 void CDebugRender::DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor)
 {
 	Float3 FromPos{}, ToPos{};
@@ -46,21 +63,13 @@ void CDebugRender::DrawLine(RVec3Arg inFrom, RVec3Arg inTo, ColorArg inColor)
 	memcpy(&vFromPos, &FromPos, sizeof(_float3));
 	memcpy(&vToPos, &ToPos, sizeof(_float3));
 
+	//inColor = Color::sYellow;
 	_float4 vColor = _float4(inColor.r, inColor.g, inColor.b, inColor.a);
 
-	m_pEffect->SetWorld(XMMatrixIdentity());
-	m_pEffect->SetView(m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW));
-	m_pEffect->SetProjection(m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
-
-	m_pContext->IASetInputLayout(m_pInputLayout);
-	m_pEffect->Apply(m_pContext);
-
-	m_pBatch->Begin();
 	m_pBatch->DrawLine(
 		VertexPositionColor(vFromPos, vColor),
 		VertexPositionColor(vToPos, vColor)
 	);
-	m_pBatch->End();
 }
 
 void CDebugRender::DrawText3D(RVec3Arg inPosition, const string_view& inString, ColorArg inColor, float inHeight)
