@@ -7,6 +7,7 @@
 #include "Model.h"
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Cube.h"
+#include "VIBuffer_Point_Instance.h"
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"

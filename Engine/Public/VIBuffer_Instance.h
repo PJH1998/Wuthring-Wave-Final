@@ -21,10 +21,11 @@ protected:
 
 public:
 	virtual HRESULT		Initialize_Prototype();
-	virtual HRESULT		Initialize_Clone(void* pArg);
-	virtual HRESULT		Render();
+	virtual HRESULT		Initialize_Prototype(const INSTANCE_DESC* pDesc);
+	virtual HRESULT		Initialize_Clone(void* pArg) override;
+	virtual HRESULT		Render() override;
 
-	virtual HRESULT		Bind_Resources();
+	virtual HRESULT		Bind_Resources() override;
 
 protected:
 	ID3D11Buffer* m_pVBInstance = { nullptr };

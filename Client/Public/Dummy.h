@@ -31,8 +31,8 @@ public:
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
-	CModel*					m_pModelCom = { nullptr };
-	CRigidbody*				m_pRigidbodyCom = { nullptr };
+	CModel*						m_pModelCom = { nullptr };
+	CRigidbody*					m_pRigidbodyCom = { nullptr };
 
 private:
 	void						Ready_Component();
