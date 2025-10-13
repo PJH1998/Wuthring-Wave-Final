@@ -5,6 +5,7 @@
 #include "Custom_UI.h"
 #include "FreeCamera.h"
 #include "GameObject.h"
+#include "Animator_UI.h"
 
 
 
@@ -38,19 +39,24 @@ HRESULT CLevel_UI::Initialize()
     // ==============================
 
     // Custom UI
-    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_UI_Custom",
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI",
         CCustom_UI::Create(m_pDevice, m_pContext))))
-        CRASH(Failed to add Custom_UI prototype.);
-
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Custom_UI Load Failed. The Custom_UI may have already been loaded.\n");
+    
     // Shader
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The shader may have already been loaded.\n");
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
 
     // VIBuffer_Rect
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
         CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
-        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The vibuffer may have already been loaded.\n");
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+
+    // Animator_UI
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
+        CAnimator_UI::Create(m_pDevice, m_pContext))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
 
 
 
@@ -122,10 +128,11 @@ void CLevel_UI::Update(_float fTimeDelta)
     m_pPreObj = m_pCurObj;
 
     Update_Picking();
-    Update_LoadWindow();
+    Update_MenuWindow();
 
     Update_Hierarchy();
     
+    Update_SaveLoad();
     Update_Inspector();
     Update_AnimEditor();
 
@@ -141,7 +148,7 @@ void CLevel_UI::Update_Picking()
 
 }
 
-void CLevel_UI::Update_LoadWindow()
+void CLevel_UI::Update_MenuWindow()
 {
     // ============================== 
     // 이미지 로드해서 UI객체로 추가하는 창
@@ -149,6 +156,8 @@ void CLevel_UI::Update_LoadWindow()
 
 
     ImGui::Begin("Editor");
+
+#pragma region Load Image
 
     // ===== [Button] Load Image =====
     if (ImGui::Button("Load Image..", ImVec2(100.f, 50.f)))
@@ -193,7 +202,7 @@ void CLevel_UI::Update_LoadWindow()
             tCustomUIDesc.strFileName = strFileName;
 
             // 생성 후 로컬 컨테이너에 추가
-            CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
+            CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
             if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
                 CRASH(Failed to add Custom_UI gameobject.);
 
@@ -207,6 +216,20 @@ void CLevel_UI::Update_LoadWindow()
         ImGuiFileDialog::Instance()->Close();
     }
     // End ==============================
+
+#pragma endregion
+
+#pragma region [Window Toggle] Save / Load
+
+    // ===== [Button] Save / Load =====
+    if (ImGui::Button("Save / Load", ImVec2(100.f, 50.f)))
+    {
+        m_isOn_SaveLoad = !m_isOn_SaveLoad;
+    }
+
+#pragma endregion
+
+
 
     ImGui::End();
 }
@@ -233,6 +256,121 @@ void CLevel_UI::Update_Hierarchy()
 
 
     ImGui::End();
+}
+
+void CLevel_UI::Update_SaveLoad()
+{
+    if (!m_isOn_SaveLoad)
+        return;
+    
+    // ksta : 이거 이 창에서 분리해야 할 듯
+    ImGui::Begin("Save / Load");
+
+
+    const ImVec2 buttonSize = { 100.f, 20.f };
+
+    ImGui::Text("..Current UI Info");
+    if (ImGui::Button("Save##InfoSave", buttonSize) &&
+        m_pCurObj)
+    {
+        UI_INFO_DESC tCurUIInfoDesc = {};
+
+        tCurUIInfoDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+        tCurUIInfoDesc.vPos = m_vCurObjPos;
+        tCurUIInfoDesc.vRot = m_vCurObjRot;
+        tCurUIInfoDesc.vSca = m_vCurObjSca;
+
+        json jUIInfoData = {};
+        to_json(jUIInfoData, tCurUIInfoDesc);
+
+        ofstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json"); // 나중에 여럿 저장 되도록..
+        file << jUIInfoData.dump(4);
+        file.close();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load##InfoLoad", buttonSize))
+    {
+        CCustom_UI::CUSTOM_UI_DESC tLoadUIInfoDesc = {};
+
+        // Output 용이라서 vPos vRot 이런게 무의미하게 날아가는듯
+        // 이걸 그냥 Transform에 다이렉트로?
+        ifstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json");
+        json jUIInfoData = {};
+        if (file.is_open()) {
+            file >> jUIInfoData;
+        }
+
+        tLoadUIInfoDesc.iNumFiles        = jUIInfoData["tUIDesc"]["iNumFiles"];
+        _string strFileName = jUIInfoData["tUIDesc"]["strFileName"].get<string>();
+        tLoadUIInfoDesc.strFileName      = STR2WSTR(strFileName);
+        _string strFilePath = jUIInfoData["tUIDesc"]["strFilePath"].get<string>();
+        tLoadUIInfoDesc.strFilePath      = STR2WSTR(strFilePath);
+
+        _float3 vPos = {jUIInfoData["vPos"][0], jUIInfoData["vPos"][1], jUIInfoData["vPos"][2]};    m_vCurObjPos = vPos;
+        _float3 vRot = {jUIInfoData["vRot"][0], jUIInfoData["vRot"][1], jUIInfoData["vRot"][2]};    m_vCurObjRot = vRot;
+        _float3 vSca = {jUIInfoData["vSca"][0], jUIInfoData["vSca"][1], jUIInfoData["vSca"][2]};    m_vCurObjSca = vSca;
+
+        CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
+        if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
+            CRASH(Failed to add Custom_UI gameobject.);
+
+        HIERARCHY_OBJ_DESC tObjDesc = { };
+        tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
+        tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.strFileName);
+
+        _matrix matScale = XMMatrixScaling(vSca.x, vSca.y, vSca.z);
+        _matrix matRotX = XMMatrixRotationX(TO_RAD(vRot.x));
+        _matrix matRotY = XMMatrixRotationY(TO_RAD(vRot.y));
+        _matrix matRotZ = XMMatrixRotationZ(TO_RAD(vRot.z));
+        _matrix matRot = matRotZ * matRotY * matRotX;
+        _matrix matTrans = XMMatrixTranslation(vPos.x, vPos.y, vPos.z);
+
+        _matrix matWorld = matScale * matRot * matTrans;
+        static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+                        
+
+        m_vecCustomUIs.push_back(tObjDesc);
+        m_pCurObj = pCustomObj;
+    }
+
+    ImGui::Separator();
+
+    ImGui::Text("..Current Anim");
+
+    _char szAnimName[256] = {};
+    ImGui::Text("[Save] Anim Name");
+    ImGui::InputText("##Anim Name", szAnimName, 256);
+
+    if (ImGui::Button("Save##AnimSave", buttonSize) &&
+        m_pCurObj)
+    {
+        UI_ANIM_DESC tAnimDesc = {};
+
+        tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+        _string strAnimName = _string(szAnimName);
+        tAnimDesc.strAnimName = STR2WSTR(strAnimName);
+        tAnimDesc.iLerpType = m_iLerpType;
+        tAnimDesc.isLoop = m_isAnimLoop;
+
+        for (auto& keyframeDesc : m_vecUIKeyFrameDescs)
+            tAnimDesc.vecKeyFrames.push_back(keyframeDesc);
+
+        json jUIAnimData = {};
+        to_json(jUIAnimData, tAnimDesc);
+
+        ofstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIAnim.json"); // 나중에 여럿 저장 되도록..
+        file << jUIAnimData.dump(4);
+        file.close();
+
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load##AnimLoad", buttonSize))
+    {
+
+    }
+
+    ImGui::End();
+
 }
 
 void CLevel_UI::Update_Inspector()
@@ -346,94 +484,6 @@ void CLevel_UI::Update_Inspector()
 
 #pragma endregion
 
-
-#pragma region [Other] Value I/O
-
-    // ksta : 이거 이 창에서 분리해야 할 듯
-    if (ImGui::CollapsingHeader("Save / Load"))
-    {
-        const ImVec2 buttonSize = { 100.f, 20.f };
-
-        ImGui::Text("..Current UI Info");
-        if (ImGui::Button("Save##InfoSave", buttonSize))
-        {
-            UI_InfoOutputDesc tCurUIInfoDesc = {};
-
-            tCurUIInfoDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
-            tCurUIInfoDesc.vPos = m_vCurObjPos;
-            tCurUIInfoDesc.vRot = m_vCurObjRot;
-            tCurUIInfoDesc.vSca = m_vCurObjSca;
-
-            json jUIInfoData = {};
-            to_json(jUIInfoData, tCurUIInfoDesc);
-
-            ofstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json"); // 나중에 여럿 저장 되도록..
-            file << jUIInfoData.dump(4);
-            file.close();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load##InfoLoad", buttonSize))
-        {
-            CCustom_UI::CUSTOM_UI_DESC tLoadUIInfoDesc = {};
-
-            // Output 용이라서 vPos vRot 이런게 무의미하게 날아가는듯
-            // 이걸 그냥 Transform에 다이렉트로?
-            ifstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json");
-            json jUIInfoData = {};
-            if (file.is_open()) {
-                file >> jUIInfoData;
-            }
-
-            tLoadUIInfoDesc.iNumFiles        = jUIInfoData["tUIDesc"]["iNumFiles"];
-            _string strFileName = jUIInfoData["tUIDesc"]["strFileName"].get<string>();
-            tLoadUIInfoDesc.strFileName      = STR2WSTR(strFileName);
-            _string strFilePath = jUIInfoData["tUIDesc"]["strFilePath"].get<string>();
-            tLoadUIInfoDesc.strFilePath      = STR2WSTR(strFilePath);
-
-            _float3 vPos = {jUIInfoData["vPos"][0], jUIInfoData["vPos"][1], jUIInfoData["vPos"][2]};    m_vCurObjPos = vPos;
-            _float3 vRot = {jUIInfoData["vRot"][0], jUIInfoData["vRot"][1], jUIInfoData["vRot"][2]};    m_vCurObjRot = vRot;
-            _float3 vSca = {jUIInfoData["vSca"][0], jUIInfoData["vSca"][1], jUIInfoData["vSca"][2]};    m_vCurObjSca = vSca;
-
-            CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_UI_Custom", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
-            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
-                CRASH(Failed to add Custom_UI gameobject.);
-
-            HIERARCHY_OBJ_DESC tObjDesc = { };
-            tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-            tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.strFileName);
-
-            _matrix matScale = XMMatrixScaling(vSca.x, vSca.y, vSca.z);
-            _matrix matRotX = XMMatrixRotationX(TO_RAD(vRot.x));
-            _matrix matRotY = XMMatrixRotationY(TO_RAD(vRot.y));
-            _matrix matRotZ = XMMatrixRotationZ(TO_RAD(vRot.z));
-            _matrix matRot = matRotZ * matRotY * matRotX;
-            _matrix matTrans = XMMatrixTranslation(vPos.x, vPos.y, vPos.z);
-
-            _matrix matWorld = matScale * matRot * matTrans;
-            static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
-                        
-
-            m_vecCustomUIs.push_back(tObjDesc);
-            m_pCurObj = pCustomObj;
-        }
-
-        ImGui::Separator();
-
-        ImGui::Text("..Current Anim");
-        if (ImGui::Button("Save##AnimSave", buttonSize))
-        {
-
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load##AnimLoad", buttonSize))
-        {
-
-        }
-
-    }
-
-#pragma endregion
-
     
     ImGui::End();
 
@@ -447,13 +497,122 @@ void CLevel_UI::Update_AnimEditor()
         !m_isOn_AnimEdit)
         return;
 
+    static _int iKeyFrame = 0;
+    static _int iRecentKeyFrame = 0;
+    static _int iTexIndex = 0;
+    static _int iMaxTexIndex = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().iNumFiles;
+    static _float fAlpha = 0.f;
 
+    static _int iSelected = -1;
+
+    UI_ANIM_KEYFRAME_DESC tKeyFrameDesc = {};
 
     ImGui::Begin("Animation Editor");
 
+    if (ImGui::CollapsingHeader("Add Menu"))
+    {
+        ImGui::Text("Keyframe Index");
+        ImGui::InputInt("##KeyFrame Index", &iKeyFrame);
+        if          (m_vecUIKeyFrameDescs.empty())  iKeyFrame = 0;
+        else if     (m_pSelectedKeyFrameDesc)       {}
+        else if     (iRecentKeyFrame >= iKeyFrame)  iKeyFrame = iRecentKeyFrame + 1;
 
+        ImGui::Separator();
 
+        ImGui::Text("Texture Index (NumTex : %d)", iMaxTexIndex);
+        ImGui::InputInt("##Texture Index", &iTexIndex);
+        if          (iTexIndex < 0)                 iTexIndex = 0;
+        else if     (m_pSelectedKeyFrameDesc)       {}
+        else if     (iMaxTexIndex <= iTexIndex)     iTexIndex = iMaxTexIndex - 1;
 
+        ImGui::Separator();
+
+        ImGui::Text("Texture Alpha");
+        ImGui::DragFloat("##Texture Alpha", &fAlpha, 0.001f, 0.f, 1.f);
+
+        ImGui::Separator();
+
+        ImGui::Text("Lerp Type");
+        if      (m_iLerpType == 0)
+        {
+            if (ImGui::Button("Linear")) { m_iLerpType = 1; } // To Cubic
+        }
+        else if (m_iLerpType == 1)
+        {
+            if (ImGui::Button("Cubic")) { m_iLerpType = 0; } // To Linear
+        }
+            
+        ImGui::Separator();
+
+        ImGui::Checkbox("Loop", &m_isAnimLoop);
+
+        ImGui::Separator();
+
+        if (m_pSelectedKeyFrameDesc == nullptr)
+        {
+            if (ImGui::Button("Add Keyframe"))
+            {
+                UI_ANIM_KEYFRAME_DESC tTempDesc = {
+                    iKeyFrame,
+                    iTexIndex,
+                    fAlpha,
+                    m_vCurObjPos,
+                    m_vCurObjRot,
+                    m_vCurObjSca
+                };
+
+                m_vecUIKeyFrameDescs.push_back(tTempDesc);
+            }
+        }
+        else
+        {
+            if (ImGui::Button("Edit Keyframe"))
+            {
+                m_pSelectedKeyFrameDesc->fAlpha = fAlpha;
+                m_pSelectedKeyFrameDesc->iKeyframeIndex = iKeyFrame;
+                m_pSelectedKeyFrameDesc->iTexIndex = iTexIndex;
+
+                m_pSelectedKeyFrameDesc->vPos = m_vCurObjPos;
+                m_pSelectedKeyFrameDesc->vRot = m_vCurObjRot;
+                m_pSelectedKeyFrameDesc->vSca = m_vCurObjSca;
+
+                m_pSelectedKeyFrameDesc = nullptr;
+                iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Deselect"))
+            {
+                m_pSelectedKeyFrameDesc = nullptr;
+                iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
+            }
+        }
+
+    }
+    if (ImGui::CollapsingHeader("Keyframe List"))
+    {
+        if (m_vecUIKeyFrameDescs.empty())
+            ImGui::Selectable("(Empty)", false);
+
+        for (_uint i = 0; i < m_vecUIKeyFrameDescs.size(); i++)
+        {
+            _string strLabel = "Keyframe [" + to_string(i + 1) + "] | [" + to_string(m_vecUIKeyFrameDescs[i].iKeyframeIndex) + "]";
+            if (ImGui::Selectable(strLabel.c_str(), iSelected == i))
+            {
+                m_pSelectedKeyFrameDesc = &m_vecUIKeyFrameDescs[i];
+
+                iKeyFrame = m_pSelectedKeyFrameDesc->iKeyframeIndex;
+                iTexIndex = m_pSelectedKeyFrameDesc->iTexIndex;
+                fAlpha = m_pSelectedKeyFrameDesc->fAlpha;
+
+                m_vCurObjPos = m_pSelectedKeyFrameDesc->vPos;
+                m_vCurObjRot = m_pSelectedKeyFrameDesc->vRot;
+                m_vCurObjSca = m_pSelectedKeyFrameDesc->vSca;
+            }
+        }
+
+    }
+
+    
 
 
 

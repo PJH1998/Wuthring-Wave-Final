@@ -11,6 +11,9 @@ class CTexture;
 class CVIBuffer_Rect;
 NS_END
 
+NS_BEGIN(Editor)
+class CAnimator_UI;
+NS_END
 
 NS_BEGIN(Editor)
 
@@ -38,6 +41,7 @@ public:
 
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()	{ return m_tUIDesc; }
+	void					Set_CurTexIndex(_uint iIndex) { m_iCurTexIndex = iIndex; };
 
 private:
 	HRESULT					Ready_Prototypes(void* pArg);
@@ -47,10 +51,14 @@ private:
 private:
 	CShader*				m_pShaderCom				= { nullptr };
 	CVIBuffer_Rect*			m_pVIBufferCom				= { nullptr };
+	CTexture*				m_pTextureCom				= { nullptr };
 
-	CTexture*				m_pTextureCom				= {};
+	CAnimator_UI*			m_pAnimator_UICom			= { nullptr };
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
+
+
+	_uint					m_iCurTexIndex				= {};
 
 	// 현재 사용중일 텍스쳐 정보, texcoord 값, 나인섹터 기준점 등의 정보.. 필요할수도 있음
 

@@ -16,29 +16,42 @@ public:
 
 
 	// for Output
+	// 나중에 *_Struct.h 로 옮겨야 할 듯?
+	typedef struct tagUIAnimKeyFrameDesc
+	{
+		_uint			iKeyframeIndex = {};			// 정보가 담길 키프레임 정보
+
+		_uint			iTexIndex = {};
+		_float			fAlpha = {};			// 0 ~ 1
+		_float3			vPos = {};
+		_float3			vRot = {};			// Euler
+		_float3			vSca = {};
+
+	} UI_ANIM_KEYFRAME_DESC;
+
 	typedef struct tagUIAnimDesc
 	{
 		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex (어떤 텍스쳐용인지를 위함)
 
 		// 키프레임, 키프레임별 행렬정보, 보간방법, 길이 등..
-		_uint					iNumKeyFrame = {};
+		_wstring				strAnimName = {};
+		//_uint					iNumKeyFrame = {};
 
-		vector<_float3>			vecPos = {};
-		vector<_float3>			vecRot = {};	// Euler
-		vector<_float3>			vecSca = {};
+		vector<UI_ANIM_KEYFRAME_DESC> vecKeyFrames = {};
 
 		_uint					iLerpType = {};
-	} UI_AnimDesc;
+		_bool					isLoop = false;
+	} UI_ANIM_DESC;
 
 	
-	typedef struct tagUIInfoOutputDesc
+	typedef struct tagUIInfoDesc
 	{
 		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex
 
 		_float3						vPos = {};
 		_float3						vRot = {};	// Euler
 		_float3						vSca = {};
-	} UI_InfoOutputDesc;
+	} UI_INFO_DESC;
 
 private:
 	explicit CLevel_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -52,9 +65,10 @@ public:
 private:
 	void				Update_Picking();
 
-	void				Update_LoadWindow();
+	void				Update_MenuWindow();
 	void				Update_Hierarchy();
-	
+   
+	void				Update_SaveLoad();
 	void				Update_Inspector();
 	void				Update_AnimEditor();
 
@@ -66,12 +80,20 @@ private:
 	_float3						m_vCurObjRot = {};	// Euler
 	_float3						m_vCurObjSca = {};
 
+	// for Update_SaveLoad
+	_bool						m_isOn_SaveLoad = false;
+
 	// for Update_Hierarchy
 	vector<HIERARCHY_OBJ_DESC>	m_vecCustomUIs = {};
 
 	// for Update_AnimEditor
 	_bool						m_isOn_AnimEdit = false;
-	vector<UI_AnimDesc>			m_vecUIAnims = {};
+	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
+
+	vector<UI_ANIM_KEYFRAME_DESC> m_vecUIKeyFrameDescs = {};	// Temp Keyframe
+	UI_ANIM_KEYFRAME_DESC*		m_pSelectedKeyFrameDesc = { nullptr };
+	_int						m_iLerpType = 0;
+	_bool						m_isAnimLoop = false;
 
 public:
 	static CLevel_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -79,6 +101,7 @@ public:
 };
 
 NS_END
+
 
 inline json vec_to_json(const std::vector<_float3>& vec)
 {
@@ -88,18 +111,45 @@ inline json vec_to_json(const std::vector<_float3>& vec)
 	return j;
 }
 
-inline void to_json(json& j, const CLevel_UI::UI_AnimDesc& d)
+inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
 	j = json{
-		{ "iNumKeyFrame", d.iNumKeyFrame },
-		{ "vecPos", vec_to_json(d.vecPos) },
-		{ "vecRot", vec_to_json(d.vecRot) },
-		{ "vecSca", vec_to_json(d.vecSca) },
-		{ "iLerpType", d.iLerpType }
+		{ "iKeyframeIndex", d.iKeyframeIndex },
+
+		{ "iTexIndex", d.iTexIndex },
+		{ "fAlpha", d.fAlpha },
+		{ "vecPos", { d.vPos.x, d.vPos.y, d.vPos.z } },
+		{ "vecRot", { d.vRot.x, d.vRot.y, d.vRot.z } },
+		{ "vecSca", { d.vSca.x, d.vSca.y, d.vSca.z } },
 	};
 }
 
-inline void to_json(json& j, const CLevel_UI::UI_InfoOutputDesc& d)
+inline void to_json(json& j, const std::vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)
+{
+	j = json::array();
+	for (const auto& v : vec)
+	{
+		json data = {};
+		to_json(data, v);
+		j.push_back(data);
+	}
+}
+
+inline void to_json(json& j, const CLevel_UI::UI_ANIM_DESC& d)
+{
+	json vecKeyFrames = {};
+	to_json(vecKeyFrames, d.vecKeyFrames);
+
+	j = json{
+		{ "strAnimName", _string(d.strAnimName.begin(), d.strAnimName.end()) },
+		{ "iNumKeyFrame", d.vecKeyFrames.size()},
+		{ "vecKeyFrames", vecKeyFrames },
+		{ "iLerpType", d.iLerpType },
+		{ "isLoop", d.isLoop }
+	};
+}
+
+inline void to_json(json& j, const CLevel_UI::UI_INFO_DESC& d)
 {
 	json j_tUIDesc = {};
 	to_json(j_tUIDesc, d.tUIDesc);
