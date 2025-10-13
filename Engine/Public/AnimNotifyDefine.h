@@ -5,6 +5,7 @@
 typedef struct tagBaseNotifiy
 {
 	_float  fTrackPosition = 0.f;
+	virtual void Execute() = 0;
 }BASENOTIFY;
 
 typedef struct tagSoundNotify : BASENOTIFY
@@ -20,7 +21,7 @@ typedef struct tagEffectNotify : BASENOTIFY
 
 	// 2. Bone 사용 여부
 	_bool IsUseBone = { false };
-	_string strBoneName;
+	_string strBoneName = "";
 
 	// 3. 자세한 설정값은 은비가 설정합시다.. => 클래스 설계 따라 너무 달라짐.
 	

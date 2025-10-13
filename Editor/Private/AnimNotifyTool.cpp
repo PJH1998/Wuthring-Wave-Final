@@ -36,16 +36,16 @@ void CAnimNotifyTool::Render()
 }
 
 // Notify 등록 시 무조건적으로 필요한 정보.
-void CAnimNotifyTool::Process_Notify(const _string& strAnimName, const _string& strModelDatPath, _float fDuration)
+void CAnimNotifyTool::Process_Notify(const _string& strAnimName, const _string& strModelDirPath, _float fDuration)
 {
     m_strCurrentAnimName = strAnimName;
 
     // 비어있지 않을 때만 저장할 폴더 경로를 받습니다.
-    if (!strModelDatPath.empty())
+    if (!strModelDirPath.empty())
     {
-        m_strCurrentFolderPath = strModelDatPath;
+        m_strCurrentFolderPath = strModelDirPath;
+        m_strCurrentFolderPath += string("\\Notify");
     }
-        
 
     m_fCurrentDuration = fDuration;
 }
@@ -155,16 +155,19 @@ void CAnimNotifyTool::RenderUI_EditCollider()
 
 void CAnimNotifyTool::RenderUI_SaveNotify()
 {
+    // 0. 공통 사항.
+    // 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
+    ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
+    ImGui::Text("Duration : %.2f", m_fCurrentDuration);
+
     // 1. 툴에서 list에 등록된 Notify 전체를 확인할 수 있어야한다.
     Render_CurrentNotify();
     
     ImGui::Separator();
 
     // 2. Save를 누르면 현재 등록된 Notify 정보를 확인하고? Json에 기록한다.
-    if (ImGui::Button("Save All Notifyes"))
-    {
-        Save_NotifyToJson();
-    }
+    Save_Notify();
+    
 }
 
 void CAnimNotifyTool::RenderUI_LoadNotify()
@@ -177,7 +180,7 @@ void CAnimNotifyTool::Load_SoundFiles()
     if (ImGui::Button("Load Sound File"))
     {
         IGFD::FileDialogConfig config;
-        config.path = "../../Client/Bin/Resource/";
+        config.path = "../../Client/Bin/Resource/Sound/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         ImGuiFileDialog::Instance()->OpenDialog("Load Sound File", "Import Sound", ".wav", config);
@@ -270,11 +273,6 @@ void CAnimNotifyTool::Render_CurrentNotify()
             _uint iDeleteIndex = {};
             
 
-            // 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
-            ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);
-            ImGui::Separator();
-
             // 현재 등록된 list 구조체 정보를 전체 렌더링한다.
             _uint iIndex = { 0 };
             for (auto& SoundNotify : m_SoundNotifyes)
@@ -309,17 +307,15 @@ void CAnimNotifyTool::Render_CurrentNotify()
                 auto iterDelete = next(m_SoundNotifyes.begin(), iDeleteIndex);
                 m_SoundNotifyes.erase(iterDelete);
             }
-                
-
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Effect List"))
         {
-            // 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
-            ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);
+            //// 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
+            //ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
+            //ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
             _uint iIndex = { 0 };
             for (auto& EffectNotify : m_EffectNotifyes)
@@ -345,8 +341,8 @@ void CAnimNotifyTool::Render_CurrentNotify()
         if (ImGui::BeginTabItem("Collider List"))
         {
             // 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
-            ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);
+           /* ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
+            ImGui::Text("Duration : %.2f", m_fCurrentDuration);*/
 
             // 현재 등록된 list 구조체 정보를 전체 렌더링한다.
             ImGui::EndTabItem();
@@ -355,8 +351,8 @@ void CAnimNotifyTool::Render_CurrentNotify()
         if (ImGui::BeginTabItem("Light List"))
         {
             // 현재 애니메이션 이름과 총 Duration 값을 맨 위에서 출력
-            ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);
+            /*ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
+            ImGui::Text("Duration : %.2f", m_fCurrentDuration);*/
 
             // 현재 등록된 list 구조체 정보를 전체 렌더링한다.
             ImGui::EndTabItem();
@@ -368,23 +364,39 @@ void CAnimNotifyTool::Render_CurrentNotify()
 }
 
 // 현재 기록된 Notify 정보를 Json 파일로 파싱해서 저장.
-void CAnimNotifyTool::Save_NotifyToJson()
+void CAnimNotifyTool::Save_Notify()
 {
     // 0. 저장 방식도 방식인데 경로는 어떻게? => AnimationActor 생성할 때 FilePath를 미리 저장할까?
     // LoadDat할때 해당 모델의 .dat 폴더 경로를 저장해놓자.
 
+    if (ImGui::Button("Save All Notifyes"))
+    {
+        IGFD::FileDialogConfig config;
+        //config.path = "../../Client/Bin/Resource/"; // 여기에 들어가야함.
+        config.path = m_strCurrentFolderPath;
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
+        ImGuiFileDialog::Instance()->OpenDialog("Save Notify", "Export File", ".json", config);
+    }
 
-    // 1. Sound
+    ImVec2 vMinSize = ImVec2(600, 400);  // 최소 크기
+    ImVec2 vMaxSize = ImVec2(800, 400); // 최대 크기
 
-    // 2. Effect
+    if (ImGuiFileDialog::Instance()->Display("Save Notify"
+        , ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize
+    )) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
 
-    // 3. Collider
-
-    // 4. Light
+            Save_NotifyToJson(strFilePath);
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
 }
 
-void CAnimNotifyTool::Load_NotifyFromJson()
+void CAnimNotifyTool::Load_Notify()
 {
 
 }
@@ -462,6 +474,70 @@ void CAnimNotifyTool::Edit_SoundNotify()
 
     ImGui::EndChild();
 }
+
+void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
+{
+    // 지정된 File 경로로 Json 만들기..
+    ofstream jsonStream(strFilePath.c_str());
+
+    // 0. 전체 Json
+    json notifyJson;
+
+    // 1. Sound
+    notifyJson["AnimName"] = m_strCurrentAnimName;
+    
+    notifyJson["Notifies"] = json::array();
+    
+
+    //notifyJson["Sound"] = json::array();
+
+    //for (auto& soundNotify : m_SoundNotifyes)
+    //{
+    //    json soundJson;
+    //    soundJson["TrackPosition"] = soundNotify.fTrackPosition;
+    //    soundJson["Volume"] = soundNotify.fVolume;
+    //    soundJson["SoundTag"] = soundNotify.strSoundTag;
+    //    notifyJson["Sound"].emplace_back(soundJson);
+    //}
+
+    //// 2. Effect
+
+    //notifyJson["Effect"] = json::array();
+    //for (auto& effectNotify : m_EffectNotifyes)
+    //{
+    //    json effectJson;
+    //    effectJson["TrackPosition"] = effectNotify.fTrackPosition;
+    //    effectJson["UsedBone"] = effectNotify.IsUseBone;
+    //    effectJson["BoneName"] = effectNotify.strBoneName;
+    //    effectJson["EffectTag"] = effectNotify.strEffectTag;
+    //}
+    //
+
+    //// 3. Collider
+    //notifyJson["Collider"] = json::array();
+    //json colliderJson;
+
+    //for (auto& colliderNotify : m_ColliderNotifyes)
+    //{
+    //    colliderJson["TrackPosition"] = colliderNotify.fTrackPosition;
+    //    colliderJson["IsActive"] = colliderNotify.IsActive;
+    //    colliderJson["ColliderTag"] = colliderNotify.strColliderTag;
+    //}
+
+    //// 4. Light
+    //json lightJson;
+    //for (auto& lightNotify : m_LightNotifyes)
+    //{
+    //    lightJson["TrackPosition"] = lightNotify.fTrackPosition;
+    //    lightJson["IsActive"] = lightNotify.IsActive;
+    //    lightJson["ColliderTag"] = lightNotify.strLightTag;
+    //}
+
+    // 저장 완료.
+    jsonStream << notifyJson.dump(4);
+    jsonStream.close();
+}
+
 
 
 #pragma endregion

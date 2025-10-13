@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="99. Define">
-      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="98. Base">
       <UniqueIdentifier>{b9e963fc-197c-486b-896a-09504ad12fce}</UniqueIdentifier>
     </Filter>
@@ -204,6 +201,12 @@
     </Filter>
     <Filter Include="01. Utility\05. Pooling\Thread">
       <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
+      <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="99. Define">
+      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -411,6 +414,12 @@
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Utility\04. Component\Model\Animation</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SoundNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -592,6 +601,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SoundNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

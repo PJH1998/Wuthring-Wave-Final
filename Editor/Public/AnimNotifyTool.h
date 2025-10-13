@@ -33,7 +33,7 @@ public:
 
 #pragma region ANIMATION Tool로부터 받을 정보.
 public:
-	void Process_Notify(const _string& strAnimName, const _string& strModelDatPath, _float fTrackPosition);
+	void Process_Notify(const _string& strAnimName, const _string& strModelDirPath, _float fTrackPosition);
 	
 #pragma endregion
 
@@ -60,8 +60,8 @@ private:
 	void Select_SoundNotify();
 
 	void Render_CurrentNotify();
-	void Save_NotifyToJson();
-	void Load_NotifyFromJson();
+	void Save_Notify();
+	void Load_Notify();
 
 
 private:
@@ -70,6 +70,8 @@ private:
 	void Load_AllSoundsFromFolder(const _string& strFolderPath);
 	
 	void Edit_SoundNotify();
+
+	void Save_NotifyToJson(const _string& strFilePath);
 
 
 	
