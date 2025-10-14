@@ -169,6 +169,7 @@
     <ClInclude Include="..\Public\Loader.h" />
     <ClInclude Include="..\Public\Loader_Logo.h" />
     <ClInclude Include="..\Public\MainApp.h" />
+    <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_Logo.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
+    <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

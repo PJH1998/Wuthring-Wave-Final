@@ -40,6 +40,9 @@
     <Filter Include="02. GameObject\Dummy">
       <UniqueIdentifier>{ed07c1bd-b2ef-4167-a5d6-d28e30bdb8b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="95. Parser">
+      <UniqueIdentifier>{621f1f92-3c6d-436d-8458-d6119a0a6bac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -84,6 +87,9 @@
     <ClInclude Include="..\Public\Dummy.h">
       <Filter>02. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Parser.h">
+      <Filter>95. Parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -118,6 +124,9 @@
     <ClCompile Include="..\Private\Dummy.cpp">
       <Filter>02. GameObject\Dummy</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Parser.cpp">
+      <Filter>95. Parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -135,8 +144,8 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxInstance_PointParticle.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>

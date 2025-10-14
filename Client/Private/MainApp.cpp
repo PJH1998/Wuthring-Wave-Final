@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "MainApp.h"
+#include "Parser.h"
 
 #include "Event_Level.h"
 
@@ -8,7 +9,8 @@
 #include "Level_Logo.h"
 
 CMainApp::CMainApp()
-	: m_pGameInstance { CGameInstance::GetInstance() }
+	: m_pGameInstance { CGameInstance::GetInstance() },
+	m_pParser { CParser::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
 }
@@ -189,5 +191,6 @@ void CMainApp::Free()
 	Safe_Release(m_pContext);
 
 	m_pGameInstance->Release_Engine();
+	Safe_Release(m_pParser);
 	Safe_Release(m_pGameInstance);
 }

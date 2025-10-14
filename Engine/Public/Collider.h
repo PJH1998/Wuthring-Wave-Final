@@ -24,10 +24,14 @@ private:
 public:
 	void								Sync_Position(class CTransform* pTransform);
 
+	_bool								IsLand(_float3* pNormalOut = nullptr);
+
+	void								Set_Gravity(_bool isGravity) { m_isGravity = isGravity; }
+
 public:
 	virtual		HRESULT				Initialize_Prototype() override;
 	virtual		HRESULT				Initialize_Clone(void* pArg) override;
-	void								Update(class CTransform* pTransform);
+	void								Update(const _fvector& vVelocity);
 	virtual		HRESULT				Render() override;
 
 private:
@@ -35,6 +39,11 @@ private:
 	CharacterVirtual*				m_pCharacterVirtual = { nullptr };
 
 	_uint								m_iCollisionLayer = {};
+
+	_bool								m_isGravity = { true };
+
+private:
+	Vec3								Slide(const Vec3& Velocity);
 
 public:
 	static		CCollider*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
