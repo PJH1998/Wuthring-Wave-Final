@@ -10,6 +10,9 @@ private:
 	virtual ~CPicking() = default;
 
 public:
+	POINT						Get_MousePoint() { return m_ptMouse; }
+
+public:
 	HRESULT			Initialize(HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	void				Update();
 
