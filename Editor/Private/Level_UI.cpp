@@ -618,7 +618,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Deselect"))
+            if (ImGui::Button("Deselect##KeyFrame Deselect"))
             {
                 m_pSelectedKeyFrameDesc = nullptr;
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
@@ -670,7 +670,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
         if (m_pSelectedUIAnim)
         {
             ImGui::SameLine();
-            if (ImGui::Button("Deselect"))
+            if (ImGui::Button("Deselect##AnimList Deselect"))
                 m_pSelectedUIAnim = nullptr;
         }
 
