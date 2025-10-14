@@ -228,6 +228,10 @@ HRESULT CGameInstance::Add_Prototype(_uint iPrototypeLevelID, const _wstring& st
 {
 	return m_pPrototype_Manager->Add_Prototype(iPrototypeLevelID, strPrototypeTag, pPrototype);
 }
+void CGameInstance::Remove_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag)
+{
+	m_pPrototype_Manager->Remove_Prototype(iPrototypeLevelID, strPrototypeTag);
+}
 CBase* CGameInstance::Clone_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, PROTOTYPE eType, void* pArg)
 {
 	return m_pPrototype_Manager->Clone_Prototype(iPrototypeLevelID, strPrototypeTag, eType, pArg);
