@@ -44,7 +44,6 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 
     m_pAnimator_UICom->Update(fTimeDelta);
-    return;
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -135,9 +134,13 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     ASSERT_CRASH(pArg);
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
-    m_tUIDesc.strFilePath = pDesc->strFilePath;
-    m_tUIDesc.strFileName = pDesc->strFileName;
-    m_tUIDesc.iNumFiles   = pDesc->iNumFiles;
+    m_tUIDesc.strFilePath   = pDesc->strFilePath;
+    m_tUIDesc.strFileName   = pDesc->strFileName;
+    m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
+
+    m_tUIDesc.strUIName     = pDesc->strUIName;
+    m_tUIDesc.iUIType       = pDesc->iUIType;
+    m_tUIDesc.strParentName = pDesc->strParentName;
 
     return S_OK;
 }
