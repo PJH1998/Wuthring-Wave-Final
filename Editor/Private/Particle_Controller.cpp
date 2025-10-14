@@ -307,13 +307,11 @@ void CParticle_Controller::Particle_Tab()
                //지금 선택되어있는 파티클의 태그 필요
                //지금 선택되어 있는 파티클 태그의 Desc 2개 필요.
                //버퍼 먼저 만들고, 파티클 만들어야함.
-          
 
 
                //생성해놓은 버퍼 원형 삭제
                //Desc에 있는 정보로 새로운 버퍼 생성
-                
-                
+                          
                //파티클 클래스 클론 할 때 Desc로 클론
                //이전에 생성한 파티클은 그냥 비활성화만 시켜줘도 될거 같음.
                 CParticle* pParticle = {};
@@ -324,18 +322,36 @@ void CParticle_Controller::Particle_Tab()
                 {
                     if (iCheckIndex == m_iSelectedParticle)
                     {
-                        ParticleTag = iter->first;
+                        ParticleTag = iter->first;  
 
+                        m_pSelectedParticleDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                        m_pSelectedParticleDesc->strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
+                        m_pSelectedParticleDesc->strVIBufferTag += ParticleTag;
+
+                        m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag);
+
+                        m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag,
+                            CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, m_pSelectedVBDesc));
+
+                        pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, m_pSelectedParticleDesc));
+                        m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Particle"), pParticle);
+
+                        m_pSelectedParticle->SetActivate(false);
+                        Safe_Release(m_pSelectedParticle);
+                        
+                        m_pSelectedParticle = pParticle;
+                        m_pSelectedParticle->SetActivate(true);
+                        
+                        iter->second = pParticle;
+                        Safe_AddRef(pParticle);
+                        break;
+                    }
+                    else
+                    {
+                        ++iCheckIndex;
+                        ++iter;
                     }
                 }
-
-
-                //Desc 텍스처태그, 버퍼태그 추가해줘야함.
-
-                pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, m_pSelectedParticleDesc));
-
-
-                
 
             }
 

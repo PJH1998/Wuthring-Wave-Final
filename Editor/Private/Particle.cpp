@@ -33,7 +33,11 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
 
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
-    m_isActivate = true;
+    //임시처리
+    m_IsSpread = pDesc->bSpread;
+    m_IsDrop = pDesc->bDrop;
+
+    m_isActivate = false;
 
     return S_OK;
 }
@@ -44,6 +48,16 @@ void CParticle::Priority_Update(_float fTimeDelta)
 
 void CParticle::Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+
+    //임시
+    if (m_IsDrop)
+        m_pVIBufferCom->Drop(fTimeDelta);
+    
+    if (m_IsSpread)
+        m_pVIBufferCom->Spread(fTimeDelta);
+
     //라이프타임 끝나면 비활성화
 }
 

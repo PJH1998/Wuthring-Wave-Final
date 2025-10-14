@@ -58,11 +58,7 @@ namespace Engine
 		return dwRefCnt;
 	}
 
-<<<<<<< Updated upstream
 	inline wstring StringToWString(const string& str)
-=======
-	inline _wstring StringToWString(const _string& str)
->>>>>>> Stashed changes
 	{
 		int iLength = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
 		if (0 == iLength)
@@ -76,11 +72,7 @@ namespace Engine
 		return wstr;
 	}
 
-<<<<<<< Updated upstream
 	inline string WStringToString(const wstring& wstr)
-=======
-	inline _string WStringToString(const _wstring& wstr)
->>>>>>> Stashed changes
 	{
 		if (wstr.empty())
 			return "";
