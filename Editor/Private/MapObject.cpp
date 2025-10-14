@@ -4,6 +4,7 @@
 #include"Mesh_Instance.h"
 #include"Event_Level.h"
 #include "AnimationActor.h"
+#include"Level_Map.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice, pContext)
@@ -44,7 +45,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
     XMStoreFloat3(&m_vTranslation, vTranslation);
     m_vNewScale = m_vScale;
     m_vRotation = m_vNewRotation = _float3(0.f, 0.f, 0.f);
-    m_vTranslation = m_vNewTranslation;
+    m_vNewTranslation = m_vTranslation;
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
 
@@ -57,9 +58,13 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
     _char Tag[MAX_PATH] = "NonInteraction";
     MAP_CREATE event(Tag, this);
+
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
     m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
+        if (!m_isActivate)
+            return;
+
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
@@ -87,11 +92,16 @@ void CMapObject::Priority_Update(_float fTimeDelta)
 
 void CMapObject::Update(_float fTimeDelta)
 {
-    if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+    //if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+    if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
     {
-        _float fDistance = {};
+        //여기에 클릭 최적화 하려면 프러스텀 컬링까지.
 
-        //if (m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
+        _float fDistance = {};
+        //월드도 바꿔야함.
+        _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
+        _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
+        if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
         {
             MAP_PICK event(this, fDistance);
 
@@ -124,6 +134,8 @@ void CMapObject::Render()
             m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
         }
 
+        //이니셜라이즈 할 때 Bind_Materials 메쉬별로 한 번씩 돌려서 텍스쳐 없는 메쉬만 내가 직접 넣어서 저장할 수 있게?
+        
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
@@ -230,10 +242,13 @@ void CMapObject::Set_ImGuiOption()
         }
         m_IsTest = !m_IsTest;
     }
+
     ImGui::SameLine();
     ImGui::Checkbox("Custom Tex", &m_TexMode);
 
-    _string Test1 = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (ImGui::Button("Destroy"))
+        m_isActivate = false;
+
     if (m_IsTest)
     {
 
@@ -359,7 +374,7 @@ void CMapObject::Set_ImGuiOption()
         if (m_MakeJson)
             Export_MaterialData();
 
-        ImGui::Begin("Textures");
+        ImGui::Begin("Textures", nullptr,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
 
         if (m_pDiffuseTextureCom[m_iSelectedMesh])
             ImGui::Image((ImTextureID)m_pDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
@@ -410,7 +425,7 @@ HRESULT CMapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    /*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
     RigidbodyDesc.eShape = SHAPE::MESH;
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
     RigidbodyDesc.eType = EMotionType::Static;
@@ -418,7 +433,7 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     RigidbodyDesc.pModel = m_pModelCom;
 
     Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);*/
 
 
     return S_OK;
