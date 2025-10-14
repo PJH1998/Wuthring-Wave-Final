@@ -1,9 +1,15 @@
 #pragma once
 #include "Base.h"
+#include "Editor_Define.h"
 #include "AnimNotifyDefine.h"
 
-NS_BEGIN(Editor)
+NS_BEGIN(Engine)
+class CAnimNotify;
+class CSoundNotify;
+class CColliderNotify;
+NS_END
 
+NS_BEGIN(Editor)
 // Notify를 생성하고 불러올 수 있는 Tool
 class CAnimNotifyTool final : public CBase
 {
@@ -16,6 +22,9 @@ public:
 		LIGHT = 3,    // LIGHT?
 		END
 	};
+
+	
+
 
 private:
 	explicit CAnimNotifyTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -33,7 +42,7 @@ public:
 
 #pragma region ANIMATION Tool로부터 받을 정보.
 public:
-	void Process_Notify(const _string& strAnimName, const _string& strModelDirPath, _float fTrackPosition);
+	void Process_Notify(class CAnimationActor* pActor, const _string& strAnimName, const _string& strModelDirPath, _float fTrackPosition);
 	
 #pragma endregion
 
@@ -59,9 +68,12 @@ private:
 	void Load_SoundFiles();
 	void Select_SoundNotify();
 
+#ifdef _DEBUG
 	void Render_CurrentNotify();
+#endif // _DEBUG
+	
 	void Save_Notify();
-	void Load_Notify();
+	void Load_NotifyFromFile();
 
 
 private:
@@ -72,12 +84,14 @@ private:
 	void Edit_SoundNotify();
 
 	void Save_NotifyToJson(const _string& strFilePath);
+	void Load_NotifyFromJson(const _string& strFilePath);
 
 
 	
 
 private:
 	class CGameInstance* m_pGameInstance = { nullptr };
+	class CAnimationActor* m_pCurrentActor = { nullptr };
 	ID3D11Device* m_pDevice = { nullptr };
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	LEVEL m_eCurLevel = { LEVEL::END };
@@ -91,23 +105,27 @@ private:
 	// Sound Tag
 	map<const _string, const _wstring> m_SoundTags = {};
 	_string m_CurrentSoundTag = {};
+	_string m_CurrentSoundType = {};
 
+	// 
+	_bool m_IsLoadNotify = { false };
 
 private:
 	// Save 용도 변수들
-	list<SOUNDNOTIFY>    m_SoundNotifyes;
-	list<EFFECTNOTIFY>   m_EffectNotifyes;
-	list<COLLIDERNOTIFY> m_ColliderNotifyes;
-	list<LIGHTNOTIFY>    m_LightNotifyes;
+	//list<SOUNDNOTIFY>    m_SoundNotifies;
+	//list<COLLIDERNOTIFY> m_ColliderNotifies;
+	//list<EFFECTNOTIFY>   m_EffectNotifies;
+	//list<LIGHTNOTIFY>    m_LightNotifies;
+
+	list<CAnimNotify*>     m_AnimNotifies;
+	list<CSoundNotify*>    m_SoundNotifies;
+	list<CColliderNotify*> m_ColliderNotifies;
 
 private:
 	HRESULT Ready_Sound();
 
 
 private:
-	// 헬퍼 함수
-	wstring StringToWstring(const std::string& str);
-	string WstringToString(const std::wstring& wstr);
 
 public:
 	static CAnimNotifyTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel);

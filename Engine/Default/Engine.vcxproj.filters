@@ -201,7 +201,7 @@
     </Filter>
     <Filter Include="01. Utility\05. Pooling\Thread">
       <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instamce">
       <UniqueIdentifier>{47fa2cb5-207a-4703-9c57-fa3773a44b78}</UniqueIdentifier>
     </Filter>
@@ -420,9 +420,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimNotifyDefine.h">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-	</ClInclude>
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
@@ -437,6 +434,9 @@
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\SoundNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
   </ItemGroup>
@@ -620,7 +620,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
@@ -635,6 +635,9 @@
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\SoundNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>

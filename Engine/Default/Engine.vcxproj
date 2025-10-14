@@ -21,9 +21,9 @@
   <ItemGroup>
     <ClInclude Include="..\Public\Animation.h" />
     <ClInclude Include="..\Public\AnimNotify.h" />
-    <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\ColliderNotify.h" />
     <ClInclude Include="..\Public\CollisionLayer.h" />
     <ClInclude Include="..\Public\Camera.h" />
     <ClInclude Include="..\Public\Camera_Manager.h" />
@@ -96,6 +96,7 @@
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
     <ClCompile Include="..\Private\AnimNotify.cpp" />
+    <ClCompile Include="..\Private\ColliderNotify.cpp" />
     <ClCompile Include="..\Private\CollisionLayer.cpp" />
     <ClCompile Include="..\Private\Camera.cpp" />
     <ClCompile Include="..\Private\Camera_Manager.cpp" />

@@ -26,6 +26,8 @@ public:
 
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
+	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
+	//void								Register_Notify_ForAnimation(const _string& strFilePath, function<void(const _wstring&, _bool)> ColliderCallbacks, function<void()> EffectCallbacks);
 
 public:
 	virtual		HRESULT				Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);

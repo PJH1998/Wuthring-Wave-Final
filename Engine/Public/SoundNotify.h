@@ -1,24 +1,35 @@
 #pragma once
 #include "AnimNotify.h"
 
-class CSoundNotify final : public CAnimNotify
+NS_BEGIN(Engine)
+class ENGINE_DLL CSoundNotify final : public CAnimNotify
 {
 public:
-	explicit CSoundNotify(_float fTrackPosition, const _string& strTag, _float fVolume);
-	void Execute() override;
-	const _string& Get_NotifyTypeName() const override { return "Sound"; }
-	json To_Json() const override;
+	explicit CSoundNotify(_float fTrackPosition, const _string& strTag, const _string& strSoundType, _float fVolume);
+	virtual void Execute() override;
+	virtual json To_Json() const override;
+	virtual const _string& Get_NotifyTypeName() const override;
+
+
+#ifdef _DEBUG
+
+	virtual void ImGui_Print() override;
+#endif // _DEBUG
+
 
 public:
-	static CSoundNotify* From_Json(_float fTrackPosition, const _string& strTag, _float fVolume);
+	static CSoundNotify* From_Json(const json& soundJson);
 	virtual void Free() override;
 
 private:
+	class CGameInstance* m_pGameInstance = { nullptr };
 	_string m_strSoundType; // BGM, Sound µîµî. 
 	_string m_strSoundTag;
 	_wstring m_wStrSoundTag;
 	_float m_fVolume;
 
+	
+
 
 };
-
+NS_END

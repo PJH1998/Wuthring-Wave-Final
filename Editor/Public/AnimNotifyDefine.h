@@ -5,12 +5,12 @@
 typedef struct tagBaseNotifiy
 {
 	_float  fTrackPosition = 0.f;
-	virtual void Execute() = 0;
 }BASENOTIFY;
 
 typedef struct tagSoundNotify : BASENOTIFY
 {
 	_string strSoundTag;
+	_string strSoundType;
 	_float fVolume = 0.1f;
 }SOUNDNOTIFY;
 
