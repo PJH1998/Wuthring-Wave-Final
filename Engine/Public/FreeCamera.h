@@ -20,6 +20,7 @@ public:
 
 private:
 	_float							m_fSpeed = {};
+	_float3						m_vPosition = {};
 
 public:
 	static		CFreeCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
