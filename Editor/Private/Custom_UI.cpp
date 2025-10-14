@@ -67,9 +67,7 @@ void CCustom_UI::Render()
         CRASH(Binding_Matrix_Failed);
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         CRASH(Binding_Matrix_Failed);
-
-    // 여기로 알파값 실시간으로 넘겨주면 될 것 같은데
-    //if (FAILED(m_pShaderCom->Bind_Value("g_AlphaStrength", &m_pAnimator_UICom->Get_CurAnimDesc().)))
+    // ksta IF : "g_AlphaStrength" 에 매 프레임마다 Animator_UI 컴포넌트에서 값 갱신중
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH(Binding_Shader_Failed);

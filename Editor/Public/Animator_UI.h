@@ -47,8 +47,6 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
-	CLevel_UI::UI_ANIM_DESC* Get_CurAnimDesc();
-
 private:
 	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);
 	_float		Calc_Lerp(_float fStart, _float fEnd, _float Ratio);

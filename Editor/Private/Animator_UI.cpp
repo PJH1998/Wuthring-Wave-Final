@@ -153,11 +153,6 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
-CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Get_CurAnimation()
-{
-    return m_pCurAnimDesc;
-}
-
 // Fix_LerpRatio, Calc_Lerp 두개 합쳐서
 // 여러 점을 기준으로 위치가 부드럽게 보간되는 것도 고려..? 근데 의미가 있나
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
@@ -273,6 +268,9 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+    pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
