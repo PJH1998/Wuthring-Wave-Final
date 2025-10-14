@@ -40,6 +40,9 @@
     <Filter Include="02. GameObject\Dummy">
       <UniqueIdentifier>{ed07c1bd-b2ef-4167-a5d6-d28e30bdb8b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="95. Parser">
+      <UniqueIdentifier>{621f1f92-3c6d-436d-8458-d6119a0a6bac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -86,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\Level_Test.h" />
+    <ClInclude Include="..\Public\Parser.h">
+      <Filter>95. Parser</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -122,6 +128,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\Level_Test.cpp" />
+    <ClCompile Include="..\Private\Parser.cpp">
+      <Filter>95. Parser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

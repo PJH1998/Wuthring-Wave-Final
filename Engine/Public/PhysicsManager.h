@@ -19,6 +19,7 @@ private:
 	virtual ~CPhysicsManager() = default;
 
 public:
+#pragma region Init
 	// Physics System 檬扁拳
 	void				SetUp_PhysicsSystem();
 	// Object -> BroadPhase 甘俏
@@ -36,11 +37,16 @@ public:
 		ASSERT_CRASH(nullptr != m_pObjectVsBPFilter);
 		m_pObjectVsBPFilter->SetUp_ObjectVsBPFilter(iObjectLayer, iBPLayer);
 	};
+#pragma endregion
 
 	// Body 积己
-	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
+	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	// Character 积己
-	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	// CharacterVirtual 积己
+	CharacterVirtual*	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+
+	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
@@ -61,10 +67,14 @@ private:
 	ContactListener*	m_pContactListener = { nullptr };
 
 	PhysicsSettings		m_PhysicsSetting;
+	CharacterVirtual::ExtendedUpdateSettings m_ExtendedUpdateSetting;
 
 	BPLayer*										m_pBPLayer = { nullptr };
 	ObjectLayerPairFilterImpl*				m_pObjectLayerFilter = { nullptr };
 	ObjectVsBroadPhaseLayerFilterImpl*	m_pObjectVsBPFilter = { nullptr };
+
+	CharacterVsCharacterCollisionSimple* m_pCVCCollision = { nullptr };
+	CharacterContactListener* m_pCharacterContactListener = { nullptr };
 
 	_uint		m_iNumBodies = { 10240 };
 	_uint		m_iNumBodyMutexes = {}; // Autodetect
@@ -72,6 +82,9 @@ private:
 	_uint		m_iMaxContactConstraints = { 20480 };
 
 	_uint		m_iMaxJob = { thread::hardware_concurrency() };
+
+	vector<CharacterVirtual*>*				m_Virtuals = { nullptr };
+	_uint		m_iNumObjectLayer = {};
 
 #ifdef _DEBUG
 	DebugRenderer*	m_pDebugRenderer = { nullptr };

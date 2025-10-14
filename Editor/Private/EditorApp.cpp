@@ -161,6 +161,8 @@ void CEditorApp::SetUp_CollisionLayer()
 void CEditorApp::Ready_Event()
 {
 	m_pGameInstance->Subscribe<CHANGE_LEVEL_EVENT>(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), [this](const CHANGE_LEVEL_EVENT& event) {
+		if (m_eNextLevel == event.eNextLevel)
+			return;
 			m_isChangeLevel = true;
 			m_eNextLevel = event.eNextLevel;
 			m_isLoad = event.isLoad;

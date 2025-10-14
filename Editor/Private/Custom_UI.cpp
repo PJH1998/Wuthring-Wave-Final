@@ -4,6 +4,7 @@
 
 #include "EditorPch.h"
 #include "Custom_UI.h"
+#include "Animator_UI.h"
 
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUIObject(pDevice, pContext)
@@ -40,6 +41,10 @@ void CCustom_UI::Priority_Update(_float fTimeDelta)
 
 void CCustom_UI::Update(_float fTimeDelta)
 {
+
+
+    m_pAnimator_UICom->Update(fTimeDelta);
+    return;
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -63,7 +68,10 @@ void CCustom_UI::Render()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         CRASH(Binding_Matrix_Failed);
 
-    if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", 0)))
+    // 여기로 알파값 실시간으로 넘겨주면 될 것 같은데
+    //if (FAILED(m_pShaderCom->Bind_Value("g_AlphaStrength", &m_pAnimator_UICom->Get_CurAnimDesc().)))
+
+    if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH(Binding_Shader_Failed);
 
 
@@ -116,6 +124,11 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
+    CAnimator_UI::ANIMATOR_UI_DESC tAnimatorUIDesc = { this };
+    if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
+        TEXT("Com_Animator_UI"), reinterpret_cast<CComponent**>(&m_pAnimator_UICom), &tAnimatorUIDesc)))
+        return E_FAIL;
+
 	return S_OK;
 }
 
@@ -164,5 +177,5 @@ void CCustom_UI::Free()
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
-
+    Safe_Release(m_pAnimator_UICom);
 }

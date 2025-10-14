@@ -130,6 +130,51 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback)
+{
+	for (auto& pair : m_Animations)
+	{
+		const _string& animName = pair.first;
+		CAnimation* pAnimation = pair.second;
+
+		_string filePath = strNotifyFolderPath + "/" + animName + ".json";
+
+
+		ifstream inputFile(filePath);
+		// 1. ¿­¸®¸é?
+		if (inputFile.is_open())
+		{
+			json notifyData;
+			inputFile >> notifyData;
+			inputFile.close();
+
+			if (notifyData.contains("Notifies") && notifyData["Notifies"].is_array())
+				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback);
+			
+		}
+
+	}
+
+	for (auto& pair : m_Animations)
+		pair.second->Sort_AnimNotify();
+		
+}
+
+
+//void CModel::Register_Notify_ForAnimation(const _string& strFilePath, function<void(const _wstring&, _bool)> ColliderCallbacks, function<void()> EffectCallbacks)
+//{
+//	ifstream InputFile(strFilePath);
+//
+//	json InputData;
+//	InputFile >> InputData;
+//
+//
+//
+//	InputFile.close();
+//	//for (auto& Pair : m_Animations)
+//	//	Pair.second->Sort_Notify();
+//}
+
 HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
 	m_eType = eType;

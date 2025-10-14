@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="99. Define">
-      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="98. Base">
       <UniqueIdentifier>{b9e963fc-197c-486b-896a-09504ad12fce}</UniqueIdentifier>
     </Filter>
@@ -204,7 +201,7 @@
     </Filter>
     <Filter Include="01. Utility\05. Pooling\Thread">
       <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instamce">
       <UniqueIdentifier>{47fa2cb5-207a-4703-9c57-fa3773a44b78}</UniqueIdentifier>
     </Filter>
@@ -213,6 +210,18 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instamce\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Collider">
+      <UniqueIdentifier>{e90640a9-0e57-4dd6-aade-72e7e4bcb042}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\97. Physics\ContactListener\Virtual">
+      <UniqueIdentifier>{99751cc9-1385-48d7-808c-2ebc28706e30}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
+      <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="99. Define">
+      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -411,16 +420,12 @@
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Model_Instance.h">
-      <Filter>01. Utility\04. Component\Model_Instance</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Utility\04. Component\Model\Animation</Filter>
-	</ClInclude>
-    <ClInclude Include="..\Public\Model_Instance.h" />
+    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
@@ -429,6 +434,24 @@
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instamce\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Model_Instance.h">
+      <Filter>01. Utility\04. Component\Model_Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Collider.h">
+      <Filter>01. Utility\04. Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CharacterContactListenerImpl.h">
+      <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\AnimNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SoundNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ColliderNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -606,13 +629,9 @@
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Model_Instance.cpp">
-      <Filter>01. Utility\04. Component\Model_Instance</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-	</ClCompile>
-    <ClCompile Include="..\Private\Model_Instance.cpp" />
+    </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClCompile>
@@ -621,6 +640,24 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instamce\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Model_Instance.cpp">
+      <Filter>01. Utility\04. Component\Model_Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Collider.cpp">
+      <Filter>01. Utility\04. Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp">
+      <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\AnimNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SoundNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ColliderNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,7 @@
 #include <process.h>
 
 #include "Editor_Enum.h"
+//#include "Editor_Struct.h"
 
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"

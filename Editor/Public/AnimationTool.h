@@ -73,7 +73,7 @@ private:
 	ANIMATIONACTORS m_AnimationActors;
 
 	typedef map<const _wstring, const _string> MODELPATHS;
-	MODELPATHS	m_ModelDatPaths;
+	MODELPATHS	m_ModelDirPaths;
 
 	// 생성한 객체에 대한 동적제어를 어떻게할까?
 	_wstring m_wSelected_PrototypeModelTag = {};
@@ -95,8 +95,6 @@ private:
 
 private:
 	// 헬퍼 함수
-	wstring StringToWstring(const std::string& str);
-	string WstringToString(const std::wstring& wstr);
 	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	
