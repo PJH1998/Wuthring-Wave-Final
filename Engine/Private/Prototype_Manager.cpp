@@ -25,12 +25,25 @@ HRESULT CPrototype_Manager::Add_Prototype(_uint iPrototypeLevelID, const _wstrin
         return E_FAIL;
 
     auto iter = m_Prototypes[iPrototypeLevelID].find(strPrototypeTag);
-    if (iter != m_Prototypes[iPrototypeLevelID].end())
+	if (iter != m_Prototypes[iPrototypeLevelID].end())
+	{
+		Safe_Release(pPrototype);
         return E_FAIL;
+	}
 
     m_Prototypes[iPrototypeLevelID].emplace(strPrototypeTag, pPrototype);
 
     return S_OK;
+}
+
+void CPrototype_Manager::Remove_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag)
+{
+	auto iter = m_Prototypes[iPrototypeLevelID].find(strPrototypeTag);
+	if (iter != m_Prototypes[iPrototypeLevelID].end())
+	{
+		Safe_Release(iter->second);
+		m_Prototypes[iPrototypeLevelID].erase(iter);
+	}
 }
 
 CBase* CPrototype_Manager::Clone_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, PROTOTYPE eType, void* pArg)

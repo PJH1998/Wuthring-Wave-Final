@@ -11,15 +11,16 @@ CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLevel_Logo::Initialize()
 {
 	// Rigidbody Sample
-	//CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
-	//BoxBodyDesc.eShape = SHAPE::BOX;
-	//BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
-	//BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
-	//BoxBodyDesc.eType = EMotionType::Dynamic;
-	//BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//
-	//m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
-	//m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+	BoxBodyDesc.eShape = SHAPE::BOX;
+	BoxBodyDesc.vPos = _float3(10.f, 50.f, 0.f);
+	BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
+	BoxBodyDesc.eType = EMotionType::Dynamic;
+	BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	BoxBodyDesc.eBodyType = CRigidbody::BODYTYPE::CHARACTER;
+	
+	m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
+	m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
 	//
 	//CRigidbody::BOXBODY_DESC BoxBodyDesc2 = {};
 	//BoxBodyDesc2.eShape = SHAPE::BOX;
@@ -39,6 +40,9 @@ HRESULT CLevel_Logo::Initialize()
 
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
 		CRASH("Dummy");
+
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
+	//	CRASH("Dummy");
 
 	//Safe_Release(pRigidBody);
 	

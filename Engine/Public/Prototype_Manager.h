@@ -11,6 +11,7 @@
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
+#include "Collider.h"
 // ==================
 
 NS_BEGIN(Engine)
@@ -23,6 +24,7 @@ private:
 
 public:
 	HRESULT		Add_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, CBase* pPrototype);
+	void		Remove_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag);
 	CBase*		Clone_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, PROTOTYPE eType, void* pArg);
 	HRESULT		Clear_Resource(_uint iClearLevelID);
 

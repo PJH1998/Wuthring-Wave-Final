@@ -2,7 +2,7 @@
 #include "Component.h"
 #include "Level_UI.h"
 
-// UIÀÇ ¾Ö´Ï¸ÞÀÌ¼Ç Á¤º¸¸¦ ¹ÙÅÁÀ¸·Î ½ÇÁúÀûÀÎ ¾Ö´Ï¸ÞÀÌ¼ÇÀ» µ¹¸®´Â Å¬·¡½º
+// UIï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½
 NS_BEGIN(Editor)
 
 class CAnimator_UI final : public CComponent
@@ -34,8 +34,8 @@ public:
 	virtual HRESULT			Render()								override;
 
 public:
-	// ¾Ö´Ï¸ÞÀÌ¼Ç ÀüÈ¯ °ü·Ã ÇÔ¼ö..?
-	// Play_Animation (ÀÎÀÚ) µî..
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½È¯ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½..?
+	// Play_Animation (ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½..
 	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc);
 	HRESULT		Remove_Animation(_wstring strAnimName);
 	HRESULT		Clear_Animation();
@@ -56,11 +56,11 @@ private:
 	void		Update_Animation(_float fTimeDelta);
 
 private:
-	// UI ´ãÀº ÄÁÅ×ÀÌ³Ê..?
-	// UI´Â ¾Ö´Ï¸ÞÀÌ¼Ç Á¤º¸¸¦ ´ãµµ·Ï..?
+	// UI ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½..?
+	// UIï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ãµµï¿½ï¿½..?
 
-	// ¾Ö´Ï¸ÞÀÌ¼Ç Å¬·¡½º¸¦ ÀúÀåÇÏ´Â °Ô ¾Æ´Ï¶ó ±×³É ¾Ö´Ï¸ÞÀÌ¼Ç Desc¸¦ ÀúÀåÇÏ°í ºÒ·¯¿Í¼­ ¾²¸é µÇ´Â °ÍÀÌ ¾Æ´ÑÁö?
-	// ±×·¯¸é ÄÁÅ×ÀÌ³Ê·Î Map »ç¿ë
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ ï¿½Æ´Ï¶ï¿½ ï¿½×³ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ Descï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½Ò·ï¿½ï¿½Í¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´ï¿½ï¿½ï¿½?
+	// ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Ê·ï¿½ Map ï¿½ï¿½ï¿½
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 

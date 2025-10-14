@@ -5,6 +5,7 @@ NS_BEGIN(Engine)
 class CShader;
 class CModel;
 class CRigidbody;
+class CCollider;
 NS_END
 
 NS_BEGIN(Client)
@@ -31,8 +32,9 @@ public:
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
-	CModel*						m_pModelCom = { nullptr };
-	CRigidbody*					m_pRigidbodyCom = { nullptr };
+	CModel*					m_pModelCom = { nullptr };
+	CRigidbody*			m_pRigidbodyCom = { nullptr };
+	CCollider*				m_pColliderCom = { nullptr };
 
 private:
 	void						Ready_Component();

@@ -67,6 +67,15 @@
     <Filter Include="01. Level\Effect\Particle">
       <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Controller">
+      <UniqueIdentifier>{e7fbc4f1-3a95-49f0-9400-b73a8259ca3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller">
+      <UniqueIdentifier>{25ff35f3-c9b6-46fb-b8ba-b5d0ab5959d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab">
+      <UniqueIdentifier>{774ff9b9-e035-4e09-a1cc-28229109e0fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -132,15 +141,23 @@
     <ClInclude Include="..\Public\MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotifyDefine.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+	</ClInclude>
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Animator_UI.h">
       <Filter>01. Level\UI\Temp Props\Temp Component</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\Particle_Controller.h">
+      <Filter>01. Level\Effect\Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -207,6 +224,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle_Controller.cpp">
+      <Filter>01. Level\Effect\Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Prefab.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

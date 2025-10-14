@@ -99,17 +99,18 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
-	m_pObject_Manager->Update(fTimeDelta);
 
+	m_pObject_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
+
+	m_pPhysicsManager->Update(fTimeDelta);
+
 	m_pObject_Manager->Late_Update(fTimeDelta);
 
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
-
-	m_pPhysicsManager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -227,6 +228,10 @@ HRESULT CGameInstance::Open_Level(_uint iNextLevelID, CLevel* pLevel)
 HRESULT CGameInstance::Add_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, CBase* pPrototype)
 {
 	return m_pPrototype_Manager->Add_Prototype(iPrototypeLevelID, strPrototypeTag, pPrototype);
+}
+void CGameInstance::Remove_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag)
+{
+	m_pPrototype_Manager->Remove_Prototype(iPrototypeLevelID, strPrototypeTag);
 }
 CBase* CGameInstance::Clone_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, PROTOTYPE eType, void* pArg)
 {
@@ -419,6 +424,14 @@ Body* CGameInstance::Register_Body(const BodyCreationSettings& BodySetting, Body
 Character* CGameInstance::Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
+}
+CharacterVirtual* CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+{
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+}
+void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
+{
+	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
 #ifdef _DEBUG
 void CGameInstance::DrawShape(const Shape* pShape)

@@ -50,6 +50,10 @@ private:
 	_float3						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
+	//연산자? 가중치? 일단 야매로 불타입으로 움직이게 동작 처리만
+	_bool						m_IsSpread = false;
+	_bool						m_IsDrop = false;
+
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);
 	HRESULT Bind_ShaderResources();

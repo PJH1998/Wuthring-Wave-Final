@@ -26,8 +26,6 @@ public:
 	virtual HRESULT Bind_Resources() override;
 	virtual HRESULT Render() override;
 
-	void Update(_float fTimeDelta);
-
 public:
 	void Spread(_float fTimeDelta);
 	void Drop(_float fTimeDelta);

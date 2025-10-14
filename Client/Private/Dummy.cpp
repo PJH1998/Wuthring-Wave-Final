@@ -34,6 +34,8 @@ void CDummy::Priority_Update(_float fTimeDelta)
 void CDummy::Update(_float fTimeDelta)
 {
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
+	m_pColliderCom->Update(m_pTransformCom);
+	
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
@@ -79,16 +81,26 @@ void CDummy::Ready_Component()
 	//RigidbodyDesc.eType = EMotionType::Static;
 	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 	//RigidbodyDesc.pModel = m_pModelCom;
-	CRigidbody::CAPSULEBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eShape = SHAPE::CAPSULE;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.fHeight = 10.f;
-	RigidbodyDesc.fRadius = 20.f;
-	RigidbodyDesc.isCharacter = true;
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	//CRigidbody::CAPSULEBODY_DESC RigidbodyDesc = {};
+	//RigidbodyDesc.eShape = SHAPE::CAPSULE;
+	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//RigidbodyDesc.eType = EMotionType::Kinematic;
+	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	//RigidbodyDesc.fHeight = 10.f;
+	//RigidbodyDesc.fRadius = m_pGameInstance->Rand(5.f, 20.f);
+	//RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::VIRTUAL;
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+	// Com_Collider
+	CCollider::COLLIDER_DESC ColliderDesc = {};
+	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	ColliderDesc.eType = EMotionType::Kinematic;
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	ColliderDesc.fHeight = 10.f;
+	ColliderDesc.fRadius = 20.f; //m_pGameInstance->Rand(5.f, 20.f);
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
+		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 }
 
 CDummy* CDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -124,4 +136,5 @@ void CDummy::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pColliderCom);
 }
