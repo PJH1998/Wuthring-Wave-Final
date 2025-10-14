@@ -21,6 +21,7 @@ public:
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
+	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 #endif
 
 public:

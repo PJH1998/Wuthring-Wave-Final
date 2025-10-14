@@ -2,7 +2,7 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
-class CModel_Instance : public CComponent
+class ENGINE_DLL CModel_Instance : public CComponent
 {
 private:
 	explicit CModel_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -23,12 +23,13 @@ public:
 
 #ifdef _DEBUG
 	_bool								Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
+	void								Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix);
 #endif
 
 public:
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex);
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType);
-
+	
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
@@ -39,6 +40,8 @@ private:
 	vector<class CMeshMaterial*>	m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
+	_float m_MinPos[3] = { FLT_MAX,FLT_MAX ,FLT_MAX };
+	_float m_MaxPos[3] = { FLT_MIN ,FLT_MIN ,FLT_MIN };
 
 private:
 	HRESULT							Ready_Mesh(ifstream& InputFile);

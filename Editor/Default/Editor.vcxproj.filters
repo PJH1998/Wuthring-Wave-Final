@@ -67,6 +67,9 @@
     <Filter Include="01. Level\UI\Temp Props\Temp Base">
       <UniqueIdentifier>{da304443-8e65-40c7-801f-1c98931ea92a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Particle">
+      <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -123,6 +126,16 @@
     <ClInclude Include="..\Public\AnimationActor.h">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotifyTool.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>01. Level\Effect\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
@@ -186,6 +199,12 @@
     <ClCompile Include="..\Private\AnimationActor.cpp">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\AnimNotifyTool.cpp">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
@@ -203,5 +222,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
       <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
     </FxCompile>
+    <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>01. Level\Effect\Particle</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

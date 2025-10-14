@@ -11,12 +11,18 @@ public:
 		LEVEL eLevel = {};
 		_wstring strShaderTag = {};
 		_wstring strModelTag = {};
+		_string strModelDatPath = {};
+
 		_uint iShaderPath = {};
 
 		// 초기 Transform 설정
 		_float3 vPostion = {};
 		_float3 vRotation = {};
 		_float3 vScale = {};
+
+
+
+		// 무기도 장착 가능하게?..
 	}ANIMATION_ACTOR_DESC;
 
 private:
@@ -31,8 +37,25 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
-
 	virtual void Render_Shadow() override;
+
+
+
+#ifdef _DEBUG
+public:
+	const vector<_string>& Get_AnimationNames() const;
+	_float* Get_TrackPositionPtr(const _string& strAnimName);
+	_float	Get_Duration(const _string& strAnimName);
+
+	const _string& Get_CurrentAnimationNames() const;
+	const _float Get_CurrentAnimationDuration() const;
+
+	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
+	void Set_TrackPosition(_float fTrackPosition);
+	void Set_PlayAnimation(_bool IsPlay);
+
+#endif // _DEBUG
+
 
 private:
 	LEVEL m_eCurLevel = {LEVEL::END};
@@ -41,6 +64,11 @@ private:
 	_uint m_iShaderPath = {};
 	_string m_strCurrentAnimation = {};
 	_float m_fTrackPosition = {};
+	_bool m_IsPlayAnimation = { true };
+
+	_float m_fTimeDelta = {}; // Stop 상태에서도 PlayAnimation 동작을 위함.
+
+	_string m_strModelDatPath = {}; // 
 
 private:
 	void Bind_Resources();

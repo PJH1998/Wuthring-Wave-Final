@@ -73,26 +73,22 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 		CRASH("Shape Error");
 	}
 
-	BodyCreationSettings bodySetting(
-		BodyShape,									// Shape
-		Vec3(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z),				// Position
-		Quat(pDesc->vQuat.x, pDesc->vQuat.y, pDesc->vQuat.z, pDesc->vQuat.w),	// Quat
-		pDesc->eType,								// Motion Type
-		ObjectLayer(pDesc->iLayer)				// Collision Layer
-	);
-	MassProperties mp;
-	mp.ScaleToMass(1.f);
+	if (false == pDesc->isCharacter)
+		Ready_Body(pDesc, BodyShape);
+	else
+		Ready_Character(pDesc, BodyShape);
+	
+	return S_OK;
+}
 
-	bodySetting.mMassPropertiesOverride = mp;
-	// 관성 (직접 설정한 질량 사용하는 세팅)
-	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
-
-	// GameObject(Owner) -> UserData로 전달
-	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
-
-	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
-	m_BodyID = m_pBody->GetID();
-
+HRESULT CRigidbody::Render()
+{
+#ifdef _DEBUG
+	if(nullptr != m_pBody)
+		m_pGameInstance->DrawShape(m_pBody->GetShape());
+	if (nullptr != m_pCharacter)
+		m_pGameInstance->DrawShape(m_pCharacter->GetShape());
+#endif
 	return S_OK;
 }
 
@@ -114,6 +110,20 @@ void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
 	_vector vQuaternion = XMVectorSet(vRotation.GetX(), vRotation.GetY(), vRotation.GetZ(), vRotation.GetW());
 	pTransform->Quaternion(vQuaternion);
 	pTransform->Set_State(STATE::POSITION, XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
+}
+
+_bool CRigidbody::IsLand(_float3* pNormalOut)
+{
+	if (nullptr == m_pCharacter)
+		return false;
+
+	if (nullptr != pNormalOut)
+	{
+		Vec3 vNormal = m_pCharacter->GetGroundNormal();
+		*pNormalOut = _float3(vNormal.GetX(), vNormal.GetY(), vNormal.GetZ());
+	}
+
+	return m_pCharacter->IsSupported();
 }
 
 const JPH::Array<Vec3> CRigidbody::ConvertToArrayVec3(CModel* pModel)
@@ -178,6 +188,44 @@ void CRigidbody::Make_MeshShape(void* pArg)
 	}
 }
 
+void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
+{
+	BodyCreationSettings bodySetting(
+		BodyShape,									// Shape
+		Vec3(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z),				// Position
+		Quat(pDesc->vQuat.x, pDesc->vQuat.y, pDesc->vQuat.z, pDesc->vQuat.w),	// Quat
+		pDesc->eType,								// Motion Type
+		ObjectLayer(pDesc->iLayer)				// Collision Layer
+	);
+	MassProperties mp;
+	mp.ScaleToMass(1.f);
+
+	bodySetting.mMassPropertiesOverride = mp;
+	// 관성 (직접 설정한 질량 사용하는 세팅)
+	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
+
+	// GameObject(Owner) -> UserData로 전달
+	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
+
+	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
+	m_BodyID = m_pBody->GetID();
+}
+
+void CRigidbody::Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
+{
+	CharacterSettings CharacterSetting;
+	CharacterSetting.mLayer = ObjectLayer(pDesc->iLayer);
+	CharacterSetting.mFriction = 1.f;
+	CharacterSetting.mGravityFactor = 0.f;
+	CharacterSetting.mShape = BodyShape;
+
+	m_pCharacter = m_pGameInstance->Register_Character(CharacterSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
+	ASSERT_CRASH(m_pCharacter);
+	m_pCharacter->AddToPhysicsSystem();
+
+	m_BodyID = m_pCharacter->GetBodyID();
+}
+
 CRigidbody* CRigidbody::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CRigidbody* pInstance = new CRigidbody(pDevice, pContext);
@@ -209,4 +257,8 @@ void CRigidbody::Free()
 	__super::Free();
 
 	m_pOwner = nullptr;
+
+	if (nullptr != m_pCharacter)
+		m_pCharacter->RemoveFromPhysicsSystem();
+	Safe_Delete(m_pCharacter);
 }

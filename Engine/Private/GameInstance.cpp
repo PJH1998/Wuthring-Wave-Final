@@ -140,10 +140,10 @@ HRESULT CGameInstance::Draw()
 	m_pLevel_Manager->Render();
 
 #ifdef _DEBUG
-	ASSERT_CRASH(m_pGUIManager);
-	m_pGUIManager->Render();
 	ASSERT_CRASH(m_pPhysicsManager);
 	m_pPhysicsManager->Render();
+	ASSERT_CRASH(m_pGUIManager);
+	m_pGUIManager->Render();
 #endif
 
 	return S_OK;
@@ -416,6 +416,16 @@ Body* CGameInstance::Register_Body(const BodyCreationSettings& BodySetting, Body
 {
 	return m_pPhysicsManager->Register_Body(BodySetting, pOut);
 }
+Character* CGameInstance::Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+{
+	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
+}
+#ifdef _DEBUG
+void CGameInstance::DrawShape(const Shape* pShape)
+{
+	m_pPhysicsManager->DrawShape(pShape);
+}
+#endif
 #pragma endregion
 
 #pragma region PIPELINE

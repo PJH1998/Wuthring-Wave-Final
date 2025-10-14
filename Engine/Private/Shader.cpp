@@ -38,7 +38,7 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
     D3DX11_TECHNIQUE_DESC TechniqueDesc = {};
     pTechnique->GetDesc(&TechniqueDesc);
     m_iNumPasses = TechniqueDesc.Passes;
-
+    
     for (_uint i = 0; i < m_iNumPasses; ++i)
     {
         ID3DX11EffectPass* pPass = pTechnique->GetPassByIndex(i);
@@ -131,6 +131,28 @@ HRESULT CShader::Bind_Value(const _char* pConstantName, const void* pValue, _uin
 
     return pVariable->SetRawValue(pValue, 0, iLength);
 }
+
+#ifdef _DEBUG
+const char* CShader::Get_PassName(_uint iNumPass)
+{
+    ID3DX11EffectTechnique* pTechnique = m_pEffect->GetTechniqueByIndex(0);
+
+    if (nullptr == pTechnique)
+        return nullptr;
+
+    D3DX11_TECHNIQUE_DESC TechniqueDesc = {};
+    pTechnique->GetDesc(&TechniqueDesc);
+    m_iNumPasses = TechniqueDesc.Passes;
+
+    ID3DX11EffectPass* pPass = pTechnique->GetPassByIndex(iNumPass);
+    if (nullptr == pPass)
+        return nullptr;
+    D3DX11_PASS_DESC PassDesc = {};
+    pPass->GetDesc(&PassDesc);
+
+    return PassDesc.Name;
+}
+#endif
 
 CShader* CShader::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* strFilePath, const D3D11_INPUT_ELEMENT_DESC* Elements, _uint iNumElements)
 {

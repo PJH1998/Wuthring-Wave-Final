@@ -154,6 +154,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\AnimationActor.h" />
     <ClInclude Include="..\Public\AnimationTool.h" />
+    <ClInclude Include="..\Public\AnimNotifyTool.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
     <ClInclude Include="..\Public\Editor_Define.h" />
@@ -166,7 +167,9 @@
     <ClInclude Include="..\Public\Level_Shader.h" />
     <ClInclude Include="..\Public\Level_UI.h" />
     <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\MapObject_Instance.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
+    <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -180,6 +183,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\AnimationActor.cpp" />
     <ClCompile Include="..\Private\AnimationTool.cpp" />
+    <ClCompile Include="..\Private\AnimNotifyTool.cpp" />
     <ClCompile Include="..\Private\EditorApp.cpp" />
     <ClCompile Include="..\Private\EditorPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -192,7 +196,9 @@
     <ClCompile Include="..\Private\Level_Shader.cpp" />
     <ClCompile Include="..\Private\Level_UI.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
+    <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

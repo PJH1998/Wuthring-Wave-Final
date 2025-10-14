@@ -6,11 +6,12 @@ NS_BEGIN(Editor)
 class CAnimationTool final : public CBase
 {
 private:
-	enum class MODE
+	enum class MODE : _uint
 	{
 		CONVERT_FBX_TO_DAT = 0, 
-		VIEW_DAT = 1, 
-		EDIT_ANIMATION = 2, // 애니메이션 수정. (Notify)?
+		LOAD_DAT = 1, 
+		CREATE_ACTOR = 2,
+		EDIT_ANIMATION = 3, // 애니메이션 수정. (Notify)?
 		END
 	};
 
@@ -32,26 +33,27 @@ private:
 	// 1 Depth Menu
 	void Render_Editor();
 	void Render_DebugWindow();
-	void Render_SelectMode();
 	void Render_Menu();
 
 
 private:
 	// 2 Depth Menu
 	void RenderUI_ConvertFbx();
-	void RenderUI_ViewDat();
+	void RenderUI_CreateActor();
 	void RenderUI_EditAnimation();
 
 private:
 	// 3 Depth Menu
 	void LoadDat();
-	void RenderUI_Prototype();
-
+	void RenderUI_ModelPrototype();
+	void RenderUI_AnimationList();
 
 private:
 	// 4 Depth Menu
-	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
-	void Render_Model_Inspector();
+	void Render_Model_Detail();
+	void Render_Animation_Detail();
+
+	
 	
 
 private:
@@ -61,22 +63,41 @@ private:
 	ID3D11DeviceContext* m_pContext = { nullptr };
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
+	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
 
-	// 아. ImGui string밖에 안됨.
-	list<_string> m_ModelNames; // 생성된 Model Component들. => .dat를 읽어와서 저장합니다.
-	list<_string> m_ActorNames; // 생성된 GameObject들.
+	// Prototype에 저장하고 이름만 가져옵니다.
+	list<_string> m_ModelNames; // 모델 컴포넌트 
+	list<_string> m_ActorNames; // 실 생성 객체. 
 
+	typedef map<const _wstring, class CAnimationActor*> ANIMATIONACTORS;
+	ANIMATIONACTORS m_AnimationActors;
+
+	typedef map<const _wstring, const _string> MODELPATHS;
+	MODELPATHS	m_ModelDatPaths;
+
+	// 생성한 객체에 대한 동적제어를 어떻게할까?
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
-	_float m_fEditorAlpha = { 1.f };
+	_wstring m_wSelected_AnimActorTag = {};
+	_string m_Selected_AnimActorTag = {};
+
+
+private:
+	_string m_Selected_AnimationTag = {};
+	_float m_fTrackPosition = {};
+	_float m_fDuration = {};
+	_bool m_IsVisibleNotify = { false };
+	_bool m_IsPlayAnimation = { true };
 	
-
-
+private:
+	_float m_fEditorAlpha = { 1.f };
 
 private:
 	// 헬퍼 함수
 	wstring StringToWstring(const std::string& str);
+	string WstringToString(const std::wstring& wstr);
+	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	
 

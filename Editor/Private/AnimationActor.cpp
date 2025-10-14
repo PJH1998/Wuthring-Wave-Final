@@ -1,7 +1,6 @@
 #include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
-#include "MapObject.h"
 
 CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
@@ -32,11 +31,14 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
     
-   /* _float3 vRadian = { 
+    _float3 vRadian = { 
         XMConvertToRadians(pDesc->vRotation.x),
         XMConvertToRadians(pDesc->vRotation.y),
         XMConvertToRadians(pDesc->vRotation.z) };
-    m_pTransformCom->Quaternion(vRadian);*/
+    m_pTransformCom->Quaternion(vRadian);
+
+    // Model의 Dat Folder Path
+    m_strModelDatPath = pDesc->strModelDatPath;
 
 
     if (FAILED(Ready_Components(pDesc)))
@@ -45,7 +47,8 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[1];
+    // Default는 0번 애니메이션 실행.
+    m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
 }
@@ -58,7 +61,11 @@ void CAnimationActor::Priority_Update(_float fTimeDelta)
 void CAnimationActor::Update(_float fTimeDelta)
 {
     CContainerObject::Update(fTimeDelta);
-    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
+    m_fTimeDelta = fTimeDelta;
+
+    if (m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -99,9 +106,62 @@ void CAnimationActor::Render_Shadow()
 
 }
 
+#ifdef _DEBUG
+const vector<_string>& CAnimationActor::Get_AnimationNames() const
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_AnimationNames();
+}
+
+_float* CAnimationActor::Get_TrackPositionPtr(const _string& strAnimName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_TrackPositionPtr(strAnimName);
+}
+
+_float CAnimationActor::Get_Duration(const _string& strAnimName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_Duration(strAnimName);
+}
+
+// Notify에서 사용할 현재 선택된 애니메이션 이름
+const _string& CAnimationActor::Get_CurrentAnimationNames() const
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_strCurrentAnimation;
+}
+
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 TrackPosition
+const _float CAnimationActor::Get_CurrentAnimationDuration() const
+{
+    ASSERT_CRASH(m_pModelCom);
+    return m_pModelCom->Get_Duration(m_strCurrentAnimation);
+}
+
+
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
+
+void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
+{
+    ASSERT_CRASH(m_pModelCom);
+    // 어차피 현재거 설정하니까 매개변수로 가져올 필요가 없을 듯.
+    m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
+
+    // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
+    if (!m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
+
+}
+void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
+{
+    m_IsPlayAnimation = IsPlay;
+}
+#endif
+
+// 1. 행렬 
 void CAnimationActor::Bind_Resources()
 {
-    // 1. 행렬 
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
 
@@ -121,9 +181,8 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
         CRASH("Failed Ready_ComShader");
         return E_FAIL;
     }
-        
 
-    // Model =>
+    // Model
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strModelTag,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
     {
@@ -163,4 +222,8 @@ CAnimationActor* CAnimationActor::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 
 void CAnimationActor::Free()
 {
+    CContainerObject::Free();
+    Safe_Release(m_pModelCom);
+    Safe_Release(m_pShaderCom);
+
 }

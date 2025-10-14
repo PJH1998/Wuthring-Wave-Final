@@ -11,7 +11,6 @@ CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLevel_Logo::Initialize()
 {
 	// Rigidbody Sample
-
 	//CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
 	//BoxBodyDesc.eShape = SHAPE::BOX;
 	//BoxBodyDesc.vPos = _float3(0.f, 100.f, 0.f);
@@ -87,7 +86,7 @@ void CLevel_Logo::Free()
 {
     __super::Free();
 
-	//Safe_Release(m_pRigidbody1);
+	Safe_Release(m_pRigidbody1);
 	//Safe_Release(m_pRigidbody2);
 	//Safe_Release(m_pRigidbody3);
 }
