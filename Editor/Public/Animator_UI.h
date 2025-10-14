@@ -2,8 +2,6 @@
 #include "Component.h"
 #include "Level_UI.h"
 
-#define __UIEditor
-
 // UI의 애니메이션 정보를 바탕으로 실질적인 애니메이션을 돌리는 클래스
 NS_BEGIN(Editor)
 
@@ -49,6 +47,7 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
+	CLevel_UI::UI_ANIM_DESC* Get_CurAnimDesc();
 
 private:
 	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);

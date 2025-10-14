@@ -153,6 +153,11 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
+CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Get_CurAnimation()
+{
+    return m_pCurAnimDesc;
+}
+
 // Fix_LerpRatio, Calc_Lerp 두개 합쳐서
 // 여러 점을 기준으로 위치가 부드럽게 보간되는 것도 고려..? 근데 의미가 있나
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
@@ -179,6 +184,9 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // 텍스쳐는 이전 값 그대로 사용해야 하고, Alpha, Transform과 같은 값은 LerpType 에 따른 보간을 이용해서 적용해야 함
     // LerpType 은 Linear, Cubic
 
+    // 현재 방식은 단순하게 점을 따라 일직선상으로 이동하기만 하는데,
+    // 필요에 따라서는 점 여러개를 인자로써 통하는 함수를 이용하여 자연스러운 곡선 움직임이 필요할수도?
+
 
     if (m_pCurAnimDesc == nullptr)
         return;
@@ -199,8 +207,9 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // 최종 현재 키프레임 (int로 내림)
 
 
-
-    // Calculate Ratio..
+    // ==============================
+    // * Calculate Ratio..
+    // ==============================
     _uint iFrame_LerpStart = {};        // 프레임 값
     _uint iFrame_LerpEnd = {};          // 프레임 값
     _uint iFrame_StartIndex = {};       // 순수 인덱스
@@ -232,8 +241,9 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->iLerpType); // 이전 키프레임와 현재 키프레임 간의 최종 보간 비율
 
 
-
-    // Calculate Results..
+    // ==============================
+    // * Calculate Results..
+    // ==============================
     _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
     _float fResultAlpha = Calc_Lerp(
         m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha, 
@@ -259,8 +269,9 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
         fFixedLerpRatio)
     );
 
-
-    // Apply Results..
+    // ==============================
+    // * Apply Results..
+    // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     
