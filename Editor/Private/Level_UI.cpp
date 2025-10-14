@@ -292,19 +292,14 @@ void CLevel_UI::Update_SaveLoad()
     {
         CCustom_UI::CUSTOM_UI_DESC tLoadUIInfoDesc = {};
 
-        // Output 용이라서 vPos vRot 이런게 무의미하게 날아가는듯
-        // 이걸 그냥 Transform에 다이렉트로?
         ifstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIInfo.json");
         json jUIInfoData = {};
         if (file.is_open()) {
             file >> jUIInfoData;
         }
 
-        tLoadUIInfoDesc.iNumFiles        = jUIInfoData["tUIDesc"]["iNumFiles"];
-        _string strFileName = jUIInfoData["tUIDesc"]["strFileName"].get<string>();
-        tLoadUIInfoDesc.strFileName      = STR2WSTR(strFileName);
-        _string strFilePath = jUIInfoData["tUIDesc"]["strFilePath"].get<string>();
-        tLoadUIInfoDesc.strFilePath      = STR2WSTR(strFilePath);
+        from_json(jUIInfoData["tUIDesc"], tLoadUIInfoDesc);
+
 
         _float3 vPos = {jUIInfoData["vPos"][0], jUIInfoData["vPos"][1], jUIInfoData["vPos"][2]};    m_vCurObjPos = vPos;
         _float3 vRot = {jUIInfoData["vRot"][0], jUIInfoData["vRot"][1], jUIInfoData["vRot"][2]};    m_vCurObjRot = vRot;
@@ -367,6 +362,37 @@ void CLevel_UI::Update_SaveLoad()
     ImGui::SameLine();
     if (ImGui::Button("Load##AnimLoad", buttonSize))
     {
+        // Load
+        UI_ANIM_DESC tLoadAnimDesc = {};
+
+        ifstream file("../../Client/Bin/Resource/UI/Test/Json/testCurUIAnim.json");
+        json jUIAnimData = {};
+        if (file.is_open()) {
+            file >> jUIAnimData;
+        }
+
+        from_json(jUIAnimData, tLoadAnimDesc);
+
+        //tLoadAnimDesc.tUIDesc.iNumFiles = jUIAnimData["tUIDesc"]["iNumFiles"];
+        //_string strFileName = jUIAnimData["tUIDesc"]["strFileName"].get<string>();
+        //tLoadAnimDesc.tUIDesc.strFileName = STR2WSTR(strFileName);
+        //_string strFilePath = jUIAnimData["tUIDesc"]["strFilePath"].get<string>();
+        //tLoadAnimDesc.tUIDesc.strFilePath = STR2WSTR(strFilePath);
+
+        //tLoadAnimDesc.iLerpType     = jUIAnimData["iLerpType"];
+        //tLoadAnimDesc.isLoop        = jUIAnimData["isLoop"];
+        //_string strAnimName = jUIAnimData["strAnimName"].get<string>();
+        //tLoadAnimDesc.strAnimName = STR2WSTR(strAnimName);
+
+        //for (_uint i = 0; i < jUIAnimData["iNumKeyFrame"]; i++)
+        //{
+        //    UI_ANIM_KEYFRAME_DESC tKeyFrameDesc = {};
+        //    from_json(jUIAnimData["vecKeyFrames"][i], tKeyFrameDesc);
+        //    tLoadAnimDesc.vecKeyFrames.push_back(tKeyFrameDesc);
+        //}
+
+        // 이제 담긴 걸..
+
 
     }
 

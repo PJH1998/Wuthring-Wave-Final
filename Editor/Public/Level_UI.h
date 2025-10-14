@@ -111,6 +111,7 @@ inline json vec_to_json(const std::vector<_float3>& vec)
 	return j;
 }
 
+
 inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
 	j = json{
@@ -124,7 +125,18 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 	};
 }
 
-inline void to_json(json& j, const std::vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)
+inline void from_json(const json& j, CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
+{
+	d.fAlpha			= j["fAlpha"];//아오이거왜이럼
+	d.iKeyframeIndex	= j["iKeyframeIndex"];
+	d.iTexIndex			= j["iTexIndex"];
+
+	d.vPos = { j["vecPos"][0], j["vecPos"][1], j["vecPos"][2] };
+	d.vRot = { j["vecRot"][0], j["vecRot"][1], j["vecRot"][2] };
+	d.vSca = { j["vecSca"][0], j["vecSca"][1], j["vecSca"][2] };
+}
+
+inline void to_json(json& j, const vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)
 {
 	j = json::array();
 	for (const auto& v : vec)
@@ -135,18 +147,46 @@ inline void to_json(json& j, const std::vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>
 	}
 }
 
+inline void from_json(const json& j, vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)
+{
+	vec.clear();
+	vec.reserve(j.size());
+
+	for (const auto& element : j)
+	{
+		CLevel_UI::UI_ANIM_KEYFRAME_DESC desc = {};
+		from_json(element, desc);
+		vec.push_back(desc);
+	}
+}
+
 inline void to_json(json& j, const CLevel_UI::UI_ANIM_DESC& d)
 {
 	json vecKeyFrames = {};
 	to_json(vecKeyFrames, d.vecKeyFrames);
 
+	json j_tUIDesc = {};
+	to_json(j_tUIDesc, d.tUIDesc);
+
 	j = json{
+		{ "tUIDesc", j_tUIDesc },
 		{ "strAnimName", _string(d.strAnimName.begin(), d.strAnimName.end()) },
 		{ "iNumKeyFrame", d.vecKeyFrames.size()},
 		{ "vecKeyFrames", vecKeyFrames },
 		{ "iLerpType", d.iLerpType },
 		{ "isLoop", d.isLoop }
 	};
+}
+
+inline void from_json(const json& j, CLevel_UI::UI_ANIM_DESC& d)
+{
+	from_json(j["vecKeyFrames"], d.vecKeyFrames);
+	from_json(j["tUIDesc"], d.tUIDesc);
+
+	d.iLerpType		= j["iLerpType"];
+	d.isLoop		= j["isLoop"];
+	_string strAnimName = j["strAnimName"].get<_string>();
+	d.strAnimName	= _wstring(strAnimName.begin(), strAnimName.end());
 }
 
 inline void to_json(json& j, const CLevel_UI::UI_INFO_DESC& d)
@@ -160,4 +200,13 @@ inline void to_json(json& j, const CLevel_UI::UI_INFO_DESC& d)
 		{ "vRot", {d.vRot.x, d.vRot.y, d.vRot.z} },
 		{ "vSca", {d.vSca.x, d.vSca.y, d.vSca.z} }
 	};
+}
+
+inline void from_json(const json& j, CLevel_UI::UI_INFO_DESC& d)
+{
+	from_json(j["tUIDesc"], d.tUIDesc);
+
+	d.vPos = {j["vPos"][0], j["vPos"][1], j["vPos"][2]};
+	d.vRot = {j["vRot"][0], j["vRot"][1], j["vRot"][2]};
+	d.vSca = {j["vSca"][0], j["vSca"][1], j["vSca"][2]};
 }

@@ -83,3 +83,12 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		{ "iNumFiles", d.iNumFiles }
 	};
 }
+
+inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
+{
+	_string strFilePath = j["strFilePath"].get<_string>();
+	d.strFilePath	= _wstring(strFilePath.begin(), strFilePath.end());
+	_string strFileName = j["strFileName"].get<_string>();
+	d.strFileName   = _wstring(strFileName.begin(), strFileName.end());
+	d.iNumFiles		= j["iNumFiles"];
+}
