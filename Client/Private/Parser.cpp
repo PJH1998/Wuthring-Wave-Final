@@ -9,7 +9,7 @@ CParser::CParser()
 	Safe_AddRef(m_pGameInstance);
 }
 
-void CParser::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
+void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, LEVEL eLevel)
 {
 
 }

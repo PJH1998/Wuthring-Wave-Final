@@ -12,7 +12,7 @@ private:
 
 public:
 	// File°æ·Î, 
-	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	void							Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, LEVEL eLevel);
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
