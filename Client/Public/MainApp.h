@@ -17,7 +17,8 @@ public:
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };
-	ID3D11Device*				m_pDevice = { nullptr };
+	class CParser*					m_pParser = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
 	_bool							m_isChangeLevel = { false };

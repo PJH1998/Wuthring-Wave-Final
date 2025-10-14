@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "MainApp.h"
+#include "Parser.h"
 
 #include "Event_Level.h"
 
@@ -7,8 +8,11 @@
 
 #include "Level_Logo.h"
 
+#include "Level_Test.h"
+
 CMainApp::CMainApp()
-	: m_pGameInstance { CGameInstance::GetInstance() }
+	: m_pGameInstance { CGameInstance::GetInstance() },
+	m_pParser { CParser::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
 }
@@ -70,6 +74,8 @@ void CMainApp::Post_Update()
 			case LEVEL::GAMEPLAY:
 				// TODO
 				break;
+			case LEVEL::TEST:
+				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -189,5 +195,6 @@ void CMainApp::Free()
 	Safe_Release(m_pContext);
 
 	m_pGameInstance->Release_Engine();
+	Safe_Release(m_pParser);
 	Safe_Release(m_pGameInstance);
 }

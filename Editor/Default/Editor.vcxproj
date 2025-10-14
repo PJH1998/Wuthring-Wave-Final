@@ -167,8 +167,8 @@
     <ClInclude Include="..\Public\Level_Map.h" />
     <ClInclude Include="..\Public\Level_Shader.h" />
     <ClInclude Include="..\Public\Level_UI.h" />
-    <ClInclude Include="..\Public\MapObject.h" />
-    <ClInclude Include="..\Public\MapObject_Instance.h" />
+    <ClInclude Include="..\Public\Edit_MapObject.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
@@ -197,8 +197,8 @@
     <ClCompile Include="..\Private\Level_Map.cpp" />
     <ClCompile Include="..\Private\Level_Shader.cpp" />
     <ClCompile Include="..\Private\Level_UI.cpp" />
-    <ClCompile Include="..\Private\MapObject.cpp" />
-    <ClCompile Include="..\Private\MapObject_Instance.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />

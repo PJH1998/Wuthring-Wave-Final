@@ -1,22 +1,22 @@
 #include"Editorpch.h"
-#include "MapObject_Instance.h"
+#include "Edit_MapObject_Instance.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
 #include"Event_Level.h"
 #include "AnimationActor.h"
 
-CMapObject_Instance::CMapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_MapObject_Instance::CEdit_MapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice,pContext)
 {
 }
 
-CMapObject_Instance::CMapObject_Instance(const CMapObject_Instance& Prototype)
+CEdit_MapObject_Instance::CEdit_MapObject_Instance(const CEdit_MapObject_Instance& Prototype)
     :CGameObject(Prototype)
 {
 }
 
 
-HRESULT CMapObject_Instance::Initialize_Prototype()
+HRESULT CEdit_MapObject_Instance::Initialize_Prototype()
 {
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
@@ -24,7 +24,7 @@ HRESULT CMapObject_Instance::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
+HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 {
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -37,12 +37,12 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CMapObject_Instance::Priority_Update(_float fTimeDelta)
+void CEdit_MapObject_Instance::Priority_Update(_float fTimeDelta)
 {
 
 }
 
-void CMapObject_Instance::Update(_float fTimeDelta)
+void CEdit_MapObject_Instance::Update(_float fTimeDelta)
 {
     if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
     {
@@ -56,12 +56,12 @@ void CMapObject_Instance::Update(_float fTimeDelta)
     }
 }
 
-void CMapObject_Instance::Late_Update(_float fTimeDelta)
+void CEdit_MapObject_Instance::Late_Update(_float fTimeDelta)
 {
     m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMapObject_Instance::Render()
+void CEdit_MapObject_Instance::Render()
 {
     Bind_Resources();
 
@@ -77,12 +77,12 @@ void CMapObject_Instance::Render()
     }
 }
 
-void CMapObject_Instance::Render_Shadow()
+void CEdit_MapObject_Instance::Render_Shadow()
 {
 
 }
 
-void CMapObject_Instance::Set_ImGuiOption()
+void CEdit_MapObject_Instance::Set_ImGuiOption()
 {
     ImGuiID PickID = ImGui::GetID("MapPick");
     char Pick_buffer[30];
@@ -173,7 +173,7 @@ void CMapObject_Instance::Set_ImGuiOption()
 
 }
 
-HRESULT CMapObject_Instance::Ready_Component(void* pArg)
+HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
     //이 부분 나중에 .Dat로드할때 데이터화 시켜서 로드 시킬것.
     //ifstream File();
@@ -206,15 +206,15 @@ HRESULT CMapObject_Instance::Ready_Component(void* pArg)
     return S_OK;
 }
 
-void CMapObject_Instance::Bind_Resources()
+void CEdit_MapObject_Instance::Bind_Resources()
 {
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 }
 
-CMapObject_Instance* CMapObject_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_MapObject_Instance* CEdit_MapObject_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CMapObject_Instance* pInstance = new CMapObject_Instance(pDevice, pContext);
+    CEdit_MapObject_Instance* pInstance = new CEdit_MapObject_Instance(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
@@ -225,9 +225,9 @@ CMapObject_Instance* CMapObject_Instance::Create(ID3D11Device* pDevice, ID3D11De
     return pInstance;
 }
 
-CGameObject* CMapObject_Instance::Clone(void* pArg)
+CGameObject* CEdit_MapObject_Instance::Clone(void* pArg)
 {
-    CMapObject_Instance* pInstance = new CMapObject_Instance(*this);
+    CEdit_MapObject_Instance* pInstance = new CEdit_MapObject_Instance(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
@@ -238,7 +238,7 @@ CGameObject* CMapObject_Instance::Clone(void* pArg)
     return pInstance;
 }
 
-void CMapObject_Instance::Free()
+void CEdit_MapObject_Instance::Free()
 {
     __super::Free();
     Safe_Release(m_pModelCom);

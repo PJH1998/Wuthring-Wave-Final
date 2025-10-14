@@ -1,22 +1,23 @@
 #include"Editorpch.h"
-#include "MapObject.h"
+#include "Edit_MapObject.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
 #include"Event_Level.h"
 #include "AnimationActor.h"
 #include"Level_Map.h"
 
-CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+_uint CEdit_MapObject::g_iNumObjects = {};
+CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice, pContext)
 {
 }
 
-CMapObject::CMapObject(const CMapObject& Prototype)
+CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
     :CGameObject(Prototype)
 {
 }
 
-HRESULT CMapObject::Initialize_Prototype()
+HRESULT CEdit_MapObject::Initialize_Prototype()
 {
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
@@ -24,7 +25,7 @@ HRESULT CMapObject::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CMapObject::Initialize_Clone(void* pArg)
+HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 {
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
     if (FAILED(__super::Initialize_Clone(pArg)))
@@ -65,6 +66,14 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
         if (!m_isActivate)
             return;
 
+        /*OBJECT_SAVE Save{};
+        Save.m_iNameLength = strlen(m_ModelName);
+        strcpy_s(Save.ModelName, m_ModelName);
+        Save.iShaderPassIndex = m_iShaderPassIndex;
+        XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
+        
+        event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
+
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
@@ -81,16 +90,17 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
     m_iSelectedDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedNormalIndex = new _uint[m_pModelCom->Get_NumMesh()];
+    m_iNumObject = g_iNumObjects++;
     return S_OK;
 }
 
-void CMapObject::Priority_Update(_float fTimeDelta)
+void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
     /*if(m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
         m_pGameInstance->Publish(ENUM_CLASS(LEVEL::MAP),TEXT("Model_Pick"))*/
 }
 
-void CMapObject::Update(_float fTimeDelta)
+void CEdit_MapObject::Update(_float fTimeDelta)
 {
     //if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
     if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
@@ -110,12 +120,12 @@ void CMapObject::Update(_float fTimeDelta)
     }
 }
 
-void CMapObject::Late_Update(_float fTimeDelta)
+void CEdit_MapObject::Late_Update(_float fTimeDelta)
 {
     m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMapObject::Render()
+void CEdit_MapObject::Render()
 {
     Bind_Resources();
 
@@ -130,8 +140,13 @@ void CMapObject::Render()
         }
         else
         {
-            m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-            m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+            _uint FailedCnt = {};
+            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
+                FailedCnt++;
+            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+                FailedCnt++;
+            if (FailedCnt > 1)
+                m_iShaderPassIndex = 1;
         }
 
         //이니셜라이즈 할 때 Bind_Materials 메쉬별로 한 번씩 돌려서 텍스쳐 없는 메쉬만 내가 직접 넣어서 저장할 수 있게?
@@ -142,18 +157,21 @@ void CMapObject::Render()
     }
 }
 
-void CMapObject::Render_Shadow()
+void CEdit_MapObject::Render_Shadow()
 {
 
 }
 
-void CMapObject::Set_ImGuiOption()
+void CEdit_MapObject::Set_ImGuiOption()
 {
 
     _matrix Scale, Rotation, Translation;
 
-    //사이즈가 점점 작아짐. 나중에 수정할것.
-    //m_pScale에다가 저장한 뒤 버튼 누르면 적용되게 하면 안바뀔듯.
+    //if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::PRESS && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
+    //    //추가 예정
+    
+    
+    
     ImGui::Text("Size");
     {
         ImGui::PushItemWidth(90.0f);
@@ -254,19 +272,21 @@ void CMapObject::Set_ImGuiOption()
 
         IGFD::FileDialogConfig config;
 
-        //C:\Users\dnheu\source\repos
-        config.path = "C:/Users/dnheu/source/repos";
+        //config.path = "C:/Users/dnheu/source/repos";
+        config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
-        ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", nullptr, config);
-        //ImGuiFileDialog::Instance()->OpenDialog("Texture File Load", "Import File", ".txt", config);
+        _char Text[32] = {};
+        sprintf_s(Text, "Object %d###Texture File Load", m_iNumObject);
+        ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", nullptr, config);
+        //ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", ".txt", config);
 
-        if (ImGuiFileDialog::Instance()->Display("Texture File Load")) {
+        if (ImGuiFileDialog::Instance()->Display(Text)) {
             if (ImGuiFileDialog::Instance()->IsOk()) {
                 _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
                     if (entry.is_regular_file()) {
-                        if (entry.path().string().find("_D_") != std::string::npos)
+                        if ((entry.path().string().find("_D_") != std::string::npos) || (entry.path().string().find("_D") != std::string::npos))
                         {
                             if (entry.path().extension() == ".png") {
                                 {
@@ -276,7 +296,7 @@ void CMapObject::Set_ImGuiOption()
                                 }
                             }
                         }
-                        else if (entry.path().string().find("_N_") != std::string::npos)
+                        else if (entry.path().string().find("_N_") != std::string::npos || (entry.path().string().find("_N") != std::string::npos))
                         {
                             if (entry.path().extension() == ".png") {
                                 {
@@ -292,6 +312,11 @@ void CMapObject::Set_ImGuiOption()
                 m_IsTest = !m_IsTest;
                 ImGuiFileDialog::Instance()->Close();
             }
+            else
+            {
+                ImGuiFileDialog::Instance()->Close();
+                m_IsTest = !m_IsTest;
+            }      
         }
     }
 
@@ -393,7 +418,7 @@ void CMapObject::Set_ImGuiOption()
 }
 
 
-HRESULT CMapObject::Ready_Component(void* pArg)
+HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
     //이 부분 나중에 .Dat로드할때 데이터화 시켜서 로드 시킬것.
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
@@ -405,17 +430,17 @@ HRESULT CMapObject::Ready_Component(void* pArg)
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
-        return E_FAIL;
+    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+    //    TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
+    //    return E_FAIL;
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
-        TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
-        return E_FAIL;
+    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
+    //    TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
+    //    return E_FAIL;
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
-        return E_FAIL;
+    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+    //    TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
+    //    return E_FAIL;
 
     /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model_LOD3"), reinterpret_cast<CComponent**>(&m_pModelComArray[3]), nullptr)))
@@ -439,27 +464,33 @@ HRESULT CMapObject::Ready_Component(void* pArg)
     return S_OK;
 }
 
-void CMapObject::Bind_Resources()
+void CEdit_MapObject::Bind_Resources()
 {
     m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 }
 
-void CMapObject::Export_MaterialData()
+void CEdit_MapObject::Export_MaterialData()
 {
 
     //최종 폴더 경로.
 
-    IGFD::FileDialogConfig config;
+    IGFD::FileDialogConfig config1;
+    _char ModelPath[MAX_PATH] = {};
 
-    config.path = "../../Client/Resource/";
-    config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
-    //config.flags = ImGuiFileDialogFlags_SelectDirectory;
+    strcat_s(ModelPath, filesystem::current_path().parent_path().parent_path().string().c_str());
+    strcat_s(ModelPath, "/Client/Bin/Resource/Map/");
+    strcat_s(ModelPath, m_ModelName);
+    strcat_s(ModelPath, "/");
 
-    ImGuiFileDialog::Instance()->OpenDialog("why", "Test", ".dat", config);
+    config1.path = string(ModelPath);
+    config1.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+    _char Text[32] = {};
+    sprintf_s(Text,"Object %d###Select.dat", m_iNumObject);
+    ImGuiFileDialog::Instance()->OpenDialog("Export Json", Text, ".dat", config1);
 
-    if (ImGuiFileDialog::Instance()->Display("why")) {
+    if (ImGuiFileDialog::Instance()->Display("Export Json")) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             _string strFolderName = ImGuiFileDialog::Instance()->GetCurrentPath();
             _string strTexturePath = {};
@@ -525,15 +556,22 @@ void CMapObject::Export_MaterialData()
             File << Totaljson.dump(4);
             File.close();
             m_MakeJson = !m_MakeJson;
+            ImGuiFileDialog::Instance()->Close();
+
 #pragma endregion
+        }
+        else
+        {
+            ImGuiFileDialog::Instance()->Close();
+            m_MakeJson = !m_MakeJson;
         }
     }
 }
 
 
-CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CMapObject* pInstance = new CMapObject(pDevice, pContext);
+    CEdit_MapObject* pInstance = new CEdit_MapObject(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
@@ -544,9 +582,9 @@ CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
     return pInstance;
 }
 
-CGameObject* CMapObject::Clone(void* pArg)
+CGameObject* CEdit_MapObject::Clone(void* pArg)
 {
-    CMapObject* pInstance = new CMapObject(*this);
+    CEdit_MapObject* pInstance = new CEdit_MapObject(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
@@ -557,7 +595,7 @@ CGameObject* CMapObject::Clone(void* pArg)
     return pInstance;
 }
 
-void CMapObject::Free()
+void CEdit_MapObject::Free()
 {
     __super::Free();
     Safe_Release(m_pModelCom);

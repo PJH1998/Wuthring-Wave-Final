@@ -42,8 +42,8 @@ public:
 private:
 	Menu m_eMenu = { END };
 	_uint m_iLevel = ENUM_CLASS(LEVEL::MAP);
-	class CMapObject* m_pPickedObject = { nullptr };
-	class CMapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_MapObject* m_pPickedObject = { nullptr };
+	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
