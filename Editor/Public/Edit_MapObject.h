@@ -11,7 +11,7 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CMapObject : public CGameObject
+class CEdit_MapObject : public CGameObject
 {
 public:
 	typedef struct tagMapLoad
@@ -21,10 +21,17 @@ public:
 		_float4x4* WorldMatrix = { nullptr };
 	}MAP_LOAD;
 
+	typedef struct tagMapLoad
+	{
+		_uint m_iNameLength;
+		_char ModelName[MAX_PATH] = {};
+		_uint iShaderPassIndex;
+		_float4x4 WorldMatrix;
+	}OBJECT_SAVE;
 private:
-	CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CMapObject(const CMapObject& Prototype);
-	virtual ~CMapObject() = default;
+	CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CEdit_MapObject(const CEdit_MapObject& Prototype);
+	virtual ~CEdit_MapObject() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype();
@@ -81,8 +88,12 @@ private:
 
 	_uint* m_iSelectedDiffuseIndex;
 	_uint* m_iSelectedNormalIndex;
+
+	_uint m_iNumObject = {};
 public:
-	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static _uint g_iNumObjects;
+public:
+	static CEdit_MapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
 	virtual void Free()override;
 

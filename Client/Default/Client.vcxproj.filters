@@ -84,6 +84,8 @@
     <ClInclude Include="..\Public\Dummy.h">
       <Filter>02. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\Level_Test.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -118,6 +120,8 @@
     <ClCompile Include="..\Private\Dummy.cpp">
       <Filter>02. GameObject\Dummy</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\Level_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -135,8 +139,8 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxInstance_PointParticle.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>

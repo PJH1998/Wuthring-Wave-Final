@@ -7,6 +7,8 @@
 
 #include "Level_Logo.h"
 
+#include "Level_Test.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -70,6 +72,8 @@ void CMainApp::Post_Update()
 			case LEVEL::GAMEPLAY:
 				// TODO
 				break;
+			case LEVEL::TEST:
+				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 			}
 			ASSERT_CRASH(pLevel);
 
