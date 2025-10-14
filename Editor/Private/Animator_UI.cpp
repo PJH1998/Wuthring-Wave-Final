@@ -56,26 +56,51 @@ HRESULT CAnimator_UI::Render()
 	return S_OK;
 }
 
-HRESULT CAnimator_UI::Insert_Animation(CLevel_UI::UI_ANIM_DESC* pDesc)
+HRESULT CAnimator_UI::Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc)
 {
-    for (auto& animDesc : m_vecAnimationDescs)
-        if (animDesc->strAnimName == pDesc->strAnimName)
-            return E_FAIL;
+    if (Find_Animation(Desc.strAnimName))
+        return E_FAIL;
 
-    m_vecAnimationDescs.push_back(pDesc);
+    m_vecAnimationDescs.push_back(Desc);
+    return S_OK;
+}
+
+HRESULT CAnimator_UI::Remove_Animation(_wstring strAnimName)
+{
+    CLevel_UI::UI_ANIM_DESC* pDesc = nullptr;
+
+    _uint iIndex = 0;
+    for (auto& animDesc : m_vecAnimationDescs)
+    {
+        if (animDesc.strAnimName == strAnimName)
+        {
+            pDesc = &animDesc;
+            break;
+        }
+        iIndex++;
+    }
+
+    if (m_pCurAnimDesc == pDesc)
+        m_pCurAnimDesc = nullptr;
+
+    if (!pDesc)
+        return E_FAIL;
+
+    m_vecAnimationDescs.erase(m_vecAnimationDescs.begin() + iIndex);
+    return S_OK;
+}
+
+HRESULT CAnimator_UI::Clear_Animation()
+{
+    m_pCurAnimDesc = nullptr;
+    m_vecAnimationDescs.clear();
+
     return S_OK;
 }
 
 HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
 {
-    CLevel_UI::UI_ANIM_DESC* pDesc = nullptr;
-
-    for (auto& animDesc : m_vecAnimationDescs)
-        if (animDesc->strAnimName == strAnimName)
-        {
-            pDesc = animDesc;
-            break;
-        }
+    CLevel_UI::UI_ANIM_DESC* pDesc = Find_Animation(strAnimName);
 
     if (!pDesc)
         return E_FAIL;
@@ -88,15 +113,48 @@ HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
 
 HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex)
 {
-    if (iAnimIndex >= m_vecAnimationDescs.size())
+    CLevel_UI::UI_ANIM_DESC* pDesc = Find_Animation(iAnimIndex);
+
+    if (!pDesc)
         return E_FAIL;
 
-    m_pCurAnimDesc = m_vecAnimationDescs[iAnimIndex];
+    m_pCurAnimDesc = pDesc;
     m_fElapsedTime = 0;
 
     return S_OK;
 }
 
+HRESULT CAnimator_UI::Deselect_Animation()
+{
+    m_pCurAnimDesc = nullptr;
+
+    return S_OK;
+}
+
+CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_wstring strAnimName)
+{
+    CLevel_UI::UI_ANIM_DESC* pDesc = nullptr;
+
+    for (auto& animDesc : m_vecAnimationDescs)
+        if (animDesc.strAnimName == strAnimName)
+        {
+            pDesc = &animDesc;
+            break;
+        }
+    
+    return (pDesc) ? pDesc : nullptr;
+}
+
+CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
+{
+    if (iAnimIndex >= m_vecAnimationDescs.size())
+        return nullptr;
+
+    return &m_vecAnimationDescs[iAnimIndex];
+}
+
+// Fix_LerpRatio, Calc_Lerp 두개 합쳐서
+// 여러 점을 기준으로 위치가 부드럽게 보간되는 것도 고려..? 근데 의미가 있나
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
 {
     switch (static_cast<UI_LERPTYPE>(iLerpType))
@@ -131,7 +189,7 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     const _float fSingleFrameTime = 1.f / iKeyFrameRate;
 
     _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // 현재 키프레임
-    if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.size())
+    if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
     {
         if (m_pCurAnimDesc->isLoop)
             m_fElapsedTime = 0.f;                                           // 루프 시, 범위 넘어가면 0으로
@@ -143,21 +201,28 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
 
 
     // Calculate Ratio..
-    _uint iFrame_LerpStart = {};
-    _uint iFrame_LerpEnd = {};
-    _uint iFrame_StartIndex = {};
-    _uint iFrame_EndIndex = {};
+    _uint iFrame_LerpStart = {};        // 프레임 값
+    _uint iFrame_LerpEnd = {};          // 프레임 값
+    _uint iFrame_StartIndex = {};       // 순수 인덱스
+    _uint iFrame_EndIndex = {};         // 순수 인덱스
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
         if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex <= iCurFrame)
         {
             iFrame_LerpStart = m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex;
+            iFrame_StartIndex = i;
 
             if (m_pCurAnimDesc->vecKeyFrames.size() > (i + 1))
+            {
                 iFrame_LerpEnd = m_pCurAnimDesc->vecKeyFrames[i + 1].iKeyframeIndex;
+                iFrame_EndIndex = i + 1;
+            }
             else
+            {
                 iFrame_LerpEnd = m_pCurAnimDesc->vecKeyFrames[0].iKeyframeIndex;
+                iFrame_EndIndex = 0;
+            }
         }
         else
             break;

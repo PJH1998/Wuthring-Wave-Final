@@ -70,7 +70,7 @@ private:
    
 	void				Update_SaveLoad();
 	void				Update_Inspector();
-	void				Update_AnimEditor();
+	void				Update_AnimEditor(_float fTimeDelta);
 
 private:
 	class CGameObject*			m_pCurObj = { nullptr };
@@ -80,20 +80,31 @@ private:
 	_float3						m_vCurObjRot = {};	// Euler
 	_float3						m_vCurObjSca = {};
 
+
+
 	// for Update_SaveLoad
 	_bool						m_isOn_SaveLoad = false;
+
 
 	// for Update_Hierarchy
 	vector<HIERARCHY_OBJ_DESC>	m_vecCustomUIs = {};
 
+
 	// for Update_AnimEditor
+	// ㄴAnimEditor
 	_bool						m_isOn_AnimEdit = false;
 	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
 
 	vector<UI_ANIM_KEYFRAME_DESC> m_vecUIKeyFrameDescs = {};	// Temp Keyframe
 	UI_ANIM_KEYFRAME_DESC*		m_pSelectedKeyFrameDesc = { nullptr };
 	_int						m_iLerpType = 0;
-	_bool						m_isAnimLoop = false;
+	_bool						m_isAnimLoop = true;
+
+	// ㄴAnimList
+	_bool						m_isPlayAnimation = false;
+
+	UI_ANIM_DESC*				m_pSelectedUIAnim = { nullptr };
+
 
 public:
 	static CLevel_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -127,7 +138,7 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 
 inline void from_json(const json& j, CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
-	d.fAlpha			= j["fAlpha"];//아오이거왜이럼
+	d.fAlpha			= j["fAlpha"];
 	d.iKeyframeIndex	= j["iKeyframeIndex"];
 	d.iTexIndex			= j["iTexIndex"];
 

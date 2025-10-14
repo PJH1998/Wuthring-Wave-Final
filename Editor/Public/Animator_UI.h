@@ -2,6 +2,8 @@
 #include "Component.h"
 #include "Level_UI.h"
 
+#define __UIEditor
+
 // UI의 애니메이션 정보를 바탕으로 실질적인 애니메이션을 돌리는 클래스
 NS_BEGIN(Editor)
 
@@ -36,10 +38,17 @@ public:
 public:
 	// 애니메이션 전환 관련 함수..?
 	// Play_Animation (인자) 등..
-	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC* pDesc);
+	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc);
+	HRESULT		Remove_Animation(_wstring strAnimName);
+	HRESULT		Clear_Animation();
 
 	HRESULT		Change_Animation(_wstring strAnimName);
 	HRESULT		Change_Animation(_uint iAnimIndex);
+	HRESULT		Deselect_Animation();
+
+	CLevel_UI::UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
+	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
+
 
 private:
 	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);
@@ -53,7 +62,7 @@ private:
 
 	// 애니메이션 클래스를 저장하는 게 아니라 그냥 애니메이션 Desc를 저장하고 불러와서 쓰면 되는 것이 아닌지?
 	// 그러면 컨테이너로 Map 사용
-	vector<CLevel_UI::UI_ANIM_DESC*>	m_vecAnimationDescs = {};
+	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 
 	CCustom_UI*							m_pOwner = { nullptr };

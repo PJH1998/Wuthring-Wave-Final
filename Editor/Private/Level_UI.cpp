@@ -134,7 +134,7 @@ void CLevel_UI::Update(_float fTimeDelta)
     
     Update_SaveLoad();
     Update_Inspector();
-    Update_AnimEditor();
+    Update_AnimEditor(fTimeDelta);
 
 }
 
@@ -360,7 +360,8 @@ void CLevel_UI::Update_SaveLoad()
         memset(szAnimName, 0, sizeof(szAnimName));
     }
     ImGui::SameLine();
-    if (ImGui::Button("Load##AnimLoad", buttonSize))
+    if (ImGui::Button("Load##AnimLoad", buttonSize) && 
+        m_pCurObj)
     {
         // Load
         UI_ANIM_DESC tLoadAnimDesc = {};
@@ -373,27 +374,29 @@ void CLevel_UI::Update_SaveLoad()
 
         from_json(jUIAnimData, tLoadAnimDesc);
 
-        //tLoadAnimDesc.tUIDesc.iNumFiles = jUIAnimData["tUIDesc"]["iNumFiles"];
-        //_string strFileName = jUIAnimData["tUIDesc"]["strFileName"].get<string>();
-        //tLoadAnimDesc.tUIDesc.strFileName = STR2WSTR(strFileName);
-        //_string strFilePath = jUIAnimData["tUIDesc"]["strFilePath"].get<string>();
-        //tLoadAnimDesc.tUIDesc.strFilePath = STR2WSTR(strFilePath);
 
-        //tLoadAnimDesc.iLerpType     = jUIAnimData["iLerpType"];
-        //tLoadAnimDesc.isLoop        = jUIAnimData["isLoop"];
-        //_string strAnimName = jUIAnimData["strAnimName"].get<string>();
-        //tLoadAnimDesc.strAnimName = STR2WSTR(strAnimName);
+        CAnimator_UI* ObjAnimatorCom = dynamic_cast<CAnimator_UI*> (m_pCurObj->Get_Component(L"Com_Animator_UI"));
+        if (!ObjAnimatorCom) CRASH();
 
-        //for (_uint i = 0; i < jUIAnimData["iNumKeyFrame"]; i++)
-        //{
-        //    UI_ANIM_KEYFRAME_DESC tKeyFrameDesc = {};
-        //    from_json(jUIAnimData["vecKeyFrames"][i], tKeyFrameDesc);
-        //    tLoadAnimDesc.vecKeyFrames.push_back(tKeyFrameDesc);
-        //}
-
-        // 이제 담긴 걸..
-
-
+        _wstring strCurObjName = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().strFileName;
+        _wstring strReqObjName = tLoadAnimDesc.tUIDesc.strFileName;
+        if (strCurObjName == strReqObjName)
+        {
+            if (FAILED(ObjAnimatorCom->Insert_Animation(tLoadAnimDesc)))
+            {
+                _wstring strLog = L"[Level_UI][Update_SaveLoad] Insert Animation Failed. Animation [" + tLoadAnimDesc.strAnimName + L"] Already Exist.";
+                OutputDebugString(strLog.c_str());
+            }
+            else
+            {
+                ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // 불러온 애니메이션으로 할당
+            }
+        }
+        else
+        {
+            _wstring strLog = L"[Level_UI][Update_SaveLoad] Load Failed. This Animation is not for this object.\nRequired Object Name : " + tLoadAnimDesc.tUIDesc.strFileName;
+            OutputDebugString(strLog.c_str());
+        }
     }
 
     ImGui::End();
@@ -489,6 +492,7 @@ void CLevel_UI::Update_Inspector()
             ImGui::PopItemWidth();
         }
 
+
         _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&m_vCurObjPos));
         _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(m_vCurObjRot.x), TO_RAD(m_vCurObjRot.y), TO_RAD(m_vCurObjRot.z));
         _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vCurObjSca));
@@ -496,7 +500,8 @@ void CLevel_UI::Update_Inspector()
         _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
 
         // UI 내의 Begin 때문에 적용 안되는듯. 임시로 비활성화함
-        pTargetTransform->Set_WorldMatrix(matXMEditResult);
+        if (!m_isPlayAnimation)
+            pTargetTransform->Set_WorldMatrix(matXMEditResult);
     }
 
 #pragma endregion
@@ -518,7 +523,7 @@ void CLevel_UI::Update_Inspector()
 
 }
 
-void CLevel_UI::Update_AnimEditor()
+void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 {
     if (!m_pCurObj ||
         !m_isOn_AnimEdit)
@@ -530,7 +535,13 @@ void CLevel_UI::Update_AnimEditor()
     static _int iMaxTexIndex = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().iNumFiles;
     static _float fAlpha = 0.f;
 
-    static _int iSelected = -1;
+    static _int iAnimEditorSelected = -1;
+    static _int iAnimListSelected = -1;
+
+
+    CCustom_UI* pTargetUI = dynamic_cast<CCustom_UI*>(m_pCurObj);
+    CAnimator_UI* pTargetAnimator = dynamic_cast<CAnimator_UI*>(pTargetUI->Get_Component(L"Com_Animator_UI"));
+
 
     UI_ANIM_KEYFRAME_DESC tKeyFrameDesc = {};
 
@@ -618,12 +629,12 @@ void CLevel_UI::Update_AnimEditor()
     if (ImGui::CollapsingHeader("Keyframe List"))
     {
         if (m_vecUIKeyFrameDescs.empty())
-            ImGui::Selectable("(Empty)", false);
+            ImGui::Selectable("(Empty)##AnimEdit", false);
 
         for (_uint i = 0; i < m_vecUIKeyFrameDescs.size(); i++)
         {
             _string strLabel = "Keyframe [" + to_string(i + 1) + "] | [" + to_string(m_vecUIKeyFrameDescs[i].iKeyframeIndex) + "]";
-            if (ImGui::Selectable(strLabel.c_str(), iSelected == i))
+            if (ImGui::Selectable(strLabel.c_str(), iAnimEditorSelected == i))
             {
                 m_pSelectedKeyFrameDesc = &m_vecUIKeyFrameDescs[i];
 
@@ -638,12 +649,67 @@ void CLevel_UI::Update_AnimEditor()
         }
 
     }
+    if (ImGui::CollapsingHeader("Animation List"))
+    {
+        
+        if (m_pSelectedUIAnim != nullptr &&
+            !m_isPlayAnimation)
+        {
+            // 애니메이션 재..생?
+            if (ImGui::Button("Play Animation"))
+                m_isPlayAnimation = true;
+        }
+        else if (m_pSelectedUIAnim != nullptr &&
+            m_isPlayAnimation)
+        {
+            if (ImGui::Button("Stop Animation"))
+                m_isPlayAnimation = false;
+        }
+        else if (ImGui::Button("Nothing Selected")) {}
 
+
+        if (m_pSelectedUIAnim)
+        {
+            ImGui::SameLine();
+            if (ImGui::Button("Deselect"))
+                m_pSelectedUIAnim = nullptr;
+        }
+
+
+        if (pTargetAnimator->Find_Animation(0) == nullptr)
+            ImGui::Selectable("(Empty)##AnimList", false);
+        
+        _uint iIndex = 0;
+        while (true)
+        {
+            CLevel_UI::UI_ANIM_DESC* pDesc = pTargetAnimator->Find_Animation(iIndex);
+            if (!pDesc) break;
+
+            _string strLabel = "Anim [" + to_string(iIndex) + "] | [" + _string(pDesc->strAnimName.begin(), pDesc->strAnimName.end()) + "]";
+            if (ImGui::Selectable(strLabel.c_str(), iAnimListSelected == iIndex))
+            {
+                m_pSelectedUIAnim = pDesc;
+            }
+
+            iIndex++;
+        }
+
+    }
     
-
-
-
     ImGui::End();
+
+
+
+#pragma region Update Animation
+    if (pTargetUI &&
+        pTargetAnimator->Find_Animation(0) != nullptr &&
+        m_isPlayAnimation)
+        pTargetAnimator->Update(fTimeDelta);
+
+#pragma endregion
+
+
+
 }
 
 CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

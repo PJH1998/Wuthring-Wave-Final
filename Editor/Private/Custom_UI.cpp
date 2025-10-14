@@ -44,6 +44,7 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 
     m_pAnimator_UICom->Update(fTimeDelta);
+    return;
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
