@@ -73,11 +73,13 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 		CRASH("Shape Error");
 	}
 
-	if (false == pDesc->isCharacter)
+	if (BODYTYPE::BODY == pDesc->eBodyType)
 		Ready_Body(pDesc, BodyShape);
-	else
+	else if(BODYTYPE::CHARACTER == pDesc->eBodyType)
 		Ready_Character(pDesc, BodyShape);
-	
+	else if (BODYTYPE::VIRTUAL == pDesc->eBodyType)
+		Ready_Virtual(pDesc, BodyShape);
+
 	return S_OK;
 }
 
@@ -216,7 +218,7 @@ void CRigidbody::Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShap
 	CharacterSettings CharacterSetting;
 	CharacterSetting.mLayer = ObjectLayer(pDesc->iLayer);
 	CharacterSetting.mFriction = 1.f;
-	CharacterSetting.mGravityFactor = 0.f;
+	CharacterSetting.mGravityFactor = 1.f;
 	CharacterSetting.mShape = BodyShape;
 
 	m_pCharacter = m_pGameInstance->Register_Character(CharacterSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
@@ -224,6 +226,17 @@ void CRigidbody::Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShap
 	m_pCharacter->AddToPhysicsSystem();
 
 	m_BodyID = m_pCharacter->GetBodyID();
+}
+
+void CRigidbody::Ready_Virtual(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
+{
+	CharacterVirtualSettings VirtualSetting;
+	VirtualSetting.mShape = BodyShape;
+	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
+	VirtualSetting.mInnerBodyShape = BodyShape;
+
+	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
+	ASSERT_CRASH(m_pCharacterVirtual);
 }
 
 CRigidbody* CRigidbody::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -261,4 +274,5 @@ void CRigidbody::Free()
 	if (nullptr != m_pCharacter)
 		m_pCharacter->RemoveFromPhysicsSystem();
 	Safe_Delete(m_pCharacter);
+	Safe_Delete(m_pCharacterVirtual);
 }

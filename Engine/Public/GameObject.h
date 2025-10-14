@@ -36,6 +36,7 @@ public:
 	// Manifold : 충돌 지점, normal, 겹친 정도를 갖고 있음
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
+	virtual		void			OnCollide_End(_uint iLayer, CGameObject* pOther) {}
 
 	// Pooling시, Spawn될 때 초기화 함수
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}

@@ -137,6 +137,8 @@ public:
 	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	CharacterVirtual*		Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	void				Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);
 #endif

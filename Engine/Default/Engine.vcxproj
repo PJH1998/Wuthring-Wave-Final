@@ -23,6 +23,8 @@
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\CharacterContactListenerImpl.h" />
+    <ClInclude Include="..\Public\Collider.h" />
     <ClInclude Include="..\Public\CollisionLayer.h" />
     <ClInclude Include="..\Public\Camera.h" />
     <ClInclude Include="..\Public\Camera_Manager.h" />
@@ -93,6 +95,8 @@
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp" />
+    <ClCompile Include="..\Private\Collider.cpp" />
     <ClCompile Include="..\Private\CollisionLayer.cpp" />
     <ClCompile Include="..\Private\Camera.cpp" />
     <ClCompile Include="..\Private\Camera_Manager.cpp" />

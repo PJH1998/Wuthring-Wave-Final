@@ -99,17 +99,18 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
-	m_pObject_Manager->Update(fTimeDelta);
 
+	m_pObject_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
+
+	m_pPhysicsManager->Update(fTimeDelta);
+
 	m_pObject_Manager->Late_Update(fTimeDelta);
 
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
-
-	m_pPhysicsManager->Update(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -423,6 +424,14 @@ Body* CGameInstance::Register_Body(const BodyCreationSettings& BodySetting, Body
 Character* CGameInstance::Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
+}
+CharacterVirtual* CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+{
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+}
+void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
+{
+	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
 #ifdef _DEBUG
 void CGameInstance::DrawShape(const Shape* pShape)
