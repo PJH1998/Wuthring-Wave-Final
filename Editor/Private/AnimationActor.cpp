@@ -157,6 +157,30 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
 }
+
+// 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.
+void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
+{
+    //m_pModelCom->Register_Notify(strFilePath);
+
+    auto colliderCallback = [this](const _wstring& tag, bool active) {
+        this->Collider_Active(tag, active); // 'this->'는 생략 가능
+    };
+
+    auto effectCallBack = [this]() {
+        this->Effect_Active();
+    };
+
+    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+    
+}
+void CAnimationActor::Collider_Active(const _wstring&, _bool)
+{
+
+}
+void CAnimationActor::Effect_Active()
+{
+}
 #endif
 
 // 1. 행렬 

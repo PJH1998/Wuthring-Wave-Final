@@ -38,9 +38,9 @@ void CAnimationTool::Render()
     if (m_IsVisibleNotify)
     {
         // 저장 시 모델 Tag로 저장할 때 Folder만 저장할까?
-        _string strModelDatPath = m_ModelDatPaths[m_wSelected_PrototypeModelTag];
+        _string strModelDirPath = m_ModelDirPaths[m_wSelected_PrototypeModelTag];
         ASSERT_CRASH(m_pAnimNotifyTool);
-        m_pAnimNotifyTool->Process_Notify(m_Selected_AnimationTag, strModelDatPath, m_fDuration);
+        m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, strModelDirPath, m_fDuration);
         m_pAnimNotifyTool->Render();
     }
         
@@ -210,7 +210,7 @@ void CAnimationTool::RenderUI_EditAnimation()
             iSelectedIndex = id;
             // 선택 정보저장.
             m_Selected_AnimActorTag = actorName;
-            m_wSelected_AnimActorTag = StringToWstring(actorName);
+            m_wSelected_AnimActorTag = StringToWString(actorName);
         }
     }
     ImGui::EndChild();
@@ -229,6 +229,7 @@ void CAnimationTool::LoadDat()
     _string strModelName = "Prototype_Component_Model_";
 
     _string strModelPath = {};
+    string basePathString = {};
 
     // 2. ImGui에서 파일을 오픈해서 해당 파일을 이용해서 Prototype Model 동적으로 생성
     CModel* pModelCom = { nullptr };
@@ -240,6 +241,8 @@ void CAnimationTool::LoadDat()
 
         config.path = "../../Client/Bin/Resource/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+        basePathString = config.path;
 
         ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
     }
@@ -255,11 +258,14 @@ void CAnimationTool::LoadDat()
             _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
             strModelPath = ImGuiFileDialog::Instance()->GetCurrentFileName();
 
+            // Dir 상대 경로로 저장.
+
+
             // .dat 잘라내기.
-            size_t last_dot_pos = strModelPath.find_last_of('.');
-            if (last_dot_pos != std::string::npos) {
+            size_t lastDotPos = strModelPath.find_last_of('.');
+            if (lastDotPos != string::npos) {
                 // 0번째 위치부터 '.' 위치까지 문자열을 잘라냅니다.
-                strModelName += strModelPath.substr(0, last_dot_pos);
+                strModelName += strModelPath.substr(0, lastDotPos);
                 
             }
             else
@@ -272,7 +278,7 @@ void CAnimationTool::LoadDat()
             _float fSize = 0.1f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
-            wStrModelName = StringToWstring(strModelName);
+            wStrModelName = StringToWString(strModelName);
 
             // Model Prototype 생성.
             HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
@@ -282,8 +288,16 @@ void CAnimationTool::LoadDat()
                 return;
             }
 
-            // 3. 생성이 완료되었으면 m_ModelNames에 추가. 
-            m_ModelDatPaths.emplace(wStrModelName, strFilePath);
+            // 3. 생성이 완료되었으면 필요한 정보들을 저장.
+            
+            size_t lastSlashPos = strFilePath.find_last_of("/\\");
+            string directoryPath = "";
+            if (lastDotPos != string::npos)
+            {
+                directoryPath = strFilePath.substr(0, lastSlashPos);
+                m_ModelDirPaths.emplace(wStrModelName, directoryPath);
+            }
+            
             m_ModelNames.emplace_back(strModelName);
         }
         ImGuiFileDialog::Instance()->Close();
@@ -308,7 +322,7 @@ void CAnimationTool::RenderUI_ModelPrototype()
         {
             iSelectedIndex = id;
             m_Selected_PrototypeModelTag = modelName;
-            m_wSelected_PrototypeModelTag = StringToWstring(modelName);
+            m_wSelected_PrototypeModelTag = StringToWString(modelName);
         }
     }
     ImGui::EndChild();
@@ -345,7 +359,7 @@ void CAnimationTool::RenderUI_AnimationList()
             // Animation이 변경될때마다? => NotifyTool에 해당 정보를 전달해주어야합니다. NotifyTool이 켜져있다면?
             if (m_IsVisibleNotify)
             {
-                m_pAnimNotifyTool->Process_Notify(m_Selected_AnimActorTag, "", m_fDuration);
+                m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
                 // 그리고 Animation이 바뀌면 현재 설정된 Notify 정보를 날려야한다.
                 m_pAnimNotifyTool->Clear();
             }
@@ -436,7 +450,7 @@ void CAnimationTool::Render_Model_Detail()
         }
 
         // 4. 생성이 완료되었으면 관리할 수 있게 해야함. 생성할 때 저장.
-        m_ActorNames.emplace_back(WstringToString(wstrObjTag));
+        m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
         m_AnimationActors.emplace(wstrObjTag, pActor);
@@ -517,39 +531,6 @@ void CAnimationTool::Render_Animation_Detail()
 
 
 
-wstring CAnimationTool::StringToWstring(const std::string& str)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    if (len == 0) {
-        return L"";
-    }
-
-    wstring wstr(len, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], len);
-
-    if (!wstr.empty() && wstr.back() == L'\0') {
-        wstr.pop_back();
-    }
-
-    return wstr;
-}
-
-string CAnimationTool::WstringToString(const std::wstring& wstr)
-{
-    if (wstr.empty())
-        return "";
-
-    int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
-    if (len == 0)
-        return "";
-
-    std::string str(len - 1, 0);  // -1로 null terminator 제외
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], len, NULL, NULL);
-
-    return str;
-}
-
-
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
@@ -587,7 +568,7 @@ void CAnimationTool::Free()
         Safe_Release(pair.second);
     m_AnimationActors.clear();
 
-    m_ModelDatPaths.clear();
+    m_ModelDirPaths.clear();
     
     m_ModelNames.clear();
     m_ActorNames.clear();

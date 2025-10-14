@@ -133,6 +133,9 @@
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AnimNotifyDefine.h">
+      <Filter>01. Level\Anim\Tool</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">

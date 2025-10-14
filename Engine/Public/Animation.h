@@ -20,8 +20,13 @@ public:
 #endif // _DEBUG
 
 public:
-	void				Register_Notify(const NOTIFY& AnimNotify);
+	void				Register_Notify(const NOTIFY& AnimNotify); // 기존 것
+
+	void				Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
+	
+
 	void				Sort_Notify();
+	void				Sort_AnimNotify();
 
 public:
 	HRESULT			Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
@@ -40,6 +45,10 @@ private:
 
 	_uint									m_iNotifyIndex = {};
 	vector<NOTIFY>					m_Notifies;
+
+
+	// 신규 Notify 기존것은 혹시 모를 호환성을 위해 냅둬둠.
+	vector<class CAnimNotify*> m_AnimNotifies;
 
 public:
 	static CAnimation* Create(ifstream& InputFile, const vector<class CBone*>& Bones);
