@@ -214,7 +214,7 @@ void CLevel_Map::Menu_Save_Load()
 {
     IGFD::FileDialogConfig config;
 
-    config.path = "../../Client/Bin/Resource/";
+    config.path = "../../Client/Bin/Resource/Map/MapData/";
     config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
     static _char exportText[128] = ""; // 입력 저장용 버퍼
