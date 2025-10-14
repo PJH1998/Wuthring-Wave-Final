@@ -124,9 +124,6 @@ private:
 private:
 	HRESULT Ready_Sound();
 
-
-private:
-
 public:
 	static CAnimNotifyTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel);
 	virtual	void Free() override;
