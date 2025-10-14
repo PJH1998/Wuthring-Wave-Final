@@ -7,6 +7,9 @@
 #include"Mesh_Instance.h"
 #include"MapObject_Instance.h"
 
+_float3 CLevel_Map::m_vWorldPos = {};
+_float3 CLevel_Map:: m_vWorldDir = {};
+_float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
 {
@@ -20,6 +23,7 @@ HRESULT CLevel_Map::Initialize()
         return E_FAIL;
 
     //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
+
     return S_OK;
 }
 
@@ -45,16 +49,18 @@ void CLevel_Map::Update(_float fTimeDelta)
         Menu_Light();
         break;
 
-    case Editor::CLevel_Map::MENU_SAVELOAD:
+    case Editor::CLevel_Map::MENU_MAPSAVELOAD:
         Menu_Save_Load();
         break;
-
+    case Editor::CLevel_Map::MENU_OBJECTLOAD:
+        Menu_Model_Load();
+        break;
     }
+    Make_MousePos();
 }
 
 void CLevel_Map::Render()
 {
-
 }
 
 void CLevel_Map::Menu_Select()
@@ -73,9 +79,23 @@ void CLevel_Map::Menu_Select()
             m_eMenu = MENU_LIGHT;
         }
 
-        if(ImGui::MenuItem("Save & Load")) {
-            m_eMenu = MENU_SAVELOAD;
+        if (ImGui::MenuItem("Map Save & Load")) {
+            m_eMenu = MENU_MAPSAVELOAD;
         }
+
+        if(ImGui::MenuItem("Object Save & Load")) {
+            m_eMenu = MENU_OBJECTLOAD;
+            Load_Objects();
+        }
+
+        _float4 CamPos = *m_pGameInstance->Get_CamPos();
+        _char szCamPos[64] = {};
+        sprintf_s(szCamPos, "Cam Pos - X : %.1f, Y : %.1f, Z : %.1f", CamPos.x, CamPos.y, CamPos.z);
+
+        ImGui::Text(szCamPos);
+
+        sprintf_s(szCamPos, "Picked Pos - X : %.1f, Y : %.1f, Z : %.1f", m_vPickedPos.x, m_vPickedPos.y, m_vPickedPos.z);
+        ImGui::Text(szCamPos);
         ImGui::EndMainMenuBar();
     }
 }
@@ -98,7 +118,7 @@ void CLevel_Map::Menu_RandSacpe()
 
     if (m_pPickedInstanceObject)
         m_pPickedInstanceObject->Set_ImGuiOption();
-
+#pragma region 랜드스케이프 메모
     //풀떼기들은 플레이어랑 가까이 있을 때 플레이어를 중점으로 옆으로 누움. 누운 상태로 바람에 흔들림.
     //플레이어랑 거의 겹친 풀떼기들은 Clip되는듯. 안보임.
     //움직일 때 플레이어 발바닥에 발자국 데칼 생김. 마스킹 이미지 같은 거로 하는듯?
@@ -122,6 +142,7 @@ void CLevel_Map::Menu_RandSacpe()
 
     //길찾기. 가만히 있으면 목표 위치로 일렁이는 이펙트 생기면서 길 알려줌. 무조건 1자가 아니라 좌우로 쪼끔씩 흔들리는 이펙트인듯.
     //거리가 좀 있으면 안개가 살짝 깔리는 맵도 있는 거 같음.
+#pragma endregion
     ImGui::End();
 }
 
@@ -135,11 +156,65 @@ void CLevel_Map::Menu_Light()
 
 }
 
+void CLevel_Map::Menu_Model_Load()
+{
+    //클릭 하기 전까지 마우스 위치 따라다니기?.
+    ImGui::Begin("Model Table", nullptr, ImGuiWindowFlags_NoTitleBar);
+    if (ImGui::BeginTable("Test", 1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::TableNextColumn();
+
+        for (_uint i = 0; i < m_ModelPaths.size(); ++i)
+        {
+            _char FileDrive[MAX_PATH] = {};
+            _char FileDir[MAX_PATH] = {};
+            _char FileName[MAX_PATH] = {};
+            _char FileExt[MAX_PATH] = {};
+            _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+            if (ImGui::Selectable(FileName))
+            {
+                /*_matrix PreTransformMatrix = XMMatrixIdentity();
+                _float fSize = 0.001f;
+                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
+
+                CMapObject::MAP_LOAD Desc{};
+                _float4x4 DefaultMatrix{};
+                XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+                Desc.WorldMatrix = &DefaultMatrix;
+
+                strcpy_s(Desc.ModelName, FileName);
+
+                _wstring ProtoModelName = TEXT("Prototype_Component_Model_");
+                ProtoModelName += StringToWString(Desc.ModelName);
+
+                m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), m_ModelPaths[i].c_str()));
+
+
+                _wstring ProtoObjectName = TEXT("Prototype_GameObject_MapObject_");
+                ProtoObjectName += StringToWString(Desc.ModelName);
+
+                m_pGameInstance->Add_Prototype(m_iLevel, ProtoObjectName,
+                    CMapObject::Create(m_pDevice, m_pContext));
+
+                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, ProtoObjectName
+                    , m_iLevel, TEXT("Layer_Test"), &Desc);
+            }
+
+        }
+        /*ImGui::BeginChild("ScrollObject");
+        ImGui::EndChild();*/
+        ImGui::EndTable();
+    }
+    ImGui::End();
+}
+
 void CLevel_Map::Menu_Save_Load()
 {
     IGFD::FileDialogConfig config;
 
-    config.path = "../../Client/Bin/Resource/";
+    config.path = "../../Client/Bin/Resource/Map/MapData/";
     config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
     static _char exportText[128] = ""; // 입력 저장용 버퍼
@@ -179,8 +254,8 @@ void CLevel_Map::Menu_Save_Load()
                 _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
                 ModelPath+= ImGuiFileDialog::Instance()->GetCurrentFileName();
 
-                ifstream File(ModelPath, ios::binary);
-                //ifstream File(strFilePath, ios::binary);
+                //ifstream File(ModelPath, ios::binary);
+                ifstream File(strFilePath, ios::binary);
 
                 if (!File.is_open())
                 {
@@ -189,9 +264,9 @@ void CLevel_Map::Menu_Save_Load()
 
                 _uint NameLength;
 
-                _matrix PreTransformMatrix = XMMatrixIdentity();
+                /*_matrix PreTransformMatrix = XMMatrixIdentity();
                 _float fSize = 0.001f;
-                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
+                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
 
                 CMapObject::MAP_LOAD Desc{};
 
@@ -209,20 +284,20 @@ void CLevel_Map::Menu_Save_Load()
                     MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
                     lstrcat(Model, Name);
 
-                    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/";
+                    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
                     strcat_s(ModelPath, Desc.ModelName);
                     strcat_s(ModelPath, "/");
                     strcat_s(ModelPath, Desc.ModelName);
                     strcat_s(ModelPath, ".dat");
 
-                    //m_pGameInstance->Add_Prototype(m_iLevel, Model,
-                    //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
+                    m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
 
                     _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
                     lstrcat(PrototypeObject, Name);
 
-                    //m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
-                    //    CMapObject::Create(m_pDevice, m_pContext));
+                    m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
+                        CMapObject::Create(m_pDevice, m_pContext));
 
                     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
@@ -242,6 +317,19 @@ void CLevel_Map::Menu_Save_Load()
     }
 }
 
+void CLevel_Map::Load_Objects()
+{
+    m_ModelPaths.clear();
+
+    string FolderPath = "../../Client/Bin/Resource/Map/";
+    for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
+        if (entry.is_regular_file()) {
+            if (entry.path().extension() == ".dat") {
+                m_ModelPaths.push_back(entry.path().string());
+            }
+        }
+    }
+}
 HRESULT CLevel_Map::Ready_Static_Component()
 {
     _matrix PreTransformMatrix = XMMatrixIdentity();
@@ -253,6 +341,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //인스턴스 모델
     
+    /*m_pGameInstance->Add_Work([&](){
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
+            CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+        });*/
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
         CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
@@ -335,7 +428,8 @@ void CLevel_Map::Ready_Event()
             if (event.fDistance <= m_fNearDistance)
             {
                 m_fNearDistance = event.fDistance;
-                    m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
             }
         }
         break;
@@ -344,7 +438,7 @@ void CLevel_Map::Ready_Event()
             if (event.fDistance <= m_fNearDistance_Instance)
             {
                 m_fNearDistance_Instance = event.fDistance;
-                    m_pPickedInstanceObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+                m_pPickedInstanceObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
             }
             break;
 
@@ -358,7 +452,30 @@ void CLevel_Map::Ready_Event()
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
         m_SaveObjects[event.ModelName].push_back(pObject);
         Safe_AddRef(pObject);
+
+        m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
         });
+}
+
+void CLevel_Map::Make_MousePos()
+{
+    POINT ptMousePos = m_pGameInstance->Get_MousePoint();
+    //뷰포트에서 투영스페이스로 옮기기. => -1~ 1로 변환.
+    _float3 vMousePos{};
+    vMousePos.x = ptMousePos.x / (g_iWinSizeX * 0.5f) - 1.f;
+    vMousePos.y = -1 * ptMousePos.y / (g_iWinSizeY * 0.5f) + 1.f;
+    vMousePos.z = 0.f;
+
+    //뷰스페이스로 전환을 위한 투영 행렬 나누기
+    XMStoreFloat3(&vMousePos, XMVector3TransformCoord(XMLoadFloat3(&vMousePos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ)));
+
+    //뷰 스페이스 기준 마우스 레이, 시작 위치 계산.
+    m_vWorldPos = {};
+    m_vWorldDir = vMousePos;
+
+    //뷰 스페이스에서 월드 매트릭스 전환.
+    XMStoreFloat3(&m_vWorldPos, XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW)));
+    XMStoreFloat3(&m_vWorldDir, XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&m_vWorldDir), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW))));
 }
 
 CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
