@@ -166,6 +166,7 @@ public:
 #pragma endregion
 
 #pragma region PICKING
+	POINT					Get_MousePoint();
 	_bool						isPicked(_float3* pOut);
 #pragma endregion
 
