@@ -470,6 +470,10 @@ _float CGameInstance::Compute_Distance_ToCam(CGameObject* pObject)
 #pragma endregion
 
 #pragma region PICKING
+POINT CGameInstance::Get_MousePoint()
+{
+	return m_pPicking->Get_MousePoint();
+}
 _bool CGameInstance::isPicked(_float3* pOut)
 {
 	return m_pPicking->isPicked(pOut);
