@@ -37,8 +37,6 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_IsSpread = pDesc->bSpread;
     m_IsDrop = pDesc->bDrop;
 
-    m_isActivate = false;
-
     return S_OK;
 }
 
