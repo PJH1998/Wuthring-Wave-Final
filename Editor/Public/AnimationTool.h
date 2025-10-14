@@ -95,8 +95,6 @@ private:
 
 private:
 	// ÇïÆÛ ÇÔ¼ö
-	wstring StringToWstring(const std::string& str);
-	string WstringToString(const std::wstring& wstr);
 	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	

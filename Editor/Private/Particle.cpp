@@ -31,8 +31,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
 
-    m_pTransformCom->Scale(_float3(10.f, 10.f, 10.f));
-    //m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
+    m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
     m_isActivate = true;
 

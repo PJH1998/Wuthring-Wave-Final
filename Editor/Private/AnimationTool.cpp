@@ -210,7 +210,7 @@ void CAnimationTool::RenderUI_EditAnimation()
             iSelectedIndex = id;
             // 선택 정보저장.
             m_Selected_AnimActorTag = actorName;
-            m_wSelected_AnimActorTag = StringToWstring(actorName);
+            m_wSelected_AnimActorTag = StringToWString(actorName);
         }
     }
     ImGui::EndChild();
@@ -272,7 +272,7 @@ void CAnimationTool::LoadDat()
             _float fSize = 0.1f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
-            wStrModelName = StringToWstring(strModelName);
+            wStrModelName = StringToWString(strModelName);
 
             // Model Prototype 생성.
             HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
@@ -308,7 +308,7 @@ void CAnimationTool::RenderUI_ModelPrototype()
         {
             iSelectedIndex = id;
             m_Selected_PrototypeModelTag = modelName;
-            m_wSelected_PrototypeModelTag = StringToWstring(modelName);
+            m_wSelected_PrototypeModelTag = StringToWString(modelName);
         }
     }
     ImGui::EndChild();
@@ -436,7 +436,7 @@ void CAnimationTool::Render_Model_Detail()
         }
 
         // 4. 생성이 완료되었으면 관리할 수 있게 해야함. 생성할 때 저장.
-        m_ActorNames.emplace_back(WstringToString(wstrObjTag));
+        m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
         m_AnimationActors.emplace(wstrObjTag, pActor);
@@ -515,39 +515,6 @@ void CAnimationTool::Render_Animation_Detail()
 
 #pragma endregion
 
-
-
-wstring CAnimationTool::StringToWstring(const std::string& str)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    if (len == 0) {
-        return L"";
-    }
-
-    wstring wstr(len, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], len);
-
-    if (!wstr.empty() && wstr.back() == L'\0') {
-        wstr.pop_back();
-    }
-
-    return wstr;
-}
-
-string CAnimationTool::WstringToString(const std::wstring& wstr)
-{
-    if (wstr.empty())
-        return "";
-
-    int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
-    if (len == 0)
-        return "";
-
-    std::string str(len - 1, 0);  // -1로 null terminator 제외
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], len, NULL, NULL);
-
-    return str;
-}
 
 
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)

@@ -102,11 +102,6 @@ private:
 	HRESULT Ready_Sound();
 
 
-private:
-	// ÇïÆÛ ÇÔ¼ö
-	wstring StringToWstring(const std::string& str);
-	string WstringToString(const std::wstring& wstr);
-
 public:
 	static CAnimNotifyTool* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel);
 	virtual	void Free() override;

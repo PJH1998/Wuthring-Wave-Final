@@ -61,6 +61,9 @@
     <Filter Include="01. Level\Effect\Particle">
       <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Controller">
+      <UniqueIdentifier>{e7fbc4f1-3a95-49f0-9400-b73a8259ca3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -133,6 +136,9 @@
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Particle_Controller.h">
+      <Filter>01. Level\Effect\Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -195,6 +201,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle_Controller.cpp">
+      <Filter>01. Level\Effect\Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

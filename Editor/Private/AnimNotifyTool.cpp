@@ -397,7 +397,7 @@ void CAnimNotifyTool::Load_SoundsFromFile(const _string& strFilePath, const _str
     if (last_dot_pos != std::string::npos) {
         // 0번째 위치부터 '.' 위치까지 문자열을 잘라냅니다.
         _string strSoundTag = strSoundPath.substr(0, last_dot_pos);
-        _wstring wStrSoundTag = StringToWstring(strSoundTag);
+        _wstring wStrSoundTag = StringToWString(strSoundTag);
 
         // 1. Sound Load
         m_pGameInstance->Load_Sound(wStrSoundTag, strFilePath.c_str());
@@ -427,7 +427,7 @@ void CAnimNotifyTool::Load_AllSoundsFromFolder(const _string& strFolderPath)
             if (extension == ".wav" || extension == ".WAV")
             {
                 _string soundTag = entry.path().stem().string(); // 확장자 제외한 파일명
-                _wstring wSoundTag = StringToWstring(soundTag);
+                _wstring wSoundTag = StringToWString(soundTag);
 
                 m_pGameInstance->Load_Sound(wSoundTag, filePath.c_str());
                 m_SoundTags.emplace(soundTag, wSoundTag);
@@ -472,38 +472,6 @@ HRESULT CAnimNotifyTool::Ready_Sound()
     //m_pGameInstance->Load_Sound(TEXT("Augusta_Attack01"), "../../Client/Bin/Resource/Player/Augusta/Sound/Attack/Augusta_Attack01_01.wav");
     
     return S_OK;
-}
-
-wstring CAnimNotifyTool::StringToWstring(const std::string& str)
-{
-    int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    if (len == 0) {
-        return L"";
-    }
-
-    wstring wstr(len, 0);
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &wstr[0], len);
-
-    if (!wstr.empty() && wstr.back() == L'\0') {
-        wstr.pop_back();
-    }
-
-    return wstr;
-}
-
-string CAnimNotifyTool::WstringToString(const std::wstring& wstr)
-{
-    if (wstr.empty())
-        return "";
-
-    int len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
-    if (len == 0)
-        return "";
-
-    std::string str(len - 1, 0);  // -1로 null terminator 제외
-    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], len, NULL, NULL);
-
-    return str;
 }
 
 CAnimNotifyTool* CAnimNotifyTool::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eLevel)
