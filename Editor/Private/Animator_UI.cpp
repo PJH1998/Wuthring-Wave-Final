@@ -252,11 +252,12 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
         fFixedLerpRatio)
     );
     _float3 vResultRot = {};
-    XMStoreFloat3(&vResultRot, XMVectorLerp(
+    XMStoreFloat3(&vResultRot, XMVectorLerp(        // degree라서 그런 것 같은데.. 
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vRot),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vRot),
         fFixedLerpRatio)
     );
+    _float3 vResultRotRad = { DegreesToRadians(vResultRot.x), DegreesToRadians(vResultRot.y), DegreesToRadians(vResultRot.z) };
     _float3 vResultSca = {};
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
@@ -274,7 +275,7 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
-    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRot));
+    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
     _matrix matTransform = matSca * matRot * matPos;
