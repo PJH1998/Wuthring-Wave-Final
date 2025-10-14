@@ -42,6 +42,8 @@ public:
 	void Bind_Resources();
 
 private:
+	void Export_MaterialData();
+private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
@@ -66,6 +68,7 @@ private:
 	_bool m_IsTest = { false };
 	_bool m_IsLoaded = { false };
 	_bool m_MakeJson = { false };
+	_bool m_TexMode = { false };
 	
 	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
 	vector<_string> m_DiffuseTextureName;
@@ -75,6 +78,9 @@ private:
 	_string m_SelectedNormal= {};
 
 	_uint m_iSelectedMesh={};
+
+	_uint* m_iSelectedDiffuseIndex;
+	_uint* m_iSelectedNormalIndex;
 public:
 	static CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
