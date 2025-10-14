@@ -53,6 +53,7 @@ BlendState BS_AlphaBlend
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D g_Texture;
 texture2D g_DepthTexture;
+float g_AlphaStrength;
 
 struct VS_IN
 {
@@ -122,6 +123,16 @@ PS_OUT PS_MAIN(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_ALPHAENABLED(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
+    
+    return Out;
+}
+
 PS_OUT PS_MAIN_BLEND(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -173,7 +184,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_MAIN();
+        PixelShader = compile ps_5_0 PS_ALPHAENABLED();
     }
 
     pass CallNonePass

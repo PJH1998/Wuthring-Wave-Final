@@ -58,6 +58,12 @@
     <Filter Include="03. GameObject\MapObject">
       <UniqueIdentifier>{37459326-e791-4800-8124-a7fc6a5fbe15}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp Object">
+      <UniqueIdentifier>{a6fc9ea8-8c8e-40c2-8cce-41af32e1cac1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp Component">
+      <UniqueIdentifier>{7113c53c-3cf4-458b-94e1-6ab78b5811b9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Level\Effect\Particle">
       <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
     </Filter>
@@ -102,9 +108,6 @@
     <ClInclude Include="..\Public\Level_Map.h">
       <Filter>01. Level\Map</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Custom_UI.h">
-      <Filter>01. Level\UI\Temp Props</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\ModelLoader.h">
       <Filter>02. ModelLoader</Filter>
     </ClInclude>
@@ -129,12 +132,17 @@
     <ClInclude Include="..\Public\MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Level\Anim\Tool</Filter>
+	</ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Animator_UI.h">
+      <Filter>01. Level\UI\Temp Props\Temp Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -175,9 +183,6 @@
     <ClCompile Include="..\Private\Level_UI.cpp">
       <Filter>01. Level\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Custom_UI.cpp">
-      <Filter>01. Level\UI\Temp Props</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\ModelLoader.cpp">
       <Filter>02. ModelLoader</Filter>
     </ClCompile>
@@ -195,6 +200,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Instance.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Animator_UI.cpp">
+      <Filter>01. Level\UI\Temp Props\Temp Component</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
