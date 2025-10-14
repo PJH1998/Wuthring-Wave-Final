@@ -655,7 +655,6 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
         if (m_pSelectedUIAnim != nullptr &&
             !m_isPlayAnimation)
         {
-            // 애니메이션 재..생?
             if (ImGui::Button("Play Animation"))
                 m_isPlayAnimation = true;
         }
@@ -704,7 +703,17 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
     if (pTargetUI &&
         pTargetAnimator->Find_Animation(0) != nullptr &&
         m_isPlayAnimation)
-        pTargetAnimator->Update(fTimeDelta);
+    {
+        if (pTargetAnimator->Get_CurAnimation() == nullptr)
+        {
+            if (m_pSelectedUIAnim != nullptr)
+                pTargetAnimator->Change_Animation(m_pSelectedUIAnim->strAnimName);
+        }
+    }
+    else
+    {
+        pTargetAnimator->Deselect_Animation();
+    }
 
 #pragma endregion
 
