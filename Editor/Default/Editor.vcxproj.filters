@@ -205,9 +205,6 @@
     <ClCompile Include="..\Private\MapObject_Instance.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
     </ClCompile>
@@ -216,6 +213,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Animation_UI.cpp">
       <Filter>01. Level\UI\Temp Props\Temp Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
