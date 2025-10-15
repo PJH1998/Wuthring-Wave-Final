@@ -21,6 +21,7 @@ public:
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
 	_bool									IsWorkFinish() { return 0 == m_iLiveWork; }
+	void									Wait_Thread_End();
 
 private:
 	class CGameInstance*				m_pGameInstance = { nullptr };

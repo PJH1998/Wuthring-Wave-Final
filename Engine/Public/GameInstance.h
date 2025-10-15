@@ -80,6 +80,7 @@ public:
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	void			Add_Work(function<void()> Work);
 	_bool			IsWorkFinish();
+	void			Wait_Thread_End();
 #pragma endregion
 
 #pragma region TARGET_MANAGER
@@ -182,6 +183,7 @@ public:
 
 #pragma region GUIMANAGER
 	ImGuiContext*		Get_ImGuiContext();
+	void					Add_GUI_Func(function<void()> func);
 #pragma endregion
 
 
