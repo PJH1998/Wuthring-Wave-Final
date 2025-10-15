@@ -78,8 +78,11 @@ public:
 #pragma region POOLING_MANAGER
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
+	// Thread가 수행할 Function 전달
 	void			Add_Work(function<void()> Work);
+	// Thread 끝났는가 확인
 	_bool			IsWorkFinish();
+	// Pooling한 Thread 끝날 때가지 대기
 	void			Wait_Thread_End();
 #pragma endregion
 

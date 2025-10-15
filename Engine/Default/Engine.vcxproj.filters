@@ -216,12 +216,18 @@
     </Filter>
     <Filter Include="01. Utility\97. Physics\ContactListener\Virtual">
       <UniqueIdentifier>{99751cc9-1385-48d7-808c-2ebc28706e30}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
       <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
     </Filter>
     <Filter Include="99. Define">
       <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\14. OctoTree">
+      <UniqueIdentifier>{ec639b4c-9f75-4716-97a7-3b383c9f61bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\14. OctoTree\CubeCell">
+      <UniqueIdentifier>{7dddd258-d4c0-4803-bbe9-608fe97a1d54}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -423,9 +429,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimNotifyDefine.h">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
@@ -443,7 +446,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\AnimNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
@@ -453,6 +456,10 @@
     <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\OctoTree.h">
+      <Filter>01. Utility\14. OctoTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CubeCell.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -649,7 +656,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\AnimNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
@@ -659,6 +666,10 @@
     <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\OctoTree.cpp">
+      <Filter>01. Utility\14. OctoTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CubeCell.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
