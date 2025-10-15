@@ -141,18 +141,18 @@
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-	  <ClInclude Include="..\Public\Edit_MapObject.h">
-		  <Filter>03. GameObject\MapObject</Filter>
-	  </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Level\Anim\Tool</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Animator_UI.h">
       <Filter>01. Level\UI\Temp Props\Temp Component</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Controller</Filter>
     </ClInclude>
@@ -236,7 +236,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
       <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
     </FxCompile>
-    <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\Particle.cpp">
       <Filter>01. Level\Effect\Particle</Filter>
     </ClCompile>

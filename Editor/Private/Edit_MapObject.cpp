@@ -82,9 +82,20 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
         });
-
-
 #endif
+    m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
+        if (m_IsSetParent)
+        {
+            //그 뭐냐 자식이 돼야하는 놈이 부모가 됨
+            CEdit_MapObject* pParent = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+            m_pParent = pParent;
+            m_IsSetParent = false;
+            m_IsParent = true;
+            pParent->m_ChildObjects.push_back(this);
+            //Safe_AddRef(*this);
+        }
+        });
+
     m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
 
@@ -170,8 +181,27 @@ void CEdit_MapObject::Set_ImGuiOption()
     //if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::PRESS && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
     //    //추가 예정
     
+    if (ImGui::Button("Set Parent"))
+    {
+        MAP_CREATE event(m_ModelName, this);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
+    }
     
-    
+    if (m_IsParent)
+    {
+        ImGuiID ShaderId = ImGui::GetID("Child");
+        ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+        ImGui::Text("Child");
+
+        for (auto& pChildObject : m_ChildObjects)
+        {
+            ImGui::Button(pChildObject->m_ModelName);
+        }
+        ImGui::EndChildFrame();
+
+    }
+
+
     ImGui::Text("Size");
     {
         ImGui::PushItemWidth(90.0f);
@@ -210,14 +240,25 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     if (ImGui::Button("OK"))
     {
+        //자식은 간단하게 부모의 변화량만 추가로 하게 하면 될듯? 회전은 모르겠음..
         Scale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vNewScale));
         Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vNewRotation)));
         Translation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f));
+        if (m_IsParent)
+        {
+            _matrix DeltaRot = XMMatrixRotationQuaternion(XMQuaternionMultiply(XMLoadFloat3(&m_vNewRotation), XMQuaternionInverse(XMLoadFloat3(&m_vRotation))));
+            _matrix DeltaTranslation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
+
+            _matrix ChildMatrix = DeltaRot * DeltaTranslation;
+            for (auto& pChild : m_ChildObjects)
+                pChild->Child_UpdateMatrix(ChildMatrix);
+        }
         m_vScale = m_vNewScale;
         m_vRotation = m_vNewRotation;
         m_vTranslation = m_vNewTranslation;
         _matrix PickedMatrix = Scale * Rotation * Translation;
         m_pTransformCom->Set_WorldMatrix(PickedMatrix);
+        
     }
 
     ImGuiID ShaderId = ImGui::GetID("ShaderPass");
@@ -471,6 +512,25 @@ void CEdit_MapObject::Bind_Resources()
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 }
 
+void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
+{
+    _bool Same = { true };
+    for (auto& pChild : m_ChildObjects)
+    {
+        if (pChild == pObject)
+        {
+            Same = false;
+            break;
+        }
+    }
+    if(Same)
+    {
+        m_ChildObjects.push_back(pObject);
+        m_IsParent = true;
+    }
+}
+
+
 void CEdit_MapObject::Export_MaterialData()
 {
 
@@ -566,6 +626,11 @@ void CEdit_MapObject::Export_MaterialData()
             m_MakeJson = !m_MakeJson;
         }
     }
+}
+
+void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix)
+{
+    m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * Matrix);
 }
 
 
