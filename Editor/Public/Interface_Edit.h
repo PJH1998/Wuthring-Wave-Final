@@ -10,7 +10,7 @@ protected:
 	virtual ~CInterface_Edit() = default;
 
 public:
-	virtual		HRESULT			Initialize();
+	virtual		HRESULT			Initialize() { return S_OK; }
 
 protected:
 	class CGameInstance*	m_pGameInstance = { nullptr };
