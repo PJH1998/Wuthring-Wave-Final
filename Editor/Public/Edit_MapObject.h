@@ -56,6 +56,7 @@ public:
 private:
 	void Export_MaterialData();
 	void Child_UpdateMatrix(_fmatrix Matrix);
+
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };

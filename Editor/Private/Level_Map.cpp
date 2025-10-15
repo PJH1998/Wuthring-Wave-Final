@@ -6,7 +6,6 @@
 #include"Mesh_Instance.h"
 #include"Edit_MapObject.h"
 #include"Edit_MapObject_Instance.h"
-#include"Edit_MapObject_Container.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -399,9 +398,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
         CEdit_MapObject::Create(m_pDevice, m_pContext));
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
-        CMapObject_Container::Create(m_pDevice, m_pContext));
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??

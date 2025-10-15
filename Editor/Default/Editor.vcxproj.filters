@@ -159,7 +159,6 @@
     <ClInclude Include="..\Public\Effect_Prefab.h">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_MapObject_Container.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -232,7 +231,6 @@
     <ClCompile Include="..\Private\Effect_Prefab.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_MapObject_Container.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
