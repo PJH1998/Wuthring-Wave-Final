@@ -3,12 +3,12 @@
 
 NS_BEGIN(Client)
 
-class CLevel_Test :
+class CLevel_GamePlay :
     public CLevel
 {
 private:
-	explicit CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual ~CLevel_Test() = default;
+	explicit CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual ~CLevel_GamePlay() = default;
 
 public:
 	virtual		HRESULT		Initialize() override;
@@ -16,7 +16,7 @@ public:
 	virtual		void			Render() override;
 
 public:
-	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CLevel_GamePlay* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;
 };
 

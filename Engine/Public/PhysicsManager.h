@@ -48,6 +48,8 @@ public:
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 
+	void					Clear_Resource();
+
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);
