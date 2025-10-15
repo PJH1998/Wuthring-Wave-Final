@@ -66,6 +66,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         if (!m_isActivate)
             return;
 
+        //경로 지정할 때 상위 폴더엔 뒤에 LOD 빼고. 폴더를 지정. 그리고 그 안에 있는 폴더 하위 1개 돌면서 .dat들 읽고 객체 안에 넣기?
+        
         /*OBJECT_SAVE Save{};
         Save.m_iNameLength = strlen(m_ModelName);
         strcpy_s(Save.ModelName, m_ModelName);
@@ -73,35 +75,47 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         
         event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
-
+        
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
+        if (m_iShaderPassIndex == 3)
+            m_iShaderPassIndex = 0;
         event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+
         _float4x4 WorldMatrix;
         XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
         });
 #endif
     m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
-        if (m_IsSetParent)
-        {
-            //그 뭐냐 자식이 돼야하는 놈이 부모가 됨
-            CEdit_MapObject* pParent = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-            m_pParent = pParent;
-            m_IsSetParent = false;
-            m_IsParent = true;
-            pParent->m_ChildObjects.push_back(this);
-            //Safe_AddRef(*this);
-        }
+        //if (m_IsSetParent)
+        //{
+        //    //그 뭐냐 자식이 돼야하는 놈이 부모가 됨
+        //    CEdit_MapObject* pParent = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+        //    m_pParent = pParent;
+        //    m_IsSetParent = false;
+        //    m_IsParent = true;
+        //    pParent->m_ChildObjects.push_back(this);
+        //    _matrix ParentMatrix = pParent->m_pTransformCom->Get_WorldMatrix();
+        //    XMStoreFloat4x4(&m_ChildLocalMat, m_pTransformCom->Get_WorldMatrix() * XMMatrixInverse(nullptr, ParentMatrix));
+        //    int a = 0;
+        //    //Safe_AddRef(*this);
+        //}
         });
 
     m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedDiffuseName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedNormalName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedDiffuseTextureName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedNormalTextureName.resize(m_pModelCom->Get_NumMesh());
+
+
 
     m_iSelectedDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedNormalIndex = new _uint[m_pModelCom->Get_NumMesh()];
-    m_iNumObject = g_iNumObjects++;
+    m_iNumObject = CEdit_MapObject::g_iNumObjects++;
     return S_OK;
 }
 
@@ -175,18 +189,28 @@ void CEdit_MapObject::Render_Shadow()
 
 void CEdit_MapObject::Set_ImGuiOption()
 {
-
-    _matrix Scale, Rotation, Translation;
-
     //if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::PRESS && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
     //    //추가 예정
-    
+    ImGui::Text(m_ModelName);
+
     if (ImGui::Button("Set Parent"))
     {
         MAP_CREATE event(m_ModelName, this);
         m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
     }
     
+    if (m_pParent)
+    {
+        ImGui::SameLine();
+        if (ImGui::Button("Delete Parent"))
+        {
+            m_pParent->Quit_Child(this);
+            m_pParent = nullptr;
+            //MAP_CREATE event(m_ModelName, this);
+            //m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
+        }
+    }
+
     if (m_IsParent)
     {
         ImGuiID ShaderId = ImGui::GetID("Child");
@@ -195,7 +219,17 @@ void CEdit_MapObject::Set_ImGuiOption()
 
         for (auto& pChildObject : m_ChildObjects)
         {
-            ImGui::Button(pChildObject->m_ModelName);
+            _char ChildName[MAX_PATH] = {};
+            sprintf_s(ChildName, "%d", pChildObject->m_iNumObject);
+            
+            if (ImGui::Button(ChildName) || ImGui::IsItemHovered())
+                //if (ImGui::Button(ChildName))
+            {
+                if (m_pPickedChild)
+                    m_pPickedChild->m_iShaderPassIndex = 0;
+                m_pPickedChild = pChildObject;
+                m_pPickedChild->m_iShaderPassIndex = 3;
+            }
         }
         ImGui::EndChildFrame();
 
@@ -241,24 +275,37 @@ void CEdit_MapObject::Set_ImGuiOption()
     if (ImGui::Button("OK"))
     {
         //자식은 간단하게 부모의 변화량만 추가로 하게 하면 될듯? 회전은 모르겠음..
+        _matrix Scale, Rotation, Translation;
+        _float3 DegreeRotation= _float3(XMConvertToRadians(m_vNewRotation.x), XMConvertToRadians(m_vNewRotation.y), XMConvertToRadians(m_vNewRotation.z));
+
         Scale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vNewScale));
-        Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vNewRotation)));
+        Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&DegreeRotation)));
         Translation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f));
+
+            m_vScale = m_vNewScale;
+            m_vRotation = m_vNewRotation;
+            m_vTranslation = m_vNewTranslation;
+ 
+        _matrix PickedMatrix = Scale * Rotation * Translation;
         if (m_IsParent)
         {
-            _matrix DeltaRot = XMMatrixRotationQuaternion(XMQuaternionMultiply(XMLoadFloat3(&m_vNewRotation), XMQuaternionInverse(XMLoadFloat3(&m_vRotation))));
+            //_matrix DeltaRot = XMMatrixRotationQuaternion(XMQuaternionMultiply(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vNewRotation)), XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vRotation))));
+            
+            _matrix DeltaRot = XMMatrixRotationQuaternion(XMQuaternionMultiply(
+                XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vNewRotation)),
+                XMQuaternionInverse(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vRotation)))));
+
             _matrix DeltaTranslation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
 
             _matrix ChildMatrix = DeltaRot * DeltaTranslation;
+            //_matrix ChildMatrix = Rotation * DeltaTranslation;
             for (auto& pChild : m_ChildObjects)
-                pChild->Child_UpdateMatrix(ChildMatrix);
+                pChild->Child_UpdateMatrix(PickedMatrix, XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
         }
-        m_vScale = m_vNewScale;
-        m_vRotation = m_vNewRotation;
-        m_vTranslation = m_vNewTranslation;
-        _matrix PickedMatrix = Scale * Rotation * Translation;
         m_pTransformCom->Set_WorldMatrix(PickedMatrix);
-        
+
+        if (m_pParent)
+            Make_ChildLocalMatrix(dynamic_cast<CTransform*>(m_pParent->Get_Component(TEXT("Com_Transform")))->Get_WorldMatrix());
     }
 
     ImGuiID ShaderId = ImGui::GetID("ShaderPass");
@@ -367,7 +414,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
         _char LOD_Index[10] = {};
 
-        if (ImGui::BeginCombo("Meshes", "?"))
+        if (ImGui::BeginCombo("Meshes", m_iSelectedMeshName.c_str()))
         {
             for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
             {
@@ -375,12 +422,13 @@ void CEdit_MapObject::Set_ImGuiOption()
                 if (ImGui::Selectable(LOD_Index))
                 {
                     m_iSelectedMesh = i;
+                    m_iSelectedMeshName = LOD_Index;
                 }
             }
             ImGui::EndCombo();
         }
 
-        if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuse.c_str()))
+        if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
         {
             for (_uint i = 0; i < m_DiffuseTextureName.size(); ++i)
             {
@@ -389,7 +437,7 @@ void CEdit_MapObject::Set_ImGuiOption()
                 _char FileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
                 _splitpath_s(m_DiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-                if (ImGui::Selectable(FileName))
+                if (ImGui::Selectable(FileName)|| ImGui::IsItemHovered())
                 {
                     ImGui::SetItemDefaultFocus();
                     m_SelectedDiffuse = m_DiffuseTextureName[i];
@@ -400,13 +448,17 @@ void CEdit_MapObject::Set_ImGuiOption()
                         Safe_Release(m_pDiffuseTextureCom[m_iSelectedMesh]);
 
                     m_pDiffuseTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_SelectedDiffuseTextureName[m_iSelectedMesh] = m_DiffuseTextureName[i].c_str();
+                        
+                    
+                    m_SelectedDiffuseName[m_iSelectedMesh] = FileName;
                     m_iSelectedDiffuseIndex[m_iSelectedMesh] = i;
                 }
             }
             ImGui::EndCombo();
         }
 
-        if (ImGui::BeginCombo("Normal", m_SelectedNormal.c_str()))
+        if (ImGui::BeginCombo("Normal", m_SelectedNormalName[m_iSelectedMesh].c_str()))
         {
 
             for (_uint i = 0; i < m_NormalTextureName.size(); ++i)
@@ -417,7 +469,7 @@ void CEdit_MapObject::Set_ImGuiOption()
                 _char FileExt[MAX_PATH] = {};
                 _splitpath_s(m_NormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-                if (ImGui::Selectable(FileName))
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
                 {
                     ImGui::SetItemDefaultFocus();
                     m_SelectedNormal = m_NormalTextureName[i].c_str();
@@ -428,6 +480,8 @@ void CEdit_MapObject::Set_ImGuiOption()
                         Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);
 
                     m_pNormalTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_SelectedNormalTextureName[m_iSelectedMesh] = m_NormalTextureName[i].c_str();
+                    m_SelectedNormalName[m_iSelectedMesh] = FileName;
                     m_iSelectedNormalIndex[m_iSelectedMesh] = i;
                 }
             }
@@ -491,17 +545,6 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    /*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    RigidbodyDesc.eShape = SHAPE::MESH;
-    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    RigidbodyDesc.eType = EMotionType::Static;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    RigidbodyDesc.pModel = m_pModelCom;
-
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);*/
-
-
     return S_OK;
 }
 
@@ -515,6 +558,10 @@ void CEdit_MapObject::Bind_Resources()
 void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
 {
     _bool Same = { true };
+
+    if (pObject->m_pParent)
+        return;
+
     for (auto& pChild : m_ChildObjects)
     {
         if (pChild == pObject)
@@ -525,9 +572,27 @@ void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
     }
     if(Same)
     {
+        pObject->m_pParent = this;
+        pObject->Make_ChildLocalMatrix(m_pTransformCom->Get_WorldMatrix());
         m_ChildObjects.push_back(pObject);
         m_IsParent = true;
     }
+    pObject->m_IsSetParent = false;
+}
+
+void CEdit_MapObject::Quit_Child(CEdit_MapObject* pObject)
+{
+    m_ChildObjects.remove(pObject);
+    if (m_ChildObjects.empty())
+        m_IsParent = false;
+
+}
+
+void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
+{
+    XMStoreFloat4x4(&m_ChildLocalMat, m_pTransformCom->Get_WorldMatrix() * XMMatrixInverse(nullptr, ParentMatrix));
+    _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * ParentMatrix;
+    m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
 }
 
 
@@ -576,8 +641,8 @@ void CEdit_MapObject::Export_MaterialData()
                 _char NormalFileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
 
-                _splitpath_s(m_DiffuseTextureName[m_iSelectedDiffuseIndex[i]].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
-                _splitpath_s(m_NormalTextureName[m_iSelectedNormalIndex[i]].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedDiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedNormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
 
                 json MaterialData;
 
@@ -610,8 +675,8 @@ void CEdit_MapObject::Export_MaterialData()
                 Totaljson["Materials"].push_back(MaterialData);
 
 
-                filesystem::copy_file(m_DiffuseTextureName[i], strTexturePath + DiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
-                filesystem::copy_file(m_NormalTextureName[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                filesystem::copy_file(m_SelectedDiffuseTextureName[i], strTexturePath + DiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                filesystem::copy_file(m_SelectedNormalTextureName[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
             }
             File << Totaljson.dump(4);
             File.close();
@@ -628,9 +693,16 @@ void CEdit_MapObject::Export_MaterialData()
     }
 }
 
-void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix)
+void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation)
 {
-    m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * Matrix);
+    _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * Matrix;
+    m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
+
+    
+    XMStoreFloat3(&m_vNewTranslation, NewChildWolrd.r[3]);
+
+    //위치만 갖고오기?
+    //부모만 회전해야할 때는 어떻게함?
 }
 
 

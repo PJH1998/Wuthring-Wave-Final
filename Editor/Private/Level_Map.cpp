@@ -105,11 +105,6 @@ void CLevel_Map::Menu_Object()
     ImGui::Begin("Menu_Object");
 
     //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
-    if (ImGui::Button("Test"))
-    {
-        m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
-            m_iLevel, TEXT("Layer_Containers"), nullptr);
-    }
     if (!m_ContainerObjects.empty())
         Container_Info();
     if (m_pPickedObject)
@@ -314,7 +309,6 @@ void CLevel_Map::Menu_Save_Load()
                 //레이어나 오브젝트매니저 전체 순회가능한 함수 생기면 변경 고려 해볼것.
 
 
-
                 //LOD를 카메라 거리 기반으로 하지 말고, 모델의 최소 최대 픽셀로 큐브를 만들었을 때 그 큐브가
                 //현재 화면을 기준으로 픽셀을 얼마나 많이 차지하고 있나로 LOD 단계 구별하기. => 스크린 픽셀 사이즈 기법
                 //LOD 모델은 상태머신을 갈아끼우듯 LOD 단계에 따라 바꾸기. => 어차피 모델의 크기는 변하지 않음. 디테일이 달라짐.
@@ -433,6 +427,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
 void CLevel_Map::Ready_Event()
 {
     m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
+        if (event.fDistance <= m_fNearDistance)
+        {
+            m_fNearDistance = event.fDistance;
+            XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
+        }
 
         switch (m_eMenu)
         {
@@ -441,8 +440,12 @@ void CLevel_Map::Ready_Event()
             if (event.fDistance <= m_fNearDistance)
             {
                 m_fNearDistance = event.fDistance;
+                if (m_pPickedObject)
+                    m_pPickedObject->Set_ShaderPass(0);
+                //m_iShaderPassIndex = 3;
                 m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-                XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
+                m_pPickedObject->Set_ShaderPass(3);
+                //XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
                 if (m_pChildObject)
                 {
                     m_pPickedObject->Add_Child(m_pChildObject);

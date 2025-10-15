@@ -52,10 +52,13 @@ public:
 	_char* Get_ModelName() { return m_ModelName; }
 
 	void Add_Child(CEdit_MapObject* pObject);
+	void Quit_Child(CEdit_MapObject* pObject);
+	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
+	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
 
 private:
 	void Export_MaterialData();
-	void Child_UpdateMatrix(_fmatrix Matrix);
+	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
 
 private:
 	CModel* m_pModelCom = { nullptr };
@@ -63,13 +66,18 @@ private:
 
 	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
-	class CEdit_MapObject* m_pParent = { nullptr };
-	vector<class CEdit_MapObject*> m_ChildObjects;
+	CEdit_MapObject* m_pParent = { nullptr };
+	list<CEdit_MapObject*> m_ChildObjects;
+
+	CEdit_MapObject* m_pPickedChild = { nullptr };
 	_bool m_IsSetParent = { false };
 	_bool m_IsParent = { false };
 	vector<CTexture*> m_pDiffuseTextureCom;
 	vector<CTexture*> m_pNormalTextureCom;
 
+
+
+	_float4x4 m_ChildLocalMat = {};
 private:
 #ifdef _DEBUG
 	_char m_ModelName[MAX_PATH];
@@ -92,10 +100,15 @@ private:
 	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
 	vector<_string> m_DiffuseTextureName;
 	vector<_string> m_NormalTextureName;
-	
-	_string m_SelectedDiffuse= {};
-	_string m_SelectedNormal= {};
 
+	vector<_string> m_SelectedDiffuseTextureName;
+	vector<_string> m_SelectedNormalTextureName;
+
+	_string m_SelectedDiffuse;
+	_string m_SelectedNormal;
+	vector<_string >m_SelectedDiffuseName;
+	vector<_string >m_SelectedNormalName;
+	_string m_iSelectedMeshName;
 	_uint m_iSelectedMesh={};
 
 	_uint* m_iSelectedDiffuseIndex;
