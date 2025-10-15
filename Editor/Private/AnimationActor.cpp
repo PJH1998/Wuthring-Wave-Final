@@ -139,6 +139,14 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
     return m_pModelCom->Get_Duration(m_strCurrentAnimation);
 }
 
+HRESULT CAnimationActor::Bind_Bone_to_GUI()
+{
+	_int iBoneIndex = 0;
+    if(FAILED(m_pModelCom->Bind_Bone_to_GUI(iBoneIndex)))
+        return E_FAIL;
+    return S_OK;
+}
+
 
 // Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
 

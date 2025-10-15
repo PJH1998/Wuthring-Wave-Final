@@ -22,6 +22,9 @@ public:
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
+
+	//Bone GUI È°¼ºÈ­
+	HRESULT								Bind_Bone_to_GUI(_int& iBoneIndex);
 #endif
 
 public:

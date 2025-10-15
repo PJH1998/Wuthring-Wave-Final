@@ -50,6 +50,9 @@ public:
 	const _string& Get_CurrentAnimationNames() const;
 	const _float Get_CurrentAnimationDuration() const;
 
+	//Bone GUI È°¼ºÈ­
+	HRESULT Bind_Bone_to_GUI();
+
 	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);

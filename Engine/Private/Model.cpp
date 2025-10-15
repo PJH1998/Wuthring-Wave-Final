@@ -105,6 +105,33 @@ void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPo
 {
 	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
 }
+HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex)
+{
+	_int iNextBoneIndex = iBoneIndex + 1;
+	ImGuiTreeNodeFlags iFlag = 0;
+	if((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentBoneIndex() != iBoneIndex))
+		iFlag |= ImGuiTreeNodeFlags_Leaf;
+	else
+		iFlag |= (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen);
+
+	if(ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
+	{
+		//Selecting Interaction 자식 노드 생성 이전에 상호작용 정의하기
+		if(ImGui::IsItemClicked())
+		{
+			std::cout << "selected : " << m_Bones[iBoneIndex]->Get_Name() << std::endl;
+		}
+
+		while(iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentBoneIndex() == iBoneIndex)
+		{
+			Bind_Bone_to_GUI(iNextBoneIndex);
+		}
+
+		ImGui::TreePop();
+	}
+	iBoneIndex = iNextBoneIndex;
+	return S_OK;
+}
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)

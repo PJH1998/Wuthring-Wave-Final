@@ -22,7 +22,12 @@
     <ClInclude Include="..\Public\Animation.h" />
     <ClInclude Include="..\Public\AnimNotify.h" />
     <ClInclude Include="..\Public\Base.h" />
+    <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\BT_Action.h" />
+    <ClInclude Include="..\Public\BT_Node.h" />
+    <ClInclude Include="..\Public\BT_Selector.h" />
+    <ClInclude Include="..\Public\BT_Sequence.h" />
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h" />
     <ClInclude Include="..\Public\Collider.h" />
     <ClInclude Include="..\Public\ColliderNotify.h" />
@@ -96,7 +101,12 @@
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
+    <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\BT_Action.cpp" />
+    <ClCompile Include="..\Private\BT_Node.cpp" />
+    <ClCompile Include="..\Private\BT_Selector.cpp" />
+    <ClCompile Include="..\Private\BT_Sequence.cpp" />
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp" />
     <ClCompile Include="..\Private\Collider.cpp" />
     <ClCompile Include="..\Private\AnimNotify.cpp" />

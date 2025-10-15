@@ -216,12 +216,27 @@
     </Filter>
     <Filter Include="01. Utility\97. Physics\ContactListener\Virtual">
       <UniqueIdentifier>{99751cc9-1385-48d7-808c-2ebc28706e30}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
       <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
     </Filter>
     <Filter Include="99. Define">
       <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree">
+      <UniqueIdentifier>{cd02884e-a999-444f-82f6-47109afae285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node">
+      <UniqueIdentifier>{8a7803e6-d55b-4b0d-8d53-c5c68f2d4938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Action">
+      <UniqueIdentifier>{e7d31422-8e3a-444e-a01f-600222e4c566}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Selector">
+      <UniqueIdentifier>{c2f309b1-a936-4f17-af94-c19d686695bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence">
+      <UniqueIdentifier>{5d0c8a64-ade4-4939-bd7d-886f75735552}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -423,9 +438,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimNotifyDefine.h">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
@@ -443,7 +455,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\AnimNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
@@ -452,6 +464,21 @@
     </ClInclude>
     <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Behavior_Tree.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Node.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Action.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Selector.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Selector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Sequence.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -649,7 +676,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\AnimNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
@@ -658,6 +685,21 @@
     </ClCompile>
     <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Behavior_Tree.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Node.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Action.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Selector.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Selector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Sequence.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
