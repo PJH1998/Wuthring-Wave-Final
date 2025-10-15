@@ -67,6 +67,7 @@
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
+    <ClInclude Include="..\Public\StaticObject.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h" />
     <ClInclude Include="..\Public\Model.h" />
     <ClInclude Include="..\Public\Navigation.h" />
@@ -140,6 +141,7 @@
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
+    <ClCompile Include="..\Private\StaticObject.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
     <ClCompile Include="..\Private\Model.cpp" />
     <ClCompile Include="..\Private\Navigation.cpp" />

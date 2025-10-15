@@ -20,6 +20,7 @@
 #include "Picking.h"
 #include "Shadow.h"
 #include "GUIManager.h"
+#include "OctoTree.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -54,6 +55,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pPooling_Manager = CPooling_Manager::Create();
 	ASSERT_CRASH(m_pPooling_Manager);
+
+	m_pOctoTree = COctoTree::Create();
+	ASSERT_CRASH(m_pOctoTree);
 
 	m_pTargetManager = CTarget_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pTargetManager);
@@ -565,6 +569,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPrototype_Manager);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
+	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pTargetManager);
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);

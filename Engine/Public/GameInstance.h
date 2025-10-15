@@ -86,6 +86,10 @@ public:
 	void			Wait_Thread_End();
 #pragma endregion
 
+#pragma region OctoTree
+
+#pragma endregion
+
 #pragma region TARGET_MANAGER
 	ID3D11Resource* Get_RT_Resource(const _wstring& strTargetTag);
 	HRESULT		Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
@@ -205,6 +209,7 @@ private:
 	class CPrototype_Manager*		m_pPrototype_Manager = { nullptr };
 	class CObject_Manager*			m_pObject_Manager = { nullptr };
 	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
+	class COctoTree*					m_pOctoTree = { nullptr };
 	class CTarget_Manager*			m_pTargetManager = { nullptr };
 	class CRenderer*					m_pRenderer = { nullptr };
 	class CLight_Manager*			m_pLight_Manager = { nullptr };
