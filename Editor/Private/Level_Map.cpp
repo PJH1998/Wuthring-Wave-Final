@@ -6,6 +6,7 @@
 #include"Mesh_Instance.h"
 #include"Edit_MapObject.h"
 #include"Edit_MapObject_Instance.h"
+#include"Edit_MapObject_Container.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -105,7 +106,13 @@ void CLevel_Map::Menu_Object()
     ImGui::Begin("Menu_Object");
 
     //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
-
+    if (ImGui::Button("Test"))
+    {
+        m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
+            m_iLevel, TEXT("Layer_Containers"), nullptr);
+    }
+    if (!m_ContainerObjects.empty())
+        Container_Info();
     if (m_pPickedObject)
         m_pPickedObject->Set_ImGuiOption();
 
@@ -390,9 +397,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //VTXMESHINSTANCE
     
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1"),
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
         CEdit_MapObject::Create(m_pDevice, m_pContext));
 
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
+        CMapObject_Container::Create(m_pDevice, m_pContext));
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
@@ -438,6 +447,11 @@ void CLevel_Map::Ready_Event()
                 m_fNearDistance = event.fDistance;
                 m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
                 XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
+                if (m_pChildObject)
+                {
+                    m_pPickedObject->Add_Child(m_pChildObject);
+                    m_pChildObject = nullptr;
+                }
             }
         }
         break;
@@ -463,6 +477,13 @@ void CLevel_Map::Ready_Event()
 
         m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
         });
+
+    m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), [this](const MAP_CREATE& event) {
+        if (!m_pChildObject)
+            m_pChildObject = reinterpret_cast<CEdit_MapObject*>(event.pObject);
+        else
+            m_pChildObject = nullptr;
+        });
 }
 
 void CLevel_Map::Make_MousePos()
@@ -484,6 +505,19 @@ void CLevel_Map::Make_MousePos()
     //뷰 스페이스에서 월드 매트릭스 전환.
     XMStoreFloat3(&m_vWorldPos, XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW)));
     XMStoreFloat3(&m_vWorldDir, XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&m_vWorldDir), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW))));
+}
+
+void CLevel_Map::Container_Info()
+{
+    ImGuiID ShaderId = ImGui::GetID("Container");
+    ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+    ImGui::Text("Current Container");
+
+    for (auto& pContainer : m_ContainerObjects)
+        if (ImGui::Button(pContainer.second->Get_ModelName())) {
+            int a = 0;
+        }
+    ImGui::EndChildFrame();
 }
 
 CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
