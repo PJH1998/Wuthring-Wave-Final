@@ -2,6 +2,7 @@
 #include "Component.h"
 
 NS_BEGIN(Engine)
+
 class ENGINE_DLL CBehavior_Tree final : public CComponent
 {
 private:
@@ -22,4 +23,5 @@ public:
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 };
+
 NS_END

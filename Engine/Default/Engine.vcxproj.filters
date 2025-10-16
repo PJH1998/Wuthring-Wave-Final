@@ -238,6 +238,9 @@
     <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence">
       <UniqueIdentifier>{5d0c8a64-ade4-4939-bd7d-886f75735552}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BlackBoard">
+      <UniqueIdentifier>{9cea817a-4e9b-4d15-a2ca-53930574055b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
