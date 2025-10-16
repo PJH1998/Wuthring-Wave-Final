@@ -205,6 +205,31 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Begin("Hierarchy");
 
+    if (m_pCurObj)
+    {
+        CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+        static _char szUIName[256] = {};
+        
+        _string strUIName = WSTR2STR(tDesc.strUIName);
+        strcpy_s(szUIName, strUIName.c_str());
+
+        ImGui::Text("Name : ");
+        ImGui::SameLine();
+        if (ImGui::InputText("##Edit Name", szUIName, 256))
+        {
+            _string strEditUIName = szUIName;
+            
+            tDesc.strUIName = STR2WSTR(strEditUIName);
+            dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
+        }
+    }
+    else
+    {
+        ImGui::Text("Selected Nothing");
+    }
+
+    ImGui::Separator();
+
     // 매 프레임마다 벡터를 통해 부모 구조를 파악하고,
     // 그걸 컨테이너에 담은 뒤, 하이어라키에서 표시?
 
