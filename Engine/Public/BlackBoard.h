@@ -23,7 +23,7 @@ private:
 	virtual ~CBlackBoard() = default;
 
 public:
-	HRESULT Add_Data(const _string& strDataTag, DATA_TYPE eType, void* pValue);
+	HRESULT Add_Data(const _string& strDataTag, _uint eType, void* pValue);
 	void* Get_Data(const _string& strDataTag);
 
 #ifdef _DEBUG
