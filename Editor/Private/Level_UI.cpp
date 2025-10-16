@@ -222,7 +222,7 @@ void CLevel_UI::Update_Hierarchy()
         _string strUIName = WSTR2STR(tDesc.strUIName);
         strcpy_s(szUIName, strUIName.c_str());
 
-        ImGui::Text("Name : ");
+        ImGui::Text("Name ");
         ImGui::SameLine();
         if (ImGui::InputText("##Edit Name", szUIName, 256))
         {
@@ -231,7 +231,25 @@ void CLevel_UI::Update_Hierarchy()
             tDesc.strUIName = STR2WSTR(strEditUIName);
             dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
         }
+        ImGui::SameLine();
+        
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+        if (ImGui::Button("Delete##Hierarchy Object Delete"))
+        {
+            //m_vecCustomUIs.erase();
+            for (_uint i = 0; i < m_vecCustomUIs.size(); i++)
+                if (m_pCurObj == (m_vecCustomUIs[i].pCustomUI))
+                {
+                    m_vecCustomUIs.erase(m_vecCustomUIs.begin() + i);
+                    Safe_Release(m_pCurObj);
+                    m_pCurObj = nullptr;
+                    break;
+                }
+        }
 
+        ImGui::PopStyleColor(3);
     }
     else
     {
@@ -402,7 +420,7 @@ void CLevel_UI::Update_SaveLoad()
     ImGui::InputText("##Tree Name", szTreeName, 256);
 
     if (ImGui::Button("Save##TreeSave", buttonSize) &&
-        m_pCurObj)
+        !m_vecCustomUIs.empty())
     {
         IGFD::FileDialogConfig config;
 
@@ -414,8 +432,7 @@ void CLevel_UI::Update_SaveLoad()
     // ==============================
     // * [UI] Tree Load
     // ==============================
-    if (ImGui::Button("Load##TreeLoad", buttonSize) && 
-        m_pCurObj)
+    if (ImGui::Button("Load##TreeLoad", buttonSize))
     {
         IGFD::FileDialogConfig config;
 
