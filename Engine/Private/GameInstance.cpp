@@ -529,6 +529,10 @@ void CGameInstance::Add_GUI_Func(function<void()> func)
 {
 	m_pGUIManager->Add_GUI_Func(func);
 }
+void CGameInstance::Use_Gizmo(CTransform* pTransform)
+{
+	m_pGUIManager->Use_Gizmo(pTransform);
+}
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)

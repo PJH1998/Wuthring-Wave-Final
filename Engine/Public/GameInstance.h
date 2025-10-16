@@ -191,6 +191,7 @@ public:
 #pragma region GUIMANAGER
 	ImGuiContext*		Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
+	void					Use_Gizmo(class CTransform* pTransform = nullptr);
 #pragma endregion
 
 
