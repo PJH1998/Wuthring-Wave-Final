@@ -20,11 +20,12 @@ public:
 public:
 	HRESULT								Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
 	HRESULT								Bind_Shader_Resource(class CShader* pShader, const _char* pConstantName);
-	void									Clear();
+	void							    Clear();
 
 #ifdef _DEBUG
 	HRESULT								Ready_Debug(_float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT								Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT                             Render(const _wstring& strRT_Name);
 #endif
 
 private:

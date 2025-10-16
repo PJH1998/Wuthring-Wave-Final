@@ -96,11 +96,12 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
-	void			End_MRT();
+	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT     Render_RT();
 	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
 #endif
 #pragma endregion

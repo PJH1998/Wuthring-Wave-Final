@@ -451,11 +451,8 @@ void CRenderer::Render_Debug()
 	if (false == m_isRenderDebug)
 		return;
 
-	ImGui::Begin("Test");
-
-	ImGui::Image(reinterpret_cast<ImTextureID>(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug"))), ImVec2(150.f, 150.f));
-
-	ImGui::End();
+	if (FAILED(m_pGameInstance->Render_RT()))
+		CRASH("Render RT");
 
 	//if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
 	//	CRASH("ViewMatrix");
@@ -464,13 +461,15 @@ void CRenderer::Render_Debug()
 
 	//if (FAILED(m_pGameInstance->Render_RT(m_pShader, m_pVIBuffer)))
 	//	CRASH("Render RT");
+
+
 }
 #endif
 
 HRESULT CRenderer::Ready_RT()
 {
 	/* RenderTarget Diffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 0.f, 1.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Normal */

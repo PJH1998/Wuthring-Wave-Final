@@ -137,6 +137,16 @@ HRESULT CTarget_Manager::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	return S_OK;
 }
+HRESULT CTarget_Manager::Render()
+{
+	for (auto& Pair : m_RenderTargets)
+	{
+		if (nullptr != Pair.second)
+			Pair.second->Render(Pair.first);
+	}
+
+	return S_OK;
+}
 #endif
 
 CRenderTarget* CTarget_Manager::Find_RenderTarget(const _wstring& strTargetTag)
