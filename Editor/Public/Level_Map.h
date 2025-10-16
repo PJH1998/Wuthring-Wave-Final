@@ -55,7 +55,7 @@ private:
 	_float m_fNearDistance_Instance = {FLT_MAX};
 
 	vector<_string> m_ModelPaths;
-
+	_wstring m_szPreViewModelName;
 	_bool m_LoadMenu = { false };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

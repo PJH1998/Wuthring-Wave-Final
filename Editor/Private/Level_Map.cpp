@@ -58,6 +58,7 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
     }
     Make_MousePos();
+    m_pPreViewObject->Late_Update(fTimeDelta, m_szPreViewModelName);
 }
 
 void CLevel_Map::Render()
@@ -69,23 +70,23 @@ void CLevel_Map::Menu_Select()
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::MenuItem("Ojbect")) {
-            m_eMenu = MENU_OBJECT;
+            m_eMenu == MENU_OBJECT ? m_eMenu = END : m_eMenu = MENU_OBJECT;
         }
 
         if (ImGui::MenuItem("RandScape")) {
-            m_eMenu = MENU_RANDSCAPE;
+            m_eMenu == MENU_RANDSCAPE ? m_eMenu = END : m_eMenu = MENU_RANDSCAPE;
         }
 
         if (ImGui::MenuItem("Light")) {
-            m_eMenu = MENU_LIGHT;
+            m_eMenu == MENU_LIGHT ? m_eMenu = END : m_eMenu = MENU_LIGHT;
         }
 
         if (ImGui::MenuItem("Map Save & Load")) {
-            m_eMenu = MENU_MAPSAVELOAD;
+            m_eMenu == MENU_MAPSAVELOAD ? m_eMenu = END : m_eMenu = MENU_MAPSAVELOAD;
         }
 
         if(ImGui::MenuItem("Object Save & Load")) {
-            m_eMenu = MENU_OBJECTLOAD;
+            m_eMenu == MENU_OBJECTLOAD ? m_eMenu = END : m_eMenu = MENU_OBJECTLOAD;
         }
 
         _float4 CamPos = *m_pGameInstance->Get_CamPos();
@@ -155,6 +156,8 @@ void CLevel_Map::Menu_Light()
        // 
        //기즈모 달거면 조명에 달기. 
     
+
+    //이샛기 누르면 왜 똥 생김?
 }
 
 void CLevel_Map::Menu_Model_Load()
@@ -189,7 +192,13 @@ void CLevel_Map::Menu_Model_Load()
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
             }
-
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+                m_szPreViewModelName = StringToWString(FileName);
+                ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
+                ImGui::End();
+            }
         }
         /*ImGui::BeginChild("ScrollObject");
         ImGui::EndChild();*/
@@ -318,6 +327,7 @@ void CLevel_Map::Load_Objects()
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     string FolderPath = "../../Client/Bin/Resource/Map/";
+    vector<_wstring> m_PrototypeNames;
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
@@ -335,19 +345,40 @@ void CLevel_Map::Load_Objects()
                 _wstring ProtoModelPath= TEXT("Prototype_Component_Model_");
                 _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
 
-                m_pGameInstance->Add_Work([=]() {
-                    m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), entry.path().string().c_str()));
+                //중단점 걸면 터지니까 걸지마쇼
+                /*while (m_pGameInstance->IsWorkFinish())
+                {
 
-                    string Test = entry.path().parent_path().string();
-                    Test += "/Mat/Tex/";
-                    if (filesystem::exists(Test))
-                        m_pPreViewObject->Add_Model(ProtoModelName);
+                }*/
+                m_PrototypeNames.push_back(ProtoModelName);
+
+
+                _string FilePath = entry.path().string();
+                //멀티쓰레드 스트링이 주소 넘기는 거라 도중에 바껴서 터지는듯ㅇㅇ 
+
+                //간헐적 터짐증상 개화나네 진짜
+
+                m_pGameInstance->Add_Work([=]() {
+                    if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+                        CRASH("ㅎㅇ");
                     });
+
+                //    string Test = entry.path().parent_path().string();
+                //    Test += "/Mat/Tex/";
+                //    if (filesystem::exists(Test))
+                //        m_pPreViewObject->Add_Model(ProtoModelName);
+                //    });
             }
         }
     }
     m_pGameInstance->Wait_Thread_End();
+
+    for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+    {
+        m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
+    }
+
 }
 
 HRESULT CLevel_Map::Ready_Static_Component()
@@ -356,7 +387,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
     _float fSize = 0.001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
 
-    Load_Objects();
 
     //일반 모델
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
@@ -387,12 +417,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
 
-    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf"),
-    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
-
-    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test"),
-    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
-
 
 
 
@@ -413,47 +437,18 @@ HRESULT CLevel_Map::Ready_Static_Component()
     //큐브 안에 모델 찍기 / 월드 최대 크기 안에 찍어야한다.
     //일단 텍스쳐 없이 모델만 로드해놓기 세이브 & 로드.
     
-    CEdit_MapObject::MAP_LOAD Desc{};
-    CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
-    _float4x4 DefaultMatrix{};
-    XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
-    InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
+    //CEdit_MapObject::MAP_LOAD Desc{};
+    //CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
+    //_float4x4 DefaultMatrix{};
+    //XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
+    //InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
 
-    strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
-    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf")
-        , m_iLevel, TEXT("Layer_Test"), &InstanceDesc);*/
+    //strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
 
-    /*strcpy_s(Desc.ModelName, "Wolf");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf")
-        , m_iLevel, TEXT("Layer_Test"), Desc.ModelName);*/
+    //strcpy_s(Desc.ModelName, "Test1");
 
-    /*strcpy_s(Desc.ModelName, "Test");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test")
-        , m_iLevel, TEXT("Layer_Test"), &Desc.ModelName);*/
+    Load_Objects();
 
-    strcpy_s(Desc.ModelName, "Test1");
-    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
-        , m_iLevel, TEXT("Layer_Test"), &Desc);*/
-
-
-
-    /*
-    
-                    CEdit_MapObject::MAP_LOAD Desc{};
-                _float4x4 DefaultMatrix{};
-                XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
-                Desc.WorldMatrix = &DefaultMatrix;
-
-                strcpy_s(Desc.ModelName, FileName);
-
-                _wstring ProtoModelName = TEXT("Prototype_Component_Model_");
-                ProtoModelName += StringToWString(Desc.ModelName);
-
-                m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), m_ModelPaths[i].c_str()));
-
-    
-    */
     return S_OK;
 }
 

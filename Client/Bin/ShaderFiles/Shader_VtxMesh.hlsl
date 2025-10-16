@@ -91,6 +91,7 @@ struct PS_OUT_LIGHT
     float4 vAmbient : SV_TARGET4;
 };
 
+
 PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
@@ -116,7 +117,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
     //Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
-    Out.vDiffuse = float4(0.f, 0.f, 0.f, 1.f);
+    Out.vDiffuse = float4(1.f, 1.f, 1.f, 1.f);
     
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     
@@ -140,8 +141,19 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     
     return Out;
 }
+struct PS_OUT_DEBUG
+{
+    float4 vDiffuse : SV_TARGET0;
+};
 
-
+PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
+{
+    PS_OUT_DEBUG Out = (PS_OUT_DEBUG) 0;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    return Out;
+}
 
 technique11 DefaultTechnique
 {
@@ -156,7 +168,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL();
     }
 
-    pass AlphaNotDiscard // 0
+    pass AlphaNotDiscard // 1
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -166,7 +178,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_ALPHA();
     }
-    pass AlphaNotDiscardNonCull // 0
+    pass AlphaNotDiscardNonCull // 2
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -176,7 +188,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_ALPHA();
     }
-    pass SelectedObject // 0
+    pass SelectedObject // 3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -186,4 +198,16 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_NORMAL_FOCUS();
     }
+
+    pass DebugRender // 4
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_DEBUG();
+    }
+
 }

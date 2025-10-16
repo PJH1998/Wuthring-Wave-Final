@@ -299,6 +299,9 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     for (_uint i = 0; i < m_pShaderCom->Get_PassCount(); ++i)
     {
+        if (!strcmp("DebugRender", m_pShaderCom->Get_PassName(i)))
+            continue;
+
         if (ImGui::Button(m_pShaderCom->Get_PassName(i))) {
             m_iShaderPassIndex = i;
         }
@@ -346,7 +349,8 @@ void CEdit_MapObject::Set_ImGuiOption()
         IGFD::FileDialogConfig config;
 
         //config.path = "C:/Users/dnheu/source/repos";
-        config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
+        //config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
+        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Rock/Tex/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         _char Text[32] = {};
@@ -414,6 +418,7 @@ void CEdit_MapObject::Set_ImGuiOption()
             }
             ImGui::EndCombo();
         }
+        m_SelectedDiffuseTextureName[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/Rock/SM_Sev_Roc_15AM/Mat/Tex/T4_Com2_Roc_05A_D.png";
 
         if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
         {
@@ -592,9 +597,35 @@ void CEdit_MapObject::Export_MaterialData()
     _char ModelPath[MAX_PATH] = {};
 
     strcat_s(ModelPath, filesystem::current_path().parent_path().parent_path().string().c_str());
+
+
     strcat_s(ModelPath, "/Client/Bin/Resource/Map/");
-    strcat_s(ModelPath, m_ModelName);
-    strcat_s(ModelPath, "/");
+    for (const auto& entry : filesystem::recursive_directory_iterator(ModelPath))
+    {
+        if (entry.path().extension() != ".dat")
+            continue;
+        _string Name = entry.path().filename().replace_extension().string();
+
+        if (entry.is_regular_file() && !strcmp(Name.c_str(), m_ModelName))
+        {
+            strcpy_s(ModelPath, entry.path().parent_path().string().c_str());
+            strcat_s(ModelPath, "/");
+            break;
+        }
+    }
+
+    //return;
+    //_string SubstrLOD;
+    //SubstrLOD = m_ModelName;
+    //size_t SubStrPos = SubstrLOD.find("_LOD");
+
+    //if (SubStrPos != std::string::npos)
+    //    SubstrLOD = SubstrLOD.substr(0, SubStrPos);
+    ////strcpy_s(ModelPath, "/"); +SubstrLOD + "/";
+    //strcat_s(ModelPath, SubstrLOD.c_str());
+    //strcat_s(ModelPath, "/");
+    //strcat_s(ModelPath, m_ModelName);
+    //strcat_s(ModelPath, "/");
 
     config1.path = string(ModelPath);
     config1.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;

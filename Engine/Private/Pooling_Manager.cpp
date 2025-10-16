@@ -113,6 +113,7 @@ void CPooling_Manager::Work_Thread()
 	{
 		unique_lock<mutex> lock(m_Mutex);
 		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
+		CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 		// Client 종료 시, Thread 모두 종료
 		if (true == m_isAllStop)
@@ -122,10 +123,12 @@ void CPooling_Manager::Work_Thread()
 		m_Works.pop();
 		lock.unlock();
 
+
 		m_iLiveWork.fetch_add(1);
 		Work();
-
 		m_iLiveWork.fetch_sub(1);
+
+		CoUninitialize();
 	}
 }
 

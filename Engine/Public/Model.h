@@ -44,7 +44,9 @@ public:
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
+	
 
+	BoundingBox*							Get_BoundingBox(_uint iNumMesh);
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 

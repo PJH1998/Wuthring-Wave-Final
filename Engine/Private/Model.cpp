@@ -310,6 +310,17 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 }
 
+BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
+{
+	if (m_eType != MODELTYPE::MAP)
+		ASSERT_CRASH("Is Not Map Object");
+
+	if (iNumMesh >= m_iNumMeshes)
+		return nullptr;
+
+	return m_Meshes[iNumMesh]->Get_BoundingBox();
+}
+
 HRESULT CModel::Render(_uint iMeshIndex)
 {
 	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources()))
