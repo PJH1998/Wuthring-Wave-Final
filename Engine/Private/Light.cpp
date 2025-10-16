@@ -28,13 +28,13 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	if (ENUM_CLASS(LIGHT_DESC::DIRECTION) == m_LightDesc.eType)
 	{
-		iPassIndex = 2;
+		iPassIndex = ENUM_CLASS(SHADER_DEFFERED::DIRECTIONAL);
 		if (FAILED(pShader->Bind_Value("g_vLightDirection", &m_LightDesc.vDirection, sizeof(_float4))))
 			return E_FAIL;
 	}
 	else if(ENUM_CLASS(LIGHT_DESC::POINT) == m_LightDesc.eType)
 	{
-		iPassIndex = 3;
+		iPassIndex = ENUM_CLASS(SHADER_DEFFERED::POINT);
 	}
 
 	pShader->Begin(iPassIndex);
