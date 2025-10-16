@@ -11,13 +11,17 @@ private:
 
 public:
 	ID3D11Texture2D* Get_RT_Resource(const _wstring& strTargetTag);
+	
+#ifdef _DEBUG
+	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
+#endif
 
 public:
 	HRESULT		Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_Shader_Resource(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV, _bool isClear);
-	void			End_MRT();
+	void	    End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 
 #ifdef _DEBUG

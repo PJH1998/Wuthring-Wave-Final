@@ -101,6 +101,7 @@ public:
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
 #endif
 #pragma endregion
 

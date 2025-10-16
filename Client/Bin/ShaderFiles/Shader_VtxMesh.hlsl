@@ -2,9 +2,13 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D g_DiffuseTexture;
-texture2D g_NormalTexture;
-texture2D g_MaskTexture[4] : register(t8);
+texture2D   g_DiffuseTexture;
+texture2D   g_NormalTexture;
+
+vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
+vector      g_vMatrlSpecular = vector(0.1f, 0.1f, 0.1f, 0.1f);
+
+texture2D   g_MaskTexture[4] : register(t8);
 
 struct VS_IN
 {
@@ -81,8 +85,10 @@ struct PS_OUT_LIGHT
     float4 vDiffuse : SV_TARGET0;
     float4 vNormal : SV_TARGET1;
     float4 vDepth : SV_TARGET2;
-    float4 vEmissive : SV_TARGET3;
-    float4 vDistortion : SV_TARGET4;
+//    float4 vEmissive : SV_TARGET3;
+//    float4 vDistortion : SV_TARGET4;
+    float4 vSpecular : SV_TARGET3;
+    float4 vAmbient : SV_TARGET4;
 };
 
 PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
@@ -98,6 +104,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vSpecular = g_vMatrlSpecular;
+    Out.vAmbient = g_vMatrlAmbient;
     
     return Out;
 }

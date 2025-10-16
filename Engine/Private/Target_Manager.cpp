@@ -20,6 +20,16 @@ ID3D11Texture2D* CTarget_Manager::Get_RT_Resource(const _wstring& strTargetTag)
 	return pRenderTarget->Get_Resource();
 }
 
+#ifdef _DEBUG
+ID3D11ShaderResourceView* CTarget_Manager::Get_Debug_RT_Resource(const _wstring& strTargetTag)
+{
+	CRenderTarget* pRenderTarget = Find_RenderTarget(strTargetTag);
+	if (nullptr == pRenderTarget)
+		return nullptr;
+
+	return pRenderTarget->Get_SRV();
+}
+#endif
 HRESULT CTarget_Manager::Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor)
 {
 	if (nullptr != Find_RenderTarget(strTargetTag))

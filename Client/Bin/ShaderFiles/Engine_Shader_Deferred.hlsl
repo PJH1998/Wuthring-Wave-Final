@@ -11,13 +11,16 @@ Texture2D g_Texture;
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_DepthTexture;
+Texture2D g_Mat_SpecularTexture;
+Texture2D g_Mat_AmbientTexture;
 Texture2D g_ShadeTexture;
 Texture2D g_SpecularTexture;
 Texture2D g_LightDepthTexture;
 Texture2D g_EmissiveTexture;
-Texture2D g_DistortionTexture;
 Texture2D g_BlurTexture;
 Texture2D g_BackBufferTexture;
+Texture2D g_DistortionTexture;
+Texture2D g_BlurEndTexture;
 
 vector g_vLightDirection = 0.f;
 vector g_vLightDiffuse = 1.f;
@@ -128,13 +131,6 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     return Out;
 }
 
-PS_OUT_BACKBUFFER PS_BLUR_Y(PS_IN In)
-{
-    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
-
-    return Out;
-}
-
 struct PS_OUT_LIGHT
 {
     float4 vShade : SV_TARGET0;
@@ -204,6 +200,57 @@ PS_OUT_BLUR PS_BLUR_X(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_BLUR_Y(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+
+    float2 vTexcoord;
+    vector vColor;
+    
+    float fTexel = 1.f / g_fHeight;
+    
+    for (int i = -6; i < 7; ++i)
+    {
+        vTexcoord.x = In.vTexcoord.x;
+        vTexcoord.y = In.vTexcoord.y + fTexel;
+        
+        vColor += g_BlurTexture.Sample(ClampSampler, vTexcoord) * g_fWeights[i + 6];
+    }
+    
+    vColor.a = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vFinalColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vColor = vFinalColor + vColor;
+    
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float2 vTexcoord;
+    float2 vWeight;
+    vector vNormal;
+    vector vNormalData;
+    
+    vNormalData = g_DistortionTexture.Sample(PointSampler, In.vTexcoord);
+    
+    vNormalData = vector((vNormalData.xy * 2.f) - 1.f, vNormalData.z, vNormalData.a);
+    vWeight = (vNormalData.xy * vNormalData.z) * vNormalData.a;
+    
+    vWeight *= 0.12f;
+    
+    vTexcoord = In.vTexcoord + vWeight;
+    
+    vector vFinalColor = g_BlurEndTexture.Sample(ClampSampler, vTexcoord);
+    
+    Out.vColor = vFinalColor;
+    
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass DebugPass // 0
@@ -265,5 +312,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_BLUR_Y();
+    }
+    
+    pass Distortion // 6
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DISTORTION();
     }
 }

@@ -10,8 +10,12 @@ private:
 	virtual ~CRenderTarget() = default;
 
 public:
-	ID3D11RenderTargetView*		Get_RTV() { return m_pRTV; }
+	ID3D11RenderTargetView*             Get_RTV() { return m_pRTV; }
 	ID3D11Texture2D*					Get_Resource() { return m_pTexture2D; }
+
+#ifdef _DEBUG
+	ID3D11ShaderResourceView*           Get_SRV() { return m_pSRV; }
+#endif
 
 public:
 	HRESULT								Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
@@ -28,8 +32,8 @@ private:
 	ID3D11DeviceContext*				m_pContext = { nullptr };
 
 	ID3D11Texture2D*					m_pTexture2D = { nullptr };
-	ID3D11RenderTargetView*		m_pRTV = { nullptr };
-	ID3D11ShaderResourceView*		m_pSRV = { nullptr };
+	ID3D11RenderTargetView*		        m_pRTV = { nullptr };
+	ID3D11ShaderResourceView*		    m_pSRV = { nullptr };
 
 	_float4								m_vClearColor = {};
 

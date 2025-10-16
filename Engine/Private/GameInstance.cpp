@@ -323,6 +323,10 @@ HRESULT CGameInstance::Render_RT(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pTargetManager->Render(pShader, pVIBuffer);
 }
+ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& strTargetTag)
+{
+	return m_pTargetManager->Get_Debug_RT_Resource(strTargetTag);
+}
 #endif
 #pragma endregion
 
