@@ -10,7 +10,7 @@ private:
 	virtual ~CMainApp() = default;
 
 public:
-	HRESULT			Initialize();
+	HRESULT				Initialize();
 	void				Post_Update();						// 레벨 전환
 	void				Update(_float fTimeDelta);
 	void				Render();

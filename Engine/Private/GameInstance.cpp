@@ -20,6 +20,7 @@
 #include "Picking.h"
 #include "Shadow.h"
 #include "GUIManager.h"
+#include "OctoTree.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -54,6 +55,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pPooling_Manager = CPooling_Manager::Create();
 	ASSERT_CRASH(m_pPooling_Manager);
+
+	m_pOctoTree = COctoTree::Create();
+	ASSERT_CRASH(m_pOctoTree);
 
 	m_pTargetManager = CTarget_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pTargetManager);
@@ -275,6 +279,10 @@ _bool CGameInstance::IsWorkFinish()
 {
 	return m_pPooling_Manager->IsWorkFinish();
 }
+void CGameInstance::Wait_Thread_End()
+{
+	m_pPooling_Manager->Wait_Thread_End();
+}
 #pragma endregion
 
 #pragma region TARGET_MANAGER
@@ -314,6 +322,14 @@ HRESULT CGameInstance::Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _
 HRESULT CGameInstance::Render_RT(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pTargetManager->Render(pShader, pVIBuffer);
+}
+HRESULT CGameInstance::Render_RT()
+{
+	return m_pTargetManager->Render();
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& strTargetTag)
+{
+	return m_pTargetManager->Get_Debug_RT_Resource(strTargetTag);
 }
 #endif
 #pragma endregion
@@ -517,6 +533,10 @@ ImGuiContext* CGameInstance::Get_ImGuiContext()
 {
 	return m_pGUIManager->Get_ImGuiContext();
 }
+void CGameInstance::Add_GUI_Func(function<void()> func)
+{
+	m_pGUIManager->Add_GUI_Func(func);
+}
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
@@ -537,6 +557,7 @@ HRESULT CGameInstance::Clear_Memory()
 {
 	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();
+	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
@@ -556,6 +577,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPrototype_Manager);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
+	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pTargetManager);
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);

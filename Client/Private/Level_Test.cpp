@@ -61,6 +61,7 @@ HRESULT CLevel_Test::Initialize()
 
 void CLevel_Test::Update(_float fTimeDelta)
 {
+	SetWindowText(g_hWnd, TEXT("Test"));
 }
 
 void CLevel_Test::Render()

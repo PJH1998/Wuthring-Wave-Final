@@ -38,7 +38,7 @@ public:
 
 private:
 	_int							m_iCurrentCellIndex = { -1 };
-	vector<class CCell*>		m_Cells;
+	vector<class CCell*>			m_Cells;
 
 	static _float4x4				m_WorldMatrix;
 

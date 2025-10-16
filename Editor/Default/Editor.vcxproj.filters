@@ -76,6 +76,9 @@
     <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab">
       <UniqueIdentifier>{774ff9b9-e035-4e09-a1cc-28229109e0fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="96. Interface">
+      <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -159,6 +162,9 @@
     <ClInclude Include="..\Public\Effect_Prefab.h">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Interface_Edit.h">
+      <Filter>96. Interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -230,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Prefab.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Interface_Edit.cpp">
+      <Filter>96. Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
