@@ -216,7 +216,7 @@
     </Filter>
     <Filter Include="01. Utility\97. Physics\ContactListener\Virtual">
       <UniqueIdentifier>{99751cc9-1385-48d7-808c-2ebc28706e30}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
       <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
     </Filter>
@@ -423,9 +423,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimNotifyDefine.h">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
@@ -443,7 +440,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\AnimNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
@@ -452,6 +449,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ComputeShader.h">
+      <Filter>01. Utility\04. Component\Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -649,7 +649,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\AnimNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
@@ -658,6 +658,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ComputeShader.cpp">
+      <Filter>01. Utility\04. Component\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

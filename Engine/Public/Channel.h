@@ -10,6 +10,11 @@ private:
 	virtual ~CChannel() = default;
 
 public:
+	const vector<KEYFRAME>& Get_Keyframes() const { return m_KeyFrames; }
+	_uint Get_NumKeyframes() const { return m_iNumKeyFrame; }
+	_uint Get_BoneIndex() const { return m_iBoneIndex; }
+
+public:
 	HRESULT					Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
 	void						Update_TransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex);
 	void						Update_TransformationMatrix_All(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex);

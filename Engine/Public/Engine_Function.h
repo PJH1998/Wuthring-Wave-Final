@@ -87,6 +87,24 @@ namespace Engine
 		return str;
 	}
 
+#ifdef _DEBUG
+	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
+	{
+		// 출력창에서 Debug 확인 하기.
+		
+		_wstring strDebug = strPrePix + L" : " +  to_wstring(fVector.x) + L", " + to_wstring(fVector.y) + L", " + to_wstring(fVector.z) + L", " + to_wstring(fVector.w) + L"\n";
+		OutputDebugString(strDebug.c_str());
+	}
+
+	inline void OutPutDebugFloat(_wstring strPrePix, _float fValue)
+	{
+		// 출력창에서 Debug 확인 하기.
+
+		_wstring strDebug = strPrePix + L" : " + to_wstring(fValue) + L"\n";
+		OutputDebugString(strDebug.c_str());
+	}
+#endif
+
 	inline Vec3 LoadVec3(const _float3& vVector) { return Vec3(vVector.x, vVector.y, vVector.z); }
 	inline Vec3 LoadVec3(const _fvector& vVector) { return Vec3(vVector.m128_f32[0], vVector.m128_f32[1], vVector.m128_f32[2]); }
 	inline Quat LoadQuat(const _float4& vQuat) { return Quat(vQuat.x, vQuat.y, vQuat.z, vQuat.w); }

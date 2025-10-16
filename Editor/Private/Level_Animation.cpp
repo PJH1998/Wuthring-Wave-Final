@@ -22,6 +22,24 @@ HRESULT CLevel_Animation::Initialize()
         return E_FAIL;
     }
 
+    // hlsl 과 맞춘다. => 이 값은 뼈 개수와 상관없이 거의 고정
+    // 한 번에 작업을 처리할 한 팀의 스레드가 몇명인가를 정의.
+    SHADER_MACRO eShaderMacro = {
+        {"THREAD_X", "64" }
+        ,{"THREAD_Y", "1" }
+        ,{"THREAD_Z", "1" }
+        , { NULL, NULL }
+    };
+    
+    string strEntryPoint = "CSMain";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+        ,eShaderMacro, strEntryPoint))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
     return S_OK;
 }
 

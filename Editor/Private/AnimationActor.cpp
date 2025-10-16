@@ -64,8 +64,27 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     m_fTimeDelta = fTimeDelta;
 
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // 하드코딩...
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
+
+
     if (m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+
+
+    // 개념상 같이 실행은 시키는데 Root 뼈를 Identity로 하면된다?
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // 하드코딩...
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
+
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -149,8 +168,8 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
     // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
-    if (!m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
+    /*if (!m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
 }
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
@@ -206,6 +225,13 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
         return E_FAIL;
     }
 
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strComputeShaderTag,
+        TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+    {
+        CRASH("Failed Ready_ComShader");
+        return E_FAIL;
+    }
+
     // Model
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strModelTag,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
@@ -249,5 +275,6 @@ void CAnimationActor::Free()
     CContainerObject::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShaderCom);
 
 }
