@@ -138,7 +138,7 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strFileName   = pDesc->strFileName;
     m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
 
-    m_tUIDesc.strUIName     = pDesc->strUIName;
+    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // 비어있다면 초기값으로 strFileName 사용
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 

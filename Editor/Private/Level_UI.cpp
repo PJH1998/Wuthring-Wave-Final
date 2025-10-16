@@ -203,22 +203,86 @@ void CLevel_UI::Update_Hierarchy()
     // 유사 하이어라키 창, 로드된 객체 선택 가능하도록
     // ============================== 
 
-
     ImGui::Begin("Hierarchy");
 
-    static _int iSelected = -1;
+    // 매 프레임마다 벡터를 통해 부모 구조를 파악하고,
+    // 그걸 컨테이너에 담은 뒤, 하이어라키에서 표시?
 
-    for (_uint i = 0; i < m_vecCustomUIs.size(); i++)
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
+
+    // 하이어라키 메인
+    for (auto& ui : m_vecCustomUIs)
     {
-        // 오브젝트 갯수만큼 목록화, 클릭 시 해당 객체를 선택된 객체로
-        if (ImGui::Selectable(WSTR2STR(m_vecCustomUIs[i].strObjName).c_str(), iSelected == i))
-        {
-            m_pCurObj = m_vecCustomUIs[i].pCustomUI;
-        }
+        CCustom_UI* pUI = ui.pCustomUI;
+        CCustom_UI::CUSTOM_UI_DESC desc = pUI->Get_UIDesc();
+
+        // 부모가 없는 (최상위) 객체만 먼저 표시
+        if (desc.strParentName.empty())
+            Update_Hierarchy_CheckTree(pUI, flags);
     }
 
+    // 부모이름은 있지만 해당 부모가 없는 경우 별도 UI로 표시
+    ImGuiTreeNodeFlags flags_missingParent = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Selected;
+    if (ImGui::CollapsingHeader("Missing Parent Objects", flags_missingParent))
+    {
+        for (auto& ui : m_vecCustomUIs)
+        {
+            _bool isParentMissing = true;
 
+            static _int iSelected = -1;
+            _uint iIndex = 0;
+
+            // 부모 이름이 있는 경우 체크X (위에서 이미 찾았으므로)
+            if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
+                break;
+            // 해당하는 부모가 있는지 검사
+            for (auto& otherui : m_vecCustomUIs)
+                if (otherui.pCustomUI->Get_UIDesc().strUIName ==
+                    ui.pCustomUI->Get_UIDesc().strParentName)
+                {
+                    isParentMissing = false;
+                    break;
+                    iIndex++;
+                }
+
+            
+            if (isParentMissing)
+            {
+                _wstring wstrUIName = ui.pCustomUI->Get_UIDesc().strUIName;
+                _string strUIName = WSTR2STR(wstrUIName);
+                if (ImGui::Selectable(strUIName.c_str(), iSelected == iIndex))
+                    m_pCurObj = ui.pCustomUI;
+            }
+        }
+    }
+    
     ImGui::End();
+}
+
+void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeFlags flags)
+{
+    CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
+
+    // TreeNode 생성
+    _string strLabel = WSTR2STR(desc.strUIName);
+    if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
+    {
+        // 클릭 시 선택.
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            m_pCurObj = pParentUI;
+
+        // m_vecCustomUIs 전체를 돌면서, 부모 이름이 일치하는 객체를 찾음
+        for (auto& ui : m_vecCustomUIs)
+        {
+            CCustom_UI* pChild = ui.pCustomUI;
+            CCustom_UI::CUSTOM_UI_DESC childDesc = pChild->Get_UIDesc();
+
+            if (childDesc.strParentName == desc.strUIName)
+                Update_Hierarchy_CheckTree(pChild, flags); // 재귀 호출
+        }
+
+        ImGui::TreePop();
+    }
 }
 
 void CLevel_UI::Update_SaveLoad()

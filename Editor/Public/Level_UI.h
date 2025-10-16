@@ -67,6 +67,7 @@ private:
 
 	void				Update_MenuWindow();
 	void				Update_Hierarchy();
+	void				Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeFlags flags);
    
 	void				Update_SaveLoad();
 	void				Update_Inspector();
