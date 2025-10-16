@@ -5,6 +5,12 @@ NS_BEGIN(Engine)
 
 class ENGINE_DLL CBehavior_Tree final : public CComponent
 {
+public:
+	typedef struct tagBehaviorTreeDesc
+	{
+		class CBlackBoard* pBlackBoard;
+	}BEHAVIOR_TREE_DESC;
+
 private:
 	CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CBehavior_Tree(const CBehavior_Tree& Prototype);
@@ -18,6 +24,8 @@ public:
 
 private:
 	CBT_Node* m_pRoot = { nullptr };
+	CBlackBoard* m_pBlackBoard = {nullptr};
+
 public:
 	static CBehavior_Tree* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CBT_Node* pRoot);
 	virtual CComponent* Clone(void* pArg) override;

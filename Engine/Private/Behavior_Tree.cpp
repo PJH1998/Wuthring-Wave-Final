@@ -1,6 +1,7 @@
 #include "EnginePch.h"
 #include "Behavior_Tree.h"
 #include "BT_Node.h"
+#include "BlackBoard.h"
 
 CBehavior_Tree::CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CComponent { pDevice , pContext }
@@ -22,6 +23,14 @@ HRESULT CBehavior_Tree::Initialize_Prototype(CBT_Node* pRoot)
 
 HRESULT CBehavior_Tree::Initialize_Clone(void* pArg)
 {
+	BEHAVIOR_TREE_DESC* pDesc = static_cast<BEHAVIOR_TREE_DESC*>(pArg);
+	if(pDesc == nullptr)
+		return E_FAIL;
+
+	m_pBlackBoard = pDesc->pBlackBoard;
+	if(m_pBlackBoard == nullptr)
+		return E_FAIL;
+    
 	return S_OK;
 }
 
@@ -56,4 +65,5 @@ void CBehavior_Tree::Free()
 {
 	__super::Free();
 	Safe_Release(m_pRoot);
+    Safe_Release(m_pBlackBoard);
 }

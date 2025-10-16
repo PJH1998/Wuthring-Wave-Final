@@ -483,6 +483,9 @@
     <ClInclude Include="..\Public\BT_Sequence.h">
       <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BlackBoard.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BlackBoard</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -703,6 +706,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\BT_Sequence.cpp">
       <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BlackBoard.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BlackBoard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -5,14 +5,15 @@ CBlackBoard::CBlackBoard()
 {
 }
 
-HRESULT CBlackBoard::Add_Data(const _string& strDataTag, _uint eType, void* pValue)
+HRESULT CBlackBoard::Add_Data(const _string& strDataTag, DATA_TYPE eType, void* pValue)
 {
 	if(!Find_Data(strDataTag))
 	{
-		if(eType >= ENUM_CLASS(DATA_TYPE::END))
+		if(eType >= ENUM_CLASS(DATA_TYPE::DATA_END))
 			return E_FAIL;
+		pair<DATA_TYPE, void*> pair = {eType, pValue};
+		m_Datas.emplace(make_pair(strDataTag, pair));
 
-		m_Datas.emplace(DATA_TYPE(eType), pValue);
 		return S_OK;
 	}
 	else
