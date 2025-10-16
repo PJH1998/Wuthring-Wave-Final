@@ -430,12 +430,30 @@ void CRenderer::Render_Debug()
 	}
 	m_DebugComponents.clear();
 
+	{   // 디버그용 렌더타겟에 그리기
+
+		if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Debug"))))
+			CRASH("MRT_Debug");
+
+		for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::RD_DEBUG)])
+		{
+			if (nullptr != pRenderObject)
+				pRenderObject->Render();
+
+			Safe_Release(pRenderObject);
+		}
+
+		m_RenderObjects[ENUM_CLASS(RENDERGROUP::RD_DEBUG)].clear();
+
+		m_pGameInstance->End_MRT();
+	}
+
 	if (false == m_isRenderDebug)
 		return;
 
 	ImGui::Begin("Test");
 
-	ImGui::Image(reinterpret_cast<ImTextureID>(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Diffuse"))), ImVec2(150.f, 150.f));
+	ImGui::Image(reinterpret_cast<ImTextureID>(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug"))), ImVec2(150.f, 150.f));
 
 	ImGui::End();
 
@@ -507,6 +525,13 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	
+#ifdef _DEBUG
+	/* RenderTarget Debug */
+	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Debug"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 0.f))))
+		ASSERT_CRASH(false);
+#endif
+
 	return S_OK;
 }
 
@@ -573,6 +598,13 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_Distortion"))))
 		ASSERT_CRASH(false);
 #pragma endregion
+
+#ifdef _DEBUG
+#pragma region MRT_DEBUG
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Debug"), TEXT("RT_Debug"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+#endif
 
 	return S_OK;
 }

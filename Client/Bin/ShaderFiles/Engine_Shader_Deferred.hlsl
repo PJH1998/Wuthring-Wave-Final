@@ -241,7 +241,7 @@ PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
     vWeight = (vNormalData.xy * vNormalData.z) * vNormalData.a;
     
     vWeight *= 0.12f;
-    
+
     vTexcoord = In.vTexcoord + vWeight;
     
     vector vFinalColor = g_BlurEndTexture.Sample(ClampSampler, vTexcoord);
