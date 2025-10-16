@@ -64,7 +64,7 @@ private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
-	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
+	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CEdit_MapObject* m_pParent = { nullptr };
 	list<CEdit_MapObject*> m_ChildObjects;

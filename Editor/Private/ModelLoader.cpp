@@ -25,7 +25,7 @@ void CModelLoader::Update()
 	if (ImGui::Button("Save Model"))
 		m_isShowSaveFile = !m_isShowSaveFile;
 
-	//ImGui::Checkbox("LoadAll_For_Map", &m_isLoadAll);
+	ImGui::Checkbox("LoadAll_For_Map", &m_isLoadAll);
 	
 	if(true == m_isShowLoadFile)
 		Load_File();

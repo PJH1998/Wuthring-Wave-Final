@@ -332,6 +332,8 @@ void CLevel_Map::Load_Objects()
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
                 continue;
+
+            //LOD 모델들은 목록에 추가하지 말고 _LOD0 이름 빼고 1개씩만 저장하게.
             if (entry.path().extension() == ".dat") {
                 m_ModelPaths.push_back(entry.path().string());
 
@@ -342,33 +344,25 @@ void CLevel_Map::Load_Objects()
                 _char FileExt[MAX_PATH] = {};
                 _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-                _wstring ProtoModelPath= TEXT("Prototype_Component_Model_");
+                _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
                 _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
 
-                //중단점 걸면 터지니까 걸지마쇼
-                /*while (m_pGameInstance->IsWorkFinish())
-                {
-
-                }*/
+                //멀티 쓰레드 쓸 때 중단점 걸면 터지니까 걸지마쇼
                 m_PrototypeNames.push_back(ProtoModelName);
 
+               _string FilePath = entry.path().string();
 
-                _string FilePath = entry.path().string();
-                //멀티쓰레드 스트링이 주소 넘기는 거라 도중에 바껴서 터지는듯ㅇㅇ 
+                //m_pGameInstance->Add_Work([=]() {
+               if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+                   CRASH("Prototype Create Failed");
 
-                //간헐적 터짐증상 개화나네 진짜
-
-                m_pGameInstance->Add_Work([=]() {
-                    if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
-                        CRASH("ㅎㅇ");
-                    });
-
-                //    string Test = entry.path().parent_path().string();
-                //    Test += "/Mat/Tex/";
-                //    if (filesystem::exists(Test))
-                //        m_pPreViewObject->Add_Model(ProtoModelName);
-                //    });
+                    //멀티쓰레드 정상화 되면 이거 쓸것.
+                    //    string Test = entry.path().parent_path().string();
+                    //    Test += "/Mat/Tex/";
+                    //    if (filesystem::exists(Test))
+                    //        m_pPreViewObject->Add_Model(ProtoModelName);
+                    //});
             }
         }
     }
@@ -465,19 +459,21 @@ void CLevel_Map::Ready_Event()
         {
         case Editor::CLevel_Map::MENU_OBJECT:
         {
-            if (event.fDistance <= m_fNearDistance)
+            if(m_pGameInstance->Get_DIKeyState(DIK_X) == KEYSTATE::PRESS)
             {
-                m_fNearDistance = event.fDistance;
-                if (m_pPickedObject)
-                    m_pPickedObject->Set_ShaderPass(0);
-                //m_iShaderPassIndex = 3;
-                m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-                m_pPickedObject->Set_ShaderPass(3);
-                //XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
-                if (m_pChildObject)
+                if (event.fDistance <= m_fNearDistance)
                 {
-                    m_pPickedObject->Add_Child(m_pChildObject);
-                    m_pChildObject = nullptr;
+                    if (m_pPickedObject)
+                        m_pPickedObject->Set_ShaderPass(0);
+
+                    m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                    m_pPickedObject->Set_ShaderPass(3);
+
+                    if (m_pChildObject)
+                    {
+                        m_pPickedObject->Add_Child(m_pChildObject);
+                        m_pChildObject = nullptr;
+                    }
                 }
             }
         }

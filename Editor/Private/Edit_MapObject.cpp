@@ -106,13 +106,11 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
-    /*if(m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::MAP),TEXT("Model_Pick"))*/
+
 }
 
 void CEdit_MapObject::Update(_float fTimeDelta)
 {
-    //if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
     if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
     {
         //여기에 클릭 최적화 하려면 프러스텀 컬링까지.
@@ -174,8 +172,6 @@ void CEdit_MapObject::Render_Shadow()
 
 void CEdit_MapObject::Set_ImGuiOption()
 {
-    //if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::PRESS && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
-    //    //추가 예정
     ImGui::Text(m_ModelName);
 
     if (ImGui::Button("Set Parent"))
@@ -512,31 +508,38 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
     _tchar Name[MAX_PATH] = {};
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
     lstrcat(Model, Name);
-
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-        return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-    //    TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
-    //    return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
-    //    TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
-    //    return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-    //    TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
-    //    return E_FAIL;
-
+    m_pModelComArray.resize(4);
     /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model_LOD3"), reinterpret_cast<CComponent**>(&m_pModelComArray[3]), nullptr)))
+        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;*/
+
+    for(_uint i=0; i<4;++i)
+    {
+        _wstring ModelCom = Model;
+        ModelCom.pop_back();
+        ModelCom += to_wstring(i);
+
+        _char ModelName[MAX_PATH] = {};
+        sprintf_s(ModelName, "Com_Model%d", i);
+        if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+            StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+            continue;
+    }
+    m_pModelCom = m_pModelComArray[0];
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
+    CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    RigidbodyDesc.eShape = SHAPE::MESH;
+    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    RigidbodyDesc.eType = EMotionType::Static;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+    RigidbodyDesc.pModel = m_pModelCom;
+
+    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
     return S_OK;
 }
 
