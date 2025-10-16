@@ -71,18 +71,12 @@ void CAnimationActor::Update(_float fTimeDelta)
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
 
-
     if (m_IsPlayAnimation)
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 
 
     // 개념상 같이 실행은 시키는데 Root 뼈를 Identity로 하면된다?
     //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // 하드코딩...
-    //if (m_IsPlayAnimation)
-    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
-
-    //if (m_IsPlayAnimation)
-    //    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }

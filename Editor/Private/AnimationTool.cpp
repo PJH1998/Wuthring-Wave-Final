@@ -484,6 +484,8 @@ void CAnimationTool::Render_Animation_Detail()
     
     ImGui::Begin("Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
 
+    ImGui::Text("Animation Name : %s", m_Selected_AnimationTag.c_str());
+
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
         // 설정된 TrackPosition을 전달합니다.
