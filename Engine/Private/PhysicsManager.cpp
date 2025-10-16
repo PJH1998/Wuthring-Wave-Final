@@ -50,6 +50,11 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 	m_Virtuals[iObjectLayer].push_back(pVirtual);
 }
 
+void CPhysicsManager::Clear_Resource()
+{
+	//m_pPhysicsSystem->GetBodyInterface().
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);

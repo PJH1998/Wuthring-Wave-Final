@@ -98,6 +98,14 @@ void CPooling_Manager::Add_Work(function<void()> Work)
 	m_CV.notify_one();
 }
 
+void CPooling_Manager::Wait_Thread_End()
+{
+	while (false == IsWorkFinish())
+	{
+
+	}
+}
+
 void CPooling_Manager::Work_Thread()
 {
 	while (true)

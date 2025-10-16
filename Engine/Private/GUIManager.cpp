@@ -8,6 +8,16 @@ CGUIManager::CGUIManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pContext);
 }
 
+void CGUIManager::Add_GUI_Func(function<void()> func)
+{
+	m_Functions.push_back(func);
+}
+
+void CGUIManager::Clear_Func()
+{
+	m_Functions.clear();
+}
+
 HRESULT CGUIManager::Initialize(HWND hWnd)
 {
 	IMGUI_CHECKVERSION();
@@ -40,6 +50,10 @@ void CGUIManager::Update()
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+
+	// GUI 등록된 Func 수행
+	for (auto& Func : m_Functions)
+		Func();
 }
 
 void CGUIManager::Render()
