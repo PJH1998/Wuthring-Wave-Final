@@ -1,0 +1,34 @@
+#pragma once
+#include "GameObject.h"
+NS_BEGIN(Engine)
+class CModel;
+class CShader;
+NS_END
+
+NS_BEGIN(Editor)
+class CEdit_PreViewModel : public CGameObject
+{
+private:
+	CEdit_PreViewModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CEdit_PreViewModel(const CEdit_PreViewModel& Prototype);
+	virtual ~CEdit_PreViewModel() = default;
+
+public:
+	virtual		HRESULT			Initialize_Prototype();
+	virtual		void			Priority_Update(_float fTimeDelta);
+	virtual		void			Update(_float fTimeDelta);
+	virtual		void			Late_Update(_float fTimeDelta);
+	void						Render(_wstring ModelName);
+
+	void						Add_Model(_wstring ModelName);
+private:
+	unordered_map<_wstring, CModel*> m_Models;
+	CShader* m_pShaderCom = { nullptr };
+
+public:
+	static CEdit_PreViewModel* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual CGameObject* Clone(void* pArg)override { return nullptr; }
+	virtual void Free()override;
+};
+
+NS_END

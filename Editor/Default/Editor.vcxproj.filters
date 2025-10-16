@@ -165,6 +165,7 @@
     <ClInclude Include="..\Public\Interface_Edit.h">
       <Filter>96. Interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_PreViewModel.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -240,6 +241,7 @@
     <ClCompile Include="..\Private\Interface_Edit.cpp">
       <Filter>96. Interface</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -14,6 +14,7 @@ HRESULT CPooling_Manager::Initialize()
 {
 	m_iNumThread = thread::hardware_concurrency();
 	m_Threads.reserve(m_iNumThread);
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
 		m_Threads.emplace_back([this]() { this->Work_Thread(); });
@@ -123,6 +124,7 @@ void CPooling_Manager::Work_Thread()
 
 		m_iLiveWork.fetch_add(1);
 		Work();
+
 		m_iLiveWork.fetch_sub(1);
 	}
 }

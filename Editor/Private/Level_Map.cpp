@@ -6,6 +6,7 @@
 #include"Mesh_Instance.h"
 #include"Edit_MapObject.h"
 #include"Edit_MapObject_Instance.h"
+#include"Edit_PreViewModel.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -85,7 +86,6 @@ void CLevel_Map::Menu_Select()
 
         if(ImGui::MenuItem("Object Save & Load")) {
             m_eMenu = MENU_OBJECTLOAD;
-            Load_Objects();
         }
 
         _float4 CamPos = *m_pGameInstance->Get_CamPos();
@@ -154,7 +154,7 @@ void CLevel_Map::Menu_Light()
        // 각종 색상정보 및 세기, 디퓨즈 앰비언트 기타 등등 다 수정할 수 있게. -> 실시간 적용? or 버튼 누르면 적용. 되돌리기 기능도 있음 좋을듯
        // 
        //기즈모 달거면 조명에 달기. 
-
+    
 }
 
 void CLevel_Map::Menu_Model_Load()
@@ -173,6 +173,7 @@ void CLevel_Map::Menu_Model_Load()
             _char FileExt[MAX_PATH] = {};
             _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
+
             if (ImGui::Selectable(FileName))
             {
                 /*_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -183,23 +184,9 @@ void CLevel_Map::Menu_Model_Load()
                 _float4x4 DefaultMatrix{};
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
-
                 strcpy_s(Desc.ModelName, FileName);
 
-                _wstring ProtoModelName = TEXT("Prototype_Component_Model_");
-                ProtoModelName += StringToWString(Desc.ModelName);
-
-                m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), m_ModelPaths[i].c_str()));
-
-
-                _wstring ProtoObjectName = TEXT("Prototype_GameObject_MapObject_");
-                ProtoObjectName += StringToWString(Desc.ModelName);
-
-                m_pGameInstance->Add_Prototype(m_iLevel, ProtoObjectName,
-                    CEdit_MapObject::Create(m_pDevice, m_pContext));
-
-                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, ProtoObjectName
+                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
             }
 
@@ -329,20 +316,47 @@ void CLevel_Map::Load_Objects()
 {
     m_ModelPaths.clear();
 
+    m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     string FolderPath = "../../Client/Bin/Resource/Map/";
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
+            if (entry.path().string().find("MapData") != std::string::npos)
+                continue;
             if (entry.path().extension() == ".dat") {
                 m_ModelPaths.push_back(entry.path().string());
+
+                //여기에 프로토타입 미리 생성
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                _wstring ProtoModelPath= TEXT("Prototype_Component_Model_");
+                _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
+
+                m_pGameInstance->Add_Work([=]() {
+                    m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), entry.path().string().c_str()));
+
+                    string Test = entry.path().parent_path().string();
+                    Test += "/Mat/Tex/";
+                    if (filesystem::exists(Test))
+                        m_pPreViewObject->Add_Model(ProtoModelName);
+                    });
             }
         }
     }
+    m_pGameInstance->Wait_Thread_End();
 }
+
 HRESULT CLevel_Map::Ready_Static_Component()
 {
     _matrix PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
+
+    Load_Objects();
 
     //일반 모델
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
@@ -421,6 +435,25 @@ HRESULT CLevel_Map::Ready_Static_Component()
     /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
         , m_iLevel, TEXT("Layer_Test"), &Desc);*/
 
+
+
+    /*
+    
+                    CEdit_MapObject::MAP_LOAD Desc{};
+                _float4x4 DefaultMatrix{};
+                XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+                Desc.WorldMatrix = &DefaultMatrix;
+
+                strcpy_s(Desc.ModelName, FileName);
+
+                _wstring ProtoModelName = TEXT("Prototype_Component_Model_");
+                ProtoModelName += StringToWString(Desc.ModelName);
+
+                m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), m_ModelPaths[i].c_str()));
+
+    
+    */
     return S_OK;
 }
 
@@ -538,6 +571,8 @@ void CLevel_Map::Free()
     m_pPickedObject = nullptr;
     m_pPickedInstanceObject = nullptr;
     m_pGameInstance->Unscribe();
+
+    Safe_Release(m_pPreViewObject);
 
     for (auto& Pair : m_SaveObjects)
     {

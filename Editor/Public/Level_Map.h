@@ -46,6 +46,9 @@ private:
 	class CEdit_MapObject* m_pChildObject = { nullptr };
 	class CEdit_MapObject* m_pPickedObject = { nullptr };
 	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
+
+
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
 	_float m_fNearDistance= { FLT_MAX };

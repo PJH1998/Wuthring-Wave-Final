@@ -88,21 +88,6 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
         });
 #endif
-    m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
-        //if (m_IsSetParent)
-        //{
-        //    //±× ¹¹³Ä ÀÚ½ÄÀÌ µÅ¾ßÇÏ´Â ³ðÀÌ ºÎ¸ð°¡ µÊ
-        //    CEdit_MapObject* pParent = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-        //    m_pParent = pParent;
-        //    m_IsSetParent = false;
-        //    m_IsParent = true;
-        //    pParent->m_ChildObjects.push_back(this);
-        //    _matrix ParentMatrix = pParent->m_pTransformCom->Get_WorldMatrix();
-        //    XMStoreFloat4x4(&m_ChildLocalMat, m_pTransformCom->Get_WorldMatrix() * XMMatrixInverse(nullptr, ParentMatrix));
-        //    int a = 0;
-        //    //Safe_AddRef(*this);
-        //}
-        });
 
     m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
@@ -374,28 +359,30 @@ void CEdit_MapObject::Set_ImGuiOption()
                 _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
                 for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
                     if (entry.is_regular_file()) {
-                        if ((entry.path().string().find("_D_") != std::string::npos) || (entry.path().string().find("_D") != std::string::npos))
+                        filesystem::path Filepath = entry.path();
+                        if ((Filepath.string().find("_D_") != std::string::npos) || (Filepath.string().find("_D") != std::string::npos))
                         {
-                            if (entry.path().extension() == ".png") {
+                            if (Filepath.extension() == ".png") {
                                 {
-                                    string fileName = entry.path().filename().string();
+                                    string fileName = Filepath.filename().string();
                                     //m_DiffuseTextureName.push_back(fileName);
-                                    m_DiffuseTextureName.push_back(entry.path().string());
+                                    m_DiffuseTextureName.push_back(Filepath.string());
                                 }
                             }
                         }
-                        else if (entry.path().string().find("_N_") != std::string::npos || (entry.path().string().find("_N") != std::string::npos))
+                        else if (Filepath.string().find("_N_") != std::string::npos || (Filepath.string().find("_N") != std::string::npos))
                         {
-                            if (entry.path().extension() == ".png") {
+                            if (Filepath.extension() == ".png") {
                                 {
-                                    string fileName = entry.path().filename().string();
+                                    string fileName = Filepath.filename().string();
                                     //m_NormalTextureName.push_back(fileName);
-                                    m_NormalTextureName.push_back(entry.path().string());
+                                    m_NormalTextureName.push_back(Filepath.string());
                                 }
                             }
                         }
                     }
                 }
+
                 m_IsLoaded = true;
                 m_IsTest = !m_IsTest;
                 ImGuiFileDialog::Instance()->Close();
