@@ -7,7 +7,7 @@
 #include "Level_Loading.h"
 
 #include "Level_Logo.h"
-
+#include "Level_GamePlay.h"
 #include "Level_Test.h"
 
 CMainApp::CMainApp()
@@ -72,10 +72,11 @@ void CMainApp::Post_Update()
 				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::GAMEPLAY:
-				// TODO
+				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
+				break;
 			}
 			ASSERT_CRASH(pLevel);
 

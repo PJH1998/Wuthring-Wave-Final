@@ -62,3 +62,5 @@ Engine/Public/json.hpp
 Editor/Default/x64/
 Engine/Default/x64/
 EngineSDK/*
+!Engine/ThirdPartyLib/Jolt.pdb
+!Engine/ThirdPartyLib/Jolt_d.pdb

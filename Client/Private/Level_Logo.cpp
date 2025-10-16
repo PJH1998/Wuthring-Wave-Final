@@ -67,11 +67,16 @@ void CLevel_Logo::Update(_float fTimeDelta)
 		m_pRigidbody1->OnGravity(true);
 	}
 
-    //if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
-    //{
-    //    CHANGE_LEVEL_EVENT event{ LEVEL::LORD, true };
-    //    m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-    //}
+    if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
+    {
+        CHANGE_LEVEL_EVENT event{ LEVEL::GAMEPLAY, true };
+        m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+    }
+	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 }
 
 void CLevel_Logo::Render()
