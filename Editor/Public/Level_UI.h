@@ -79,6 +79,7 @@ private:
 	void				Update_SaveLoad();
 	void				Update_Inspector();
 	void				Update_AnimEditor(_float fTimeDelta);
+	void				Update_ObjectParents();
 
 
 private:

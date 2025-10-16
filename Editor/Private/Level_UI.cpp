@@ -104,7 +104,12 @@ void CLevel_UI::Update(_float fTimeDelta)
     
     Update_SaveLoad();
     Update_Inspector();
+
+
     Update_AnimEditor(fTimeDelta);
+    Update_ObjectParents();
+
+
 }
 
 void CLevel_UI::Render()
@@ -124,7 +129,6 @@ void CLevel_UI::Update_MenuWindow()
     // ============================== 
     // 이미지 로드해서 UI객체로 추가하는 창
     // ============================== 
-
 
     ImGui::Begin("Editor");
 
@@ -285,7 +289,7 @@ void CLevel_UI::Update_Hierarchy()
             static _int iSelected = -1;
             _uint iIndex = 0;
 
-            // 부모 이름이 있는 경우 체크X (위에서 이미 찾았으므로)
+            // 부모 이름이 없는 경우 체크X (위에서 이미 찾았으므로)
             if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
                 break;
             // 해당하는 부모가 있는지 검사
@@ -294,6 +298,7 @@ void CLevel_UI::Update_Hierarchy()
                     ui.pCustomUI->Get_UIDesc().strParentName)
                 {
                     isParentMissing = false;
+
                     break;
                     iIndex++;
                 }
@@ -310,13 +315,16 @@ void CLevel_UI::Update_Hierarchy()
     }
     
     ImGui::End();
+    
+    
+    
+
 }
 
 void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeFlags flags)
 {
     CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
 
-    // TreeNode 생성
     _string strLabel = WSTR2STR(desc.strUIName);
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
@@ -755,15 +763,15 @@ void CLevel_UI::Update_Inspector()
     CTransform* pTargetTransform = dynamic_cast<CTransform*>(m_pCurObj->Get_Component(L"Com_Transform"));
     _bool   isOn_TransformCom = pTargetTransform != nullptr;
 
+    static _float fSensitivity = 1.f;
+
     if (isOn_TransformCom)
     {
-        //static _float3 vSelectedObjPos = {};      // changed to m_vCurObjPos
-        //static _float3 vSelectedObjRot = {};      // changed to m_vCurObjRot
-        //static _float3 vSelectedObjSca = {};      // changed to m_vCurObjSca
-
         if (m_pPreObj != m_pCurObj ||
             m_isPlayAnimation)
+            // 아니면 대상의 부모가 바뀌었을 때?
         {
+            
             _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
             _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
             XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, pTargetTransform->Get_WorldMatrix());
@@ -786,6 +794,11 @@ void CLevel_UI::Update_Inspector()
         {
             if (ImGui::BeginMenu("Reset Menu"))
             {
+                ImGui::Text("Sensitivity");
+                ImGui::SameLine();
+                ImGui::DragFloat("##Sensitivity", &fSensitivity, 0.001f, 0.001f, 10.f);
+                ImGui::Separator();
+
                 if (ImGui::MenuItem("Reset Position"))  { m_vCurObjPos = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Rotation"))  { m_vCurObjRot = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { 100.f, 100.f, 1.f }; }
@@ -803,23 +816,23 @@ void CLevel_UI::Update_Inspector()
 
             // Position Ctrl
             ImGui::Text("Position");
-            ImGui::DragFloat("X##pos", &m_vCurObjPos.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##pos", &m_vCurObjPos.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##pos", &m_vCurObjPos.z, 1.f);
+            ImGui::DragFloat("X##pos", &m_vCurObjPos.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##pos", &m_vCurObjPos.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##pos", &m_vCurObjPos.z, fSensitivity);
             ImGui::Separator();
 
             // Rotation Ctrl
             ImGui::Text("Rotation");
-            ImGui::DragFloat("X##rot", &m_vCurObjRot.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##rot", &m_vCurObjRot.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##rot", &m_vCurObjRot.z, 1.f);
+            ImGui::DragFloat("X##rot", &m_vCurObjRot.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##rot", &m_vCurObjRot.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##rot", &m_vCurObjRot.z, fSensitivity);
             ImGui::Separator();
 
             // Scale Ctrl
             ImGui::Text("Scale");
-            ImGui::DragFloat("X##sca", &m_vCurObjSca.x, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Y##sca", &m_vCurObjSca.y, 1.f);   ImGui::SameLine();
-            ImGui::DragFloat("Z##sca", &m_vCurObjSca.z, 1.f);
+            ImGui::DragFloat("X##sca", &m_vCurObjSca.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##sca", &m_vCurObjSca.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##sca", &m_vCurObjSca.z, fSensitivity);
             ImGui::Separator();
 
             ImGui::PopItemWidth();
@@ -1135,6 +1148,35 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
 }
 
+void CLevel_UI::Update_ObjectParents()
+{
+    // ==============================
+    // * 부모 오브젝트 업데이트
+    // ==============================
+
+    for (auto& UIObject : m_vecCustomUIs)
+    {
+        CCustom_UI::CUSTOM_UI_DESC tDesc = UIObject.pCustomUI->Get_UIDesc();
+        if (tDesc.strParentName.empty())
+        {
+            tDesc.pParentObject = nullptr;
+            UIObject.pCustomUI->Set_UIDesc(tDesc);
+
+            continue;
+        }
+
+        for (auto& compareUIObject : m_vecCustomUIs)
+        {
+            if (tDesc.strParentName == compareUIObject.pCustomUI->Get_UIDesc().strUIName)
+            {
+                tDesc.pParentObject = compareUIObject.pCustomUI;
+                UIObject.pCustomUI->Set_UIDesc(tDesc);
+                break;
+            }
+        }
+    }
+}
+
 CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CLevel_UI* pInstance = new CLevel_UI(pDevice, pContext);
@@ -1150,6 +1192,8 @@ CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 void CLevel_UI::Free()
 {
-    __super::Free();
+    for (auto& UIObject : m_vecCustomUIs)
+        Safe_Release(UIObject.pCustomUI);
 
+    __super::Free();
 }

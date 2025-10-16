@@ -33,6 +33,8 @@ public:
 		//_wstring	strUIType = {};
 		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
 		_wstring	strParentName = {};
+
+		CGameObject* pParentObject = nullptr;
 	} CUSTOM_UI_DESC;
 
 
@@ -60,6 +62,8 @@ private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Bind_Description(void* pArg);
 
+	void					Update_CombinedMatrix();
+
 private:
 	CShader*				m_pShaderCom				= { nullptr };
 	CVIBuffer_Rect*			m_pVIBufferCom				= { nullptr };
@@ -69,6 +73,11 @@ private:
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
 	_uint					m_iCurTexIndex				= {};
+
+	_bool					m_isPrevParentExist			= false;
+
+	_float4x4				m_CombinedWorldMatrix		= {};
+
 
 	// 현재 사용중일 텍스쳐 정보, texcoord 값, 나인섹터 기준점 등의 정보.. 필요할수도 있음
 

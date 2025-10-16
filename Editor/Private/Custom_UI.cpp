@@ -44,6 +44,8 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 
     m_pAnimator_UICom->Update(fTimeDelta);
+
+    Update_CombinedMatrix();
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -59,7 +61,9 @@ void CCustom_UI::Render()
 {
     //__super::Begin();
 
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+    //if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+    //    CRASH(Binding_Matrix_Failed);
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
         CRASH(Binding_Matrix_Failed);
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
@@ -143,6 +147,25 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strParentName = pDesc->strParentName;
 
     return S_OK;
+}
+
+void CCustom_UI::Update_CombinedMatrix()
+{
+    if (m_tUIDesc.pParentObject)
+    {
+        CTransform* pParentTransform = dynamic_cast<CTransform*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Transform"));
+        XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix() * pParentTransform->Get_WorldMatrix());
+
+        m_isPrevParentExist = true;
+    }
+    else
+    {
+        if (m_isPrevParentExist)
+            m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_CombinedWorldMatrix));
+
+        XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix());
+        m_isPrevParentExist = false;
+    }
 }
 
 CCustom_UI* CCustom_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
