@@ -33,13 +33,25 @@ void CDummy::Priority_Update(_float fTimeDelta)
 
 void CDummy::Update(_float fTimeDelta)
 {
+	_vector vVelocity = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+	_float fMoveSpeed = 30.f;
+	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+		vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * fMoveSpeed;
+	if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+		vVelocity -= XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * fMoveSpeed;
+	if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+		vVelocity -= XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
+	if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+		vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
+
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
-	m_pColliderCom->Update(m_pTransformCom);
+	m_pColliderCom->Update(vVelocity);
 	
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
 {
+	m_pColliderCom->Sync_Position(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
@@ -94,7 +106,8 @@ void CDummy::Ready_Component()
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
-	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
 	ColliderDesc.fHeight = 10.f;

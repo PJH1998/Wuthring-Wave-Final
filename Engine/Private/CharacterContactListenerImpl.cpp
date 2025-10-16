@@ -5,14 +5,25 @@ CharacterContactListenerImpl::CharacterContactListenerImpl()
 {
 }
 
+CharacterContactListenerImpl::CharacterContactListenerImpl(BodyInterface* pInterface)
+	: m_pBodyInterface { pInterface }
+{
+}
+
 void CharacterContactListenerImpl::OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	int a = 0;
+	if(EMotionType::Static ==  m_pBodyInterface->GetMotionType(inBodyID2))
+		ioSettings.mCanPushCharacter = true;
+	else
+		ioSettings.mCanPushCharacter = false;
 }
 
 void CharacterContactListenerImpl::OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	int a = 0;
+	if (EMotionType::Static == m_pBodyInterface->GetMotionType(inBodyID2))
+		ioSettings.mCanPushCharacter = true;
+	else
+		ioSettings.mCanPushCharacter = false;
 }
 
 void CharacterContactListenerImpl::OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2)
@@ -22,12 +33,12 @@ void CharacterContactListenerImpl::OnContactRemoved(const CharacterVirtual* inCh
 
 void CharacterContactListenerImpl::OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	int a = 0;
+	ioSettings.mCanPushCharacter = false;
 }
 
 void CharacterContactListenerImpl::OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	int a = 0;
+	ioSettings.mCanPushCharacter = false;
 }
 
 void CharacterContactListenerImpl::OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2)

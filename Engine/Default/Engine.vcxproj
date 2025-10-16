@@ -35,6 +35,7 @@
     <ClInclude Include="..\Public\ComputeShader.h" />
     <ClInclude Include="..\Public\ContactListenerImpl.h" />
     <ClInclude Include="..\Public\ContainerObject.h" />
+    <ClInclude Include="..\Public\CubeCell.h" />
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
     <ClInclude Include="..\Public\DebugRender.h" />
@@ -65,7 +66,9 @@
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
+    <ClInclude Include="..\Public\StaticObject.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h" />
     <ClInclude Include="..\Public\Model.h" />
     <ClInclude Include="..\Public\Navigation.h" />
@@ -111,6 +114,7 @@
     <ClCompile Include="..\Private\ComputeShader.cpp" />
     <ClCompile Include="..\Private\ContactListenerImpl.cpp" />
     <ClCompile Include="..\Private\ContainerObject.cpp" />
+    <ClCompile Include="..\Private\CubeCell.cpp" />
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />
     <ClCompile Include="..\Private\DebugRender.cpp" />
@@ -137,7 +141,9 @@
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
+    <ClCompile Include="..\Private\StaticObject.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
     <ClCompile Include="..\Private\Model.cpp" />
     <ClCompile Include="..\Private\Navigation.cpp" />

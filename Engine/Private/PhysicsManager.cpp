@@ -50,6 +50,11 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 	m_Virtuals[iObjectLayer].push_back(pVirtual);
 }
 
+void CPhysicsManager::Clear_Resource()
+{
+	//m_pPhysicsSystem->GetBodyInterface().
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);
@@ -85,8 +90,6 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
 	// CharacterVirtual VS CharacterVirtual Collision
 	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
-	// Character Contact Listener
-	m_pCharacterContactListener = new CharacterContactListenerImpl();
 
 #ifdef _DEBUG
 	m_pDebugRenderer = new CDebugRender(m_pDevice, m_pContext);
@@ -96,11 +99,15 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
+
 	return S_OK;
 }
 
 void CPhysicsManager::Update(_float fTimeDelta)
 {
+	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
+
 	for (_uint i = 0; i < m_iNumObjectLayer; ++i)
 	{
 		for (auto& pVirtual : m_Virtuals[i])
@@ -124,8 +131,6 @@ void CPhysicsManager::Update(_float fTimeDelta)
 		}
 		m_Virtuals[i].clear();
 	}
-
-	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
 }
 
 #ifdef _DEBUG
@@ -153,6 +158,9 @@ void CPhysicsManager::SetUp_PhysicsSystem()
 		*m_pBPLayer, *m_pObjectVsBPFilter, *m_pObjectLayerFilter);
 	m_pPhysicsSystem->SetPhysicsSettings(m_PhysicsSetting);
 	m_pPhysicsSystem->SetContactListener(m_pContactListener);
+
+	// Character Contact Listener
+	m_pCharacterContactListener = new CharacterContactListenerImpl(&m_pPhysicsSystem->GetBodyInterface());
 
 	Vec3 vGravity = Vec3(0, -9.81f, 0);
 	//Vec3 vGravity = Vec3(0, -5.81f, 0);

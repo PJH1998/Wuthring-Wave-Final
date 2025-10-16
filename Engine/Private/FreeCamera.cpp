@@ -44,6 +44,10 @@ void CFreeCamera::Update(_float fTimeDelta)
 	if (ImGui::Button("Apply", ImVec2(50.f, 20.f)))
 		m_pTransformCom->Change_Speed(m_fSpeed);
 
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vPosition), "%.2f");
+	if (ImGui::Button("Move", ImVec2(50.f, 20.f)))
+		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vPosition), 1.f));
+
 	ImGui::End();
 #endif
 }

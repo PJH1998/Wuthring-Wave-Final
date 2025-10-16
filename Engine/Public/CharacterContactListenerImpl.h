@@ -5,6 +5,7 @@ class CharacterContactListenerImpl : public CharacterContactListener
 {
 public:
 	explicit CharacterContactListenerImpl();
+	explicit CharacterContactListenerImpl(BodyInterface* pInterface);
 	virtual ~CharacterContactListenerImpl() = default;
 	// 캐릭터가 인식하는 물체의 속도를 조정할 때 사용
 	// 컨베이어 벨트 위에 있을 때 캐릭터가 벨트 이동속도를 반영해 움직일 때 사용
@@ -32,5 +33,8 @@ public:
 	virtual void						OnContactSolve(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) { /* Default do nothing */ }
 	// Character와 Character가 충돌 했을 때, 물리 연산 시 들어오는 함수
 	virtual void						OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) { /* Default do nothing */ }
+
+private:
+	BodyInterface*					m_pBodyInterface = { nullptr };
 };
 

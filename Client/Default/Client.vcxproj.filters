@@ -40,6 +40,21 @@
     <Filter Include="02. GameObject\Dummy">
       <UniqueIdentifier>{ed07c1bd-b2ef-4167-a5d6-d28e30bdb8b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="95. Parser">
+      <UniqueIdentifier>{621f1f92-3c6d-436d-8458-d6119a0a6bac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Test">
+      <UniqueIdentifier>{6947a9ad-ad47-4103-b09e-1c5b2bc2e655}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\MapObject">
+      <UniqueIdentifier>{040d8769-a965-4ca5-ae9c-fa3a893680fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Loader\Test">
+      <UniqueIdentifier>{6788c395-5c8e-4b8c-bbe4-56116da35bc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Loader\GamePlay">
+      <UniqueIdentifier>{f5fad4f8-9dfd-46e7-b0da-c921dca7dbbf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -84,6 +99,24 @@
     <ClInclude Include="..\Public\Dummy.h">
       <Filter>02. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Parser.h">
+      <Filter>95. Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Test.h">
+      <Filter>01. Level\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject.h">
+      <Filter>02. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader_Test.h">
+      <Filter>01. Level\Loader\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Loader_GamePlay.h">
+      <Filter>01. Level\Loader\GamePlay</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_GamePlay.h">
+      <Filter>01. Level\GamePlay</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -117,6 +150,24 @@
     </ClCompile>
     <ClCompile Include="..\Private\Dummy.cpp">
       <Filter>02. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Parser.cpp">
+      <Filter>95. Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Test.cpp">
+      <Filter>01. Level\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject.cpp">
+      <Filter>02. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader_Test.cpp">
+      <Filter>01. Level\Loader\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader_GamePlay.cpp">
+      <Filter>01. Level\Loader\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_GamePlay.cpp">
+      <Filter>01. Level\GamePlay</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

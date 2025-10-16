@@ -3,9 +3,9 @@
 
 #include "Event_Level.h"
 #include"Model_Instance.h"
-#include"MapObject.h"
 #include"Mesh_Instance.h"
-#include"MapObject_Instance.h"
+#include"Edit_MapObject.h"
+#include"Edit_MapObject_Instance.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -105,7 +105,13 @@ void CLevel_Map::Menu_Object()
     ImGui::Begin("Menu_Object");
 
     //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
-
+    if (ImGui::Button("Test"))
+    {
+        m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
+            m_iLevel, TEXT("Layer_Containers"), nullptr);
+    }
+    if (!m_ContainerObjects.empty())
+        Container_Info();
     if (m_pPickedObject)
         m_pPickedObject->Set_ImGuiOption();
 
@@ -178,7 +184,7 @@ void CLevel_Map::Menu_Model_Load()
                 _float fSize = 0.001f;
                 PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
 
-                CMapObject::MAP_LOAD Desc{};
+                CEdit_MapObject::MAP_LOAD Desc{};
                 _float4x4 DefaultMatrix{};
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
@@ -196,7 +202,7 @@ void CLevel_Map::Menu_Model_Load()
                 ProtoObjectName += StringToWString(Desc.ModelName);
 
                 m_pGameInstance->Add_Prototype(m_iLevel, ProtoObjectName,
-                    CMapObject::Create(m_pDevice, m_pContext));
+                    CEdit_MapObject::Create(m_pDevice, m_pContext));
 
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, ProtoObjectName
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
@@ -268,10 +274,11 @@ void CLevel_Map::Menu_Save_Load()
                 _float fSize = 0.001f;
                 PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
 
-                CMapObject::MAP_LOAD Desc{};
+                CEdit_MapObject::MAP_LOAD Desc{};
 
                 while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
                 {
+                    memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
                     File.read(Desc.ModelName, NameLength);
                     
                     File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
@@ -297,7 +304,7 @@ void CLevel_Map::Menu_Save_Load()
                     lstrcat(PrototypeObject, Name);
 
                     m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
-                        CMapObject::Create(m_pDevice, m_pContext));
+                        CEdit_MapObject::Create(m_pDevice, m_pContext));
 
                     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
@@ -312,6 +319,13 @@ void CLevel_Map::Menu_Save_Load()
                 //현재 화면을 기준으로 픽셀을 얼마나 많이 차지하고 있나로 LOD 단계 구별하기. => 스크린 픽셀 사이즈 기법
                 //LOD 모델은 상태머신을 갈아끼우듯 LOD 단계에 따라 바꾸기. => 어차피 모델의 크기는 변하지 않음. 디테일이 달라짐.
                 m_LoadMenu = !m_LoadMenu;
+                ImGuiFileDialog::Instance()->Close();
+
+            }
+            else
+            {
+                m_LoadMenu = !m_LoadMenu;
+                ImGuiFileDialog::Instance()->Close();
             }
         }
     }
@@ -363,13 +377,13 @@ HRESULT CLevel_Map::Ready_Static_Component()
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
-        CMapObject_Instance::Create(m_pDevice, m_pContext));
+        CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
 
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf"),
-    //    CMapObject::Create(m_pDevice, m_pContext));
+    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
 
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test"),
-    //    CMapObject::Create(m_pDevice, m_pContext));
+    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
 
 
 
@@ -382,9 +396,8 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //VTXMESHINSTANCE
     
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1"),
-        CMapObject::Create(m_pDevice, m_pContext));
-
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
+        CEdit_MapObject::Create(m_pDevice, m_pContext));
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
@@ -392,15 +405,15 @@ HRESULT CLevel_Map::Ready_Static_Component()
     //큐브 안에 모델 찍기 / 월드 최대 크기 안에 찍어야한다.
     //일단 텍스쳐 없이 모델만 로드해놓기 세이브 & 로드.
     
-    CMapObject::MAP_LOAD Desc{};
-    CMapObject_Instance::MAP_LOAD InstanceDesc{};
+    CEdit_MapObject::MAP_LOAD Desc{};
+    CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
     _float4x4 DefaultMatrix{};
     XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
     InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
 
     strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf")
-        , m_iLevel, TEXT("Layer_Test"), &InstanceDesc);
+    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf")
+        , m_iLevel, TEXT("Layer_Test"), &InstanceDesc);*/
 
     /*strcpy_s(Desc.ModelName, "Wolf");
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf")
@@ -411,8 +424,8 @@ HRESULT CLevel_Map::Ready_Static_Component()
         , m_iLevel, TEXT("Layer_Test"), &Desc.ModelName);*/
 
     strcpy_s(Desc.ModelName, "Test1");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
-        , m_iLevel, TEXT("Layer_Test"), &Desc);
+    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
+        , m_iLevel, TEXT("Layer_Test"), &Desc);*/
 
     return S_OK;
 }
@@ -428,8 +441,13 @@ void CLevel_Map::Ready_Event()
             if (event.fDistance <= m_fNearDistance)
             {
                 m_fNearDistance = event.fDistance;
-                m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
                 XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
+                if (m_pChildObject)
+                {
+                    m_pPickedObject->Add_Child(m_pChildObject);
+                    m_pChildObject = nullptr;
+                }
             }
         }
         break;
@@ -438,7 +456,7 @@ void CLevel_Map::Ready_Event()
             if (event.fDistance <= m_fNearDistance_Instance)
             {
                 m_fNearDistance_Instance = event.fDistance;
-                m_pPickedInstanceObject = dynamic_cast<CMapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+                m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
             }
             break;
 
@@ -453,7 +471,14 @@ void CLevel_Map::Ready_Event()
         m_SaveObjects[event.ModelName].push_back(pObject);
         Safe_AddRef(pObject);
 
-        m_pPickedObject = dynamic_cast<CMapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+        m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+        });
+
+    m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), [this](const MAP_CREATE& event) {
+        if (!m_pChildObject)
+            m_pChildObject = reinterpret_cast<CEdit_MapObject*>(event.pObject);
+        else
+            m_pChildObject = nullptr;
         });
 }
 
@@ -476,6 +501,19 @@ void CLevel_Map::Make_MousePos()
     //뷰 스페이스에서 월드 매트릭스 전환.
     XMStoreFloat3(&m_vWorldPos, XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW)));
     XMStoreFloat3(&m_vWorldDir, XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&m_vWorldDir), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW))));
+}
+
+void CLevel_Map::Container_Info()
+{
+    ImGuiID ShaderId = ImGui::GetID("Container");
+    ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+    ImGui::Text("Current Container");
+
+    for (auto& pContainer : m_ContainerObjects)
+        if (ImGui::Button(pContainer.second->Get_ModelName())) {
+            int a = 0;
+        }
+    ImGui::EndChildFrame();
 }
 
 CLevel_Map* CLevel_Map::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

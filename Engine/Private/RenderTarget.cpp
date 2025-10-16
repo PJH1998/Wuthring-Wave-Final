@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "VIBuffer_Rect.h"
 
+
 CRenderTarget::CRenderTarget(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice{ pDevice }, m_pContext { pContext }
 {
@@ -80,6 +81,16 @@ HRESULT CRenderTarget::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 
 	return S_OK;
 }
+HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
+{
+	ImGui::Begin(WStringToString(strRT_Name).c_str());
+
+	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(150.f, 150.f));
+
+	ImGui::End();
+
+	return E_NOTIMPL;
+}
 #endif
 
 CRenderTarget* CRenderTarget::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor)
@@ -105,4 +116,5 @@ void CRenderTarget::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+
 }

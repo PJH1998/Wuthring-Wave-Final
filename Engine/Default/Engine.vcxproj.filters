@@ -223,6 +223,15 @@
     <Filter Include="99. Define">
       <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\14. OctoTree">
+      <UniqueIdentifier>{ec639b4c-9f75-4716-97a7-3b383c9f61bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\14. OctoTree\CubeCell">
+      <UniqueIdentifier>{7dddd258-d4c0-4803-bbe9-608fe97a1d54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\03. GameObject\Static">
+      <UniqueIdentifier>{65feeaef-cd70-4af5-9d03-4f151c302416}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -450,8 +459,14 @@
     <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\ComputeShader.h">
-      <Filter>01. Utility\04. Component\Shader</Filter>
+    <ClInclude Include="..\Public\OctoTree.h">
+      <Filter>01. Utility\14. OctoTree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CubeCell.h">
+      <Filter>01. Utility\14. OctoTree\CubeCell</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\StaticObject.h">
+      <Filter>01. Utility\03. GameObject\Static</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -659,8 +674,14 @@
     <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\ComputeShader.cpp">
-      <Filter>01. Utility\04. Component\Shader</Filter>
+    <ClCompile Include="..\Private\OctoTree.cpp">
+      <Filter>01. Utility\14. OctoTree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CubeCell.cpp">
+      <Filter>01. Utility\14. OctoTree\CubeCell</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\StaticObject.cpp">
+      <Filter>01. Utility\03. GameObject\Static</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
