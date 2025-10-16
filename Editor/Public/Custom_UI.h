@@ -36,6 +36,7 @@ public:
 	} CUSTOM_UI_DESC;
 
 
+
 private:
 	explicit				CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CCustom_UI(const CCustom_UI& Prototype);
@@ -109,4 +110,28 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 	d.iUIType				= j["iUIType"];
 	_string strParentName	= j["strParentName"].get<_string>();
 	d.strParentName			= _wstring(strParentName.begin(), strParentName.end());
+}
+
+inline void to_json(json& j, const vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
+{
+	j = json::array();
+	for (const auto& v : vec)
+	{
+		json data = {};
+		to_json(data, v);
+		j.push_back(data);
+	}
+}
+
+inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
+{
+	vec.clear();
+	vec.reserve(j.size());
+
+	for (const auto& element : j)
+	{
+		CCustom_UI::CUSTOM_UI_DESC desc = {};
+		from_json(element, desc);
+		vec.push_back(desc);
+	}
 }

@@ -88,6 +88,13 @@ void CLevel_UI::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("UI"));
 
+    for (auto& customUI : m_vecCustomUIs)
+        customUI.pCustomUI->Priority_Update(fTimeDelta);
+    for (auto& customUI : m_vecCustomUIs)
+        customUI.pCustomUI->Update(fTimeDelta);
+    for (auto& customUI : m_vecCustomUIs)
+        customUI.pCustomUI->Late_Update(fTimeDelta);
+
     m_pPreObj = m_pCurObj;
 
     Update_Picking();
@@ -98,11 +105,12 @@ void CLevel_UI::Update(_float fTimeDelta)
     Update_SaveLoad();
     Update_Inspector();
     Update_AnimEditor(fTimeDelta);
-
 }
 
 void CLevel_UI::Render()
 {
+    for (auto& customUI : m_vecCustomUIs)
+        customUI.pCustomUI->Render();
 }
 
 void CLevel_UI::Update_Picking()
@@ -166,8 +174,8 @@ void CLevel_UI::Update_MenuWindow()
 
             // 생성 후 로컬 컨테이너에 추가
             CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
-            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
-                CRASH(Failed to add Custom_UI gameobject.);
+            //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
+            //    CRASH(Failed to add Custom_UI gameobject.);
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
@@ -205,6 +213,7 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Begin("Hierarchy");
 
+    // quick edit UIName
     if (m_pCurObj)
     {
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
@@ -222,10 +231,11 @@ void CLevel_UI::Update_Hierarchy()
             tDesc.strUIName = STR2WSTR(strEditUIName);
             dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
         }
+
     }
     else
     {
-        ImGui::Text("Selected Nothing");
+        ImGui::Text("Nothing Selected");
     }
 
     ImGui::Separator();
@@ -378,6 +388,42 @@ void CLevel_UI::Update_SaveLoad()
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField | ImGuiFileDialogFlags_Modal;
         ImGuiFileDialog::Instance()->OpenDialog("UI_Anim_Load", "Select Anim", ".json", config);
     }
+
+    ImGui::Separator();
+
+    
+    // ==============================
+    // * [UI] Tree Save
+    // ==============================
+    ImGui::Text("..Current Tree");
+
+    static _char szTreeName[256] = {};
+    ImGui::Text("[Save] Tree Name");
+    ImGui::InputText("##Tree Name", szTreeName, 256);
+
+    if (ImGui::Button("Save##TreeSave", buttonSize) &&
+        m_pCurObj)
+    {
+        IGFD::FileDialogConfig config;
+
+        config.path = "../../Client/Bin/Resource/UI/FJson/UITree/";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal;
+        ImGuiFileDialog::Instance()->OpenDialog("UI_Tree_Save", "Select Tree Save Path", ".json", config);
+    }
+    ImGui::SameLine();
+    // ==============================
+    // * [UI] Tree Load
+    // ==============================
+    if (ImGui::Button("Load##TreeLoad", buttonSize) && 
+        m_pCurObj)
+    {
+        IGFD::FileDialogConfig config;
+
+        config.path = "../../Client/Bin/Resource/UI/FJson/UITree/";
+        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField | ImGuiFileDialogFlags_Modal;
+        ImGuiFileDialog::Instance()->OpenDialog("UI_Tree_Load", "Select Tree", ".json", config);
+    }
+
 #pragma endregion
     ImGui::End();
 
@@ -437,8 +483,8 @@ void CLevel_UI::Update_SaveLoad()
             _float3 vSca = { jUIInfoData["vSca"][0], jUIInfoData["vSca"][1], jUIInfoData["vSca"][2] };    m_vCurObjSca = vSca;
 
             CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
-            if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
-                CRASH(Failed to add Custom_UI gameobject.);
+            //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
+            //    CRASH(Failed to add Custom_UI gameobject.);
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
@@ -534,6 +580,138 @@ void CLevel_UI::Update_SaveLoad()
                 _wstring strLog = L"[Level_UI][Update_SaveLoad] Load Failed. This Animation is not for this object.\nRequired Object Name : " + tLoadAnimDesc.tUIDesc.strFileName;
                 OutputDebugString(strLog.c_str());
             }
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+    // ==============================
+    // * [Logic] Tree Save
+    // =============================='
+    if (ImGuiFileDialog::Instance()->Display("UI_Tree_Save"))
+    {
+        if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
+        {
+            _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            _wstring strFilePath = STR2WSTR(filePath);
+
+            CUSTOM_UITREE_DESC tTreeDesc = {};
+
+            _string strTreeName = _string(szTreeName);
+            tTreeDesc.strTreeName = STR2WSTR(strTreeName);
+
+
+            for (auto& tCustomUIDesc : m_vecCustomUIs)
+            {
+                // UI Info Desc..
+                UI_INFO_DESC tCurUIInfoDesc = {};
+                tCurUIInfoDesc.tUIDesc = dynamic_cast<CCustom_UI*>(tCustomUIDesc.pCustomUI)->Get_UIDesc();
+                
+                // (Info Desc) Transform 정보 계산 및 대입
+                CTransform* pTargetTransform = static_cast<CTransform*>(tCustomUIDesc.pCustomUI->Get_Component(L"Com_Transform"));
+
+                _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
+                _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
+                XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, pTargetTransform->Get_WorldMatrix());
+
+                _float4x4	matStoreObjQuaternion = {};	// 쿼터니언
+                XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
+
+                XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
+                vStoreObjRotation = MAT_TO_ROT(matStoreObjQuaternion);
+                XMStoreFloat3(&vStoreObjScale, vXMObjScale);
+
+                tCurUIInfoDesc.vPos = vStoreObjPosition;
+                tCurUIInfoDesc.vRot = vStoreObjRotation;
+                tCurUIInfoDesc.vSca = vStoreObjScale;
+
+                // Info Desc 대입
+                tTreeDesc.vecUIInfoDescs.push_back(tCurUIInfoDesc);
+            }
+
+            json jUITreeData = {};
+            to_json(jUITreeData, tTreeDesc);
+
+            ofstream file(filePath);
+            file << jUITreeData.dump(4);
+            file.close();
+
+            memset(szTreeName, 0, sizeof(szTreeName));
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+    // ==============================
+    // * [Logic] Tree Load
+    // ==============================
+    if (ImGuiFileDialog::Instance()->Display("UI_Tree_Load"))
+    {
+        if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
+        {
+            _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
+
+            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFileName = STR2WSTR(fileName);
+
+            ifstream file(strFilePath);
+            json jUITreeData = {};
+            if (file.is_open()) {
+                file >> jUITreeData;
+            }
+
+
+            // 상대경로
+            _tchar curPath[256] = {};
+            _wgetcwd(curPath, 256);
+            filesystem::path basePath = curPath;
+            filesystem::path targetPath = filePath;
+            filesystem::path relativePath = filesystem::relative(targetPath, basePath);
+
+
+            // json load
+            CUSTOM_UITREE_DESC tLoadTreeDesc = {};
+            from_json(jUITreeData, tLoadTreeDesc);
+
+
+            // 로드된 모든 데이터 삭제
+            m_pCurObj = nullptr;
+            m_vCurObjPos = {}; m_vCurObjRot = {}; m_vCurObjSca = {};
+            for (auto& customUI : m_vecCustomUIs)
+                Safe_Release(customUI.pCustomUI);
+            m_vecCustomUIs.clear();
+
+
+            // 그 뒤 로드..
+            for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
+            {
+                UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
+
+                m_vCurObjPos = tLoadUIInfoDesc.vPos;
+                m_vCurObjRot = tLoadUIInfoDesc.vRot;
+                m_vCurObjSca = tLoadUIInfoDesc.vSca;
+
+                CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
+                //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
+                //    CRASH(Failed to add Custom_UI gameobject.);
+
+                HIERARCHY_OBJ_DESC tObjDesc = { };
+                tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
+                tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.tUIDesc.strFileName);
+
+                _matrix matScale = XMMatrixScaling(m_vCurObjSca.x, m_vCurObjSca.y, m_vCurObjSca.z);
+                _matrix matRotX = XMMatrixRotationX(TO_RAD(m_vCurObjRot.x));
+                _matrix matRotY = XMMatrixRotationY(TO_RAD(m_vCurObjRot.y));
+                _matrix matRotZ = XMMatrixRotationZ(TO_RAD(m_vCurObjRot.z));
+                _matrix matRot = matRotZ * matRotY * matRotX;
+                _matrix matTrans = XMMatrixTranslation(m_vCurObjPos.x, m_vCurObjPos.y, m_vCurObjPos.z);
+
+                _matrix matWorld = matScale * matRot * matTrans;
+                static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+
+
+                m_vecCustomUIs.push_back(tObjDesc);
+                //m_pCurObj = pCustomObj;
+            }
+
         }
         ImGuiFileDialog::Instance()->Close();
     }

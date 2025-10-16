@@ -2,7 +2,7 @@
 #include "Component.h"
 #include "Level_UI.h"
 
-// UI�� �ִϸ��̼� ������ �������� �������� �ִϸ��̼��� ������ Ŭ����
+// UI의 애니메이션 정보를 바탕으로 실질적인 애니메이션을 돌리는 클래스
 NS_BEGIN(Editor)
 
 class CAnimator_UI final : public CComponent
@@ -34,8 +34,6 @@ public:
 	virtual HRESULT			Render()								override;
 
 public:
-	// �ִϸ��̼� ��ȯ ���� �Լ�..?
-	// Play_Animation (����) ��..
 	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc);
 	HRESULT		Remove_Animation(_wstring strAnimName);
 	HRESULT		Clear_Animation();
@@ -56,11 +54,6 @@ private:
 	void		Update_Animation(_float fTimeDelta);
 
 private:
-	// UI ���� �����̳�..?
-	// UI�� �ִϸ��̼� ������ �㵵��..?
-
-	// �ִϸ��̼� Ŭ������ �����ϴ� �� �ƴ϶� �׳� �ִϸ��̼� Desc�� �����ϰ� �ҷ��ͼ� ���� �Ǵ� ���� �ƴ���?
-	// �׷��� �����̳ʷ� Map ���
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 

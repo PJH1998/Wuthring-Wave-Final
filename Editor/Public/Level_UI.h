@@ -53,6 +53,13 @@ public:
 		_float3						vSca = {};
 	} UI_INFO_DESC;
 
+	typedef struct tagCustomUITreeDesc {
+		wstring					strTreeName = {};
+
+		vector<UI_INFO_DESC>	vecUIInfoDescs = {};
+	} CUSTOM_UITREE_DESC;
+
+
 private:
 	explicit CLevel_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CLevel_UI() = default;
@@ -72,6 +79,7 @@ private:
 	void				Update_SaveLoad();
 	void				Update_Inspector();
 	void				Update_AnimEditor(_float fTimeDelta);
+
 
 private:
 	class CGameObject*			m_pCurObj = { nullptr };
@@ -222,3 +230,47 @@ inline void from_json(const json& j, CLevel_UI::UI_INFO_DESC& d)
 	d.vRot = {j["vRot"][0], j["vRot"][1], j["vRot"][2]};
 	d.vSca = {j["vSca"][0], j["vSca"][1], j["vSca"][2]};
 }
+
+inline void to_json(json& j, const vector<CLevel_UI::UI_INFO_DESC>& vec)
+{
+	j = json::array();
+	for (const auto& v : vec)
+	{
+		json data = {};
+		to_json(data, v);
+		j.push_back(data);
+	}
+}
+
+inline void from_json(const json& j, vector<CLevel_UI::UI_INFO_DESC>& vec)
+{
+	vec.clear();
+	vec.reserve(j.size());
+
+	for (const auto& element : j)
+	{
+		CLevel_UI::UI_INFO_DESC desc = {};
+		from_json(element, desc);
+		vec.push_back(desc);
+	}
+}
+
+inline void to_json(json& j, const CLevel_UI::CUSTOM_UITREE_DESC& d)
+{
+	json vecUIInfoDescs = {};
+	to_json(vecUIInfoDescs, d.vecUIInfoDescs);
+
+	j = {
+		{ "strTreeName", _string(d.strTreeName.begin(), d.strTreeName.end()) },
+		//{ "iNumUIDescs", d.vecUIDescs.size() },
+		{ "vecUIInfoDescs", vecUIInfoDescs }
+	};
+}
+
+inline void from_json(const json& j, CLevel_UI::CUSTOM_UITREE_DESC& d)
+{
+	_string strTreeName = j["strTreeName"].get<_string>();
+	d.strTreeName = _wstring(strTreeName.begin(), strTreeName.end());
+	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
+}
+
