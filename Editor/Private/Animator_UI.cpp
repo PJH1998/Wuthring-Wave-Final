@@ -35,13 +35,7 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 
 void CAnimator_UI::Update(_float fTimeDelta)
 {
-    // 업데이트는 어떻게 돌림? 게임인스턴스에서 돌 매니저도 아니고
-    // UI가 업데이트를 돌게 하고, UI Update에서 애니메이터를 Update 돌려야 하나
-
     Update_Animation(fTimeDelta);
-
-
-    // m_pCurAnimDesc 갱신도 있어야 함
 
     m_fElapsedTime += fTimeDelta;
 }
@@ -163,6 +157,8 @@ _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
     case UI_LERPTYPE::CUBIC:        return fIn * fIn * (3.0f - 2.0f * fIn);
     default:        break;
     }
+
+    return fIn;
 }
 
 _float CAnimator_UI::Calc_Lerp(_float fStart, _float fEnd, _float fRatio)

@@ -758,12 +758,10 @@ void CLevel_UI::Update_Inspector()
 
     ImGui::Begin("Inspector");
     
-#pragma region [Component] Transform
-
     CTransform* pTargetTransform = dynamic_cast<CTransform*>(m_pCurObj->Get_Component(L"Com_Transform"));
     _bool   isOn_TransformCom = pTargetTransform != nullptr;
 
-    static _float fSensitivity = 1.f;
+#pragma region [Component] Transform
 
     if (isOn_TransformCom)
     {
@@ -792,13 +790,14 @@ void CLevel_UI::Update_Inspector()
 
         if (ImGui::CollapsingHeader("Transform"))
         {
+            static _float fSensitivity = 1.f;
+            ImGui::Text("Sensitivity");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Sensitivity", &fSensitivity, 0.001f, 0.001f, 10.f);
+            ImGui::Separator();
+
             if (ImGui::BeginMenu("Reset Menu"))
             {
-                ImGui::Text("Sensitivity");
-                ImGui::SameLine();
-                ImGui::DragFloat("##Sensitivity", &fSensitivity, 0.001f, 0.001f, 10.f);
-                ImGui::Separator();
-
                 if (ImGui::MenuItem("Reset Position"))  { m_vCurObjPos = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Rotation"))  { m_vCurObjRot = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { 100.f, 100.f, 1.f }; }
@@ -853,6 +852,7 @@ void CLevel_UI::Update_Inspector()
 #pragma endregion
 
 #pragma region [Other] Description Edit
+
     if (ImGui::CollapsingHeader("Edit UI Desciption"))
     {
         static _char szUIName[256] = {};

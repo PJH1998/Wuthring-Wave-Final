@@ -30,7 +30,6 @@ public:
 		_uint		iNumFiles = 1;
 
 		_wstring	strUIName = {};
-		//_wstring	strUIType = {};
 		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
 		_wstring	strParentName = {};
 
@@ -73,8 +72,6 @@ private:
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
 	_uint					m_iCurTexIndex				= {};
-
-	_bool					m_isPrevParentExist			= false;
 
 	_float4x4				m_CombinedWorldMatrix		= {};
 
