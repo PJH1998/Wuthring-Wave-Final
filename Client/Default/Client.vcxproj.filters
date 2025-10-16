@@ -55,6 +55,9 @@
     <Filter Include="01. Level\Loader\GamePlay">
       <UniqueIdentifier>{f5fad4f8-9dfd-46e7-b0da-c921dca7dbbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\MonsterTest">
+      <UniqueIdentifier>{41486888-d776-4dc3-922d-fe6dff0765b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -117,6 +120,9 @@
     <ClInclude Include="..\Public\Level_GamePlay.h">
       <Filter>01. Level\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MonsterTest.h">
+      <Filter>02. GameObject\MonsterTest</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -168,6 +174,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Level_GamePlay.cpp">
       <Filter>01. Level\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterTest.cpp">
+      <Filter>02. GameObject\MonsterTest</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #include "ClientPch.h"
 #include "Level_Test.h"
 #include "MapObject.h"
+#include "MonsterTest.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -51,7 +52,14 @@ HRESULT CLevel_Test::Initialize()
     //    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), PrototypeObject
     //        , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
     //}
+	CMonsterTest::MONSTERTEST_DESC MobDesc = {};
+	MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
+    MobDesc.fSpeedPerSec = 5.f;
+    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
+		CRASH("FalseSoverign");
 
+	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
+		CRASH("Dummy");
 
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
         CRASH("Dummy");*/

@@ -1,5 +1,6 @@
 #pragma once
 #include "Component.h"
+#include "BlackBoard.h"
 
 NS_BEGIN(Engine)
 
@@ -21,6 +22,11 @@ public:
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 	
 	void tick(class CGameObject* pGameObject);
+
+#ifdef _DEBUG
+	void BlackBoardInfo();
+#endif // _DEBUG
+
 
 private:
 	CBT_Node* m_pRoot = { nullptr };

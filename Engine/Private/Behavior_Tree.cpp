@@ -1,7 +1,6 @@
 #include "EnginePch.h"
 #include "Behavior_Tree.h"
 #include "BT_Node.h"
-#include "BlackBoard.h"
 
 CBehavior_Tree::CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CComponent { pDevice , pContext }
@@ -36,8 +35,15 @@ HRESULT CBehavior_Tree::Initialize_Clone(void* pArg)
 
 void CBehavior_Tree::tick(CGameObject* pGameObject)
 {
-    m_pRoot->tick(pGameObject);
+    m_pRoot->tick(pGameObject, m_pBlackBoard);
 }
+
+#ifdef _DEBUG
+void CBehavior_Tree::BlackBoardInfo()
+{
+    m_pBlackBoard->Bind_Data_to_GUI();
+}
+#endif // _DEBUG
 
 CBehavior_Tree* CBehavior_Tree::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CBT_Node* pRoot)
 {

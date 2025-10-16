@@ -12,6 +12,7 @@
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "Collider.h"
+#include "Behavior_Tree.h"
 // ==================
 
 NS_BEGIN(Engine)

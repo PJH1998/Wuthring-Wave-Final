@@ -1,5 +1,6 @@
 #include "EnginePch.h"
 #include "BT_Selector.h"
+#include "BlackBoard.h"
 
 CBT_Selector::CBT_Selector()
     :CBT_Node{}
@@ -24,17 +25,17 @@ HRESULT CBT_Selector::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-CBT_Node::PATTERN_STATE CBT_Selector::tick(CGameObject* pGameObject)
+CBT_Node::BT_STATE CBT_Selector::tick(CGameObject* pGameObject, class CBlackBoard* pBlackBoard)
 {
-    PATTERN_STATE eState{};
+    BT_STATE eState{};
     for (auto& child : m_Children)
     {
-        eState = child->tick(pGameObject);
-        if (PATTERN_STATE::FAILURE != eState)
+        eState = child->tick(pGameObject, pBlackBoard);
+        if (BT_STATE::FAILURE != eState)
             return eState;
     }
 
-    return PATTERN_STATE::FAILURE;
+    return BT_STATE::FAILURE;
 }
 
 CBT_Selector* CBT_Selector::Create()

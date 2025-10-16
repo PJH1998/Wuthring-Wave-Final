@@ -5,7 +5,7 @@ NS_BEGIN(Engine)
 class ENGINE_DLL CBT_Node abstract : public CBase
 {
 public:
-	enum PATTERN_STATE
+	enum BT_STATE
 {
 	FAILURE,
 	RUNNING,
@@ -21,7 +21,7 @@ public:
 	virtual HRESULT Initialize_Clone(void* pArg) = 0;
 
 public:
-	virtual PATTERN_STATE tick(class CGameObject* pGameObject) = 0;
+	virtual BT_STATE tick(class CGameObject* pGameObject, class CBlackBoard* pBlackBoard) = 0;
 
 public:
 	virtual CBT_Node* Clone(void* pArg) = 0;

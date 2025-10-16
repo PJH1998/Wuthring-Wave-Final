@@ -1,5 +1,6 @@
 #include "EnginePch.h"
 #include "BT_Sequence.h"
+#include "BlackBoard.h"
 
 CBT_Sequence::CBT_Sequence()
     :CBT_Node{}
@@ -24,17 +25,17 @@ HRESULT CBT_Sequence::Initialize_Clone(void* pArg)
 	return S_OK;
 }
 
-CBT_Node::PATTERN_STATE CBT_Sequence::tick(CGameObject* pGameObject)
+CBT_Node::BT_STATE CBT_Sequence::tick(CGameObject* pGameObject, class CBlackBoard* pBlackBoard)
 {
-    PATTERN_STATE eState{};
+    BT_STATE eState{};
     for (auto& child : m_Children)
     {
-        eState = child->tick(pGameObject);
-        if (PATTERN_STATE::SUCCESS != eState)
+        eState = child->tick(pGameObject, pBlackBoard);
+        if (BT_STATE::SUCCESS != eState)
             return eState;
     }
 
-    return PATTERN_STATE::SUCCESS;
+    return BT_STATE::SUCCESS;
 }
 
 CBT_Sequence* CBT_Sequence::Create()

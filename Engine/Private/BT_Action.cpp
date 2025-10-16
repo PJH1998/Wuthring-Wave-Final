@@ -1,5 +1,6 @@
 #include "EnginePch.h"
 #include "BT_Action.h"
+#include "BlackBoard.h"
 
 CBT_Action::CBT_Action(const CBT_Action& Prototype)
 	:CBT_Node{ Prototype }
@@ -17,7 +18,12 @@ HRESULT CBT_Action::Initialize_Clone(void* pArg)
 	return S_OK;
 }
 
-CBT_Action* CBT_Action::Create(function<PATTERN_STATE(CGameObject* pGameObject)> Action)
+CBT_Node::BT_STATE CBT_Action::tick(CGameObject* pGameObject, CBlackBoard* pBlackBoard)
+{
+    return m_Action(pGameObject, pBlackBoard);
+}
+
+CBT_Action* CBT_Action::Create(function<BT_STATE(CGameObject* pGameObject, CBlackBoard* pBlackBoard)> Action)
 {
     CBT_Action* pInstance = new CBT_Action(Action);
     if (FAILED(pInstance->Initialize_Prototype()))

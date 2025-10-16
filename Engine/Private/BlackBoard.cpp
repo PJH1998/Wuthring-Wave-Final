@@ -18,7 +18,7 @@ HRESULT CBlackBoard::Add_Data(const _string& strDataTag, DATA_TYPE eType, void* 
 	}
 	else
 	{
-		// 이미 존재하는 데이터 태그입니다.
+		// 이미 존재하는 데이터 키
 		return E_FAIL;
 	}
 }
@@ -29,6 +29,19 @@ void* CBlackBoard::Get_Data(const _string& strDataTag)
 		return m_Datas[strDataTag].second;
 	else
 		return nullptr;
+}
+
+HRESULT CBlackBoard::Add_Checker(const _string& strDataTag, function<_int()> Checker)
+{
+	m_Checkers.emplace(make_pair(strDataTag, Checker)); return S_OK;
+}
+
+_int CBlackBoard::Get_Checker(const _string& strFuncTag)
+{
+	if(m_Checkers.find(strFuncTag) == m_Checkers.end())
+		return -1;
+
+	return m_Checkers[strFuncTag]();
 }
 
 #ifdef _DEBUG
