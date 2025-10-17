@@ -16,6 +16,8 @@ public:
 
 	// Gizmo 적용할 객체의 Transform 전달
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	// Gizmo Render용
+	void					Render_Gizmo(const _fmatrix& Matrix);
 
 public:
 	HRESULT				Initialize(HWND hWnd);

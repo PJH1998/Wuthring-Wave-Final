@@ -541,6 +541,10 @@ void CGameInstance::Use_Gizmo(CTransform* pTransform)
 {
 	m_pGUIManager->Use_Gizmo(pTransform);
 }
+void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
+{
+	m_pGUIManager->Render_Gizmo(Matrix);
+}
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)

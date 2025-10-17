@@ -32,6 +32,30 @@ void CGUIManager::Use_Gizmo(CTransform* pTransform)
 	Safe_AddRef(m_pTransform);
 }
 
+void CGUIManager::Render_Gizmo(const _fmatrix& Matrix)
+{
+	_float4x4 ViewMatrix = {};
+	_float4x4 ProjMatrix = {};
+	XMStoreFloat4x4(&ViewMatrix, m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW));
+	XMStoreFloat4x4(&ProjMatrix, m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
+
+	_float4x4 WorldMatrix = {};
+	XMStoreFloat4x4(&WorldMatrix, Matrix);
+
+	ImGuizmo::SetDrawlist();
+	ImGuizmo::SetRect(0.f, 0.f, 1920.f, 1080.f);
+	ImGuizmo::BeginFrame();
+	ImGuizmo::PushID(100);
+	ImGuizmo::Manipulate(
+		reinterpret_cast<const _float*>(&ViewMatrix),
+		reinterpret_cast<const _float*>(&ProjMatrix),
+		m_CurrentGizmoOperation,
+		m_CurrentGizmoMode,
+		reinterpret_cast<_float*>(&WorldMatrix)
+	);
+	ImGuizmo::PopID();
+}
+
 HRESULT CGUIManager::Initialize(HWND hWnd)
 {
 	IMGUI_CHECKVERSION();
