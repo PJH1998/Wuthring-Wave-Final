@@ -33,6 +33,8 @@ public:
 		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
 		_wstring	strParentName = {};
 
+		vector<_wstring> vecChildNames = {};
+
 		CGameObject* pParentObject = nullptr;
 	} CUSTOM_UI_DESC;
 
@@ -92,6 +94,14 @@ NS_END
 
 inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 {
+	json childNames = json::array();
+	for (const auto& v : d.vecChildNames)
+	{
+		json data = {};
+		to_json(data, _string(v.begin(), v.end()));
+		childNames.push_back(data);
+	}
+
 	j = {
 		{ "strFilePath", _string(d.strFilePath.begin(), d.strFilePath.end()) },
 		{ "strFileName", _string(d.strFileName.begin(), d.strFileName.end()) },
@@ -99,7 +109,9 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 
 		{ "strUIName",  _string(d.strUIName.begin(), d.strUIName.end()) },
 		{ "iUIType", d.iUIType },
-		{ "strParentName", _string(d.strParentName.begin(), d.strParentName.end()) }
+		{ "strParentName", _string(d.strParentName.begin(), d.strParentName.end()) },
+
+		{ "vecChildNames", childNames }
 	};
 }
 
@@ -116,6 +128,12 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 	d.iUIType				= j["iUIType"];
 	_string strParentName	= j["strParentName"].get<_string>();
 	d.strParentName			= _wstring(strParentName.begin(), strParentName.end());
+
+	for (const auto& element : j["vecChildNames"])
+	{
+		_string strChildName = element.get<_string>();
+		d.vecChildNames.push_back(_wstring(strChildName.begin(), strChildName.end()));
+	}
 }
 
 inline void to_json(json& j, const vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
@@ -141,3 +159,4 @@ inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
 		vec.push_back(desc);
 	}
 }
+

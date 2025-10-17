@@ -146,6 +146,8 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 
+    m_tUIDesc.vecChildNames = pDesc->vecChildNames;
+
     return S_OK;
 }
 

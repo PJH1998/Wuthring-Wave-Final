@@ -217,6 +217,16 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Begin("Hierarchy");
 
+    if (ImGui::BeginMenu("Manual Menu"))
+    {
+        if (ImGui::MenuItem("Manual Update Childs"))
+            Update_ObjectChilds();
+
+        ImGui::EndMenu();
+    }
+
+    ImGui::Separator();
+
     // quick edit UIName
     if (m_pCurObj)
     {
@@ -461,6 +471,8 @@ void CLevel_UI::Update_SaveLoad()
     {
         if (ImGuiFileDialog::Instance()->IsOk())
         {
+            Update_ObjectChilds();
+
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _wstring strFilePath = STR2WSTR(filePath);
 
@@ -539,6 +551,8 @@ void CLevel_UI::Update_SaveLoad()
     {
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
         {
+            Update_ObjectChilds();
+
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _wstring strFilePath = STR2WSTR(filePath);
 
@@ -616,6 +630,8 @@ void CLevel_UI::Update_SaveLoad()
     {
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
         {
+            Update_ObjectChilds();
+
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _wstring strFilePath = STR2WSTR(filePath);
 
@@ -1203,6 +1219,32 @@ void CLevel_UI::Update_ObjectParents()
                 break;
             }
         }
+    }
+}
+
+void CLevel_UI::Update_ObjectChilds()
+{
+    // ==============================
+    // * 자식 오브젝트 업데이트
+    // (Client를 위함, Editor 에서는 미사용. 저장 시에만 사용)
+    // ==============================
+
+    for (auto& UIObject : m_vecCustomUIs)
+    {
+        CCustom_UI::CUSTOM_UI_DESC tDesc = UIObject.pCustomUI->Get_UIDesc();
+        vector<_wstring> vecChilds = {};
+
+        // 모든 객체를 순회하며, 해당 객체를 부모로 가진 자식이 있다면
+        // 해당 자식의 이름을 부모에 추가.
+
+        for (auto& compareUIObject : m_vecCustomUIs)
+        {
+            if (tDesc.strUIName == compareUIObject.pCustomUI->Get_UIDesc().strParentName)
+                vecChilds.push_back(compareUIObject.pCustomUI->Get_UIDesc().strUIName);
+        }
+
+        tDesc.vecChildNames = vecChilds;
+        UIObject.pCustomUI->Set_UIDesc(tDesc);
     }
 }
 
