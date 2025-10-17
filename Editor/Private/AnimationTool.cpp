@@ -239,7 +239,7 @@ void CAnimationTool::LoadDat()
     {
         IGFD::FileDialogConfig config;
 
-        config.path = "../../Client/Bin/Resource/";
+        config.path = "../../Client/Bin/Resource/Model/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         basePathString = config.path;
@@ -404,6 +404,7 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
         Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh"); // 일단 하드코딩..
+        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"); // 일단 하드코딩..
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
@@ -482,6 +483,8 @@ void CAnimationTool::Render_Animation_Detail()
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
     
     ImGui::Begin("Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
+
+    ImGui::Text("Animation Name : %s", m_Selected_AnimationTag.c_str());
 
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {

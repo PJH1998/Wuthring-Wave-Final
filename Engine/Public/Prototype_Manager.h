@@ -3,6 +3,7 @@
 
 // [Component]
 #include "Shader.h"
+#include "ComputeShader.h"
 #include "Texture.h"
 #include "Model.h"
 #include "VIBuffer_Rect.h"

@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+癤�#include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
 
@@ -37,7 +37,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
-    // Model의 Dat Folder Path
+    // Model?? Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -47,7 +47,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    // Default는 0번 애니메이션 실행.
+    // Default?? 0?? ??????? ????.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
@@ -64,8 +64,31 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     m_fTimeDelta = fTimeDelta;
 
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
+
     if (m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+    {
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+        /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
+        m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
+    }
+        
+#ifdef _DEBUG
+	_int iBoneIndex = 0;
+    m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
+#endif // _DEBUG
+
+    
+
+    // ????? ???? ?????? ?????? Root ???? Identity?? ??????
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -125,14 +148,14 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-// Notify에서 사용할 현재 선택된 애니메이션 이름
+// Notify???? ????? ???? ????? ??????? ???
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-// Notify에서 사용할 현재 선택된 애니메이션의 최대 TrackPosition
+// Notify???? ????? ???? ????? ????????? ??? TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
@@ -140,17 +163,17 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 }
 
 
-// Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
+// Notify???? ????? ???? ????? ????????? ??? ?????? ?????
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
-    // 어차피 현재거 설정하니까 매개변수로 가져올 필요가 없을 듯.
+    // ?????? ????? ???????? ????????? ?????? ??? ???? ??.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
-    if (!m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
+    // TrackPosition?? ??????? ???? Stop?? ??쿡?? ????? ?? ??? Play Animation?? ????????.
+    /*if (!m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
 }
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
@@ -158,13 +181,13 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
-// 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.
+// ?????? ??????? ??? ??????? json?? ?о??? ???????.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'는 생략 가능
+        this->Collider_Active(tag, active); // 'this->'?? ???? ????
     };
 
     auto effectCallBack = [this]() {
@@ -183,7 +206,7 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
-// 1. 행렬 
+// 1. ??? 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
@@ -201,6 +224,13 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
     // Shader
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strShaderTag,
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+    {
+        CRASH("Failed Ready_ComShader");
+        return E_FAIL;
+    }
+
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strComputeShaderTag,
+        TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
     {
         CRASH("Failed Ready_ComShader");
         return E_FAIL;
@@ -249,5 +279,6 @@ void CAnimationActor::Free()
     CContainerObject::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShaderCom);
 
 }
