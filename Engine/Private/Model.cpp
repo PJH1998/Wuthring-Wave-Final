@@ -424,6 +424,9 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	
 #pragma endregion
 
+	// Root Node Translation 조정
+	if (true == isRootMotion)
+		Compute_RootAnimation(fRootMotionRate);
 	
 	
 
@@ -434,39 +437,14 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		return true; // 애니메이션 종료
 	}
 
-	// Root Node Translation 조정
-	if (true == isRootMotion)
-		Compute_RootAnimation(fRootMotionRate);
-
 
 	// Combined는 한번만.
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 
-#ifdef _DEBUG
-	
-	/*OutputDebugString(TEXT("Play_Animation GPU "));
-	
-	_wstring strAnimDebug = StringToWString(strAnimationName) + L"\n";
-	OutputDebugString(strAnimDebug.c_str());
-
-	_float4 fValue = {};
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
-
-
-	OutPutDebugFloat(TEXT("Track Position : "), fTrackPosition);*/
-#endif
+	/*_string strRibAnimationName = "Rib_" + strAnimationName;
+	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);*/
 
 	return false;
 }
@@ -495,30 +473,29 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
 
 
-#ifdef _DEBUG
-	// Bone Name�� ������ ���ٸ�?
-	for (size_t i = 0; i < m_Bones.size(); ++i)
-	{
-		
-		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
-		{
-			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-			OutPutDebugMatrix(TEXT("Bip001RHand Play Rib Animation Matrix"), mat);
+//#ifdef _DEBUG
+//	for (size_t i = 0; i < m_Bones.size(); ++i)
+//	{
+//		
+//		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001_Shoulder_R_M"))
+//		{
+//			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+//			OutPutDebugMatrix(TEXT("Bip001_Shoulder_R_M Play Rib Animation Matrix"), mat);
+//
+//			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+//			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine"))
+//			{
+//				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+//				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
+//				OutPutDebugMatrix(strBoneName, mat);
+//				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+//			}
+//		}
+//	}
+//#endif // _DEBUG
 
-			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
-			{
-				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
-				OutPutDebugMatrix(strBoneName, mat);
-				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-			}
-		}
-	}
-#endif // _DEBUG
-
-	//for (auto& pBone : m_Bones)
-	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+	//Sfor (auto& pBone : m_Bones)
+	//S	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
@@ -583,28 +560,31 @@ void CModel::ApplyComputeResults_ToBones()
 		/* Prev Final 곱하기?*/
 		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
-		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-
-#ifdef _DEBUG
-		// Bone Name�� ������ ���ٸ�?
-		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
-		{
-			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-			OutPutDebugMatrix(TEXT("Bip001RHand Play Animation Matrix : "), mat);
-
-			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
-			{
-				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
-				OutPutDebugMatrix(strBoneName, mat);
-				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-			}
-		}
-#endif // _DEBUG
-
-		
+		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);		
 	}
+
+//	for (size_t i = 0; i < m_Bones.size(); ++i)
+//	{
+//#ifdef _DEBUG
+//		// Bone Name?
+//		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001_Shoulder_R_M"))
+//		{
+//			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+//			OutPutDebugMatrix(TEXT("Bip001_Shoulder_R_M Play Animation Matrix : "), mat);
+//
+//			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+//			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine"))
+//			{
+//				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+//				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
+//				OutPutDebugMatrix(strBoneName, mat);
+//				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+//			}
+//		}
+//#endif // _DEBUG
+//
+//
+//	}
 
 	// 5. Unmap으로 마무리합니다.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);

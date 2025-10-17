@@ -78,12 +78,13 @@ void CChannel::Update_TransformationMatrix(_float fCurrentTrackPosition, const v
 
 void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
 {
-	if (m_iNumKeyFrame == 2)
+	if (m_iNumKeyFrame == 2 
+		|| 0 == strcmp(m_szName, "Bip001RClavicle") 
+		|| 0 == strcmp(m_szName, "Bip001LClavicle"))
 	{
 		int x = 10;
 		return;
-	}
-		
+	}		
 
 	if (0.f == fCurrentTrackPosition)
 		*pCurrentFrameIndex = 0;
@@ -121,13 +122,20 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 
 		// 1. 이전 뼈의 정보를 가져옵니다.
 		_matrix PrevMatrix = XMLoadFloat4x4(Bones[m_iBoneIndex]->Get_TransformationMatrix());
-
-		//// 2. 고유의 움직임을 추가로 적용하는 것.
-		_matrix FinalMatrix = LerpMatrix * PrevMatrix;
+		// 2. 고유의 움직임을 추가로 적용하는 것.
+		_matrix FinalMatrix = PrevMatrix * LerpMatrix;
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
-
 		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
-		// Bip001LHand
+
+#ifdef _DEBUG
+		// 들어온 뼈의 이름 모두 출력
+		// 이 함수로 들어온 뼈의 이름을 출력해 봅시다.
+		wstring wstrBoneName = StringToWString(m_szName);
+		wstrBoneName += L"\n";
+		OutputDebugString(wstrBoneName.c_str());
+
+#endif // _DEBUG
+
 
 
 	}
