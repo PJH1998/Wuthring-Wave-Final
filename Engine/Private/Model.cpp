@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Model.h"
 #include "GameInstance.h"
 
@@ -42,21 +42,21 @@ CModel::CModel(const CModel& Prototype)
 	for (auto& Pair : Prototype.m_Animations)
 		m_Animations.emplace(Pair.first, Pair.second->Clone());
 
-	// Prototype »ı¼º Buffer¿Í Instance »ı¼º Buffer°¡ ´Ù¸£±â ¶§¹®¿¡ nullptr Ã¼Å©¸¦ ÇØÁİ´Ï´Ù.
+	//  Prototype ìƒì„± Bufferì™€ Instance ìƒì„± Bufferê°€ ë‹¤ë¥´ê¸° ë•Œë¬¸ì— nullptr ì²´í¬ë¥¼ í•´ì¤ë‹ˆë‹¤.
 	for (auto& pBuffer : m_Buffers)
 	{
 		if (nullptr != pBuffer)
 			Safe_AddRef(pBuffer);
 	}
 
-	// SRV´Â Prototype, Instance ¸ğµÎ µ¿ÀÏÇÏ°Ô »ç¿ë.
+	//  SRVëŠ” Prototype, Instance ëª¨ë‘ ë™ì¼í•˜ê²Œ ì‚¬ìš©.
 	for (auto& pSRV : m_SRVs)
 	{
 		if (nullptr != pSRV)
 			Safe_AddRef(pSRV);
 	}
 
-	// Å©±â¸¸ ÁöÁ¤.
+	// í¬ê¸°ë§Œ ì§€ì •.
 	m_UAVs.resize(Prototype.m_UAVs.size());
 
 #ifdef _DEBUG
@@ -192,7 +192,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 
 
 		ifstream inputFile(filePath);
-		// 1. ¿­¸®¸é?
+		// 1. ì—´ë¦¬ë©´?
 		if (inputFile.is_open())
 		{
 			json notifyData;
@@ -289,14 +289,14 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
 {
-	// ´Ù¸¥ Animation µé¾î¿Ã ½Ã, ÀÌÀü Animation ÀúÀå
+	// ë‹¤ë¥¸ Animation ë“¤ì–´ì˜¬ ì‹œ, ì´ì „ Animation ì €ì¥
 	//if (m_strPreAnimation != strAnimationName)
 	//{
 	//	m_isChangeAnimation = true;
 	//	m_strPreAnimation = strAnimationName;
 	//}
 
-	// Animation Á¾·á ½Ã, ´ÙÀ½ Animation Ã³À½ KeyFrame°ú Blend => »ç½Ç»ó ¾È¾²°í ÀÖÀ½.
+	// Animation ì¢…ë£Œ ì‹œ, ë‹¤ìŒ Animation ì²˜ìŒ KeyFrameê³¼ Blend => ì‚¬ì‹¤ìƒ ì•ˆì“°ê³  ìˆìŒ.
 	if (true == isBlend && true == m_isBlend)
 	{
 		*pTrackPosition = 0.f;
@@ -328,7 +328,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 		if(nullptr != pTrackPosition)
 			*pTrackPosition = fTrackPosition;
 
-		// Root Node Translation Á¶Á¤
+		// Root Node Translation ì¡°ì •
 		if (true == isRootMotion)
 			Compute_RootAnimation(fRootMotionRate);
 	}
@@ -367,46 +367,46 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	if (iter == m_Animations.end())
 		return S_OK;
 
-#pragma region 1. »À Çà·Ä °è»ê ºÎºĞÀ» Compute Shader¿¡ Àü´Ş ¹× °»½Å.
-	// 1. ÇöÀç ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ Track Position ¾÷µ¥ÀÌÆ®
-	//    (¾Ö´Ï¸ŞÀÌ¼Ç Á¾·á ¿©ºÎ ÆÇ´ÜÀº ±âÁ¸ ·ÎÁ÷ È°¿ë °¡´É)
+#pragma region 1. ë¼ˆ_í–‰ë ¬ ê³„ì‚° ë¶€ë¶„ì„ Compute Shaderì— ì „ë‹¬ ë° ê°±ì‹ .
+	// 1. í˜„ì¬ ì• ë‹ˆë©”ì´ì…˜ì˜ Track Position ì—…ë°ì´íŠ¸
+	//    (ì• ë‹ˆë©”ì´ì…˜ ì¢…ë£Œ ì—¬ë¶€ íŒë‹¨ì€ ê¸°ì¡´ ë¡œì§ í™œìš© ê°€ëŠ¥)
 	_float fTrackPosition = 0.f;
 
-	// 2. ÇöÀç Æ®·¢ Æ÷Áö¼ÇÀ» °¡Á®¿É´Ï´Ù. (Æ®·¢ Æ÷Áö¼ÇÀº ¾Ö´Ï¸ŞÀÌ¼Ç Å¬·¡½º¿¡¼­ °»½ÅÀ» ¹Ş½À´Ï´Ù.)
+	// 2. í˜„ì¬ íŠ¸ë™ í¬ì§€ì…˜ì„ ê°€ì ¸ì˜µë‹ˆë‹¤. (íŠ¸ë™ í¬ì§€ì…˜ì€ ì• ë‹ˆë©”ì´ì…˜ í´ë˜ìŠ¤ì—ì„œ ê°±ì‹ ì„ ë°›ìŠµë‹ˆë‹¤.)
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;
 
-	// 3. »ó¼ö ¹öÆÛ(CB) ¾÷µ¥ÀÌÆ®
-	//    - ¼ÎÀÌ´õ¿¡¼­ ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ Ã£±â À§ÇÑ ÀÎµ¦½º¿Í ÇöÀç Àç»ı ½Ã°£À» Àü´Ş
+	// 3. ìƒìˆ˜ ë²„í¼(CB) ì—…ë°ì´íŠ¸
+	//    - ì…°ì´ë”ì—ì„œ í˜„ì¬ ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ë¥¼ ì°¾ê¸° ìœ„í•œ ì¸ë±ìŠ¤ì™€ í˜„ì¬ ì¬ìƒ ì‹œê°„ì„ ì „ë‹¬
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
-	// ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸ CB ±¸Á¶Ã¼ => ÇöÀç AnimIndex¿Í TrackPositionÀ» ¼ÒÀ¯.
+	// ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ CB êµ¬ì¡°ì²´ => í˜„ì¬ AnimIndexì™€ TrackPositionì„ ì†Œìœ .
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
 	pAnimCBInfo->fTrackPosition = fTrackPosition;
-	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§(strAnimationName)¿¡ ÇØ´çÇÏ´Â ÀÎµ¦½º */;
+	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* ì• ë‹ˆë©”ì´ì…˜ ì´ë¦„(strAnimationName)ì— í•´ë‹¹í•˜ëŠ” ì¸ë±ìŠ¤ */;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 
-	// 4. Compute Shader¿¡ ¸®¼Ò½º ¹ÙÀÎµù
-//    - ComputeShader.h/cppÀÇ Set ÇÔ¼öµéÀ» »ç¿ë
-	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // ¾ÆÁ÷ .hlsl¿¡ ¾øÀ½
+	// 4. Compute Shaderì— ë¦¬ì†ŒìŠ¤ ë°”ì¸ë”©
+//    - ComputeShader.h/cppì˜ Set í•¨ìˆ˜ë“¤ì„ ì‚¬ìš©
+	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // ì•„ì§ .hlslì— ì—†ìŒ
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // ¾ÆÁ÷ .hlsl¿¡ ¾øÀ½
+	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // ì•„ì§ .hlslì— ì—†ìŒ
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
 	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
 	
 
-#pragma region ÀÌ ºÎºĞÀÌ ³Ê¹« ºı¼À.. Dispatch
+#pragma region ì´ ë¶€ë¶„ì´ ë„ˆë¬´ ë¹¡ì…ˆ.. Dispatch
 
-	// EX) »À 504°³, ÆÀ Å©±â 64¸í
+	// EX) ë¼ˆ 504ê°œ, íŒ€ í¬ê¸° 64ëª…
 	
-	// 5. Compute Shader ½ÇÇà (Dispatch)
-	// - ÃÑ »À °³¼ö¸¸Å­ ½º·¹µå¸¦ »ı¼ºÇÏµµ·Ï ½º·¹µå ±×·ì ¼ö¸¦ Á¶Àı
-	// - ¿¹: ¼ÎÀÌ´õ ½º·¹µå ±×·ì Å©±â°¡ 64ÀÏ ¶§, (ÃÑ »À °³¼ö + 63) / 64
+	// 5. Compute Shader ì‹¤í–‰ (Dispatch)
+	// - ì´ ë¼ˆ ê°œìˆ˜ë§Œí¼ ìŠ¤ë ˆë“œë¥¼ ìƒì„±í•˜ë„ë¡ ìŠ¤ë ˆë“œ ê·¸ë£¹ ìˆ˜ë¥¼ ì¡°ì ˆ
+	// - ì˜ˆ: ì…°ì´ë” ìŠ¤ë ˆë“œ ê·¸ë£¹ í¬ê¸°ê°€ 64ì¼ ë•Œ, (ì´ ë¼ˆ ê°œìˆ˜ + 63) / 64
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
@@ -414,10 +414,10 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	
 	
-	// 6. Áß°£ °á°ú Àû¿ë.(ÀÏ´Ü RootAnimation CombinedTransofrmationMatrix´Â ±×´ë·Î Àû¿ë)
+	// 6. ì¤‘ê°„ ê²°ê³¼ ì ìš©.(ì¼ë‹¨ RootAnimation CombinedTransofrmationMatrixëŠ” ê·¸ëŒ€ë¡œ ì ìš©)
 	ApplyComputeResults_ToBones();
 
-	// 7. Rib ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı ÈÄ »À¿¡ Á¤º¸ Àü´Ş.
+	// 7. Rib ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒ í›„ ë¼ˆì— ì •ë³´ ì „ë‹¬.
 	_string strRibAnimationName = "Rib_" + strAnimationName;
 	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
@@ -427,19 +427,19 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	
 	
 
-	// 8. ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ³¡³µ´Ù¸é? Clear ÀÛ¾÷À» ÁøÇàÇÏ°í AnimationÀ» Å¬¸®¾îÇØÁİ´Ï´Ù.
+	// 8. ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚¬ë‹¤ë©´? Clear ì‘ì—…ì„ ì§„í–‰í•˜ê³  Animationì„ í´ë¦¬ì–´í•´ì¤ë‹ˆë‹¤.
 	if (bIsAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
-		return true; // ¾Ö´Ï¸ŞÀÌ¼Ç Á¾·á
+		return true; // ì• ë‹ˆë©”ì´ì…˜ ì¢…ë£Œ
 	}
 
-	// Root Node Translation Á¶Á¤
+	// Root Node Translation ì¡°ì •
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate);
 
 
-	// Combined´Â ÇÑ¹ø¸¸.
+	// CombinedëŠ” í•œë²ˆë§Œ.
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
@@ -496,7 +496,7 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 
 
 #ifdef _DEBUG
-	// Bone NameÀÌ ´ÙÀ½°ú °°´Ù¸é?
+	// Bone Nameï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½?
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
 		
@@ -564,29 +564,29 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 
 void CModel::ApplyComputeResults_ToBones()
 {
-	// 1. GPUÀÇ Ãâ·Â ¹öÆÛ(m_pFinalBoneMatrix_Buffer) ³»¿ëÀ» Staging ¹öÆÛ·Î º¹»çÇÕ´Ï´Ù.
+	// 1. GPUì˜ ì¶œë ¥ ë²„í¼(m_pFinalBoneMatrix_Buffer) ë‚´ìš©ì„ Staging ë²„í¼ë¡œ ë³µì‚¬í•©ë‹ˆë‹¤.
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 2. Staging ¹öÆÛ¸¦ CPU°¡ ÀĞÀ» ¼ö ÀÖµµ·Ï Map ÇÕ´Ï´Ù.
+	// 2. Staging ë²„í¼ë¥¼ CPUê°€ ì½ì„ ìˆ˜ ìˆë„ë¡ Map í•©ë‹ˆë‹¤.
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
 	if (FAILED(hr))
 		return;
 
-	// 3. ¸ÊÇÎµÈ ¸Ş¸ğ¸®¿¡¼­ ·ÎÄÃ Çà·Ä µ¥ÀÌÅÍ¸¦ CPU º¯¼ö·Î º¹»çÇÕ´Ï´Ù.
-	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UPÀÇ w°¡ -7.4°¡ ³ª¿È.
+	// 3. ë§µí•‘ëœ ë©”ëª¨ë¦¬ì—ì„œ ë¡œì»¬ í–‰ë ¬ ë°ì´í„°ë¥¼ CPU ë³€ìˆ˜ë¡œ ë³µì‚¬í•©ë‹ˆë‹¤.
+	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UPì˜ wê°€ -7.4ê°€ ë‚˜ì˜´.
 	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
-	// 4. m_Bones ¹è¿­¿¡ GPU°¡ °è»êÇÑ ÃÖ½Å ·ÎÄÃ Çà·ÄÀ» Àû¿ëÇÕ´Ï´Ù.
+	// 4. m_Bones ë°°ì—´ì— GPUê°€ ê³„ì‚°í•œ ìµœì‹  ë¡œì»¬ í–‰ë ¬ì„ ì ìš©í•©ë‹ˆë‹¤.
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		/* Prev Final °öÇÏ±â?*/
+		/* Prev Final ê³±í•˜ê¸°?*/
 		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 
 #ifdef _DEBUG
-		// Bone NameÀÌ ´ÙÀ½°ú °°´Ù¸é?
+		// Bone Nameï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½?
 		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
 		{
 			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
@@ -606,10 +606,7 @@ void CModel::ApplyComputeResults_ToBones()
 		
 	}
 
-
-	
-
-	// 5. UnmapÀ¸·Î ¸¶¹«¸®ÇÕ´Ï´Ù.
+	// 5. Unmapìœ¼ë¡œ ë§ˆë¬´ë¦¬í•©ë‹ˆë‹¤.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
@@ -621,13 +618,13 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
 
-	// Axis Á¶Á¤ (-y => +z)
+	// Axis ì¡°ì • (-y => +z)
 	_float fTemp = vTranslation.m128_f32[2];
 	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
 	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
 	vTranslation.m128_f32[1] = fTemp * -1.f;
 
-	// Animation º¯°æ ½Ã, PreRootPositionÀ» º¯°æµÈ Animation Ã³À½ KeyFrame Root PositionÀ¸·Î º¯°æ
+	// Animation ë³€ê²½ ì‹œ, PreRootPositionì„ ë³€ê²½ëœ Animation ì²˜ìŒ KeyFrame Root Positionìœ¼ë¡œ ë³€ê²½
 	if (true == m_isChangeAnimation)
 	{
 		m_isChangeAnimation = false;
@@ -635,7 +632,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	}
 
 	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-	//// Àü À§Ä¡¿Í Å©°Ô ¹ş¾î³ª¸é ¿¹¿ÜÃ³¸®
+	//// ì „ ìœ„ì¹˜ì™€ í¬ê²Œ ë²—ì–´ë‚˜ë©´ ì˜ˆì™¸ì²˜ë¦¬
 	//if (fDistance > 150.f)
 	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
 
@@ -665,7 +662,7 @@ HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 	m_Bones.push_back(pBone);
 
 	_int iIndex = m_Bones.size() - 1;
-	// Root Bone Index ÀúÀå
+	// Root Bone Index ì €ì¥
 	if (0 == strcmp(szName, "Root"))
 		m_iRootBoneIndex = iIndex;
 
@@ -763,7 +760,7 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 	AnimationFile.close();
 
 
-	// Compute Shader °è»êÀ» À§ÇÑ Animation Index ÀúÀå.
+	// Compute Shader ê³„ì‚°ì„ ìœ„í•œ Animation Index ì €ì¥.
 	
 	_uint iAnimIdx = 0;
 	m_AnimationNameToIndex.clear();
@@ -779,7 +776,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 {
 	ASSERT_CRASH(m_pDevice);
 
-	// ¾Ö´Ï¸ŞÀÌ¼Ç ¸ğµ¨ÀÌ ¾Æ´Ï¸é »ı¼ºÇÏÁö ¾ÊÀ½.
+	// ì• ë‹ˆë©”ì´ì…˜ ëª¨ë¸ì´ ì•„ë‹ˆë©´ ìƒì„±í•˜ì§€ ì•ŠìŒ.
 	if (MODELTYPE::ANIM != m_eType)
 		return S_OK;
 
@@ -789,36 +786,36 @@ HRESULT CModel::Ready_Shared_Buffers()
 	m_SRVs.resize(SRV_END);
 	m_UAVs.resize(UAV_END);
 
-	// --- 1. µ¥ÀÌÅÍ ¼öÁıÀ» À§ÇÑ vector ÁØºñ ---
+	//  --- 1. ë°ì´í„° ìˆ˜ì§‘ì„ ìœ„í•œ vector ì¤€ë¹„ ---
 
 	vector<ANIMINFO>        vAllAnimInfos;		  // Depth1
 	vector<GPU_CHANNELINFO> vAllChannelBoneInfos; // Depth2
 	vector<GPU_KEYFRAME>    vAllKeyframes;        // Depth3
 
-	// Depth1¿¡ ´ëÇÑ ¼³Á¤.
+	// Depth1ì— ëŒ€í•œ ì„¤ì •.
 	for (const auto& Pair : m_Animations)
 	{
 		CAnimation* pAnimation = Pair.second;
 		ANIMINFO animInfo = {};
 
-		// ½ÃÀÛ ÀÎµ¦½º, °³¼ö, Áö¼Ó½Ã°£.
-		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // ¼øÂ÷ Å½»ö AnimInfo¿¡¼­ 0ºÎÅÍ Àç»ı.
-		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size()); // ¸ğµç Ã¤³ÎÀÇ °³¼ö
+		// ì‹œì‘ ì¸ë±ìŠ¤, ê°œìˆ˜, ì§€ì†ì‹œê°„.
+		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // ìˆœì°¨ íƒìƒ‰ AnimInfoì—ì„œ 0ë¶€í„° ì¬ìƒ.
+		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // ëª¨ë“  ì±„ë„ì˜ ê°œìˆ˜
 		animInfo.fDuration = pAnimation->Get_Duration();
 
-		// Depth2¿¡ ´ëÇÑ ¼³Á¤.
+		// Depth2ì— ëŒ€í•œ ì„¤ì •.
 		for (const auto& pChannel : pAnimation->Get_Channels())
 		{
-			// ½ÃÀÛ Å°ÇÁ·¹ÀÓ(´©Àû ÀÎµ¦½º), Å°ÇÁ·¹ÀÓ °³¼ö, Ã¤³ÎÀÌ °ü¸®ÇÏ´Â »À ÀÎµ¦½º
+			// ì‹œì‘ í‚¤í”„ë ˆì„(ëˆ„ì  ì¸ë±ìŠ¤), í‚¤í”„ë ˆì„ ê°œìˆ˜, ì±„ë„ì´ ê´€ë¦¬í•˜ëŠ” ë¼ˆ ì¸ë±ìŠ¤
 			GPU_CHANNELINFO channelInfo = {};
 			channelInfo.iStartKeyframeOffset = static_cast<_uint>(vAllKeyframes.size());
 			channelInfo.iNumKeyframes = pChannel->Get_NumKeyframes();
 			channelInfo.iBoneIndex = pChannel->Get_BoneIndex();
 
-			// Depth3¿¡ ´ëÇÑ ¼³Á¤.
+			// Depth3ì— ëŒ€í•œ ì„¤ì •.
 			for (const auto& keyframe : pChannel->Get_Keyframes())
 			{
-				// Å°ÇÁ·¹ÀÓ¿¡ ´ëÇÑ Á¤º¸ º¹»ç. Scale, Rotation, Translation, Æ®·¢ À§Ä¡.
+				// í‚¤í”„ë ˆì„ì— ëŒ€í•œ ì •ë³´ ë³µì‚¬. Scale, Rotation, Translation, íŠ¸ë™ ìœ„ì¹˜.
 				GPU_KEYFRAME gpuKeyframe = {};
 				gpuKeyframe.vScale = _float4(keyframe.vScale.x, keyframe.vScale.y, keyframe.vScale.z, 1.f);
 				gpuKeyframe.vRotation = keyframe.vRotation;
@@ -832,7 +829,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	}
 
 
-	// --- 2. ¼öÁıµÈ µ¥ÀÌÅÍ·Î ½ÇÁ¦ GPU ¹öÆÛ »ı¼º ---
+	// --- 2. ìˆ˜ì§‘ëœ ë°ì´í„°ë¡œ ì‹¤ì œ GPU ë²„í¼ ìƒì„± ---
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = sizeof(GPU_KEYFRAME) * static_cast<_uint>(vAllKeyframes.size());
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -845,7 +842,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_KEY_FRAME], nullptr, &m_SRVs[SRV_KEY_FRAME]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-2. ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸ ¹öÆÛ (g_AllAnimInfos)
+	// 2-2. ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ ë²„í¼ (g_AllAnimInfos)
 	bufferDesc.ByteWidth = sizeof(ANIMINFO) * static_cast<_uint>(vAllAnimInfos.size());
 	bufferDesc.StructureByteStride = sizeof(ANIMINFO);
 	subresourceData.pSysMem = vAllAnimInfos.data();
@@ -854,7 +851,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_ANIM_INFO], nullptr, &m_SRVs[SRV_ANIM_INFO]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-3. »À(Ã¤³Î)º° Á¤º¸ ¹öÆÛ (g_ChannelInfos)
+	// 2-3. ë¼ˆ(ì±„ë„)ë³„ ì •ë³´ ë²„í¼ (g_ChannelInfos)
 	bufferDesc.ByteWidth = sizeof(GPU_CHANNELINFO) * static_cast<_uint>(vAllChannelBoneInfos.size());
 	bufferDesc.StructureByteStride = sizeof(GPU_CHANNELINFO);
 	subresourceData.pSysMem = vAllChannelBoneInfos.data();
@@ -872,7 +869,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 {
 	HRESULT hr = S_OK;
 	D3D11_BUFFER_DESC bufferDesc = {};
-	// 2-4. ÃÖÁ¾ ·ÎÄÃ Çà·Ä Ãâ·Â(Output) ¹öÆÛ (g_OutLocalMatrices)
+	// 2-4. ìµœì¢… ë¡œì»¬ í–‰ë ¬ ì¶œë ¥(Output) ë²„í¼ (g_OutLocalMatrices)
 	bufferDesc = {};
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -886,7 +883,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_SRVs[SRV_FINAL_BONEMATRIX]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-5. ¸Å ÇÁ·¹ÀÓ ¾÷µ¥ÀÌÆ®ÇÒ »ó¼ö ¹öÆÛ (AnimationInfo)
+	// 2-5. ë§¤ í”„ë ˆì„ ì—…ë°ì´íŠ¸í•  ìƒìˆ˜ ë²„í¼ (AnimationInfo)
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO);
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -895,7 +892,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOCB]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-6. GPU -> CPU º¹»ç¸¦ À§ÇÑ Staging ¹öÆÛ
+	// 2-6. GPU -> CPU ë³µì‚¬ë¥¼ ìœ„í•œ Staging ë²„í¼
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
 	bufferDesc.Usage = D3D11_USAGE_STAGING;
@@ -953,7 +950,7 @@ void CModel::Free()
 	m_Materials.clear();
 
 
-	/* GPU Buffer ³»¿ë Á¦°Å */
+	/* GPU Buffer ë‚´ìš© ì œê±° */
 	for (auto& pBuffer : m_Buffers)
 		Safe_Release(pBuffer);
 	m_Buffers.clear();
