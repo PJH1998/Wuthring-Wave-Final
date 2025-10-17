@@ -11,17 +11,22 @@ protected:
 	virtual ~CStaticObject() = default;
 
 public:
+	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
+
+public:
 	virtual		HRESULT		Initialize_Prototype() { return S_OK; };
 	virtual		HRESULT		Initialize_Clone(void* pArg) { return __super::Initialize_Clone(pArg); };
 	virtual		void			Priority_Update(_float fTimeDelta) {};
 	virtual		void			Update(_float fTimeDelta) {};
 	virtual		void			Late_Update(_float fTimeDelta) {};
-	virtual		void			Render(_uint iLOD = 0) {};
+	virtual		void			Render() {};
 	virtual		void			Render_Shadow() {};
 
 protected:
 	// LOD °³¼ö
 	_uint		m_iNumLOD = {};
+	// LOD Index
+	_uint		m_iLODIndex = {};
 
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;

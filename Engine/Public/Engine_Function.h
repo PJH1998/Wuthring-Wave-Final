@@ -94,6 +94,9 @@ namespace Engine
 	inline Quat LoadQuat(const _float4& vQuat) { return Quat(vQuat.x, vQuat.y, vQuat.z, vQuat.w); }
 	inline Quat LoadQuat(const _fvector& vQuat) { return Quat(vQuat.m128_f32[0], vQuat.m128_f32[1], vQuat.m128_f32[2], vQuat.m128_f32[3]); }
 	inline _float4 StoreQuat(const Quat& vQuat) { return _float4(vQuat.GetX(), vQuat.GetY(), vQuat.GetZ(), vQuat.GetW()); }
+	
+	// BoundingBox Local -> World µ¿±âÈ­
+	inline void Sync_BoundingBox(BoundingBox* pBox, _fmatrix WorldMatrix) { pBox->Transform(*pBox, WorldMatrix); }
 }
 
 #endif // Engine_Function_h__

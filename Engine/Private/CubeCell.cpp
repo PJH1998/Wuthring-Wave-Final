@@ -50,12 +50,29 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
     return S_OK;
 }
 
+void CCubeCell::Priority_Update(_float fTimeDelta)
+{
+}
+
 void CCubeCell::Update(_float fTimeDelta)
+{
+}
+
+void CCubeCell::Late_Update(_float fTimeDelta)
 {
 }
 
 void CCubeCell::Render()
 {
+}
+
+void CCubeCell::Add_Object(CStaticObject* pObject, const BoundingBox* pBox)
+{
+}
+
+_bool CCubeCell::isIn(const BoundingBox* pBox)
+{
+	return _bool();
 }
 
 CCubeCell* CCubeCell::Create(_float3 vCenter, _float3 vExtent, _uint iDepth)

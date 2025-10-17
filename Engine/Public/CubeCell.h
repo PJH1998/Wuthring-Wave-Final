@@ -22,9 +22,13 @@ private:
 
 public:
 	HRESULT		Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth);
+	void			Priority_Update(_float fTimeDelta);
 	void			Update(_float fTimeDelta);
+	void			Late_Update(_float fTimeDelta);
 	void			Render();
 
+	void			Add_Object(class CStaticObject* pObject, const BoundingBox* pBox);
+	_bool			isIn(const BoundingBox* pBox);
 private:
 	BoundingBox*						m_pBoundingBox = { nullptr };
 	vector<CCubeCell*>				m_ChildCells;
