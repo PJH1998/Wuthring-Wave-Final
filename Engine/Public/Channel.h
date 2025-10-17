@@ -14,6 +14,13 @@ public:
 	_uint Get_NumKeyframes() const { return m_iNumKeyFrame; }
 	_uint Get_BoneIndex() const { return m_iBoneIndex; }
 
+#ifdef _DEBUG
+public:
+	const _string& Get_Name() const { return m_szName; }
+#endif // _DEBUG
+
+
+
 public:
 	HRESULT					Initialize(ifstream& InputFile, const vector<class CBone*>& Bones);
 	void						Update_TransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex);

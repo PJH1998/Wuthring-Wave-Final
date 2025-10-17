@@ -103,6 +103,25 @@ namespace Engine
 		_wstring strDebug = strPrePix + L" : " + to_wstring(fValue) + L"\n";
 		OutputDebugString(strDebug.c_str());
 	}
+
+	inline void OutPutDebugMatrix(_wstring strPrePix, const _float4x4& mat)
+	{
+		_wstring strDebug = strPrePix + L" : " + L"\n";
+		OutputDebugString(strDebug.c_str());
+
+		_float4 fValue = {};
+		memcpy(&fValue, mat.m[0], sizeof(_float4));
+		OutPutDebugFloat4(TEXT("Right"), fValue);
+		memcpy(&fValue, mat.m[1], sizeof(_float4));
+		OutPutDebugFloat4(TEXT("Up"), fValue);
+		memcpy(&fValue, mat.m[2], sizeof(_float4));
+		OutPutDebugFloat4(TEXT("Look"), fValue);
+		memcpy(&fValue, mat.m[3], sizeof(_float4));
+		OutPutDebugFloat4(TEXT("Position"), fValue);
+
+		OutputDebugString(TEXT("\n"));
+		
+	}
 #endif
 
 	inline Vec3 LoadVec3(const _float3& vVector) { return Vec3(vVector.x, vVector.y, vVector.z); }

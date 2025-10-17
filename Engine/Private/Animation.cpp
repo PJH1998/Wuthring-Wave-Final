@@ -143,6 +143,9 @@ _bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vect
 		return true;
 	}
 
+
+
+
 	for (size_t i = 0; i < m_iNumChannels; ++i)
 	{
 		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);

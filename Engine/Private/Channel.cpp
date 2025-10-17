@@ -79,7 +79,11 @@ void CChannel::Update_TransformationMatrix(_float fCurrentTrackPosition, const v
 void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
 {
 	if (m_iNumKeyFrame == 2)
+	{
+		int x = 10;
 		return;
+	}
+		
 
 	if (0.f == fCurrentTrackPosition)
 		*pCurrentFrameIndex = 0;
@@ -123,7 +127,9 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
 
 		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
-		// sss
+		// Bip001LHand
+
+
 	}
 	
 }

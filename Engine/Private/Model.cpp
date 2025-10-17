@@ -495,6 +495,28 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
 
 
+#ifdef _DEBUG
+	// Bone Name이 다음과 같다면?
+	for (size_t i = 0; i < m_Bones.size(); ++i)
+	{
+		
+		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
+		{
+			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+			OutPutDebugMatrix(TEXT("Bip001RHand Play Rib Animation Matrix"), mat);
+
+			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
+			{
+				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
+				OutPutDebugMatrix(strBoneName, mat);
+				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+			}
+		}
+	}
+#endif // _DEBUG
+
 	//for (auto& pBone : m_Bones)
 	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
@@ -562,7 +584,30 @@ void CModel::ApplyComputeResults_ToBones()
 		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+
+#ifdef _DEBUG
+		// Bone Name이 다음과 같다면?
+		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
+		{
+			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+			OutPutDebugMatrix(TEXT("Bip001RHand Play Animation Matrix : "), mat);
+
+			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
+			{
+				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
+				OutPutDebugMatrix(strBoneName, mat);
+				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+			}
+		}
+#endif // _DEBUG
+
+		
 	}
+
+
+	
 
 	// 5. Unmap으로 마무리합니다.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
