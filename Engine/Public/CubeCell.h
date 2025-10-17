@@ -5,6 +5,7 @@ NS_BEGIN(Engine)
 
 class CCubeCell final : public CBase
 {
+public:
 	enum class CORNER {
 		LBU,	// 谅惑窜 第率
 		RBU,	// 快惑窜 第率
@@ -37,7 +38,6 @@ public:
 	void			Late_Update(_float fTimeDelta);
 
 	void			Add_Object(class CStaticObject* pObject, const _float* pMinMax);
-	_bool			isIn(const _float* pMinMax);
 
 private:
 	class CGameInstance*			m_pGameInstance = { nullptr };
@@ -50,6 +50,7 @@ private:
 
 private:
 	void									Compute_MinMax();
+	_bool									isIn(const _float* pMinMax);
 
 public:
 	static CCubeCell* Create(_float3 vCenter, _float3 vExtent, _uint iDepth);

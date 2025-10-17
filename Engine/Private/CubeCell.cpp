@@ -27,7 +27,10 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	Compute_MinMax();
 
 	if (MAX_DEPTH == iDepth)
+	{
+		//cout << "Extent : " << Extent.x << endl;
 		return S_OK;
+	}
 
 	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
@@ -76,18 +79,18 @@ void CCubeCell::Late_Update(_float fTimeDelta)
 
 void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 {
+	ASSERT_CRASH(pObject);
+	ASSERT_CRASH(pMinMax);
 
-}
-
-_bool CCubeCell::isIn(const _float* pMinMax)
-{
-	//_float3 vCorners[ENUM_CLASS(CORNER::END)];
-	//pBox->GetCorners(vCorners);
-	//
-	//pBox.
-	//if(m_Corners[ENUM_CLASS(CORNER::LBU)])
-
-	return _bool();
+	for (size_t i = 0; i < m_ChildCells.size(); ++i)
+	{
+		if (true == m_ChildCells[i]->isIn(pMinMax))
+		{
+			m_ChildCells[i]->Add_Object(pObject, pMinMax);
+			return;
+		}
+	}
+	m_Objects.push_back(pObject);
 }
 
 void CCubeCell::Compute_MinMax()
@@ -100,6 +103,29 @@ void CCubeCell::Compute_MinMax()
 
 	m_MinMax[ENUM_CLASS(MINMAX::MIN_Z)] = m_Corners[ENUM_CLASS(CORNER::LBD)].z;
 	m_MinMax[ENUM_CLASS(MINMAX::MAX_Z)] = m_Corners[ENUM_CLASS(CORNER::LFD)].z;
+}
+
+_bool CCubeCell::isIn(const _float* pMinMax)
+{
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_X)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_X)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_X)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_X)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_Y)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_Y)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_Y)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_Y)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_Z)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_Z)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_Z)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_Z)])
+		return false;
+
+	return true;
 }
 
 CCubeCell* CCubeCell::Create(_float3 vCenter, _float3 vExtent, _uint iDepth)

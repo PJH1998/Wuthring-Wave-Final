@@ -17,7 +17,7 @@ CLoader::CLoader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 void CLoader::Complete_Load()
 {
 	lock_guard<mutex> lock(m_Mutex);
-	m_fProgress += 25.f;
+	m_fProgress += 20.f;
 }
 
 void CLoader::Free()

@@ -98,8 +98,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.a < 0.1f)
-        discard;
+    //if (Out.vDiffuse.a < 0.1f)
+    //    discard;
     
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     
