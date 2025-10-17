@@ -8,14 +8,14 @@
 
 _uint CEdit_MapObject::g_iNumObjects = {};
 CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    //:CStaticObject(pDevice, pContext)
-    :CGameObject(pDevice, pContext)
+    :CStaticObject(pDevice, pContext)
+    //:CGameObject(pDevice, pContext)
 {
 }
 
 CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
-    //:CStaticObject(Prototype)
-    :CGameObject(Prototype)
+    :CStaticObject(Prototype)
+    //:CGameObject(Prototype)
 {
 }
 
@@ -38,7 +38,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
-    //m_iNumLOD = m_pModelComArray.size()-1;
+
+    m_iNumLOD = m_pModelComArray.size()-1;
 
     _vector vScale, vRotation, vTranslation;
 
