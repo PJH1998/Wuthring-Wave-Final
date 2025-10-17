@@ -36,7 +36,7 @@ HRESULT CLevel_Effect::Initialize()
     string strEntryPoint = "main";
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
-        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl")));
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
 
     //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
