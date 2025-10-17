@@ -60,7 +60,6 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
     }
     Make_MousePos();
-    m_pPreViewObject->Late_Update(fTimeDelta, m_szPreViewModelName);
 }
 
 void CLevel_Map::Render()
@@ -180,10 +179,6 @@ void CLevel_Map::Menu_Model_Load()
 
             if (ImGui::Selectable(FileName))
             {
-                /*_matrix PreTransformMatrix = XMMatrixIdentity();
-                _float fSize = 0.001f;
-                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
-
                 CEdit_MapObject::MAP_LOAD Desc{};
                 _float4x4 DefaultMatrix{};
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
@@ -199,12 +194,12 @@ void CLevel_Map::Menu_Model_Load()
                 m_szPreViewModelName = StringToWString(FileName);
                 ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
                 ImGui::End();
+                m_pPreViewObject->Late_Update(0.016f, m_szPreViewModelName);
             }
         }
-        /*ImGui::BeginChild("ScrollObject");
-        ImGui::EndChild();*/
         ImGui::EndTable();
     }
+
     ImGui::End();
 }
 
@@ -262,9 +257,9 @@ void CLevel_Map::Menu_Save_Load()
 
                 _uint NameLength;
 
-                /*_matrix PreTransformMatrix = XMMatrixIdentity();
-                _float fSize = 0.001f;
-                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
+                _matrix PreTransformMatrix = XMMatrixIdentity();
+                _float fSize = 0.01f;
+                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
                 CEdit_MapObject::MAP_LOAD Desc{};
 
@@ -291,7 +286,9 @@ void CLevel_Map::Menu_Save_Load()
 
                     m_pGameInstance->Add_Prototype(m_iLevel, Model,
                         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
-
+                    /*m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath));
+                    */
                     _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
                     lstrcat(PrototypeObject, Name);
 
@@ -329,6 +326,11 @@ void CLevel_Map::Load_Objects()
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     string FolderPath = "../../Client/Bin/Resource/Map/";
     vector<_wstring> m_PrototypeNames;
+
+    _matrix PreTransformMatrix = XMMatrixIdentity();
+    _float fSize = 0.01f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
@@ -378,7 +380,7 @@ void CLevel_Map::Load_Objects()
                 _string FilePath = entry.path().string();
                 //m_pGameInstance->Add_Work([=]() {
                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
                    CRASH("Prototype Create Failed");
 
                     //멀티쓰레드 정상화 되면 이거 쓸것.

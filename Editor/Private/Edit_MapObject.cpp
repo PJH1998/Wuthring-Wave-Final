@@ -40,7 +40,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_iNumLOD = m_pModelComArray.size()-1;
-
+    Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
+    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
