@@ -123,6 +123,7 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
 
 		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
+		// sss
 	}
 	
 }
