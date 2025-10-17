@@ -14,6 +14,7 @@ HRESULT CPooling_Manager::Initialize()
 {
 	m_iNumThread = thread::hardware_concurrency();
 	m_Threads.reserve(m_iNumThread);
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
 		m_Threads.emplace_back([this]() { this->Work_Thread(); });
@@ -108,6 +109,7 @@ void CPooling_Manager::Wait_Thread_End()
 
 void CPooling_Manager::Work_Thread()
 {
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	while (true)
 	{
 		unique_lock<mutex> lock(m_Mutex);
@@ -121,10 +123,13 @@ void CPooling_Manager::Work_Thread()
 		m_Works.pop();
 		lock.unlock();
 
+
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
+
 	}
+		CoUninitialize();
 }
 
 CPooling_Manager* CPooling_Manager::Create()

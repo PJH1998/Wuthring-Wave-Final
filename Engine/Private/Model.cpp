@@ -418,8 +418,8 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	ApplyComputeResults_ToBones();
 
 	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
-	_string strRibAnimationName = "Rib_" + strAnimationName;
-	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+	//_string strRibAnimationName = "Rib_" + strAnimationName;
+	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
 	
 #pragma endregion
@@ -506,6 +506,17 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+}
+
+BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
+{
+	if (m_eType != MODELTYPE::MAP)
+		ASSERT_CRASH("Is Not Map Object");
+
+	if (iNumMesh >= m_iNumMeshes)
+		return nullptr;
+
+	return m_Meshes[iNumMesh]->Get_BoundingBox();
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)

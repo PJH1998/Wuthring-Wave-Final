@@ -86,7 +86,9 @@ public:
 
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
+	
 
+	BoundingBox*							Get_BoundingBox(_uint iNumMesh);
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 

@@ -33,7 +33,7 @@ private:
 	_uint						m_iBoneIndex = {};
 
 	_uint						m_iNumKeyFrame = {};
-	vector<KEYFRAME>	m_KeyFrames;
+	vector<KEYFRAME>			m_KeyFrames;
 
 	_float3					m_BlendScale;
 	_float4					m_BlendRotation;

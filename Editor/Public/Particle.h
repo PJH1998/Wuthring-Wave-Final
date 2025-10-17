@@ -6,6 +6,7 @@ NS_BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Point_Instance;
+class CComputeShader;
 NS_END
 
 NS_BEGIN(Editor)
@@ -13,7 +14,9 @@ NS_BEGIN(Editor)
 class CParticle final : public CGameObject
 {
 public:
-	typedef struct tagParticleDesc {
+	typedef struct tagParticleDesc
+	{
+		_wstring strMyTag;
 		_wstring strTextureTag;
 		//_wstring strShaderTag;
 		_wstring strVIBufferTag;
@@ -24,9 +27,10 @@ public:
 		_float3 vColor = { 0.f, 0.f, 0.f };
 		_float2	vLifeTime = { 5.f, 10.f};
 
-		_bool	bSpread = false;
-		_bool	bDrop = false;
+		//_bool	bSpread = false;
+		//_bool	bDrop = false;
 	}PARTICLE_DESC;
+
 private:
 	CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CParticle(const CParticle& Prototype);
@@ -44,6 +48,7 @@ private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CVIBuffer_Point_Instance*	m_pVIBufferCom = { nullptr };
+	CComputeShader*				m_pComputeShader = { nullptr };
 
 	_float						m_fShaderPass = 0;
 	_float3						m_vPos = {};
@@ -51,8 +56,8 @@ private:
 	_float2						m_vLifeTime = {};
 
 	//연산자? 가중치? 일단 야매로 불타입으로 움직이게 동작 처리만
-	_bool						m_IsSpread = false;
-	_bool						m_IsDrop = false;
+	//_bool						m_IsSpread = false;
+	//_bool						m_IsDrop = false;
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);

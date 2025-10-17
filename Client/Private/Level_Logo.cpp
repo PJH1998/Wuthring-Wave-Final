@@ -50,7 +50,15 @@ HRESULT CLevel_Logo::Initialize()
 	//	CRASH("Dummy");
 
 	//Safe_Release(pRigidBody);
-	
+
+	LIGHT_DESC LightDesc{};
+	LightDesc.eType = LIGHT_DESC::DIRECTION;
+	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);
+	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     return S_OK;
 }
 

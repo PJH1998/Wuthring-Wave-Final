@@ -30,9 +30,19 @@ private:
 	//void Texture_Loading(const char* TextureName, const _tchar* pFilePath);
 	void Load_AllTextureFromFolder(const _string& strFolderPath);
 
+public:
 	void Particle_Tab();
-	void UpdateSelected_ParticleFromIndex();
+
+	void Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticleDesc, _bool& IsCreate);
+
+	void UpdateSelected_ParticleFormTag(_wstring ParticleTag);
 	
+	CParticle::PARTICLE_DESC* Get_ParticleDesc(_wstring& ParticleTag);
+	CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* Get_VBDesc(_wstring& VBTag);
+
+	void Set_ParticleTag(const _char* szParticleTag);
+
+	void Remove_Desc(const _wstring& DescTag);
 
 private:
 	ID3D11Device* m_pDevice = { nullptr };
@@ -43,16 +53,14 @@ private:
 	_int														m_iSelectedTexture = -1;
 	_bool														m_TexturPopOpend = false;
 
-	_char														m_ParticleTag[MAX_PATH];
+	_char														m_ParticleTag[MAX_PATH] = {};
 	_bool														m_bTagFlag = false;
 
 	map<const _wstring, CParticle::PARTICLE_DESC>						m_tParticleDesc = {};
 	map<const _wstring, CVIBuffer_Point_Instance::POINT_INSTANCE_DESC>	m_tVBDesc = {};
-	map<const _wstring, class CParticle*>								m_Particles = {};
 
 	_int														m_iSelectedParticle = 0;
 	_bool														m_bSelectedParticle = false;
-	class CParticle*											m_pSelectedParticle = { nullptr };
 	CParticle::PARTICLE_DESC*									m_pSelectedParticleDesc = { nullptr };
 	CVIBuffer_Point_Instance::POINT_INSTANCE_DESC*				m_pSelectedVBDesc = { nullptr };
 

@@ -14,12 +14,11 @@ public:
 	virtual void			Update(_float fTimeDelta) override;
 	virtual void			Render() override;
 
-private:
-	void Effect_MenuBar();
 
 private:
-	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
-
+	class CEffect_Controller*										m_pEffect_Controller = { nullptr };
+	//
+	class CAnimationTool*											m_pAnimation_Tool = { nullptr };
 
 public:
 	static		CLevel_Effect*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

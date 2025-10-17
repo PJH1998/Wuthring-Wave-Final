@@ -44,7 +44,8 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 
     m_pAnimator_UICom->Update(fTimeDelta);
-    return;
+
+    Update_CombinedMatrix();
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -60,7 +61,7 @@ void CCustom_UI::Render()
 {
     //__super::Begin();
 
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
         CRASH(Binding_Matrix_Failed);
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
@@ -68,8 +69,8 @@ void CCustom_UI::Render()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         CRASH(Binding_Matrix_Failed);
 
-    // 여기로 알파값 실시간으로 넘겨주면 될 것 같은데
-    //if (FAILED(m_pShaderCom->Bind_Value("g_AlphaStrength", &m_pAnimator_UICom->Get_CurAnimDesc().)))
+
+    // ksta IF : "g_AlphaStrength" 에 매 프레임마다 Animator_UI 컴포넌트에서 값 갱신중
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH(Binding_Shader_Failed);
@@ -137,11 +138,28 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     ASSERT_CRASH(pArg);
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
-    m_tUIDesc.strFilePath = pDesc->strFilePath;
-    m_tUIDesc.strFileName = pDesc->strFileName;
-    m_tUIDesc.iNumFiles   = pDesc->iNumFiles;
+    m_tUIDesc.strFilePath   = pDesc->strFilePath;
+    m_tUIDesc.strFileName   = pDesc->strFileName;
+    m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
+
+    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // 비어있다면 초기값으로 strFileName 사용
+    m_tUIDesc.iUIType       = pDesc->iUIType;
+    m_tUIDesc.strParentName = pDesc->strParentName;
+
+    m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
     return S_OK;
+}
+
+void CCustom_UI::Update_CombinedMatrix()
+{
+    if (m_tUIDesc.pParentObject)
+    {
+        CTransform* pParentTransform = dynamic_cast<CTransform*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Transform"));
+        XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix() * pParentTransform->Get_WorldMatrix());
+    }
+    else
+        XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix());
 }
 
 CCustom_UI* CCustom_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

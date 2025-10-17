@@ -46,13 +46,17 @@ private:
 	class CEdit_MapObject* m_pChildObject = { nullptr };
 	class CEdit_MapObject* m_pPickedObject = { nullptr };
 	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
+	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
+
+
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
 
 	vector<_string> m_ModelPaths;
-
+	_wstring m_szPreViewModelName;
 	_bool m_LoadMenu = { false };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -36,7 +36,12 @@ using json = nlohmann::json;
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/ImGuiFileDialog.h"
 #include "ImGui/ImGuiFileDialogConfig.h"
-
+//#include "ImGui/ImApp.h"
+#include "ImGui/ImGuizmo.h"
+#include "ImGui/ImSequencer.h"
+#include "ImGui/ImZoomSlider.h"
+#include "ImGui/ImCurveEdit.h"
+#include "ImGui/GraphEditor.h"
 
 #pragma warning(push)
 #pragma warning(disable: 26495)

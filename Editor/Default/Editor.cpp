@@ -31,6 +31,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // TODO: 여기에 코드를 입력합니다.
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	// Console Create
+	AllocConsole();
+
+	FILE* pOut = { nullptr };
+	FILE* pIn = { nullptr };
+	freopen_s(&pOut, "CONOUT$", "w", stdout);
+	freopen_s(&pOut, "CONOUT$", "w", stderr);
+	freopen_s(&pIn, "CONIN$", "r", stdin);
+
+	HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+	DWORD prev_mode;
+	GetConsoleMode(hInput, &prev_mode);
+
+	prev_mode &= ~ENABLE_QUICK_EDIT_MODE;
+	prev_mode &= ~ENABLE_INSERT_MODE;
+	prev_mode |= ENABLE_EXTENDED_FLAGS;
+
+	SetConsoleMode(hInput, prev_mode);
 #endif // _DEBUG
 
     // 전역 문자열을 초기화합니다.

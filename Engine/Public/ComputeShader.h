@@ -19,7 +19,7 @@ public:
 
 public:
     // numThreads 컴파일 정보를 가져옵니다.
-	const COMPUTESHADER_INFO& Get_ThreadInfo() const { return m_ThreadInfo; }
+    const COMPUTESHADER_INFO& Get_ThreadInfo() const { return m_ThreadInfo; }
 
 public:
     // 이름으로 리소스를 바인딩합니다.
@@ -45,7 +45,7 @@ private:
     COMPUTESHADER_INFO m_ThreadInfo = {};
 
     // 리플렉션으로 얻어온 리소스 정보 (이름 -> 바인딩 슬롯 번호)
-    map<string, _uint>          m_SRV_BindPoints; 
+    map<string, _uint>          m_SRV_BindPoints;
     map<string, _uint>          m_UAV_BindPoints;
     map<string, _uint>          m_CB_BindPoints;
 
@@ -60,4 +60,3 @@ public:
     virtual void Free() override;
 };
 NS_END
-

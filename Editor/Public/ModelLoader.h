@@ -28,7 +28,7 @@ private:
 
 	_uint					m_iAnim = {};
 	MODELTYPE			m_eType = { MODELTYPE::NONANIM };
-
+	_bool					m_isLoadAll = { false };
 	_char					m_szReadPath[MAX_PATH] = {};
 	_char					m_szWritePath[MAX_PATH] = {};
 	_char					m_szFileName[MAX_PATH] = {};

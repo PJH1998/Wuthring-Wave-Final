@@ -15,7 +15,7 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions },
     m_Indices { Prototype.m_Indices }
-    ,m_Cube{Prototype.m_Cube}
+    , m_pBoundingBox{Prototype.m_pBoundingBox }
 {
 }
 
@@ -301,8 +301,10 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
     
     vCorner[LBF] = _float3(MinPos.x, MinPos.y, MaxPos.z);
 
-    m_Cube.Center = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
-    m_Cube.Extents = _float3((MaxPos.x - m_Cube.Center.x), (MaxPos.y - m_Cube.Center.y) , (MaxPos.z - m_Cube.Center.z));
+    _float3 vCenter = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
+    _float3  vExtents = _float3((MaxPos.x - vCenter.x), (MaxPos.y - vCenter.y) , (MaxPos.z - vCenter.z));
+    
+    m_pBoundingBox = new BoundingBox(vCenter, vExtents);
 
 	m_iVertexStride = sizeof(VTXMESH);
 	m_iNumVertexBuffers = 1;
@@ -381,4 +383,7 @@ CComponent* CMesh::Clone(void* pArg)
 void CMesh::Free()
 {
 	__super::Free();
+
+    if (!m_isClone)
+        Safe_Delete(m_pBoundingBox);
 }

@@ -1,6 +1,7 @@
 #include "ClientPch.h"
 #include "Dummy.h"
 
+
 CDummy::CDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
 {
@@ -46,12 +47,15 @@ void CDummy::Update(_float fTimeDelta)
 
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 	m_pColliderCom->Update(vVelocity);
-	
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
 {
-	m_pColliderCom->Sync_Position(m_pTransformCom);
+	//m_pColliderCom->Sync_Position(m_pTransformCom);
+
+	// Guizmo Test
+	m_pGameInstance->Use_Gizmo(m_pTransformCom);
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 

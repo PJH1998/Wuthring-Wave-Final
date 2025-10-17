@@ -12,7 +12,10 @@
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
+#include "ComputeShader.h"
 #include "Collider.h"
+#include"Model_Instance.h"
+
 // ==================
 
 NS_BEGIN(Engine)
