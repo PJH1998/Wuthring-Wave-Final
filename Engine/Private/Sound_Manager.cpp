@@ -118,7 +118,7 @@ void CSound_Manager::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 HRESULT CSound_Manager::Initialize(_uint iNumChannels)
 {
     m_iNumChannels = iNumChannels;
-    m_pChannels = new FMOD_CHANNEL * [m_iNumChannels];
+    m_pChannels = new FMOD_CHANNEL * [m_iNumChannels] {nullptr};
 
     // 사운드 담당 대표 객체 생성
     FMOD_System_Create(&m_pSystem, FMOD_VERSION);

@@ -117,6 +117,9 @@
     <ClInclude Include="..\Public\Level_GamePlay.h">
       <Filter>01. Level\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ShadowDummy.h">
+      <Filter>02. GameObject\Dummy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -168,6 +171,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Level_GamePlay.cpp">
       <Filter>01. Level\GamePlay</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ShadowDummy.cpp">
+      <Filter>02. GameObject\Dummy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

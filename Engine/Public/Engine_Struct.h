@@ -31,11 +31,11 @@ namespace Engine
 
 	typedef struct tagShadowLightDesc
 	{
-		_float3 vEye;
-		_float3 vAt;
-		_float fFovy;
-		_float fNear;
-		_float fFar;
+		XMFLOAT4	vDirection;
+		_float		fDistance;
+		_float		fFovy;
+		_float		fNear;
+		_float		fFar;
 	}SHADOW_LIGHT_DESC;
 
 	typedef struct tagNotify

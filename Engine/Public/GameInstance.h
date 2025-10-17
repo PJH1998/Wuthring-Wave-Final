@@ -116,9 +116,8 @@ public:
 #pragma endregion
 
 #pragma region LIGHT_MANAGER
-	const LIGHT_DESC*	Get_LightDesc(const _wstring& strLightTag);
+	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
-	HRESULT					SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #pragma endregion
 
@@ -127,17 +126,19 @@ public:
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames);
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
-	void				Play_Action(const _wstring& strActionTag);
+	void			Play_Action(const _wstring& strActionTag);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
-	void				Change_Distance(_float fDistance);
-	void				Change_FixedDistance(_float fFixedDistance);
+	void			Change_Distance(_float fDistance);
+	void			Change_FixedDistance(_float fFixedDistance);
+	_float			Get_CurrentCamera_Near();
+	_float			Get_CurrentCamera_Far();
 #pragma endregion
 
 #pragma region TIMER_MANAGER
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
-	HRESULT		Add_Timer(const _wstring& strTimerTag);
+	HRESULT			Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
@@ -146,8 +147,8 @@ public:
 	void				SetUp_ObjectFilter(_uint iSrc, _uint iDst);
 	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	CharacterVirtual*		Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	CharacterVirtual*	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	void				Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);
@@ -162,7 +163,7 @@ public:
 	void Publish(_uint iLevelID, const _wstring& strEventTag, const class CEvent& event) { m_pEventBus->Publish(iLevelID, strEventTag, event); }
 	void Unscribe() { m_pEventBus->Unscribe(); };
 #pragma endregion
-
+	
 #pragma region PIPELINE
 public:
 	const _float4x4*		Get_TransformState_Float4x4(D3DTS eState) const;
@@ -171,58 +172,75 @@ public:
 	const _float4x4*		Get_TransformState_Float4x4_Inv(D3DTS eState) const;
 	_matrix					Get_TransformState_Matrix_Inv(D3DTS eState) const;
 
-	void						Set_TransformState(D3DTS eState, _fmatrix Matrix);
-	void						Set_TransformState(D3DTS eState, const _float4x4& Matrix);
+	void					Set_TransformState(D3DTS eState, _fmatrix Matrix);
+	void					Set_TransformState(D3DTS eState, const _float4x4& Matrix);
 
 	const _float4*			Get_CamPos() const;
-	_float						Compute_Distance_ToCam(class CGameObject* pObject);
+	_float					Compute_Distance_ToCam(class CGameObject* pObject);
 #pragma endregion
 
 #pragma region PICKING
+public:
 	POINT					Get_MousePoint();
-	_bool						isPicked(_float3* pOut);
+	_bool					isPicked(_float3* pOut);
 #pragma endregion
 
 #pragma region SHADOW
 	const _float4x4*		Get_ShadowLight_Matrix(D3DTS eType);
 	HRESULT					Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc);
 	HRESULT					Bind_Shadow_Resource(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName);
-	void						Update_ShadowLight_Transform(const _fvector& vAt);
+	void					Update_ShadowLight_Transform(const _fvector& vAt);
 #pragma endregion
 
 #pragma region GUIMANAGER
+public:
 	ImGuiContext*		Get_ImGuiContext();
-	void					Add_GUI_Func(function<void()> func);
+	void				Add_GUI_Func(function<void()> func);
 #pragma endregion
 
+#pragma region FRUSTRUM
+public:
+	const _float4*		Get_Frustrum_WorldPoints() const;
+	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);						
+	_bool				IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange);	
+#pragma endregion
 
+#pragma region CSM
+	HRESULT				SetUp_ShadowLight(const _wstring& strLightTag);
+	HRESULT				Bind_CSM_Resources(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName);
+	HRESULT				Bind_CSM_SRV(CShader* pShader, const _char* pConstantName);
+	HRESULT				Begin_CSM();
+	HRESULT				End_CSM();
+#pragma endregion
 
 public:
 	HRESULT			Clear_Resource(_uint iLevelID);
 	HRESULT			Clear_Memory();
-	void				Release_Engine();
+	void			Release_Engine();
 
 private:
-	class CGraphic_Device*			m_pGraphic_Device = { nullptr };
-	class CInput_Device*				m_pInput_Device = { nullptr };
-	class CSound_Manager*			m_pSound_Manager = { nullptr };
-	class CFont_Manager*			m_pFont_Manager = { nullptr };
-	class CLevel_Manager*			m_pLevel_Manager = { nullptr };
-	class CPrototype_Manager*		m_pPrototype_Manager = { nullptr };
-	class CObject_Manager*			m_pObject_Manager = { nullptr };
+	class CGraphic_Device*		m_pGraphic_Device = { nullptr };
+	class CInput_Device*		m_pInput_Device = { nullptr };
+	class CSound_Manager*		m_pSound_Manager = { nullptr };
+	class CFont_Manager*		m_pFont_Manager = { nullptr };
+	class CLevel_Manager*		m_pLevel_Manager = { nullptr };
+	class CPrototype_Manager*	m_pPrototype_Manager = { nullptr };
+	class CObject_Manager*		m_pObject_Manager = { nullptr };
 	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
-	class COctoTree*					m_pOctoTree = { nullptr };
-	class CTarget_Manager*			m_pTargetManager = { nullptr };
-	class CRenderer*					m_pRenderer = { nullptr };
-	class CLight_Manager*			m_pLight_Manager = { nullptr };
+	class COctoTree*			m_pOctoTree = { nullptr };
+	class CTarget_Manager*		m_pTargetManager = { nullptr };
+	class CRenderer*			m_pRenderer = { nullptr };
+	class CLight_Manager*		m_pLight_Manager = { nullptr };
 	class CCamera_Manager*		m_pCamera_Manager = { nullptr };
-	class CTimer_Manager*			m_pTimer_Manager = { nullptr };
+	class CTimer_Manager*		m_pTimer_Manager = { nullptr };
 	class CPhysicsManager*		m_pPhysicsManager = { nullptr };
-	class CEventBus*					m_pEventBus = { nullptr };
-	class CPipeLine*					m_pPipeLine = { nullptr };
-	class CPicking*						m_pPicking = { nullptr };
-	class CShadow*					m_pShadow = { nullptr };
+	class CEventBus*			m_pEventBus = { nullptr };
+	class CPipeLine*			m_pPipeLine = { nullptr };
+	class CPicking*				m_pPicking = { nullptr };
+	class CShadow*				m_pShadow = { nullptr };			//아마 삭제 예정?
 	class CGUIManager*			m_pGUIManager = { nullptr };
+	class CFrustrum*			m_pFrustrum = { nullptr };
+	class CCSM*					m_pCSM = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

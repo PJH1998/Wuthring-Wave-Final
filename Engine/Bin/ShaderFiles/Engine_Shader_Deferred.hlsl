@@ -2,7 +2,6 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
-matrix g_LightViewMatrix, g_LightProjMatrix;
 float g_fLightFar;
 vector g_vCamPosition;
 
@@ -22,6 +21,15 @@ Texture2D g_BackBufferTexture;
 Texture2D g_DistortionTexture;
 Texture2D g_BlurEndTexture;
 
+Texture2DArray<float> g_ShadowMap : register(t0);
+
+cbuffer CSMDatas : register(b4)
+{
+    matrix g_ShadowViewMatrix[4];
+    matrix g_ShadowProjMatrix[4];
+    float4 g_vDistance;
+};
+
 vector g_vLightDirection = 0.f;
 vector g_vLightDiffuse = 1.f;
 vector g_vLightAmbient = 1.f;
@@ -31,6 +39,8 @@ vector g_vMtrlSpecular = 1.f;
 
 float g_fWidth = 1920.f;
 float g_fHeight= 1080.f;
+
+int testIndex;
 
 struct VS_IN
 {
@@ -73,7 +83,30 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    float fShadow = 0.f;
+   
+    fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, testIndex), 1.f);
+    
+    float4 vColor = 0.f;
+    
+    switch (testIndex)
+    {
+        case 0:
+            vColor = float4(fShadow, 0.f, 0.f, 1.f);
+            break;
+            case 1:
+            
+            vColor = float4(0.f, fShadow, 0.f, 1.f);
+            break;
+            case 2:
+            
+            vColor = float4(0.f, 0.f, fShadow, 1.f);
+            break;
+            case 3:
+            vColor = float4(fShadow, fShadow, fShadow, 1.f);
+            break;
+    }
+    Out.vColor = vColor;
     
     return Out;
 }
@@ -104,28 +137,67 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     vWorldPos = vWorldPos * vDepthDesc.y;
     vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
+    float fViewZ = vWorldPos.z;
+    
+    int iSlice = 0;
+     
+    for (int i = 0; i < 4; i++)
+    {
+        if (fViewZ > g_vDistance[i])
+            iSlice = i;
+    }
+   
+    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
+   
     vector vShadowPos;
     matrix matShadowLightVP;
-    matShadowLightVP = mul(g_LightViewMatrix, g_LightProjMatrix);
+    matShadowLightVP = mul(g_ShadowViewMatrix[iSlice], g_ShadowProjMatrix[iSlice]);
     vShadowPos = mul(vWorldPos, matShadowLightVP);
     
     float2 vTexcood;
-    //vTexcood.x = vShadowPos.x / vShadowPos.w * 0.5f + 0.5f;
-    //vTexcood.y = vShadowPos.y / vShadowPos.w * -0.5f + 0.5f;
     vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     vTexcood.y = vShadowPos.y * -0.5f + 0.5f;
     
-    vector vLightDepth = g_LightDepthTexture.Sample(DefaultSampler, vTexcood);
+    float fZ = vShadowPos.z;
     
-    float fLightDepth = vLightDepth.x;
-    //float fDepth = vShadowPos.w / g_fLightFar;
-    float fDepth = vShadowPos.z;
+    float Bias = 0.f;
+        
+    float fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vTexcood, iSlice), vShadowPos.z - Bias);
     
-    float fDistance = fDepth - fLightDepth;
-    if (fDistance > 0.0005f)
-        Out.vColor.rgb = Out.vColor.rgb * 0.5f;
+    if (fShadow != 1.f)
+    {
+        switch (iSlice)
+        {
+            case 0:
+                Out.vColor = float4(1.f, 0.f, 0.f, 1.f);
+                break;
+            case 1:
+                Out.vColor = float4(0.f, 1.f, 0.f, 1.f);
+                break;
+            case 2:
+                Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+                break;
+            case 3:
+                Out.vColor = float4(1.f, 1.f, 1.f, 1.f);
+                break;
+        }
+    
+    }
+   
+        
+    //if(fShadow == 0.f)
+    //    Out.vColor = 1.f;
+    
+    //vector vLightDepth = g_LightDepthTexture.Sample(DefaultSampler, vTexcood);
+    
+    //float fLightDepth = vLightDepth.x;
+    ////float fDepth = vShadowPos.w / g_fLightFar;
+    //    float fDepth = vShadowPos.z;
+    
+    //float fDistance = fDepth - fLightDepth;
+    //if (fDistance > 0.0005f)
+    //    Out.vColor.rgb = Out.vColor.rgb * 0.5f;
     //saturate(fDistance * 30.f);
     
     return Out;
@@ -156,6 +228,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vWorldPos.w = 1.f;
     
     vWorldPos *= DepthDesc.y;
+
     vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
     vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
@@ -256,7 +329,7 @@ technique11 DefaultTechnique
     pass DebugPass // 0
     {
         SetRasterizerState(RS_Default);
-        SetDepthStencilState(DSS_Default, 0);
+        SetDepthStencilState(DSS_None, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();

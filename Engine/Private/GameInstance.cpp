@@ -21,6 +21,8 @@
 #include "Shadow.h"
 #include "GUIManager.h"
 #include "OctoTree.h"
+#include "Frustrum.h"
+#include "CSM.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -92,6 +94,12 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pGUIManager = CGUIManager::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
 	ASSERT_CRASH(m_pGUIManager);
 
+	m_pFrustrum = CFrustrum::Create();
+	ASSERT_CRASH(m_pFrustrum);
+
+	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH( m_pCSM );
+
 	return S_OK;
 }
 
@@ -105,9 +113,12 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 
 	m_pObject_Manager->Update(fTimeDelta);
+	
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
-
+	m_pFrustrum->Update();
+	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
+	
 	m_pPhysicsManager->Update(fTimeDelta);
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
@@ -138,6 +149,9 @@ void CGameInstance::Render_Begin(const _float4* pClearColor)
 
 HRESULT CGameInstance::Draw()
 {
+	ASSERT_CRASH(m_pPooling_Manager);
+	m_pPooling_Manager->Wait_Thread_End();
+
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
@@ -356,10 +370,6 @@ HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& 
 {
 	return m_pLight_Manager->Add_Light(strLightTag, LightDesc);
 }
-HRESULT	CGameInstance::SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType)
-{
-	return m_pLight_Manager->SetUp_Light(pShader, strLightTag, eType);
-}
 HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
@@ -398,6 +408,14 @@ void CGameInstance::Change_Distance(_float fDistance)
 void CGameInstance::Change_FixedDistance(_float fFixedDistance)
 {
 	m_pCamera_Manager->Change_FixedDistance(fFixedDistance);
+}
+_float CGameInstance::Get_CurrentCamera_Near()
+{
+	return m_pCamera_Manager->Get_CurrentCamera_Near();
+}
+_float CGameInstance::Get_CurrentCamera_Far()
+{
+	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
 #pragma endregion
 
@@ -516,7 +534,8 @@ const _float4x4* CGameInstance::Get_ShadowLight_Matrix(D3DTS eType)
 }
 HRESULT CGameInstance::Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc)
 {
-	return m_pShadow->Ready_ShadowLight(Desc);
+//	return m_pShadow->Ready_ShadowLight(Desc);
+	return S_OK;
 }
 HRESULT CGameInstance::Bind_Shadow_Resource(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName)
 {
@@ -536,6 +555,41 @@ ImGuiContext* CGameInstance::Get_ImGuiContext()
 void CGameInstance::Add_GUI_Func(function<void()> func)
 {
 	m_pGUIManager->Add_GUI_Func(func);
+}
+#pragma endregion
+
+#pragma region FRUSTRUM
+const _float4* CGameInstance::Get_Frustrum_WorldPoints() const
+{
+	return m_pFrustrum->Get_Frustrum_WorldPoints();
+}
+_bool CGameInstance::IsIn_WorldSpace(_fvector vWorldPosition, _float fRange)
+{
+	return m_pFrustrum->IsIn_WorldSpace(vWorldPosition, fRange);
+}
+_bool CGameInstance::IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange)
+{
+	return m_pFrustrum->IsIn_LocalSpace(WorldMatrix, vLocalPosition, fRange);
+}
+HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
+{
+	return m_pCSM->SetUp_ShadowLight(strLightTag);
+}
+HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName)
+{
+	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pDistanceName);
+}
+HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
+{
+	return m_pCSM->Bind_CSM_SRV(pShader, pConstantName);
+}
+HRESULT CGameInstance::Begin_CSM()
+{
+	return m_pCSM->Begin_CSM();
+}
+HRESULT CGameInstance::End_CSM()
+{
+	return m_pCSM->End_CSM();
 }
 #pragma endregion
 
@@ -591,6 +645,9 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);
+	Safe_Release(m_pFrustrum);
+	Safe_Release(m_pCSM);
+
 	Release();
 }
 
