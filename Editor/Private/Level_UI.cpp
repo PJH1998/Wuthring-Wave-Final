@@ -561,7 +561,7 @@ void CLevel_UI::Update_SaveLoad()
             tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
             _string strAnimName = _string(szAnimName);
             tAnimDesc.strAnimName = STR2WSTR(strAnimName);
-            tAnimDesc.iLerpType = m_iLerpType;
+            //tAnimDesc.iLerpType = m_iLerpType;
             tAnimDesc.isLoop = m_isAnimLoop;
 
             for (auto& keyframeDesc : m_vecUIKeyFrameDescs)
@@ -1005,11 +1005,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
         const char* szLerpTypeNames[] = {
             "LINEAR",
-            //"MT",  
-            //"MB",  
             "LT",    
-            //"LB",    
-            //"RT",    
             "RB",
             "CUBIC"
         };
@@ -1030,15 +1026,6 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             }
             ImGui::EndCombo();
         }
-
-        //if      (m_iLerpType == 0)
-        //{
-        //    if (ImGui::Button("Linear")) { m_iLerpType = 1; } // To Cubic
-        //}
-        //else if (m_iLerpType == 1)
-        //{
-        //    if (ImGui::Button("Cubic")) { m_iLerpType = 0; } // To Linear
-        //}
             
         ImGui::Separator();
 
@@ -1052,6 +1039,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             {
                 UI_ANIM_KEYFRAME_DESC tTempDesc = {
                     (_uint)iKeyFrame,
+                    m_iLerpType,
                     (_uint)iTexIndex,
                     fAlpha,
                     m_vCurObjPos,
@@ -1069,6 +1057,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 m_pSelectedKeyFrameDesc->fAlpha = fAlpha;
                 m_pSelectedKeyFrameDesc->iKeyframeIndex = iKeyFrame;
                 m_pSelectedKeyFrameDesc->iTexIndex = iTexIndex;
+                m_pSelectedKeyFrameDesc->iLerpType = m_iLerpType;
 
                 m_pSelectedKeyFrameDesc->vPos = m_vCurObjPos;
                 m_pSelectedKeyFrameDesc->vRot = m_vCurObjRot;
@@ -1093,12 +1082,19 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
     if (ImGui::CollapsingHeader("Keyframe List"))
     {
+        const char* szLerpTypeNames[] = {
+            "LN-",
+            "LT",    
+            "RB",
+            "CB~"
+        };
+
         if (m_vecUIKeyFrameDescs.empty())
             ImGui::Selectable("(Empty)##AnimEdit", false);
 
         for (_uint i = 0; i < m_vecUIKeyFrameDescs.size(); i++)
         {
-            _string strLabel = "Keyframe [" + to_string(i + 1) + "] | [" + to_string(m_vecUIKeyFrameDescs[i].iKeyframeIndex) + "]";
+            _string strLabel = "Keyframe [" + to_string(i + 1) + "] \t| [" + to_string(m_vecUIKeyFrameDescs[i].iKeyframeIndex) + "] \t| [" + szLerpTypeNames[m_vecUIKeyFrameDescs[i].iLerpType] + "]";
             if (ImGui::Selectable(strLabel.c_str(), iAnimEditorSelected == i))
             {
                 m_pSelectedKeyFrameDesc = &m_vecUIKeyFrameDescs[i];
@@ -1106,6 +1102,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 iKeyFrame = m_pSelectedKeyFrameDesc->iKeyframeIndex;
                 iTexIndex = m_pSelectedKeyFrameDesc->iTexIndex;
                 fAlpha = m_pSelectedKeyFrameDesc->fAlpha;
+                m_iLerpType = m_pSelectedKeyFrameDesc->iLerpType;
 
                 m_vCurObjPos = m_pSelectedKeyFrameDesc->vPos;
                 m_vCurObjRot = m_pSelectedKeyFrameDesc->vRot;

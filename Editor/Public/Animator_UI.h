@@ -11,11 +11,7 @@ public:
 	enum class UI_LERPTYPE
 	{
 		LINEAR,	// 같은 속도로.
-		//MT,	
-		//MB,	
 		LT,		// 처음엔 빠름, 그 뒤에 느려짐. / 그래프 모양이 왼쪽 위 방향을 봄 (Left-Top)
-		//LB,	
-		//RT,	
 		RB,		// 처음엔 느림, 그 뒤에 빨라짐. / 그래프 모양이 오른쪽 아래 방향을 봄 (Right-Bottom)
 		CUBIC,	// 처음과 끝은 느림, 중간 부분만 자연스럽게 빠름. / 기존.
 			

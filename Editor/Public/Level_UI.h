@@ -20,6 +20,7 @@ public:
 	typedef struct tagUIAnimKeyFrameDesc
 	{
 		_uint			iKeyframeIndex = {};			// 정보가 담길 키프레임 정보
+		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
 		_float			fAlpha = {};			// 0 ~ 1
@@ -39,7 +40,7 @@ public:
 
 		vector<UI_ANIM_KEYFRAME_DESC> vecKeyFrames = {};
 
-		_uint					iLerpType = {};
+		//_uint					iLerpType = {};
 		_bool					isLoop = false;
 	} UI_ANIM_DESC;
 
@@ -140,6 +141,7 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 	j = json{
 		{ "iKeyframeIndex", d.iKeyframeIndex },
 
+		{ "iLerpType", d.iLerpType },
 		{ "iTexIndex", d.iTexIndex },
 		{ "fAlpha", d.fAlpha },
 		{ "vecPos", { d.vPos.x, d.vPos.y, d.vPos.z } },
@@ -150,9 +152,11 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 
 inline void from_json(const json& j, CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
-	d.fAlpha			= j["fAlpha"];
 	d.iKeyframeIndex	= j["iKeyframeIndex"];
+	
+	d.iLerpType			= j["iLerpType"];
 	d.iTexIndex			= j["iTexIndex"];
+	d.fAlpha			= j["fAlpha"];
 
 	d.vPos = { j["vecPos"][0], j["vecPos"][1], j["vecPos"][2] };
 	d.vRot = { j["vecRot"][0], j["vecRot"][1], j["vecRot"][2] };
@@ -196,7 +200,7 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_DESC& d)
 		{ "strAnimName", _string(d.strAnimName.begin(), d.strAnimName.end()) },
 		{ "iNumKeyFrame", d.vecKeyFrames.size()},
 		{ "vecKeyFrames", vecKeyFrames },
-		{ "iLerpType", d.iLerpType },
+		//{ "iLerpType", d.iLerpType },
 		{ "isLoop", d.isLoop }
 	};
 }
@@ -206,7 +210,7 @@ inline void from_json(const json& j, CLevel_UI::UI_ANIM_DESC& d)
 	from_json(j["vecKeyFrames"], d.vecKeyFrames);
 	from_json(j["tUIDesc"], d.tUIDesc);
 
-	d.iLerpType		= j["iLerpType"];
+	//d.iLerpType		= j["iLerpType"];
 	d.isLoop		= j["isLoop"];
 	_string strAnimName = j["strAnimName"].get<_string>();
 	d.strAnimName	= _wstring(strAnimName.begin(), strAnimName.end());
