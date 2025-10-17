@@ -12,6 +12,7 @@
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "ComputeShader.h"
+#include "Collider.h"
 // ==================
 
 NS_BEGIN(Engine)

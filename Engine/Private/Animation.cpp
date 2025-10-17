@@ -3,6 +3,9 @@
 
 #include "Channel.h"
 
+#include "SoundNotify.h"
+#include "ColliderNotify.h"
+
 CAnimation::CAnimation()
 {
 }
@@ -28,6 +31,35 @@ void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
 	m_Notifies.push_back(AnimNotify);
 }
 
+void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback)
+{
+	for (const auto& notifyObject : notifyJson)
+	{
+		string type = notifyObject["NotifyType"].get<string>();
+		CAnimNotify* pAnimNotify = { nullptr };
+
+		// 1. 객체 생성
+		if (type == "Sound")
+			pAnimNotify = CSoundNotify::From_Json(notifyObject);
+		else if (type == "Collider")
+		{
+			pAnimNotify = CColliderNotify::From_Json(notifyObject);
+			pAnimNotify->Set_ColliderCallBack(ColliderCallback);
+		}
+		else if (type == "Effect")
+		{
+			// EffectNotify
+			pAnimNotify->Set_EffectCallback(EffectCallback);
+		}
+		// 2. 문제 생기면 Crash 발생.
+		ASSERT_CRASH(pAnimNotify);
+
+		// 3. 관리 컨테이너에 넣어두기.
+		m_AnimNotifies.emplace_back(pAnimNotify);
+	}
+}
+
+
 void CAnimation::Sort_Notify()
 {
 	if (0 == m_Notifies.size())
@@ -36,6 +68,17 @@ void CAnimation::Sort_Notify()
 	sort(m_Notifies.begin(), m_Notifies.end(), [](const NOTIFY& Src, const NOTIFY& Dst)->_bool {
 			return Src.fTrackPosition < Dst.fTrackPosition ? true : false;
 		});
+}
+
+// 애니메이션에 등록된 Notify를 TrackPosition 별로 정렬.
+void CAnimation::Sort_AnimNotify()
+{
+	if (0 == m_AnimNotifies.size())
+		return;
+
+	sort(m_AnimNotifies.begin(), m_AnimNotifies.end(), [](CAnimNotify* pSrc, CAnimNotify* pDst)->_bool{
+		return pSrc->Get_TrackPosition() < pDst->Get_TrackPosition();
+	});
 }
 
 HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& Bones)
@@ -103,8 +146,12 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 
 	// Notfiy 현재 인덱스가 size를 넘지 않고, TrackPosition이 Notify에 해당한다면? 
 	// Notify에 해당하는 함수를 실행하라.
-	while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
-		m_Notifies[m_iNotifyIndex++].Func();
+	
+	//while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
+	//	m_Notifies[m_iNotifyIndex++].Func();
+
+	while (m_iNotifyIndex < m_AnimNotifies.size() && m_fCurrentTrackPosition >= m_AnimNotifies[m_iNotifyIndex]->Get_TrackPosition())
+		m_AnimNotifies[m_iNotifyIndex++]->Execute();
 
 
 

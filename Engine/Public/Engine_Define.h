@@ -1,6 +1,8 @@
 #ifndef Engine_Define_h__
 #define Engine_Define_h__
 
+#pragma warning(disable: 4251)
+
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
@@ -34,7 +36,15 @@ using json = nlohmann::json;
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/ImGuiFileDialog.h"
 #include "ImGui/ImGuiFileDialogConfig.h"
+//#include "ImGui/ImApp.h"
+#include "ImGui/ImGuizmo.h"
+#include "ImGui/ImSequencer.h"
+#include "ImGui/ImZoomSlider.h"
+#include "ImGui/ImCurveEdit.h"
+#include "ImGui/GraphEditor.h"
 
+#pragma warning(push)
+#pragma warning(disable: 26495)
 // Jolt
 #define JPH_NAMESPACE JPH
 #include "Jolt/Jolt.h"
@@ -44,12 +54,14 @@ using json = nlohmann::json;
 #include "Jolt/Physics/Body/BodyInterface.h"
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Character/Character.h"
+#include "Jolt/Physics/Character/CharacterVirtual.h"
 #include "Jolt/Core/Factory.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Core/JobSystemSingleThreaded.h"
 #include "Jolt/Core/TempAllocator.h"
 #include "Jolt/Physics/Collision/CollisionDispatch.h"
 using namespace JPH;
+#pragma warning(pop)
 
 #include <vector>
 #include <list>
@@ -82,7 +94,7 @@ namespace Engine
 	const unsigned int g_iMaxHeight = 4608;
 }
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#define MAX_DEPTH 8
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"
@@ -93,5 +105,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 using namespace Engine;
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #endif // Engine_Define_h__

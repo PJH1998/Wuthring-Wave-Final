@@ -73,7 +73,7 @@ private:
 	ANIMATIONACTORS m_AnimationActors;
 
 	typedef map<const _wstring, const _string> MODELPATHS;
-	MODELPATHS	m_ModelDatPaths;
+	MODELPATHS	m_ModelDirPaths;
 
 	// 생성한 객체에 대한 동적제어를 어떻게할까?
 	_wstring m_wSelected_PrototypeModelTag = {};

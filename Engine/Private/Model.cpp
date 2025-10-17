@@ -130,6 +130,51 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback)
+{
+	for (auto& pair : m_Animations)
+	{
+		const _string& animName = pair.first;
+		CAnimation* pAnimation = pair.second;
+
+		_string filePath = strNotifyFolderPath + "/" + animName + ".json";
+
+
+		ifstream inputFile(filePath);
+		// 1. ¿­¸®¸é?
+		if (inputFile.is_open())
+		{
+			json notifyData;
+			inputFile >> notifyData;
+			inputFile.close();
+
+			if (notifyData.contains("Notifies") && notifyData["Notifies"].is_array())
+				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback);
+			
+		}
+
+	}
+
+	for (auto& pair : m_Animations)
+		pair.second->Sort_AnimNotify();
+		
+}
+
+
+//void CModel::Register_Notify_ForAnimation(const _string& strFilePath, function<void(const _wstring&, _bool)> ColliderCallbacks, function<void()> EffectCallbacks)
+//{
+//	ifstream InputFile(strFilePath);
+//
+//	json InputData;
+//	InputFile >> InputData;
+//
+//
+//
+//	InputFile.close();
+//	//for (auto& Pair : m_Animations)
+//	//	Pair.second->Sort_Notify();
+//}
+
 HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
 	m_eType = eType;
@@ -263,6 +308,17 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+}
+
+BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
+{
+	if (m_eType != MODELTYPE::MAP)
+		ASSERT_CRASH("Is Not Map Object");
+
+	if (iNumMesh >= m_iNumMeshes)
+		return nullptr;
+
+	return m_Meshes[iNumMesh]->Get_BoundingBox();
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)

@@ -78,8 +78,16 @@ public:
 #pragma region POOLING_MANAGER
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
+	// Thread가 수행할 Function 전달
 	void			Add_Work(function<void()> Work);
+	// Thread 끝났는가 확인
 	_bool			IsWorkFinish();
+	// Pooling한 Thread 끝날 때가지 대기
+	void			Wait_Thread_End();
+#pragma endregion
+
+#pragma region OctoTree
+
 #pragma endregion
 
 #pragma region TARGET_MANAGER
@@ -88,11 +96,13 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
-	void			End_MRT();
+	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT     Render_RT();
+	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
 #endif
 #pragma endregion
 
@@ -137,6 +147,8 @@ public:
 	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*		Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	CharacterVirtual*		Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	void				Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);
 #endif
@@ -180,6 +192,8 @@ public:
 
 #pragma region GUIMANAGER
 	ImGuiContext*		Get_ImGuiContext();
+	void					Add_GUI_Func(function<void()> func);
+	void					Use_Gizmo(class CTransform* pTransform = nullptr);
 #pragma endregion
 
 
@@ -198,6 +212,7 @@ private:
 	class CPrototype_Manager*		m_pPrototype_Manager = { nullptr };
 	class CObject_Manager*			m_pObject_Manager = { nullptr };
 	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
+	class COctoTree*					m_pOctoTree = { nullptr };
 	class CTarget_Manager*			m_pTargetManager = { nullptr };
 	class CRenderer*					m_pRenderer = { nullptr };
 	class CLight_Manager*			m_pLight_Manager = { nullptr };

@@ -2,6 +2,7 @@
 #include "PhysicsManager.h"
 
 #include "ContactListenerImpl.h"
+#include "CharacterContactListenerImpl.h"
 
 CPhysicsManager::CPhysicsManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice{ pDevice }, m_pContext{ pContext }
@@ -27,9 +28,38 @@ Character* CPhysicsManager::Register_Character(const CharacterSettings& Characte
 	return new Character(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 }
 
+CharacterVirtual* CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+{
+	CharacterVirtual* pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
+	ASSERT_CRASH(pInstance);
+
+	// Character VS Character Collision SetUp
+	pInstance->SetCharacterVsCharacterCollision(m_pCVCCollision);
+	// Chararcter VS Character Collision에 등록
+	m_pCVCCollision->Add(pInstance);
+	// CharacterContactListener SetUp
+	pInstance->SetListener(m_pCharacterContactListener);
+
+	return pInstance;
+}
+
+void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
+{
+	ASSERT_CRASH(pVirtual);
+
+	m_Virtuals[iObjectLayer].push_back(pVirtual);
+}
+
+void CPhysicsManager::Clear_Resource()
+{
+	//m_pPhysicsSystem->GetBodyInterface().
+}
+
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 {
 	ASSERT_CRASH(iNumObjectLayer > 0);
+
+	m_iNumObjectLayer = iNumObjectLayer;
 
 	// Register Allocator
 	RegisterDefaultAllocator();
@@ -56,6 +86,11 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_pContactListener = new CContactListenerImpl();
 	ASSERT_CRASH(m_pContactListener);
 
+	// Virtual Container 동적 할당
+	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
+	// CharacterVirtual VS CharacterVirtual Collision
+	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
+
 #ifdef _DEBUG
 	m_pDebugRenderer = new CDebugRender(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pDebugRenderer);
@@ -64,12 +99,38 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
+
 	return S_OK;
 }
 
 void CPhysicsManager::Update(_float fTimeDelta)
 {
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
+
+	for (_uint i = 0; i < m_iNumObjectLayer; ++i)
+	{
+		for (auto& pVirtual : m_Virtuals[i])
+		{
+			// BroadPhaseLayerFilter
+			DefaultBroadPhaseLayerFilter BPLayerFilter = DefaultBroadPhaseLayerFilter(*m_pObjectVsBPFilter, ObjectLayer(i));
+			DefaultObjectLayerFilter ObjectLayerFilter = DefaultObjectLayerFilter(*m_pObjectLayerFilter, ObjectLayer(i));
+			BodyFilter bodyFilter = BodyFilter();
+			ShapeFilter shapeFilter = ShapeFilter();
+
+			pVirtual->ExtendedUpdate(fTimeDelta, Vec3(0.f, -9.81f, 0.f),
+				m_ExtendedUpdateSetting,
+				BPLayerFilter,
+				ObjectLayerFilter,
+				bodyFilter,
+				shapeFilter,
+				*m_pAllocator
+			);
+
+			pVirtual = nullptr;
+		}
+		m_Virtuals[i].clear();
+	}
 }
 
 #ifdef _DEBUG
@@ -98,6 +159,9 @@ void CPhysicsManager::SetUp_PhysicsSystem()
 	m_pPhysicsSystem->SetPhysicsSettings(m_PhysicsSetting);
 	m_pPhysicsSystem->SetContactListener(m_pContactListener);
 
+	// Character Contact Listener
+	m_pCharacterContactListener = new CharacterContactListenerImpl(&m_pPhysicsSystem->GetBodyInterface());
+
 	Vec3 vGravity = Vec3(0, -9.81f, 0);
 	//Vec3 vGravity = Vec3(0, -5.81f, 0);
 	m_pPhysicsSystem->SetGravity(vGravity);
@@ -120,13 +184,17 @@ void CPhysicsManager::Free()
 {
 	__super::Free();
 
+	Safe_Delete_Array(m_Virtuals);
+
 	Safe_Delete(m_pBPLayer);
 	Safe_Delete(m_pObjectLayerFilter);
 	Safe_Delete(m_pObjectVsBPFilter);
+	Safe_Delete(m_pCVCCollision);
 #ifdef _DEBUG
 	Safe_Delete(m_pDebugRenderer);
 #endif
 	Safe_Delete(m_pPhysicsSystem);
+	Safe_Delete(m_pCharacterContactListener);
 	Safe_Delete(m_pContactListener);
 	Safe_Delete(m_pJobSystem);
 	Safe_Delete(m_pAllocator);

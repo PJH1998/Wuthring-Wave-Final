@@ -14,6 +14,7 @@ HRESULT CPooling_Manager::Initialize()
 {
 	m_iNumThread = thread::hardware_concurrency();
 	m_Threads.reserve(m_iNumThread);
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
 		m_Threads.emplace_back([this]() { this->Work_Thread(); });
@@ -98,12 +99,21 @@ void CPooling_Manager::Add_Work(function<void()> Work)
 	m_CV.notify_one();
 }
 
+void CPooling_Manager::Wait_Thread_End()
+{
+	while (false == IsWorkFinish())
+	{
+
+	}
+}
+
 void CPooling_Manager::Work_Thread()
 {
 	while (true)
 	{
 		unique_lock<mutex> lock(m_Mutex);
 		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
+		CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 		// Client 종료 시, Thread 모두 종료
 		if (true == m_isAllStop)
@@ -113,9 +123,12 @@ void CPooling_Manager::Work_Thread()
 		m_Works.pop();
 		lock.unlock();
 
+
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
+
+		CoUninitialize();
 	}
 }
 

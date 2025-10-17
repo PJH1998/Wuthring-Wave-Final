@@ -26,7 +26,7 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
-
+	BoundingBox*				Get_BoundingBox() { return m_pBoundingBox; }
 private:
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
@@ -39,7 +39,8 @@ private:
 	// Mesh Shape¿ë Container
 	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
-	BoundingBox					m_Cube = {};
+	BoundingBox*				m_pBoundingBox = { nullptr };
+
 private:
 	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
 	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);

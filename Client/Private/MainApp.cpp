@@ -1,14 +1,18 @@
 #include "ClientPch.h"
 #include "MainApp.h"
+#include "Parser.h"
 
 #include "Event_Level.h"
 
 #include "Level_Loading.h"
 
 #include "Level_Logo.h"
+#include "Level_GamePlay.h"
+#include "Level_Test.h"
 
 CMainApp::CMainApp()
-	: m_pGameInstance { CGameInstance::GetInstance() }
+	: m_pGameInstance { CGameInstance::GetInstance() },
+	m_pParser { CParser::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
 }
@@ -68,7 +72,10 @@ void CMainApp::Post_Update()
 				pLevel = CLevel_Logo::Create(m_pDevice, m_pContext);
 				break;
 			case LEVEL::GAMEPLAY:
-				// TODO
+				pLevel = CLevel_GamePlay::Create(m_pDevice, m_pContext);
+				break;
+			case LEVEL::TEST:
+				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
 			}
 			ASSERT_CRASH(pLevel);
@@ -121,6 +128,7 @@ void CMainApp::SetUp_CollisionLayer()
 	// Object VS Object
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::MAP));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::NON_MOVE));
@@ -154,6 +162,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
 		CRASH("Rigidbody");
+
+	// Collider
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
+		CCollider::Create(m_pDevice, m_pContext))))
+		CRASH("Collider");
 }
 
 void CMainApp::Start_Level()
@@ -183,5 +196,6 @@ void CMainApp::Free()
 	Safe_Release(m_pContext);
 
 	m_pGameInstance->Release_Engine();
+	Safe_Release(m_pParser);
 	Safe_Release(m_pGameInstance);
 }

@@ -11,6 +11,11 @@ private:
 
 public:
 	ImGuiContext*		Get_ImGuiContext() { return ImGui::GetCurrentContext(); }
+	void					Add_GUI_Func(function<void()> func);
+	void					Clear_Func();
+
+	// Gizmo 적용할 객체의 Transform 전달
+	void					Use_Gizmo(class CTransform* pTransform = nullptr);
 
 public:
 	HRESULT				Initialize(HWND hWnd);
@@ -18,12 +23,26 @@ public:
 	void					Render();
 
 private:
-	ID3D11Device*				m_pDevice = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
 	ID3D11RenderTargetView*	m_pMainRTV = { nullptr };
-	ID3D11DepthStencilView*		m_pMainDSV = { nullptr };
+	ID3D11DepthStencilView*	m_pMainDSV = { nullptr };
 
+	vector<function<void()>>	m_Functions;
+
+	// Gizmo 사용할 때 필요한 Transform
+	class CTransform*				m_pTransform = { nullptr };
+	_float4x4							m_ObjectWorldMatrix = {};
+	// Gizmo Setting
+	ImGuizmo::OPERATION		m_CurrentGizmoOperation = { ImGuizmo::TRANSLATE };
+	ImGuizmo::MODE				m_CurrentGizmoMode = { ImGuizmo::WORLD };
+	// Gizmo Snap
+	_bool								m_isSnap = { false };
+
+private:
+	void					Gizmo();
 
 public:
 	static		CGUIManager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd);

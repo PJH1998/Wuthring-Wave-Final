@@ -54,6 +54,12 @@ public:
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);
 
+	void Register_AllNotifies(const _string& strFolderPath);
+
+
+	// 테스트 콜백 함수.
+	void Collider_Active(const _wstring&, _bool IsActive);
+	void Effect_Active();
 #endif // _DEBUG
 
 

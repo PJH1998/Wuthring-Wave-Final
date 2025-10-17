@@ -7,6 +7,11 @@ CContactListenerImpl::CContactListenerImpl()
 {
 }
 
+CContactListenerImpl::CContactListenerImpl(BodyInterface* pInterface)
+	: m_pBodyInterface { pInterface }
+{
+}
+
 CContactListenerImpl::~CContactListenerImpl()
 {
 }
@@ -40,5 +45,12 @@ void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& i
 
 void CContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
 {
-	
+	//CGameObject* pSrc = reinterpret_cast<CGameObject*>(m_pBodyInterface->GetUserData(inSubShapePair.GetBody1ID()));
+	//CGameObject* pDst = reinterpret_cast<CGameObject*>(m_pBodyInterface->GetUserData(inSubShapePair.GetBody2ID()));
+	//
+	//m_pBodyInterface->GetObjectLayer()
+	//if (nullptr != pSrc)
+	//	pSrc->OnCollide_End(inBody2.GetObjectLayer(), pDst);
+	//if (nullptr != pDst)
+	//	pDst->OnCollide_End(inBody1.GetObjectLayer(), pSrc);
 }

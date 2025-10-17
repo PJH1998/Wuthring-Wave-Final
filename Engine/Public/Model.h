@@ -14,8 +14,8 @@ public:
 	_uint								Get_NumMesh() { return m_iNumMeshes; }
 	void								Sync_RootNode(class CTransform* pOwnerTransform, class CNavigation* pOwnerNavigation, _float fTimeDelta);
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
-	const vector<_float3>&		Get_VerticesPos(_uint iIndex);
-	const vector<_uint>&			Get_Indices(_uint iIndex);
+	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
+	const vector<_uint>&				Get_Indices(_uint iIndex);
 
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
@@ -26,6 +26,8 @@ public:
 
 public:
 	void								Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions);
+	void								Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
+	//void								Register_Notify_ForAnimation(const _string& strFilePath, function<void(const _wstring&, _bool)> ColliderCallbacks, function<void()> EffectCallbacks);
 
 public:
 	virtual		HRESULT				Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
@@ -42,7 +44,9 @@ public:
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
+	
 
+	BoundingBox*							Get_BoundingBox(_uint iNumMesh);
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 

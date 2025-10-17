@@ -9,7 +9,7 @@ NS_BEGIN(Editor)
 
 class CLevel_Map final : public CLevel
 {
-	enum Menu { MENU_OBJECT, MENU_RANDSCAPE, MENU_LIGHT, MENU_SAVELOAD, END };
+	enum Menu { MENU_OBJECT, MENU_RANDSCAPE, MENU_LIGHT, MENU_MAPSAVELOAD, MENU_OBJECTLOAD, END };
 private:
 	explicit CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CLevel_Map() = default;
@@ -24,22 +24,38 @@ public:
 	void Menu_RandSacpe();
 	void Menu_Light();
 	void Menu_Save_Load();
+	void Menu_Model_Load();
+	void Load_Objects();
+	//클라이언트에 리소스에 Map 폴더에 있는 .dat들 읽어서(오브젝트들만) 누르면 생성할 수 있게 하기. 생성 위치는 뭐.. 알아서
 
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
 
+	void Make_MousePos();
+
+	void Container_Info();
+public:
+	static _float3 m_vWorldPos;
+	static _float3 m_vWorldDir;
+	static _float4 m_vPickedPos;
+	
 private:
 	Menu m_eMenu = { END };
 	_uint m_iLevel = ENUM_CLASS(LEVEL::MAP);
-	class CMapObject* m_pPickedObject = { nullptr };
-	class CMapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_MapObject* m_pChildObject = { nullptr };
+	class CEdit_MapObject* m_pPickedObject = { nullptr };
+	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
+
+
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
+	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
 
-	
-
+	vector<_string> m_ModelPaths;
+	_wstring m_szPreViewModelName;
 	_bool m_LoadMenu = { false };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

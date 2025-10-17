@@ -76,6 +76,8 @@ HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strP
 		return E_FAIL;
 
 	CBase* pClone = m_pGameInstance->Clone_Prototype(iPrototypeLevelID, strPrototypeTag, PROTOTYPE::COMPONENT, pArg);
+	if (!pClone)
+		int a = 0;
 	ASSERT_CRASH(pClone);
 
 	CComponent* pComponent = static_cast<CComponent*>(pClone);

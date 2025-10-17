@@ -3,10 +3,10 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float g_fLightFar;
 
-texture2D g_DiffuseTexture;
-texture2D g_SecondDiffuseTexture;
-texture2D g_NormalTexture;
-texture2D g_MaskTexture[4] : register(t8);
+Texture2D g_DiffuseTexture;
+Texture2D g_SecondDiffuseTexture;
+Texture2D g_NormalTexture;
+Texture2D g_MaskTexture[4] : register(t8);
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
@@ -53,6 +53,7 @@ VS_OUT VS_MAIN(VS_IN In)
     float4 vBinormal = mul(float4(In.vBinormal, 0.f), matBone);
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
+    
     Out.vPosition = mul(vPosition, matWVP);
     Out.vNormal = normalize(mul(vNormal, g_WorldMatrix));
     Out.vTangent = normalize(mul(vTangent, g_WorldMatrix));
