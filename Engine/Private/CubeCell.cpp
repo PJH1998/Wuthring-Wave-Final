@@ -15,7 +15,7 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	_float3 Extent = vExtent;
 	if (0 < iDepth)
 	{
-		XMStoreFloat3(&Extent, XMLoadFloat3(&Extent) * 2.f);
+		XMStoreFloat3(&Extent, XMLoadFloat3(&Extent) * 1.1f);
 		m_pBoundingBox = new BoundingBox(vCenter, Extent);
 	}
 	else
