@@ -393,7 +393,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 #pragma endregion
 
 	_string strRibAnimationName = "Rib_" + strAnimationName;
-	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
 	// 7. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (bIsAnimationEnd)
