@@ -52,10 +52,8 @@ Client/Bin/Release/*
 Client/Bin/Sound/*
 Editor/Bin/Debug/*
 !Editor/Bin/Debug/fmod.dll
-!Editor/Bin/Debug/assimp-vc143-mtd.dll
 Editor/Bin/Release/*
 !Editor/Bin/Release/fmod.dll
-!Editor/Bin/Release/assimp-vc143-mt.dll
 Engine/Bin/Debug
 Engine/Bin/Release
 Engine/Public/json.hpp
