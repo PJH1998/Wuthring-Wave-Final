@@ -412,8 +412,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
 #pragma endregion
 
-	
-	
 	// 6. 중간 결과 적용.(일단 RootAnimation CombinedTransofrmationMatrix는 그대로 적용)
 	ApplyComputeResults_ToBones();
 
@@ -574,29 +572,6 @@ void CModel::ApplyComputeResults_ToBones()
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);		
 	}
 
-//	for (size_t i = 0; i < m_Bones.size(); ++i)
-//	{
-//#ifdef _DEBUG
-//		// Bone Name?
-//		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001_Shoulder_R_M"))
-//		{
-//			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-//			OutPutDebugMatrix(TEXT("Bip001_Shoulder_R_M Play Animation Matrix : "), mat);
-//
-//			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-//			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine"))
-//			{
-//				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-//				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
-//				OutPutDebugMatrix(strBoneName, mat);
-//				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-//			}
-//		}
-//#endif // _DEBUG
-//
-//
-//	}
-
 	// 5. Unmap으로 마무리합니다.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
@@ -610,10 +585,16 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
 
 	// Axis 조정 (-y => +z)
+	// 이거 빼면 제생각에. 안해도 되지않을까 설정을
+
+#pragma region MyRegion
 	_float fTemp = vTranslation.m128_f32[2];
 	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
 	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
 	vTranslation.m128_f32[1] = fTemp * -1.f;
+#pragma endregion
+
+	
 
 	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
 	if (true == m_isChangeAnimation)

@@ -50,6 +50,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     // Default?? 0?? ??????? ????.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
+    m_IsPlayAnimation = true;
     return S_OK;
 }
 
