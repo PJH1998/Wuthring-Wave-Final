@@ -76,7 +76,7 @@ public:
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	// Compute Shader
-	_bool								Play_Animation_GPU(class CComputeShader* pComputeShader, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
+	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);

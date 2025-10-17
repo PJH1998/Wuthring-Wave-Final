@@ -242,19 +242,8 @@ void CComputeShader::Free()
 {
     CComponent::Free();
 
-  /*  for (auto& pair : m_SRVs_To_Bind)
-        Safe_Release(pair.second);*/
-
     m_SRVs_To_Bind.clear();
-
-    /*for (auto& pair : m_UAVs_To_Bind)
-        Safe_Release(pair.second);*/
-
     m_UAVs_To_Bind.clear();
-
-    /*for (auto& pair : m_CBs_To_Bind)
-        Safe_Release(pair.second);*/
-
     m_CBs_To_Bind.clear();
 
     Safe_Release(m_pComputeShader);

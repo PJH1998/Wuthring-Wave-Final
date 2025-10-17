@@ -35,8 +35,8 @@ HRESULT CChannel::Initialize(ifstream& InputFile, const vector<class CBone*>& Bo
 
 void CChannel::Update_TransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
 {
-	if (m_iNumKeyFrame == 2)
-		return;
+	//if (m_iNumKeyFrame == 2)
+	//	return;
 
 	if (0.f == fCurrentTrackPosition)
 		*pCurrentFrameIndex = 0;

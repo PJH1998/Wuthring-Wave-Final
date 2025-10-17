@@ -331,9 +331,9 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	return false;
 }
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
 {
-	ASSERT_CRASH(pComputeShader);
+	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
 
 	auto iter = m_Animations.find(strAnimationName);
@@ -358,21 +358,19 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& 
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
 	pAnimCBInfo->fTrackPosition = fTrackPosition;
 	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
-	
-
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 
 	// 4. Compute Shader에 리소스 바인딩
 //    - ComputeShader.h/cpp의 Set 함수들을 사용
-	pComputeShader->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // 아직 .hlsl에 없음
-	pComputeShader->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
-	pComputeShader->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
-	pComputeShader->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShader->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
-	pComputeShader->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
-	pComputeShader->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
+	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // 아직 .hlsl에 없음
+	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
+	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
+	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
+	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
+	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
+	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
 	
 
 
@@ -384,8 +382,8 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& 
 	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
 	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
-	_uint iGroupCount = (iNumBones + (pComputeShader->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShader->Get_ThreadInfo().iThreadGroupX;
-	pComputeShader->Dispatch(iGroupCount, 1, 1);
+	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
+	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
 #pragma endregion
 
 	
@@ -393,6 +391,9 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& 
 	// 6. 중간 결과 적용.(일단 RootAnimation CombinedTransofrmationMatrix는 그대로 적용)
 	ApplyComputeResults_ToBones();
 #pragma endregion
+
+	_string strRibAnimationName = "Rib_" + strAnimationName;
+	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
 	// 7. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (bIsAnimationEnd)
@@ -406,14 +407,14 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& 
 		Compute_RootAnimation(fRootMotionRate);
 
 
-
+	// Combined는 한번만.
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 
 #ifdef _DEBUG
 	
-	OutputDebugString(TEXT("Play_Animation GPU "));
+	/*OutputDebugString(TEXT("Play_Animation GPU "));
 	
 	_wstring strAnimDebug = StringToWString(strAnimationName) + L"\n";
 	OutputDebugString(strAnimDebug.c_str());
@@ -432,7 +433,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShader, const _string& 
 	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
 
 
-	OutPutDebugFloat(TEXT("Track Position : "), fTrackPosition);
+	OutPutDebugFloat(TEXT("Track Position : "), fTrackPosition);*/
 #endif
 
 	return false;
@@ -461,8 +462,8 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 
 	iter->second->Update_TransformationMatrices(fTimeDelta, m_Bones);
 
-	for (auto& pBone : m_Bones)
-		pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+	//for (auto& pBone : m_Bones)
+	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
