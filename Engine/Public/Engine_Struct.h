@@ -74,6 +74,26 @@ namespace Engine
 		_uint		iType;
 	}CELL;
 
+
+	typedef struct ParticleSRV
+	{
+		_float4 DefaultPos; 
+		_float  fSpeed;
+		_float	_pad0[3];
+	}PARTICLE_SRV;
+
+	typedef struct ParticleCB
+	{
+		_float3 vPivot;		
+		_float  fTimeDelta;
+
+		_uint	IsLoop;		// 0이면 false, 1이면 true
+		_float	fSpreadWeight;
+		_float  fDropWeight;
+		_float  fRotationWeight;
+	}PARTICLE_CB;
+
+
 }
 
 

@@ -1,6 +1,5 @@
 #include "Editorpch.h"
 #include "Particle.h"
-#include "GameInstance.h"
 
 CParticle::CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -34,8 +33,6 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
     //임시처리
-    m_IsSpread = pDesc->bSpread;
-    m_IsDrop = pDesc->bDrop;
 
     return S_OK;
 }
@@ -49,12 +46,7 @@ void CParticle::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //임시
-    if (m_IsDrop)
-        m_pVIBufferCom->Drop(fTimeDelta);
-    
-    if (m_IsSpread)
-        m_pVIBufferCom->Spread(fTimeDelta);
+    m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);
 
     //라이프타임 끝나면 비활성화
 }
@@ -91,6 +83,10 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
+        return E_FAIL;
+
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
+        TEXT("Com_CShader"), reinterpret_cast<CComponent**>(&m_pComputeShader), nullptr)))
         return E_FAIL;
 
     return S_OK;
@@ -149,4 +145,5 @@ void CParticle::Free()
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShader);
 }

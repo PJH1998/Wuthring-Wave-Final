@@ -12,7 +12,13 @@ CVIBuffer_Point_Instance::CVIBuffer_Point_Instance(const CVIBuffer_Point_Instanc
 	, m_vPivot{ Prototype.m_vPivot }
 	, m_pSpeeds{ Prototype.m_pSpeeds }
 	, m_isLoop{ Prototype.m_isLoop }
+	, m_pCBBuffer { Prototype.m_pCBBuffer}
+	, m_pSRV { Prototype.m_pSRV }
+	, m_pSRVBuffer { Prototype.m_pSRVBuffer}
 {
+	Safe_AddRef(m_pCBBuffer);
+	Safe_AddRef(m_pSRVBuffer);
+	Safe_AddRef(m_pSRV);
 }
 
 HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
@@ -57,9 +63,11 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_VBInstanceDesc.MiscFlags = 0;
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
-
 	m_pVBInstanceVertices = new VTXINSTANCE_PARTICLE[m_iNumInstance];
 	m_pSpeeds = new _float[m_iNumInstance];
+
+	//SRV에 들어갈 정보 구조체에 개수만큼 저장
+	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
 	for (size_t i = 0; i < m_iNumInstance; i++)
 	{
@@ -68,6 +76,8 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 		m_pSpeeds[i] = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+		//SRV데이터용 저장
+		pSRV[i].fSpeed = m_pSpeeds[i];
 
 		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
 		pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
@@ -81,7 +91,63 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
+		//SRV데이터 초기 위치 저장용
+		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
 	}
+	
+	//SRV용 버퍼 생성
+	D3D11_BUFFER_DESC SRV_BufferDesc = {};
+	SRV_BufferDesc.StructureByteStride = sizeof(PARTICLE_SRV);
+	SRV_BufferDesc.ByteWidth = SRV_BufferDesc.StructureByteStride * m_iNumInstance;
+	SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//불변
+	SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//리소스
+	SRV_BufferDesc.CPUAccessFlags = 0; 
+	SRV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	D3D11_SUBRESOURCE_DATA SRVInitialData{};
+	SRVInitialData.pSysMem = pSRV;
+
+	if (FAILED(m_pDevice->CreateBuffer(&SRV_BufferDesc, &SRVInitialData, &m_pSRVBuffer)))
+		return E_FAIL;
+
+	Safe_Delete_Array(pSRV);
+
+	//SRV 버퍼를 통해 리소스뷰 생성
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	SRVDesc.Buffer.FirstElement = 0;
+	SRVDesc.Buffer.NumElements = SRV_BufferDesc.ByteWidth / SRV_BufferDesc.StructureByteStride;
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_pSRVBuffer, &SRVDesc, &m_pSRV)))
+		return E_FAIL;
+
+	//CB 버퍼 생성
+	PARTICLE_CB* pCB = new PARTICLE_CB;
+	pCB->fTimeDelta = 0.1f;
+	pCB->vPivot = m_vPivot;
+	pCB->IsLoop = m_isLoop ? 1 : 0;
+	pCB->fSpreadWeight = pPointDesc->fSpreadWeight;
+	pCB->fDropWeight = pPointDesc->fDropWeight;
+	pCB->fRotationWeight = pPointDesc->fRotationWeight;
+
+
+	D3D11_BUFFER_DESC CB_BufferDesc = {};
+	CB_BufferDesc.StructureByteStride = 0;
+	CB_BufferDesc.ByteWidth = sizeof(PARTICLE_CB);				 //16바이트 배수로 맞춘 구조체 필요
+	CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC ;					//자주변함
+	CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//뷰 없음
+	CB_BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	CB_BufferDesc.MiscFlags = 0;
+
+
+	D3D11_SUBRESOURCE_DATA CBInitialData{};
+	CBInitialData.pSysMem = pCB;
+
+	if (FAILED(m_pDevice->CreateBuffer(&CB_BufferDesc, &CBInitialData, &m_pCBBuffer)))
+		return E_FAIL;
+
+	Safe_Delete(pCB);
 
 	return S_OK;
 }
@@ -89,6 +155,39 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+
+	//UAV 클론에서 생성해줘야함 (똑같은 설정값을 가진 파티클을 클론해서 여러개 만들었을 때, 같은 UAV를 공유하면 모든 파티클이 동일한 움직임을 가지게 됨.)
+	// SRV와 CB는 프로토타입에서 생성해줘도 됨.
+	// SRV는 불변할 개별인스턴스 값들이라 프로토타입에 만들어서 클론끼리 공유해도 문제 없음,
+	// CB는 변하는 값 (타임델타) 같은 변수들이 들어가지만, 매 프레임마다 맵, 언맵으로 값 설정해줘야하니 프로토타입에 만들어도 상관없음
+
+	
+	//여기서 UAV 버퍼 만들고, 리소스뷰 만들어줘야함.
+	D3D11_BUFFER_DESC UAV_BufferDesc = {};
+	UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	UAV_BufferDesc.ByteWidth = UAV_BufferDesc.StructureByteStride * m_iNumInstance;
+	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						//UAV는 디폴트
+	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			//다른곳에서도 읽을거면  | D3D11_BIND_SHADER_RESOURCE 해줘야함
+	UAV_BufferDesc.CPUAccessFlags = 0;			
+	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;	
+
+
+	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
+	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
+
+	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, &UAVInitialDesc, &m_pUABuffer)))
+		return E_FAIL;
+
+	//UAV 버퍼를 통해 리소스뷰 생성
+	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
+	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
+	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	UAVDesc.Buffer.FirstElement = 0;
+	UAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
+	UAVDesc.Buffer.NumElements = UAV_BufferDesc.ByteWidth / UAV_BufferDesc.StructureByteStride;
+
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
 		return E_FAIL;
 
 	return S_OK;
@@ -122,6 +221,30 @@ HRESULT CVIBuffer_Point_Instance::Render()
 	m_pContext->DrawInstanced(1, m_iNumInstance, 0, 0);
 
 	return S_OK;
+}
+
+void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader, _float fTimeDelta)
+{
+	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+
+	m_pContext->Map(m_pCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+
+	PARTICLE_CB* pCB = static_cast<PARTICLE_CB*>(SubResource.pData);
+
+	pCB->fTimeDelta = fTimeDelta;
+
+	m_pContext->Unmap(m_pCBBuffer, 0);
+
+	pCShader->Set_ConstantBuffer("CB", m_pCBBuffer);
+
+	pCShader->Set_SRV("g_ParticleStatic", m_pSRV);
+
+	pCShader->Set_UAV("g_ParticleState", m_pUAV);
+
+	pCShader->Dispatch(128, 1, 1);
+
+	//GPU에서 복사 진행함. 내부에서 연산작업이 끝났는지 확인하고 복사 진행해준다고 함.
+	m_pContext->CopyResource(m_pVBInstance, m_pUABuffer);
 }
 
 void CVIBuffer_Point_Instance::Spread(_float fTimeDelta)
@@ -255,5 +378,13 @@ void CVIBuffer_Point_Instance::Free()
 	__super::Free();
 
 	if (false == m_isClone)
+	{
 		Safe_Delete_Array(m_pSpeeds);
+	}
+
+	Safe_Release(m_pSRV);
+	Safe_Release(m_pCBBuffer);
+	Safe_Release(m_pSRVBuffer);
+	Safe_Release(m_pUABuffer);
+	Safe_Release(m_pUAV);
 }

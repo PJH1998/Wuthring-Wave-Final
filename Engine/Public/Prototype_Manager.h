@@ -11,6 +11,7 @@
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
+#include "ComputeShader.h"
 // ==================
 
 NS_BEGIN(Engine)

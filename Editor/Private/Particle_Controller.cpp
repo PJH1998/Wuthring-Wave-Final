@@ -24,7 +24,6 @@ HRESULT CParticle_Controller::Initialize()
 void CParticle_Controller::Update()
 {
     Particle_Tab();
-
 }
 
 void CParticle_Controller::Render()
@@ -92,7 +91,7 @@ void CParticle_Controller::Load_AllTextureFromFolder(const _string& strFolderPat
 
                 //생성한 텍스처 주소 등록, 미리보기 띄울려면 주소로 SRV가져와야해서 저장해줘야함.
                 Desc.pTexture = pTexture;
-                Safe_AddRef(pTexture);
+                //Safe_AddRef(pTexture);
 
                 m_Textures.push_back(Desc);
             }
@@ -102,103 +101,11 @@ void CParticle_Controller::Load_AllTextureFromFolder(const _string& strFolderPat
 
 void CParticle_Controller::Particle_Tab()
 {
-    //텍스처 이미지 설정
-    if (ImGui::BeginCombo("Texture", "Texture")) {
-        for (size_t i = 0; i < m_Textures.size(); i++)
-        {
-            bool IsSelected = (m_iSelectedTexture == i);
-            if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
-                m_iSelectedTexture = i;
-
-            if (IsSelected)
-                ImGui::SetItemDefaultFocus();
-
-        }
-        ImGui::EndCombo();
-    }
-
-    ImGui::Separator();
-    if (m_iSelectedTexture >= 0) {
-        ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
-    }
-
-    //파티클 태그
-    if (ImGui::InputText("ParticleTag", m_ParticleTag, IM_ARRAYSIZE(m_ParticleTag), ImGuiInputTextFlags_EnterReturnsTrue))
-        m_bTagFlag = true;
-
-    if (m_bTagFlag)
-    {
-        if (ImGui::Button("Create"))
-        {
-            if (m_bTagFlag)
-            {
-                //기본베이스로 생성
-                _tchar ParticleTag[MAX_PATH] = {};
-                CParticle::PARTICLE_DESC ParticleDesc{};
-                CVIBuffer_Point_Instance::POINT_INSTANCE_DESC VIBufferDesc{};
-                CParticle* pParticle;
-
-                MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_ParticleTag, strlen(m_ParticleTag), ParticleTag, MAX_PATH);
-
-                ParticleDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
-                ParticleDesc.strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
-                ParticleDesc.strVIBufferTag += ParticleTag;
-
-                //버퍼 최소 설정 값
-                VIBufferDesc.iNumInstance = 1;
-                VIBufferDesc.vSize = _float2(5.f, 5.f);
-
-                m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), ParticleDesc.strVIBufferTag,
-                    CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, &VIBufferDesc));
-
-                pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, &ParticleDesc));
-
-                m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Particle"), pParticle);
-
-                m_Particles.emplace(ParticleTag, pParticle);
-                Safe_AddRef(pParticle);
-
-                m_tParticleDesc.emplace(ParticleTag, ParticleDesc);
-                m_tVBDesc.emplace(ParticleTag, VIBufferDesc);
-
-                //초기화
-                m_bTagFlag = false;
-                m_ParticleTag[0] = _T('\0');
-            }
-        }
-    }
-
-    if (!m_Particles.empty())
+    if (m_bSelectedParticle)
     {
         if (ImGui::Begin("Particle Info"))
         {
-            //생성된 파티클태그로 리스트 목록 활성화
-            vector<_string> strParticleTag = {};
-            vector<const _char*> szParticleTag = {};
-
-            //wstring -> string
-            for (auto iter = m_Particles.begin(); iter != m_Particles.end(); ++iter)
-            {
-                _string strTag = WStringToString(iter->first);
-
-                strParticleTag.push_back(strTag);
-            }
-
-            //string -> char
-            for (auto& strTag : strParticleTag)
-            {
-                szParticleTag.push_back(strTag.c_str());
-            }
-
-            if (ImGui::ListBox("ParticleTag", &m_iSelectedParticle, szParticleTag.data(), int(szParticleTag.size()), int(szParticleTag.size())))
-            {
-                //이번 프레임에 선택된 인덱스가 바뀌었으면 true 반환
-                //선택된 인덱스로 저장해놓은 Desc와 파티클 주소 접근. 
-                UpdateSelected_ParticleFromIndex();
-            }
-
-            if (m_bSelectedParticle)
-            {
+       
                 //파티클 설정값 VIBuffer
                 if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
                 {
@@ -208,6 +115,18 @@ void CParticle_Controller::Particle_Tab()
                     ImGui::PushItemWidth(100);
                     ImGui::DragInt("##NumInstance", (int*)&(m_pSelectedVBDesc->iNumInstance));
                     ImGui::PopItemWidth();
+
+                    ImGui::Text("SpreadWeight");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##SpreadW", &(m_pSelectedVBDesc->fSpreadWeight), 1.f ,0.f, 1.f);
+
+                    ImGui::Text("DropWeight");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##DorpW", &(m_pSelectedVBDesc->fDropWeight), 1.f, 0.f, 1.f);
+
+                    ImGui::Text("RotationWeight");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##RotationW", &(m_pSelectedVBDesc->fRotationWeight), 1.f, 0.f, 1.f);
 
                     ImGui::Text("Center");
                     ImGui::PushItemWidth(60);
@@ -260,8 +179,8 @@ void CParticle_Controller::Particle_Tab()
 
                 if (ImGui::CollapsingHeader("Particle", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    ImGui::Checkbox("Spread", &(m_pSelectedParticleDesc->bSpread));
-                    ImGui::Checkbox("Drop", &(m_pSelectedParticleDesc->bDrop));
+              /*      ImGui::Checkbox("Spread", &(m_pSelectedParticleDesc->bSpread));
+                    ImGui::Checkbox("Drop", &(m_pSelectedParticleDesc->bDrop));*/
 
                     ImGui::Text("Size");
                     ImGui::PushItemWidth(60);
@@ -298,61 +217,60 @@ void CParticle_Controller::Particle_Tab()
                     ImGui::PopItemWidth();
                 }
 
-                if (ImGui::Button("Apply"))
-                {
-                    //디스크립션만 저장하고, 주소는 따로 저장할 필요 없을 거 같음.
-                    //저장한 디스크립션으로 값 수정해서 들고 있고, Apply 버튼 누르면 이전에 만들어놓은 파티클 파괴 시키고, 다시 재생성
+                //if (ImGui::Button("Apply"))
+                //{
+                //    //디스크립션만 저장하고, 주소는 따로 저장할 필요 없을 거 같음.
+                //    //저장한 디스크립션으로 값 수정해서 들고 있고, Apply 버튼 누르면 이전에 만들어놓은 파티클 파괴 시키고, 다시 재생성
 
-                    //지금 선택되어있는 파티클의 태그 필요
-                    //지금 선택되어 있는 파티클 태그의 Desc 2개 필요.
-                    //버퍼 먼저 만들고, 파티클 만들어야함.
+                //    //지금 선택되어있는 파티클의 태그 필요
+                //    //지금 선택되어 있는 파티클 태그의 Desc 2개 필요.
+                //    //버퍼 먼저 만들고, 파티클 만들어야함.
 
 
-                    //생성해놓은 버퍼 원형 삭제
-                    //Desc에 있는 정보로 새로운 버퍼 생성
+                //    //생성해놓은 버퍼 원형 삭제
+                //    //Desc에 있는 정보로 새로운 버퍼 생성
 
-                    //파티클 클래스 클론 할 때 Desc로 클론
-                    //이전에 생성한 파티클은 그냥 비활성화만 시켜줘도 될거 같음.
-                    CParticle* pParticle = {};
-                    _wstring ParticleTag = {};
+                //    //파티클 클래스 클론 할 때 Desc로 클론
+                //    //이전에 생성한 파티클은 그냥 비활성화만 시켜줘도 될거 같음.
+                //    CParticle* pParticle = {};
+                //    _wstring ParticleTag = {};
 
-                    _int iCheckIndex = 0;
-                    for (auto iter = m_Particles.begin(); iter != m_Particles.end();)
-                    {
-                        if (iCheckIndex == m_iSelectedParticle)
-                        {
-                            ParticleTag = iter->first;
+                //    _int iCheckIndex = 0;
+                //    for (auto iter = m_Particles.begin(); iter != m_Particles.end();)
+                //    {
+                //        if (iCheckIndex == m_iSelectedParticle)
+                //        {
+                //            ParticleTag = iter->first;
 
-                            m_pSelectedParticleDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
-                            m_pSelectedParticleDesc->strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
-                            m_pSelectedParticleDesc->strVIBufferTag += ParticleTag;
+                //            m_pSelectedParticleDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                //            m_pSelectedParticleDesc->strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
+                //            m_pSelectedParticleDesc->strVIBufferTag += ParticleTag;
 
-                            m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag);
+                //            m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag);
 
-                            m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag,
-                                CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, m_pSelectedVBDesc));
+                //            m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag,
+                //                CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, m_pSelectedVBDesc));
 
-                            pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, m_pSelectedParticleDesc));
-                            m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Particle"), pParticle);
+                //            pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, m_pSelectedParticleDesc));
+                //            m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Particle"), pParticle);
 
-                            m_pSelectedParticle->SetActivate(false);
-                            Safe_Release(m_pSelectedParticle);
+                //            m_pSelectedParticle->SetActivate(false);
+                //            Safe_Release(m_pSelectedParticle);
 
-                            m_pSelectedParticle = pParticle;
+                //            m_pSelectedParticle = pParticle;
 
-                            iter->second = pParticle;
-                            Safe_AddRef(pParticle);
-                            break;
-                        }
-                        else
-                        {
-                            ++iCheckIndex;
-                            ++iter;
-                        }
-                    }
+                //            iter->second = pParticle;
+                //            Safe_AddRef(pParticle);
+                //            break;
+                //        }
+                //        else
+                //        {
+                //            ++iCheckIndex;
+                //            ++iter;
+                //        }
+                //    }
 
-                }
-            }
+                //}
 
             ImGui::End();
         }
@@ -360,63 +278,123 @@ void CParticle_Controller::Particle_Tab()
 
 }
 
-void CParticle_Controller::UpdateSelected_ParticleFromIndex()
+void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticleDesc, _bool& IsCreate)
 {
-    if (m_pSelectedParticle != nullptr)
-        m_pSelectedParticle->SetActivate(false);
-
-    _int iCheckIndex = 0;
-
-    for (auto iter = m_Particles.begin(); iter != m_Particles.end();)
+    if (ImGui::Begin("Particle Base"))
     {
-        if (iCheckIndex == m_iSelectedParticle)
-        {
-            m_pSelectedParticle = iter->second;
-            iCheckIndex = 0;
-            break;
+        //텍스처 이미지 설정
+        if (ImGui::BeginCombo("Texture", "")) {
+            for (size_t i = 0; i < m_Textures.size(); i++)
+            {
+                bool IsSelected = (m_iSelectedTexture == i);
+                if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                    m_iSelectedTexture = i;
+
+                if (IsSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
         }
-        else
-        {
-            ++iter;
-            ++iCheckIndex;
+
+        ImGui::Separator();
+        if (m_iSelectedTexture >= 0) {
+            ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
         }
+
+        if (m_bTagFlag)
+        {
+            if (ImGui::Button("Create"))
+            {
+                //기본베이스로 생성
+                _tchar ParticleTag[MAX_PATH] = {};
+                CParticle::PARTICLE_DESC ParticleDesc{};
+                CVIBuffer_Point_Instance::POINT_INSTANCE_DESC VIBufferDesc{};
+                CParticle* pParticle;
+
+                MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_ParticleTag, strlen(m_ParticleTag), ParticleTag, MAX_PATH);
+
+                ParticleDesc.strMyTag = ParticleTag;
+                ParticleDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                ParticleDesc.strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
+                ParticleDesc.strVIBufferTag += ParticleTag;
+           
+                //버퍼 최소 설정 값
+                VIBufferDesc.iNumInstance = 1;
+                VIBufferDesc.vSize = _float2(5.f, 5.f);
+
+                m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), ParticleDesc.strVIBufferTag,
+                    CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, &VIBufferDesc));
+
+                m_tParticleDesc.emplace(ParticleTag, ParticleDesc);
+                m_tVBDesc.emplace(ParticleTag, VIBufferDesc);
+
+                tParticleDesc = ParticleDesc;
+
+                //초기화
+                m_ParticleTag[0] = _T('\0');
+
+                IsCreate = true;
+                m_bTagFlag = false;
+            }
+        }
+        ImGui::End();
     }
-
-    for (auto iter = m_tParticleDesc.begin(); iter != m_tParticleDesc.end();)
-    {
-        if (iCheckIndex == m_iSelectedParticle)
-        {
-            m_pSelectedParticleDesc = &iter->second;
-            iCheckIndex = 0;
-            break;
-        }
-        else
-        {
-            ++iter;
-            ++iCheckIndex;
-        }
-    }
-
-    for (auto iter = m_tVBDesc.begin(); iter != m_tVBDesc.end();)
-    {
-        if (iCheckIndex == m_iSelectedParticle)
-        {
-            m_pSelectedVBDesc = &iter->second;
-            iCheckIndex = 0;
-            break;
-        }
-        else
-        {
-            ++iter;
-            ++iCheckIndex;
-        }
-    }
-
-    m_pSelectedParticle->SetActivate(true);
-
-    m_bSelectedParticle = true;
 }
 
+void CParticle_Controller::UpdateSelected_ParticleFormTag(_wstring ParticleTag)
+{
+
+    auto iterParticleDesc = m_tParticleDesc.find(ParticleTag);
+    
+    if (iterParticleDesc == m_tParticleDesc.end())
+    {
+        m_pSelectedParticleDesc = nullptr;
+    }
+    else
+    {
+        m_pSelectedParticleDesc = &iterParticleDesc->second;
+    }
+
+    auto iterVBDesc = m_tVBDesc.find(ParticleTag);
+
+    if (iterVBDesc == m_tVBDesc.end())
+    {
+        m_pSelectedVBDesc = nullptr;
+    }
+    else
+    {
+        m_pSelectedVBDesc = &iterVBDesc->second;
+    }
+
+    if(m_pSelectedParticleDesc != nullptr)
+        m_bSelectedParticle = true;
+}
+
+CParticle::PARTICLE_DESC* CParticle_Controller::Get_ParticleDesc(_wstring& ParticleTag)
+{
+    auto iter = m_tParticleDesc.find(ParticleTag);
+    
+    if (iter == m_tParticleDesc.end())
+        return nullptr;
+
+    return &iter->second;
+}
+
+CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* CParticle_Controller::Get_VBDesc(_wstring& VBTag)
+{
+    auto iter = m_tVBDesc.find(VBTag);
+
+    if (iter == m_tVBDesc.end())
+        return nullptr;
+
+    return &iter->second;
+}
+void CParticle_Controller::Set_ParticleTag(const _char* szParticleTag)
+{
+    strcat_s(m_ParticleTag, szParticleTag);
+
+    m_bTagFlag = true;
+}
 //CParticle::PARTICLE_DESC CParticle_Controller::Find_Particle(_tchar ParticleTag)
 //{
 //    for (auto iter = m_tParticleDesc.begin(); iter != m_tParticleDesc.end(); )
@@ -453,7 +431,5 @@ void CParticle_Controller::Free()
 
     for (auto& pTexture : m_Textures)
         Safe_Release(pTexture.pTexture);
-
-    for (auto& pParticle : m_Particles)
-        Safe_Release(pParticle.second);
+    m_Textures.clear();
 }

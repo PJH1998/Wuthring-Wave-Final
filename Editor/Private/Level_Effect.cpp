@@ -1,7 +1,9 @@
 #include "EditorPch.h"
 #include "Level_Effect.h"
 #include "Event_Level.h"
-#include "Particle_Controller.h"
+#include "Effect_Controller.h"
+#include "Particle.h"
+#include "ComputeShader.h"
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -10,14 +12,20 @@ CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Effect::Initialize()
 {
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Prefab"),
+        CEffect_Prefab::Create(m_pDevice, m_pContext));
+
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"),
         CParticle::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
-    m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl")));
 
+    //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
+    m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -26,9 +34,11 @@ void CLevel_Effect::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Effect"));
 
-    if(ImGui::Begin("Effect"))
-        Effect_MenuBar();
-    ImGui::End();
+    m_pEffect_Controller->Update();
+
+    //if(ImGui::Begin("Effect"))
+    //    Effect_MenuBar();
+    //ImGui::End();
 }
 
 void CLevel_Effect::Render()
@@ -38,18 +48,19 @@ void CLevel_Effect::Render()
 
 void CLevel_Effect::Effect_MenuBar()
 {
-    if (ImGui::BeginTabBar("Effect"))
-    {
+    //if (ImGui::BeginTabBar("Effect"))
+    //{
 
-        if (ImGui::BeginTabItem("Particle"))
-        {
-            m_pParticle_Controller->Update();
+    //    if (ImGui::BeginTabItem("Particle"))
+    //    {
+    //  /*      m_pParticle_Controller->Update();*/
+    //        m_pEffect_Controller->Update();
 
-            ImGui::EndTabItem();
-        }
+    //        ImGui::EndTabItem();
+    //    }
 
-        ImGui::EndTabBar();
-    }
+    //    ImGui::EndTabBar();
+    //}
 }
 
 CLevel_Effect* CLevel_Effect::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -69,5 +80,5 @@ void CLevel_Effect::Free()
 {
     __super::Free();
 
-    Safe_Release(m_pParticle_Controller);
+    Safe_Release(m_pEffect_Controller);
 }

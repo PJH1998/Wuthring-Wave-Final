@@ -18,7 +18,8 @@ private:
 	void Effect_MenuBar();
 
 private:
-	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
+	//class CParticle_Controller*									m_pParticle_Controller = { nullptr };
+	class CEffect_Controller*										m_pEffect_Controller = { nullptr };
 
 
 public:
