@@ -47,12 +47,15 @@ void CEffect_Controller::Prefab_Tab()
         {
             if (ImGui::Button("Create Prefab"))
             {
+                CEffect_Prefab::PREFAB_DESC pPrefabDesc = {};
                 _tchar PrefabTag[MAX_PATH] = {};
                 CEffect_Prefab* pPrefab = {};
 
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_PrefabTag, strlen(m_PrefabTag), PrefabTag, MAX_PATH);
 
-                pPrefab = static_cast<CEffect_Prefab*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Prefab"), PROTOTYPE::GAMEOBJECT));
+                pPrefabDesc.strPrefabTag = PrefabTag;
+
+                pPrefab = static_cast<CEffect_Prefab*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Prefab"), PROTOTYPE::GAMEOBJECT, &pPrefabDesc));
 
                 m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prefab"), pPrefab);
 
@@ -84,12 +87,30 @@ void CEffect_Controller::Prefab_Tab()
                 szPrefabTag.push_back(strTag.c_str());
             }
 
-            if (ImGui::ListBox("PrefabTag", &m_iSelectedPrefab, szPrefabTag.data(), int(szPrefabTag.size()), int(szPrefabTag.size())))
+            if (ImGui::ListBox("PrefabTag", &m_iSelectedPrefab, szPrefabTag.data(), int(szPrefabTag.size()), int(szPrefabTag.size() + 2)))
             {
                 //이번 프레임에 선택된 인덱스가 바뀌었으면 true 반환
                 UpdateSelected_PrefabFromIndex();
             }
             
+            if (m_pSelectedPrefab != nullptr)
+            {
+                if (ImGui::Button("Delete Prefab"))
+                {
+                    //프리팹의 자식들 삭제.
+                    auto iter = m_Prefabs.find(m_pSelectedPrefab->Get_MyTag());
+
+                    if (iter != m_Prefabs.end())
+                    {
+                        Safe_Release(iter->second);
+                        m_Prefabs.erase(iter);
+
+                        m_pSelectedPrefab = nullptr; 
+
+                        Reset_TabInfo();
+                    }
+                }
+            }
             //현재 선택되어있는 프리팹의 자식들 정보 띄우자
             if (m_pSelectedPrefab != nullptr)
             {
@@ -149,7 +170,7 @@ void CEffect_Controller::Prefab_Tab()
                     
                     //선택된 자식이 누구인지 알아야함. 그걸 알아야 파티클컨트롤러로 정보 수정할 수 있는 창 띄울 수 있을 듯.
                     //그리고 선택된 자식의 타입을 알아야할 듯 ex) 파티클, 매쉬, 트레일매쉬
-                    if (ImGui::ListBox("Prefab Children", &m_iSelectedChildren, szChildrenTag.data(), int(szChildrenTag.size()), int(szChildrenTag.size())))
+                    if (ImGui::ListBox("Prefab Children", &m_iSelectedChildren, szChildrenTag.data(), int(szChildrenTag.size()), int(szChildrenTag.size() + 2)))
                     {
                         //몇번째 자식, 그 자식의 타입, 그자식의 태그가 필요함.
                         UpdateSelected_ChildrenFromIndex();
@@ -183,15 +204,28 @@ void CEffect_Controller::Prefab_Tab()
 
                        }
                     }
+
+                    if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
+                    {
+                        if (ImGui::Button("Delete Effect"))
+                        {
+                            if (m_IsParticle)
+                            {
+                                //프리팹이 들고있는 자식 삭제
+                                m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
+
+                                //파티클 컨트롤러가 가지고 있는 Desc 삭제
+                                m_pParticle_Controller->Remove_Desc(m_strChildrenTag);
+
+                                Reset_TabInfo();
+                            }
+
+                        }
+                    }
                     
                     //어플라이 버튼 눌러서 해당 컨트롤러의 Desc 뽑아오고,
                     //뽑아온 Desc를 통해 프리팹에 차일드 추가.
                     //추가하기전에 이미 같은 이름의 차일드 있다면, 걔 삭제시키고 받아온 Desc로 다시 만들게 설정해주자.
-
-                   
-                    
-
-
                 }
           
            
@@ -256,6 +290,22 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         //파티클 선택됐으니 현재 파티클 활성화 해줘야함.
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
+}
+
+void CEffect_Controller::Reset_TabInfo()
+{
+    //혹시 이전에 프리팹의 자식 선택해놨으면 플래그 끄기
+    m_ChildrenTag[0] = _T('\0');
+    m_bChildrenCreatFlag = false;
+    m_bChildrenTagFlag = false;
+    m_eChildrenType = EFFECT_TYPE::END;
+    m_iSelectedChildren = 0;
+    m_strChildrenTag = TEXT("");
+
+    m_IsParticle = false;
+    m_IsMeshEffect = false;
+    m_IsTrailMesh = false;
+
 }
 
 CEffect_Controller* CEffect_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

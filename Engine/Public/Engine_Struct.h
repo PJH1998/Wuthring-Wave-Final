@@ -57,7 +57,7 @@ namespace Engine
 	typedef struct tagActionFrame
 	{
 		_float		fDuration;
-		_float4	vRotation;
+		_float4		vRotation;
 		_float		fDistance;
 	}ACTIONFRAME;
 
@@ -91,6 +91,9 @@ namespace Engine
 		_float	fSpreadWeight;
 		_float  fDropWeight;
 		_float  fRotationWeight;
+
+		_float	fGravity;
+		_float	_pad[3];
 	}PARTICLE_CB;
 
 

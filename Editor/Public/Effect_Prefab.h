@@ -33,8 +33,13 @@ public:
 	_int Get_Children_Count();
 	_wstring Get_Children_Tag(_int iIndex);
 	CGameObject* Get_Children(_wstring ChildrenTag);
+	_wstring	Get_MyTag() {
+		return m_strMyTag;
+	};
 
 private:
+	_wstring							m_strMyTag;	 //툴 임시용
+	
 	//자식들
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	

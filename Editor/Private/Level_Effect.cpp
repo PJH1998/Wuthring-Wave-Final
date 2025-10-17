@@ -5,6 +5,8 @@
 #include "Particle.h"
 #include "ComputeShader.h"
 
+#include "AnimationTool.h"
+
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
 {
@@ -27,6 +29,17 @@ HRESULT CLevel_Effect::Initialize()
     //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
+    //파티클 움직임 및 위치같은 설정들 보기 위해 플레이어 띄울려고 추가함.
+    m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
+
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+            , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
     return S_OK;
 }
 
@@ -36,32 +49,14 @@ void CLevel_Effect::Update(_float fTimeDelta)
 
     m_pEffect_Controller->Update();
 
-    //if(ImGui::Begin("Effect"))
-    //    Effect_MenuBar();
-    //ImGui::End();
+   
 }
 
 void CLevel_Effect::Render()
 {
-
+    m_pAnimation_Tool->Render();
 }
 
-void CLevel_Effect::Effect_MenuBar()
-{
-    //if (ImGui::BeginTabBar("Effect"))
-    //{
-
-    //    if (ImGui::BeginTabItem("Particle"))
-    //    {
-    //  /*      m_pParticle_Controller->Update();*/
-    //        m_pEffect_Controller->Update();
-
-    //        ImGui::EndTabItem();
-    //    }
-
-    //    ImGui::EndTabBar();
-    //}
-}
 
 CLevel_Effect* CLevel_Effect::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -81,4 +76,5 @@ void CLevel_Effect::Free()
     __super::Free();
 
     Safe_Release(m_pEffect_Controller);
+    Safe_Release(m_pAnimation_Tool);
 }

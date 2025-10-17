@@ -19,8 +19,12 @@ HRESULT CEffect_Prefab::Initialize_Prototype()
 
 HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 {
+    PREFAB_DESC* pDesc = static_cast<PREFAB_DESC*>(pArg);
+
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
+
+    m_strMyTag = pDesc->strPrefabTag;
 
     return S_OK;
 }

@@ -17,6 +17,7 @@ public:
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
+		_float		fGravity = 9.8f;	//¼öÄ¡°í¹Î
 	}POINT_INSTANCE_DESC;
 
 private:

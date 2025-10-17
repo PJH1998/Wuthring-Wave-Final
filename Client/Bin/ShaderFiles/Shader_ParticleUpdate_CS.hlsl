@@ -22,6 +22,9 @@ cbuffer CB : register(b0)
     float SpreadWeight;
     float DropWeight;
     float RotationWeight;
+    float Gravity;
+    
+    float3 _pad0;
 }
 
 //SRV
@@ -86,29 +89,32 @@ void main(uint3 tid : SV_DispatchThreadID)
 {
     uint i = tid.x;
     
-    float4 Position = g_ParticleState[i].Pos;
-    float Speed = g_ParticleStatic[i].Speed;
-    
-    if (SpreadWeight > 0)
+    if (g_ParticleState[i].LifeTime.x <= g_ParticleState[i].LifeTime.y)
     {
-        Position = Spread(Position, Speed);
-    }
+    
+        float4 Position = g_ParticleState[i].Pos;
+        float Speed = g_ParticleStatic[i].Speed;
+    
+        if (SpreadWeight > 0)
+        {
+            Position = Spread(Position, Speed);
+        }
 
-    if (DropWeight > 0)
-    {
-        Position = Drop(Position, Speed);
-    }
+        if (DropWeight > 0)
+        {
+            Position = Drop(Position, Speed);
+        }
     
-    if (RotationWeight > 0)
-    {
-        Position = Rotation(Position, Speed);
-    }
+        if (RotationWeight > 0)
+        {
+            Position = Rotation(Position, Speed);
+        }
     
     //여러 동작 처리들 다해서 나온 포지션 값 대입
-    g_ParticleState[i].Pos = Position;
+        g_ParticleState[i].Pos = Position;
     
-    g_ParticleState[i].LifeTime.x += DeltaTime;
-    
+        g_ParticleState[i].LifeTime.x += DeltaTime;
+    }
     if(IsLoop == 1)
     {
         if(g_ParticleState[i].LifeTime.x >= g_ParticleState[i].LifeTime.y)
@@ -117,7 +123,17 @@ void main(uint3 tid : SV_DispatchThreadID)
             g_ParticleState[i].Pos = g_ParticleStatic[i].DefaultPos;
         }
     }
-   
+    else
+    {
+        if (g_ParticleState[i].LifeTime.x >= g_ParticleState[i].LifeTime.y)
+        {
+            float4 DeltaPosition = float4(g_ParticleStatic[i].DefaultPos.xyz, 1.f);
+            
+            DeltaPosition.xy += Gravity * DeltaTime * g_ParticleStatic[i].Speed;
+           
+            g_ParticleState[i].Pos.xy -= DeltaPosition * DeltaTime;
+        }
+    }
 }
 
 

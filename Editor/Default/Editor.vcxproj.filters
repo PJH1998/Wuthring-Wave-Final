@@ -81,7 +81,7 @@
     </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Particle_Controller\Particle">
       <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
     </Filter>
@@ -159,9 +159,6 @@
     <ClInclude Include="..\Public\Effect_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Particle_Controller.h">
-      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Level\Anim\Tool</Filter>
     </ClInclude>
@@ -181,6 +178,9 @@
       <Filter>96. Interface</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
+    <ClInclude Include="..\Public\Particle_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">

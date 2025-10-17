@@ -116,17 +116,25 @@ void CParticle_Controller::Particle_Tab()
                     ImGui::DragInt("##NumInstance", (int*)&(m_pSelectedVBDesc->iNumInstance));
                     ImGui::PopItemWidth();
 
+                    ImGui::PushItemWidth(200);
+
                     ImGui::Text("SpreadWeight");
                     ImGui::SameLine();
-                    ImGui::DragFloat("##SpreadW", &(m_pSelectedVBDesc->fSpreadWeight), 1.f ,0.f, 1.f);
+                    ImGui::DragFloat("##SpreadW", &(m_pSelectedVBDesc->fSpreadWeight), 0.1f ,0.f, 1.f);
 
                     ImGui::Text("DropWeight");
                     ImGui::SameLine();
-                    ImGui::DragFloat("##DorpW", &(m_pSelectedVBDesc->fDropWeight), 1.f, 0.f, 1.f);
+                    ImGui::DragFloat("##DorpW", &(m_pSelectedVBDesc->fDropWeight), 0.1f, 0.f, 1.f);
 
                     ImGui::Text("RotationWeight");
                     ImGui::SameLine();
-                    ImGui::DragFloat("##RotationW", &(m_pSelectedVBDesc->fRotationWeight), 1.f, 0.f, 1.f);
+                    ImGui::DragFloat("##RotationW", &(m_pSelectedVBDesc->fRotationWeight), 0.1f, 0.f, 1.f);
+
+                    ImGui::Text("Gravity");
+                    ImGui::SameLine();
+                    ImGui::DragFloat("##Gravity", &(m_pSelectedVBDesc->fGravity), 0.1f, 0.f, 9.8f);
+     
+                    ImGui::PopItemWidth();
 
                     ImGui::Text("Center");
                     ImGui::PushItemWidth(60);
@@ -395,6 +403,32 @@ void CParticle_Controller::Set_ParticleTag(const _char* szParticleTag)
 
     m_bTagFlag = true;
 }
+void CParticle_Controller::Remove_Desc(const _wstring& DescTag)
+{
+    auto iterParticleDesc = m_tParticleDesc.find(DescTag);
+
+    if (iterParticleDesc != m_tParticleDesc.end())
+    {
+        //혹시 같은 이름으로 다시만들어지는거 대비해서 지워줘야하나? 필요없을거 같으면 지워도 될듯.
+        m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterParticleDesc->second.strVIBufferTag);
+
+        m_tParticleDesc.erase(iterParticleDesc);
+    }
+
+    auto iterVBDesc = m_tVBDesc.find(DescTag);
+
+    if (iterVBDesc != m_tVBDesc.end())
+    {
+        m_tVBDesc.erase(iterVBDesc);
+    }
+
+    //초기화
+    m_iSelectedParticle = 0;
+    m_bSelectedParticle = false;
+    m_pSelectedParticleDesc = nullptr;
+    m_pSelectedVBDesc = nullptr;
+}
+
 //CParticle::PARTICLE_DESC CParticle_Controller::Find_Particle(_tchar ParticleTag)
 //{
 //    for (auto iter = m_tParticleDesc.begin(); iter != m_tParticleDesc.end(); )

@@ -30,6 +30,9 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
 
+    _vector Pos = XMVectorSet(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z, 1.f);
+
+    m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
     //임시처리
@@ -47,6 +50,11 @@ void CParticle::Update(_float fTimeDelta)
         return;
 
     m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);
+
+    m_vLifeTime.x += fTimeDelta;
+
+    if (m_vLifeTime.x >= m_vLifeTime.y)
+        m_isActivate = false;
 
     //라이프타임 끝나면 비활성화
 }

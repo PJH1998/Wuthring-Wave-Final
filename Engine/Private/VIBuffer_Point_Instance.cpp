@@ -130,6 +130,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	pCB->fSpreadWeight = pPointDesc->fSpreadWeight;
 	pCB->fDropWeight = pPointDesc->fDropWeight;
 	pCB->fRotationWeight = pPointDesc->fRotationWeight;
+	pCB->fGravity = pPointDesc->fGravity;
 
 
 	D3D11_BUFFER_DESC CB_BufferDesc = {};
