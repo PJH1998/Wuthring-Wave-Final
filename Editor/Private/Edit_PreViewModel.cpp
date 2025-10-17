@@ -75,7 +75,7 @@ void CEdit_PreViewModel::Render()
     switch (m_eViewType)
     {
     case X:
-        eyepos = XMVectorSet(-vMaxExt.x *2.f , vMaxExt.y * 0.5f, 0.f, 1.f);
+        eyepos = XMVectorSet(-vMaxExt.x * 2.f, vMaxExt.y * 0.5f, 0.f, 1.f);
         break;
     case Y:
         eyepos = XMVectorSet(vMaxExt.x * 0.5f, -vMaxExt.y * 2.f, vMaxExt.z * 0.5f, 1.f);
@@ -95,6 +95,8 @@ void CEdit_PreViewModel::Render()
         pModel->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
         pModel->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 
+        if (FAILED(pModel->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         m_pShaderCom->Begin(4);
         pModel->Render(i);
     }
