@@ -1,3 +1,8 @@
+// --- Resources (CModel::Ready_GPU_Buffers에서 생성한 버퍼들) ---
+#define THREAD_X 64
+#define THREAD_Y 1
+#define THREAD_Z 1
+
 struct ParticleState
 {
     float4 Right;
@@ -84,7 +89,7 @@ float4 Rotation(float4 Pos, float Speed)
 }
 
 
-[numthreads(64, 1, 1)]
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void main(uint3 tid : SV_DispatchThreadID)
 {
     uint i = tid.x;

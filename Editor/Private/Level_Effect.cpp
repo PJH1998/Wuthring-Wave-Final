@@ -23,6 +23,18 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
+
+    // hlsl 과 맞춘다. => 이 값은 뼈 개수와 상관없이 거의 고정
+// 한 번에 작업을 처리할 한 팀의 스레드가 몇명인가를 정의.
+    SHADER_MACRO eShaderMacro = {
+        {"THREAD_X", "64" }
+        ,{"THREAD_Y", "1" }
+        ,{"THREAD_Z", "1" }
+        , { NULL, NULL }
+    };
+
+    string strEntryPoint = "main";
+
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl")));
 

@@ -17,6 +17,18 @@ const LIGHT_DESC* CLight_Manager::Get_LightDesc(const _wstring& strLightTag)
 	return iter->second->Get_LightDesc();
 }
 
+#ifdef _DEBUG
+LIGHT_DESC* CLight_Manager::Get_LightDesc_For_Map(const _wstring& strLightTag)
+{
+	auto iter = m_Lights.find(strLightTag);
+
+	if (iter == m_Lights.end())
+		return nullptr;
+
+	return iter->second->Get_LightDesc_For_Map();
+}
+#endif
+
 HRESULT CLight_Manager::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc)
 {
 	auto iter = m_Lights.find(strLightTag);

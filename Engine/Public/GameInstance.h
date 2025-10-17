@@ -120,6 +120,9 @@ public:
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#ifdef _DEBUG
+	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
+#endif
 #pragma endregion
 
 #pragma region CAMERA_MANAGER
@@ -194,6 +197,7 @@ public:
 	ImGuiContext*		Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Render_Gizmo(const _fmatrix& Matrix);
 #pragma endregion
 
 

@@ -10,6 +10,7 @@ public:
 	{
 		LEVEL eLevel = {};
 		_wstring strShaderTag = {};
+		_wstring strComputeShaderTag = {};
 		_wstring strModelTag = {};
 		_string strModelDatPath = {};
 
@@ -19,8 +20,6 @@ public:
 		_float3 vPostion = {};
 		_float3 vRotation = {};
 		_float3 vScale = {};
-
-
 
 		// 무기도 장착 가능하게?..
 	}ANIMATION_ACTOR_DESC;
@@ -67,8 +66,11 @@ private:
 	LEVEL m_eCurLevel = {LEVEL::END};
 	class CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
+	class CComputeShader* m_pComputeShaderCom = { nullptr };
+
 	_uint m_iShaderPath = {};
 	_string m_strCurrentAnimation = {};
+	_string m_strCurrentRibAnimation = {};
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 

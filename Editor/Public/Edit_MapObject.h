@@ -1,5 +1,5 @@
 #pragma once
-#include"GameObject.h"
+#include"StaticObject.h"
 
 
 NS_BEGIN(Engine)
@@ -11,7 +11,8 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CEdit_MapObject : public CGameObject
+//class CEdit_MapObject : public CStaticObject
+	class CEdit_MapObject : public CGameObject
 {
 public:
 	typedef struct tagMapLoad
@@ -40,6 +41,7 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);
+	//virtual		void			Render(_uint iLOD = 0);
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 
@@ -59,12 +61,14 @@ public:
 private:
 	void Export_MaterialData();
 	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
-
+	void About_Parent();
+	void About_Transform();
+	void About_Texture();
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
-	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
+	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CEdit_MapObject* m_pParent = { nullptr };
 	list<CEdit_MapObject*> m_ChildObjects;
@@ -92,7 +96,7 @@ private:
 	_float3 m_vNewRotation = {};
 	_float3 m_vNewTranslation = {};
 
-	_bool m_IsTest = { false };
+	_bool m_IsCustomTexture = { false };
 	_bool m_IsLoaded = { false };
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };
