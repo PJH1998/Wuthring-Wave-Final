@@ -25,6 +25,8 @@ void CModelLoader::Update()
 	if (ImGui::Button("Save Model"))
 		m_isShowSaveFile = !m_isShowSaveFile;
 
+	ImGui::Checkbox("LoadAll_For_Map", &m_isLoadAll);
+	
 	if(true == m_isShowLoadFile)
 		Load_File();
 	if (true == m_isShowSaveFile)
@@ -67,6 +69,7 @@ HRESULT CModelLoader::Save_Dat_Anim(const _char* pFileName)
 		file.write(reinterpret_cast<const _char*>(&pMesh->mMaterialIndex), sizeof(_uint));
 		file.write(reinterpret_cast<const _char*>(&pMesh->mNumBones), sizeof(_uint));
 
+		
 		VTXANIMMESH* Vertices = new VTXANIMMESH[pMesh->mNumVertices];
 		ZeroMemory(Vertices, sizeof(VTXANIMMESH) * pMesh->mNumVertices);
 
@@ -353,17 +356,67 @@ void CModelLoader::Load_File()
 		, vMinSize
 		, vMaxSize)) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
-			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			m_strModelName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-
-			_uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
-			if (MODELTYPE::NONANIM == m_eType)
-				iFlag |= aiProcess_PreTransformVertices;
-			m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
-			if (nullptr == m_pAIScene)
+			if (!m_isLoadAll)
 			{
-				MSG_BOX("경로 잘못됨");
-				return;
+				_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				m_strModelName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+				_uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
+				if (MODELTYPE::NONANIM == m_eType)
+					iFlag |= aiProcess_PreTransformVertices;
+				m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
+				if (nullptr == m_pAIScene)
+				{
+					MSG_BOX("경로 잘못됨");
+					return;
+				}
+			}
+			else
+			{
+				_string strCurrentFilePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+
+				_uint iFlag = { aiProcess_ConvertToLeftHanded | aiProcessPreset_TargetRealtime_Fast };
+				if (MODELTYPE::NONANIM == m_eType)
+					iFlag |= aiProcess_PreTransformVertices;
+				for (const auto& entry : filesystem::directory_iterator(strCurrentFilePath)) {
+					if (entry.is_regular_file()) {
+						if (entry.path().extension() == ".fbx")
+						{
+							_string strFilePath = entry.path().string();
+							m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
+
+							if (nullptr == m_pAIScene)
+							{
+								MSG_BOX("경로 잘못됨");
+								return;
+							}
+							_string SaveFilePath = "../../Client/Bin/Resource/Map/Rock";
+
+							//여기에 넣어야되는 건 저장 경로 => 파일 이름 떼야함.
+
+
+							_string FileName = entry.path().filename().string();
+							_string FolderPath;
+							
+							size_t CutPos = FileName.find("_LOD");
+
+							if (CutPos != std::string::npos)
+								FolderPath = FileName.substr(0, CutPos);
+							SaveFilePath += "/" + FolderPath + "/";
+
+							filesystem::create_directories(SaveFilePath);
+
+							CutPos = FileName.find(".mo");
+							if (CutPos != std::string::npos)
+								FileName = FileName.substr(0, CutPos);
+
+							SaveFilePath +=  FileName + ".dat";
+
+							Save_Dat_NonAnim(SaveFilePath.c_str());
+							Save_Material(SaveFilePath.c_str());
+						}
+					}
+				}
 			}
 		}
 		ImGuiFileDialog::Instance()->Close();
@@ -460,7 +513,7 @@ HRESULT CModelLoader::Save_Bone(ofstream& OutPut, const aiNode* pNode)
 	OutPut.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
 	OutPut.write(strName.data, iLength);
 	OutPut.write(reinterpret_cast<const _char*>(&pNode->mTransformation), sizeof(_float4x4));
-
+	//OutPut.write(reinterpret_cast<const _char*>(&pNode->mOffsetMatrix), sizeof(_float4x4));
 	for (size_t i = 0; i < pNode->mNumChildren; ++i)
 	{
 		if (FAILED(Save_Bone(OutPut, pNode->mChildren[i])))

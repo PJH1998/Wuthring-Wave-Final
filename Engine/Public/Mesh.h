@@ -16,6 +16,9 @@ public:
 	const vector<_float3>&	Get_VerticesPos() { return m_VertexPositions; }
 	const vector<_uint>&		Get_Indices() { return m_Indices; }
 
+	const vector<_uint>& Get_BoneIndices() { return m_BoneIndices; }
+	const vector<_float4x4>& Get_OffsetMatrices() const { return m_OffsetMatrices; }
+
 public:
 	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
 	virtual		HRESULT			Initialize_Clone(void* pArg);
@@ -26,20 +29,21 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
-
+	BoundingBox*				Get_BoundingBox() { return m_pBoundingBox; }
 private:
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
 
 	vector<_uint>				m_BoneIndices;
-	_float4x4						m_BoneMatrices[g_iMaxNumBones] = {};
+	_float4x4					m_BoneMatrices[g_iMaxNumBones] = {};
 
 	vector<_float4x4>			m_OffsetMatrices;
 
 	// Mesh Shape¿ë Container
 	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
-	BoundingBox					m_Cube = {};
+	BoundingBox*				m_pBoundingBox = { nullptr };
+
 private:
 	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
 	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);

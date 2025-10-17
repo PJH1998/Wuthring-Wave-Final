@@ -323,6 +323,14 @@ HRESULT CGameInstance::Render_RT(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pTargetManager->Render(pShader, pVIBuffer);
 }
+HRESULT CGameInstance::Render_RT()
+{
+	return m_pTargetManager->Render();
+}
+ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& strTargetTag)
+{
+	return m_pTargetManager->Get_Debug_RT_Resource(strTargetTag);
+}
 #endif
 #pragma endregion
 
@@ -356,6 +364,12 @@ HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
 }
+#ifdef _DEBUG
+LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
+{
+	return m_pLight_Manager->Get_LightDesc_For_Map(strLightTag);
+}
+#endif
 #pragma endregion
 
 #pragma region CAMERA_MANAGER
@@ -528,6 +542,14 @@ ImGuiContext* CGameInstance::Get_ImGuiContext()
 void CGameInstance::Add_GUI_Func(function<void()> func)
 {
 	m_pGUIManager->Add_GUI_Func(func);
+}
+void CGameInstance::Use_Gizmo(CTransform* pTransform)
+{
+	m_pGUIManager->Use_Gizmo(pTransform);
+}
+void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
+{
+	m_pGUIManager->Render_Gizmo(Matrix);
 }
 #pragma endregion
 

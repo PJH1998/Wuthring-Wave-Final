@@ -60,6 +60,7 @@ public:
 
 
 private:
+	class CGameInstance*		m_pGameInstance = { nullptr };
 	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
@@ -91,6 +92,7 @@ private:
 #ifdef _DEBUG
 	DebugRenderer*	m_pDebugRenderer = { nullptr };
 	BodyManager::DrawSettings m_DrawSetting;
+	_bool					m_isRenderAll = { true };
 #endif
 
 public:

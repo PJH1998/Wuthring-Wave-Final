@@ -96,11 +96,13 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
-	void			End_MRT();
+	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 #ifdef _DEBUG
 	HRESULT		Ready_Debug_RT(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render_RT(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	HRESULT     Render_RT();
+	ID3D11ShaderResourceView* Get_Debug_RT_Resource(const _wstring& strTargetTag);
 #endif
 #pragma endregion
 
@@ -118,6 +120,9 @@ public:
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#ifdef _DEBUG
+	LIGHT_DESC* Get_LightDesc_For_Map(const _wstring& strLightTag);
+#endif
 #pragma endregion
 
 #pragma region CAMERA_MANAGER
@@ -191,6 +196,8 @@ public:
 #pragma region GUIMANAGER
 	ImGuiContext*		Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
+	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Render_Gizmo(const _fmatrix& Matrix);
 #pragma endregion
 
 

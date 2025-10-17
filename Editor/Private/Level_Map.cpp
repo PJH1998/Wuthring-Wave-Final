@@ -2,10 +2,10 @@
 #include "Level_Map.h"
 
 #include "Event_Level.h"
-#include"Model_Instance.h"
-#include"Mesh_Instance.h"
 #include"Edit_MapObject.h"
 #include"Edit_MapObject_Instance.h"
+#include"Edit_PreViewModel.h"
+#include"Edit_LightObject.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -57,6 +57,7 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
     }
     Make_MousePos();
+    m_pPreViewObject->Late_Update(fTimeDelta, m_szPreViewModelName);
 }
 
 void CLevel_Map::Render()
@@ -68,24 +69,23 @@ void CLevel_Map::Menu_Select()
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::MenuItem("Ojbect")) {
-            m_eMenu = MENU_OBJECT;
+            m_eMenu == MENU_OBJECT ? m_eMenu = END : m_eMenu = MENU_OBJECT;
         }
 
         if (ImGui::MenuItem("RandScape")) {
-            m_eMenu = MENU_RANDSCAPE;
+            m_eMenu == MENU_RANDSCAPE ? m_eMenu = END : m_eMenu = MENU_RANDSCAPE;
         }
 
         if (ImGui::MenuItem("Light")) {
-            m_eMenu = MENU_LIGHT;
+            m_eMenu == MENU_LIGHT ? m_eMenu = END : m_eMenu = MENU_LIGHT;
         }
 
         if (ImGui::MenuItem("Map Save & Load")) {
-            m_eMenu = MENU_MAPSAVELOAD;
+            m_eMenu == MENU_MAPSAVELOAD ? m_eMenu = END : m_eMenu = MENU_MAPSAVELOAD;
         }
 
         if(ImGui::MenuItem("Object Save & Load")) {
-            m_eMenu = MENU_OBJECTLOAD;
-            Load_Objects();
+            m_eMenu == MENU_OBJECTLOAD ? m_eMenu = END : m_eMenu = MENU_OBJECTLOAD;
         }
 
         _float4 CamPos = *m_pGameInstance->Get_CamPos();
@@ -105,11 +105,6 @@ void CLevel_Map::Menu_Object()
     ImGui::Begin("Menu_Object");
 
     //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
-    if (ImGui::Button("Test"))
-    {
-        m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Container"),
-            m_iLevel, TEXT("Layer_Containers"), nullptr);
-    }
     if (!m_ContainerObjects.empty())
         Container_Info();
     if (m_pPickedObject)
@@ -157,9 +152,11 @@ void CLevel_Map::Menu_Light()
     // 조명. 일단 Imgui에 List로 현재 내가 넣은 조명들 정보? 순서 띄우기. 버튼형식으로 누르면 그 조명에 대한 정보가 나오게.
        // 라이트 오브젝트를 하나 만들어서 그 놈의 위치 정보를 조명으로. 조절할 수 있게. -> 라이트 객체가 현재 추가된 조명들 중에서 몇 번째 순서인지
        // 각종 색상정보 및 세기, 디퓨즈 앰비언트 기타 등등 다 수정할 수 있게. -> 실시간 적용? or 버튼 누르면 적용. 되돌리기 기능도 있음 좋을듯
-       // 
+       // 점조명에는 그림자 없음.
        //기즈모 달거면 조명에 달기. 
+    
 
+    //이샛기 누르면 왜 똥 생김?
 }
 
 void CLevel_Map::Menu_Model_Load()
@@ -178,6 +175,7 @@ void CLevel_Map::Menu_Model_Load()
             _char FileExt[MAX_PATH] = {};
             _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
+
             if (ImGui::Selectable(FileName))
             {
                 /*_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -188,26 +186,18 @@ void CLevel_Map::Menu_Model_Load()
                 _float4x4 DefaultMatrix{};
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
-
                 strcpy_s(Desc.ModelName, FileName);
 
-                _wstring ProtoModelName = TEXT("Prototype_Component_Model_");
-                ProtoModelName += StringToWString(Desc.ModelName);
-
-                m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), m_ModelPaths[i].c_str()));
-
-
-                _wstring ProtoObjectName = TEXT("Prototype_GameObject_MapObject_");
-                ProtoObjectName += StringToWString(Desc.ModelName);
-
-                m_pGameInstance->Add_Prototype(m_iLevel, ProtoObjectName,
-                    CEdit_MapObject::Create(m_pDevice, m_pContext));
-
-                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, ProtoObjectName
+                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
             }
-
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+                m_szPreViewModelName = StringToWString(FileName);
+                ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
+                ImGui::End();
+            }
         }
         /*ImGui::BeginChild("ScrollObject");
         ImGui::EndChild();*/
@@ -314,7 +304,6 @@ void CLevel_Map::Menu_Save_Load()
                 //레이어나 오브젝트매니저 전체 순회가능한 함수 생기면 변경 고려 해볼것.
 
 
-
                 //LOD를 카메라 거리 기반으로 하지 말고, 모델의 최소 최대 픽셀로 큐브를 만들었을 때 그 큐브가
                 //현재 화면을 기준으로 픽셀을 얼마나 많이 차지하고 있나로 LOD 단계 구별하기. => 스크린 픽셀 사이즈 기법
                 //LOD 모델은 상태머신을 갈아끼우듯 LOD 단계에 따라 바꾸기. => 어차피 모델의 크기는 변하지 않음. 디테일이 달라짐.
@@ -335,20 +324,62 @@ void CLevel_Map::Load_Objects()
 {
     m_ModelPaths.clear();
 
+    m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     string FolderPath = "../../Client/Bin/Resource/Map/";
+    vector<_wstring> m_PrototypeNames;
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
+            if (entry.path().string().find("MapData") != std::string::npos)
+                continue;
+
+            //LOD 모델들은 목록에 추가하지 말고 _LOD0 이름 빼고 1개씩만 저장하게.
             if (entry.path().extension() == ".dat") {
                 m_ModelPaths.push_back(entry.path().string());
+
+                //여기에 프로토타입 미리 생성
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
+                _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
+
+                //멀티 쓰레드 쓸 때 중단점 걸면 터지니까 걸지마쇼
+                m_PrototypeNames.push_back(ProtoModelName);
+
+               _string FilePath = entry.path().string();
+
+                //m_pGameInstance->Add_Work([=]() {
+               if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
+                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+                   CRASH("Prototype Create Failed");
+
+                    //멀티쓰레드 정상화 되면 이거 쓸것.
+                    //    string Test = entry.path().parent_path().string();
+                    //    Test += "/Mat/Tex/";
+                    //    if (filesystem::exists(Test))
+                    //        m_pPreViewObject->Add_Model(ProtoModelName);
+                    //});
             }
         }
     }
+    m_pGameInstance->Wait_Thread_End();
+
+    for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+    {
+        m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
+    }
+
 }
+
 HRESULT CLevel_Map::Ready_Static_Component()
 {
     _matrix PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
+
 
     //일반 모델
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
@@ -370,20 +401,8 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test"),
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test/Test.dat"));
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test1"),
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
-
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
-
-    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf"),
-    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
-
-    //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test"),
-    //    CEdit_MapObject::Create(m_pDevice, m_pContext));
 
 
 
@@ -398,6 +417,12 @@ HRESULT CLevel_Map::Ready_Static_Component()
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
         CEdit_MapObject::Create(m_pDevice, m_pContext));
+    
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
+        CEdit_LightObject::Create(m_pDevice, m_pContext));
+
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
+        , m_iLevel, TEXT("Layer_Light"));
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
@@ -405,27 +430,18 @@ HRESULT CLevel_Map::Ready_Static_Component()
     //큐브 안에 모델 찍기 / 월드 최대 크기 안에 찍어야한다.
     //일단 텍스쳐 없이 모델만 로드해놓기 세이브 & 로드.
     
-    CEdit_MapObject::MAP_LOAD Desc{};
-    CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
-    _float4x4 DefaultMatrix{};
-    XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
-    InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
+    //CEdit_MapObject::MAP_LOAD Desc{};
+    //CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
+    //_float4x4 DefaultMatrix{};
+    //XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
+    //InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
 
-    strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
-    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf")
-        , m_iLevel, TEXT("Layer_Test"), &InstanceDesc);*/
+    //strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
 
-    /*strcpy_s(Desc.ModelName, "Wolf");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Wolf")
-        , m_iLevel, TEXT("Layer_Test"), Desc.ModelName);*/
+    //strcpy_s(Desc.ModelName, "Test1");
 
-    /*strcpy_s(Desc.ModelName, "Test");
-    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test")
-        , m_iLevel, TEXT("Layer_Test"), &Desc.ModelName);*/
-
-    strcpy_s(Desc.ModelName, "Test1");
-    /*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Test1")
-        , m_iLevel, TEXT("Layer_Test"), &Desc);*/
+    //m_pGameInstance->Add_GameObject_ToLayer()
+    Load_Objects();
 
     return S_OK;
 }
@@ -433,39 +449,48 @@ HRESULT CLevel_Map::Ready_Static_Component()
 void CLevel_Map::Ready_Event()
 {
     m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
-
-        switch (m_eMenu)
+        if (event.fDistance <= m_fNearDistance)
         {
-        case Editor::CLevel_Map::MENU_OBJECT:
+            m_fNearDistance = event.fDistance;
+            XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
+        }
+        if (m_pGameInstance->Get_DIKeyState(DIK_X) == KEYSTATE::PRESS)
         {
-            if (event.fDistance <= m_fNearDistance)
+            switch (m_eMenu)
             {
-                m_fNearDistance = event.fDistance;
-                m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-                XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
-                if (m_pChildObject)
+            case Editor::CLevel_Map::MENU_OBJECT:
+            {
+                if (event.fDistance <= m_fNearDistance)
                 {
-                    m_pPickedObject->Add_Child(m_pChildObject);
-                    m_pChildObject = nullptr;
+                    if (m_pPickedObject)
+                        m_pPickedObject->Set_ShaderPass(0);
+
+                    m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                    m_pPickedObject->Set_ShaderPass(3);
+
+                    if (m_pChildObject)
+                    {
+                        m_pPickedObject->Add_Child(m_pChildObject);
+                        m_pChildObject = nullptr;
+                    }
                 }
             }
-        }
-        break;
+            break;
 
-        case Editor::CLevel_Map::MENU_RANDSCAPE:
-            if (event.fDistance <= m_fNearDistance_Instance)
-            {
-                m_fNearDistance_Instance = event.fDistance;
-                m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+            case Editor::CLevel_Map::MENU_RANDSCAPE:
+                if (event.fDistance <= m_fNearDistance_Instance)
+                {
+                    m_fNearDistance_Instance = event.fDistance;
+                    m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+                }
+                break;
+
+            case Editor::CLevel_Map::MENU_LIGHT:
+                int a = 0;
+                break;
             }
-            break;
-
-        case Editor::CLevel_Map::MENU_LIGHT:
-            int a = 0;
-            break;
         }
         });
-
     m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
         m_SaveObjects[event.ModelName].push_back(pObject);
@@ -535,6 +560,8 @@ void CLevel_Map::Free()
     m_pPickedObject = nullptr;
     m_pPickedInstanceObject = nullptr;
     m_pGameInstance->Unscribe();
+
+    Safe_Release(m_pPreViewObject);
 
     for (auto& Pair : m_SaveObjects)
     {

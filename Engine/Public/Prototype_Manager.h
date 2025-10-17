@@ -3,6 +3,7 @@
 
 // [Component]
 #include "Shader.h"
+#include "ComputeShader.h"
 #include "Texture.h"
 #include "Model.h"
 #include "VIBuffer_Rect.h"
@@ -12,6 +13,8 @@
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "Collider.h"
+#include"Model_Instance.h"
+
 // ==================
 
 NS_BEGIN(Engine)
