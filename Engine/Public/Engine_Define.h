@@ -94,7 +94,7 @@ namespace Engine
 	const unsigned int g_iMaxHeight = 4608;
 }
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 5
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"

@@ -35,13 +35,7 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 
 void CAnimator_UI::Update(_float fTimeDelta)
 {
-    // 업데이트는 어떻게 돌림? 게임인스턴스에서 돌 매니저도 아니고
-    // UI가 업데이트를 돌게 하고, UI Update에서 애니메이터를 Update 돌려야 하나
-
     Update_Animation(fTimeDelta);
-
-
-    // m_pCurAnimDesc 갱신도 있어야 함
 
     m_fElapsedTime += fTimeDelta;
 }
@@ -153,43 +147,95 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
-// Fix_LerpRatio, Calc_Lerp 두개 합쳐서
-// 여러 점을 기준으로 위치가 부드럽게 보간되는 것도 고려..? 근데 의미가 있나
+// 회전 및 스케일용
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
 {
     switch (static_cast<UI_LERPTYPE>(iLerpType))
     {
-    case UI_LERPTYPE::LINEAR:       return fIn;
-    case UI_LERPTYPE::CUBIC:        return fIn * fIn * (3.0f - 2.0f * fIn);
-    default:        break;
+    default:        
+    case UI_LERPTYPE::END:
+    case UI_LERPTYPE::LINEAR:               return fIn;
+
+    //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
+    //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
+    case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));                          //
+    //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
+    //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
+    case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));                          //
+
+    case UI_LERPTYPE::CUBIC:                return fIn * fIn * (3.0f - 2.0f * fIn);
+    //case UI_LERPTYPE_SPEED::CUBICR:
     }
 }
 
-_float CAnimator_UI::Calc_Lerp(_float fStart, _float fEnd, _float fRatio)
+_float CAnimator_UI::Calc_LerpRatio(_float fStart, _float fEnd, _float fRatio)
 {
     if (fRatio > 1.f || fRatio < 0.f)
-        CRASH();
+        CRASH("Unclamped Data. fRatio must between [0, 1]");
 
     return (fStart * (1 - fRatio)) + (fEnd * fRatio);
 }
 
+_float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
+{
+    if (!m_pCurAnimDesc)
+        return _float3();
+
+    _vector vPoses[4]               = {};
+
+    _uint iKeyframeTimeStart        = UINT_MAX;
+    _uint iKeyframeTimeEnd          = UINT_MAX;
+    const _bool isLoop              = m_pCurAnimDesc->isLoop;
+    const _uint iLastKeyframeIndex  = m_pCurAnimDesc->vecKeyFrames.size() - 1;
+    _uint iKeyframeIndex            = 0;
+
+    // 현재 키프레임의 vector 내 인덱스를 검색
+    for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
+    {
+        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex > iKeyframe)
+            break;
+        iKeyframeIndex = i;
+    }
+    
+    // lerp에 사용할 값들 할당
+    for (_uint i = 0; i < 4; i++)
+    {
+        // 1, 2 사잇값을 사용할 것.
+        // 다만 인덱스를 벗어나는 경우에 대해 정의. 이는 loop 여부에 따라 다름.
+        _uint iIndex = iKeyframeIndex + i - 1;
+        if (iIndex < 0)
+            iIndex = (isLoop) ? iLastKeyframeIndex : 0;
+        else if (iIndex > iLastKeyframeIndex)
+            iIndex = (isLoop) ? 0 : iLastKeyframeIndex;
+
+        vPoses[i] = XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iIndex].vPos);
+        
+        if (i == 1) iKeyframeTimeStart  = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+        if (i == 2) iKeyframeTimeEnd    = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+        if (iKeyframeTimeStart == iKeyframeTimeEnd) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[(iIndex + 1) % m_pCurAnimDesc->vecKeyFrames.size()].iKeyframeIndex;
+    }
+
+    // 할당한 값을 이용하여 계산, 반환
+    // 키프레임 차에 따른 간격도 고려해여 계산해야 함. XMVectorCatmullRom 는 키프레임 간격이 같음이 전제기 때문.
+    // 1, 2 사이의 키프레임을 기준으로 ratio 계산하여 인자를 주면 될듯?
+
+    _float fKeyframeRatio = (_float)(iKeyframe - iKeyframeTimeStart) / (iKeyframeTimeEnd - iKeyframeTimeStart);
+
+    _vector vResultPos = XMVectorCatmullRom(vPoses[0], vPoses[1], vPoses[2], vPoses[3], fKeyframeRatio);
+    _float3 vResult = {};
+    XMStoreFloat3(&vResult, vResultPos);
+
+    return vResult;
+}
+
 void CAnimator_UI::Update_Animation(_float fTimeDelta)
 {
-    // 도출된 키프레임을 통해 현재 값이어야 하는 것 걸러내고 실제로 적용시켜야 함
-    // 텍스쳐는 이전 값 그대로 사용해야 하고, Alpha, Transform과 같은 값은 LerpType 에 따른 보간을 이용해서 적용해야 함
-    // LerpType 은 Linear, Cubic
-
-    // 현재 방식은 단순하게 점을 따라 일직선상으로 이동하기만 하는데,
-    // 필요에 따라서는 점 여러개를 인자로써 통하는 함수를 이용하여 자연스러운 곡선 움직임이 필요할수도?
-
-
     if (m_pCurAnimDesc == nullptr)
         return;
 
-
     // Calculate Frame..
-    const _uint iKeyFrameRate = 60; // 기준 초당 프레임
-    const _float fSingleFrameTime = 1.f / iKeyFrameRate;
+    const _uint     iKeyFrameRate       = 60; // 기준 초당 프레임
+    const _float    fSingleFrameTime    = 1.f / iKeyFrameRate;
 
     _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // 현재 키프레임
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
@@ -233,30 +279,35 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
-    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->iLerpType); // 이전 키프레임와 현재 키프레임 간의 최종 보간 비율
+    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // 이전 키프레임와 현재 키프레임 간의 최종 보간 비율
 
 
     // ==============================
     // * Calculate Results..
     // ==============================
     _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
-    _float fResultAlpha = Calc_Lerp(
+    _float fResultAlpha = Calc_LerpRatio(
         m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha, 
         m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha, 
         fFixedLerpRatio
     );
-    _float3 vResultPos = {};
-    XMStoreFloat3(&vResultPos, XMVectorLerp(
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
-        fFixedLerpRatio)
-    );
+    //_float3 vResultPos = {};
+    // ksta : cmr 넣으면 이부분 제거 및 변경 필요
+    //XMStoreFloat3(&vResultPos, XMVectorLerp(
+    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
+    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
+    //    fFixedLerpRatio)
+    //);
+
+    _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
+
     _float3 vResultRot = {};
-    XMStoreFloat3(&vResultRot, XMVectorLerp(
+    XMStoreFloat3(&vResultRot, XMVectorLerp(        // degree라서 그런 것 같은데.. 
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vRot),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vRot),
         fFixedLerpRatio)
     );
+    _float3 vResultRotRad = { DegreesToRadians(vResultRot.x), DegreesToRadians(vResultRot.y), DegreesToRadians(vResultRot.z) };
     _float3 vResultSca = {};
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
@@ -268,10 +319,13 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+    pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
-    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRot));
+    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
     _matrix matTransform = matSca * matRot * matPos;

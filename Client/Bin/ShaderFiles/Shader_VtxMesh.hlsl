@@ -107,8 +107,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     
-    if (Out.vDiffuse.a < 0.1f)
-        discard;
+    //if (Out.vDiffuse.a < 0.1f)
+    //    discard;
     
     //float3 vNormal = vNormalDesc.xyz * 2.f - 1.f;
 

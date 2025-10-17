@@ -76,6 +76,7 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 }
 #endif
 
+// 이것도 계산 셰이더가 적용되어야 하는 부분?
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)

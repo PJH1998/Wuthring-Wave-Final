@@ -1,10 +1,13 @@
 #include "EnginePch.h"
 #include "CubeCell.h"
 
+#include "GameInstance.h"
 #include "StaticObject.h"
 
 CCubeCell::CCubeCell()
+	: m_pGameInstance { CGameInstance::GetInstance() }
 {
+	Safe_AddRef(m_pGameInstance);
 }
 
 HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
@@ -20,10 +23,16 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 
 	ASSERT_CRASH(m_pBoundingBox);
 
-	if (MAX_DEPTH == iDepth)
-		return S_OK;
+	m_pBoundingBox->GetCorners(m_Corners);
+	Compute_MinMax();
 
-	for (_uint i = 0; i < ENUM_CLASS(TYPE::END); ++i)
+	if (MAX_DEPTH == iDepth)
+	{
+		//cout << "Extent : " << Extent.x << endl;
+		return S_OK;
+	}
+
+	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
 		_float3 vOffset = {};
 		vOffset.x = (i & 1) ? 0.25f : -0.25f;
@@ -52,27 +61,71 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 
 void CCubeCell::Priority_Update(_float fTimeDelta)
 {
+	for (auto& pObject : m_Objects)
+		pObject->Priority_Update(fTimeDelta);
 }
 
 void CCubeCell::Update(_float fTimeDelta)
 {
+	for (auto& pObject : m_Objects)
+		pObject->Update(fTimeDelta);
 }
 
 void CCubeCell::Late_Update(_float fTimeDelta)
 {
+	for (auto& pObject : m_Objects)
+		pObject->Late_Update(fTimeDelta);
 }
 
-void CCubeCell::Render()
+void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 {
+	ASSERT_CRASH(pObject);
+	ASSERT_CRASH(pMinMax);
+
+	for (size_t i = 0; i < m_ChildCells.size(); ++i)
+	{
+		if (true == m_ChildCells[i]->isIn(pMinMax))
+		{
+			m_ChildCells[i]->Add_Object(pObject, pMinMax);
+			return;
+		}
+	}
+	m_Objects.push_back(pObject);
 }
 
-void CCubeCell::Add_Object(CStaticObject* pObject, const BoundingBox* pBox)
+void CCubeCell::Compute_MinMax()
 {
+	m_MinMax[ENUM_CLASS(MINMAX::MIN_X)] = m_Corners[ENUM_CLASS(CORNER::LBD)].x;
+	m_MinMax[ENUM_CLASS(MINMAX::MAX_X)] = m_Corners[ENUM_CLASS(CORNER::RBD)].x;
+
+	m_MinMax[ENUM_CLASS(MINMAX::MIN_Y)] = m_Corners[ENUM_CLASS(CORNER::LBD)].y;
+	m_MinMax[ENUM_CLASS(MINMAX::MAX_Y)] = m_Corners[ENUM_CLASS(CORNER::LBU)].y;
+
+	m_MinMax[ENUM_CLASS(MINMAX::MIN_Z)] = m_Corners[ENUM_CLASS(CORNER::LBD)].z;
+	m_MinMax[ENUM_CLASS(MINMAX::MAX_Z)] = m_Corners[ENUM_CLASS(CORNER::LFD)].z;
 }
 
-_bool CCubeCell::isIn(const BoundingBox* pBox)
+_bool CCubeCell::isIn(const _float* pMinMax)
 {
-	return _bool();
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_X)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_X)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_X)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_X)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_Y)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_Y)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_Y)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_Y)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MIN_Z)] < m_MinMax[ENUM_CLASS(MINMAX::MIN_Z)])
+		return false;
+
+	if (pMinMax[ENUM_CLASS(MINMAX::MAX_Z)] > m_MinMax[ENUM_CLASS(MINMAX::MAX_Z)])
+		return false;
+
+	return true;
 }
 
 CCubeCell* CCubeCell::Create(_float3 vCenter, _float3 vExtent, _uint iDepth)
@@ -101,4 +154,6 @@ void CCubeCell::Free()
 	for (auto& Child : m_ChildCells)
 		Safe_Release(Child);
 	m_ChildCells.clear();
+
+	Safe_Release(m_pGameInstance);
 }

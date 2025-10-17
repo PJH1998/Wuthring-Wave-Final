@@ -69,6 +69,7 @@ HRESULT CModelLoader::Save_Dat_Anim(const _char* pFileName)
 		file.write(reinterpret_cast<const _char*>(&pMesh->mMaterialIndex), sizeof(_uint));
 		file.write(reinterpret_cast<const _char*>(&pMesh->mNumBones), sizeof(_uint));
 
+		
 		VTXANIMMESH* Vertices = new VTXANIMMESH[pMesh->mNumVertices];
 		ZeroMemory(Vertices, sizeof(VTXANIMMESH) * pMesh->mNumVertices);
 
@@ -512,7 +513,7 @@ HRESULT CModelLoader::Save_Bone(ofstream& OutPut, const aiNode* pNode)
 	OutPut.write(reinterpret_cast<const _char*>(&iLength), sizeof(_uint));
 	OutPut.write(strName.data, iLength);
 	OutPut.write(reinterpret_cast<const _char*>(&pNode->mTransformation), sizeof(_float4x4));
-
+	//OutPut.write(reinterpret_cast<const _char*>(&pNode->mOffsetMatrix), sizeof(_float4x4));
 	for (size_t i = 0; i < pNode->mNumChildren; ++i)
 	{
 		if (FAILED(Save_Bone(OutPut, pNode->mChildren[i])))

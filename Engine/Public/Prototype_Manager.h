@@ -3,6 +3,7 @@
 
 // [Component]
 #include "Shader.h"
+#include "ComputeShader.h"
 #include "Texture.h"
 #include "Model.h"
 #include "VIBuffer_Rect.h"
@@ -11,6 +12,7 @@
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
+#include "ComputeShader.h"
 #include "Collider.h"
 #include"Model_Instance.h"
 

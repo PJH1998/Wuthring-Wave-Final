@@ -285,6 +285,19 @@ void CGameInstance::Wait_Thread_End()
 }
 #pragma endregion
 
+#pragma region OctoTree
+void CGameInstance::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
+{
+	m_pOctoTree->SetUp_OctoTree(vCenter, vExtent);
+}
+
+void CGameInstance::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
+{
+	m_pOctoTree->Add_To_OctoTree(pObject, pBox);
+}
+#pragma endregion
+
+
 #pragma region TARGET_MANAGER
 ID3D11Resource* CGameInstance::Get_RT_Resource(const _wstring& strTargetTag)
 {

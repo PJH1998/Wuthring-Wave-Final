@@ -87,6 +87,8 @@ public:
 #pragma endregion
 
 #pragma region OctoTree
+	void			SetUp_OctoTree(_float3 vCenter, _float3 vExtent);
+	void			Add_To_OctoTree(class CStaticObject* pObject, const BoundingBox* pBox);
 
 #pragma endregion
 

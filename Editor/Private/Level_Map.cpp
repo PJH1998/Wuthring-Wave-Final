@@ -22,6 +22,9 @@ HRESULT CLevel_Map::Initialize()
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
+	// OctoTree SetUp
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
     //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 
     return S_OK;

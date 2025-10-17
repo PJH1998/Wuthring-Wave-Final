@@ -2,7 +2,7 @@
 #include "Component.h"
 #include "Level_UI.h"
 
-// UIÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ ¹ÙÅÁÀ¸·Î ½ÇÁúÀûÀÎ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» µ¹¸®´Â Å¬·¡½º
+// UIì˜ ì• ë‹ˆë©”ì´ì…˜ ì •ë³´ë¥¼ ë°”íƒ•ìœ¼ë¡œ ì‹¤ì§ˆì ì¸ ì• ë‹ˆë©”ì´ì…˜ì„ ëŒë¦¬ëŠ” í´ë˜ìŠ¤
 NS_BEGIN(Editor)
 
 class CAnimator_UI final : public CComponent
@@ -10,8 +10,11 @@ class CAnimator_UI final : public CComponent
 public:
 	enum class UI_LERPTYPE
 	{
-		LINEAR,
-		CUBIC,
+		LINEAR,	// ê°™ì€ ì†ë„ë¡œ.
+		LT,		// ì²˜ìŒì—” ë¹ ë¦„, ê·¸ ë’¤ì— ëŠë ¤ì§. / ê·¸ë˜í”„ ëª¨ì–‘ì´ ì™¼ìª½ ìœ„ ë°©í–¥ì„ ë´„ (Left-Top)
+		RB,		// ì²˜ìŒì—” ëŠë¦¼, ê·¸ ë’¤ì— ë¹¨ë¼ì§. / ê·¸ë˜í”„ ëª¨ì–‘ì´ ì˜¤ë¥¸ìª½ ì•„ë˜ ë°©í–¥ì„ ë´„ (Right-Bottom)
+		CUBIC,	// ì²˜ìŒê³¼ ëì€ ëŠë¦¼, ì¤‘ê°„ ë¶€ë¶„ë§Œ ìì—°ìŠ¤ëŸ½ê²Œ ë¹ ë¦„. / ê¸°ì¡´.
+			
 		END
 	};
 
@@ -34,8 +37,6 @@ public:
 	virtual HRESULT			Render()								override;
 
 public:
-	// ¾Ö´Ï¸ŞÀÌ¼Ç ÀüÈ¯ °ü·Ã ÇÔ¼ö..?
-	// Play_Animation (ÀÎÀÚ) µî..
 	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc);
 	HRESULT		Remove_Animation(_wstring strAnimName);
 	HRESULT		Clear_Animation();
@@ -47,18 +48,17 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
+	CLevel_UI::UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
+
 private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);
-	_float		Calc_Lerp(_float fStart, _float fEnd, _float Ratio);
+	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ì—ì„œ ì‚¬ìš©í• , LerpTypeì— ë”°ë¥¸ ë¹„ìœ¨ fInê°’ì˜ ë³´ì •ê°’ ë°˜í™˜ (0 -> 1 ë¡œ ê°€ëŠ” ê·¸ë˜í”„ì˜ ê³¡ì„ í™”)
+	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ì •ë§ ë‹¨ìˆœíˆ Ratio ì— ë”°ë¥¸ Startì™€ End ì‚¬ì´ì˜ ê°’ì„ ë°˜í™˜
+
+	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// í‚¤í”„ë ˆì„ì„ ë„£ìœ¼ë©´ í˜„ì¬ ì• ë‹ˆë©”ì´ì…˜ì˜ í˜„ì¬ positionì— ë§ëŠ” ê°’ì„ ë°˜í™˜ (catmull-rom ì ìš©)
 
 	void		Update_Animation(_float fTimeDelta);
 
 private:
-	// UI ´ãÀº ÄÁÅ×ÀÌ³Ê..?
-	// UI´Â ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ ´ãµµ·Ï..?
-
-	// ¾Ö´Ï¸ŞÀÌ¼Ç Å¬·¡½º¸¦ ÀúÀåÇÏ´Â °Ô ¾Æ´Ï¶ó ±×³É ¾Ö´Ï¸ŞÀÌ¼Ç Desc¸¦ ÀúÀåÇÏ°í ºÒ·¯¿Í¼­ ¾²¸é µÇ´Â °ÍÀÌ ¾Æ´ÑÁö?
-	// ±×·¯¸é ÄÁÅ×ÀÌ³Ê·Î Map »ç¿ë
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 
