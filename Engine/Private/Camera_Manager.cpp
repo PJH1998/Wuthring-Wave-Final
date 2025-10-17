@@ -125,6 +125,22 @@ void CCamera_Manager::Change_FixedDistance(_float fFixedDistance)
     m_pMainCamera->Set_FixedDistance(fFixedDistance);
 }
 
+_float CCamera_Manager::Get_CurrentCamera_Near()
+{
+    if (nullptr == m_pMainCamera || true == m_isFree)
+        return m_pFreeCamera->Get_Near();
+    else
+        return m_pMainCamera->Get_Near();
+}
+
+_float CCamera_Manager::Get_CurrentCamera_Far()
+{
+    if (nullptr == m_pMainCamera || true == m_isFree)
+        return m_pFreeCamera->Get_Far();
+    else
+        return m_pMainCamera->Get_Far();
+}
+
 HRESULT CCamera_Manager::Initialize(_uint iNumLevel)
 {
     m_iNumLevel = iNumLevel;
@@ -226,7 +242,7 @@ void CCamera_Manager::Ready_FreeCamera()
 	CCamera::CAMERA_DESC CameraDesc = {};
 	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
-	CameraDesc.fFar = 100000.f;
+	CameraDesc.fFar = 5000.f;
 	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
 	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
 	CameraDesc.fSpeedPerSec = 1000.f;

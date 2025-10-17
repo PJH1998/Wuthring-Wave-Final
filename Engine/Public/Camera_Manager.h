@@ -15,15 +15,18 @@ public:
 	
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames);
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
-	void				Play_Action(const _wstring& strActionTag);
+	void			Play_Action(const _wstring& strActionTag);
 
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
-	void				Change_Distance(_float fDistance);
-	void				Change_FixedDistance(_float fFixedDistance);
+	void			Change_Distance(_float fDistance);
+	void			Change_FixedDistance(_float fFixedDistance);
+
+	_float			Get_CurrentCamera_Near();
+	_float			Get_CurrentCamera_Far();
 
 public:
 	HRESULT			Initialize(_uint iNumLevel);
-	void				Update(_float fTimeDelta);	// PipeLine에 Camera Matrix 갱신
+	void			Update(_float fTimeDelta);	// PipeLine에 Camera Matrix 갱신
 
 	HRESULT			Clear_Resource(_uint iCurrentLevelID);
 
@@ -32,9 +35,9 @@ private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
-	_uint							m_iNumLevel = {};
+	_uint						m_iNumLevel = {};
 	typedef map<const _wstring, class CCamera*> CAMERA;
-	CAMERA*					m_Cameras = { nullptr };
+	CAMERA*						m_Cameras = { nullptr };
 	class CCamera*				m_pMainCamera = { nullptr };
 
 	typedef map<const _wstring, vector<ACTIONFRAME>> CAMERA_ACTION;

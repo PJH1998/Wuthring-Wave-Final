@@ -19,16 +19,17 @@ public:
 
 public:
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
-	HRESULT					SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType);
 	HRESULT					Clear_Light();
 	HRESULT					Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 
 private:
+
 	map<_wstring, CLight*>		m_Lights;
+	LIGHT_DESC*					m_pShadowLight;
 
 public:
-	static		CLight_Manager*	Create();
-	virtual		void					Free() override;
+	static		CLight_Manager*		Create();
+	virtual		void				Free() override;
 };
 
 NS_END

@@ -46,24 +46,24 @@ HRESULT CLight_Manager::Add_Light(const _wstring& strLightTag, const LIGHT_DESC&
 	return S_OK;
 }
 
-HRESULT CLight_Manager::SetUp_Light(CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType)
-{
-	auto iter = m_Lights.find(strLightTag);
-	if (iter == m_Lights.end())
-		return E_FAIL;
-
-	const LIGHT_DESC* pLight = iter->second->Get_LightDesc();
-
-	if (eType == LIGHT_DESC::DIRECTION)
-	{
-		pShader->Bind_Value("g_vLightDiffuse", &pLight->vDiffuse, sizeof(_float4));
-		pShader->Bind_Value("g_vLightAmbient", &pLight->vAmbient, sizeof(_float4));
-		pShader->Bind_Value("g_vLightSpecular", &pLight->vSpecular, sizeof(_float4));
-		pShader->Bind_Value("g_vLightDir", &pLight->vDirection, sizeof(_float4));
-	}
-
-	return S_OK;
-}
+//HRESULT CLight_Manager::SetUp_Light(CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType)
+//{
+//	auto iter = m_Lights.find(strLightTag);
+//	if (iter == m_Lights.end())
+//		return E_FAIL;
+//
+//	const LIGHT_DESC* pLight = iter->second->Get_LightDesc();
+//
+//	if (eType == LIGHT_DESC::DIRECTION)
+//	{
+//		pShader->Bind_Value("g_vLightDiffuse", &pLight->vDiffuse, sizeof(_float4));
+//		pShader->Bind_Value("g_vLightAmbient", &pLight->vAmbient, sizeof(_float4));
+//		pShader->Bind_Value("g_vLightSpecular", &pLight->vSpecular, sizeof(_float4));
+//		pShader->Bind_Value("g_vLightDir", &pLight->vDirection, sizeof(_float4));
+//	}
+//
+//	return S_OK;
+//}
 
 HRESULT CLight_Manager::Clear_Light()
 {
