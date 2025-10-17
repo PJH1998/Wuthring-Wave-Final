@@ -14,8 +14,9 @@ void COctoTree::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
 	ASSERT_CRASH(m_pRootCell);
 }
 
-void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox, const _fvector& vPosition)
+void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 {
+	
 }
 
 COctoTree* COctoTree::Create()

@@ -4,11 +4,15 @@
 #include "ContactListenerImpl.h"
 #include "CharacterContactListenerImpl.h"
 
+#include "GameInstance.h"
+
 CPhysicsManager::CPhysicsManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: m_pDevice{ pDevice }, m_pContext{ pContext }
+	: m_pDevice{ pDevice }, m_pContext{ pContext },
+	m_pGameInstance { CGameInstance::GetInstance() }
 {
 	Safe_AddRef(m_pDevice);
 	Safe_AddRef(m_pContext);
+	Safe_AddRef(m_pGameInstance);
 }
 
 Body* CPhysicsManager::Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut)
@@ -106,6 +110,9 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 
 void CPhysicsManager::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_DELETE) == KEYSTATE::DOWN)
+		m_isRenderAll = !m_isRenderAll;
+
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
 
 	for (_uint i = 0; i < m_iNumObjectLayer; ++i)
@@ -136,6 +143,8 @@ void CPhysicsManager::Update(_float fTimeDelta)
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
+	if (false == m_isRenderAll)
+		return;
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
 	m_pPhysicsSystem->DrawBodies(m_DrawSetting, m_pDebugRenderer);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
@@ -202,4 +211,5 @@ void CPhysicsManager::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pGameInstance);
 }
