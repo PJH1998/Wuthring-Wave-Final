@@ -12,7 +12,7 @@ protected:
 
 public:
 	virtual		HRESULT		Initialize_Prototype() { return S_OK; };
-	virtual		HRESULT		Initialize_Clone(void* pArg) { return S_OK; };
+	virtual		HRESULT		Initialize_Clone(void* pArg) { return __super::Initialize_Clone(pArg); };
 	virtual		void			Priority_Update(_float fTimeDelta) {};
 	virtual		void			Update(_float fTimeDelta) {};
 	virtual		void			Late_Update(_float fTimeDelta) {};

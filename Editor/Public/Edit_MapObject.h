@@ -1,5 +1,5 @@
 #pragma once
-#include"GameObject.h"
+#include"StaticObject.h"
 
 
 NS_BEGIN(Engine)
@@ -11,7 +11,8 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CEdit_MapObject : public CGameObject
+//class CEdit_MapObject : public CStaticObject
+	class CEdit_MapObject : public CGameObject
 {
 public:
 	typedef struct tagMapLoad
@@ -40,6 +41,7 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);
+	//virtual		void			Render(_uint iLOD = 0);
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 

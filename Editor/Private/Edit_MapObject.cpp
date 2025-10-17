@@ -8,11 +8,13 @@
 
 _uint CEdit_MapObject::g_iNumObjects = {};
 CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+    //:CStaticObject(pDevice, pContext)
     :CGameObject(pDevice, pContext)
 {
 }
 
 CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
+    //:CStaticObject(Prototype)
     :CGameObject(Prototype)
 {
 }
@@ -37,6 +39,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
 
+    //m_iNumLOD = m_pModelComArray.size()-1;
 
     _vector vScale, vRotation, vTranslation;
 
@@ -134,6 +137,7 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 }
 
 void CEdit_MapObject::Render()
+//void CEdit_MapObject::Render(_uint iLOD)
 {
     Bind_Resources();
 
@@ -513,33 +517,41 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;*/
 
-    for(_uint i=0; i<4;++i)
+    for (_uint i = 0; i < 4; ++i)
     {
-        _wstring ModelCom = Model;
-        ModelCom.pop_back();
-        ModelCom += to_wstring(i);
+        m_pGameInstance->Add_Work([&,Index = i, Name = Model]() {
+            _wstring ModelCom = Name;
+            ModelCom.pop_back();
+            ModelCom += to_wstring(Index);
 
-        _char ModelName[MAX_PATH] = {};
-        sprintf_s(ModelName, "Com_Model%d", i);
-        if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
-            StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-            continue;
+            _char ModelName[MAX_PATH] = {};
+            sprintf_s(ModelName, "Com_Model%d", Index);
+            if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+                StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[Index]), nullptr)))
+                CRASH("FAILED");
+                int a = 0;
+            });
     }
-    m_pModelCom = m_pModelComArray[0];
+    m_pGameInstance->Wait_Thread_End();
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
+    
+#pragma region 리지드바디
+        //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+        //RigidbodyDesc.eShape = SHAPE::MESH;
+        //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+        //RigidbodyDesc.eType = EMotionType::Static;
+        //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+        //RigidbodyDesc.pModel = m_pModelCom;
 
-    CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    RigidbodyDesc.eShape = SHAPE::MESH;
-    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    RigidbodyDesc.eType = EMotionType::Static;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    RigidbodyDesc.pModel = m_pModelCom;
-
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+        //if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+        //    CRASH("FAILED");
+#pragma endregion
+    m_pGameInstance->Wait_Thread_End();
+    m_pModelCom = m_pModelComArray[0];
     return S_OK;
 }
 
