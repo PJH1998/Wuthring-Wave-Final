@@ -387,15 +387,21 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 #pragma endregion
 
 	
-
+	
 	// 6. 중간 결과 적용.(일단 RootAnimation CombinedTransofrmationMatrix는 그대로 적용)
 	ApplyComputeResults_ToBones();
+
+	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
+	_string strRibAnimationName = "Rib_" + strAnimationName;
+	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+
+	
 #pragma endregion
 
-	_string strRibAnimationName = "Rib_" + strAnimationName;
-	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+	
+	
 
-	// 7. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	// 8. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (bIsAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
@@ -460,7 +466,8 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 	if (iter == m_Animations.end())
 		return;
 
-	iter->second->Update_TransformationMatrices(fTimeDelta, m_Bones);
+	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
+
 
 	//for (auto& pBone : m_Bones)
 	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
@@ -525,7 +532,10 @@ void CModel::ApplyComputeResults_ToBones()
 	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		m_Bones[i]->Set_TransformationMatrix(XMLoadFloat4x4(&vLocalMatrices[i]));
+		/* Prev Final 곱하기?*/
+		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
+		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
 
 	// 5. Unmap으로 마무리합니다.

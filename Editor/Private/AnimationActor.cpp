@@ -75,10 +75,9 @@ void CAnimationActor::Update(_float fTimeDelta)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
         /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
-        
         m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
-    }
-        
+
+    }        
 
     
 

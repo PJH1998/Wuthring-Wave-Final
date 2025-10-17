@@ -132,6 +132,27 @@ _bool CAnimation::Update_TransformationMatrices(_float fTimeDelta, const vector<
 	return false;
 }
 
+_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+{
+	if (nullptr != pTrackPosition)
+		*pTrackPosition = m_fCurrentTrackPosition;
+
+	if (m_fCurrentTrackPosition > m_fDuration)
+	{
+		m_fCurrentTrackPosition = 0.f;
+		return true;
+	}
+
+	for (size_t i = 0; i < m_iNumChannels; ++i)
+	{
+		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
+	}
+
+	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+
+	return false;
+}
+
 _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
 {
 	if (nullptr != pTrackPosition)
