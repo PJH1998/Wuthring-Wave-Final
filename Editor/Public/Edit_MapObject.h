@@ -61,7 +61,9 @@ public:
 private:
 	void Export_MaterialData();
 	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
-
+	void About_Parent();
+	void About_Transform();
+	void About_Texture();
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
@@ -94,7 +96,7 @@ private:
 	_float3 m_vNewRotation = {};
 	_float3 m_vNewTranslation = {};
 
-	_bool m_IsTest = { false };
+	_bool m_IsCustomTexture = { false };
 	_bool m_IsLoaded = { false };
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };

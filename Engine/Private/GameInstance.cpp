@@ -364,6 +364,12 @@ HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
 }
+#ifdef _DEBUG
+LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
+{
+	return m_pLight_Manager->Get_LightDesc_For_Map(strLightTag);
+}
+#endif
 #pragma endregion
 
 #pragma region CAMERA_MANAGER

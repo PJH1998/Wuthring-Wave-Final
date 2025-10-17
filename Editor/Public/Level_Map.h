@@ -46,6 +46,7 @@ private:
 	class CEdit_MapObject* m_pChildObject = { nullptr };
 	class CEdit_MapObject* m_pPickedObject = { nullptr };
 	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
+	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
 
 

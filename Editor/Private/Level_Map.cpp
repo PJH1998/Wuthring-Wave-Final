@@ -2,11 +2,10 @@
 #include "Level_Map.h"
 
 #include "Event_Level.h"
-#include"Model_Instance.h"
-#include"Mesh_Instance.h"
 #include"Edit_MapObject.h"
 #include"Edit_MapObject_Instance.h"
 #include"Edit_PreViewModel.h"
+#include"Edit_LightObject.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -153,7 +152,7 @@ void CLevel_Map::Menu_Light()
     // 조명. 일단 Imgui에 List로 현재 내가 넣은 조명들 정보? 순서 띄우기. 버튼형식으로 누르면 그 조명에 대한 정보가 나오게.
        // 라이트 오브젝트를 하나 만들어서 그 놈의 위치 정보를 조명으로. 조절할 수 있게. -> 라이트 객체가 현재 추가된 조명들 중에서 몇 번째 순서인지
        // 각종 색상정보 및 세기, 디퓨즈 앰비언트 기타 등등 다 수정할 수 있게. -> 실시간 적용? or 버튼 누르면 적용. 되돌리기 기능도 있음 좋을듯
-       // 
+       // 점조명에는 그림자 없음.
        //기즈모 달거면 조명에 달기. 
     
 
@@ -402,12 +401,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test"),
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test/Test.dat"));
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test1"),
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Test1/Test1.dat"));
-
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
 
@@ -424,6 +417,12 @@ HRESULT CLevel_Map::Ready_Static_Component()
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
         CEdit_MapObject::Create(m_pDevice, m_pContext));
+    
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
+        CEdit_LightObject::Create(m_pDevice, m_pContext));
+
+    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
+        , m_iLevel, TEXT("Layer_Light"));
 
     //오브젝트매니저에서 레이어 전부 돌면서 순차적으로 저장.
     //LOD 개수 LOD0, LOD1, LOD2같이 LOD 수도 저장??
@@ -441,6 +440,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //strcpy_s(Desc.ModelName, "Test1");
 
+    //m_pGameInstance->Add_GameObject_ToLayer()
     Load_Objects();
 
     return S_OK;
@@ -454,12 +454,11 @@ void CLevel_Map::Ready_Event()
             m_fNearDistance = event.fDistance;
             XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
         }
-
-        switch (m_eMenu)
+        if (m_pGameInstance->Get_DIKeyState(DIK_X) == KEYSTATE::PRESS)
         {
-        case Editor::CLevel_Map::MENU_OBJECT:
-        {
-            if(m_pGameInstance->Get_DIKeyState(DIK_X) == KEYSTATE::PRESS)
+            switch (m_eMenu)
+            {
+            case Editor::CLevel_Map::MENU_OBJECT:
             {
                 if (event.fDistance <= m_fNearDistance)
                 {
@@ -476,23 +475,22 @@ void CLevel_Map::Ready_Event()
                     }
                 }
             }
-        }
-        break;
+            break;
 
-        case Editor::CLevel_Map::MENU_RANDSCAPE:
-            if (event.fDistance <= m_fNearDistance_Instance)
-            {
-                m_fNearDistance_Instance = event.fDistance;
-                m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+            case Editor::CLevel_Map::MENU_RANDSCAPE:
+                if (event.fDistance <= m_fNearDistance_Instance)
+                {
+                    m_fNearDistance_Instance = event.fDistance;
+                    m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
+                }
+                break;
+
+            case Editor::CLevel_Map::MENU_LIGHT:
+                int a = 0;
+                break;
             }
-            break;
-
-        case Editor::CLevel_Map::MENU_LIGHT:
-            int a = 0;
-            break;
         }
         });
-
     m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
         m_SaveObjects[event.ModelName].push_back(pObject);

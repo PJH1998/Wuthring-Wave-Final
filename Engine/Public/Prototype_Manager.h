@@ -12,6 +12,8 @@
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "Collider.h"
+#include"Model_Instance.h"
+
 // ==================
 
 NS_BEGIN(Engine)

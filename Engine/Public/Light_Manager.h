@@ -12,7 +12,10 @@ private:
 	virtual ~CLight_Manager() = default;
 
 public:
-	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
+	const LIGHT_DESC* Get_LightDesc(const _wstring& strLightTag);
+#ifdef _DEBUG
+	LIGHT_DESC*		Get_LightDesc_For_Map(const _wstring& strLightTag);
+#endif
 
 public:
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
