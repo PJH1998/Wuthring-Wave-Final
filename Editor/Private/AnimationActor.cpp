@@ -37,7 +37,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
-    // ModelÀÇ Dat Folder Path
+    // Modelï¿½ï¿½ Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -47,7 +47,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    // Default´Â 0¹ø ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà.
+    // Defaultï¿½ï¿½ 0ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
@@ -67,7 +67,7 @@ void CAnimationActor::Update(_float fTimeDelta)
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ÇÏµåÄÚµù...
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ï¿½Ïµï¿½ï¿½Úµï¿½...
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
 
@@ -76,13 +76,17 @@ void CAnimationActor::Update(_float fTimeDelta)
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
         /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
         m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
-
-    }        
+    }
+        
+#ifdef _DEBUG
+	_int iBoneIndex = 0;
+    m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
+#endif // _DEBUG
 
     
 
-    // °³³ä»ó °°ÀÌ ½ÇÇàÀº ½ÃÅ°´Âµ¥ Root »À¸¦ Identity·Î ÇÏ¸éµÈ´Ù?
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ÇÏµåÄÚµù...
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å°ï¿½Âµï¿½ Root ï¿½ï¿½ï¿½ï¿½ Identityï¿½ï¿½ ï¿½Ï¸ï¿½È´ï¿½?
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ï¿½Ïµï¿½ï¿½Úµï¿½...
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
@@ -144,14 +148,14 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼Ç ÀÌ¸§
+// Notifyï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½Ì¸ï¿½
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÃÖ´ë TrackPosition
+// Notifyï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
@@ -159,15 +163,15 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 }
 
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÃÖ´ë ÇÁ·¹ÀÓ Á¤º¸?
+// Notifyï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½?
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
-    // ¾îÂ÷ÇÇ ÇöÀç°Å ¼³Á¤ÇÏ´Ï±î ¸Å°³º¯¼ö·Î °¡Á®¿Ã ÇÊ¿ä°¡ ¾øÀ» µí.
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´Ï±ï¿½ ï¿½Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ä°¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    // TrackPositionÀ» ¼³Á¤ÇÏ¸é¼­ ¸¸¾à StopÀÎ °æ¿ì¿¡µµ È®ÀÎÇÒ ¼ö ÀÖ°Ô Play AnimationÀ» ½ÇÇàÇÕ´Ï´Ù.
+    // TrackPositionï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸é¼­ ï¿½ï¿½ï¿½ï¿½ Stopï¿½ï¿½ ï¿½ï¿½ì¿¡ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ Play Animationï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
     /*if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
@@ -177,13 +181,13 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
-// Æú´õ¿¡ Á¸ÀçÇÏ´Â ¸ðµç ¾Ö´Ï¸ÞÀÌ¼Ç jsonÀ» ÀÐ¾î¿Í¼­ µî·ÏÇÕ´Ï´Ù.
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ jsonï¿½ï¿½ ï¿½Ð¾ï¿½Í¼ï¿½ ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'´Â »ý·« °¡´É
+        this->Collider_Active(tag, active); // 'this->'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     };
 
     auto effectCallBack = [this]() {
@@ -202,7 +206,7 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
-// 1. Çà·Ä 
+// 1. ï¿½ï¿½ï¿½ 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
