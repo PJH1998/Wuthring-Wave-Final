@@ -44,7 +44,7 @@ void CPicking::Update()
 	GetCursorPos(&m_ptMouse);
 	ScreenToClient(m_hWnd, &m_ptMouse);
 
-	ID3D11Resource* pResource = m_pGameInstance->Get_RT_Resource(TEXT("Target_Depth"));
+	ID3D11Resource* pResource = m_pGameInstance->Get_RT_Resource(TEXT("RT_Depth"));
 	if (nullptr == pResource)
 		return;
 
@@ -53,6 +53,10 @@ void CPicking::Update()
 
 _bool CPicking::isPicked(_float3* pOut)
 {
+	_uint MousePos = m_ptMouse.y * m_iWinSizeX + m_ptMouse.x;
+	if (MousePos > m_iWinSizeX * m_iWinSizeY)
+		return false;
+
 	// Mouse ÁÂÇ¥ÀÇ DepthDesc ÃßÃâ
 	D3D11_MAPPED_SUBRESOURCE SubResource = {};
 	if (FAILED(m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ, 0, &SubResource)))

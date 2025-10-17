@@ -152,6 +152,7 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 void CEdit_MapObject::Render()
 //void CEdit_MapObject::Render(_uint iLOD)
 {
+    //안보이는 거 깊이
     Bind_Resources();
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
@@ -543,9 +544,11 @@ void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, 
     _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * Matrix;
     m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
 
-    
+
     XMStoreFloat3(&m_vNewTranslation, NewChildWolrd.r[3]);
 
+    for (auto& pChild : m_ChildObjects)
+        pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
     //위치만 갖고오기?
     //부모만 회전해야할 때는 어떻게함?
 }
@@ -636,11 +639,9 @@ void CEdit_MapObject::About_Transform()
     //m_pGameInstance->Add_Light()
     //자식은 간단하게 부모의 변화량만 추가로 하게 하면 될듯? 회전은 모르겠음..
 
-    if (m_IsParent)
-    {
-        for (auto& pChild : m_ChildObjects)
-            pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
-    }
+
+    for (auto& pChild : m_ChildObjects)
+        pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
 
     if (m_pParent)
         Make_ChildLocalMatrix(dynamic_cast<CTransform*>(m_pParent->Get_Component(TEXT("Com_Transform")))->Get_WorldMatrix());
@@ -1031,6 +1032,10 @@ void CEdit_MapObject::Free()
     for (auto& pTexture : m_pMaskDiffuseTextureCom)
         if (pTexture)
             Safe_Release(pTexture);
+
+
+    for (auto& pChild : m_ChildObjects)
+        pChild = nullptr;
 
     m_pGameInstance->Unscribe();
 }

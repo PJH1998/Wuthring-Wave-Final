@@ -34,7 +34,12 @@ void CLevel_Map::Update(_float fTimeDelta)
 {
     m_fNearDistance = FLT_MAX;
     m_fNearDistance_Instance = FLT_MAX;
-
+    _float3 Test;
+    if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+    {
+        if (m_pGameInstance->isPicked(&Test))
+            int a = 0;
+    }
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
