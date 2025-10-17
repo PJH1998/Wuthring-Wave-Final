@@ -812,8 +812,9 @@ HRESULT CModel::Ready_Shared_Buffers()
 		// 시작 인덱스, 개수, 지속시간.
 		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // 순차 탐색 AnimInfo에서 0부터 재생.
 		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 모든 채널의 개수
+#ifdef _DEBUG
 		animInfo.fDuration = pAnimation->Get_Duration();
-
+#endif
 		// Depth2에 대한 설정.
 		for (const auto& pChannel : pAnimation->Get_Channels())
 		{
