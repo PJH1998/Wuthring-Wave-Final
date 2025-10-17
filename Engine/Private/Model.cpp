@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Model.h"
 #include "GameInstance.h"
 
@@ -367,7 +367,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	if (iter == m_Animations.end())
 		return S_OK;
 
-#pragma region 1. 뼈 행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+#pragma region 1. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
 	// 1. 현재 애니메이션의 Track Position 업데이트
 	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
 	_float fTrackPosition = 0.f;
