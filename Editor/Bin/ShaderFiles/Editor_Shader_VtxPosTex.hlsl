@@ -55,6 +55,8 @@ texture2D g_Texture;
 texture2D g_DepthTexture;
 float g_AlphaStrength;
 
+float2 g_TexcoordLT, g_TexcoordRB;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -123,16 +125,6 @@ PS_OUT PS_MAIN(PS_IN In)
     return Out;
 }
 
-PS_OUT PS_ALPHAENABLED(PS_IN In)
-{
-    PS_OUT Out = (PS_OUT) 0;
-    
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
-    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
-    
-    return Out;
-}
-
 PS_OUT PS_MAIN_BLEND(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -148,6 +140,16 @@ PS_OUT PS_MAIN_BLEND(PS_IN In)
     
     
     Out.vColor.a = Out.vColor.a * saturate(vDepthDesc.y - In.vProjPos.w);
+    
+    return Out;
+}
+
+PS_OUT PS_ALPHAENABLED_UI(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     return Out;
 }
@@ -176,7 +178,7 @@ technique11 DefaultTechnique
 
     }
 
-    pass AlphaPass
+    pass AlphaPass_UI
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -184,7 +186,7 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_ALPHAENABLED();
+        PixelShader = compile ps_5_0 PS_ALPHAENABLED_UI();
     }
 
     pass CallNonePass
