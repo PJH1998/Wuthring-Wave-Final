@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+#include "ClientPch.h"
 #include "Animator_UI.h"
 
 CAnimator_UI::CAnimator_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -50,7 +50,7 @@ HRESULT CAnimator_UI::Render()
 	return S_OK;
 }
 
-HRESULT CAnimator_UI::Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc)
+HRESULT CAnimator_UI::Insert_Animation(UI_ANIM_DESC& Desc)
 {
     if (Find_Animation(Desc.strAnimName))
         return E_FAIL;
@@ -61,7 +61,7 @@ HRESULT CAnimator_UI::Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc)
 
 HRESULT CAnimator_UI::Remove_Animation(_wstring strAnimName)
 {
-    CLevel_UI::UI_ANIM_DESC* pDesc = nullptr;
+    UI_ANIM_DESC* pDesc = nullptr;
 
     _uint iIndex = 0;
     for (auto& animDesc : m_vecAnimationDescs)
@@ -94,7 +94,7 @@ HRESULT CAnimator_UI::Clear_Animation()
 
 HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
 {
-    CLevel_UI::UI_ANIM_DESC* pDesc = Find_Animation(strAnimName);
+    UI_ANIM_DESC* pDesc = Find_Animation(strAnimName);
 
     if (!pDesc)
         return E_FAIL;
@@ -107,7 +107,7 @@ HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
 
 HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex)
 {
-    CLevel_UI::UI_ANIM_DESC* pDesc = Find_Animation(iAnimIndex);
+    UI_ANIM_DESC* pDesc = Find_Animation(iAnimIndex);
 
     if (!pDesc)
         return E_FAIL;
@@ -125,9 +125,9 @@ HRESULT CAnimator_UI::Deselect_Animation()
     return S_OK;
 }
 
-CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_wstring strAnimName)
+CAnimator_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_wstring strAnimName)
 {
-    CLevel_UI::UI_ANIM_DESC* pDesc = nullptr;
+    UI_ANIM_DESC* pDesc = nullptr;
 
     for (auto& animDesc : m_vecAnimationDescs)
         if (animDesc.strAnimName == strAnimName)
@@ -139,7 +139,7 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_wstring strAnimName)
     return (pDesc) ? pDesc : nullptr;
 }
 
-CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
+CAnimator_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
 {
     if (iAnimIndex >= m_vecAnimationDescs.size())
         return nullptr;
@@ -186,7 +186,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     _uint       iKeyframeTimeStart  = UINT_MAX;
     _uint       iKeyframeTimeEnd    = UINT_MAX;
     const _bool isLoop              = m_pCurAnimDesc->isLoop;
-    const _uint iLastKeyframeIndex  = m_pCurAnimDesc->vecKeyFrames.size() - 1;
+    const _uint iLastKeyframeIndex  = static_cast<_uint>(m_pCurAnimDesc->vecKeyFrames.size() - 1);
     _uint       iKeyframeIndex      = 0;
 
     // 현재 키프레임의 vector 내 인덱스를 검색
@@ -216,7 +216,9 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     }
 
     // 할당한 값을 이용하여 계산, 반환
+    // 키프레임 차에 따른 간격도 고려해여 계산해야 함. XMVectorCatmullRom 는 키프레임 간격이 같음이 전제기 때문.
     // 1, 2 사이의 키프레임을 기준으로 ratio 계산하여 인자를 주면 될듯?
+
     _float fKeyframeRatio = {};
 
     if ((iKeyframeTimeEnd - iKeyframeTimeStart) == 0)       fKeyframeRatio = 0;

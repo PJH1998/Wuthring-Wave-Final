@@ -55,6 +55,30 @@
     <Filter Include="01. Level\Loader\GamePlay">
       <UniqueIdentifier>{f5fad4f8-9dfd-46e7-b0da-c921dca7dbbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\UI">
+      <UniqueIdentifier>{563c526b-7c8a-4f92-aea8-449dcd05b960}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\_Component">
+      <UniqueIdentifier>{568e43bc-56f3-431f-ad3e-3d6b304aa7c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\_Parents">
+      <UniqueIdentifier>{cafcd8f0-cf04-43db-82bc-10aa7b6ddf53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\_Parents\_SubParents">
+      <UniqueIdentifier>{227c8b9a-6632-4aaa-b184-f27332add1b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\Child_Containers">
+      <UniqueIdentifier>{bcc5e1c4-c008-4a3d-9347-79f895a898b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\Child_Containers\HUD">
+      <UniqueIdentifier>{85a2c17f-884c-46f0-b33c-a45891365597}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\Child_Containers\EscMenu">
+      <UniqueIdentifier>{3676f597-ae70-427f-b080-012e3f414fbb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\UI\_Shader">
+      <UniqueIdentifier>{c73bb3bc-f04c-4c7a-9003-495eede35a7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -117,6 +141,27 @@
     <ClInclude Include="..\Public\Level_GamePlay.h">
       <Filter>01. Level\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Animator_UI.h">
+      <Filter>02. GameObject\UI\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Image.h">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Text.h">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Button.h">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Interact.h">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_HUD.h">
+      <Filter>02. GameObject\UI\Child_Containers\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>02. GameObject\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -169,6 +214,27 @@
     <ClCompile Include="..\Private\Level_GamePlay.cpp">
       <Filter>01. Level\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Animator_UI.cpp">
+      <Filter>02. GameObject\UI\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Image.cpp">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Text.cpp">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Button.cpp">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Interact.cpp">
+      <Filter>02. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_HUD.cpp">
+      <Filter>02. GameObject\UI\Child_Containers\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>02. GameObject\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -193,6 +259,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader_UI_VtxPosTex.hlsl">
+      <Filter>02. GameObject\UI\_Shader</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
