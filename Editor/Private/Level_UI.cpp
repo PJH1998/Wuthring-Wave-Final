@@ -584,7 +584,7 @@ void CLevel_UI::Update_SaveLoad()
             from_json(jUIAnimData, tLoadAnimDesc);
 
             CAnimator_UI* ObjAnimatorCom = dynamic_cast<CAnimator_UI*> (m_pCurObj->Get_Component(L"Com_Animator_UI"));
-            if (!ObjAnimatorCom) CRASH();
+            if (!ObjAnimatorCom) CRASH(cannot find AnimatorCom);
 
             _wstring strCurObjName = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().strFileName;
             _wstring strReqObjName = tLoadAnimDesc.tUIDesc.strFileName;
@@ -986,14 +986,43 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
         ImGui::Separator();
 
         ImGui::Text("Lerp Type");
-        if      (m_iLerpType == 0)
+
+        const char* szLerpTypeNames[] = {
+            "LINEAR",
+            //"MT",  
+            //"MB",  
+            "LT",    
+            //"LB",    
+            //"RT",    
+            "RB",
+            "CUBIC"
+        };
+
+        if (ImGui::BeginCombo("Lerp Type##LerpType", szLerpTypeNames[m_iLerpType]))
         {
-            if (ImGui::Button("Linear")) { m_iLerpType = 1; } // To Cubic
+            for (_uint i = 0; i < IM_ARRAYSIZE(szLerpTypeNames); i++)
+            {
+                // 현재 선택 여부
+                _bool isSelected = (m_iLerpType == i);
+
+                if (ImGui::Selectable(szLerpTypeNames[i], isSelected))
+                    m_iLerpType = i; // 선택 시 값 업데이트
+
+                // 선택된 항목에 체크 표시
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
         }
-        else if (m_iLerpType == 1)
-        {
-            if (ImGui::Button("Cubic")) { m_iLerpType = 0; } // To Linear
-        }
+
+        //if      (m_iLerpType == 0)
+        //{
+        //    if (ImGui::Button("Linear")) { m_iLerpType = 1; } // To Cubic
+        //}
+        //else if (m_iLerpType == 1)
+        //{
+        //    if (ImGui::Button("Cubic")) { m_iLerpType = 0; } // To Linear
+        //}
             
         ImGui::Separator();
 
@@ -1006,8 +1035,8 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             if (ImGui::Button("Add Keyframe"))
             {
                 UI_ANIM_KEYFRAME_DESC tTempDesc = {
-                    iKeyFrame,
-                    iTexIndex,
+                    (_uint)iKeyFrame,
+                    (_uint)iTexIndex,
                     fAlpha,
                     m_vCurObjPos,
                     m_vCurObjRot,

@@ -11,7 +11,14 @@ public:
 	enum class UI_LERPTYPE
 	{
 		LINEAR,
+		//MT,		// mid top
+		//MB,		// mid bottom
+		LT,		// left top
+		//LB,		// left bottom
+		//RT,		// right top
+		RB,		// right bottom
 		CUBIC,
+			
 		END
 	};
 
@@ -48,8 +55,10 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
 
 private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);
-	_float		Calc_Lerp(_float fStart, _float fEnd, _float Ratio);
+	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp 에서 사용할, LerpType에 따른 비율 fIn값의 보정값 반환 (0 -> 1 로 가는 그래프의 곡선화)
+	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// 정말 단순히 Ratio 에 따른 Start와 End 사이의 값을 반환
+
+	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// 키프레임을 넣으면 현재 애니메이션의 현재 position에 맞는 값을 반환 (catmull-rom 적용)
 
 	void		Update_Animation(_float fTimeDelta);
 
