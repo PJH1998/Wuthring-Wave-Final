@@ -156,8 +156,9 @@ void CEdit_MapObject::Render()
     {
         if (m_TexMode)
         {
+            //커스텀 텍스쳐 모드면 마스킹 이미지 없어서 제대로 안됨.
             if (m_pDiffuseTextureCom[i])
-                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
+                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture",0);
             if (m_pNormalTextureCom[i])
                 m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture");
             if (m_pMaskTextureCom[i])
@@ -165,7 +166,7 @@ void CEdit_MapObject::Render()
             else
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
             if (m_pMaskDiffuseTextureCom[i])
-                m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskDiffuse");
+                m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 1);
         }
         else
         {
@@ -177,15 +178,8 @@ void CEdit_MapObject::Render()
 
             if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-
-            if (FailedCnt > 1)
-                m_iShaderPassIndex = 1;
-            else
-                m_iShaderPassIndex = 0;
         }
 
-        //이니셜라이즈 할 때 Bind_Materials 메쉬별로 한 번씩 돌려서 텍스쳐 없는 메쉬만 내가 직접 넣어서 저장할 수 있게?
-        
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
@@ -300,16 +294,15 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         //    });
         CModel* pModel = nullptr;
         _wstring ModelCom = Model;
-        ModelCom.pop_back();
+        //ModelCom.pop_back();
         ModelCom += to_wstring(i);
-
+        
         _char ModelName[MAX_PATH] = {};
         sprintf_s(ModelName, "Com_Model%d", i);
         if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
-            //StringToWString(ModelName), reinterpret_cast<CComponent**>(&pModel), nullptr)))
             StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
             CRASH("FAILED");
-        //m_pModelComArray.push_back(pModel);
+
     }
     m_pGameInstance->Wait_Thread_End();
 
@@ -345,7 +338,7 @@ void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
 {
     _bool Same = { true };
 
-    if (pObject->m_pParent)
+    if (pObject->m_pParent || pObject == this || m_pParent == pObject)
         return;
 
     for (auto& pChild : m_ChildObjects)
@@ -593,6 +586,9 @@ void CEdit_MapObject::About_Parent()
                 m_pPickedChild = pChildObject;
                 m_pPickedChild->m_iShaderPassIndex = 3;
             }
+            else
+                if (m_pPickedChild)
+                    m_pPickedChild->m_iShaderPassIndex = 0;
         }
         ImGui::EndChildFrame();
 
@@ -891,13 +887,21 @@ void CEdit_MapObject::About_Texture()
                     m_SelectedMaskTexturePath[m_iSelectedMesh] = m_EntireMaskTextureName[i].c_str();
 
                     m_SelectedMaskTextureName[m_iSelectedMesh] = FileName;
-                    m_iSelectedMaskIndex[m_iSelectedMesh] = i;
                 }
             }
             ImGui::EndCombo();
         }
+        ImGui::SameLine();
+        if (ImGui::Button("X###Mask"))
+        {
+            if (m_pMaskTextureCom[m_iSelectedMesh])
+                Safe_Release(m_pMaskTextureCom[m_iSelectedMesh]);
 
-        if (ImGui::BeginCombo("MaskDiffuse", m_SelectedMaskDiffuseName[m_iSelectedMesh].c_str()))
+            m_SelectedMaskTexturePath[m_iSelectedMesh] = "";
+            m_SelectedMaskTextureName[m_iSelectedMesh] = "";
+        }
+
+        if (ImGui::BeginCombo("X###MaskDiffuse", m_SelectedMaskDiffuseName[m_iSelectedMesh].c_str()))
         {
 
             for (_uint i = 0; i < m_EntireDiffuseTextureName.size(); ++i)
@@ -918,7 +922,7 @@ void CEdit_MapObject::About_Texture()
                     if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
                         Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
 
-                    m_pMaskDiffuseTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_pMaskDiffuseTextureCom[m_iSelectedMesh] = CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1);
                     m_SelectedMaskDiffusePath[m_iSelectedMesh] = m_EntireDiffuseTextureName[i].c_str();
 
                     m_SelectedMaskDiffuseName[m_iSelectedMesh] = FileName;
@@ -926,6 +930,15 @@ void CEdit_MapObject::About_Texture()
                 }
             }
             ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("MaskDiffuse###X"))
+        {
+            if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
+                Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
+
+            m_SelectedMaskDiffusePath[m_iSelectedMesh] = "";
+            m_SelectedMaskDiffuseName[m_iSelectedMesh] = "";
         }
 
         if (ImGui::Button("Make_Json"))

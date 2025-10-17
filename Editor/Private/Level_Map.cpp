@@ -105,8 +105,7 @@ void CLevel_Map::Menu_Object()
     ImGui::Begin("Menu_Object");
 
     //레이어나 오브젝트매니저에서 오브젝트 포인터 갖고오는 거 되면 피킹 말고 BeginChildFrame으로 또 선택해도 될듯.
-    if (!m_ContainerObjects.empty())
-        Container_Info();
+
     if (m_pPickedObject)
         m_pPickedObject->Set_ImGuiOption();
 
@@ -334,7 +333,7 @@ void CLevel_Map::Load_Objects()
 
             //LOD 모델들은 목록에 추가하지 말고 _LOD0 이름 빼고 1개씩만 저장하게.
             if (entry.path().extension() == ".dat") {
-                m_ModelPaths.push_back(entry.path().string());
+                //m_ModelPaths.push_back(entry.path().string());
 
                 //여기에 프로토타입 미리 생성
                 _char FileDrive[MAX_PATH] = {};
@@ -345,12 +344,35 @@ void CLevel_Map::Load_Objects()
 
                 _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
                 _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
-
+                _wstring  PushName = ProtoModelPath + StringToWString(FileName);
+                PushName.pop_back();
                 //멀티 쓰레드 쓸 때 중단점 걸면 터지니까 걸지마쇼
-                m_PrototypeNames.push_back(ProtoModelName);
 
-               _string FilePath = entry.path().string();
+                _bool IsExists = { false };
 
+                _string Temp;
+                Temp += FileDir;
+                Temp += FileName;
+                Temp.pop_back();
+
+                for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+                {
+                    _wstring PopName = m_PrototypeNames[i];
+                    PopName.pop_back();
+
+                    if (!lstrcmp(PushName.c_str(), PopName.c_str()))
+                    {
+                        IsExists = true;
+                        break;
+                    }
+                }
+                if (!IsExists)
+                {
+                    m_PrototypeNames.push_back(ProtoModelName);
+                    m_ModelPaths.push_back(Temp);
+                }
+
+                _string FilePath = entry.path().string();
                 //m_pGameInstance->Add_Work([=]() {
                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))

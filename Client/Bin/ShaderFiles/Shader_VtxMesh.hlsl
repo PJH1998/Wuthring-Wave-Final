@@ -99,7 +99,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
@@ -110,8 +110,10 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (Out.vDiffuse.a < 0.1f)
         discard;
     
-    Out.vNormal = In.vNormal * 0.5f + 0.5f;
-    //Out.vNormal = vNormal * 2.f + -1.f;
+    //float3 vNormal = vNormalDesc.xyz * 2.f - 1.f;
+
+    //Out.vNormal = vector(vNormal * 0.5f + 0.5f, 0.f);
+    Out.vNormal = vNormalDesc * 2.f -1.f;
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
