@@ -37,7 +37,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
-    // Model�� Dat Folder Path
+    // Model?? Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -47,7 +47,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    // Default�� 0�� �ִϸ��̼� ����.
+    // Default?? 0?? ??????? ????.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
@@ -67,7 +67,7 @@ void CAnimationActor::Update(_float fTimeDelta)
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // �ϵ��ڵ�...
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
 
@@ -85,8 +85,8 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     
 
-    // ����� ���� ������ ��Ű�µ� Root ���� Identity�� �ϸ�ȴ�?
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // �ϵ��ڵ�...
+    // ????? ???? ?????? ?????? Root ???? Identity?? ??????
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
@@ -148,14 +148,14 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-// Notify���� ����� ���� ���õ� �ִϸ��̼� �̸�
+// Notify???? ????? ???? ????? ??????? ???
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-// Notify���� ����� ���� ���õ� �ִϸ��̼��� �ִ� TrackPosition
+// Notify???? ????? ???? ????? ????????? ??? TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
@@ -163,15 +163,15 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 }
 
 
-// Notify���� ����� ���� ���õ� �ִϸ��̼��� �ִ� ������ ����?
+// Notify???? ????? ???? ????? ????????? ??? ?????? ?????
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
-    // ������ ����� �����ϴϱ� �Ű������� ������ �ʿ䰡 ���� ��.
+    // ?????? ????? ???????? ????????? ?????? ??? ???? ??.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    // TrackPosition�� �����ϸ鼭 ���� Stop�� ��쿡�� Ȯ���� �� �ְ� Play Animation�� �����մϴ�.
+    // TrackPosition?? ??????? ???? Stop?? ??��?? ????? ?? ??? Play Animation?? ????????.
     /*if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
@@ -181,13 +181,13 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
-// ������ �����ϴ� ��� �ִϸ��̼� json�� �о�ͼ� ����մϴ�.
+// ?????? ??????? ??? ??????? json?? ?��??? ???????.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'�� ���� ����
+        this->Collider_Active(tag, active); // 'this->'?? ???? ????
     };
 
     auto effectCallBack = [this]() {
@@ -206,7 +206,7 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
-// 1. ��� 
+// 1. ??? 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
