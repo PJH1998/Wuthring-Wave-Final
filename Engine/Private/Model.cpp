@@ -418,8 +418,8 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	ApplyComputeResults_ToBones();
 
 	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
-	_string strRibAnimationName = "Rib_" + strAnimationName;
-	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+	//_string strRibAnimationName = "Rib_" + strAnimationName;
+	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
 	
 #pragma endregion
