@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "GameInstance.h"
 
 #include "Graphic_Device.h"
@@ -21,6 +21,8 @@
 #include "Shadow.h"
 #include "GUIManager.h"
 #include "OctoTree.h"
+#include "Frustrum.h"
+#include "CSM.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -92,6 +94,12 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pGUIManager = CGUIManager::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
 	ASSERT_CRASH(m_pGUIManager);
 
+	m_pFrustrum = CFrustrum::Create();
+	ASSERT_CRASH(m_pFrustrum);
+
+	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH( m_pCSM );
+
 	return S_OK;
 }
 
@@ -105,9 +113,13 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 
 	m_pObject_Manager->Update(fTimeDelta);
+	
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPipeLine->Update();
-
+	m_pFrustrum->Update();
+	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
+	m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
+	
 	m_pPhysicsManager->Update(fTimeDelta);
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
@@ -138,6 +150,9 @@ void CGameInstance::Render_Begin(const _float4* pClearColor)
 
 HRESULT CGameInstance::Draw()
 {
+	ASSERT_CRASH(m_pPooling_Manager);
+	m_pPooling_Manager->Wait_Thread_End();
+
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
@@ -285,6 +300,19 @@ void CGameInstance::Wait_Thread_End()
 }
 #pragma endregion
 
+#pragma region OctoTree
+void CGameInstance::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
+{
+	m_pOctoTree->SetUp_OctoTree(vCenter, vExtent);
+}
+
+void CGameInstance::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
+{
+	m_pOctoTree->Add_To_OctoTree(pObject, pBox);
+}
+#pragma endregion
+
+
 #pragma region TARGET_MANAGER
 ID3D11Resource* CGameInstance::Get_RT_Resource(const _wstring& strTargetTag)
 {
@@ -344,6 +372,10 @@ HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
 }
+HRESULT CGameInstance::Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength)
+{
+	return m_pRenderer->Bind_RawValue(pConstantName, pValue, iLength);
+}
 #endif
 #pragma endregion
 
@@ -356,14 +388,16 @@ HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& 
 {
 	return m_pLight_Manager->Add_Light(strLightTag, LightDesc);
 }
-HRESULT	CGameInstance::SetUp_Light(class CShader* pShader, const _wstring& strLightTag, LIGHT_DESC::TYPE eType)
-{
-	return m_pLight_Manager->SetUp_Light(pShader, strLightTag, eType);
-}
 HRESULT CGameInstance::Render_Light(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
 	return m_pLight_Manager->Render(pShader, pVIBuffer);
 }
+#ifdef _DEBUG
+LIGHT_DESC* CGameInstance::Get_LightDesc_For_Map(const _wstring& strLightTag)
+{
+	return m_pLight_Manager->Get_LightDesc_For_Map(strLightTag);
+}
+#endif
 #pragma endregion
 
 #pragma region CAMERA_MANAGER
@@ -398,6 +432,14 @@ void CGameInstance::Change_Distance(_float fDistance)
 void CGameInstance::Change_FixedDistance(_float fFixedDistance)
 {
 	m_pCamera_Manager->Change_FixedDistance(fFixedDistance);
+}
+_float CGameInstance::Get_CurrentCamera_Near()
+{
+	return m_pCamera_Manager->Get_CurrentCamera_Near();
+}
+_float CGameInstance::Get_CurrentCamera_Far()
+{
+	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
 #pragma endregion
 
@@ -516,7 +558,8 @@ const _float4x4* CGameInstance::Get_ShadowLight_Matrix(D3DTS eType)
 }
 HRESULT CGameInstance::Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc)
 {
-	return m_pShadow->Ready_ShadowLight(Desc);
+//	return m_pShadow->Ready_ShadowLight(Desc);
+	return S_OK;
 }
 HRESULT CGameInstance::Bind_Shadow_Resource(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName)
 {
@@ -537,6 +580,59 @@ void CGameInstance::Add_GUI_Func(function<void()> func)
 {
 	m_pGUIManager->Add_GUI_Func(func);
 }
+void CGameInstance::Use_Gizmo(CTransform* pTransform)
+{
+	m_pGUIManager->Use_Gizmo(pTransform);
+}
+void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
+{
+	m_pGUIManager->Render_Gizmo(Matrix);
+}
+#pragma endregion
+
+#pragma region FRUSTRUM
+const _float4* CGameInstance::Get_Frustrum_WorldPoints() const
+{
+	return m_pFrustrum->Get_Frustrum_WorldPoints();
+}
+_bool CGameInstance::IsIn_WorldSpace(_fvector vWorldPosition, _float fRange)
+{
+	return m_pFrustrum->IsIn_WorldSpace(vWorldPosition, fRange);
+}
+_bool CGameInstance::IsIn_WorldSpace(const BoundingBox* pBoundingBox)
+{
+	return m_pFrustrum->IsIn_WorldSpace(pBoundingBox);
+}
+_bool CGameInstance::IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange)
+{
+	return m_pFrustrum->IsIn_LocalSpace(WorldMatrix, vLocalPosition, fRange);
+}
+HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
+{
+	return m_pCSM->SetUp_ShadowLight(strLightTag);
+}
+HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName)
+{
+	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pDistanceName);
+}
+HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
+{
+	return m_pCSM->Bind_CSM_SRV(pShader, pConstantName);
+}
+HRESULT CGameInstance::Begin_CSM()
+{
+	return m_pCSM->Begin_CSM();
+}
+HRESULT CGameInstance::End_CSM()
+{
+	return m_pCSM->End_CSM();
+}
+#ifdef _DEBUG
+void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	m_pCSM->Render(pShader, pVIBuffer);
+}
+#endif
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
@@ -591,6 +687,9 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pGraphic_Device);
+	Safe_Release(m_pFrustrum);
+	Safe_Release(m_pCSM);
+
 	Release();
 }
 

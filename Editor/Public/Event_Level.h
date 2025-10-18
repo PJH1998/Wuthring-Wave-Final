@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "EditorPch.h"
 
 typedef struct tagChangeLevel : public CEvent

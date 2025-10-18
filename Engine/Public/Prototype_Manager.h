@@ -1,17 +1,21 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 // [Component]
 #include "Shader.h"
+#include "ComputeShader.h"
 #include "Texture.h"
 #include "Model.h"
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Cube.h"
 #include "VIBuffer_Point_Instance.h"
+#include "VIBuffer_Point.h"
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "Collider.h"
+#include"Model_Instance.h"
+
 #include "Behavior_Tree.h"
 // ==================
 

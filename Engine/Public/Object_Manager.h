@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -28,6 +28,8 @@ private:
 
 	map<const _wstring, class CLayer*>* m_Layers = { nullptr };
 	typedef map<const _wstring, class CLayer*> LAYERS;
+
+	mutex							m_Mutex;
 
 private:
 	class CLayer* Find_Layer(_uint iLayerLevelID, const _wstring& strLayerTag);

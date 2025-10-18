@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Parser.h"
 #include"MapObject.h"
 IMPLEMENT_SINGLETON(CParser)
@@ -24,7 +24,7 @@ void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
             CMapObject::Create(pDevice, pContext));
         });
 
-    //�ӵ� �׽�Ʈ
+    //?띾룄 ?뚯뒪??
     for (size_t i = 0; i < 10; i++)
     {
         ifstream File(pFilePath, ios::binary);

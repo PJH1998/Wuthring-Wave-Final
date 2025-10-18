@@ -1,5 +1,6 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Dummy.h"
+
 
 CDummy::CDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -46,13 +47,17 @@ void CDummy::Update(_float fTimeDelta)
 
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 	m_pColliderCom->Update(vVelocity);
-	
 }
 
 void CDummy::Late_Update(_float fTimeDelta)
 {
-	m_pColliderCom->Sync_Position(m_pTransformCom);
+	//m_pColliderCom->Sync_Position(m_pTransformCom);
+
+	// Guizmo Test
+	m_pGameInstance->Use_Gizmo(m_pTransformCom);
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 }
 
 void CDummy::Render()
@@ -74,6 +79,23 @@ void CDummy::Render()
 #ifdef _DEBUG
 	//m_pRigidbodyCom->Render();
 #endif
+}
+
+void CDummy::Render_Shadow()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vDistance");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pShaderCom->Begin(5);
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CDummy::Ready_Component()

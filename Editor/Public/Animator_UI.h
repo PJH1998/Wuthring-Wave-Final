@@ -1,8 +1,8 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 #include "Level_UI.h"
 
-// UIÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ ¹ÙÅÁÀ¸·Î ½ÇÁúÀûÀÎ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» µ¹¸®´Â Å¬·¡½º
+// UI???é†«ë”…ë¹ç­Œë¡«ë—„????ï§ï½‹ê¶–??ç„ì…?æº??ê³—ì¨® ??ì‡±ì¶³?æ€¨ëª„ëµ¥ ?é†«ë”…ë¹ç­Œë¡«ë—„???ë¥ë±½ ???ë´º????Â€???
 NS_BEGIN(Editor)
 
 class CAnimator_UI final : public CComponent
@@ -10,8 +10,11 @@ class CAnimator_UI final : public CComponent
 public:
 	enum class UI_LERPTYPE
 	{
-		LINEAR,
-		CUBIC,
+		LINEAR,	// æ¶ì†ëŠ¿? ??ì–œì¦²åš¥?
+		LT,		// ç­Œï½Œê¼·?????ì¥“å·²? åŸŸ???ì‡°í“  ?ç™’?ì »ç­Œ? / åŸŸë°¸ì±¶???ç­Œë¤´ë«å ‰????ê¸±ê±¹ ??ç„ì»ë«šå ‰????(Left-Top)
+		RB,		// ç­Œï½Œê¼·????ç™’?ëµ, åŸŸ???ì‡°í“  ??ë«€?ã‚ì­ª? / åŸŸë°¸ì±¶???ç­Œë¤´ë«å ‰????ì‚˜ë€²ç­Œ??è¢â‘¥ì‚‹ ç„ì»ë«šå ‰????(Right-Bottom)
+		CUBIC,	// ç­Œï½Œê¼·?Ñ„Â€???? ?ç™’?ëµ, é¤“Î»ìµŒè€Œ??ë´”Â€?ë¸Œì‘¬å½›??ç™’?ì—¼??ì‚´ì“¦é‡???ì¥“å·²? / ç–«ê¿¸í€£??
+			
 		END
 	};
 
@@ -34,8 +37,6 @@ public:
 	virtual HRESULT			Render()								override;
 
 public:
-	// ¾Ö´Ï¸ŞÀÌ¼Ç ÀüÈ¯ °ü·Ã ÇÔ¼ö..?
-	// Play_Animation (ÀÎÀÚ) µî..
 	HRESULT		Insert_Animation(CLevel_UI::UI_ANIM_DESC& Desc);
 	HRESULT		Remove_Animation(_wstring strAnimName);
 	HRESULT		Clear_Animation();
@@ -47,18 +48,17 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
+	CLevel_UI::UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
+
 private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);
-	_float		Calc_Lerp(_float fStart, _float fEnd, _float Ratio);
+	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ?ç™’?í£ ????? LerpType???æ€¨ëºšë€² ??ì‘´??fInæ¶ì…???ç™°ê·£ë˜»?ì‡¿ì²?ç„ì†ê¼¹??(0 -> 1 åš¥?æ¶ì›Â€??åŸŸë°¸ì±¶??è¢â‘¹ë²¥ ?â“¥ë¦è‹‘??
+	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ?ï§ï½Œì¶¾ ??Î»ë–„??Ratio ???æ€¨ëºšë€² Start?? End ?????æ¶ì…???ç„ì†ê¼¹??
+
+	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// ??ìˆëŠ„??ë±ë¿«???ç¯€ëš¯ëªµç­Œ??è¢â‘¹ì‚º ?é†«ë”…ë¹ç­Œë¡«ë—„???ë¥ë²¥ ?è¢â‘¹ì‚º position??ç­Œë¿ì‰¶??æ¶ì…???ç„ì†ê¼¹??(catmull-rom ?æ€¨ëª„ë’ )
 
 	void		Update_Animation(_float fTimeDelta);
 
 private:
-	// UI ´ãÀº ÄÁÅ×ÀÌ³Ê..?
-	// UI´Â ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ ´ãµµ·Ï..?
-
-	// ¾Ö´Ï¸ŞÀÌ¼Ç Å¬·¡½º¸¦ ÀúÀåÇÏ´Â °Ô ¾Æ´Ï¶ó ±×³É ¾Ö´Ï¸ŞÀÌ¼Ç Desc¸¦ ÀúÀåÇÏ°í ºÒ·¯¿Í¼­ ¾²¸é µÇ´Â °ÍÀÌ ¾Æ´ÑÁö?
-	// ±×·¯¸é ÄÁÅ×ÀÌ³Ê·Î Map »ç¿ë
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 

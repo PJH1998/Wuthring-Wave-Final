@@ -1,4 +1,4 @@
-/*
+﻿/*
   _____              _____         _  ______  _  _        _____   _         _
  |_   _|            / ____|       (_)|  ____|(_)| |      |  __ \ (_)       | |
    | |   _ __ ___  | |  __  _   _  _ | |__    _ | |  ___ | |  | | _   __ _ | |  ___    __ _
@@ -184,7 +184,7 @@ struct IGFD_Thumbnail_Info {
 };
 #endif  // USE_THUMBNAILS
 
-// stdint is used for cpp and c apî (cstdint is only for cpp)
+// stdint is used for cpp and c ap梨?(cstdint is only for cpp)
 #include <stdint.h>
 
 #ifdef __cplusplus

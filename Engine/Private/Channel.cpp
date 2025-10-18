@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Channel.h"
 
 #include "Bone.h"
@@ -76,6 +76,64 @@ void CChannel::Update_TransformationMatrix(_float fCurrentTrackPosition, const v
 	}
 }
 
+void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
+{
+	if (m_iNumKeyFrame == 2)
+	{
+		int x = 10;
+		return;
+	}
+		
+
+	if (0.f == fCurrentTrackPosition)
+		*pCurrentFrameIndex = 0;
+	
+	if (m_KeyFrames.back().fTrackPosition <= fCurrentTrackPosition)
+	{
+		*pCurrentFrameIndex = m_iNumKeyFrame - 1;
+	}
+	else
+	{
+#ifdef _DEBUG
+		while (m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
+			--*pCurrentFrameIndex;
+#endif // _DEBUG
+
+		while (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition <= fCurrentTrackPosition)
+			++*pCurrentFrameIndex;
+
+		_float3 vLeftScale = m_KeyFrames[*pCurrentFrameIndex].vScale;
+		_float4 vLeftRotation = m_KeyFrames[*pCurrentFrameIndex].vRotation;
+		_float3 vLeftPosition = m_KeyFrames[*pCurrentFrameIndex].vTranslation;
+
+		_float3 vRightScale = m_KeyFrames[*pCurrentFrameIndex + 1].vScale;
+		_float4 vRightRotation = m_KeyFrames[*pCurrentFrameIndex + 1].vRotation;
+		_float3 vRightPosition = m_KeyFrames[*pCurrentFrameIndex + 1].vTranslation;
+
+		_float fRatio = (fCurrentTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition) / (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition);
+
+		_vector vLerpScale = XMVectorLerp(XMLoadFloat3(&vLeftScale), XMLoadFloat3(&vRightScale), fRatio);
+		_vector vLerpRotation = XMQuaternionSlerp(XMLoadFloat4(&vLeftRotation), XMLoadFloat4(&vRightRotation), fRatio);
+		_vector vLerpPosition = XMVectorSetW(XMVectorLerp(XMLoadFloat3(&vLeftPosition), XMLoadFloat3(&vRightPosition), fRatio), 1.f);
+
+		_matrix LerpMatrix = {};
+		LerpMatrix = XMMatrixAffineTransformation(vLerpScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vLerpRotation, vLerpPosition);
+
+		// 1. ?ëŒìŸ¾ å ‰ë‰ì“½ ?ëº£ë‚«ç‘œ?åª›Â€?ëª„ìƒƒ?ëˆë–Ž.
+		_matrix PrevMatrix = XMLoadFloat4x4(Bones[m_iBoneIndex]->Get_TransformationMatrix());
+
+		//// 2. æ€¨ì¢Žì‘€???Â€ï§žê³¸ì—«??ç•°ë¶½?æ¿¡??ê³¸ìŠœ?ì„Žë’— å¯ƒ?
+		_matrix FinalMatrix = LerpMatrix * PrevMatrix;
+		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
+
+		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
+		// Bip001LHand
+
+
+	}
+	
+}
+
 void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
 {
 	if (0.f == fCurrentTrackPosition)
@@ -87,7 +145,7 @@ void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, con
 	}
 	else
 	{
-#ifdef _DEBUG //=> ¾Ö´Ï¸ÞÀÌ¼Ç Æ®·¢Æ÷Áö¼Ç Á¶Àý¿ë => ºí·»´õ±â´É
+#ifdef _DEBUG //=> ?ì¢Šë•²ï§Žë¶¿ì” ???ëªƒì˜“?ÑŠ???è­°ê³—ì …??=> é‡‰ë¶¾ì ‹?ë¶½ë¦°??
 		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
 			--*pCurrentFrameIndex;
 #endif // _DEBUG

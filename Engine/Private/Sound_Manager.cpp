@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Sound_Manager.h"
 
 CSound_Manager::CSound_Manager()
@@ -118,12 +118,12 @@ void CSound_Manager::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 HRESULT CSound_Manager::Initialize(_uint iNumChannels)
 {
     m_iNumChannels = iNumChannels;
-    m_pChannels = new FMOD_CHANNEL * [m_iNumChannels];
+    m_pChannels = new FMOD_CHANNEL * [m_iNumChannels] {nullptr};
 
-    // »ç¿îµå ´ã´ç ´ëÇ¥ °´Ã¼ »ı¼º
+    // ?ÑŠìŠ«???ëŒ€ë–¦ ?Â€??åª›ì•¹ê»œ ?ì•¹ê½¦
     FMOD_System_Create(&m_pSystem, FMOD_VERSION);
 
-    // 1. ½Ã½ºÅÛ Æ÷ÀÎÅÍ / 2. »ç¿ëÇÒ °¡»óÃ¤³Î ¼ö / 3. ÃÊ±âÈ­ ¹æ½Ä
+    // 1. ?ì’–ë’ª???ÑŠì”¤??/ 2. ?ÑŠìŠœ??åª›Â€?ê³¸ì½ˆ????/ 3. ç¥ë‡ë¦°??è«›â‘¹ë–‡
     FMOD_System_Init(m_pSystem, 32, FMOD_INIT_NORMAL, NULL);
 
     return S_OK;

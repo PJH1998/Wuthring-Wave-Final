@@ -1,14 +1,18 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "PhysicsManager.h"
 
 #include "ContactListenerImpl.h"
 #include "CharacterContactListenerImpl.h"
 
+#include "GameInstance.h"
+
 CPhysicsManager::CPhysicsManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: m_pDevice{ pDevice }, m_pContext{ pContext }
+	: m_pDevice{ pDevice }, m_pContext{ pContext },
+	m_pGameInstance { CGameInstance::GetInstance() }
 {
 	Safe_AddRef(m_pDevice);
 	Safe_AddRef(m_pContext);
+	Safe_AddRef(m_pGameInstance);
 }
 
 Body* CPhysicsManager::Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut)
@@ -35,7 +39,7 @@ CharacterVirtual* CPhysicsManager::Register_CharacterVirtual(const CharacterVirt
 
 	// Character VS Character Collision SetUp
 	pInstance->SetCharacterVsCharacterCollision(m_pCVCCollision);
-	// Chararcter VS Character Collision¿¡ µî·Ï
+	// Chararcter VS Character Collision???ê¹…ì¤‰
 	m_pCVCCollision->Add(pInstance);
 	// CharacterContactListener SetUp
 	pInstance->SetListener(m_pCharacterContactListener);
@@ -74,19 +78,19 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_pJobSystem = new JobSystemThreadPool(2048, 8, m_iMaxJob - 1);
 	ASSERT_CRASH(m_pJobSystem);
 
-	// Layer »ý¼º
+	// Layer ?ì•¹ê½¦
 	m_pBPLayer = new BPLayer(iNumObjectLayer);
 	ASSERT_CRASH(m_pBPLayer);
-	// Filter »ý¼º
+	// Filter ?ì•¹ê½¦
 	m_pObjectLayerFilter = new ObjectLayerPairFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectLayerFilter);
 	m_pObjectVsBPFilter = new ObjectVsBroadPhaseLayerFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectVsBPFilter);
-	// Contact Listener »ý¼º
+	// Contact Listener ?ì•¹ê½¦
 	m_pContactListener = new CContactListenerImpl();
 	ASSERT_CRASH(m_pContactListener);
 
-	// Virtual Container µ¿Àû ÇÒ´ç
+	// Virtual Container ?ìˆˆìŸ» ?ì¢Šë–¦
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
 	// CharacterVirtual VS CharacterVirtual Collision
 	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
@@ -106,6 +110,10 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 
 void CPhysicsManager::Update(_float fTimeDelta)
 {
+#ifdef _DEBUG
+	if (m_pGameInstance->Get_DIKeyState(DIK_DELETE) == KEYSTATE::DOWN)
+		m_isRenderAll = !m_isRenderAll;
+#endif
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
 
 	for (_uint i = 0; i < m_iNumObjectLayer; ++i)
@@ -136,6 +144,8 @@ void CPhysicsManager::Update(_float fTimeDelta)
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
+	if (false == m_isRenderAll)
+		return;
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
 	m_pPhysicsSystem->DrawBodies(m_DrawSetting, m_pDebugRenderer);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
@@ -150,7 +160,7 @@ void CPhysicsManager::DrawShape(const Shape* pShape)
 
 void CPhysicsManager::SetUp_PhysicsSystem()
 {
-	// PhysicsSystem »ý¼º
+	// PhysicsSystem ?ì•¹ê½¦
 	m_pPhysicsSystem = new PhysicsSystem();
 	m_pPhysicsSystem->Init(
 		m_iNumBodies, m_iNumBodyMutexes, 
@@ -202,4 +212,5 @@ void CPhysicsManager::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pGameInstance);
 }

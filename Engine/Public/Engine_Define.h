@@ -36,7 +36,12 @@ using json = nlohmann::json;
 #include "ImGui/imgui_impl_win32.h"
 #include "ImGui/ImGuiFileDialog.h"
 #include "ImGui/ImGuiFileDialogConfig.h"
-
+//#include "ImGui/ImApp.h"
+#include "ImGui/ImGuizmo.h"
+#include "ImGui/ImSequencer.h"
+#include "ImGui/ImZoomSlider.h"
+#include "ImGui/ImCurveEdit.h"
+#include "ImGui/GraphEditor.h"
 
 #pragma warning(push)
 #pragma warning(disable: 26495)
@@ -87,9 +92,12 @@ namespace Engine
 
 	const unsigned int g_iMaxWidth = 8192;
 	const unsigned int g_iMaxHeight = 4608;
+
+	const unsigned int g_iNumCascade = 4;
+	const float g_fLODDistance[4] = { 0.f, 512.f, 2048.f, 4096.f };
 }
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 5
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"

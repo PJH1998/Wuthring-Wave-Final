@@ -1,5 +1,5 @@
-#pragma once
-#include "GameObject.h"
+﻿#pragma once
+#include "StaticObject.h"
 
 NS_BEGIN(Engine)
 class CShader;
@@ -8,7 +8,7 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
-class CMapObject final: public CGameObject
+class CMapObject final: public CStaticObject
 {
 public:
 	typedef struct tagMapLoad
@@ -38,8 +38,8 @@ public:
 
 private:
 	CShader* m_pShaderCom = { nullptr };
-	CModel* m_pModelCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
+	vector<CModel*> m_pModelComArray;
 
 private:
 	void						Ready_Component(void* pArg);

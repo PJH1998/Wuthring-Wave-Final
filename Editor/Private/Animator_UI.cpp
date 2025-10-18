@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Animator_UI.h"
 
 CAnimator_UI::CAnimator_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -35,13 +35,7 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 
 void CAnimator_UI::Update(_float fTimeDelta)
 {
-    // ¾÷µ¥ÀÌÆ®´Â ¾î¶»°Ô µ¹¸²? °ÔÀÓÀÎ½ºÅÏ½º¿¡¼­ µ¹ ¸Å´ÏÀúµµ ¾Æ´Ï°í
-    // UI°¡ ¾÷µ¥ÀÌÆ®¸¦ µ¹°Ô ÇÏ°í, UI Update¿¡¼­ ¾Ö´Ï¸ŞÀÌÅÍ¸¦ Update µ¹·Á¾ß ÇÏ³ª
-
     Update_Animation(fTimeDelta);
-
-
-    // m_pCurAnimDesc °»½Åµµ ÀÖ¾î¾ß ÇÔ
 
     m_fElapsedTime += fTimeDelta;
 }
@@ -153,62 +147,114 @@ CLevel_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
-// Fix_LerpRatio, Calc_Lerp µÎ°³ ÇÕÃÄ¼­
-// ¿©·¯ Á¡À» ±âÁØÀ¸·Î À§Ä¡°¡ ºÎµå·´°Ô º¸°£µÇ´Â °Íµµ °í·Á..? ±Ùµ¥ ÀÇ¹Ì°¡ ÀÖ³ª
+// ?ëš¯ìŸ¾ è«›??ã…¼??ì‡±ìŠœ
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
 {
     switch (static_cast<UI_LERPTYPE>(iLerpType))
     {
-    case UI_LERPTYPE::LINEAR:       return fIn;
-    case UI_LERPTYPE::CUBIC:        return fIn * fIn * (3.0f - 2.0f * fIn);
-    default:        break;
+    default:        
+    case UI_LERPTYPE::END:
+    case UI_LERPTYPE::LINEAR:               return fIn;
+
+    //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
+    //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
+    case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));                          //
+    //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
+    //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
+    case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));                          //
+
+    case UI_LERPTYPE::CUBIC:                return fIn * fIn * (3.0f - 2.0f * fIn);
+    //case UI_LERPTYPE_SPEED::CUBICR:
     }
 }
 
-_float CAnimator_UI::Calc_Lerp(_float fStart, _float fEnd, _float fRatio)
+_float CAnimator_UI::Calc_LerpRatio(_float fStart, _float fEnd, _float fRatio)
 {
     if (fRatio > 1.f || fRatio < 0.f)
-        CRASH();
+        CRASH("Unclamped Data. fRatio must between [0, 1]");
 
     return (fStart * (1 - fRatio)) + (fEnd * fRatio);
 }
 
+_float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
+{
+    if (!m_pCurAnimDesc)
+        return _float3();
+
+    _vector vPoses[4]               = {};
+
+    _uint iKeyframeTimeStart        = UINT_MAX;
+    _uint iKeyframeTimeEnd          = UINT_MAX;
+    const _bool isLoop              = m_pCurAnimDesc->isLoop;
+    const _uint iLastKeyframeIndex  = m_pCurAnimDesc->vecKeyFrames.size() - 1;
+    _uint iKeyframeIndex            = 0;
+
+    // ?ê¾©ì˜± ?ã…½ë´½?ë‰ì—«??vector ???ëªƒëœ³?ã…»? å¯ƒÂ€??
+    for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
+    {
+        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex > iKeyframe)
+            break;
+        iKeyframeIndex = i;
+    }
+    
+    // lerp???ÑŠìŠœ??åª›ë¯©ë±¾ ?ì¢Šë–¦
+    for (_uint i = 0; i < 4; i++)
+    {
+        // 1, 2 ?ÑŠì—²åª›ë¯ªì“£ ?ÑŠìŠœ??å¯ƒ?
+        // ?ã…»ì­” ?ëªƒëœ³?ã…»? è¸°ì€¬ë¼±?ì„ë’— å¯ƒìŒìŠ¦???Â€???ëº¤ì“½. ?ëŒ€ë’— loop ?Ñ‰????ê³•ì”ª ?ã…»ì««.
+        _uint iIndex = iKeyframeIndex + i - 1;
+        if (iIndex < 0)
+            iIndex = (isLoop) ? iLastKeyframeIndex : 0;
+        else if (iIndex > iLastKeyframeIndex)
+            iIndex = (isLoop) ? 0 : iLastKeyframeIndex;
+
+        vPoses[i] = XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iIndex].vPos);
+        
+        if (i == 1) iKeyframeTimeStart  = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+        if (i == 2) iKeyframeTimeEnd    = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+        if (iKeyframeTimeStart == iKeyframeTimeEnd) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[(iIndex + 1) % m_pCurAnimDesc->vecKeyFrames.size()].iKeyframeIndex;
+    }
+
+    // ?ì¢Šë–¦??åª›ë¯ªì“£ ?ëŒìŠœ?ì„ë¿¬ æ€¨ê¾©ê¶›, è«›ì„‘ì†š
+    // ?ã…½ë´½?ë‰ì—« ï§¡â‘¥ë¿‰ ?ê³•â…¨ åª›ê¾§êº½??æ€¨ì¢Šì ®?ëŒë¿¬ æ€¨ê¾©ê¶›?ëŒë¹ ?? XMVectorCatmullRom ???ã…½ë´½?ë‰ì—« åª›ê¾§êº½??åª›ìˆˆì“¬???ê¾©ì £æ¹²??ëš®Ğ¦.
+    // 1, 2 ?ÑŠì” ???ã…½ë´½?ë‰ì—«??æ¹²ê³—??ì‡°ì¤ˆ ratio æ€¨ê¾©ê¶›?ì„ë¿¬ ?ëª„ì˜„ç‘œ?äºŒì‡°ãˆƒ ?ì¢Šë²?
+
+    _float fKeyframeRatio = (_float)(iKeyframe - iKeyframeTimeStart) / (iKeyframeTimeEnd - iKeyframeTimeStart);
+
+    _vector vResultPos = XMVectorCatmullRom(vPoses[0], vPoses[1], vPoses[2], vPoses[3], fKeyframeRatio);
+    _float3 vResult = {};
+    XMStoreFloat3(&vResult, vResultPos);
+
+    return vResult;
+}
+
 void CAnimator_UI::Update_Animation(_float fTimeDelta)
 {
-    // µµÃâµÈ Å°ÇÁ·¹ÀÓÀ» ÅëÇØ ÇöÀç °ªÀÌ¾î¾ß ÇÏ´Â °Í °É·¯³»°í ½ÇÁ¦·Î Àû¿ë½ÃÄÑ¾ß ÇÔ
-    // ÅØ½ºÃÄ´Â ÀÌÀü °ª ±×´ë·Î »ç¿ëÇØ¾ß ÇÏ°í, Alpha, Transform°ú °°Àº °ªÀº LerpType ¿¡ µû¸¥ º¸°£À» ÀÌ¿ëÇØ¼­ Àû¿ëÇØ¾ß ÇÔ
-    // LerpType Àº Linear, Cubic
-
-    // ÇöÀç ¹æ½ÄÀº ´Ü¼øÇÏ°Ô Á¡À» µû¶ó ÀÏÁ÷¼±»óÀ¸·Î ÀÌµ¿ÇÏ±â¸¸ ÇÏ´Âµ¥,
-    // ÇÊ¿ä¿¡ µû¶ó¼­´Â Á¡ ¿©·¯°³¸¦ ÀÎÀÚ·Î½á ÅëÇÏ´Â ÇÔ¼ö¸¦ ÀÌ¿ëÇÏ¿© ÀÚ¿¬½º·¯¿î °î¼± ¿òÁ÷ÀÓÀÌ ÇÊ¿äÇÒ¼öµµ?
-
-
     if (m_pCurAnimDesc == nullptr)
         return;
 
-
     // Calculate Frame..
-    const _uint iKeyFrameRate = 60; // ±âÁØ ÃÊ´ç ÇÁ·¹ÀÓ
-    const _float fSingleFrameTime = 1.f / iKeyFrameRate;
+    const _uint     iKeyFrameRate       = 60; // æ¹²ê³—? ç¥ëˆë–¦ ?ê¾¨ì …??
+    const _float    fSingleFrameTime    = 1.f / iKeyFrameRate;
 
-    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ÇöÀç Å°ÇÁ·¹ÀÓ
+    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ?ê¾©ì˜± ?ã…½ë´½?ë‰ì—«
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
     {
         if (m_pCurAnimDesc->isLoop)
-            m_fElapsedTime = 0.f;                                           // ·çÇÁ ½Ã, ¹üÀ§ ³Ñ¾î°¡¸é 0À¸·Î
+            m_fElapsedTime = 0.f;                                           // çŒ·â‘¦ë´½ ?? è¸°ë¶¿ì ?ì„ë¼±åª›Â€ï§?0?ì‡°ì¤ˆ
     }
 
-    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // ÃÖÁ¾ ÇöÀç Å°ÇÁ·¹ÀÓ
-    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // ÃÖÁ¾ ÇöÀç Å°ÇÁ·¹ÀÓ (int·Î ³»¸²)
+    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // ï§¤ì’–ì¥Œ ?ê¾©ì˜± ?ã…½ë´½?ë‰ì—«
+    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // ï§¤ì’–ì¥Œ ?ê¾©ì˜± ?ã…½ë´½?ë‰ì—« (intæ¿¡??ëŒ€â”)
 
 
     // ==============================
     // * Calculate Ratio..
     // ==============================
-    _uint iFrame_LerpStart = {};        // ÇÁ·¹ÀÓ °ª
-    _uint iFrame_LerpEnd = {};          // ÇÁ·¹ÀÓ °ª
-    _uint iFrame_StartIndex = {};       // ¼ø¼ö ÀÎµ¦½º
-    _uint iFrame_EndIndex = {};         // ¼ø¼ö ÀÎµ¦½º
+    _uint iFrame_LerpStart = {};        // ?ê¾¨ì …??åª›?
+    _uint iFrame_LerpEnd = {};          // ?ê¾¨ì …??åª›?
+    _uint iFrame_StartIndex = {};       // ?ì’–ë‹” ?ëªƒëœ³??
+    _uint iFrame_EndIndex = {};         // ?ì’–ë‹” ?ëªƒëœ³??
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
@@ -233,30 +279,35 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
-    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->iLerpType); // ÀÌÀü Å°ÇÁ·¹ÀÓ¿Í ÇöÀç Å°ÇÁ·¹ÀÓ °£ÀÇ ÃÖÁ¾ º¸°£ ºñÀ²
+    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // ?ëŒìŸ¾ ?ã…½ë´½?ë‰ì—«?Â€ ?ê¾©ì˜± ?ã…½ë´½?ë‰ì—« åª›ê¾©ì“½ ï§¤ì’–ì¥Œ è¹‚ë‹¿ì»™ é®ê¾©ì‘‰
 
 
     // ==============================
     // * Calculate Results..
     // ==============================
     _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
-    _float fResultAlpha = Calc_Lerp(
+    _float fResultAlpha = Calc_LerpRatio(
         m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha, 
         m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha, 
         fFixedLerpRatio
     );
-    _float3 vResultPos = {};
-    XMStoreFloat3(&vResultPos, XMVectorLerp(
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
-        XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
-        fFixedLerpRatio)
-    );
+    //_float3 vResultPos = {};
+    // ksta : cmr ?ï½Œì‘ï§??ëŒ€?éº??ì’“êµ… è«›?è¹‚Â€å¯ƒ??ê¾©ìŠ‚
+    //XMStoreFloat3(&vResultPos, XMVectorLerp(
+    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
+    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
+    //    fFixedLerpRatio)
+    //);
+
+    _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
+
     _float3 vResultRot = {};
-    XMStoreFloat3(&vResultRot, XMVectorLerp(
+    XMStoreFloat3(&vResultRot, XMVectorLerp(        // degree?ì‡±ê½Œ æ´¹ëªƒìœ´ å¯ƒ?åª›ìˆˆ???. 
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vRot),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vRot),
         fFixedLerpRatio)
     );
+    _float3 vResultRotRad = { DegreesToRadians(vResultRot.x), DegreesToRadians(vResultRot.y), DegreesToRadians(vResultRot.z) };
     _float3 vResultSca = {};
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
@@ -268,10 +319,13 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+    pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
-    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRot));
+    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
     _matrix matTransform = matSca * matRot * matPos;

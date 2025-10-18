@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Model.h"
 #include "GameInstance.h"
 
@@ -6,6 +6,8 @@
 #include "MeshMaterial.h"
 #include "Bone.h"
 #include "Animation.h"
+#include "Channel.h"
+#include "ComputeShader.h"
 
 CModel::CModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CComponent { pDevice, pContext }
@@ -23,7 +25,10 @@ CModel::CModel(const CModel& Prototype)
 	m_vPreRootPosition { Prototype.m_vPreRootPosition },
 	m_RootMatrix{ Prototype.m_RootMatrix },
 	m_iRootBoneIndex{ Prototype.m_iRootBoneIndex },
-	m_iNumAnimations { Prototype.m_iNumAnimations }
+	m_iNumAnimations { Prototype.m_iNumAnimations },
+	m_AnimationNameToIndex { Prototype.m_AnimationNameToIndex},
+	m_Buffers {Prototype.m_Buffers},
+	m_SRVs { Prototype.m_SRVs }
 {
 	for (auto& pMesh : m_Meshes)
 		Safe_AddRef(pMesh);
@@ -36,10 +41,29 @@ CModel::CModel(const CModel& Prototype)
 
 	for (auto& Pair : Prototype.m_Animations)
 		m_Animations.emplace(Pair.first, Pair.second->Clone());
-	
+
+	//  Prototype ?앹꽦 Buffer? Instance ?앹꽦 Buffer媛 ?ㅻⅤ湲??뚮Ц??nullptr 泥댄겕瑜??댁쨳?덈떎.
+	for (auto& pBuffer : m_Buffers)
+	{
+		if (nullptr != pBuffer)
+			Safe_AddRef(pBuffer);
+	}
+
+	//  SRV??Prototype, Instance 紐⑤몢 ?숈씪?섍쾶 ?ъ슜.
+	for (auto& pSRV : m_SRVs)
+	{
+		if (nullptr != pSRV)
+			Safe_AddRef(pSRV);
+	}
+
+	// ?ш린留?吏??
+	m_UAVs.resize(Prototype.m_UAVs.size());
+
 #ifdef _DEBUG
 	m_AnimationNames = Prototype.m_AnimationNames;
 #endif
+
+
 }
 
 void CModel::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavigation, _float fTimeDelta)
@@ -105,26 +129,26 @@ void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPo
 {
 	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
 }
-HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex)
+HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;
 	ImGuiTreeNodeFlags iFlag = 0;
-	if((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentBoneIndex() != iBoneIndex))
+	if((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
 		iFlag |= ImGuiTreeNodeFlags_Leaf;
 	else
 		iFlag |= (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen);
 
 	if(ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
 	{
-		//Selecting Interaction �ڽ� ��� ���� ������ ��ȣ�ۿ� �����ϱ�
+		//Selecting Interaction 
 		if(ImGui::IsItemClicked())
 		{
 			std::cout << "selected : " << m_Bones[iBoneIndex]->Get_Name() << std::endl;
 		}
 
-		while(iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentBoneIndex() == iBoneIndex)
+		while(iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
 		{
-			Bind_Bone_to_GUI(iNextBoneIndex);
+			Bind_Bone_to_GUI(iNextBoneIndex, TransformMatrix);
 		}
 
 		ImGui::TreePop();
@@ -168,7 +192,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 
 
 		ifstream inputFile(filePath);
-		// 1. ������?
+		// 1. ?대━硫?
 		if (inputFile.is_open())
 		{
 			json notifyData;
@@ -186,21 +210,6 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 		pair.second->Sort_AnimNotify();
 		
 }
-
-
-//void CModel::Register_Notify_ForAnimation(const _string& strFilePath, function<void(const _wstring&, _bool)> ColliderCallbacks, function<void()> EffectCallbacks)
-//{
-//	ifstream InputFile(strFilePath);
-//
-//	json InputData;
-//	InputFile >> InputData;
-//
-//
-//
-//	InputFile.close();
-//	//for (auto& Pair : m_Animations)
-//	//	Pair.second->Sort_Notify();
-//}
 
 HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {
@@ -232,11 +241,27 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_RootMatrix = XMMatrixIdentity();
 
+
+	if (MODELTYPE::ANIM == m_eType)
+	{
+		if (FAILED(Ready_Shared_Buffers()))
+			return E_FAIL;
+
+	}
+	
+
 	return S_OK;
 }
 
 HRESULT CModel::Initialize_Clone(void* pArg)
 {
+	if (MODELTYPE::ANIM == m_eType)
+	{
+		if (FAILED(Ready_Instance_Buffers()))
+			return E_FAIL;
+	}
+	
+
     return S_OK;
 }
 
@@ -262,16 +287,16 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-_bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
 {
-	// �ٸ� Animation ���� ��, ���� Animation ����
+	//
 	//if (m_strPreAnimation != strAnimationName)
 	//{
 	//	m_isChangeAnimation = true;
 	//	m_strPreAnimation = strAnimationName;
 	//}
 
-	// Animation ���� ��, ���� Animation ó�� KeyFrame�� Blend
+	// Animation
 	if (true == isBlend && true == m_isBlend)
 	{
 		*pTrackPosition = 0.f;
@@ -303,16 +328,150 @@ _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta,
 		if(nullptr != pTrackPosition)
 			*pTrackPosition = fTrackPosition;
 
-		// Root Node Translation ����
+		// Root Node Translation
 		if (true == isRootMotion)
 			Compute_RootAnimation(fRootMotionRate);
 	}
 
+
+
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
+
+#ifdef _DEBUG
+	_float4 fValue = {};
+	OutputDebugString(TEXT("Play_Animation CPU \n"));
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
+#endif
+
 	return false;
 }
+
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
+{
+	ASSERT_CRASH(pComputeShaderCom);
+	ASSERT_CRASH(pTrackPosition);
+
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return S_OK;
+
+#pragma region 1. Compute Shader
+	// 1. 
+	//    (
+	_float fTrackPosition = 0.f;
+
+	// 2. ?꾩옱 ?몃옓 ?ъ??섏쓣 媛?몄샃?덈떎. (?몃옓 ?ъ??섏? ?좊땲硫붿씠???대옒?ㅼ뿉??媛깆떊??諛쏆뒿?덈떎.)
+	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
+	*pTrackPosition = fTrackPosition;
+
+	// 3. ?곸닔 踰꾪띁(CB) ?낅뜲?댄듃
+	//    - ?곗씠?붿뿉???꾩옱 ?좊땲硫붿씠???뺣낫瑜?李얘린 ?꾪븳 ?몃뜳?ㅼ? ?꾩옱 ?ъ깮 ?쒓컙???꾨떖
+	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
+
+	// ?좊땲硫붿씠???뺣낫 CB 援ъ“泥?=> ?꾩옱 AnimIndex? TrackPosition???뚯쑀.
+	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
+	pAnimCBInfo->fTrackPosition = fTrackPosition;
+	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* ?좊땲硫붿씠???대쫫(strAnimationName)???대떦?섎뒗 ?몃뜳??*/;
+
+	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
+
+
+	// 4. Compute Shader??由ъ냼??諛붿씤??
+//    - ComputeShader.h/cpp??Set ?⑥닔?ㅼ쓣 ?ъ슜
+	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // ?꾩쭅 .hlsl???놁쓬
+	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
+	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
+	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
+	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // ?꾩쭅 .hlsl???놁쓬
+	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
+	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
+	
+
+#pragma region 이 부분 빡셈.... Dispatch
+
+	// EX) 堉?504媛? ? ?ш린 64紐?
+	
+	// 5. Compute Shader ?ㅽ뻾 (Dispatch)
+	// - 珥?堉?媛쒖닔留뚰겮 ?ㅻ젅?쒕? ?앹꽦?섎룄濡??ㅻ젅??洹몃９ ?섎? 議곗젅
+	// - ?? ?곗씠???ㅻ젅??洹몃９ ?ш린媛 64???? (珥?堉?媛쒖닔 + 63) / 64
+	_uint iNumBones = static_cast<_uint>(m_Bones.size());
+	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
+	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
+#pragma endregion
+
+	
+	
+	// 6. 以묎컙 寃곌낵 ?곸슜.(?쇰떒 RootAnimation CombinedTransofrmationMatrix??洹몃?濡??곸슜)
+	ApplyComputeResults_ToBones();
+
+	// 7. Rib ?좊땲硫붿씠???ъ깮 ??堉덉뿉 ?뺣낫 ?꾨떖.
+	//_string strRibAnimationName = "Rib_" + strAnimationName;
+	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+
+	
+#pragma endregion
+
+	
+	
+
+	// 8. ?좊땲硫붿씠?섏씠 ?앸궗?ㅻ㈃? Clear ?묒뾽??吏꾪뻾?섍퀬 Animation???대━?댄빐以띾땲??
+	if (bIsAnimationEnd)
+	{
+		Clear_Animation(strAnimationName);
+		return true; // ?좊땲硫붿씠??醫낅즺
+	}
+
+	// Root Node Translation 議곗젙
+	if (true == isRootMotion)
+		Compute_RootAnimation(fRootMotionRate);
+
+
+	// Combined???쒕쾲留?
+	for (auto& pBone : m_Bones)
+		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
+
+#ifdef _DEBUG
+	
+	/*OutputDebugString(TEXT("Play_Animation GPU "));
+	
+	_wstring strAnimDebug = StringToWString(strAnimationName) + L"\n";
+	OutputDebugString(strAnimDebug.c_str());
+
+	_float4 fValue = {};
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
+
+	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
+	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
+
+
+	OutPutDebugFloat(TEXT("Track Position : "), fTrackPosition);*/
+#endif
+
+	return false;
+}
+
+
 
 void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta)
 {
@@ -327,6 +486,41 @@ void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeD
 
 }
 
+void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta)
+{
+	auto iter = m_Animations.find(strRibAnimationName);
+	if (iter == m_Animations.end())
+		return;
+
+	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
+
+
+#ifdef _DEBUG
+	// Bone Name占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌕몌옙?
+	for (size_t i = 0; i < m_Bones.size(); ++i)
+	{
+		
+		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
+		{
+			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+			OutPutDebugMatrix(TEXT("Bip001RHand Play Rib Animation Matrix"), mat);
+
+			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
+			{
+				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
+				OutPutDebugMatrix(strBoneName, mat);
+				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+			}
+		}
+	}
+#endif // _DEBUG
+
+	//for (auto& pBone : m_Bones)
+	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+}
+
 void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
 {
 	if (strAnimationName == "")
@@ -335,6 +529,17 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+}
+
+BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
+{
+	if (m_eType != MODELTYPE::MAP)
+		ASSERT_CRASH("Is Not Map Object");
+
+	if (iNumMesh >= m_iNumMeshes)
+		return nullptr;
+
+	return m_Meshes[iNumMesh]->Get_BoundingBox();
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)
@@ -366,6 +571,55 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 	return false;
 }
 #endif
+ 
+
+void CModel::ApplyComputeResults_ToBones()
+{
+	// 1. GPU??異쒕젰 踰꾪띁(m_pFinalBoneMatrix_Buffer) ?댁슜??Staging 踰꾪띁濡?蹂듭궗?⑸땲??
+	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
+
+	// 2. Staging 踰꾪띁瑜?CPU媛 ?쎌쓣 ???덈룄濡?Map ?⑸땲??
+	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
+	if (FAILED(hr))
+		return;
+
+	// 3. 留듯븨??硫붾え由ъ뿉??濡쒖뺄 ?됰젹 ?곗씠?곕? CPU 蹂?섎줈 蹂듭궗?⑸땲??
+	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UP??w媛 -7.4媛 ?섏샂.
+	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+
+	// 4. m_Bones 諛곗뿴??GPU媛 怨꾩궛??理쒖떊 濡쒖뺄 ?됰젹???곸슜?⑸땲??
+	for (size_t i = 0; i < m_Bones.size(); ++i)
+	{
+		/* Prev Final 怨깊븯湲?*/
+		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
+		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+
+#ifdef _DEBUG
+		// Bone Name占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌕몌옙?
+		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
+		{
+			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
+			OutPutDebugMatrix(TEXT("Bip001RHand Play Animation Matrix : "), mat);
+
+			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
+			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
+			{
+				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
+				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
+				OutPutDebugMatrix(strBoneName, mat);
+				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
+			}
+		}
+#endif // _DEBUG
+
+		
+	}
+
+	// 5. Unmap?쇰줈 留덈Т由ы빀?덈떎.
+	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+}
 
 void CModel::Compute_RootAnimation(_float fRootMotionRate)
 {
@@ -375,13 +629,13 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
 
-	// Axis ���� (-y => +z)
+	// Axis 議곗젙 (-y => +z)
 	_float fTemp = vTranslation.m128_f32[2];
 	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
 	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
 	vTranslation.m128_f32[1] = fTemp * -1.f;
 
-	// Animation ���� ��, PreRootPosition�� ����� Animation ó�� KeyFrame Root Position���� ����
+	// Animation 蹂寃??? PreRootPosition??蹂寃쎈맂 Animation 泥섏쓬 KeyFrame Root Position?쇰줈 蹂寃?
 	if (true == m_isChangeAnimation)
 	{
 		m_isChangeAnimation = false;
@@ -389,7 +643,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	}
 
 	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-	//// �� ��ġ�� ũ�� ����� ����ó��
+	//// ???꾩튂? ?ш쾶 踰쀬뼱?섎㈃ ?덉쇅泥섎━
 	//if (fDistance > 150.f)
 	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
 
@@ -419,7 +673,7 @@ HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 	m_Bones.push_back(pBone);
 
 	_int iIndex = m_Bones.size() - 1;
-	// Root Bone Index ����
+	// Root Bone Index ???
 	if (0 == strcmp(szName, "Root"))
 		m_iRootBoneIndex = iIndex;
 
@@ -516,6 +770,148 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 
 	AnimationFile.close();
 
+
+	// Compute Shader 怨꾩궛???꾪븳 Animation Index ???
+	
+	_uint iAnimIdx = 0;
+	m_AnimationNameToIndex.clear();
+	for (auto& pair : m_Animations)
+		m_AnimationNameToIndex.emplace(pair.first, iAnimIdx++);
+		
+
+	return S_OK;
+}
+
+
+HRESULT CModel::Ready_Shared_Buffers()
+{
+	ASSERT_CRASH(m_pDevice);
+
+	// ?좊땲硫붿씠??紐⑤뜽???꾨땲硫??앹꽦?섏? ?딆쓬.
+	if (MODELTYPE::ANIM != m_eType)
+		return S_OK;
+
+	HRESULT hr = S_OK;
+
+	m_Buffers.resize(BUFFER_END);
+	m_SRVs.resize(SRV_END);
+	m_UAVs.resize(UAV_END);
+
+	//  --- 1. ?곗씠???섏쭛???꾪븳 vector 以鍮?---
+
+	vector<ANIMINFO>        vAllAnimInfos;		  // Depth1
+	vector<GPU_CHANNELINFO> vAllChannelBoneInfos; // Depth2
+	vector<GPU_KEYFRAME>    vAllKeyframes;        // Depth3
+
+	// Depth1??????ㅼ젙.
+	for (const auto& Pair : m_Animations)
+	{
+		CAnimation* pAnimation = Pair.second;
+		ANIMINFO animInfo = {};
+
+		// ?쒖옉 ?몃뜳?? 媛쒖닔, 吏?띿떆媛?
+		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // ?쒖감 ?먯깋 AnimInfo?먯꽌 0遺???ъ깮.
+		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 紐⑤뱺 梨꾨꼸??媛쒖닔
+#ifdef _DEBUG
+		animInfo.fDuration = pAnimation->Get_Duration();
+#endif
+		// Depth2??????ㅼ젙.
+		for (const auto& pChannel : pAnimation->Get_Channels())
+		{
+			// ?쒖옉 ?ㅽ봽?덉엫(?꾩쟻 ?몃뜳??, ?ㅽ봽?덉엫 媛쒖닔, 梨꾨꼸??愿由ы븯??堉??몃뜳??
+			GPU_CHANNELINFO channelInfo = {};
+			channelInfo.iStartKeyframeOffset = static_cast<_uint>(vAllKeyframes.size());
+			channelInfo.iNumKeyframes = pChannel->Get_NumKeyframes();
+			channelInfo.iBoneIndex = pChannel->Get_BoneIndex();
+
+			// Depth3??????ㅼ젙.
+			for (const auto& keyframe : pChannel->Get_Keyframes())
+			{
+				// ?ㅽ봽?덉엫??????뺣낫 蹂듭궗. Scale, Rotation, Translation, ?몃옓 ?꾩튂.
+				GPU_KEYFRAME gpuKeyframe = {};
+				gpuKeyframe.vScale = _float4(keyframe.vScale.x, keyframe.vScale.y, keyframe.vScale.z, 1.f);
+				gpuKeyframe.vRotation = keyframe.vRotation;
+				gpuKeyframe.vTranslation = _float4(keyframe.vTranslation.x, keyframe.vTranslation.y, keyframe.vTranslation.z, 1.f);
+				gpuKeyframe.fTrackPosition = keyframe.fTrackPosition;
+				vAllKeyframes.push_back(gpuKeyframe);
+			}
+			vAllChannelBoneInfos.push_back(channelInfo);
+		}
+		vAllAnimInfos.push_back(animInfo);
+	}
+
+
+	// --- 2. ?섏쭛???곗씠?곕줈 ?ㅼ젣 GPU 踰꾪띁 ?앹꽦 ---
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.ByteWidth = sizeof(GPU_KEYFRAME) * static_cast<_uint>(vAllKeyframes.size());
+	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
+	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(GPU_KEYFRAME);
+	D3D11_SUBRESOURCE_DATA subresourceData = { vAllKeyframes.data() };
+	hr = m_pDevice->CreateBuffer(&bufferDesc, &subresourceData, &m_Buffers[BUFFER_KEY_FRAME]);
+	if (FAILED(hr)) return E_FAIL;
+	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_KEY_FRAME], nullptr, &m_SRVs[SRV_KEY_FRAME]);
+	if (FAILED(hr)) return E_FAIL;
+
+	// 2-2. ?좊땲硫붿씠???뺣낫 踰꾪띁 (g_AllAnimInfos)
+	bufferDesc.ByteWidth = sizeof(ANIMINFO) * static_cast<_uint>(vAllAnimInfos.size());
+	bufferDesc.StructureByteStride = sizeof(ANIMINFO);
+	subresourceData.pSysMem = vAllAnimInfos.data();
+	hr = m_pDevice->CreateBuffer(&bufferDesc, &subresourceData, &m_Buffers[BUFFER_ANIM_INFO]);
+	if (FAILED(hr)) return E_FAIL;
+	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_ANIM_INFO], nullptr, &m_SRVs[SRV_ANIM_INFO]);
+	if (FAILED(hr)) return E_FAIL;
+
+	// 2-3. 堉?梨꾨꼸)蹂??뺣낫 踰꾪띁 (g_ChannelInfos)
+	bufferDesc.ByteWidth = sizeof(GPU_CHANNELINFO) * static_cast<_uint>(vAllChannelBoneInfos.size());
+	bufferDesc.StructureByteStride = sizeof(GPU_CHANNELINFO);
+	subresourceData.pSysMem = vAllChannelBoneInfos.data();
+	hr = m_pDevice->CreateBuffer(&bufferDesc, &subresourceData, &m_Buffers[BUFFER_BONE_CHANNEL]);
+	if (FAILED(hr)) return E_FAIL;
+	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_BONE_CHANNEL], nullptr, &m_SRVs[SRV_BONE_CHANNEL]);
+	if (FAILED(hr)) return E_FAIL;
+
+	
+
+	return S_OK;
+}
+
+HRESULT CModel::Ready_Instance_Buffers()
+{
+	HRESULT hr = S_OK;
+	D3D11_BUFFER_DESC bufferDesc = {};
+	// 2-4. 理쒖쥌 濡쒖뺄 ?됰젹 異쒕젰(Output) 踰꾪띁 (g_OutLocalMatrices)
+	bufferDesc = {};
+	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(_float4x4);
+	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_FINAL_BONEMATRIX]);
+	if (FAILED(hr)) return E_FAIL;
+	hr = m_pDevice->CreateUnorderedAccessView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_UAVs[UAV_FINAL_BONEMATRIX]);
+	if (FAILED(hr)) return E_FAIL;
+	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_SRVs[SRV_FINAL_BONEMATRIX]);
+	if (FAILED(hr)) return E_FAIL;
+
+	// 2-5. 留??꾨젅???낅뜲?댄듃???곸닔 踰꾪띁 (AnimationInfo)
+	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
+	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO);
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOCB]);
+	if (FAILED(hr)) return E_FAIL;
+
+	// 2-6. GPU -> CPU 蹂듭궗瑜??꾪븳 Staging 踰꾪띁
+	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
+	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_STAGING]);
+	if (FAILED(hr)) return E_FAIL;
+
 	return S_OK;
 }
 
@@ -564,4 +960,19 @@ void CModel::Free()
 	for (auto& pMaterial : m_Materials)
 		Safe_Release(pMaterial);
 	m_Materials.clear();
+
+
+	/* GPU Buffer ?댁슜 ?쒓굅 */
+	for (auto& pBuffer : m_Buffers)
+		Safe_Release(pBuffer);
+	m_Buffers.clear();
+
+	for (auto& pSRV : m_SRVs)
+		Safe_Release(pSRV);
+	m_SRVs.clear();
+
+	for (auto& pUAV : m_UAVs)
+		Safe_Release(pUAV);
+	m_UAVs.clear();
+
 }

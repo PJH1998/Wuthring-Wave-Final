@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -11,12 +11,16 @@ private:
 
 public:
 	void		SetUp_OctoTree(_float3 vCenter, _float3 vExtent);
-	void		Add_To_OctoTree(class CStaticObject* pObject, const BoundingBox* pBox, const _fvector& vPosition);
+	void		Add_To_OctoTree(class CStaticObject* pObject, const BoundingBox* pBox);
+
+public:
+	void		Update();
 
 private:
-	_uint		m_iDepth = {};
+	class CGameInstance*	m_pGameInstance = { nullptr };
+	_uint							m_iDepth = {};
 
-	class CCubeCell*	m_pRootCell = { nullptr };
+	class CCubeCell*			m_pRootCell = { nullptr };
 
 public:
 	static		COctoTree*		Create();

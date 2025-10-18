@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Editor_Define.h"
 #include "UIObject.h"
@@ -20,11 +20,25 @@ NS_BEGIN(Editor)
 class CCustom_UI final : public CUIObject
 {
 public:
+	enum class UI_TYPE {
+		NONE, BUTTON, INTERACT, END
+	};
+
 	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
 		_uint		iNumFiles = 1;
+
+		_wstring	strUIName = {};
+		_uint		iUIType = {};			// ?â‘¥ë‹š ï§¡ìŒì”¤ï§Â€, è¸°ê¾ªë“‰?ëª„?, ï§¤ì’–ê¸½??æ´Ñ‹ì½éºÂ€?ëª„? æ´Ñ‰í…‡?
+		_wstring	strParentName = {};
+
+		vector<_wstring> vecChildNames = {};
+
+		CGameObject* pParentObject = nullptr;
 	} CUSTOM_UI_DESC;
+
+
 
 private:
 	explicit				CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -40,13 +54,16 @@ public:
 	virtual void			Render()								override;
 
 public:
-	CUSTOM_UI_DESC			Get_UIDesc()	{ return m_tUIDesc; }
-	void					Set_CurTexIndex(_uint iIndex) { m_iCurTexIndex = iIndex; };
+	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
+	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
+	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 private:
 	HRESULT					Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Bind_Description(void* pArg);
+
+	void					Update_CombinedMatrix();
 
 private:
 	CShader*				m_pShaderCom				= { nullptr };
@@ -56,17 +73,17 @@ private:
 	CAnimator_UI*			m_pAnimator_UICom			= { nullptr };
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
-
-
 	_uint					m_iCurTexIndex				= {};
 
-	// ÇöÀç »ç¿ëÁßÀÏ ÅØ½ºÃÄ Á¤º¸, texcoord °ª, ³ªÀÎ¼½ÅÍ ±âÁØÁ¡ µîÀÇ Á¤º¸.. ÇÊ¿äÇÒ¼öµµ ÀÖÀ½
+	_float4x4				m_CombinedWorldMatrix		= {};
+
+
+	// ?ê¾©ì˜± ?ÑŠìŠœä»¥ë¬’ì”ª ?ë¿ë’ªçˆ¾??ëº£ë‚«, texcoord åª›? ?ì„ì”¤?ë±ê½£ æ¹²ê³—????ê¹†ì“½ ?ëº£ë‚«.. ?ê¾©ìŠ‚?ì¢ë‹”???ë‰ì“¬
 
 public:
 	static CCustom_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*	Clone(void* pArg) override;
 	virtual void			Free() override;
-
 };
 
 NS_END
@@ -77,18 +94,69 @@ NS_END
 
 inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 {
+	json childNames = json::array();
+	for (const auto& v : d.vecChildNames)
+	{
+		json data = {};
+		to_json(data, _string(v.begin(), v.end()));
+		childNames.push_back(data);
+	}
+
 	j = {
 		{ "strFilePath", _string(d.strFilePath.begin(), d.strFilePath.end()) },
 		{ "strFileName", _string(d.strFileName.begin(), d.strFileName.end()) },
-		{ "iNumFiles", d.iNumFiles }
+		{ "iNumFiles", d.iNumFiles },
+
+		{ "strUIName",  _string(d.strUIName.begin(), d.strUIName.end()) },
+		{ "iUIType", d.iUIType },
+		{ "strParentName", _string(d.strParentName.begin(), d.strParentName.end()) },
+
+		{ "vecChildNames", childNames }
 	};
 }
 
 inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 {
-	_string strFilePath = j["strFilePath"].get<_string>();
-	d.strFilePath	= _wstring(strFilePath.begin(), strFilePath.end());
-	_string strFileName = j["strFileName"].get<_string>();
-	d.strFileName   = _wstring(strFileName.begin(), strFileName.end());
-	d.iNumFiles		= j["iNumFiles"];
+	_string strFilePath		= j["strFilePath"].get<_string>();
+	d.strFilePath			= _wstring(strFilePath.begin(), strFilePath.end());
+	_string strFileName		= j["strFileName"].get<_string>();
+	d.strFileName			= _wstring(strFileName.begin(), strFileName.end());
+	d.iNumFiles				= j["iNumFiles"];
+
+	_string strUIName		= j["strUIName"].get<_string>();
+	d.strUIName				= _wstring(strUIName.begin(), strUIName.end());
+	d.iUIType				= j["iUIType"];
+	_string strParentName	= j["strParentName"].get<_string>();
+	d.strParentName			= _wstring(strParentName.begin(), strParentName.end());
+
+	for (const auto& element : j["vecChildNames"])
+	{
+		_string strChildName = element.get<_string>();
+		d.vecChildNames.push_back(_wstring(strChildName.begin(), strChildName.end()));
+	}
 }
+
+inline void to_json(json& j, const vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
+{
+	j = json::array();
+	for (const auto& v : vec)
+	{
+		json data = {};
+		to_json(data, v);
+		j.push_back(data);
+	}
+}
+
+inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
+{
+	vec.clear();
+	vec.reserve(j.size());
+
+	for (const auto& element : j)
+	{
+		CCustom_UI::CUSTOM_UI_DESC desc = {};
+		from_json(element, desc);
+		vec.push_back(desc);
+	}
+}
+

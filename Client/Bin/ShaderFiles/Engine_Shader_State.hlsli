@@ -19,7 +19,11 @@ sampler ClampSampler = sampler_state
     AddressV = clamp;
 };
 
-
+SamplerComparisonState ShadowSampler
+{
+    filter = comparison_min_mag_mip_linear;
+    ComparisonFunc = LESS_EQUAL;
+};
 // Rasterize 
 RasterizerState RS_Default
 {

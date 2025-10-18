@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Base.h"
 
@@ -17,13 +17,13 @@ public:
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
+	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 #endif
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };
 	ID3D11DeviceContext*				m_pContext = { nullptr };
 	class CGameInstance*				m_pGameInstance = { nullptr };
-	ID3D11DepthStencilView*				m_pShadowDSV = { nullptr };
 
 	list<class CGameObject*>			m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 
@@ -39,7 +39,7 @@ private:
 #endif
 
 private:
-	// Viewport Size º¯°æ
+	// Viewport Size è¹‚Â€å¯ƒ?
 	void		Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:
@@ -65,6 +65,7 @@ private:
 	HRESULT		Ready_RT();
 	HRESULT		Ready_MRT();
 	HRESULT		Ready_Shadow_DSV();
+
 
 public:
 	static		CRenderer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

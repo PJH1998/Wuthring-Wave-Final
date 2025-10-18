@@ -76,8 +76,17 @@
     <Filter Include="01. Level\Effect\Effect_Controller\Effect_Prefab">
       <UniqueIdentifier>{774ff9b9-e035-4e09-a1cc-28229109e0fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Particle_Controller">
+      <UniqueIdentifier>{2b2fad62-1edf-4bd6-9a2a-458a7f630978}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Particle_Controller\Particle">
+      <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
+    </Filter>
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96. Interface\Shader">
+      <UniqueIdentifier>{21eca06b-421e-485e-9750-c3ffa52c827e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,13 +148,19 @@
       <Filter>01. Level\Anim\Tool</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Particle.h">
-      <Filter>01. Level\Effect\Particle</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller\Particle</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_MapObject.h">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AnimNotifyDefine.h">
       <Filter>01. Level\Anim\Tool</Filter>
@@ -164,6 +179,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\Interface_Edit.h">
       <Filter>96. Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_PreViewModel.h" />
+    <ClInclude Include="..\Public\Particle_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Edit_Brush.h" />
+    <ClInclude Include="..\public\Shader_Interface.h">
+      <Filter>96. Interface\Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -231,14 +255,23 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Particle_Controller.cpp">
-      <Filter>01. Level\Effect\Controller</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Effect_Prefab.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Effect_Prefab</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Effect_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Interface_Edit.cpp">
       <Filter>96. Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
+    <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Edit_Brush.cpp" />
+    <ClCompile Include="..\private\Shader_Interface.cpp">
+      <Filter>96. Interface\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +279,7 @@
       <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
     </FxCompile>
     <ClCompile Include="..\Private\Particle.cpp">
-      <Filter>01. Level\Effect\Particle</Filter>
+      <Filter>01. Level\Effect\Effect_Controller\Particle_Controller\Particle</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

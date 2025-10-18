@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -14,12 +14,18 @@ public:
 	void					Add_GUI_Func(function<void()> func);
 	void					Clear_Func();
 
+	// Gizmo ?곸슜??媛앹껜??Transform ?꾨떖
+	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	// Gizmo Render??
+	void					Render_Gizmo(const _fmatrix& Matrix);
+
 public:
 	HRESULT				Initialize(HWND hWnd);
 	void					Update();
 	void					Render();
 
 private:
+	class CGameInstance*		m_pGameInstance = { nullptr };
 	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
@@ -27,6 +33,18 @@ private:
 	ID3D11DepthStencilView*	m_pMainDSV = { nullptr };
 
 	vector<function<void()>>	m_Functions;
+
+	// Gizmo ?ъ슜?????꾩슂??Transform
+	class CTransform*				m_pTransform = { nullptr };
+	_float4x4							m_ObjectWorldMatrix = {};
+	// Gizmo Setting
+	ImGuizmo::OPERATION		m_CurrentGizmoOperation = { ImGuizmo::TRANSLATE };
+	ImGuizmo::MODE				m_CurrentGizmoMode = { ImGuizmo::WORLD };
+	// Gizmo Snap
+	_bool								m_isSnap = { false };
+
+private:
+	void					Gizmo();
 
 public:
 	static		CGUIManager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd);

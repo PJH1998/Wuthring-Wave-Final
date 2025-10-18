@@ -1,4 +1,4 @@
-#include"Editorpch.h"
+Ôªø#include"Editorpch.h"
 #include "Edit_MapObject.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
@@ -8,12 +8,12 @@
 
 _uint CEdit_MapObject::g_iNumObjects = {};
 CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CGameObject(pDevice, pContext)
+    :CStaticObject(pDevice, pContext)
 {
 }
 
 CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
-    :CGameObject(Prototype)
+    :CStaticObject(Prototype)
 {
 }
 
@@ -21,6 +21,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
 {
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
+
+    //ÔøΩÔøΩÔøΩÔøΩ∆ÆÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩŸ∏ÔøΩÔøΩÔøΩ?
+    //ÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩƒ°ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ≈©ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩŸ≤„º≠ »ØÔøΩÔøΩÔøΩÔøΩ ÔøΩŸ≤ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩ÷±ÔøΩ.
 
     return S_OK;
 }
@@ -37,7 +40,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
 
+    m_iNumLOD = m_pModelComArray.size()-1;
 
+    Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
+    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
@@ -50,10 +56,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
 
-    //ImGuiø°º≠ ¿˙¿Â ¥©∏¶ ∂ß ∏µ® ¿Ã∏ß∫∞∑Œ ¿Ã ∏µ®¿∫ æÓµ¥Ÿ ¿˙¿Â«“¡ˆ º±≈√«œ∞‘?
+    //ImGui?Î®ØÍΩå ?¬Ä???Íæ®? ??Ôßè‚ë§ÎúΩ ?ÎåÄÏ´´ËπÇÍæ®Ï§à ??Ôßè‚ë§ÎúΩ?¬Ä ?ÎåÄÎµí???¬Ä?ŒΩÎ∏∑Ôßû¬Ä ?Ï¢èÍπÆ?ÏÑçÏæ∂?
 #ifdef _DEBUG
 
-    //¡¯¬• ∏∂¿Ωø° æ»µÍ. ≥™¡ﬂø° π∞æÓ∫∏∞Ì ºˆ¡§«“∞Õ
+    //ÔßûÍæ©Ï≠® ÔßçÎçâÏì¨???ÎçàÎ≤Ä. ?ÏÑèÏ®∑??ËáæÏá±Îº±ËπÇÎãøÌÄ¨ ?ÏÑèÏ†ô?Ï¢âÏæ¨
 
     //MAP_CREATE event(m_ModelName, this);
 
@@ -66,6 +72,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         if (!m_isActivate)
             return;
 
+        //ÂØÉÏéàÏ§à Ôßû¬Ä?Î∫•Î∏∑ ???Í≥∏Ïêû ?ÎåÄÎúë???„ÖºÎøâ LOD ÈçÆÏá®ÌÄ¨. ?ÎåÄÎúëÁëú?Ôßû¬Ä?? Ê¥πÎ™É‚îÅÊÄ®?Ê¥π??ÎçâÎøâ ?ÎçàÎíó ?ÎåÄÎúë ?ÏÑèÏêû 1Â™õ??ÎöÆ„àÉ??.dat???ÏéÑÌÄ¨ Â™õÏïπÍªú ?ÎçâÎøâ ?ÔΩäÎ¶∞?
+        
         /*OBJECT_SAVE Save{};
         Save.m_iNameLength = strlen(m_ModelName);
         strcpy_s(Save.ModelName, m_ModelName);
@@ -73,53 +81,60 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         
         event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
-
+        
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
+        if (m_iShaderPassIndex == 3)
+            m_iShaderPassIndex = 0;
         event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+
         _float4x4 WorldMatrix;
         XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
         });
 #endif
-    m_pGameInstance->Subscribe<MAP_PICK>(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), [this](const MAP_PICK& event) {
-        if (m_IsSetParent)
-        {
-            //±◊ ππ≥ƒ ¿⁄Ωƒ¿Ã µ≈æﬂ«œ¥¬ ≥¿Ã ∫Œ∏∞° µ 
-            CEdit_MapObject* pParent = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-            m_pParent = pParent;
-            m_IsSetParent = false;
-            m_IsParent = true;
-            pParent->m_ChildObjects.push_back(this);
-            //Safe_AddRef(*this);
-        }
-        });
 
     m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
+    m_pMaskTextureCom.resize(m_pModelCom->Get_NumMesh());
+    m_pMaskDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
+
+    m_SelectedDiffuseName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedNormalName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskTextureName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskDiffuseName.resize(m_pModelCom->Get_NumMesh());
+
+
+    m_SelectedDiffuseTexturePath.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedNormalTexturePath.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskTexturePath.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskTexturePath.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskDiffusePath.resize(m_pModelCom->Get_NumMesh());
+
 
     m_iSelectedDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedNormalIndex = new _uint[m_pModelCom->Get_NumMesh()];
-    m_iNumObject = g_iNumObjects++;
+    m_iSelectedMaskIndex = new _uint[m_pModelCom->Get_NumMesh()];
+    m_iSelectedMaskDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
+
+    m_iNumObject = CEdit_MapObject::g_iNumObjects++;
     return S_OK;
 }
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
-    /*if(m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::MAP),TEXT("Model_Pick"))*/
+
 }
 
 void CEdit_MapObject::Update(_float fTimeDelta)
 {
-    //if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
     if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
     {
-        //ø©±‚ø° ≈¨∏Ø √÷¿˚»≠ «œ∑¡∏È «¡∑ØΩ∫≈“ ƒ√∏µ±Ó¡ˆ.
+        //?—àÎ¶∞???ÎåÄ‚îÉ Ôß§ÏíñÏüª???ÏÑéÏ†ÆÔßé??Íæ®Ïú≠?„ÖΩ? ËÄå—âÏ≠ÖÊ∫êÎöØ?.
 
         _float fDistance = {};
-        //ø˘µÂµµ πŸ≤„æﬂ«‘.
+        //?Î∂æÎ±∂??Ë´õÎ∂ΩÌì≠?Ïá≥Î∏ø.
         _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
         _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
         if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
@@ -129,6 +144,7 @@ void CEdit_MapObject::Update(_float fTimeDelta)
             m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
         }
     }
+    //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
@@ -137,34 +153,42 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 }
 
 void CEdit_MapObject::Render()
+//void CEdit_MapObject::Render(_uint iLOD)
 {
+    //ÔøΩ»∫ÔøΩÔøΩÃ¥ÔøΩ ÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ
     Bind_Resources();
 
-    for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+    for (_uint i = 0; i < m_pModelComArray[m_iLODIndex]->Get_NumMesh(); ++i)
     {
         if (m_TexMode)
         {
+            //ƒøÔøΩÔøΩÔøΩÔøΩ ÔøΩÿΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩ≈∑ ÔøΩÃπÔøΩÔøΩÔøΩ ÔøΩÔøΩÔøΩÓº≠ ÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩ»µÔøΩ.
             if (m_pDiffuseTextureCom[i])
-                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
+                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture",0);
             if (m_pNormalTextureCom[i])
                 m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture");
+            if (m_pMaskTextureCom[i])
+                m_pMaskTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
+            else
+                m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+            if (m_pMaskDiffuseTextureCom[i])
+                m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 1);
         }
         else
         {
             _uint FailedCnt = {};
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
                 FailedCnt++;
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                 FailedCnt++;
-            if (FailedCnt > 1)
-                m_iShaderPassIndex = 1;
+
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+                m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         }
 
-        //¿Ã¥œº»∂Û¿Ã¡Ó «“ ∂ß Bind_Materials ∏ﬁΩ¨∫∞∑Œ «— π¯æø µπ∑¡º≠ ≈ÿΩ∫√ƒ æ¯¥¬ ∏ﬁΩ¨∏∏ ≥ª∞° ¡˜¡¢ ≥÷æÓº≠ ¿˙¿Â«“ ºˆ ¿÷∞‘?
-        
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
-        m_pModelCom->Render(i);
+        m_pModelComArray[m_iLODIndex]->Render(i);
     }
 }
 
@@ -176,90 +200,12 @@ void CEdit_MapObject::Render_Shadow()
 void CEdit_MapObject::Set_ImGuiOption()
 {
 
-    _matrix Scale, Rotation, Translation;
-
-    //if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::PRESS && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
-    //    //√ﬂ∞° øπ¡§
-    
-    if (ImGui::Button("Set Parent"))
-    {
-        MAP_CREATE event(m_ModelName, this);
-        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
-    }
-    
-    if (m_IsParent)
-    {
-        ImGuiID ShaderId = ImGui::GetID("Child");
-        ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
-        ImGui::Text("Child");
-
-        for (auto& pChildObject : m_ChildObjects)
-        {
-            ImGui::Button(pChildObject->m_ModelName);
-        }
-        ImGui::EndChildFrame();
-
-    }
+    ImGui::Text(m_ModelName);
 
 
-    ImGui::Text("Size");
-    {
-        ImGui::PushItemWidth(90.0f);
-        ImGui::InputFloat("R", &m_vNewScale.x, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("U", &m_vNewScale.y, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("L", &m_vNewScale.z, 0.1f, 0.1f);
+    About_Parent();
 
-    }
-
-    ImGui::Text("Turn_Quaternion");
-    {
-        //∑Œ≈◊¿Ãº«¿Ã ∞Ëº” æ˜µ•¿Ã∆Æ µ«æÓº≠ ∞™¿Ã √ ±‚»≠µ .
-        ImGui::PushItemWidth(90.0f);
-        //_float4 DegreeRotation = m_pRotation[m_iPickedInstance];
-
-        //µ±◊∏Æ ∞¢µµ∑Œ 0µµø°º≠ 360µµ±Ó¡ˆ.
-
-        ImGui::InputFloat("Yaw", &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Picth", &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Roll", &m_vNewRotation.z, 0.1f, 0.1f);
-
-    }
-
-    ImGui::Text("Position");
-    //_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-    {
-        ImGui::PushItemWidth(90.0f);
-        ImGui::InputFloat("X", &m_vNewTranslation.x, 1.f, 1.f); ImGui::SameLine();
-        ImGui::InputFloat("Y", &m_vNewTranslation.y, 1.f, 1.f); ImGui::SameLine();
-        ImGui::InputFloat("Z", &m_vNewTranslation.z, 1.f, 1.f);
-
-
-    }
-    ImGui::PopItemWidth();
-
-
-    if (ImGui::Button("OK"))
-    {
-        //¿⁄Ωƒ¿∫ ∞£¥‹«œ∞‘ ∫Œ∏¿« ∫Ø»≠∑Æ∏∏ √ﬂ∞°∑Œ «œ∞‘ «œ∏È µ…µÌ? »∏¿¸¿∫ ∏∏£∞⁄¿Ω..
-        Scale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vNewScale));
-        Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_vNewRotation)));
-        Translation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f));
-        if (m_IsParent)
-        {
-            _matrix DeltaRot = XMMatrixRotationQuaternion(XMQuaternionMultiply(XMLoadFloat3(&m_vNewRotation), XMQuaternionInverse(XMLoadFloat3(&m_vRotation))));
-            _matrix DeltaTranslation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
-
-            _matrix ChildMatrix = DeltaRot * DeltaTranslation;
-            for (auto& pChild : m_ChildObjects)
-                pChild->Child_UpdateMatrix(ChildMatrix);
-        }
-        m_vScale = m_vNewScale;
-        m_vRotation = m_vNewRotation;
-        m_vTranslation = m_vNewTranslation;
-        _matrix PickedMatrix = Scale * Rotation * Translation;
-        m_pTransformCom->Set_WorldMatrix(PickedMatrix);
-        
-    }
+    About_Transform();
 
     ImGuiID ShaderId = ImGui::GetID("ShaderPass");
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
@@ -267,6 +213,9 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     for (_uint i = 0; i < m_pShaderCom->Get_PassCount(); ++i)
     {
+        if (!strcmp("DebugRender", m_pShaderCom->Get_PassName(i)))
+            continue;
+
         if (ImGui::Button(m_pShaderCom->Get_PassName(i))) {
             m_iShaderPassIndex = i;
         }
@@ -294,12 +243,14 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     if (ImGui::Button("Set Texture"))
     {
-        if (!m_IsTest)
+        if (!m_IsCustomTexture)
         {
-            m_DiffuseTextureName.clear();
-            m_NormalTextureName.clear();
+            m_EntireDiffuseTextureName.clear();
+            m_EntireNormalTextureName.clear();
+            m_EntireMaskTextureName.clear();
+
         }
-        m_IsTest = !m_IsTest;
+        m_IsCustomTexture = !m_IsCustomTexture;
     }
 
     ImGui::SameLine();
@@ -308,200 +259,76 @@ void CEdit_MapObject::Set_ImGuiOption()
     if (ImGui::Button("Destroy"))
         m_isActivate = false;
 
-    if (m_IsTest)
-    {
-
-        IGFD::FileDialogConfig config;
-
-        //config.path = "C:/Users/dnheu/source/repos";
-        config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
-        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
-
-        _char Text[32] = {};
-        sprintf_s(Text, "Object %d###Texture File Load", m_iNumObject);
-        ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", nullptr, config);
-        //ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", ".txt", config);
-
-        if (ImGuiFileDialog::Instance()->Display(Text)) {
-            if (ImGuiFileDialog::Instance()->IsOk()) {
-                _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
-                for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
-                    if (entry.is_regular_file()) {
-                        if ((entry.path().string().find("_D_") != std::string::npos) || (entry.path().string().find("_D") != std::string::npos))
-                        {
-                            if (entry.path().extension() == ".png") {
-                                {
-                                    string fileName = entry.path().filename().string();
-                                    //m_DiffuseTextureName.push_back(fileName);
-                                    m_DiffuseTextureName.push_back(entry.path().string());
-                                }
-                            }
-                        }
-                        else if (entry.path().string().find("_N_") != std::string::npos || (entry.path().string().find("_N") != std::string::npos))
-                        {
-                            if (entry.path().extension() == ".png") {
-                                {
-                                    string fileName = entry.path().filename().string();
-                                    //m_NormalTextureName.push_back(fileName);
-                                    m_NormalTextureName.push_back(entry.path().string());
-                                }
-                            }
-                        }
-                    }
-                }
-                m_IsLoaded = true;
-                m_IsTest = !m_IsTest;
-                ImGuiFileDialog::Instance()->Close();
-            }
-            else
-            {
-                ImGuiFileDialog::Instance()->Close();
-                m_IsTest = !m_IsTest;
-            }      
-        }
-    }
-
-    if (m_IsLoaded)
-    {
-        ImGui::Begin("Texture Change");
-
-        _char LOD_Index[10] = {};
-
-        if (ImGui::BeginCombo("Meshes", "?"))
-        {
-            for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
-            {
-                sprintf_s(LOD_Index, "Mesh : %d", i);
-                if (ImGui::Selectable(LOD_Index))
-                {
-                    m_iSelectedMesh = i;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuse.c_str()))
-        {
-            for (_uint i = 0; i < m_DiffuseTextureName.size(); ++i)
-            {
-                _char FileDrive[MAX_PATH] = {};
-                _char FileDir[MAX_PATH] = {};
-                _char FileName[MAX_PATH] = {};
-                _char FileExt[MAX_PATH] = {};
-                _splitpath_s(m_DiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-                if (ImGui::Selectable(FileName))
-                {
-                    ImGui::SetItemDefaultFocus();
-                    m_SelectedDiffuse = m_DiffuseTextureName[i];
-
-
-                    _wstring Test(m_SelectedDiffuse.begin(), m_SelectedDiffuse.end());
-                    if (m_pDiffuseTextureCom[m_iSelectedMesh])
-                        Safe_Release(m_pDiffuseTextureCom[m_iSelectedMesh]);
-
-                    m_pDiffuseTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
-                    m_iSelectedDiffuseIndex[m_iSelectedMesh] = i;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        if (ImGui::BeginCombo("Normal", m_SelectedNormal.c_str()))
-        {
-
-            for (_uint i = 0; i < m_NormalTextureName.size(); ++i)
-            {
-                _char FileDrive[MAX_PATH] = {};
-                _char FileDir[MAX_PATH] = {};
-                _char FileName[MAX_PATH] = {};
-                _char FileExt[MAX_PATH] = {};
-                _splitpath_s(m_NormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-                if (ImGui::Selectable(FileName))
-                {
-                    ImGui::SetItemDefaultFocus();
-                    m_SelectedNormal = m_NormalTextureName[i].c_str();
-
-                    //WΩ∫∆Æ∏µ¿∏∑Œ πŸ≤„.
-                    _wstring Test(m_SelectedNormal.begin(), m_SelectedNormal.end());
-                    if (m_pNormalTextureCom[m_iSelectedMesh])
-                        Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);
-
-                    m_pNormalTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
-                    m_iSelectedNormalIndex[m_iSelectedMesh] = i;
-                }
-            }
-            ImGui::EndCombo();
-        }
-
-        if (ImGui::Button("Make_Json"))
-            m_MakeJson = !m_MakeJson;
-
-        if (m_MakeJson)
-            Export_MaterialData();
-
-        ImGui::Begin("Textures", nullptr,ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
-
-        if (m_pDiffuseTextureCom[m_iSelectedMesh])
-            ImGui::Image((ImTextureID)m_pDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
-
-        if (m_pNormalTextureCom[m_iSelectedMesh])
-            ImGui::Image((ImTextureID)m_pNormalTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
-
-        ImGui::End();
-
-        ImGui::End();
-    }
-    //LOD∞° √— 4¥‹∞Ë∑Œ ≥™¥µæÓ¡Æ¿÷¥¬µ• ¿Ã∞≈ æÓ∂ª∞‘ «“ ∞«¡ˆ ª˝∞¢.
-    //¡¶¿œ ∞£¥‹«— πÊπ˝ => ƒıµÂ∆Æ∏Æø°º≠ ≈©±‚ø° ∫Ò∑ «ÿº≠ ∑ª¥ı«“ ∂ß ∏µ® ∞•æ∆≥¢±‚.
-    //=> ¿ŒΩ∫≈œΩÃ«— ∏ﬁΩ¨µÈ¿∫ ∞¢ ∏≈∆Æ∏ØΩ∫∏∂¥Ÿ ∫Ò±≥«ÿº≠ ∏ﬁΩ¨ ππ æµ¡ˆ ∞·¡§«ÿæﬂ«“µÌ?
+    About_Texture();
+    //LODÂ™õ¬Ä Áè•?4?‚ë£ÌÄéÊø°??ÏÑéÎèá?ÎåÅÏ°á?ÎçàÎíó???ÎãøÍµÖ ?ÎåÄÎº∏ÂØÉ???Â´ÑÎåÅ? ?Ïï∑Ïªñ.
+    //?ÏíñÏî™ Â™õÍæ®Îñí??Ë´õ‚ë∏Ïæø => ËçëÏá∞Î±∂?Î™É‚îÅ?Î®ØÍΩå ?—àÎ¶∞??ÈçÆÍæ®??ÎåÅÍΩå ?ÎöÆÎúë????Ôßè‚ë§ÎúΩ Â™õÎçâÎ∏ò?Ïá®Î¶∞.
+    //=> ?Î™ÑÎí™?ÎåÅÎñõ??ÔßéÎ∂øÎè©?„Öº? Â™õ?Ôßç„ÖΩÎìÉÁî±?Îí™ÔßçÎçàÎñé ÈçÆÍæßÌÉ≥?ÎåÅÍΩå ÔßéÎ∂øÎè© Ëê∏??Î™Ñ? ÂØÉÍ≥óÏ†ô?ÎåÅÎπû?Ï¢äÎ≤è?
 
 }
 
 
 HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
-    //¿Ã ∫Œ∫– ≥™¡ﬂø° .Dat∑ŒµÂ«“∂ß µ•¿Ã≈Õ»≠ Ω√ƒ—º≠ ∑ŒµÂ Ω√≈≥∞Õ.
+    m_pGameInstance->Wait_Thread_End();
+
+    //??ÈÅ∫¬ÄÈÅ∫??ÏÑèÏ®∑??.DatÊø°ÏíïÎ±∂?Ï¢äÎ∏£ ?Í≥óÏî†?Í≥†ÏÜï ?ÏíñÌèí??Êø°ÏíïÎ±∂ ?ÏíóÍ∂óÂØÉ?
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
     lstrcat(Model, Name);
-
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-        return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-    //    TEXT("Com_Model_LOD0"), reinterpret_cast<CComponent**>(&m_pModelComArray[0]), nullptr)))
-    //    return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf"),
-    //    TEXT("Com_Model_LOD1"), reinterpret_cast<CComponent**>(&m_pModelComArray[1]), nullptr)))
-    //    return E_FAIL;
-
-    //if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-    //    TEXT("Com_Model_LOD2"), reinterpret_cast<CComponent**>(&m_pModelComArray[2]), nullptr)))
-    //    return E_FAIL;
-
+    m_pModelComArray.resize(4);
     /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-        TEXT("Com_Model_LOD3"), reinterpret_cast<CComponent**>(&m_pModelComArray[3]), nullptr)))
+        TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;*/
+
+
+    for (_uint i = 0; i < 4; ++i)
+    {
+        //m_pGameInstance->Add_Work([&,Index = i, Name = Model]() {
+        //    CModel* pModel = nullptr;
+        //    _wstring ModelCom = Name;
+        //    ModelCom.pop_back();
+        //    ModelCom += to_wstring(Index);
+
+        //    _char ModelName[MAX_PATH] = {};
+        //    sprintf_s(ModelName, "Com_Model%d", Index);
+        //    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+        //        //StringToWString(ModelName), reinterpret_cast<CComponent**>(&pModel), nullptr)))
+        //        StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[Index]), nullptr)))
+        //        CRASH("FAILED");
+        //    //m_pModelComArray.push_back(pModel);
+        //    });
+        _wstring ModelCom = Model;
+        //ModelCom.pop_back();
+        ModelCom += to_wstring(i);
+        
+        _char ModelName[MAX_PATH] = {};
+        sprintf_s(ModelName, "Com_Model%d", i);
+        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+            StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+            CRASH("FAILED");
+
+    }
+    m_pGameInstance->Wait_Thread_End();
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
+    
+#pragma region Áî±—ä??ÏíïÏªÆ??
+        //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+        //RigidbodyDesc.eShape = SHAPE::MESH;
+        //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+        //RigidbodyDesc.eType = EMotionType::Static;
+        //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+        //RigidbodyDesc.pModel = m_pModelCom;
 
-    /*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    RigidbodyDesc.eShape = SHAPE::MESH;
-    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    RigidbodyDesc.eType = EMotionType::Static;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    RigidbodyDesc.pModel = m_pModelCom;
-
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);*/
-
-
+        //if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+        //    CRASH("FAILED");
+#pragma endregion
+    m_pGameInstance->Wait_Thread_End();
+    m_pModelCom = m_pModelComArray[0];
     return S_OK;
 }
 
@@ -515,6 +342,10 @@ void CEdit_MapObject::Bind_Resources()
 void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
 {
     _bool Same = { true };
+
+    if (pObject->m_pParent || pObject == this || m_pParent == pObject)
+        return;
+
     for (auto& pChild : m_ChildObjects)
     {
         if (pChild == pObject)
@@ -525,24 +356,68 @@ void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
     }
     if(Same)
     {
+        pObject->m_pParent = this;
+        pObject->Make_ChildLocalMatrix(m_pTransformCom->Get_WorldMatrix());
         m_ChildObjects.push_back(pObject);
         m_IsParent = true;
     }
+    pObject->m_IsSetParent = false;
+}
+
+void CEdit_MapObject::Quit_Child(CEdit_MapObject* pObject)
+{
+    m_ChildObjects.remove(pObject);
+    if (m_ChildObjects.empty())
+        m_IsParent = false;
+
+}
+
+void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
+{
+    XMStoreFloat4x4(&m_ChildLocalMat, m_pTransformCom->Get_WorldMatrix() * XMMatrixInverse(nullptr, ParentMatrix));
+    _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * ParentMatrix;
+    m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
 }
 
 
 void CEdit_MapObject::Export_MaterialData()
 {
 
-    //√÷¡æ ∆˙¥ı ∞Ê∑Œ.
+    //Ôß§ÏíñÏ•å ?ÎåÄÎúë ÂØÉÏéàÏ§à.
 
     IGFD::FileDialogConfig config1;
     _char ModelPath[MAX_PATH] = {};
 
     strcat_s(ModelPath, filesystem::current_path().parent_path().parent_path().string().c_str());
+
+
     strcat_s(ModelPath, "/Client/Bin/Resource/Map/");
-    strcat_s(ModelPath, m_ModelName);
-    strcat_s(ModelPath, "/");
+    for (const auto& entry : filesystem::recursive_directory_iterator(ModelPath))
+    {
+        if (entry.path().extension() != ".dat")
+            continue;
+        _string Name = entry.path().filename().replace_extension().string();
+
+        if (entry.is_regular_file() && !strcmp(Name.c_str(), m_ModelName))
+        {
+            strcpy_s(ModelPath, entry.path().parent_path().string().c_str());
+            strcat_s(ModelPath, "/");
+            break;
+        }
+    }
+
+    //return;
+    //_string SubstrLOD;
+    //SubstrLOD = m_ModelName;
+    //size_t SubStrPos = SubstrLOD.find("_LOD");
+
+    //if (SubStrPos != std::string::npos)
+    //    SubstrLOD = SubstrLOD.substr(0, SubStrPos);
+    ////strcpy_s(ModelPath, "/"); +SubstrLOD + "/";
+    //strcat_s(ModelPath, SubstrLOD.c_str());
+    //strcat_s(ModelPath, "/");
+    //strcat_s(ModelPath, m_ModelName);
+    //strcat_s(ModelPath, "/");
 
     config1.path = string(ModelPath);
     config1.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
@@ -561,7 +436,7 @@ void CEdit_MapObject::Export_MaterialData()
 
             ofstream File(strFolderName);
 
-#pragma region ≈ÿΩ∫√ƒ ∫πªÁ π◊ Json ¿˙¿Â
+#pragma region Json Ï∂îÏ∂ú
             strTexturePath += "/Tex/";
             filesystem::create_directories(strTexturePath);
             json Totaljson;
@@ -574,16 +449,20 @@ void CEdit_MapObject::Export_MaterialData()
                 _char FileDir[MAX_PATH] = {};
                 _char DiffuseFileName[MAX_PATH] = {};
                 _char NormalFileName[MAX_PATH] = {};
+                _char MaskFileName[MAX_PATH] = {};
+                _char MaskDiffuseFileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
 
-                _splitpath_s(m_DiffuseTextureName[m_iSelectedDiffuseIndex[i]].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
-                _splitpath_s(m_NormalTextureName[m_iSelectedNormalIndex[i]].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedDiffuseTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedNormalTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedMaskTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskFileName, MAX_PATH, FileExt, MAX_PATH);
+                _splitpath_s(m_SelectedMaskDiffusePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskDiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
 
                 json MaterialData;
 
                 json DiffuseData;
 
-                DiffuseData["TextureCnt"] = 1;
+                _uint TextureCnt = { 0 };
                 DiffuseData["FileName"] = json::array();
 
                 _char DiffuseName[MAX_PATH] = {};
@@ -591,6 +470,18 @@ void CEdit_MapObject::Export_MaterialData()
                 strcat_s(DiffuseName, FileExt);
 
                 DiffuseData["FileName"].push_back(DiffuseName);
+
+                if(!m_SelectedMaskTexturePath[i].empty())
+                {
+                    _char MaskDiffuseName[MAX_PATH] = {};
+                    strcat_s(MaskDiffuseName, MaskDiffuseFileName);
+                    strcat_s(MaskDiffuseName, FileExt);
+
+                    DiffuseData["FileName"].push_back(MaskDiffuseName);
+                    DiffuseData["TextureCnt"] = 2;
+                }
+                else
+                    DiffuseData["TextureCnt"] = 1;
 
                 MaterialData["Diffuse"] = DiffuseData;
 
@@ -607,11 +498,33 @@ void CEdit_MapObject::Export_MaterialData()
 
                 MaterialData["Normal"] = NormalData;
 
+                json MaskData;
+                if (!m_SelectedMaskTexturePath[i].empty())
+                {
+                    MaskData["TextureCnt"] = 1;
+                    MaskData["FileName"] = json::array();
+
+                    _char MaskName[MAX_PATH] = {};
+                    strcat_s(MaskName, MaskFileName);
+                    strcat_s(MaskName, FileExt);
+
+                    MaskData["FileName"].push_back(MaskName);
+
+                    MaterialData["Mask"] = MaskData;
+                }
+
+
                 Totaljson["Materials"].push_back(MaterialData);
 
 
-                filesystem::copy_file(m_DiffuseTextureName[i], strTexturePath + DiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
-                filesystem::copy_file(m_NormalTextureName[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                filesystem::copy_file(m_SelectedDiffuseTexturePath[i], strTexturePath + DiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                filesystem::copy_file(m_SelectedNormalTexturePath[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                if (!m_SelectedMaskTexturePath[i].empty())
+                {
+
+                    filesystem::copy_file(m_SelectedMaskTexturePath[i], strTexturePath + MaskFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                    filesystem::copy_file(m_SelectedMaskDiffusePath[i], strTexturePath + MaskDiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                }
             }
             File << Totaljson.dump(4);
             File.close();
@@ -628,11 +541,436 @@ void CEdit_MapObject::Export_MaterialData()
     }
 }
 
-void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix)
+void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation)
 {
-    m_pTransformCom->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix() * Matrix);
+    _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * Matrix;
+    m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
+
+
+    XMStoreFloat3(&m_vNewTranslation, NewChildWolrd.r[3]);
+
+    for (auto& pChild : m_ChildObjects)
+        pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
 }
 
+void CEdit_MapObject::About_Parent()
+{
+    if (ImGui::Button("Set Parent"))
+    {
+        MAP_CREATE event(m_ModelName, this);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
+    }
+
+    if (m_pParent)
+    {
+        ImGui::SameLine();
+        if (ImGui::Button("Delete Parent"))
+        {
+            m_pParent->Quit_Child(this);
+            m_pParent = nullptr;
+            //MAP_CREATE event(m_ModelName, this);
+            //m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), event);
+        }
+    }
+
+    if (m_IsParent)
+    {
+        ImGuiID ShaderId = ImGui::GetID("Child");
+        ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
+        ImGui::Text("Child");
+
+        for (auto& pChildObject : m_ChildObjects)
+        {
+            _char ChildName[MAX_PATH] = {};
+            sprintf_s(ChildName, "%d", pChildObject->m_iNumObject);
+
+            if (ImGui::Button(ChildName) || ImGui::IsItemHovered())
+            {
+                if (m_pPickedChild)
+                    m_pPickedChild->m_iShaderPassIndex = 0;
+                m_pPickedChild = pChildObject;
+                m_pPickedChild->m_iShaderPassIndex = 3;
+            }
+            else
+                if (m_pPickedChild)
+                    m_pPickedChild->m_iShaderPassIndex = 0;
+        }
+        ImGui::EndChildFrame();
+
+    }
+}
+
+void CEdit_MapObject::About_Transform()
+{
+    m_pGameInstance->Use_Gizmo(m_pTransformCom);
+
+    _float vScale[3] = {};
+    _float vRotation[3] = {};
+    _float vTransfrom[3] = {};
+    _matrix matrix = m_pTransformCom->Get_WorldMatrix();
+    ImGuizmo::DecomposeMatrixToComponents(reinterpret_cast<_float*>(&matrix), vTransfrom, vRotation, vScale);
+
+    ImGui::Text("Size");
+    {
+        ImGui::PushItemWidth(300.0f);
+        ImGui::InputFloat3("Scale", vScale);
+    }
+
+    ImGui::Text("Turn_Quaternion");
+    {
+        //Êø°ÏíóÎÄí?ÎåÅÎÄ°??ÊÄ®Íæ©ÎÉΩ ?ÎÇÖÎú≤?ÎåÑÎìÉ ?ÏÑèÎº±??Â™õÎØ™Ïî† Áè•ÎçáÎ¶∞?Î∂æÎßñ.
+        ImGui::PushItemWidth(300.0f);
+        //?Î∂ΩÎ†áÁî±?Â™õÍ≥∑Î£ÑÊø°?0?Íæ©Îøâ??360?ÍæßÌâ¥Ôßû¬Ä.
+        ImGui::InputFloat3("Rotation", vRotation);
+    }
+
+    ImGui::Text("Position");
+    {
+        ImGui::PushItemWidth(300.0f);
+        ImGui::InputFloat3("Translation", vTransfrom);
+    }
+
+    ImGui::PopItemWidth();
+
+    ImGuizmo::RecomposeMatrixFromComponents(vTransfrom, vRotation, vScale, reinterpret_cast<_float*>(&matrix));
+
+    m_pTransformCom->Set_WorldMatrix(matrix);
+
+    //m_pGameInstance->Add_Light()
+    //?Î®ØÎñá?¬Ä Â™õÍæ®Îñí?ÏÑçÏæ∂ ÈÅ∫¬ÄÔßè‚ë•ÏìΩ ËπÇ¬Ä?Î∂æÏõæÔßç?Áï∞Î∂Ω?Êø°??ÏÑçÏæ∂ ?ÏÑé„àÉ ?Ï¢äÎ≤è? ?ÎöØÏüæ?¬Ä Ôßè‚ë§‚Ö§ÂØÉÏ¢éÏì¨..
+
+
+    for (auto& pChild : m_ChildObjects)
+        pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
+
+    if (m_pParent)
+        Make_ChildLocalMatrix(dynamic_cast<CTransform*>(m_pParent->Get_Component(TEXT("Com_Transform")))->Get_WorldMatrix());
+    {
+
+        //ImGui::Text("Size");
+        //{
+        //    ImGui::PushItemWidth(90.0f);
+        //    ImGui::InputFloat("R", &m_vNewScale.x, 0.1f, 0.1f); ImGui::SameLine();
+        //    ImGui::InputFloat("U", &m_vNewScale.y, 0.1f, 0.1f); ImGui::SameLine();
+        //    ImGui::InputFloat("L", &m_vNewScale.z, 0.1f, 0.1f);
+
+        //}
+
+        //ImGui::Text("Turn_Quaternion");
+        //{
+        //    //Êø°ÏíóÎÄí?ÎåÅÎÄ°??ÊÄ®Íæ©ÎÉΩ ?ÎÇÖÎú≤?ÎåÑÎìÉ ?ÏÑèÎº±??Â™õÎØ™Ïî† Áè•ÎçáÎ¶∞?Î∂æÎßñ.
+        //    ImGui::PushItemWidth(90.0f);
+        //    //_float4 DegreeRotation = m_pRotation[m_iPickedInstance];
+
+        //    //?Î∂ΩÎ†áÁî±?Â™õÍ≥∑Î£ÑÊø°?0?Íæ©Îøâ??360?ÍæßÌâ¥Ôßû¬Ä.
+
+        //    ImGui::InputFloat("Yaw", &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
+        //    ImGui::InputFloat("Picth", &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
+        //    ImGui::InputFloat("Roll", &m_vNewRotation.z, 0.1f, 0.1f);
+
+        //}
+
+        //ImGui::Text("Position");
+        ////_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+        //{
+        //    ImGui::PushItemWidth(90.0f);
+        //    ImGui::InputFloat("X", &m_vNewTranslation.x, 1.f, 1.f); ImGui::SameLine();
+        //    ImGui::InputFloat("Y", &m_vNewTranslation.y, 1.f, 1.f); ImGui::SameLine();
+        //    ImGui::InputFloat("Z", &m_vNewTranslation.z, 1.f, 1.f);
+
+
+        //}
+        //ImGui::PopItemWidth();
+
+
+        //if (ImGui::Button("OK"))
+        //{
+        //    //?Î®ØÎñá?¬Ä Â™õÍæ®Îñí?ÏÑçÏæ∂ ÈÅ∫¬ÄÔßè‚ë•ÏìΩ ËπÇ¬Ä?Î∂æÏõæÔßç?Áï∞Î∂Ω?Êø°??ÏÑçÏæ∂ ?ÏÑé„àÉ ?Ï¢äÎ≤è? ?ÎöØÏüæ?¬Ä Ôßè‚ë§‚Ö§ÂØÉÏ¢éÏì¨..
+        //    _matrix Scale, Rotation, Translation;
+        //    _float3 DegreeRotation = _float3(XMConvertToRadians(m_vNewRotation.x), XMConvertToRadians(m_vNewRotation.y), XMConvertToRadians(m_vNewRotation.z));
+
+        //    Scale = XMMatrixScalingFromVector(XMLoadFloat3(&m_vNewScale));
+        //    Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&DegreeRotation)));
+        //    Translation = XMMatrixTranslationFromVector(XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f));
+
+        //    m_vScale = m_vNewScale;
+        //    m_vRotation = m_vNewRotation;
+        //    m_vTranslation = m_vNewTranslation;
+
+        //    _matrix PickedMatrix = Scale * Rotation * Translation;
+        //    if (m_IsParent)
+        //    {
+        //        for (auto& pChild : m_ChildObjects)
+        //            pChild->Child_UpdateMatrix(PickedMatrix, XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
+        //    }
+
+        //    m_pTransformCom->Set_WorldMatrix(PickedMatrix);
+
+        //    if (m_pParent)
+        //        Make_ChildLocalMatrix(dynamic_cast<CTransform*>(m_pParent->Get_Component(TEXT("Com_Transform")))->Get_WorldMatrix());
+        //}
+    }
+
+}
+
+void CEdit_MapObject::About_Texture()
+{
+    if (m_IsCustomTexture)
+    {
+        IGFD::FileDialogConfig config;
+
+        //config.path = "C:/Users/dnheu/source/repos";
+        config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
+        //Ê¥πÎ™ÉÎ∏£Ê¥πÎ™ÉÎ∏£ Ë´õÎ∂ΩÌì≠?Ïá®Î¶∞.
+        //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Rock/Tex/";
+        config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+        _char Text[32] = {};
+        sprintf_s(Text, "Object %d###Texture File Load", m_iNumObject);
+        ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", nullptr, config);
+        //ImGuiFileDialog::Instance()->OpenDialog(Text, "Import File", ".txt", config);
+
+        if (ImGuiFileDialog::Instance()->Display(Text)) {
+            if (ImGuiFileDialog::Instance()->IsOk()) {
+                _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
+                    if (entry.is_regular_file()) {
+                        filesystem::path Filepath = entry.path();
+
+                        if ((Filepath.string().find("_D_") != std::string::npos) || (Filepath.string().find("_D") != std::string::npos))
+                        {
+                            if (Filepath.extension() == ".png") {
+                                {
+                                    string fileName = Filepath.filename().string();
+                                    //m_EntireDiffuseTextureName.push_back(fileName);
+                                    m_EntireDiffuseTextureName.push_back(Filepath.string());
+                                }
+                            }
+                        }
+                        else if (Filepath.string().find("_N_") != std::string::npos || (Filepath.string().find("_N") != std::string::npos))
+                        {
+                            if (Filepath.extension() == ".png") {
+                                {
+                                    string fileName = Filepath.filename().string();
+                                    //m_EntireNormalTextureName.push_back(fileName);
+                                    m_EntireNormalTextureName.push_back(Filepath.string());
+                                }
+                            }
+                        }
+                        else if (Filepath.string().find("_MA_") != std::string::npos || (Filepath.string().find("_MA") != std::string::npos))
+                        {
+                            if (Filepath.extension() == ".png") {
+                                {
+                                    string fileName = Filepath.filename().string();
+                                    //m_EntireNormalTextureName.push_back(fileName);
+                                    m_EntireMaskTextureName.push_back(Filepath.string());
+                                }
+                            }
+                        }
+                    }
+                }
+                m_IsLoaded = true;
+                m_IsCustomTexture = !m_IsCustomTexture;
+                ImGuiFileDialog::Instance()->Close();
+            }
+            else
+            {
+                ImGuiFileDialog::Instance()->Close();
+                m_IsCustomTexture = !m_IsCustomTexture;
+            }
+        }
+    }
+
+    if (m_IsLoaded)
+    {
+        ImGui::Begin("Texture Change");
+
+        _char LOD_Index[10] = {};
+
+        if (ImGui::BeginCombo("Meshes", m_iSelectedMeshName.c_str()))
+        {
+            for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+            {
+                sprintf_s(LOD_Index, "Mesh : %d", i);
+                if (ImGui::Selectable(LOD_Index))
+                {
+                    m_iSelectedMesh = i;
+                    m_iSelectedMeshName = LOD_Index;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/Rock/SM_Sev_Roc_15AM/Mat/Tex/T4_Com2_Roc_05A_D.png";
+
+        if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
+        {
+            for (_uint i = 0; i < m_EntireDiffuseTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_EntireDiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedDiffuse = m_EntireDiffuseTextureName[i];
+
+
+                    _wstring Test(m_SelectedDiffuse.begin(), m_SelectedDiffuse.end());
+                    if (m_pDiffuseTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pDiffuseTextureCom[m_iSelectedMesh]);
+
+                    m_pDiffuseTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_SelectedDiffuseTexturePath[m_iSelectedMesh] = m_EntireDiffuseTextureName[i].c_str();
+
+
+                    m_SelectedDiffuseName[m_iSelectedMesh] = FileName;
+                    m_iSelectedDiffuseIndex[m_iSelectedMesh] = i;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::BeginCombo("Normal", m_SelectedNormalName[m_iSelectedMesh].c_str()))
+        {
+
+            for (_uint i = 0; i < m_EntireNormalTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_EntireNormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedNormal = m_EntireNormalTextureName[i].c_str();
+
+                    //W?„ÖΩÎìÉÔßçÍ≥∏ÏëùÊø°?Ë´õÎ∂ΩÌì≠.
+                    _wstring Test(m_SelectedNormal.begin(), m_SelectedNormal.end());
+                    if (m_pNormalTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);
+
+                    m_pNormalTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_SelectedNormalTexturePath[m_iSelectedMesh] = m_EntireNormalTextureName[i].c_str();
+
+                    m_SelectedNormalName[m_iSelectedMesh] = FileName;
+                    m_iSelectedNormalIndex[m_iSelectedMesh] = i;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::BeginCombo("Mask", m_SelectedMaskTextureName[m_iSelectedMesh].c_str()))
+        {
+
+            for (_uint i = 0; i < m_EntireMaskTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_EntireMaskTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedMask = m_EntireMaskTextureName[i].c_str();
+
+                    //WÔøΩÔøΩ∆ÆÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩŸ≤ÔøΩ.
+                    _wstring Test(m_SelectedMask.begin(), m_SelectedMask.end());
+                    if (m_pMaskTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pMaskTextureCom[m_iSelectedMesh]);
+
+                    m_pMaskTextureCom[m_iSelectedMesh] = (CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1));
+                    m_SelectedMaskTexturePath[m_iSelectedMesh] = m_EntireMaskTextureName[i].c_str();
+
+                    m_SelectedMaskTextureName[m_iSelectedMesh] = FileName;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("X###Mask"))
+        {
+            if (m_pMaskTextureCom[m_iSelectedMesh])
+                Safe_Release(m_pMaskTextureCom[m_iSelectedMesh]);
+
+            m_SelectedMaskTexturePath[m_iSelectedMesh] = "";
+            m_SelectedMaskTextureName[m_iSelectedMesh] = "";
+        }
+
+        if (ImGui::BeginCombo("X###MaskDiffuse", m_SelectedMaskDiffuseName[m_iSelectedMesh].c_str()))
+        {
+
+            for (_uint i = 0; i < m_EntireDiffuseTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_EntireDiffuseTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedMaskDiffuse = m_EntireDiffuseTextureName[i].c_str();
+
+                    //WÔøΩÔøΩ∆ÆÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩŸ≤ÔøΩ.
+                    _wstring Test(m_SelectedMaskDiffuse.begin(), m_SelectedMaskDiffuse.end());
+                    if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
+
+                    m_pMaskDiffuseTextureCom[m_iSelectedMesh] = CTexture::Create(m_pDevice, m_pContext, Test.c_str(), 1);
+                    m_SelectedMaskDiffusePath[m_iSelectedMesh] = m_EntireDiffuseTextureName[i].c_str();
+
+                    m_SelectedMaskDiffuseName[m_iSelectedMesh] = FileName;
+                    m_iSelectedMaskIndex[m_iSelectedMesh] = i;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("MaskDiffuse###X"))
+        {
+            if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
+                Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
+
+            m_SelectedMaskDiffusePath[m_iSelectedMesh] = "";
+            m_SelectedMaskDiffuseName[m_iSelectedMesh] = "";
+        }
+
+        if (ImGui::Button("Make_Json"))
+            m_MakeJson = !m_MakeJson;
+
+        if (m_MakeJson)
+            Export_MaterialData();
+
+        ImGui::Begin("Textures", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+
+        if (m_pDiffuseTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        ImGui::SameLine();
+        if (m_pNormalTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pNormalTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        if (m_pMaskTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pMaskTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        ImGui::SameLine();
+        if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
+            ImGui::Image((ImTextureID)m_pMaskDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImVec2(256, 256));
+
+        ImGui::End();
+
+        ImGui::End();
+    }
+
+}
 
 CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -663,12 +1001,21 @@ CGameObject* CEdit_MapObject::Clone(void* pArg)
 void CEdit_MapObject::Free()
 {
     __super::Free();
-    Safe_Release(m_pModelCom);
+    //Safe_Release(m_pModelCom);
+
+    m_pModelCom = nullptr;
+
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pRigidbodyCom);
+
     Safe_Delete(m_iSelectedDiffuseIndex);
     Safe_Delete(m_iSelectedNormalIndex);
-        
+    Safe_Delete(m_iSelectedMaskIndex);
+    Safe_Delete(m_iSelectedMaskDiffuseIndex);
+
+    m_pParent = nullptr;
+    m_pPickedChild = nullptr;
+
     for (auto& pModel : m_pModelComArray)
         Safe_Release(pModel);
 
@@ -680,6 +1027,17 @@ void CEdit_MapObject::Free()
         if (pTexture)
             Safe_Release(pTexture);
 
+    for (auto& pTexture : m_pMaskTextureCom)
+        if (pTexture)
+            Safe_Release(pTexture);
+
+    for (auto& pTexture : m_pMaskDiffuseTextureCom)
+        if (pTexture)
+            Safe_Release(pTexture);
+
+
+    for (auto& pChild : m_ChildObjects)
+        pChild = nullptr;
 
     m_pGameInstance->Unscribe();
 }

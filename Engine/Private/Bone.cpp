@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Bone.h"
 
 CBone::CBone()
@@ -24,6 +24,20 @@ void CBone::Update_CombinedTransformationMatrix(const _fmatrix& PreTransformatio
 		return;
 	}
 	XMStoreFloat4x4(&m_CombinedTransformationMatrix, 
+		XMLoadFloat4x4(&m_TransformationMatrix) * XMLoadFloat4x4(&Bones[m_iParentBoneIndex]->m_CombinedTransformationMatrix));
+}
+
+void CBone::Update_RibCombinedTransformationMatrix(const _fmatrix& PreTransformationMatrix, const vector<CBone*>& Bones)
+{
+	if (-1 == m_iParentBoneIndex)
+	{
+		_matrix		PreRibTransformMatrix = XMMatrixIdentity();
+		_float fSize = 0.1f;
+		PreRibTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+		XMStoreFloat4x4(&m_CombinedTransformationMatrix, PreRibTransformMatrix);
+		return;
+	}
+	XMStoreFloat4x4(&m_CombinedTransformationMatrix,
 		XMLoadFloat4x4(&m_TransformationMatrix) * XMLoadFloat4x4(&Bones[m_iParentBoneIndex]->m_CombinedTransformationMatrix));
 }
 

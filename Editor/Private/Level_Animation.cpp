@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "Level_Animation.h"
 
 #include "Event_Level.h"
@@ -13,10 +13,28 @@ HRESULT CLevel_Animation::Initialize()
 {
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
-    /* �ӽ� ���̴� �߰�. */
+    /* ?꾩떆 ?먯씠??異붽?. */
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
             , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
+    // hlsl 怨?留욎텣?? => ??媛믪? 堉?媛쒖닔? ?곴??놁씠 嫄곗쓽 怨좎젙
+    // ??踰덉뿉 ?묒뾽??泥섎━????????ㅻ젅?쒓? 紐뉖챸?멸?瑜??뺤쓽.
+    SHADER_MACRO eShaderMacro = {
+        {"THREAD_X", "64" }
+        ,{"THREAD_Y", "1" }
+        ,{"THREAD_Z", "1" }
+        , { NULL, NULL }
+    };
+    
+    string strEntryPoint = "CSMain";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+        ,eShaderMacro, strEntryPoint))))
     {
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;

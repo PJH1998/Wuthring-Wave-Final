@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Object_Manager.h"
 #include "GameInstance.h"
 
@@ -20,13 +20,16 @@ HRESULT CObject_Manager::Add_GameObject_ToLayer(_uint iPrototypeLevelID, const _
 	if (nullptr == pClone)
 		return E_FAIL;
 
-	CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
-	if (nullptr == pLayer)
 	{
-		pLayer = CLayer::Create();
-		m_Layers[iLayerLevelID].emplace(strLayerTag, pLayer);
+		lock_guard<mutex> lock(m_Mutex);
+		CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
+		if (nullptr == pLayer)
+		{
+			pLayer = CLayer::Create();
+			m_Layers[iLayerLevelID].emplace(strLayerTag, pLayer);
+		}
+		pLayer->Add_GameObject(pClone);
 	}
-	pLayer->Add_GameObject(pClone);
 
 	return S_OK;
 }
@@ -36,13 +39,16 @@ HRESULT CObject_Manager::Add_GameObject_ToLayer(_uint iLayerLevelID, const _wstr
 	if (m_iNumLevel <= iLayerLevelID)
 		return E_FAIL;
 
-	CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
-	if (nullptr == pLayer)
 	{
-		pLayer = CLayer::Create();
-		m_Layers[iLayerLevelID].emplace(strLayerTag, pLayer);
+		lock_guard<mutex> lock(m_Mutex);
+		CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
+		if (nullptr == pLayer)
+		{
+			pLayer = CLayer::Create();
+			m_Layers[iLayerLevelID].emplace(strLayerTag, pLayer);
+		}
+		pLayer->Add_GameObject(pObject);
 	}
-	pLayer->Add_GameObject(pObject);
 
 	return S_OK;
 }

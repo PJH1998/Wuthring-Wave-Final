@@ -1,5 +1,5 @@
-#pragma once
-#include"GameObject.h"
+癤�#pragma once
+#include"StaticObject.h"
 
 
 NS_BEGIN(Engine)
@@ -11,7 +11,7 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CEdit_MapObject : public CGameObject
+class CEdit_MapObject : public CStaticObject
 {
 public:
 	typedef struct tagMapLoad
@@ -52,24 +52,37 @@ public:
 	_char* Get_ModelName() { return m_ModelName; }
 
 	void Add_Child(CEdit_MapObject* pObject);
+	void Quit_Child(CEdit_MapObject* pObject);
+	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
+	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
 
 private:
 	void Export_MaterialData();
-	void Child_UpdateMatrix(_fmatrix Matrix);
+	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
+	void About_Parent();
+	void About_Transform();
+	void About_Texture();
 
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
-	CModel* m_pModelComArray[4] = { nullptr, nullptr, nullptr, nullptr };
+	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
-	class CEdit_MapObject* m_pParent = { nullptr };
-	vector<class CEdit_MapObject*> m_ChildObjects;
+	CEdit_MapObject* m_pParent = { nullptr };
+	list<CEdit_MapObject*> m_ChildObjects;
+
+	CEdit_MapObject* m_pPickedChild = { nullptr };
 	_bool m_IsSetParent = { false };
 	_bool m_IsParent = { false };
 	vector<CTexture*> m_pDiffuseTextureCom;
 	vector<CTexture*> m_pNormalTextureCom;
+	vector<CTexture*> m_pMaskTextureCom;
+	vector<CTexture*> m_pMaskDiffuseTextureCom;
 
+
+
+	_float4x4 m_ChildLocalMat = {};
 private:
 #ifdef _DEBUG
 	_char m_ModelName[MAX_PATH];
@@ -84,23 +97,42 @@ private:
 	_float3 m_vNewRotation = {};
 	_float3 m_vNewTranslation = {};
 
-	_bool m_IsTest = { false };
+	_bool m_IsCustomTexture = { false };
 	_bool m_IsLoaded = { false };
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };
 	
-	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
-	vector<_string> m_DiffuseTextureName;
-	vector<_string> m_NormalTextureName;
-	
-	_string m_SelectedDiffuse= {};
-	_string m_SelectedNormal= {};
+	//
+	vector<_string> m_EntireDiffuseTextureName;
+	vector<_string> m_EntireNormalTextureName;
+	vector<_string> m_EntireMaskTextureName;
 
+	
+	vector<_string> m_SelectedDiffuseTexturePath;
+	vector<_string> m_SelectedNormalTexturePath;
+	vector<_string> m_SelectedMaskTexturePath;
+	vector<_string> m_SelectedMaskDiffusePath;
+
+	_string m_SelectedDiffuse;
+	_string m_SelectedNormal;
+	_string m_SelectedMask;
+	_string m_SelectedMaskDiffuse;
+
+	
+	vector<_string >m_SelectedDiffuseName;
+	vector<_string >m_SelectedNormalName;
+	vector<_string> m_SelectedMaskTextureName;
+	vector<_string> m_SelectedMaskDiffuseName;
+
+	
+	_string m_iSelectedMeshName;
 	_uint m_iSelectedMesh={};
 
 	_uint* m_iSelectedDiffuseIndex;
 	_uint* m_iSelectedNormalIndex;
-
+	_uint* m_iSelectedMaskIndex;
+	_uint* m_iSelectedMaskDiffuseIndex;
+	
 	_uint m_iNumObject = {};
 private:
 	static _uint g_iNumObjects;

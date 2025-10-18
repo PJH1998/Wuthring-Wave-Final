@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
@@ -11,7 +11,7 @@ private:
 		CONVERT_FBX_TO_DAT = 0, 
 		LOAD_DAT = 1, 
 		CREATE_ACTOR = 2,
-		EDIT_ANIMATION = 3, // ¾Ö´Ï¸ŞÀÌ¼Ç ¼öÁ¤. (Notify)?
+		EDIT_ANIMATION = 3, // ?ì¢Šë•²ï§ë¶¿ì” ???ì„ì ™. (Notify)?
 		END
 	};
 
@@ -21,7 +21,7 @@ private:
 	virtual ~CAnimationTool() = default;
 
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region æ¹²ê³•ë‚¯ ?â‘¥ë‹”
 public:
 	HRESULT	Initialize(LEVEL eLevel);
 	void Update();
@@ -65,9 +65,9 @@ private:
 	class CModelLoader* m_pLoader = { nullptr };
 	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
 
-	// Prototype¿¡ ÀúÀåÇÏ°í ÀÌ¸§¸¸ °¡Á®¿É´Ï´Ù.
-	list<_string> m_ModelNames; // ¸ğµ¨ ÄÄÆ÷³ÍÆ® 
-	list<_string> m_ActorNames; // ½Ç »ı¼º °´Ã¼. 
+	// Prototype???Â€?Î½ë¸¯æ€¨??ëŒ€ì««ï§?åª›Â€?ëª„ìƒƒ?ëˆë–.
+	list<_string> m_ModelNames; // ï§â‘¤ëœ½ è€ŒëŒ„ë£·?ëš°ë“ƒ 
+	list<_string> m_ActorNames; // ???ì•¹ê½¦ åª›ì•¹ê»œ. 
 
 	typedef map<const _wstring, class CAnimationActor*> ANIMATIONACTORS;
 	ANIMATIONACTORS m_AnimationActors;
@@ -75,7 +75,7 @@ private:
 	typedef map<const _wstring, const _string> MODELPATHS;
 	MODELPATHS	m_ModelDirPaths;
 
-	// »ı¼ºÇÑ °´Ã¼¿¡ ´ëÇÑ µ¿ÀûÁ¦¾î¸¦ ¾î¶»°ÔÇÒ±î?
+	// ?ì•¹ê½¦??åª›ì•¹ê»œ???Â€???ìˆˆìŸ»?ì’–ë¼±ç‘œ??ëŒ€ë¼¸å¯ƒëš°ë¸·æº?
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
@@ -94,7 +94,7 @@ private:
 	_float m_fEditorAlpha = { 1.f };
 
 private:
-	// ÇïÆÛ ÇÔ¼ö
+	// ?Ñ‹ë ?â‘¥ë‹”
 	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	

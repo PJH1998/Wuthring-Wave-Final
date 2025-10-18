@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Mesh.h"
 
 #include "Bone.h"
@@ -15,7 +15,7 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions },
     m_Indices { Prototype.m_Indices }
-    ,m_Cube{Prototype.m_Cube}
+    , m_pBoundingBox{Prototype.m_pBoundingBox }
 {
 }
 
@@ -76,6 +76,7 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 }
 #endif
 
+// ?닿쾬??怨꾩궛 ?곗씠?붽? ?곸슜?섏뼱???섎뒗 遺遺?
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)
@@ -271,7 +272,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
 		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
 
-		// Mesh Shape�� Container
+		// Mesh Shape??Container
 		m_VertexPositions.push_back(pVertices[i].vPosition);
         MaxPos.x = max(pVertices[i].vPosition.x, MaxPos.x);
         MaxPos.y = max(pVertices[i].vPosition.y, MaxPos.y);
@@ -300,8 +301,10 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
     
     vCorner[LBF] = _float3(MinPos.x, MinPos.y, MaxPos.z);
 
-    m_Cube.Center = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
-    m_Cube.Extents = _float3((MaxPos.x - m_Cube.Center.x), (MaxPos.y - m_Cube.Center.y) , (MaxPos.z - m_Cube.Center.z));
+    _float3 vCenter = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
+    _float3  vExtents = _float3((MaxPos.x - vCenter.x), (MaxPos.y - vCenter.y) , (MaxPos.z - vCenter.z));
+    
+    m_pBoundingBox = new BoundingBox(vCenter, vExtents);
 
 	m_iVertexStride = sizeof(VTXMESH);
 	m_iNumVertexBuffers = 1;
@@ -323,7 +326,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 	Safe_Delete_Array(pVertices);
 #pragma endregion
 
-	// Mesh Shape�� Container
+	// Mesh Shape??Container
 	for (size_t i = 0; i < m_iNumIndices; ++i)
 		m_Indices.push_back(pIndices[i]);
 
@@ -380,4 +383,7 @@ CComponent* CMesh::Clone(void* pArg)
 void CMesh::Free()
 {
 	__super::Free();
+
+    if (!m_isClone)
+        Safe_Delete(m_pBoundingBox);
 }

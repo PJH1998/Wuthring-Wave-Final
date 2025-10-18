@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "AnimationActor.h"
 #include "Model.h"
 
@@ -64,8 +64,31 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     m_fTimeDelta = fTimeDelta;
 
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; //
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
+
     if (m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+    {
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+        /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
+        m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
+    }
+        
+#ifdef _DEBUG
+	_int iBoneIndex = 0;
+    m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
+#endif // _DEBUG
+
+    
+
+  
+    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
+    //if (m_IsPlayAnimation)
+    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -214,6 +237,13 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
         return E_FAIL;
     }
 
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strComputeShaderTag,
+        TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+    {
+        CRASH("Failed Ready_ComShader");
+        return E_FAIL;
+    }
+
     // Model
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strModelTag,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
@@ -257,5 +287,6 @@ void CAnimationActor::Free()
     CContainerObject::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShaderCom);
 
 }

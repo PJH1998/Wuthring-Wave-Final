@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Loader.h"
 
 NS_BEGIN(Client)
