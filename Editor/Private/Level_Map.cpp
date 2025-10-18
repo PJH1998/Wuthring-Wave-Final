@@ -6,13 +6,23 @@
 #include"Edit_MapObject_Instance.h"
 #include"Edit_PreViewModel.h"
 #include"Edit_LightObject.h"
+#include"Edit_Brush.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
 _float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
+
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
 {
+    // ���彺�������� ���� �޽� ���� �귯�� ����� �޸�
+    // ���� Ÿ���� ����ͼ� ���ε�. ���� ��ġ�� ��ȯ.
+    // �� ���콺 ��ġ �� �ϳ� VS_IN���� ������, Range ���� ���̴� ����.
+    // ���� Ÿ���� w���� 0�̸� discard
+    // GS���̴����� �簢 ���� ����, �� �������� ���� �귯�� ����? => �簢�� ���� ���� �� ���� ���� ����?
+    // ����, Y�� ���� ȸ�� ������ġ, ����, ����..? �Է� �����ϰ� ?
+    
+    // ��ư ������ ������ �� �ְ�?
 }
 
 HRESULT CLevel_Map::Initialize()
@@ -51,6 +61,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
     case Editor::CLevel_Map::MENU_RANDSCAPE:
         Menu_RandSacpe();
+        m_pBrush->Update(fTimeDelta);
         break;
 
     case Editor::CLevel_Map::MENU_LIGHT:
@@ -91,7 +102,7 @@ void CLevel_Map::Menu_Select()
             m_eMenu == MENU_MAPSAVELOAD ? m_eMenu = END : m_eMenu = MENU_MAPSAVELOAD;
         }
 
-        if(ImGui::MenuItem("Object Save & Load")) {
+        if(ImGui::MenuItem("Object Load")) {
             m_eMenu == MENU_OBJECTLOAD ? m_eMenu = END : m_eMenu = MENU_OBJECTLOAD;
         }
 
@@ -125,7 +136,7 @@ void CLevel_Map::Menu_RandSacpe()
 
     if (m_pPickedInstanceObject)
         m_pPickedInstanceObject->Set_ImGuiOption();
-#pragma region ?쒕뱶?ㅼ??댄봽 硫붾え
+#pragma region 랜드스케이프
     //??쇨린?ㅼ? ?뚮젅?댁뼱??媛源뚯씠 ?덉쓣 ???뚮젅?댁뼱瑜?以묒젏?쇰줈 ?놁쑝濡??꾩?. ?꾩슫 ?곹깭濡?諛붾엺???붾뱾由?
     //?뚮젅?댁뼱??嫄곗쓽 寃뱀튇 ??쇨린?ㅼ? Clip?섎뒗?? ?덈낫??
     //?吏곸씪 ???뚮젅?댁뼱 諛쒕컮?μ뿉 諛쒖옄援??곗뭡 ?앷?. 留덉뒪???대?吏 媛숈? 嫄곕줈 ?섎뒗??
@@ -189,7 +200,7 @@ void CLevel_Map::Menu_Model_Load()
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
                 strcpy_s(Desc.ModelName, FileName);
-
+                //m_pGameInstance->Clone_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
             }
@@ -278,26 +289,24 @@ void CLevel_Map::Menu_Save_Load()
                     File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                     Desc.WorldMatrix = &Matrix;
 
-                    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-                    _tchar Name[MAX_PATH] = {};
-                    MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
-                    lstrcat(Model, Name);
+                    //_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+                    //_tchar Name[MAX_PATH] = {};
+                    //MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
+                    //lstrcat(Model, Name);
 
-                    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
-                    strcat_s(ModelPath, Desc.ModelName);
-                    strcat_s(ModelPath, "/");
-                    strcat_s(ModelPath, Desc.ModelName);
-                    strcat_s(ModelPath, ".dat");
+                    //_char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
+                    //strcat_s(ModelPath, Desc.ModelName);
+                    //strcat_s(ModelPath, "/");
+                    //strcat_s(ModelPath, Desc.ModelName);
+                    //strcat_s(ModelPath, ".dat");
 
-                    m_pGameInstance->Add_Prototype(m_iLevel, Model,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
-                    /*m_pGameInstance->Add_Prototype(m_iLevel, Model,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath));
-                    */
-                    _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
-                    lstrcat(PrototypeObject, Name);
+                    //m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                    //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
 
-                    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
+                    //_tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject");
+                    //lstrcat(PrototypeObject, Name);
+
+                    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
 
                 }
@@ -330,7 +339,7 @@ void CLevel_Map::Load_Objects()
     vector<_wstring> m_PrototypeNames;
 
     _matrix PreTransformMatrix = XMMatrixIdentity();
-    _float fSize = 0.01f;
+    _float fSize = 0.1f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
@@ -383,6 +392,7 @@ void CLevel_Map::Load_Objects()
                 //m_pGameInstance->Add_Work([=]() {
                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
+                   //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
                    CRASH("Prototype Create Failed");
 
                     //硫?곗벐?덈뱶 ?뺤긽???섎㈃ ?닿굅 ?멸쾬.
@@ -441,6 +451,12 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
      CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
 
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
+        CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
     //VTXMESHINSTANCE
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
@@ -448,6 +464,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
         CEdit_LightObject::Create(m_pDevice, m_pContext));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
+        CEdit_Brush::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
@@ -470,7 +489,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //m_pGameInstance->Add_GameObject_ToLayer()
     Load_Objects();
-
+    m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
     return S_OK;
 }
 
@@ -591,6 +610,7 @@ void CLevel_Map::Free()
     m_pGameInstance->Unscribe();
 
     Safe_Release(m_pPreViewObject);
+    Safe_Release(m_pBrush);
 
     for (auto& Pair : m_SaveObjects)
     {

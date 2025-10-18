@@ -62,6 +62,7 @@ private:
 	void About_Parent();
 	void About_Transform();
 	void About_Texture();
+
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };

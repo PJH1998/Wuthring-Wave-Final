@@ -367,7 +367,7 @@ void CModelLoader::Load_File()
 				m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
 				if (nullptr == m_pAIScene)
 				{
-					MSG_BOX("寃쎈줈 ?섎せ??);
+					MSG_BOX("寃쎈줈 ?섎せ??");
 					return;
 				}
 			}
@@ -387,7 +387,7 @@ void CModelLoader::Load_File()
 
 							if (nullptr == m_pAIScene)
 							{
-								MSG_BOX("寃쎈줈 ?섎せ??);
+								MSG_BOX("寃쎈줈 ?섎せ??");
 								return;
 							}
 							_string SaveFilePath = "../../Client/Bin/Resource/Map/Rock";

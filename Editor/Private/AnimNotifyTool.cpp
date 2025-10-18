@@ -546,7 +546,7 @@ void CAnimNotifyTool::Load_SoundsFromFile(const _string& strFilePath, const _str
     }
     else
     {
-        MSG_BOX("寃쎈줈 ?섎せ??);
+        MSG_BOX("寃쎈줈 ?섎せ??");
         return;
     }
 }

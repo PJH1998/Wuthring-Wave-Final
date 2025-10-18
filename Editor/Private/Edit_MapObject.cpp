@@ -22,6 +22,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
 
+    //����Ʈ�� ������ ���� ���� �ٸ���?
+    //���� ��ġ�� ���� ����ũ�� ���� �ٲ㼭 ȯ���� �ٲ�� ���� �ֱ�.
+
     return S_OK;
 }
 
@@ -38,6 +41,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_iNumLOD = m_pModelComArray.size()-1;
+
     Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
     m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
@@ -140,6 +144,7 @@ void CEdit_MapObject::Update(_float fTimeDelta)
             m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
         }
     }
+    //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
@@ -153,7 +158,7 @@ void CEdit_MapObject::Render()
     //�Ⱥ��̴� �� ����
     Bind_Resources();
 
-    for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+    for (_uint i = 0; i < m_pModelComArray[m_iLODIndex]->Get_NumMesh(); ++i)
     {
         if (m_TexMode)
         {
@@ -172,18 +177,18 @@ void CEdit_MapObject::Render()
         else
         {
             _uint FailedCnt = {};
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
                 FailedCnt++;
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                 FailedCnt++;
 
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         }
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
-        m_pModelCom->Render(i);
+        m_pModelComArray[m_iLODIndex]->Render(i);
     }
 }
 
@@ -293,7 +298,6 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         //        CRASH("FAILED");
         //    //m_pModelComArray.push_back(pModel);
         //    });
-        CModel* pModel = nullptr;
         _wstring ModelCom = Model;
         //ModelCom.pop_back();
         ModelCom += to_wstring(i);
@@ -432,7 +436,7 @@ void CEdit_MapObject::Export_MaterialData()
 
             ofstream File(strFolderName);
 
-#pragma region ?띿뒪爾?蹂듭궗 諛?Json ???
+#pragma region Json 추출
             strTexturePath += "/Tex/";
             filesystem::create_directories(strTexturePath);
             json Totaljson;
@@ -967,7 +971,6 @@ void CEdit_MapObject::About_Texture()
     }
 
 }
-
 
 CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

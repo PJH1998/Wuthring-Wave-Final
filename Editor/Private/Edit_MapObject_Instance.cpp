@@ -65,9 +65,6 @@ void CEdit_MapObject_Instance::Render()
 {
     Bind_Resources();
 
-    //m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-    
-
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
         m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture",i,TEXTURETYPE::DIFFUSE);

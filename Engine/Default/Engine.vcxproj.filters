@@ -429,6 +429,9 @@
     <ClInclude Include="..\public\UIObject.h">
       <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
     </ClInclude>
@@ -468,11 +471,12 @@
     <ClInclude Include="..\public\CSM.h">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
-    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -647,9 +651,6 @@
     <ClCompile Include="..\private\UIObject.cpp">
       <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Mesh_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Point</Filter>
     </ClCompile>
@@ -686,11 +687,12 @@
     <ClCompile Include="..\private\CSM.cpp">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Mesh_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
-    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

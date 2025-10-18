@@ -49,6 +49,8 @@ private:
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
 
+	class CEdit_Brush* m_pBrush = { nullptr };
+
 
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;

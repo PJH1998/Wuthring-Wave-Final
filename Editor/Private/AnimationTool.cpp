@@ -270,7 +270,7 @@ void CAnimationTool::LoadDat()
             }
             else
             {
-                MSG_BOX("寃쎈줈 ?섎せ??);
+                MSG_BOX("寃쎈줈 ?섎せ??");
                 return;
             }
 
@@ -421,7 +421,7 @@ void CAnimationTool::Render_Model_Detail()
         }
         else
         {
-            MSG_BOX("寃쎈줈 ?섎せ??);
+            MSG_BOX("寃쎈줈 ?섎せ??");
             return;
         }
 

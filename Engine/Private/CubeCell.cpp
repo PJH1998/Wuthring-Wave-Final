@@ -70,10 +70,10 @@ void CCubeCell::Update(const _fvector& vCamPos)
 		_float3 vCenter = m_pBoundingBox->Center;
 		_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
 
-		_uint iLODIndex = {};
-		for (_uint i = 0; i < 4; ++i)
+		_uint iLODIndex = {3};
+		for (_uint i = 0; i < 3; ++i)
 		{
-			if (fDistance > g_fLODDistance[i])
+			if (fDistance > g_fLODDistance[i + 1])
 				continue;
 
 			iLODIndex = i;
