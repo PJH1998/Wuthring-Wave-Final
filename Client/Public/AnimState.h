@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -29,6 +29,7 @@ public:
 
 private:
 	_string m_strAnimationTag;
+	_string m_strAnimStateTag;
 	ANIMSTATE_DESC m_StateData{};
 	
 public:

@@ -1,5 +1,5 @@
-#include "ClientPch.h"
-#include "AnimMacnine.h"
+ï»¿#include "ClientPch.h"
+#include "AnimMachine.h"
 #include "Model.h"
 #include "AnimState.h"
 
@@ -7,22 +7,22 @@
 
 #pragma endregion
 
-CAnimMacnine::CAnimMacnine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAnimMachine::CAnimMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CComponent{ pDevice, pContext }
 {
 }
 
-CAnimMacnine::CAnimMacnine(const CAnimMacnine& Prototype)
+CAnimMachine::CAnimMachine(const CAnimMachine& Prototype)
 	: CComponent{ Prototype }
 {
 }
 
-HRESULT CAnimMacnine::Initialize_Prototype()
+HRESULT CAnimMachine::Initialize_Prototype()
 {
     return E_NOTIMPL;
 }
 
-HRESULT CAnimMacnine::Initialize_Clone(void* pArg)
+HRESULT CAnimMachine::Initialize_Clone(void* pArg)
 {
 	ANIMMACNINE_DESC* pDesc = (ANIMMACNINE_DESC*)pArg;
 	if(nullptr == pDesc)
@@ -32,50 +32,50 @@ HRESULT CAnimMacnine::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CAnimMacnine::Handle_Input(CModel* pModelCom, _uint iIndex)
+void CAnimMachine::Handle_Input(CModel* pModelCom, _uint iIndex)
 {
 	if(iIndex >= m_AnimStates.size())
 		return;
 	if(iIndex != m_iCurrentStateIndex)
 	{
         m_AnimStates[m_iCurrentStateIndex]->Exit(pModelCom, m_pOwnerState, &m_strCurrentAnimTag);
-		// Enter »õ·Î¿î »óÅÂ
+		// Enter ìƒˆë¡œìš´ ìƒíƒœ
 		m_AnimStates[iIndex]->Enter(pModelCom, m_pOwnerState, &m_strCurrentAnimTag);
 		m_iCurrentStateIndex = iIndex;
 	}
 }
 
-void CAnimMacnine::Update(_float fTimeDelata, CModel* pModelCom)
+void CAnimMachine::Update(_float fTimeDelata, CModel* pModelCom)
 {
 }
 
-void CAnimMacnine::Reset()
+void CAnimMachine::Reset()
 {
 }
 
-CAnimMacnine* CAnimMacnine::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAnimMachine* CAnimMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CAnimMacnine* pInstance = new CAnimMacnine(pDevice, pContext);
+    CAnimMachine* pInstance = new CAnimMachine(pDevice, pContext);
     if(FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Created : CAnimMacnine");
+        MSG_BOX("Failed to Created : CAnimMachine");
         Safe_Release(pInstance);
     }
     return pInstance;
 }
 
-CComponent* CAnimMacnine::Clone(void* pArg)
+CComponent* CAnimMachine::Clone(void* pArg)
 {
-    CAnimMacnine* pInstance = new CAnimMacnine(*this);
+    CAnimMachine* pInstance = new CAnimMachine(*this);
     if(FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Failed to Cloned : CAnimMacnine");
+        MSG_BOX("Failed to Cloned : CAnimMachine");
         Safe_Release(pInstance);
     }
     return pInstance;
 }
 
-void CAnimMacnine::Free()
+void CAnimMachine::Free()
 {
     __super::Free();
 }

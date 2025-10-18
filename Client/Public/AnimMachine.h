@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -6,7 +6,7 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
-class CAnimMacnine final : public CComponent
+class CAnimMachine final : public CComponent
 {
 	typedef struct tagAnimMacnineDesc
 	{
@@ -14,9 +14,9 @@ class CAnimMacnine final : public CComponent
 	}ANIMMACNINE_DESC;
 
 private:
-	explicit CAnimMacnine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CAnimMacnine(const CAnimMacnine& Prototype);
-	virtual ~CAnimMacnine() = default;
+	explicit CAnimMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CAnimMachine(const CAnimMachine& Prototype);
+	virtual ~CAnimMachine() = default;
 
 public:
 	virtual HRESULT		Initialize_Prototype();
@@ -34,8 +34,8 @@ private:
 	_uint m_iCurrentStateIndex{};
 
 public:
-	static CAnimMacnine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual CAnimMacnine* Clone(void* pArg) override;
+	static CAnimMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 
 };

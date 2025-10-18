@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "MonsterTest.h"
 #include  "GameInstance.h"
 
@@ -53,7 +53,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	//if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
 	//	vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
 
-	m_isAnimationFinished = m_pModelCom->Play_Animation(m_strCurrentAnimTag, fTimeDelta, nullptr);
+	//m_isAnimationFinished = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelta, nullptr);
 	//m_pColliderCom->Update(vVelocity);
 	
 }

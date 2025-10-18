@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "BT_Node.h"
 
 NS_BEGIN(Engine)
@@ -12,7 +12,7 @@ public:
 	HRESULT Initialize_Prototype() override;
 	HRESULT Initialize_Clone(void* pArg) override;
 
-	BT_STATE tick(class CGameObject* pGameObject, class CBlackBoard* pBlackBoard) override;
+	virtual BT_STATE tick(class CGameObject* pGameObject, class CBlackBoard* pBlackBoard) override;
 
 private:
 	function<BT_STATE(CGameObject* pGameObject, CBlackBoard* pBlackBoard)> m_Action;

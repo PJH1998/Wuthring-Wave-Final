@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Component.h"
 #include "BlackBoard.h"
 
@@ -9,7 +9,7 @@ class ENGINE_DLL CBehavior_Tree final : public CComponent
 public:
 	typedef struct tagBehaviorTreeDesc
 	{
-		class CBlackBoard* pBlackBoard;
+		CBlackBoard* pBlackBoard;
 	}BEHAVIOR_TREE_DESC;
 
 private:
