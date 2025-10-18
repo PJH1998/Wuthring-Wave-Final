@@ -94,12 +94,17 @@ void CGUIManager::Update()
 		Func();
 
 	Gizmo();
+
+	// ImGui Render
+	if (m_pGameInstance->Get_DIKeyState(DIK_END) == KEYSTATE::DOWN)
+		m_isRender = !m_isRender;
 }
 
 void CGUIManager::Render()
 {
 	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	if(true == m_isRender)
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	
 	m_pContext->OMGetRenderTargets(1, &m_pMainRTV, &m_pMainDSV);
 

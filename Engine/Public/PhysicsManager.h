@@ -92,7 +92,7 @@ private:
 #ifdef _DEBUG
 	DebugRenderer*	m_pDebugRenderer = { nullptr };
 	BodyManager::DrawSettings m_DrawSetting;
-	_bool					m_isRenderAll = { true };
+	_bool					m_isRenderAll = { false };
 #endif
 
 public:

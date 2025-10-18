@@ -24,6 +24,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
 	m_iNumLOD = m_pModelComArray.size() - 1;
 	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
@@ -59,6 +61,9 @@ void CMapObject::Late_Update(_float fTimeDelta)
 
 void CMapObject::Render()
 {
+	if (m_iNumLOD <= m_iLODIndex)
+		return;
+
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));

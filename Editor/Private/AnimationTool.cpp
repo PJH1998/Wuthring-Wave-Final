@@ -343,6 +343,7 @@ void CAnimationTool::RenderUI_AnimationList()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+#ifdef _DEBUG
     for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
     {
         if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
@@ -367,6 +368,7 @@ void CAnimationTool::RenderUI_AnimationList()
         }
     }
     ImGui::EndChild();
+#endif 
 
     // 2. ?좏깮??Animation Detail 泥섎━瑜??꾪븳 湲곕뒫 異붽?.
     Render_Animation_Detail();
@@ -466,10 +468,11 @@ void CAnimationTool::Render_Model_Detail()
 // ?좏깮???좊땲硫붿씠?섏뿉 ????뷀뀒?쇳븳 ?뺣낫瑜?媛?몄삤湲?
 void CAnimationTool::Render_Animation_Detail()
 {
+#ifdef _DEBUG
     // 1. ?꾩옱 TrackPosition ???
     if (!m_Selected_AnimationTag.empty())
         m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
-
+#endif
 
     // 2. TrackBar 議곗젅 UI 留뚮뱾湲?
     _float minTrackPos = 0.f;
@@ -488,9 +491,11 @@ void CAnimationTool::Render_Animation_Detail()
 
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
+#ifdef _DEBUG
         // ?ㅼ젙??TrackPosition???꾨떖?⑸땲??
         if (!m_Selected_AnimationTag.empty())
             m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
+#endif
     }
 
     _bool IsChanged = { false };
@@ -516,8 +521,10 @@ void CAnimationTool::Render_Animation_Detail()
         m_IsPlayAnimation = true;
     }
 
+#ifdef _DEBUG
     if (IsChanged)
         m_AnimationActors[m_wSelected_AnimActorTag]->Set_PlayAnimation(m_IsPlayAnimation);
+#endif
 
     if (ImGui::Button("Notify Visible"))
         m_IsVisibleNotify = !m_IsVisibleNotify;

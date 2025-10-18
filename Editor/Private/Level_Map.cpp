@@ -208,7 +208,9 @@ void CLevel_Map::Menu_Model_Load()
             {
                 ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
                 m_szPreViewModelName = StringToWString(FileName);
+#ifdef _DEBUG
                 ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
+#endif
                 ImGui::End();
                 m_pPreViewObject->Late_Update(0.016f, m_szPreViewModelName);
             }

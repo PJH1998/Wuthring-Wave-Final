@@ -16,6 +16,7 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Ready_OctoTree(); Complete_Load(); });
 
     m_pGameInstance->Wait_Thread_End();
     return S_OK;
@@ -122,6 +123,13 @@ HRESULT CLoader_Test::Load_Object()
         CMapObject::Create(m_pDevice, m_pContext));
 
     return S_OK;
+}
+
+HRESULT CLoader_Test::Ready_OctoTree()
+{
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
+	return S_OK;
 }
 
 CLoader_Test* CLoader_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -35,7 +35,9 @@ void CEdit_Brush::Update(_float fTimeDelta)
     if (m_pGameInstance->isPicked(&m_vMousePos))
         m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vMousePos), 1.f));
 
+#ifdef _DEBUG
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
+#endif
 }
 
 void CEdit_Brush::Late_Update(_float fTimeDelta)

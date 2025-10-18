@@ -48,8 +48,9 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     }
 
     // Default?? 0?? ??????? ????.
+#ifdef _DEBUG
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
-
+#endif
     return S_OK;
 }
 

@@ -151,6 +151,7 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
     
     XMStoreFloat4x4(&m_pInstanceMatrix[m_iPickedInstance], PickedMatrix);
 
+#ifdef _DEBUG
     if (ImGui::Button("OK"))
         m_pModelCom->Change_InstanceInfo(m_iPickedInstance, PickedMatrix);
 
@@ -163,7 +164,7 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
         }
     }
     ImGui::EndChildFrame();
-
+#endif
     //LOD媛 珥?4?④퀎濡??섎돇?댁졇?덈뒗???닿굅 ?대뼸寃???嫄댁? ?앷컖.
     //?쒖씪 媛꾨떒??諛⑸쾿 => 荑쇰뱶?몃━?먯꽌 ?ш린??鍮꾨??댁꽌 ?뚮뜑????紐⑤뜽 媛덉븘?쇨린.
     //=> ?몄뒪?댁떛??硫붿돩?ㅼ? 媛?留ㅽ듃由?뒪留덈떎 鍮꾧탳?댁꽌 硫붿돩 萸??몄? 寃곗젙?댁빞?좊벏?

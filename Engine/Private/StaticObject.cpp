@@ -11,6 +11,11 @@ CStaticObject::CStaticObject(const CStaticObject& Prototype)
 {
 }
 
+_float CStaticObject::Compute_Distance(const _fvector& vCamPos)
+{
+    return XMVectorGetX(XMVector3Length(vCamPos - m_pTransformCom->Get_State(STATE::POSITION)));
+}
+
 void CStaticObject::Free()
 {
 	__super::Free();

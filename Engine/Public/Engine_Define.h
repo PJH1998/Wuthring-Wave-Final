@@ -94,7 +94,8 @@ namespace Engine
 	const unsigned int g_iMaxHeight = 4608;
 
 	const unsigned int g_iNumCascade = 4;
-	const float g_fLODDistance[4] = { 0.f, 512.f, 2048.f, 4096.f };
+	const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };
+	const float g_fLODGap = { 1500.f };
 }
 
 #define MAX_DEPTH 5

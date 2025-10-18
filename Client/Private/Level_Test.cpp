@@ -9,7 +9,6 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
-    m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
     ifstream File("../Bin/Resource/Map/MapData/LOD_TEST_NonInteraction.dat", ios::binary);
 
     if (!File.is_open())
@@ -41,7 +40,8 @@ HRESULT CLevel_Test::Initialize()
         strcat_s(ModelPath, Desc.ModelName);
         strcat_s(ModelPath, ".dat");
 
-        m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
+		for(_uint i = 0; i < 50; ++i)
+			m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
 
         //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
         //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
