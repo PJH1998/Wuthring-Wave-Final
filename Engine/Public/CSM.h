@@ -24,10 +24,15 @@ public:
 	HRESULT					Begin_CSM();
 	HRESULT					End_CSM();
 
+#ifdef _DEBUG
+	void					Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#endif
+
 private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*				m_pGameInstance = { nullptr };
+
 	const LIGHT_DESC*			m_pLightDesc = { nullptr };
 	
 	ID3D11DepthStencilView*		m_pShadowDSV = { nullptr };
@@ -39,7 +44,8 @@ private:
 	_uint						m_iNumClip = {};
 	_uint						m_iNumClipDistance = {};
 
-	vector<_float4x4>			m_Matrices[ENUM_CLASS( D3DTS::END )];
+	_float4x4					m_Matrices[ENUM_CLASS( D3DTS::END )][g_iNumCascade];
+	_float						m_fClipZ[g_iNumCascade];
 	vector<_float>				m_ClipDistance;
 
 private:
@@ -54,6 +60,7 @@ private:
 
 	_matrix						Make_SplitViewMatrix(const _float4* pFrustrumPoints);
 	_matrix						Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix ShadowViewMatrix);
+	void						Make_ClipZ();
 
 public:
 	static CCSM*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

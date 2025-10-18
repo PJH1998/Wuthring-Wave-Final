@@ -93,6 +93,10 @@ HRESULT CRenderer::Add_Render_Debug(CComponent* pDebugComponent)
 
 	return S_OK;
 }
+HRESULT CRenderer::Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength)
+{
+	return m_pShader->Bind_Value(pConstantName, pValue, iLength);
+}
 #endif
 
 void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
@@ -452,13 +456,13 @@ void CRenderer::Render_Debug()
 	if (FAILED(m_pGameInstance->Render_RT()))
 		CRASH("Render RT");
 
-	//if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-	//	CRASH("ViewMatrix");
-	//if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-	//	CRASH("ProjMatrix");
-	////if (FAILED(m_pGameInstance->Render_RT(m_pShader, m_pVIBuffer)))
-	////	CRASH("Render RT");
 
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		CRASH("ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		CRASH("ProjMatrix");
+	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
+		
 }
 #endif
 
@@ -490,22 +494,6 @@ HRESULT CRenderer::Ready_RT()
 
 	/* RenderTarget Speuclar */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Specular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
-		ASSERT_CRASH(false);
-
-	/* RenderTarget LightDpeth_Near */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDepth_Near"), g_iMaxWidth, g_iMaxHeight, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
-		ASSERT_CRASH(false);
-
-	/* RenderTarget LightDpeth_Mid_N */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDepth_Mid_N"), g_iMaxWidth, g_iMaxHeight, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
-		ASSERT_CRASH(false);
-
-	/* RenderTarget LightDpeth_Mid_F */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDepth_Mid_F"), g_iMaxWidth, g_iMaxHeight, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
-		ASSERT_CRASH(false);
-
-	/* RenderTarget LightDpeth_Far */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDepth_Far"), g_iMaxWidth, g_iMaxHeight, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget LightDepth_Map */
@@ -562,18 +550,6 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Shade"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Specular"))))
-		ASSERT_CRASH(false);
-#pragma endregion
-
-	// RENDERGROUP::SHADOW
-#pragma region MRT_SHADOW
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("RT_LightDepth_Near"))))
-		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("RT_LightDepth_Mid_N"))))
-		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("RT_LightDepth_Mid_F"))))
-		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow"), TEXT("RT_LightDepth_Far"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

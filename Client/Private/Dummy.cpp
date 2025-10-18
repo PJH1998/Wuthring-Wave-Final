@@ -88,10 +88,11 @@ void CDummy::Render_Shadow()
 	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vDistance");
 
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pShaderCom->Begin(3);
+		m_pShaderCom->Begin(5);
 
 		m_pModelCom->Render(i);
 	}

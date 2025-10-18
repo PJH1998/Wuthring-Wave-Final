@@ -371,6 +371,10 @@ HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
 }
+HRESULT CGameInstance::Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength)
+{
+	return m_pRenderer->Bind_RawValue(pConstantName, pValue, iLength);
+}
 #endif
 #pragma endregion
 
@@ -618,6 +622,12 @@ HRESULT CGameInstance::End_CSM()
 {
 	return m_pCSM->End_CSM();
 }
+#ifdef _DEBUG
+void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	m_pCSM->Render(pShader, pVIBuffer);
+}
+#endif
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
