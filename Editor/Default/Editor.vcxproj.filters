@@ -88,6 +88,9 @@
     <Filter Include="96. Interface\Shader">
       <UniqueIdentifier>{21eca06b-421e-485e-9750-c3ffa52c827e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Camera">
+      <UniqueIdentifier>{d283c436-c990-447a-bf81-d5b355c034dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -189,6 +192,9 @@
     <ClInclude Include="..\public\Shader_Interface.h">
       <Filter>96. Interface\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Level_Camera.h">
+      <Filter>01. Level\Camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -272,6 +278,9 @@
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp">
       <Filter>96. Interface\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_Camera.cpp">
+      <Filter>01. Level\Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
