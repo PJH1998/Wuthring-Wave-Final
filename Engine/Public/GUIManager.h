@@ -43,7 +43,7 @@ private:
 	// Gizmo Snap
 	_bool								m_isSnap = { false };
 
-	_bool								m_isRender = { false };
+	_bool								m_isRender = { true };
 
 private:
 	void					Gizmo();
