@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -12,8 +12,8 @@ public:
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		EMotionType	eType;
 		_uint				iLayer;
-		_float				fHeight;		// Ä¸½¶ ¸öÅë ³ôÀÌ
-		_float				fRadius;		// Ä¸½¶ ±¸ ºÎºĞ ¹İÁö¸§
+		_float				fHeight;		// ï§¦â‰ªë’“ ï§ëª…ë„» ?ë¯ªì” 
+		_float				fRadius;		// ï§¦â‰ªë’“ æ´?éºÂ€éº?è«›ì„?ç”±?
 	}COLLIDER_DESC;
 
 private:

@@ -1,4 +1,4 @@
-#pragma once
+癤�#pragma once
 #include"StaticObject.h"
 
 
@@ -12,7 +12,6 @@ NS_END
 
 NS_BEGIN(Editor)
 class CEdit_MapObject : public CStaticObject
-	//class CEdit_MapObject : public CGameObject
 {
 public:
 	typedef struct tagMapLoad
@@ -63,6 +62,7 @@ private:
 	void About_Parent();
 	void About_Transform();
 	void About_Texture();
+
 private:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
@@ -102,7 +102,7 @@ private:
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };
 	
-	//폴더 구조대로. 오브젝트에서 버튼 누르면 폴더 위치 잡고 그 위치를 읽게? 
+	//
 	vector<_string> m_EntireDiffuseTextureName;
 	vector<_string> m_EntireNormalTextureName;
 	vector<_string> m_EntireMaskTextureName;
@@ -112,7 +112,6 @@ private:
 	vector<_string> m_SelectedNormalTexturePath;
 	vector<_string> m_SelectedMaskTexturePath;
 	vector<_string> m_SelectedMaskDiffusePath;
-
 
 	_string m_SelectedDiffuse;
 	_string m_SelectedNormal;

@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 /*
-	[���� �ν��Ͻ�]
-	Client�� Engine���� ��� ���
+	[寃뚯엫 ?몄뒪?댁뒪]
+	Client? Engine ?곌껐
 */
 #include "Prototype_Manager.h"
 #include "EventBus.h"
@@ -20,9 +20,9 @@ public:
 	HRESULT			Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext);
 	void				Update_Engine(_float fTimeDelta);
 
-	// 0~1 ���� ���� �� ��ȯ
+	// 0~1 ?쒕뜡??媛?諛섑솚
 	_float				Rand_Normal();
-	// Min, Max ���� ���� �� ��ȯ
+	// Min, Max ?ъ씠???쒕뜡 媛?蹂??
 	_float				Rand(_float fMin, _float fMax);
 #pragma endregion
 
@@ -78,11 +78,11 @@ public:
 #pragma region POOLING_MANAGER
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
-	// Thread�� ������ Function ����
+	// Thread濡??ㅽ뻾???⑥닔 異붽?
 	void			Add_Work(function<void()> Work);
-	// Thread �����°� Ȯ��
+	// Thread媛 紐⑤몢 醫낅즺?섏뿀?붿? 諛섑솚
 	_bool			IsWorkFinish();
-	// Pooling�� Thread ���� ������ ���
+	// Thread 紐⑤몢 ?앸궇 ?뚭퉴吏 ?湲?
 	void			Wait_Thread_End();
 #pragma endregion
 
@@ -208,7 +208,8 @@ public:
 #pragma region FRUSTRUM
 public:
 	const _float4*		Get_Frustrum_WorldPoints() const;
-	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);						
+	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);	
+	_bool				IsIn_WorldSpace(const BoundingBox* pBoundingBox);
 	_bool				IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange);	
 #pragma endregion
 
@@ -244,7 +245,7 @@ private:
 	class CEventBus*			m_pEventBus = { nullptr };
 	class CPipeLine*			m_pPipeLine = { nullptr };
 	class CPicking*				m_pPicking = { nullptr };
-	class CShadow*				m_pShadow = { nullptr };			//�Ƹ� ���� ����?
+	class CShadow*				m_pShadow = { nullptr };
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CCSM*					m_pCSM = { nullptr };

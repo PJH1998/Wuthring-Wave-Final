@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "GameInstance.h"
 
 #include "Graphic_Device.h"
@@ -118,6 +118,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPipeLine->Update();
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
+	m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
 	
 	m_pPhysicsManager->Update(fTimeDelta);
 
@@ -593,6 +594,10 @@ const _float4* CGameInstance::Get_Frustrum_WorldPoints() const
 _bool CGameInstance::IsIn_WorldSpace(_fvector vWorldPosition, _float fRange)
 {
 	return m_pFrustrum->IsIn_WorldSpace(vWorldPosition, fRange);
+}
+_bool CGameInstance::IsIn_WorldSpace(const BoundingBox* pBoundingBox)
+{
+	return m_pFrustrum->IsIn_WorldSpace(pBoundingBox);
 }
 _bool CGameInstance::IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange)
 {

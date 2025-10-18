@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -47,8 +47,8 @@ public:
 	HRESULT		Bind_Matrix(class CShader* pShader, const _char* ConstantName);
 
 public:
-	void			Scale(_float3 vScale);		// vScale °ªÀ¸·Î Å©±â Á¶Á¤
-	void			Scaling(_float3 vScale);		// vScale °ª¸¸Å­ ¹èÀ² Á¶Á¤
+	void			Scale(_float3 vScale);		// vScale åª›ë¯ªì‘æ¿¡??Ñˆë¦° è­°ê³—ì ™
+	void			Scaling(_float3 vScale);		// vScale åª›ë¯©ì­”??è«›ê³—ì‘‰ è­°ê³—ì ™
 
 	void			Go_Straight(_float fTimeDelta);
 	void			Go_Backward(_float fTimeDelta);

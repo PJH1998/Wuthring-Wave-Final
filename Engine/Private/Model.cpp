@@ -42,21 +42,21 @@ CModel::CModel(const CModel& Prototype)
 	for (auto& Pair : Prototype.m_Animations)
 		m_Animations.emplace(Pair.first, Pair.second->Clone());
 
-	//  Prototype 생성 Buffer와 Instance 생성 Buffer가 다르기 때문에 nullptr 체크를 해줍니다.
+	//  Prototype ?앹꽦 Buffer? Instance ?앹꽦 Buffer媛 ?ㅻⅤ湲??뚮Ц??nullptr 泥댄겕瑜??댁쨳?덈떎.
 	for (auto& pBuffer : m_Buffers)
 	{
 		if (nullptr != pBuffer)
 			Safe_AddRef(pBuffer);
 	}
 
-	//  SRV는 Prototype, Instance 모두 동일하게 사용.
+	//  SRV??Prototype, Instance 紐⑤몢 ?숈씪?섍쾶 ?ъ슜.
 	for (auto& pSRV : m_SRVs)
 	{
 		if (nullptr != pSRV)
 			Safe_AddRef(pSRV);
 	}
 
-	// 크기만 지정.
+	// ?ш린留?吏??
 	m_UAVs.resize(Prototype.m_UAVs.size());
 
 #ifdef _DEBUG
@@ -192,7 +192,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 
 
 		ifstream inputFile(filePath);
-		// 1. 열리면?
+		// 1. ?대━硫?
 		if (inputFile.is_open())
 		{
 			json notifyData;
@@ -289,14 +289,14 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
 {
-	// 다른 Animation 들어올 시, 이전 Animation 저장
+	//
 	//if (m_strPreAnimation != strAnimationName)
 	//{
 	//	m_isChangeAnimation = true;
 	//	m_strPreAnimation = strAnimationName;
 	//}
 
-	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
+	// Animation
 	if (true == isBlend && true == m_isBlend)
 	{
 		*pTrackPosition = 0.f;
@@ -328,7 +328,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 		if(nullptr != pTrackPosition)
 			*pTrackPosition = fTrackPosition;
 
-		// Root Node Translation 조정
+		// Root Node Translation
 		if (true == isRootMotion)
 			Compute_RootAnimation(fRootMotionRate);
 	}
@@ -367,46 +367,46 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	if (iter == m_Animations.end())
 		return S_OK;
 
-#pragma region 1. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	// 1. 현재 애니메이션의 Track Position 업데이트
-	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
+#pragma region 1. Compute Shader
+	// 1. 
+	//    (
 	_float fTrackPosition = 0.f;
 
-	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
+	// 2. ?꾩옱 ?몃옓 ?ъ??섏쓣 媛?몄샃?덈떎. (?몃옓 ?ъ??섏? ?좊땲硫붿씠???대옒?ㅼ뿉??媛깆떊??諛쏆뒿?덈떎.)
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;
 
-	// 3. 상수 버퍼(CB) 업데이트
-	//    - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
+	// 3. ?곸닔 踰꾪띁(CB) ?낅뜲?댄듃
+	//    - ?곗씠?붿뿉???꾩옱 ?좊땲硫붿씠???뺣낫瑜?李얘린 ?꾪븳 ?몃뜳?ㅼ? ?꾩옱 ?ъ깮 ?쒓컙???꾨떖
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
-	// 애니메이션 정보 CB 구조체 => 현재 AnimIndex와 TrackPosition을 소유.
+	// ?좊땲硫붿씠???뺣낫 CB 援ъ“泥?=> ?꾩옱 AnimIndex? TrackPosition???뚯쑀.
 	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
 	pAnimCBInfo->fTrackPosition = fTrackPosition;
-	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
+	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* ?좊땲硫붿씠???대쫫(strAnimationName)???대떦?섎뒗 ?몃뜳??*/;
 
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 
-	// 4. Compute Shader에 리소스 바인딩
-//    - ComputeShader.h/cpp의 Set 함수들을 사용
-	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // 아직 .hlsl에 없음
+	// 4. Compute Shader??由ъ냼??諛붿씤??
+//    - ComputeShader.h/cpp??Set ?⑥닔?ㅼ쓣 ?ъ슜
+	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // ?꾩쭅 .hlsl???놁쓬
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
 	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
+	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // ?꾩쭅 .hlsl???놁쓬
 	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
 	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
 	
 
-#pragma region 이 부분이 너무 빡셈.. Dispatch
+#pragma region 이 부분 빡셈.... Dispatch
 
-	// EX) 뼈 504개, 팀 크기 64명
+	// EX) 堉?504媛? ? ?ш린 64紐?
 	
-	// 5. Compute Shader 실행 (Dispatch)
-	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
-	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
+	// 5. Compute Shader ?ㅽ뻾 (Dispatch)
+	// - 珥?堉?媛쒖닔留뚰겮 ?ㅻ젅?쒕? ?앹꽦?섎룄濡??ㅻ젅??洹몃９ ?섎? 議곗젅
+	// - ?? ?곗씠???ㅻ젅??洹몃９ ?ш린媛 64???? (珥?堉?媛쒖닔 + 63) / 64
 	_uint iNumBones = static_cast<_uint>(m_Bones.size());
 	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
 	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
@@ -414,10 +414,10 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	
 	
-	// 6. 중간 결과 적용.(일단 RootAnimation CombinedTransofrmationMatrix는 그대로 적용)
+	// 6. 以묎컙 寃곌낵 ?곸슜.(?쇰떒 RootAnimation CombinedTransofrmationMatrix??洹몃?濡??곸슜)
 	ApplyComputeResults_ToBones();
 
-	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
+	// 7. Rib ?좊땲硫붿씠???ъ깮 ??堉덉뿉 ?뺣낫 ?꾨떖.
 	//_string strRibAnimationName = "Rib_" + strAnimationName;
 	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
 
@@ -427,19 +427,19 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	
 	
 
-	// 8. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	// 8. ?좊땲硫붿씠?섏씠 ?앸궗?ㅻ㈃? Clear ?묒뾽??吏꾪뻾?섍퀬 Animation???대━?댄빐以띾땲??
 	if (bIsAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
-		return true; // 애니메이션 종료
+		return true; // ?좊땲硫붿씠??醫낅즺
 	}
 
-	// Root Node Translation 조정
+	// Root Node Translation 議곗젙
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate);
 
 
-	// Combined는 한번만.
+	// Combined???쒕쾲留?
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
@@ -496,7 +496,7 @@ void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fT
 
 
 #ifdef _DEBUG
-	// Bone Name�� ������ ���ٸ�?
+	// Bone Name占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌕몌옙?
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
 		
@@ -575,29 +575,29 @@ _bool CModel::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float
 
 void CModel::ApplyComputeResults_ToBones()
 {
-	// 1. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+	// 1. GPU??異쒕젰 踰꾪띁(m_pFinalBoneMatrix_Buffer) ?댁슜??Staging 踰꾪띁濡?蹂듭궗?⑸땲??
 	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
 
-	// 2. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+	// 2. Staging 踰꾪띁瑜?CPU媛 ?쎌쓣 ???덈룄濡?Map ?⑸땲??
 	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
 	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &MappedSubResource);
 	if (FAILED(hr))
 		return;
 
-	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UP의 w가 -7.4가 나옴.
+	// 3. 留듯븨??硫붾え由ъ뿉??濡쒖뺄 ?됰젹 ?곗씠?곕? CPU 蹂?섎줈 蹂듭궗?⑸땲??
+	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UP??w媛 -7.4媛 ?섏샂.
 	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
-	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+	// 4. m_Bones 諛곗뿴??GPU媛 怨꾩궛??理쒖떊 濡쒖뺄 ?됰젹???곸슜?⑸땲??
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		/* Prev Final 곱하기?*/
+		/* Prev Final 怨깊븯湲?*/
 		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 
 #ifdef _DEBUG
-		// Bone Name�� ������ ���ٸ�?
+		// Bone Name占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌕몌옙?
 		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
 		{
 			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
@@ -617,7 +617,7 @@ void CModel::ApplyComputeResults_ToBones()
 		
 	}
 
-	// 5. Unmap으로 마무리합니다.
+	// 5. Unmap?쇰줈 留덈Т由ы빀?덈떎.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
@@ -629,13 +629,13 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
 
-	// Axis 조정 (-y => +z)
+	// Axis 議곗젙 (-y => +z)
 	_float fTemp = vTranslation.m128_f32[2];
 	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
 	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
 	vTranslation.m128_f32[1] = fTemp * -1.f;
 
-	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
+	// Animation 蹂寃??? PreRootPosition??蹂寃쎈맂 Animation 泥섏쓬 KeyFrame Root Position?쇰줈 蹂寃?
 	if (true == m_isChangeAnimation)
 	{
 		m_isChangeAnimation = false;
@@ -643,7 +643,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	}
 
 	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-	//// 전 위치와 크게 벗어나면 예외처리
+	//// ???꾩튂? ?ш쾶 踰쀬뼱?섎㈃ ?덉쇅泥섎━
 	//if (fDistance > 150.f)
 	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
 
@@ -673,7 +673,7 @@ HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 	m_Bones.push_back(pBone);
 
 	_int iIndex = m_Bones.size() - 1;
-	// Root Bone Index 저장
+	// Root Bone Index ???
 	if (0 == strcmp(szName, "Root"))
 		m_iRootBoneIndex = iIndex;
 
@@ -771,7 +771,7 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 	AnimationFile.close();
 
 
-	// Compute Shader 계산을 위한 Animation Index 저장.
+	// Compute Shader 怨꾩궛???꾪븳 Animation Index ???
 	
 	_uint iAnimIdx = 0;
 	m_AnimationNameToIndex.clear();
@@ -787,7 +787,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 {
 	ASSERT_CRASH(m_pDevice);
 
-	// 애니메이션 모델이 아니면 생성하지 않음.
+	// ?좊땲硫붿씠??紐⑤뜽???꾨땲硫??앹꽦?섏? ?딆쓬.
 	if (MODELTYPE::ANIM != m_eType)
 		return S_OK;
 
@@ -797,37 +797,37 @@ HRESULT CModel::Ready_Shared_Buffers()
 	m_SRVs.resize(SRV_END);
 	m_UAVs.resize(UAV_END);
 
-	//  --- 1. 데이터 수집을 위한 vector 준비 ---
+	//  --- 1. ?곗씠???섏쭛???꾪븳 vector 以鍮?---
 
 	vector<ANIMINFO>        vAllAnimInfos;		  // Depth1
 	vector<GPU_CHANNELINFO> vAllChannelBoneInfos; // Depth2
 	vector<GPU_KEYFRAME>    vAllKeyframes;        // Depth3
 
-	// Depth1에 대한 설정.
+	// Depth1??????ㅼ젙.
 	for (const auto& Pair : m_Animations)
 	{
 		CAnimation* pAnimation = Pair.second;
 		ANIMINFO animInfo = {};
 
-		// 시작 인덱스, 개수, 지속시간.
-		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // 순차 탐색 AnimInfo에서 0부터 재생.
-		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 모든 채널의 개수
+		// ?쒖옉 ?몃뜳?? 媛쒖닔, 吏?띿떆媛?
+		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // ?쒖감 ?먯깋 AnimInfo?먯꽌 0遺???ъ깮.
+		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 紐⑤뱺 梨꾨꼸??媛쒖닔
 #ifdef _DEBUG
 		animInfo.fDuration = pAnimation->Get_Duration();
 #endif
-		// Depth2에 대한 설정.
+		// Depth2??????ㅼ젙.
 		for (const auto& pChannel : pAnimation->Get_Channels())
 		{
-			// 시작 키프레임(누적 인덱스), 키프레임 개수, 채널이 관리하는 뼈 인덱스
+			// ?쒖옉 ?ㅽ봽?덉엫(?꾩쟻 ?몃뜳??, ?ㅽ봽?덉엫 媛쒖닔, 梨꾨꼸??愿由ы븯??堉??몃뜳??
 			GPU_CHANNELINFO channelInfo = {};
 			channelInfo.iStartKeyframeOffset = static_cast<_uint>(vAllKeyframes.size());
 			channelInfo.iNumKeyframes = pChannel->Get_NumKeyframes();
 			channelInfo.iBoneIndex = pChannel->Get_BoneIndex();
 
-			// Depth3에 대한 설정.
+			// Depth3??????ㅼ젙.
 			for (const auto& keyframe : pChannel->Get_Keyframes())
 			{
-				// 키프레임에 대한 정보 복사. Scale, Rotation, Translation, 트랙 위치.
+				// ?ㅽ봽?덉엫??????뺣낫 蹂듭궗. Scale, Rotation, Translation, ?몃옓 ?꾩튂.
 				GPU_KEYFRAME gpuKeyframe = {};
 				gpuKeyframe.vScale = _float4(keyframe.vScale.x, keyframe.vScale.y, keyframe.vScale.z, 1.f);
 				gpuKeyframe.vRotation = keyframe.vRotation;
@@ -841,7 +841,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	}
 
 
-	// --- 2. 수집된 데이터로 실제 GPU 버퍼 생성 ---
+	// --- 2. ?섏쭛???곗씠?곕줈 ?ㅼ젣 GPU 踰꾪띁 ?앹꽦 ---
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.ByteWidth = sizeof(GPU_KEYFRAME) * static_cast<_uint>(vAllKeyframes.size());
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -854,7 +854,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_KEY_FRAME], nullptr, &m_SRVs[SRV_KEY_FRAME]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-2. 애니메이션 정보 버퍼 (g_AllAnimInfos)
+	// 2-2. ?좊땲硫붿씠???뺣낫 踰꾪띁 (g_AllAnimInfos)
 	bufferDesc.ByteWidth = sizeof(ANIMINFO) * static_cast<_uint>(vAllAnimInfos.size());
 	bufferDesc.StructureByteStride = sizeof(ANIMINFO);
 	subresourceData.pSysMem = vAllAnimInfos.data();
@@ -863,7 +863,7 @@ HRESULT CModel::Ready_Shared_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_ANIM_INFO], nullptr, &m_SRVs[SRV_ANIM_INFO]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-3. 뼈(채널)별 정보 버퍼 (g_ChannelInfos)
+	// 2-3. 堉?梨꾨꼸)蹂??뺣낫 踰꾪띁 (g_ChannelInfos)
 	bufferDesc.ByteWidth = sizeof(GPU_CHANNELINFO) * static_cast<_uint>(vAllChannelBoneInfos.size());
 	bufferDesc.StructureByteStride = sizeof(GPU_CHANNELINFO);
 	subresourceData.pSysMem = vAllChannelBoneInfos.data();
@@ -881,7 +881,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 {
 	HRESULT hr = S_OK;
 	D3D11_BUFFER_DESC bufferDesc = {};
-	// 2-4. 최종 로컬 행렬 출력(Output) 버퍼 (g_OutLocalMatrices)
+	// 2-4. 理쒖쥌 濡쒖뺄 ?됰젹 異쒕젰(Output) 踰꾪띁 (g_OutLocalMatrices)
 	bufferDesc = {};
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -895,7 +895,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_FINAL_BONEMATRIX], nullptr, &m_SRVs[SRV_FINAL_BONEMATRIX]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-5. 매 프레임 업데이트할 상수 버퍼 (AnimationInfo)
+	// 2-5. 留??꾨젅???낅뜲?댄듃???곸닔 踰꾪띁 (AnimationInfo)
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(ANIMATION_CBINFO);
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -904,7 +904,7 @@ HRESULT CModel::Ready_Instance_Buffers()
 	hr = m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_Buffers[BUFFER_ANIM_INFOCB]);
 	if (FAILED(hr)) return E_FAIL;
 
-	// 2-6. GPU -> CPU 복사를 위한 Staging 버퍼
+	// 2-6. GPU -> CPU 蹂듭궗瑜??꾪븳 Staging 踰꾪띁
 	ZeroMemory(&bufferDesc, sizeof(D3D11_BUFFER_DESC));
 	bufferDesc.ByteWidth = sizeof(_float4x4) * static_cast<_uint>(m_Bones.size());
 	bufferDesc.Usage = D3D11_USAGE_STAGING;
@@ -962,7 +962,7 @@ void CModel::Free()
 	m_Materials.clear();
 
 
-	/* GPU Buffer 내용 제거 */
+	/* GPU Buffer ?댁슜 ?쒓굅 */
 	for (auto& pBuffer : m_Buffers)
 		Safe_Release(pBuffer);
 	m_Buffers.clear();

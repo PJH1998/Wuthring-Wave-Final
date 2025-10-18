@@ -1,4 +1,4 @@
-#include"EditorPch.h"
+﻿#include"EditorPch.h"
 #include "Edit_LightObject.h"
 
 CEdit_LightObject::CEdit_LightObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

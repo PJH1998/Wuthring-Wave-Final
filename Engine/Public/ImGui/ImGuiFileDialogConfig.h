@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // uncomment and modify defines under for customize ImGuiFileDialog
 

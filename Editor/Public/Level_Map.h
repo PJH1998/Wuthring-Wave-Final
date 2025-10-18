@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Level.h"
 
 NS_BEGIN(Engine)
@@ -26,7 +26,7 @@ public:
 	void Menu_Save_Load();
 	void Menu_Model_Load();
 	void Load_Objects();
-	//Å¬¶óÀÌ¾ğÆ®¿¡ ¸®¼Ò½º¿¡ Map Æú´õ¿¡ ÀÖ´Â .datµé ÀĞ¾î¼­(¿ÀºêÁ§Æ®µé¸¸) ´©¸£¸é »ı¼ºÇÒ ¼ö ÀÖ°Ô ÇÏ±â. »ı¼º À§Ä¡´Â ¹¹.. ¾Ë¾Æ¼­
+	//?ëŒ€ì”ª?ëŒë¼µ?ëª„ë¿‰ ç”±ÑŠëƒ¼?ã…¼ë¿‰ Map ?ëŒ€ëœ‘???ëˆë’— .dat???ìŒë¼±???ã…»íˆ•?ì•ºë“ƒ?ã…»ì­”) ?ê¾¨â…¤ï§??ì•¹ê½¦?????ë‡ì¾¶ ?ì„ë¦°. ?ì•¹ê½¦ ?ê¾©íŠ‚??è¸?. ?ëš¯ë¸˜??
 
 private:
 	HRESULT Ready_Static_Component();

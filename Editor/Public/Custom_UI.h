@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Editor_Define.h"
 #include "UIObject.h"
@@ -30,7 +30,7 @@ public:
 		_uint		iNumFiles = 1;
 
 		_wstring	strUIName = {};
-		_uint		iUIType = {};			// ´Ü¼ø Ã¢ÀÎÁö, ¹öÆ°ÀÎÁö, ÃÖ»óÀ§ ±¸ÇöºÎÀÎÁö ±¸ºĞ?
+		_uint		iUIType = {};			// ?â‘¥ë‹š ï§¡ìŒì”¤ï§Â€, è¸°ê¾ªë“‰?ëª„?, ï§¤ì’–ê¸½??æ´Ñ‹ì½éºÂ€?ëª„? æ´Ñ‰í…‡?
 		_wstring	strParentName = {};
 
 		vector<_wstring> vecChildNames = {};
@@ -78,7 +78,7 @@ private:
 	_float4x4				m_CombinedWorldMatrix		= {};
 
 
-	// ÇöÀç »ç¿ëÁßÀÏ ÅØ½ºÃÄ Á¤º¸, texcoord °ª, ³ªÀÎ¼½ÅÍ ±âÁØÁ¡ µîÀÇ Á¤º¸.. ÇÊ¿äÇÒ¼öµµ ÀÖÀ½
+	// ?ê¾©ì˜± ?ÑŠìŠœä»¥ë¬’ì”ª ?ë¿ë’ªçˆ¾??ëº£ë‚«, texcoord åª›? ?ì„ì”¤?ë±ê½£ æ¹²ê³—????ê¹†ì“½ ?ëº£ë‚«.. ?ê¾©ìŠ‚?ì¢ë‹”???ë‰ì“¬
 
 public:
 	static CCustom_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

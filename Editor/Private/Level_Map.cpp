@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Level_Map.h"
 
 #include "Event_Level.h"
@@ -15,14 +15,14 @@ _float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
 {
-    // ·£µå½ºÄÉÀÌÇÁ¸¦ À§ÇØ ¸Ş½¬ À§¿¡ ºê·¯½¬ ¸¸µå´Â ¸Ş¸ğ
-    // µª½º Å¸°ÙÀ» °®°í¿Í¼­ ¹ÙÀÎµù. ¿ùµå À§Ä¡·Î º¯È¯.
-    // ³» ¸¶¿ì½º À§Ä¡ Á¡ ÇÏ³ª VS_INÀ¸·Î º¸³»°í, Range º¯¼ö ¼ÎÀÌ´õ Àü´Ş.
-    // µª½º Å¸°ÙÀÇ w°ªÀÌ 0ÀÌ¸é discard
-    // GS¼ÎÀÌ´õ¿¡¼­ »ç°¢ ¹öÆÛ »ı¼º, Á¡ ±âÁØÀ¸·Î ¿øÇü ºê·¯½¬ »ı¼º? => »ç°¢ÇÒ °ÇÁö ¿øÇü ÇÒ °ÇÁö º¯¼ö Àü´Ş?
-    // ¹üÀ§, YÃà ±âÁØ È¸Àü ·£´ı¼öÄ¡, °³¼ö, »ö»ó..? ÀÔ·Â °¡´ÉÇÏ°Ô ?
+    // ï¿½ï¿½ï¿½å½ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ş½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ê·¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ş¸ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ ï¿½ï¿½ï¿½Îµï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½È¯.
+    // ï¿½ï¿½ ï¿½ï¿½ï¿½ì½º ï¿½ï¿½Ä¡ ï¿½ï¿½ ï¿½Ï³ï¿½ VS_INï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Range ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    // ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½ï¿½ï¿½ï¿½ wï¿½ï¿½ï¿½ï¿½ 0ï¿½Ì¸ï¿½ discard
+    // GSï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ç°¢ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ê·¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? => ï¿½ç°¢ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½?
+    // ï¿½ï¿½ï¿½ï¿½, Yï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡, ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½..? ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ?
     
-    // ¹öÆ° ´©¸£¸é »ı¼ºÇÒ ¼ö ÀÖ°Ô?
+    // ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½?
 }
 
 HRESULT CLevel_Map::Initialize()
@@ -102,7 +102,7 @@ void CLevel_Map::Menu_Select()
             m_eMenu == MENU_MAPSAVELOAD ? m_eMenu = END : m_eMenu = MENU_MAPSAVELOAD;
         }
 
-        if(ImGui::MenuItem("Object Save & Load")) {
+        if(ImGui::MenuItem("Object Load")) {
             m_eMenu == MENU_OBJECTLOAD ? m_eMenu = END : m_eMenu = MENU_OBJECTLOAD;
         }
 
@@ -122,8 +122,8 @@ void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
 
-    //·¹ÀÌ¾î³ª ¿ÀºêÁ§Æ®¸Å´ÏÀú¿¡¼­ ¿ÀºêÁ§Æ® Æ÷ÀÎÅÍ °®°í¿À´Â °Å µÇ¸é ÇÇÅ· ¸»°í BeginChildFrameÀ¸·Î ¶Ç ¼±ÅÃÇØµµ µÉµí.
 
+    //
     if (m_pPickedObject)
         m_pPickedObject->Set_ImGuiOption();
 
@@ -136,49 +136,49 @@ void CLevel_Map::Menu_RandSacpe()
 
     if (m_pPickedInstanceObject)
         m_pPickedInstanceObject->Set_ImGuiOption();
-#pragma region ·£µå½ºÄÉÀÌÇÁ ¸Ş¸ğ
-    //Ç®¶¼±âµéÀº ÇÃ·¹ÀÌ¾î¶û °¡±îÀÌ ÀÖÀ» ¶§ ÇÃ·¹ÀÌ¾î¸¦ ÁßÁ¡À¸·Î ¿·À¸·Î ´©¿ò. ´©¿î »óÅÂ·Î ¹Ù¶÷¿¡ Èçµé¸².
-    //ÇÃ·¹ÀÌ¾î¶û °ÅÀÇ °ãÄ£ Ç®¶¼±âµéÀº ClipµÇ´Âµí. ¾Èº¸ÀÓ.
-    //¿òÁ÷ÀÏ ¶§ ÇÃ·¹ÀÌ¾î ¹ß¹Ù´Ú¿¡ ¹ßÀÚ±¹ µ¥Ä® »ı±è. ¸¶½ºÅ· ÀÌ¹ÌÁö °°Àº °Å·Î ÇÏ´Âµí?
-    //±×¸²ÀÚ Áø °÷ÀÌµç ¾Æ´Ñ °÷ÀÌµç ¶È°°ÀÌ ¾îµÎ¿ò. ¹«Á¶°Ç ¸¶½ºÅ·.
+#pragma region ëœë“œìŠ¤ì¼€ì´í”„
+    //?Â€?ì‡¨ë¦°?ã…¼? ?ëš®ì …?ëŒë¼±??åª›Â€æºëš¯ì”  ?ë‰ì“£ ???ëš®ì …?ëŒë¼±ç‘œ?ä»¥ë¬’ì ?ì‡°ì¤ˆ ?ë†ì‘æ¿¡??ê¾©?. ?ê¾©ìŠ« ?ê³¹ê¹­æ¿¡?è«›ë¶¾ì—º???ë¶¾ë±¾ç”±?
+    //?ëš®ì …?ëŒë¼±??å«„ê³—ì“½ å¯ƒë±€íŠ‡ ?Â€?ì‡¨ë¦°?ã…¼? Clip?ì„ë’—?? ?ëˆë‚«??
+    //?Â€ï§ê³¸ì”ª ???ëš®ì …?ëŒë¼± è«›ì’•ì»®?Î¼ë¿‰ è«›ì’–ì˜„æ´??ê³—ë­¡ ?ì•·?. ï§ë‰ë’ª???ëŒ€?ï§Â€ åª›ìˆˆ? å«„ê³•ì¤ˆ ?ì„ë’—??
+    //æ´¹ëªƒâ”??ï§?æ€¨ë…¹ì” ???ê¾¨ë•¶ æ€¨ë…¹ì” ???ë¬ì»³???ëŒ€ëª¢?Â€. è‡¾ëŒâ€œå«„?ï§ë‰ë’ª??
 
-    // Á¡ÇÁ´Â ¹ßÀÚ±¹Àº ¾È»ı±âÁö¸¸ ¶Û ¶§¿Í ÂøÁöÇÒ ¶§ Ç®¶¼±â°¡ ½ÉÇÏ°Ô Èçµé¸².(¾î¶»°Ô ÇÔ?)
-    //º®¿¡¼­ ´Ş¸®±â ÇÒ ¶§ ¹ß À§Ä¡¿¡ ¹ßÀÚ±¹ µ¥Ä® ´ë½Å ÀÌÆåÆ®°¡ »ı±è.
+    // ?ë¨°ë´½??è«›ì’–ì˜„æ´?? ?ë‰ê¹®æ¹²ê³—?ï§????ëš¯? ï§¡â‘¹??????Â€?ì‡¨ë¦°åª›Â€ ?Ñ‹ë¸¯å¯ƒ??ë¶¾ë±¾ç”±?(?ëŒ€ë¼¸å¯ƒ???)
+    //è¸°ìŒë¿‰???Ñ‰â”æ¹²?????è«›??ê¾©íŠ‚??è«›ì’–ì˜„æ´??ê³—ë­¡ ?Â€???ëŒ„ëŸº?ë©¸? ?ì•·?.
 
-    //¸Ê¿¡ ±ò·ÁÀÖ´Â ¾ÆÀÌÅÛÀ» ¸ÔÀ» ¶§´Â ¹Ù´Ú¿¡ ³ª¹µÀÙ Èçµé¸®´Â ÀÌÆåÆ® »ı±â¸é¼­ »ç¶óÁü.
-    //±ÙÃ³¿¡ ¸ÔÀ» ¼ö ÀÖ´Â(»óÈ£ÀÛ¿ë °¡´ÉÇÑ ¾ÆÀÌÅÛÀÌ ÀÖÀ¸¸é UI »ı¼º. ÀÏÁ¤ ÁÖ±â¸¶´Ù °ÑºÎºĞÀÌ ºû³².
-    //¹Ù´Ú Ç®¶¼±â ¸»°í Å° Å« Ç®¶¼±âµéÀÌ¶û ¸ö ºñºô ¶§ ¼Ò¸® ³ª¾ßÇÔ.(Äİ¶óÀÌ´õ?) ¾ê³×µµ ¶È°°ÀÌ ÇÃ·¹ÀÌ¾î À§Ä¡¿¡ ¸ÂÃç¼­ Èçµé¸®´Âµí.
+    //ï§ë“­ë¿‰ æºë¶¾ì ®?ëˆë’— ?ê¾©ì” ?ì’–ì“£ ç™’ë±€ì“£ ?ëš®ë’— è«›ë¶¾ë–???ì„ì¶ª???ë¶¾ë±¾ç”±Ñ‰ë’— ?ëŒ„ëŸº???ì•·ë¦°ï§ëŒê½Œ ?Ñ‰ì”ªï§?
+    //æ´¹ì‡±ì¿‚??ç™’ë±€ì“£ ???ëˆë’—(?ê³¹ìƒ‡?ë¬’ìŠœ åª›Â€?Î½ë¸³ ?ê¾©ì” ?ì’–ì”  ?ë‰ì‘ï§?UI ?ì•¹ê½¦. ?ì‡±ì ™ äºŒì‡¨ë¦°ï§ëˆë– å¯ƒë°?éºê¾©ì”  é®ì…ê¶“.
+    //è«›ë¶¾ë– ?Â€?ì‡¨ë¦° ï§ë¨­í€¬ ?????Â€?ì‡¨ë¦°?ã…¼ì” ??ï§?é®ê¾¨í‰´ ???ëš®â” ?ì„ë¹??(è‚„ì’•ì”ª?ëŒ€ëœ‘?) ?ì„ê½•???ë¬ì»³???ëš®ì …?ëŒë¼± ?ê¾©íŠ‚??ï§ìšë– ???ë¶¾ë±¾ç”±Ñ‰ë’—??
 
-    //À§Ä¡¿¡ µû¶ó µğ·º¼Å³Î¶óÀÌÆ® µğÇ»Áî »öÀÌ ¹Ù²î´Âµí? -> ±×³É ¸Ş½¬°¡ ´Ù¸¥ °ÅÀÏ ¼öµµ
+    //?ê¾©íŠ‚???ê³•ì”ª ?ë¶¾ì †?ë¶¾ê¼¸?ì‡±ì” ???ë·€ë²‚ï§??ë±ì”  è«›ë¶¾Â€ëš®ë’—?? -> æ´¹ëªƒê¹· ï§ë¶¿ë©åª›Â€ ?ã…»â…¨ å«„ê³—ì”ª ?ì„ë£„
 
-    //¹Ù¶÷¿¡ Èçµé¸®´Â ¹æÇâÀº ¸ğµÎ °°Àº ¹æÇâÀÎ?µí 
+    //è«›ë¶¾ì—º???ë¶¾ë±¾ç”±Ñ‰ë’— è«›â‘ºë¼¢?Â€ ï§â‘¤ëª¢ åª›ìˆˆ? è«›â‘ºë¼¢????
 
-    //µ¹Àº ¤»¤» ±×³É ¿¡¼Â½ºÅä¾î¿¡¼­ ¶¼¿Âµí¤»¤»
-    //Æ¯Á¤ À§Ä¡¿¡ µû¶ó Ç®¶¼±âÀÇ »öÀÌ ¤¸±İ¾¿ ¹Ù²ñ.
-    //±¤¹°·ù´Â ¸Ö¸® ÀÖÀ¸¸é ºşÂ¦ºşÂ¦´ï.
+    //?ëš¯? ?ë—£ë€‘ æ´¹ëªƒê¹· ?ë¨¯ë€‘?ã…½ë„—?ëŒë¿‰???ì‡±ì‚©??ë€‘??
+    //?ë±€ì ™ ?ê¾©íŠ‚???ê³•ì”ª ?Â€?ì‡¨ë¦°???ë±ì”  ?ë‡íˆ‘??è«›ë¶¾Â€?
+    //æ„¿ë¬Ğªç‘œì„ë’— ï§Â€ç”±??ë‰ì‘ï§?é®ã…¼ì­©é®ã…¼ì­©??
 
 
-    //±æÃ£±â. °¡¸¸È÷ ÀÖÀ¸¸é ¸ñÇ¥ À§Ä¡·Î ÀÏ··ÀÌ´Â ÀÌÆåÆ® »ı±â¸é¼­ ±æ ¾Ë·ÁÁÜ. ¹«Á¶°Ç 1ÀÚ°¡ ¾Æ´Ï¶ó ÁÂ¿ì·Î ÂÉ²û¾¿ Èçµé¸®´Â ÀÌÆåÆ®ÀÎµí.
-    //°Å¸®°¡ Á» ÀÖÀ¸¸é ¾È°³°¡ »ìÂ¦ ±ò¸®´Â ¸Êµµ ÀÖ´Â °Å °°À½.
+    //æ¹²ëª„ê°¼æ¹²? åª›Â€ï§ëš°ì—³ ?ë‰ì‘ï§?ï§â‘ºëª´ ?ê¾©íŠ‚æ¿¡??ì‡°ìŸ»?ëŒ€ë’— ?ëŒ„ëŸº???ì•·ë¦°ï§ëŒê½Œ æ¹²??ëš®ì ®ä»¥? è‡¾ëŒâ€œå«„?1?ë¨­? ?ê¾¨ë•²??é†«ëš¯ìŠ¦æ¿¡?ï§Ÿì‡°ê±«???ë¶¾ë±¾ç”±Ñ‰ë’— ?ëŒ„ëŸº?ëª„ì”¤??
+    //å«„ê³•â”åª›Â€ é†«Â€ ?ë‰ì‘ï§??ë‡ì»»åª›Â€ ?ëŒì­© æºë¶¾â”??ï§ë“¬ë£„ ?ëˆë’— å«„?åª›ìˆˆì“¬.
 #pragma endregion
     ImGui::End();
 }
 
 void CLevel_Map::Menu_Light()
 {
-    // Á¶¸í. ÀÏ´Ü Imgui¿¡ List·Î ÇöÀç ³»°¡ ³ÖÀº Á¶¸íµé Á¤º¸? ¼ø¼­ ¶ç¿ì±â. ¹öÆ°Çü½ÄÀ¸·Î ´©¸£¸é ±× Á¶¸í¿¡ ´ëÇÑ Á¤º¸°¡ ³ª¿À°Ô.
-       // ¶óÀÌÆ® ¿ÀºêÁ§Æ®¸¦ ÇÏ³ª ¸¸µé¾î¼­ ±× ³ğÀÇ À§Ä¡ Á¤º¸¸¦ Á¶¸íÀ¸·Î. Á¶ÀıÇÒ ¼ö ÀÖ°Ô. -> ¶óÀÌÆ® °´Ã¼°¡ ÇöÀç Ãß°¡µÈ Á¶¸íµé Áß¿¡¼­ ¸î ¹øÂ° ¼ø¼­ÀÎÁö
-       // °¢Á¾ »ö»óÁ¤º¸ ¹× ¼¼±â, µğÇ»Áî ¾Úºñ¾ğÆ® ±âÅ¸ µîµî ´Ù ¼öÁ¤ÇÒ ¼ö ÀÖ°Ô. -> ½Ç½Ã°£ Àû¿ë? or ¹öÆ° ´©¸£¸é Àû¿ë. µÇµ¹¸®±â ±â´Éµµ ÀÖÀ½ ÁÁÀ»µí
-       // Á¡Á¶¸í¿¡´Â ±×¸²ÀÚ ¾øÀ½.
-       //±âÁî¸ğ ´Ş°Å¸é Á¶¸í¿¡ ´Ş±â. 
+    // è­°ê³•ì±¸. ?ì‡°ë–’ Imgui??Listæ¿¡??ê¾©ì˜± ?ë‹¿? ?ï½Œ? è­°ê³•ì±¸???ëº£ë‚«? ?ì’–ê½Œ ?ê¾©ìŠ¦æ¹²? è¸°ê¾ªë“‰?ëº¤ë–‡?ì‡°ì¤ˆ ?ê¾¨â…¤ï§?æ´¹?è­°ê³•ì±¸???Â€???ëº£ë‚«åª›Â€ ?ì„ì‚¤å¯ƒ?
+       // ?ì‡±ì” ???ã…»íˆ•?ì•ºë“ƒç‘œ??ì„êµ¹ ï§ëš®ë±¾?ëŒê½Œ æ´¹??ë‰ì“½ ?ê¾©íŠ‚ ?ëº£ë‚«ç‘œ?è­°ê³•ì±¸?ì‡°ì¤ˆ. è­°ê³—ì …?????ë‡ì¾¶. -> ?ì‡±ì” ??åª›ì•¹ê»œåª›Â€ ?ê¾©ì˜± ç•°ë¶½???è­°ê³•ì±¸??ä»¥ë¬’ë¿‰??ï§?è¸°ë‰ã ?ì’–ê½Œ?ëª„?
+       // åª›ê³¸ì¥Œ ?ë±ê¸½?ëº£ë‚« è«›??ë©¸ë¦°, ?ë·€ë²‚ï§??ê³•í‰¬?ëª…ë“ƒ æ¹²ê³ ? ?ê¹…ë²‘ ???ì„ì ™?????ë‡ì¾¶. -> ?ã…¼ë–†åª›??ê³¸ìŠœ? or è¸°ê¾ªë“‰ ?ê¾¨â…¤ï§??ê³¸ìŠœ. ?ì„ë£ç”±Ñˆë¦° æ¹²ê³•ë’«???ë‰ì“¬ é†«ë—­ì“£??
+       // ?ë¨¯â€œï§ë‚†ë¿‰??æ´¹ëªƒâ”???ë†ì“¬.
+       //æ¹²ê³—ì«°ï§??Ñˆêµ…ï§?è­°ê³•ì±¸???Ñˆë¦°. 
     
 
-    //ÀÌ»û±â ´©¸£¸é ¿Ö ¶Ë »ı±è?
+    //?ëŒê¹«æ¹²??ê¾¨â…¤ï§??????ì•·??
 }
 
 void CLevel_Map::Menu_Model_Load()
 {
-    //Å¬¸¯ ÇÏ±â Àü±îÁö ¸¶¿ì½º À§Ä¡ µû¶ó´Ù´Ï±â?.
+    //?ëŒ€â”ƒ ?ì„ë¦° ?ê¾§í‰´ï§Â€ ï§ë‰ìŠ¦???ê¾©íŠ‚ ?ê³•ì”ª?ã…»ë•²æ¹²?.
     ImGui::Begin("Model Table", nullptr, ImGuiWindowFlags_NoTitleBar);
     if (ImGui::BeginTable("Test", 1, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -200,7 +200,7 @@ void CLevel_Map::Menu_Model_Load()
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
                 strcpy_s(Desc.ModelName, FileName);
-
+                //m_pGameInstance->Clone_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_Test"), &Desc);
             }
@@ -226,8 +226,8 @@ void CLevel_Map::Menu_Save_Load()
     config.path = "../../Client/Bin/Resource/Map/MapData/";
     config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
-    static _char exportText[128] = ""; // ÀÔ·Â ÀúÀå¿ë ¹öÆÛ
-    ImGui::InputText("ÆÄÀÏ ÀÌ¸§", exportText, IM_ARRAYSIZE(exportText));
+    static _char exportText[128] = ""; // ?ë‚…ì ° ?Â€?Î¼ìŠœ è¸°ê¾ªë
+    ImGui::InputText("?ëš¯ì”ª ?ëŒ€ì««", exportText, IM_ARRAYSIZE(exportText));
 
     if (ImGui::BeginMenu("Save"))
     {
@@ -245,7 +245,7 @@ void CLevel_Map::Menu_Save_Load()
                 m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
                 File.close();
             }
-        //»óÈ£ÀÛ¿ëÇÒ °´Ã¼µé µû·Î, ÀÎ½ºÅÏ½Ì °´Ã¼µé µû·Î, ÀÏ¹İ ¸Ê µû·Î.
+        //?ê³¹ìƒ‡?ë¬’ìŠœ??åª›ì•¹ê»œ???ê³•ì¤ˆ, ?ëª„ë’ª?ëŒë–› åª›ì•¹ê»œ???ê³•ì¤ˆ, ?ì‡°ì»² ï§??ê³•ì¤ˆ.
 
         ImGui::EndMenu();
     }
@@ -289,36 +289,34 @@ void CLevel_Map::Menu_Save_Load()
                     File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                     Desc.WorldMatrix = &Matrix;
 
-                    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-                    _tchar Name[MAX_PATH] = {};
-                    MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
-                    lstrcat(Model, Name);
+                    //_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+                    //_tchar Name[MAX_PATH] = {};
+                    //MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
+                    //lstrcat(Model, Name);
 
-                    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
-                    strcat_s(ModelPath, Desc.ModelName);
-                    strcat_s(ModelPath, "/");
-                    strcat_s(ModelPath, Desc.ModelName);
-                    strcat_s(ModelPath, ".dat");
+                    //_char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
+                    //strcat_s(ModelPath, Desc.ModelName);
+                    //strcat_s(ModelPath, "/");
+                    //strcat_s(ModelPath, Desc.ModelName);
+                    //strcat_s(ModelPath, ".dat");
 
-                    m_pGameInstance->Add_Prototype(m_iLevel, Model,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
-                    /*m_pGameInstance->Add_Prototype(m_iLevel, Model,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath));
-                    */
-                    _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
-                    lstrcat(PrototypeObject, Name);
+                    //m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                    //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
 
-                    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
+                    //_tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject");
+                    //lstrcat(PrototypeObject, Name);
+
+                    m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
 
                 }
                 File.close();
-                //·¹ÀÌ¾î³ª ¿ÀºêÁ§Æ®¸Å´ÏÀú ÀüÃ¼ ¼øÈ¸°¡´ÉÇÑ ÇÔ¼ö »ı±â¸é º¯°æ °í·Á ÇØº¼°Í.
+                //?ë‰ì” ?ëŒ€êµ¹ ?ã…»íˆ•?ì•ºë“ƒï§ã…»ë•²?Â€ ?ê¾©ê»œ ?ì’—ì‰¶åª›Â€?Î½ë¸³ ?â‘¥ë‹” ?ì•·ë¦°ï§?è¹‚Â€å¯ƒ?æ€¨ì¢Šì ® ?ëŒ€ë‚µå¯ƒ?
 
 
-                //LOD¸¦ Ä«¸Ş¶ó °Å¸® ±â¹İÀ¸·Î ÇÏÁö ¸»°í, ¸ğµ¨ÀÇ ÃÖ¼Ò ÃÖ´ë ÇÈ¼¿·Î Å¥ºê¸¦ ¸¸µé¾úÀ» ¶§ ±× Å¥ºê°¡
-                //ÇöÀç È­¸éÀ» ±âÁØÀ¸·Î ÇÈ¼¿À» ¾ó¸¶³ª ¸¹ÀÌ Â÷ÁöÇÏ°í ÀÖ³ª·Î LOD ´Ü°è ±¸º°ÇÏ±â. => ½ºÅ©¸° ÇÈ¼¿ »çÀÌÁî ±â¹ı
-                //LOD ¸ğµ¨Àº »óÅÂ¸Ó½ÅÀ» °¥¾Æ³¢¿ìµí LOD ´Ü°è¿¡ µû¶ó ¹Ù²Ù±â. => ¾îÂ÷ÇÇ ¸ğµ¨ÀÇ Å©±â´Â º¯ÇÏÁö ¾ÊÀ½. µğÅ×ÀÏÀÌ ´Ş¶óÁü.
+                //LODç‘œ?ç§»ëŒ€ì°“??å«„ê³•â” æ¹²ê³•ì»²?ì‡°ì¤ˆ ?ì„? ï§ë¨­í€¬, ï§â‘¤ëœ½??ï§¤ì’–ëƒ¼ ï§¤ì’•? ?ìŒ?æ¿¡??ë¨®íˆ•ç‘œ?ï§ëš®ë±¾?ë‰ì“£ ??æ´¹??ë¨®íˆ•åª›Â€
+                //?ê¾©ì˜± ?ë¶¾ãˆƒ??æ¹²ê³—??ì‡°ì¤ˆ ?ìŒ????ì‡°ì­??ï§ë¡®ì”  ï§¡â‘¥??ì„í€¬ ?ëˆêµ¹æ¿¡?LOD ?â‘£í€ æ´Ñ‰í€?ì„ë¦°. => ?ã…½ê²•ç”±??ìŒ? ?ÑŠì” ï§?æ¹²ê³•ì¾¿
+                //LOD ï§â‘¤ëœ½?Â€ ?ê³¹ê¹­ç™’ëª„ë–Š??åª›ë‰ë¸˜?ì‡±ìŠ¦??LOD ?â‘£í€???ê³•ì”ª è«›ë¶½ì”€æ¹²? => ?ëŒê°??ï§â‘¤ëœ½???Ñˆë¦°??è¹‚Â€?ì„? ?ë”†ì“¬. ?ë·€ë€’?ì‡±ì”  ?Ñ‰ì”ªï§?
                 m_LoadMenu = !m_LoadMenu;
                 ImGuiFileDialog::Instance()->Close();
 
@@ -341,7 +339,7 @@ void CLevel_Map::Load_Objects()
     vector<_wstring> m_PrototypeNames;
 
     _matrix PreTransformMatrix = XMMatrixIdentity();
-    _float fSize = 0.01f;
+    _float fSize = 0.1f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
@@ -349,11 +347,11 @@ void CLevel_Map::Load_Objects()
             if (entry.path().string().find("MapData") != std::string::npos)
                 continue;
 
-            //LOD ¸ğµ¨µéÀº ¸ñ·Ï¿¡ Ãß°¡ÇÏÁö ¸»°í _LOD0 ÀÌ¸§ »©°í 1°³¾¿¸¸ ÀúÀåÇÏ°Ô.
+            //LOD ï§â‘¤ëœ½?ã…¼? ï§â‘¸ì¤‰??ç•°ë¶½??ì„? ï§ë¨­í€¬ _LOD0 ?ëŒ€ì«« é®ì‡¨í€¬ 1åª›ì’–ëµ«ï§??Â€?Î½ë¸¯å¯ƒ?
             if (entry.path().extension() == ".dat") {
                 //m_ModelPaths.push_back(entry.path().string());
 
-                //¿©±â¿¡ ÇÁ·ÎÅäÅ¸ÀÔ ¹Ì¸® »ı¼º
+                //?Ñˆë¦°???ê¾¨ì¤ˆ?ì¢???èª˜ëªƒâ” ?ì•¹ê½¦
                 _char FileDrive[MAX_PATH] = {};
                 _char FileDir[MAX_PATH] = {};
                 _char FileName[MAX_PATH] = {};
@@ -362,10 +360,10 @@ void CLevel_Map::Load_Objects()
 
                 _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
                 _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
+
                 _wstring  PushName = ProtoModelPath + StringToWString(FileName);
                 PushName.pop_back();
-                //¸ÖÆ¼ ¾²·¹µå ¾µ ¶§ Áß´ÜÁ¡ °É¸é ÅÍÁö´Ï±î °ÉÁö¸¶¼î
-
+                //
                 _bool IsExists = { false };
 
                 _string Temp;
@@ -394,9 +392,10 @@ void CLevel_Map::Load_Objects()
                 //m_pGameInstance->Add_Work([=]() {
                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
+                   //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
                    CRASH("Prototype Create Failed");
 
-                    //¸ÖÆ¼¾²·¹µå Á¤»óÈ­ µÇ¸é ÀÌ°Å ¾µ°Í.
+                    //ï§Â€?ê³—ë²?ëˆë±¶ ?ëº¤ê¸½???ì„ãˆƒ ?ë‹¿êµ… ?ë©¸ì¾¬.
                     //    string Test = entry.path().parent_path().string();
                     //    Test += "/Mat/Tex/";
                     //    if (filesystem::exists(Test))
@@ -421,10 +420,10 @@ HRESULT CLevel_Map::Ready_Static_Component()
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));
 
 
-    //ÀÏ¹İ ¸ğµ¨
+    //?ì‡°ì»² ï§â‘¤ëœ½
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
-    //ÀÎ½ºÅÏ½º ¸ğµ¨
+    //?ëª„ë’ª?ëŒë’ª ï§â‘¤ëœ½
     
     /*m_pGameInstance->Add_Work([&](){
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
@@ -472,11 +471,11 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
 
-    //¿ÀºêÁ§Æ®¸Å´ÏÀú¿¡¼­ ·¹ÀÌ¾î ÀüºÎ µ¹¸é¼­ ¼øÂ÷ÀûÀ¸·Î ÀúÀå.
-    //LOD °³¼ö LOD0, LOD1, LOD2°°ÀÌ LOD ¼öµµ ÀúÀå??
+    //?ã…»íˆ•?ì•ºë“ƒï§ã…»ë•²?Â€?ë¨¯ê½Œ ?ë‰ì” ???ê¾¨? ?ëš®ãˆƒ???ì’–ê°?ê³¸ì‘æ¿¡??Â€??
+    //LOD åª›ì’–ë‹” LOD0, LOD1, LOD2åª›ìˆˆì”  LOD ?ì„ë£„ ?Â€???
 
-    //Å¥ºê ¾È¿¡ ¸ğµ¨ Âï±â / ¿ùµå ÃÖ´ë Å©±â ¾È¿¡ Âï¾î¾ßÇÑ´Ù.
-    //ÀÏ´Ü ÅØ½ºÃÄ ¾øÀÌ ¸ğµ¨¸¸ ·ÎµåÇØ³õ±â ¼¼ÀÌºê & ·Îµå.
+    //?ë¨®íˆ• ?ë‰ë¿‰ ï§â‘¤ëœ½ ï§¡ë»ë¦° / ?ë¶¾ë±¶ ï§¤ì’•? ?Ñˆë¦° ?ë‰ë¿‰ ï§¡ë¿ë¼±?ì‡³ë¸³??
+    //?ì‡°ë–’ ?ë¿ë’ªçˆ¾??ë†ì”  ï§â‘¤ëœ½ï§?æ¿¡ì’•ë±¶?ëŒ€ë„ƒæ¹²??ëª„ì” é‡‰?& æ¿¡ì’•ë±¶.
     
     //CEdit_MapObject::MAP_LOAD Desc{};
     //CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
@@ -558,20 +557,20 @@ void CLevel_Map::Ready_Event()
 void CLevel_Map::Make_MousePos()
 {
     POINT ptMousePos = m_pGameInstance->Get_MousePoint();
-    //ºäÆ÷Æ®¿¡¼­ Åõ¿µ½ºÆäÀÌ½º·Î ¿Å±â±â. => -1~ 1·Î º¯È¯.
+    //é…‰ê³ ë£·?ëª„ë¿‰???ÑŠìº?ã…½ëŸ¹?ëŒë’ªæ¿¡???ë¦°æ¹²? => -1~ 1æ¿¡?è¹‚Â€??
     _float3 vMousePos{};
     vMousePos.x = ptMousePos.x / (g_iWinSizeX * 0.5f) - 1.f;
     vMousePos.y = -1 * ptMousePos.y / (g_iWinSizeY * 0.5f) + 1.f;
     vMousePos.z = 0.f;
 
-    //ºä½ºÆäÀÌ½º·Î ÀüÈ¯À» À§ÇÑ Åõ¿µ Çà·Ä ³ª´©±â
+    //é…‰ê³—ë’ª?ì„ì” ?ã…»ì¤ˆ ?ê¾ªì†š???ê¾ªë¸³ ?ÑŠìº ?ë°ì ¹ ?ì„ëŠ»æ¹²?
     XMStoreFloat3(&vMousePos, XMVector3TransformCoord(XMLoadFloat3(&vMousePos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ)));
 
-    //ºä ½ºÆäÀÌ½º ±âÁØ ¸¶¿ì½º ·¹ÀÌ, ½ÃÀÛ À§Ä¡ °è»ê.
+    //é…‰??ã…½ëŸ¹?ëŒë’ª æ¹²ê³—? ï§ë‰ìŠ¦???ë‰ì” , ?ì’–ì˜‰ ?ê¾©íŠ‚ æ€¨ê¾©ê¶›.
     m_vWorldPos = {};
     m_vWorldDir = vMousePos;
 
-    //ºä ½ºÆäÀÌ½º¿¡¼­ ¿ùµå ¸ÅÆ®¸¯½º ÀüÈ¯.
+    //é…‰??ã…½ëŸ¹?ëŒë’ª?ë¨¯ê½Œ ?ë¶¾ë±¶ ï§ã…½ë“ƒç”±?ë’ª ?ê¾ªì†š.
     XMStoreFloat3(&m_vWorldPos, XMVector3TransformCoord(XMLoadFloat3(&m_vWorldPos), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW)));
     XMStoreFloat3(&m_vWorldDir, XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&m_vWorldDir), m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW))));
 }
@@ -611,6 +610,7 @@ void CLevel_Map::Free()
     m_pGameInstance->Unscribe();
 
     Safe_Release(m_pPreViewObject);
+    Safe_Release(m_pBrush);
 
     for (auto& Pair : m_SaveObjects)
     {

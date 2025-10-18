@@ -1,4 +1,4 @@
-#include"Editorpch.h"
+ï»¿#include"Editorpch.h"
 #include "Edit_MapObject_Instance.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
@@ -104,8 +104,8 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
     _matrix Scale, Rotation, Translation;
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, PickedMatrix);
 
-    //»çÀÌÁî°¡ Á¡Á¡ ÀÛ¾ÆÁü. ³ªÁß¿¡ ¼öÁ¤ÇÒ°Í.
-    //m_pScale¿¡´Ù°¡ ÀúÀåÇÑ µÚ ¹öÆ° ´©¸£¸é Àû¿ëµÇ°Ô ÇÏ¸é ¾È¹Ù²ğµí.
+    //?ÑŠì” ï§ë‡? ?ë¨¯ì  ?ë¬’ë¸˜ï§? ?ì„ì¨·???ì„ì ™?ì¢‰ì¾¬.
+    //m_pScale?ë¨®ë–åª›Â€ ?Â€?Î½ë¸³ ??è¸°ê¾ªë“‰ ?ê¾¨â…¤ï§??ê³¸ìŠœ?ì„ì¾¶ ?ì„ãˆƒ ?ëˆì»®?ë¶¾ë².
     ImGui::Text("Size");
     {
         ImGui::PushItemWidth(90.0f);
@@ -119,12 +119,12 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
 
     ImGui::Text("Turn_Quaternion");
     {
-        //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         ImGui::PushItemWidth(90.0f);
         //_float3 DegreeRotation = _float3(XMConvertToDegrees(m_pRotation[m_iPickedInstance].x), XMConvertToDegrees(m_pRotation[m_iPickedInstance].y), XMConvertToDegrees(m_pRotation[m_iPickedInstance].z));
         _float4 DegreeRotation = m_pRotation[m_iPickedInstance];
         
-        //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
 
         ImGui::InputFloat("Yaw",    &DegreeRotation.x, 0.1f, 0.1f); ImGui::SameLine();
         ImGui::InputFloat("Picth",  &DegreeRotation.y, 0.1f, 0.1f); ImGui::SameLine();
@@ -164,15 +164,15 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
     }
     ImGui::EndChildFrame();
 
-    //LOD°¡ ÃÑ 4´Ü°è·Î ³ª´µ¾îÁ®ÀÖ´Âµ¥ ÀÌ°Å ¾î¶»°Ô ÇÒ °ÇÁö »ı°¢.
-    //Á¦ÀÏ °£´ÜÇÑ ¹æ¹ı => ÄõµåÆ®¸®¿¡¼­ Å©±â¿¡ ºñ·ÊÇØ¼­ ·»´õÇÒ ¶§ ¸ğµ¨ °¥¾Æ³¢±â.
-    //=> ÀÎ½ºÅÏ½ÌÇÑ ¸Ş½¬µéÀº °¢ ¸ÅÆ®¸¯½º¸¶´Ù ºñ±³ÇØ¼­ ¸Ş½¬ ¹¹ ¾µÁö °áÁ¤ÇØ¾ßÇÒµí?
+    //LODåª›Â€ ç¥?4?â‘£í€æ¿¡??ì„ë‡?ëŒì¡‡?ëˆë’—???ë‹¿êµ… ?ëŒ€ë¼¸å¯ƒ???å«„ëŒ? ?ì•·ì»–.
+    //?ì’–ì”ª åª›ê¾¨ë–’??è«›â‘¸ì¾¿ => è‘ì‡°ë±¶?ëªƒâ”?ë¨¯ê½Œ ?Ñˆë¦°??é®ê¾¨??ëŒê½Œ ?ëš®ëœ‘????ï§â‘¤ëœ½ åª›ë‰ë¸˜?ì‡¨ë¦°.
+    //=> ?ëª„ë’ª?ëŒë–›??ï§ë¶¿ë©?ã…¼? åª›?ï§ã…½ë“ƒç”±?ë’ªï§ëˆë– é®ê¾§íƒ³?ëŒê½Œ ï§ë¶¿ë© è¸??ëª„? å¯ƒê³—ì ™?ëŒë¹?ì¢Šë²?
 
 }
 
 HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
-    //ÀÌ ºÎºĞ ³ªÁß¿¡ .Dat·ÎµåÇÒ¶§ µ¥ÀÌÅÍÈ­ ½ÃÄÑ¼­ ·Îµå ½ÃÅ³°Í.
+    //??éºÂ€éº??ì„ì¨·??.Datæ¿¡ì’•ë±¶?ì¢Šë¸£ ?ê³—ì” ?ê³ ì†• ?ì’–í’??æ¿¡ì’•ë±¶ ?ì’—ê¶—å¯ƒ?
     //ifstream File();
     CMesh_Instance::MESH_INST_DESC Desc{};
     m_iNumInstance = Desc.iNumInstance = 2;
@@ -186,7 +186,7 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
     _vector vScale, vRotation, vTranslation;
     m_pRotation = new _float4[m_iNumInstance];
 
-    //È¸Àü°ªÀº ¹Ì¸® ÀúÀå
+    //?ëš¯ìŸ¾åª›ë¯ª? èª˜ëªƒâ” ?Â€??
     for (_uint i = 0; i < m_iNumInstance; ++i)
     {
         XMStoreFloat4(&m_pRotation[i], XMVectorSet(0.f, 0.f, 0.f, 0.f));

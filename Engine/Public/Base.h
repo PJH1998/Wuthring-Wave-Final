@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "EnginePch.h"
 
@@ -11,11 +11,11 @@ protected:
 	virtual ~CBase() = default;
 
 public:
-	_uint		AddRef(); // ÂüÁ¶ ½Ã ·¹ÆÛ·±½º Ä«¿îÆ® Áõ°¡
-	_uint		Release(); // ÂüÁ¶¸¦ ³¡³¾ ½Ã ·¹ÆÛ·±½º Ä«¿îÆ® °¨¼Ò ¹× 0ÀÏ ¶§ °´Ã¼ »èÁ¦
+	_uint		AddRef(); // ï§¡ëª„â€œ ???ëŠë?ê³—ë’ª ç§»ëŒìŠ«??ï§ì•·?
+	_uint		Release(); // ï§¡ëª„â€œç‘œ??ì•¸ê¶ª ???ëŠë?ê³—ë’ª ç§»ëŒìŠ«??åª›ë¨¯ëƒ¼ è«›?0????åª›ì•¹ê»œ ??ì £
 
 private:
-	_uint		m_iRefCnt = {}; 	// ·¹ÆÛ·±½º Ä«¿îÆ®
+	_uint		m_iRefCnt = {}; 	// ?ëŠë?ê³—ë’ª ç§»ëŒìŠ«??
 
 public:
 	virtual void Free();

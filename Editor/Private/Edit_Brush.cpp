@@ -88,4 +88,6 @@ CEdit_Brush* CEdit_Brush::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 void CEdit_Brush::Free()
 {
     __super::Free();
+    Safe_Release(m_pShaderCom);
+    Safe_Release(m_pVIBufferCom);
 }

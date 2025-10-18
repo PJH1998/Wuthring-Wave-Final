@@ -190,9 +190,6 @@
     <Filter Include="01. Utility\03. GameObject\UI">
       <UniqueIdentifier>{6c4f0a80-08f5-4ff9-9569-6828dccffafc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\Instance">
-      <UniqueIdentifier>{afafc0ea-df60-420a-8440-f88be064ca29}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\Model_Instance">
       <UniqueIdentifier>{333e4a5a-933b-4322-932f-4aa070c2bfba}</UniqueIdentifier>
     </Filter>
@@ -201,15 +198,6 @@
     </Filter>
     <Filter Include="01. Utility\05. Pooling\Thread">
       <UniqueIdentifier>{2da77f69-39f0-4bee-ac7c-e2cd883470ff}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\Instamce">
-      <UniqueIdentifier>{47fa2cb5-207a-4703-9c57-fa3773a44b78}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\Instamce\Point">
-      <UniqueIdentifier>{0b0d0337-b9de-4bf4-92bb-b36c6a5930b0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\Instamce\Mesh">
-      <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\Shader\ComputeShader">
       <UniqueIdentifier>{c88a01cf-f161-4e6d-ae5c-73a301dcb49d}</UniqueIdentifier>
@@ -237,6 +225,15 @@
     </Filter>
     <Filter Include="01. Utility\07. Shadow\Cascade">
       <UniqueIdentifier>{61272df4-4c82-475f-a831-ddc7dc89683d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance">
+      <UniqueIdentifier>{47fa2cb5-207a-4703-9c57-fa3773a44b78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Point">
+      <UniqueIdentifier>{0b0d0337-b9de-4bf4-92bb-b36c6a5930b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
+      <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -433,19 +430,13 @@
       <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h">
-      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Point</Filter>
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Point</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ComputeShader.h">
       <Filter>01. Utility\04. Component\Shader\ComputeShader</Filter>
@@ -481,6 +472,12 @@
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point.h" />
+    <ClInclude Include="..\Public\VIBuffer_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -654,20 +651,8 @@
     <ClCompile Include="..\private\UIObject.cpp">
       <Filter>01. Utility\03. GameObject\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Mesh_Instance.cpp">
-      <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Mesh_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Point</Filter>
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Point</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp">
       <Filter>01. Utility\04. Component\Shader\ComputeShader</Filter>
@@ -703,6 +688,12 @@
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">

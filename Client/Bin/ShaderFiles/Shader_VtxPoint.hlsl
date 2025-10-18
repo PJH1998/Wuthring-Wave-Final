@@ -45,9 +45,9 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     GS_OUT Out[4];
     
     vector vRight, vUp, vLook;
-    vRight = float4(1.f, 0.f, 0.f, 0.f);
+    vRight = float4(g_fRange, 0.f, 0.f, 0.f);
     vUp = float4(0.f, 1.f, 0.f, 0.f);
-    vLook = float4(0.f, 0.f, 1.f, 0.f);
+    vLook = float4(0.f, 0.f, g_fRange, 0.f);
     
     matrix matVP = mul(g_ViewMatrix, g_ProjMatrix);
     

@@ -70,7 +70,6 @@
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\Public\StaticObject.h" />
-    <ClInclude Include="..\Public\VIBuffer_Instance.h" />
     <ClInclude Include="..\Public\Model.h" />
     <ClInclude Include="..\Public\Navigation.h" />
     <ClInclude Include="..\Public\Object_Manager.h" />
@@ -96,6 +95,7 @@
     <ClInclude Include="..\Public\VIBuffer_Cell.h" />
     <ClInclude Include="..\Public\VIBuffer_Cube.h" />
     <ClInclude Include="..\Public\VIBuffer_Point.h" />
+    <ClInclude Include="..\Public\VIBuffer_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect.h" />
   </ItemGroup>
@@ -147,7 +147,6 @@
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\Private\StaticObject.cpp" />
-    <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
     <ClCompile Include="..\Private\Model.cpp" />
     <ClCompile Include="..\Private\Navigation.cpp" />
     <ClCompile Include="..\Private\Object_Manager.cpp" />
@@ -173,6 +172,7 @@
     <ClCompile Include="..\Private\VIBuffer_Cell.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cube.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect.cpp" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Shadow.h"
 
 #include "Shader.h"
@@ -159,7 +159,7 @@ _float CShadow::Compute_Radius(const vector<_float4>& FrustrumPoints, _vector vC
 
 void CShadow::Make_Matrices(const _float4* pFrustrumPoints)
 {
-	_float fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();		// Camera ±³Ã¼½Ã ÇÑ¹ø¸¸ ¹Ş¾Æ¿À°í ½Í
+	_float fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();		// Camera æ´ë¨¯ê»œ???ì’•ì¾²ï§?è«›ì†ë¸˜?ã…ºí€¬ ??
 	_float fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
 
 	for (_uint i = 0; i < m_iNumSplitDistances; i++)
@@ -179,7 +179,7 @@ void CShadow::Make_Matrices(const _float4* pFrustrumPoints)
 		fFarRatio = (fSplitFar - fCameraNear) / (fCameraFar - fCameraNear);
 
 
-		for (_uint k = 0; k < 4; k++)				// ÇÁ·¯½ºÅÒ ³ª´²¼­ »õ·Î¿î ÇÁ·¯½ºÅÒ ¸¸µé±â
+		for (_uint k = 0; k < 4; k++)				// ?ê¾¨ìœ­?ã…½? ?ì„ë‹ ???ëˆì¤ˆ???ê¾¨ìœ­?ã…½? ï§ëš®ë±¾æ¹²?
 		{
 			XMStoreFloat4(&m_pSplitPoints[j][k], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fNearRatio));
 			XMStoreFloat4(&m_pSplitPoints[j][k + 4], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fFarRatio));
@@ -196,9 +196,9 @@ void CShadow::Make_Matrices(const _float4* pFrustrumPoints)
 		_float3 vMinExtents = _float3( fMinRadius, fMinRadius, fMinRadius );
 
 		XMStoreFloat4x4( &m_Matrices[ENUM_CLASS( D3DTS::VIEW )][j], Make_SplitViewMatrix( m_pSplitPoints[j]) );
-		XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::PROJ)][j], Make_SplitProjMatrix( m_pSplitPoints[j], j )); // ³ª´« ÇÁ·¯
+		XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::PROJ)][j], Make_SplitProjMatrix( m_pSplitPoints[j], j )); // ?ì„ëŠ¿ ?ê¾¨ìœ­
 	//	XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::VIEW)][j], Make_SplitViewMatrix(vMaxExtents, vMinExtents, vCenterPos));
-	//	XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::PROJ)][j], Make_SplitProjMatrix(vMaxExtents, vMinExtents)); // ³ª´« ÇÁ·¯½ºÅÒÀ¸·Î Åõ¿µÇà·Ä ¸¸µé±â
+	//	XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::PROJ)][j], Make_SplitProjMatrix(vMaxExtents, vMinExtents)); // ?ì„ëŠ¿ ?ê¾¨ìœ­?ã…½??ì‡°ì¤ˆ ?ÑŠìº?ë°ì ¹ ï§ëš®ë±¾æ¹²?
 	}
 }
 
@@ -235,7 +235,7 @@ _matrix CShadow::Make_SplitProjMatrix( const vector<_float4>& SplitFrustrumPoint
 	
 	for (_uint i = 0; i < 8; i++)
 	{
-		XMStoreFloat4(&vShadowViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&SplitFrustrumPoints[i]), XMLoadFloat4x4(&m_Matrices[ENUM_CLASS( D3DTS::VIEW )][iIndex] ))); // ³ª´« ÇÁ·¯½ºÅÒ ³» ºäÇà·Ä·Î ¿Ã¸®±â
+		XMStoreFloat4(&vShadowViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&SplitFrustrumPoints[i]), XMLoadFloat4x4(&m_Matrices[ENUM_CLASS( D3DTS::VIEW )][iIndex] ))); // ?ì„ëŠ¿ ?ê¾¨ìœ­?ã…½? ??é…‰ê³ ë»¾?Ñ‰ì¤ˆ ?Ñ‰â”æ¹²?
 	
 		fMinX = min(fMinX, vShadowViewPoints[i].x);
 		fMaxX = max(fMaxX, vShadowViewPoints[i].x);
@@ -253,7 +253,7 @@ _matrix CShadow::Make_SplitProjMatrix( const vector<_float4>& SplitFrustrumPoint
 	//if (fNear > fFar)
 	//	swap(fNear, fFar);
 	
-	return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ºäÇà·Ä ¿Ã¸° ÇÁ·¯½ºÅÒ¿¡¼­ Min,Max, Near, Far ±¸ÇØ¼­ Åõ¿µÇà·Ä »ı¼º	
+	return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// é…‰ê³ ë»¾???Ñ‰â”› ?ê¾¨ìœ­?ã…½??ë¨¯ê½Œ Min,Max, Near, Far æ´Ñ‹ë¹???ÑŠìº?ë°ì ¹ ?ì•¹ê½¦	
 }
 
 //_matrix CShadow::Make_SplitViewMatrix( const _float3& vMaxExtents, const _float3& vMinExtents, _vector vCenterPos )
@@ -303,13 +303,13 @@ void CShadow::Make_ProjMatrices(const _float4* pFrustrumPoints)
 		fFarRatio = ( fSplitFar - fCameraNear ) / ( fCameraFar - fCameraNear );
 
 		
-		for (_uint k = 0; k < 4; k++)				// ÇÁ·¯½ºÅÒ ³ª´²¼­ »õ·Î¿î ÇÁ·¯½ºÅÒ ¸¸µé±â
+		for (_uint k = 0; k < 4; k++)				// ?ê¾¨ìœ­?ã…½? ?ì„ë‹ ???ëˆì¤ˆ???ê¾¨ìœ­?ã…½? ï§ëš®ë±¾æ¹²?
 		{
 			XMStoreFloat4(&m_pSplitPoints[j][k], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fNearRatio));
 			XMStoreFloat4(&m_pSplitPoints[j][k+4], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fFarRatio));
 		}
 
-		XMStoreFloat4x4(&m_ProjMatrices[j], Make_SplitProjMatrix(m_pSplitPoints[j])); // ³ª´« ÇÁ·¯½ºÅÒÀ¸·Î Åõ¿µÇà·Ä ¸¸µé±â
+		XMStoreFloat4x4(&m_ProjMatrices[j], Make_SplitProjMatrix(m_pSplitPoints[j])); // ?ì„ëŠ¿ ?ê¾¨ìœ­?ã…½??ì‡°ì¤ˆ ?ÑŠìº?ë°ì ¹ ï§ëš®ë±¾æ¹²?
 	}
 }
 */
@@ -326,7 +326,7 @@ void CShadow::Make_ProjMatrices(const _float4* pFrustrumPoints)
 //
 //	for (_uint i = 0; i < 8; i++)
 //	{
-//		XMStoreFloat4(&vShadowViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&SplitPoints[i]), XMLoadFloat4x4(&m_ViewMatrix))); // ³ª´« ÇÁ·¯½ºÅÒ ³» ºäÇà·Ä·Î ¿Ã¸®±â
+//		XMStoreFloat4(&vShadowViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&SplitPoints[i]), XMLoadFloat4x4(&m_ViewMatrix))); // ?ì„ëŠ¿ ?ê¾¨ìœ­?ã…½? ??é…‰ê³ ë»¾?Ñ‰ì¤ˆ ?Ñ‰â”æ¹²?
 //
 //		fMinX = min(fMinX, vShadowViewPoints[i].x);
 //		fMaxX = max(fMaxX, vShadowViewPoints[i].x);
@@ -344,7 +344,7 @@ void CShadow::Make_ProjMatrices(const _float4* pFrustrumPoints)
 //	//if (fNear > fFar)
 //	//	swap(fNear, fFar);
 //
-//	return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ºäÇà·Ä ¿Ã¸° ÇÁ·¯½ºÅÒ¿¡¼­ Min,Max, Near, Far ±¸ÇØ¼­ Åõ¿µÇà·Ä »ı¼º
+//	return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// é…‰ê³ ë»¾???Ñ‰â”› ?ê¾¨ìœ­?ã…½??ë¨¯ê½Œ Min,Max, Near, Far æ´Ñ‹ë¹???ÑŠìº?ë°ì ¹ ?ì•¹ê½¦
 //}
 
 void CShadow::Make_SplitPlanes()
@@ -369,10 +369,10 @@ void CShadow::Make_SplitPlanes()
 _float CShadow::Compute_SplitDistances(_float fCameraNear, _float fCameraFar, _uint iIndex, _uint iNumSplit, _float fLambda)
 {
 	_float fSplitDistance = {};
-	_float fLinearSplit = fCameraNear + ( ( fCameraFar - fCameraNear ) * ( static_cast<_float>( iIndex ) / static_cast<_float>( iNumSplit ) ) );	// Linear º¸°£
-	_float fLogSplit = fCameraNear * powf(fCameraFar / fCameraNear, static_cast<_float>( iIndex ) / static_cast<_float>( iNumSplit ));				// Log	 º¸°£
+	_float fLinearSplit = fCameraNear + ( ( fCameraFar - fCameraNear ) * ( static_cast<_float>( iIndex ) / static_cast<_float>( iNumSplit ) ) );	// Linear è¹‚ë‹¿ì»™
+	_float fLogSplit = fCameraNear * powf(fCameraFar / fCameraNear, static_cast<_float>( iIndex ) / static_cast<_float>( iNumSplit ));				// Log	 è¹‚ë‹¿ì»™
 
-	fSplitDistance = ( fLambda * fLogSplit ) + ( 1.f - fLambda ) * fLinearSplit;			// Linear¿Í Log Lerp
+	fSplitDistance = ( fLambda * fLogSplit ) + ( 1.f - fLambda ) * fLinearSplit;			// Linear?Â€ Log Lerp
 
 	return fSplitDistance;
 }

@@ -1,4 +1,4 @@
-#ifndef Engine_Enum_h__
+﻿#ifndef Engine_Enum_h__
 #define Engine_Enum_h__
 
 namespace Engine

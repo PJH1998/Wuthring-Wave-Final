@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Graphic_Device.h"
 
 CGraphic_Device::CGraphic_Device()
@@ -14,22 +14,22 @@ HRESULT CGraphic_Device::Initialize(HWND hWnd, WINMODE eMode, _uint iWinSizeX, _
 #endif // _DEBUG
     D3D_FEATURE_LEVEL   FeatureLV = {};
 
-    // ±×·¡ÇÈ ÀåÄ¡ ÃÊ±âÈ­
+    // æ´¹ëªƒì˜’???Î¼íŠ‚ ç¥ë‡ë¦°??
     if (FAILED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, 0, iFlag,
         nullptr, 0, D3D11_SDK_VERSION, &m_pDevice, &FeatureLV, &m_pContext)))
         return E_FAIL;
 
-    // SwapChain °´Ã¼ ¹× Back Buffer »ý¼º
+    // SwapChain åª›ì•¹ê»œ è«›?Back Buffer ?ì•¹ê½¦
     if (FAILED(Ready_SwapChain(hWnd, eMode, iWinSizeX, iWinSizeY)))
         return E_FAIL;
-    // Render Target View »ý¼º
+    // Render Target View ?ì•¹ê½¦
     if (FAILED(Ready_BackBufferRenderTargetView()))
         return E_FAIL;
-    // Depth Stencil View »ý¼º
+    // Depth Stencil View ?ì•¹ê½¦
     if (FAILED(Ready_DepthStencilView(iWinSizeX, iWinSizeY)))
         return E_FAIL;
 
-    // ÀåÄ¡¿¡ RTV, DepthStencilView ¼ÂÆÃ
+    // ?Î¼íŠ‚??RTV, DepthStencilView ?ë—®ë˜¿
     ID3D11RenderTargetView* pRTVs[] = {
         m_pBackBufferRTV,
     };
@@ -109,7 +109,7 @@ HRESULT CGraphic_Device::Ready_SwapChain(HWND hWnd, WINMODE eMode, _uint iWinSiz
     SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
     SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 
-    // ¸ÖÆ¼ »ùÇÃ¸µ
+    // ï§ŽÂ€???ì„‘ëµ†ï§?
     SwapChainDesc.SampleDesc.Quality = 0;
     SwapChainDesc.SampleDesc.Count = 1;
 
@@ -134,12 +134,12 @@ HRESULT CGraphic_Device::Ready_BackBufferRenderTargetView()
 
     ID3D11Texture2D* pBackBufferTexture = { nullptr };
 
-    // SwapChainÀÌ °®°í ÀÖ´Â Texture(Back Buffer) °¡Á®¿À±â
+    // SwapChain??åª›ë½®í€¬ ?ëˆë’— Texture(Back Buffer) åª›Â€?ëª„ì‚¤æ¹²?
     if (FAILED(m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), 
         reinterpret_cast<void**>(&pBackBufferTexture))))
         return E_FAIL;
 
-    // RenderTarget ¿ëµµ·Î ¾µ ÅØ½ºÃ³ °´Ã¼¸¦ »ý¼º (Back Buffer ±â¹Ý)
+    // RenderTarget ?â‘¸ë£„æ¿¡????ë¿ë’ªï§£?åª›ì•¹ê»œç‘œ??ì•¹ê½¦ (Back Buffer æ¹²ê³•ì»²)
     if (FAILED(m_pDevice->CreateRenderTargetView(pBackBufferTexture, 
         nullptr, &m_pBackBufferRTV)))
         return E_FAIL;
@@ -167,7 +167,7 @@ HRESULT CGraphic_Device::Ready_DepthStencilView(_uint iWinSizeX, _uint iWinSizeY
     TextureDesc.SampleDesc.Quality = 0;
     TextureDesc.SampleDesc.Count = 1;
 
-    TextureDesc.Usage = D3D11_USAGE_DEFAULT; // Á¤Àû
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT; // ?ëº¤ìŸ»
     TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
     TextureDesc.CPUAccessFlags = 0;
     TextureDesc.MiscFlags = 0;

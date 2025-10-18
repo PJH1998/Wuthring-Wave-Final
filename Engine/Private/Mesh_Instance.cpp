@@ -1,4 +1,4 @@
-#include"EnginePch.h"
+ï»¿#include"EnginePch.h"
 #include "Mesh_Instance.h"
 
 CMesh_Instance::CMesh_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -134,7 +134,7 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 #ifdef _DEBUG
 _bool CMesh_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
 {
-    //ÀÎ½ºÅÏ½ÌÀÏ ¶§ ¸î¹ø Â°ÀÎÁö ¾Ë¾Æ¾ßÇÔ.
+    //?ëª„ë’ª?ëŒë–›????ï§ë‰–ì¾² ï§ëª„ì”¤ï§Â€ ?ëš¯ë¸˜?ì‡³ë¸¿.
 
     _float fMin = FLT_MAX;
     for (size_t i = 0; i < m_Indices.size() - 2; i += 3)

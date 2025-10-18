@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+Ôªø#include "EnginePch.h"
 #include "Rigidbody.h"
 
 #include "GameInstance.h"
@@ -65,7 +65,7 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 	}
 	case SHAPE::MESH:
 	{
-		// Mesh¥¬ µ˚∑Œ √≥∏Æ
+		// Mesh???Í≥ïÏ§à Ôß£ÏÑé‚îÅ
 		Make_MeshShape(pArg);
 		return S_OK;
 	}
@@ -203,10 +203,10 @@ void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
 	mp.ScaleToMass(1.f);
 
 	bodySetting.mMassPropertiesOverride = mp;
-	// ∞¸º∫ (¡˜¡¢ º≥¡§«— ¡˙∑Æ ªÁøÎ«œ¥¬ ºº∆√)
+	// ÊÑø¬Ä??(ÔßûÍ≥∏Ï†í ?„ÖºÏ†ô??ÔßûÎçàÏõæ ?—äÏäú?ÏÑéÎíó ?Î™ÖÎòø)
 	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
 
-	// GameObject(Owner) -> UserData∑Œ ¿¸¥ﬁ
+	// GameObject(Owner) -> UserDataÊø°??Íæ®Îññ
 	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
 
 	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);

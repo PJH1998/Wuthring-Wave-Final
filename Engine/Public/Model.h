@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -109,7 +109,7 @@ private:
 	_uint									m_iNumAnimations = {};
 	_string								m_strPreAnimation;
 	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader¿¡ Àü´ŞÇÒ¶§´Â _uint Àü´ŞÇØ¾ßÇÔ
+	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader???ê¾¨ë––?ì¢Šë¸£??_uint ?ê¾¨ë––?ëŒë¹??
 
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
@@ -121,7 +121,7 @@ private:
 	
 
 
-#pragma region Compute Shader ±¸Çö ¿ë 
+#pragma region Compute Shader æ´Ñ‹ì½ ??
 private:
 	void ApplyComputeResults_ToBones();
 

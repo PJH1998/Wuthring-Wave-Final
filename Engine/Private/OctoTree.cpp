@@ -1,11 +1,13 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "OctoTree.h"
 
 #include "CubeCell.h"
 #include "GameInstance.h"
 
 COctoTree::COctoTree()
+	: m_pGameInstance { CGameInstance::GetInstance() }
 {
+	Safe_AddRef(m_pGameInstance);
 }
 
 void COctoTree::SetUp_OctoTree(_float3 vCenter, _float3 vExtent)
@@ -19,7 +21,7 @@ void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 {
 	ASSERT_CRASH(m_pRootCell);
 
-	// ObjectÀÇ BoundingBox Min, Max X/Y/Z »ý¼º
+	// Object??BoundingBox Min, Max X/Y/Z ?ì•¹ê½¦
 	_float fMinMax[ENUM_CLASS(CCubeCell::MINMAX::END)] = {};
 
 	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MIN_X)] = pBox->Center.x - pBox->Extents.x * 0.5f;
@@ -32,6 +34,14 @@ void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 	m_pRootCell->Add_Object(pObject, fMinMax);
 }
 
+void COctoTree::Update()
+{
+	if (nullptr == m_pRootCell)
+		return;
+
+	m_pRootCell->Update(XMLoadFloat4(m_pGameInstance->Get_CamPos()));
+}
+
 COctoTree* COctoTree::Create()
 {
     return new COctoTree();
@@ -42,4 +52,6 @@ void COctoTree::Free()
 	__super::Free();
 
 	Safe_Release(m_pRootCell);
+
+	Safe_Release(m_pGameInstance);
 }

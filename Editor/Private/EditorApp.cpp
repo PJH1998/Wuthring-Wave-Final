@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "EditorApp.h"
 
 #include "Event_Level.h"
@@ -33,7 +33,7 @@ HRESULT CEditorApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ¿¬µ¿
+	// ImGui Context ?ê³•ë£ž
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
@@ -53,7 +53,7 @@ HRESULT CEditorApp::Initialize()
 
 void CEditorApp::Post_Update()
 {
-	// Level ÀüÈ¯
+	// Level ?ê¾ªì†š
 	if (true == m_isChangeLevel)
 	{
 		m_isChangeLevel = false;
