@@ -78,11 +78,8 @@ void CChannel::Update_TransformationMatrix(_float fCurrentTrackPosition, const v
 
 void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, const vector<class CBone*>& Bones, _uint* pCurrentFrameIndex)
 {
-	if (m_iNumKeyFrame == 2 
-		|| 0 == strcmp(m_szName, "Bip001RClavicle") 
-		|| 0 == strcmp(m_szName, "Bip001LClavicle"))
+	if (m_iNumKeyFrame == 2)
 	{
-		int x = 10;
 		return;
 	}		
 
@@ -127,14 +124,6 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
 		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
 
-#ifdef _DEBUG
-		// 들어온 뼈의 이름 모두 출력
-		// 이 함수로 들어온 뼈의 이름을 출력해 봅시다.
-		wstring wstrBoneName = StringToWString(m_szName);
-		wstrBoneName += L"\n";
-		OutputDebugString(wstrBoneName.c_str());
-
-#endif // _DEBUG
 
 
 

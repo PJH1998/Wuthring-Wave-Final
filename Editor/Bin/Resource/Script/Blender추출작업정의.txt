@@ -1,0 +1,7 @@
+Blender version 4.5
+
+1. Blender에서 .psk로 Augusta 모델을 불러옵니다.
+2. Texture들을 노드에 연결해둡니다.
+3. Augusta Amature를 선택한 뒤에 필요한 애니메이션들을 폴더에서 블렌더로 끌어서 임포트합니다.
+4. 임포트가 성공적으로 되었으면 Augusta_BaseAnim.py 를 긁어서 스크립트 실행 시킵니다.
+5. Base Animation과 싱크가 맞지않는 뼈들의 채널이 사라집니다.

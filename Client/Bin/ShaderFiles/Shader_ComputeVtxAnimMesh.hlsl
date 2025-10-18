@@ -210,13 +210,6 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     // C++과 달리 HLSL에는 DirectXMath의 XMQuaternionSlerp가 없으므로 직접 구현한 custom_slerp 사용
     float4 interpRotation = custom_slerp(key1.vRotation, key2.vRotation, blendFactor);
    
-    // 임시 수정.
-    //matrix_rm debugMatrix = (matrix_rm) 0; // 행렬을 0으로 초기화
-    //debugMatrix._11 = interpRotation.w;
-    //g_OutLocalMatrices[boneIndex] = debugMatrix;
-    //return; // 여기서 계산을 바로 종료
-   
-    
     // 보간된 SRT로 로컬 행렬 생성 시 인자 순서를 (Scale, Rotation, Translation)으로 바로잡습니다.
     matrix_rm localmatrix_rm = matrix_rmFromSQT(interpScale, interpRotation, interpTranslation);
     

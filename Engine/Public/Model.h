@@ -82,7 +82,8 @@ public:
 
 
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
-	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta);
+	//void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta);
+	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition);
 
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);

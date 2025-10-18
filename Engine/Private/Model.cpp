@@ -250,6 +250,19 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 	}
 	
 
+#ifdef _DEBUG
+	OutputDebugString(TEXT("Augusta : Bones Name\n"));
+	for (size_t i = 0; i < m_Bones.size(); i++)
+	{
+		
+		_string strBoneName = m_Bones[i]->Get_Name();
+		wstring wstrBoneName = StringToWString(strBoneName);
+		wstrBoneName += L"\n";
+		OutputDebugString(wstrBoneName.c_str());
+	}
+#endif // _DEBUG
+
+
 	return S_OK;
 }
 
@@ -339,22 +352,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 
-#ifdef _DEBUG
-	_float4 fValue = {};
-	OutputDebugString(TEXT("Play_Animation CPU \n"));
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
-#endif
-
 	return false;
 }
 
@@ -390,7 +387,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 
 	// 4. Compute Shader에 리소스 바인딩
-//    - ComputeShader.h/cpp의 Set 함수들을 사용
+	//    - ComputeShader.h/cpp의 Set 함수들을 사용
 	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // 아직 .hlsl에 없음
 	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
 	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
@@ -416,8 +413,9 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	ApplyComputeResults_ToBones();
 
 	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
-	//_string strRibAnimationName = "Rib_" + strAnimationName;
+	_string strRibAnimationName = "Rib_" + strAnimationName;
 	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
+	Play_RibAnimation_GPU(strRibAnimationName, fTrackPosition);
 
 	
 #pragma endregion
@@ -425,7 +423,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	// Root Node Translation 조정
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate);
-	
 	
 
 	// 8. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
@@ -438,7 +435,11 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	// Combined는 한번만.
 	for (auto& pBone : m_Bones)
+	{
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+		
+	}
+		
 
 
 	/*_string strRibAnimationName = "Rib_" + strAnimationName;
@@ -462,35 +463,15 @@ void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeD
 
 }
 
-void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta)
+void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition)
 {
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 		return;
 
-	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
+	iter->second->Update_RibTransformationMatrices(fTrackPosition, m_Bones);
 
 
-//#ifdef _DEBUG
-//	for (size_t i = 0; i < m_Bones.size(); ++i)
-//	{
-//		
-//		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001_Shoulder_R_M"))
-//		{
-//			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-//			OutPutDebugMatrix(TEXT("Bip001_Shoulder_R_M Play Rib Animation Matrix"), mat);
-//
-//			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-//			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine"))
-//			{
-//				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-//				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
-//				OutPutDebugMatrix(strBoneName, mat);
-//				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-//			}
-//		}
-//	}
-//#endif // _DEBUG
 
 	//Sfor (auto& pBone : m_Bones)
 	//S	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
@@ -560,7 +541,7 @@ void CModel::ApplyComputeResults_ToBones()
 		return;
 
 	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UP의 w가 -7.4가 나옴.
+	vector<_float4x4> vLocalMatrices(m_Bones.size()); 
 	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.

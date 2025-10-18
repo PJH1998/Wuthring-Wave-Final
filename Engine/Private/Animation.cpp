@@ -108,6 +108,9 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
 	
 
+
+
+
 	return S_OK;
 }
 
@@ -132,10 +135,32 @@ _bool CAnimation::Update_TransformationMatrices(_float fTimeDelta, const vector<
 	return false;
 }
 
-_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//{
+//	if (nullptr != pTrackPosition)
+//		*pTrackPosition = m_fCurrentTrackPosition;
+//
+//	if (m_fCurrentTrackPosition > m_fDuration)
+//	{
+//		m_fCurrentTrackPosition = 0.f;
+//		return true;
+//	}
+//
+//
+//	for (size_t i = 0; i < m_iNumChannels; ++i)
+//	{
+//		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
+//	}
+//
+//	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+//
+//	return false;
+//}
+
+// TrackPosition을 외부에서 넣어주는 형태 => Rib TrackPosition과 기본 TrackPosition은 Sync가 맞습니다.
+_bool CAnimation::Update_RibTransformationMatrices(_float fTrackPosition, const vector<class CBone*>& Bones, _float* pTrackPosition)
 {
-	if (nullptr != pTrackPosition)
-		*pTrackPosition = m_fCurrentTrackPosition;
+	m_fCurrentTrackPosition = fTrackPosition;
 
 	if (m_fCurrentTrackPosition > m_fDuration)
 	{
@@ -148,8 +173,6 @@ _bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vect
 	{
 		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
 	}
-
-	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	return false;
 }

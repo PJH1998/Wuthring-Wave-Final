@@ -56,6 +56,8 @@ private:
 	// 신규 Notify 
 	vector<class CAnimNotify*> m_AnimNotifies;
 
+	/* 행렬 */
+
 private:
 
 public:
