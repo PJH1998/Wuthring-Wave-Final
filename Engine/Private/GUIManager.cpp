@@ -120,7 +120,6 @@ void CGUIManager::Render()
 
 void CGUIManager::Gizmo()
 {
-	// Gizmo ?곸슜??Transform ?놁쑝硫?Return
 	if (nullptr == m_pTransform)
 		return;
 
@@ -185,7 +184,7 @@ void CGUIManager::Gizmo()
 	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		m_isSnap = !m_isSnap;
 
-	ImGui::Separator();
+	//ImGui::Separator();
 #pragma region Gizmo
 	ImGuiIO io = ImGui::GetIO();
 	ImGui::Text("X: %f Y: %f", io.MousePos.x, io.MousePos.y);

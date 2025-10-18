@@ -66,9 +66,6 @@ void CCubeCell::Update(const _fvector& vCamPos)
 	// Frustrum, BoundingBox Intersect Check
 	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
 	{
-//#ifdef _DEBUG
-//		cout << "Depth : " << m_iDepth << endl;
-//#endif
 		// LOD SetUp
 		_float3 vCenter = m_pBoundingBox->Center;
 		_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
@@ -90,7 +87,7 @@ void CCubeCell::Update(const _fvector& vCamPos)
 		}
 
 		// 거리가 멀면 자식은 X
-		if (iLODIndex >= 2)
+		if (iLODIndex >= 3)
 			return;
 		// Child O -> Child Update
 		if (0 < m_ChildCells.size())
