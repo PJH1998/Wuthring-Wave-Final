@@ -96,13 +96,13 @@ protected:
 
 	HRESULT					Bind_Description(void* pArg);
 
-	void					Update_CombinedMatrix(_matrix* pParentMatrix);
+	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
 
 protected:
-	CShader*				m_pShaderCom = { nullptr };
-	CVIBuffer*				m_pVIBufferCom = { nullptr };
-	CTexture*				m_pTextureCom = { nullptr };
-	CAnimator_UI*			m_pAnimator_UICom = { nullptr };
+	CShader*				m_pShaderCom			= { nullptr };
+	CVIBuffer*				m_pVIBufferCom			= { nullptr };
+	CTexture*				m_pTextureCom			= { nullptr };
+	CAnimator_UI*			m_pAnimator_UICom		= { nullptr };
 
 
 	CUSTOM_UI_DESC			m_tUIDesc = {};
@@ -163,6 +163,15 @@ inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
 
 // ---- from Level.h
 
+inline void from_json(const json& j, CCustom_UI::UI_INFO_DESC& d)
+{
+	from_json(j["tUIDesc"], d.tUIDesc);
+
+	d.vPos = { j["vPos"][0], j["vPos"][1], j["vPos"][2] };
+	d.vRot = { j["vRot"][0], j["vRot"][1], j["vRot"][2] };
+	d.vSca = { j["vSca"][0], j["vSca"][1], j["vSca"][2] };
+}
+
 inline void from_json(const json& j, vector<CCustom_UI::UI_INFO_DESC>& vec)
 {
 	vec.clear();
@@ -181,20 +190,4 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UITREE_DESC& d)
 	_string strTreeName = j["strTreeName"].get<_string>();
 	d.strTreeName = StringToWString(strTreeName);
 	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
-}
-
-inline void from_json(const json& j, CCustom_UI::CUSTOM_UITREE_DESC& d)
-{
-	_string strTreeName = j["strTreeName"].get<_string>();
-	d.strTreeName = StringToWString(strTreeName);
-	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
-}
-
-inline void from_json(const json& j, CCustom_UI::UI_INFO_DESC& d)
-{
-	from_json(j["tUIDesc"], d.tUIDesc);
-
-	d.vPos = { j["vPos"][0], j["vPos"][1], j["vPos"][2] };
-	d.vRot = { j["vRot"][0], j["vRot"][1], j["vRot"][2] };
-	d.vSca = { j["vSca"][0], j["vSca"][1], j["vSca"][2] };
 }

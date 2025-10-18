@@ -214,7 +214,10 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
         XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix());
 
     for (auto& child : m_vecChildObjects)
-        child->Update_CombinedMatrix(&XMLoadFloat4x4(&m_CombinedWorldMatrix));
+    {
+        _matrix LoadCombinedMatrix = XMLoadFloat4x4(&m_CombinedWorldMatrix);
+        child->Update_CombinedMatrix(&LoadCombinedMatrix);
+    }
 }
 
 void CCustom_UI::Free()

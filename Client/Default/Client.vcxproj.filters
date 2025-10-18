@@ -162,6 +162,12 @@
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>02. GameObject\UI</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Level_Test_UI.h">
+      <Filter>01. Level\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Loader_Test_UI.h">
+      <Filter>01. Level\Loader\Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -180,9 +186,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\ClientPch.cpp">
       <Filter>99. Define</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Loader.cpp">
-      <Filter>01. Level\Loader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Loading.cpp">
       <Filter>01. Level\Loading</Filter>
@@ -235,6 +238,15 @@
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>02. GameObject\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Level_Test_UI.cpp">
+      <Filter>01. Level\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Loader_Test_UI.cpp">
+      <Filter>01. Level\Loader\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader.cpp">
+      <Filter>01. Level\Loader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -260,8 +272,16 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
-    <FxCompile Include="Shader_UI_VtxPosTex.hlsl">
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
       <Filter>02. GameObject\UI\_Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
+      <Filter>02. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">
+      <Filter>02. GameObject\UI\_Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

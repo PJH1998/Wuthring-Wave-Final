@@ -42,6 +42,8 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
+    Update_CombinedMatrix();
+
     __super::Update(fTimeDelta);            // Update Animator_UI Component
 }
 
@@ -52,7 +54,6 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 
 void CUI_HUD::Render()
 {
-    StringToWString();
     __super::Render();                      // Nothing.
 }
 

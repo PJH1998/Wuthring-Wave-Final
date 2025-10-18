@@ -1,62 +1,16 @@
 // UI¿ë
-
-// ==============================
-// * Sampler, State
-// ==============================
-sampler DefaultSampler = sampler_state
-{
-    filter = min_mag_mip_linear;
-    AddressU = wrap;
-    AddressV = wrap;
-};
-
-RasterizerState RS_Default
-{
-    FillMode = solid;
-    CullMode = back;
-    FrontCounterClockwise = false;
-};
-
-RasterizerState RS_Cull_None
-{
-    FillMode = solid;
-    CullMode = none;
-    FrontCounterClockwise = false;
-};
-
-DepthStencilState DSS_Default
-{
-    DepthEnable = true;
-    DepthWriteMask = all;
-    DepthFunc = LESS_EQUAL;
-};
-
-BlendState BS_Default
-{
-    BlendEnable[0] = false;
-};
-
-BlendState BS_AlphaBlend
-{
-    BlendEnable[0] = true;
-    BlendEnable[1] = true;
-
-    SrcBlend = SRC_ALPHA;
-    DestBlend = INV_SRC_ALPHA;
-    BlendOp = Add;
-};
-
+#include "Shader_UI_State.hlsli"
 
 // ==============================
 // * Global Variables
 // ==============================
 matrix      g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D   g_Texture;
-texture2D   g_DepthTexture;
+//texture2D   g_DepthTexture;
 float       g_AlphaStrength;
 
 float2      g_TexcoordLT, g_TexcoordRB;         // for 9sector
-float2      g_ScreenLT  , g_ScreenRB;           // for discard by pos (esc menu, inventory, etc..)
+float2      g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1.f, 1.f }; // for discard by pos (esc menu, inventory, etc..)
 float       g_CutoutAlphaDiscard = 0.3f;
 
 
@@ -135,9 +89,9 @@ PS_OUT PS_MAIN_BLEND(PS_IN In) //?
     
     vTexcoord.x = (In.vProjPos.x / In.vProjPos.w) * 0.5f + 0.5f;
     vTexcoord.y = (In.vProjPos.y / In.vProjPos.w) * -0.5f + 0.5f;
-    vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, vTexcoord);
+    //vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, vTexcoord);
     
-    Out.vColor.a = Out.vColor.a * saturate(vDepthDesc.y - In.vProjPos.w);
+    Out.vColor.a = Out.vColor.a; // * saturate(vDepthDesc.y - In.vProjPos.w);
     
     return Out;
 }
