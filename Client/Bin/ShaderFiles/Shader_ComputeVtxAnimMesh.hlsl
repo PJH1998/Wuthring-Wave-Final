@@ -50,7 +50,8 @@ cbuffer AnimationInfoCB : register(b0)
 {
     float g_TrackPosition;
     uint g_AnimIndex;
-    float2 g_Padding;
+    bool g_IsRibAnimUsed;
+    uint g_RibbonAnimIndex;
 }
 
 // 쿼터니언 slerp 직접 구현
@@ -118,15 +119,12 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
     return m;
 }
 
-
-[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
+matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon)
 {
-    // 현재 본 Index 가져오기.
-    uint boneIndex = dispatchThreadID.x;
+    matrix_rm resultMatrix;
     
     // 1. 현재 애니메이션 정보 가져오기
-    AnimInfo anim = g_AllAnimInfos[g_AnimIndex];
+    AnimInfo anim = g_AllAnimInfos[animIndex];
     
     // 2. 현재 뼈에 해당하는 채널 찾기
     int channelIndex = -1;
@@ -155,8 +153,8 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
             0.f, 0.f, 0.f, 1.f
         };
         
-        g_OutLocalMatrices[boneIndex] = identitymatrix_rm;
-        return;
+        resultMatrix = identitymatrix_rm;
+        return resultMatrix;
     }
     
     // 4. 가지고 있는 채널 인덱스로 채널 정보 가져오기.
@@ -168,15 +166,30 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     {
         // 첫 번째 키프레임의 변환을 그대로 사용
         GPU_KEYFRAME staticKey = g_AllKeyframes[channel.iStartKeyframeOffset];
-        g_OutLocalMatrices[boneIndex] = matrix_rmFromSQT(staticKey.vScale, staticKey.vRotation, staticKey.vTranslation);
-        return;
+        resultMatrix = matrix_rmFromSQT(staticKey.vScale, staticKey.vRotation, staticKey.vTranslation);
+        return resultMatrix;
     }
     
-    // 6. 보간할 두 개의 키프레임을 찾을 인덱스를 채널의 시작 오프셋으로 초기화.
-    uint keyframeIndex = channel.iStartKeyframeOffset; 
+    // 6. Ribbon Animation의 경우 키프레임이 2개이면 항상 단위 행렬 반환
+    if (isRibbon == true && channel.iNumKeyframes == 2)
+    {
+        matrix_rm identitymatrix_rm =
+        {
+            1.f, 0.f, 0.f, 0.f,
+            0.f, 1.f, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            0.f, 0.f, 0.f, 1.f
+        };
+        
+        resultMatrix = identitymatrix_rm;
+        return resultMatrix;
+    }
+    
+    // 7. 보간할 두 개의 키프레임을 찾을 인덱스를 채널의 시작 오프셋으로 초기화.
+    uint keyframeIndex = channel.iStartKeyframeOffset;
     
     
-    // 7. 채널의 모든 키프레임을 순회하면서 다음 키프레임의 시간이 현재 재생 기간 보다 크면 
+    // 8. 채널의 모든 키프레임을 순회하면서 다음 키프레임의 시간이 현재 재생 기간 보다 크면 
     // 해당 키프레임과 그 다음 키프레임 사이를 보간하면됨.
     for (uint k = 0; k < channel.iNumKeyframes - 1; ++k)
     {
@@ -193,7 +206,7 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     GPU_KEYFRAME key1 = g_AllKeyframes[keyframeIndex];
     GPU_KEYFRAME key2 = g_AllKeyframes[keyframeIndex + 1];
 
-    // 8. 두 키프레임 사이의 보간 비율 계산
+    // 9. 두 키프레임 사이의 보간 비율 계산
     float blendFactor = 0.f;
     float segmentDuration = key2.fTrackPosition - key1.fTrackPosition;
     
@@ -214,6 +227,39 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     matrix_rm localmatrix_rm = matrix_rmFromSQT(interpScale, interpRotation, interpTranslation);
     
     // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
-    g_OutLocalMatrices[boneIndex] = localmatrix_rm;
+    resultMatrix = localmatrix_rm;
+    
+    return resultMatrix;
+}
+
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
+{
+    //// 현재 본 Index 가져오기.
+    uint boneIndex = dispatchThreadID.x;
+    
+    matrix action_matrix = Calculate_Matrix(boneIndex, g_AnimIndex, false);
+    
+    matrix result_matrix;
+    matrix ribbon_matrix =
+    {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f
+    };
+    
+    // Ribbon Animation을 사용한다면?
+    if (g_IsRibAnimUsed)
+    {
+        ribbon_matrix = Calculate_Matrix(boneIndex, g_RibbonAnimIndex, true);
+    }
+    
+    result_matrix = mul(action_matrix, ribbon_matrix);
+        
+    
+    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
+    g_OutLocalMatrices[boneIndex] = result_matrix;
     
 }

@@ -47,7 +47,6 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    // Default?? 0?? ??????? ????.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     m_IsPlayAnimation = true;
@@ -68,16 +67,19 @@ void CAnimationActor::Update(_float fTimeDelta)
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
 
+    if (m_IsPlayAnimation)
+        m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+
     //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; //
     //if (m_IsPlayAnimation)
     //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
 
-    if (m_IsPlayAnimation)
-    {
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
-        /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
-        m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
-    }
+    //if (m_IsPlayAnimation)
+    //{
+    //    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
+    //    /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
+    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
+    //}
         
 #ifdef _DEBUG
 	_int iBoneIndex = 0;

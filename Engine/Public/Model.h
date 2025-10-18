@@ -125,8 +125,12 @@ private:
 #pragma region Compute Shader ±¸Çö ¿ë 
 private:
 	void ApplyComputeResults_ToBones();
+	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 
 private:
+	vector<_float4x4> m_ActionAnimations;
+	vector<_float4x4> m_RibbonAnimations;
+
 	vector<ID3D11Buffer*> m_Buffers = {};
 	vector<ID3D11ShaderResourceView*> m_SRVs = {};
 	vector<ID3D11UnorderedAccessView*> m_UAVs = {};

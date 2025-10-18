@@ -141,7 +141,8 @@ namespace Engine
 	typedef struct tagAnimationCBInfo {
 		_float fTrackPosition;
 		_uint  iAnimindex;
-		_float2 vPadding;
+		_bool  IsRibAnimUsed = false;
+		_uint  iRibbonAnimIndex;
 	}ANIMATION_CBINFO;
 
 }

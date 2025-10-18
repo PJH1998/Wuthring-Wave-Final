@@ -122,11 +122,6 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 		// 2. 고유의 움직임을 추가로 적용하는 것.
 		_matrix FinalMatrix = PrevMatrix * LerpMatrix;
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
-		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
-
-
-
-
 	}
 	
 }
