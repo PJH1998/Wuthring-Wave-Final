@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -20,16 +20,16 @@ public:
 	}RIGIDBODY_DESC;
 
 	typedef struct tagSphereBodyDesc : public RIGIDBODY_DESC {
-		_float				fRadius; // ±¸ ¹İÁö¸§
+		_float				fRadius; // æ´?è«›ì„?ç”±?
 	}SPHEREBODY_DESC;
 
 	typedef struct tagBoxBodyDesc : public RIGIDBODY_DESC {
-		_float3			vExtent; // Box °¢ Ãà º° ¹İÁö¸§
+		_float3			vExtent; // Box åª›?ç•°?è¹‚?è«›ì„?ç”±?
 	}BOXBODY_DESC;
 
 	typedef struct tagCapsuleBodyDesc : public RIGIDBODY_DESC {
-		_float				fHeight; // Ä¸½¶ ¸öÅë ³ôÀÌ
-		_float				fRadius; // Ä¸½¶ ±¸ ºÎºĞ ¹İÁö¸§
+		_float				fHeight; // ï§¦â‰ªë’“ ï§ëª…ë„» ?ë¯ªì” 
+		_float				fRadius; // ï§¦â‰ªë’“ æ´?éºÂ€éº?è«›ì„?ç”±?
 	}CAPSULEBODY_DESC;
 
 	typedef struct tagConvexHullBodyDesc : public RIGIDBODY_DESC {

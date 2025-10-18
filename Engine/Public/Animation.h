@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -21,7 +21,7 @@ public:
 #endif // _DEBUG
 
 public:
-	void				Register_Notify(const NOTIFY& AnimNotify); // ±âÁ¸ °Í
+	void				Register_Notify(const NOTIFY& AnimNotify); // æ¹²ê³—ã€ˆ å¯ƒ?
 
 	void				Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
 	
@@ -49,11 +49,11 @@ private:
 	vector<class CChannel*>				m_Channels;
 	vector<_uint>						m_CurrentFrameIndices;
 
-	vector<NOTIFY>					m_Notifies; // È£È¯¼ºÀ» À§ÇØ »ì·ÁµÒ.
+	vector<NOTIFY>					m_Notifies; // ?ëª…ì†š?ê¹†ì“£ ?ê¾ªë¹ ?ëŒ€ì ®??
 
 	_uint							m_iNotifyIndex = {};
 	
-	// ½Å±Ô Notify 
+	// ?ì¢‰í‡‹ Notify 
 	vector<class CAnimNotify*> m_AnimNotifies;
 
 private:

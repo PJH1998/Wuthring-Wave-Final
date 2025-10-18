@@ -1,11 +1,11 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "AnimNotifyTool.h"
 #include "AnimationActor.h"
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
 
 
-#pragma region ±âº» ÇÔ¼öµé
+#pragma region æ¹²ê³•ë‚¯ ?â‘¥ë‹”??
 CAnimNotifyTool::CAnimNotifyTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
     , m_pContext { pContext }
@@ -38,7 +38,7 @@ void CAnimNotifyTool::Render()
     RenderUI_EditNotify();
 }
 
-// Notify µî·Ï ½Ã ¹«Á¶°ÇÀûÀ¸·Î ÇÊ¿äÇÑ Á¤º¸.
+// Notify ?ê¹…ì¤‰ ??è‡¾ëŒâ€œå«„ëŒìŸ»?ì‡°ì¤ˆ ?ê¾©ìŠ‚???ëº£ë‚«.
 void CAnimNotifyTool::Process_Notify(CAnimationActor* pActor, const _string& strAnimName, const _string& strModelDirPath, _float fDuration)
 {
     ASSERT_CRASH(pActor);
@@ -46,7 +46,7 @@ void CAnimNotifyTool::Process_Notify(CAnimationActor* pActor, const _string& str
     
     m_strCurrentAnimName = strAnimName;
 
-    // ºñ¾îÀÖÁö ¾ÊÀ» ¶§¸¸ ÀúÀåÇÒ Æú´õ °æ·Î¸¦ ¹Ş½À´Ï´Ù.
+    // é®ê¾©ë¼±?ë‰? ?ë”†ì“£ ?ëš®ì­” ?Â€?Î½ë¸· ?ëŒ€ëœ‘ å¯ƒìˆì¤ˆç‘œ?è«›ì†ë’¿?ëˆë–.
     if (!strModelDirPath.empty())
     {
         m_strCurrentFolderPath = strModelDirPath;
@@ -87,7 +87,7 @@ void CAnimNotifyTool::RenderUI_EditNotify()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    // ¿À¸¥ÂÊ À§ À§Ä¡ °è»ê (Ã¢ Å©±â 300x250 °í·Á)
+    // ?ã…»â…¨ï§Ÿ????ê¾©íŠ‚ æ€¨ê¾©ê¶› (ï§¡??Ñˆë¦° 300x250 æ€¨ì¢Šì ®)
     ImVec2 vPos = ImVec2(g_iWinSizeX * 0.75f, 0.f); 
     ImGui::SetNextWindowPos(vPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(ImVec2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f), ImGuiCond_Once);
@@ -119,14 +119,14 @@ void CAnimNotifyTool::RenderUI_EditNotify()
             ImGui::EndTabItem();
         }
 
-        // ¼³Á¤µÈ ¸ğµç Á¤º¸¸¦ ÀúÀå ÇÏ¸é¼­, ¼³Á¤µÈ Á¤º¸µµ È®ÀÎ °¡´ÉÇÏ°Ô.
+        // ?ã…¼ì ™??ï§â‘¤ë±º ?ëº£ë‚«ç‘œ??Â€???ì„ãˆƒ?? ?ã…¼ì ™???ëº£ë‚«???ëº¤ì”¤ åª›Â€?Î½ë¸¯å¯ƒ?
         if (ImGui::BeginTabItem("Save"))
         {
             RenderUI_SaveNotify();
             ImGui::EndTabItem();
         }
 
-        // ¼³Á¤µÈ Á¤º¸¸¦ ºÒ·¯¿Í¼­ Notify¸¦ È®ÀÎÇÏ±â
+        // ?ã…¼ì ™???ëº£ë‚«ç‘œ?éºëˆìœ­?Â€??Notifyç‘œ??ëº¤ì”¤?ì„ë¦°
         if (ImGui::BeginTabItem("Load"))
         {
             RenderUI_LoadNotify();
@@ -144,7 +144,7 @@ void CAnimNotifyTool::RenderUI_EditNotify()
 
 void CAnimNotifyTool::RenderUI_EditSound()
 {
-    // 1. »ç¿îµå ÆÄÀÏ ¸ñ·Ï FileDialog·Î ¼±ÅÃ?
+    // 1. ?ÑŠìŠ«???ëš¯ì”ª ï§â‘¸ì¤‰ FileDialogæ¿¡??ì¢ê¹®?
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
     {
@@ -154,7 +154,7 @@ void CAnimNotifyTool::RenderUI_EditSound()
             ImGui::EndTabItem();
         }
 
-        // 2. LoadµÈ Sound FileÀ» ÀÌ¿ë Notify ¼³Á¤À» Ãß°¡ÇÑ´Ù. 
+        // 2. Load??Sound File???ëŒìŠœ Notify ?ã…¼ì ™??ç•°ë¶½??ì’•ë–. 
         if (ImGui::BeginTabItem("Edit"))
         {
             Select_SoundNotify();
@@ -192,12 +192,12 @@ void CAnimNotifyTool::RenderUI_EditCollider()
     ImGui::Checkbox("Active", & IsActive);
 
 
-    // 2. ¼³Á¤ÇÑ Á¤º¸¸¦ Notify¼³Á¤.
+    // 2. ?ã…¼ì ™???ëº£ë‚«ç‘œ?Notify?ã…¼ì ™.
     if (ImGui::Button("Apply Collider Notify"))
     {
         json ColliderJson;
         ColliderJson["TrackPosition"] = fTrackPosition;
-        ColliderJson["ColliderTag"] = strColliderTag.c_str(); // ÀÔ·Â¹ŞÀº ½ºÆ®¸µÀ¸·Î
+        ColliderJson["ColliderTag"] = strColliderTag.c_str(); // ?ë‚…ì °è«›ì†? ?ã…½ë“ƒï§ê³¸ì‘æ¿¡?
         ColliderJson["IsActive"] = IsActive;
         CColliderNotify* pColliderNotify = CColliderNotify::From_Json(ColliderJson);
         m_ColliderNotifies.emplace_back(pColliderNotify);
@@ -208,25 +208,25 @@ void CAnimNotifyTool::RenderUI_EditCollider()
 
 void CAnimNotifyTool::RenderUI_SaveNotify()
 {
-    // 0. °øÅë »çÇ×.
-    // ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§°ú ÃÑ Duration °ªÀ» ¸Ç À§¿¡¼­ Ãâ·Â
+    // 0. æ€¨ë“¯ë„» ?Ñ‹ë¹†.
+    // ?ê¾©ì˜± ?ì¢Šë•²ï§ë¶¿ì” ???ëŒ€ì««æ€¨?ç¥?Duration åª›ë¯ªì“£ ï§??ê¾©ë¿‰??ç•°ì’•ì °
     ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
     ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
-    // 1. Åø¿¡¼­ list¿¡ µî·ÏµÈ Notify ÀüÃ¼¸¦ È®ÀÎÇÒ ¼ö ÀÖ¾î¾ßÇÑ´Ù.
+    // 1. ?ëŒë¿‰??list???ê¹…ì¤‰??Notify ?ê¾©ê»œç‘œ??ëº¤ì”¤?????ë‰ë¼±?ì‡³ë¸³??
     Render_CurrentNotify();
     
     ImGui::Separator();
 
-    // 2. Save¸¦ ´©¸£¸é ÇöÀç µî·ÏµÈ Notify Á¤º¸¸¦ È®ÀÎÇÏ°í? Json¿¡ ±â·ÏÇÑ´Ù.
+    // 2. Saveç‘œ??ê¾¨â…¤ï§??ê¾©ì˜± ?ê¹…ì¤‰??Notify ?ëº£ë‚«ç‘œ??ëº¤ì”¤?ì„í€¬? Json??æ¹²ê³•ì¤‰?ì’•ë–.
     Save_Notify();
     
 }
 
 void CAnimNotifyTool::RenderUI_LoadNotify()
 {
-    // 0. °øÅë »çÇ×.
-    // ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§°ú ÃÑ Duration °ªÀ» ¸Ç À§¿¡¼­ Ãâ·Â
+    // 0. æ€¨ë“¯ë„» ?Ñ‹ë¹†.
+    // ?ê¾©ì˜± ?ì¢Šë•²ï§ë¶¿ì” ???ëŒ€ì««æ€¨?ç¥?Duration åª›ë¯ªì“£ ï§??ê¾©ë¿‰??ç•°ì’•ì °
     ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
     ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
@@ -234,16 +234,16 @@ void CAnimNotifyTool::RenderUI_LoadNotify()
         ImGui::Text("All Animation Notify Loaded");
 
 
-    // 1. Åø¿¡¼­ list¿¡ µî·ÏµÈ Notify ÀüÃ¼¸¦ È®ÀÎÇÒ ¼ö ÀÖ¾î¾ßÇÑ´Ù.
-    if (m_IsLoadNotify) // LoadÅ°¸¦ ´­·¶À» °æ¿ì¿¡¸¸ º¸¿©Áİ´Ï´Ù.
+    // 1. ?ëŒë¿‰??list???ê¹…ì¤‰??Notify ?ê¾©ê»œç‘œ??ëº¤ì”¤?????ë‰ë¼±?ì‡³ë¸³??
+    if (m_IsLoadNotify) // Load?ã…»? ?ëš®???å¯ƒìŒìŠ¦?ë¨®ì­” è¹‚ëŒë¿¬ä»¥ë¾ë•²??
         Render_CurrentNotify();
 
     ImGui::Separator();
 
-    // 2. Load¸¦ ´©¸£¸é JsonÀ¸·ÎºÎÅÍ NotfiyÁ¤º¸¸¦ ÀĞ¾î¿Í¼­ List¿¡ Ã¤¿öµÎ°í
+    // 2. Loadç‘œ??ê¾¨â…¤ï§?Json?ì‡°ì¤ˆéºÂ€??Notfiy?ëº£ë‚«ç‘œ??ìŒë¼±?Â€??List??ï§¢ê¾©ì™?ë¨­í€¬
     Load_NotifyFromFile();
 
-    // 3. LoadÇÒ ¶§ ÇÑ¹ø¿¡ Æú´õ¸¦ ´ÙÀĞ¾î¿Í¼­ LoadÇÏ°í È®ÀÎ.
+    // 3. Load?????ì’•ì¾²???ëŒ€ëœ‘ç‘œ??ã…¼ì”«?ëŒ???Load?ì„í€¬ ?ëº¤ì”¤.
     if (ImGui::Button("Load All Animation Notifies"))
     {
         m_IsLoadNotify = true;
@@ -276,8 +276,8 @@ void CAnimNotifyTool::Load_SoundFiles()
         ImGuiFileDialog::Instance()->OpenDialog("Load Sound Folder", "Import Sound Foloder", nullptr, config);
     }
 
-    ImVec2 vMinSize = ImVec2(600, 400);  // ÃÖ¼Ò Å©±â
-    ImVec2 vMaxSize = ImVec2(800, 400); // ÃÖ´ë Å©±â
+    ImVec2 vMinSize = ImVec2(600, 400);  // ï§¤ì’–ëƒ¼ ?Ñˆë¦°
+    ImVec2 vMaxSize = ImVec2(800, 400); // ï§¤ì’•? ?Ñˆë¦°
 
     if (ImGuiFileDialog::Instance()->Display(
         "Load Sound File", ImGuiWindowFlags_NoCollapse
@@ -304,7 +304,7 @@ void CAnimNotifyTool::Load_SoundFiles()
     }
 }
 
-// ¸ñ·Ï È®ÀÎ ¹× Sound ÆÄÀÏ ¼±ÅÃ.
+// ï§â‘¸ì¤‰ ?ëº¤ì”¤ è«›?Sound ?ëš¯ì”ª ?ì¢ê¹®.
 void CAnimNotifyTool::Select_SoundNotify()
 {
     _wstring objTag = {};
@@ -315,24 +315,24 @@ void CAnimNotifyTool::Select_SoundNotify()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
-    // 1. ÇöÀç Sound Tag¸¦ ÀúÀå.
+    // 1. ?ê¾©ì˜± Sound Tagç‘œ??Â€??
     for (auto& pair : m_SoundTags)
     {
         if (ImGui::Selectable(pair.first.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // Sound Tag¸¸ ÀúÀåÇÏÀÚ.
+            // Sound Tagï§??Â€?Î½ë¸¯??
             m_CurrentSoundTag = pair.first;
         }
     }
     ImGui::EndChild();
 
     ImGui::SameLine();
-    // ÇÊ¿äÇÑ Á¤º¸
-    // 1. ÇöÀç ÇÃ·¹ÀÌ ÁßÀÎ ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸
-    // 2. ÇöÀç ¾Ö´Ï¸ŞÀÌ¼ÇÀÇ ÃÖ´ë ÇÁ·¹ÀÓ Á¤º¸ (TrackPosition À¸·Î ¼³Á¤ÇÒµí?)
-    // Process Notify·Î ÀÌ¹Ì ¹Ş¾Æ¿È.
-    // ÇØ´ç Á¤º¸¸¦ ¹ÙÅÁÀ¸·Î ¼³Á¤ °ª Á¶±İ Ãß°¡ÇØ¼­ list¿¡ struct·Î Ãß°¡. 
+    // ?ê¾©ìŠ‚???ëº£ë‚«
+    // 1. ?ê¾©ì˜± ?ëš®ì …??ä»¥ë¬’ì”¤ ?ì¢Šë•²ï§ë¶¿ì” ???ëº£ë‚«
+    // 2. ?ê¾©ì˜± ?ì¢Šë•²ï§ë¶¿ì” ?ì„ì“½ ï§¤ì’•? ?ê¾¨ì …???ëº£ë‚« (TrackPosition ?ì‡°ì¤ˆ ?ã…¼ì ™?ì¢Šë²?)
+    // Process Notifyæ¿¡??ëŒ€? è«›ì†ë¸˜??
+    // ?ëŒ€ë–¦ ?ëº£ë‚«ç‘œ?è«›ë·€ê¹¢?ì‡°ì¤ˆ ?ã…¼ì ™ åª›?è­°ê³Œíˆ‘ ç•°ë¶½??ëŒê½Œ list??structæ¿¡?ç•°ë¶½?. 
 
     if (iSelectedIndex >= 0 && iSelectedIndex < m_SoundTags.size())
         Edit_SoundNotify();
@@ -349,14 +349,14 @@ void CAnimNotifyTool::Render_CurrentNotify()
     {
         if (ImGui::BeginTabItem("Sound List"))
         {
-            // »èÁ¦ÇÒ index
+            // ??ì £??index
             _uint iDeleteIndex = {};
 
-            // ÇöÀç µî·ÏµÈ list ±¸Á¶Ã¼ Á¤º¸¸¦ ÀüÃ¼ ·»´õ¸µÇÑ´Ù.
+            // ?ê¾©ì˜± ?ê¹…ì¤‰??list æ´ÑŠâ€œï§£??ëº£ë‚«ç‘œ??ê¾©ê»œ ?ëš®ëœ‘ï§ê³¹ë¸³??
             _uint iIndex = { 0 };
             for (auto& SoundNotify : m_SoundNotifies)
             {
-                // ÇöÀç ·çÇÁÀÇ ÀÎµ¦½º¸¦ »ç¿ëÇÏ¿© °íÀ¯ÇÑ ID ½ºÅÃÀ» ¸¸µì´Ï´Ù.
+                // ?ê¾©ì˜± çŒ·â‘¦ë´½???ëªƒëœ³?ã…»? ?ÑŠìŠœ?ì„ë¿¬ æ€¨ì¢ì‘€??ID ?ã…½ê¹®??ï§ëš®ë²Š?ëˆë–.
                 ImGui::PushID(iIndex);
 
                 SoundNotify->ImGui_Print();
@@ -367,10 +367,10 @@ void CAnimNotifyTool::Render_CurrentNotify()
                     iDeleteIndex = iIndex;
                 }
 
-                // ID ½ºÅÃÀ» ¿ø·¡´ë·Î µÇµ¹¸³´Ï´Ù.
+                // ID ?ã…½ê¹®???ë¨®ì˜’?Â€æ¿¡??ì„ë£ç”±ìˆë•²??
                 ImGui::PopID();
 
-                // ¸¶Áö¸· Ç×¸ñÀÌ ¾Æ´Ò ¶§¸¸ ±¸ºĞ¼± Ãß°¡
+                // ï§ë‰?ï§???ã‰???ê¾¨ë•º ?ëš®ì­” æ´Ñ‰í…‡??ç•°ë¶½?
                 if (iIndex < m_SoundNotifies.size() - 1)
                     ImGui::Separator();
 
@@ -389,7 +389,7 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Effect List"))
         {
-            //// ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§°ú ÃÑ Duration °ªÀ» ¸Ç À§¿¡¼­ Ãâ·Â
+            //// ?ê¾©ì˜± ?ì¢Šë•²ï§ë¶¿ì” ???ëŒ€ì««æ€¨?ç¥?Duration åª›ë¯ªì“£ ï§??ê¾©ë¿‰??ç•°ì’•ì °
             //ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
             //ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
@@ -399,15 +399,15 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Collider List"))
         {
-            // »èÁ¦ÇÒ index
+            // ??ì £??index
             _uint iDeleteIndex = {};
 
-            // ÇöÀç µî·ÏµÈ list ±¸Á¶Ã¼ Á¤º¸¸¦ ÀüÃ¼ ·»´õ¸µÇÑ´Ù.
+            // ?ê¾©ì˜± ?ê¹…ì¤‰??list æ´ÑŠâ€œï§£??ëº£ë‚«ç‘œ??ê¾©ê»œ ?ëš®ëœ‘ï§ê³¹ë¸³??
             _uint iIndex = { 0 };
             for (auto& ColliderNotify : m_ColliderNotifies)
             {
-                // ÇöÀç ·çÇÁÀÇ ÀÎµ¦½º¸¦ »ç¿ëÇÏ¿© °íÀ¯ÇÑ ID ½ºÅÃÀ» ¸¸µì´Ï´Ù.
-                // -> ImGui´Â String ID°¡ µ¿ÀÏÇÑ °´Ã¼°¡ °°Àº È­¸é¿¡ ÀÖÀ¸¸é ¿À·ù°¡ ÀÖÀ½.
+                // ?ê¾©ì˜± çŒ·â‘¦ë´½???ëªƒëœ³?ã…»? ?ÑŠìŠœ?ì„ë¿¬ æ€¨ì¢ì‘€??ID ?ã…½ê¹®??ï§ëš®ë²Š?ëˆë–.
+                // -> ImGui??String IDåª›Â€ ?ìˆˆì”ª??åª›ì•¹ê»œåª›Â€ åª›ìˆˆ? ?ë¶¾ãˆƒ???ë‰ì‘ï§??ã…»ìªŸåª›Â€ ?ë‰ì“¬.
                 ImGui::PushID(iIndex);
 
                 ColliderNotify->ImGui_Print();
@@ -418,10 +418,10 @@ void CAnimNotifyTool::Render_CurrentNotify()
                     iDeleteIndex = iIndex;
                 }
 
-                // ID ½ºÅÃÀ» ¿ø·¡´ë·Î µÇµ¹¸³´Ï´Ù.
+                // ID ?ã…½ê¹®???ë¨®ì˜’?Â€æ¿¡??ì„ë£ç”±ìˆë•²??
                 ImGui::PopID();
 
-                // ¸¶Áö¸· Ç×¸ñÀÌ ¾Æ´Ò ¶§¸¸ ±¸ºĞ¼± Ãß°¡
+                // ï§ë‰?ï§???ã‰???ê¾¨ë•º ?ëš®ì­” æ´Ñ‰í…‡??ç•°ë¶½?
                 if (iIndex < m_ColliderNotifies.size() - 1)
                     ImGui::Separator();
 
@@ -440,11 +440,11 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Light List"))
         {
-            // ÇöÀç ¾Ö´Ï¸ŞÀÌ¼Ç ÀÌ¸§°ú ÃÑ Duration °ªÀ» ¸Ç À§¿¡¼­ Ãâ·Â
+            // ?ê¾©ì˜± ?ì¢Šë•²ï§ë¶¿ì” ???ëŒ€ì««æ€¨?ç¥?Duration åª›ë¯ªì“£ ï§??ê¾©ë¿‰??ç•°ì’•ì °
             /*ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
             ImGui::Text("Duration : %.2f", m_fCurrentDuration);*/
 
-            // ÇöÀç µî·ÏµÈ list ±¸Á¶Ã¼ Á¤º¸¸¦ ÀüÃ¼ ·»´õ¸µÇÑ´Ù.
+            // ?ê¾©ì˜± ?ê¹…ì¤‰??list æ´ÑŠâ€œï§£??ëº£ë‚«ç‘œ??ê¾©ê»œ ?ëš®ëœ‘ï§ê³¹ë¸³??
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -456,24 +456,24 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
 
 
-// ÇöÀç ±â·ÏµÈ Notify Á¤º¸¸¦ Json ÆÄÀÏ·Î ÆÄ½ÌÇØ¼­ ÀúÀå.
+// ?ê¾©ì˜± æ¹²ê³•ì¤‰??Notify ?ëº£ë‚«ç‘œ?Json ?ëš¯ì”ªæ¿¡??ëš¯ë–›?ëŒê½Œ ?Â€??
 void CAnimNotifyTool::Save_Notify()
 {
-    // 0. ÀúÀå ¹æ½Äµµ ¹æ½ÄÀÎµ¥ °æ·Î´Â ¾î¶»°Ô? => AnimationActor »ı¼ºÇÒ ¶§ FilePath¸¦ ¹Ì¸® ÀúÀåÇÒ±î?
-    // LoadDatÇÒ¶§ ÇØ´ç ¸ğµ¨ÀÇ .dat Æú´õ °æ·Î¸¦ ÀúÀåÇØ³õÀÚ.
+    // 0. ?Â€??è«›â‘¹ë–‡??è«›â‘¹ë–‡?ëªƒëœ² å¯ƒìˆì¤ˆ???ëŒ€ë¼¸å¯ƒ? => AnimationActor ?ì•¹ê½¦????FilePathç‘œ?èª˜ëªƒâ” ?Â€?Î½ë¸·æº?
+    // LoadDat?ì¢Šë¸£ ?ëŒ€ë–¦ ï§â‘¤ëœ½??.dat ?ëŒ€ëœ‘ å¯ƒìˆì¤ˆç‘œ??Â€?Î½ë¹?ë³¦ì˜„.
 
     if (ImGui::Button("Save All Notifyes"))
     {
         IGFD::FileDialogConfig config;
-        //config.path = "../../Client/Bin/Resource/"; // ¿©±â¿¡ µé¾î°¡¾ßÇÔ.
+        //config.path = "../../Client/Bin/Resource/"; // ?Ñˆë¦°???ã…¼ë¼±åª›Â€?ì‡³ë¸¿.
         config.path = m_strCurrentFolderPath;
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
         ImGuiFileDialog::Instance()->OpenDialog("Save Notify", "Export File", ".json", config);
     }
 
-    ImVec2 vMinSize = ImVec2(600, 400);  // ÃÖ¼Ò Å©±â
-    ImVec2 vMaxSize = ImVec2(800, 400); // ÃÖ´ë Å©±â
+    ImVec2 vMinSize = ImVec2(600, 400);  // ï§¤ì’–ëƒ¼ ?Ñˆë¦°
+    ImVec2 vMaxSize = ImVec2(800, 400); // ï§¤ì’•? ?Ñˆë¦°
 
     if (ImGuiFileDialog::Instance()->Display("Save Notify"
         , ImGuiWindowFlags_NoCollapse
@@ -491,7 +491,7 @@ void CAnimNotifyTool::Save_Notify()
 
 void CAnimNotifyTool::Load_NotifyFromFile()
 {
-    // 1. ¹öÆ°À» ´­·¯¼­ ÆÄÀÏ·ÎºÎÅÍ Json µ¥ÀÌÅÍ¸¦ ÆÄ½ÌÇÑ´Ù.
+    // 1. è¸°ê¾ªë“‰???ëš®ìœ­???ëš¯ì”ªæ¿¡ì’•???Json ?ê³—ì” ?ê³•? ?ëš¯ë–›?ì’•ë–.
     if (ImGui::Button("Load Notifyes"))
     {
         IGFD::FileDialogConfig config;
@@ -501,13 +501,13 @@ void CAnimNotifyTool::Load_NotifyFromFile()
         ImGuiFileDialog::Instance()->OpenDialog("Load Notify", "Import File", ".json", config);
     }
 
-    ImVec2 vMinSize = ImVec2(600, 400);  // ÃÖ¼Ò Å©±â
-    ImVec2 vMaxSize = ImVec2(800, 400); // ÃÖ´ë Å©±â
+    ImVec2 vMinSize = ImVec2(600, 400);  // ï§¤ì’–ëƒ¼ ?Ñˆë¦°
+    ImVec2 vMaxSize = ImVec2(800, 400); // ï§¤ì’•? ?Ñˆë¦°
     _string strFileName = {};
     _string strFilePath = {};
     _string strFolderPath = {};
 
-    // 2. ÆÄ½ÌÇÑ µ¥ÀÌÅÍ¸¦ ¹ÙÅÁÀ¸·Î list¿¡ °ªÀ» Ã¤¿öÁİ´Ï´Ù.
+    // 2. ?ëš¯ë–›???ê³—ì” ?ê³•? è«›ë·€ê¹¢?ì‡°ì¤ˆ list??åª›ë¯ªì“£ ï§¢ê¾©ì™ä»¥ë¾ë•²??
     if (ImGuiFileDialog::Instance()->Display("Load Notify"
         , ImGuiWindowFlags_NoCollapse
         , vMinSize
@@ -518,7 +518,7 @@ void CAnimNotifyTool::Load_NotifyFromFile()
 
             size_t lastSlashPos = strFilePath.find_last_of("\\");
             if (lastSlashPos != string::npos) {
-                // 0¹øÂ° À§Ä¡ºÎÅÍ '.' À§Ä¡±îÁö ¹®ÀÚ¿­À» Àß¶ó³À´Ï´Ù.
+                // 0è¸°ë‰ã ?ê¾©íŠ‚éºÂ€??'.' ?ê¾©íŠ‚æºëš¯? è‡¾ëª„ì˜„?ëŒì“£ ?ì„ì”ª?ë‚…ë•²??
                 strFolderPath += strFilePath.substr(0, lastSlashPos);
 
             }
@@ -531,22 +531,22 @@ void CAnimNotifyTool::Load_NotifyFromFile()
 
 void CAnimNotifyTool::Load_SoundsFromFile(const _string& strFilePath, const _string& strSoundPath)
 {
-    // .wav Àß¶ó³»±â.
+    // .wav ?ì„ì”ª?ë‹¿ë¦°.
     size_t last_dot_pos = strSoundPath.find_last_of('.');
     if (last_dot_pos != std::string::npos) {
-        // 0¹øÂ° À§Ä¡ºÎÅÍ '.' À§Ä¡±îÁö ¹®ÀÚ¿­À» Àß¶ó³À´Ï´Ù.
+        // 0è¸°ë‰ã ?ê¾©íŠ‚éºÂ€??'.' ?ê¾©íŠ‚æºëš¯? è‡¾ëª„ì˜„?ëŒì“£ ?ì„ì”ª?ë‚…ë•²??
         _string strSoundTag = strSoundPath.substr(0, last_dot_pos);
         _wstring wStrSoundTag = StringToWString(strSoundTag);
 
         // 1. Sound Load
         m_pGameInstance->Load_Sound(wStrSoundTag, strFilePath.c_str());
 
-        // 2. Sound ÀÌ¸§ °ü¸®
+        // 2. Sound ?ëŒ€ì«« æ„¿Â€ç”±?
         m_SoundTags.emplace(strSoundTag, wStrSoundTag);
     }
     else
     {
-        MSG_BOX("°æ·Î Àß¸øµÊ");
+        MSG_BOX("å¯ƒìˆì¤ˆ ?ì„ã›??);
         return;
     }
 }
@@ -562,10 +562,10 @@ void CAnimNotifyTool::Load_AllSoundsFromFolder(const _string& strFolderPath)
             _string fileName = entry.path().filename().string();
             _string extension = entry.path().extension().string();
 
-            // .wav ÆÄÀÏ¸¸ Ã³¸®
+            // .wav ?ëš¯ì”ªï§?ï§£ì„â”
             if (extension == ".wav" || extension == ".WAV")
             {
-                _string soundTag = entry.path().stem().string(); // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                _string soundTag = entry.path().stem().string(); // ?ëº¤ì˜£???ì’–ì‡…???ëš¯ì”ªï§?
                 _wstring wSoundTag = StringToWString(soundTag);
 
                 m_pGameInstance->Load_Sound(wSoundTag, filePath.c_str());
@@ -584,7 +584,7 @@ void CAnimNotifyTool::Edit_SoundNotify()
     static float fTrackPosition = {};
     ImGui::InputFloat("TrackPosition", &fTrackPosition);
 
-    // °ª ³ÑÀ¸¸é Max °ªÀ¸·Î ÀÚµ¿ ¼³Á¤.
+    // åª›??ì„ì‘ï§?Max åª›ë¯ªì‘æ¿¡??ë¨®ë£ ?ã…¼ì ™.
     fTrackPosition = clamp(fTrackPosition, 0.f, m_fCurrentDuration);
    
 
@@ -600,14 +600,14 @@ void CAnimNotifyTool::Edit_SoundNotify()
         m_CurrentSoundType = "Other";
   
 
-    // 1. Å¬·¡½º·Î ¸®½ºÆ®¿¡ ÀúÀåÇÏ±â.
+    // 1. ?ëŒ€ì˜’?ã…»ì¤ˆ ç”±ÑŠë’ª?ëª„ë¿‰ ?Â€?Î½ë¸¯æ¹²?
     if (ImGui::Button("Add SoundNotify"))
     {
         json SoundJson;
         SoundJson["TrackPosition"] = fTrackPosition;
         SoundJson["SoundTag"] = m_CurrentSoundTag;
         SoundJson["SoundType"] = m_CurrentSoundType;
-        SoundJson["Volume"] = fVolume;  // ¼Ò¼öÁ¡ 3ÀÚ¸®·Î ¹İ¿Ã¸²
+        SoundJson["Volume"] = fVolume;  // ?ëš¯ë‹”??3?ë¨®â”æ¿¡?è«›ì„ì‚±ç”±?
         CSoundNotify* pSoundNotify = CSoundNotify::From_Json(SoundJson);
         m_SoundNotifies.emplace_back(pSoundNotify);
     }
@@ -617,10 +617,10 @@ void CAnimNotifyTool::Edit_SoundNotify()
 
 void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
 {
-    // ÁöÁ¤µÈ File °æ·Î·Î Json ¸¸µé±â..
+    // ï§Â€?ëº£ë§‚ File å¯ƒìˆì¤ˆæ¿¡?Json ï§ëš®ë±¾æ¹²?.
     ofstream jsonStream(strFilePath.c_str());
 
-    // 0. ÀüÃ¼ Json
+    // 0. ?ê¾©ê»œ Json
     json notifyJson;
 
     // 1. Sound
@@ -636,14 +636,14 @@ void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
     for (auto& colliderNotify : m_ColliderNotifies)
         notifyJson["Notifies"].emplace_back(colliderNotify->To_Json());
 
-    // ÀúÀå ¿Ï·á.
+    // ?Â€???ê¾¨ì¦º.
     jsonStream << notifyJson.dump(4);
     jsonStream.close();
 }
 
 void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
 {
-    // 1. ÇöÀç ·ÎµåµÈ µ¥ÀÌÅÍ ¸ğµÎ »èÁ¦.
+    // 1. ?ê¾©ì˜± æ¿¡ì’•ë±¶???ê³—ì” ??ï§â‘¤ëª¢ ??ì £.
     Clear();
 
     ifstream jsonStream(strFilePath.c_str());
@@ -652,15 +652,15 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
         return;
     }
 
-    // 2. ÆÄÀÏ ³»¿ëÀ» json °´Ã¼·Î ÆÄ½Ì
+    // 2. ?ëš¯ì”ª ?ëŒìŠœ??json åª›ì•¹ê»œæ¿¡??ëš¯ë–›
     json notifyJson;
     jsonStream >> notifyJson;
     jsonStream.close();
 
-    // 3. ÆÄ½ÌµÈ µ¥ÀÌÅÍ·Î ¸â¹ö º¯¼ö Ã¤¿ì±â
+    // 3. ?ëš¯ë–›???ê³—ì” ?ê³•ì¤ˆ ï§ã…»ì¾­ è¹‚Â€??ï§¢ê¾©ìŠ¦æ¹²?
     m_strCurrentAnimName = notifyJson["AnimName"].get<_string>();
     
-    // 4. "Notifies" ¹è¿­ ¼øÈ¸ ¹× Å¸ÀÔ¿¡ ¸Â°Ô º¹¿ø
+    // 4. "Notifies" è«›ê³—ë¿´ ?ì’—ì‰¶ è«›??Â€?ë‚†ë¿‰ ï§ìšŠì¾¶ è¹‚ë“­ì
     if (notifyJson.contains("Notifies") && notifyJson["Notifies"].is_array())
     {
         for (const auto& notifyObject : notifyJson["Notifies"])
@@ -669,14 +669,14 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
 
             if (type == "Sound")
             {
-                // CSoundNotify Å¬·¡½º¿¡µµ From_Json ÇÔ¼ö°¡ ÀÖ´Ù°í °¡Á¤
+                // CSoundNotify ?ëŒ€ì˜’?ã…¼ë¿‰??From_Json ?â‘¥ë‹”åª›Â€ ?ëˆë–æ€¨?åª›Â€??
                 CSoundNotify* pSoundNotify = CSoundNotify::From_Json(notifyObject);
                 m_SoundNotifies.emplace_back(pSoundNotify);
                 
 
                 Safe_AddRef(pSoundNotify);
 
-                // ¸ğµ¨¿¡ Àü´ŞÇÒ List ÄÁÅ×ÀÌ³Ê
+                // ï§â‘¤ëœ½???ê¾¨ë––??List è€Œâ‘¦ë€’?ëŒ€ê¼«
                 m_AnimNotifies.emplace_back(pSoundNotify);
             }
             else if (type == "Collider")
@@ -686,7 +686,7 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
 
                 Safe_AddRef(pColliderNotify);
 
-                // ¸ğµ¨¿¡ Àü´ŞÇÒ List ÄÁÅ×ÀÌ³Ê
+                // ï§â‘¤ëœ½???ê¾¨ë––??List è€Œâ‘¦ë€’?ëŒ€ê¼«
                 m_AnimNotifies.emplace_back(pColliderNotify);
             }
             

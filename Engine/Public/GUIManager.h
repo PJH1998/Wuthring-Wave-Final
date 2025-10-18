@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -14,9 +14,9 @@ public:
 	void					Add_GUI_Func(function<void()> func);
 	void					Clear_Func();
 
-	// Gizmo Àû¿ëÇÒ °´Ã¼ÀÇ Transform Àü´Þ
+	// Gizmo ?ê³¸ìŠœ??åª›ì•¹ê»œ??Transform ?ê¾¨ë––
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
-	// Gizmo Render¿ë
+	// Gizmo Render??
 	void					Render_Gizmo(const _fmatrix& Matrix);
 
 public:
@@ -34,7 +34,7 @@ private:
 
 	vector<function<void()>>	m_Functions;
 
-	// Gizmo »ç¿ëÇÒ ¶§ ÇÊ¿äÇÑ Transform
+	// Gizmo ?ÑŠìŠœ?????ê¾©ìŠ‚??Transform
 	class CTransform*				m_pTransform = { nullptr };
 	_float4x4							m_ObjectWorldMatrix = {};
 	// Gizmo Setting

@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef Editor_Struct_h__
 #define Editor_Struct_h__
 
@@ -8,7 +8,7 @@ namespace Editor
 
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		unsigned int			iKeyframeIndex = {};	// Á¤º¸°¡ ´ã±æ Å°ÇÁ·¹ÀÓ Á¤º¸
+		unsigned int			iKeyframeIndex = {};	// ?ëº£ë‚«åª›Â€ ?ë‹¿ë§Œ ?ã…½ë´½?ë‰ì—« ?ëº£ë‚«
 
 		unsigned int			iTexIndex = {};
 		float			fAlpha = {};			// 0 ~ 1
@@ -20,9 +20,9 @@ namespace Editor
 
 	typedef struct tagUIAnimDesc
 	{
-		class CUSTOM_UI_DESC*	pUIDesc = {};// FilePath, FileName, NumTex (¾î¶² ÅØ½ºÃÄ¿ëÀÎÁö¸¦ À§ÇÔ)
+		class CUSTOM_UI_DESC*	pUIDesc = {};// FilePath, FileName, NumTex (?ëŒ€ë¼¡ ?ë¿ë’ªçˆ¾ë¨¯ìŠœ?ëª„?ç‘œ??ê¾ªë¸¿)
 
-		// Å°ÇÁ·¹ÀÓ, Å°ÇÁ·¹ÀÓº° Çà·ÄÁ¤º¸, º¸°£¹æ¹ı, ±æÀÌ µî..
+		// ?ã…½ë´½?ë‰ì—«, ?ã…½ë´½?ë‰ì—«è¹‚??ë°ì ¹?ëº£ë‚«, è¹‚ë‹¿ì»™è«›â‘¸ì¾¿, æ¹²ëª„ì”  ??.
 		wstring				strAnimName = {};
 		//_uint					iNumKeyFrame = {};
 

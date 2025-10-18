@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include"StaticObject.h"
 
 
@@ -101,7 +101,7 @@ private:
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };
 	
-	//Æú´õ ±¸Á¶´ë·Î. ¿ÀºêÁ§Æ®¿¡¼­ ¹öÆ° ´©¸£¸é Æú´õ À§Ä¡ Àâ°í ±× À§Ä¡¸¦ ÀĞ°Ô? 
+	//?ëŒ€ëœ‘ æ´ÑŠâ€œ?Â€æ¿¡? ?ã…»íˆ•?ì•ºë“ƒ?ë¨¯ê½Œ è¸°ê¾ªë“‰ ?ê¾¨â…¤ï§??ëŒ€ëœ‘ ?ê¾©íŠ‚ ?â†”í€¬ æ´¹??ê¾©íŠ‚ç‘œ??ì„ì¾¶? 
 	vector<_string> m_DiffuseTextureName;
 	vector<_string> m_NormalTextureName;
 

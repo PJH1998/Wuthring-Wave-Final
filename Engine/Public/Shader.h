@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -23,7 +23,7 @@ public:
 	HRESULT					Bind_Value(const _char* pConstantName, const void* pValue, _uint iLength);
 
 #ifdef _DEBUG
-	//ÀÌ¸§ ¾î¶»°Ô °®°í¿ÀÁö
+	//?ëŒ€ì«« ?ëŒ€ë¼¸å¯ƒ?åª›ë½®í€¬?ã…¼?
 	_uint					Get_PassCount() { return m_iNumPasses; }
 	const char*				Get_PassName(_uint iNumPass);
 #endif

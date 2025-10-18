@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -17,7 +17,7 @@ private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 
-	SpriteBatch*					m_pBatch = { nullptr };	// Font¸¦ ±×¸®±â À§ÇÑ »ç°¢Çü ¹öÆÛ
+	SpriteBatch*					m_pBatch = { nullptr };	// Fontç‘œ?æ´¹ëªƒâ”æ¹²??ê¾ªë¸³ ?Ñˆì»–??è¸°ê¾ªë
 	SpriteFont*					m_pFont = { nullptr };		// Font
 
 public:

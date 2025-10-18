@@ -1,4 +1,4 @@
-#include"Editorpch.h"
+ï»¿#include"Editorpch.h"
 #include "Edit_MapObject.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
@@ -52,10 +52,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
 
-    //ImGui¿¡¼­ ÀúÀå ´©¸¦ ¶§ ¸ğµ¨ ÀÌ¸§º°·Î ÀÌ ¸ğµ¨Àº ¾îµğ´Ù ÀúÀåÇÒÁö ¼±ÅÃÇÏ°Ô?
+    //ImGui?ë¨¯ê½Œ ?Â€???ê¾¨? ??ï§â‘¤ëœ½ ?ëŒ€ì««è¹‚ê¾¨ì¤ˆ ??ï§â‘¤ëœ½?Â€ ?ëŒ€ëµ’???Â€?Î½ë¸·ï§Â€ ?ì¢ê¹®?ì„ì¾¶?
 #ifdef _DEBUG
 
-    //ÁøÂ¥ ¸¶À½¿¡ ¾Èµê. ³ªÁß¿¡ ¹°¾îº¸°í ¼öÁ¤ÇÒ°Í
+    //ï§ê¾©ì­¨ ï§ë‰ì“¬???ëˆë²€. ?ì„ì¨·??è‡¾ì‡±ë¼±è¹‚ë‹¿í€¬ ?ì„ì ™?ì¢‰ì¾¬
 
     //MAP_CREATE event(m_ModelName, this);
 
@@ -68,7 +68,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         if (!m_isActivate)
             return;
 
-        //°æ·Î ÁöÁ¤ÇÒ ¶§ »óÀ§ Æú´õ¿£ µÚ¿¡ LOD »©°í. Æú´õ¸¦ ÁöÁ¤. ±×¸®°í ±× ¾È¿¡ ÀÖ´Â Æú´õ ÇÏÀ§ 1°³ µ¹¸é¼­ .datµé ÀĞ°í °´Ã¼ ¾È¿¡ ³Ö±â?
+        //å¯ƒìˆì¤ˆ ï§Â€?ëº¥ë¸· ???ê³¸ì ?ëŒ€ëœ‘???ã…¼ë¿‰ LOD é®ì‡¨í€¬. ?ëŒ€ëœ‘ç‘œ?ï§Â€?? æ´¹ëªƒâ”æ€¨?æ´¹??ë‰ë¿‰ ?ëˆë’— ?ëŒ€ëœ‘ ?ì„ì 1åª›??ëš®ãˆƒ??.dat???ì„í€¬ åª›ì•¹ê»œ ?ë‰ë¿‰ ?ï½Šë¦°?
         
         /*OBJECT_SAVE Save{};
         Save.m_iNameLength = strlen(m_ModelName);
@@ -115,10 +115,10 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 {
     if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
     {
-        //¿©±â¿¡ Å¬¸¯ ÃÖÀûÈ­ ÇÏ·Á¸é ÇÁ·¯½ºÅÒ ÄÃ¸µ±îÁö.
+        //?Ñˆë¦°???ëŒ€â”ƒ ï§¤ì’–ìŸ»???ì„ì ®ï§??ê¾¨ìœ­?ã…½? è€ŒÑ‰ì­…æºëš¯?.
 
         _float fDistance = {};
-        //¿ùµåµµ ¹Ù²ã¾ßÇÔ.
+        //?ë¶¾ë±¶??è«›ë¶½í“­?ì‡³ë¸¿.
         _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
         _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
         if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
@@ -160,7 +160,7 @@ void CEdit_MapObject::Render()
                 m_iShaderPassIndex = 1;
         }
 
-        //ÀÌ´Ï¼È¶óÀÌÁî ÇÒ ¶§ Bind_Materials ¸Ş½¬º°·Î ÇÑ ¹ø¾¿ µ¹·Á¼­ ÅØ½ºÃÄ ¾ø´Â ¸Ş½¬¸¸ ³»°¡ Á÷Á¢ ³Ö¾î¼­ ÀúÀåÇÒ ¼ö ÀÖ°Ô?
+        //?ëŒ€ë•²?ì’•ì”ª?ëŒì«° ????Bind_Materials ï§ë¶¿ë©è¹‚ê¾¨ì¤ˆ ??è¸°ë‰ëµ« ?ëš®ì ®???ë¿ë’ªçˆ¾??ë…¿ë’— ï§ë¶¿ë©ï§??ë‹¿? ï§ê³¸ì ’ ?ï½Œë¼±???Â€?Î½ë¸· ???ë‡ì¾¶?
         
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
@@ -234,9 +234,9 @@ void CEdit_MapObject::Set_ImGuiOption()
         m_isActivate = false;
 
     About_Texture();
-    //LOD°¡ ÃÑ 4´Ü°è·Î ³ª´µ¾îÁ®ÀÖ´Âµ¥ ÀÌ°Å ¾î¶»°Ô ÇÒ °ÇÁö »ı°¢.
-    //Á¦ÀÏ °£´ÜÇÑ ¹æ¹ı => ÄõµåÆ®¸®¿¡¼­ Å©±â¿¡ ºñ·ÊÇØ¼­ ·»´õÇÒ ¶§ ¸ğµ¨ °¥¾Æ³¢±â.
-    //=> ÀÎ½ºÅÏ½ÌÇÑ ¸Ş½¬µéÀº °¢ ¸ÅÆ®¸¯½º¸¶´Ù ºñ±³ÇØ¼­ ¸Ş½¬ ¹¹ ¾µÁö °áÁ¤ÇØ¾ßÇÒµí?
+    //LODåª›Â€ ç¥?4?â‘£í€æ¿¡??ì„ë‡?ëŒì¡‡?ëˆë’—???ë‹¿êµ… ?ëŒ€ë¼¸å¯ƒ???å«„ëŒ? ?ì•·ì»–.
+    //?ì’–ì”ª åª›ê¾¨ë–’??è«›â‘¸ì¾¿ => è‘ì‡°ë±¶?ëªƒâ”?ë¨¯ê½Œ ?Ñˆë¦°??é®ê¾¨??ëŒê½Œ ?ëš®ëœ‘????ï§â‘¤ëœ½ åª›ë‰ë¸˜?ì‡¨ë¦°.
+    //=> ?ëª„ë’ª?ëŒë–›??ï§ë¶¿ë©?ã…¼? åª›?ï§ã…½ë“ƒç”±?ë’ªï§ëˆë– é®ê¾§íƒ³?ëŒê½Œ ï§ë¶¿ë© è¸??ëª„? å¯ƒê³—ì ™?ëŒë¹?ì¢Šë²?
 
 }
 
@@ -245,7 +245,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
     m_pGameInstance->Wait_Thread_End();
 
-    //ÀÌ ºÎºĞ ³ªÁß¿¡ .Dat·ÎµåÇÒ¶§ µ¥ÀÌÅÍÈ­ ½ÃÄÑ¼­ ·Îµå ½ÃÅ³°Í.
+    //??éºÂ€éº??ì„ì¨·??.Datæ¿¡ì’•ë±¶?ì¢Šë¸£ ?ê³—ì” ?ê³ ì†• ?ì’–í’??æ¿¡ì’•ë±¶ ?ì’—ê¶—å¯ƒ?
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
@@ -291,7 +291,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
     
-#pragma region ¸®Áöµå¹Ùµğ
+#pragma region ç”±ÑŠ??ì’•ì»®??
         //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
         //RigidbodyDesc.eShape = SHAPE::MESH;
         //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -359,7 +359,7 @@ void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 void CEdit_MapObject::Export_MaterialData()
 {
 
-    //ÃÖÁ¾ Æú´õ °æ·Î.
+    //ï§¤ì’–ì¥Œ ?ëŒ€ëœ‘ å¯ƒìˆì¤ˆ.
 
     IGFD::FileDialogConfig config1;
     _char ModelPath[MAX_PATH] = {};
@@ -412,7 +412,7 @@ void CEdit_MapObject::Export_MaterialData()
 
             ofstream File(strFolderName);
 
-#pragma region ÅØ½ºÃÄ º¹»ç ¹× Json ÀúÀå
+#pragma region ?ë¿ë’ªçˆ¾?è¹‚ë“­ê¶— è«›?Json ?Â€??
             strTexturePath += "/Tex/";
             filesystem::create_directories(strTexturePath);
             json Totaljson;
@@ -487,8 +487,8 @@ void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, 
     
     XMStoreFloat3(&m_vNewTranslation, NewChildWolrd.r[3]);
 
-    //À§Ä¡¸¸ °®°í¿À±â?
-    //ºÎ¸ğ¸¸ È¸ÀüÇØ¾ßÇÒ ¶§´Â ¾î¶»°ÔÇÔ?
+    //?ê¾©íŠ‚ï§?åª›ë½®í€¬?ã…ºë¦°?
+    //éºÂ€ï§â‘¤ì­” ?ëš¯ìŸ¾?ëŒë¹???ëš®ë’— ?ëŒ€ë¼¸å¯ƒëš°ë¸¿?
 }
 
 void CEdit_MapObject::About_Parent()
@@ -553,9 +553,9 @@ void CEdit_MapObject::About_Transform()
 
     ImGui::Text("Turn_Quaternion");
     {
-        //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         ImGui::PushItemWidth(300.0f);
-        //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
         ImGui::InputFloat3("Rotation", vRotation);
     }
 
@@ -572,7 +572,7 @@ void CEdit_MapObject::About_Transform()
     m_pTransformCom->Set_WorldMatrix(matrix);
 
     //m_pGameInstance->Add_Light()
-    //ÀÚ½ÄÀº °£´ÜÇÏ°Ô ºÎ¸ğÀÇ º¯È­·®¸¸ Ãß°¡·Î ÇÏ°Ô ÇÏ¸é µÉµí? È¸ÀüÀº ¸ğ¸£°ÚÀ½..
+    //?ë¨¯ë–‡?Â€ åª›ê¾¨ë–’?ì„ì¾¶ éºÂ€ï§â‘¥ì“½ è¹‚Â€?ë¶¾ì›¾ï§?ç•°ë¶½?æ¿¡??ì„ì¾¶ ?ì„ãˆƒ ?ì¢Šë²? ?ëš¯ìŸ¾?Â€ ï§â‘¤â…¤å¯ƒì¢ì“¬..
 
     if (m_IsParent)
     {
@@ -595,11 +595,11 @@ void CEdit_MapObject::About_Transform()
 
         //ImGui::Text("Turn_Quaternion");
         //{
-        //    //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //    //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         //    ImGui::PushItemWidth(90.0f);
         //    //_float4 DegreeRotation = m_pRotation[m_iPickedInstance];
 
-        //    //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //    //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
 
         //    ImGui::InputFloat("Yaw", &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
         //    ImGui::InputFloat("Picth", &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
@@ -622,7 +622,7 @@ void CEdit_MapObject::About_Transform()
 
         //if (ImGui::Button("OK"))
         //{
-        //    //ÀÚ½ÄÀº °£´ÜÇÏ°Ô ºÎ¸ğÀÇ º¯È­·®¸¸ Ãß°¡·Î ÇÏ°Ô ÇÏ¸é µÉµí? È¸ÀüÀº ¸ğ¸£°ÚÀ½..
+        //    //?ë¨¯ë–‡?Â€ åª›ê¾¨ë–’?ì„ì¾¶ éºÂ€ï§â‘¥ì“½ è¹‚Â€?ë¶¾ì›¾ï§?ç•°ë¶½?æ¿¡??ì„ì¾¶ ?ì„ãˆƒ ?ì¢Šë²? ?ëš¯ìŸ¾?Â€ ï§â‘¤â…¤å¯ƒì¢ì“¬..
         //    _matrix Scale, Rotation, Translation;
         //    _float3 DegreeRotation = _float3(XMConvertToRadians(m_vNewRotation.x), XMConvertToRadians(m_vNewRotation.y), XMConvertToRadians(m_vNewRotation.z));
 
@@ -658,7 +658,7 @@ void CEdit_MapObject::About_Texture()
 
         //config.path = "C:/Users/dnheu/source/repos";
         config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
-        //±×¶§±×¶§ ¹Ù²ã³¢±â.
+        //æ´¹ëªƒë¸£æ´¹ëªƒë¸£ è«›ë¶½í“­?ì‡¨ë¦°.
         //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Rock/Tex/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
@@ -728,7 +728,7 @@ void CEdit_MapObject::About_Texture()
             ImGui::EndCombo();
         }
 
-        //¸Ş½¬¸¶´Ù °øÅëµÇ´Â °Å ÀÖÀ¸¸é ¿©±â¿¡ ÁöÁ¤.
+        //ï§ë¶¿ë©ï§ëˆë– æ€¨ë“¯ë„»?ì„ë’— å«„??ë‰ì‘ï§??Ñˆë¦°??ï§Â€??
         //m_SelectedDiffuseTextureName[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/Rock/SM_Sev_Roc_15AM/Mat/Tex/T4_Com2_Roc_05A_D.png";
 
         if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
@@ -777,7 +777,7 @@ void CEdit_MapObject::About_Texture()
                     ImGui::SetItemDefaultFocus();
                     m_SelectedNormal = m_NormalTextureName[i].c_str();
 
-                    //W½ºÆ®¸µÀ¸·Î ¹Ù²ã.
+                    //W?ã…½ë“ƒï§ê³¸ì‘æ¿¡?è«›ë¶½í“­.
                     _wstring Test(m_SelectedNormal.begin(), m_SelectedNormal.end());
                     if (m_pNormalTextureCom[m_iSelectedMesh])
                         Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);

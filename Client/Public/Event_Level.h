@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ClientPch.h"
 
 typedef struct tagChangeLevel : public CEvent

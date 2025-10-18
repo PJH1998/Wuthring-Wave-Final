@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "CubeCell.h"
 
 #include "GameInstance.h"
@@ -22,6 +22,8 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 		m_pBoundingBox = new BoundingBox(vCenter, vExtent);
 
 	ASSERT_CRASH(m_pBoundingBox);
+
+	m_iDepth = iDepth;
 
 	m_pBoundingBox->GetCorners(m_Corners);
 	Compute_MinMax();
@@ -51,7 +53,7 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 			vExtent.z * 0.5f
 		);
 
-		CCubeCell* pCubeCell = CCubeCell::Create(vChildCenter, vChildExtent, iDepth + 1);
+		CCubeCell* pCubeCell = CCubeCell::Create(vChildCenter, vChildExtent, m_iDepth + 1);
 		ASSERT_CRASH(pCubeCell);
 		m_ChildCells.push_back(pCubeCell);
 	}
@@ -59,22 +61,45 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
     return S_OK;
 }
 
-void CCubeCell::Priority_Update(_float fTimeDelta)
+void CCubeCell::Update(const _fvector& vCamPos)
 {
-	for (auto& pObject : m_Objects)
-		pObject->Priority_Update(fTimeDelta);
-}
+	// Frustrum, BoundingBox Intersect Check
+	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
+	{
+//#ifdef _DEBUG
+//		cout << "Depth : " << m_iDepth << endl;
+//#endif
+		// LOD SetUp
+		_float3 vCenter = m_pBoundingBox->Center;
+		_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
 
-void CCubeCell::Update(_float fTimeDelta)
-{
-	for (auto& pObject : m_Objects)
-		pObject->Update(fTimeDelta);
-}
+		_uint iLODIndex = {};
+		for (_uint i = 0; i < 4; ++i)
+		{
+			if (fDistance > g_fLODDistance[i])
+				continue;
 
-void CCubeCell::Late_Update(_float fTimeDelta)
-{
-	for (auto& pObject : m_Objects)
-		pObject->Late_Update(fTimeDelta);
+			iLODIndex = i;
+			break;
+		}
+
+		for (auto& pObject : m_Objects)
+		{
+			pObject->Set_LOD(iLODIndex);
+			m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, pObject);
+		}
+
+		// 거리가 멀면 자식은 X
+		if (iLODIndex >= 2)
+			return;
+		// Child O -> Child Update
+		if (0 < m_ChildCells.size())
+		{
+			for (auto& pCell : m_ChildCells)
+				pCell->Update(vCamPos);
+				//m_pGameInstance->Add_Work([&]() { pCell->Update(vCamPos); });
+		}
+	}
 }
 
 void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)

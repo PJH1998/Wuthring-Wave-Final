@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "GUIManager.h"
 
 #include "GameInstance.h"
@@ -89,7 +89,7 @@ void CGUIManager::Update()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	// GUI µî·ÏµÈ Func ¼öÇà
+	// GUI ?ê¹…ì¤‰??Func ?ì„‘ë»¾
 	for (auto& Func : m_Functions)
 		Func();
 
@@ -120,7 +120,7 @@ void CGUIManager::Render()
 
 void CGUIManager::Gizmo()
 {
-	// Gizmo Àû¿ëÇÒ Transform ¾øÀ¸¸é Return
+	// Gizmo ?ê³¸ìŠœ??Transform ?ë†ì‘ï§Ž?Return
 	if (nullptr == m_pTransform)
 		return;
 
@@ -154,7 +154,7 @@ void CGUIManager::Gizmo()
 	XMStoreFloat4x4(&m_ObjectWorldMatrix, m_pTransform->Get_WorldMatrix());
 	//XMStoreFloat4x4(&Matrix, XMMatrixTranspose(m_pTransform->Get_WorldMatrix()));
 
-	// Scale, Rotation, Traslation °»½Å
+	// Scale, Rotation, Traslation åª›ê¹†ë–Š
 	ImGuizmo::DecomposeMatrixToComponents(
 		reinterpret_cast<const _float*>(&m_ObjectWorldMatrix),
 		reinterpret_cast<_float*>(&vTranslation),
@@ -209,8 +209,8 @@ void CGUIManager::Gizmo()
 #pragma endregion
 	ImGui::End();
 
-	//ImGuizmo::SetRect(0.f, 0.f, io.DisplaySize.x, io.DisplaySize.y);
-	ImGuizmo::SetRect(0.f, 0.f, 1920.f, 1080.f);
+	ImGuizmo::SetRect(0.f, 0.f, io.DisplaySize.x, io.DisplaySize.y);
+	//ImGuizmo::SetRect(0.f, 0.f, 1920.f, 1080.f);
 	ImGuizmo::BeginFrame();
 	ImGuizmo::Manipulate(
 		reinterpret_cast<const _float*>(&ViewMatrix),

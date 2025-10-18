@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Transform.h"
 
@@ -30,15 +30,15 @@ public:
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 
-	// Ãæµ¹ ½Ã, ºĞ±â¿¡ µû¶ó È£ÃâµÇ´Â ÇÔ¼ö
-	// iLayer : »ó´ëÀÇ CollisionLayer
-	// pOther : »ó´ë
-	// Manifold : Ãæµ¹ ÁöÁ¡, normal, °ãÄ£ Á¤µµ¸¦ °®°í ÀÖÀ½
+	// ç•°â‘¸ë£ ?? éºê¾§ë¦°???ê³•ì”ª ?ëª„í…§?ì„ë’— ?â‘¥ë‹”
+	// iLayer : ?ê³·???CollisionLayer
+	// pOther : ?ê³·?
+	// Manifold : ç•°â‘¸ë£ ï§Â€?? normal, å¯ƒë±€íŠ‡ ?ëº£ë£„ç‘œ?åª›ë½®í€¬ ?ë‰ì“¬
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	virtual		void			OnCollide_End(_uint iLayer, CGameObject* pOther) {}
 
-	// Pooling½Ã, SpawnµÉ ¶§ ÃÊ±âÈ­ ÇÔ¼ö
+	// Pooling?? Spawn????ç¥ë‡ë¦°???â‘¥ë‹”
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 protected:
@@ -49,7 +49,7 @@ protected:
 
 	map<const _wstring, class CComponent*>	m_Components;
 
-	// È°¼ºÈ­ °ü·Ã Bool º¯¼ö
+	// ?ì’–ê½¦??æ„¿Â€??Bool è¹‚Â€??
 	_bool							m_isActivate = { true };
 	// Object ID
 	_uint							m_iObjectID = {};

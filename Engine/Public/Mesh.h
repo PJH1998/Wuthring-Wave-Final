@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "VIBuffer.h"
 
 NS_BEGIN(Engine)
@@ -39,7 +39,7 @@ private:
 
 	vector<_float4x4>			m_OffsetMatrices;
 
-	// Mesh Shape¿ë Container
+	// Mesh Shape??Container
 	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
 	BoundingBox*				m_pBoundingBox = { nullptr };

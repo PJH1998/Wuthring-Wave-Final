@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Client)
@@ -11,7 +11,7 @@ private:
 	virtual ~CParser() = default;
 
 public:
-	// File°æ·Î, 
+	// Fileå¯ƒìŽˆì¤ˆ, 
 	void							Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, LEVEL eLevel);
 
 private:

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 #include "CollisionLayer.h"
@@ -20,9 +20,9 @@ private:
 
 public:
 #pragma region Init
-	// Physics System ÃÊ±âÈ­
+	// Physics System ç¥ë‡ë¦°??
 	void				SetUp_PhysicsSystem();
-	// Object -> BroadPhase ¸ÊÇÎ
+	// Object -> BroadPhase ï§ë“¯ë¸¨
 	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer) {
 		ASSERT_CRASH(nullptr != m_pBPLayer);
 		m_pBPLayer->SetUp_ObjectToBP(iObjectLayer, iBPLayer);
@@ -39,11 +39,11 @@ public:
 	};
 #pragma endregion
 
-	// Body »ý¼º
+	// Body ?ì•¹ê½¦
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	// Character »ý¼º
+	// Character ?ì•¹ê½¦
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	// CharacterVirtual »ý¼º
+	// CharacterVirtual ?ì•¹ê½¦
 	CharacterVirtual*	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);

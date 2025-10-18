@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_Point_Instance.h"
 #include "GameInstance.h"
 
@@ -66,7 +66,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_pVBInstanceVertices = new VTXINSTANCE_PARTICLE[m_iNumInstance];
 	m_pSpeeds = new _float[m_iNumInstance];
 
-	//SRV¿¡ µé¾î°¥ Á¤º¸ ±¸Á¶Ã¼¿¡ °³¼ö¸¸Å­ ÀúÀå
+	//SRV???ã…¼ë¼±åª›??ëº£ë‚« æ´ÑŠâ€œï§£ëŒë¿‰ åª›ì’–ë‹”ï§ëš°ê²® ?Â€??
 	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
 	for (size_t i = 0; i < m_iNumInstance; i++)
@@ -76,7 +76,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 		m_pSpeeds[i] = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
-		//SRVµ¥ÀÌÅÍ¿ë ÀúÀå
+		//SRV?ê³—ì” ?ê³—ìŠœ ?Â€??
 		pSRV[i].fSpeed = m_pSpeeds[i];
 
 		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
@@ -91,16 +91,16 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-		//SRVµ¥ÀÌÅÍ ÃÊ±â À§Ä¡ ÀúÀå¿ë
+		//SRV?ê³—ì” ??ç¥ë‡ë¦° ?ê¾©íŠ‚ ?Â€?Î¼ìŠœ
 		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
 	}
 	
-	//SRV¿ë ¹öÆÛ »ı¼º
+	//SRV??è¸°ê¾ªë ?ì•¹ê½¦
 	D3D11_BUFFER_DESC SRV_BufferDesc = {};
 	SRV_BufferDesc.StructureByteStride = sizeof(PARTICLE_SRV);
 	SRV_BufferDesc.ByteWidth = SRV_BufferDesc.StructureByteStride * m_iNumInstance;
-	SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//ºÒº¯
-	SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//¸®¼Ò½º
+	SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//éºëˆ?
+	SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//ç”±ÑŠëƒ¼??
 	SRV_BufferDesc.CPUAccessFlags = 0; 
 	SRV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
@@ -112,7 +112,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	Safe_Delete_Array(pSRV);
 
-	//SRV ¹öÆÛ¸¦ ÅëÇØ ¸®¼Ò½ººä »ı¼º
+	//SRV è¸°ê¾ªëç‘œ??ë“¯ë¹ ç”±ÑŠëƒ¼?ã…»ëŸ­ ?ì•¹ê½¦
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
 	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -122,7 +122,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	if (FAILED(m_pDevice->CreateShaderResourceView(m_pSRVBuffer, &SRVDesc, &m_pSRV)))
 		return E_FAIL;
 
-	//CB ¹öÆÛ »ı¼º
+	//CB è¸°ê¾ªë ?ì•¹ê½¦
 	PARTICLE_CB* pCB = new PARTICLE_CB;
 	pCB->fTimeDelta = 0.1f;
 	pCB->vPivot = m_vPivot;
@@ -135,9 +135,9 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	D3D11_BUFFER_DESC CB_BufferDesc = {};
 	CB_BufferDesc.StructureByteStride = 0;
-	CB_BufferDesc.ByteWidth = sizeof(PARTICLE_CB);				 //16¹ÙÀÌÆ® ¹è¼ö·Î ¸ÂÃá ±¸Á¶Ã¼ ÇÊ¿ä
-	CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC ;					//ÀÚÁÖº¯ÇÔ
-	CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//ºä ¾øÀ½
+	CB_BufferDesc.ByteWidth = sizeof(PARTICLE_CB);				 //16è«›ë¶¿ì” ??è«›ê³—ë‹”æ¿¡?ï§ìší…£ æ´ÑŠâ€œï§£??ê¾©ìŠ‚
+	CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC ;					//?ë¨¯ï¼œè¹‚Â€??
+	CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//é…‰??ë†ì“¬
 	CB_BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	CB_BufferDesc.MiscFlags = 0;
 
@@ -158,18 +158,18 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	//UAV Å¬·Ğ¿¡¼­ »ı¼ºÇØÁà¾ßÇÔ (¶È°°Àº ¼³Á¤°ªÀ» °¡Áø ÆÄÆ¼Å¬À» Å¬·ĞÇØ¼­ ¿©·¯°³ ¸¸µé¾úÀ» ¶§, °°Àº UAV¸¦ °øÀ¯ÇÏ¸é ¸ğµç ÆÄÆ¼Å¬ÀÌ µ¿ÀÏÇÑ ¿òÁ÷ÀÓÀ» °¡Áö°Ô µÊ.)
-	// SRV¿Í CB´Â ÇÁ·ÎÅäÅ¸ÀÔ¿¡¼­ »ı¼ºÇØÁàµµ µÊ.
-	// SRV´Â ºÒº¯ÇÒ °³º°ÀÎ½ºÅÏ½º °ªµéÀÌ¶ó ÇÁ·ÎÅäÅ¸ÀÔ¿¡ ¸¸µé¾î¼­ Å¬·Ğ³¢¸® °øÀ¯ÇØµµ ¹®Á¦ ¾øÀ½,
-	// CB´Â º¯ÇÏ´Â °ª (Å¸ÀÓµ¨Å¸) °°Àº º¯¼öµéÀÌ µé¾î°¡Áö¸¸, ¸Å ÇÁ·¹ÀÓ¸¶´Ù ¸Ê, ¾ğ¸ÊÀ¸·Î °ª ¼³Á¤ÇØÁà¾ßÇÏ´Ï ÇÁ·ÎÅäÅ¸ÀÔ¿¡ ¸¸µé¾îµµ »ó°ü¾øÀ½
+	//UAV ?ëŒ€ì¤?ë¨¯ê½Œ ?ì•¹ê½¦?ëŒì¨¾?ì‡³ë¸¿ (?ë¬ì»³?Â€ ?ã…¼ì ™åª›ë¯ªì“£ åª›Â€ï§??ëš°ë–š?ëŒì“£ ?ëŒ€ì¤?ëŒê½Œ ?Ñ‰ìœ­åª›?ï§ëš®ë±¾?ë‰ì“£ ?? åª›ìˆˆ? UAVç‘œ?æ€¨ë“­ì‘€?ì„ãˆƒ ï§â‘¤ë±º ?ëš°ë–š?ëŒì”  ?ìˆˆì”ª???Â€ï§ê³¸ì—«??åª›Â€ï§Â€å¯ƒ???)
+	// SRV?Â€ CB???ê¾¨ì¤ˆ?ì¢??ë‚†ë¿‰???ì•¹ê½¦?ëŒì¨¾????
+	// SRV??éºëˆ???åª›ì’•í€?ëª„ë’ª?ëŒë’ª åª›ë¯©ë±¾?ëŒ€ì”ª ?ê¾¨ì¤ˆ?ì¢??ë‚†ë¿‰ ï§ëš®ë±¾?ëŒê½Œ ?ëŒ€ì¤?ì‡°â” æ€¨ë“­ì‘€?ëŒ€ë£„ è‡¾ëª„ì £ ?ë†ì“¬,
+	// CB??è¹‚Â€?ì„ë’— åª›?(?Â€?ê¾¨ëœ½?Â€) åª›ìˆˆ? è¹‚Â€?ì„ë±¾???ã…¼ë¼±åª›Â€ï§Â€ï§? ï§??ê¾¨ì …?ê¾¨ì­??ï§? ?ëªƒãŠ?ì‡°ì¤ˆ åª›??ã…¼ì ™?ëŒì¨¾?ì‡³ë¸¯???ê¾¨ì¤ˆ?ì¢??ë‚†ë¿‰ ï§ëš®ë±¾?ëŒ€ë£„ ?ê³´??ë†ì“¬
 
 	
-	//¿©±â¼­ UAV ¹öÆÛ ¸¸µé°í, ¸®¼Ò½ººä ¸¸µé¾îÁà¾ßÇÔ.
+	//?Ñˆë¦°??UAV è¸°ê¾ªë ï§ëš®ë±¾æ€¨? ç”±ÑŠëƒ¼?ã…»ëŸ­ ï§ëš®ë±¾?ëŒì¨¾?ì‡³ë¸¿.
 	D3D11_BUFFER_DESC UAV_BufferDesc = {};
 	UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
 	UAV_BufferDesc.ByteWidth = UAV_BufferDesc.StructureByteStride * m_iNumInstance;
-	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						//UAV´Â µğÆúÆ®
-	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			//´Ù¸¥°÷¿¡¼­µµ ÀĞÀ»°Å¸é  | D3D11_BIND_SHADER_RESOURCE ÇØÁà¾ßÇÔ
+	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						//UAV???ë·€ë¤ƒ??
+	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			//?ã…»â…¨æ€¨ë…¹ë¿‰?ì’•ë£„ ?ìŒì“£å«„ê³•ãˆƒ  | D3D11_BIND_SHADER_RESOURCE ?ëŒì¨¾?ì‡³ë¸¿
 	UAV_BufferDesc.CPUAccessFlags = 0;			
 	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;	
 
@@ -180,7 +180,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, &UAVInitialDesc, &m_pUABuffer)))
 		return E_FAIL;
 
-	//UAV ¹öÆÛ¸¦ ÅëÇØ ¸®¼Ò½ººä »ı¼º
+	//UAV è¸°ê¾ªëç‘œ??ë“¯ë¹ ç”±ÑŠëƒ¼?ã…»ëŸ­ ?ì•¹ê½¦
 	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
 	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
 	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
@@ -244,7 +244,7 @@ void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader, _float
 
 	pCShader->Dispatch(128, 1, 1);
 
-	//GPU¿¡¼­ º¹»ç ÁøÇàÇÔ. ³»ºÎ¿¡¼­ ¿¬»êÀÛ¾÷ÀÌ ³¡³µ´ÂÁö È®ÀÎÇÏ°í º¹»ç ÁøÇàÇØÁØ´Ù°í ÇÔ.
+	//GPU?ë¨¯ê½Œ è¹‚ë“­ê¶— ï§ê¾ªë»¾?? ?ëŒ€??ë¨¯ê½Œ ?ê³—ê¶›?ë¬’ë¾½???ì•¸ê¶—?ë¶¿? ?ëº¤ì”¤?ì„í€¬ è¹‚ë“­ê¶— ï§ê¾ªë»¾?ëŒ??ã…ºí€¬ ??
 	m_pContext->CopyResource(m_pVBInstance, m_pUABuffer);
 }
 

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Editor_Define.h"
 #include "AnimNotifyDefine.h"
@@ -10,7 +10,7 @@ class CColliderNotify;
 NS_END
 
 NS_BEGIN(Editor)
-// Notify¸¦ »ı¼ºÇÏ°í ºÒ·¯¿Ã ¼ö ÀÖ´Â Tool
+// Notifyç‘œ??ì•¹ê½¦?ì„í€¬ éºëˆìœ­?????ëˆë’— Tool
 class CAnimNotifyTool final : public CBase
 {
 public:
@@ -18,7 +18,7 @@ public:
 	{
 		SOUND = 0,	  // SOUND
 		EFFECT = 1,   // EFFECT 
-		COLLIDER = 2, // ¾Ö´Ï¸ŞÀÌ¼Ç Äİ¶óÀÌ´õ È°¼ºÈ­.
+		COLLIDER = 2, // ?ì¢Šë•²ï§ë¶¿ì” ??è‚„ì’•ì”ª?ëŒ€ëœ‘ ?ì’–ê½¦??
 		LIGHT = 3,    // LIGHT?
 		END
 	};
@@ -32,7 +32,7 @@ private:
 
 
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region æ¹²ê³•ë‚¯ ?â‘¥ë‹”
 public:
 	HRESULT	Initialize(LEVEL eLevel);
 	void Update();
@@ -40,7 +40,7 @@ public:
 #pragma endregion
 
 
-#pragma region ANIMATION Tool·ÎºÎÅÍ ¹ŞÀ» Á¤º¸.
+#pragma region ANIMATION Toolæ¿¡ì’•???è«›ì†ì“£ ?ëº£ë‚«.
 public:
 	void Process_Notify(class CAnimationActor* pActor, const _string& strAnimName, const _string& strModelDirPath, _float fTrackPosition);
 	
@@ -97,7 +97,7 @@ private:
 	LEVEL m_eCurLevel = { LEVEL::END };
 	NOTIFYTYPE m_eType = { NOTIFYTYPE::END };
 
-	// Notify µî·Ï ½Ã ¹«Á¶°Ç ÇÊ¿äÇÑ Á¤º¸
+	// Notify ?ê¹…ì¤‰ ??è‡¾ëŒâ€œå«„??ê¾©ìŠ‚???ëº£ë‚«
 	_string m_strCurrentAnimName = {};
 	_string m_strCurrentFolderPath = {};
 	_float m_fCurrentDuration = {};
@@ -111,7 +111,7 @@ private:
 	_bool m_IsLoadNotify = { false };
 
 private:
-	// Save ¿ëµµ º¯¼öµé
+	// Save ?â‘¸ë£„ è¹‚Â€?ì„ë±¾
 	//list<SOUNDNOTIFY>    m_SoundNotifies;
 	//list<COLLIDERNOTIFY> m_ColliderNotifies;
 	//list<EFFECTNOTIFY>   m_EffectNotifies;

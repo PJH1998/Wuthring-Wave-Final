@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Camera_Manager.h"
 
 #include "GameInstance.h"
@@ -197,7 +197,7 @@ void CCamera_Manager::Compute_Action(_float fTimeDelta)
 {
     _float fDuration = m_CameraActions[m_strActionTag][m_iActionIndex].fDuration;
     m_fCurrentTrackPosition += fTimeDelta;
-    // 1°³ÀÇ Action ¿Ï·á
+    // 1åª›ì’–ì“½ Action ?ê¾¨ì¦º
     if (m_fCurrentTrackPosition > fDuration)
     {
         m_fCurrentTrackPosition = 0.f;

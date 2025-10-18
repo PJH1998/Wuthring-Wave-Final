@@ -1,4 +1,4 @@
-#include"ClientPch.h"
+ï»¿#include"ClientPch.h"
 #include "MapObject.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -27,7 +27,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Ready_Component(pArg);
 
 	/*
-	ÀÐ´Â ¼ø¼­.
+	?ìŽˆë’— ?ì’–ê½Œ.
 	        _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);

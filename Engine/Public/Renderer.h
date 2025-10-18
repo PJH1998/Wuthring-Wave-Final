@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Base.h"
 
@@ -38,7 +38,7 @@ private:
 #endif
 
 private:
-	// Viewport Size º¯°æ
+	// Viewport Size è¹‚Â€å¯ƒ?
 	void		Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "AnimNotify.h"
 
 NS_BEGIN(Engine)
@@ -23,7 +23,7 @@ public:
 
 private:
 	class CGameInstance* m_pGameInstance = { nullptr };
-	_string m_strSoundType; // BGM, Sound µîµî. 
+	_string m_strSoundType; // BGM, Sound ?ê¹…ë²‘. 
 	_string m_strSoundTag;
 	_wstring m_wStrSoundTag;
 	_float m_fVolume;

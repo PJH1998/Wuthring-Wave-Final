@@ -1,4 +1,4 @@
-#ifndef Engine_Vertex_h__
+﻿#ifndef Engine_Vertex_h__
 #define Engine_Vertex_h__
 
 #include "Engine_Typedef.h"

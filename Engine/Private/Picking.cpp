@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Picking.h"
 
 #include "GameInstance.h"
@@ -53,7 +53,7 @@ void CPicking::Update()
 
 _bool CPicking::isPicked(_float3* pOut)
 {
-	// Mouse ÁÂÇ¥ÀÇ DepthDesc ÃßÃâ
+	// Mouse é†«ëš°ëª´??DepthDesc ç•°ë¶¿í…§
 	D3D11_MAPPED_SUBRESOURCE SubResource = {};
 	if (FAILED(m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ, 0, &SubResource)))
 		return false;
@@ -67,11 +67,11 @@ _bool CPicking::isPicked(_float3* pOut)
 
 	m_pContext->Unmap(m_pTexture2D, 0);
 
-	// Picking¿ë Object ¾Æ´Ô
+	// Picking??Object ?ê¾¨ë–‚
 	if (0.f == DepthDesc.w)
 		return false;
 
-	// World·Î Ä¡È¯
+	// Worldæ¿¡?ç§»ì„‘ì†š
 	_vector WorldPos = {};
 	WorldPos = XMVectorSetX(WorldPos, m_ptMouse.x / (m_iWinSizeX * 0.5f) - 1.f);
 	WorldPos = XMVectorSetY(WorldPos, m_ptMouse.y / (m_iWinSizeY * -0.5f) + 1.f);
