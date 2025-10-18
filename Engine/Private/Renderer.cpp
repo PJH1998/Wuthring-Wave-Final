@@ -473,7 +473,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Depth */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Depth"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Depth"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Mat_Specular */

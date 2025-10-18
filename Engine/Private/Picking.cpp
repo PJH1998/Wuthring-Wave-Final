@@ -83,8 +83,8 @@ _bool CPicking::isPicked(_float3* pOut)
 	WorldPos = XMVectorSetZ(WorldPos, DepthDesc.x);
 	WorldPos = XMVectorSetW(WorldPos, 1.f);
 
-	XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
-	XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
+	WorldPos = XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
+	WorldPos = XMVector3TransformCoord(WorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
 
 	XMStoreFloat3(pOut, WorldPos);
 
