@@ -16,14 +16,14 @@ protected:
 	virtual ~CGameObject() = default;
 
 public:
-	class CComponent*	Get_Component(const _wstring& strComponentTag);
+	class CComponent*			Get_Component(const _wstring& strComponentTag);
 	_bool						IsActivate() { return m_isActivate; }
 	void						SetActivate(_bool isActivate) { m_isActivate = isActivate; }
 	_uint						Get_ID() { return m_iObjectID; }
 
 public:
-	virtual		HRESULT		Initialize_Prototype();
-	virtual		HRESULT		Initialize_Clone(void* pArg);
+	virtual		HRESULT			Initialize_Prototype();
+	virtual		HRESULT			Initialize_Clone(void* pArg);
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);

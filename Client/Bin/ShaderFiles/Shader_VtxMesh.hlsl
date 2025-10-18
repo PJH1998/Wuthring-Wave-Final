@@ -11,6 +11,15 @@ vector      g_vMatrlSpecular = vector(0.1f, 0.1f, 0.1f, 0.1f);
 
 texture2D   g_MaskTexture[4] : register(t8);
 
+cbuffer CSMDatas : register(b4)
+{
+    matrix g_ShadowViewMatrix[4];
+    matrix g_ShadowProjMatrix[4];
+    float4 g_vDistance;
+};
+
+int g_iIndex = 0;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -48,29 +57,6 @@ VS_OUT VS_MAIN(VS_IN In)
     return Out;
 }
 
-struct VS_OUT_SHADOW
-{
-    float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
-    float4 vProjPos : TEXCOORD1;
-};
-
-VS_OUT_SHADOW VS_SHADOW(VS_IN In)
-{
-    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
-    
-    matrix matWV, matWVP;
-    
-    matWV = mul(g_WorldMatrix, g_ViewMatrix);
-    matWVP = mul(matWV, g_ProjMatrix);
-    
-    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
-    Out.vTexcoord = In.vTexcoord;
-    Out.vProjPos = Out.vPosition;
-    
-    return Out;
-}
-
 struct PS_IN
 {
     float4 vPosition : SV_POSITION;
@@ -104,13 +90,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
+    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask; 
     
-    //if (Out.vDiffuse.a < 0.1f)
-    //    discard;
-    
-    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);    
     float3 vNormal = vNormalDesc.xyz * 2.f - 1.f;
     vNormal = mul(vNormal, WorldMatrix);
     Out.vNormal = vector(vNormal * 0.5f + 0.5f, 0.f);
@@ -134,6 +116,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 0.f;
+    Out.vDepth.w = 1.f;
     
     return Out;
 }
@@ -152,6 +136,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     
     return Out;
 }
+
 struct PS_OUT_DEBUG
 {
     float4 vDiffuse : SV_TARGET0;
@@ -167,11 +152,77 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
-    //vector vMaskDiffiuse = g_MaskDiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     
     return Out;
+}
+///////////////////////////SHADOW///////////////////////////
+
+struct VS_OUT_SHADOW
+{
+    float4 vPosition : POSITION;
+    float2 vTexcoord : TEXCOORD0;
+};
+
+VS_OUT_SHADOW VS_SHADOW(VS_IN In)
+{
+    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
+    
+    Out.vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    Out.vTexcoord = In.vTexcoord;
+    
+    return Out;
+}
+
+struct GS_IN
+{
+    float4 vPosition : POSITION;
+    float2 vTexcoord : TEXCOORD0;
+};
+
+struct GS_OUT
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+[maxvertexcount(12)]
+void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
+{
+    for (int Face = 0; Face < 4; Face++)
+    {
+        GS_OUT Out;
+        Out.iIndex = Face;
+        
+        matrix matVP;
+        matVP = mul(g_ShadowViewMatrix[Face], g_ShadowProjMatrix[Face]);
+        
+        for (int i = 0; i < 3; i++)
+        {
+            Out.vPosition = mul(In[i].vPosition, matVP);
+            Out.vTexcoord = In[i].vTexcoord;
+            Vertices.Append(Out);
+        }
+        Vertices.RestartStrip();
+    }
+}
+
+struct PS_IN_SHADOW
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+};
+
+void PS_SHADOW(PS_IN_SHADOW In)
+{
+    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    if (vDiffuse.a <= 0.1f)
+        discard;
+    
+    if (In.vPosition.z >= 1.f || In.vPosition.z < 0.f)
+        discard;
 }
 
 technique11 DefaultTechnique
@@ -227,5 +278,15 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_DEBUG();
+    }
+    pass ShadowPass     //5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_SHADOW();
+        GeometryShader = compile gs_5_0 GS_SHADOW();
+        PixelShader = compile ps_5_0 PS_SHADOW();
     }
 }

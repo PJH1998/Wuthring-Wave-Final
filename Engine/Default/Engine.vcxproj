@@ -23,6 +23,7 @@
     <ClInclude Include="..\Public\AnimNotify.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\public\CSM.h" />
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h" />
     <ClInclude Include="..\Public\Collider.h" />
     <ClInclude Include="..\Public\ColliderNotify.h" />
@@ -101,6 +102,7 @@
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\private\CSM.cpp" />
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp" />
     <ClCompile Include="..\Private\Collider.cpp" />
     <ClCompile Include="..\Private\AnimNotify.cpp" />

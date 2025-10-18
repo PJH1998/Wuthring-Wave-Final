@@ -92,6 +92,8 @@ namespace Engine
 
 	const unsigned int g_iMaxWidth = 8192;
 	const unsigned int g_iMaxHeight = 4608;
+
+	const unsigned int g_iNumCascade = 4;
 }
 
 #define MAX_DEPTH 5

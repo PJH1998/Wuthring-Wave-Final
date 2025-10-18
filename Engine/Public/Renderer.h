@@ -23,7 +23,6 @@ private:
 	ID3D11Device*						m_pDevice = { nullptr };
 	ID3D11DeviceContext*				m_pContext = { nullptr };
 	class CGameInstance*				m_pGameInstance = { nullptr };
-	ID3D11DepthStencilView*				m_pShadowDSV = { nullptr };
 
 	list<class CGameObject*>			m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 
@@ -65,6 +64,7 @@ private:
 	HRESULT		Ready_RT();
 	HRESULT		Ready_MRT();
 	HRESULT		Ready_Shadow_DSV();
+
 
 public:
 	static		CRenderer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

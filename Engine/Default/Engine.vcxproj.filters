@@ -235,6 +235,9 @@
     <Filter Include="01. Utility\03. GameObject\Static">
       <UniqueIdentifier>{65feeaef-cd70-4af5-9d03-4f151c302416}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\07. Shadow\Cascade">
+      <UniqueIdentifier>{61272df4-4c82-475f-a831-ddc7dc89683d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -477,6 +480,9 @@
     <ClInclude Include="..\Public\StaticObject.h">
       <Filter>01. Utility\03. GameObject\Static</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\CSM.h">
+      <Filter>01. Utility\07. Shadow\Cascade</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -694,6 +700,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\StaticObject.cpp">
       <Filter>01. Utility\03. GameObject\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\CSM.cpp">
+      <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
