@@ -1,4 +1,4 @@
-﻿#ifndef Engine_Define_h__
+#ifndef Engine_Define_h__
 #define Engine_Define_h__
 
 #pragma warning(disable: 4251)
@@ -94,7 +94,6 @@ namespace Engine
 	const unsigned int g_iMaxHeight = 4608;
 
 	const unsigned int g_iNumCascade = 4;
-
 	const float g_fLODDistance[4] = { 0.f, 512.f, 2048.f, 4096.f };
 }
 
