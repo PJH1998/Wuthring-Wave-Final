@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Particle_Controller.h"
 
 CParticle_Controller::CParticle_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -13,7 +13,7 @@ CParticle_Controller::CParticle_Controller(ID3D11Device* pDevice, ID3D11DeviceCo
 
 HRESULT CParticle_Controller::Initialize()
 {
-    //ÅØ½ºÃ³ ºÒ·¯¿À±â
+    //?ë¿ë’ªï§£?éºëˆìœ­?ã…ºë¦°
     //Texture_Loading("TEST1", TEXT("../../Client/Bin/Resource/Effect/Texture/T_Spark_300012.png"));
 
     Load_AllTextureFromFolder("../../Client/Bin/Resource/Effect/Texture");
@@ -70,26 +70,26 @@ void CParticle_Controller::Load_AllTextureFromFolder(const _string& strFolderPat
                 PARTICLE_TEXTURE Desc{};
                 CTexture* pTexture = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // ?ëº¤ì˜£???ì’–ì‡…???ëš¯ì”ªï§?
                 _string strTextureTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÀÌ¸§ ÁöÁ¤
+                //?ëš¯ì”ªï§ë‚†ì‘æ¿¡??ë¿ë’ªï§£??ëŒ€ì«« ï§žÂ€??
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //?ëš¯ì”ªï§ë‚†ì‘æ¿¡??ë¿ë’ªï§£?è€ŒëŒ„ë£·?ëš°ë“ƒ ?ëŒ€ì«« ï§žÂ€??
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
-                //ÆÄÀÏ°æ·Î wstring º¯È¯
+                //?ëš¯ì”ªå¯ƒìŽˆì¤ˆ wstring è¹‚Â€??
                 _wstring wstrFilePath = StringToWString(filePath);
    
-                //ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® »ý¼º
+                //?ë¿ë’ªï§£?è€ŒëŒ„ë£·?ëš°ë“ƒ ?ì•¹ê½¦
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
                     pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
 
-                //»ý¼ºÇÑ ÅØ½ºÃ³ ÁÖ¼Ò µî·Ï, ¹Ì¸®º¸±â ¶ç¿ï·Á¸é ÁÖ¼Ò·Î SRV°¡Á®¿Í¾ßÇØ¼­ ÀúÀåÇØÁà¾ßÇÔ.
+                //?ì•¹ê½¦???ë¿ë’ªï§£?äºŒì‡±ëƒ¼ ?ê¹…ì¤‰, èª˜ëªƒâ”è¹‚ë‹¿ë¦° ?ê¾©ìŠ±?ã…»ãˆƒ äºŒì‡±ëƒ¼æ¿¡?SRVåª›Â€?ëª„??ì‡³ë¹???Â€?Î½ë¹ä»¥ì„ë¹ž??
                 Desc.pTexture = pTexture;
                 //Safe_AddRef(pTexture);
 
@@ -106,7 +106,7 @@ void CParticle_Controller::Particle_Tab()
         if (ImGui::Begin("Particle Info"))
         {
        
-                //ÆÄÆ¼Å¬ ¼³Á¤°ª VIBuffer
+                //?ëš°ë–š???ã…¼ì ™åª›?VIBuffer
                 if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGui::Checkbox("Loop", &(m_pSelectedVBDesc->IsLoop));
@@ -227,19 +227,19 @@ void CParticle_Controller::Particle_Tab()
 
                 //if (ImGui::Button("Apply"))
                 //{
-                //    //µð½ºÅ©¸³¼Ç¸¸ ÀúÀåÇÏ°í, ÁÖ¼Ò´Â µû·Î ÀúÀåÇÒ ÇÊ¿ä ¾øÀ» °Å °°À½.
-                //    //ÀúÀåÇÑ µð½ºÅ©¸³¼ÇÀ¸·Î °ª ¼öÁ¤ÇØ¼­ µé°í ÀÖ°í, Apply ¹öÆ° ´©¸£¸é ÀÌÀü¿¡ ¸¸µé¾î³õÀº ÆÄÆ¼Å¬ ÆÄ±« ½ÃÅ°°í, ´Ù½Ã Àç»ý¼º
+                //    //?ë¶¿ë’ª?Ñ‰â”°?ì„Žì­” ?Â€?Î½ë¸¯æ€¨? äºŒì‡±ëƒ¼???ê³•ì¤ˆ ?Â€?Î½ë¸· ?ê¾©ìŠ‚ ?ë†ì“£ å«„?åª›ìˆˆì“¬.
+                //    //?Â€?Î½ë¸³ ?ë¶¿ë’ª?Ñ‰â”°?ì„ì‘æ¿¡?åª›??ì„ì ™?ëŒê½Œ ?ã…ºí€¬ ?ë‡í€¬, Apply è¸°ê¾ªë“‰ ?ê¾¨â…¤ï§Ž??ëŒìŸ¾??ï§ëš®ë±¾?ëŒ€ë„ƒ?Â€ ?ëš°ë–š???ëš­ëˆ¼ ?ì’—ê¶Žæ€¨? ?ã…¼ë–† ?ÑŠê¹®??
 
-                //    //Áö±Ý ¼±ÅÃµÇ¾îÀÖ´Â ÆÄÆ¼Å¬ÀÇ ÅÂ±× ÇÊ¿ä
-                //    //Áö±Ý ¼±ÅÃµÇ¾î ÀÖ´Â ÆÄÆ¼Å¬ ÅÂ±×ÀÇ Desc 2°³ ÇÊ¿ä.
-                //    //¹öÆÛ ¸ÕÀú ¸¸µé°í, ÆÄÆ¼Å¬ ¸¸µé¾î¾ßÇÔ.
+                //    //ï§žÂ€æ¹²??ì¢ê¹®?ì„ë¼±?ëˆë’— ?ëš°ë–š?ëŒì“½ ?ì’“ë ‡ ?ê¾©ìŠ‚
+                //    //ï§žÂ€æ¹²??ì¢ê¹®?ì„ë¼± ?ëˆë’— ?ëš°ë–š???ì’“ë ‡??Desc 2åª›??ê¾©ìŠ‚.
+                //    //è¸°ê¾ªë ç™’ì‡±? ï§ëš®ë±¾æ€¨? ?ëš°ë–š??ï§ëš®ë±¾?ëŒë¹ž??
 
 
-                //    //»ý¼ºÇØ³õÀº ¹öÆÛ ¿øÇü »èÁ¦
-                //    //Desc¿¡ ÀÖ´Â Á¤º¸·Î »õ·Î¿î ¹öÆÛ »ý¼º
+                //    //?ì•¹ê½¦?ëŒ€ë„ƒ?Â€ è¸°ê¾ªë ?ë¨°ì‚Ž ??ì £
+                //    //Desc???ëˆë’— ?ëº£ë‚«æ¿¡??ëˆì¤ˆ??è¸°ê¾ªë ?ì•¹ê½¦
 
-                //    //ÆÄÆ¼Å¬ Å¬·¡½º Å¬·Ð ÇÒ ¶§ Desc·Î Å¬·Ð
-                //    //ÀÌÀü¿¡ »ý¼ºÇÑ ÆÄÆ¼Å¬Àº ±×³É ºñÈ°¼ºÈ­¸¸ ½ÃÄÑÁàµµ µÉ°Å °°À½.
+                //    //?ëš°ë–š???ëŒ€ì˜’???ëŒ€ì¤Ž ????Descæ¿¡??ëŒ€ì¤Ž
+                //    //?ëŒìŸ¾???ì•¹ê½¦???ëš°ë–š?ëŒ? æ´¹ëªƒê¹· é®ê¾ªì†¢?ê¹Šì†•ï§??ì’–í’ä»¥ì„Žë£„ ?ì¢‰êµ… åª›ìˆˆì“¬.
                 //    CParticle* pParticle = {};
                 //    _wstring ParticleTag = {};
 
@@ -290,7 +290,7 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
 {
     if (ImGui::Begin("Particle Base"))
     {
-        //ÅØ½ºÃ³ ÀÌ¹ÌÁö ¼³Á¤
+        //?ë¿ë’ªï§£??ëŒ€?ï§žÂ€ ?ã…¼ì ™
         if (ImGui::BeginCombo("Texture", "")) {
             for (size_t i = 0; i < m_Textures.size(); i++)
             {
@@ -313,7 +313,7 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
         {
             if (ImGui::Button("Create"))
             {
-                //±âº»º£ÀÌ½º·Î »ý¼º
+                //æ¹²ê³•ë‚¯è¸°ì¢Žì” ?ã…»ì¤ˆ ?ì•¹ê½¦
                 _tchar ParticleTag[MAX_PATH] = {};
                 CParticle::PARTICLE_DESC ParticleDesc{};
                 CVIBuffer_Point_Instance::POINT_INSTANCE_DESC VIBufferDesc{};
@@ -326,7 +326,7 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
                 ParticleDesc.strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
                 ParticleDesc.strVIBufferTag += ParticleTag;
            
-                //¹öÆÛ ÃÖ¼Ò ¼³Á¤ °ª
+                //è¸°ê¾ªë ï§¤ì’–ëƒ¼ ?ã…¼ì ™ åª›?
                 VIBufferDesc.iNumInstance = 1;
                 VIBufferDesc.vSize = _float2(5.f, 5.f);
 
@@ -338,7 +338,7 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
 
                 tParticleDesc = ParticleDesc;
 
-                //ÃÊ±âÈ­
+                //ç¥ë‡ë¦°??
                 m_ParticleTag[0] = _T('\0');
 
                 IsCreate = true;
@@ -409,7 +409,7 @@ void CParticle_Controller::Remove_Desc(const _wstring& DescTag)
 
     if (iterParticleDesc != m_tParticleDesc.end())
     {
-        //È¤½Ã °°Àº ÀÌ¸§À¸·Î ´Ù½Ã¸¸µé¾îÁö´Â°Å ´ëºñÇØ¼­ Áö¿öÁà¾ßÇÏ³ª? ÇÊ¿ä¾øÀ»°Å °°À¸¸é Áö¿öµµ µÉµí.
+        //?ë±€ë–† åª›ìˆˆ? ?ëŒ€ì««?ì‡°ì¤ˆ ?ã…¼ë–†ï§ëš®ë±¾?ëŒ??ë¶½êµ… ?Â€é®ê¾ªë¹??ï§žÂ€?ëš¯ì¨¾?ì‡³ë¸¯?? ?ê¾©ìŠ‚?ë†ì“£å«„?åª›ìˆˆì‘ï§Ž?ï§žÂ€?ëš®ë£„ ?ì¢Šë².
         m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterParticleDesc->second.strVIBufferTag);
 
         m_tParticleDesc.erase(iterParticleDesc);
@@ -422,7 +422,7 @@ void CParticle_Controller::Remove_Desc(const _wstring& DescTag)
         m_tVBDesc.erase(iterVBDesc);
     }
 
-    //ÃÊ±âÈ­
+    //ç¥ë‡ë¦°??
     m_iSelectedParticle = 0;
     m_bSelectedParticle = false;
     m_pSelectedParticleDesc = nullptr;

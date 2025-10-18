@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "ModelLoader.h"
 
 CModelLoader::CModelLoader()
@@ -180,11 +180,11 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 		file.write(strName.data, iLength);
 
 		_float fDuration = pAnimation->mDuration;
-		// Animation Duration (Áö¼Ó½Ã°£)
+		// Animation Duration (ï§Â€?ë¿ë–†åª›?
 		file.write(reinterpret_cast<const _char*>(&fDuration), sizeof(_float));
 
 		_float fTickPerSecond = pAnimation->mTicksPerSecond;
-		// Animation TickPerSecond (ÃÊ´ç ÀÌµ¿·®)
+		// Animation TickPerSecond (ç¥ëˆë–¦ ?ëŒ€ë£??
 		file.write(reinterpret_cast<const _char*>(&fTickPerSecond), sizeof(_float));
 
 		_uint iNumChannels = pAnimation->mNumChannels;
@@ -348,8 +348,8 @@ void CModelLoader::Load_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("FBX File Load", "Import File", ".fbx", config);
 
-	ImVec2 vMinSize = ImVec2(600, 400);  // ÃÖ¼Ò Å©±â
-	ImVec2 vMaxSize = ImVec2(800, 400); // ÃÖ´ë Å©±â
+	ImVec2 vMinSize = ImVec2(600, 400);  // ï§¤ì’–ëƒ¼ ?Ñˆë¦°
+	ImVec2 vMaxSize = ImVec2(800, 400); // ï§¤ì’•? ?Ñˆë¦°
 
 	if (ImGuiFileDialog::Instance()->Display(
 		"FBX File Load", ImGuiWindowFlags_NoCollapse
@@ -367,7 +367,7 @@ void CModelLoader::Load_File()
 				m_pAIScene = m_Importer.ReadFile(strFilePath.c_str(), iFlag);
 				if (nullptr == m_pAIScene)
 				{
-					MSG_BOX("°æ·Î Àß¸øµÊ");
+					MSG_BOX("å¯ƒìˆì¤ˆ ?ì„ã›??");
 					return;
 				}
 			}
@@ -387,12 +387,12 @@ void CModelLoader::Load_File()
 
 							if (nullptr == m_pAIScene)
 							{
-								MSG_BOX("°æ·Î Àß¸øµÊ");
+								MSG_BOX("å¯ƒìˆì¤ˆ ?ì„ã›??");
 								return;
 							}
 							_string SaveFilePath = "../../Client/Bin/Resource/Map/Rock";
 
-							//¿©±â¿¡ ³Ö¾î¾ßµÇ´Â °Ç ÀúÀå °æ·Î => ÆÄÀÏ ÀÌ¸§ ¶¼¾ßÇÔ.
+							//?Ñˆë¦°???ï½Œë¼±?ì‡°ë¦º??å«„??Â€??å¯ƒìˆì¤ˆ => ?ëš¯ì”ª ?ëŒ€ì«« ?ì‡±ë¹??
 
 
 							_string FileName = entry.path().filename().string();
@@ -436,8 +436,8 @@ void CModelLoader::Save_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
 
-	ImVec2 vMinSize = ImVec2(600, 400);  // ÃÖ¼Ò Å©±â
-	ImVec2 vMaxSize = ImVec2(800, 400); // ÃÖ´ë Å©±â
+	ImVec2 vMinSize = ImVec2(600, 400);  // ï§¤ì’–ëƒ¼ ?Ñˆë¦°
+	ImVec2 vMaxSize = ImVec2(800, 400); // ï§¤ì’•? ?Ñˆë¦°
 
 	if (ImGuiFileDialog::Instance()->Display("Save Model"
 		, ImGuiWindowFlags_NoCollapse

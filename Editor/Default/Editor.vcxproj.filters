@@ -185,6 +185,7 @@
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Edit_Brush.h" />
     <ClInclude Include="..\public\Shader_Interface.h">
       <Filter>96. Interface\Shader</Filter>
     </ClInclude>
@@ -268,6 +269,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp">
       <Filter>96. Interface\Shader</Filter>
     </ClCompile>

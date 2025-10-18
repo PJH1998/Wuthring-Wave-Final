@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -7,14 +7,14 @@ class CCubeCell final : public CBase
 {
 public:
 	enum class CORNER {
-		LFD,	// ÁÂÇÏ´Ü ¾ÕÂÊ
-		RFD,	// ¿ìÇÏ´Ü ¾ÕÂÊ
-		RFU,	// ¿ì»ó´Ü ¾ÕÂÊ
-		LFU,	// ÁÂ»ó´Ü ¾ÕÂÊ
-		LBD,	// ÁÂÇÏ´Ü µÚÂÊ
-		RBD,	// ¿ìÇÏ´Ü µÚÂÊ
-		RBU,	// ¿ì»ó´Ü µÚÂÊ
-		LBU,	// ÁÂ»ó´Ü µÚÂÊ
+		LFD,	// é†«ëš°ë¸¯???ìšã
+		RFD,	// ?ê³ ë¸¯???ìšã
+		RFU,	// ?ê³—ê¸½???ìšã
+		LFU,	// é†«ëš¯ê¸½???ìšã
+		LBD,	// é†«ëš°ë¸¯???ã…¼ã
+		RBD,	// ?ê³ ë¸¯???ã…¼ã
+		RBU,	// ?ê³—ê¸½???ã…¼ã
+		LBU,	// é†«ëš¯ê¸½???ã…¼ã
 		END
 	};
 
@@ -33,9 +33,7 @@ private:
 
 public:
 	HRESULT		Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth);
-	void			Priority_Update(_float fTimeDelta);
-	void			Update(_float fTimeDelta);
-	void			Late_Update(_float fTimeDelta);
+	void			Update(const _fvector& vCamPos);
 
 	void			Add_Object(class CStaticObject* pObject, const _float* pMinMax);
 
@@ -44,6 +42,7 @@ private:
 	BoundingBox*						m_pBoundingBox = { nullptr };
 	vector<CCubeCell*>				m_ChildCells;
 	vector<class CStaticObject*>	m_Objects;
+	_uint									m_iDepth = {};
 
 	_float3								m_Corners[ENUM_CLASS(CORNER::END)] = {};
 	_float									m_MinMax[ENUM_CLASS(MINMAX::END)] = {};

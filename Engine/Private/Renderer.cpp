@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Renderer.h"
 
 #include "GameInstance.h"
@@ -432,7 +432,7 @@ void CRenderer::Render_Debug()
 	}
 	m_DebugComponents.clear();
 
-	{   // µð¹ö±×¿ë ·»´õÅ¸°Ù¿¡ ±×¸®±â
+	{   // ?ë¶¾ì¾­æ´¹ëª„ìŠœ ?ëš®ëœ‘?Â€å¯ƒìž›ë¿‰ æ´¹ëªƒâ”æ¹²?
 
 		if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Debug"))))
 			CRASH("MRT_Debug");
@@ -553,7 +553,7 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
-	// RENDERGROUP::SHADOW_MAP // ¹ÌÃß°¡
+	// RENDERGROUP::SHADOW_MAP // ï¿½ï¿½ï¿½ß°ï¿½
 #pragma region MRT_SHADOW_MAP
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow_Map"), TEXT("RT_LightDepth_Map"))))
 		ASSERT_CRASH(false);

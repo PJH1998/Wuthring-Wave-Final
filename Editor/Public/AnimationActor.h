@@ -1,11 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ContainerObject.h"
 NS_BEGIN(Editor)
 class CAnimationActor final : public CContainerObject
 {
 public:
-	// »ı¼º½Ã Shader Tag¿Í Model Tag Àü´Ş.
+	// ?ì•¹ê½¦??Shader Tag?Â€ Model Tag ?ê¾¨ë––.
 	typedef struct tagAnimationActorDesc : CContainerObject::GAMEOBJECT_DESC
 	{
 		LEVEL eLevel = {};
@@ -16,12 +16,12 @@ public:
 
 		_uint iShaderPath = {};
 
-		// ÃÊ±â Transform ¼³Á¤
+		// ç¥ë‡ë¦° Transform ?ã…¼ì ™
 		_float3 vPostion = {};
 		_float3 vRotation = {};
 		_float3 vScale = {};
 
-		// ¹«±âµµ ÀåÂø °¡´ÉÇÏ°Ô?..
+		// è‡¾ë‹¿ë¦°???Î¼ê°‘ åª›Â€?Î½ë¸¯å¯ƒ?..
 	}ANIMATION_ACTOR_DESC;
 
 private:
@@ -56,7 +56,7 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
-	// Å×½ºÆ® Äİ¹é ÇÔ¼ö.
+	// ?ëš¯ë’ª??è‚„ì’•ê°š ?â‘¥ë‹”.
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
 #endif // _DEBUG
@@ -74,7 +74,7 @@ private:
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 
-	_float m_fTimeDelta = {}; // Stop »óÅÂ¿¡¼­µµ PlayAnimation µ¿ÀÛÀ» À§ÇÔ.
+	_float m_fTimeDelta = {}; // Stop ?ê³¹ê¹­?ë¨¯ê½Œ??PlayAnimation ?ìˆˆì˜‰???ê¾ªë¸¿.
 
 	_string m_strModelDatPath = {}; // 
 

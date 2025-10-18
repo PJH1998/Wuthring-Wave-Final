@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -19,8 +19,8 @@ public:
 	HRESULT				Initialize();
 	void				Update();
 
-	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);						// Volume À¸·Î º¯°æ?
-	_bool				IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange);	// Volume À¸·Î º¯°æ?
+	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);						// Volume ?ì‡°ì¤ˆ è¹‚Â€å¯ƒ?
+	_bool				IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange);	// Volume ?ì‡°ì¤ˆ è¹‚Â€å¯ƒ?
 	_bool				IsIn_WorldSpace( const BoundingBox* pBoundingBox );
 private:
 	CGameInstance*		m_pGameInstance = { nullptr };

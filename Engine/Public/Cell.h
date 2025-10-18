@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -40,11 +40,11 @@ private:
 
 
 	_float3						m_vPlaneNormal = {};
-	_float							m_fMinY = {};				// PointÀÇ Y°ª Áß ÃÖ¼Ò °ª
-	_float							m_fMaxY = {};				// PointÀÇ Y°ª Áß ÃÖ¼Ò °ª
+	_float							m_fMinY = {};				// Point??Yåª›?ä»¥?ï§¤ì’–ëƒ¼ åª›?
+	_float							m_fMaxY = {};				// Point??Yåª›?ä»¥?ï§¤ì’–ëƒ¼ åª›?
 
-	LINE							m_eHighLine = { LINE::END };	// Á¦ÀÏ ³ôÀº ¼±ºÐ
-	LINE							m_eLowLine = { LINE::END };		// Á¦ÀÏ ³·Àº ¼±ºÐ
+	LINE							m_eHighLine = { LINE::END };	// ?ì’–ì”ª ?ë¯ª? ?ì¢Ší…‡
+	LINE							m_eLowLine = { LINE::END };		// ?ì’–ì”ª ??? ?ì¢Ší…‡
 
 	_float3						m_Points[ENUM_CLASS(POINTS::END)] = {};
 	_float3						m_vNormals[ENUM_CLASS(LINE::END)] = {};

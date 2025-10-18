@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Level_Effect.h"
 #include "Event_Level.h"
 #include "Effect_Controller.h"
@@ -24,8 +24,8 @@ HRESULT CLevel_Effect::Initialize()
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
 
-    // hlsl °ú ¸ÂÃá´Ù. => ÀÌ °ªÀº »À °³¼ö¿Í »ó°ü¾øÀÌ °ÅÀÇ °íÁ¤
-// ÇÑ ¹ø¿¡ ÀÛ¾÷À» Ã³¸®ÇÒ ÇÑ ÆÀÀÇ ½º·¹µå°¡ ¸î¸íÀÎ°¡¸¦ Á¤ÀÇ.
+    // hlsl æ€¨?ï§ìšŽí…£?? => ??åª›ë¯ª? å ‰?åª›ì’–ë‹”?Â€ ?ê³´??ë†ì”  å«„ê³—ì“½ æ€¨ì¢Žì ™
+// ??è¸°ë‰ë¿‰ ?ë¬’ë¾½??ï§£ì„Žâ”?????Â€???ã…»ì …?ì’“? ï§ë‰–ì±¸?ë©¸?ç‘œ??ëº¤ì“½.
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -41,7 +41,7 @@ HRESULT CLevel_Effect::Initialize()
     //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
-    //ÆÄÆ¼Å¬ ¿òÁ÷ÀÓ ¹× À§Ä¡°°Àº ¼³Á¤µé º¸±â À§ÇØ ÇÃ·¹ÀÌ¾î ¶ç¿ï·Á°í Ãß°¡ÇÔ.
+    //?ëš°ë–š???Â€ï§žê³¸ì—« è«›??ê¾©íŠ‚åª›ìˆˆ? ?ã…¼ì ™??è¹‚ë‹¿ë¦° ?ê¾ªë¹ ?ëš®ì …?ëŒë¼± ?ê¾©ìŠ±?ã…ºí€¬ ç•°ë¶½???
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMesh"),

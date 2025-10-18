@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "CSM.h"
 #include "GameInstance.h"
 #include "Shader.h"
@@ -162,7 +162,7 @@ void CCSM::Update_Matrices()
 
 void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 {
-	_float fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();		// Camera ±³Ã¼½Ã ÇÑ¹ø¸¸ ¹Þ¾Æ¿À°í ½Í
+	_float fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();		// Camera æ´ë¨¯ê»œ???ì’•ì¾²ï§?è«›ì†ë¸˜?ã…ºí€¬ ??
 	_float fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
 
 	for (_uint i = 0; i < m_iNumClipDistance; i++)
@@ -183,7 +183,7 @@ void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 
 		_float4 vClipPoints[8] = {};
 
-		for (_uint k = 0; k < 4; k++)				// ÇÁ·¯½ºÅÒ ³ª´²¼­ »õ·Î¿î ÇÁ·¯½ºÅÒ ¸¸µé±â
+		for (_uint k = 0; k < 4; k++)				// ?ê¾¨ìœ­?ã…½? ?ì„Žë‹ ???ëˆì¤ˆ???ê¾¨ìœ­?ã…½? ï§ëš®ë±¾æ¹²?
 		{
 			XMStoreFloat4(&vClipPoints[k], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fNearRatio));
 			XMStoreFloat4(&vClipPoints[k + 4], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fFarRatio));
@@ -226,23 +226,23 @@ _float CCSM::Compute_Radius(const _float4* pFrustrumPoints, _vector vCenterPos )
 _float CCSM::Compute_ClipDistance(_float fNear, _float fFar, _uint iIndex, _uint iNumClip, _float fLambda)
 {
 	_float fClipDistance = {};
-	_float fLinearClip = fNear + ( ( fFar - fNear ) * ( static_cast<_float>( iIndex ) / static_cast<_float>( iNumClip ) ) );	// Linear º¸°£
-	_float fLogClip = fNear * powf(fFar / fNear, static_cast<_float>( iIndex ) / static_cast<_float>( iNumClip ));				// Log	 º¸°£
+	_float fLinearClip = fNear + ( ( fFar - fNear ) * ( static_cast<_float>( iIndex ) / static_cast<_float>( iNumClip ) ) );	// Linear è¹‚ë‹¿ì»™
+	_float fLogClip = fNear * powf(fFar / fNear, static_cast<_float>( iIndex ) / static_cast<_float>( iNumClip ));				// Log	 è¹‚ë‹¿ì»™
 
-	fClipDistance = ( fLambda * fLogClip ) + ( 1.f - fLambda ) * fLinearClip;			// Linear¿Í Log Lerp
+	fClipDistance = ( fLambda * fLogClip ) + ( 1.f - fLambda ) * fLinearClip;			// Linear?Â€ Log Lerp
 
 	return fClipDistance;
 }
 
 _matrix CCSM::Make_SplitViewMatrix(const _float4* pFrustrumPoints)
 {
-	_vector vCenterPos = Compute_Center(pFrustrumPoints);							// ³ª´« ÇÁ·¯½ºÅÒÀÇ Áß½É
+	_vector vCenterPos = Compute_Center(pFrustrumPoints);							// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß½ï¿½
 
-	_float	fMaxRadius = Compute_Radius(pFrustrumPoints, vCenterPos);				// ÁßÁ¡¿¡¼­ ÇÁ·¯½ºÅÒ ²ÀÁöÁ¡±îÁöÀÇ ÃÖ´ë ±æÀÌ
+	_float	fMaxRadius = Compute_Radius(pFrustrumPoints, vCenterPos);				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
 	
 	fMaxRadius += fMaxRadius * 0.1f;
 
-	_vector vDir = XMLoadFloat4(&m_pLightDesc->vDirection);							// ÇöÀç ¸ÞÀÎ LightÀÇ Dir
+	_vector vDir = XMLoadFloat4(&m_pLightDesc->vDirection);							// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Lightï¿½ï¿½ Dir
 
 	_vector vEye = XMVectorSubtract(vCenterPos, XMVectorScale(vDir, fMaxRadius));	// Eye
 
@@ -259,7 +259,7 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 
 	for (_uint i = 0; i < 8; i++)
 	{
-		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // ³ª´« ÇÁ·¯½ºÅÒÀ» Lightºä·Î ¿Ã¸®±â
+		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Lightï¿½ï¿½ï¿½ ï¿½Ã¸ï¿½ï¿½ï¿½
 
 		fMinX = min(fMinX, vViewPoints[i].x);
 		fMaxX = max(fMaxX, vViewPoints[i].x);
@@ -271,17 +271,17 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 		fMaxZ = max(fMaxZ, vViewPoints[i].z);
 	}
 
-	_float fCascadeExtentX = (fMaxX - fMinX ) * 0.5f;				// ÇÁ·¯½ºÅÒ X Áö¸§
-	_float fCascadeExtentY = ( fMaxY - fMinY ) * 0.5f;				// ÇÁ·¯½ºÅÒ Y Áö¸§
+	_float fCascadeExtentX = (fMaxX - fMinX ) * 0.5f;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X ï¿½ï¿½ï¿½ï¿½
+	_float fCascadeExtentY = ( fMaxY - fMinY ) * 0.5f;				// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Y ï¿½ï¿½ï¿½ï¿½
 
-	//_float fCascadeExtent = max(fCascadeExtentX, fCascadeExtentY) * 0.5f; // x, y Áß Ä¿´Ù¶õ ÂÊÀ» ¹ÝÁö¸§À¸·Î »ç¿ë ( ³Ê¹« ³Ð¾îÁü Pass )
+	//_float fCascadeExtent = max(fCascadeExtentX, fCascadeExtentY) * 0.5f; // x, y ï¿½ï¿½ Ä¿ï¿½Ù¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ( ï¿½Ê¹ï¿½ ï¿½Ð¾ï¿½ï¿½ï¿½ Pass )
 
 	fMinZ -= fMinZ * 0.1f;
 	fMaxZ += fMaxZ * 0.1f;
 
-	_float fTexelSizeX = ( fCascadeExtentX * 2.f) / static_cast<_float>(g_iMaxWidth);		// ÇöÀç ±×·ÁÁú ÇÁ·¯½ºÅÒÀÇ 1ÅØ¼¿ »çÀÌÁî X
+	_float fTexelSizeX = ( fCascadeExtentX * 2.f) / static_cast<_float>(g_iMaxWidth);		// ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X
 
-	_float fTexelSizeY = ( fCascadeExtentY * 2.f ) / static_cast<_float>(g_iMaxHeight);		// ÇöÀç ±×·ÁÁú ÇÁ·¯½ºÅÒÀÇ 1ÅØ¼¿ »çÀÌÁî Y
+	_float fTexelSizeY = ( fCascadeExtentY * 2.f ) / static_cast<_float>(g_iMaxHeight);		// ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Y
 
 	_float3 vViewCenterPos = {};
 	XMStoreFloat3(&vViewCenterPos, Compute_Center(vViewPoints));
@@ -321,7 +321,7 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 	_float fNear = fMinZ;
 	_float fFar = fMaxZ;*/
 
-	//return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ºäÇà·Ä ¿Ã¸° ÇÁ·¯½ºÅÒ¿¡¼­ Min,Max, Near, Far ±¸ÇØ¼­ Åõ¿µÇà·Ä »ý¼º	;
+	//return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¿ï¿½ï¿½ï¿½ Min,Max, Near, Far ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½	;
 }
 
 void CCSM::Make_ClipZ()

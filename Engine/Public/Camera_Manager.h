@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -26,7 +26,7 @@ public:
 
 public:
 	HRESULT			Initialize(_uint iNumLevel);
-	void			Update(_float fTimeDelta);	// PipeLine¿¡ Camera Matrix °»½Å
+	void			Update(_float fTimeDelta);	// PipeLine??Camera Matrix åª›ê¹†ë–Š
 
 	HRESULT			Clear_Resource(_uint iCurrentLevelID);
 

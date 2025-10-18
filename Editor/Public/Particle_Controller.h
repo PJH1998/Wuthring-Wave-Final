@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 #include "Particle.h"
 
@@ -18,7 +18,7 @@ private:
 	explicit CParticle_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CParticle_Controller() = default;
 
-#pragma region �⺻
+#pragma region 湲곕낯
 public:
 	HRESULT Initialize();
 	void Update();

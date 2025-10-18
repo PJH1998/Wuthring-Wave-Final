@@ -1,4 +1,4 @@
-#ifndef Engine_Macro_h__
+﻿#ifndef Engine_Macro_h__
 #define Engine_Macro_h__
 
 namespace Engine

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "StaticObject.h"
 
 CStaticObject::CStaticObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

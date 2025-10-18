@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -23,7 +23,7 @@ public:
 	virtual		void			Render_Shadow() {};
 
 protected:
-	// LOD °³¼ö
+	// LOD åª›ì’–ë‹”
 	_uint		m_iNumLOD = {};
 	// LOD Index
 	_uint		m_iLODIndex = {};

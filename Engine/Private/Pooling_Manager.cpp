@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Pooling_Manager.h"
 
 #include "GameInstance.h"
@@ -115,7 +115,7 @@ void CPooling_Manager::Work_Thread()
 		unique_lock<mutex> lock(m_Mutex);
 		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
 
-		// Client Á¾·á ½Ã, Thread ¸ðµÎ Á¾·á
+		// Client é†«ë‚…ì¦º ?? Thread ï§â‘¤ëª¢ é†«ë‚…ì¦º
 		if (true == m_isAllStop)
 			return;
 

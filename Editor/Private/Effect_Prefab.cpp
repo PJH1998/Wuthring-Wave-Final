@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+ï»¿#include "Editorpch.h"
 #include "Effect_Prefab.h"
 #include "Particle.h"
 
@@ -40,7 +40,7 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
 void CEffect_Prefab::Update(_float fTimeDelta)
 {
-    //ÀÚ½Äµé ¼³Á¤°ª¿¡ µû¶ó Activate È°¼ºÈ­ ÇØÁà¾ßÇÔ.
+    //?ë¨¯ë–‡???ã…¼ì ™åª›ë¯ªë¿‰ ?ê³•ì”ª Activate ?ì’–ê½¦???ëŒì¨¾?ì‡³ë¸¿.
 
     for (auto& Children : m_EffectChildren)
     {
@@ -60,14 +60,14 @@ void CEffect_Prefab::Late_Update(_float fTimeDelta)
 
 void CEffect_Prefab::Render()
 {
-    //·£´õ ¾ø¾îµµ µÉµí
+    //?ì’•ëœ‘ ?ë†ë¼±???ì¢Šë²
 }
 
 void CEffect_Prefab::Add_Children(void* pArg)
 {
-    //ÀÚ½Äµé Ãß°¡ (ÆÄÆ¼Å¬ÀÌ¸é ÆÄÆ¼Å¬ DescÇÊ¿ä)
-    //ÀÚ½Ä Ãß°¡ÇÒ ¶§ ÆÄÆ¼Å¬ÀÎÁö ¹ºÁö ¾Ë¾Æ¾ßÇÒ°Å °°Àºµ¥?
-    //ÀÏ´Ü ÀÓ½Ã·Î ÆÄÆ¼Å¬ °íÁ¤
+    //?ë¨¯ë–‡??ç•°ë¶½? (?ëš°ë–š?ëŒì” ï§??ëš°ë–š??Desc?ê¾©ìŠ‚)
+    //?ë¨¯ë–‡ ç•°ë¶½??????ëš°ë–š?ëŒì”¤ï§Â€ è¸ë¶¿? ?ëš¯ë¸˜?ì‡³ë¸·å«„?åª›ìˆˆ???
+    //?ì‡°ë–’ ?ê¾©ë–†æ¿¡??ëš°ë–š??æ€¨ì¢ì ™
 
     CGameObject* pChildren = {};
     CParticle::PARTICLE_DESC* pDesc = static_cast<CParticle::PARTICLE_DESC*>(pArg);
@@ -84,7 +84,7 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
 {
    auto iter = m_EffectChildren.find(ChildrenTag);
 
-   //Àß¸øµÈ Å°°ª
+   //?ì„ã›???ã…ºì»ª
    if (iter == m_EffectChildren.end())
        return;
 
@@ -158,7 +158,7 @@ void CEffect_Prefab::Free()
 {
     __super::Free();
 
-    //ÀÚ½Ä »èÁ¦
+    //?ë¨¯ë–‡ ??ì £
     for (auto& Children : m_EffectChildren)
         Safe_Release(Children.second);
 

@@ -1,4 +1,4 @@
-#include"EnginePch.h"
+ï»¿#include"EnginePch.h"
 #include"Model_Instance.h"
 #include"MeshMaterial.h"
 #include"Mesh_Instance.h"
@@ -59,7 +59,7 @@ HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTrans
 
 HRESULT CModel_Instance::Initialize_Clone(void* pArg)
 {
-	//ÀÓ½Ã
+	//?ê¾©ë–†
 	for (auto& pMesh : m_Meshes)
 		pMesh->Initialize_Clone(pArg);
 
@@ -177,7 +177,7 @@ CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceCont
 {
 	CModel_Instance* pInstance = new CModel_Instance(pDevice, pContext);
 
-	//ÀÓ½Ã. ³ªÁß¿¡ ¾Ö´Ô ¸ðµ¨µµ ¸Þ½¬ ÀÎ½ºÅÏ½ÌÀÌ ÇÊ¿äÇÒ °æ¿ì ´ëºñ ¾ø¾ÖÁø ¾ÊÀ½.
+	//?ê¾©ë–†. ?ì„ì¨·???ì¢Šë–‚ ï§â‘¤ëœ½??ï§Žë¶¿ë© ?ëª„ë’ª?ëŒë–›???ê¾©ìŠ‚??å¯ƒìŽŒìŠ¦ ?Â€é®??ë†ë¸·ï§ž??ë”†ì“¬.
 	MODELTYPE eType = MODELTYPE::MAP;
 
 	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath)))

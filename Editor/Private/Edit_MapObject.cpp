@@ -1,4 +1,4 @@
-#include"Editorpch.h"
+ï»¿#include"Editorpch.h"
 #include "Edit_MapObject.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
@@ -9,13 +9,11 @@
 _uint CEdit_MapObject::g_iNumObjects = {};
 CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CStaticObject(pDevice, pContext)
-    //:CGameObject(pDevice, pContext)
 {
 }
 
 CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
     :CStaticObject(Prototype)
-    //:CGameObject(Prototype)
 {
 }
 
@@ -23,6 +21,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
 {
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
+
+    //ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ï¿½ï¿½?
+    //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ã¼­ È¯ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±ï¿½.
 
     return S_OK;
 }
@@ -40,6 +41,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_iNumLOD = m_pModelComArray.size()-1;
+
     Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
     m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
@@ -54,10 +56,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
     MODELTYPE::MAP;
 
-    //ImGui¿¡¼­ ÀúÀå ´©¸¦ ¶§ ¸ğµ¨ ÀÌ¸§º°·Î ÀÌ ¸ğµ¨Àº ¾îµğ´Ù ÀúÀåÇÒÁö ¼±ÅÃÇÏ°Ô?
+    //ImGui?ë¨¯ê½Œ ?Â€???ê¾¨? ??ï§â‘¤ëœ½ ?ëŒ€ì««è¹‚ê¾¨ì¤ˆ ??ï§â‘¤ëœ½?Â€ ?ëŒ€ëµ’???Â€?Î½ë¸·ï§Â€ ?ì¢ê¹®?ì„ì¾¶?
 #ifdef _DEBUG
 
-    //ÁøÂ¥ ¸¶À½¿¡ ¾Èµê. ³ªÁß¿¡ ¹°¾îº¸°í ¼öÁ¤ÇÒ°Í
+    //ï§ê¾©ì­¨ ï§ë‰ì“¬???ëˆë²€. ?ì„ì¨·??è‡¾ì‡±ë¼±è¹‚ë‹¿í€¬ ?ì„ì ™?ì¢‰ì¾¬
 
     //MAP_CREATE event(m_ModelName, this);
 
@@ -70,7 +72,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         if (!m_isActivate)
             return;
 
-        //°æ·Î ÁöÁ¤ÇÒ ¶§ »óÀ§ Æú´õ¿£ µÚ¿¡ LOD »©°í. Æú´õ¸¦ ÁöÁ¤. ±×¸®°í ±× ¾È¿¡ ÀÖ´Â Æú´õ ÇÏÀ§ 1°³ µ¹¸é¼­ .datµé ÀĞ°í °´Ã¼ ¾È¿¡ ³Ö±â?
+        //å¯ƒìˆì¤ˆ ï§Â€?ëº¥ë¸· ???ê³¸ì ?ëŒ€ëœ‘???ã…¼ë¿‰ LOD é®ì‡¨í€¬. ?ëŒ€ëœ‘ç‘œ?ï§Â€?? æ´¹ëªƒâ”æ€¨?æ´¹??ë‰ë¿‰ ?ëˆë’— ?ëŒ€ëœ‘ ?ì„ì 1åª›??ëš®ãˆƒ??.dat???ì„í€¬ åª›ì•¹ê»œ ?ë‰ë¿‰ ?ï½Šë¦°?
         
         /*OBJECT_SAVE Save{};
         Save.m_iNameLength = strlen(m_ModelName);
@@ -129,10 +131,10 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 {
     if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB)== KEYSTATE::DOWN)
     {
-        //¿©±â¿¡ Å¬¸¯ ÃÖÀûÈ­ ÇÏ·Á¸é ÇÁ·¯½ºÅÒ ÄÃ¸µ±îÁö.
+        //?Ñˆë¦°???ëŒ€â”ƒ ï§¤ì’–ìŸ»???ì„ì ®ï§??ê¾¨ìœ­?ã…½? è€ŒÑ‰ì­…æºëš¯?.
 
         _float fDistance = {};
-        //¿ùµåµµ ¹Ù²ã¾ßÇÔ.
+        //?ë¶¾ë±¶??è«›ë¶½í“­?ì‡³ë¸¿.
         _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
         _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
         if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
@@ -142,6 +144,7 @@ void CEdit_MapObject::Update(_float fTimeDelta)
             m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
         }
     }
+    //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
@@ -152,14 +155,14 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 void CEdit_MapObject::Render()
 //void CEdit_MapObject::Render(_uint iLOD)
 {
-    //¾Èº¸ÀÌ´Â °Å ±íÀÌ
+    //ï¿½Èºï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     Bind_Resources();
 
-    for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
+    for (_uint i = 0; i < m_pModelComArray[m_iLODIndex]->Get_NumMesh(); ++i)
     {
         if (m_TexMode)
         {
-            //Ä¿½ºÅÒ ÅØ½ºÃÄ ¸ğµå¸é ¸¶½ºÅ· ÀÌ¹ÌÁö ¾ø¾î¼­ Á¦´ë·Î ¾ÈµÊ.
+            //Ä¿ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å· ï¿½Ì¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Èµï¿½.
             if (m_pDiffuseTextureCom[i])
                 m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture",0);
             if (m_pNormalTextureCom[i])
@@ -174,18 +177,18 @@ void CEdit_MapObject::Render()
         else
         {
             _uint FailedCnt = {};
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
                 FailedCnt++;
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                 FailedCnt++;
 
-            if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         }
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
-        m_pModelCom->Render(i);
+        m_pModelComArray[m_iLODIndex]->Render(i);
     }
 }
 
@@ -257,9 +260,9 @@ void CEdit_MapObject::Set_ImGuiOption()
         m_isActivate = false;
 
     About_Texture();
-    //LOD°¡ ÃÑ 4´Ü°è·Î ³ª´µ¾îÁ®ÀÖ´Âµ¥ ÀÌ°Å ¾î¶»°Ô ÇÒ °ÇÁö »ı°¢.
-    //Á¦ÀÏ °£´ÜÇÑ ¹æ¹ı => ÄõµåÆ®¸®¿¡¼­ Å©±â¿¡ ºñ·ÊÇØ¼­ ·»´õÇÒ ¶§ ¸ğµ¨ °¥¾Æ³¢±â.
-    //=> ÀÎ½ºÅÏ½ÌÇÑ ¸Ş½¬µéÀº °¢ ¸ÅÆ®¸¯½º¸¶´Ù ºñ±³ÇØ¼­ ¸Ş½¬ ¹¹ ¾µÁö °áÁ¤ÇØ¾ßÇÒµí?
+    //LODåª›Â€ ç¥?4?â‘£í€æ¿¡??ì„ë‡?ëŒì¡‡?ëˆë’—???ë‹¿êµ… ?ëŒ€ë¼¸å¯ƒ???å«„ëŒ? ?ì•·ì»–.
+    //?ì’–ì”ª åª›ê¾¨ë–’??è«›â‘¸ì¾¿ => è‘ì‡°ë±¶?ëªƒâ”?ë¨¯ê½Œ ?Ñˆë¦°??é®ê¾¨??ëŒê½Œ ?ëš®ëœ‘????ï§â‘¤ëœ½ åª›ë‰ë¸˜?ì‡¨ë¦°.
+    //=> ?ëª„ë’ª?ëŒë–›??ï§ë¶¿ë©?ã…¼? åª›?ï§ã…½ë“ƒç”±?ë’ªï§ëˆë– é®ê¾§íƒ³?ëŒê½Œ ï§ë¶¿ë© è¸??ëª„? å¯ƒê³—ì ™?ëŒë¹?ì¢Šë²?
 
 }
 
@@ -268,7 +271,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
     m_pGameInstance->Wait_Thread_End();
 
-    //ÀÌ ºÎºĞ ³ªÁß¿¡ .Dat·ÎµåÇÒ¶§ µ¥ÀÌÅÍÈ­ ½ÃÄÑ¼­ ·Îµå ½ÃÅ³°Í.
+    //??éºÂ€éº??ì„ì¨·??.Datæ¿¡ì’•ë±¶?ì¢Šë¸£ ?ê³—ì” ?ê³ ì†• ?ì’–í’??æ¿¡ì’•ë±¶ ?ì’—ê¶—å¯ƒ?
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
@@ -295,7 +298,6 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         //        CRASH("FAILED");
         //    //m_pModelComArray.push_back(pModel);
         //    });
-        CModel* pModel = nullptr;
         _wstring ModelCom = Model;
         //ModelCom.pop_back();
         ModelCom += to_wstring(i);
@@ -313,7 +315,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
     
-#pragma region ¸®Áöµå¹Ùµğ
+#pragma region ç”±ÑŠ??ì’•ì»®??
         //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
         //RigidbodyDesc.eShape = SHAPE::MESH;
         //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
@@ -381,7 +383,7 @@ void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 void CEdit_MapObject::Export_MaterialData()
 {
 
-    //ÃÖÁ¾ Æú´õ °æ·Î.
+    //ï§¤ì’–ì¥Œ ?ëŒ€ëœ‘ å¯ƒìˆì¤ˆ.
 
     IGFD::FileDialogConfig config1;
     _char ModelPath[MAX_PATH] = {};
@@ -434,7 +436,7 @@ void CEdit_MapObject::Export_MaterialData()
 
             ofstream File(strFolderName);
 
-#pragma region ÅØ½ºÃÄ º¹»ç ¹× Json ÀúÀå
+#pragma region Json ì¶”ì¶œ
             strTexturePath += "/Tex/";
             filesystem::create_directories(strTexturePath);
             json Totaljson;
@@ -549,8 +551,6 @@ void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, 
 
     for (auto& pChild : m_ChildObjects)
         pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
-    //À§Ä¡¸¸ °®°í¿À±â?
-    //ºÎ¸ğ¸¸ È¸ÀüÇØ¾ßÇÒ ¶§´Â ¾î¶»°ÔÇÔ?
 }
 
 void CEdit_MapObject::About_Parent()
@@ -618,9 +618,9 @@ void CEdit_MapObject::About_Transform()
 
     ImGui::Text("Turn_Quaternion");
     {
-        //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         ImGui::PushItemWidth(300.0f);
-        //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
         ImGui::InputFloat3("Rotation", vRotation);
     }
 
@@ -637,7 +637,7 @@ void CEdit_MapObject::About_Transform()
     m_pTransformCom->Set_WorldMatrix(matrix);
 
     //m_pGameInstance->Add_Light()
-    //ÀÚ½ÄÀº °£´ÜÇÏ°Ô ºÎ¸ğÀÇ º¯È­·®¸¸ Ãß°¡·Î ÇÏ°Ô ÇÏ¸é µÉµí? È¸ÀüÀº ¸ğ¸£°ÚÀ½..
+    //?ë¨¯ë–‡?Â€ åª›ê¾¨ë–’?ì„ì¾¶ éºÂ€ï§â‘¥ì“½ è¹‚Â€?ë¶¾ì›¾ï§?ç•°ë¶½?æ¿¡??ì„ì¾¶ ?ì„ãˆƒ ?ì¢Šë²? ?ëš¯ìŸ¾?Â€ ï§â‘¤â…¤å¯ƒì¢ì“¬..
 
 
     for (auto& pChild : m_ChildObjects)
@@ -658,11 +658,11 @@ void CEdit_MapObject::About_Transform()
 
         //ImGui::Text("Turn_Quaternion");
         //{
-        //    //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //    //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         //    ImGui::PushItemWidth(90.0f);
         //    //_float4 DegreeRotation = m_pRotation[m_iPickedInstance];
 
-        //    //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //    //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
 
         //    ImGui::InputFloat("Yaw", &m_vNewRotation.x, 0.1f, 0.1f); ImGui::SameLine();
         //    ImGui::InputFloat("Picth", &m_vNewRotation.y, 0.1f, 0.1f); ImGui::SameLine();
@@ -685,7 +685,7 @@ void CEdit_MapObject::About_Transform()
 
         //if (ImGui::Button("OK"))
         //{
-        //    //ÀÚ½ÄÀº °£´ÜÇÏ°Ô ºÎ¸ğÀÇ º¯È­·®¸¸ Ãß°¡·Î ÇÏ°Ô ÇÏ¸é µÉµí? È¸ÀüÀº ¸ğ¸£°ÚÀ½..
+        //    //?ë¨¯ë–‡?Â€ åª›ê¾¨ë–’?ì„ì¾¶ éºÂ€ï§â‘¥ì“½ è¹‚Â€?ë¶¾ì›¾ï§?ç•°ë¶½?æ¿¡??ì„ì¾¶ ?ì„ãˆƒ ?ì¢Šë²? ?ëš¯ìŸ¾?Â€ ï§â‘¤â…¤å¯ƒì¢ì“¬..
         //    _matrix Scale, Rotation, Translation;
         //    _float3 DegreeRotation = _float3(XMConvertToRadians(m_vNewRotation.x), XMConvertToRadians(m_vNewRotation.y), XMConvertToRadians(m_vNewRotation.z));
 
@@ -721,7 +721,7 @@ void CEdit_MapObject::About_Texture()
 
         //config.path = "C:/Users/dnheu/source/repos";
         config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
-        //±×¶§±×¶§ ¹Ù²ã³¢±â.
+        //æ´¹ëªƒë¸£æ´¹ëªƒë¸£ è«›ë¶½í“­?ì‡¨ë¦°.
         //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Rock/Tex/";
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
@@ -801,7 +801,6 @@ void CEdit_MapObject::About_Texture()
             ImGui::EndCombo();
         }
 
-        //¸Ş½¬¸¶´Ù °øÅëµÇ´Â °Å ÀÖÀ¸¸é ¿©±â¿¡ ÁöÁ¤.
         //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/Rock/SM_Sev_Roc_15AM/Mat/Tex/T4_Com2_Roc_05A_D.png";
 
         if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
@@ -850,7 +849,7 @@ void CEdit_MapObject::About_Texture()
                     ImGui::SetItemDefaultFocus();
                     m_SelectedNormal = m_EntireNormalTextureName[i].c_str();
 
-                    //W½ºÆ®¸µÀ¸·Î ¹Ù²ã.
+                    //W?ã…½ë“ƒï§ê³¸ì‘æ¿¡?è«›ë¶½í“­.
                     _wstring Test(m_SelectedNormal.begin(), m_SelectedNormal.end());
                     if (m_pNormalTextureCom[m_iSelectedMesh])
                         Safe_Release(m_pNormalTextureCom[m_iSelectedMesh]);
@@ -881,7 +880,7 @@ void CEdit_MapObject::About_Texture()
                     ImGui::SetItemDefaultFocus();
                     m_SelectedMask = m_EntireMaskTextureName[i].c_str();
 
-                    //W½ºÆ®¸µÀ¸·Î ¹Ù²ã.
+                    //Wï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½.
                     _wstring Test(m_SelectedMask.begin(), m_SelectedMask.end());
                     if (m_pMaskTextureCom[m_iSelectedMesh])
                         Safe_Release(m_pMaskTextureCom[m_iSelectedMesh]);
@@ -920,7 +919,7 @@ void CEdit_MapObject::About_Texture()
                     ImGui::SetItemDefaultFocus();
                     m_SelectedMaskDiffuse = m_EntireDiffuseTextureName[i].c_str();
 
-                    //W½ºÆ®¸µÀ¸·Î ¹Ù²ã.
+                    //Wï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½.
                     _wstring Test(m_SelectedMaskDiffuse.begin(), m_SelectedMaskDiffuse.end());
                     if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
                         Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
@@ -972,7 +971,6 @@ void CEdit_MapObject::About_Texture()
     }
 
 }
-
 
 CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

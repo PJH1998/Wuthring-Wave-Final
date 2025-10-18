@@ -91,7 +91,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask; 
+    //Out.vDiffuse = vDiffuse * (1.f - vMask) + (vMaskDiffiuse * float4(0.1f, 0.f, 1.f, 1.f)) * vMask;
+    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     
     float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);    
     float3 vNormal = vNormalDesc.xyz * 2.f - 1.f;

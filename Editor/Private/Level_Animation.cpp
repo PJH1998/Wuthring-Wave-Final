@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Level_Animation.h"
 
 #include "Event_Level.h"
@@ -13,7 +13,7 @@ HRESULT CLevel_Animation::Initialize()
 {
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
-    /* ÀÓ½Ã ½¦ÀÌ´õ Ãß°¡. */
+    /* ?ê¾©ë–† ?ë¨¯ì” ??ç•°ë¶½?. */
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
             , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -22,8 +22,8 @@ HRESULT CLevel_Animation::Initialize()
         return E_FAIL;
     }
 
-    // hlsl °ú ¸ÂÃá´Ù. => ÀÌ °ªÀº »À °³¼ö¿Í »ó°ü¾øÀÌ °ÅÀÇ °íÁ¤
-    // ÇÑ ¹ø¿¡ ÀÛ¾÷À» Ã³¸®ÇÒ ÇÑ ÆÀÀÇ ½º·¹µå°¡ ¸î¸íÀÎ°¡¸¦ Á¤ÀÇ.
+    // hlsl æ€¨?ï§ìšŽí…£?? => ??åª›ë¯ª? å ‰?åª›ì’–ë‹”?Â€ ?ê³´??ë†ì”  å«„ê³—ì“½ æ€¨ì¢Žì ™
+    // ??è¸°ë‰ë¿‰ ?ë¬’ë¾½??ï§£ì„Žâ”?????Â€???ã…»ì …?ì’“? ï§ë‰–ì±¸?ë©¸?ç‘œ??ëº¤ì“½.
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -9,8 +9,8 @@ public:
     virtual ~CAnimNotify() = default;
     
     virtual void Execute() = 0;
-    virtual json To_Json() const = 0;         // JSON º¯È¯
-    virtual const _string& Get_NotifyTypeName() const = 0; // Å¸ÀÔ ÀÌ¸§
+    virtual json To_Json() const = 0;         // JSON è¹‚Â€??
+    virtual const _string& Get_NotifyTypeName() const = 0; // ?Â€???ëŒ€ì««
 
     void Set_ColliderCallBack(function<void(const _wstring&, _bool)> ColliderCallback) { m_ColliderCallback = ColliderCallback;  }
     void Set_EffectCallback(function<void()> EffectCallback) { m_EffectCallback = EffectCallback; }
@@ -22,7 +22,7 @@ public:
     const _float Get_TrackPosition() const { return m_fTrackPosition; }
 
 protected:
-    _float m_fTrackPosition = {}; // ¹«Á¶°ÇÀûÀ¸·Î ÇÊ¿ä.
+    _float m_fTrackPosition = {}; // è‡¾ëŒâ€œå«„ëŒìŸ»?ì‡°ì¤ˆ ?ê¾©ìŠ‚.
     _string m_strNotifyTypeName = {};
     function<void(const _wstring&, _bool)> m_ColliderCallback;
     function<void()> m_EffectCallback;

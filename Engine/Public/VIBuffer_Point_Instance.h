@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "VIBuffer_Instance.h"
 
@@ -17,7 +17,7 @@ public:
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
-		_float		fGravity = 9.8f;	//¼öÄ¡°í¹Î
+		_float		fGravity = 9.8f;	//?ì„íŠ‚æ€¨ì¢Š?
 	}POINT_INSTANCE_DESC;
 
 private:

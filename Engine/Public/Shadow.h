@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -50,9 +50,9 @@ private:
 	_float4x4				m_ViewMatrix = {};							// Shadow Light View
 	vector<_float4x4>		m_ProjMatrices;								// Shadow Light Proj * Num Splits
 
-	vector<_float>			m_SplitDistances;							// ÇÁ·¯½ºÅÒµé ±æÀÌ
-	vector<_float4>*		m_pSplitPoints = { nullptr };				// ³ª´« ÇÁ·¯½ºÅÒµé Points
-	vector<_float4>*		m_pSplitPlanes = { nullptr };				// ÇÁ·¯½ºÅÒ Æò¸éµé ÄÃ¸±¿ë
+	vector<_float>			m_SplitDistances;							// ?ê¾¨ìœ­?ã…½???æ¹²ëª„ì” 
+	vector<_float4>*		m_pSplitPoints = { nullptr };				// ?ì„ëŠ¿ ?ê¾¨ìœ­?ã…½???Points
+	vector<_float4>*		m_pSplitPlanes = { nullptr };				// ?ê¾¨ìœ­?ã…½? ?ë°ãˆƒ??è€ŒÑ‰â”«??
 
 
 private:
