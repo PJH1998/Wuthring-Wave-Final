@@ -6,13 +6,23 @@
 #include"Edit_MapObject_Instance.h"
 #include"Edit_PreViewModel.h"
 #include"Edit_LightObject.h"
+#include"Edit_Brush.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
 _float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
+
 CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
 {
+    // 랜드스케이프를 위해 메쉬 위에 브러쉬 만드는 메모
+    // 뎁스 타겟을 갖고와서 바인딩. 월드 위치로 변환.
+    // 내 마우스 위치 점 하나 VS_IN으로 보내고, Range 변수 셰이더 전달.
+    // 뎁스 타겟의 w값이 0이면 discard
+    // GS셰이더에서 사각 버퍼 생성, 점 기준으로 원형 브러쉬 생성? => 사각할 건지 원형 할 건지 변수 전달?
+    // 범위, Y축 기준 회전 랜덤수치, 개수, 색상..? 입력 가능하게 ?
+    
+    // 버튼 누르면 생성할 수 있게?
 }
 
 HRESULT CLevel_Map::Initialize()
@@ -51,6 +61,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
     case Editor::CLevel_Map::MENU_RANDSCAPE:
         Menu_RandSacpe();
+        m_pBrush->Update(fTimeDelta);
         break;
 
     case Editor::CLevel_Map::MENU_LIGHT:
@@ -441,6 +452,12 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
      CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
 
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
+        CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
     //VTXMESHINSTANCE
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
@@ -448,6 +465,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
     
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
         CEdit_LightObject::Create(m_pDevice, m_pContext));
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
+        CEdit_Brush::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
@@ -470,7 +490,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     //m_pGameInstance->Add_GameObject_ToLayer()
     Load_Objects();
-
+    m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
     return S_OK;
 }
 

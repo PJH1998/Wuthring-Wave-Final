@@ -159,6 +159,7 @@
     <ClInclude Include="..\Public\EditorPch.h" />
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
+    <ClInclude Include="..\Public\Edit_Brush.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
@@ -194,6 +195,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />

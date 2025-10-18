@@ -9,10 +9,10 @@
 #include "VIBuffer_Rect.h"
 #include "VIBuffer_Cube.h"
 #include "VIBuffer_Point_Instance.h"
+#include "VIBuffer_Point.h"
 #include "Transform.h"
 #include "Navigation.h"
 #include "Rigidbody.h"
-#include "ComputeShader.h"
 #include "Collider.h"
 #include"Model_Instance.h"
 

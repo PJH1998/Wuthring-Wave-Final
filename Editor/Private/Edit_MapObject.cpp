@@ -24,6 +24,9 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
 
+    //옥토트리 구역에 따라 색도 다르게?
+    //월드 위치에 따라 마스크의 색을 바꿔서 환경이 바뀌는 느낌 주기.
+
     return S_OK;
 }
 
@@ -40,8 +43,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_iNumLOD = m_pModelComArray.size()-1;
-    Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
-    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
+    //Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
+    //m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
@@ -972,7 +975,6 @@ void CEdit_MapObject::About_Texture()
     }
 
 }
-
 
 CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

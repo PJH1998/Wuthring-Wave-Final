@@ -213,7 +213,7 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\Shader\ComputeShader">
       <UniqueIdentifier>{c88a01cf-f161-4e6d-ae5c-73a301dcb49d}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\Collider">
       <UniqueIdentifier>{e90640a9-0e57-4dd6-aade-72e7e4bcb042}</UniqueIdentifier>
     </Filter>
@@ -438,9 +438,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimNotifyDefine.h">
-      <Filter>01. Utility\04. Component\Model\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
@@ -452,7 +449,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\ComputeShader.h">
       <Filter>01. Utility\04. Component\Shader\ComputeShader</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Model_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance</Filter>
     </ClInclude>
@@ -483,6 +480,7 @@
     <ClInclude Include="..\public\CSM.h">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Point.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -673,7 +671,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\ComputeShader.cpp">
       <Filter>01. Utility\04. Component\Shader\ComputeShader</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Model_Instance.cpp">
       <Filter>01. Utility\04. Component\Model_Instance</Filter>
     </ClCompile>
@@ -704,6 +702,7 @@
     <ClCompile Include="..\private\CSM.cpp">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
