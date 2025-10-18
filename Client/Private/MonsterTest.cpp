@@ -32,6 +32,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_iHP = 1;
+	m_strCurrentAnimTag = "Born1";
 	return S_OK;
 }
 
@@ -52,7 +53,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	//if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
 	//	vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
 
-	m_isAnimationFinished = m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
+	m_isAnimationFinished = m_pModelCom->Play_Animation(m_strCurrentAnimTag, fTimeDelta, nullptr);
 	//m_pColliderCom->Update(vVelocity);
 	
 }

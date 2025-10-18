@@ -37,7 +37,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
-    // ModelÀÇ Dat Folder Path
+    // Modelì˜ Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -47,7 +47,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
-    // Default´Â 0¹ø ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà.
+    // DefaultëŠ” 0ë²ˆ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     return S_OK;
@@ -125,14 +125,14 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼Ç ÀÌ¸§
+// Notifyì—ì„œ ì‚¬ìš©í•  í˜„ìž¬ ì„ íƒëœ ì• ë‹ˆë©”ì´ì…˜ ì´ë¦„
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÃÖ´ë TrackPosition
+// Notifyì—ì„œ ì‚¬ìš©í•  í˜„ìž¬ ì„ íƒëœ ì• ë‹ˆë©”ì´ì…˜ì˜ ìµœëŒ€ TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
@@ -148,15 +148,15 @@ HRESULT CAnimationActor::Bind_Bone_to_GUI()
 }
 
 
-// Notify¿¡¼­ »ç¿ëÇÒ ÇöÀç ¼±ÅÃµÈ ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÃÖ´ë ÇÁ·¹ÀÓ Á¤º¸?
+// Notifyì—ì„œ ì‚¬ìš©í•  í˜„ìž¬ ì„ íƒëœ ì• ë‹ˆë©”ì´ì…˜ì˜ ìµœëŒ€ í”„ë ˆìž„ ì •ë³´?
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
-    // ¾îÂ÷ÇÇ ÇöÀç°Å ¼³Á¤ÇÏ´Ï±î ¸Å°³º¯¼ö·Î °¡Á®¿Ã ÇÊ¿ä°¡ ¾øÀ» µí.
+    // ì–´ì°¨í”¼ í˜„ìž¬ê±° ì„¤ì •í•˜ë‹ˆê¹Œ ë§¤ê°œë³€ìˆ˜ë¡œ ê°€ì ¸ì˜¬ í•„ìš”ê°€ ì—†ì„ ë“¯.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    // TrackPositionÀ» ¼³Á¤ÇÏ¸é¼­ ¸¸¾à StopÀÎ °æ¿ì¿¡µµ È®ÀÎÇÒ ¼ö ÀÖ°Ô Play AnimationÀ» ½ÇÇàÇÕ´Ï´Ù.
+    // TrackPositionì„ ì„¤ì •í•˜ë©´ì„œ ë§Œì•½ Stopì¸ ê²½ìš°ì—ë„ í™•ì¸í•  ìˆ˜ ìžˆê²Œ Play Animationì„ ì‹¤í–‰í•©ë‹ˆë‹¤.
     if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
 
@@ -166,13 +166,13 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
-// Æú´õ¿¡ Á¸ÀçÇÏ´Â ¸ðµç ¾Ö´Ï¸ÞÀÌ¼Ç jsonÀ» ÀÐ¾î¿Í¼­ µî·ÏÇÕ´Ï´Ù.
+// í´ë”ì— ì¡´ìž¬í•˜ëŠ” ëª¨ë“  ì• ë‹ˆë©”ì´ì…˜ jsonì„ ì½ì–´ì™€ì„œ ë“±ë¡í•©ë‹ˆë‹¤.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'´Â »ý·« °¡´É
+        this->Collider_Active(tag, active); // 'this->'ëŠ” ìƒëžµ ê°€ëŠ¥
     };
 
     auto effectCallBack = [this]() {
@@ -191,7 +191,7 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
-// 1. Çà·Ä 
+// 1. í–‰ë ¬ 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))

@@ -48,6 +48,7 @@ private:
 	_uint					m_iState{};
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
+	_string					m_strCurrentAnimTag;
 
 private:
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
