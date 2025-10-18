@@ -114,6 +114,7 @@ public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
+	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 #endif
 #pragma endregion
 
@@ -199,7 +200,7 @@ public:
 
 #pragma region GUIMANAGER
 public:
-	ImGuiContext*		Get_ImGuiContext();
+	ImGuiContext*			Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
 	void					Render_Gizmo(const _fmatrix& Matrix);
@@ -216,9 +217,12 @@ public:
 #pragma region CSM
 	HRESULT				SetUp_ShadowLight(const _wstring& strLightTag);
 	HRESULT				Bind_CSM_Resources(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName);
-	HRESULT				Bind_CSM_SRV(CShader* pShader, const _char* pConstantName);
+	HRESULT				Bind_CSM_SRV(class CShader* pShader, const _char* pConstantName);
 	HRESULT				Begin_CSM();
 	HRESULT				End_CSM();
+#ifdef _DEBUG
+	void				Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#endif
 #pragma endregion
 
 public:

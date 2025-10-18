@@ -17,6 +17,7 @@ public:
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
+	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 #endif
 
 private:

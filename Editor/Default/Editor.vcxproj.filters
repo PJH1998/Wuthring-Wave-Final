@@ -85,6 +85,9 @@
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="96. Interface\Shader">
+      <UniqueIdentifier>{21eca06b-421e-485e-9750-c3ffa52c827e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -183,6 +186,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\Edit_LightObject.h" />
     <ClInclude Include="..\Public\Edit_Brush.h" />
+    <ClInclude Include="..\public\Shader_Interface.h">
+      <Filter>96. Interface\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -264,6 +270,9 @@
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
+    <ClCompile Include="..\private\Shader_Interface.cpp">
+      <Filter>96. Interface\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

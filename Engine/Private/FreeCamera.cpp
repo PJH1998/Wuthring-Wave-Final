@@ -60,6 +60,8 @@ void CFreeCamera::Update(_float fTimeDelta)
 
 void CFreeCamera::Late_Update(_float fTimeDelta)
 {
+
+
 }
 
 void CFreeCamera::Render()

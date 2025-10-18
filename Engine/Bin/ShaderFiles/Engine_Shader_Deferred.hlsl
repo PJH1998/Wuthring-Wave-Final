@@ -40,7 +40,7 @@ vector g_vMtrlSpecular = 1.f;
 float g_fWidth = 1920.f;
 float g_fHeight= 1080.f;
 
-int testIndex;
+int g_DebugCSMIndex;
 
 struct VS_IN
 {
@@ -83,30 +83,7 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    float fShadow = 0.f;
-   
-    fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, testIndex), 1.f);
-    
-    float4 vColor = 0.f;
-    
-    switch (testIndex)
-    {
-        case 0:
-            vColor = float4(fShadow, 0.f, 0.f, 1.f);
-            break;
-            case 1:
-            
-            vColor = float4(0.f, fShadow, 0.f, 1.f);
-            break;
-            case 2:
-            
-            vColor = float4(0.f, 0.f, fShadow, 1.f);
-            break;
-            case 3:
-            vColor = float4(fShadow, fShadow, fShadow, 1.f);
-            break;
-    }
-    Out.vColor = vColor;
+    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
     
     return Out;
 }
@@ -136,9 +113,13 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vWorldPos.w = 1.f;
     
     vWorldPos = vWorldPos * vDepthDesc.y;
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);  
+    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
-    float fViewZ = vWorldPos.z;
+    float fViewZ = vDepthDesc.y;
+   
+    vector vShadowPos;
+    matrix matShadowLightVP;
     
     int iSlice = 0;
      
@@ -147,11 +128,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         if (fViewZ > g_vDistance[i])
             iSlice = i;
     }
-   
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-   
-    vector vShadowPos;
-    matrix matShadowLightVP;
+    
     matShadowLightVP = mul(g_ShadowViewMatrix[iSlice], g_ShadowProjMatrix[iSlice]);
     vShadowPos = mul(vWorldPos, matShadowLightVP);
     
@@ -159,11 +136,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     vTexcood.y = vShadowPos.y * -0.5f + 0.5f;
     
-    float fZ = vShadowPos.z;
+    float fDepth = vShadowPos.z - g_fShadowBais[iSlice];
     
-    float Bias = 0.f;
-        
-    float fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vTexcood, iSlice), vShadowPos.z - Bias);
+    float fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vTexcood, iSlice), fDepth);
     
     if (fShadow != 1.f)
     {
@@ -184,6 +159,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         }
     
     }
+   
    
         
     //if(fShadow == 0.f)
@@ -324,6 +300,43 @@ PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float fShadow = 0.f;
+   
+    fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, g_DebugCSMIndex), 1.f);
+    
+    float4 vColor = 1.f;
+   
+    if (fShadow != 1.f)
+    {
+    
+    switch (g_DebugCSMIndex)
+    {
+        case 0:
+            vColor = float4(fShadow, 0.f, 0.f, 1.f);
+            break;
+        case 1:
+            
+            vColor = float4(0.f, fShadow, 0.f, 1.f);
+            break;
+        case 2:
+            
+            vColor = float4(0.f, 0.f, fShadow, 1.f);
+            break;
+        case 3:
+            vColor = float4(fShadow, fShadow, fShadow, 1.f);
+            break;
+    }
+    }
+   
+    Out.vColor = vColor;
+    
+    return Out;
+}
+
 technique11 DefaultTechnique
 {
     pass DebugPass // 0
@@ -396,5 +409,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DISTORTION();
+    }
+    
+    pass CSM        // 7
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_DEBUG_CSM();
     }
 }
