@@ -94,8 +94,8 @@ void main(uint3 tid : SV_DispatchThreadID)
 {
     uint i = tid.x;
     
-    if (g_ParticleState[i].LifeTime.x <= g_ParticleState[i].LifeTime.y)
-    {
+    //if (g_ParticleState[i].LifeTime.x <= g_ParticleState[i].LifeTime.y)
+    //{
     
         float4 Position = g_ParticleState[i].Pos;
         float Speed = g_ParticleStatic[i].Speed;
@@ -119,7 +119,8 @@ void main(uint3 tid : SV_DispatchThreadID)
         g_ParticleState[i].Pos = Position;
     
         g_ParticleState[i].LifeTime.x += DeltaTime;
-    }
+    
+    //}
     if(IsLoop == 1)
     {
         if(g_ParticleState[i].LifeTime.x >= g_ParticleState[i].LifeTime.y)
@@ -132,11 +133,7 @@ void main(uint3 tid : SV_DispatchThreadID)
     {
         if (g_ParticleState[i].LifeTime.x >= g_ParticleState[i].LifeTime.y)
         {
-            float4 DeltaPosition = float4(g_ParticleStatic[i].DefaultPos.xyz, 1.f);
-            
-            DeltaPosition.xy += Gravity * DeltaTime * g_ParticleStatic[i].Speed;
-           
-            g_ParticleState[i].Pos.xy -= DeltaPosition * DeltaTime;
+            g_ParticleState[i].Pos.y -= Gravity * DeltaTime;
         }
     }
 }

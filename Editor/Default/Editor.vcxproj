@@ -161,6 +161,7 @@
     <ClInclude Include="..\Public\Editor_Enum.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
+    <ClInclude Include="..\Public\Effect_Mesh.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Mesh_Controller.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
@@ -196,6 +198,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
+    <ClCompile Include="..\Private\Effect_Mesh.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
@@ -207,6 +210,7 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Mesh_Controller.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />

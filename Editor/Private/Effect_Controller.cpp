@@ -2,6 +2,7 @@
 #include "Effect_Controller.h"
 #include "Effect_Prefab.h"
 #include "Particle_Controller.h"
+#include "Mesh_Controller.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -16,6 +17,7 @@ CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContex
 HRESULT CEffect_Controller::Initialize()
 {
     m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
+    m_pMesh_Controller = CMesh_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -60,7 +62,7 @@ void CEffect_Controller::Prefab_Tab()
                 m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prefab"), pPrefab);
 
                 m_Prefabs.emplace(PrefabTag, pPrefab);
-                Safe_AddRef(pPrefab);
+                //Safe_AddRef(pPrefab);
 
                 //초기화
                 m_bTagFlag = false;
@@ -102,6 +104,7 @@ void CEffect_Controller::Prefab_Tab()
 
                     if (iter != m_Prefabs.end())
                     {
+                        iter->second->SetActivate(false);           //레이어에 넣어둔건 삭제 안됨. 어차피 Desc 뽑는거라 상관없으니 그냥 비활성화 처리
                         Safe_Release(iter->second);
                         m_Prefabs.erase(iter);
 
@@ -124,6 +127,8 @@ void CEffect_Controller::Prefab_Tab()
 
                 if (m_bChildrenTagFlag)
                 {
+                    //선택된 버튼에 따라, 각각의 컨트롤러에게 현재 프리팹이 설정한 자식의 태그를 전달해줌.
+                    //그리고 각각의 컨트롤러가 내부에서 활성화 ON
                     if (ImGui::Button("Particle"))
                     {
                         //설정한 태그 버튼 타입에 맞는 컨트롤러에게 전달해서 자식 기본 베이스 창 띄우기
@@ -133,22 +138,53 @@ void CEffect_Controller::Prefab_Tab()
                         m_eChildrenType = EFFECT_TYPE::PARTICLE;
                     }
 
+                    if (ImGui::Button("Mesh"))
+                    {
+                        m_pMesh_Controller->Set_EffectMeshTag(m_ChildrenTag);
+                            
+                        m_eChildrenType = EFFECT_TYPE::MESH;
+                    }
+
+                    //현재 선택한 타입이 뭔지에 따라 각각의 컨트롤러 업데이트 활성화 + 구조체 전달.
+                    //내부에서 생성하겠다 선언하면 컨트롤러가 가지고 있는 DESC 전달받음.
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
                     {
                         CParticle::PARTICLE_DESC pDesc = {};
 
                         m_pParticle_Controller->Particle_Base_Tab(pDesc, m_bChildrenCreatFlag);
 
+                        //아래로 빼고 싶은데, 컨트롤러에게 받아와야하는 정보들이 각각 다르다보니 하나로 묶어줄 수가 없음.
                         if (m_bChildrenCreatFlag)
                         {
-                            m_pSelectedPrefab->Add_Children(&pDesc);
+                            m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
 
                             //초기화
                             m_ChildrenTag[0] = _T('\0');
                             m_bChildrenCreatFlag = false;
                             m_bChildrenTagFlag = false;
+                            m_eChildrenType == EFFECT_TYPE::END;
                         }
                     }
+
+                    if (m_eChildrenType == EFFECT_TYPE::MESH)
+                    {
+                        CEffect_Mesh::EFFECTMESH_DESC pDesc = {};
+
+                        m_pMesh_Controller->EffectMesh_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+                        //아래로 빼고 싶은데, 컨트롤러에게 받아와야하는 정보들이 각각 다르다보니 하나로 묶어줄 수가 없음.
+                        if (m_bChildrenCreatFlag)
+                        {
+                            m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+                            //초기화
+                            m_ChildrenTag[0] = _T('\0');
+                            m_bChildrenCreatFlag = false;
+                            m_bChildrenTagFlag = false;
+                            m_eChildrenType == EFFECT_TYPE::END;
+                        }
+                    }
+
                 }
 
                 // 프리팹이 자식이 있을 때 그 자식의 태그 가져와야할거 같음.
@@ -200,7 +236,7 @@ void CEffect_Controller::Prefab_Tab()
                            m_pSelectedPrefab->Remove_Children(pParticleDesc->strMyTag);
 
                            //이전에 가지고 있던 자식과 동일한 이름, 다른 Desc로 신규 자식 생성
-                           m_pSelectedPrefab->Add_Children(pParticleDesc);
+                           m_pSelectedPrefab->Add_Children(pParticleDesc, EFFECT_TYPE::PARTICLE);
 
                        }
                     }
@@ -330,6 +366,7 @@ void CEffect_Controller::Free()
     Safe_Release(m_pGameInstance);
 
     Safe_Release(m_pParticle_Controller);
+    Safe_Release(m_pMesh_Controller);
 
     for (auto& Prefab : m_Prefabs)
         Safe_Release(Prefab.second);

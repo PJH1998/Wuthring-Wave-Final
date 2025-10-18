@@ -13,8 +13,8 @@ CMesh::CMesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
-    , m_VertexPositions { Prototype.m_VertexPositions },
-    m_Indices { Prototype.m_Indices }
+    , m_VertexPositions { Prototype.m_VertexPositions }
+    , m_Indices { Prototype.m_Indices }
     , m_pBoundingBox{Prototype.m_pBoundingBox }
 {
 }

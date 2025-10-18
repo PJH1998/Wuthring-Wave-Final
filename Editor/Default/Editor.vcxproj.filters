@@ -64,9 +64,6 @@
     <Filter Include="01. Level\UI\Temp Props\Temp Component">
       <UniqueIdentifier>{7113c53c-3cf4-458b-94e1-6ab78b5811b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\Effect\Particle">
-      <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Level\Effect\Controller">
       <UniqueIdentifier>{e7fbc4f1-3a95-49f0-9400-b73a8259ca3e}</UniqueIdentifier>
     </Filter>
@@ -84,6 +81,15 @@
     </Filter>
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Controller\Particle">
+      <UniqueIdentifier>{2a0944a9-b39e-4557-96c5-e4bced5aac12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller">
+      <UniqueIdentifier>{9263d0e1-7d86-4ac4-9599-2ba75b735225}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller\Effect_Mesh">
+      <UniqueIdentifier>{1bb47858-1a20-4e2d-9d0a-f4ed9c99e57b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +188,12 @@
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Effect_Mesh.h">
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Effect_Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -262,6 +274,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Effect_Mesh.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Effect_Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Mesh_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

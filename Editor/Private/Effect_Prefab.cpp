@@ -1,6 +1,7 @@
 #include "Editorpch.h"
 #include "Effect_Prefab.h"
 #include "Particle.h"
+#include "Effect_Mesh.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -63,21 +64,39 @@ void CEffect_Prefab::Render()
     //랜더 없어도 될듯
 }
 
-void CEffect_Prefab::Add_Children(void* pArg)
+void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 {
     //자식들 추가 (파티클이면 파티클 Desc필요)
     //자식 추가할 때 파티클인지 뭔지 알아야할거 같은데?
-    //일단 임시로 파티클 고정
+    //타입을 받아오면 될거같긴한데, 그러면 추후 프리팹 데이터 파일에서 자식들 타입을 각각 다 설정해서 저장해줘야할거 같은데.
+    // EX) 파티클 Desc 안에 자신의 태그(이름임, 프로토타입원형이름 x 파일이름으로 쓸 예정) , 타입도 추가해줘야하나 ?
 
     CGameObject* pChildren = {};
-    CParticle::PARTICLE_DESC* pDesc = static_cast<CParticle::PARTICLE_DESC*>(pArg);
+    _wstring strChildrenTag = {};
+    CParticle::PARTICLE_DESC* pParticleDesc = {};
+    CEffect_Mesh::EFFECTMESH_DESC* pMeshDesc = {};
 
-    pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
+    switch (eType)
+    {
+    case Editor::EFFECT_TYPE::PARTICLE:
+        pParticleDesc = static_cast<CParticle::PARTICLE_DESC*>(pArg);
+        strChildrenTag = pParticleDesc->strMyTag;
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
+        break;
+    case Editor::EFFECT_TYPE::MESH:
+        pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
+        strChildrenTag = pMeshDesc->strMyTag;
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
+        break;
+    case Editor::EFFECT_TYPE::END:
+        CRASH("Failed Children Desc");
+        break;
+    }
 
     if (pChildren == nullptr)
         return;
 
-    m_EffectChildren.emplace(pDesc->strMyTag, pChildren);
+    m_EffectChildren.emplace(strChildrenTag, pChildren);
 }
 
 void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
@@ -109,7 +128,7 @@ _wstring CEffect_Prefab::Get_Children_Tag(_int iIndex)
         if (iCheckIndex == iIndex)
         {
             return iter->first;
-        }
+        } 
         else
         {
             ++iter;

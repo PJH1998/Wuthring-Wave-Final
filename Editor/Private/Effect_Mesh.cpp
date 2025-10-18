@@ -1,24 +1,24 @@
 #include "Editorpch.h"
-#include "Particle.h"
+#include "Effect_Mesh.h"
 
-CParticle::CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Mesh::CEffect_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
 {
 }
 
-CParticle::CParticle(const CParticle& Prototype)
+CEffect_Mesh::CEffect_Mesh(const CEffect_Mesh& Prototype)
     : CGameObject{ Prototype }
 {
 }
 
-HRESULT CParticle::Initialize_Prototype()
+HRESULT CEffect_Mesh::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CParticle::Initialize_Clone(void* pArg)
+HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
 {
-    PARTICLE_DESC* pDesc = static_cast<PARTICLE_DESC*>(pArg);
+    EFFECTMESH_DESC* pDesc = static_cast<EFFECTMESH_DESC*>(pArg);
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -36,31 +36,32 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
     //임시처리
-   // m_isActivate = true;
+    m_isActivate = true;
 
     return S_OK;
 }
 
-void CParticle::Priority_Update(_float fTimeDelta)
+void CEffect_Mesh::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CParticle::Update(_float fTimeDelta)
+void CEffect_Mesh::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
 
-    m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);
+    //움직임 처리 어떻게 ?
+   /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
-//   m_vLifeTime.x += fTimeDelta;
-//
-//   if (m_vLifeTime.x >= m_vLifeTime.y)
-//       m_isActivate = false;
-//
+   // m_vLifeTime.x += fTimeDelta;
+   //
+   // if (m_vLifeTime.x >= m_vLifeTime.y)
+   //     m_isActivate = false;
+   //
     //라이프타임 끝나면 비활성화
 }
 
-void CParticle::Late_Update(_float fTimeDelta)
+void CEffect_Mesh::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -68,7 +69,7 @@ void CParticle::Late_Update(_float fTimeDelta)
     m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CParticle::Render()
+void CEffect_Mesh::Render()
 {
     if (FAILED(Bind_ShaderResources()))
         return;
@@ -80,9 +81,9 @@ void CParticle::Render()
     m_pVIBufferCom->Render();
 }
 
-HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
+HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -90,18 +91,16 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
+    //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
-        TEXT("Com_CShader"), reinterpret_cast<CComponent**>(&m_pComputeShader), nullptr)))
-        return E_FAIL;
 
     return S_OK;
 }
 
-HRESULT CParticle::Bind_ShaderResources()
+HRESULT CEffect_Mesh::Bind_ShaderResources()
 {
     if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
@@ -112,47 +111,43 @@ HRESULT CParticle::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-        return E_FAIL;
-
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
     return S_OK;
 }
 
-CParticle* CParticle::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Mesh* CEffect_Mesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CParticle* pInstance = new CParticle(pDevice, pContext);
+    CEffect_Mesh* pInstance = new CEffect_Mesh(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Created : CParticle");
+        MSG_BOX("Failed to Created : CEffect_Mesh");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CParticle::Clone(void* pArg)
+CGameObject* CEffect_Mesh::Clone(void* pArg)
 {
-    CParticle* pInstance = new CParticle(*this);
+    CEffect_Mesh* pInstance = new CEffect_Mesh(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Failed to Created : CParticle");
+        MSG_BOX("Failed to Created : CEffect_Mesh");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CParticle::Free()
+void CEffect_Mesh::Free()
 {
     __super::Free();
 
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);
-    Safe_Release(m_pComputeShader);
 }

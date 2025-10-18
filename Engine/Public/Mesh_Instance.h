@@ -26,7 +26,7 @@ public:
 
 	//virtual HRESULT		Bind_Resources();
 #ifdef _DEBUG
-	_bool							Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
+	_bool								Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance);
 	void								Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix);
 #endif
 

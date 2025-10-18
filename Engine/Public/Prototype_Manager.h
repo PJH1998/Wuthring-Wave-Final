@@ -14,7 +14,8 @@
 #include "Rigidbody.h"
 #include "ComputeShader.h"
 #include "Collider.h"
-#include"Model_Instance.h"
+#include "Model_Instance.h"
+#include "VIBuffer_Mesh.h"
 
 // ==================
 

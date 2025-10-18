@@ -3,8 +3,8 @@
 #include "Event_Level.h"
 #include "Effect_Controller.h"
 #include "Particle.h"
+#include "Effect_Mesh.h"
 #include "ComputeShader.h"
-
 #include "AnimationTool.h"
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -20,12 +20,18 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"),
         CParticle::Create(m_pDevice, m_pContext));
 
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"),
+        CEffect_Mesh::Create(m_pDevice, m_pContext));
+
+    //파티클 그리기용 셰이더
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
+    //매쉬 그리기용 셰이더
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
-    // hlsl 과 맞춘다. => 이 값은 뼈 개수와 상관없이 거의 고정
-// 한 번에 작업을 처리할 한 팀의 스레드가 몇명인가를 정의.
+    //파티클 연산용 셰이더
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -38,15 +44,32 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
 
-    //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
+    //이펙트 툴
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
-    //파티클 움직임 및 위치같은 설정들 보기 위해 플레이어 띄울려고 추가함.
+    //파티클 움직임 및 위치같은 설정들 보기 위해 플레이어 띄울려고 추가함. 영훈오빠가 만든 애니메이션 툴
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
             , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
+    //애니메이션 연산용 셰이더
+    SHADER_MACRO eShaderMacroB = {
+    {"THREAD_X", "64" }
+    ,{"THREAD_Y", "1" }
+    ,{"THREAD_Z", "1" }
+    , { NULL, NULL }
+    };
+
+    string strEntryPointB = "CSMain";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+            , eShaderMacroB, strEntryPointB))))
     {
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
@@ -59,7 +82,7 @@ void CLevel_Effect::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Effect"));
 
-    m_pEffect_Controller->Update();
+        m_pEffect_Controller->Update();
 
    
 }

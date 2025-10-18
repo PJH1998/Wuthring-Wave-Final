@@ -43,7 +43,8 @@ namespace Engine
 		_float fTrackPosition;
 		function<void()> Func;
 		tagNotify(_float _fTrackPosition, function<void()> _Func)
-			: fTrackPosition{ _fTrackPosition }, Func{ _Func } {};
+			: fTrackPosition{ _fTrackPosition }, Func{ _Func } {
+		};
 	}NOTIFY;
 
 	typedef struct tagKeyFrame
@@ -74,6 +75,10 @@ namespace Engine
 		_uint		iType;
 	}CELL;
 
+	typedef struct EffectDesc
+	{
+
+	}EFFECT_DESC;
 
 	typedef struct ParticleSRV
 	{

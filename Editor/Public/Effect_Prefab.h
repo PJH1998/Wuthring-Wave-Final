@@ -26,7 +26,7 @@ public:
 	virtual void Render() override;
 
 public:
-	void Add_Children(void* pArg);
+	void Add_Children(void* pArg, EFFECT_TYPE eType);
 	void Remove_Children(_wstring& ChildrenTag);
 
 public:
