@@ -297,9 +297,6 @@ void CLevel_Map::Menu_Save_Load()
                     _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
                     lstrcat(PrototypeObject, Name);
 
-                    m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
-                        CEdit_MapObject::Create(m_pDevice, m_pContext));
-
                     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
 
@@ -435,7 +432,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
-
 
 
 
@@ -591,6 +587,7 @@ void CLevel_Map::Free()
     __super::Free();
     m_pPickedObject = nullptr;
     m_pPickedInstanceObject = nullptr;
+    m_pPickedLightObject = nullptr;
     m_pGameInstance->Unscribe();
 
     Safe_Release(m_pPreViewObject);

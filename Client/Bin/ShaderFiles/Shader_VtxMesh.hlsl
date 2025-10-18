@@ -217,7 +217,7 @@ struct PS_IN_SHADOW
 
 void PS_SHADOW(PS_IN_SHADOW In)
 {
-    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     if (vDiffuse.a <= 0.1f)
         discard;
     

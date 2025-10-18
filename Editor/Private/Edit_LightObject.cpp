@@ -86,4 +86,5 @@ CGameObject* CEdit_LightObject::Clone(void* pArg)
 void CEdit_LightObject::Free()
 {
 	__super::Free();
+	m_LightDesc = nullptr;
 }

@@ -1004,15 +1004,19 @@ void CEdit_MapObject::Free()
 {
     __super::Free();
     //Safe_Release(m_pModelCom);
+
     m_pModelCom = nullptr;
+
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pRigidbodyCom);
+
     Safe_Delete(m_iSelectedDiffuseIndex);
     Safe_Delete(m_iSelectedNormalIndex);
     Safe_Delete(m_iSelectedMaskIndex);
     Safe_Delete(m_iSelectedMaskDiffuseIndex);
 
     m_pParent = nullptr;
+    m_pPickedChild = nullptr;
 
     for (auto& pModel : m_pModelComArray)
         Safe_Release(pModel);

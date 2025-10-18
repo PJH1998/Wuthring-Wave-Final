@@ -36,6 +36,8 @@ HRESULT CPicking::Initialize(HWND hWnd, _uint iWinSizeX, _uint iWinSizeY)
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
 		return E_FAIL;
 
+	m_pPoints = new _float4[m_iWinSizeX * m_iWinSizeY];
+
     return S_OK;
 }
 
@@ -62,12 +64,11 @@ _bool CPicking::isPicked(_float3* pOut)
 	if (FAILED(m_pContext->Map(m_pTexture2D, 0, D3D11_MAP_READ, 0, &SubResource)))
 		return false;
 
-	_float4* pPoints = new _float4[m_iWinSizeX * m_iWinSizeY];
-	pPoints = static_cast<_float4*>(SubResource.pData);
+	memcpy(m_pPoints, SubResource.pData, sizeof(_float4) * m_iWinSizeX * m_iWinSizeY);
 
 	_uint iIndex = m_ptMouse.y * m_iWinSizeX + m_ptMouse.x;
 
-	_float4 DepthDesc = pPoints[iIndex];
+	_float4 DepthDesc = m_pPoints[iIndex];
 
 	m_pContext->Unmap(m_pTexture2D, 0);
 
@@ -107,6 +108,7 @@ void CPicking::Free()
 {
 	__super::Free();
 
+	Safe_Delete_Array(m_pPoints);
 	Safe_Release(m_pGameInstance);
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
