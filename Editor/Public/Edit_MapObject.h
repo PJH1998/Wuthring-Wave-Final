@@ -11,8 +11,7 @@ NS_END
 
 
 NS_BEGIN(Editor)
-//class CEdit_MapObject : public CStaticObject
-	class CEdit_MapObject : public CGameObject
+class CEdit_MapObject : public CStaticObject
 {
 public:
 	typedef struct tagMapLoad
@@ -41,7 +40,6 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	virtual		void			Late_Update(_float fTimeDelta);
-	//virtual		void			Render(_uint iLOD = 0);
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 
@@ -78,6 +76,8 @@ private:
 	_bool m_IsParent = { false };
 	vector<CTexture*> m_pDiffuseTextureCom;
 	vector<CTexture*> m_pNormalTextureCom;
+	vector<CTexture*> m_pMaskTextureCom;
+	vector<CTexture*> m_pMaskDiffuseTextureCom;
 
 
 
@@ -101,23 +101,37 @@ private:
 	_bool m_MakeJson = { false };
 	_bool m_TexMode = { false };
 	
-	//?대뜑 援ъ“?濡? ?ㅻ툕?앺듃?먯꽌 踰꾪듉 ?꾨Ⅴ硫??대뜑 ?꾩튂 ?↔퀬 洹??꾩튂瑜??쎄쾶? 
-	vector<_string> m_DiffuseTextureName;
-	vector<_string> m_NormalTextureName;
+	//
+	vector<_string> m_EntireDiffuseTextureName;
+	vector<_string> m_EntireNormalTextureName;
+	vector<_string> m_EntireMaskTextureName;
 
-	vector<_string> m_SelectedDiffuseTextureName;
-	vector<_string> m_SelectedNormalTextureName;
+	
+	vector<_string> m_SelectedDiffuseTexturePath;
+	vector<_string> m_SelectedNormalTexturePath;
+	vector<_string> m_SelectedMaskTexturePath;
+	vector<_string> m_SelectedMaskDiffusePath;
 
 	_string m_SelectedDiffuse;
 	_string m_SelectedNormal;
+	_string m_SelectedMask;
+	_string m_SelectedMaskDiffuse;
+
+	
 	vector<_string >m_SelectedDiffuseName;
 	vector<_string >m_SelectedNormalName;
+	vector<_string> m_SelectedMaskTextureName;
+	vector<_string> m_SelectedMaskDiffuseName;
+
+	
 	_string m_iSelectedMeshName;
 	_uint m_iSelectedMesh={};
 
 	_uint* m_iSelectedDiffuseIndex;
 	_uint* m_iSelectedNormalIndex;
-
+	_uint* m_iSelectedMaskIndex;
+	_uint* m_iSelectedMaskDiffuseIndex;
+	
 	_uint m_iNumObject = {};
 private:
 	static _uint g_iNumObjects;

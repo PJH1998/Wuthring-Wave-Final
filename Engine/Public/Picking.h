@@ -27,7 +27,7 @@ private:
 	HWND						m_hWnd = { nullptr };
 	POINT						m_ptMouse = {};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
-
+	_float4* m_pPoints = { nullptr };
 public:
 	static CPicking*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	virtual void			Free() override;

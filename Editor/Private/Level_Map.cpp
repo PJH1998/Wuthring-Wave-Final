@@ -34,7 +34,12 @@ void CLevel_Map::Update(_float fTimeDelta)
 {
     m_fNearDistance = FLT_MAX;
     m_fNearDistance_Instance = FLT_MAX;
-
+    _float3 Test;
+    if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+    {
+        if (m_pGameInstance->isPicked(&Test))
+            int a = 0;
+    }
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
@@ -60,7 +65,6 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
     }
     Make_MousePos();
-    m_pPreViewObject->Late_Update(fTimeDelta, m_szPreViewModelName);
 }
 
 void CLevel_Map::Render()
@@ -107,9 +111,8 @@ void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
 
-    //?덉씠?대굹 ?ㅻ툕?앺듃留ㅻ땲??먯꽌 ?ㅻ툕?앺듃 ?ъ씤??媛뽮퀬?ㅻ뒗 嫄??섎㈃ ?쇳궧 留먭퀬 BeginChildFrame?쇰줈 ???좏깮?대룄 ?좊벏.
-    if (!m_ContainerObjects.empty())
-        Container_Info();
+
+    //
     if (m_pPickedObject)
         m_pPickedObject->Set_ImGuiOption();
 
@@ -181,10 +184,6 @@ void CLevel_Map::Menu_Model_Load()
 
             if (ImGui::Selectable(FileName))
             {
-                /*_matrix PreTransformMatrix = XMMatrixIdentity();
-                _float fSize = 0.001f;
-                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
-
                 CEdit_MapObject::MAP_LOAD Desc{};
                 _float4x4 DefaultMatrix{};
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
@@ -200,12 +199,12 @@ void CLevel_Map::Menu_Model_Load()
                 m_szPreViewModelName = StringToWString(FileName);
                 ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
                 ImGui::End();
+                m_pPreViewObject->Late_Update(0.016f, m_szPreViewModelName);
             }
         }
-        /*ImGui::BeginChild("ScrollObject");
-        ImGui::EndChild();*/
         ImGui::EndTable();
     }
+
     ImGui::End();
 }
 
@@ -263,9 +262,9 @@ void CLevel_Map::Menu_Save_Load()
 
                 _uint NameLength;
 
-                /*_matrix PreTransformMatrix = XMMatrixIdentity();
-                _float fSize = 0.001f;
-                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.0f));*/
+                _matrix PreTransformMatrix = XMMatrixIdentity();
+                _float fSize = 0.01f;
+                PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
                 CEdit_MapObject::MAP_LOAD Desc{};
 
@@ -292,12 +291,11 @@ void CLevel_Map::Menu_Save_Load()
 
                     m_pGameInstance->Add_Prototype(m_iLevel, Model,
                         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
-
+                    /*m_pGameInstance->Add_Prototype(m_iLevel, Model,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath));
+                    */
                     _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
                     lstrcat(PrototypeObject, Name);
-
-                    m_pGameInstance->Add_Prototype(m_iLevel, PrototypeObject,
-                        CEdit_MapObject::Create(m_pDevice, m_pContext));
 
                     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, PrototypeObject
                         , m_iLevel, TEXT("Layer_Test"), &Desc);
@@ -330,6 +328,11 @@ void CLevel_Map::Load_Objects()
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     string FolderPath = "../../Client/Bin/Resource/Map/";
     vector<_wstring> m_PrototypeNames;
+
+    _matrix PreTransformMatrix = XMMatrixIdentity();
+    _float fSize = 0.01f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
@@ -337,7 +340,7 @@ void CLevel_Map::Load_Objects()
 
             //LOD 紐⑤뜽?ㅼ? 紐⑸줉??異붽??섏? 留먭퀬 _LOD0 ?대쫫 鍮쇨퀬 1媛쒖뵫留???ν븯寃?
             if (entry.path().extension() == ".dat") {
-                m_ModelPaths.push_back(entry.path().string());
+                //m_ModelPaths.push_back(entry.path().string());
 
                 //?ш린???꾨줈?좏???誘몃━ ?앹꽦
                 _char FileDrive[MAX_PATH] = {};
@@ -349,14 +352,37 @@ void CLevel_Map::Load_Objects()
                 _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
                 _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
 
-                //硫???곕젅??????以묐떒??嫄몃㈃ ?곗??덇퉴 嫄몄?留덉눥
-                m_PrototypeNames.push_back(ProtoModelName);
+                _wstring  PushName = ProtoModelPath + StringToWString(FileName);
+                PushName.pop_back();
+                //
+                _bool IsExists = { false };
 
-               _string FilePath = entry.path().string();
+                _string Temp;
+                Temp += FileDir;
+                Temp += FileName;
+                Temp.pop_back();
 
+                for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+                {
+                    _wstring PopName = m_PrototypeNames[i];
+                    PopName.pop_back();
+
+                    if (!lstrcmp(PushName.c_str(), PopName.c_str()))
+                    {
+                        IsExists = true;
+                        break;
+                    }
+                }
+                if (!IsExists)
+                {
+                    m_PrototypeNames.push_back(ProtoModelName);
+                    m_ModelPaths.push_back(Temp);
+                }
+
+                _string FilePath = entry.path().string();
                 //m_pGameInstance->Add_Work([=]() {
                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
                    CRASH("Prototype Create Failed");
 
                     //硫?곗벐?덈뱶 ?뺤긽???섎㈃ ?닿굅 ?멸쾬.
@@ -406,7 +432,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
-
 
 
 
@@ -562,6 +587,7 @@ void CLevel_Map::Free()
     __super::Free();
     m_pPickedObject = nullptr;
     m_pPickedInstanceObject = nullptr;
+    m_pPickedLightObject = nullptr;
     m_pGameInstance->Unscribe();
 
     Safe_Release(m_pPreViewObject);

@@ -2,8 +2,9 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D   g_DiffuseTexture;
+texture2D   g_DiffuseTexture[2];
 texture2D   g_NormalTexture;
+texture2D   g_MaskDiffuseTexture;
 
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector      g_vMatrlSpecular = vector(0.1f, 0.1f, 0.1f, 0.1f);
@@ -82,13 +83,22 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vNormal = vector(In.vNormal.xyz * 0.5f + 0.5f, 0.f);
+    vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask; 
+    
+    float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);    
+    float3 vNormal = vNormalDesc.xyz * 2.f - 1.f;
+    vNormal = mul(vNormal, WorldMatrix);
+    Out.vNormal = vector(vNormal * 0.5f + 0.5f, 0.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    
+    Out.vDepth.w = 1.f;
     Out.vSpecular = g_vMatrlSpecular;
     Out.vAmbient = g_vMatrlAmbient;
     
@@ -116,9 +126,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vDiffuse *= float4(1.f, 0.5f, 1.f, 1.f);
+    Out.vDiffuse *= float4(0.5f, 1.f, 0.5f, 1.f);
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
@@ -126,6 +136,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     
     return Out;
 }
+
 struct PS_OUT_DEBUG
 {
     float4 vDiffuse : SV_TARGET0;
@@ -135,7 +146,14 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
 {
     PS_OUT_DEBUG Out = (PS_OUT_DEBUG) 0;
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     
     return Out;
 }
@@ -199,7 +217,7 @@ struct PS_IN_SHADOW
 
 void PS_SHADOW(PS_IN_SHADOW In)
 {
-    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     if (vDiffuse.a <= 0.1f)
         discard;
     
@@ -261,8 +279,6 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_DEBUG();
     }
-
-    
     pass ShadowPass     //5
     {
         SetRasterizerState(RS_Default);
