@@ -8,9 +8,10 @@ NS_END
 NS_BEGIN(Client)
 class CAnimMachine final : public CComponent
 {
+public:
 	typedef struct tagAnimMacnineDesc
 	{
-		_uint*			pOwnerState;
+		const _char* pAnimationTag;
 	}ANIMMACNINE_DESC;
 
 private:
@@ -19,22 +20,21 @@ private:
 	virtual ~CAnimMachine() = default;
 
 public:
-	virtual HRESULT		Initialize_Prototype();
+	virtual HRESULT		Initialize_Prototype(/*const _char* AnimMachineDataPath*/);
 	virtual HRESULT		Initialize_Clone(void* pArg);
 
-	void Handle_Input(CModel* pModelCom, _uint iIndex);
-	void Update(_float fTimeDelata, CModel* pModelCom);
+	void Handle_Input(CModel* pModelCom, _uint iIndex, _uint* pState);
+	void Update(_float fTimeDelata, CModel* pModelCom, _uint* pState);
 	
 	void Reset();
 
 private:
-	_uint* m_pOwnerState = { nullptr };
 	_string m_strCurrentAnimTag;
 	vector<class CAnimState*> m_AnimStates;
 	_uint m_iCurrentStateIndex{};
 
 public:
-	static CAnimMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CAnimMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext /*, const _char* AnimMachineDataPath*/);
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 

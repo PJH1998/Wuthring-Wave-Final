@@ -13,14 +13,25 @@ HRESULT CAnimState::Initialize(const _string& strAnimationTag, ANIMSTATE_DESC& S
 void CAnimState::Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag)
 {
 	*pCurrentAnimTag = m_strAnimationTag;
+
 }
 
-void CAnimState::Update(_float fTimeDelta, CAnimMachine* pAnimMachine, _uint* pOwnerState, _string* pCurrentAnimTag, ANIMSTATE_DESC& StateData)
+void CAnimState::Update(_float fTimeDelta, CAnimMachine* pAnimMachine, _uint* pOwnerState, _string* pCurrentAnimTag/*, ANIMSTATE_DESC& StateData*/)
 {
+	*pOwnerState |= ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING);
 }
 
-void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag)
+void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState)
 {
+
+}
+
+void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom)
+{
+	if(isAnimationFinished)
+	{
+		*pOwnerState &= ~(ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING));
+	}
 }
 
 CAnimState* CAnimState::Create(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc)

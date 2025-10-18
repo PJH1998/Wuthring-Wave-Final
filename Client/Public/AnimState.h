@@ -23,8 +23,9 @@ protected:
 public:
 	virtual HRESULT Initialize(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc);
 	virtual void Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag);
-	virtual void Update(_float fTimeDelta, class CAnimMachine* pAnimMachine, _uint* pOwnerState, _string* pCurrentAnimTag, ANIMSTATE_DESC& StateData);
-	virtual void Exit(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag);
+	virtual void Update(_float fTimeDelta, class CAnimMachine* pAnimMachine, _uint* pOwnerState, _string* pCurrentAnimTag/*, ANIMSTATE_DESC& StateData*/);
+	virtual void Exit(CModel* pModelCom, _uint* pOwnerState);
+	virtual void Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom);
 	//virtual void Reset() PURE;
 
 private:

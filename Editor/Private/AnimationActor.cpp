@@ -165,7 +165,7 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 HRESULT CAnimationActor::Bind_Bone_to_GUI()
 {
 	_int iBoneIndex = 0;
-    if(FAILED(m_pModelCom->Bind_Bone_to_GUI(iBoneIndex)))
+    if(FAILED(m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix())))
         return E_FAIL;
     return S_OK;
 }
@@ -180,8 +180,8 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
     // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
-    if (!m_IsPlayAnimation)
-        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);
+   /* if (!m_IsPlayAnimation)
+        m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
 }
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)

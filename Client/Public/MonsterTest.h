@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -9,6 +9,8 @@ class CModel;
 NS_END
 
 NS_BEGIN(Client)
+
+class CAnimMachine;
 
 class CMonsterTest final : public CGameObject
 {
@@ -42,6 +44,7 @@ private:
 	//CRigidbody*			m_pRigidbodyCom = { nullptr };
 	//CCollider*				m_pColliderCom = { nullptr };
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 
 	CTransform*				m_pTargetTransformCom = { nullptr };
 

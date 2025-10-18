@@ -47,7 +47,8 @@ HRESULT CLevel_Test::Initialize()
         //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
         //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
     }
-    
+	File.close();
+
 	CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
     MobDesc.fSpeedPerSec = 5.f;

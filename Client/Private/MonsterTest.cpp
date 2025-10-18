@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "MonsterTest.h"
 #include  "GameInstance.h"
+#include "AnimMachine.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
@@ -42,17 +43,13 @@ void CMonsterTest::Priority_Update(_float fTimeDelta)
 
 void CMonsterTest::Update(_float fTimeDelta)
 {
-	//_vector vVelocity = XMVectorSet(0.f, 0.f, 0.f, 0.f);
-	//_float fMoveSpeed = 30.f;
-	//if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
-	//	vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * fMoveSpeed;
-	//if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
-	//	vVelocity -= XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * fMoveSpeed;
-	//if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
-	//	vVelocity -= XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
-	//if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
-	//	vVelocity += XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT)) * fMoveSpeed;
+	// 1. 행동트리로 상태 갱신
+	m_pBehaviorTreeCom->tick(this);
 
+	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
+	m_pAnimMachineCom->Update(fTimeDelta, m_pModelCom, &m_iState);
+
+	// 
 	//m_isAnimationFinished = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelta, nullptr);
 	//m_pColliderCom->Update(vVelocity);
 	
@@ -124,6 +121,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 	//	TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 
+#pragma region BlackBoard_Value_&_Condition
 	CBlackBoard* pBlackBoard = CBlackBoard::Create();
 	pBlackBoard->Add_Data("iState", CBlackBoard::DATA_TYPE::INT, &m_iState);
 	pBlackBoard->Add_Data("isAnimationFinished", CBlackBoard::DATA_TYPE::BOOL, &m_isAnimationFinished);
@@ -138,7 +136,13 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	//Com_BehaviorTree
 	Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc);
+#pragma endregion
 
+	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
+	AnimMachineDesc.pAnimationTag = "Born1";
+	//Com_AnimMachine
+	Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine"),
+		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc);
 }
 
 CMonsterTest* CMonsterTest::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -174,6 +178,7 @@ void CMonsterTest::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pModelCom);
 	Safe_Release(m_pBehaviorTreeCom);
+	Safe_Release(m_pAnimMachineCom);
 	//Safe_Release(m_pRigidbodyCom);
 	//Safe_Release(m_pColliderCom);
 }
