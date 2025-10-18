@@ -10,8 +10,6 @@
 
 
 // 임시로 여기에 매크로로..
-#define         STR2WSTR(str)                                   _wstring(str.begin(), str.end())
-#define         WSTR2STR(wstr)                                  _string(wstr.begin(), wstr.end())
 #define         STR_ONLYFILENAME(str)                           std::filesystem::path(str).stem().string();
 
 #define			TO_RAD(DEGREE)									XMConvertToRadians(DEGREE)
@@ -156,8 +154,8 @@ void CLevel_UI::Update_MenuWindow()
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
 
-            strFilePath = STR2WSTR(filePath);
-            strFileName = STR2WSTR(fileName);
+            strFilePath = StringToWString(filePath);
+            strFileName = StringToWString(fileName);
 
 
             // 상대경로
@@ -183,7 +181,7 @@ void CLevel_UI::Update_MenuWindow()
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-            tObjDesc.strObjName = STR2WSTR(fileName);
+            tObjDesc.strObjName = StringToWString(fileName);
 
             m_vecCustomUIs.push_back(tObjDesc);
             m_pCurObj = pCustomObj;
@@ -233,7 +231,7 @@ void CLevel_UI::Update_Hierarchy()
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
         static _char szUIName[256] = {};
         
-        _string strUIName = WSTR2STR(tDesc.strUIName);
+        _string strUIName = WStringToString(tDesc.strUIName);
         strcpy_s(szUIName, strUIName.c_str());
 
         ImGui::Text("Name ");
@@ -242,7 +240,7 @@ void CLevel_UI::Update_Hierarchy()
         {
             _string strEditUIName = szUIName;
             
-            tDesc.strUIName = STR2WSTR(strEditUIName);
+            tDesc.strUIName = StringToWString(strEditUIName);
             dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
         }
         ImGui::SameLine();
@@ -317,7 +315,7 @@ void CLevel_UI::Update_Hierarchy()
             if (isParentMissing)
             {
                 _wstring wstrUIName = ui.pCustomUI->Get_UIDesc().strUIName;
-                _string strUIName = WSTR2STR(wstrUIName);
+                _string strUIName = WStringToString(wstrUIName);
                 if (ImGui::Selectable(strUIName.c_str(), iSelected == iIndex))
                     m_pCurObj = ui.pCustomUI;
             }
@@ -335,7 +333,7 @@ void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeF
 {
     CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
 
-    _string strLabel = WSTR2STR(desc.strUIName);
+    _string strLabel = WStringToString(desc.strUIName);
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
         // 클릭 시 선택.
@@ -474,10 +472,10 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
-            _wstring strFileName = STR2WSTR(fileName);
+            _wstring strFileName = StringToWString(fileName);
 
             UI_INFO_DESC tCurUIInfoDesc = {};
 
@@ -503,7 +501,7 @@ void CLevel_UI::Update_SaveLoad()
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             ifstream file(strFilePath);
             json jUIInfoData = {};
@@ -525,7 +523,7 @@ void CLevel_UI::Update_SaveLoad()
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-            tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.strFileName);
+            tObjDesc.strObjName = tLoadUIInfoDesc.strFileName;
 
             _matrix matScale = XMMatrixScaling(vSca.x, vSca.y, vSca.z);
             _matrix matRotX = XMMatrixRotationX(TO_RAD(vRot.x));
@@ -554,13 +552,13 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             UI_ANIM_DESC tAnimDesc = {};
 
             tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
             _string strAnimName = _string(szAnimName);
-            tAnimDesc.strAnimName = STR2WSTR(strAnimName);
+            tAnimDesc.strAnimName = StringToWString(strAnimName);
             //tAnimDesc.iLerpType = m_iLerpType;
             tAnimDesc.isLoop = m_isAnimLoop;
 
@@ -586,7 +584,7 @@ void CLevel_UI::Update_SaveLoad()
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             ifstream file(strFilePath);
             json jUIAnimData = {};
@@ -633,12 +631,12 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             CUSTOM_UITREE_DESC tTreeDesc = {};
 
             _string strTreeName = _string(szTreeName);
-            tTreeDesc.strTreeName = STR2WSTR(strTreeName);
+            tTreeDesc.strTreeName = StringToWString(strTreeName);
 
 
             for (auto& tCustomUIDesc : m_vecCustomUIs)
@@ -690,8 +688,8 @@ void CLevel_UI::Update_SaveLoad()
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
 
-            _wstring strFilePath = STR2WSTR(filePath);
-            _wstring strFileName = STR2WSTR(fileName);
+            _wstring strFilePath = StringToWString(filePath);
+            _wstring strFileName = StringToWString(fileName);
 
             ifstream file(strFilePath);
             json jUITreeData = {};
@@ -736,7 +734,7 @@ void CLevel_UI::Update_SaveLoad()
 
                 HIERARCHY_OBJ_DESC tObjDesc = { };
                 tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-                tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.tUIDesc.strFileName);
+                tObjDesc.strObjName = tLoadUIInfoDesc.tUIDesc.strFileName;
 
                 _matrix matScale = XMMatrixScaling(m_vCurObjSca.x, m_vCurObjSca.y, m_vCurObjSca.z);
                 _matrix matRotX = XMMatrixRotationX(TO_RAD(m_vCurObjRot.x));

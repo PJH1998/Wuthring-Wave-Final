@@ -29,4 +29,8 @@ namespace Client
 	enum class DIRECTION {
 		FRONT, BACK, LEFT, RIGHT, UP, DOWN, END
 	};
+
+	enum class UI_EVENT_TYPE {
+		CLICK, HOVER, SCROLL, END
+	};
 }

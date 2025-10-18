@@ -197,7 +197,7 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_DESC& d)
 
 	j = json{
 		{ "tUIDesc", j_tUIDesc },
-		{ "strAnimName", _string(d.strAnimName.begin(), d.strAnimName.end()) },
+		{ "strAnimName", WStringToString(d.strAnimName) },
 		{ "iNumKeyFrame", d.vecKeyFrames.size()},
 		{ "vecKeyFrames", vecKeyFrames },
 		//{ "iLerpType", d.iLerpType },
@@ -213,7 +213,7 @@ inline void from_json(const json& j, CLevel_UI::UI_ANIM_DESC& d)
 	//d.iLerpType		= j["iLerpType"];
 	d.isLoop		= j["isLoop"];
 	_string strAnimName = j["strAnimName"].get<_string>();
-	d.strAnimName	= _wstring(strAnimName.begin(), strAnimName.end());
+	d.strAnimName	= StringToWString(strAnimName);
 }
 
 inline void to_json(json& j, const CLevel_UI::UI_INFO_DESC& d)
@@ -268,7 +268,7 @@ inline void to_json(json& j, const CLevel_UI::CUSTOM_UITREE_DESC& d)
 	to_json(vecUIInfoDescs, d.vecUIInfoDescs);
 
 	j = {
-		{ "strTreeName", _string(d.strTreeName.begin(), d.strTreeName.end()) },
+		{ "strTreeName", WStringToString(d.strTreeName) },
 		//{ "iNumUIDescs", d.vecUIDescs.size() },
 		{ "vecUIInfoDescs", vecUIInfoDescs }
 	};
@@ -277,7 +277,7 @@ inline void to_json(json& j, const CLevel_UI::CUSTOM_UITREE_DESC& d)
 inline void from_json(const json& j, CLevel_UI::CUSTOM_UITREE_DESC& d)
 {
 	_string strTreeName = j["strTreeName"].get<_string>();
-	d.strTreeName = _wstring(strTreeName.begin(), strTreeName.end());
+	d.strTreeName = StringToWString(strTreeName);
 	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
 }
 

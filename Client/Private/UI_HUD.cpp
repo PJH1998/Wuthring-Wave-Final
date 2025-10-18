@@ -1,6 +1,8 @@
 #include "ClientPch.h"
 #include "UI_HUD.h"
 
+// 얘는 오브젝트 매니저의 통제를 받음.
+// 자식들은 얘의 통제를 받음. 삭제 포함.
 CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
 {
@@ -18,11 +20,15 @@ HRESULT CUI_HUD::Initialize_Prototype()
 
 HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 {
-    __super::Initialize_Clone(pArg);
+    //__super::Initialize_Clone(pArg);
 
     Ready_Components(pArg);
+    __super::Ready_Events();
 
-    CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
+    // Load from json
+    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/UI_HUD.json";
+    Load_ChildObjects(strFilePath);
+
     
 
 
@@ -46,7 +52,52 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 
 void CUI_HUD::Render()
 {
+    StringToWString();
     __super::Render();                      // Nothing.
+}
+
+HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
+{
+    ifstream file(strFilePath);
+    json jUITreeData = {};
+    if (file.is_open()) {
+        file >> jUITreeData;
+    }
+
+    // json load
+    CUSTOM_UITREE_DESC tLoadTreeDesc = {};
+    from_json(jUITreeData, tLoadTreeDesc);
+
+    // 그 뒤 로드..
+    vector<CGameObject*> vecLoadObjects = {};
+    for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
+    {
+        UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
+
+        _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
+        _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
+        _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
+
+        CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
+        // 로컬에 저장
+        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj));
+
+        HIERARCHY_OBJ_DESC tObjDesc = { };
+        tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
+        tObjDesc.strObjName = _wstring(tLoadUIInfoDesc.tUIDesc.strFileName.begin(), tLoadUIInfoDesc.tUIDesc.strFileName.end());
+
+        _matrix matScale = XMMatrixScaling(vCurObjSca.x, vCurObjSca.y, vCurObjSca.z);
+        _matrix matRotX = XMMatrixRotationX(DegreesToRadians(vCurObjRot.x));
+        _matrix matRotY = XMMatrixRotationY(DegreesToRadians(vCurObjRot.y));
+        _matrix matRotZ = XMMatrixRotationZ(DegreesToRadians(vCurObjRot.z));
+        _matrix matRot = matRotZ * matRotY * matRotX;
+        _matrix matTrans = XMMatrixTranslation(vCurObjPos.x, vCurObjPos.y, vCurObjPos.z);
+
+        _matrix matWorld = matScale * matRot * matTrans;
+        static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+    }
+
+    return S_OK;
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -82,6 +133,8 @@ CGameObject* CUI_HUD::Clone(void* pArg)
 
 void CUI_HUD::Free()
 {
+    for (auto& child : m_vecChildObjects)
+        Safe_Release(child);
 
     __super::Free();
 }

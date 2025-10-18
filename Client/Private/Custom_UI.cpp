@@ -2,6 +2,8 @@
 #include "Custom_UI.h"
 #include "Animator_UI.h"
 
+#include "Event_Level.h"
+
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)
 {
@@ -21,11 +23,13 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 {
     __super::Initialize_Clone(pArg);
 
-    Ready_Prototypes(pArg);
+    //Ready_Prototypes(pArg);
     Ready_Components(pArg);
+    Ready_Events();
 
     Bind_Description(pArg);
-
+    
+    
     __super::Begin();
 
     return S_OK;
@@ -51,8 +55,8 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
 {
-    //if (!m_isActive)
-    //    return;
+    if (!m_isActivate)
+        return;
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
@@ -105,9 +109,20 @@ CCustom_UI* CCustom_UI::Find_ChildObject(_wstring strChildName)
     return nullptr;
 }
 
+void CCustom_UI::Add_EventFunction(_uint iEventType, function<void()> function)
+{
+    m_vecFunctions[iEventType].push_back(function);
+}
+
+void CCustom_UI::OnEvent(_uint iEventType)
+{
+    for (auto& func : m_vecFunctions[iEventType])
+        func();
+}
+
+/*
 HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 {
-    /*
     ASSERT_CRASH(pArg);
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
@@ -123,9 +138,9 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
 
 
-    */
     return S_OK;
 }
+*/
 
 HRESULT CCustom_UI::Ready_Components(void* pArg)
 {
@@ -156,6 +171,19 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
         TEXT("Com_Animator_UI"), reinterpret_cast<CComponent**>(&m_pAnimator_UICom), &tAnimatorUIDesc)))
         return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CCustom_UI::Ready_Events()
+{
+    m_pGameInstance->Subscribe<ONCLICK_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnClickUI",
+        [this](const ONCLICK_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK)); });
+    m_pGameInstance->Subscribe<ONHOVER_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnHoverUI",
+        [this](const ONHOVER_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER));});
+    m_pGameInstance->Subscribe<ONSCROLL_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnScrollUI",
+        [this](const ONSCROLL_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
+
 
     return S_OK;
 }
@@ -191,6 +219,8 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 
 void CCustom_UI::Free()
 {
+    m_pGameInstance->Unscribe();
+
     for (auto& child : m_vecChildObjects)
         Safe_Release(child);
     m_vecChildObjects.clear();

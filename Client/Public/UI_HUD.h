@@ -24,8 +24,11 @@ public:
 	virtual void			Render()								override;
 
 private:
-	HRESULT					Ready_Components(void* pArg);
+	HRESULT					Load_ChildObjects(_wstring strFilePath);
 
+private:
+	HRESULT					Ready_Components(void* pArg);
+	
 private:
 
 public:

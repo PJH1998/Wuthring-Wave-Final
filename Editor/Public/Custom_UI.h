@@ -98,18 +98,18 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 	for (const auto& v : d.vecChildNames)
 	{
 		json data = {};
-		to_json(data, _string(v.begin(), v.end()));
+		to_json(data, WStringToString(v));
 		childNames.push_back(data);
 	}
 
 	j = {
-		{ "strFilePath", _string(d.strFilePath.begin(), d.strFilePath.end()) },
-		{ "strFileName", _string(d.strFileName.begin(), d.strFileName.end()) },
+		{ "strFilePath", WStringToString(d.strFilePath) },
+		{ "strFileName", WStringToString(d.strFileName) },
 		{ "iNumFiles", d.iNumFiles },
 
-		{ "strUIName",  _string(d.strUIName.begin(), d.strUIName.end()) },
+		{ "strUIName",  WStringToString(d.strUIName) },
 		{ "iUIType", d.iUIType },
-		{ "strParentName", _string(d.strParentName.begin(), d.strParentName.end()) },
+		{ "strParentName", WStringToString(d.strParentName) },
 
 		{ "vecChildNames", childNames }
 	};
@@ -118,21 +118,21 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 {
 	_string strFilePath		= j["strFilePath"].get<_string>();
-	d.strFilePath			= _wstring(strFilePath.begin(), strFilePath.end());
+	d.strFilePath			= StringToWString(strFilePath);
 	_string strFileName		= j["strFileName"].get<_string>();
-	d.strFileName			= _wstring(strFileName.begin(), strFileName.end());
+	d.strFileName			= StringToWString(strFileName);
 	d.iNumFiles				= j["iNumFiles"];
 
 	_string strUIName		= j["strUIName"].get<_string>();
-	d.strUIName				= _wstring(strUIName.begin(), strUIName.end());
+	d.strUIName				= StringToWString(strUIName);
 	d.iUIType				= j["iUIType"];
 	_string strParentName	= j["strParentName"].get<_string>();
-	d.strParentName			= _wstring(strParentName.begin(), strParentName.end());
+	d.strParentName			= StringToWString(strParentName);
 
 	for (const auto& element : j["vecChildNames"])
 	{
 		_string strChildName = element.get<_string>();
-		d.vecChildNames.push_back(_wstring(strChildName.begin(), strChildName.end()));
+		d.vecChildNames.push_back(StringToWString(strChildName));
 	}
 }
 
