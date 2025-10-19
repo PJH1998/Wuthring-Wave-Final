@@ -37,7 +37,6 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Quaternion(vRadian);
 
-    // Model?? Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -50,6 +49,14 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     m_IsPlayAnimation = true;
+
+
+    
+    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 1.f);
+
+    // Look 벡터 설정한 방향으로 잘갑니다 지금.
+    m_pTransformCom->Set_State(STATE::LOOK, XMVectorSet(0.f, 0.f, -1.f, 0.f));
+
     return S_OK;
 }
 
@@ -63,35 +70,35 @@ void CAnimationActor::Update(_float fTimeDelta)
     CContainerObject::Update(fTimeDelta);
 
     m_fTimeDelta = fTimeDelta;
+   
+    /*if (m_IsPlayAnimation)
+        m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);*/
 
-    //if (m_IsPlayAnimation)
-    //    m_pModelCom->Play_Animation(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+    /*if (m_IsPlayAnimation)
+        m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
+
 
     if (m_IsPlayAnimation)
-        m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false);
+    {
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
+        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+        _float4 vPos = {};
+        XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
+        OutPutDebugFloat4(TEXT("Position"), vPos);
+    }
 
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; //
-    //if (m_IsPlayAnimation)
-    //    m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
 
-    //if (m_IsPlayAnimation)
-    //{
-    //    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
-    //    /*_string strRibAnimation = "Rib_" + m_strCurrentAnimation;
-    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
-    //}
+    m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
+        
+
+    
+  
         
 #ifdef _DEBUG
 	_int iBoneIndex = 0;
     m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
 #endif // _DEBUG
 
-    
-
-  
-    //_string strRibAnimation = "Rib_XA_Loop_RL_Mid"; // ??????...
-    //if (m_IsPlayAnimation)
-    //    m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -151,14 +158,12 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-// Notify???? ????? ???? ????? ??????? ???
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-// Notify???? ????? ???? ????? ????????? ??? TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
@@ -166,17 +171,36 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 }
 
 
-// Notify???? ????? ???? ????? ????????? ??? ?????? ?????
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
-    // ?????? ????? ???????? ????????? ?????? ??? ???? ??.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    // TrackPosition?? ??????? ???? Stop?? ??��?? ????? ?? ??? Play Animation?? ????????.
     /*if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
+
+    if (!m_IsPlayAnimation)
+    {
+        // 3. m_fTrackPosition을 방금 설정한 값으로 업데이트합니다.
+        //    (Play_Animation_GPU가 이 값을 참조하기 때문)
+        m_fTrackPosition = fTrackPosition;
+
+        // 4. fTimeDelta = 0.f로 GPU 업데이트를 1회 실행합니다.
+        //    (기존 주석 코드를 GPU 버전으로 변경)
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom,
+            m_strCurrentAnimation,
+            0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
+            &m_fTrackPosition,
+            true, 1.f);
+
+        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
+        m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
+
+        _float4 vPos = {};
+        XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
+        OutPutDebugFloat4(TEXT("Position"), vPos);
+    }
 
 }
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
@@ -184,7 +208,6 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
-// ?????? ??????? ??? ??????? json?? ?��??? ???????.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
@@ -209,7 +232,6 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
-// 1. ??? 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))

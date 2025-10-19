@@ -110,6 +110,16 @@ namespace Engine
 		_uint iThreadGroupZ;
 	}COMPUTESHADER_INFO;
 
+
+	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
+	typedef struct tagGpuKeyFrame {
+		_float4 vScale;
+		_float4 vRotation;
+		_float4 vTranslation;
+		_float fTrackPosition;
+		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
+	}GPU_KEYFRAME;
+
 	// 애니메이션 정보 구조체 => Depth1
 	typedef struct AnimInfo {
 		_uint  iStartChannelIndexOffset; // Channel 시작 (누적 인덱스)  
@@ -127,14 +137,15 @@ namespace Engine
 		_uint iPadding;    // 16바이트 정렬을 위한 패딩
 	}GPU_CHANNELINFO;
 
-	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
-	typedef struct tagGpuKeyFrame {
+
+	// SRT KeyFrame 구조체. => Compute Shader에서 사용.
+	typedef struct tagSRTKeyFrame
+	{
 		_float4 vScale;
 		_float4 vRotation;
 		_float4 vTranslation;
-		_float fTrackPosition;
-		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
-	}GPU_KEYFRAME;
+	}SRT_KEYFRAME;
+
 
 	// (매 프레임 업데이트)
 	// Constant Buffer는 총 크기가 반드시 16의 배수여야함.
