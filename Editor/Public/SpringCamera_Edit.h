@@ -37,6 +37,7 @@ private:
 	_float							m_fDamp = {};			// °¨¼è °è¼ö
 
 private:
+	void							Spring();
 	void							Check_Ray();
 
 private:

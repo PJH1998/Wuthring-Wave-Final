@@ -2,6 +2,7 @@
 #include "Level_Camera.h"
 
 #include "SpringCamera_Edit.h"
+#include "EditDummy_Wolf.h"
 
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel { pDevice, pContext }
@@ -9,6 +10,23 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 }
 
 HRESULT CLevel_Camera::Initialize()
+{
+	Ready_Camera();
+	Ready_Dummy();
+
+    return S_OK;
+}
+
+void CLevel_Camera::Update(_float fTimeDelta)
+{
+	SetWindowText(g_hWnd, TEXT("Camera"));
+}
+
+void CLevel_Camera::Render()
+{
+}
+
+void CLevel_Camera::Ready_Camera()
 {
 	m_pSpringCamera = CSpringCamera_Edit::Create(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pSpringCamera);
@@ -29,17 +47,23 @@ HRESULT CLevel_Camera::Initialize()
 	Safe_AddRef(m_pSpringCamera);
 
 	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
-
-    return S_OK;
 }
 
-void CLevel_Camera::Update(_float fTimeDelta)
+void CLevel_Camera::Ready_Dummy()
 {
-	SetWindowText(g_hWnd, TEXT("Camera"));
-}
+	CEditDummy_Wolf::DUMMY_WOLF_DESC WolfDesc = {};
+	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f));
+	WolfDesc.PreTransformMatrix = PreTransformationMatrix;
 
-void CLevel_Camera::Render()
-{
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"),
+	//	ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
+	//	CRASH("Failed Clone Dummy Wolf");
+
+	WolfDesc.fSpeedPerSec = 100.f;
+	WolfDesc.vPosition = XMVectorSet(0.f, -200.f, 0.f, 1.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"),
+		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
+		CRASH("Failed Clone Dummy Wolf");
 }
 
 CLevel_Camera* CLevel_Camera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

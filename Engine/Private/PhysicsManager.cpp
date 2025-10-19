@@ -32,9 +32,9 @@ Character* CPhysicsManager::Register_Character(const CharacterSettings& Characte
 	return new Character(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 }
 
-CharacterVirtual* CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
 {
-	CharacterVirtual* pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
+	Ref<CharacterVirtual> pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 	ASSERT_CRASH(pInstance);
 
 	// Character VS Character Collision SetUp
@@ -141,7 +141,7 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	}
 }
 
-const _fvector& CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos)
+_bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {
 	RVec3 StartPos = LoadVec3(vStartPos);
 	RVec3 EndPos = LoadVec3(vEndPos);
@@ -150,9 +150,14 @@ const _fvector& CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvec
 
 	RRayCast ray(StartPos, (EndPos - StartPos).Normalized());
 	RayCastResult result;
+
+	_float fOriginFraction = result.mFraction;
 	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
 
-	return vStartPos + result.mFraction * vDir;
+	if (nullptr != pOut)
+		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir);
+
+	return fOriginFraction > result.mFraction && result.mFraction > 0 ? true : false;
 }
 
 #ifdef _DEBUG

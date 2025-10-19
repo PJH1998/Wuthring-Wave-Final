@@ -144,7 +144,7 @@ public:
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
-	HRESULT			Add_Timer(const _wstring& strTimerTag);
+	HRESULT		Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
@@ -154,9 +154,9 @@ public:
 	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	CharacterVirtual*	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
-	const _fvector&	Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos);
+	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);
 #endif

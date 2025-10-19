@@ -41,6 +41,7 @@ void CEditDummy_Wolf::Priority_Update(_float fTimeDelta)
 
 void CEditDummy_Wolf::Update(_float fTimeDelta)
 {
+	Key_Move(fTimeDelta);
 }
 
 void CEditDummy_Wolf::Late_Update(_float fTimeDelta)
@@ -86,6 +87,18 @@ void CEditDummy_Wolf::Render_Shadow()
 
         m_pModelCom->Render(i);
     }
+}
+
+void CEditDummy_Wolf::Key_Move(_float fTimeDelta)
+{
+	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Straight(fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Backward(fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Left(fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Right(fTimeDelta);
 }
 
 HRESULT CEditDummy_Wolf::Ready_Components(_fmatrix PreTransformMatrix)

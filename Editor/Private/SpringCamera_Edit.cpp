@@ -44,7 +44,6 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	Check_Ray();
 
 	// 3. 거리 제한으로 인한 간격 보정
-
 }
 
 void CSpringCamera_Edit::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
@@ -63,8 +62,12 @@ void CSpringCamera_Edit::Check_Ray()
 {
 	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-	_vector vPos = m_pGameInstance->Ray_Cast(vMyPos, vLook * m_fDistance);
-	m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	_float4 vOut;
+	if (true == m_pGameInstance->Ray_Cast(vMyPos, vMyPos + vLook * m_fDistance, &vOut))
+		cout << "맞음!" << endl;
+	else
+		cout << "안맞음!" << endl;
+	//m_pTransformCom->Set_State(STATE::POSITION, vPos - vLook * m_fDistance);
 }
 
 void CSpringCamera_Edit::Ready_Component()
@@ -110,4 +113,6 @@ CGameObject* CSpringCamera_Edit::Clone(void* pArg)
 void CSpringCamera_Edit::Free()
 {
 	__super::Free();
+
+	Safe_Release(m_pColliderCom);
 }

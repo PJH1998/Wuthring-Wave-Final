@@ -37,7 +37,7 @@ public:
 
 private:
 	class CGameObject*			m_pOwner = { nullptr };
-	CharacterVirtual*				m_pCharacterVirtual = { nullptr };
+	Ref<CharacterVirtual>		m_pCharacterVirtual = { nullptr };
 
 	_uint								m_iCollisionLayer = {};
 

@@ -35,6 +35,9 @@ private:
 	CShader*			m_pShaderCom = { nullptr };
 
 private:
+	void					Key_Move(_float fTimeDelta);
+
+private:
 	HRESULT				Ready_Components(_fmatrix PreTransformMatrix);
 
 public:

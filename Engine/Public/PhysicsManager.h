@@ -44,7 +44,7 @@ public:
 	// Character 생성
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	// CharacterVirtual 생성
-	CharacterVirtual*	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Ref<CharacterVirtual>	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 
@@ -58,7 +58,7 @@ public:
 	void				DrawShape(const Shape* pShape);
 #endif
 
-	const _fvector&	Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos);
+	_bool				Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };

@@ -484,7 +484,7 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
-CharacterVirtual* CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
 {
     return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
 }
@@ -492,9 +492,9 @@ void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
-const _fvector& CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos)
+_bool CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {
-	return m_pPhysicsManager->Ray_Cast(vStartPos, vEndPos);
+	return m_pPhysicsManager->Ray_Cast(vStartPos, vEndPos, pOut);
 }
 #ifdef _DEBUG
 void CGameInstance::DrawShape(const Shape* pShape)
@@ -696,7 +696,6 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
-	Safe_Release(m_pPhysicsManager);
 	Safe_Release(m_pCamera_Manager);
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
@@ -707,6 +706,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
+	Safe_Release(m_pPhysicsManager);
 
 	Release();
 }
