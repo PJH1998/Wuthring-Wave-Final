@@ -32,8 +32,7 @@ HRESULT CLevel_Map::Initialize()
     if (FAILED(Ready_Static_Component()))
         return E_FAIL;
 
-	// OctoTree SetUp
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
     //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
 
@@ -343,75 +342,135 @@ void CLevel_Map::Load_Objects()
     _matrix PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.1f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+    _int version={};
+    _int Lastversion = {};
+    _wstring LastVersionName;
+    _string LastVersionPath;
+
 
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
                 continue;
 
-            //LOD 紐⑤뜽?ㅼ? 紐⑸줉??異붽??섏? 留먭퀬 _LOD0 ?대쫫 鍮쇨퀬 1媛쒖뵫留???ν븯寃?
             if (entry.path().extension() == ".dat") {
-                //m_ModelPaths.push_back(entry.path().string());
 
-                //?ш린???꾨줈?좏???誘몃━ ?앹꽦
                 _char FileDrive[MAX_PATH] = {};
                 _char FileDir[MAX_PATH] = {};
                 _char FileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
                 _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-                _wstring ProtoModelPath = TEXT("Prototype_Component_Model_");
-                _wstring  ProtoModelName = ProtoModelPath + StringToWString(FileName);
+                _wstring baseName = StringToWString(FileName);
 
-                _wstring  PushName = ProtoModelPath + StringToWString(FileName);
-                PushName.pop_back();
-                //
-                _bool IsExists = { false };
+                // LOD 마지막에 붙은 숫자 추출
+                size_t pos = baseName.find_last_not_of(L"0123456789");
+                _wstring namePart = baseName.substr(0, pos + 1);
+                _wstring numberPart = baseName.substr(pos + 1);
+                version = stoi(numberPart);
 
-                _string Temp;
-                Temp += FileDir;
-                Temp += FileName;
-                Temp.pop_back();
+                _wstring key = L"Prototype_Component_Model_" + namePart;
+                _string VersionPath = FileDir;
+                VersionPath += FileName;
+                VersionPath += ".dat";
 
-                for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+
+
+                _wstring PrototypeName = L"Prototype_Component_Model_";
+                PrototypeName+= StringToWString(FileName);
+
+                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, VersionPath.c_str()))))
+                    CRASH("Prototype Create Failed");
+
+                if (version == 0)
+                    m_PrototypeNames.push_back(key + to_wstring(version));
+
+                //if (Lastversion != version && version == 0)
                 {
-                    _wstring PopName = m_PrototypeNames[i];
-                    PopName.pop_back();
-
-                    if (!lstrcmp(PushName.c_str(), PopName.c_str()))
-                    {
-                        IsExists = true;
-                        break;
-                    }
-                }
-                if (!IsExists)
-                {
-                    m_PrototypeNames.push_back(ProtoModelName);
-                    m_ModelPaths.push_back(Temp);
+                    m_ModelPaths.push_back(LastVersionPath);
                 }
 
-                _string FilePath = entry.path().string();
-                //m_pGameInstance->Add_Work([=]() {
-               if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoModelName,
-                   CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
-                   //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
-                   CRASH("Prototype Create Failed");
-
-                    //硫?곗벐?덈뱶 ?뺤긽???섎㈃ ?닿굅 ?멸쾬.
-                    //    string Test = entry.path().parent_path().string();
-                    //    Test += "/Mat/Tex/";
-                    //    if (filesystem::exists(Test))
-                    //        m_pPreViewObject->Add_Model(ProtoModelName);
-                    //});
+                Lastversion = version;
+                LastVersionName = key;
+                LastVersionPath = VersionPath;
             }
         }
     }
+
+    // 최종적으로 컨테이너에 넣기
+    //for (const auto& [name, data] : MaxVersionMap) {
+    //    m_PrototypeNames.push_back(name + std::to_wstring(data.first));
+    //    m_ModelPaths.push_back(data.second);
+    //}
+
+
+    //for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
+    //    if (entry.is_regular_file()) {
+    //        if (entry.path().string().find("MapData") != std::string::npos)
+    //            continue;
+
+    //        if (entry.path().extension() == ".dat") {
+
+    //            _char FileDrive[MAX_PATH] = {};
+    //            _char FileDir[MAX_PATH] = {};
+    //            _char FileName[MAX_PATH] = {};
+    //            _char FileExt[MAX_PATH] = {};
+    //            _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+    //            _wstring ProtoModelPath = L"Prototype_Component_Model_"s;
+    //            _wstring  ProtoModelName = _wstring(ProtoModelPath + StringToWString(FileName));
+
+    //            _wstring  PushName = _wstring(ProtoModelPath + StringToWString(FileName));
+    //            PushName.pop_back();
+    //            //
+    //            _bool IsExists = { false };
+
+    //            _string Temp;
+    //            Temp += FileDir;
+    //            Temp += FileName;
+    //            Temp.pop_back();
+
+    //            for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+    //            {
+    //                _wstring PopName = m_PrototypeNames[i];
+    //                PopName.pop_back();
+
+    //                if (!lstrcmp(PushName.c_str(), PopName.c_str()))
+    //                {
+    //                    IsExists = true;
+    //                    break;
+    //                }
+    //            }
+    //            if (!IsExists)
+    //            {
+    //                m_PrototypeNames.push_back(ProtoModelName);
+    //                m_ModelPaths.push_back(Temp);
+    //            }
+
+    //            _string FilePath = entry.path().string();
+    //            
+    //            //m_pGameInstance->Add_Work([&, Path = FilePath, Modelname = ProtoModelName]() {
+    //            //if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Modelname,
+    //            //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str))))
+    //            //    //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
+    //            //    CRASH("Prototype Create Failed");
+    //            //});
+    //            
+    //            if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, _wstring(ProtoModelName),
+    //                CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
+    //                CRASH("Prototype Create Failed");
+    //        }
+    //    }
+    //}
     m_pGameInstance->Wait_Thread_End();
 
     for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
     {
         m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
     }
+
+    m_pGameInstance->Wait_Thread_End();
 
 }
 
@@ -432,47 +491,70 @@ HRESULT CLevel_Map::Ready_Static_Component()
             CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
         });*/
 
+    m_pGameInstance->Add_Work([&]() {
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
         CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Test_Instance"),
-        CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Test/Test.dat"));
-
+        });
+    m_pGameInstance->Add_Work([&]() {
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+        });
+    m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance_Wolf"),
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
         CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
+        });
 
 
+    m_pGameInstance->Add_Work([&]() {
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
-
+        });
+    m_pGameInstance->Add_Work([&]() {
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
      CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
 
+        });
+
+    m_pGameInstance->Wait_Thread_End();
+
+    m_pGameInstance->Add_Work([&]() {
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+        });
+    m_pGameInstance->Add_Work([&]() {
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
         CVIBuffer_Point::Create(m_pDevice, m_pContext));
+        });
 
     //VTXMESHINSTANCE
-    
+    m_pGameInstance->Add_Work([&]() {
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
         CEdit_MapObject::Create(m_pDevice, m_pContext));
-    
+        });
+    m_pGameInstance->Add_Work([&]() {
+
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
         CEdit_LightObject::Create(m_pDevice, m_pContext));
+        });
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
-        CEdit_Brush::Create(m_pDevice, m_pContext));
+    m_pGameInstance->Add_Work([&]() {
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
+        });
 
+
+    m_pGameInstance->Wait_Thread_End();
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
+        CEdit_Brush::Create(m_pDevice, m_pContext));
     //?ㅻ툕?앺듃留ㅻ땲??먯꽌 ?덉씠???꾨? ?뚮㈃???쒖감?곸쑝濡????
     //LOD 媛쒖닔 LOD0, LOD1, LOD2媛숈씠 LOD ?섎룄 ????
 

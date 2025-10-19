@@ -173,17 +173,12 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
 
 HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
-    //??遺遺??섏쨷??.Dat濡쒕뱶?좊븣 ?곗씠?고솕 ?쒖폒??濡쒕뱶 ?쒗궗寃?
-    //ifstream File();
-    CMesh_Instance::MESH_INST_DESC Desc{};
-    m_iNumInstance = Desc.iNumInstance = 2;
-    _float4x4* pMatrix = new _float4x4[Desc.iNumInstance];
-    _matrix TT =XMMatrixScalingFromVector(XMVectorSet(20.f,10.f,1.f,0.f)) * XMMatrixTranslationFromVector(XMVectorSet(10.f, 0.f, 0.f, 1.f));
-    memcpy(&pMatrix[0], &TT, sizeof(_float4x4));
-    TT = XMMatrixTranslationFromVector(XMVectorSet(-10.f, 30.f, 0.f, 1.f));
-    memcpy(&pMatrix[1], &TT, sizeof(_float4x4));
-    m_pInstanceMatrix = Desc.pTransformMatrix = pMatrix;
+    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
+    CMesh_Instance::MESH_INST_DESC Desc{};
+    Desc.iNumInstance= m_iNumInstance = pDesc->iNumInstance;
+    Desc.pTransformMatrix = pDesc->WorldMatrix;
+    
     _vector vScale, vRotation, vTranslation;
     m_pRotation = new _float4[m_iNumInstance];
 
@@ -193,7 +188,7 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
         XMStoreFloat4(&m_pRotation[i], XMVectorSet(0.f, 0.f, 0.f, 0.f));
     }
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf_Instance"),
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
         return E_FAIL;
 

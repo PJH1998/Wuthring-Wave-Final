@@ -49,12 +49,7 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstre
 #endif
     }
 
-    _float Test =MaxPos[0];
-   _float Test1 =      MaxPos[1];
-   _float Test2 =      MaxPos[2];    
-   _float Test3 =      MinPos[0];
-   _float Test4 =      MinPos[1];
-   _float Test5 =      MinPos[2];
+
     D3D11_BUFFER_DESC   VBDesc = {};
     VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -102,10 +97,13 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, ifstre
 
 HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 {
+    if (m_pVBInstance)
+        Safe_Release(m_pVBInstance);
+
     MESH_INST_DESC* pDesc = static_cast<MESH_INST_DESC*>(pArg);
     
     m_iNumInstance = pDesc->iNumInstance;
-    
+    m_TransformMatrices = pDesc->pTransformMatrix;
     m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH);
     m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
     m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -177,6 +175,8 @@ void CMesh_Instance::Change_InstanceInfo(_uint iNumInstance, _fmatrix fMatrix)
 CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile,_float* MinPos, _float* MaxPos)
 {
     CMesh_Instance* pInstance = new CMesh_Instance(pDevice, pContext);
+    
+    //혹시 메쉬 인스턴스 생성할 때 pArg 받으면 랜덤성 말고 정해진 대로 하게 할것.
 
     if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, InputFile,MinPos,MaxPos)))
     {
@@ -187,15 +187,9 @@ CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContex
     return pInstance;
 }
 
-CComponent* CMesh_Instance::Clone(void* pArg)
+CMesh_Instance* CMesh_Instance::Clone(void* pArg)
 {
     CMesh_Instance* pClone = new CMesh_Instance(*this);
-
-    if (FAILED(pClone->Initialize_Clone(pArg)))
-    {
-        MSG_BOX("Failed to Create : Mesh_Instance (Clone)");
-        Safe_Release(pClone);
-    }
 
     return pClone;
 }

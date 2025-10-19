@@ -9,7 +9,10 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
-    ifstream File("../Bin/Resource/Map/MapData/LOD_TEST_NonInteraction.dat", ios::binary);
+
+    m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
+
 
     if (!File.is_open())
     {
@@ -40,8 +43,7 @@ HRESULT CLevel_Test::Initialize()
         strcat_s(ModelPath, Desc.ModelName);
         strcat_s(ModelPath, ".dat");
 
-		for(_uint i = 0; i < 50; ++i)
-			m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
+        m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
 
         //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
         //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
@@ -51,17 +53,16 @@ HRESULT CLevel_Test::Initialize()
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
         CRASH("Dummy");*/
 
-	LIGHT_DESC LightDesc{};
-	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
-	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+    LIGHT_DESC LightDesc{};
+    LightDesc.eType = LIGHT_DESC::DIRECTION;
+    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+    LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+    LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
-	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-	m_pGameInstance->SetUp_ShadowNF();
-
+    m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+    m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+    m_pGameInstance->SetUp_ShadowNF();
 
     return S_OK;
 }

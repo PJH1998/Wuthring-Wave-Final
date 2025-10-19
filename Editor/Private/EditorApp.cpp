@@ -11,6 +11,10 @@
 #include "Level_UI.h"
 #include "Level_Camera.h"
 
+//Dummy
+#include "EditDummy_Wolf.h"
+#include "EditDummy_Augusta.h"
+
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -45,6 +49,7 @@ HRESULT CEditorApp::Initialize()
 	Ready_Event();
 	Ready_Prototype_ForStatic();
 	Start_Level();
+	Ready_Dummies();
 
 	return S_OK;
 }
@@ -178,7 +183,8 @@ void CEditorApp::Ready_Event()
 		});
 }
 
-void CEditorApp::Ready_Prototype_ForStatic()
+
+	void CEditorApp::Ready_Prototype_ForStatic()
 {
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))
@@ -187,6 +193,15 @@ void CEditorApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		CCollider::Create(m_pDevice, m_pContext))))
 		CRASH("Collider");
+}
+
+void CEditorApp::Ready_Dummies()
+{
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"), CEditDummy_Wolf::Create(m_pDevice, m_pContext))))
+	   CRASH("Failed Add Prototype Dummy Wolf");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"), CEditDummy_Augusta::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Augu");
 }
 
 void CEditorApp::Start_Level()

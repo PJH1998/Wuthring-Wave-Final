@@ -28,6 +28,7 @@ private:
 	void				SetUp_CollisionLayer();
 	void				Ready_Event();
 	void				Ready_Prototype_ForStatic();
+	void				Ready_Dummies();
 	void				Start_Level();
 
 public:

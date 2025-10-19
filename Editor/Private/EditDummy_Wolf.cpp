@@ -45,19 +45,52 @@ void CEditDummy_Wolf::Update(_float fTimeDelta)
 
 void CEditDummy_Wolf::Late_Update(_float fTimeDelta)
 {
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 }
 
 void CEditDummy_Wolf::Render()
 {
+    m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+    m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+    m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+    _uint iNumMesh = m_pModelCom->Get_NumMesh();
+    for (_uint i = 0; i < iNumMesh; ++i)
+    {
+        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+        _bool HasNormal = { false };
+        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            HasNormal = true;
+
+        m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+
+        m_pShaderCom->Begin(0);
+        m_pModelCom->Render(i);
+    }
 }
 
 void CEditDummy_Wolf::Render_Shadow()
 {
+    m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+    m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+    _uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+    for (_uint i = 0; i < iNumMesh; ++i)
+    {
+        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+        m_pShaderCom->Begin(5);
+
+        m_pModelCom->Render(i);
+    }
 }
 
 HRESULT CEditDummy_Wolf::Ready_Components(_fmatrix PreTransformMatrix)
 {
-    m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat");
+    m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat");
     ASSERT_CRASH(m_pModelCom);
 
     m_pShaderCom = CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements);

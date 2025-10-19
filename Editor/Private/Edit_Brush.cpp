@@ -1,5 +1,7 @@
 #include "EditorPch.h"
 #include "Edit_Brush.h"
+#include"Edit_MapObject_Instance.h"
+#include"Mesh_Instance.h"
 
 CEdit_Brush::CEdit_Brush(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice, pContext)
@@ -18,6 +20,7 @@ HRESULT CEdit_Brush::Initialize_Prototype()
 
     Ready_Components();
     m_fRange = 100.f;
+    m_iNumInstance = 10.f;
     return S_OK;
 }
 
@@ -32,8 +35,33 @@ void CEdit_Brush::Priority_Update(_float fTimeDelta)
 
 void CEdit_Brush::Update(_float fTimeDelta)
 {
-    if (m_pGameInstance->isPicked(&m_vMousePos))
-        m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vMousePos), 1.f));
+    if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS)
+    {
+        vector<_float4> m_Points;
+        _uint iNumPixels = {};
+        if (m_pGameInstance->Get_Points(200.f, m_Points, &iNumPixels))
+        {
+            _float4x4* pTransformMatrix = new _float4x4[m_iNumInstance];
+            for (_uint i = 0; i < m_iNumInstance; ++i)
+            {
+                _uint RandNum = m_pGameInstance->Rand(0, m_Points.size() - 1);
+                do {
+                    RandNum = m_pGameInstance->Rand(0, m_Points.size() - 1);
+                } while (m_Points[RandNum].w == 0);
+
+                XMStoreFloat4x4(&pTransformMatrix[i], XMMatrixTranslationFromVector(XMLoadFloat4(&m_Points[RandNum])));
+            }
+
+            CEdit_MapObject_Instance::MAP_LOAD Desc;
+            Desc.WorldMatrix = pTransformMatrix;
+            Desc.iNumInstance = m_iNumInstance;
+            strcpy_s(Desc.ModelName, WStringToString(TEXT("Prototype_Component_Model_Wolf_Instance")).c_str());
+
+            m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Instance")
+                , ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Instance"), &Desc);
+            Safe_Delete_Array(pTransformMatrix);
+        }
+    }
 
 #ifdef _DEBUG
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
