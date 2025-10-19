@@ -3,6 +3,7 @@
 
 NS_BEGIN(Engine)
 class CTransform;
+class CCollider;
 NS_END
 
 NS_BEGIN(Editor)
@@ -15,7 +16,7 @@ private:
 	virtual ~CSpringCamera_Edit() = default;
 
 public:
-	void		SetUp_Target(CTransform* pTargetTransform);
+	void		Update_TargetMatrix(const _fmatrix& TargetMatrix) { XMStoreFloat4x4(&m_TargetMatrix, TargetMatrix); };
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -27,7 +28,19 @@ public:
 	virtual		void				Render() override;
 
 private:
-	CTransform*				m_pTargetTransform = { nullptr };
+	CCollider*					m_pColliderCom = { nullptr };
+	_float4x4						m_TargetMatrix = {};
+
+	// Spring
+	_bool							m_isSpring = { false };
+	_float							m_fStiffness = {};		// Spring Force
+	_float							m_fDamp = {};			// °¨¼è °è¼ö
+
+private:
+	void							Check_Ray();
+
+private:
+	void							Ready_Component();
 
 public:
 	static		CSpringCamera_Edit*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

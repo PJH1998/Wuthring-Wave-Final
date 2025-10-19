@@ -492,6 +492,10 @@ void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
+const _fvector& CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos)
+{
+	return m_pPhysicsManager->Ray_Cast(vStartPos, vEndPos);
+}
 #ifdef _DEBUG
 void CGameInstance::DrawShape(const Shape* pShape)
 {

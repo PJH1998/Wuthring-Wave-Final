@@ -1,7 +1,7 @@
 ﻿#pragma once
 /*
-	[寃뚯엫 ?몄뒪?댁뒪]
-	Client? Engine ?곌껐
+	[GameInstance]
+	Client, Engine Connect
 */
 #include "Prototype_Manager.h"
 #include "EventBus.h"
@@ -20,9 +20,9 @@ public:
 	HRESULT			Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device** ppDevice, ID3D11DeviceContext** ppContext);
 	void				Update_Engine(_float fTimeDelta);
 
-	// 0~1 ?쒕뜡??媛?諛섑솚
+	// 0~1 Random
 	_float				Rand_Normal();
-	// Min, Max ?ъ씠???쒕뜡 媛?蹂??
+	// Min, Max Random
 	_float				Rand(_float fMin, _float fMax);
 #pragma endregion
 
@@ -78,11 +78,11 @@ public:
 #pragma region POOLING_MANAGER
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
-	// Thread濡??ㅽ뻾???⑥닔 異붽?
+	// Thread Work Assign
 	void			Add_Work(function<void()> Work);
-	// Thread媛 紐⑤몢 醫낅즺?섏뿀?붿? 諛섑솚
+	// Thread Work Finish -> bool
 	_bool			IsWorkFinish();
-	// Thread 紐⑤몢 ?앸궇 ?뚭퉴吏 ?湲?
+	// Thread Wait End
 	void			Wait_Thread_End();
 #pragma endregion
 
@@ -148,14 +148,15 @@ public:
 #pragma endregion
 
 #pragma region PHYSICS_MANAGER
-	void				SetUp_PhysicsSystem();
-	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
-	void				SetUp_ObjectFilter(_uint iSrc, _uint iDst);
-	void				SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
-	Body*				Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
+	void					SetUp_PhysicsSystem();
+	void					SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer);
+	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);
+	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
+	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	CharacterVirtual*	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	void				Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	const _fvector&	Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);
 #endif

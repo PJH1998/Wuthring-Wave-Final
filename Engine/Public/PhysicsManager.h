@@ -20,9 +20,9 @@ private:
 
 public:
 #pragma region Init
-	// Physics System 珥덇린??
+	// Physics System 세팅
 	void				SetUp_PhysicsSystem();
-	// Object -> BroadPhase 留듯븨
+	// Object -> BroadPhase 맵핑
 	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer) {
 		ASSERT_CRASH(nullptr != m_pBPLayer);
 		m_pBPLayer->SetUp_ObjectToBP(iObjectLayer, iBPLayer);
@@ -39,11 +39,11 @@ public:
 	};
 #pragma endregion
 
-	// Body ?앹꽦
+	// Body 생성
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	// Character ?앹꽦
+	// Character 생성
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	// CharacterVirtual ?앹꽦
+	// CharacterVirtual 생성
 	CharacterVirtual*	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
@@ -58,6 +58,7 @@ public:
 	void				DrawShape(const Shape* pShape);
 #endif
 
+	const _fvector&	Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos);
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };

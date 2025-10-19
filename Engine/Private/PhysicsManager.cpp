@@ -141,6 +141,20 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	}
 }
 
+const _fvector& CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos)
+{
+	RVec3 StartPos = LoadVec3(vStartPos);
+	RVec3 EndPos = LoadVec3(vEndPos);
+
+	_vector vDir = vEndPos - vStartPos;
+
+	RRayCast ray(StartPos, (EndPos - StartPos).Normalized());
+	RayCastResult result;
+	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
+
+	return vStartPos + result.mFraction * vDir;
+}
+
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
