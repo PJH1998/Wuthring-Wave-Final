@@ -451,6 +451,7 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 }
 
 BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
@@ -591,7 +592,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
 	}
 
-	// 9. Unmap으로 마무리합니다.
+	// 9. Unmap으로 마무리합니다.  
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 

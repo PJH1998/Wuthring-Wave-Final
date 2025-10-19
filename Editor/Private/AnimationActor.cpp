@@ -52,6 +52,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
 
     
+	m_strCurrentAnimation = "Blend_BasePose";
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 1.f);
 
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
@@ -80,19 +81,15 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     if (m_IsPlayAnimation)
     {
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 0.1f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
         _float4 vPos = {};
         XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
         OutPutDebugFloat4(TEXT("Position"), vPos);
     }
-
-
-    m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
-        
-
-    
   
+
+    //m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
         
 #ifdef _DEBUG
 	_int iBoneIndex = 0;
@@ -192,14 +189,10 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
             m_strCurrentAnimation,
             0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
             &m_fTrackPosition,
-            true, 1.f);
+            true, 0.1f);
 
-        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
-        m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
-
-        _float4 vPos = {};
-        XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-        OutPutDebugFloat4(TEXT("Position"), vPos);
+       // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
+       // m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
     }
 
 }
