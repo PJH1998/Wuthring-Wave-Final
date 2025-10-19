@@ -33,6 +33,15 @@ public:
 		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
 		_wstring	strParentName = {};
 
+		_float2		vScreenLT = {};			// 표시될 화면상의 좌표 제한. (우상 0, 0 / 좌하 화면크기)
+		_float2		vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+
+		_bool		isInverseScreenDiscard = false;	// 그릴 구역 반전
+		_float		fCutout = 0.3f;					// (1:컷아웃 사용 시) 알파값 기준
+		_float4		vBlendOuterWidth = { };			// (3:그라디언트 사용 시) 방향 별 그라디언트 두께. 좌우상하 순. 음수 가능.
+
+		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+
 		vector<_wstring> vecChildNames = {};
 
 		CGameObject* pParentObject = nullptr;

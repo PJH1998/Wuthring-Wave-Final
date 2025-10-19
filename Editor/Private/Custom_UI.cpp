@@ -146,6 +146,14 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 
+    m_tUIDesc.vScreenLT     = pDesc->vScreenLT;
+    m_tUIDesc.vScreenRB     = pDesc->vScreenRB;
+
+    m_tUIDesc.fCutout           = pDesc->fCutout;
+    m_tUIDesc.vBlendOuterWidth  = pDesc->vBlendOuterWidth;
+
+    m_tUIDesc.iPassType         = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
     return S_OK;
