@@ -31,6 +31,7 @@ private:
 	_float m_fRange = {};
 	_uint m_iNumInstance = {};
 	_float3 m_vMousePos = {};
+	_float4* m_pPoints= {nullptr};
 
 public:
 	static CEdit_Brush* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

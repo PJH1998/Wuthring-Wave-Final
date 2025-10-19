@@ -73,7 +73,7 @@ void CVIBuffer_Instance::Free()
 {
 	__super::Free();
 
-	if (!m_isClone)
+	if (m_isClone)
 		Safe_Delete_Array(m_pVBInstanceVertices);
 	Safe_Release(m_pVBInstance);
 }

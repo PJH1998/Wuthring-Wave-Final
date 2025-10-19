@@ -34,7 +34,9 @@ void CEdit_PreViewModel::Update(_float fTimeDelta)
 void CEdit_PreViewModel::Late_Update(_float fTimeDelta, _wstring ModelName)
 {
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
-    m_szModelName = ModelName+to_wstring(0);
+    _wstring Name = ModelName;
+    Name.pop_back();
+    m_szModelName = Name + to_wstring(0);
 
     m_fViewTime += fTimeDelta;
     if (0.f <= m_fViewTime && m_fViewTime < 2.f)
@@ -104,11 +106,20 @@ void CEdit_PreViewModel::Render()
 
 void CEdit_PreViewModel::Add_Model(_wstring ModelName)
 {
-    _wstring ModelCom = TEXT("Com_") + ModelName;
+    /*m_pGameInstance->Add_Work([&, Name = ModelName]() {
+        _wstring ModelCom = L"Com_"s + Name;
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelName,
-        ModelCom, reinterpret_cast<CComponent**>(&m_Models[ModelName]), nullptr)))
-        int a = 0;
+        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), Name,
+            ModelCom, reinterpret_cast<CComponent**>(&m_Models[Name]), nullptr)))
+            int a = 0;
+
+        });*/
+        _wstring ModelCom = L"Com_"s + ModelName;
+
+        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelName,
+            ModelCom, reinterpret_cast<CComponent**>(&m_Models[ModelName]), nullptr)))
+            int a = 0;
+
 }
 
 CEdit_PreViewModel* CEdit_PreViewModel::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

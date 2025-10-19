@@ -12,17 +12,16 @@ CModel_Instance::CModel_Instance(const CModel_Instance& Prototype)
     :CComponent(Prototype),
 	m_eType{ Prototype.m_eType },
 	m_iNumMeshes{ Prototype.m_iNumMeshes },
-	m_Meshes{ Prototype.m_Meshes },
 	m_iNumMaterials{ Prototype.m_iNumMaterials },
 	m_Materials{ Prototype.m_Materials },
 	m_PreTransformMatrix{ Prototype.m_PreTransformMatrix }
 {
-	for (auto& pMesh : m_Meshes)
-		Safe_AddRef(pMesh);
+	//메쉬는 깊은복사하되, m_pVB, m_pIB와같이 메쉬의 정보는 얕은복사.
+	for (auto& pMesh : Prototype.m_Meshes)
+		m_Meshes.push_back(pMesh->Clone(nullptr));
 
 	for (auto& pMaterial : m_Materials)
 		Safe_AddRef(pMaterial);
-        
 }
 
 void CModel_Instance::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavigation, _float fTimeDelta)

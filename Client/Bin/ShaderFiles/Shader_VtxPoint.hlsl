@@ -51,19 +51,19 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     
     matrix matVP = mul(g_ViewMatrix, g_ProjMatrix);
     
-    Out[0].vWorldPos = In[0].vPosition + vRight + vUp;
+    Out[0].vWorldPos = In[0].vPosition + vRight + vLook;
     Out[0].vPosition = mul(Out[0].vWorldPos, matVP);
     Out[0].vTexcoord = float2(0.f, 0.f);
     
-    Out[1].vWorldPos = In[0].vPosition - vRight + vUp;
+    Out[1].vWorldPos = In[0].vPosition - vRight + vLook;
     Out[1].vPosition = mul(Out[1].vWorldPos, matVP);
     Out[1].vTexcoord = float2(1.f, 0.f);
     
-    Out[2].vWorldPos = In[0].vPosition - vRight - vUp;
+    Out[2].vWorldPos = In[0].vPosition - vRight - vLook;
     Out[2].vPosition = mul(Out[2].vWorldPos, matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     
-    Out[3].vWorldPos = In[0].vPosition + vRight - vUp;
+    Out[3].vWorldPos = In[0].vPosition + vRight - vLook;
     Out[3].vPosition = mul(Out[3].vWorldPos, matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     
@@ -76,6 +76,7 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Vertices.Append(Out[2]);
     Vertices.Append(Out[3]);
     Vertices.RestartStrip();
+    float4 vDepth = g_DepthTexture.Sample(DefaultSampler, float2(0, 0));
 }
 
 struct PS_IN
@@ -99,7 +100,8 @@ PS_OUT PS_MAIN(PS_IN In)
     float4 vDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     Out.vColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    clip(vDepth.w);
+    if(vDepth.w == 0)
+        discard;
     
     float3 PixelWorldPos = In.vWorldPos.xyz;
     

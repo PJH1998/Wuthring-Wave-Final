@@ -31,10 +31,12 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
 HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 {
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
 
     strcpy_s(m_ModelName, pDesc->ModelName);
+
     m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 
     if (FAILED(Ready_Component(pArg)))
@@ -42,8 +44,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     m_iNumLOD = m_pModelComArray.size()-1;
 
-    Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
-    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));
+    /*Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
+    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));*/
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
@@ -225,10 +227,12 @@ void CEdit_MapObject::Set_ImGuiOption()
     ImGui::SameLine();
     ShaderId = ImGui::GetID("Test");
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
-    ImGui::Text("LOD");
+    _char LOD[10] = {};
+    sprintf_s(LOD, "LOD %d", m_iLODIndex);
+    ImGui::Text(LOD);
     _char LOD_Index[10] = {};
 
-    for (_uint i = 0; i < 4; ++i)
+    for (_uint i = 0; i < m_pModelComArray.size(); ++i)
     {
         if (m_pModelComArray[i] == nullptr)
             continue;
@@ -236,7 +240,7 @@ void CEdit_MapObject::Set_ImGuiOption()
         sprintf_s(LOD_Index, "LOD%d", i);
         if (ImGui::Button(LOD_Index))
         {
-            m_pModelCom = m_pModelComArray[i];
+            m_iLODIndex = i;
         }
     }
     ImGui::EndChildFrame();
@@ -271,18 +275,18 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
     m_pGameInstance->Wait_Thread_End();
 
-    //??遺遺??섏쨷??.Dat濡쒕뱶?좊븣 ?곗씠?고솕 ?쒖폒??濡쒕뱶 ?쒗궗寃?
+
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
     lstrcat(Model, Name);
-    m_pModelComArray.resize(4);
+    _uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
+    
+    m_pModelComArray.resize(V);
     /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         return E_FAIL;*/
-
-
-    for (_uint i = 0; i < 4; ++i)
+    for (_uint i = 0; i < V; ++i)
     {
         //m_pGameInstance->Add_Work([&,Index = i, Name = Model]() {
         //    CModel* pModel = nullptr;
@@ -299,7 +303,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         //    //m_pModelComArray.push_back(pModel);
         //    });
         _wstring ModelCom = Model;
-        //ModelCom.pop_back();
+        ModelCom.pop_back();
         ModelCom += to_wstring(i);
         
         _char ModelName[MAX_PATH] = {};
@@ -406,19 +410,6 @@ void CEdit_MapObject::Export_MaterialData()
         }
     }
 
-    //return;
-    //_string SubstrLOD;
-    //SubstrLOD = m_ModelName;
-    //size_t SubStrPos = SubstrLOD.find("_LOD");
-
-    //if (SubStrPos != std::string::npos)
-    //    SubstrLOD = SubstrLOD.substr(0, SubStrPos);
-    ////strcpy_s(ModelPath, "/"); +SubstrLOD + "/";
-    //strcat_s(ModelPath, SubstrLOD.c_str());
-    //strcat_s(ModelPath, "/");
-    //strcat_s(ModelPath, m_ModelName);
-    //strcat_s(ModelPath, "/");
-
     config1.path = string(ModelPath);
     config1.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
     _char Text[32] = {};
@@ -432,10 +423,18 @@ void CEdit_MapObject::Export_MaterialData()
             strFolderName += "/Mat/";
             strTexturePath = strFolderName;
             strFolderName += m_ModelName;
-            strFolderName += ".json";
 
-            ofstream File(strFolderName);
+            //strFolderName += ".json";
+            _string FileExt = ".json";
+            _int i = 0;
+            ofstream File(strFolderName + to_string(i++) + FileExt);
+            
+            ofstream File1(strFolderName + to_string(i++) + FileExt);
+        
+            ofstream File2(strFolderName + to_string(i++) + FileExt);
 
+            ofstream File3(strFolderName + to_string(i++) + FileExt);
+        
 #pragma region Json 추출
             strTexturePath += "/Tex/";
             filesystem::create_directories(strTexturePath);
@@ -455,8 +454,11 @@ void CEdit_MapObject::Export_MaterialData()
 
                 _splitpath_s(m_SelectedDiffuseTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
                 _splitpath_s(m_SelectedNormalTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, NormalFileName, MAX_PATH, FileExt, MAX_PATH);
-                _splitpath_s(m_SelectedMaskTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskFileName, MAX_PATH, FileExt, MAX_PATH);
-                _splitpath_s(m_SelectedMaskDiffusePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskDiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                if (!m_SelectedMaskTexturePath[i].empty())
+                {
+                    _splitpath_s(m_SelectedMaskTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskFileName, MAX_PATH, FileExt, MAX_PATH);
+                    _splitpath_s(m_SelectedMaskDiffusePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskDiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                }
 
                 json MaterialData;
 
@@ -527,7 +529,14 @@ void CEdit_MapObject::Export_MaterialData()
                 }
             }
             File << Totaljson.dump(4);
+            File1 << Totaljson.dump(4);
+            File2 << Totaljson.dump(4);
+            File3 << Totaljson.dump(4);
+
             File.close();
+            File1.close();
+            File2.close();
+            File3.close();
             m_MakeJson = !m_MakeJson;
             ImGuiFileDialog::Instance()->Close();
 
@@ -1001,9 +1010,6 @@ CGameObject* CEdit_MapObject::Clone(void* pArg)
 void CEdit_MapObject::Free()
 {
     __super::Free();
-    //Safe_Release(m_pModelCom);
-
-    m_pModelCom = nullptr;
 
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pRigidbodyCom);
