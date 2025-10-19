@@ -188,6 +188,21 @@ void CTransform::Turn_Dir(const _fvector& vDir, _float fTimeDelta)
 		Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), fTimeDelta);
 }
 
+void CTransform::Turn_Quaternion(const _fvector& vQuaternion)
+{
+	_vector vRight = XMVector3Normalize(Get_State(STATE::RIGHT));
+	_vector vUp = XMVector3Normalize(Get_State(STATE::UP));
+	_vector vLook = XMVector3Normalize(Get_State(STATE::LOOK));
+
+	_matrix RotationMatrix = XMMatrixRotationQuaternion(vQuaternion);
+
+	_float3 vScale = Get_Scaled();
+
+	Set_State(STATE::RIGHT, XMVector3TransformNormal(vRight, RotationMatrix) * vScale.x);
+	Set_State(STATE::UP, XMVector3TransformNormal(vUp, RotationMatrix) * vScale.y);
+	Set_State(STATE::LOOK, XMVector3TransformNormal(vLook, RotationMatrix) * vScale.z);
+}
+
 void CTransform::Turn_Quaternion(const _float3& vRadian, _float fTimeDelta)
 {
 	_vector vRight = XMVector3Normalize(Get_State(STATE::RIGHT));
@@ -203,7 +218,7 @@ void CTransform::Turn_Quaternion(const _float3& vRadian, _float fTimeDelta)
 	Set_State(STATE::LOOK, XMVector3TransformNormal(vLook, RotationMatrix) * vScale.z);
 }
 
-void CTransform::Quaternion(const _float3& vRadian)
+void CTransform::Rotation_Quaternion(const _float3& vRadian)
 {
 	_vector vRight = XMVectorSet(1.f, 0.f, 0.f, 0.f);
 	_vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
@@ -220,7 +235,7 @@ void CTransform::Quaternion(const _float3& vRadian)
 
 }
 
-void CTransform::Quaternion(const _fvector& vQuaternion)
+void CTransform::Rotation_Quaternion(const _fvector& vQuaternion)
 {
 	_vector vRight = XMVectorSet(1.f, 0.f, 0.f, 0.f);
 	_vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);
@@ -305,6 +320,23 @@ void CTransform::Chase(const _fvector& vTargetPos, _float fTimeDelta, _float fLi
 		vPosition += XMVector3Normalize(vMoveDir) * m_fSpeedPerSec * fTimeDelta;
 		Set_State(STATE::POSITION, vPosition);
 	}
+}
+
+void CTransform::Lerp(const _fmatrix& StartMatrix, const _fmatrix& EndMatrix, _float fRatio)
+{
+	_vector vStartScale{}, vStartRotation{}, vStartTranslation{};
+	_vector vEndScale{}, vEndRotation{}, vEndTranslation{};
+
+	XMMatrixDecompose(&vStartScale, &vStartRotation, &vStartTranslation, StartMatrix);
+	XMMatrixDecompose(&vEndScale, &vEndRotation, &vEndTranslation, EndMatrix);
+
+	_vector vLerpScale{}, vLerpRotation{}, vLerpTranslation{};
+
+	vLerpScale = XMVectorLerp(vStartScale, vEndScale, fRatio);
+	vLerpRotation = XMQuaternionSlerp(vStartRotation, vEndRotation, fRatio);
+	vLerpTranslation = XMVectorSetW(XMVectorLerp(vStartTranslation, vEndTranslation, fRatio), 1.f);
+
+	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixAffineTransformation(vLerpScale, XMVectorSet(0.f, 0.f, 0.f, 0.f), vLerpRotation, vLerpTranslation));
 }
 
 CTransform* CTransform::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

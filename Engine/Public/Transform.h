@@ -47,8 +47,8 @@ public:
 	HRESULT		Bind_Matrix(class CShader* pShader, const _char* ConstantName);
 
 public:
-	void			Scale(_float3 vScale);		// vScale 媛믪쑝濡??ш린 議곗젙
-	void			Scaling(_float3 vScale);		// vScale 媛믩쭔??諛곗쑉 議곗젙
+	void			Scale(_float3 vScale);		// vScale 조정
+	void			Scaling(_float3 vScale);		// vScale 배율 조정
 
 	void			Go_Straight(_float fTimeDelta);
 	void			Go_Backward(_float fTimeDelta);
@@ -64,22 +64,26 @@ public:
 	void			Rotation(const _fvector& vAxis, _float fRadian);
 	void			Turn(const _fvector& vAxis, _float fTimeDelta);
 	void			Turn_Dir(const _fvector& vDir, _float fTimeDelta);
+	void			Turn_Quaternion(const _fvector& vQuaternion);
 	void			Turn_Quaternion(const _float3& vRadian, _float fTimeDelta);
-	void			Quaternion(const _float3& vRadian);
-	void			Quaternion(const _fvector& vQuaternion);
+	void			Rotation_Quaternion(const _float3& vRadian);
+	void			Rotation_Quaternion(const _fvector& vQuaternion);
 
 	void			LookAt(const _fvector& vAt);
 	void			LookAt_KeepUp(const _fvector& vAt);
 	void			LookDir(const _fvector& vDir);
+	// Dir 방향으로 보간하여 돈다.
 	void			LookLerp(const _fvector& vDir, _float fTimeDelta, _float fRate = 1.f);
 	void			Chase(const _fvector& vTargetPos, _float fTimeDelta, _float fLimit);
+
+	// 행렬 사이 보간
+	void			Lerp(const _fmatrix& StartMatrix, const _fmatrix& EndMatrix, _float fRatio);
 
 private:
 	_float4x4		m_WorldMatrix = {};
 
 	_float			m_fSpeedPerSec = {};
 	_float			m_fRotationPerSec = {};
-	_float3		m_vAngle = {};
 
 public:
 	static		CTransform*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

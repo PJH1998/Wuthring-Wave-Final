@@ -110,7 +110,7 @@ void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
 	m_pBodyInterface->GetPositionAndRotation(m_BodyID, vPos, vRotation);
 
 	_vector vQuaternion = XMVectorSet(vRotation.GetX(), vRotation.GetY(), vRotation.GetZ(), vRotation.GetW());
-	pTransform->Quaternion(vQuaternion);
+	pTransform->Rotation_Quaternion(vQuaternion);
 	pTransform->Set_State(STATE::POSITION, XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
 }
 

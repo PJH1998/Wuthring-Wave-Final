@@ -46,6 +46,9 @@ float g_fHeight= 1080.f;
 
 int g_DebugCSMIndex;
 
+float g_fShadowBais[4] = { 0.01f, 0.02f, 0.03f, 0.05f };
+float g_DebugSlopeScale = 2.f;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -173,7 +176,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         
         float BlendGradiant = length(float2(BlendGradiantX, BlendGradiantY));
     
-        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], 2.f * fSlopeFactor * BlendGradiant);
+        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
     
         float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
@@ -199,7 +202,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         
     float BlendGradiant = length(float2(GradiantX, GradiantY));
     
-    float fBias = max(g_fShadowBais[iCascadeIndex], 2.f * fSlopeFactor * BlendGradiant);
+    float fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
     
     float fDepth = vShadowPos.z - fBias;
  
@@ -210,7 +213,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     fFinalShadow = saturate(fFinalShadow + 0.3f);
     
     Out.vColor.xyz *= fFinalShadow;
-///////// Shadow /////////
+///////// Shadow End /////////
 
 
     return Out;
