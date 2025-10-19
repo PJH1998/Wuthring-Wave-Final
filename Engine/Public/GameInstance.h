@@ -215,8 +215,11 @@ public:
 #pragma endregion
 
 #pragma region CSM
+public:
 	HRESULT				SetUp_ShadowLight(const _wstring& strLightTag);
-	HRESULT				Bind_CSM_Resources(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName);
+	HRESULT				SetUp_ShadowNF();
+	HRESULT				Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName = nullptr);
+	HRESULT				Bind_ShadowDistance_Resource(_uint iDataBufferIndex);
 	HRESULT				Bind_CSM_SRV(class CShader* pShader, const _char* pConstantName);
 	HRESULT				Begin_CSM();
 	HRESULT				End_CSM();

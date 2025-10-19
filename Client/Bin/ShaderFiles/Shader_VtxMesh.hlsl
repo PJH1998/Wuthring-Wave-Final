@@ -11,11 +11,6 @@ vector      g_vMatrlSpecular = vector(0.1f, 0.1f, 0.1f, 0.1f);
 
 texture2D   g_MaskTexture[4] : register(t8);
 
-cbuffer CSMDatas : register(b4)
-{
-    float4 g_vDistance;
-};
-
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
@@ -219,7 +214,7 @@ struct PS_IN_SHADOW
 };
 
 void PS_SHADOW(PS_IN_SHADOW In)
-{
+{        
     if (In.vPosition.z >= 1.f)
         discard;
 }

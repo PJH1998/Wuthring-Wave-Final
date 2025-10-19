@@ -229,11 +229,17 @@ void CRenderer::Render_Combined()
 	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_ShadowMap")))
 		CRASH("Failed Bind_CSM_SRV");
 	
-	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vDistance")))
+	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vLightDirection")))
 		CRASH("Failed Bind CSM Resource");
 
-	if(FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::CONBINED))))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
 		CRASH("Render Fail")
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::CONBINED))))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(1)))
+		CRASH("Render Fail");
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
@@ -551,6 +557,7 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Specular"))))
 		ASSERT_CRASH(false);
+	
 #pragma endregion
 
 	// RENDERGROUP::SHADOW_MAP // ���߰�
