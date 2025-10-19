@@ -90,8 +90,8 @@ void CMapObject::Ready_Component(void* pArg)
 	// Com_Shader
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
-
-	for (_uint i = 0; i < 4; ++i)
+	_uint i = 0;
+	//for (_uint i = 0; i < 4; ++i)
 	{
 		_wstring ModelCom = Model;
 		ModelCom += to_wstring(i);

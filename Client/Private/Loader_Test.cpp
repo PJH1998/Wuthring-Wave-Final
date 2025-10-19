@@ -44,10 +44,9 @@ HRESULT CLoader_Test::Load_Model()
             if (entry.path().string().find("MapData") != std::string::npos)
                 continue;
 
-            //LOD 紐⑤뜽?ㅼ? 紐⑸줉??異붽??섏? 留먭퀬 _LOD0 ?대쫫 鍮쇨퀬 1媛쒖뵫留???ν븯寃?
             if (entry.path().extension() == ".dat") {
-                if (i > 5)
-                    break;
+                //if (i > 5)
+                //    break;
                 //m_ModelPaths.push_back(entry.path().string());
 
                 //?ш린???꾨줈?좏???誘몃━ ?앹꽦
@@ -94,7 +93,6 @@ HRESULT CLoader_Test::Load_Model()
                     //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
                     CRASH("Prototype Create Failed");
 
-                i++;
                 //硫?곗벐?덈뱶 ?뺤긽???섎㈃ ?닿굅 ?멸쾬.
                 //    string Test = entry.path().parent_path().string();
                 //    Test += "/Mat/Tex/";

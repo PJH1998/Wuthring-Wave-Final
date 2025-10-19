@@ -10,7 +10,7 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLevel_Test::Initialize()
 {
     m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    ifstream File("../Bin/Resource/Map/MapData/LOD_TEST_NonInteraction.dat", ios::binary);
+    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
 
     if (!File.is_open())
     {
