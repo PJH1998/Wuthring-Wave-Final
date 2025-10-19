@@ -116,6 +116,10 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		{ "iUIType", d.iUIType },
 		{ "strParentName", WStringToString(d.strParentName) },
 
+		{ "isInverseScreenDiscard", d.isInverseScreenDiscard },
+		{ "fCutout", d.fCutout },
+		{ "iPassType", d.iPassType },
+
 		{ "vecChildNames", childNames }
 	};
 }
@@ -133,6 +137,11 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 	d.iUIType				= j["iUIType"];
 	_string strParentName	= j["strParentName"].get<_string>();
 	d.strParentName			= StringToWString(strParentName);
+
+
+	d.isInverseScreenDiscard= j["isInverseScreenDiscard"];
+	d.fCutout				= j["fCutout"];
+	d.iPassType				= j["iPassType"];
 
 	for (const auto& element : j["vecChildNames"])
 	{

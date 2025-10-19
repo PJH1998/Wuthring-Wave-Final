@@ -186,7 +186,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     _uint       iKeyframeTimeStart  = UINT_MAX;
     _uint       iKeyframeTimeEnd    = UINT_MAX;
     const _bool isLoop              = m_pCurAnimDesc->isLoop;
-    const _uint iLastKeyframeIndex  = m_pCurAnimDesc->vecKeyFrames.size() - 1;
+    const _uint iLastKeyframeIndex  = (_uint)(m_pCurAnimDesc->vecKeyFrames.size() - 1);
     _uint       iKeyframeIndex      = 0;
 
     // 현재 키프레임의 vector 내 인덱스를 검색

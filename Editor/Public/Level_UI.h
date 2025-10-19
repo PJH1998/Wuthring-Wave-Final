@@ -154,6 +154,11 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 		{ "vecPos", { d.vPos.x, d.vPos.y, d.vPos.z } },
 		{ "vecRot", { d.vRot.x, d.vRot.y, d.vRot.z } },
 		{ "vecSca", { d.vSca.x, d.vSca.y, d.vSca.z } },
+
+		{ "vScreenLT", { d.vScreenLT.x, d.vScreenLT.y } },
+		{ "vScreenRB", { d.vScreenRB.x, d.vScreenRB.y } },
+
+		{ "vBlendToOuterWidth", { d.vBlendToOuterWidth.x, d.vBlendToOuterWidth.y, d.vBlendToOuterWidth.z, d.vBlendToOuterWidth.w} }
 	};
 }
 
@@ -168,6 +173,14 @@ inline void from_json(const json& j, CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 	d.vPos = { j["vecPos"][0], j["vecPos"][1], j["vecPos"][2] };
 	d.vRot = { j["vecRot"][0], j["vecRot"][1], j["vecRot"][2] };
 	d.vSca = { j["vecSca"][0], j["vecSca"][1], j["vecSca"][2] };
+
+	d.vScreenLT = _float2(j["vScreenLT"][0], j["vScreenLT"][1]);
+	d.vScreenRB = _float2(j["vScreenRB"][0], j["vScreenRB"][1]);
+
+	d.vBlendToOuterWidth = _float4(
+		j["vBlendToOuterWidth"][0], j["vBlendToOuterWidth"][1], 
+		j["vBlendToOuterWidth"][2], j["vBlendToOuterWidth"][3]
+	);
 }
 
 inline void to_json(json& j, const vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)

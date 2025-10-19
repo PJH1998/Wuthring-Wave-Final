@@ -611,6 +611,11 @@ void CLevel_UI::Update_SaveLoad()
                 else
                 {
                     ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // 불러온 애니메이션으로 할당
+
+                    m_vecUIKeyFrameDescs.clear();
+                    m_pSelectedKeyFrameDesc = nullptr;
+                    for (auto& keyframe : tLoadAnimDesc.vecKeyFrames)
+                        m_vecUIKeyFrameDescs.push_back(keyframe);
                 }
             }
             else
