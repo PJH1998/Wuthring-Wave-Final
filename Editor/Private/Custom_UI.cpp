@@ -76,7 +76,7 @@ void CCustom_UI::Render()
         CRASH(Binding_Shader_Failed);
 
 
-    m_pShaderCom->Begin(2); // AlphaPass
+    m_pShaderCom->Begin(3); // Gradient
 
     m_pVIBufferCom->Bind_Resources();
 
