@@ -48,27 +48,37 @@ BlendState BS_AlphaBlend
 // ==============================
 // * Global Variables
 // ==============================
+
+// Basic Variables
 matrix      g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D   g_Texture;
-//texture2D   g_DepthTexture;
 float       g_AlphaStrength;
 
-float2      g_TexcoordLT, g_TexcoordRB;                                     // based on local texcoord.     for 9sector
 
-
-
+// Gradient Variables
+float2      g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f };     // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
+bool        g_InverseScreenDiscard = false;                                 // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
+float4      g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                   // (좌, 우, 상, 하) (left, right, top, bottom)
 float2      g_ScreenSize = { 1920.f, 1080.f };
+
+
+// Cutout Variables
+float       g_CutoutAlphaDiscard = 0.3f;
+
+
+// Nine-Sector Variables
+float2      g_ImageSize = { 0.f, 0.f };
+float4      g_SectorBorder = { 0.f, 0.f };                                  // based on local texcoord.     for 9sector
+float       g_UIScale = 1.f;                                                // UI Scaler
+
+
+
+
 
 
 //float2      g_ScreenLT = { 200.f, 200.f }, g_ScreenRB = { 1720.f, 880.f };     // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
 //bool        g_InverseScreenDiscard = false;                                 // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
 //float4      g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                   // (좌, 우, 상, 하) (left, right, top, bottom)
-
-float2      g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f };     // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
-bool        g_InverseScreenDiscard = false;                                 // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
-float4      g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                   // (좌, 우, 상, 하) (left, right, top, bottom)
-
-float       g_CutoutAlphaDiscard = 0.3f;
 
 
 
@@ -131,7 +141,64 @@ float Check_SpaceRatioP(float originPoint, float startPoint, float endPoint)
     return saturate((originPoint - startPoint) / (endPoint - startPoint));
 }
 
+float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2 imageSize) // 1. texcoord 상 좌표?
+{
+    /*
+    
+    [ originPos ]   : 현재 주시중인 texcoord의, 크기가 반영된 텍스쳐 위의 좌표값
+    [ modSize ]     : 크기가 반영된 텍스쳐의 크기
+    [ border ]      : 섹터가 구분될 기준 폭 width
+    [ imageSize ]   : 크기가 반영되지 않은 원본 텍스쳐의 크기
+    
+    1. 좌측과 상단의 경우. 즉 바로 border 보다 적게 이동한 위치의 경우.
+    단순히 전체 크기 대비 해당 위치의 비교값을 주면 됨.
+    
+    2. 우측과 하단의 경우. 즉 끝에서부터 border 만큼 뺀 것 사이에 있는 경우.
+    비율화하기 전에는 끝으로부터의 거리가 modSize에 상관없이 항상 일정함을 이용한다.
+    원본 텍스쳐 크기 대비 오른쪽만큼의 거리 비율을 그대로 이식?
+    
+    modSize - border*2 만큼의 크기만 변한다고 생각
+    
+    (modSIze - border * 2) - (ImageSize - border * 2)  ..만이 0 대비 항시 변하는 크기.
+    
+    
+    
+    3. 그 외. 즉 중앙점에 있는 경우
+    1, 2 에서 구한 최대 / 최소값을 기준으로 사이의 값을 비율화.
+    
+    
+    
+    
+    */
+    
+    
 
+    
+    float2 resultUV;
+    
+    // x축 계산
+    
+    if      (originPos.x < border.x)                    // 왼쪽.
+        resultUV.x = originPos.x / modSize.x;
+    else if ((modSize.x - border.x) > originPos.x)      // 오른쪽. 
+        resultUV.x = 1.0f - (modSize.x - originPos.x) / imageSize.x;
+    else
+    {
+        
+    }
+    
+    
+    if      (originPos.y < border.y)                    // 위쪽
+        resultUV.y = originPos.y / modSize.y;
+    else if ((modSize.y - border.y) > originPos.y)      // 아래쪽.
+        resultUV.y = 1.0f - (modSize.y - originPos.y) / imageSize.y;
+    else
+    {
+        
+    }
+    
+    
+}
 
 
 
@@ -322,6 +389,50 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_NINESECTOR_UI(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    if (g_ImageSize.x == 0 || g_ImageSize.y == 0)
+        abort();
+
+    
+    float2 vSize = { 
+        length(g_WorldMatrix[0].xyz),
+        length(g_WorldMatrix[1].xyz),
+    };
+        
+    // 1. ui 크기 대비 border의 비율을 계산
+    // 2. 비율에 맞게 texcoord 조절
+    // 3. 조절 완료한 좌표 texcoord 로 삽입하여 return
+    // 왼쪽 위가 0,0 오른쪽 아래가 1,1임에 주의.
+
+    float2 resultUV;
+    
+    // 비율
+    float borderRatioX = saturate(g_SectorBorder.x / g_ImageSize.x);
+    float borderRatioY = saturate(g_SectorBorder.y / g_ImageSize.y);
+    
+    
+    
+    
+    
+    
+    
+    // 화면 내 로컬 좌표 (0 ~ g_UISize)
+    float3 vPosition = g_WorldMatrix[3].xyz;
+    
+        localPos = In.vTexcoord * g_UISize;
+
+    //// 9-slice 계산된 UV
+    //float2 uv = Calc9SliceUV(localPos, g_UISize, g_Border, g_TexSize);
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, uv);
+    return Out;
+}
+
+
+
 // ==============================
 // * Technique (Pass)
 // ==============================
@@ -367,5 +478,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_GRADIENT_UI();
+    }
+
+    pass NineSectorPass
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_NINESECTOR_UI();
     }
 }

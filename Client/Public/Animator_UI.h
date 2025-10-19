@@ -21,18 +21,23 @@ public:
 
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		_uint			iKeyframeIndex = {};
+		_uint			iKeyframeIndex = {};			// 정보가 담길 키프레임 정보
 		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
-		_float			fAlpha = {};
+		_float			fAlpha = {};			// 0 ~ 1
 		_float3			vPos = {};
 		_float3			vRot = {};			// Euler
 		_float3			vSca = {};
 
-		_float4		    vBlendOuterWidth = { };			// 방향 별 그라디언트 두께. 좌우상하 순. 음수 가능.
+
+		_float2			vScreenLT = {};			// 표시될 화면상의 좌표 제한. (우상 0, 0 / 좌하 화면크기)
+		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+
+		_float4			vBlendToOuterWidth = {};
 
 	} UI_ANIM_KEYFRAME_DESC;
+
 
 	typedef struct tagUIAnimDesc
 	{
@@ -94,3 +99,39 @@ public:
 };
 
 NS_END
+
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC & d)
+{
+	d.iKeyframeIndex = j["iKeyframeIndex"];
+
+	d.iLerpType = j["iLerpType"];
+	d.iTexIndex = j["iTexIndex"];
+	d.fAlpha = j["fAlpha"];
+
+	d.vPos = { j["vecPos"][0], j["vecPos"][1], j["vecPos"][2] };
+	d.vRot = { j["vecRot"][0], j["vecRot"][1], j["vecRot"][2] };
+	d.vSca = { j["vecSca"][0], j["vecSca"][1], j["vecSca"][2] };
+
+	d.vScreenLT = _float2(j["vScreenLT"][0], j["vScreenLT"][1]);
+	d.vScreenRB = _float2(j["vScreenRB"][0], j["vScreenRB"][1]);
+
+	d.vBlendToOuterWidth = _float4(
+		j["vBlendToOuterWidth"][0], j["vBlendToOuterWidth"][1],
+		j["vBlendToOuterWidth"][2], j["vBlendToOuterWidth"][3]
+	);
+}
+
+inline void from_json(const json& j, vector<CAnimator_UI::UI_ANIM_KEYFRAME_DESC>& vec)
+{
+	vec.clear();
+	vec.reserve(j.size());
+
+	for (const auto& element : j)
+	{
+		CAnimator_UI::UI_ANIM_KEYFRAME_DESC desc = {};
+		from_json(element, desc);
+		vec.push_back(desc);
+	}
+}
+
+

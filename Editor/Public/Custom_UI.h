@@ -24,7 +24,11 @@ public:
 		NONE, BUTTON, INTERACT, END
 	};
 
-	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC {
+	typedef struct tagCustomUISizeDesc {
+		vector<_float2>	vecSize = {};
+	} UI_SIZE_DESC;
+
+	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
 		_uint		iNumFiles = 1;

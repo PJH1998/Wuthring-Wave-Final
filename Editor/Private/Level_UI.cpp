@@ -186,6 +186,14 @@ void CLevel_UI::Update_MenuWindow()
 
             m_vecCustomUIs.push_back(tObjDesc);
             m_pCurObj = pCustomObj;
+
+            CTransform* pObjTransformCom = dynamic_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"));
+            pObjTransformCom->Scale( _float3(
+                dynamic_cast<CCustom_UI*>(pCustomObj)->Get_UIDesc().vecSize[0].x,
+                dynamic_cast<CCustom_UI*>(pCustomObj)->Get_UIDesc().vecSize[0].y,
+                1
+            ));
+
         }
         ImGuiFileDialog::Instance()->Close();
     }
@@ -818,9 +826,11 @@ void CLevel_UI::Update_Inspector()
 
             if (ImGui::BeginMenu("Reset Menu"))
             {
+                vector<_float2> targetImgSize = static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecSize;
+
                 if (ImGui::MenuItem("Reset Position"))  { m_vCurObjPos = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Rotation"))  { m_vCurObjRot = { 0.f, 0.f, 0.f }; }
-                if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { 100.f, 100.f, 1.f }; }
+                if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { targetImgSize[0].x, targetImgSize[0].y, 1.f}; }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Reset Transform")) {
                     m_vCurObjPos = { 0.f, 0.f, 0.f };

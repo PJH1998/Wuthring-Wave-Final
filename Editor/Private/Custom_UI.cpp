@@ -157,6 +157,22 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
 
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
+    uint iIndex = 0;
+    while (true)
+    {
+        ID3D11ShaderResourceView* pSRV = m_pTextureCom->Get_SRV(iIndex);
+        if (pSRV == nullptr) break;
+        ID3D11Resource* pResource;
+        pSRV->GetResource(&pResource);
+        ID3D11Texture2D* pTexture;
+        pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
+        D3D11_TEXTURE2D_DESC desc = {};
+        pTexture->GetDesc(&desc);
+
+        m_tUIDesc.vecSize.push_back(_float2{ (_float)desc.Width , (_float)desc.Height });
+        iIndex++;
+    }
+
     return S_OK;
 }
 

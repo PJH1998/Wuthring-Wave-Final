@@ -1,6 +1,8 @@
 // UI용
 #include "Shader_UI_State.hlsli"
 
+
+
 // ==============================
 // * Global Variables
 // ==============================
@@ -9,9 +11,9 @@ texture2D g_Texture;
 //texture2D   g_DepthTexture;
 float g_AlphaStrength;
 
+
+
 float2 g_TexcoordLT, g_TexcoordRB; // based on local texcoord.     for 9sector
-
-
 
 float2 g_ScreenSize = { 1920.f, 1080.f };
 
@@ -207,55 +209,68 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     float2 FixedScreenLT = { g_ScreenLT.x - g_BlendToOuterWidth.x, g_ScreenLT.y - g_BlendToOuterWidth.z };
     float2 FixedScreenRB = { g_ScreenRB.x + g_BlendToOuterWidth.y, g_ScreenRB.y + g_BlendToOuterWidth.w };
     
-    // discard 클리핑용. 그려질 부분을 모두 감싸는 사각형 좌표 구함.
-    float2 ClipScreenLT = float2(min(FixedScreenLT.x, g_ScreenLT.x), min(FixedScreenLT.y, g_ScreenLT.y));
-    float2 ClipScreenRB = float2(max(FixedScreenRB.x, g_ScreenRB.x), max(FixedScreenRB.y, g_ScreenRB.y));
-    
-    if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
-        discard;
-    
-    
-    float alphaRatioX = 0.f;
-    float alphaRatioY = 0.f;
-    
+    // discard 클리핑용. 그려질 부분을 모두 감싸는 사각형 좌표 구함. 반전의 경우엔 모두 감싸지는 사각형.
     if (!g_InverseScreenDiscard)
     {
-        if (g_BlendToOuterWidth.x > 0 || g_BlendToOuterWidth.y > 0) // Outer Gradient
-        {
-            if (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
-                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenLT.x, FixedScreenLT.x);
-            else if (g_ScreenRB.x <= In.vPosition.x) // 오른쪽 밖에 있음
-                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenRB.x, FixedScreenRB.x);
-        }
-        else if (g_BlendToOuterWidth.x < 0 || g_BlendToOuterWidth.y < 0) // Inner Gradient
-        {
-            if (g_ScreenLT.x <= In.vPosition.x && In.vPosition.x <= (g_ScreenLT.x + g_ScreenRB.x) / 2.f) // 왼쪽 안에 있음
-                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenLT.x, g_ScreenLT.x);
-            else if ((g_ScreenLT.x + g_ScreenRB.x) / 2.f <= In.vPosition.x && In.vPosition.x <= g_ScreenRB.x)
-                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenRB.x, g_ScreenRB.x);
-        }
+        float2 ClipScreenLT = float2(min(FixedScreenLT.x, g_ScreenLT.x), min(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(max(FixedScreenRB.x, g_ScreenRB.x), max(FixedScreenRB.y, g_ScreenRB.y));
     
-        if (g_BlendToOuterWidth.z > 0 || g_BlendToOuterWidth.w > 0) // Outer Gradient
-        {
-            if (In.vPosition.y <= g_ScreenLT.y)        // 위쪽 밖
-                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenLT.y, FixedScreenLT.y);
-            else if (In.vPosition.y >= g_ScreenRB.y)   // 아래쪽 밖
-                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenRB.y, FixedScreenRB.y);
-        }
-        else if (g_BlendToOuterWidth.z < 0 || g_BlendToOuterWidth.w < 0) // Inner Gradient
-        {
-            if (In.vPosition.y >= g_ScreenLT.y && In.vPosition.y <= (g_ScreenLT.y + g_ScreenRB.y) / 2.f)
-                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenLT.y, g_ScreenLT.y);
-            else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
-                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
-        }
-        
-        
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
     }
-
-    float alphaRatio = max(alphaRatioX, alphaRatioY);
+    else
+    {
+        float2 ClipScreenLT = float2(max(FixedScreenLT.x, g_ScreenLT.x), max(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(min(FixedScreenRB.x, g_ScreenRB.x), min(FixedScreenRB.y, g_ScreenRB.y));
     
-    Out.vColor.a *= (1.f - alphaRatio);
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
+    }
+    
+    
+    float alphaRatioX = (g_InverseScreenDiscard) ? 1.f : 0.f;
+    float alphaRatioY = (g_InverseScreenDiscard) ? 1.f : 0.f;
+    
+    //if (!g_InverseScreenDiscard)
+    //{
+    if (g_BlendToOuterWidth.x > 0 || g_BlendToOuterWidth.y > 0) // Outer Gradient
+    {
+        if (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenLT.x, FixedScreenLT.x);
+        else if (g_ScreenRB.x <= In.vPosition.x) // 오른쪽 밖에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenRB.x, FixedScreenRB.x);
+    }
+    else if (g_BlendToOuterWidth.x < 0 || g_BlendToOuterWidth.y < 0) // Inner Gradient
+    {
+        if (g_ScreenLT.x <= In.vPosition.x && In.vPosition.x <= (g_ScreenLT.x + g_ScreenRB.x) / 2.f) // 왼쪽 안에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenLT.x, g_ScreenLT.x);
+        else if ((g_ScreenLT.x + g_ScreenRB.x) / 2.f <= In.vPosition.x && In.vPosition.x <= g_ScreenRB.x)
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenRB.x, g_ScreenRB.x);
+    }
+    
+    if (g_BlendToOuterWidth.z > 0 || g_BlendToOuterWidth.w > 0) // Outer Gradient
+    {
+        if (In.vPosition.y <= g_ScreenLT.y)        // 위쪽 밖
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenLT.y, FixedScreenLT.y);
+        else if (In.vPosition.y >= g_ScreenRB.y)   // 아래쪽 밖
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenRB.y, FixedScreenRB.y);
+    }
+    else if (g_BlendToOuterWidth.z < 0 || g_BlendToOuterWidth.w < 0) // Inner Gradient
+    {
+        if (In.vPosition.y >= g_ScreenLT.y && In.vPosition.y <= (g_ScreenLT.y + g_ScreenRB.y) / 2.f)
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenLT.y, g_ScreenLT.y);
+        else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
+    }
+    //}
+
+    
+    
+    
+    float alphaRatio = max(alphaRatioX, alphaRatioY);
+    float finalAlphaRatio = (g_InverseScreenDiscard) ? alphaRatio : (1.f - alphaRatio); // inverse 여부 반영    
+    
+    Out.vColor.a *= finalAlphaRatio;
     
     return Out;
 }
@@ -307,3 +322,4 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_GRADIENT_UI();
     }
 }
+

@@ -34,6 +34,11 @@ public:
 		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
 		_wstring	strParentName = {};
 
+		_bool		isInverseScreenDiscard = false;	// 그릴 구역 반전
+		_float		fCutout = 0.3f;					// (1:컷아웃 사용 시) 알파값 기준
+
+		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+
 		vector<_wstring> vecChildNames = {};
 
 		CGameObject* pParentObject = nullptr;
