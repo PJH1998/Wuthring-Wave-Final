@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Level.h"
 #include "Custom_UI.h"
 
@@ -16,10 +16,10 @@ public:
 
 
 	// for Output
-	// ³ªÁß¿¡ *_Struct.h ·Î ¿Å°Ü¾ß ÇÒ µí?
+	// ?ì„ì¨·??*_Struct.h æ¿¡???êº¼??????
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		_uint			iKeyframeIndex = {};			// Á¤º¸°¡ ´ã±æ Å°ÇÁ·¹ÀÓ Á¤º¸
+		_uint			iKeyframeIndex = {};			// ?ëº£ë‚«åª›Â€ ?ë‹¿ë§Œ ?ã…½ë´½?ë‰ì—« ?ëº£ë‚«
 		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
@@ -32,9 +32,9 @@ public:
 
 	typedef struct tagUIAnimDesc
 	{
-		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex (¾î¶² ÅØ½ºÃÄ¿ëÀÎÁö¸¦ À§ÇÔ)
+		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex (?ëŒ€ë¼¡ ?ë¿ë’ªçˆ¾ë¨¯ìŠœ?ëª„?ç‘œ??ê¾ªë¸¿)
 
-		// Å°ÇÁ·¹ÀÓ, Å°ÇÁ·¹ÀÓº° Çà·ÄÁ¤º¸, º¸°£¹æ¹ı, ±æÀÌ µî..
+		// ?ã…½ë´½?ë‰ì—«, ?ã…½ë´½?ë‰ì—«è¹‚??ë°ì ¹?ëº£ë‚«, è¹‚ë‹¿ì»™è«›â‘¸ì¾¿, æ¹²ëª„ì”  ??.
 		_wstring				strAnimName = {};
 		//_uint					iNumKeyFrame = {};
 
@@ -104,7 +104,7 @@ private:
 
 
 	// for Update_AnimEditor
-	// ¤¤AnimEditor
+	// ?í€®nimEditor
 	_bool						m_isOn_AnimEdit = false;
 	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
 
@@ -113,7 +113,7 @@ private:
 	_int						m_iLerpType = 0;
 	_bool						m_isAnimLoop = true;
 
-	// ¤¤AnimList
+	// ?í€®nimList
 	_bool						m_isPlayAnimation = false;
 
 	UI_ANIM_DESC*				m_pSelectedUIAnim = { nullptr };

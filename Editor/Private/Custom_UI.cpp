@@ -1,5 +1,5 @@
-// ==============================
-// * ¿¡µðÅÍ¿¡¼­¸¸ »ç¿ëÇÒ ÀÓ½Ã UI ¿ÀºêÁ§Æ®
+ï»¿// ==============================
+// * ?ë¨®ëµ’?ê³—ë¿‰?ì’•ì­” ?ÑŠìŠœ???ê¾©ë–† UI ?ã…»íˆ•?ì•ºë“ƒ
 // ==============================
 
 #include "EditorPch.h"
@@ -70,7 +70,7 @@ void CCustom_UI::Render()
         CRASH(Binding_Matrix_Failed);
 
 
-    // ksta IF : "g_AlphaStrength" ¿¡ ¸Å ÇÁ·¹ÀÓ¸¶´Ù Animator_UI ÄÄÆ÷³ÍÆ®¿¡¼­ °ª °»½ÅÁß
+    // ksta IF : "g_AlphaStrength" ??ï§??ê¾¨ì …?ê¾¨ì­??Animator_UI è€ŒëŒ„ë£·?ëš°ë“ƒ?ë¨¯ê½Œ åª›?åª›ê¹†ë–Šä»¥?
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH(Binding_Shader_Failed);
@@ -94,7 +94,7 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 
     const   _uint       iDestLevel  = ENUM_CLASS(LEVEL::UI);
 
-    // ÅØ½ºÃÄ ÇÁ·ÎÅäÅ¸ÀÔÈ­
+    // ?ë¿ë’ªçˆ¾??ê¾¨ì¤ˆ?ì¢??ë‚‡ì†•
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
         CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
@@ -142,7 +142,7 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strFileName   = pDesc->strFileName;
     m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
 
-    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // ºñ¾îÀÖ´Ù¸é ÃÊ±â°ªÀ¸·Î strFileName »ç¿ë
+    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // é®ê¾©ë¼±?ëˆë–Žï§Ž?ç¥ë‡ë¦°åª›ë¯ªì‘æ¿¡?strFileName ?ÑŠìŠœ
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 

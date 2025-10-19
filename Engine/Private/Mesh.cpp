@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Mesh.h"
 
 #include "Bone.h"
@@ -76,7 +76,7 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 }
 #endif
 
-// ÀÌ°Íµµ °è»ê ¼ÎÀÌ´õ°¡ Àû¿ëµÇ¾î¾ß ÇÏ´Â ºÎºĞ?
+// ?ë‹¿ì¾¬??æ€¨ê¾©ê¶› ?ê³—ì” ?ë¶½? ?ê³¸ìŠœ?ì„ë¼±???ì„ë’— éºÂ€éº?
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)
@@ -272,7 +272,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
 		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
 
-		// Mesh Shape¿ë Container
+		// Mesh Shape??Container
 		m_VertexPositions.push_back(pVertices[i].vPosition);
         MaxPos.x = max(pVertices[i].vPosition.x, MaxPos.x);
         MaxPos.y = max(pVertices[i].vPosition.y, MaxPos.y);
@@ -326,7 +326,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 	Safe_Delete_Array(pVertices);
 #pragma endregion
 
-	// Mesh Shape¿ë Container
+	// Mesh Shape??Container
 	for (size_t i = 0; i < m_iNumIndices; ++i)
 		m_Indices.push_back(pIndices[i]);
 

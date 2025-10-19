@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Level_Test.h"
 #include "MapObject.h"
 
@@ -9,48 +9,45 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
-    //ifstream File("../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", ios::binary);
 
-    //if (!File.is_open())
-    //{
-    //    CRASH("File Load Fail");
-    //}
-    //_uint NameLength = {};
-    //CMapObject::MAP_LOAD Desc{};
+    m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
 
-    //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-    //{
-    //    memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-    //    File.read(Desc.ModelName, NameLength);
 
-    //    File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-    //    _float4x4 Matrix = {};
-    //    File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-    //    Desc.WorldMatrix = &Matrix;
+    if (!File.is_open())
+    {
+        CRASH("File Load Fail");
+    }
+    _uint NameLength = {};
+    CMapObject::MAP_LOAD Desc{};
 
-    //    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-    //    _tchar Name[MAX_PATH] = {};
-    //    MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
-    //    lstrcat(Model, Name);
 
-    //    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
-    //    strcat_s(ModelPath, Desc.ModelName);
-    //    strcat_s(ModelPath, "/");
-    //    strcat_s(ModelPath, Desc.ModelName);
-    //    strcat_s(ModelPath, ".dat");
+    while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+    {
+        memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+        File.read(Desc.ModelName, NameLength);
 
-    //    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), Model,
-    //        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
+        File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+        _float4x4 Matrix = {};
+        File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+        Desc.WorldMatrix = &Matrix;
 
-    //    _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
-    //    lstrcat(PrototypeObject, Name);
+        _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+        _tchar Name[MAX_PATH] = {};
+        MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
+        lstrcat(Model, Name);
 
-    //    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), PrototypeObject,
-    //        CMapObject::Create(m_pDevice, m_pContext));
+        _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
+        strcat_s(ModelPath, Desc.ModelName);
+        strcat_s(ModelPath, "/");
+        strcat_s(ModelPath, Desc.ModelName);
+        strcat_s(ModelPath, ".dat");
 
-    //    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), PrototypeObject
-    //        , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
-    //}
+        m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
+
+        //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
+        //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
+    }
 
 
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))

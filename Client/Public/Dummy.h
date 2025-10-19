@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -24,7 +24,7 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
-
+	virtual		void			Render_Shadow() override;
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 

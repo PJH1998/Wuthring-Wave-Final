@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -17,7 +17,7 @@ public:
 	void				Update();
 
 	_bool				isPicked(_float3* pOut);
-
+	_bool				Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels);
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };
@@ -27,7 +27,8 @@ private:
 	HWND						m_hWnd = { nullptr };
 	POINT						m_ptMouse = {};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
-
+	_float4* m_pPoints = { nullptr };
+	vector<_float4> m_WorldPoints;
 public:
 	static CPicking*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd, _uint iWinSizeX, _uint iWinSizeY);
 	virtual void			Free() override;

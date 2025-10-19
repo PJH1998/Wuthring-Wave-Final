@@ -117,6 +117,9 @@
     <ClInclude Include="..\Public\Level_GamePlay.h">
       <Filter>01. Level\GamePlay</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ShadowDummy.h">
+      <Filter>02. GameObject\Dummy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -169,6 +172,9 @@
     <ClCompile Include="..\Private\Level_GamePlay.cpp">
       <Filter>01. Level\GamePlay</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\ShadowDummy.cpp">
+      <Filter>02. GameObject\Dummy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -192,9 +198,12 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ParticleUpdate_CS.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

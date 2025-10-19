@@ -1,4 +1,4 @@
-#include"EnginePch.h"
+﻿#include"EnginePch.h"
 #include "VIBuffer_Instance.h"
 
 CVIBuffer_Instance::CVIBuffer_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -73,7 +73,7 @@ void CVIBuffer_Instance::Free()
 {
 	__super::Free();
 
-	if (!m_isClone)
+	if (m_isClone)
 		Safe_Delete_Array(m_pVBInstanceVertices);
 	Safe_Release(m_pVBInstance);
 }

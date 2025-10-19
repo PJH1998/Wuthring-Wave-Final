@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"GameObject.h"
 
 
@@ -17,6 +17,7 @@ public:
 	{
 		_char ModelName[MAX_PATH] = {};
 		_float4x4* WorldMatrix = { nullptr };
+		_uint iNumInstance;
 	}MAP_LOAD;
 private:
 	CEdit_MapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

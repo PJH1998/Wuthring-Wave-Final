@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "GameInstance.h"
 #include "SoundNotify.h"
 
@@ -19,15 +19,15 @@ void CSoundNotify::Execute()
 
 	iChannel = iChannel % 31;
 	if ("Effect" == m_strSoundType)
-		m_pGameInstance->Play_Sound(m_wStrSoundTag, iChannel++, m_fVolume); // ÀÏ´Ü Ã¤³Î ÀÓ½Ã.
-		//m_pGameInstance->Play_Other(m_wStrSoundTag, m_fVolume); // ÀÏ´Ü Ã¤³Î ÀÓ½Ã.
+		m_pGameInstance->Play_Sound(m_wStrSoundTag, iChannel++, m_fVolume); // ?ì‡°ë–’ ï§¢ê¾¨ê¼¸ ?ê¾©ë–†.
+		//m_pGameInstance->Play_Other(m_wStrSoundTag, m_fVolume); // ?ì‡°ë–’ ï§¢ê¾¨ê¼¸ ?ê¾©ë–†.
 
 }
 
 json CSoundNotify::To_Json() const
 {
 	json soundJson;
-	soundJson["NotifyType"] = "Sound"; // ÀĞ¾î¿Ã ¶§ ±¸ºĞÀ» À§ÇØ?
+	soundJson["NotifyType"] = "Sound"; // ?ìŒë¼±????æ´Ñ‰í…‡???ê¾ªë¹?
 	soundJson["TrackPosition"] = m_fTrackPosition;
 	soundJson["SoundTag"] = m_strSoundTag;
 	soundJson["SoundType"] = m_strSoundType;
@@ -37,13 +37,13 @@ json CSoundNotify::To_Json() const
 
 const _string& CSoundNotify::Get_NotifyTypeName() const
 {
-	// ³ëÆ¼ÆÄÀÌ´Â ¿©·¯°³ »ı¼ºµÇ´Âµ¥ °°Àº typeNameÀÌ¹Ç·Î °øÀ¯ÇÑ´Ù.
+	// ?ëª…ë–š?ëš¯ì” ???Ñ‰ìœ­åª›??ì•¹ê½¦?ì„ë’—??åª›ìˆˆ? typeName?ëŒ€?æ¿¡?æ€¨ë“­ì‘€?ì’•ë–.
 	static const _string typeName = "Sound";
 	return typeName;
 }
 
 #ifdef _DEBUG
-// ImGui¿ëµµ Ãâ·Â
+// ImGui?â‘¸ë£„ ç•°ì’•ì °
 void CSoundNotify::ImGui_Print()
 {
 	ImGui::Text("TrackPosition : %.2f", m_fTrackPosition);

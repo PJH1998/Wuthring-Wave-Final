@@ -92,9 +92,13 @@ namespace Engine
 
 	const unsigned int g_iMaxWidth = 8192;
 	const unsigned int g_iMaxHeight = 4608;
+
+	const unsigned int g_iNumCascade = 4;
+	const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };
+	const float g_fLODGap = { 1500.f };
 }
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 5
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"

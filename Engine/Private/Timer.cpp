@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Timer.h"
 
 CTimer::CTimer() 
@@ -12,12 +12,12 @@ CTimer::CTimer()
 
 HRESULT CTimer::Initialize()
 {
-	// ÇöÀç CPU Ä«¿îÆÃ ¼ıÀÚ
+	// ?ê¾©ì˜± CPU ç§»ëŒìŠ«???ãƒ¬ì˜„
 	QueryPerformanceCounter(&m_FrameTime);			// 1077
 	QueryPerformanceCounter(&m_LastTime);			// 1085
 	QueryPerformanceCounter(&m_FixTime);			// 1090
 
-	// ÃÊ´ç CPU°¡ Ä«¿îÆÃ ÇÒ ¼ö ÀÖ´Â ÃÖ´ë ¼ıÀÚ
+	// ç¥ëˆë–¦ CPUåª›Â€ ç§»ëŒìŠ«???????ëˆë’— ï§¤ì’•? ?ãƒ¬ì˜„
 	QueryPerformanceFrequency(&m_CpuTick);
 
 	return S_OK;

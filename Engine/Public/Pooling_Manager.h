@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -25,24 +25,24 @@ public:
 
 private:
 	class CGameInstance*				m_pGameInstance = { nullptr };
-	// Pooling ´ë±â
+	// Pooling ?Â€æ¹²?
 	map<const _wstring, queue<class CGameObject*>>			m_PoolingObjects;
-	// È°¼ºÈ­µÈ Object
+	// ?ì’–ê½¦?ë¶¾ë§‚ Object
 	map<const _wstring, list<class CGameObject*>>				m_ActiveObjects;
 
 	// Thread
 	vector<thread>					m_Threads;
-	// Hardware¿¡¼­ Á¦°øÇÏ´Â CPU Core °³¼ö
+	// Hardware?ë¨¯ê½Œ ?ì’“ë‚¬?ì„ë’— CPU Core åª›ì’–ë‹”
 	_uint								m_iNumThread = {};
-	// Thread¿¡ ÇÒ´çÇÒ ÀÛ¾÷µé
+	// Thread???ì¢Šë–¦???ë¬’ë¾½??
 	queue<function<void()>>	m_Works;
-	// Mutex (Data ÂüÁ¶ ½Ã, ¼ø¼­´ë·Î 1°³ÀÇ Thread¸¸ Á¢±Ù °¡´ÉÇÏ°Ô ÇÏµµ·Ï)
+	// Mutex (Data ï§¡ëª„â€œ ?? ?ì’–ê½Œ?Â€æ¿¡?1åª›ì’–ì“½ Threadï§??ë¬ë  åª›Â€?Î½ë¸¯å¯ƒ??ì„ë£„æ¿¡?
 	mutex								m_Mutex;
-	// Thread Wait »óÅÂ ¸¸µé±â À§ÇÑ °´Ã¼
+	// Thread Wait ?ê³¹ê¹­ ï§ëš®ë±¾æ¹²??ê¾ªë¸³ åª›ì•¹ê»œ
 	condition_variable				m_CV;
 	// Thread All Stop
 	_bool								m_isAllStop = { false };
-	// ÁøÇàÁßÀÎ Work Count
+	// ï§ê¾ªë»¾ä»¥ë¬’ì”¤ Work Count
 	atomic<_int>					m_iLiveWork = {};
 
 private:

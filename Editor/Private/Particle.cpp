@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+ï»¿#include "Editorpch.h"
 #include "Particle.h"
 
 CParticle::CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -35,7 +35,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
-    //ÀÓ½ÃÃ³¸®
+    //?ê¾©ë–†ï§£ì„â”
 
     return S_OK;
 }
@@ -56,7 +56,7 @@ void CParticle::Update(_float fTimeDelta)
     if (m_vLifeTime.x >= m_vLifeTime.y)
         m_isActivate = false;
 
-    //¶óÀÌÇÁÅ¸ÀÓ ³¡³ª¸é ºñÈ°¼ºÈ­
+    //?ì‡±ì” ?ê¾ª????ì•¸êµ¹ï§?é®ê¾ªì†¢?ê¹Šì†•
 }
 
 void CParticle::Late_Update(_float fTimeDelta)

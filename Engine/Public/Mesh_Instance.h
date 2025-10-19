@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VIBuffer_Instance.h"
 NS_BEGIN(Engine)
 
@@ -46,7 +46,7 @@ public:
 	
 		//static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile);
 	static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
-	virtual CComponent* Clone(void* pArg)override;
+	virtual CMesh_Instance* Clone(void* pArg)override;
 	virtual void Free()override;
 };
 

@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "EditorApp.h"
 
 #include "Event_Level.h"
@@ -9,6 +9,7 @@
 #include "Level_Effect.h"
 #include "Level_Map.h"
 #include "Level_UI.h"
+#include "Level_Camera.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -33,7 +34,7 @@ HRESULT CEditorApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ¿¬µ¿
+	// ImGui Context ?ê³•ë£ž
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
@@ -53,7 +54,7 @@ HRESULT CEditorApp::Initialize()
 
 void CEditorApp::Post_Update()
 {
-	// Level ÀüÈ¯
+	// Level ?ê¾ªì†š
 	if (true == m_isChangeLevel)
 	{
 		m_isChangeLevel = false;
@@ -81,6 +82,9 @@ void CEditorApp::Post_Update()
 			break;
 		case LEVEL::UI:
 			pLevel = CLevel_UI::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::CAMERA:
+			pLevel = CLevel_Camera::Create(m_pDevice, m_pContext);
 			break;
 		}
 
@@ -122,6 +126,11 @@ void CEditorApp::Update(_float fTimeDelta)
 	if (ImGui::Button("UI", ImVec2(100.f, 50.f)))
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::UI, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (ImGui::Button("Camera", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::CAMERA, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 

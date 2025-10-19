@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Light.h"
 
 #include "Shader.h"
@@ -37,8 +37,8 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 		iPassIndex = ENUM_CLASS(SHADER_DEFFERED::POINT);
 	}
 
-	pShader->Begin(iPassIndex);
 	pVIBuffer->Bind_Resources();
+	pShader->Begin(iPassIndex);
 	pVIBuffer->Render();
 
 	return S_OK;

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Shader.h"
 
 CShader::CShader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -120,6 +120,7 @@ HRESULT CShader::Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceV
 	if (nullptr == pSRVariable)
 		return E_FAIL;
 
+
 	return pSRVariable->SetResourceArray(ppSRV, 0, iNumTextures);
 }
 
@@ -128,8 +129,8 @@ HRESULT CShader::Bind_Value(const _char* pConstantName, const void* pValue, _uin
     ID3DX11EffectVariable* pVariable = m_pEffect->GetVariableByName(pConstantName);
     if (nullptr == pVariable)
         return E_FAIL;
-
     return pVariable->SetRawValue(pValue, 0, iLength);
+
 }
 
 #ifdef _DEBUG

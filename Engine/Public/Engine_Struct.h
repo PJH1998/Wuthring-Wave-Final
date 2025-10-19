@@ -1,4 +1,4 @@
-#ifndef Engine_Struct_h__
+ï»¿#ifndef Engine_Struct_h__
 #define Engine_Struct_h__
 
 #include "Engine_Typedef.h"
@@ -31,11 +31,11 @@ namespace Engine
 
 	typedef struct tagShadowLightDesc
 	{
-		_float3 vEye;
-		_float3 vAt;
-		_float fFovy;
-		_float fNear;
-		_float fFar;
+		XMFLOAT4	vDirection;
+		_float		fDistance;
+		_float		fFovy;
+		_float		fNear;
+		_float		fFar;
 	}SHADOW_LIGHT_DESC;
 
 	typedef struct tagNotify
@@ -87,7 +87,7 @@ namespace Engine
 		_float3 vPivot;		
 		_float  fTimeDelta;
 
-		_uint	IsLoop;		// 0ÀÌ¸é false, 1ÀÌ¸é true
+		_uint	IsLoop;		// 0?ëŒ€ãˆƒ false, 1?ëŒ€ãˆƒ true
 		_float	fSpreadWeight;
 		_float  fDropWeight;
 		_float  fRotationWeight;
@@ -111,34 +111,35 @@ namespace Engine
 	}COMPUTESHADER_INFO;
 
 
-	// Ã¤³ÎÀÌ ¼ÒÀ¯ÇÏ´Â KeyFrame(¸Å TrackPosition¸¶´Ù »ÀÀÇ ÀÌµ¿ Á¤º¸) ±¸Á¶Ã¼ => Depth3
+	// Ã¤ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ KeyFrame(ï¿½ï¿½ TrackPositionï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½Ã¼ => Depth3
 	typedef struct tagGpuKeyFrame {
 		_float4 vScale;
 		_float4 vRotation;
 		_float4 vTranslation;
 		_float fTrackPosition;
-		_float3 vPadding;  // 16¹ÙÀÌÆ® Á¤·ÄÀ» À§ÇÑ ÆĞµù
+		_float3 vPadding;  // 16ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ğµï¿½
 	}GPU_KEYFRAME;
 
-	// ¾Ö´Ï¸ŞÀÌ¼Ç Á¤º¸ ±¸Á¶Ã¼ => Depth1
+	// ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¼ => Depth1
+	// ?ì¢Šë•²ï§ë¶¿ì” ???ëº£ë‚« æ´ÑŠâ€œï§£?=> Depth1
 	typedef struct AnimInfo {
-		_uint  iStartChannelIndexOffset; // Channel ½ÃÀÛ (´©Àû ÀÎµ¦½º)  
-		_uint  iNumChannels; // ÀÌ Å¬¸³¿¡ Æ÷ÇÔµÈ Ã¤³Î(»À)ÀÇ °³¼ö
+		_uint  iStartChannelIndexOffset; // Channel ?ì’–ì˜‰ (?ê¾©ìŸ» ?ëªƒëœ³??  
+		_uint  iNumChannels; // ???ëŒ€â”°???Ñ‹ë¸¿??ï§¢ê¾¨ê¼¸(å ‰???åª›ì’–ë‹”
 		_float fDuration;
-		uint iPadding;  // 4 ¹ÙÀÌÆ® ÆĞµùÀ» Ãß°¡
+		uint iPadding;  // 4 è«›ë¶¿ì” ???â‘¤ëµ«??ç•°ë¶½?
 	}ANIMINFO;
 
-	// Ã¤³Î Á¤º¸ ±¸Á¶Ã¼ => Depth2
+	// ï§¢ê¾¨ê¼¸ ?ëº£ë‚« æ´ÑŠâ€œï§£?=> Depth2
 	typedef struct tagGpuChannelInfo
 	{
-		_uint iStartKeyframeOffset; // Key Frame ½ÃÀÛ (´©Àû ÀÎµ¦½º)
-		_uint iNumKeyframes; // ÇöÀç Channel¿¡¼­ÀÇ KeyFrame °³¼ö.
-		_uint iBoneIndex;  // Ãß°¡: ÀÌ Ã¤³ÎÀÌ ¾î¶² »À¸¦ ÄÁÆ®·ÑÇÏ´ÂÁö
-		_uint iPadding;    // 16¹ÙÀÌÆ® Á¤·ÄÀ» À§ÇÑ ÆĞµù
+		_uint iStartKeyframeOffset; // Key Frame ?ì’–ì˜‰ (?ê¾©ìŸ» ?ëªƒëœ³??
+		_uint iNumKeyframes; // ?ê¾©ì˜± Channel?ë¨¯ê½Œ??KeyFrame åª›ì’–ë‹”.
+		_uint iBoneIndex;  // ç•°ë¶½?: ??ï§¢ê¾¨ê¼¸???ëŒ€ë¼¡ å ‰ëˆ? è€Œâ‘¦ë“ƒæ¿¡ã…½ë¸¯?ë¶¿?
+		_uint iPadding;    // 16è«›ë¶¿ì” ???ëº£ì ¹???ê¾ªë¸³ ?â‘¤ëµ«
 	}GPU_CHANNELINFO;
 
 
-	// SRT KeyFrame ±¸Á¶Ã¼. => Compute Shader¿¡¼­ »ç¿ë.
+	// SRT KeyFrame ï¿½ï¿½ï¿½ï¿½Ã¼. => Compute Shaderï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½.
 	typedef struct tagSRTKeyFrame
 	{
 		_float4 vScale;
@@ -146,9 +147,17 @@ namespace Engine
 		_float4 vTranslation;
 	}SRT_KEYFRAME;
 
+	// ï§¢ê¾¨ê¼¸???ëš¯ì‘€?ì„ë’— KeyFrame(ï§?TrackPositionï§ëˆë– å ‰ë‰ì“½ ?ëŒ€ë£ ?ëº£ë‚«) æ´ÑŠâ€œï§£?=> Depth3
+	typedef struct tagGpuKeyFrame {
+		_float4 vScale;
+		_float4 vRotation;
+		_float4 vTranslation;
+		_float fTrackPosition;
+		_float3 vPadding;  // 16è«›ë¶¿ì” ???ëº£ì ¹???ê¾ªë¸³ ?â‘¤ëµ«
+	}GPU_KEYFRAME;
 
-	// (¸Å ÇÁ·¹ÀÓ ¾÷µ¥ÀÌÆ®)
-	// Constant Buffer´Â ÃÑ Å©±â°¡ ¹İµå½Ã 16ÀÇ ¹è¼ö¿©¾ßÇÔ.
+	// (ï§??ê¾¨ì …???ë‚…ëœ²?ëŒ„ë“ƒ)
+	// Constant Buffer??ç¥??Ñˆë¦°åª›Â€ è«›ì„ë±¶??16??è«›ê³—ë‹”?ÑŠë¹??
 	typedef struct tagAnimationCBInfo {
 		_float fTrackPosition;
 		_uint  iAnimindex;

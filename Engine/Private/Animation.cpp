@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Animation.h"
 
 #include "Channel.h"
@@ -38,7 +38,7 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 		string type = notifyObject["NotifyType"].get<string>();
 		CAnimNotify* pAnimNotify = { nullptr };
 
-		// 1. °´Ã¼ »ı¼º
+		// 1. åª›ì•¹ê»œ ?ì•¹ê½¦
 		if (type == "Sound")
 			pAnimNotify = CSoundNotify::From_Json(notifyObject);
 		else if (type == "Collider")
@@ -51,10 +51,10 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 			// EffectNotify
 			pAnimNotify->Set_EffectCallback(EffectCallback);
 		}
-		// 2. ¹®Á¦ »ı±â¸é Crash ¹ß»ı.
+		// 2. è‡¾ëª„ì £ ?ì•·ë¦°ï§?Crash è«›ì’–ê¹®.
 		ASSERT_CRASH(pAnimNotify);
 
-		// 3. °ü¸® ÄÁÅ×ÀÌ³Ê¿¡ ³Ö¾îµÎ±â.
+		// 3. æ„¿Â€ç”±?è€Œâ‘¦ë€’?ëŒ€ê¼«???ï½Œë¼±?ë¨­ë¦°.
 		m_AnimNotifies.emplace_back(pAnimNotify);
 	}
 }
@@ -70,7 +70,7 @@ void CAnimation::Sort_Notify()
 		});
 }
 
-// ¾Ö´Ï¸ŞÀÌ¼Ç¿¡ µî·ÏµÈ Notify¸¦ TrackPosition º°·Î Á¤·Ä.
+// ?ì¢Šë•²ï§ë¶¿ì” ?ì„ë¿‰ ?ê¹…ì¤‰??Notifyç‘œ?TrackPosition è¹‚ê¾¨ì¤ˆ ?ëº£ì ¹.
 void CAnimation::Sort_AnimNotify()
 {
 	if (0 == m_AnimNotifies.size())
@@ -189,8 +189,8 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 		return true;
 	}
 
-	// Notfiy ÇöÀç ÀÎµ¦½º°¡ size¸¦ ³ÑÁö ¾Ê°í, TrackPositionÀÌ Notify¿¡ ÇØ´çÇÑ´Ù¸é? 
-	// Notify¿¡ ÇØ´çÇÏ´Â ÇÔ¼ö¸¦ ½ÇÇàÇÏ¶ó.
+	// Notfiy ?ê¾©ì˜± ?ëªƒëœ³?ã…º? sizeç‘œ??ì„? ?ë”„í€¬, TrackPosition??Notify???ëŒ€ë–¦?ì’•ë–ï§? 
+	// Notify???ëŒ€ë–¦?ì„ë’— ?â‘¥ë‹”ç‘œ??ã…½ë»¾?ì„ì”ª.
 	
 	//while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 	//	m_Notifies[m_iNotifyIndex++].Func();
@@ -246,7 +246,7 @@ _bool CAnimation::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition
 		m_AnimNotifies[m_iNotifyIndex++]->Execute();
 
 	/* 
-	* ¿ø·¡ ¿©±â¿¡ Animation °»½Å ·ÎÁ÷ÀÌ Á¸Àç.
+	* ?ë¨®ì˜’ ?Ñˆë¦°??Animation åª›ê¹†ë–Š æ¿¡ì’–ì­…??è­°ëŒì˜±.
 	*/
 
 	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;

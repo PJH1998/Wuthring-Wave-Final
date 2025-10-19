@@ -122,6 +122,12 @@
       <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;../ThirdPartyLib;</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -145,26 +151,37 @@
       <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;../ThirdPartyLib;</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderType>Effect</ShaderType>
+    </FxCompile>
+    <FxCompile>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\public\Animator_UI.h" />
+    <ClInclude Include="..\Public\Camera_Interface.h" />
     <ClInclude Include="..\public\Custom_UI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\AnimationActor.h" />
     <ClInclude Include="..\Public\AnimationTool.h" />
     <ClInclude Include="..\Public\AnimNotifyTool.h" />
+    <ClInclude Include="..\public\EditDummy.h" />
+    <ClInclude Include="..\public\EditDummy_Wolf.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
+    <ClInclude Include="..\Public\Edit_Brush.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
     <ClInclude Include="..\Public\Level_Animation.h" />
+    <ClInclude Include="..\Public\Level_Camera.h" />
     <ClInclude Include="..\Public\Level_Edit.h" />
     <ClInclude Include="..\Public\Level_Effect.h" />
     <ClInclude Include="..\Public\Level_Map.h" />
@@ -176,6 +193,8 @@
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
+    <ClInclude Include="..\public\Shader_Interface.h" />
+    <ClInclude Include="..\Public\SpringCamera_Edit.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -183,22 +202,27 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Animator_UI.cpp" />
+    <ClCompile Include="..\Private\Camera_Interface.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\AnimationActor.cpp" />
     <ClCompile Include="..\Private\AnimationTool.cpp" />
     <ClCompile Include="..\Private\AnimNotifyTool.cpp" />
+    <ClCompile Include="..\private\EditDummy.cpp" />
+    <ClCompile Include="..\private\EditDummy_Wolf.cpp" />
     <ClCompile Include="..\Private\EditorApp.cpp" />
     <ClCompile Include="..\Private\EditorPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
+    <ClCompile Include="..\Private\Level_Camera.cpp" />
     <ClCompile Include="..\Private\Level_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Effect.cpp" />
     <ClCompile Include="..\Private\Level_Map.cpp" />
@@ -210,6 +234,8 @@
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\private\Shader_Interface.cpp" />
+    <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

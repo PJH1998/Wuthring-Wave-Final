@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "MainApp.h"
 #include "Parser.h"
 
@@ -34,7 +34,7 @@ HRESULT CMainApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ¿¬µ¿
+	// ImGui Context ?ê³•ë£ž
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
@@ -51,13 +51,13 @@ HRESULT CMainApp::Initialize()
 
 void CMainApp::Post_Update()
 {
-	// Level ÀüÈ¯
+	// Level ?ê¾ªì†š
 	if (true == m_isChangeLevel)
 	{
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
-			// Level¿¡ ¼ÓÇÏÁö ¾ÊÀº °´Ã¼µé Release
+			// Level???ëžë¸¯ï§žÂ€ ?ë”†? åª›ì•¹ê»œ??Release
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				return;
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));
@@ -89,7 +89,7 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	// Docking ±âº» ¼³Á¤
+	// Docking æ¹²ê³•ë‚¯ ?ã…¼ì ™
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 

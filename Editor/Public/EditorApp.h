@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
@@ -11,7 +11,7 @@ private:
 
 public:
 	HRESULT			Initialize();
-	void				Post_Update();						// ·¹º§ ÀüÈ¯
+	void				Post_Update();						// ?ëˆêº¼ ?ê¾ªì†š
 	void				Update(_float fTimeDelta);
 	void				Render();
 

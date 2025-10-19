@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "ColliderNotify.h"
 #include "GameInstance.h"
 
@@ -30,7 +30,7 @@ json CColliderNotify::To_Json() const
 
 const _string& CColliderNotify::Get_NotifyTypeName() const
 {
-	// ³ëÆ¼ÆÄÀÌ´Â ¿©·¯°³ »ý¼ºµÇ´Âµ¥ °°Àº typeNameÀÌ¹Ç·Î °øÀ¯ÇÑ´Ù.
+	// ?ëª…ë–š?ëš¯ì” ???Ñ‰ìœ­åª›??ì•¹ê½¦?ì„Žë’—??åª›ìˆˆ? typeName?ëŒ€?æ¿¡?æ€¨ë“­ì‘€?ì’•ë–Ž.
 	static const _string typeName = "Collider";
 	return typeName;
 }
