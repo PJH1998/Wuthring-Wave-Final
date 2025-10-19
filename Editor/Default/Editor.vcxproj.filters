@@ -93,7 +93,7 @@
     </Filter>
     <Filter Include="03. GameObject\Dummy\Wolf">
       <UniqueIdentifier>{c0bf34ec-7cee-42c3-9edb-a381b63719df}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Level\Camera">
       <UniqueIdentifier>{d283c436-c990-447a-bf81-d5b355c034dd}</UniqueIdentifier>
     </Filter>
@@ -105,6 +105,9 @@
     </Filter>
     <Filter Include="03. GameObject\Camera\Action">
       <UniqueIdentifier>{bfd1b2ba-66c1-4aba-998e-ff6db6deb0c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Dummy\Augusta">
+      <UniqueIdentifier>{e3b0fe7a-92fa-4d49-9339-e575e6ab1be3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -212,7 +215,7 @@
     </ClInclude>
     <ClInclude Include="..\public\EditDummy_Wolf.h">
       <Filter>03. GameObject\Dummy\Wolf</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Level_Camera.h">
       <Filter>01. Level\Camera</Filter>
     </ClInclude>
@@ -221,6 +224,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\SpringCamera_Edit.h">
       <Filter>03. GameObject\Camera\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\EditDummy_Augusta.h">
+      <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -311,7 +317,7 @@
     </ClCompile>
     <ClCompile Include="..\private\EditDummy_Wolf.cpp">
       <Filter>03. GameObject\Dummy\Wolf</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Level_Camera.cpp">
       <Filter>01. Level\Camera</Filter>
     </ClCompile>
@@ -320,6 +326,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp">
       <Filter>03. GameObject\Camera\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\EditDummy_Augusta.cpp">
+      <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
