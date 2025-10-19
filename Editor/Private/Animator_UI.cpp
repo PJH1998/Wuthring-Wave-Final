@@ -313,15 +313,41 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vSca),
-        fFixedLerpRatio)
-    );
+        fFixedLerpRatio
+    ));
+
+
+    _float2 vResultScreenLT = {};
+    XMStoreFloat2(&vResultScreenLT, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenLT),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenLT),
+        fFixedLerpRatio
+    ));
+
+    _float2 vResultScreenRB = {};
+    XMStoreFloat2(&vResultScreenRB, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenRB),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenRB),
+        fFixedLerpRatio
+    ));
+
+    _float4 vResultOuterWidth = {};
+    XMStoreFloat4(&vResultOuterWidth, XMVectorLerp(
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vBlendToOuterWidth),
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vBlendToOuterWidth),
+        fFixedLerpRatio
+    ));
 
     // ==============================
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
+    
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
     pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+    pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+    pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+    pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     

@@ -59,6 +59,11 @@ float2      g_TexcoordLT, g_TexcoordRB;                                     // b
 
 float2      g_ScreenSize = { 1920.f, 1080.f };
 
+
+//float2      g_ScreenLT = { 200.f, 200.f }, g_ScreenRB = { 1720.f, 880.f };     // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
+//bool        g_InverseScreenDiscard = false;                                 // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
+//float4      g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                   // (좌, 우, 상, 하) (left, right, top, bottom)
+
 float2      g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f };     // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
 bool        g_InverseScreenDiscard = false;                                 // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
 float4      g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                   // (좌, 우, 상, 하) (left, right, top, bottom)
@@ -252,18 +257,29 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     float2 FixedScreenRB = { g_ScreenRB.x + g_BlendToOuterWidth.y, g_ScreenRB.y + g_BlendToOuterWidth.w };
     
     // discard 클리핑용. 그려질 부분을 모두 감싸는 사각형 좌표 구함. 반전의 경우엔 모두 감싸지는 사각형.
-    float2 ClipScreenLT = float2(min(FixedScreenLT.x, g_ScreenLT.x), min(FixedScreenLT.y, g_ScreenLT.y));
-    float2 ClipScreenRB = float2(max(FixedScreenRB.x, g_ScreenRB.x), max(FixedScreenRB.y, g_ScreenRB.y));
-    
-    if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
-        discard;
-    
-    
-    float alphaRatioX = 0.f;
-    float alphaRatioY = 0.f;
-    
     if (!g_InverseScreenDiscard)
     {
+        float2 ClipScreenLT = float2(min(FixedScreenLT.x, g_ScreenLT.x), min(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(max(FixedScreenRB.x, g_ScreenRB.x), max(FixedScreenRB.y, g_ScreenRB.y));
+    
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
+    }
+    else
+    {
+        float2 ClipScreenLT = float2(max(FixedScreenLT.x, g_ScreenLT.x), max(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(min(FixedScreenRB.x, g_ScreenRB.x), min(FixedScreenRB.y, g_ScreenRB.y));
+    
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
+    }
+    
+    
+    float alphaRatioX = (g_InverseScreenDiscard)? 1.f : 0.f;
+    float alphaRatioY = (g_InverseScreenDiscard)? 1.f : 0.f;
+    
+    //if (!g_InverseScreenDiscard)
+    //{
         if      (g_BlendToOuterWidth.x > 0 || g_BlendToOuterWidth.y > 0) // Outer Gradient
         {
             if (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
@@ -293,13 +309,15 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
             else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
                 alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
         }
-        
-        
-    }
+    //}
 
-    float alphaRatio = max(alphaRatioX, alphaRatioY);
     
-    Out.vColor.a *= (1.f - alphaRatio);
+    
+    
+    float alphaRatio        = max(alphaRatioX, alphaRatioY);
+    float finalAlphaRatio   = (g_InverseScreenDiscard)? alphaRatio : (1.f - alphaRatio); // inverse 여부 반영    
+    
+    Out.vColor.a *= finalAlphaRatio;
     
     return Out;
 }

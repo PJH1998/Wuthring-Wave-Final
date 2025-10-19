@@ -28,6 +28,12 @@ public:
 		_float3			vRot = {};			// Euler
 		_float3			vSca = {};
 
+
+		_float2			vScreenLT = {};			// 표시될 화면상의 좌표 제한. (우상 0, 0 / 좌하 화면크기)
+		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+
+		_float4			vBlendToOuterWidth = {};
+
 	} UI_ANIM_KEYFRAME_DESC;
 
 	typedef struct tagUIAnimDesc
@@ -84,6 +90,7 @@ private:
 	void				Update_ObjectParents();
 	void				Update_ObjectChilds();
 
+	void				Update_SelectedKeyframeDesc();
 
 private:
 	class CGameObject*			m_pCurObj = { nullptr };

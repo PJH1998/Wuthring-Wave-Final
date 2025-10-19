@@ -62,21 +62,26 @@ void CCustom_UI::Render()
     //__super::Begin();
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
-        CRASH(Binding_Matrix_Failed);
+        CRASH("Binding_Matrix_Failed");
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-        CRASH(Binding_Matrix_Failed);
+        CRASH("Binding_Matrix_Failed");
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-        CRASH(Binding_Matrix_Failed);
+        CRASH("Binding_Matrix_Failed");
+
 
 
     // ksta IF : "g_AlphaStrength" 에 매 프레임마다 Animator_UI 컴포넌트에서 값 갱신중
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
-        CRASH(Binding_Shader_Failed);
+        CRASH("Binding_Matrix_Failed");
 
+    if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
+        CRASH("Binding_Value_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
+        CRASH("Binding_Value_Failed");
 
-    m_pShaderCom->Begin(3); // Gradient
+    m_pShaderCom->Begin(m_tUIDesc.iPassType); // Gradient
 
     m_pVIBufferCom->Bind_Resources();
 
@@ -146,11 +151,7 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 
-    m_tUIDesc.vScreenLT     = pDesc->vScreenLT;
-    m_tUIDesc.vScreenRB     = pDesc->vScreenRB;
-
     m_tUIDesc.fCutout           = pDesc->fCutout;
-    m_tUIDesc.vBlendOuterWidth  = pDesc->vBlendOuterWidth;
 
     m_tUIDesc.iPassType         = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
 

@@ -108,6 +108,7 @@ void CLevel_UI::Update(_float fTimeDelta)
     Update_ObjectParents();
 
 
+    Update_SelectedKeyframeDesc();
 }
 
 void CLevel_UI::Render()
@@ -869,10 +870,17 @@ void CLevel_UI::Update_Inspector()
 
     if (ImGui::CollapsingHeader("Edit UI Desciption"))
     {
-        static _char szUIName[256] = {};
-        static _uint iUIType = {};
-        static _char szParentName[256] = {};
+        static _char    szUIName[256] = {};
+        static _uint    iUIType = {};
+        static _char    szParentName[256] = {};
         
+        static _uint    iPassType = 2;
+        static _float2  vScreenLT = {};
+        static _float2  vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+        static _bool    isInverseScreenDiscard = false;
+        static _float   fCutout = 0.3f;
+
+
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
 
 
@@ -885,14 +893,19 @@ void CLevel_UI::Update_Inspector()
         _string strParentName = _string(tDesc.strParentName.begin(), tDesc.strParentName.end());
         strcpy_s(szParentName, strParentName.c_str());
 
+        iPassType = tDesc.iPassType;
+        isInverseScreenDiscard = tDesc.isInverseScreenDiscard;
+        fCutout = tDesc.fCutout;
 
 
         // 값 수정 UI
+        // szUIName
         ImGui::Text("UI Name");
         ImGui::InputText("##UI Name", szUIName, 256);
 
         ImGui::Separator();
 
+        // iUIType
         ImGui::Text("UI Type");
         const char* szUITypeNames[] = { "NONE", "BUTTON", "INTERACT" };
         const _uint iTypeCount = ENUM_CLASS(CCustom_UI::UI_TYPE::END);
@@ -914,8 +927,42 @@ void CLevel_UI::Update_Inspector()
 
         ImGui::Separator();
 
+        // szParentName
         ImGui::Text("Parent Name");
         ImGui::InputText("##Parent Name", szParentName, 256);
+
+        ImGui::Separator();
+
+        // iPassType
+        ImGui::Text("Pass Type");
+        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient"};
+        const _uint iPassTypeCount = 4;
+        const char* szCurrentPassItem = szPassTypeNames[iPassType];
+
+        if (ImGui::BeginCombo("##Pass Type", szCurrentPassItem))
+        {
+            for (_uint i = 0; i < iPassTypeCount; ++i)
+            {
+                const _bool isSelected = (iPassType == i);
+                if (ImGui::Selectable(szPassTypeNames[i], isSelected))
+                    iPassType = i;
+
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::Separator();
+
+        // isInverseScreenDiscard
+        ImGui::Text("isInverseScreenDiscard");
+        ImGui::Checkbox("##isInverseScreenDiscard", &isInverseScreenDiscard);
+        ImGui::Separator();
+
+        // fCutout
+        ImGui::Text("Cutout Rate");
+        ImGui::DragFloat("##CutoutRate", &fCutout, 0.001f, 0.f, 1.f);
 
 
 
@@ -927,6 +974,12 @@ void CLevel_UI::Update_Inspector()
 
         _string strEditedParentName = szParentName;
         tDesc.strParentName = _wstring(strEditedParentName.begin(), strEditedParentName.end());
+
+        tDesc.iPassType = iPassType;
+        tDesc.isInverseScreenDiscard  = isInverseScreenDiscard;
+        tDesc.fCutout = fCutout;
+
+
 
         dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
     }
@@ -958,9 +1011,15 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
     static _int iKeyFrame = 0;
     static _int iRecentKeyFrame = 0;
+
     static _int iTexIndex = 0;
     static _int iMaxTexIndex = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().iNumFiles;
     static _float fAlpha = 0.f;
+
+    static _float2 vScreenLT = {};			// 표시될 화면상의 좌표 제한. (우상 0, 0 / 좌하 화면크기)
+    static _float2 vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+    static _float4 vBlendToOuterWidth = {};
+
 
     static _int iAnimEditorSelected = -1;
     static _int iAnimListSelected = -1;
@@ -978,6 +1037,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
     if (ImGui::CollapsingHeader("Add Menu"))
     {
+        // iKeyFrame
         ImGui::Text("Keyframe Index");
         ImGui::InputInt("##KeyFrame Index", &iKeyFrame);
         if          (m_vecUIKeyFrameDescs.empty())  iKeyFrame = 0;
@@ -986,6 +1046,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
         ImGui::Separator();
 
+        // iTexIndex
         ImGui::Text("Texture Index (NumTex : %d)", iMaxTexIndex);
         ImGui::InputInt("##Texture Index", &iTexIndex);
         if          (iTexIndex < 0)                 iTexIndex = 0;
@@ -994,6 +1055,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
         ImGui::Separator();
 
+        // fAlpha
         ImGui::Text("Texture Alpha");
         ImGui::DragFloat("##Texture Alpha", &fAlpha, 0.001f, 0.f, 1.f);
 
@@ -1008,6 +1070,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             "CUBIC"
         };
 
+        // LerpType (m)
         if (ImGui::BeginCombo("Lerp Type##LerpType", szLerpTypeNames[m_iLerpType]))
         {
             for (_uint i = 0; i < IM_ARRAYSIZE(szLerpTypeNames); i++)
@@ -1027,10 +1090,61 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             
         ImGui::Separator();
 
+        // Loop (m)
         ImGui::Checkbox("Loop", &m_isAnimLoop);
 
         ImGui::Separator();
 
+        // vScreenLT, vScreenRB
+        ImGui::PushItemWidth(60.f);
+        ImGui::Text("Screen Clip");
+
+        ImGui::Text("LT | X");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipLT_X", &vScreenLT.x, 1.f, 0.f, vScreenRB.x);
+        ImGui::SameLine();
+        ImGui::Text("Y");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipLT_Y", &vScreenLT.y, 1.f, 0.f, vScreenRB.y);
+
+        ImGui::Text("RB | X");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipRB_X", &vScreenRB.x, 1.f, vScreenLT.x, g_iMaxWidth);
+        ImGui::SameLine();
+        ImGui::Text("Y");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipRB_Y", &vScreenRB.y, 1.f, vScreenLT.y, g_iMaxHeight);
+        ImGui::SameLine();
+
+        ImGui::PopItemWidth();
+        ImGui::Separator();
+
+        // vBlendToOuterWidth 
+        ImGui::PushItemWidth(40.f);
+        ImGui::Text("Blend Outer Width");
+        ImGui::Text("L");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_L", &vBlendToOuterWidth.x, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("R");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_R", &vBlendToOuterWidth.y, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("T");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_T", &vBlendToOuterWidth.z, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("B");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_B", &vBlendToOuterWidth.w, 1.f);
+        ImGui::SameLine();
+
+        ImGui::PopItemWidth();
+        ImGui::Separator();
+
+
+
+        // Add / Edit / Delete
         if (m_pSelectedKeyFrameDesc == nullptr)
         {
             if (ImGui::Button("Add Keyframe"))
@@ -1042,7 +1156,10 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                     fAlpha,
                     m_vCurObjPos,
                     m_vCurObjRot,
-                    m_vCurObjSca
+                    m_vCurObjSca,
+                    vScreenLT,
+                    vScreenRB,
+                    vBlendToOuterWidth
                 };
 
                 m_vecUIKeyFrameDescs.push_back(tTempDesc);
@@ -1061,6 +1178,10 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 m_pSelectedKeyFrameDesc->vRot = m_vCurObjRot;
                 m_pSelectedKeyFrameDesc->vSca = m_vCurObjSca;
 
+                m_pSelectedKeyFrameDesc->vScreenLT = vScreenLT;
+                m_pSelectedKeyFrameDesc->vScreenRB = vScreenRB;
+                m_pSelectedKeyFrameDesc->vBlendToOuterWidth = vBlendToOuterWidth;
+
                 m_pSelectedKeyFrameDesc = nullptr;
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
             }
@@ -1069,6 +1190,23 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             {
                 m_pSelectedKeyFrameDesc = nullptr;
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
+            }
+            if (ImGui::CollapsingHeader("Danger Section##Danger Section"))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+                if (ImGui::Button("Remove Keyframe"))
+                {
+                    for (_uint i = 0; i < m_vecUIKeyFrameDescs.size(); i++)
+                        if (&m_vecUIKeyFrameDescs[i] == m_pSelectedKeyFrameDesc)
+                        {
+                            m_vecUIKeyFrameDescs.erase(m_vecUIKeyFrameDescs.begin() + i);
+                            m_pSelectedKeyFrameDesc = nullptr;
+                            break;
+                        }
+                }
+                ImGui::PopStyleColor(3);
             }
         }
 
@@ -1105,6 +1243,10 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 m_vCurObjPos = m_pSelectedKeyFrameDesc->vPos;
                 m_vCurObjRot = m_pSelectedKeyFrameDesc->vRot;
                 m_vCurObjSca = m_pSelectedKeyFrameDesc->vSca;
+
+                vScreenLT = m_pSelectedKeyFrameDesc->vScreenLT;
+                vScreenRB = m_pSelectedKeyFrameDesc->vScreenRB;
+                vBlendToOuterWidth = m_pSelectedKeyFrameDesc->vBlendToOuterWidth;
             }
         }
 
@@ -1241,6 +1383,24 @@ void CLevel_UI::Update_ObjectChilds()
         tDesc.vecChildNames = vecChilds;
         UIObject.pCustomUI->Set_UIDesc(tDesc);
     }
+}
+
+void CLevel_UI::Update_SelectedKeyframeDesc()
+{
+    //_bool isCheck = false;
+    //확인할것;
+    
+    if (m_pCurObj == nullptr || m_pSelectedKeyFrameDesc == nullptr)
+        return;
+    CCustom_UI* curObj = dynamic_cast<CCustom_UI*>(m_pCurObj);
+    CShader* curObjShader = dynamic_cast<CShader*>(curObj->Get_Component(L"Com_Shader"));
+    
+    curObjShader->Bind_Value("g_AlphaStrength", &m_pSelectedKeyFrameDesc->fAlpha, sizeof(m_pSelectedKeyFrameDesc->fAlpha));
+    curObjShader->Bind_Value("g_ScreenLT", &m_pSelectedKeyFrameDesc->vScreenLT, sizeof(m_pSelectedKeyFrameDesc->vScreenLT));
+    curObjShader->Bind_Value("g_ScreenRB", &m_pSelectedKeyFrameDesc->vScreenRB, sizeof(m_pSelectedKeyFrameDesc->vScreenRB));
+    curObjShader->Bind_Value("g_BlendToOuterWidth", &m_pSelectedKeyFrameDesc->vBlendToOuterWidth, sizeof(m_pSelectedKeyFrameDesc->vBlendToOuterWidth));
+    
+
 }
 
 CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

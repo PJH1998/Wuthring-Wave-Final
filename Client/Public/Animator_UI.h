@@ -30,6 +30,8 @@ public:
 		_float3			vRot = {};			// Euler
 		_float3			vSca = {};
 
+		_float4		    vBlendOuterWidth = { };			// 방향 별 그라디언트 두께. 좌우상하 순. 음수 가능.
+
 	} UI_ANIM_KEYFRAME_DESC;
 
 	typedef struct tagUIAnimDesc

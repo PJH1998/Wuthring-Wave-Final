@@ -77,6 +77,9 @@ void CCustom_UI::Render()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         CRASH(Binding_Matrix_Failed);
 
+
+
+
     // ksta IF : "g_AlphaStrength" 에 매 프레임마다 Animator_UI 컴포넌트에서 값 갱신중
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
