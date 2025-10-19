@@ -35,7 +35,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.x),
         XMConvertToRadians(pDesc->vRotation.y),
         XMConvertToRadians(pDesc->vRotation.z) };
-    m_pTransformCom->Quaternion(vRadian);
+    m_pTransformCom->Rotation_Quaternion(vRadian);
 
     // Model?? Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;

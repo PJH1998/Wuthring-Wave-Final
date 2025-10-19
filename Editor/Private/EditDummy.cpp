@@ -27,7 +27,7 @@ HRESULT CEditDummy::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Scale(pDesc->vScale);
 	m_pTransformCom->Set_State(STATE::POSITION, pDesc->vPosition);
-	m_pTransformCom->Quaternion(pDesc->vRotation);
+	m_pTransformCom->Rotation_Quaternion(pDesc->vRotation);
 	
 	return S_OK;
 }
