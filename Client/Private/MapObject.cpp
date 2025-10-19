@@ -24,6 +24,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
+	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
+	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
 	m_iNumLOD = m_pModelComArray.size() - 1;
 	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
@@ -59,21 +61,44 @@ void CMapObject::Late_Update(_float fTimeDelta)
 
 void CMapObject::Render()
 {
+	//For_Test, when Object's m_iNumLOD is Lower Than m_iLODIndex Clip Operation Disable
+	
+	//if (m_iNumLOD <= m_iLODIndex)
+	//	return;
+
+	{
+		//m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+		//m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+		//m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+		//_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+		//for (_uint i = 0; i < iNumMesh; ++i)
+		//{
+		//	m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		//	m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+
+		//	if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		//		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+		//	m_pShaderCom->Begin(0);
+
+		//	m_pModelComArray[m_iLODIndex]->Render(i);
+		//}
+	}
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+	_uint iNumMesh = m_pModelComArray[m_iNumLOD]->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
+		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 
-		if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 		m_pShaderCom->Begin(0);
 
-		m_pModelComArray[m_iLODIndex]->Render(i);
+		m_pModelComArray[m_iNumLOD]->Render(i);
 	}
 }
 
@@ -81,26 +106,48 @@ void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+	/*_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	_tchar Name[MAX_PATH] = {};
+	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());*/
+
+	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
+	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
 
-	m_pModelComArray.resize(4);
-
-	// Com_Shader
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
-		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
-	_uint i = 0;
-	//for (_uint i = 0; i < 4; ++i)
+	m_pModelComArray.resize(V);
+	/*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		return E_FAIL;*/
+	for (_uint i = 0; i < V; ++i)
 	{
+		//m_pGameInstance->Add_Work([&,Index = i, Name = Model]() {
+		//    CModel* pModel = nullptr;
+		//    _wstring ModelCom = Name;
+		//    ModelCom.pop_back();
+		//    ModelCom += to_wstring(Index);
+
+		//    _char ModelName[MAX_PATH] = {};
+		//    sprintf_s(ModelName, "Com_Model%d", Index);
+		//    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+		//        //StringToWString(ModelName), reinterpret_cast<CComponent**>(&pModel), nullptr)))
+		//        StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[Index]), nullptr)))
+		//        CRASH("FAILED");
+		//    //m_pModelComArray.push_back(pModel);
+		//    });
 		_wstring ModelCom = Model;
+		ModelCom.pop_back();
 		ModelCom += to_wstring(i);
+
 		_char ModelName[MAX_PATH] = {};
 		sprintf_s(ModelName, "Com_Model%d", i);
-		// Com_Model
-		Add_Component(ENUM_CLASS(LEVEL::TEST), ModelCom,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr);
+		if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), ModelCom,
+			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+			CRASH("FAILED");
+
 	}
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		CRASH("FAILED");
 
 	// Com_Rigidbody
 	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};

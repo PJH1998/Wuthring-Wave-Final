@@ -33,10 +33,13 @@ void CEdit_PreViewModel::Update(_float fTimeDelta)
 
 void CEdit_PreViewModel::Late_Update(_float fTimeDelta, _wstring ModelName)
 {
+#ifdef _DEBUG
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
     _wstring Name = ModelName;
     Name.pop_back();
     m_szModelName = Name + to_wstring(0);
+#endif 
+
 
     m_fViewTime += fTimeDelta;
     if (0.f <= m_fViewTime && m_fViewTime < 2.f)

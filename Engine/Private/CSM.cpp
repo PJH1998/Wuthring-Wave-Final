@@ -22,15 +22,31 @@ HRESULT CCSM::SetUp_ShadowLight(const _wstring& strLightTag)
 	return S_OK;
 }
 
+HRESULT CCSM::SetUp_ShadowNF()
+{
+	m_fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();
+	m_fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
+
+	for (_uint i = 0; i < m_iNumClipDistance; i++)
+		m_fClipDistance[i] = Compute_ClipDistance(m_fCameraNear, m_fCameraFar, i, m_iNumClip, 0.5f);
+
+	CSM_DATA Data = {};
+	ZeroMemory(&Data, sizeof(CSM_DATA));
+
+	memcpy(&Data, m_fClipDistance, sizeof(_float) * 5);
+
+	D3D11_MAPPED_SUBRESOURCE SubResource;
+	m_pContext->Map(m_pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
+	memcpy(SubResource.pData, reinterpret_cast<void*>(&Data), sizeof(CSM_DATA));
+	m_pContext->Unmap(m_pConstantBuffer, 0);
+
+	return S_OK;
+}
+
 HRESULT CCSM::Initialize()
 {
 	m_iNumClip = g_iNumCascade;
 	m_iNumClipDistance = m_iNumClip + 1;
-
-	m_Matrices[ENUM_CLASS(D3DTS::VIEW)].resize(m_iNumClip);
-	m_Matrices[ENUM_CLASS(D3DTS::PROJ)].resize(m_iNumClip);
-
-	m_ClipDistance.resize(m_iNumClipDistance, 0.f);
 
 	if (FAILED(Ready_CSM_View()))
 		CRASH("Failed Created CSM");
@@ -46,18 +62,34 @@ void CCSM::Update_CSM()
 	Update_Matrices();
 }
 
-HRESULT CCSM::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName)
+void CCSM::Clear()
+{
+	m_pLightDesc = nullptr;
+}
+
+HRESULT CCSM::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName)
 {
 	ASSERT_CRASH(pShader);
 
-	if (FAILED(pShader->Bind_Matrices(pViewName, m_Matrices[ENUM_CLASS(D3DTS::VIEW)].data(), m_iNumClip)))
+	if (FAILED(pShader->Bind_Matrices(pViewName, &m_Matrices[ENUM_CLASS(D3DTS::VIEW)][0], m_iNumClip)))
 		CRASH("Failed CSM View Matrices");
 	
-	if (FAILED(pShader->Bind_Matrices(pViewName, m_Matrices[ENUM_CLASS(D3DTS::PROJ)].data(), m_iNumClip)))
+	if (FAILED(pShader->Bind_Matrices(pProjName, &m_Matrices[ENUM_CLASS(D3DTS::PROJ)][0], m_iNumClip)))
 		CRASH("Failed CSM PROJ Matrices");
 
-	if (FAILED(pShader->Bind_Value(pDistanceName, &m_ClipDistance[1], sizeof(_float4))))
-		CRASH("Failed CSM Distance");
+	if(nullptr != pLightDirName && nullptr != m_pLightDesc)
+	{
+		if (FAILED(pShader->Bind_Value(pLightDirName, &m_pLightDesc->vDirection, sizeof(_float4))))
+			CRASH("Failed Light Dir");
+	}
+
+	return S_OK;
+}
+
+
+HRESULT CCSM::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+{
+	m_pContext->PSSetConstantBuffers(iDataBufferIndex, 1, &m_pConstantBuffer);
 
 	return S_OK;
 }
@@ -69,17 +101,11 @@ HRESULT CCSM::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 
 HRESULT CCSM::Begin_CSM()
 {
-	//ID3D11ShaderResourceView* pSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT]{};
-
-	//m_pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
-
 	m_pContext->OMGetRenderTargets(1, &m_pBackBuffer, &m_pOriginalDSV);
 
 	m_pContext->ClearDepthStencilView(m_pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
-	ID3D11RenderTargetView* RTV[1] = { nullptr };
-
-	m_pContext->OMSetRenderTargets(1, RTV, m_pShadowDSV);
+	m_pContext->OMSetRenderTargets(0, nullptr, m_pShadowDSV);
 
 	return S_OK;
 }
@@ -94,6 +120,26 @@ HRESULT CCSM::End_CSM()
 	return S_OK;
 }
 
+#ifdef _DEBUG
+void CCSM::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	for (_uint i = 0; i < 4; i++)
+	{
+		_matrix World = XMMatrixScaling(150.f, 150.f, 1.f) * XMMatrixTranslationFromVector(XMVectorSet(-300.f, ( -200.f * (i +1) ) + 1280.f * 0.5f, 0.1f, 1.f));
+		_float4x4 DebugWorld = {};
+		XMStoreFloat4x4(&DebugWorld, World);
+
+		pShader->Bind_Value("g_DebugCSMIndex", &i, sizeof(_uint));
+		pShader->Bind_Matrix("g_WorldMatrix", &DebugWorld);
+
+		pShader->Begin(7);
+		pVIBuffer->Bind_Resources();
+		pVIBuffer->Render();
+	}
+
+}
+#endif
+
 HRESULT CCSM::Ready_CSM_View()
 {
 	D3D11_TEXTURE2D_DESC TextureDesc = {};
@@ -107,7 +153,7 @@ HRESULT CCSM::Ready_CSM_View()
 	TextureDesc.SampleDesc.Count = 1;
 
 	TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-	TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;			// DSV, SRV
 	TextureDesc.CPUAccessFlags = 0;
 	TextureDesc.MiscFlags = 0;
 
@@ -120,6 +166,7 @@ HRESULT CCSM::Ready_CSM_View()
 	DsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	DsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 	DsvDesc.Texture2DArray.MipSlice = 0;
+	DsvDesc.Texture2DArray.FirstArraySlice = 0;
 	DsvDesc.Texture2DArray.ArraySize = m_iNumClip;
 
 	if (FAILED(m_pDevice->CreateDepthStencilView(pTexture2D, &DsvDesc, &m_pShadowDSV)))
@@ -136,7 +183,16 @@ HRESULT CCSM::Ready_CSM_View()
 	if (FAILED(m_pDevice->CreateShaderResourceView(pTexture2D, &SrvDesc, &m_pShadowSRV)))
 		CRASH("Shadow SRV")
 
-		Safe_Release(pTexture2D);
+	Safe_Release(pTexture2D);
+
+	D3D11_BUFFER_DESC BufferDesc = {};
+	BufferDesc.ByteWidth = sizeof(CSM_DATA);
+	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pConstantBuffer)))
+		CRASH("Shadow Constant Buffer");
 
 	return S_OK;
 }
@@ -150,12 +206,6 @@ void CCSM::Update_Matrices()
 
 void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 {
-	_float fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();		// Camera 援먯껜???쒕쾲留?諛쏆븘?ㅺ퀬 ??
-	_float fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
-
-	for (_uint i = 0; i < m_iNumClipDistance; i++)
-		m_ClipDistance[i] = Compute_ClipDistance(fCameraNear, fCameraFar, i, m_iNumClip, 0.5f);
-
 	_float fClipNear = {};
 	_float fClipFar = {};
 	_float fNearRatio = {};
@@ -163,11 +213,11 @@ void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 
 	for (_uint j = 0; j < m_iNumClip; j++)
 	{
-		fClipNear = m_ClipDistance[j];
-		fClipFar = m_ClipDistance[j + 1];
+		fClipNear = m_fClipDistance[j];
+		fClipFar = m_fClipDistance[j + 1];
 
-		fNearRatio = ( fClipNear - fCameraNear ) / ( fCameraFar - fCameraNear );
-		fFarRatio = ( fClipFar - fCameraNear ) / ( fCameraFar - fCameraNear );
+		fNearRatio = ( fClipNear - m_fCameraNear ) / ( m_fCameraFar - m_fCameraNear );
+		fFarRatio = ( fClipFar - m_fCameraNear ) / ( m_fCameraFar - m_fCameraNear );
 
 		_float4 vClipPoints[8] = {};
 
@@ -177,10 +227,11 @@ void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 			XMStoreFloat4(&vClipPoints[k + 4], XMVectorLerp(XMLoadFloat4(&pFrustrumPoints[k]), XMLoadFloat4(&pFrustrumPoints[k + 4]), fFarRatio));
 		}
 
-
 		XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::VIEW)][j], Make_SplitViewMatrix(vClipPoints));
 		XMStoreFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::PROJ)][j], Make_SplitProjMatrix(vClipPoints, XMLoadFloat4x4(&m_Matrices[ENUM_CLASS(D3DTS::VIEW)][j])));
 	}
+
+//	Make_ClipZ();
 }
 
 _vector CCSM::Compute_Center(const _float4* pFrustrumPoints)
@@ -190,7 +241,7 @@ _vector CCSM::Compute_Center(const _float4* pFrustrumPoints)
 	for (_uint i = 0; i < 8; i++)
 		vCenterPos = XMVectorAdd(vCenterPos, XMLoadFloat4(&pFrustrumPoints[i]));
 
-	vCenterPos = XMVectorSetW(XMVectorScale(vCenterPos, 1.f / 8.f), 1.f);
+	vCenterPos = XMVectorSetW(XMVectorScale(vCenterPos, 0.125f), 1.f);
 
 	return vCenterPos;
 }
@@ -222,13 +273,15 @@ _float CCSM::Compute_ClipDistance(_float fNear, _float fFar, _uint iIndex, _uint
 
 _matrix CCSM::Make_SplitViewMatrix(const _float4* pFrustrumPoints)
 {
-	_vector vCenterPos = Compute_Center(pFrustrumPoints);
+	_vector vCenterPos = Compute_Center(pFrustrumPoints);							// ���� ���������� �߽�
 
-	_float	fMaxRadius = Compute_Radius(pFrustrumPoints, vCenterPos);
+	_float	fMaxRadius = Compute_Radius(pFrustrumPoints, vCenterPos);				// �������� �������� ������������ �ִ� ����
 	
-	_vector vDir = XMLoadFloat4(&m_pLightDesc->vDirection);
+	fMaxRadius += fMaxRadius * 0.1f;
 
-	_vector vEye = XMVectorSubtract(vCenterPos, XMVectorScale(vDir, fMaxRadius));
+	_vector vDir = XMLoadFloat4(&m_pLightDesc->vDirection);							// ���� ���� Light�� Dir
+
+	_vector vEye = XMVectorSubtract(vCenterPos, XMVectorScale(vDir, fMaxRadius));	// Eye
 
 	return XMMatrixLookAtLH(vEye, vCenterPos, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 }
@@ -243,7 +296,7 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 
 	for (_uint i = 0; i < 8; i++)
 	{
-		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // ?섎늿 ?꾨윭?ㅽ? ??酉고뻾?щ줈 ?щ━湲?
+		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // ���� ���������� Light��� �ø���
 
 		fMinX = min(fMinX, vViewPoints[i].x);
 		fMaxX = max(fMaxX, vViewPoints[i].x);
@@ -255,11 +308,67 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 		fMaxZ = max(fMaxZ, vViewPoints[i].z);
 	}
 
-	_float fNear = fMinZ;
-	_float fFar = fMaxZ;
+	_float fCascadeExtentX = (fMaxX - fMinX ) * 0.5f;				// �������� X ����
+	_float fCascadeExtentY = ( fMaxY - fMinY ) * 0.5f;				// �������� Y ����
 
-	return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// 酉고뻾???щ┛ ?꾨윭?ㅽ??먯꽌 Min,Max, Near, Far 援ы빐???ъ쁺?됰젹 ?앹꽦	;
+	//_float fCascadeExtent = max(fCascadeExtentX, fCascadeExtentY) * 0.5f; // x, y �� Ŀ�ٶ� ���� ���������� ��� ( �ʹ� �о��� Pass )
+
+	fMinZ -= fMinZ * 0.1f;
+	fMaxZ += fMaxZ * 0.1f;
+
+	_float fTexelSizeX = ( fCascadeExtentX * 2.f) / static_cast<_float>(g_iMaxWidth);		// ���� �׷��� ���������� 1�ؼ� ������ X
+
+	_float fTexelSizeY = ( fCascadeExtentY * 2.f ) / static_cast<_float>(g_iMaxHeight);		// ���� �׷��� ���������� 1�ؼ� ������ Y
+
+	_float3 vViewCenterPos = {};
+	XMStoreFloat3(&vViewCenterPos, Compute_Center(vViewPoints));
+
+	vViewCenterPos.x = floor(vViewCenterPos.x / ( fTexelSizeX * 0.5f )) * fTexelSizeX;
+	vViewCenterPos.y = floor(vViewCenterPos.y / ( fTexelSizeY * 0.5f )) * fTexelSizeY;
+
+	_float4 vRect = _float4(vViewCenterPos.x - fCascadeExtentX,		//fCascadeExtent,
+							vViewCenterPos.x + fCascadeExtentX,		//fCascadeExtent,
+							vViewCenterPos.y - fCascadeExtentY,		//fCascadeExtent,
+							vViewCenterPos.y + fCascadeExtentY);	// fCascadeExtent);
+
+	_float fCascadeExtentZ = ( fMaxZ - fMinZ ) * 0.5f;
+
+	_float fNear = vViewCenterPos.z - fCascadeExtentZ;
+	_float fFar = vViewCenterPos.z + fCascadeExtentZ;
+
+	return XMMatrixOrthographicOffCenterLH(vRect.x, vRect.y, vRect.z, vRect.w, fNear, fFar);
+
+//	_vector vCenterPos = Compute_Center(vViewPoints);
+//	_float fMaxRadius = Compute_Radius(vViewPoints, vCenterPos);
+////	fMaxRadius += fMaxRadius * 0.2f;
+//
+//	_float fMinRadius = fMaxRadius * -1.f;
+//
+//	_float fFar = fMaxRadius - fMinRadius;
+//
+//	return XMMatrixOrthographicOffCenterLH(fMinRadius, fMaxRadius, fMinRadius, fMaxRadius, 0.f, fFar);
+
+	/*fMinX += fMinX * 0.1f;
+	fMaxX += fMaxX * 0.1f;
+	fMinY += fMinY * 0.1f;
+	fMaxY += fMaxY * 0.1f;
+	fMinX += fMinZ * 0.1f;
+	fMaxX += fMaxZ * 0.1f;
+
+	_float fNear = fMinZ;
+	_float fFar = fMaxZ;*/
+
+	//return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ����� �ø� �������ҿ��� Min,Max, Near, Far ���ؼ� ������� ����	;
 }
+//
+//void CCSM::Make_ClipZ()
+//{
+//	for (_uint i = 0; i < m_iNumClip; i++)
+//	{
+//		_vector vProjZ = XMVector4Transform(XMVectorSet(0.f, 0.f, m_ClipDistance[i], 1.f), m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
+//		m_fClipZ[i] = XMVectorGetW(vProjZ);
+//	}
+//}
 
 CCSM* CCSM::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -282,4 +391,5 @@ void CCSM::Free()
 
 	Safe_Release(m_pShadowDSV);
 	Safe_Release(m_pShadowSRV);
+	Safe_Release(m_pConstantBuffer);
 }

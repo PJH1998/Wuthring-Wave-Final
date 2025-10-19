@@ -66,32 +66,33 @@ void CCubeCell::Update(const _fvector& vCamPos)
 	// Frustrum, BoundingBox Intersect Check
 	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
 	{
-//#ifdef _DEBUG
-//		cout << "Depth : " << m_iDepth << endl;
-//#endif
 		// LOD SetUp
 		_float3 vCenter = m_pBoundingBox->Center;
-		_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
+		//_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
 
-		_uint iLODIndex = {3};
-		for (_uint i = 0; i < 3; ++i)
-		{
-			if (fDistance > g_fLODDistance[i + 1])
-				continue;
+		//_uint iLODIndex = {3};
+		//for (_uint i = 0; i < 3; ++i)
+		//{
+		//	if (fDistance > g_fLODDistance[i + 1])
+		//		continue;
+		//
+		//	iLODIndex = i;
+		//	break;
+		//}
 
-			iLODIndex = i;
-			break;
-		}
-
+		//_uint iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
+		_uint iLODIndex = {};
 		for (auto& pObject : m_Objects)
 		{
+			_float fDistance = pObject->Compute_Distance(vCamPos);
+			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 			pObject->Set_LOD(iLODIndex);
 			m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, pObject);
 		}
 
 		// 거리가 멀면 자식은 X
-		if (iLODIndex >= 3)
-			return;
+		//if (iLODIndex >= 3)
+		//	return;
 		// Child O -> Child Update
 		if (0 < m_ChildCells.size())
 		{

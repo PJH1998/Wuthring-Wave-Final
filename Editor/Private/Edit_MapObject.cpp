@@ -34,7 +34,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
-
+#ifdef _DEBUG
     strcpy_s(m_ModelName, pDesc->ModelName);
 
     m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
@@ -59,7 +59,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     MODELTYPE::MAP;
 
     //ImGui?먯꽌 ????꾨? ??紐⑤뜽 ?대쫫蹂꾨줈 ??紐⑤뜽? ?대뵒????ν븷吏 ?좏깮?섍쾶?
-#ifdef _DEBUG
+
 
     //吏꾩쭨 留덉쓬???덈벀. ?섏쨷??臾쇱뼱蹂닿퀬 ?섏젙?좉쾬
 
@@ -139,12 +139,14 @@ void CEdit_MapObject::Update(_float fTimeDelta)
         //?붾뱶??諛붽퓭?쇳븿.
         _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
         _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
-        if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
+#ifdef _DEBUG
+		if (m_pModelCom->Is_Picked(RayPos,RayDir, &fDistance))
         {
             MAP_PICK event(this, fDistance);
 
             m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
         }
+#endif
     }
     //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
@@ -201,7 +203,7 @@ void CEdit_MapObject::Render_Shadow()
 
 void CEdit_MapObject::Set_ImGuiOption()
 {
-
+#ifdef _DEBUG
     ImGui::Text(m_ModelName);
 
 
@@ -267,7 +269,7 @@ void CEdit_MapObject::Set_ImGuiOption()
     //LOD媛 珥?4?④퀎濡??섎돇?댁졇?덈뒗???닿굅 ?대뼸寃???嫄댁? ?앷컖.
     //?쒖씪 媛꾨떒??諛⑸쾿 => 荑쇰뱶?몃━?먯꽌 ?ш린??鍮꾨??댁꽌 ?뚮뜑????紐⑤뜽 媛덉븘?쇨린.
     //=> ?몄뒪?댁떛??硫붿돩?ㅼ? 媛?留ㅽ듃由?뒪留덈떎 鍮꾧탳?댁꽌 硫붿돩 萸??몄? 寃곗젙?댁빞?좊벏?
-
+#endif
 }
 
 
@@ -278,6 +280,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
+
     MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
     lstrcat(Model, Name);
     _uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;

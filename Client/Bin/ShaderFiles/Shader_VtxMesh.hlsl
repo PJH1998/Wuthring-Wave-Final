@@ -11,12 +11,8 @@ vector      g_vMatrlSpecular = vector(0.1f, 0.1f, 0.1f, 0.1f);
 
 texture2D   g_MaskTexture[4] : register(t8);
 
-cbuffer CSMDatas : register(b4)
-{
-    matrix g_ShadowViewMatrix[4];
-    matrix g_ShadowProjMatrix[4];
-    float4 g_vDistance;
-};
+matrix g_ShadowViewMatrix[4];
+matrix g_ShadowProjMatrix[4];
 
 int g_iIndex = 0;
 
@@ -194,11 +190,12 @@ void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
 {
     for (int Face = 0; Face < 4; Face++)
     {
-        GS_OUT Out;
+        GS_OUT Out = (GS_OUT) 0;
         Out.iIndex = Face;
         
         matrix matVP;
-        matVP = mul(g_ShadowViewMatrix[Face], g_ShadowProjMatrix[Face]);
+        matVP = mul(g_ShadowViewMatrix[Face] , g_ShadowProjMatrix[Face]);
+
         
         for (int i = 0; i < 3; i++)
         {
@@ -217,12 +214,8 @@ struct PS_IN_SHADOW
 };
 
 void PS_SHADOW(PS_IN_SHADOW In)
-{
-    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
-    if (vDiffuse.a <= 0.1f)
-        discard;
-    
-    if (In.vPosition.z >= 1.f || In.vPosition.z < 0.f)
+{        
+    if (In.vPosition.z >= 1.f)
         discard;
 }
 

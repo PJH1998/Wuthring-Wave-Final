@@ -118,7 +118,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPipeLine->Update();
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
-	m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
+	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
+	m_pOctoTree->Update();
 	
 	m_pPhysicsManager->Update(fTimeDelta);
 
@@ -162,9 +163,9 @@ HRESULT CGameInstance::Draw()
 #ifdef _DEBUG
 	ASSERT_CRASH(m_pPhysicsManager);
 	m_pPhysicsManager->Render();
+#endif
 	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
-#endif
 
 	return S_OK;
 }
@@ -371,6 +372,10 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
+}
+HRESULT CGameInstance::Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength)
+{
+	return m_pRenderer->Bind_RawValue(pConstantName, pValue, iLength);
 }
 #endif
 #pragma endregion
@@ -611,9 +616,17 @@ HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
 {
 	return m_pCSM->SetUp_ShadowLight(strLightTag);
 }
-HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName)
+HRESULT CGameInstance::SetUp_ShadowNF()
 {
-	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pDistanceName);
+	return m_pCSM->SetUp_ShadowNF();
+}
+HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName)
+{
+	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
+}
+HRESULT CGameInstance::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+{
+	return m_pCSM->Bind_ShadowDistance_Resource(iDataBufferIndex);
 }
 HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 {
@@ -627,6 +640,12 @@ HRESULT CGameInstance::End_CSM()
 {
 	return m_pCSM->End_CSM();
 }
+#ifdef _DEBUG
+void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
+{
+	m_pCSM->Render(pShader, pVIBuffer);
+}
+#endif
 #pragma endregion
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
@@ -649,6 +668,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pEventBus->Unscribe();
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
+	m_pCSM->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

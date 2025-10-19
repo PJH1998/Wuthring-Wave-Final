@@ -26,7 +26,9 @@ HRESULT CEdit_LightObject::Initialize_Clone(void* pArg)
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+#ifdef _DEBUG
 	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(TEXT("Test"));
+#endif
 	return S_OK;
 }
 

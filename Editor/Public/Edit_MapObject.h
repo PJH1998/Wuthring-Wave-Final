@@ -84,9 +84,8 @@ private:
 
 	_float4x4 m_ChildLocalMat = {};
 private:
-#ifdef _DEBUG
+
 	_char m_ModelName[MAX_PATH];
-#endif
 
 	_uint m_iShaderPassIndex = {};
 	_float3 m_vScale = {};

@@ -214,8 +214,9 @@ void CAnimNotifyTool::RenderUI_SaveNotify()
     ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
     // 1. ?댁뿉??list???깅줉??Notify ?꾩껜瑜??뺤씤?????덉뼱?쇳븳??
+#ifdef _DEBUG
     Render_CurrentNotify();
-    
+#endif
     ImGui::Separator();
 
     // 2. Save瑜??꾨Ⅴ硫??꾩옱 ?깅줉??Notify ?뺣낫瑜??뺤씤?섍퀬? Json??湲곕줉?쒕떎.
@@ -234,9 +235,11 @@ void CAnimNotifyTool::RenderUI_LoadNotify()
         ImGui::Text("All Animation Notify Loaded");
 
 
+#ifdef _DEBUG
     // 1. ?댁뿉??list???깅줉??Notify ?꾩껜瑜??뺤씤?????덉뼱?쇳븳??
     if (m_IsLoadNotify) // Load?ㅻ? ?뚮???寃쎌슦?먮쭔 蹂댁뿬以띾땲??
         Render_CurrentNotify();
+#endif
 
     ImGui::Separator();
 
@@ -244,13 +247,14 @@ void CAnimNotifyTool::RenderUI_LoadNotify()
     Load_NotifyFromFile();
 
     // 3. Load?????쒕쾲???대뜑瑜??ㅼ씫?댁???Load?섍퀬 ?뺤씤.
+#ifdef _DEBUG
     if (ImGui::Button("Load All Animation Notifies"))
     {
         m_IsLoadNotify = true;
         ASSERT_CRASH(m_pCurrentActor);
         m_pCurrentActor->Register_AllNotifies(m_strCurrentFolderPath);
     }
-
+#endif
 }
 
 void CAnimNotifyTool::Load_SoundFiles()

@@ -94,12 +94,17 @@ void CGUIManager::Update()
 		Func();
 
 	Gizmo();
+
+	// ImGui Render
+	if (m_pGameInstance->Get_DIKeyState(DIK_END) == KEYSTATE::DOWN)
+		m_isRender = !m_isRender;
 }
 
 void CGUIManager::Render()
 {
 	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	if(true == m_isRender)
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	
 	m_pContext->OMGetRenderTargets(1, &m_pMainRTV, &m_pMainDSV);
 
@@ -120,7 +125,6 @@ void CGUIManager::Render()
 
 void CGUIManager::Gizmo()
 {
-	// Gizmo ?곸슜??Transform ?놁쑝硫?Return
 	if (nullptr == m_pTransform)
 		return;
 
@@ -185,7 +189,7 @@ void CGUIManager::Gizmo()
 	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		m_isSnap = !m_isSnap;
 
-	ImGui::Separator();
+	//ImGui::Separator();
 #pragma region Gizmo
 	ImGuiIO io = ImGui::GetIO();
 	ImGui::Text("X: %f Y: %f", io.MousePos.x, io.MousePos.y);

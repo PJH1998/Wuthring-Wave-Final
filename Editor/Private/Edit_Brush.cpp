@@ -63,7 +63,9 @@ void CEdit_Brush::Update(_float fTimeDelta)
         }
     }
 
+#ifdef _DEBUG
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
+#endif
 }
 
 void CEdit_Brush::Late_Update(_float fTimeDelta)
