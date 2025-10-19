@@ -120,6 +120,7 @@ HRESULT CShader::Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceV
 	if (nullptr == pSRVariable)
 		return E_FAIL;
 
+
 	return pSRVariable->SetResourceArray(ppSRV, 0, iNumTextures);
 }
 
@@ -129,6 +130,7 @@ HRESULT CShader::Bind_Value(const _char* pConstantName, const void* pValue, _uin
     if (nullptr == pVariable)
         return E_FAIL;
     return pVariable->SetRawValue(pValue, 0, iLength);
+
 }
 
 #ifdef _DEBUG

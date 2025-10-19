@@ -21,7 +21,7 @@ private:
 	HRESULT					Ready_TestObjects();
 
 private:
-	CShader_Interface*		m_pShader_Interface;
+	CShader_Interface*		m_pShader_Interface = { nullptr };
 
 public:
 	static		CLevel_Shader*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -85,7 +85,7 @@ void CDummy::Render_Shadow()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 
-	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vDistance");
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
 
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 

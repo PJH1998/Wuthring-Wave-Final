@@ -21,7 +21,6 @@ public:
 	HRESULT					Bind_Texture(const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
 	HRESULT					Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceView** ppSRV, _uint iNumTextures);
 	HRESULT					Bind_Value(const _char* pConstantName, const void* pValue, _uint iLength);
-
 #ifdef _DEBUG
 	//?대쫫 ?대뼸寃?媛뽮퀬?ㅼ?
 	_uint					Get_PassCount() { return m_iNumPasses; }

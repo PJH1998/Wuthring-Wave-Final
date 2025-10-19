@@ -611,9 +611,17 @@ HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
 {
 	return m_pCSM->SetUp_ShadowLight(strLightTag);
 }
-HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pDistanceName)
+HRESULT CGameInstance::SetUp_ShadowNF()
 {
-	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pDistanceName);
+	return m_pCSM->SetUp_ShadowNF();
+}
+HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName)
+{
+	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
+}
+HRESULT CGameInstance::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+{
+	return m_pCSM->Bind_ShadowDistance_Resource(iDataBufferIndex);
 }
 HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 {
@@ -655,6 +663,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pEventBus->Unscribe();
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
+	m_pCSM->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

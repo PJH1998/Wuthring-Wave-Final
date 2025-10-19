@@ -12,6 +12,7 @@ Texture2D g_NormalTexture;
 Texture2D g_DepthTexture;
 Texture2D g_Mat_SpecularTexture;
 Texture2D g_Mat_AmbientTexture;
+
 Texture2D g_ShadeTexture;
 Texture2D g_SpecularTexture;
 Texture2D g_LightDepthTexture;
@@ -23,12 +24,15 @@ Texture2D g_BlurEndTexture;
 
 Texture2DArray<float> g_ShadowMap : register(t0);
 
-cbuffer CSMDatas : register(b4)
+cbuffer CSMDatas : register(b1)
 {
-    matrix g_ShadowViewMatrix[4];
-    matrix g_ShadowProjMatrix[4];
-    float4 g_vDistance;
+    float4  g_vClipDistances;
+    float   g_fLastDistance;
+    float3  padding;
 };
+
+matrix g_ShadowViewMatrix[4];
+matrix g_ShadowProjMatrix[4];
 
 vector g_vLightDirection = 0.f;
 vector g_vLightDiffuse = 1.f;
@@ -41,6 +45,9 @@ float g_fWidth = 1920.f;
 float g_fHeight= 1080.f;
 
 int g_DebugCSMIndex;
+
+float g_fShadowBais[4] = { 0.01f, 0.02f, 0.03f, 0.05f };
+float g_DebugSlopeScale = 2.f;
 
 struct VS_IN
 {
@@ -103,7 +110,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     Out.vColor = vDiffuse * vShade; //+vSpecular;
     
-    // Shadow 적용
+///////// Shadow 적용 /////////
     vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     
     vector vWorldPos;
@@ -114,68 +121,101 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     vWorldPos = vWorldPos * vDepthDesc.y;
     vWorldPos = mul(vWorldPos, g_ProjMatrixInv);  
+    
+    float fViewZ = vWorldPos.z;
+    
     vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
-    float fViewZ = vDepthDesc.y;
-   
-    vector vShadowPos;
-    matrix matShadowLightVP;
+    int iCascadeIndex = 0;
     
-    int iSlice = 0;
-     
     for (int i = 0; i < 4; i++)
     {
-        if (fViewZ > g_vDistance[i])
-            iSlice = i;
+        if (fViewZ > g_vClipDistances[i])
+            iCascadeIndex = i;
     }
     
-    matShadowLightVP = mul(g_ShadowViewMatrix[iSlice], g_ShadowProjMatrix[iSlice]);
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float fDot = saturate(dot(vNormal, g_vLightDirection));
+    float fSlopeFactor = (1.f - fDot); // 연산 비용 싸게, 단순 빛이 스쳐 들어올수록 커지게
+    // float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // 면의 기울기를 계산한 물리적 연산
+    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
+    
+    float BlendFactor = 0.f;
+    
+    float fShadowBlend = 0.f;
+    
+    
+    if (iCascadeIndex < 3)          // Cascade 구역 마지막 제외
+    {
+        int iBlendCascadeIndex = iCascadeIndex + 1;
+    
+        float CurrentNear = g_vClipDistances[iCascadeIndex];
+        float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
+        
+        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // 어느구간부터 Blend 할건지 결정 ( 0.15 == 0.85 구간부터 )
+        
+        BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
+        
+        // Blend Cascade
+        vector vShadowBlendPos;
+        matrix matShadowBlendLightVP;
+        
+        matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
+        vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
+    
+        float2 vBlendTexcood;
+        vBlendTexcood.x = vShadowBlendPos.x * 0.5f + 0.5f;
+        vBlendTexcood.y = vShadowBlendPos.y * -0.5f + 0.5f;
+    
+        float BlendDepthDDX = ddx(vShadowBlendPos.z);
+        float BlendDepthDDY = ddy(vShadowBlendPos.z);
+        
+        float BlendGradiantX = abs(BlendDepthDDX) * vTexelSize.x;
+        float BlendGradiantY = abs(BlendDepthDDY) * vTexelSize.y;
+        
+        float BlendGradiant = length(float2(BlendGradiantX, BlendGradiantY));
+    
+        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
+    
+        float fBlendDepth = vShadowBlendPos.z - fBlendBias;
+
+        fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 2);      // 2 == Kernel size
+    }
+    
+    // 현재 Cascade
+    vector vShadowPos;
+    matrix matShadowLightVP;
+
+    matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
     vShadowPos = mul(vWorldPos, matShadowLightVP);
     
     float2 vTexcood;
     vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     vTexcood.y = vShadowPos.y * -0.5f + 0.5f;
     
-    float fDepth = vShadowPos.z - g_fShadowBais[iSlice];
-    
-    float fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vTexcood, iSlice), fDepth);
-    
-    if (fShadow != 1.f)
-    {
-        switch (iSlice)
-        {
-            case 0:
-                Out.vColor = float4(1.f, 0.f, 0.f, 1.f);
-                break;
-            case 1:
-                Out.vColor = float4(0.f, 1.f, 0.f, 1.f);
-                break;
-            case 2:
-                Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-                break;
-            case 3:
-                Out.vColor = float4(1.f, 1.f, 1.f, 1.f);
-                break;
-        }
-    
-    }
-   
-   
+    float DepthDDX = ddx(vShadowPos.z);
+    float DepthDDY = ddy(vShadowPos.z);
         
-    //if(fShadow == 0.f)
-    //    Out.vColor = 1.f;
+    float GradiantX = abs(DepthDDX) * vTexelSize.x;
+    float GradiantY = abs(DepthDDY) * vTexelSize.y;
+        
+    float BlendGradiant = length(float2(GradiantX, GradiantY));
     
-    //vector vLightDepth = g_LightDepthTexture.Sample(DefaultSampler, vTexcood);
+    float fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
     
-    //float fLightDepth = vLightDepth.x;
-    ////float fDepth = vShadowPos.w / g_fLightFar;
-    //    float fDepth = vShadowPos.z;
+    float fDepth = vShadowPos.z - fBias;
+ 
+    float fShadow = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vTexcood, fDepth), iCascadeIndex, 2);
+
+    float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
+
+    fFinalShadow = saturate(fFinalShadow + 0.3f);
     
-    //float fDistance = fDepth - fLightDepth;
-    //if (fDistance > 0.0005f)
-    //    Out.vColor.rgb = Out.vColor.rgb * 0.5f;
-    //saturate(fDistance * 30.f);
-    
+    Out.vColor.xyz *= fFinalShadow;
+///////// Shadow End /////////
+
+
     return Out;
 }
 
@@ -363,7 +403,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;

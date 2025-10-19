@@ -88,6 +88,12 @@
     <Filter Include="96. Interface\Shader">
       <UniqueIdentifier>{21eca06b-421e-485e-9750-c3ffa52c827e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Dummy">
+      <UniqueIdentifier>{8bda64fb-8c84-43cf-aeba-bf18fe387c1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Dummy\Wolf">
+      <UniqueIdentifier>{c0bf34ec-7cee-42c3-9edb-a381b63719df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -189,6 +195,12 @@
     <ClInclude Include="..\public\Shader_Interface.h">
       <Filter>96. Interface\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\EditDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\EditDummy_Wolf.h">
+      <Filter>03. GameObject\Dummy\Wolf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -272,6 +284,12 @@
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp">
       <Filter>96. Interface\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\EditDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\EditDummy_Wolf.cpp">
+      <Filter>03. GameObject\Dummy\Wolf</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

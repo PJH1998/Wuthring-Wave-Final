@@ -13,9 +13,9 @@ public:
 	virtual	HRESULT		Initialize();
 	void				Update_Shadow();
 	
-
 private:
 	_float				m_fBias[4] = {};
+	_float				m_fSlopeScale = {};
 
 private:
 	void				Set_ShadowBias();
