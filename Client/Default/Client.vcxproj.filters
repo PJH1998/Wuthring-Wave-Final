@@ -58,12 +58,6 @@
     <Filter Include="02. GameObject\MonsterTest">
       <UniqueIdentifier>{41486888-d776-4dc3-922d-fe6dff0765b4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. GameObject\MonsterTest\AnimMachine">
-      <UniqueIdentifier>{793e4d94-f3e6-4242-ab23-2ab0246042f9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02. GameObject\MonsterTest\AnimMachine\AnimState">
-      <UniqueIdentifier>{6a438713-5bb5-4fbc-9252-1a96689e15a4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -132,12 +126,6 @@
     <ClInclude Include="..\Public\MonsterTest.h">
       <Filter>02. GameObject\MonsterTest</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AnimMachine.h">
-      <Filter>02. GameObject\MonsterTest\AnimMachine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\AnimState.h">
-      <Filter>02. GameObject\MonsterTest\AnimMachine\AnimState</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -195,12 +183,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\MonsterTest.cpp">
       <Filter>02. GameObject\MonsterTest</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\AnimMachine.cpp">
-      <Filter>02. GameObject\MonsterTest\AnimMachine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\AnimState.cpp">
-      <Filter>02. GameObject\MonsterTest\AnimMachine\AnimState</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

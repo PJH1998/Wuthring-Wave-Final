@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "BT_Action.h"
 #include "BlackBoard.h"
 
@@ -6,6 +6,9 @@ CBT_Action::CBT_Action(const CBT_Action& Prototype)
 	:CBT_Node{ Prototype }
 	//,m_Action { Prototype.m_Action }
 {
+#ifdef _DEBUG
+    m_iType = 0;
+#endif // _DEBUG
 }
 
 HRESULT CBT_Action::Initialize_Prototype()

@@ -88,6 +88,12 @@
     <Filter Include="96. Interface\Shader">
       <UniqueIdentifier>{21eca06b-421e-485e-9750-c3ffa52c827e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\StateMachine">
+      <UniqueIdentifier>{cb31a44c-e4ba-40b8-9e45-14e9d8e0e9be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96. Interface\StateMachine">
+      <UniqueIdentifier>{d30d9ac5-e7ba-40a0-a9c6-e7559e971818}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -189,6 +195,12 @@
     <ClInclude Include="..\public\Shader_Interface.h">
       <Filter>96. Interface\Shader</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Level_ASM.h">
+      <Filter>01. Level\StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ASM_Interface.h">
+      <Filter>96. Interface\StateMachine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -272,6 +284,12 @@
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp">
       <Filter>96. Interface\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_ASM.cpp">
+      <Filter>01. Level\StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ASM_Interface.cpp">
+      <Filter>96. Interface\StateMachine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

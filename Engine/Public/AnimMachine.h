@@ -3,10 +3,8 @@
 
 NS_BEGIN(Engine)
 class CModel;
-NS_END
 
-NS_BEGIN(Client)
-class CAnimMachine final : public CComponent
+class ENGINE_DLL CAnimMachine final : public CComponent
 {
 public:
 	typedef struct tagAnimMacnineDesc

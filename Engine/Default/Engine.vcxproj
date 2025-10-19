@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Animation.h" />
+    <ClInclude Include="..\Public\AnimMachine.h" />
     <ClInclude Include="..\Public\AnimNotify.h" />
+    <ClInclude Include="..\Public\AnimState.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\BlackBoard.h" />
@@ -107,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
+    <ClCompile Include="..\Private\AnimMachine.cpp" />
+    <ClCompile Include="..\Private\AnimState.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\BlackBoard.cpp" />

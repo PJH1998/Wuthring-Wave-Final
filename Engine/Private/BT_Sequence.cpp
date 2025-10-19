@@ -1,10 +1,14 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "BT_Sequence.h"
 #include "BlackBoard.h"
 
 CBT_Sequence::CBT_Sequence()
     :CBT_Node{}
 {
+#ifdef _DEBUG
+    m_iType = 2;
+#endif // _DEBUG
+
 }
 
 CBT_Sequence::CBT_Sequence(const CBT_Sequence& Prototype)

@@ -3,10 +3,8 @@
 
 NS_BEGIN(Engine)
 class CModel;
-NS_END
 
-NS_BEGIN(Client)
-class CAnimState : public CBase
+class ENGINE_DLL CAnimState : public CBase
 {
 public:
 	typedef struct tagAnimStateDesc

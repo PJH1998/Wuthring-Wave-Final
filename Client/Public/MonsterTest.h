@@ -4,13 +4,12 @@
 NS_BEGIN(Engine)
 class CShader;
 class CModel;
+class CAnimMachine;
 //class CRigidbody;
 //class CCollider;
 NS_END
 
 NS_BEGIN(Client)
-
-class CAnimMachine;
 
 class CMonsterTest final : public CGameObject
 {

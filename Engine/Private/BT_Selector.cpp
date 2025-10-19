@@ -1,10 +1,13 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "BT_Selector.h"
 #include "BlackBoard.h"
 
 CBT_Selector::CBT_Selector()
     :CBT_Node{}
 {
+#ifdef _DEBUG
+    m_iType = 1;
+#endif // _DEBUG
 }
 
 CBT_Selector::CBT_Selector(const CBT_Selector& Prototype)

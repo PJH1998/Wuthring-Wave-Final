@@ -1,4 +1,4 @@
-﻿#include "ClientPch.h"
+﻿#include "EnginePch.h"
 #include "AnimState.h"
 #include "Model.h"
 #include "AnimMachine.h"
@@ -18,7 +18,7 @@ void CAnimState::Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentA
 
 void CAnimState::Update(_float fTimeDelta, CAnimMachine* pAnimMachine, _uint* pOwnerState, _string* pCurrentAnimTag/*, ANIMSTATE_DESC& StateData*/)
 {
-	*pOwnerState |= ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING);
+	//*pOwnerState |= ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING);
 }
 
 void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState)
@@ -30,7 +30,7 @@ void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMa
 {
 	if(isAnimationFinished)
 	{
-		*pOwnerState &= ~(ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING));
+		//*pOwnerState &= ~(ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING));
 	}
 }
 
