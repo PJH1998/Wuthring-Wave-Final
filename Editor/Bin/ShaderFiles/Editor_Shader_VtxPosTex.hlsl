@@ -262,36 +262,39 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     float alphaRatioX = 0.f;
     float alphaRatioY = 0.f;
     
-    if      (g_BlendToOuterWidth.x > 0) // Outer Gradient
+    if (!g_InverseScreenDiscard)
     {
-        if      (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
-            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenLT.x, FixedScreenLT.x);
-        else if (g_ScreenRB.x <= In.vPosition.x) // 오른쪽 밖에 있음
-            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenRB.x, FixedScreenRB.x);
-    }
-    else if (g_BlendToOuterWidth.x < 0) // Inner Gradient
-    {
-        if      (g_ScreenLT.x <= In.vPosition.x && In.vPosition.x <= (g_ScreenLT.x + g_ScreenRB.x) / 2.f) // 왼쪽 안에 있음
-            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenLT.x, g_ScreenLT.x);
-        else if ((g_ScreenLT.x + g_ScreenRB.x) / 2.f <= In.vPosition.x && In.vPosition.x <= g_ScreenRB.x)
-            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenRB.x, g_ScreenRB.x);
-    }
+        if      (g_BlendToOuterWidth.x > 0) // Outer Gradient
+        {
+            if (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
+                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenLT.x, FixedScreenLT.x);
+            else if (g_ScreenRB.x <= In.vPosition.x) // 오른쪽 밖에 있음
+                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenRB.x, FixedScreenRB.x);
+        }
+        else if (g_BlendToOuterWidth.x < 0) // Inner Gradient
+        {
+            if (g_ScreenLT.x <= In.vPosition.x && In.vPosition.x <= (g_ScreenLT.x + g_ScreenRB.x) / 2.f) // 왼쪽 안에 있음
+                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenLT.x, g_ScreenLT.x);
+            else if ((g_ScreenLT.x + g_ScreenRB.x) / 2.f <= In.vPosition.x && In.vPosition.x <= g_ScreenRB.x)
+                alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenRB.x, g_ScreenRB.x);
+        }
     
-    if      (g_BlendToOuterWidth.y > 0) // Outer Gradient
-    {
-        if (In.vPosition.y <= g_ScreenLT.y)        // 위쪽 밖
-            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenLT.y, FixedScreenLT.y);
-        else if (In.vPosition.y >= g_ScreenRB.y)   // 아래쪽 밖
-            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenRB.y, FixedScreenRB.y);
+        if (g_BlendToOuterWidth.y > 0) // Outer Gradient
+        {
+            if (In.vPosition.y <= g_ScreenLT.y)        // 위쪽 밖
+                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenLT.y, FixedScreenLT.y);
+            else if (In.vPosition.y >= g_ScreenRB.y)   // 아래쪽 밖
+                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenRB.y, FixedScreenRB.y);
+        }
+        else if (g_BlendToOuterWidth.y < 0) // Inner Gradient
+        {
+            if (In.vPosition.y >= g_ScreenLT.y && In.vPosition.y <= (g_ScreenLT.y + g_ScreenRB.y) / 2.f)
+                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenLT.y, g_ScreenLT.y);
+            else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
+                alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
+        }
     }
-    else if (g_BlendToOuterWidth.y < 0) // Inner Gradient
-    {
-        if (In.vPosition.y >= g_ScreenLT.y && In.vPosition.y <= (g_ScreenLT.y + g_ScreenRB.y) / 2.f)
-            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenLT.y, g_ScreenLT.y);
-        else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
-            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
-    }
-    
+
     float alphaRatio = max(alphaRatioX, alphaRatioY);
     
     Out.vColor.a *= (1.f - alphaRatio);
