@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\public\Animator_UI.h" />
+    <ClInclude Include="..\Public\Camera_Interface.h" />
     <ClInclude Include="..\public\Custom_UI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -191,6 +192,7 @@
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
+    <ClInclude Include="..\Public\SpringCamera_Edit.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -198,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\private\Animator_UI.cpp" />
+    <ClCompile Include="..\Private\Camera_Interface.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -228,6 +231,7 @@
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
+    <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>
