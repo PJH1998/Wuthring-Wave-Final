@@ -125,11 +125,11 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CBlackBoard* pBlackBoard = CBlackBoard::Create();
 	pBlackBoard->Add_Data("iState", CBlackBoard::DATA_TYPE::INT, &m_iState);
 	pBlackBoard->Add_Data("isAnimationFinished", CBlackBoard::DATA_TYPE::BOOL, &m_isAnimationFinished);
-	pBlackBoard->Add_Checker("Attack1_Enable", [this]() ->_int {
+	/*pBlackBoard->Add_Checker("Attack1_Enable", [this]() ->_int {
 		
 
 		return 1;
-		});
+		});*/
 
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
