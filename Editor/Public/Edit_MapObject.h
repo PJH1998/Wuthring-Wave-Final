@@ -141,6 +141,7 @@ private:
 	_uint m_iLevel = {};
 private:
 	static _uint g_iNumObjects;
+
 public:
 	static CEdit_MapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

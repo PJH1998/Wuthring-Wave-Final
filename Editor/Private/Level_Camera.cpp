@@ -10,17 +10,17 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Camera::Initialize()
 {
-	//class CMap_Interface* pMap = { nullptr };
-	/*pMap = CMap_Interface::Create(m_pDevice, m_pContext);
-	이거 업데이트 아무데나.
-	if (pMap->Initialize_ModelPath(ENUM_CLASS(LEVEL::CAMERA), XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f))))
-		pMap->Add_MapObject();*/
+	class CMap_Interface* pMap = { nullptr };
+	pMap = CMap_Interface::Create(m_pDevice, m_pContext);
+	//이거 업데이트 아무데나.
     return S_OK;
 }
 
 void CLevel_Camera::Update(_float fTimeDelta)
 {
 
+	if (pMap->Initialize_ModelPath(ENUM_CLASS(LEVEL::CAMERA), XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f))))
+		pMap->Add_MapObject();
 	SetWindowText(g_hWnd, TEXT("Camera"));
 }
 

@@ -20,15 +20,12 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLoader_Test::Initialize()
 {
 	CoInitializeEx(nullptr, 0);
-    Load_Model();
+
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-
-
 	m_pGameInstance->Add_Work([this]() {Ready_OctoTree(); Complete_Load(); });
 
     m_pGameInstance->Wait_Thread_End();
@@ -38,7 +35,7 @@ HRESULT CLoader_Test::Initialize()
 HRESULT CLoader_Test::Load_Texture()
 {
 	cout << "Texture" << endl;
-
+    
     return S_OK;
 }
 
@@ -88,9 +85,12 @@ HRESULT CLoader_Test::Load_Model()
                 _wstring PrototypeName = L"Prototype_Component_Model_";
                 PrototypeName += StringToWString(FileName);
 
-                if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), PrototypeName,
-                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, VersionPath.c_str()))))
+                m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, FileDir = VersionPath]() {
+
+                if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), ProtoName,
+                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FileDir.c_str()))))
                     CRASH("Prototype Create Failed");
+                    });
 
             }
         }

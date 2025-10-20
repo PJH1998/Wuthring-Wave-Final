@@ -17,7 +17,7 @@ public:
 
 private:
 	HRESULT Ready_Layer_Augusta();
-
+	HRESULT Ready_Layer_Map();
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
 
