@@ -115,6 +115,18 @@
     <Filter Include="96. Interface\StateMachine">
       <UniqueIdentifier>{d30d9ac5-e7ba-40a0-a9c6-e7559e971818}</UniqueIdentifier>
     </Filter>
+    <Filter Include="96. Interface\Map">
+      <UniqueIdentifier>{4bd189de-803f-4b9d-acea-690d376b0d31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Brush">
+      <UniqueIdentifier>{4778d04b-2c4b-4128-ba74-01a5ae1afb96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Light">
+      <UniqueIdentifier>{db0c8029-72af-4f1e-9e5b-ccfe1d547f0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\PreView">
+      <UniqueIdentifier>{4e151d40-03f1-4157-9d26-b544a6224106}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -207,12 +219,9 @@
     <ClInclude Include="..\Public\Interface_Edit.h">
       <Filter>96. Interface</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_LightObject.h" />
-    <ClInclude Include="..\Public\Edit_Brush.h" />
     <ClInclude Include="..\public\Shader_Interface.h">
       <Filter>96. Interface\Shader</Filter>
     </ClInclude>
@@ -231,7 +240,6 @@
     <ClInclude Include="..\Public\SpringCamera_Edit.h">
       <Filter>03. GameObject\Camera\Action</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\public\EditDummy_Augusta.h">
       <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClInclude>
@@ -240,6 +248,18 @@
     </ClInclude>
     <ClInclude Include="..\Public\ASM_Interface.h">
       <Filter>96. Interface\StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Map_Interface.h">
+      <Filter>96. Interface\Map</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_Brush.h">
+      <Filter>03. GameObject\MapObject\Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_LightObject.h">
+      <Filter>03. GameObject\MapObject\Light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_PreViewModel.h">
+      <Filter>03. GameObject\MapObject\PreView</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -319,9 +339,6 @@
     <ClCompile Include="..\Private\Interface_Edit.cpp">
       <Filter>96. Interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
-    <ClCompile Include="..\Private\Edit_LightObject.cpp" />
-    <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp">
       <Filter>96. Interface\Shader</Filter>
     </ClCompile>
@@ -340,7 +357,6 @@
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp">
       <Filter>03. GameObject\Camera\Action</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\private\EditDummy_Augusta.cpp">
       <Filter>03. GameObject\Dummy\Augusta</Filter>
     </ClCompile>
@@ -349,6 +365,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\ASM_Interface.cpp">
       <Filter>96. Interface\StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Map_Interface.cpp">
+      <Filter>96. Interface\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_Brush.cpp">
+      <Filter>03. GameObject\MapObject\Brush</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_LightObject.cpp">
+      <Filter>03. GameObject\MapObject\Light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_PreViewModel.cpp">
+      <Filter>03. GameObject\MapObject\PreView</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

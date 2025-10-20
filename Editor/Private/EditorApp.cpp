@@ -91,6 +91,7 @@ void CEditorApp::Post_Update()
 			break;
 		case LEVEL::CAMERA:
 			pLevel = CLevel_Camera::Create(m_pDevice, m_pContext);
+			break;
 		case LEVEL::STATEMACHINE:
 			pLevel = CLevel_ASM::Create(m_pDevice, m_pContext);
 			break;

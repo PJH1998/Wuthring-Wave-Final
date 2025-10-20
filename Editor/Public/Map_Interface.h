@@ -23,12 +23,14 @@ public:
 	_bool						Load_Textures(_uint Origin, vector<_string>* VectorTextures, _string ResearchKeyWord, _string ResearchExt, _bool IsIntoChild, _string TextureFolderPath, _bool IsPng = true, _string SecondKeyWord = "");
 	_bool						Display_Textures(CTexture* pTexture, _uint iTextureNum = 0, _float SizeX = 256.f, _float SizeY = 0.f);
 
-	_bool						Initialize_ModelPath(_bool* Test);
-	void						Add_MapObject(_uint iLevel, _fmatrix PreTransformMatrix,_fvector vPos = XMVectorSet(0.f, 0.f, 0.f, 0.f));
+	_bool						Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMatrix);
+	void						Add_MapObject(_fvector vPos = XMVectorSet(0.f, 0.f, 0.f, 0.f));
 private:
 	_bool m_IsCreateProto = { false };
 	vector<_string> m_ModelPaths;
 	class CEdit_PreViewModel* m_pPreView = { nullptr };
+	_uint m_iLevel = { ENUM_CLASS(LEVEL::MAP) };
+	
 public:
 	static CMap_Interface* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

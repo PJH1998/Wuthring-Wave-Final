@@ -179,10 +179,13 @@ _bool CMap_Interface::Display_Textures(CTexture* pTexture, _uint iTextureNum, _f
     return true;
 }
 
-_bool CMap_Interface::Initialize_ModelPath(_bool* Test)
+_bool CMap_Interface::Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMatrix)
 {
-    m_ModelPaths.clear();
+    if (m_IsCreateProto)
+        return true;
 
+    m_ModelPaths.clear();
+    m_iLevel = iLevel;
     IGFD::FileDialogConfig config;
     config.path = "../../Client/Bin/Resource/Map/";
     config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
@@ -192,13 +195,29 @@ _bool CMap_Interface::Initialize_ModelPath(_bool* Test)
 
     ImGuiFileDialog::Instance()->OpenDialog(Text, "Model Folder", nullptr, config);
 
-    _int version = {};
-    _int Lastversion = {};
-    _wstring LastVersionName;
-    _string LastVersionPath;
+
+
+
 
     if (ImGuiFileDialog::Instance()->Display(Text)) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
+            
+            _int version = {};
+            _int Lastversion = {};
+            _wstring LastVersionName;
+            _string LastVersionPath;
+            vector<_wstring> m_PrototypeNames;
+
+            m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+                CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+
+
+            if (FAILED(m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_MapObject"),
+                CEdit_MapObject::Create(m_pDevice, m_pContext))))
+                CRASH("Prototype Create Failed");
+
+            m_pPreView = CEdit_PreViewModel::Create(m_pDevice, m_pContext, iLevel);
+
             _string strFolderPath = ImGuiFileDialog::Instance()->GetCurrentPath();
 
             for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
@@ -227,8 +246,17 @@ _bool CMap_Interface::Initialize_ModelPath(_bool* Test)
                         VersionPath += FileName;
                         VersionPath += ".dat";
 
+                        _wstring PrototypeName = L"Prototype_Component_Model_";
+                        PrototypeName += StringToWString(FileName);
+
+                        m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+                            if (FAILED(m_pGameInstance->Add_Prototype(iLevel, ProtoName,
+                                CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+                                CRASH("Prototype Create Failed");
+                            });
                         if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
                         {
+                            m_PrototypeNames.push_back(LastVersionName + to_wstring(version));
                             m_ModelPaths.push_back(LastVersionPath);
                         }
 
@@ -236,29 +264,28 @@ _bool CMap_Interface::Initialize_ModelPath(_bool* Test)
                         LastVersionName = key;
                         LastVersionPath = VersionPath;
                     }
+
                 }
             }
-        }
-            *Test = true;
 
-            return true;
+            m_pGameInstance->Wait_Thread_End();
+
+            for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
+            {
+                m_pPreView->Add_Model(m_PrototypeNames[i]);
+            }
+
+            m_IsCreateProto = true;
+        }
     }
-    return false;
+    return m_IsCreateProto;
 }
 
-void CMap_Interface::Add_MapObject(_uint iLevel, _fmatrix PreTransformMatrix,_fvector vPos)
+void CMap_Interface::Add_MapObject(_fvector vPos)
 {
     if (m_ModelPaths.empty())
         return;
 
-    if (!m_IsCreateProto)
-    {
-        /*if (FAILED(m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_MapObject"),
-            CEdit_MapObject::Create(m_pDevice, m_pContext))))
-            CRASH("Prototype Create Failed");*/
-
-        m_IsCreateProto = true;
-    }
     ImGui::Begin("Create Model Prototype & Clone");
 
     ImGuiID MapId = ImGui::GetID("Map Model");
@@ -298,10 +325,6 @@ void CMap_Interface::Add_MapObject(_uint iLevel, _fmatrix PreTransformMatrix,_fv
             ModelName.pop_back();
             PrototypeName += ModelName;
 
-            /*if (FAILED(m_pGameInstance->Add_Prototype(iLevel, PrototypeName,
-                CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
-                CRASH("Prototype Create Failed");*/
-
             _wstring ObjectName;
             CEdit_MapObject::MAP_LOAD Desc{};
             _float4x4 DefaultMatrix{};
@@ -314,10 +337,21 @@ void CMap_Interface::Add_MapObject(_uint iLevel, _fmatrix PreTransformMatrix,_fv
             Desc.WorldMatrix = &DefaultMatrix;
             Desc.iShaderPassIndex = 0;
             strcpy_s(Desc.ModelName, FileName);
-
-            m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_MapObject")
-                , iLevel, TEXT("Layer_MapObject"), &Desc);
+            Desc.iLevel = m_iLevel;
+            m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+                , m_iLevel, TEXT("Layer_MapObject"), &Desc);
             break;
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
+            _wstring m_szPreViewModelName = StringToWString(FileName);
+#ifdef _DEBUG
+            ImGui::Image(m_pGameInstance->Get_Debug_RT_Resource(TEXT("RT_Debug")), ImVec2(128, 128));
+#endif
+            ImGui::End();
+            m_pPreView->Late_Update(0.016f, m_szPreViewModelName);
+            m_pPreView->Render();
         }
     }
     ImGui::EndChildFrame();

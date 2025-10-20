@@ -19,6 +19,7 @@ public:
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };
+		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 	}MAP_LOAD;
 
 	typedef struct tagMapSave
@@ -137,8 +138,7 @@ private:
 	_uint m_iNumObject = {};
 
 
-
-	_bool Test = { false };
+	_uint m_iLevel = {};
 private:
 	static _uint g_iNumObjects;
 public:

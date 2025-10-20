@@ -123,34 +123,34 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
-    if (!Test)
-        m_pMapInterface->Initialize_ModelPath(&Test);
-    else
-        m_pMapInterface->Add_MapObject(ENUM_CLASS(LEVEL::MAP), XMMatrixIdentity());
 }
 
 void CEdit_MapObject::Update(_float fTimeDelta)
 {
+#ifdef _DEBUG
     if (!ImGui::GetIO().WantCaptureMouse)
     {
-        if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+        if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
         {
-            //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
 
-            _float fDistance = {};
-            //?붾뱶??諛붽퓭?쇳븿.
-            _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
-            _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
-#ifdef _DEBUG
-            if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+            if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
             {
-                MAP_PICK event(this, fDistance);
+                //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
 
-                m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+                _float fDistance = {};
+                //?붾뱶??諛붽퓭?쇳븿.
+                _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
+                _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
+                if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+                {
+                    MAP_PICK event(this, fDistance);
+
+                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+                }
             }
-#endif
         }
     }
+#endif
     m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
@@ -182,11 +182,14 @@ void CEdit_MapObject::Render()
         }
         else
         {
-            _uint FailedCnt = {};
-            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE)))
-                FailedCnt++;
+            m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+            _bool HasNormal = { true };
+
             if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-                FailedCnt++;
+                HasNormal = false;
+
+            m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
             if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
@@ -243,8 +246,10 @@ void CEdit_MapObject::Set_ImGuiOption()
 HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
     m_pGameInstance->Wait_Thread_End();
+    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-
+    m_iLevel = pDesc->iLevel;
+    
     _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
     _tchar Name[MAX_PATH] = {};
 
@@ -262,14 +267,14 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         
         _char ModelName[MAX_PATH] = {};
         sprintf_s(ModelName, "Com_Model%d", i);
-        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+        if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
             StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
             CRASH("FAILED");
 
     }
     m_pGameInstance->Wait_Thread_End();
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
+    if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
