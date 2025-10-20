@@ -9,7 +9,12 @@
 #include "Level_Effect.h"
 #include "Level_Map.h"
 #include "Level_UI.h"
+#include "Level_ASM.h"
 #include "Level_Camera.h"
+
+//Dummy
+#include "EditDummy_Wolf.h"
+#include "EditDummy_Augusta.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -48,6 +53,7 @@ HRESULT CEditorApp::Initialize()
 
 	Ready_Event();
 	Start_Level();
+	Ready_Dummies();
 
 	return S_OK;
 }
@@ -85,6 +91,8 @@ void CEditorApp::Post_Update()
 			break;
 		case LEVEL::CAMERA:
 			pLevel = CLevel_Camera::Create(m_pDevice, m_pContext);
+		case LEVEL::STATEMACHINE:
+			pLevel = CLevel_ASM::Create(m_pDevice, m_pContext);
 			break;
 		}
 
@@ -133,6 +141,11 @@ void CEditorApp::Update(_float fTimeDelta)
 		CHANGE_LEVEL_EVENT event{ LEVEL::CAMERA, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
+	if(ImGui::Button("State Machine", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{LEVEL::STATEMACHINE, true};
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 
 	
 	ImGui::End();
@@ -176,6 +189,15 @@ void CEditorApp::Ready_Event()
 			m_eNextLevel = event.eNextLevel;
 			m_isLoad = event.isLoad;
 		});
+}
+
+void CEditorApp::Ready_Dummies()
+{
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"), CEditDummy_Wolf::Create(m_pDevice, m_pContext))))
+	   CRASH("Failed Add Prototype Dummy Wolf");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"), CEditDummy_Augusta::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Augu");
 }
 
 void CEditorApp::Start_Level()

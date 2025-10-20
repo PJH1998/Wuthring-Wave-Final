@@ -13,6 +13,13 @@ float g_fFlowRate = 0.f;
 
 matrix g_BoneMatrices[512];
 
+
+cbuffer GlobalConstants
+{
+    // <-- 바로 이 상수입니다. C++에서 2로 설정.
+    int g_iNumBlendWeightsToUse = 2; 
+}
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -40,8 +47,14 @@ VS_OUT VS_MAIN(VS_IN In)
     
     matrix matBone, matBW, matWV, matWVP;
     
+    
+    uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
+    uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
+    uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
+    uint iW = max(In.vBlendIndex.w, g_iNumBlendWeightsToUse);
+    
     float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
-    matBone = 
+    matBone =
     g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
     g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
     g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +

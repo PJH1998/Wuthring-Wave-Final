@@ -214,6 +214,24 @@
     <Filter Include="99. Define">
       <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree">
+      <UniqueIdentifier>{cd02884e-a999-444f-82f6-47109afae285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node">
+      <UniqueIdentifier>{8a7803e6-d55b-4b0d-8d53-c5c68f2d4938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Action">
+      <UniqueIdentifier>{e7d31422-8e3a-444e-a01f-600222e4c566}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Selector">
+      <UniqueIdentifier>{c2f309b1-a936-4f17-af94-c19d686695bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence">
+      <UniqueIdentifier>{5d0c8a64-ade4-4939-bd7d-886f75735552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\Behavior_Tree\BlackBoard">
+      <UniqueIdentifier>{9cea817a-4e9b-4d15-a2ca-53930574055b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\14. OctoTree">
       <UniqueIdentifier>{ec639b4c-9f75-4716-97a7-3b383c9f61bb}</UniqueIdentifier>
     </Filter>
@@ -234,6 +252,12 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\AnimMachine">
+      <UniqueIdentifier>{a54d431a-e7ed-4546-9ff3-5fdefe162fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\AnimMachine\AnimState">
+      <UniqueIdentifier>{a9d127fd-08d8-4cb3-b4cb-bbbe35b6f3ff}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -432,9 +456,6 @@
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Point</Filter>
     </ClInclude>
@@ -459,6 +480,24 @@
     <ClInclude Include="..\Public\ColliderNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Behavior_Tree.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Node.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Action.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Action</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Selector.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Selector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BT_Sequence.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\BlackBoard.h">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BlackBoard</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\OctoTree.h">
       <Filter>01. Utility\14. OctoTree</Filter>
     </ClInclude>
@@ -477,6 +516,13 @@
     </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\Public\AnimMachine.h">
+      <Filter>01. Utility\04. Component\AnimMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AnimState.h">
+      <Filter>01. Utility\04. Component\AnimMachine\AnimState</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -675,6 +721,24 @@
     <ClCompile Include="..\Private\ColliderNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Behavior_Tree.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Node.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Action.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Action</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Selector.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Selector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BT_Sequence.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BT_Node\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\BlackBoard.cpp">
+      <Filter>01. Utility\04. Component\Behavior_Tree\BlackBoard</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\OctoTree.cpp">
       <Filter>01. Utility\14. OctoTree</Filter>
     </ClCompile>
@@ -693,6 +757,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimMachine.cpp">
+      <Filter>01. Utility\04. Component\AnimMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AnimState.cpp">
+      <Filter>01. Utility\04. Component\AnimMachine\AnimState</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

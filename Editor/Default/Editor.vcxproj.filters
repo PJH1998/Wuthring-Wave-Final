@@ -106,6 +106,15 @@
     <Filter Include="03. GameObject\Camera\Action">
       <UniqueIdentifier>{bfd1b2ba-66c1-4aba-998e-ff6db6deb0c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Dummy\Augusta">
+      <UniqueIdentifier>{e3b0fe7a-92fa-4d49-9339-e575e6ab1be3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\StateMachine">
+      <UniqueIdentifier>{cb31a44c-e4ba-40b8-9e45-14e9d8e0e9be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96. Interface\StateMachine">
+      <UniqueIdentifier>{d30d9ac5-e7ba-40a0-a9c6-e7559e971818}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -223,6 +232,15 @@
       <Filter>03. GameObject\Camera\Action</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Map_Interface.h" />
+    <ClInclude Include="..\public\EditDummy_Augusta.h">
+      <Filter>03. GameObject\Dummy\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_ASM.h">
+      <Filter>01. Level\StateMachine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ASM_Interface.h">
+      <Filter>96. Interface\StateMachine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -323,6 +341,15 @@
       <Filter>03. GameObject\Camera\Action</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Map_Interface.cpp" />
+    <ClCompile Include="..\private\EditDummy_Augusta.cpp">
+      <Filter>03. GameObject\Dummy\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Level_ASM.cpp">
+      <Filter>01. Level\StateMachine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ASM_Interface.cpp">
+      <Filter>96. Interface\StateMachine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

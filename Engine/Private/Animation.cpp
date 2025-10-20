@@ -51,10 +51,8 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 			// EffectNotify
 			pAnimNotify->Set_EffectCallback(EffectCallback);
 		}
-		// 2. 臾몄젣 ?앷린硫?Crash 諛쒖깮.
 		ASSERT_CRASH(pAnimNotify);
 
-		// 3. 愿由?而⑦뀒?대꼫???ｌ뼱?먭린.
 		m_AnimNotifies.emplace_back(pAnimNotify);
 	}
 }
@@ -70,7 +68,6 @@ void CAnimation::Sort_Notify()
 		});
 }
 
-// ?좊땲硫붿씠?섏뿉 ?깅줉??Notify瑜?TrackPosition 蹂꾨줈 ?뺣젹.
 void CAnimation::Sort_AnimNotify()
 {
 	if (0 == m_AnimNotifies.size())
@@ -106,7 +103,74 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	}
 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
-	
+
+	// Ribbon 애니메
+#ifdef _DEBUG
+	_string strNames[5] = {"Rib_Attack01", "Rib_Attack02", "Rib_Attack03", "Rib_Move_F", "Rib_Move_B"};
+
+	string strName = m_szName;
+	_wstring Prefix = L"Animation Name : " + StringToWString(m_szName) + L"\n";
+
+	for (auto& str : strNames)
+	{
+		if (strName == str)
+		{
+			OutputDebugString(Prefix.c_str());
+			for (size_t i = 0; i < m_iNumChannels; ++i)
+			{
+				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+
+				if (m_Channels[i]->Get_NumKeyframes() == 2)
+				{
+					OutputDebugString(TEXT("Key Frame == 2 : "));
+					OutputDebugString(boneName.c_str());
+				}
+			}
+
+			for (size_t i = 0; i < m_iNumChannels; ++i)
+			{
+				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+
+				if (m_Channels[i]->Get_NumKeyframes() < 2)
+				{
+					OutputDebugString(TEXT("Key Frame < 2 : "));
+					OutputDebugString(boneName.c_str());
+				}
+			}
+
+			for (size_t i = 0; i < m_iNumChannels; ++i)
+			{
+				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+
+				if (m_Channels[i]->Get_NumKeyframes() > 2)
+				{
+					OutputDebugString(TEXT("Key Frame > 2 : "));
+					OutputDebugString(boneName.c_str());
+				}
+
+			}
+
+			Prefix = L"Animation Name : " + StringToWString(m_szName) + L" / End \n";
+			OutputDebugString(Prefix.c_str());
+		}
+	}
+
+	/*if (strName._Starts_with("Rib"))
+	{
+		OutputDebugString(Prefix.c_str());
+			for (size_t i = 0; i < m_iNumChannels; ++i)
+			{
+				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+				if (m_Channels[i]->Get_NumKeyframes() == 2)
+					OutputDebugString(boneName.c_str());
+			}
+			Prefix = L"Animation Name : " + StringToWString(m_szName) + L"End \n";
+			OutputDebugString(Prefix.c_str());
+
+	}*/
+#endif // _DEBUG
+
+
 
 	return S_OK;
 }
@@ -132,10 +196,32 @@ _bool CAnimation::Update_TransformationMatrices(_float fTimeDelta, const vector<
 	return false;
 }
 
-_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//{
+//	if (nullptr != pTrackPosition)
+//		*pTrackPosition = m_fCurrentTrackPosition;
+//
+//	if (m_fCurrentTrackPosition > m_fDuration)
+//	{
+//		m_fCurrentTrackPosition = 0.f;
+//		return true;
+//	}
+//
+//
+//	for (size_t i = 0; i < m_iNumChannels; ++i)
+//	{
+//		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
+//	}
+//
+//	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+//
+//	return false;
+//}
+
+// TrackPosition�� �ܺο��� �־��ִ� ���� => Rib TrackPosition�� �⺻ TrackPosition�� Sync�� �½��ϴ�.
+_bool CAnimation::Update_RibTransformationMatrices(_float fTrackPosition, const vector<class CBone*>& Bones, _float* pTrackPosition)
 {
-	if (nullptr != pTrackPosition)
-		*pTrackPosition = m_fCurrentTrackPosition;
+	m_fCurrentTrackPosition = fTrackPosition;
 
 	if (m_fCurrentTrackPosition > m_fDuration)
 	{
@@ -144,14 +230,10 @@ _bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vect
 	}
 
 
-
-
 	for (size_t i = 0; i < m_iNumChannels; ++i)
 	{
 		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
 	}
-
-	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	return false;
 }

@@ -37,7 +37,7 @@ matrix g_ShadowProjMatrix[4];
 vector g_vLightDirection = 0.f;
 vector g_vLightDiffuse = 1.f;
 vector g_vLightAmbient = 1.f;
-vector g_vMtrlAmbient = { 0.7f, 0.7f, 0.7f, 0.f };
+vector g_vMtrlAmbient = { 1.f, 1.f, 1.f, 1.f };
 vector g_vLightSpecular = 1.f;
 vector g_vMtrlSpecular = 1.f;
 
@@ -46,7 +46,8 @@ float g_fHeight= 1080.f;
 
 int g_DebugCSMIndex;
 
-float g_fShadowBais[4] = { 0.01f, 0.02f, 0.03f, 0.05f };
+float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
+float4 g_fMinShadowBias = 0.f;
 float g_DebugSlopeScale = 2.f;
 
 struct VS_IN
@@ -108,7 +109,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vector vShade = g_ShadeTexture.Sample(DefaultSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vDiffuse * vShade; //+vSpecular;
+    Out.vColor = vDiffuse * vShade + vSpecular;
     
 ///////// Shadow 적용 /////////
     vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
@@ -120,7 +121,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vWorldPos.w = 1.f;
     
     vWorldPos = vWorldPos * vDepthDesc.y;
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);  
+    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
     
     float fViewZ = vWorldPos.z;
     
@@ -134,13 +135,24 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
             iCascadeIndex = i;
     }
     
-    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float fDot = saturate(dot(vNormal, g_vLightDirection));
-    float fSlopeFactor = (1.f - fDot); // 연산 비용 싸게, 단순 빛이 스쳐 들어올수록 커지게
-    // float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // 면의 기울기를 계산한 물리적 연산
+    float DepthDDX = ddx(fViewZ * 0.0001f);
+    float DepthDDY = ddy(fViewZ * 0.0001f);
+        
     float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
+    float GradiantX = abs(DepthDDX);
+    float GradiantY = abs(DepthDDY);
+        
+    float Gradiant = length(float2(GradiantX, GradiantY));
+    
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
+    
+    float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
+   
+    //float fSlopeFactor = (1.f - fDot); // 연산 비용 싸게, 단순 빛이 스쳐 들어올수록 커지게
+    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // 면의 기울기를 계산한 물리적 연산
+
     float BlendFactor = 0.f;
     
     float fShadowBlend = 0.f;
@@ -176,8 +188,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         
         float BlendGradiant = length(float2(BlendGradiantX, BlendGradiantY));
     
-        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
+        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
+        fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
         float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
         fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 2);      // 2 == Kernel size
@@ -194,18 +207,32 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vTexcood.x = vShadowPos.x * 0.5f + 0.5f;
     vTexcood.y = vShadowPos.y * -0.5f + 0.5f;
     
-    float DepthDDX = ddx(vShadowPos.z);
-    float DepthDDY = ddy(vShadowPos.z);
-        
-    float GradiantX = abs(DepthDDX) * vTexelSize.x;
-    float GradiantY = abs(DepthDDY) * vTexelSize.y;
-        
-    float BlendGradiant = length(float2(GradiantX, GradiantY));
+    float fBias = 0.f;
     
-    float fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * BlendGradiant);
+    //if(iCascadeIndex == 0)
+    //{ 
+    //    fBias = g_fShadowBais[0];
+    //}
+    //else
+    {
+        //float DepthDDX = ddx(vShadowPos.z);
+        //float DepthDDY = ddy(vShadowPos.z);  
+        
+        //float GradiantX = abs(DepthDDX) * vTexelSize.x;
+        //float GradiantY = abs(DepthDDY) * vTexelSize.y;
+        
+        //float Gradiant = max(length(float2(GradiantX, GradiantY)), 0.0001f);
+    
+        fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
+
+        //Out.vColor = float4(0.f, 0.f, 0.f, 1.f);
+        //Out.vColor.x = Gradiant * 1000.f;
+        
+        fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
+    }
     
     float fDepth = vShadowPos.z - fBias;
- 
+    
     float fShadow = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vTexcood, fDepth), iCascadeIndex, 2);
 
     float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
@@ -213,6 +240,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     fFinalShadow = saturate(fFinalShadow + 0.3f);
     
     Out.vColor.xyz *= fFinalShadow;
+    
 ///////// Shadow End /////////
 
 
@@ -233,7 +261,13 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
     float fShade = max(dot(normalize(g_vLightDirection), -1.f * vNormal), 0.f);
-    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
+    
+    if(fShade >= 0.5f)
+        fShade = 1.f;
+    else
+        fShade = 0.2f;    
+    
+    Out.vShade = g_vLightDiffuse * fShade;//    saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
 
     vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     

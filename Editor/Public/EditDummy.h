@@ -7,9 +7,9 @@ class CEditDummy abstract : public CGameObject
 {
 public:
 	typedef struct tagDummyDesc {
-		_float3 vScale;
-		_vector vPosition;
-		_vector vRotation;
+		_float3 vScale = _float3(1.f, 1.f, 1.f);
+		_vector vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+		_vector vRotation = XMQuaternionIdentity();
 	}DUMMY_DESC;
 
 protected:

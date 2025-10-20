@@ -17,6 +17,7 @@ public:
 	virtual void			Render() override;
 
 private:
+	HRESULT					Ready_Light();
 	HRESULT					Ready_Interface();
 	HRESULT					Ready_TestObjects();
 
