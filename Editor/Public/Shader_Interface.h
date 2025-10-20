@@ -15,10 +15,12 @@ public:
 	
 private:
 	_float				m_fBias[4] = {};
+	_float				m_fMinBias[4] = {};
 	_float				m_fSlopeScale = {};
 
 private:
 	void				Set_ShadowBias();
+	void				Setting_Bias(const _char* pName, _float* pFloat);
 
 public:
 	static CShader_Interface* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
