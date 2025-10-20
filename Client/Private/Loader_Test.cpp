@@ -6,6 +6,8 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
+#include "PlayerController.h"
+
 #pragma region BehaviorTree
 #include "BT_Action.h"
 #include "BT_Selector.h"
@@ -23,7 +25,9 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
+    
 
     m_pGameInstance->Wait_Thread_End();
     return S_OK;
@@ -229,6 +233,17 @@ HRESULT CLoader_Test::Load_Component()
 	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 	//	CBehavior_Tree::Create(m_pDevice, m_pContext, pRoot))))
 	//	return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test::Load_PlayerController()
+{
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerController");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrControllerTag
+        , CPlayerController::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
 
     return S_OK;
 }

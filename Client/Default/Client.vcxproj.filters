@@ -57,21 +57,18 @@
     </Filter>
     <Filter Include="03. GameObject\MapObject">
       <UniqueIdentifier>{040d8769-a965-4ca5-ae9c-fa3a893680fb}</UniqueIdentifier>
-	</Filter>
-    <Filter Include="02. GameObject\Actor">
-      <UniqueIdentifier>{340679b2-e86e-47b4-8e66-f95105b73999}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02. GameObject\MonsterTest">
-      <UniqueIdentifier>{41486888-d776-4dc3-922d-fe6dff0765b4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02. GameObject\PlayerController">
-      <UniqueIdentifier>{868a9a9e-96b3-4a21-b3ef-613073a958af}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="02. GameObject\Actor\Player">
-      <UniqueIdentifier>{f2ee6aaa-2946-4a3a-8344-9c6a90db15d7}</UniqueIdentifier>
     </Filter>
     <Filter Include="02. GameObject\Actor\Player\Augusta">
       <UniqueIdentifier>{98cc7302-c08d-48c9-9e95-3d0338e7d788}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor">
+      <UniqueIdentifier>{3751a3ce-7071-4ce5-8e29-f10ab8e03834}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player">
+      <UniqueIdentifier>{fedaac66-9216-4df1-a561-1ebbe813bca3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Controller">
+      <UniqueIdentifier>{49d9be5c-bc11-4fe1-914d-ba12dbb05df0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -141,26 +138,24 @@
     <ClInclude Include="..\Public\GameSystem.h">
       <Filter>01. GameSystem</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\AnimationDummy.h">
-      <Filter>02. GameObject\Dummy</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MonsterTest.h">
-      <Filter>02. GameObject\MonsterTest</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerController.h">
-      <Filter>02. GameObject\PlayerController</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Player.h">
-      <Filter>02. GameObject\Actor\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerAugusta.h">
-      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\Player_Define.h">
-      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
+      <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h">
-      <Filter>02. GameObject\Actor</Filter>
+      <Filter>03. GameObject\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Player_Define.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerAugusta.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerController.h">
+      <Filter>03. GameObject\Controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -220,23 +215,21 @@
     <ClCompile Include="..\Private\GameSystem.cpp">
       <Filter>01. GameSystem</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp">
-      <Filter>02. GameObject\Dummy</Filter>
+      <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp">
-      <Filter>02. GameObject\Actor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MonsterTest.cpp">
-      <Filter>02. GameObject\MonsterTest</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerController.cpp">
-      <Filter>02. GameObject\PlayerController</Filter>
+      <Filter>03. GameObject\Actor</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Player.cpp">
-      <Filter>02. GameObject\Actor\Player</Filter>
+      <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerAugusta.cpp">
-      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerController.cpp">
+      <Filter>03. GameObject\Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
