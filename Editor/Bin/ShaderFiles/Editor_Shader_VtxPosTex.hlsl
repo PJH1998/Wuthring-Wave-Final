@@ -68,7 +68,7 @@ float       g_CutoutAlphaDiscard = 0.3f;
 
 // Nine-Sector Variables
 float2      g_ImageSize = { 0.f, 0.f };
-float4      g_SectorBorder = { 0.f, 0.f };                                  // based on local texcoord.     for 9sector
+float2      g_SectorBorder = { 0.f, 0.f };                                  // based on local texcoord.     for 9sector
 float       g_UIScale = 1.f;                                                // UI Scaler
 
 
@@ -143,61 +143,49 @@ float Check_SpaceRatioP(float originPoint, float startPoint, float endPoint)
 
 float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2 imageSize) // 1. texcoord 상 좌표?
 {
-    /*
-    
-    [ originPos ]   : 현재 주시중인 texcoord의, 크기가 반영된 텍스쳐 위의 좌표값
-    [ modSize ]     : 크기가 반영된 텍스쳐의 크기
-    [ border ]      : 섹터가 구분될 기준 폭 width
-    [ imageSize ]   : 크기가 반영되지 않은 원본 텍스쳐의 크기
-    
-    1. 좌측과 상단의 경우. 즉 바로 border 보다 적게 이동한 위치의 경우.
-    단순히 전체 크기 대비 해당 위치의 비교값을 주면 됨.
-    
-    2. 우측과 하단의 경우. 즉 끝에서부터 border 만큼 뺀 것 사이에 있는 경우.
-    비율화하기 전에는 끝으로부터의 거리가 modSize에 상관없이 항상 일정함을 이용한다.
-    원본 텍스쳐 크기 대비 오른쪽만큼의 거리 비율을 그대로 이식?
-    
-    modSize - border*2 만큼의 크기만 변한다고 생각
-    
-    (modSIze - border * 2) - (ImageSize - border * 2)  ..만이 0 대비 항시 변하는 크기.
-    
-    
-    
-    3. 그 외. 즉 중앙점에 있는 경우
-    1, 2 에서 구한 최대 / 최소값을 기준으로 사이의 값을 비율화.
-    
-    
-    
-    
-    */
-    
-    
-
+    // 전체 대비 왼쪽/위 로부터 얼마나 오른쪽/아래에 있는지의 비율
     
     float2 resultUV;
     
     // x축 계산
     
     if      (originPos.x < border.x)                    // 왼쪽.
-        resultUV.x = originPos.x / modSize.x;
-    else if ((modSize.x - border.x) > originPos.x)      // 오른쪽. 
-        resultUV.x = 1.0f - (modSize.x - originPos.x) / imageSize.x;
+        resultUV.x = originPos.x / imageSize.x;
+    else if ((modSize.x - border.x) < originPos.x)      // 오른쪽. 
+        resultUV.x = (originPos.x - (modSize.x - imageSize.x)) / imageSize.x;
     else
     {
+        // [ originPos.x - border.x ] ~ [ originPos.x ] 의 사잇값인 originPosX_OnMod 를
+        // [ border.x ] ~ [ modSize.x - border.x ] 사이로 비율을 맞춰야 함 
         
+        float originPosX_OnMod = originPos.x - border.x;
+
+        float startX = border.x;
+        float endX = modSize.x - border.x;
+        
+        float resultRatio = originPosX_OnMod / (endX - startX);
+        
+        resultUV.x = (border.x + (resultRatio * (imageSize.x - border.x * 2))) / imageSize.x;
     }
     
     
     if      (originPos.y < border.y)                    // 위쪽
-        resultUV.y = originPos.y / modSize.y;
-    else if ((modSize.y - border.y) > originPos.y)      // 아래쪽.
-        resultUV.y = 1.0f - (modSize.y - originPos.y) / imageSize.y;
+        resultUV.y = originPos.y / imageSize.y;
+    else if ((modSize.y - border.y) < originPos.y)      // 아래쪽.
+        resultUV.y = (originPos.y - (modSize.y - imageSize.y)) / imageSize.y;
     else
     {
+        float originPosX_OnMod = originPos.y - border.y;
+
+        float startY = border.y;
+        float endY = modSize.y - border.y;
         
+        float resultRatio = originPosX_OnMod / (endY - startY);
+        
+        resultUV.y = (border.y + (resultRatio * (imageSize.y - border.y * 2))) / imageSize.y;
     }
     
-    
+    return resultUV;
 }
 
 
@@ -316,8 +304,7 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
-    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
+
     
     // gradient 목적지 좌표 구함.
     float2 FixedScreenLT = { g_ScreenLT.x - g_BlendToOuterWidth.x, g_ScreenLT.y - g_BlendToOuterWidth.z };
@@ -377,12 +364,14 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
                 alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
         }
     //}
-
     
-    
-    
+   
     float alphaRatio        = max(alphaRatioX, alphaRatioY);
     float finalAlphaRatio   = (g_InverseScreenDiscard)? alphaRatio : (1.f - alphaRatio); // inverse 여부 반영    
+    
+     
+    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     Out.vColor.a *= finalAlphaRatio;
     
@@ -393,41 +382,95 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    if (g_ImageSize.x == 0 || g_ImageSize.y == 0)
-        abort();
 
     
-    float2 vSize = { 
-        length(g_WorldMatrix[0].xyz),
-        length(g_WorldMatrix[1].xyz),
+    // gradient 목적지 좌표 구함.
+    float2 FixedScreenLT = { g_ScreenLT.x - g_BlendToOuterWidth.x, g_ScreenLT.y - g_BlendToOuterWidth.z };
+    float2 FixedScreenRB = { g_ScreenRB.x + g_BlendToOuterWidth.y, g_ScreenRB.y + g_BlendToOuterWidth.w };
+    
+    // discard 클리핑용. 그려질 부분을 모두 감싸는 사각형 좌표 구함. 반전의 경우엔 모두 감싸지는 사각형.
+    if (!g_InverseScreenDiscard)
+    {
+        float2 ClipScreenLT = float2(min(FixedScreenLT.x, g_ScreenLT.x), min(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(max(FixedScreenRB.x, g_ScreenRB.x), max(FixedScreenRB.y, g_ScreenRB.y));
+    
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
+    }
+    else
+    {
+        float2 ClipScreenLT = float2(max(FixedScreenLT.x, g_ScreenLT.x), max(FixedScreenLT.y, g_ScreenLT.y));
+        float2 ClipScreenRB = float2(min(FixedScreenRB.x, g_ScreenRB.x), min(FixedScreenRB.y, g_ScreenRB.y));
+    
+        if (!Check_isInSpace(In.vPosition.xy, ClipScreenLT, ClipScreenRB, g_InverseScreenDiscard))
+            discard;
+    }
+    
+    
+    float alphaRatioX = (g_InverseScreenDiscard) ? 1.f : 0.f;
+    float alphaRatioY = (g_InverseScreenDiscard) ? 1.f : 0.f;
+    
+    //if (!g_InverseScreenDiscard)
+    //{
+    if (g_BlendToOuterWidth.x > 0 || g_BlendToOuterWidth.y > 0) // Outer Gradient
+    {
+        if (g_ScreenLT.x >= In.vPosition.x) // 왼쪽 밖에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenLT.x, FixedScreenLT.x);
+        else if (g_ScreenRB.x <= In.vPosition.x) // 오른쪽 밖에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, g_ScreenRB.x, FixedScreenRB.x);
+    }
+    else if (g_BlendToOuterWidth.x < 0 || g_BlendToOuterWidth.y < 0) // Inner Gradient
+    {
+        if (g_ScreenLT.x <= In.vPosition.x && In.vPosition.x <= (g_ScreenLT.x + g_ScreenRB.x) / 2.f) // 왼쪽 안에 있음
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenLT.x, g_ScreenLT.x);
+        else if ((g_ScreenLT.x + g_ScreenRB.x) / 2.f <= In.vPosition.x && In.vPosition.x <= g_ScreenRB.x)
+            alphaRatioX = Check_SpaceRatioP(In.vPosition.x, FixedScreenRB.x, g_ScreenRB.x);
+    }
+    
+    if (g_BlendToOuterWidth.z > 0 || g_BlendToOuterWidth.w > 0) // Outer Gradient
+    {
+        if (In.vPosition.y <= g_ScreenLT.y)        // 위쪽 밖
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenLT.y, FixedScreenLT.y);
+        else if (In.vPosition.y >= g_ScreenRB.y)   // 아래쪽 밖
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, g_ScreenRB.y, FixedScreenRB.y);
+    }
+    else if (g_BlendToOuterWidth.z < 0 || g_BlendToOuterWidth.w < 0) // Inner Gradient
+    {
+        if (In.vPosition.y >= g_ScreenLT.y && In.vPosition.y <= (g_ScreenLT.y + g_ScreenRB.y) / 2.f)
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenLT.y, g_ScreenLT.y);
+        else if (In.vPosition.y >= (g_ScreenLT.y + g_ScreenRB.y) / 2.f && In.vPosition.y <= g_ScreenRB.y)
+            alphaRatioY = Check_SpaceRatioP(In.vPosition.y, FixedScreenRB.y, g_ScreenRB.y);
+    }
+    //}
+
+    
+   
+    float alphaRatio = max(alphaRatioX, alphaRatioY);
+    float finalAlphaRatio = (g_InverseScreenDiscard) ? alphaRatio : (1.f - alphaRatio); // inverse 여부 반영    
+    
+    
+    
+    
+    float2 vSize =
+    {
+        length(g_WorldMatrix[0].xyz) * g_UIScale,
+        length(g_WorldMatrix[1].xyz) * g_UIScale,
     };
-        
-    // 1. ui 크기 대비 border의 비율을 계산
-    // 2. 비율에 맞게 texcoord 조절
-    // 3. 조절 완료한 좌표 texcoord 로 삽입하여 return
-    // 왼쪽 위가 0,0 오른쪽 아래가 1,1임에 주의.
+    float2 border = g_SectorBorder * g_UIScale;
+    
+    float2 localPos = In.vTexcoord * vSize;
 
-    float2 resultUV;
-    
-    // 비율
-    float borderRatioX = saturate(g_SectorBorder.x / g_ImageSize.x);
-    float borderRatioY = saturate(g_SectorBorder.y / g_ImageSize.y);
+    // 9-slice 계산된 UV
+    float2 resultUV = Calc_NineSectorUV(localPos, vSize, border, g_ImageSize);
     
     
     
     
+    Out.vColor = g_Texture.Sample(DefaultSampler, resultUV);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
+    Out.vColor.a *= finalAlphaRatio;
     
-    
-    // 화면 내 로컬 좌표 (0 ~ g_UISize)
-    float3 vPosition = g_WorldMatrix[3].xyz;
-    
-        localPos = In.vTexcoord * g_UISize;
-
-    //// 9-slice 계산된 UV
-    //float2 uv = Calc9SliceUV(localPos, g_UISize, g_Border, g_TexSize);
-    
-    Out.vColor = g_Texture.Sample(DefaultSampler, uv);
     return Out;
 }
 
@@ -480,7 +523,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_GRADIENT_UI();
     }
 
-    pass NineSectorPass
+    pass NineSectorPass     // Test. 나중에 AlphaGradient 에 합치거나 두 개를 합친 Pass 만들어야 할 듯?
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);

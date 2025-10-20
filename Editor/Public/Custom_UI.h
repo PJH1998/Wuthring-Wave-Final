@@ -28,7 +28,12 @@ public:
 		vector<_float2>	vecSize = {};
 	} UI_SIZE_DESC;
 
-	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC {
+	typedef struct tagCustomUISectorDesc {
+		_float2		vSectorBorder = {}; // pixel
+		_float		fUIScale = {};		// ui 배율
+	} UI_SECTOR_DESC;
+
+	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC, UI_SECTOR_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
 		_uint		iNumFiles = 1;
@@ -41,6 +46,7 @@ public:
 		_float		fCutout = 0.3f;					// (1:컷아웃 사용 시) 알파값 기준
 		
 		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+
 
 		vector<_wstring> vecChildNames = {};
 
@@ -111,6 +117,14 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		childNames.push_back(data);
 	}
 
+	json vecImgSizes = json::array();
+	for (const auto& v : d.vecSize)
+	{
+		json data = {};
+		data = { v.x, v.y };
+		vecImgSizes.push_back(data);
+	}
+
 	j = {
 		{ "strFilePath", WStringToString(d.strFilePath) },
 		{ "strFileName", WStringToString(d.strFileName) },
@@ -124,7 +138,18 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		{ "fCutout", d.fCutout },
 		{ "iPassType", d.iPassType },
 
-		{ "vecChildNames", childNames }
+		{ "vecChildNames", childNames },
+
+
+		// descs (size, sector)
+		{ "vecSize", vecImgSizes },
+		{ "vSectorBorder", {
+			d.vSectorBorder.x,
+			d.vSectorBorder.y
+			}
+		},
+		{ "fUIScale", d.fUIScale },
+
 	};
 }
 
@@ -152,6 +177,12 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 		_string strChildName = element.get<_string>();
 		d.vecChildNames.push_back(StringToWString(strChildName));
 	}
+
+	// descs
+	for (const auto& element : j["vecSize"])
+		d.vecSize.push_back(_float2{ element[0], element[1] });
+	d.vSectorBorder			= _float2( j["vSectorBorder"][0], j["vSectorBorder"][1] );
+	d.fUIScale				= j["fUIScale"];
 }
 
 inline void to_json(json& j, const vector<CCustom_UI::CUSTOM_UI_DESC>& vec)

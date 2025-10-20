@@ -895,6 +895,9 @@ void CLevel_UI::Update_Inspector()
         static _bool    isInverseScreenDiscard = false;
         static _float   fCutout = 0.3f;
 
+        static _float2  vSectorBorder = {};
+        static _float   fUIScale = 1.f;
+        
 
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
 
@@ -950,8 +953,8 @@ void CLevel_UI::Update_Inspector()
 
         // iPassType
         ImGui::Text("Pass Type");
-        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient"};
-        const _uint iPassTypeCount = 4;
+        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec"};
+        const _uint iPassTypeCount = 5;
         const char* szCurrentPassItem = szPassTypeNames[iPassType];
 
         if (ImGui::BeginCombo("##Pass Type", szCurrentPassItem))
@@ -975,10 +978,39 @@ void CLevel_UI::Update_Inspector()
         ImGui::Checkbox("##isInverseScreenDiscard", &isInverseScreenDiscard);
         ImGui::Separator();
 
-        // fCutout
-        ImGui::Text("Cutout Rate");
-        ImGui::DragFloat("##CutoutRate", &fCutout, 0.001f, 0.f, 1.f);
 
+        // fCutout
+        if (iPassType == 1)
+        {
+            ImGui::Text("Cutout Rate");
+            ImGui::DragFloat("##CutoutRate", &fCutout, 0.001f, 0.f, 1.f);
+            ImGui::Separator();
+        }
+
+        // vSector, fScale
+        if (iPassType == 4)
+        {
+            // vSector
+            ImGui::PushItemWidth(90.f);
+
+            ImGui::Text("Sector Border");
+            ImGui::Text("X");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorBorderX", &vSectorBorder.x, 0.1f, 0.f, 0.f, "%.1f");
+            ImGui::SameLine();
+            ImGui::Text("Y");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorBorderY", &vSectorBorder.y, 0.1f, 0.f, 0.f, "%.1f");
+
+            ImGui::PopItemWidth();
+            ImGui::Separator();
+            
+            // fScale
+            ImGui::Text("UI Sector Scale");
+            ImGui::Text("Scale");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorScale", &fUIScale, 0.001f);
+        }
 
 
         // 다시 값 할당
@@ -994,7 +1026,8 @@ void CLevel_UI::Update_Inspector()
         tDesc.isInverseScreenDiscard  = isInverseScreenDiscard;
         tDesc.fCutout = fCutout;
 
-
+        tDesc.vSectorBorder = vSectorBorder;
+        tDesc.fUIScale = fUIScale;
 
         dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
     }

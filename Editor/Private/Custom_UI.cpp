@@ -71,15 +71,27 @@ void CCustom_UI::Render()
 
 
 
-    // ksta IF : "g_AlphaStrength" 에 매 프레임마다 Animator_UI 컴포넌트에서 값 갱신중
+    // ksta IF : 키프레임 관련 변수는 매 프레임마다, Animator_UI 컴포넌트에서 값 갱신중
+
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH("Binding_Matrix_Failed");
-
     if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
         CRASH("Binding_Value_Failed");
     if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
         CRASH("Binding_Value_Failed");
+
+    // 이미지 크기 넘겨주기
+    if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
+        CRASH("Binding_Value_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
+        CRASH("Binding_Value_Failed");  
+    if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
+        CRASH("Binding_Value_Failed");
+
+
+
+
 
     m_pShaderCom->Begin(m_tUIDesc.iPassType); // Gradient
 
@@ -141,6 +153,7 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
 HRESULT CCustom_UI::Bind_Description(void* pArg)
 {
     ASSERT_CRASH(pArg);
+
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
     m_tUIDesc.strFilePath   = pDesc->strFilePath;
@@ -151,12 +164,13 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
 
-    m_tUIDesc.fCutout           = pDesc->fCutout;
+    m_tUIDesc.fCutout       = pDesc->fCutout;
 
-    m_tUIDesc.iPassType         = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+    m_tUIDesc.iPassType     = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
 
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
+    // 원본 이미지 Size 가져오기.
     uint iIndex = 0;
     while (true)
     {
@@ -172,6 +186,9 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
         m_tUIDesc.vecSize.push_back(_float2{ (_float)desc.Width , (_float)desc.Height });
         iIndex++;
     }
+
+    m_tUIDesc.vSectorBorder = pDesc->vSectorBorder;
+    m_tUIDesc.fUIScale      = pDesc->fUIScale;
 
     return S_OK;
 }
