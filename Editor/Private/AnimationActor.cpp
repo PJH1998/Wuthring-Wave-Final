@@ -37,6 +37,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         XMConvertToRadians(pDesc->vRotation.z) };
     m_pTransformCom->Rotation_Quaternion(vRadian);
 
+    // Model의 Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
 
@@ -46,6 +47,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
+    // Default는 0번 애니메이션 실행.
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 
     m_IsPlayAnimation = true;
@@ -163,26 +165,39 @@ _float CAnimationActor::Get_Duration(const _string& strAnimName)
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
+// Notify에서 사용할 현재 선택된 애니메이션 이름
 const _string& CAnimationActor::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 TrackPosition
 const _float CAnimationActor::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_Duration(m_strCurrentAnimation);
 }
 
+HRESULT CAnimationActor::Bind_Bone_to_GUI()
+{
+	_int iBoneIndex = 0;
+    if(FAILED(m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix())))
+        return E_FAIL;
+    return S_OK;
+}
 
+
+// Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
 
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
+    // 어차피 현재거 설정하니까 매개변수로 가져올 필요가 없을 듯.
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
 
-    /*if (!m_IsPlayAnimation)
+    // TrackPosition을 설정하면서 만약 Stop인 경우에도 확인할 수 있게 Play Animation을 실행합니다.
+   /* if (!m_IsPlayAnimation)
         m_pModelCom->Play_Animation(m_strCurrentAnimation, m_fTimeDelta, &m_fTrackPosition, false);*/
 
     if (!m_IsPlayAnimation)
@@ -209,12 +224,13 @@ void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
     m_IsPlayAnimation = IsPlay;
 }
 
+// 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.
 void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'?? ???? ????
+        this->Collider_Active(tag, active); // 'this->'는 생략 가능
     };
 
     auto effectCallBack = [this]() {
@@ -233,6 +249,7 @@ void CAnimationActor::Effect_Active()
 }
 #endif
 
+// 1. 행렬 
 void CAnimationActor::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))

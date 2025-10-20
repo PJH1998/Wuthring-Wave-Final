@@ -176,6 +176,7 @@
     <ClInclude Include="..\Public\Loader_Test.h" />
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\MapObject.h" />
+    <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="Client.h" />
@@ -201,6 +202,7 @@
     <ClCompile Include="..\Private\Loader_Test.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
+    <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="Client.cpp">

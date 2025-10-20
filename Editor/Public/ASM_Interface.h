@@ -1,0 +1,125 @@
+﻿#pragma once
+#include "Interface_Edit.h"
+NS_BEGIN(Engine)
+class CBehavior_Tree;
+NS_END
+
+NS_BEGIN(Editor)
+class CASM_Interface final : public CInterface_Edit
+{
+	enum ASM_MENU
+	{
+		BEHAVIOR_TREE,
+		ANIM_MACHINE
+	};
+	enum BT_TYPE
+	{
+		ACTION, SELECTOR, SEQUENCE
+	};
+	enum DATA_TYPE
+	{
+		INT,
+		FLOAT,
+		STRING,
+		BOOL,
+		VECTOR3,
+		VECTOR4
+	};
+
+	//typedef std::variant<std::monostate, _int, _float, _string, _bool, _float3, _float4> VAR;
+
+	typedef struct tagValue
+	{
+		DATA_TYPE eType;
+		//VAR pValue;
+		void* pValue;
+	}ASM_VALUE;
+
+#pragma region GraphEditor_Definition
+
+	typedef struct tagBTDelegate : public GraphEditor::Delegate
+	{
+		CASM_Interface* pInterface {nullptr};
+
+		bool AllowedLink(GraphEditor::NodeIndex from, GraphEditor::NodeIndex to) override;
+		void SelectNode(GraphEditor::NodeIndex nodeIndex, bool selected) override;
+		void MoveSelectedNodes(const ImVec2 delta) override;
+		void AddLink(GraphEditor::NodeIndex inputNodeIndex, GraphEditor::SlotIndex inputSlotIndex, GraphEditor::NodeIndex outputNodeIndex, GraphEditor::SlotIndex outputSlotIndex) override;
+		void DelLink(GraphEditor::LinkIndex linkIndex) override;
+		void CustomDraw(ImDrawList* drawList, ImRect rectangle, GraphEditor::NodeIndex nodeIndex) override;
+		void RightClick(GraphEditor::NodeIndex nodeIndex, GraphEditor::SlotIndex slotIndexInput, GraphEditor::SlotIndex slotIndexOutput) override;
+		const size_t GetTemplateCount() override;
+		const GraphEditor::Template GetTemplate(GraphEditor::TemplateIndex index) override;
+		const size_t GetNodeCount() override;
+		const GraphEditor::Node GetNode(GraphEditor::NodeIndex index) override;
+		const size_t GetLinkCount() override;
+		const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
+	}BT_DELEGATE;
+
+	struct MyNode : public GraphEditor::Node
+	{
+		_string strName;
+		float x, y;
+		vector<GraphEditor::Link> Transitions;
+	};
+#pragma endregion
+
+private:
+	explicit CASM_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual ~CASM_Interface() = default;
+
+public:
+	virtual	HRESULT		Initialize();
+	void				Update_ASM();
+
+	
+
+private:
+	ASM_MENU			m_eCurrentMenu = { ASM_MENU::BEHAVIOR_TREE };
+
+#pragma region BehaviorTree_GraphEdit
+	BT_DELEGATE				m_BehaviorTreeGraphDelegate;
+	GraphEditor::Options	m_BehaviorTreeGraphOptions;
+	GraphEditor::ViewState	m_BehaviorTreeViewState;
+
+	vector<MyNode>			m_Nodes;
+	std::vector<GraphEditor::Link> m_Links;
+	GraphEditor::Template	m_Templates[2];
+
+	_int m_iCurrentNodeIndex { -1 };
+	_uint m_iNodeCount{};
+#pragma endregion
+
+	CBehavior_Tree*		m_pBehaviorTree = { nullptr };
+	CBlackBoard*		m_pBlackBoard = {nullptr};
+
+	DATA_TYPE			m_eDataType{};
+
+#pragma region INPUT_VALUE
+	//map<const _string, pair<DATA_TYPE, VAR>> m_ValueContainer;
+	map<const _string, pair<DATA_TYPE, void*>> m_ValueContainer;
+	_string m_strValueTag;
+	_int m_iInputTemp{};
+	_float m_fInputTemp{};
+	_string m_strInputTemp;
+	_bool m_bInputTemp{};
+	_float3 m_v3InputTemp{};
+	_float4 m_v4InputTemp{};
+#pragma endregion
+
+private:
+	void				Menu_BehaviorTree();
+	void				Graph_BehaviorTree();
+	void				Delete_Link();
+	void				BlackBoard_Setting();
+
+	void				Menu_AnimMachine();
+	void				Graph_AnimMachine();
+
+	void				Clear_Container();
+
+public:
+	static		CASM_Interface* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual		void				Free() override;
+};
+NS_END

@@ -46,6 +46,9 @@ public:
 	const _string& Get_CurrentAnimationNames() const;
 	const _float Get_CurrentAnimationDuration() const;
 
+	//Bone GUI 연결
+	HRESULT Bind_Bone_to_GUI();
+
 	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);
@@ -53,7 +56,7 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
-	// ?뚯뒪??肄쒕갚 ?⑥닔.
+	
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
 #endif // _DEBUG
@@ -71,7 +74,7 @@ private:
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 
-	_float m_fTimeDelta = {}; // Stop ?곹깭?먯꽌??PlayAnimation ?숈옉???꾪븿.
+	_float m_fTimeDelta = {};
 
 	_string m_strModelDatPath = {}; // 
 

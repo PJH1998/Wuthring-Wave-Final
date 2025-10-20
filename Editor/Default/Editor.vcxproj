@@ -162,6 +162,7 @@
     <ClInclude Include="..\Public\AnimNotifyDefine.h" />
     <ClInclude Include="..\public\Animator_UI.h" />
     <ClInclude Include="..\Public\Camera_Interface.h" />
+    <ClInclude Include="..\Public\ASM_Interface.h" />
     <ClInclude Include="..\public\Custom_UI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -183,6 +184,7 @@
     <ClInclude Include="..\Public\Interface_Edit.h" />
     <ClInclude Include="..\Public\Level_Animation.h" />
     <ClInclude Include="..\Public\Level_Camera.h" />
+    <ClInclude Include="..\Public\Level_ASM.h" />
     <ClInclude Include="..\Public\Level_Edit.h" />
     <ClInclude Include="..\Public\Level_Effect.h" />
     <ClInclude Include="..\Public\Level_Map.h" />
@@ -204,6 +206,7 @@
   <ItemGroup>
     <ClCompile Include="..\private\Animator_UI.cpp" />
     <ClCompile Include="..\Private\Camera_Interface.cpp" />
+    <ClCompile Include="..\Private\ASM_Interface.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -225,6 +228,7 @@
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
     <ClCompile Include="..\Private\Level_Camera.cpp" />
+    <ClCompile Include="..\Private\Level_ASM.cpp" />
     <ClCompile Include="..\Private\Level_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Effect.cpp" />
     <ClCompile Include="..\Private\Level_Map.cpp" />

@@ -1,4 +1,4 @@
-#ifndef Engine_Define_h__
+﻿#ifndef Engine_Define_h__
 #define Engine_Define_h__
 
 #pragma warning(disable: 4251)
