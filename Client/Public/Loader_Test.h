@@ -22,9 +22,6 @@ private:
 	HRESULT				Load_PlayerController();
 	HRESULT				Load_Augusta();	
 
-	HRESULT				Ready_OctoTree();
-
-
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
 

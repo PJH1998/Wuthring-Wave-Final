@@ -4,9 +4,6 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
-#include "PlayerAugusta.h"
-#include "PlayerController.h"
-
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
 {
@@ -14,10 +11,10 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
+	// SetUp OctoTree
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-    m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
     ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
-
 
     if (!File.is_open())
     {
@@ -55,20 +52,15 @@ HRESULT CLevel_Test::Initialize()
     }
 	File.close();
 
-    
-    //if (FAILED(Ready_Layer_PlayerController()))
-    //    return E_FAIL;
-
-    if (FAILED(Ready_Layer_Augusta()))
-        return E_FAIL;
+    Ready_Layer_Augusta();
 
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
- //   MobDesc.fSpeedPerSec = 5.f;
- //   if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
+    //MobDesc.fSpeedPerSec = 5.f;
+    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
 	//	CRASH("FalseSoverign");
-
+	//
 	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
 	//	CRASH("Dummy");
 
@@ -86,7 +78,6 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_ShadowNF();
 
-
     return S_OK;
 }
 
@@ -99,41 +90,12 @@ void CLevel_Test::Render()
 {
 }
 
-HRESULT CLevel_Test::Ready_Layer_PlayerController()
-{
-    // 1. Player Spec 채우기.
-    vector<PLAYER_SPEC> PlayerSpecs = {};
-
-    PLAYER_SPEC PlayerSpecDesc{};
-    PlayerSpecDesc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
-    PlayerSpecDesc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
-    PlayerSpecDesc.strModelTag = TEXT("Prototype_Component_Model_Augusta");
-    PlayerSpecDesc.strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
-    PlayerSpecDesc.iShaderPath = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
-    PlayerSpecs.emplace_back(PlayerSpecDesc);
-
-    CPlayerController::PLAYER_CONTROLLER_DESC Desc{};
-    Desc.eCurLevel = m_eCurLevel;
-    Desc.iPlayerCount = PlayerSpecs.size();
-    Desc.PlayerSpecs = PlayerSpecs;
-
-    // 2. ObjectLayer에 생성 및 추가.
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerController"),
-        ENUM_CLASS(m_eCurLevel), TEXT("Layer_PlayerController"), &Desc)))
-    {
-        CRASH("Failed Load Player Controller");
-        return E_FAIL;
-    }
-
-    return S_OK;
-}
-
 HRESULT CLevel_Test::Ready_Layer_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
 	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
 	_wstring wstrComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
-    _uint iShaderPath = 1;
+    _uint iShaderPath = 0;
 
     CAnimationDummy::ANIMATION_ACTOR_DESC Desc{};
     Desc.fSpeedPerSec = 10.f;

@@ -105,11 +105,11 @@ void CPooling_Manager::Wait_Thread_End()
 	{
 
 	}
+	//cout << "Work End" << endl;
 }
 
 void CPooling_Manager::Work_Thread()
 {
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	while (true)
 	{
 		unique_lock<mutex> lock(m_Mutex);
@@ -123,13 +123,10 @@ void CPooling_Manager::Work_Thread()
 		m_Works.pop();
 		lock.unlock();
 
-
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
-
 	}
-		CoUninitialize();
 }
 
 CPooling_Manager* CPooling_Manager::Create()

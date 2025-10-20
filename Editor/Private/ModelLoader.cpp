@@ -390,7 +390,7 @@ void CModelLoader::Load_File()
 								MSG_BOX("寃쎈줈 ?섎せ??");
 								return;
 							}
-							_string SaveFilePath = "../../Client/Bin/Resource/Map/Temp";
+							_string SaveFilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock";
 
 							//?ш린???ｌ뼱?쇰릺??嫄????寃쎈줈 => ?뚯씪 ?대쫫 ?쇱빞??
 

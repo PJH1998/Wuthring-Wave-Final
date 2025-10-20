@@ -17,7 +17,6 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
-	HRESULT				Ready_OctoTree();
 
 public:
 	static		CLoader_Logo*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

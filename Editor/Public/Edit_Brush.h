@@ -25,6 +25,7 @@ public:
 private:
 	void Bind_Resources();
 	void Ready_Components();
+	void Foliage();
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CVIBuffer_Point* m_pVIBufferCom = { nullptr };
@@ -33,6 +34,9 @@ private:
 	_float3 m_vMousePos = {};
 	_float4* m_pPoints= {nullptr};
 
+
+	_uint m_iMinNum = {};
+	_uint m_iMaxNum = {};
 public:
 	static CEdit_Brush* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) { return nullptr; }

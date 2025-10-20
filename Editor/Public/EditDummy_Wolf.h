@@ -34,7 +34,13 @@ private:
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
 
+	class CSpringCamera_Edit* m_pSpringCamera = { nullptr };
+
 private:
+	void					Key_Move(_float fTimeDelta);
+
+private:
+	HRESULT				Ready_Camera();
 	HRESULT				Ready_Components(_fmatrix PreTransformMatrix);
 
 public:

@@ -16,8 +16,8 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-	m_pGameInstance->Add_Work([this]() {Ready_OctoTree(); Complete_Load(); });
 
+	m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 
@@ -65,13 +65,6 @@ HRESULT CLoader_Logo::Load_Object()
 	cout << "Object" << endl;
 
     return S_OK;
-}
-
-HRESULT CLoader_Logo::Ready_OctoTree()
-{
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-
-	return S_OK;
 }
 
 CLoader_Logo* CLoader_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

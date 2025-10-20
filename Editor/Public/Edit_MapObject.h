@@ -19,6 +19,7 @@ public:
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };
+		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 	}MAP_LOAD;
 
 	typedef struct tagMapSave
@@ -81,7 +82,9 @@ private:
 	vector<CTexture*> m_pMaskDiffuseTextureCom;
 
 
+	class CMap_Interface* m_pMapInterface = {nullptr};
 
+	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
 private:
 
@@ -133,6 +136,9 @@ private:
 	_uint* m_iSelectedMaskDiffuseIndex;
 	
 	_uint m_iNumObject = {};
+
+
+	_uint m_iLevel = {};
 private:
 	static _uint g_iNumObjects;
 public:

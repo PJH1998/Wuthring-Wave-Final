@@ -14,6 +14,13 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 
+private:
+	class CSpringCamera_Edit*	m_pSpringCamera = { nullptr };
+
+private:
+	void						Ready_Camera();
+	void						Ready_Dummy();
+
 public:
 	static		CLevel_Camera* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void			Free() override;
