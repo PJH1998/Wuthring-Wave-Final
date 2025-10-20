@@ -1,6 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "MainApp.h"
-#include "Parser.h"
+#include "GameSystem.h"
 
 #include "Event_Level.h"
 
@@ -12,7 +12,7 @@
 
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
-	m_pParser { CParser::GetInstance() }
+	m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
 }
@@ -42,6 +42,9 @@ HRESULT CMainApp::Initialize()
 	// Jolt PhysicsSystem SetUp
 	m_pGameInstance->SetUp_PhysicsSystem();
 
+	// Game System Ready
+	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
+
 	Ready_Prototype_ForStatic();
 	Ready_Event();
 	Start_Level();
@@ -54,6 +57,8 @@ void CMainApp::Post_Update()
 	// Level ?꾪솚
 	if (true == m_isChangeLevel)
 	{
+		m_pGameInstance->Wait_Thread_End();
+
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
@@ -196,6 +201,6 @@ void CMainApp::Free()
 	Safe_Release(m_pContext);
 
 	m_pGameInstance->Release_Engine();
-	Safe_Release(m_pParser);
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pGameInstance);
 }

@@ -21,20 +21,22 @@ public:
 #endif
 
 private:
-	ID3D11Device*						m_pDevice = { nullptr };
-	ID3D11DeviceContext*				m_pContext = { nullptr };
-	class CGameInstance*				m_pGameInstance = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
 
-	list<class CGameObject*>			m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	list<class CGameObject*>	m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 
-	class CShader*						m_pShader = { nullptr };
-	class CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
+	class CShader*					m_pShader = { nullptr };
+	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };
 
 	_float4x4							m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint								m_iWinSizeX{}, m_iWinSizeY{};
 
+	recursive_mutex				m_RecursiveMutex;
+
 #ifdef _DEBUG
-	list<class CComponent*>				m_DebugComponents;
+	list<class CComponent*>	m_DebugComponents;
 	_bool								m_isRenderDebug = { true };
 #endif
 

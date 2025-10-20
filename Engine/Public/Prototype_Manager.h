@@ -40,6 +40,7 @@ private:
 	typedef map<const _wstring, CBase*> PROTOTYPES;
 
 	_uint										m_iNumLevel = {};
+	mutex										m_Mutex;
 	
 public:
 	static		CPrototype_Manager*	Create(_uint iNumLevel);

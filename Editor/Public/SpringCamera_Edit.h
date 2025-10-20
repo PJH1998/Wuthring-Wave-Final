@@ -16,7 +16,7 @@ private:
 	virtual ~CSpringCamera_Edit() = default;
 
 public:
-	void		Update_TargetMatrix(const _fmatrix& TargetMatrix) { XMStoreFloat4x4(&m_TargetMatrix, TargetMatrix); };
+	void		Update_Target(const _fvector& TargetPos, _float fOffsetY) { XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; };
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -29,7 +29,8 @@ public:
 
 private:
 	CCollider*					m_pColliderCom = { nullptr };
-	_float4x4						m_TargetMatrix = {};
+	_float4						m_vTargetPosition = {};
+	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
 
 	// Spring
 	_bool							m_isSpring = { false };
@@ -37,7 +38,8 @@ private:
 	_float							m_fDamp = {};			// °¨¼è °è¼ö
 
 private:
-	void							Spring();
+	//void							Spring();
+	void							Compute_CamPos();
 	void							Check_Ray();
 
 private:

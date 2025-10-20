@@ -34,16 +34,17 @@ void CSpringCamera_Edit::Priority_Update(_float fTimeDelta)
 
 void CSpringCamera_Edit::Update(_float fTimeDelta)
 {
-	__super::Key_Move(fTimeDelta);
+	//__super::Key_Move(fTimeDelta);
+	// 0. Cam Rotate
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)
 		__super::Mouse_Move_Up();
 
 	// 1. Spring
 
-	// 2. Ray Cast 이용하여 지형, 오브젝트와 충돌
+	// 2. 거리 제한으로 인한 간격 보정
+	Compute_CamPos();
+	// 3. Ray Cast 이용하여 지형, 오브젝트와 충돌
 	Check_Ray();
-
-	// 3. 거리 제한으로 인한 간격 보정
 }
 
 void CSpringCamera_Edit::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
@@ -56,6 +57,19 @@ void CSpringCamera_Edit::Late_Update(_float fTimeDelta)
 
 void CSpringCamera_Edit::Render()
 {
+}
+
+void CSpringCamera_Edit::Compute_CamPos()
+{
+	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+
+	// Offset Y Adjust
+	m_vTargetPosition.y += m_fOffsetY;
+	_vector vTargetPos;
+	vTargetPos = XMLoadFloat4(&m_vTargetPosition);
+
+	_vector vCamPos = XMVectorSetW(vTargetPos - vLook * m_fDistance , 1.f);
+	m_pTransformCom->Set_State(STATE::POSITION, vCamPos);
 }
 
 void CSpringCamera_Edit::Check_Ray()

@@ -11,7 +11,7 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 HRESULT CLevel_Camera::Initialize()
 {
-	Ready_Camera();
+	//Ready_Camera();
 	Ready_Dummy();
 
     return S_OK;

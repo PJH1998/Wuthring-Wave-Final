@@ -1,6 +1,8 @@
 #include "EditorPch.h"
 #include "EditDummy_Wolf.h"
 
+#include "SpringCamera_Edit.h"
+
 CEditDummy_Wolf::CEditDummy_Wolf(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CEditDummy { pDevice, pContext }
 {
@@ -32,6 +34,9 @@ HRESULT CEditDummy_Wolf::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Components(pDesc->PreTransformMatrix)))
         return E_FAIL;
 
+	if (FAILED(Ready_Camera()))
+		CRASH("Camera");
+
     return S_OK;
 }
 
@@ -42,6 +47,8 @@ void CEditDummy_Wolf::Priority_Update(_float fTimeDelta)
 void CEditDummy_Wolf::Update(_float fTimeDelta)
 {
 	Key_Move(fTimeDelta);
+
+	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
 }
 
 void CEditDummy_Wolf::Late_Update(_float fTimeDelta)
@@ -101,6 +108,31 @@ void CEditDummy_Wolf::Key_Move(_float fTimeDelta)
 		m_pTransformCom->Go_Right(fTimeDelta);
 }
 
+HRESULT CEditDummy_Wolf::Ready_Camera()
+{
+	m_pSpringCamera = CSpringCamera_Edit::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pSpringCamera);
+
+	CSpringCamera_Edit::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fSpeedPerSec = 100.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 5000.f;
+	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+	CameraDesc.fMouseSensor = 0.004f;
+
+	m_pSpringCamera->Initialize_Clone(&CameraDesc);
+
+	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), m_pSpringCamera);
+	Safe_AddRef(m_pSpringCamera);
+
+	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
+
+	return S_OK;
+}
+
 HRESULT CEditDummy_Wolf::Ready_Components(_fmatrix PreTransformMatrix)
 {
     m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat");
@@ -140,4 +172,6 @@ void CEditDummy_Wolf::Free()
 
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
+
+	Safe_Release(m_pSpringCamera);
 }
