@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+Ôªø#include "EnginePch.h"
 #include "BlackBoard.h"
 
 CBlackBoard::CBlackBoard()
@@ -18,7 +18,7 @@ HRESULT CBlackBoard::Add_Data(const _string& strDataTag, DATA_TYPE eType, void* 
 	}
 	else
 	{
-		// ¿ÃπÃ ¡∏¿Á«œ¥¬ µ•¿Ã≈Õ ≈∞
+		// Ïù¥ÎØ∏ Ï°¥Ïû¨ÌïòÎäî Îç∞Ïù¥ÌÑ∞ ÌÇ§
 		return E_FAIL;
 	}
 }
@@ -31,17 +31,17 @@ void* CBlackBoard::Get_Data(const _string& strDataTag)
 		return nullptr;
 }
 
-HRESULT CBlackBoard::Add_Checker(const _string& strDataTag, function<_int()> Checker)
+HRESULT CBlackBoard::Add_Condition(const _string& strDataTag, function<_int()> Condition)
 {
-	m_Checkers.emplace(make_pair(strDataTag, Checker)); return S_OK;
+	m_Conditions.emplace(make_pair(strDataTag, Condition)); return S_OK;
 }
 
-_int CBlackBoard::Get_Checker(const _string& strFuncTag)
+_int CBlackBoard::Get_Condition(const _string& strFuncTag)
 {
-	if(m_Checkers.find(strFuncTag) == m_Checkers.end())
+	if(m_Conditions.find(strFuncTag) == m_Conditions.end())
 		return -1;
 
-	return m_Checkers[strFuncTag]();
+	return m_Conditions[strFuncTag]();
 }
 
 #ifdef _DEBUG
@@ -85,6 +85,10 @@ void CBlackBoard::Bind_Data_to_GUI()
 	}
 	ImGui::End();
 }
+void CBlackBoard::Clear_Data()
+{
+	m_Datas.clear();
+}
 #endif // _DEBUG
 
 _bool CBlackBoard::Find_Data(const _string& strDataTag)
@@ -101,4 +105,5 @@ CBlackBoard* CBlackBoard::Create()
 void CBlackBoard::Free()
 {
 	__super::Free();
+	Clear_Data();
 }

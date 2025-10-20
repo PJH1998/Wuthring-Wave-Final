@@ -10,9 +10,30 @@ class CASM_Interface final : public CInterface_Edit
 	enum ASM_MENU
 	{
 		BEHAVIOR_TREE,
-		ANIM_MACHINE,
-		END
+		ANIM_MACHINE
 	};
+	enum BT_TYPE
+	{
+		ACTION, SELECTOR, SEQUENCE
+	};
+	enum DATA_TYPE
+	{
+		INT,
+		FLOAT,
+		STRING,
+		BOOL,
+		VECTOR3,
+		VECTOR4
+	};
+
+	//typedef std::variant<std::monostate, _int, _float, _string, _bool, _float3, _float4> VAR;
+
+	typedef struct tagValue
+	{
+		DATA_TYPE eType;
+		//VAR pValue;
+		void* pValue;
+	}ASM_VALUE;
 
 #pragma region GraphEditor_Definition
 
@@ -72,13 +93,30 @@ private:
 	CBehavior_Tree*		m_pBehaviorTree = { nullptr };
 	CBlackBoard*		m_pBlackBoard = {nullptr};
 
+	DATA_TYPE			m_eDataType{};
+
+#pragma region INPUT_VALUE
+	//map<const _string, pair<DATA_TYPE, VAR>> m_ValueContainer;
+	map<const _string, pair<DATA_TYPE, void*>> m_ValueContainer;
+	_string m_strValueTag;
+	_int m_iInputTemp{};
+	_float m_fInputTemp{};
+	_string m_strInputTemp;
+	_bool m_bInputTemp{};
+	_float3 m_v3InputTemp{};
+	_float4 m_v4InputTemp{};
+#pragma endregion
+
 private:
 	void				Menu_BehaviorTree();
 	void				Graph_BehaviorTree();
 	void				Delete_Link();
+	void				BlackBoard_Setting();
 
 	void				Menu_AnimMachine();
 	void				Graph_AnimMachine();
+
+	void				Clear_Container();
 
 public:
 	static		CASM_Interface* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

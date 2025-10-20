@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -25,18 +25,19 @@ private:
 public:
 	HRESULT Add_Data(const _string& strDataTag, DATA_TYPE eType, void* pValue);
 	void* Get_Data(const _string& strDataTag);
-	HRESULT Add_Checker(const _string& strDataTag, function<_int()> Checker);
-	_int Get_Checker(const _string& strFuncTag);
+	HRESULT Add_Condition(const _string& strDataTag, function<_int()> Condition);
+	_int Get_Condition(const _string& strFuncTag);
 
 #ifdef _DEBUG
-	// ºí·¢º¸µå¿¡ ¹ÙÀÎµù µÈ µ¥ÀÌÅÍ ½Ã°¢È­
+	// ë¸”ë™ë³´ë“œì— ë°”ì¸ë”© ëœ ë°ì´í„° ì‹œê°í™”
 	void Bind_Data_to_GUI();
+	void Clear_Data();
 #endif // _DEBUG
 
 
 private:
 	BLACKBOARD_DATA			m_Datas;
-	map<const _string, function<_int()>> m_Checkers;
+	map<const _string, function<_int()>> m_Conditions;
 
 private:
 	_bool Find_Data(const _string& strDataTag);
