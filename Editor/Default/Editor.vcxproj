@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;..\..\Client\Bin\ShaderFiles</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>EditorPch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$EditorPch.pch</PrecompiledHeaderOutputFile>

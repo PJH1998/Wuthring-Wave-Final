@@ -34,6 +34,7 @@ void CSpringCamera_Edit::Priority_Update(_float fTimeDelta)
 
 void CSpringCamera_Edit::Update(_float fTimeDelta)
 {
+	m_pTransformCom->Save_PreviousPosition();
 	//__super::Key_Move(fTimeDelta);
 	// 0. Cam Rotate
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)

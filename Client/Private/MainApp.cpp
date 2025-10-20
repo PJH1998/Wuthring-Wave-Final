@@ -34,7 +34,7 @@ HRESULT CMainApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ?곕룞
+	// ImGui Context Setting
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
@@ -54,15 +54,16 @@ HRESULT CMainApp::Initialize()
 
 void CMainApp::Post_Update()
 {
-	// Level ?꾪솚
+	// Level Change
 	if (true == m_isChangeLevel)
 	{
+		// Wait Thread End
 		m_pGameInstance->Wait_Thread_End();
 
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
-			// Level???랁븯吏 ?딆? 媛앹껜??Release
+			// Level Memory Clear
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				return;
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));

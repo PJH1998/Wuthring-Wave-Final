@@ -195,10 +195,6 @@ _bool CMap_Interface::Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMa
 
     ImGuiFileDialog::Instance()->OpenDialog(Text, "Model Folder", nullptr, config);
 
-
-
-
-
     if (ImGuiFileDialog::Instance()->Display(Text)) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
             

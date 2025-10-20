@@ -11,10 +11,18 @@ private:
 	virtual ~CGameSystem() = default;
 
 public:
+#pragma region GameSystem
 	void		Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+#pragma endregion
+
+#pragma region Parser
+	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+#pragma endregion
+
+
 
 private:
-	class CParser*	m_pParser = { nullptr };
+	class		CParser*		m_pParser = { nullptr };
 
 public:
 	virtual		void	Free() override;

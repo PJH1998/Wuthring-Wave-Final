@@ -15,7 +15,12 @@ public:
 	virtual		void			Render() override;
 
 private:
+	class CMap_Interface*		m_pMapInterface = { nullptr };
+
 	class CSpringCamera_Edit*	m_pSpringCamera = { nullptr };
+
+private:
+	_bool						m_isMapInterface = { false };
 
 private:
 	void						Ready_Camera();

@@ -4,7 +4,7 @@
 #include "SpringCamera_Edit.h"
 #include "EditDummy_Wolf.h"
 
-#include"Map_Interface.h"
+#include	"Map_Interface.h"
 
 
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -17,18 +17,25 @@ HRESULT CLevel_Camera::Initialize()
 	//Ready_Camera();
 	Ready_Dummy();
 
-	//class CMap_Interface* pMap = { nullptr };
-	/*pMap = CMap_Interface::Create(m_pDevice, m_pContext);
-	if (pMap->Initialize_ModelPath(ENUM_CLASS(LEVEL::CAMERA), XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f))))
-		pMap->Add_MapObject();*/
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
 
 void CLevel_Camera::Update(_float fTimeDelta)
 {
-
 	SetWindowText(g_hWnd, TEXT("Camera"));
+
+	ImGui::Begin("Camera Edit");
+
+	if (ImGui::Button("MapInterface"))
+		m_isMapInterface = !m_isMapInterface;
+
+	if(true == m_isMapInterface)
+		if (m_pMapInterface->Initialize_ModelPath(ENUM_CLASS(LEVEL::CAMERA), XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f))))
+			m_pMapInterface->Add_MapObject();
+
+	ImGui::End();
 }
 
 void CLevel_Camera::Render()
@@ -69,7 +76,7 @@ void CLevel_Camera::Ready_Dummy()
 	//	CRASH("Failed Clone Dummy Wolf");
 
 	WolfDesc.fSpeedPerSec = 100.f;
-	WolfDesc.vPosition = XMVectorSet(0.f, -200.f, 0.f, 1.f);
+	WolfDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"),
 		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
 		CRASH("Failed Clone Dummy Wolf");
@@ -93,4 +100,5 @@ void CLevel_Camera::Free()
 	__super::Free();
 
 	Safe_Release(m_pSpringCamera);
+	Safe_Release(m_pMapInterface);
 }
