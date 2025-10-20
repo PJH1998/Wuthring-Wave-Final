@@ -109,20 +109,11 @@ void CEdit_PreViewModel::Render()
 
 void CEdit_PreViewModel::Add_Model(_wstring ModelName)
 {
-    /*m_pGameInstance->Add_Work([&, Name = ModelName]() {
-        _wstring ModelCom = L"Com_"s + Name;
+    _wstring ModelCom = L"Com_"s + ModelName;
 
-        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), Name,
-            ModelCom, reinterpret_cast<CComponent**>(&m_Models[Name]), nullptr)))
-            int a = 0;
-
-        });*/
-        _wstring ModelCom = L"Com_"s + ModelName;
-
-        if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelName,
-            ModelCom, reinterpret_cast<CComponent**>(&m_Models[ModelName]), nullptr)))
-            int a = 0;
-
+    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelName,
+        ModelCom, reinterpret_cast<CComponent**>(&m_Models[ModelName]), nullptr)))
+        CRASH("Clone Failed");
 }
 
 CEdit_PreViewModel* CEdit_PreViewModel::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -190,6 +190,7 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
@@ -231,6 +232,7 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />

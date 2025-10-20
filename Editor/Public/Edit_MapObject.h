@@ -81,7 +81,9 @@ private:
 	vector<CTexture*> m_pMaskDiffuseTextureCom;
 
 
+	class CMap_Interface* m_pMapInterface = {nullptr};
 
+	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
 private:
 
@@ -133,6 +135,10 @@ private:
 	_uint* m_iSelectedMaskDiffuseIndex;
 	
 	_uint m_iNumObject = {};
+
+
+
+	_bool Test = { false };
 private:
 	static _uint g_iNumObjects;
 public:

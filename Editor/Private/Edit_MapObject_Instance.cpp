@@ -31,6 +31,7 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
+    Ready_Events();
 
     m_iShaderPassIndex = 0;
     MODELTYPE::MAP;
@@ -181,12 +182,8 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
     
     _vector vScale, vRotation, vTranslation;
     m_pRotation = new _float4[m_iNumInstance];
+    m_pInstanceMatrix = Desc.pTransformMatrix;
 
-    //?뚯쟾媛믪? 誘몃━ ???
-    for (_uint i = 0; i < m_iNumInstance; ++i)
-    {
-        XMStoreFloat4(&m_pRotation[i], XMVectorSet(0.f, 0.f, 0.f, 0.f));
-    }
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
@@ -203,6 +200,11 @@ void CEdit_MapObject_Instance::Bind_Resources()
 {
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+}
+
+void CEdit_MapObject_Instance::Ready_Events()
+{
+    //m_pGameInstance->Subscribe()
 }
 
 CEdit_MapObject_Instance* CEdit_MapObject_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
