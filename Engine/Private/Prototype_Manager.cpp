@@ -25,9 +25,9 @@ HRESULT CPrototype_Manager::Add_Prototype(_uint iPrototypeLevelID, const _wstrin
         return E_FAIL;
 
     auto iter = m_Prototypes[iPrototypeLevelID].find(strPrototypeTag);
-	if (iter != m_Prototypes[iPrototypeLevelID].end())
-	{
-		Safe_Release(pPrototype);
+    if (iter != m_Prototypes[iPrototypeLevelID].end())
+    {
+        Safe_Release(pPrototype);
         return E_FAIL;
 	}
 

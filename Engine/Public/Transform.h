@@ -79,11 +79,16 @@ public:
 	// 행렬 사이 보간
 	void			Lerp(const _fmatrix& StartMatrix, const _fmatrix& EndMatrix, _float fRatio);
 
+	// 이전 위치 저장.
+	void Save_PreviousPosition() { XMStoreFloat4(&m_vPreviousPosition,Get_State(STATE::POSITION)); }
+	
+
 private:
 	_float4x4		m_WorldMatrix = {};
 
 	_float			m_fSpeedPerSec = {};
 	_float			m_fRotationPerSec = {};
+	_float4			m_vPreviousPosition = {};	
 
 public:
 	static		CTransform*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

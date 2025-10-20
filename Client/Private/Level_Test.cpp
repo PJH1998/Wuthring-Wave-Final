@@ -1,6 +1,8 @@
 ﻿#include "ClientPch.h"
 #include "Level_Test.h"
 #include "MapObject.h"
+#include "AnimationDummy.h"
+#include "MonsterTest.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -48,7 +50,19 @@ HRESULT CLevel_Test::Initialize()
         //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
         //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
     }
+	File.close();
 
+    Ready_Layer_Augusta();
+
+
+	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
+	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
+    //MobDesc.fSpeedPerSec = 5.f;
+    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
+	//	CRASH("FalseSoverign");
+	//
+	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
+	//	CRASH("Dummy");
 
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
         CRASH("Dummy");*/
@@ -74,6 +88,31 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 void CLevel_Test::Render()
 {
+}
+
+HRESULT CLevel_Test::Ready_Layer_Augusta()
+{
+    _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
+	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+	_wstring wstrComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+    _uint iShaderPath = 0;
+
+    CAnimationDummy::ANIMATION_ACTOR_DESC Desc{};
+    Desc.fSpeedPerSec = 10.f;
+    Desc.fRotationPerSec = XMConvertToRadians(90.f);
+    Desc.strModelTag = wStrModelTag;
+    Desc.strShaderTag = wstrShaderTag; 
+    Desc.strComputeShaderTag = wstrComputeShaderTag;
+    Desc.iShaderPath = iShaderPath;
+    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
+    Desc.vRotation = _float3(0.f, 0.f, 0.f);
+    Desc.vScale = _float3(1.f, 1.f, 1.f);
+    Desc.eLevel = m_eCurLevel;
+
+    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc);
+
+    return S_OK;
 }
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

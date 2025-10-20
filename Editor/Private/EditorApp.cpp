@@ -9,6 +9,7 @@
 #include "Level_Effect.h"
 #include "Level_Map.h"
 #include "Level_UI.h"
+#include "Level_ASM.h"
 #include "Level_Camera.h"
 
 //Dummy
@@ -88,6 +89,9 @@ void CEditorApp::Post_Update()
 		case LEVEL::CAMERA:
 			pLevel = CLevel_Camera::Create(m_pDevice, m_pContext);
 			break;
+		case LEVEL::STATEMACHINE:
+			pLevel = CLevel_ASM::Create(m_pDevice, m_pContext);
+			break;
 		}
 
 		if (nullptr == pLevel)
@@ -133,6 +137,11 @@ void CEditorApp::Update(_float fTimeDelta)
 	if (ImGui::Button("Camera", ImVec2(100.f, 50.f)))
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::CAMERA, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if(ImGui::Button("State Machine", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{LEVEL::STATEMACHINE, true};
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 

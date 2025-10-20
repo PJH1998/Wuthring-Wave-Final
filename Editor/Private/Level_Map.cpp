@@ -43,12 +43,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 {
     m_fNearDistance = FLT_MAX;
     m_fNearDistance_Instance = FLT_MAX;
-    _float3 Test;
-    if(m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
-    {
-        if (m_pGameInstance->isPicked(&Test))
-            int a = 0;
-    }
+
     SetWindowText(g_hWnd, TEXT("Map"));
     Menu_Select();
 
@@ -59,6 +54,7 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
 
     case Editor::CLevel_Map::MENU_RANDSCAPE:
+        m_pBrush->Priority_Update(fTimeDelta);
         Menu_RandSacpe();
         m_pBrush->Update(fTimeDelta);
         break;
@@ -74,7 +70,11 @@ void CLevel_Map::Update(_float fTimeDelta)
         Menu_Model_Load();
         break;
     }
+
     Make_MousePos();
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_GRAVE) == KEYSTATE::PRESS && m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+        m_pPickedObject = nullptr;
 }
 
 void CLevel_Map::Render()
@@ -121,10 +121,8 @@ void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
 
-
-    //
-    if (m_pPickedObject)
-        m_pPickedObject->Set_ImGuiOption();
+        if (m_pPickedObject)
+            m_pPickedObject->Set_ImGuiOption();
 
     ImGui::End();
 }
@@ -342,6 +340,7 @@ void CLevel_Map::Load_Objects()
     _matrix PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.1f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
     _int version={};
     _int Lastversion = {};
     _wstring LastVersionName;
@@ -364,7 +363,7 @@ void CLevel_Map::Load_Objects()
                 _wstring baseName = StringToWString(FileName);
 
                 // LOD 마지막에 붙은 숫자 추출
-                size_t pos = baseName.find_last_not_of(L"0123456789");
+                size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
                 _wstring namePart = baseName.substr(0, pos + 1);
                 _wstring numberPart = baseName.substr(pos + 1);
                 version = stoi(numberPart);
@@ -379,15 +378,15 @@ void CLevel_Map::Load_Objects()
                 _wstring PrototypeName = L"Prototype_Component_Model_";
                 PrototypeName+= StringToWString(FileName);
 
-                if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
-                    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, VersionPath.c_str()))))
-                    CRASH("Prototype Create Failed");
+                m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+                    if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+                        CRASH("Prototype Create Failed");
+                    });
 
-                if (version == 0)
-                    m_PrototypeNames.push_back(key + to_wstring(version));
-
-                //if (Lastversion != version && version == 0)
+                if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
                 {
+                    m_PrototypeNames.push_back(LastVersionName + to_wstring(version));
                     m_ModelPaths.push_back(LastVersionPath);
                 }
 
@@ -398,71 +397,6 @@ void CLevel_Map::Load_Objects()
         }
     }
 
-    // 최종적으로 컨테이너에 넣기
-    //for (const auto& [name, data] : MaxVersionMap) {
-    //    m_PrototypeNames.push_back(name + std::to_wstring(data.first));
-    //    m_ModelPaths.push_back(data.second);
-    //}
-
-
-    //for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
-    //    if (entry.is_regular_file()) {
-    //        if (entry.path().string().find("MapData") != std::string::npos)
-    //            continue;
-
-    //        if (entry.path().extension() == ".dat") {
-
-    //            _char FileDrive[MAX_PATH] = {};
-    //            _char FileDir[MAX_PATH] = {};
-    //            _char FileName[MAX_PATH] = {};
-    //            _char FileExt[MAX_PATH] = {};
-    //            _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-    //            _wstring ProtoModelPath = L"Prototype_Component_Model_"s;
-    //            _wstring  ProtoModelName = _wstring(ProtoModelPath + StringToWString(FileName));
-
-    //            _wstring  PushName = _wstring(ProtoModelPath + StringToWString(FileName));
-    //            PushName.pop_back();
-    //            //
-    //            _bool IsExists = { false };
-
-    //            _string Temp;
-    //            Temp += FileDir;
-    //            Temp += FileName;
-    //            Temp.pop_back();
-
-    //            for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
-    //            {
-    //                _wstring PopName = m_PrototypeNames[i];
-    //                PopName.pop_back();
-
-    //                if (!lstrcmp(PushName.c_str(), PopName.c_str()))
-    //                {
-    //                    IsExists = true;
-    //                    break;
-    //                }
-    //            }
-    //            if (!IsExists)
-    //            {
-    //                m_PrototypeNames.push_back(ProtoModelName);
-    //                m_ModelPaths.push_back(Temp);
-    //            }
-
-    //            _string FilePath = entry.path().string();
-    //            
-    //            //m_pGameInstance->Add_Work([&, Path = FilePath, Modelname = ProtoModelName]() {
-    //            //if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, Modelname,
-    //            //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str))))
-    //            //    //CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), FilePath.c_str()))))
-    //            //    CRASH("Prototype Create Failed");
-    //            //});
-    //            
-    //            if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, _wstring(ProtoModelName),
-    //                CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, FilePath.c_str()))))
-    //                CRASH("Prototype Create Failed");
-    //        }
-    //    }
-    //}
     m_pGameInstance->Wait_Thread_End();
 
     for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
@@ -501,6 +435,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
         });
+
     m_pGameInstance->Add_Work([&]() {
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
@@ -510,38 +445,27 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
-        });
-    m_pGameInstance->Add_Work([&]() {
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
-     CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+       
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
+            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
+        
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
+            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
 
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
+            CVIBuffer_Point::Create(m_pDevice, m_pContext));
         });
 
     m_pGameInstance->Wait_Thread_End();
 
     m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
-        });
-    m_pGameInstance->Add_Work([&]() {
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
-        CVIBuffer_Point::Create(m_pDevice, m_pContext));
-        });
-
-    //VTXMESHINSTANCE
-    m_pGameInstance->Add_Work([&]() {
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
-        CEdit_MapObject::Create(m_pDevice, m_pContext));
-        });
-    m_pGameInstance->Add_Work([&]() {
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
-        CEdit_LightObject::Create(m_pDevice, m_pContext));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
+            CEdit_MapObject::Create(m_pDevice, m_pContext));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
+            CEdit_LightObject::Create(m_pDevice, m_pContext));
         });
 
     m_pGameInstance->Add_Work([&]() {
@@ -555,23 +479,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
         CEdit_Brush::Create(m_pDevice, m_pContext));
-    //?ㅻ툕?앺듃留ㅻ땲??먯꽌 ?덉씠???꾨? ?뚮㈃???쒖감?곸쑝濡????
-    //LOD 媛쒖닔 LOD0, LOD1, LOD2媛숈씠 LOD ?섎룄 ????
 
-    //?먮툕 ?덉뿉 紐⑤뜽 李띻린 / ?붾뱶 理쒕? ?ш린 ?덉뿉 李띿뼱?쇳븳??
-    //?쇰떒 ?띿뒪爾??놁씠 紐⑤뜽留?濡쒕뱶?대넃湲??몄씠釉?& 濡쒕뱶.
-    
-    //CEdit_MapObject::MAP_LOAD Desc{};
-    //CEdit_MapObject_Instance::MAP_LOAD InstanceDesc{};
-    //_float4x4 DefaultMatrix{};
-    //XMStoreFloat4x4(&DefaultMatrix, XMMatrixIdentity());
-    //InstanceDesc.WorldMatrix = Desc.WorldMatrix = &DefaultMatrix;
-
-    //strcpy_s(InstanceDesc.ModelName, "Wolf_Instance");
-
-    //strcpy_s(Desc.ModelName, "Test1");
-
-    //m_pGameInstance->Add_GameObject_ToLayer()
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
     return S_OK;
@@ -585,42 +493,42 @@ void CLevel_Map::Ready_Event()
             m_fNearDistance = event.fDistance;
             XMStoreFloat4(&m_vPickedPos, XMVectorSetW(XMLoadFloat3(&m_vWorldPos) + m_fNearDistance * XMLoadFloat3(&m_vWorldDir), 1.f));
         }
-        if (m_pGameInstance->Get_DIKeyState(DIK_X) == KEYSTATE::PRESS)
+
+
+        switch (m_eMenu)
         {
-            switch (m_eMenu)
+        case Editor::CLevel_Map::MENU_OBJECT:
+        {
+            if (event.fDistance <= m_fNearDistance)
             {
-            case Editor::CLevel_Map::MENU_OBJECT:
-            {
-                if (event.fDistance <= m_fNearDistance)
+                if (m_pPickedObject)
+                    m_pPickedObject->Set_ShaderPass(0);
+
+                m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
+                m_pPickedObject->Set_ShaderPass(3);
+
+                if (m_pChildObject)
                 {
-                    if (m_pPickedObject)
-                        m_pPickedObject->Set_ShaderPass(0);
-
-                    m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-                    m_pPickedObject->Set_ShaderPass(3);
-
-                    if (m_pChildObject)
-                    {
-                        m_pPickedObject->Add_Child(m_pChildObject);
-                        m_pChildObject = nullptr;
-                    }
+                    m_pPickedObject->Add_Child(m_pChildObject);
+                    m_pChildObject = nullptr;
                 }
+            }
+        }
+        break;
+
+        case Editor::CLevel_Map::MENU_RANDSCAPE:
+            if (event.fDistance <= m_fNearDistance_Instance)
+            {
+                m_fNearDistance_Instance = event.fDistance;
+                m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
             }
             break;
 
-            case Editor::CLevel_Map::MENU_RANDSCAPE:
-                if (event.fDistance <= m_fNearDistance_Instance)
-                {
-                    m_fNearDistance_Instance = event.fDistance;
-                    m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(reinterpret_cast<CGameObject*>(event.pObject));
-                }
-                break;
-
-            case Editor::CLevel_Map::MENU_LIGHT:
-                int a = 0;
-                break;
-            }
+        case Editor::CLevel_Map::MENU_LIGHT:
+            int a = 0;
+            break;
         }
+
         });
     m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);

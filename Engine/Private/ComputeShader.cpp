@@ -124,6 +124,7 @@ void CComputeShader::Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB
 
 void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ)
 {
+    
     m_pContext->CSSetShader(m_pComputeShader, nullptr, 0);
 
     for (auto& Pair : m_SRVs_To_Bind)

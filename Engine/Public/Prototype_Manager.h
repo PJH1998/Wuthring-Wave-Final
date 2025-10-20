@@ -16,6 +16,7 @@
 #include "Collider.h"
 #include"Model_Instance.h"
 
+#include "Behavior_Tree.h"
 // ==================
 
 NS_BEGIN(Engine)
@@ -41,7 +42,7 @@ private:
 
 	_uint										m_iNumLevel = {};
 	mutex										m_Mutex;
-	
+
 public:
 	static		CPrototype_Manager*	Create(_uint iNumLevel);
 	virtual		void							Free() override;

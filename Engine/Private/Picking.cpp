@@ -115,6 +115,9 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 
 	//스크린 기준 마우스 찍은 점 기준으로 옆으로 1칸 2칸씩 움직이면서 내가 지정한 월드 길이보다 길어지면 거기서 스탑. 스크린 상에서 마우스 점이랑 그 점이랑 
 	//길이 비교해서 범위가 되는 지점 생성. 벡터로 저장 후 벡터에 있는 점들을 월드까지 내리기? -> 카메라가 가까워지면 연산 많이함.
+	
+	//현재 인스턴스 한 놈이 자꾸 카메라 위치로 나오는 오류 있음.
+
 	_vector MouseWorldPos = {};
 
 	MouseWorldPos = XMVectorSetX(MouseWorldPos, m_ptMouse.x / (m_iWinSizeX * 0.5f) - 1.f);

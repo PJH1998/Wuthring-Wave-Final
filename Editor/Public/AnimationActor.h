@@ -5,7 +5,6 @@ NS_BEGIN(Editor)
 class CAnimationActor final : public CContainerObject
 {
 public:
-	// ?앹꽦??Shader Tag? Model Tag ?꾨떖.
 	typedef struct tagAnimationActorDesc : CContainerObject::GAMEOBJECT_DESC
 	{
 		LEVEL eLevel = {};
@@ -16,12 +15,10 @@ public:
 
 		_uint iShaderPath = {};
 
-		// 珥덇린 Transform ?ㅼ젙
 		_float3 vPostion = {};
 		_float3 vRotation = {};
 		_float3 vScale = {};
 
-		// 臾닿린???μ갑 媛?ν븯寃?..
 	}ANIMATION_ACTOR_DESC;
 
 private:
@@ -49,6 +46,9 @@ public:
 	const _string& Get_CurrentAnimationNames() const;
 	const _float Get_CurrentAnimationDuration() const;
 
+	//Bone GUI 연결
+	HRESULT Bind_Bone_to_GUI();
+
 	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);
@@ -56,7 +56,7 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
-	// ?뚯뒪??肄쒕갚 ?⑥닔.
+	
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
 #endif // _DEBUG
@@ -74,7 +74,7 @@ private:
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 
-	_float m_fTimeDelta = {}; // Stop ?곹깭?먯꽌??PlayAnimation ?숈옉???꾪븿.
+	_float m_fTimeDelta = {};
 
 	_string m_strModelDatPath = {}; // 
 

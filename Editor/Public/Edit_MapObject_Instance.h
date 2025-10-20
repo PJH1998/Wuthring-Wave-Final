@@ -40,6 +40,8 @@ public:
 	void Bind_Resources();
 
 private:
+	void Ready_Events();
+private:
 	//class CModel* m_pModelCom = { nullptr };
 	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };

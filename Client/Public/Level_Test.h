@@ -15,6 +15,12 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 
+private:
+	HRESULT Ready_Layer_Augusta();
+
+private:
+	LEVEL m_eCurLevel = { LEVEL::TEST };
+
 public:
 	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

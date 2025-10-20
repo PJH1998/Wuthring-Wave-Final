@@ -12,11 +12,14 @@ private:
 public:
 	_int Get_ParentIndex() const { return m_iParentBoneIndex; }
 	const _char*				Get_Name() { return m_szName; }
-	const _float4x4*		Get_InverseBindPoseMatrix() { return &m_TransformationMatrix; }
 	const _float4x4*		Get_CombinedTransformationMatrix() { return &m_CombinedTransformationMatrix; }
 	const _float4x4*		Get_TransformationMatrix() { return &m_TransformationMatrix; }
 	void					Set_TransformationMatrix(const _fmatrix& Matrix) {
 		XMStoreFloat4x4(&m_TransformationMatrix, Matrix);
+	}
+
+	void					Set_CombinedTransformationMatrix(const _fmatrix& Matrix) {
+		XMStoreFloat4x4(&m_CombinedTransformationMatrix, Matrix);
 	}
 public:
 	HRESULT					Initialize(const _char* pBoneName, const _fmatrix& TransformationMatrix, _int iParentBoneIndex);

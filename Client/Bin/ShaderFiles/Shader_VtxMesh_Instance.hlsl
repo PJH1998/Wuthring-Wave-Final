@@ -83,9 +83,8 @@ struct PS_OUT_LIGHT
 {
     float4 vDiffuse : SV_TARGET0;
     float4 vNormal : SV_TARGET1;
-    float4 vDepth : SV_TARGET2;
-    float4 vEmissive : SV_TARGET3;
-    float4 vDistortion : SV_TARGET4;
+    float4 vSpecular : SV_TARGET3;
+    float4 vAmbient : SV_TARGET4;
 };
 
 PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
@@ -98,9 +97,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     //    discard;
     
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
-    
-    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-    Out.vDepth.y = In.vProjPos.w;
+
     
     return Out;
 }
@@ -115,9 +112,6 @@ PS_OUT_LIGHT PS_MAIN_TEST(PS_IN In)
     //    discard;
     
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
-    
-    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
-    Out.vDepth.y = In.vProjPos.w;
     
     return Out;
 }
