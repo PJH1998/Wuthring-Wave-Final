@@ -157,83 +157,83 @@ HRESULT CLoader_Test::Load_Component()
 {
     cout << "Component" << endl;
 
-	CBT_Selector* pRoot = CBT_Selector::Create();
+	//CBT_Selector* pRoot = CBT_Selector::Create();
 
-    //is Dead
-    CBT_Action* pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+ //   //is Dead
+ //   CBT_Action* pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 
-        _bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
-		if(*isAnimationFinished)
-			return CBT_Node::BT_STATE::RUNNING;
-        
-        _uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
-        if(*pState & ENUM_CLASS(TEST_STATE::DEAD))
-        {
-            return CBT_Node::BT_STATE::SUCCESS;
-        }
+ //       _bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
+	//	if(*isAnimationFinished)
+	//		return CBT_Node::BT_STATE::RUNNING;
+ //       
+ //       _uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+ //       if(*pState & ENUM_CLASS(TEST_STATE::DEAD))
+ //       {
+ //           return CBT_Node::BT_STATE::SUCCESS;
+ //       }
 
-        return  CBT_Node::BT_STATE::FAILURE;
-        });
+ //       return  CBT_Node::BT_STATE::FAILURE;
+ //       });
 
-	pRoot->Add_Child(pAction);
-    pAction = nullptr;
+	//pRoot->Add_Child(pAction);
+ //   pAction = nullptr;
 
-    //Attack Sequence
-	CBT_Sequence* pSequence = CBT_Sequence::Create();
+ //   //Attack Sequence
+	//CBT_Sequence* pSequence = CBT_Sequence::Create();
 
-    //      Check Enable
-	pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+ //   //      Check Enable
+	//pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 
-        _bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
-        if(!(*isAnimationFinished))
-            return CBT_Node::BT_STATE::RUNNING;
+ //       _bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
+ //       if(!(*isAnimationFinished))
+ //           return CBT_Node::BT_STATE::RUNNING;
 
-		_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
-		if(*pState & ENUM_CLASS(TEST_STATE::DEAD))
-			return CBT_Node::BT_STATE::FAILURE;
-		return  CBT_Node::BT_STATE::FAILURE;
-		});
-	pSequence->Add_Child(pAction);
-	pAction = nullptr;
+	//	_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+	//	if(*pState & ENUM_CLASS(TEST_STATE::DEAD))
+	//		return CBT_Node::BT_STATE::FAILURE;
+	//	return  CBT_Node::BT_STATE::FAILURE;
+	//	});
+	//pSequence->Add_Child(pAction);
+	//pAction = nullptr;
 
-	//      Attack Selector
-	CBT_Selector* pSelector = CBT_Selector::Create();
+	////      Attack Selector
+	//CBT_Selector* pSelector = CBT_Selector::Create();
 
-	//              Attack1
-	pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
-		_bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
-        if(!(*isAnimationFinished))
-			return CBT_Node::BT_STATE::RUNNING;
+	////              Attack1
+	//pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+	//	_bool* isAnimationFinished = static_cast<_bool*>(pBlackBoard->Get_Data("isAnimationFinished"));
+ //       if(!(*isAnimationFinished))
+	//		return CBT_Node::BT_STATE::RUNNING;
 
-        if(pBlackBoard->Get_Checker("Attack1_Enable") > 0)
-        {
-            _uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
-            *pState |= ENUM_CLASS(TEST_STATE::ATTACK_1);
-            return  CBT_Node::BT_STATE::SUCCESS;
-        }
-        else
-			return CBT_Node::BT_STATE::FAILURE;
-		});
-    pSelector->Add_Child(pAction);
-    pAction = nullptr;
+ //       if(pBlackBoard->Get_Checker("Attack1_Enable") > 0)
+ //       {
+ //           _uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+ //           *pState |= ENUM_CLASS(TEST_STATE::ATTACK_1);
+ //           return  CBT_Node::BT_STATE::SUCCESS;
+ //       }
+ //       else
+	//		return CBT_Node::BT_STATE::FAILURE;
+	//	});
+ //   pSelector->Add_Child(pAction);
+ //   pAction = nullptr;
 
-    pSequence->Add_Child(pSelector);
-    pSelector = nullptr;
-    pRoot->Add_Child(pSequence);
-    pSequence = nullptr;
+ //   pSequence->Add_Child(pSelector);
+ //   pSelector = nullptr;
+ //   pRoot->Add_Child(pSequence);
+ //   pSequence = nullptr;
 
-    // Idle
-	pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
-		_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
-		*pState = ENUM_CLASS(TEST_STATE::NONE);
-		return  CBT_Node::BT_STATE::SUCCESS;
-		});
-    pRoot->Add_Child(pAction);
-    pAction = nullptr;
+ //   // Idle
+	//pAction = CBT_Action::Create([](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+	//	_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+	//	*pState = ENUM_CLASS(TEST_STATE::NONE);
+	//	return  CBT_Node::BT_STATE::SUCCESS;
+	//	});
+ //   pRoot->Add_Child(pAction);
+ //   pAction = nullptr;
 
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
-		CBehavior_Tree::Create(m_pDevice, m_pContext, pRoot))))
-		return E_FAIL;
+	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
+	//	CBehavior_Tree::Create(m_pDevice, m_pContext, pRoot))))
+	//	return E_FAIL;
 
     return S_OK;
 }
