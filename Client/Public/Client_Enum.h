@@ -61,4 +61,6 @@ namespace Client
 		DEAD = 1 << 31
 	};
 
+	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, SHADOW, END };
+
 }

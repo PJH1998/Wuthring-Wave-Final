@@ -105,70 +105,56 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
 
 	// Ribbon 애니메
-#ifdef _DEBUG
-	_string strNames[5] = {"Rib_Attack01", "Rib_Attack02", "Rib_Attack03", "Rib_Move_F", "Rib_Move_B"};
-
-	string strName = m_szName;
-	_wstring Prefix = L"Animation Name : " + StringToWString(m_szName) + L"\n";
-
-	for (auto& str : strNames)
-	{
-		if (strName == str)
-		{
-			OutputDebugString(Prefix.c_str());
-			for (size_t i = 0; i < m_iNumChannels; ++i)
-			{
-				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-
-				if (m_Channels[i]->Get_NumKeyframes() == 2)
-				{
-					OutputDebugString(TEXT("Key Frame == 2 : "));
-					OutputDebugString(boneName.c_str());
-				}
-			}
-
-			for (size_t i = 0; i < m_iNumChannels; ++i)
-			{
-				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-
-				if (m_Channels[i]->Get_NumKeyframes() < 2)
-				{
-					OutputDebugString(TEXT("Key Frame < 2 : "));
-					OutputDebugString(boneName.c_str());
-				}
-			}
-
-			for (size_t i = 0; i < m_iNumChannels; ++i)
-			{
-				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-
-				if (m_Channels[i]->Get_NumKeyframes() > 2)
-				{
-					OutputDebugString(TEXT("Key Frame > 2 : "));
-					OutputDebugString(boneName.c_str());
-				}
-
-			}
-
-			Prefix = L"Animation Name : " + StringToWString(m_szName) + L" / End \n";
-			OutputDebugString(Prefix.c_str());
-		}
-	}
-
-	/*if (strName._Starts_with("Rib"))
-	{
-		OutputDebugString(Prefix.c_str());
-			for (size_t i = 0; i < m_iNumChannels; ++i)
-			{
-				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
-				if (m_Channels[i]->Get_NumKeyframes() == 2)
-					OutputDebugString(boneName.c_str());
-			}
-			Prefix = L"Animation Name : " + StringToWString(m_szName) + L"End \n";
-			OutputDebugString(Prefix.c_str());
-
-	}*/
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	_string strNames[5] = {"Rib_Attack01", "Rib_Attack02", "Rib_Attack03", "Rib_Move_F", "Rib_Move_B"};
+//
+//	string strName = m_szName;
+//	_wstring Prefix = L"Animation Name : " + StringToWString(m_szName) + L"\n";
+//
+//	for (auto& str : strNames)
+//	{
+//		if (strName == str)
+//		{
+//			OutputDebugString(Prefix.c_str());
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() == 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame == 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//			}
+//
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() < 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame < 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//			}
+//
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() > 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame > 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//
+//			}
+//
+//			Prefix = L"Animation Name : " + StringToWString(m_szName) + L" / End \n";
+//			OutputDebugString(Prefix.c_str());
+//		}
+//	}
+//#endif // _DEBUG
 
 
 

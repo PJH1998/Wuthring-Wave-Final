@@ -262,12 +262,8 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     
     float fShade = max(dot(normalize(g_vLightDirection), -1.f * vNormal), 0.f);
     
-    if(fShade >= 0.5f)
-        fShade = 1.f;
-    else
-        fShade = 0.2f;    
     
-    Out.vShade = g_vLightDiffuse * fShade;//    saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
+    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
 
     vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     

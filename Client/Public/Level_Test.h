@@ -16,6 +16,7 @@ public:
 	virtual		void			Render() override;
 
 private:
+	HRESULT Ready_Layer_PlayerController();
 	HRESULT Ready_Layer_Augusta();
 
 private:

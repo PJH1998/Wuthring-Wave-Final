@@ -6,6 +6,11 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
+#include "PlayerAugusta.h"
+#include "PlayerController.h"
+
+
+
 #pragma region BehaviorTree
 #include "BT_Action.h"
 #include "BT_Selector.h"
@@ -26,6 +31,8 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
+
+    m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 
 
@@ -238,6 +245,19 @@ HRESULT CLoader_Test::Load_Component()
     return S_OK;
 }
 
+// Player Controller에만 필요한 값들.
+HRESULT CLoader_Test::Load_PlayerController()
+{
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerController");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrControllerTag
+        , CPlayerController::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+
+    return S_OK;
+}
+
+// Augusta에만 필요한 값들.
 HRESULT CLoader_Test::Load_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
@@ -250,11 +270,18 @@ HRESULT CLoader_Test::Load_Augusta()
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
 
-	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrActorTag
-        , CAnimationDummy::Create(m_pDevice, m_pContext))))
-		CRASH("Prototype Create Failed");
+        , CPlayerAugusta::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+
+
+    //_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+    //    , wStrActorTag
+    //    , CAnimationDummy::Create(m_pDevice, m_pContext))))
+    //    CRASH("Prototype Create Failed");
 
 
     return S_OK;

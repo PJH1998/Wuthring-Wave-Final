@@ -30,5 +30,7 @@ namespace Engine
 	enum class BPLAYER { NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
 	enum class SHAPE { SPHERE, BOX, CAPSULE, CONVEXHULL, MESH };
+
+	
 }
 #endif // Engine_Enum_h__

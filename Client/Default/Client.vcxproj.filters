@@ -61,6 +61,15 @@
     <Filter Include="02. GameObject\MonsterTest">
       <UniqueIdentifier>{41486888-d776-4dc3-922d-fe6dff0765b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\PlayerController">
+      <UniqueIdentifier>{868a9a9e-96b3-4a21-b3ef-613073a958af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\Actor\Player">
+      <UniqueIdentifier>{f2ee6aaa-2946-4a3a-8344-9c6a90db15d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. GameObject\Actor\Player\Augusta">
+      <UniqueIdentifier>{98cc7302-c08d-48c9-9e95-3d0338e7d788}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -129,11 +138,23 @@
     <ClInclude Include="..\Public\AnimationDummy.h">
       <Filter>02. GameObject\Dummy</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Actor.h">
-      <Filter>02. GameObject\Actor</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\MonsterTest.h">
       <Filter>02. GameObject\MonsterTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerController.h">
+      <Filter>02. GameObject\PlayerController</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player.h">
+      <Filter>02. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerAugusta.h">
+      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Player_Define.h">
+      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Actor.h">
+      <Filter>02. GameObject\Actor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -198,6 +219,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\MonsterTest.cpp">
       <Filter>02. GameObject\MonsterTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerController.cpp">
+      <Filter>02. GameObject\PlayerController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player.cpp">
+      <Filter>02. GameObject\Actor\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerAugusta.cpp">
+      <Filter>02. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
