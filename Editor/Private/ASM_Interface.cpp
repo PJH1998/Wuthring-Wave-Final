@@ -13,30 +13,19 @@ CASM_Interface::CASM_Interface(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CASM_Interface::Initialize()
 {
-	m_Templates[0] = {
-
-		IM_COL32(160, 160, 180, 255),
-		IM_COL32(100, 100, 140, 255),
-		IM_COL32(110, 110, 150, 255),
-		1,
-		nullptr,
-		nullptr,
-		2,
-		nullptr,
-		nullptr
-	};
-	m_Templates[1] = {
-
-		IM_COL32(160, 160, 180, 255),
-		IM_COL32(100, 100, 140, 255),
-		IM_COL32(110, 110, 150, 255),
-		4,
-		nullptr,
-		nullptr,
-		4,
-		nullptr,
-		nullptr
-	};
+	//Action Templete
+	//m_Templates[0] = {
+	//
+	//	IM_COL32(160, 160, 180, 255),
+	//	IM_COL32(100, 100, 140, 255),
+	//	IM_COL32(110, 110, 150, 255),
+	//	1,
+	//	nullptr,
+	//	nullptr,
+	//	0,
+	//	nullptr,
+	//	nullptr
+	//};
 	//Node tNode = {"Test",0, 0.f, 0.f, false};
 	//m_Nodes.push_back(tNode);
 	m_BehaviorTreeGraphDelegate.pInterface = this;
@@ -53,7 +42,7 @@ HRESULT CASM_Interface::Initialize()
 	return S_OK;
 }
 
-void CASM_Interface::Update_ASM()
+void CASM_Interface::Update_ASM(_float fTimeDelta)
 {
 	ImGui::Begin("Animation State Machine Interface");
 
@@ -99,28 +88,9 @@ void CASM_Interface::Menu_BehaviorTree()
 {
 	ImGui::BeginTable("Property", 2, ImGuiTableFlags_BordersInnerV);
 	ImGui::TableNextColumn();
-	ImGui::Text("Behavior Tree Editor - To Be Continued...");
-	ImGui::Text("Selected Node Index : %d", m_iCurrentNodeIndex);
-	if(ImGui::Button("Add Node"))
-	{
-		_string szNodeName;
-		szNodeName = "new Node";
-		szNodeName += to_string(m_iNodeCount).c_str();
-		MyNode tNode = {"new Node", 0, ImRect(), false, szNodeName, 0.f, 0.f};
-		m_Nodes.push_back(tNode);
-		++m_iNodeCount;
-	}
-	ImGui::SameLine();
-	if(ImGui::Button("Delete Node"))
-	{
-		if(m_iCurrentNodeIndex >= 0 && m_iCurrentNodeIndex < static_cast<_int>(m_Nodes.size()))
-		{
-			Delete_Link();
 
-			m_Nodes.erase(m_Nodes.begin() + m_iCurrentNodeIndex);
-			m_iCurrentNodeIndex = -1;
-		}
-	}
+	BehaviorTree_Setting();
+
 	ImGui::TableNextColumn();
 	
 	BlackBoard_Setting();
@@ -154,6 +124,12 @@ void CASM_Interface::Delete_Link()
 	{
 		if((*iter).mInputNodeIndex == m_iCurrentNodeIndex || (*iter).mOutputNodeIndex == m_iCurrentNodeIndex)
 		{
+			Delete_Transitions((*iter));
+			
+			m_Templates[m_Nodes[(*iter).mInputNodeIndex].mTemplateIndex].mOutputCount--;
+			if(m_Templates[m_Nodes[(*iter).mInputNodeIndex].mTemplateIndex].mOutputCount < 1)
+				m_Templates[m_Nodes[(*iter).mInputNodeIndex].mTemplateIndex].mOutputCount = 1;
+
 			iter = m_Links.erase(iter);
 		}
 		else
@@ -163,9 +139,135 @@ void CASM_Interface::Delete_Link()
 	}
 }
 
+_bool CASM_Interface::Allowed_LInkEx(GraphEditor::Link& tLink)
+{
+	for(auto& tTrans : m_Nodes[tLink.mInputNodeIndex].Transitions)
+		if(tLink.mInputSlotIndex == tTrans.mInputSlotIndex)
+			return false;
+
+	return true;
+}
+
+void CASM_Interface::BehaviorTree_Setting()
+{
+	ImGui::Text("Behavior Tree Editor - To Be Continued...");
+	ImGui::Text("Selected Node Index : %d", m_iCurrentNodeIndex);
+	if(m_iCurrentNodeIndex > -1)
+	{
+		ImGui::Text(m_Nodes[m_iCurrentNodeIndex].strName.c_str());
+		ImGui::Text("x : %.3f", m_Nodes[m_iCurrentNodeIndex].x);
+		ImGui::SameLine();
+		ImGui::Text("y : %.3f", m_Nodes[m_iCurrentNodeIndex].y);
+		if(ImGui::Button("Add Slot"))
+		{
+			if(BT_TYPE::ACTION != m_Nodes[m_iCurrentNodeIndex].eType)
+				m_Templates[m_Nodes[m_iCurrentNodeIndex].mTemplateIndex].mOutputCount++;
+		}
+	}
+	ImGui::Separator();
+	if(ImGui::RadioButton("Action", reinterpret_cast<int*>(&m_eNodeType), 0)){}
+	ImGui::SameLine();
+	if(ImGui::RadioButton("Selector", reinterpret_cast<int*>(&m_eNodeType), 1)){}
+	ImGui::SameLine();
+	if(ImGui::RadioButton("Sequence", reinterpret_cast<int*>(&m_eNodeType), 2)){}
+
+	if(ImGui::Button("Add Node"))
+	{
+		_string szNodeName, strNodeType;
+		szNodeName = "new Node";
+		szNodeName += to_string(m_iNodeCount).c_str();
+		switch(m_eNodeType)
+		{
+		case Editor::CASM_Interface::ACTION:
+			strNodeType = "Action";
+			break;
+		case Editor::CASM_Interface::SELECTOR:
+			strNodeType = "Selector";
+			break;
+		case Editor::CASM_Interface::SEQUENCE:
+			strNodeType = "Sequence";
+			break;
+		default:
+			break;
+		}
+		MyNode tNode = {strNodeType.c_str(), m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+		//노드 동적 템플릿
+		Create_Template(m_eNodeType);
+		m_Nodes.push_back(tNode);
+		++m_iNodeCount;
+	}
+	ImGui::SameLine();
+	if(ImGui::Button("Delete Node"))
+	{
+		if(m_iCurrentNodeIndex >= 0 && m_iCurrentNodeIndex < static_cast<_int>(m_Nodes.size()))
+		{
+			Delete_Link();
+			//m_Links[0] == ImGuizmo::;
+			m_Templates.erase(m_Templates.begin() + m_iCurrentNodeIndex);
+			m_Nodes.erase(m_Nodes.begin() + m_iCurrentNodeIndex);
+			size_t iNumNodes = m_Nodes.size();
+			for(size_t i = 0; i < iNumNodes; ++i)
+			{
+				m_Nodes[i].mTemplateIndex = i;
+			}
+			m_iCurrentNodeIndex = -1;
+		}
+	}
+}
+
 void CASM_Interface::BlackBoard_Setting()
 {
 	ImGui::Text("Black Board Data Setting");
+
+	if(!m_ValueContainer.empty())
+	{
+		const _char* szPreview = m_strValueKey.c_str();
+		if(ImGui::BeginCombo("Select Data", szPreview))
+		{
+			_int iGuiID{};
+			for(auto& Pair : m_ValueContainer)
+			{
+				ImGui::PushID(iGuiID);
+				const _bool isSelected = Pair.first == m_strValueKey;
+				if(ImGui::Selectable(Pair.first.c_str(), isSelected))
+				{
+					m_strValueKey = Pair.first;
+				}
+				ImGui::PopID();
+			}
+			ImGui::EndCombo();
+		}
+		switch(m_ValueContainer[m_strValueKey].first)
+		{
+		case Editor::CASM_Interface::INT:
+			ImGui::InputInt(m_strValueKey.c_str(), static_cast<_int*>(m_ValueContainer[m_strValueKey].second));
+			break;
+		case Editor::CASM_Interface::FLOAT:
+			ImGui::InputFloat(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
+			break;
+		case Editor::CASM_Interface::STRING:
+		{
+			char strBuffer[MAX_PATH] = {};
+			strcpy_s(strBuffer, MAX_PATH, m_strValueKey.c_str());
+			strcat_s(strBuffer, MAX_PATH, " : ");
+			strcat_s(strBuffer, MAX_PATH, static_cast<_string*>(m_ValueContainer[m_strValueKey].second)->c_str());
+			ImGui::Text(strBuffer);
+			break;
+		}
+		case Editor::CASM_Interface::BOOL:
+			ImGui::Checkbox(m_strValueKey.c_str(), static_cast<_bool*>(m_ValueContainer[m_strValueKey].second));
+			break;
+		case Editor::CASM_Interface::VECTOR3:
+			ImGui::InputFloat3(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
+			break;
+		case Editor::CASM_Interface::VECTOR4:
+			ImGui::InputFloat4(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
+			break;
+		default:
+			break;
+		}
+	}
+	ImGui::Separator();
 	if(ImGui::RadioButton("Int", reinterpret_cast<int*>(&m_eDataType), 0)){}
 	ImGui::SameLine();
 	if(ImGui::RadioButton("Float", reinterpret_cast<int*>(&m_eDataType), 1)){}
@@ -261,10 +363,126 @@ void CASM_Interface::BlackBoard_Setting()
 			ASSERT_CRASH(false);
 			break;
 		}
+		//m_strValueTag를 바로 map 키로 대입하거나 함수 매개변수로 대입하면 size 0인 상황 발생.
 		_char szValueTag[MAX_PATH];
 		strcpy_s(szValueTag, m_strValueTag.c_str());
 		m_ValueContainer.emplace(szValueTag, _Value);
 		m_pBlackBoard->Add_Data(szValueTag, CBlackBoard::DATA_TYPE(m_ValueContainer[szValueTag].first), m_ValueContainer[szValueTag].second);
+		//m_strValueKey = m_strValueTag; 대입 시 m_strValueKey이 size 0 인 상태로 복사됨.
+		m_strValueKey = szValueTag;
+//#ifdef _DEBUG
+//		cout << "a: \"" << m_strValueKey << "\" size=" << m_strValueKey.size() << "\n";
+//		cout << "b: \"" << m_strValueTag << "\" size=" << m_strValueTag.size() << "\n";
+//		cout << "&a=" << (const void*)&m_strValueKey << " &b=" << (const void*)&m_strValueTag << "\n";
+//		cout << "a.data=" << static_cast<const void*>(m_strValueKey.data())
+//			<< " b.data=" << static_cast<const void*>(m_strValueTag.data()) << "\n";
+//#endif // _DEBUG
+
+	}
+}
+
+void CASM_Interface::Create_Template(BT_TYPE eType)
+{
+	/*
+		IM_COL32(160, 160, 180, 255),
+		IM_COL32(100, 100, 140, 255),
+		IM_COL32(110, 110, 150, 255),
+		1,
+		nullptr,
+		nullptr,
+		0,
+		nullptr,
+		nullptr
+	*/
+	GraphEditor::Template tTemplate{};
+	tTemplate.mInputCount = 1;
+	switch(eType)
+	{
+	case Editor::CASM_Interface::ACTION:
+	{
+		tTemplate.mHeaderColor = IM_COL32(10, 120, 200, 255);
+		tTemplate.mBackgroundColor = IM_COL32(0, 80, 160, 255);
+		tTemplate.mBackgroundColorOver = IM_COL32(20, 100, 180, 255);
+		tTemplate.mOutputCount = 0;
+		break;
+	}
+
+	case Editor::CASM_Interface::SELECTOR:
+	{
+		tTemplate.mHeaderColor = IM_COL32(160, 160, 180, 255);
+		tTemplate.mBackgroundColor = IM_COL32(100, 100, 140, 255);
+		tTemplate.mBackgroundColorOver = IM_COL32(110, 110, 150, 255);
+		tTemplate.mOutputCount = 1;
+		break;
+	}
+	case Editor::CASM_Interface::SEQUENCE:
+	{
+		tTemplate.mHeaderColor = IM_COL32(10, 200, 10, 255);
+		tTemplate.mBackgroundColor = IM_COL32(0, 160, 0, 255);
+		tTemplate.mBackgroundColorOver = IM_COL32(20, 180, 20, 255);
+		tTemplate.mOutputCount = 1;
+		break;
+	}
+	default:
+		break;
+	}
+	//tTemplate.mInputNames = nullptr;
+	//tTemplate.mInputColors = nullptr;
+	//tTemplate.mOutputNames = nullptr;
+	//tTemplate.mOutputColors = nullptr;
+	m_Templates.push_back(tTemplate);
+}
+
+#ifdef _DEBUG
+void CASM_Interface::Safe_Delete_Variable(const _string& strVariableTag)
+{
+	if(m_ValueContainer.find(strVariableTag) == m_ValueContainer.end())
+		return;
+	m_pBlackBoard->Unbind_Data(strVariableTag);
+	switch(m_ValueContainer[strVariableTag].first)
+	{
+	case Editor::CASM_Interface::INT:
+		delete static_cast<_int*>(m_ValueContainer[strVariableTag].second);
+		break;
+	case Editor::CASM_Interface::FLOAT:
+		delete static_cast<_float*>(m_ValueContainer[strVariableTag].second);
+		break;
+	case Editor::CASM_Interface::STRING:
+		delete static_cast<_string*>(m_ValueContainer[strVariableTag].second);
+		break;
+	case Editor::CASM_Interface::BOOL:
+		delete static_cast<_bool*>(m_ValueContainer[strVariableTag].second);
+		break;
+	case Editor::CASM_Interface::VECTOR3:
+		delete static_cast<_float3*>(m_ValueContainer[strVariableTag].second);
+		break;
+	case Editor::CASM_Interface::VECTOR4:
+		delete static_cast<_float4*>(m_ValueContainer[strVariableTag].second);
+		break;
+	default:
+		break;
+	}
+	m_ValueContainer.erase(strVariableTag);
+	if(!m_ValueContainer.empty())
+		m_strValueKey = m_ValueContainer.begin()->first;
+}
+#endif // _DEBUG
+
+void CASM_Interface::Delete_Transitions(const GraphEditor::Link& tLink)
+{
+	for(auto& tNode : m_Nodes)
+	{
+		auto iter = tNode.Transitions.begin();
+		while(iter != tNode.Transitions.end())
+		{
+			if(tLink.mInputNodeIndex == (*iter).mInputNodeIndex &&
+				tLink.mInputSlotIndex == (*iter).mInputSlotIndex &&
+				tLink.mOutputNodeIndex == (*iter).mOutputNodeIndex &&
+				tLink.mOutputSlotIndex == (*iter).mOutputSlotIndex)
+				iter = tNode.Transitions.erase(iter);
+			else
+				iter++;
+		}
 	}
 }
 
@@ -331,23 +549,12 @@ bool CASM_Interface::tagBTDelegate::AllowedLink(GraphEditor::NodeIndex from, Gra
 	if(from == to)
 		return false;
 
-	const auto& outNode = pInterface->m_Nodes[from];
-	const auto& inNode = pInterface->m_Nodes[to];
-
-	const auto& outTmpl = pInterface->m_Templates[outNode.mTemplateIndex];
-	const auto& inTmpl = pInterface->m_Templates[inNode.mTemplateIndex];
-
 	for(const auto& tLink : pInterface->m_Links)
 	{
 		if(tLink.mInputNodeIndex == to)
 		{
 			if(tLink.mOutputNodeIndex == from)
 				return false;
-			for(const auto& nTrans : inNode.Transitions)
-			{
-				if(tLink.mInputSlotIndex == nTrans.mInputSlotIndex)
-					return false;
-			}
 		}
 	}
 
@@ -367,9 +574,8 @@ void CASM_Interface::tagBTDelegate::MoveSelectedNodes(const ImVec2 delta)
 	for(auto& node : pInterface->m_Nodes)
 	{
 		if(!node.mSelected)
-		{
 			continue;
-		}
+
 		node.x += delta.x;
 		node.y += delta.y;
 	}
@@ -378,12 +584,22 @@ void CASM_Interface::tagBTDelegate::MoveSelectedNodes(const ImVec2 delta)
 void CASM_Interface::tagBTDelegate::AddLink(GraphEditor::NodeIndex inputNodeIndex, GraphEditor::SlotIndex inputSlotIndex, GraphEditor::NodeIndex outputNodeIndex, GraphEditor::SlotIndex outputSlotIndex)
 {
 	GraphEditor::Link tLink = {inputNodeIndex, inputSlotIndex, outputNodeIndex, outputSlotIndex};
+	if(false == pInterface->Allowed_LInkEx(tLink))
+		return;
 	pInterface->m_Links.push_back(tLink);
 	pInterface->m_Nodes[inputNodeIndex].Transitions.push_back(tLink);
 }
 
 void CASM_Interface::tagBTDelegate::DelLink(GraphEditor::LinkIndex linkIndex)
 {
+	//링크의 인풋 슬롯 인덱스가 작을 때, 인덱스 매칭이 이뤄지지 않아서 에러 발생
+	const GraphEditor::Link tLink = pInterface->m_Links[linkIndex];
+	pInterface->Delete_Transitions(tLink);
+	
+	pInterface->m_Templates[pInterface->m_Nodes[tLink.mInputNodeIndex].mTemplateIndex].mOutputCount--;
+	if(pInterface->m_Templates[pInterface->m_Nodes[tLink.mInputNodeIndex].mTemplateIndex].mOutputCount < 1)
+		pInterface->m_Templates[pInterface->m_Nodes[tLink.mInputNodeIndex].mTemplateIndex].mOutputCount = 1;
+
 	pInterface->m_Links.erase(pInterface->m_Links.begin() + linkIndex);
 }
 
@@ -399,7 +615,8 @@ void CASM_Interface::tagBTDelegate::RightClick(GraphEditor::NodeIndex nodeIndex,
 
 const size_t CASM_Interface::tagBTDelegate::GetTemplateCount()
 {
-	return sizeof(pInterface->m_Templates) / sizeof(GraphEditor::Template);
+	//return sizeof(pInterface->m_Templates.data()) / sizeof(GraphEditor::Template);
+	return pInterface->m_Templates.size();
 }
 
 const GraphEditor::Template CASM_Interface::tagBTDelegate::GetTemplate(GraphEditor::TemplateIndex index)

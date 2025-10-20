@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ContainerObject.h"
 
 NS_BEGIN(Client)
@@ -6,8 +6,8 @@ class CActor abstract : public CContainerObject
 {
 
 
-#pragma region �⺻ �Լ�
-private:
+#pragma region 기본 함수
+protected:
 	explicit CActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CActor(const CActor& Prototype);
 	virtual ~CActor() = default;

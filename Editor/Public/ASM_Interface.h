@@ -60,6 +60,7 @@ class CASM_Interface final : public CInterface_Edit
 	{
 		_string strName;
 		float x, y;
+		BT_TYPE eType;
 		vector<GraphEditor::Link> Transitions;
 	};
 #pragma endregion
@@ -70,7 +71,7 @@ private:
 
 public:
 	virtual	HRESULT		Initialize();
-	void				Update_ASM();
+	void				Update_ASM(_float fTimeDelta);
 
 	
 
@@ -78,25 +79,28 @@ private:
 	ASM_MENU			m_eCurrentMenu = { ASM_MENU::BEHAVIOR_TREE };
 
 #pragma region BehaviorTree_GraphEdit
-	BT_DELEGATE				m_BehaviorTreeGraphDelegate;
-	GraphEditor::Options	m_BehaviorTreeGraphOptions;
-	GraphEditor::ViewState	m_BehaviorTreeViewState;
+	BT_DELEGATE						m_BehaviorTreeGraphDelegate;
+	GraphEditor::Options			m_BehaviorTreeGraphOptions;
+	GraphEditor::ViewState			m_BehaviorTreeViewState;
 
-	vector<MyNode>			m_Nodes;
-	std::vector<GraphEditor::Link> m_Links;
-	GraphEditor::Template	m_Templates[2];
+	vector<MyNode>					m_Nodes;
+	std::vector<GraphEditor::Link>	m_Links;
+	//GraphEditor::Template	m_Templates[4]{};
+	vector<GraphEditor::Template>	m_Templates;
 
-	_int m_iCurrentNodeIndex { -1 };
-	_uint m_iNodeCount{};
+	_int							m_iCurrentNodeIndex { -1 };
+	_uint							m_iNodeCount{};
+	BT_TYPE							m_eNodeType{};
 #pragma endregion
 
-	CBehavior_Tree*		m_pBehaviorTree = { nullptr };
-	CBlackBoard*		m_pBlackBoard = {nullptr};
+	CBehavior_Tree*					m_pBehaviorTree = { nullptr };
+	CBlackBoard*					m_pBlackBoard = {nullptr};
 
-	DATA_TYPE			m_eDataType{};
+	DATA_TYPE						m_eDataType{};
 
 #pragma region INPUT_VALUE
 	//map<const _string, pair<DATA_TYPE, VAR>> m_ValueContainer;
+	_string m_strValueKey;
 	map<const _string, pair<DATA_TYPE, void*>> m_ValueContainer;
 	_string m_strValueTag;
 	_int m_iInputTemp{};
@@ -111,7 +115,16 @@ private:
 	void				Menu_BehaviorTree();
 	void				Graph_BehaviorTree();
 	void				Delete_Link();
+	_bool				Allowed_LInkEx(GraphEditor::Link& tLink);
+	void				Delete_Transitions(const GraphEditor::Link& tLink);
+	void				BehaviorTree_Setting();
 	void				BlackBoard_Setting();
+
+	void				Create_Template(BT_TYPE eType);
+
+#ifdef _DEBUG
+	void				Safe_Delete_Variable(const _string& strVariableTag);
+#endif
 
 	void				Menu_AnimMachine();
 	void				Graph_AnimMachine();

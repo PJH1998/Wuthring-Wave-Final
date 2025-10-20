@@ -31,6 +31,7 @@ public:
 #ifdef _DEBUG
 	// 블랙보드에 바인딩 된 데이터 시각화
 	void Bind_Data_to_GUI();
+	void Unbind_Data(const _string& strDataTag);
 	void Clear_Data();
 #endif // _DEBUG
 

@@ -66,7 +66,7 @@ void CBlackBoard::Bind_Data_to_GUI()
 			char strBuffer[MAX_PATH] = {};
 			strcpy_s(strBuffer, MAX_PATH, strKey);
 			strcat_s(strBuffer, MAX_PATH, ": ");
-			strcat_s(strBuffer, MAX_PATH, static_cast<_char*>(pValue));
+			strcat_s(strBuffer, MAX_PATH, static_cast<_string*>(pValue)->c_str());
 			ImGui::Text(strBuffer);
 			break;
 		}
@@ -85,6 +85,15 @@ void CBlackBoard::Bind_Data_to_GUI()
 	}
 	ImGui::End();
 }
+
+void CBlackBoard::Unbind_Data(const _string& strDataTag)
+{
+	if(m_Datas.find(strDataTag) == m_Datas.end())
+		return;
+
+	m_Datas.erase(strDataTag);
+}
+
 void CBlackBoard::Clear_Data()
 {
 	m_Datas.clear();
