@@ -56,12 +56,17 @@ class CASM_Interface final : public CInterface_Edit
 		const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
 	}BT_DELEGATE;
 
+	struct MyLink : public GraphEditor::Link
+	{
+		_string strCondition;
+	};
+
 	struct MyNode : public GraphEditor::Node
 	{
 		_string strName;
 		float x, y;
 		BT_TYPE eType;
-		vector<GraphEditor::Link> Transitions;
+		vector<MyLink> Transitions;
 	};
 #pragma endregion
 

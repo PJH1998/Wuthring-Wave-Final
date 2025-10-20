@@ -173,27 +173,36 @@ void CASM_Interface::BehaviorTree_Setting()
 
 	if(ImGui::Button("Add Node"))
 	{
-		_string szNodeName, strNodeType;
-		szNodeName = "new Node";
+		_string szNodeName;
+		szNodeName = "Count";
 		szNodeName += to_string(m_iNodeCount).c_str();
 		switch(m_eNodeType)
 		{
 		case Editor::CASM_Interface::ACTION:
-			strNodeType = "Action";
+		{
+			MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			m_Nodes.push_back(tNode);
 			break;
+		}
 		case Editor::CASM_Interface::SELECTOR:
-			strNodeType = "Selector";
+		{
+			MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			m_Nodes.push_back(tNode);
 			break;
+		}
 		case Editor::CASM_Interface::SEQUENCE:
-			strNodeType = "Sequence";
+		{
+			MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			m_Nodes.push_back(tNode);
 			break;
+		}
 		default:
 			break;
 		}
-		MyNode tNode = {strNodeType.c_str(), m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+		
 		//노드 동적 템플릿
 		Create_Template(m_eNodeType);
-		m_Nodes.push_back(tNode);
+		
 		++m_iNodeCount;
 	}
 	ImGui::SameLine();
@@ -240,9 +249,11 @@ void CASM_Interface::BlackBoard_Setting()
 		switch(m_ValueContainer[m_strValueKey].first)
 		{
 		case Editor::CASM_Interface::INT:
+			ImGui::Text("Int");
 			ImGui::InputInt(m_strValueKey.c_str(), static_cast<_int*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::FLOAT:
+			ImGui::Text("Float");
 			ImGui::InputFloat(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::STRING:
@@ -255,12 +266,15 @@ void CASM_Interface::BlackBoard_Setting()
 			break;
 		}
 		case Editor::CASM_Interface::BOOL:
+			ImGui::Text("Bool");
 			ImGui::Checkbox(m_strValueKey.c_str(), static_cast<_bool*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR3:
+			ImGui::Text("Float3");
 			ImGui::InputFloat3(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR4:
+			ImGui::Text("Float4");
 			ImGui::InputFloat4(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		default:
@@ -268,6 +282,7 @@ void CASM_Interface::BlackBoard_Setting()
 		}
 	}
 	ImGui::Separator();
+#pragma region DATA_SELECT
 	if(ImGui::RadioButton("Int", reinterpret_cast<int*>(&m_eDataType), 0)){}
 	ImGui::SameLine();
 	if(ImGui::RadioButton("Float", reinterpret_cast<int*>(&m_eDataType), 1)){}
@@ -279,6 +294,7 @@ void CASM_Interface::BlackBoard_Setting()
 	if(ImGui::RadioButton("Vec3", reinterpret_cast<int*>(&m_eDataType), 4)){}
 	ImGui::SameLine();
 	if(ImGui::RadioButton("Vec4", reinterpret_cast<int*>(&m_eDataType), 5)){}
+#pragma endregion
 	ImGui::InputText("Value Name", m_strValueTag.data(), MAX_PATH);
 	switch(m_eDataType)
 	{
@@ -379,6 +395,10 @@ void CASM_Interface::BlackBoard_Setting()
 //#endif // _DEBUG
 
 	}
+#ifdef _DEBUG
+
+#endif // _DEBUG
+
 }
 
 void CASM_Interface::Create_Template(BT_TYPE eType)
@@ -583,7 +603,8 @@ void CASM_Interface::tagBTDelegate::MoveSelectedNodes(const ImVec2 delta)
 
 void CASM_Interface::tagBTDelegate::AddLink(GraphEditor::NodeIndex inputNodeIndex, GraphEditor::SlotIndex inputSlotIndex, GraphEditor::NodeIndex outputNodeIndex, GraphEditor::SlotIndex outputSlotIndex)
 {
-	GraphEditor::Link tLink = {inputNodeIndex, inputSlotIndex, outputNodeIndex, outputSlotIndex};
+	//Link 구조체 변경으로 수정작업 필요
+	MyLink tLink = {inputNodeIndex, inputSlotIndex, outputNodeIndex, outputSlotIndex};
 	if(false == pInterface->Allowed_LInkEx(tLink))
 		return;
 	pInterface->m_Links.push_back(tLink);
