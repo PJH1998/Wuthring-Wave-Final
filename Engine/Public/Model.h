@@ -56,6 +56,7 @@ public:
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
+	void Render_Gizmo(_fmatrix TransformMatrix);
 #endif
 
 public:
@@ -74,11 +75,12 @@ public:
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex);
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType);
 	HRESULT							Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex);
-	//_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
+	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	// Compute Shader
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
+	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
 	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition);
@@ -116,6 +118,7 @@ private:
 
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
+	_uint m_iSelectIndex = { 0 };
 #endif
 	
 

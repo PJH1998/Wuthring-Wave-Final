@@ -14,14 +14,14 @@ public:
 	const _char*		Get_Name() { return m_szName; }
 	const vector<class CChannel*>& Get_Channels() const { return m_Channels; }
 	void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
-
+	_float				Get_Duration() { return m_fDuration; }
 #ifdef _DEBUG
 	_float*				Get_TrackPositionPtr() { return &m_fCurrentTrackPosition; }
-	_float				Get_Duration() { return m_fDuration; }
+	
 #endif // _DEBUG
 
 public:
-	void				Register_Notify(const NOTIFY& AnimNotify); // 湲곗〈 寃?
+	void				Register_Notify(const NOTIFY& AnimNotify); 
 
 	void				Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
 	
@@ -56,7 +56,7 @@ private:
 	// ?좉퇋 Notify 
 	vector<class CAnimNotify*> m_AnimNotifies;
 
-	/* ��� */
+	/* ��� */
 
 private:
 

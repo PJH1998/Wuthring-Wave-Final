@@ -348,6 +348,41 @@ SRTKeyFrame Calculate_SRT(uint boneIndex, uint animIndex, bool isRibbon, float f
 }
 
 
+// 1. 애니메이션 레이어링.
+//[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
+//{
+//    // 현재 본 Index 가져오기.
+//    uint boneIndex = dispatchThreadID.x;
+    
+//    // 1. Action Animation의 SRT 가져오기
+//    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+   
+//    matrix result_matrix;
+    
+//    SRTKeyFrame finalSRT = actionSRT;
+    
+//    // Ribbon Animation을 사용한다면?
+//    if (g_IsRibAnimUsed)
+//    {
+//      // 2. Ribbon Animation의 SRT 가져오기
+//        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        
+//        if (ribbonSRT.rotation.w < 0.99999f)
+//        {
+//            // Rib 뼈가 단위 SRT가 아닌 경우에만 덮어씌워줍니다.'.
+//            finalSRT = ribbonSRT;
+//        }
+//    }
+    
+//    result_matrix = matrix_rmFromSQT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
+    
+//    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
+//    g_OutLocalMatrices[boneIndex] = result_matrix;
+    
+//}
+
+// 2. 가산 블렌딩 방식
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
 {
@@ -384,44 +419,4 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
     g_OutLocalMatrices[boneIndex] = result_matrix;
     
 }
-
-//[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
-//{
-//    // 현재 본 Index 가져오기.
-//    uint boneIndex = dispatchThreadID.x;
-    
-//    // Additive Blending을 위한 inverse Bind Pose 행렬 가져오기
-//    matrix bindInverse_matrix = g_InverseBindPoses[boneIndex];
-    
-//    matrix action_matrix = Calculate_Matrix(boneIndex, g_AnimIndex, false, g_TrackPosition);
-    
-//    matrix result_matrix;
-//    matrix ribbon_matrix =
-//    {
-//        1.f, 0.f, 0.f, 0.f,
-//        0.f, 1.f, 0.f, 0.f,
-//        0.f, 0.f, 1.f, 0.f,
-//        0.f, 0.f, 0.f, 1.f
-//    };
-    
-//    // Ribbon Animation을 사용한다면?
-    
-//    if (g_IsRibAnimUsed)
-//    {
-//        ribbon_matrix = Calculate_Matrix(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        
-//        // 핵심 변화량(Delta) 행렬을 계산합니다.
-//        ribbon_matrix = mul(ribbon_matrix, bindInverse_matrix);
-//    }
-    
-//    //result_matrix = mul(ribbon_matrix, action_matrix);
-//    result_matrix = mul(action_matrix, ribbon_matrix);
-        
-    
-//    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
-//    g_OutLocalMatrices[boneIndex] = result_matrix;
-    
-//}
-
 

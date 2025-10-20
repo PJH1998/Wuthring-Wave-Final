@@ -1,23 +1,23 @@
-﻿#include "EditorPch.h"
-#include "AnimationActor.h"
+﻿#include "ClientPch.h"
+#include "AnimationDummy.h"
 #include "Model.h"
 
-CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAnimationDummy::CAnimationDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
 {
 }
 
-CAnimationActor::CAnimationActor(const CAnimationActor& Prototype)
+CAnimationDummy::CAnimationDummy(const CAnimationDummy& Prototype)
     : CContainerObject(Prototype)
 {
 }
 
-HRESULT CAnimationActor::Initialize_Prototype()
+HRESULT CAnimationDummy::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CAnimationActor::Initialize_Clone(void* pArg)
+HRESULT CAnimationDummy::Initialize_Clone(void* pArg)
 {
     ANIMATION_ACTOR_DESC* pDesc = static_cast<ANIMATION_ACTOR_DESC*>(pArg);
     if (FAILED(CContainerObject::Initialize_Clone(pDesc)))
@@ -53,60 +53,51 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
     
 	m_strCurrentAnimation = "Blend_BasePose";
-    //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
-    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
+    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 1.f);
 
-
-    //m_pTransformCom->Scale(pDesc->vScale);
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
+    
 
     return S_OK;
 }
 
-void CAnimationActor::Priority_Update(_float fTimeDelta)
+void CAnimationDummy::Priority_Update(_float fTimeDelta)
 {
     CContainerObject::Priority_Update(fTimeDelta);
+
+    // 0. Transform의 Previous Position을 저장해둔다.
+    m_pTransformCom->Save_PreviousPosition();
 }
 
-void CAnimationActor::Update(_float fTimeDelta)
+void CAnimationDummy::Update(_float fTimeDelta)
 {
     CContainerObject::Update(fTimeDelta);
 
+	
+
     m_fTimeDelta = fTimeDelta;
-   
-    //if (m_IsPlayAnimation)
-    //{
-    //    m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, 0.01f);
-    //    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    //}
-        
+  
+    m_strPreAnimation = m_strCurrentAnimation;
 
-    /*if (m_IsPlayAnimation)
-        m_pModelCom->Play_RibAnimation_GPU(strRibAnimation, fTimeDelta);*/
-
-
+    // 1. 무조건 처음 해줘야하는거
     if (m_IsPlayAnimation)
     {
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 0.01f);
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-       /* _float4 vPos = {};
-        XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-        OutPutDebugFloat4(TEXT("Position"), vPos);*/
     }
-  
 
-    //m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
+    // 2. 추가 이동량을 Transform에 적용해 + 중력
+    Calc_Translate();
+    // 3. 이전 프레임 포지션을 가지고 와서 현재 트랜스폼 위치에서 뺀다음에 그 이동량을
+    // Collider Update에 던진다.
+
+
+    if (m_strPreAnimation != m_strCurrentAnimation)
+        m_fTrackPosition = 0.f;
         
-#ifdef _DEBUG
-	_int iBoneIndex = 0;
-    m_pModelCom->Bind_Bone_to_GUI(iBoneIndex, m_pTransformCom->Get_WorldMatrix());
-
-    m_pModelCom->Render_Gizmo(m_pTransformCom->Get_WorldMatrix());
-#endif // _DEBUG
-
 }
 
-void CAnimationActor::Late_Update(_float fTimeDelta)
+void CAnimationDummy::Late_Update(_float fTimeDelta)
 {
     CContainerObject::Late_Update(fTimeDelta);
 
@@ -114,7 +105,7 @@ void CAnimationActor::Late_Update(_float fTimeDelta)
         return;
 }
 
-void CAnimationActor::Render()
+void CAnimationDummy::Render()
 {
     Bind_Resources();
 
@@ -139,37 +130,37 @@ void CAnimationActor::Render()
     
 }
 
-void CAnimationActor::Render_Shadow()
+void CAnimationDummy::Render_Shadow()
 {
 
 }
 
 #ifdef _DEBUG
-const vector<_string>& CAnimationActor::Get_AnimationNames() const
+const vector<_string>& CAnimationDummy::Get_AnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_AnimationNames();
 }
 
-_float* CAnimationActor::Get_TrackPositionPtr(const _string& strAnimName)
+_float* CAnimationDummy::Get_TrackPositionPtr(const _string& strAnimName)
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_TrackPositionPtr(strAnimName);
 }
 
-_float CAnimationActor::Get_Duration(const _string& strAnimName)
+_float CAnimationDummy::Get_Duration(const _string& strAnimName)
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_Duration(strAnimName);
 }
 
-const _string& CAnimationActor::Get_CurrentAnimationNames() const
+const _string& CAnimationDummy::Get_CurrentAnimationNames() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_strCurrentAnimation;
 }
 
-const _float CAnimationActor::Get_CurrentAnimationDuration() const
+const _float CAnimationDummy::Get_CurrentAnimationDuration() const
 {
     ASSERT_CRASH(m_pModelCom);
     return m_pModelCom->Get_Duration(m_strCurrentAnimation);
@@ -177,7 +168,7 @@ const _float CAnimationActor::Get_CurrentAnimationDuration() const
 
 
 
-void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
+void CAnimationDummy::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
     m_pModelCom->Set_TrackPosition(m_strCurrentAnimation, fTrackPosition);
@@ -204,12 +195,12 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
     }
 
 }
-void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
+void CAnimationDummy::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
 }
 
-void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
+void CAnimationDummy::Register_AllNotifies(const _string& strFolderPath)
 {
     //m_pModelCom->Register_Notify(strFilePath);
 
@@ -224,16 +215,55 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
     m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
     
 }
-void CAnimationActor::Collider_Active(const _wstring&, _bool)
+void CAnimationDummy::Collider_Active(const _wstring&, _bool)
 {
 
 }
-void CAnimationActor::Effect_Active()
+void CAnimationDummy::Effect_Active()
 {
 }
+
 #endif
 
-void CAnimationActor::Bind_Resources()
+void CAnimationDummy::Calc_Translate()
+{
+    _vector vTranslate = {};
+    
+    if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_F";
+        vTranslate = m_pTransformCom->Get_State(STATE::LOOK) * -1.f;
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_B";
+        vTranslate = m_pTransformCom->Get_State(STATE::LOOK);
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_LF";
+        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT);
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_RF";
+        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT) * -1.f;
+    }
+
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::UP)
+        m_strCurrentAnimation = "Move_F";
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
+        m_strCurrentAnimation = "Jump_Walk_LF";
+
+
+    m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), m_fTimeDelta * 100.f);
+
+    
+}
+
+void CAnimationDummy::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
@@ -245,7 +275,7 @@ void CAnimationActor::Bind_Resources()
         CRASH("Failed Proj Matrix");
 }
 
-HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
+HRESULT CAnimationDummy::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
 {
     // Shader
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strShaderTag,
@@ -274,33 +304,33 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
     return S_OK;
 }
 
-CGameObject* CAnimationActor::Clone(void* pArg)
+CGameObject* CAnimationDummy::Clone(void* pArg)
 {
-    CAnimationActor* pInstance = new CAnimationActor(*this);
+    CAnimationDummy* pInstance = new CAnimationDummy(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Clone Failed : CAnimationActor");
+        MSG_BOX("Clone Failed : CAnimationDummy");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CAnimationActor* CAnimationActor::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAnimationDummy* CAnimationDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CAnimationActor* pInstance = new CAnimationActor(pDevice, pContext);
+    CAnimationDummy* pInstance = new CAnimationDummy(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CAnimationActor");
+        MSG_BOX("Failed to Create : CAnimationDummy");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CAnimationActor::Free()
+void CAnimationDummy::Free()
 {
     CContainerObject::Free();
     Safe_Release(m_pModelCom);

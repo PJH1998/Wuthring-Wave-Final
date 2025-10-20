@@ -90,12 +90,14 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavig
 
 void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 {
-	_vector vPrePosition = pOwnerTransform->Get_State(STATE::POSITION);
+	//_vector vPrePosition = pOwnerTransform->Get_State(STATE::POSITION);
 
+	_matrix matWorld = pOwnerTransform->Get_WorldMatrix();
 	_matrix ResultMatrix = m_RootMatrix * pOwnerTransform->Get_WorldMatrix();
 
 	_vector vScale, vRotation, vPosition;
 	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);
+
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
 }
 
@@ -145,20 +147,21 @@ HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;
 	ImGuiTreeNodeFlags iFlag = 0;
-	if((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
+	if ((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
 		iFlag |= ImGuiTreeNodeFlags_Leaf;
 	else
 		iFlag |= (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen);
 
-	if(ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
+	if (ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
 	{
 		//Selecting Interaction 
-		if(ImGui::IsItemClicked())
+		if (ImGui::IsItemClicked())
 		{
 			std::cout << "selected : " << m_Bones[iBoneIndex]->Get_Name() << std::endl;
+			m_iSelectIndex = iBoneIndex;
 		}
 
-		while(iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
+		while (iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
 		{
 			Bind_Bone_to_GUI(iNextBoneIndex, TransformMatrix);
 		}
@@ -168,6 +171,12 @@ HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 	iBoneIndex = iNextBoneIndex;
 	return S_OK;
 }
+void CModel::Render_Gizmo(_fmatrix TransformMatrix)
+{
+	_fmatrix BoneLocalMatrix = XMLoadFloat4x4(m_Bones[m_iSelectIndex]->Get_CombinedTransformationMatrix());
+	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
+}
+
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
@@ -300,60 +309,60 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-//_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
-//{
-//	// 다른 Animation 들어올 시, 이전 Animation 저장
-//	//if (m_strPreAnimation != strAnimationName)
-//	//{
-//	//	m_isChangeAnimation = true;
-//	//	m_strPreAnimation = strAnimationName;
-//	//}
-//
-//	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
-//	if (true == isBlend && true == m_isBlend)
-//	{
-//		*pTrackPosition = 0.f;
-//		if (true == m_Animations.find(strAnimationName)->second->Blend_TransformationMatrices(fTimeDelta, m_Bones, 1.f))
-//		{
-//			Clear_Animation(strAnimationName);
-//			m_isBlend = false;
-//		}
-//	}
-//	else
-//	{
-//		auto iter = m_Animations.find(strAnimationName);
-//		if (iter == m_Animations.end())
-//			return S_OK;
-//
-//		_float fTrackPosition = {};
-//
-//		if (true == iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition))
-//		{
-//			if (m_strPreAnimation != strAnimationName)
-//			{
-//				if(m_strPreAnimation != "")
-//					m_isBlend = true;
-//				m_strPreAnimation = strAnimationName;
-//			}
-//			Clear_Animation(strAnimationName);
-//			return true;
-//		}
-//		if(nullptr != pTrackPosition)
-//			*pTrackPosition = fTrackPosition;
-//
-//		// Root Node Translation 조정
-//		if (true == isRootMotion)
-//			Compute_RootAnimation(fRootMotionRate);
-//	}
-//
-//
-//
-//	for (auto& pBone : m_Bones)
-//		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-//
-//
-//	return false;
-//}
+_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+{
+	// 다른 Animation 들어올 시, 이전 Animation 저장
+	//if (m_strPreAnimation != strAnimationName)
+	//{
+	//	m_isChangeAnimation = true;
+	//	m_strPreAnimation = strAnimationName;
+	//}
+
+	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
+	if (true == isBlend && true == m_isBlend)
+	{
+		*pTrackPosition = 0.f;
+		if (true == m_Animations.find(strAnimationName)->second->Blend_TransformationMatrices(fTimeDelta, m_Bones, 1.f))
+		{
+			Clear_Animation(strAnimationName);
+			m_isBlend = false;
+		}
+	}
+	else
+	{
+		auto iter = m_Animations.find(strAnimationName);
+		if (iter == m_Animations.end())
+			return S_OK;
+
+		_float fTrackPosition = {};
+
+		if (true == iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition))
+		{
+			if (m_strPreAnimation != strAnimationName)
+			{
+				if(m_strPreAnimation != "")
+					m_isBlend = true;
+				m_strPreAnimation = strAnimationName;
+			}
+			Clear_Animation(strAnimationName);
+			return true;
+		}
+		if(nullptr != pTrackPosition)
+			*pTrackPosition = fTrackPosition;
+
+		// Root Node Translation 조정
+		if (true == isRootMotion)
+			Compute_RootAnimation(fRootMotionRate);
+	}
+
+
+
+	for (auto& pBone : m_Bones)
+		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+
+
+	return false;
+}
 
 
 _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
@@ -365,11 +374,12 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	if (iter == m_Animations.end())
 		return false;
 
-	// RootMotion에서 바뀐 애니메이션을 체크
+	// RootMotion에서 바뀐 애니메이션에 대한 로직 처리.
 	if (m_strPreAnimation != strAnimationName)
 	{
 		m_isChangeAnimation = true;
 		m_strPreAnimation = strAnimationName;
+		Clear_Animation(strAnimationName);
 	}
 
 
@@ -397,21 +407,32 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		return true; // 애니메이션 종료
 	}
 
-
 	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
 	{
+		/*if (true == isRootMotion && i == m_iRootBoneIndex)
+			Compute_RootAnimation(fRootMotionRate);*/
+
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-
-		//if (true == isRootMotion && i == m_iRootBoneIndex)
-		//	Compute_RootAnimation(fRootMotionRate);
 	}
-		
-		
 
+	
 
-	/*_string strRibAnimationName = "Rib_" + strAnimationName;
-	Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);*/
+	return false;
+}
+
+_bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+{
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return false;
+
+	if (m_strPreAnimation != strAnimationName)
+	{
+		m_isChangeAnimation = true;
+		m_strPreAnimation = strAnimationName;
+	}
+
 
 	return false;
 }
@@ -447,10 +468,11 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 {
 	if (strAnimationName == "")
 		return;
+
 	m_isChangeAnimation = true;
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
-	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 }
 
@@ -598,41 +620,47 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 void CModel::Compute_RootAnimation(_float fRootMotionRate)
 {
+	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
 
-	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
+	// 2. 스켈레톤의 루트 본은 '제자리'에서 (Scale, Rotation)만 하도록
+	_matrix RootBoneLocalMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneLocalMatrix);
 
-	// Axis 조정 (-y => +z)
-	// 이거 빼면 제생각에. 안해도 되지않을까 설정을
-	// 우리가 생각하는 정면은 +z인데 블렌더에서는 -y라서 문제다.
-	_float fTemp = vTranslation.m128_f32[2];
-	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
-	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
-	vTranslation.m128_f32[1] = fTemp * -1.f;
+	// 축 변환 쿼터니언 생성
+	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
-	
+	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환
+	_vector vConvertedTranslation = XMVector3Transform(vTranslation, matConversion);
+	_vector vConvertedRotation = XMQuaternionMultiply(qConversion, vRotation);
 
-	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
+	// 이동 변화량 계산
+	_vector vLocalTranslate = vConvertedTranslation - XMLoadFloat4(&m_vPreRootPosition);
+	// 회전 변화량 계산
+	_vector vRotationDelta = XMQuaternionMultiply(vConvertedRotation, XMQuaternionInverse(XMLoadFloat4(&m_vPreRootRotation)));
+
+
+	// 애니메이션 변경 시 순간이동 방지
 	if (true == m_isChangeAnimation)
 	{
 		m_isChangeAnimation = false;
-		XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+		vLocalTranslate = XMVectorSet(0.f, 0.f, 0.f, 1.f); 
+		vRotationDelta = XMQuaternionIdentity();           
 	}
 
-	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-	//// 전 위치와 크게 벗어나면 예외처리
-	//if (fDistance > 150.f)
-	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+	// 행렬은 이제 '엔진 좌표계' 기준.
+	m_RootMatrix = XMMatrixAffineTransformation(
+		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
+		vRotationDelta,                  // 회전 델타
+		vLocalTranslate * fRootMotionRate // 이동 델타
+	);
 
-
-
-	//m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * 0.1f);
-	m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * fRootMotionRate);
-	
-	XMStoreFloat4(&m_vPreRootRotation, vRotation);
-	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.
+	XMStoreFloat4(&m_vPreRootPosition, vConvertedTranslation);
+	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
 
 //void CModel::Compute_RootAnimation(_float fRootMotionRate)
@@ -648,8 +676,8 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 //	// 우리가 생각하는 정면은 +z인데 블렌더에서는 -y라서 문제다.
 //	_float fTemp = vTranslation.m128_f32[2];
 //	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
-//	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
-//	vTranslation.m128_f32[1] = fTemp * -1.f;
+//	vTranslation.m128_f32[2] = vTranslation.m128_f32[1];
+//	vTranslation.m128_f32[1] = fTemp;
 //
 //	
 //
@@ -660,14 +688,6 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 //		XMStoreFloat4(&m_vPreRootPosition, vTranslation);
 //	}
 //
-//	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-//	//// 전 위치와 크게 벗어나면 예외처리
-//	//if (fDistance > 150.f)
-//	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
-//
-//
-//
-//	//m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * 0.1f);
 //	m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * fRootMotionRate);
 //	
 //	XMStoreFloat4(&m_vPreRootRotation, vRotation);
@@ -836,6 +856,8 @@ HRESULT CModel::Ready_Shared_Buffers()
 		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // 순차 탐색 AnimInfo에서 0부터 재생.
 		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 모든 채널의 개수
 		animInfo.fDuration = pAnimation->Get_Duration();
+
+		
 
 		// Depth2에 대한 설정.
 		for (const auto& pChannel : pAnimation->Get_Channels())

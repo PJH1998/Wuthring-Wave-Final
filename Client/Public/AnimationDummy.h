@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "ContainerObject.h"
-NS_BEGIN(Editor)
-class CAnimationActor final : public CContainerObject
+NS_BEGIN(Client)
+class CAnimationDummy final : public CContainerObject
 {
 public:
 	typedef struct tagAnimationActorDesc : CContainerObject::GAMEOBJECT_DESC
@@ -22,9 +22,9 @@ public:
 	}ANIMATION_ACTOR_DESC;
 
 private:
-	explicit CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CAnimationActor(const CAnimationActor& Prototype);
-	virtual ~CAnimationActor() = default;
+	explicit CAnimationDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CAnimationDummy(const CAnimationDummy& Prototype);
+	virtual ~CAnimationDummy() = default;
 
 public:
 	virtual	HRESULT Initialize_Prototype() override;
@@ -53,11 +53,13 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
-	// ?뚯뒪??肄쒕갚 ?⑥닔.
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
 #endif // _DEBUG
 
+
+public:
+	void Calc_Translate();
 
 private:
 	LEVEL m_eCurLevel = {LEVEL::END};
@@ -67,6 +69,7 @@ private:
 
 	_uint m_iShaderPath = {};
 	_string m_strCurrentAnimation = {};
+	_string m_strPreAnimation = {};
 	_string m_strCurrentRibAnimation = {};
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
@@ -81,7 +84,7 @@ private:
 
 public:
 	virtual	CGameObject* Clone(void* pArg) override;
-	static CAnimationActor* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CAnimationDummy* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	void Free() override;
 };
 NS_END

@@ -110,18 +110,7 @@ namespace Engine
 		_uint iThreadGroupZ;
 	}COMPUTESHADER_INFO;
 
-
-	// ä���� �����ϴ� KeyFrame(�� TrackPosition���� ���� �̵� ����) ����ü => Depth3
-	typedef struct tagGpuKeyFrame {
-		_float4 vScale;
-		_float4 vRotation;
-		_float4 vTranslation;
-		_float fTrackPosition;
-		_float3 vPadding;  // 16����Ʈ ������ ���� �е�
-	}GPU_KEYFRAME;
-
-	// �ִϸ��̼� ���� ����ü => Depth1
-	// ?좊땲硫붿씠???뺣낫 援ъ“泥?=> Depth1
+	// 애니메이션 정보 구조체 => Depth1
 	typedef struct AnimInfo {
 		_uint  iStartChannelIndexOffset; // Channel ?쒖옉 (?꾩쟻 ?몃뜳??  
 		_uint  iNumChannels; // ???대┰???ы븿??梨꾨꼸(堉???媛쒖닔
@@ -138,22 +127,13 @@ namespace Engine
 		_uint iPadding;    // 16諛붿씠???뺣젹???꾪븳 ?⑤뵫
 	}GPU_CHANNELINFO;
 
-
-	// SRT KeyFrame ����ü. => Compute Shader���� ���.
-	typedef struct tagSRTKeyFrame
-	{
-		_float4 vScale;
-		_float4 vRotation;
-		_float4 vTranslation;
-	}SRT_KEYFRAME;
-
-	// 梨꾨꼸???뚯쑀?섎뒗 KeyFrame(留?TrackPosition留덈떎 堉덉쓽 ?대룞 ?뺣낫) 援ъ“泥?=> Depth3
+	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
 	typedef struct tagGpuKeyFrame {
 		_float4 vScale;
 		_float4 vRotation;
 		_float4 vTranslation;
 		_float fTrackPosition;
-		_float3 vPadding;  // 16諛붿씠???뺣젹???꾪븳 ?⑤뵫
+		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
 	// (留??꾨젅???낅뜲?댄듃)

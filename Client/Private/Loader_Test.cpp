@@ -2,7 +2,8 @@
 #include "Loader_Test.h"
 
 #include "Dummy.h"
-#include"MapObject.h"
+#include "MapObject.h"
+#include "AnimationDummy.h"
 
 CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -17,6 +18,10 @@ HRESULT CLoader_Test::Initialize()
 	//m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
+
+    m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
+
+
 	m_pGameInstance->Add_Work([this]() {Ready_OctoTree(); Complete_Load(); });
 
     m_pGameInstance->Wait_Thread_End();
@@ -90,6 +95,30 @@ HRESULT CLoader_Test::Load_Shader()
 {
 	cout << "Shader" << endl;
 
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+            , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
+    SHADER_MACRO eShaderMacro = {
+        {"THREAD_X", "64" }
+        ,{"THREAD_Y", "1" }
+        ,{"THREAD_Z", "1" }
+        , { NULL, NULL }
+    };
+
+    string strEntryPoint = "CSMain";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+            , eShaderMacro, strEntryPoint))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
     return S_OK;
 }
 
@@ -99,6 +128,28 @@ HRESULT CLoader_Test::Load_Object()
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"),
         CMapObject::Create(m_pDevice, m_pContext));
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Augusta()
+{
+    _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+    _matrix		PreTransformMatrix = XMMatrixIdentity();
+    _float fSize = 0.01f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrActorTag
+        , CAnimationDummy::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 
     return S_OK;
 }

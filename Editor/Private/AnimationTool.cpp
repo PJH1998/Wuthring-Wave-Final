@@ -5,7 +5,7 @@
 #include "AnimNotifyTool.h"
 
 
-#pragma region 湲곕낯 ?⑥닔??
+#pragma region 기본함수들
 CAnimationTool::CAnimationTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
     , m_pContext{ pContext }
@@ -20,10 +20,8 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 {
     m_eCurLevel = eLevel;
 
-    // 1. FBX ?뚯씪??Dat???댁＜??Loader ?앹꽦.
     m_pLoader = CModelLoader::Create();
 
-    // 2. Animation Notify瑜??깅줉 諛?愿由ы븯???대옒??
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
    
 
@@ -34,10 +32,8 @@ void CAnimationTool::Render()
 {
     Render_Editor();
     
-    // Animation Notify媛 Visible ?곹깭?쇰㈃?
     if (m_IsVisibleNotify)
     {
-        // ?????紐⑤뜽 Tag濡???ν븷 ??Folder留???ν븷源?
         _string strModelDirPath = m_ModelDirPaths[m_wSelected_PrototypeModelTag];
         ASSERT_CRASH(m_pAnimNotifyTool);
         m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, strModelDirPath, m_fDuration);
@@ -48,10 +44,8 @@ void CAnimationTool::Render()
 
 void CAnimationTool::Render_Editor()
 {
-    // 0. Debug Render => ?꾩옱 ?곹깭瑜?異쒕젰.
     Render_DebugWindow();
 
-    // 1. ?뚰뙆媛?議곗젅?댁꽌 ?щ챸?섍쾶 留뚮뱾 ???덉쓬.
     ImGui::Begin(u8"Editor", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
         | ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
@@ -77,11 +71,9 @@ void CAnimationTool::Render_DebugWindow()
     ImVec2 windowPos = ImVec2(300.f, g_iWinSizeY - 300.f);
     ImVec2 windowSize = ImVec2(300.f, 300.f);
 
-    // Cond_Once: 理쒖큹 ??踰덈쭔 ?꾩튂 ?곸슜 ???댄썑 ?쒕옒洹?媛??
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
 
-    // NoCollapse留??좎?, ?대룞 媛?ν븯寃?
     ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoCollapse);
 
     _float4 camPos = {};
@@ -90,7 +82,6 @@ void CAnimationTool::Render_DebugWindow()
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 
-    // ?꾩옱 ?좏깮???뚯씪 ????쒖떆
     const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "NONE"};
     ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
 
@@ -191,10 +182,8 @@ void CAnimationTool::RenderUI_CreateActor()
     
 }
 
-//?좏깮??媛앹껜???좊땲硫붿씠???꾩껜 紐⑸줉???뺤씤?섍퀬 ?좊땲硫붿씠?섏뿉 ????묒뾽??吏꾪뻾.
 void CAnimationTool::RenderUI_EditAnimation()
 {
-     // 1. ?앹꽦??Prototype 紐⑸줉?ㅼ쓣 ?뺤씤?섍린.
     _wstring objTag = {};
     _wstring modelTag = {};
 
@@ -208,14 +197,12 @@ void CAnimationTool::RenderUI_EditAnimation()
         if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // ?좏깮 ?뺣낫???
             m_Selected_AnimActorTag = actorName;
             m_wSelected_AnimActorTag = StringToWString(actorName);
         }
     }
     ImGui::EndChild();
 
-    // ?좊땲硫붿씠??紐⑸줉李쎄퉴吏??媛숈? ?먯떇 媛쒖껜濡??앹꽦.
     ImGui::SameLine();
     if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
         RenderUI_AnimationList();
@@ -223,7 +210,6 @@ void CAnimationTool::RenderUI_EditAnimation()
 
 void CAnimationTool::LoadDat()
 {
-    // 1. Load?섍퀬 Load???꾨줈?좏????대쫫????ν빐?먭린.
     _wstring wStrModelName = {};
 
     _string strModelName = "Prototype_Component_Model_";
@@ -231,7 +217,6 @@ void CAnimationTool::LoadDat()
     _string strModelPath = {};
     string basePathString = {};
 
-    // 2. ImGui?먯꽌 ?뚯씪???ㅽ뵂?댁꽌 ?대떦 ?뚯씪???댁슜?댁꽌 Prototype Model ?숈쟻?쇰줈 ?앹꽦
     CModel* pModelCom = { nullptr };
 
 
@@ -247,8 +232,8 @@ void CAnimationTool::LoadDat()
         ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
     }
   
-    ImVec2 vMinSize = ImVec2(600, 400);  // 理쒖냼 ?ш린
-    ImVec2 vMaxSize = ImVec2(800, 400); // 理쒕? ?ш린
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
 
     if (ImGuiFileDialog::Instance()->Display(
         "DAT File Load", ImGuiWindowFlags_NoCollapse
@@ -258,33 +243,26 @@ void CAnimationTool::LoadDat()
             _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
             strModelPath = ImGuiFileDialog::Instance()->GetCurrentFileName();
 
-            // Dir ?곷? 寃쎈줈濡????
-
-
-            // .dat ?섎씪?닿린.
             size_t lastDotPos = strModelPath.find_last_of('.');
             if (lastDotPos != string::npos) {
-                // 0踰덉㎏ ?꾩튂遺??'.' ?꾩튂源뚯? 臾몄옄?댁쓣 ?섎씪?낅땲??
                 strModelName += strModelPath.substr(0, lastDotPos);
                 
             }
             else
             {
-                MSG_BOX("寃쎈줈 ?섎せ??");
                 return;
             }
 
             _matrix		PreTransformMatrix = XMMatrixIdentity();
+            //_float fSize = 1.f;
             _float fSize = 0.01f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
             wStrModelName = StringToWString(strModelName);
 
-            // Model Prototype ?앹꽦.
             HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
             if (FAILED(hr))
             {
-                MSG_BOX("寃쎈줈 ?섎せ?섏뿀嫄곕굹, 以묐났 ?앹꽦.");
                 return;
             }
 
@@ -339,7 +317,6 @@ void CAnimationTool::RenderUI_AnimationList()
 {
     ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
 
-    // 1. Animation 紐⑸줉.
     static int iSelectedIndex = -1;
     _uint id = 0;
 
@@ -349,19 +326,14 @@ void CAnimationTool::RenderUI_AnimationList()
         if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // ?꾩옱 ?좏깮???좊땲硫붿씠???대쫫 ???
             m_Selected_AnimationTag = animName;
 
-            // ?좏깮?좊븣留????
             m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
             m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
 
-            // Animation Tool??耳쒖졇?덈뒗 ?곹깭濡?NotifyTool???묒뾽???덉젙?대?濡?
-            // Animation??蹂寃쎈맆?뚮쭏?? => NotifyTool???대떦 ?뺣낫瑜??꾨떖?댁＜?댁빞?⑸땲?? NotifyTool??耳쒖졇?덈떎硫?
             if (m_IsVisibleNotify)
             {
                 m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
-                // 洹몃━怨?Animation??諛붾뚮㈃ ?꾩옱 ?ㅼ젙??Notify ?뺣낫瑜??좊젮?쇳븳??
                 m_pAnimNotifyTool->Clear();
             }
                 
@@ -370,7 +342,6 @@ void CAnimationTool::RenderUI_AnimationList()
     ImGui::EndChild();
 #endif 
 
-    // 2. ?좏깮??Animation Detail 泥섎━瑜??꾪븳 湲곕뒫 異붽?.
     Render_Animation_Detail();
 }
 
@@ -416,43 +387,38 @@ void CAnimationTool::Render_Model_Detail()
         _wstring wstrObjTag = TEXT("Prototype_GameObject_Actor_");
         
 
-        // 留덉?留?紐⑤뜽 ?대쫫留??섎씪?닿린.
         size_t last_dot_pos = m_wSelected_PrototypeModelTag.find_last_of('_');
         if (last_dot_pos != std::string::npos) {
             wstrObjTag += m_wSelected_PrototypeModelTag.substr(last_dot_pos + 1, m_wSelected_PrototypeModelTag.size());
         }
         else
         {
-            MSG_BOX("寃쎈줈 ?섎せ??");
+            MSG_BOX("경로에 없습니다.");
             return;
         }
 
 
-        // 1. Animation Actor??Prototype ?앹꽦
         if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
             , wstrObjTag
             , CAnimationActor::Create(m_pDevice, m_pContext))))
         {
-            MSG_BOX("Animation Actor Prototype ?앹꽦 ?ㅽ뙣");
+            MSG_BOX("Animation Actor Prototype");
             return;
         }
 
-        // 2. ?앹꽦??Prototype Clone
         CAnimationActor* pActor = dynamic_cast<CAnimationActor*>(
             m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel)
             , wstrObjTag, PROTOTYPE::GAMEOBJECT, &Desc));
         ASSERT_CRASH(pActor);
 
 
-        // 3. ?앹꽦??媛앹껜 ?덉씠?댁뿉 異붽?
         if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
             , TEXT("Layer_Actor"), pActor)))
         {
-            MSG_BOX("Animation Actor 異붽?. ?앹꽦 ?ㅽ뙣");
+            MSG_BOX("Animation Actor 없습니다. ");
             return;
         }
 
-        // 4. ?앹꽦???꾨즺?섏뿀?쇰㈃ 愿由ы븷 ???덇쾶 ?댁빞?? ?앹꽦???????
         m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
@@ -492,7 +458,6 @@ void CAnimationTool::Render_Animation_Detail()
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
 #ifdef _DEBUG
-        // ?ㅼ젙??TrackPosition???꾨떖?⑸땲??
         if (!m_Selected_AnimationTag.empty())
             m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
 #endif

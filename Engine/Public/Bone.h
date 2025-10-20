@@ -17,6 +17,10 @@ public:
 	void					Set_TransformationMatrix(const _fmatrix& Matrix) {
 		XMStoreFloat4x4(&m_TransformationMatrix, Matrix);
 	}
+
+	void					Set_CombinedTransformationMatrix(const _fmatrix& Matrix) {
+		XMStoreFloat4x4(&m_CombinedTransformationMatrix, Matrix);
+	}
 public:
 	HRESULT					Initialize(const _char* pBoneName, const _fmatrix& TransformationMatrix, _int iParentBoneIndex);
 	void						Update_CombinedTransformationMatrix(const _fmatrix& PreTransformationMatrix, const vector<CBone*>& Bones);
