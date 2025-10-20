@@ -56,11 +56,11 @@ HRESULT CLevel_Test::Initialize()
 	File.close();
 
     
-    if (FAILED(Ready_Layer_PlayerController()))
-        return E_FAIL;
+    //if (FAILED(Ready_Layer_PlayerController()))
+    //    return E_FAIL;
 
-    /*if (FAILED(Ready_Layer_Augusta()))
-        return E_FAIL;*/
+    if (FAILED(Ready_Layer_Augusta()))
+        return E_FAIL;
 
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
@@ -128,30 +128,30 @@ HRESULT CLevel_Test::Ready_Layer_PlayerController()
     return S_OK;
 }
 
-//HRESULT CLevel_Test::Ready_Layer_Augusta()
-//{
-//    _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
-//	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
-//	_wstring wstrComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
-//    _uint iShaderPath = 1;
-//
-//    CAnimationDummy::ANIMATION_ACTOR_DESC Desc{};
-//    Desc.fSpeedPerSec = 10.f;
-//    Desc.fRotationPerSec = XMConvertToRadians(90.f);
-//    Desc.strModelTag = wStrModelTag;
-//    Desc.strShaderTag = wstrShaderTag; 
-//    Desc.strComputeShaderTag = wstrComputeShaderTag;
-//    Desc.iShaderPath = iShaderPath;
-//    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
-//    Desc.vRotation = _float3(0.f, 0.f, 0.f);
-//    Desc.vScale = _float3(1.f, 1.f, 1.f);
-//    Desc.eLevel = m_eCurLevel;
-//
-//    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta"),
-//		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc);
-//
-//    return S_OK;
-//}
+HRESULT CLevel_Test::Ready_Layer_Augusta()
+{
+    _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
+	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+	_wstring wstrComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
+    _uint iShaderPath = 1;
+
+    CAnimationDummy::ANIMATION_ACTOR_DESC Desc{};
+    Desc.fSpeedPerSec = 10.f;
+    Desc.fRotationPerSec = XMConvertToRadians(90.f);
+    Desc.strModelTag = wStrModelTag;
+    Desc.strShaderTag = wstrShaderTag; 
+    Desc.strComputeShaderTag = wstrComputeShaderTag;
+    Desc.iShaderPath = iShaderPath;
+    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
+    Desc.vRotation = _float3(0.f, 0.f, 0.f);
+    Desc.vScale = _float3(1.f, 1.f, 1.f);
+    Desc.eLevel = m_eCurLevel;
+
+    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc);
+
+    return S_OK;
+}
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

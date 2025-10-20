@@ -32,7 +32,7 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
 
-    m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
+    //m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 
 
@@ -270,18 +270,18 @@ HRESULT CLoader_Test::Load_Augusta()
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
 
-    _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , wStrActorTag
-        , CPlayerAugusta::Create(m_pDevice, m_pContext))))
-        CRASH("Prototype Create Failed");
-
-
     //_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
     //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
     //    , wStrActorTag
-    //    , CAnimationDummy::Create(m_pDevice, m_pContext))))
+    //    , CPlayerAugusta::Create(m_pDevice, m_pContext))))
     //    CRASH("Prototype Create Failed");
+
+
+    _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrActorTag
+        , CAnimationDummy::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
 
 
     return S_OK;
