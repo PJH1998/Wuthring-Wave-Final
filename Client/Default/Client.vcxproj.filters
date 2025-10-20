@@ -55,6 +55,9 @@
     <Filter Include="01. Level\Loader\GamePlay">
       <UniqueIdentifier>{f5fad4f8-9dfd-46e7-b0da-c921dca7dbbf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\Actor">
+      <UniqueIdentifier>{340679b2-e86e-47b4-8e66-f95105b73999}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -123,6 +126,9 @@
     <ClInclude Include="..\Public\AnimationDummy.h">
       <Filter>02. GameObject\Dummy</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Actor.h">
+      <Filter>02. GameObject\Actor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -180,6 +186,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AnimationDummy.cpp">
       <Filter>02. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Actor.cpp">
+      <Filter>02. GameObject\Actor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
