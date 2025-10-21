@@ -28,6 +28,10 @@ public:
 	virtual void	Render_Shadow() override;
 #pragma endregion
 
+
+private:
+	void Change_State(_float fTimeDelta);
+
 private:
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};

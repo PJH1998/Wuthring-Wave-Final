@@ -5,7 +5,7 @@
 #include "MonsterTest.h"
 
 #include "GameSystem.h"
-#include "PlayerController.h"
+#include "PlayerManager.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -56,7 +56,7 @@ HRESULT CLevel_Test::Initialize()
 	File.close();
 
     //Ready_Layer_Augusta();
-    Ready_Layer_PlayerController();
+    Ready_Layer_PlayerManager();
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
@@ -93,23 +93,23 @@ void CLevel_Test::Render()
 {
 }
 
-void CLevel_Test::Ready_Layer_PlayerController()
+void CLevel_Test::Ready_Layer_PlayerManager()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
     vScale = { 1.f, 1.f, 1.f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { -20.f, 50.f, -180.f };
 
-    CPlayerController::PLAYER_CONTROLLER_DESC Desc{};
+    CPlayerManager::PLAYER_CONTROLLER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
-    Desc.iPlayerCount = CPlayerController::PLAYERTYPE::TYPE_END;
+    Desc.iPlayerCount = CPlayerManager::PLAYERTYPE::TYPE_END;
 
     // 0. vector 크기 정의
-    Desc.PlayerSpecs.resize(CPlayerController::PLAYERTYPE::TYPE_END);
+    Desc.PlayerSpecs.resize(CPlayerManager::PLAYERTYPE::TYPE_END);
 
     // 1. Augusta 정의.
-    Desc.PlayerSpecs[CPlayerController::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayerController::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    Desc.PlayerSpecs[CPlayerManager::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayerManager::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
 
     // 2. Galbrena 정의
 

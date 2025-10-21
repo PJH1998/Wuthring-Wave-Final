@@ -63,7 +63,7 @@ void CMainApp::Post_Update()
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
-			// Level Memory Clear
+			// Level???랁븯吏 ?딆? 媛앹껜??Release
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				return;
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));

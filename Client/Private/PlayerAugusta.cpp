@@ -1,6 +1,6 @@
 #include "ClientPch.h"
 #include "PlayerAugusta.h"
-#include "PlayerController.h"
+#include "PlayerManager.h"
 
 CPlayerAugusta::CPlayerAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPlayer{ pDevice, pContext }
@@ -38,11 +38,6 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     // 4. 위치 설정.
     Ready_Positions(pDesc);
 
-   
-
-    // 3. 변수 추가
-    
-
     // 4. Parts추가
     // Ready_PartObjects(pDesc);
     
@@ -59,6 +54,8 @@ void CPlayerAugusta::Priority_Update(_float fTimeDelta)
 {
     CPlayer::Priority_Update(fTimeDelta);
 
+    m_pTransformCom->Save_PreviousPosition();
+    
     
 }
 
@@ -72,40 +69,7 @@ void CPlayerAugusta::Update(_float fTimeDelta)
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
-    _vector vTranslate = {};
-
-    if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_F";
-        vTranslate = m_pTransformCom->Get_State(STATE::LOOK) * -1.f;
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_B";
-        vTranslate = m_pTransformCom->Get_State(STATE::LOOK);
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_LF";
-        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT);
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_RF";
-        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT) * -1.f;
-    }
-
-
-    if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::UP)
-        m_strCurrentAnimation = "Move_F";
-
-    if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
-        m_strCurrentAnimation = "Jump_Walk_LF";
-
-    m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 100.f);
-
-    if (m_strPreAnimation != m_strCurrentAnimation)
-        m_fTrackPosition = 0.f;
+    Change_State(fTimeDelta);
 }
 
 void CPlayerAugusta::Late_Update(_float fTimeDelta)
@@ -141,6 +105,45 @@ void CPlayerAugusta::Render()
 
 void CPlayerAugusta::Render_Shadow()
 {
+}
+
+void CPlayerAugusta::Change_State(_float fTimeDelta)
+{
+
+    _vector vTranslate = {};
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_F";
+        vTranslate = m_pTransformCom->Get_State(STATE::LOOK) * -1.f;
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_B";
+        vTranslate = m_pTransformCom->Get_State(STATE::LOOK);
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_LF";
+        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT);
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+    {
+        m_strCurrentAnimation = "Run_RF";
+        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT) * -1.f;
+    }
+
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::UP)
+        m_strCurrentAnimation = "Move_F";
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
+        m_strCurrentAnimation = "Jump_Walk_LF";
+
+    m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 100.f);
+
+    if (m_strPreAnimation != m_strCurrentAnimation)
+        m_fTrackPosition = 0.f;
 }
 
 void CPlayerAugusta::Bind_Resources()

@@ -10,7 +10,6 @@ class CColliderNotify;
 NS_END
 
 NS_BEGIN(Editor)
-// Notify瑜??앹꽦?섍퀬 遺덈윭?????덈뒗 Tool
 class CAnimNotifyTool final : public CBase
 {
 public:
@@ -18,7 +17,7 @@ public:
 	{
 		SOUND = 0,	  // SOUND
 		EFFECT = 1,   // EFFECT 
-		COLLIDER = 2, // ?좊땲硫붿씠??肄쒕씪?대뜑 ?쒖꽦??
+		COLLIDER = 2, // 
 		LIGHT = 3,    // LIGHT?
 		END
 	};
@@ -32,7 +31,7 @@ private:
 
 
 
-#pragma region 湲곕낯 ?⑥닔
+#pragma region
 public:
 	HRESULT	Initialize(LEVEL eLevel);
 	void Update();
@@ -40,7 +39,7 @@ public:
 #pragma endregion
 
 
-#pragma region ANIMATION Tool濡쒕???諛쏆쓣 ?뺣낫.
+#pragma region ANIMATION Tool
 public:
 	void Process_Notify(class CAnimationActor* pActor, const _string& strAnimName, const _string& strModelDirPath, _float fTrackPosition);
 	
@@ -71,7 +70,7 @@ private:
 #ifdef _DEBUG
 	void Render_CurrentNotify();
 #endif // _DEBUG
-	
+
 	void Save_Notify();
 	void Load_NotifyFromFile();
 
@@ -97,7 +96,6 @@ private:
 	LEVEL m_eCurLevel = { LEVEL::END };
 	NOTIFYTYPE m_eType = { NOTIFYTYPE::END };
 
-	// Notify ?깅줉 ??臾댁“嫄??꾩슂???뺣낫
 	_string m_strCurrentAnimName = {};
 	_string m_strCurrentFolderPath = {};
 	_float m_fCurrentDuration = {};
@@ -107,16 +105,9 @@ private:
 	_string m_CurrentSoundTag = {};
 	_string m_CurrentSoundType = {};
 
-	// 
 	_bool m_IsLoadNotify = { false };
 
 private:
-	// Save ?⑸룄 蹂?섎뱾
-	//list<SOUNDNOTIFY>    m_SoundNotifies;
-	//list<COLLIDERNOTIFY> m_ColliderNotifies;
-	//list<EFFECTNOTIFY>   m_EffectNotifies;
-	//list<LIGHTNOTIFY>    m_LightNotifies;
-
 	list<CAnimNotify*>     m_AnimNotifies;
 	list<CSoundNotify*>    m_SoundNotifies;
 	list<CColliderNotify*> m_ColliderNotifies;

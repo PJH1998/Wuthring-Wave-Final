@@ -2,7 +2,7 @@
 #include "Component.h"
 
 NS_BEGIN(Client)
-class CPlayerController final : public CComponent
+class CParameter final : public CComponent
 {
 
 };
