@@ -70,18 +70,18 @@ void CPlayerAugusta::Update(_float fTimeDelta)
 {
     CPlayer::Update(fTimeDelta);
 
-   
+    if (m_IsPlayAnimation)
+    {
+        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
+        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    }
 
     Change_State(fTimeDelta);
 
     // 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-    if (m_IsPlayAnimation)
-    {
-        m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
-        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    }
+    
 
     // Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -162,13 +162,7 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
 
         _float4 vVelocity = {};
         XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
-
         OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
-
-
-        //_float3 vNormal = {};
-        //if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
-        //    m_pColliderCom->Set_Gravity(true);
     }
         
 
