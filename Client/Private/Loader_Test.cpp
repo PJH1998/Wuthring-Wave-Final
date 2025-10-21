@@ -7,7 +7,7 @@
 #include "MonsterTest.h"
 
 #include "PlayerAugusta.h"
-#include "PlayerManager.h"
+#include "PlayerParty.h"
 
 
 #pragma region BehaviorTree
@@ -229,10 +229,10 @@ HRESULT CLoader_Test::Load_Component()
 HRESULT CLoader_Test::Load_PlayerController()
 {
     
-    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerController");
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerParty");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrControllerTag
-        , CPlayerManager::Create(m_pDevice, m_pContext))))
+        , CPlayerParty::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
     return S_OK;
@@ -251,8 +251,6 @@ HRESULT CLoader_Test::Load_Augusta()
         CRASH("Prototype Create Failed");
 
 
-
-
     _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
@@ -261,10 +259,10 @@ HRESULT CLoader_Test::Load_Augusta()
 		CRASH("Prototype Create Failed");
 
     
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+    /*if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , TEXT("Prototype_GameObject_Dummy_Augusta")
         , CAnimationDummy::Create(m_pDevice, m_pContext))))
-        CRASH("Prototype Create Failed");
+        CRASH("Prototype Create Failed");*/
 
 
     return S_OK;

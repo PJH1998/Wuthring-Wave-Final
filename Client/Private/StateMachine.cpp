@@ -61,7 +61,7 @@ CStateMachine* CStateMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 
     if (FAILED(pInstance->Initialize_Prototype(pFilePath)))
     {
-        MSG_BOX("Failed to Create : CPlayerManager");
+        MSG_BOX("Failed to Create : CPlayerParty");
         Safe_Release(pInstance);
     }
 

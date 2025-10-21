@@ -1,20 +1,20 @@
 #include "ClientPch.h"
-#include "PlayerManager.h"
+#include "PlayerParty.h"
 #include "Player.h"
 #include "PlayerAugusta.h"
 
 #pragma region 기본 함수
-CPlayerManager::CPlayerManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CPlayerParty::CPlayerParty(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
 {
 }
 
-CPlayerManager::CPlayerManager(const CPlayerManager& Prototype)
+CPlayerParty::CPlayerParty(const CPlayerParty& Prototype)
     : CGameObject(Prototype)
 {
 }
 
-HRESULT CPlayerManager::Initialize_Prototype()
+HRESULT CPlayerParty::Initialize_Prototype()
 {
     if (FAILED(CGameObject::Initialize_Prototype()))
         return E_FAIL;
@@ -22,10 +22,10 @@ HRESULT CPlayerManager::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CPlayerManager::Initialize_Clone(void* pArg)
+HRESULT CPlayerParty::Initialize_Clone(void* pArg)
 {
 
-    PLAYER_CONTROLLER_DESC* pDesc = static_cast<PLAYER_CONTROLLER_DESC*>(pArg);
+    PLAYER_PARTY_DESC* pDesc = static_cast<PLAYER_PARTY_DESC*>(pArg);
 
     m_eCurLevel = pDesc->eCurLevel;
 
@@ -34,17 +34,17 @@ HRESULT CPlayerManager::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     // 1. Players 초기화.
-    //if (FAILED(Ready_Players(pDesc)))
-    //    return E_FAIL;
+    if (FAILED(Ready_Players(pDesc)))
+        return E_FAIL;
 
-    CPlayer::PLAYER_DESC Desc{};
+    /*CPlayer::PLAYER_DESC Desc{};
     Desc = PlayerData::GetAugustaCloneData({1.f, 1.f, 1.f}
     , { 0.f, 0.f, 0.f }, { -14.1f, 50.f, -180.f }, m_eCurLevel);
 
     m_Players.resize(PLAYERTYPE::TYPE_END);
     m_Players[PLAYERTYPE::AUGUSTA] = dynamic_cast<CPlayer*>(
-        m_pGameInstance->Clone_Prototype(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta")
-            , PROTOTYPE::GAMEOBJECT, &Desc));
+        m_pGameInstance->Clone_Prototype(ENUM_CLASS(pDesc->eCurLevel), PlayerData::AUGUSTA_ACTOR_TAG
+            , PROTOTYPE::GAMEOBJECT, &Desc));*/
 
 
 
@@ -52,42 +52,38 @@ HRESULT CPlayerManager::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CPlayerManager::Priority_Update(_float fTimeDelta)
+void CPlayerParty::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
     m_Players[m_iCurrentPlayerIdx]->Priority_Update(fTimeDelta);
 
-    //m_pAugusta->Priority_Update(fTimeDelta);
-    
 }
 
-void CPlayerManager::Update(_float fTimeDelta)
+void CPlayerParty::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
     m_Players[m_iCurrentPlayerIdx]->Update(fTimeDelta);
-    //m_pAugusta->Update(fTimeDelta);
 }
 
-void CPlayerManager::Late_Update(_float fTimeDelta)
+void CPlayerParty::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
     m_Players[m_iCurrentPlayerIdx]->Late_Update(fTimeDelta);
-    //m_pAugusta->Late_Update(fTimeDelta);
 }
 
-void CPlayerManager::Render()
+void CPlayerParty::Render()
 {
     
 }
 
-void CPlayerManager::Render_Shadow()
+void CPlayerParty::Render_Shadow()
 {
 
 }
 
 #pragma endregion
 
-void CPlayerManager::Ensemble_Skill(PLAYERTYPE iPlayerType)
+void CPlayerParty::Ensemble_Skill(PLAYERTYPE iPlayerType)
 {
     switch (iPlayerType)
     {
@@ -100,13 +96,12 @@ void CPlayerManager::Ensemble_Skill(PLAYERTYPE iPlayerType)
     }
 }
 
-HRESULT CPlayerManager::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
+HRESULT CPlayerParty::Ready_Players(const PLAYER_PARTY_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
 
     // 1. Players 공간 확보
     m_Players.resize(PLAYERTYPE::TYPE_END);
-
     
     CPlayer::PLAYER_DESC PlayerDesc;
     CPlayer* pPlayer = { nullptr };
@@ -127,12 +122,7 @@ HRESULT CPlayerManager::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
                 &PlayerDesc));
 
             ASSERT_CRASH(pPlayer);
-
-            /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
-                , TEXT("Layer_Augusta"), pPlayer)))
-                CRASH("Augusta");*/
             m_Players[i] = pPlayer;
-            Safe_AddRef(pPlayer);
         }
             break;
         case PLAYERTYPE::GALBRENA:
@@ -150,33 +140,33 @@ HRESULT CPlayerManager::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
     return S_OK;
 }
 
-CPlayerManager* CPlayerManager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CPlayerParty* CPlayerParty::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CPlayerManager* pInstance = new CPlayerManager(pDevice, pContext);
+    CPlayerParty* pInstance = new CPlayerParty(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CPlayerManager");
+        MSG_BOX("Failed to Create : CPlayerParty");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CPlayerManager::Clone(void* pArg)
+CGameObject* CPlayerParty::Clone(void* pArg)
 {
-    CPlayerManager* pInstance = new CPlayerManager(*this);
+    CPlayerParty* pInstance = new CPlayerParty(*this);
     
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Clone Failed : CPlayerManager");
+        MSG_BOX("Clone Failed : CPlayerParty");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CPlayerManager::Free()
+void CPlayerParty::Free()
 {
     CGameObject::Free();
 

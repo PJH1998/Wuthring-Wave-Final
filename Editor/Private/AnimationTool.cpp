@@ -155,12 +155,12 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::EDIT_ANIMATION;
         }
 
-        if (ImGui::BeginTabItem("SaveState"))
+      /*  if (ImGui::BeginTabItem("SaveState"))
         {
             RenderUI_EditState();
             ImGui::EndTabItem();
             m_eMode = MODE::SAVE_STATE;
-        }
+        }*/
 
         ImGui::EndTabBar();
     }
@@ -311,8 +311,7 @@ void CAnimationTool::RenderUI_OptionState()
             static float fTrackPosition = { 0.f };
             ImGui::InputFloat("TrackPosition", &fTrackPosition, 0.f, 0.f, "%.2f");
 
-            if (fTrackPosition > m_fDuration)
-                MSG_BOX("Duration Over");
+           
 
             // 2. 함수 설정.
             static char textBuffer[256] = "";
@@ -321,6 +320,9 @@ void CAnimationTool::RenderUI_OptionState()
             _string strTransition = {};
             if (ImGui::Button("Add Transition"))
             {
+                if (fTrackPosition > m_fDuration)
+                    MSG_BOX("Duration Over");
+
                 stringstream ss;
                 ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
                     << "," << to_string(fTrackPosition) << "," << textBuffer;
@@ -733,7 +735,7 @@ void CAnimationTool::Export_StateAnimationMap_ToCSV()
 {
     // 현재 애니메이션 목록을 내보냅니다. 
 
-    if (ImGui::Button("SaveCSV"))
+    if (ImGui::Button("Save AnimStateList"))
     {
         IGFD::FileDialogConfig config;
         config.path = "../../Client/Bin/Resource/Model";
@@ -776,7 +778,7 @@ void CAnimationTool::Export_StateAnimationMap_ToCSV()
 }
 void CAnimationTool::Export_StateTransition_To_CSV()
 {
-    if (ImGui::Button("Save Transition CSV"))
+    if (ImGui::Button("Save Transition"))
     {
         IGFD::FileDialogConfig config;
         config.path = "../../Client/Bin/Resource/Model";

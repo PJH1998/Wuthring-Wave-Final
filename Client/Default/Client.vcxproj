@@ -183,7 +183,7 @@
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\Player.h" />
-    <ClInclude Include="..\Public\PlayerManager.h" />
+    <ClInclude Include="..\Public\PlayerParty.h" />
     <ClInclude Include="..\Public\PlayerAugusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\State.h" />
@@ -217,7 +217,7 @@
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Player.cpp" />
-    <ClCompile Include="..\Private\PlayerManager.cpp" />
+    <ClCompile Include="..\Private\PlayerParty.cpp" />
     <ClCompile Include="..\Private\PlayerAugusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\State.cpp" />

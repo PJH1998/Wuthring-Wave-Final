@@ -1,5 +1,5 @@
 1. StateMachine은 전환할 애니메이션에 대한 정보 .csv
 2. Parameter는 전환 조건(Transition)에 대한 정보 .csv
 
-3. Animation Tool에서 현재 애니메이션과 스테이트 정보 .csv로 Save_CSV 
-4. Animation Tool에서 현재 애니메이션 이름(스테이트 이름과 동일) => 전환 조건을 .csv로 만들기.
+3. Animation Tool에서 현재 애니메이션과 스테이트 정보 .csv로 Save_CSV => 예시 AugustaStateMachine.csv
+4. Animation Tool에서 현재 애니메이션 이름(스테이트 이름과 동일) => 전환 조건을 .csv로 만들기. AugustaTransitionState.csv
