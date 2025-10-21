@@ -105,7 +105,7 @@ void CDummy::Ready_Component()
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
 
 	// Com_Model
-	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Wolf"),
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Model_Wolf"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr);
 
 	// Com_Rigidbody

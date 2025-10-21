@@ -54,6 +54,11 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 	m_Virtuals[iObjectLayer].push_back(pVirtual);
 }
 
+void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pCVCCollision->Remove(pVirtual);
+}
+
 void CPhysicsManager::Clear_Resource()
 {
 	//m_pPhysicsSystem->GetBodyInterface().

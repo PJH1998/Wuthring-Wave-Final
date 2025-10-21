@@ -43,10 +43,11 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	Mouse_Scroll(fTimeDelta);
 	Lerp_Distance(fTimeDelta);
 
-	// 1. Spring
-
-	// 2. 거리 제한으로 인한 간격 보정
+	// 1. 거리 제한으로 인한 간격 보정
 	Compute_CamPos();
+	// 2. Spring
+	if(true == m_isSpring)
+		Spring(fTimeDelta);
 	// 3. Ray Cast 이용하여 지형, 오브젝트와 충돌
 	Check_Ray();
 }
@@ -73,6 +74,16 @@ void CSpringCamera_Edit::Lerp_Distance(_float fTimeDelta)
 void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
 {
 	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+}
+
+void CSpringCamera_Edit::Spring(_float fTimeDelta)
+{
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+	vPos += m_fStiffness * vVelocity * fTimeDelta * fTimeDelta;
+
+	m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
 void CSpringCamera_Edit::Compute_CamPos()

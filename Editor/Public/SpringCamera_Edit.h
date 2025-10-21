@@ -49,7 +49,7 @@ private:
 private:
 	void							Lerp_Distance(_float fTimeDelta);
 	void							Mouse_Scroll(_float fTimeDelta);
-	//void							Spring();
+	void							Spring(_float fTimeDelta);
 	void							Compute_CamPos();
 	void							Check_Ray();
 

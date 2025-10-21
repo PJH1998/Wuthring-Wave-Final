@@ -48,6 +48,8 @@ public:
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 
+	void					Remove_Virtual(CharacterVirtual* pVirtual);
+
 	void					Clear_Resource();
 
 public:

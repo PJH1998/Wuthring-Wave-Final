@@ -122,6 +122,8 @@ CComponent* CCollider::Clone(void* pArg)
 
 void CCollider::Free()
 {
+	m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+
 	__super::Free();
 
 	m_pCharacterVirtual = nullptr;

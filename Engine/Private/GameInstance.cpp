@@ -488,6 +488,10 @@ void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
+void CGameInstance::Remove_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pPhysicsManager->Remove_Virtual(pVirtual);
+}
 _bool CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {
 	return m_pPhysicsManager->Ray_Cast(vStartPos, vEndPos, pOut);

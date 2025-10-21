@@ -129,6 +129,10 @@ HRESULT CLoader_Test::Load_Object()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
         CMapObject::Create(m_pDevice, m_pContext));
 
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"),
+		CDummy::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"), CMonsterTest::Create(m_pDevice, m_pContext))))
 	//	return E_FAIL;
 
