@@ -84,6 +84,16 @@ namespace Engine
 		return str;
 	}
 
+	inline XMFLOAT4 ComputeAtlasUV(float fTextureSizeX, float fTextureSizeY, float fLeft, float fRight, float Top, float Bottom)
+	{
+		float fStartU = ( fLeft ) / ( fTextureSizeX );
+		float fStartV = ( Top ) / ( fTextureSizeY );
+		float fEndU = ( fRight ) / ( fTextureSizeY );
+		float fEndV = ( Bottom ) / ( fTextureSizeY );
+
+		return XMFLOAT4(fStartU, fStartV, fEndU, fEndV);
+	}
+
 #ifdef _DEBUG
 	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
 	{

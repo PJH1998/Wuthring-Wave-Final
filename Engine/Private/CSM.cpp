@@ -132,7 +132,7 @@ void CCSM::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 		pShader->Bind_Value("g_DebugCSMIndex", &i, sizeof(_uint));
 		pShader->Bind_Matrix("g_WorldMatrix", &DebugWorld);
 
-		pShader->Begin(7);
+		pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::RD_DEBUG_CSM));
 		pVIBuffer->Bind_Resources();
 		pVIBuffer->Render();
 	}
@@ -296,7 +296,7 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 
 	for (_uint i = 0; i < 8; i++)
 	{
-		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // ���� ���������� Light��� �ø���
+		XMStoreFloat4(&vViewPoints[i], XMVector3TransformCoord(XMLoadFloat4(&pFrustrumPoints[i]), ShadowViewMatrix)); // 
 
 		fMinX = min(fMinX, vViewPoints[i].x);
 		fMaxX = max(fMaxX, vViewPoints[i].x);
@@ -308,17 +308,17 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 		fMaxZ = max(fMaxZ, vViewPoints[i].z);
 	}
 
-	_float fCascadeExtentX = (fMaxX - fMinX ) * 0.5f;				// �������� X ����
-	_float fCascadeExtentY = ( fMaxY - fMinY ) * 0.5f;				// �������� Y ����
+	_float fCascadeExtentX = (fMaxX - fMinX ) * 0.5f;				// Cascade Half Size X
+	_float fCascadeExtentY = ( fMaxY - fMinY ) * 0.5f;				// Cascade Half Size Y 
 
-	//_float fCascadeExtent = max(fCascadeExtentX, fCascadeExtentY) * 0.5f; // x, y �� Ŀ�ٶ� ���� ���������� ��� ( �ʹ� �о��� Pass )
+	//_float fCascadeExtent = max(fCascadeExtentX, fCascadeExtentY) * 0.5f; // 
 
 	fMinZ -= fMinZ * 0.1f;
 	fMaxZ += fMaxZ * 0.1f;
 
-	_float fTexelSizeX = ( fCascadeExtentX * 2.f) / static_cast<_float>(g_iMaxWidth);		// ���� �׷��� ���������� 1�ؼ� ������ X
+	_float fTexelSizeX = ( fCascadeExtentX * 2.f) / static_cast<_float>(g_iMaxWidth);		// 현재 Cascade 프러스텀의 NDC상 Texel 사이즈 X
 
-	_float fTexelSizeY = ( fCascadeExtentY * 2.f ) / static_cast<_float>(g_iMaxHeight);		// ���� �׷��� ���������� 1�ؼ� ������ Y
+	_float fTexelSizeY = ( fCascadeExtentY * 2.f ) / static_cast<_float>(g_iMaxHeight);		// 현재 Cascade 프러스텀의 NDC상 Texel 사이즈 Y
 
 	_float3 vViewCenterPos = {};
 	XMStoreFloat3(&vViewCenterPos, Compute_Center(vViewPoints));
@@ -337,38 +337,7 @@ _matrix CCSM::Make_SplitProjMatrix(const _float4* pFrustrumPoints, _fmatrix Shad
 	_float fFar = vViewCenterPos.z + fCascadeExtentZ;
 
 	return XMMatrixOrthographicOffCenterLH(vRect.x, vRect.y, vRect.z, vRect.w, fNear, fFar);
-
-//	_vector vCenterPos = Compute_Center(vViewPoints);
-//	_float fMaxRadius = Compute_Radius(vViewPoints, vCenterPos);
-////	fMaxRadius += fMaxRadius * 0.2f;
-//
-//	_float fMinRadius = fMaxRadius * -1.f;
-//
-//	_float fFar = fMaxRadius - fMinRadius;
-//
-//	return XMMatrixOrthographicOffCenterLH(fMinRadius, fMaxRadius, fMinRadius, fMaxRadius, 0.f, fFar);
-
-	/*fMinX += fMinX * 0.1f;
-	fMaxX += fMaxX * 0.1f;
-	fMinY += fMinY * 0.1f;
-	fMaxY += fMaxY * 0.1f;
-	fMinX += fMinZ * 0.1f;
-	fMaxX += fMaxZ * 0.1f;
-
-	_float fNear = fMinZ;
-	_float fFar = fMaxZ;*/
-
-	//return XMMatrixOrthographicOffCenterLH(fMinX, fMaxX, fMinY, fMaxY, fNear, fFar);		// ����� �ø� �������ҿ��� Min,Max, Near, Far ���ؼ� ������� ����	;
 }
-//
-//void CCSM::Make_ClipZ()
-//{
-//	for (_uint i = 0; i < m_iNumClip; i++)
-//	{
-//		_vector vProjZ = XMVector4Transform(XMVectorSet(0.f, 0.f, m_ClipDistance[i], 1.f), m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
-//		m_fClipZ[i] = XMVectorGetW(vProjZ);
-//	}
-//}
 
 CCSM* CCSM::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

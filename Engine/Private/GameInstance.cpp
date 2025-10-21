@@ -369,6 +369,10 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
 #ifdef _DEBUG
+void CGameInstance::Set_LUT_Index(_uint iIndex)
+{
+	m_pRenderer->Set_LUT_Index(iIndex);
+}
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
