@@ -15,6 +15,7 @@
 //Dummy
 #include "EditDummy_Wolf.h"
 #include "EditDummy_Augusta.h"
+#include "EditDummy_Map.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -211,6 +212,9 @@ void CEditorApp::Ready_Dummies()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"), CEditDummy_Augusta::Create(m_pDevice, m_pContext))))
 		CRASH("Failed Add Prototype Dummy Augu");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"), CEditDummy_Map::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Map");
 }
 
 void CEditorApp::Start_Level()

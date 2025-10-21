@@ -103,8 +103,27 @@ void CParser::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
     //File.close();
 }
 
-void CParser::Load_CSV(const _char* pFilePath)
+const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 {
+	ifstream InputFile(pFilePath);
+
+	_string strLine;
+
+	while (getline(InputFile, strLine))
+	{
+		stringstream ss(strLine);
+		_string strCell;
+		vector<_string> row;
+
+		while (getline(ss, strCell, ','))
+			row.push_back(strCell);
+
+		m_Data.push_back(row);
+	}
+
+	InputFile.close();
+
+	return m_Data;
 }
 
 HRESULT CParser::Initialize()
