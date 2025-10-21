@@ -6,7 +6,7 @@ NS_BEGIN(Editor)
 class CEditDummy abstract : public CGameObject
 {
 public:
-	typedef struct tagDummyDesc {
+	typedef struct tagDummyDesc : public CGameObject::GAMEOBJECT_DESC {
 		_float3 vScale = _float3(1.f, 1.f, 1.f);
 		_vector vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 		_vector vRotation = XMQuaternionIdentity();

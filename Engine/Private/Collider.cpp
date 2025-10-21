@@ -124,6 +124,6 @@ void CCollider::Free()
 {
 	__super::Free();
 
-	Safe_Delete(m_pCharacterVirtual);
+	m_pCharacterVirtual = nullptr;
 	m_pOwner = nullptr;
 }

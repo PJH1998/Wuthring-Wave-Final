@@ -34,6 +34,11 @@ void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 	m_pRootCell->Add_Object(pObject, fMinMax);
 }
 
+void COctoTree::Clear_OctoTree()
+{
+	Safe_Release(m_pRootCell);
+}
+
 void COctoTree::Update()
 {
 	if (nullptr == m_pRootCell)

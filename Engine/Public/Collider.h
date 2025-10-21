@@ -12,8 +12,8 @@ public:
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		EMotionType	eType;
 		_uint				iLayer;
-		_float				fHeight;		// 罹≪뒓 紐명넻 ?믪씠
-		_float				fRadius;		// 罹≪뒓 援?遺遺?諛섏?由?
+		_float				fHeight;		// Capsule Height
+		_float				fRadius;		// Capsule Radius
 	}COLLIDER_DESC;
 
 private:
@@ -22,10 +22,11 @@ private:
 	virtual ~CCollider() = default;
 
 public:
+	// Collider 움직임 -> Transform에 적용
 	void								Sync_Position(class CTransform* pTransform);
-
+	// 땅을 타고 있는지 Check
 	_bool								IsLand(_float3* pNormalOut = nullptr);
-
+	// Gravity On/Off
 	void								Set_Gravity(_bool isGravity) { m_isGravity = isGravity; }
 
 public:
@@ -36,13 +37,14 @@ public:
 
 private:
 	class CGameObject*			m_pOwner = { nullptr };
-	CharacterVirtual*				m_pCharacterVirtual = { nullptr };
+	Ref<CharacterVirtual>		m_pCharacterVirtual = { nullptr };
 
 	_uint								m_iCollisionLayer = {};
 
 	_bool								m_isGravity = { true };
 
 private:
+	// 경사로에서 이동속도 변화 -> Slide로 보정
 	Vec3								Slide(const Vec3& Velocity);
 
 public:

@@ -105,6 +105,7 @@ void CPooling_Manager::Wait_Thread_End()
 	{
 
 	}
+	//cout << "Work End" << endl;
 }
 
 void CPooling_Manager::Work_Thread()
@@ -125,7 +126,6 @@ void CPooling_Manager::Work_Thread()
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
-
 	}
 }
 

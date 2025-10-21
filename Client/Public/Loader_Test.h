@@ -20,9 +20,6 @@ private:
 	HRESULT				Load_Component();
 	HRESULT				Load_Augusta();	
 
-	HRESULT				Ready_OctoTree();
-
-
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
 

@@ -517,7 +517,6 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\AnimMachine.h">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
     </ClInclude>

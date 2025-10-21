@@ -12,6 +12,9 @@ CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Logo::Initialize()
 {
+	// SetUp OctoTree
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
 	// Rigidbody Sample
 	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
 	BoxBodyDesc.eShape = SHAPE::BOX;

@@ -68,19 +68,6 @@ void CCubeCell::Update(const _fvector& vCamPos)
 	{
 		// LOD SetUp
 		_float3 vCenter = m_pBoundingBox->Center;
-		//_float fDistance = XMVectorGetX(XMVector3Length(vCamPos - XMVectorSetW(XMLoadFloat3(&vCenter), 1.f)));
-
-		//_uint iLODIndex = {3};
-		//for (_uint i = 0; i < 3; ++i)
-		//{
-		//	if (fDistance > g_fLODDistance[i + 1])
-		//		continue;
-		//
-		//	iLODIndex = i;
-		//	break;
-		//}
-
-		//_uint iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 		_uint iLODIndex = {};
 		for (auto& pObject : m_Objects)
 		{
@@ -90,15 +77,21 @@ void CCubeCell::Update(const _fvector& vCamPos)
 			m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, pObject);
 		}
 
-		// 거리가 멀면 자식은 X
-		//if (iLODIndex >= 3)
-		//	return;
-		// Child O -> Child Update
+		// Child Update
 		if (0 < m_ChildCells.size())
 		{
 			for (auto& pCell : m_ChildCells)
-				pCell->Update(vCamPos);
-				//m_pGameInstance->Add_Work([&]() { pCell->Update(vCamPos); });
+			{
+				if(0 == m_iDepth)
+				{
+					// Thread
+					m_pGameInstance->Add_Work([&, vCamPos]() {
+							pCell->Update(vCamPos);
+						});
+				}
+				else
+					pCell->Update(vCamPos);
+			}
 		}
 	}
 }
@@ -116,6 +109,7 @@ void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 			return;
 		}
 	}
+
 	m_Objects.push_back(pObject);
 }
 

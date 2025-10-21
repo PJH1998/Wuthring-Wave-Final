@@ -11,19 +11,21 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
-    Ready_Layer_Map();
+	// SetUp OctoTree
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+    Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
     Ready_Layer_Augusta();
 
 
-	CMonsterTest::MONSTERTEST_DESC MobDesc = {};
-	MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
-    MobDesc.fSpeedPerSec = 5.f;
-    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
-		CRASH("FalseSoverign");
-
-	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
-		CRASH("Dummy");
+	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
+	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
+    //MobDesc.fSpeedPerSec = 5.f;
+    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
+	//	CRASH("FalseSoverign");
+	//
+	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
+	//	CRASH("Dummy");
 
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
         CRASH("Dummy");*/
@@ -38,7 +40,6 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_ShadowNF();
-
 
     return S_OK;
 }
@@ -77,10 +78,9 @@ HRESULT CLevel_Test::Ready_Layer_Augusta()
     return S_OK;
 }
 
-HRESULT CLevel_Test::Ready_Layer_Map()
+HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
-    m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
+    ifstream File(pFilePath, ios::binary);
 
     if (!File.is_open())
     {

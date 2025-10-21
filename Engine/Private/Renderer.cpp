@@ -54,11 +54,13 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 {
 	if (nullptr == pRenderObject)
 		return E_FAIL;
-
-	m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
-
-	Safe_AddRef(pRenderObject);
 	
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
+		Safe_AddRef(pRenderObject);
+	}
+
 	return S_OK;
 }
 

@@ -29,12 +29,13 @@ HRESULT CPrototype_Manager::Add_Prototype(_uint iPrototypeLevelID, const _wstrin
     {
         Safe_Release(pPrototype);
         return E_FAIL;
-    }
- 
-    {
-        lock_guard<mutex> lock(m_Mutex);
-        m_Prototypes[iPrototypeLevelID].emplace(strPrototypeTag, pPrototype);
-    }
+	}
+
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_Prototypes[iPrototypeLevelID].emplace(strPrototypeTag, pPrototype);
+	}
+
     return S_OK;
 }
 

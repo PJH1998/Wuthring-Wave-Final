@@ -1,15 +1,17 @@
 ﻿#include "ClientPch.h"
 #include "Parser.h"
-#include"MapObject.h"
-IMPLEMENT_SINGLETON(CParser)
+#include	"MapObject.h"
 
-CParser::CParser()
-	: m_pGameInstance{ CGameInstance::GetInstance() }
+CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	: m_pGameInstance{ CGameInstance::GetInstance() },
+	m_pDevice { pDevice }, m_pContext { pContext }
 {
+	Safe_AddRef(m_pDevice);
+	Safe_AddRef(m_pContext);
 	Safe_AddRef(m_pGameInstance);
 }
 
-void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, LEVEL eLevel)
+void CParser::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
 {
     ifstream File(pFilePath, ios::binary);
 
@@ -21,17 +23,9 @@ void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
     m_pGameInstance->Add_Work([=]() {
         m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"),
-            CMapObject::Create(pDevice, pContext));
+            CMapObject::Create(m_pDevice, m_pContext));
         });
-
-
-    //ifstream File(pFilePath, ios::binary);
-    m_pGameInstance->Wait_Thread_End();
-
-    if (!File.is_open())
-    {
-        CRASH("File Load Fail");
-    }
+    // 
     while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
     {
         CMapObject::MAP_LOAD Desc{};
@@ -54,11 +48,6 @@ void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
         strcat_s(ModelPath, Desc.ModelName);
         strcat_s(ModelPath, ".dat");
 
-        m_pGameInstance->Add_Work([=]() {
-            if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), Model,
-                CModel::Create(pDevice, pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath))))
-                int a = 0;
-            });
         File.close();
     }
     //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
@@ -120,9 +109,33 @@ void CParser::Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 }
 
+void CParser::Load_CSV(const _char* pFilePath)
+{
+}
+
+HRESULT CParser::Initialize()
+{
+	return S_OK;
+}
+
+CParser* CParser::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+{
+	CParser* pInstance = new CParser(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize()))
+	{
+		MSG_BOX("Failed to Create : Parser");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
 void CParser::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pDevice);
+	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 }
