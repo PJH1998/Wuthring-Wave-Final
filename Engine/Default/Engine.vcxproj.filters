@@ -253,6 +253,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
+      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>	
+    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine">
       <UniqueIdentifier>{a54d431a-e7ed-4546-9ff3-5fdefe162fda}</UniqueIdentifier>
     </Filter>
@@ -517,6 +520,10 @@
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\public\ShaderFilter.h">
+      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\AnimMachine.h">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
     </ClInclude>
@@ -757,6 +764,9 @@
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\ShaderFilter.cpp">
+      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
+    </ClInclude>
     <ClCompile Include="..\Private\AnimMachine.cpp">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
     </ClCompile>
