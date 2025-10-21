@@ -15,6 +15,8 @@ public:
 
 	void							Load_CSV(const _char* pFilePath);
 
+private:
+	void							Read_Map_Dat(const _string pFilePath, LEVEL eLevel);
 public:
 	HRESULT						Initialize();
 

@@ -18,6 +18,7 @@ public:
 private:
 	HRESULT Ready_Layer_Augusta();
 	HRESULT Ready_Layer_Map(const _char* pFilePath);
+	void Read_Map_Dat(const _string pFilePath);
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
 

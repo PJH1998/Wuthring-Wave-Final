@@ -31,17 +31,6 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
 	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
 
-	/*
-	?쎈뒗 ?쒖꽌.
-	        _uint Length = strlen(m_ModelName);
-        event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
-        event.File.write(m_ModelName, Length);
-        event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
-        _float4x4 WorldMatrix;
-        XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
-        event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
-	*/
-
 	return S_OK;
 }
 
@@ -96,7 +85,7 @@ void CMapObject::Render()
 
 		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(m_iShaderPassIndex);
 
 		m_pModelComArray[m_iNumLOD]->Render(i);
 	}
@@ -106,34 +95,17 @@ void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-	/*_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-	_tchar Name[MAX_PATH] = {};
-	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());*/
-
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
 	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
 
+	m_iShaderPassIndex = pDesc->iShaderPassIndex;
+
 	m_pModelComArray.resize(V);
-	/*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), Model,
-		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-		return E_FAIL;*/
+
 	for (_uint i = 0; i < V; ++i)
 	{
-		//m_pGameInstance->Add_Work([&,Index = i, Name = Model]() {
-		//    CModel* pModel = nullptr;
-		//    _wstring ModelCom = Name;
-		//    ModelCom.pop_back();
-		//    ModelCom += to_wstring(Index);
 
-		//    _char ModelName[MAX_PATH] = {};
-		//    sprintf_s(ModelName, "Com_Model%d", Index);
-		//    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
-		//        //StringToWString(ModelName), reinterpret_cast<CComponent**>(&pModel), nullptr)))
-		//        StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[Index]), nullptr)))
-		//        CRASH("FAILED");
-		//    //m_pModelComArray.push_back(pModel);
-		//    });
 		_wstring ModelCom = Model;
 		ModelCom.pop_back();
 		ModelCom += to_wstring(i);
