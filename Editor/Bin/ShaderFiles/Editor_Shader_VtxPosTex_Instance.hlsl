@@ -194,10 +194,20 @@ float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2
 // ==============================
 // * Vertex Shader
 // ==============================
-struct VS_IN
+struct VS_IN_INSTANCE
 {
-    float3 vPosition    : POSITION;
-    float2 vTexcoord    : TEXCOORD0;
+    float3 vPosition        : POSITION;
+    float2 vTexcoord        : TEXCOORD0;
+    
+    float4 vSInstRight      : TEXCOORD1;
+    float4 vSInstUp         : TEXCOORD2;
+    float4 vSInstLook       : TEXCOORD3;
+    float4 vSInstTrans      : TEXCOORD4;
+    
+    float2 vSInstCoordX     : TEXCOORD5;
+    float2 vSInstCoordY     : TEXCOORD6;
+    float2 vClipTexcoordX   : TEXCOORD7;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
+    float2 vClipTexcoordY   : TEXCOORD8;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
 };
 
 struct VS_OUT
@@ -210,24 +220,53 @@ struct VS_OUT
 
 
 
-VS_OUT VS_MAIN(VS_IN In)
+//VS_OUT VS_MAIN(VS_IN In)
+//{
+//    VS_OUT Out = (VS_OUT) 0;
+//    
+//    /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
+//        
+//    float4x4 matWV, matWVP;
+//    
+//    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+//    matWVP = mul(matWV, g_ProjMatrix);
+//    
+//    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+//    Out.vTexcoord = In.vTexcoord;
+//    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+//    Out.vProjPos = Out.vPosition;
+//    
+//    return Out;
+//}
+
+VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
     VS_OUT Out = (VS_OUT) 0;
+    // [ 인스턴싱용 ] 각 인스턴스별 Vertex 의 Out 정의
     
-    /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
-        
     float4x4 matWV, matWVP;
     
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
     
-    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    float4x4 matDestTransform =
+    {
+        In.vSInstRight,
+        In.vSInstUp,
+        In.vSInstLook,
+        In.vSInstTrans,
+    };
+    
+    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matDestTransform);
+    
+    Out.vPosition = mul(vWorldPos, matWVP);
     Out.vTexcoord = In.vTexcoord;
-    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-    Out.vProjPos = Out.vPosition;
+    Out.vWorldPos = vWorldPos;
+    Out.vProjPos = Out.vPosition;   
     
     return Out;
 }
+
 
 // ==============================
 // * Pixel Shader
@@ -456,7 +495,6 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
         length(g_WorldMatrix[1].xyz) * g_UIScale,
     };
     float2 border = g_SectorBorder * g_UIScale;
-    
     float2 localPos = In.vTexcoord * vSize;
 
     // 9-slice 계산된 UV
@@ -485,7 +523,7 @@ technique11 DefaultTechnique
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN();
     }
@@ -495,7 +533,7 @@ technique11 DefaultTechnique
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_CUTOUT_UI();
     }
@@ -506,7 +544,7 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_ALPHAENABLED_UI();
     }
@@ -517,7 +555,7 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_GRADIENT_UI();
     }
@@ -528,7 +566,7 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
-        VertexShader = compile vs_5_0 VS_MAIN();
+        VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_NINESECTOR_UI();
     }

@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Editor_Define_UI.h"
+
 #include "Level.h"
 #include "Custom_UI.h"
 
@@ -38,13 +41,13 @@ public:
 
 	typedef struct tagUIAnimDesc
 	{
-		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex (어떤 텍스쳐용인지를 위함)
+		CCustom_UI::CUSTOM_UI_DESC		tUIDesc = {};	// FilePath, FileName, NumTex (어떤 텍스쳐용인지를 위함)
 
 		// 키프레임, 키프레임별 행렬정보, 보간방법, 길이 등..
 		_wstring				strAnimName = {};
 		//_uint					iNumKeyFrame = {};
 
-		vector<UI_ANIM_KEYFRAME_DESC> vecKeyFrames = {};
+		vector<UI_ANIM_KEYFRAME_DESC>	vecKeyFrames = {};
 
 		//_uint					iLerpType = {};
 		_bool					isLoop = false;

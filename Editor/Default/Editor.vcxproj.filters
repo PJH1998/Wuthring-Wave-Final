@@ -79,6 +79,9 @@
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp VIBuffer">
+      <UniqueIdentifier>{d88da4ce-b21b-485c-85ed-641ff34d1d1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -167,6 +170,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Custom_UI_Instance.h">
+      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Editor_Define_UI.h">
+      <Filter>01. Level\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -244,6 +256,12 @@
     <ClCompile Include="..\Private\Level_Shader.cpp">
       <Filter>01. Level\Shader</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI_Instance.cpp">
+      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
@@ -252,5 +270,8 @@
     <ClCompile Include="..\Private\Particle.cpp">
       <Filter>01. Level\Effect\Particle</Filter>
     </ClCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex_Instance.hlsl">
+      <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

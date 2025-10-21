@@ -6,6 +6,8 @@
 #include "Custom_UI.h"
 #include "Animator_UI.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
+
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUIObject(pDevice, pContext)
 {
@@ -41,7 +43,8 @@ void CCustom_UI::Priority_Update(_float fTimeDelta)
 
 void CCustom_UI::Update(_float fTimeDelta)
 {
-
+    //if (m_tUIDesc.isInstance)
+    //    dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, );
 
     m_pAnimator_UICom->Update(fTimeDelta);
 
@@ -129,6 +132,7 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _uint         iNumFiles   = pDesc->iNumFiles;
 
     const   _uint       iDestLevel  = ENUM_CLASS(LEVEL::UI);
+    const   _bool       isInstance  = pDesc->isInstance;
 
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Texture_Custom_" + strFileName),
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
@@ -138,9 +142,17 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
-        TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
-        return E_FAIL;
+    if (!isInstance) {
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
+            TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
+            return E_FAIL;
+    }
+    else if (isInstance) {
+
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
+            TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
+            return E_FAIL;
+    }
 
     CAnimator_UI::ANIMATOR_UI_DESC tAnimatorUIDesc = { this };
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
@@ -156,6 +168,7 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
 
     CUSTOM_UI_DESC* pDesc = static_cast<CUSTOM_UI_DESC*>(pArg);
 
+
     m_tUIDesc.strFilePath   = pDesc->strFilePath;
     m_tUIDesc.strFileName   = pDesc->strFileName;
     m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
@@ -163,11 +176,8 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // 비어있다면 초기값으로 strFileName 사용
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
-
     m_tUIDesc.fCutout       = pDesc->fCutout;
-
     m_tUIDesc.iPassType     = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
-
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
     // 원본 이미지 Size 가져오기.
@@ -179,16 +189,24 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
         ID3D11Resource* pResource;
         pSRV->GetResource(&pResource);
         ID3D11Texture2D* pTexture;
-        pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
-        D3D11_TEXTURE2D_DESC desc = {};
-        pTexture->GetDesc(&desc);
-
-        m_tUIDesc.vecSize.push_back(_float2{ (_float)desc.Width , (_float)desc.Height });
+        if (pResource)
+        {
+            HRESULT hr = pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
+            if (SUCCEEDED(hr) && pTexture)
+            {
+                D3D11_TEXTURE2D_DESC desc = {};
+                pTexture->GetDesc(&desc);
+                m_tUIDesc.vecSize.push_back(_float2{ (_float)desc.Width , (_float)desc.Height });
+                pTexture->Release();
+            }
+            pResource->Release();
+        }
         iIndex++;
     }
 
     m_tUIDesc.vSectorBorder = pDesc->vSectorBorder;
     m_tUIDesc.fUIScale      = pDesc->fUIScale;
+    m_tUIDesc.isInstance    = pDesc->isInstance;
 
     return S_OK;
 }

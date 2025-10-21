@@ -1,3 +1,5 @@
+#include "VIBuffer_Rect_Instance_UI.h"
+#include "VIBuffer_Rect_Instance_UI.h"
 #include "EnginePch.h"
 #include "VIBuffer_Point_Instance.h"
 #include "GameInstance.h"

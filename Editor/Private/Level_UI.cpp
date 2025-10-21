@@ -7,6 +7,7 @@
 #include "GameObject.h"
 #include "Animator_UI.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
 
 
 // 임시로 여기에 매크로로..
@@ -45,11 +46,24 @@ HRESULT CLevel_UI::Initialize()
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+    
+    // Shader_Instance
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex_Instance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
     // VIBuffer_Rect
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
         CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+
+    // VIBuffer_Rect_Instance_UI
+    // 임시 선언. 나중에 instance 갯수 변경 필요 시 변경
+    CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
+    tRectInstDesc.iNumInstance = 500U;
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
+        CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
     // Animator_UI
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
@@ -148,6 +162,16 @@ void CLevel_UI::Update_MenuWindow()
     // ===== [Logic] Load FilePath, Create & Store CustomUI =====
     _wstring strFilePath = {}, strFileName = {};
 
+    static _int isInstanceSelected = 0; // 0 = false, 1 = true
+    ImGui::Text("UI Type");
+    if (ImGui::RadioButton("Normal", isInstanceSelected == 0))
+        isInstanceSelected = 0;
+    if (ImGui::RadioButton("Instance", isInstanceSelected == 1))
+        isInstanceSelected = 1;
+    _bool isInstance = (isInstanceSelected == 1);
+
+    ImGui::Separator();
+
     if (ImGuiFileDialog::Instance()->Display("UI_Image_Load"))
     {
         if (ImGuiFileDialog::Instance()->IsOk())    // 파일 선택 시
@@ -174,6 +198,7 @@ void CLevel_UI::Update_MenuWindow()
             tCustomUIDesc.fY = g_iWinSizeY / 2.f;
             tCustomUIDesc.strFilePath = relativePath.wstring();
             tCustomUIDesc.strFileName = strFileName;
+            tCustomUIDesc.isInstance = isInstance;
 
             // 생성 후 로컬 컨테이너에 추가
             CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));

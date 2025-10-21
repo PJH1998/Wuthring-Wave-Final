@@ -9,6 +9,7 @@ NS_BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Rect;
+class CVIBuffer_Rect_Instance_UI;
 NS_END
 
 NS_BEGIN(Editor)
@@ -19,6 +20,8 @@ NS_BEGIN(Editor)
 
 class CCustom_UI final : public CUIObject
 {
+#pragma region enum class & struct
+
 public:
 	enum class UI_TYPE {
 		NONE, BUTTON, INTERACT, END
@@ -33,6 +36,8 @@ public:
 		_float		fUIScale = {};		// ui 배율
 	} UI_SECTOR_DESC;
 
+
+
 	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC, UI_SECTOR_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
@@ -44,15 +49,17 @@ public:
 
 		_bool		isInverseScreenDiscard = false;	// 그릴 구역 반전
 		_float		fCutout = 0.3f;					// (1:컷아웃 사용 시) 알파값 기준
-		
 		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
 
-
 		vector<_wstring> vecChildNames = {};
-
 		CGameObject* pParentObject = nullptr;
+
+
+		_bool		isInstance = false;
 	} CUSTOM_UI_DESC;
 
+
+#pragma endregion
 
 
 private:
@@ -82,15 +89,16 @@ private:
 
 private:
 	CShader*				m_pShaderCom				= { nullptr };
-	CVIBuffer_Rect*			m_pVIBufferCom				= { nullptr };
+	CVIBuffer*				m_pVIBufferCom				= { nullptr };
 	CTexture*				m_pTextureCom				= { nullptr };
-
 	CAnimator_UI*			m_pAnimator_UICom			= { nullptr };
+
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
 	_uint					m_iCurTexIndex				= {};
 
 	_float4x4				m_CombinedWorldMatrix		= {};
+	//vector// 인스턴스별 정보 저장해야함
 
 
 	// 현재 사용중일 텍스쳐 정보, texcoord 값, 나인섹터 기준점 등의 정보.. 필요할수도 있음
@@ -106,6 +114,8 @@ NS_END
 
 
 
+
+#pragma region json
 
 inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 {
@@ -209,3 +219,5 @@ inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
 	}
 }
 
+
+#pragma endregion
