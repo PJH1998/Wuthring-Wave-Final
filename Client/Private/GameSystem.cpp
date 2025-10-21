@@ -15,6 +15,11 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	ASSERT_CRASH(m_pParser);
 }
 
+const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
+{
+	return m_pParser->Load_CSV(pFilePath);
+}
+
 void CGameSystem::Free()
 {
 	__super::Free();

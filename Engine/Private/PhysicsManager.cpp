@@ -155,9 +155,9 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
 
 	if (nullptr != pOut)
-		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir);
+		XMStoreFloat4(pOut, vStartPos + (result.mFraction) * vDir);
 
-	return fOriginFraction > result.mFraction && result.mFraction > 0 ? true : false;
+	return fOriginFraction > result.mFraction && result.mFraction > 0.f ? true : false;
 }
 
 #ifdef _DEBUG
