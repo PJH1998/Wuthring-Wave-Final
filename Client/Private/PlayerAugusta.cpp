@@ -45,6 +45,7 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     m_strCurrentAnimation = "Pose";
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
 
+
 #endif // _DEBUG
 
     return S_OK;
@@ -54,8 +55,13 @@ void CPlayerAugusta::Priority_Update(_float fTimeDelta)
 {
     CPlayer::Priority_Update(fTimeDelta);
 
+    // 1. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
     
+
+    // 2. 땅이면 Gravity 끄기.
+    if (m_pColliderCom->IsLand())
+        m_pColliderCom->Set_Gravity(false);
     
 }
 
@@ -75,6 +81,9 @@ void CPlayerAugusta::Update(_float fTimeDelta)
 void CPlayerAugusta::Late_Update(_float fTimeDelta)
 {
     CPlayer::Late_Update(fTimeDelta);
+
+    // Collider 충돌 처리후 위치에 맞춘다.
+    m_pColliderCom->Sync_Position(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
@@ -138,9 +147,27 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
         m_strCurrentAnimation = "Move_F";
 
     if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
+    {
         m_strCurrentAnimation = "Jump_Walk_LF";
 
+        _float3 vNormal = {};
+        if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
+            m_pColliderCom->Set_Gravity(true);
+    }
+        
+
+    // 추가 이동량 지정.
     m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 100.f);
+
+    // 현재 위치 - 1Frame 이전 위치 값 계산
+    _vector vVelocity = m_pTransformCom->Get_Velocity();
+
+    // Collider 갱신
+    m_pColliderCom->Update(vVelocity);
+
+    
+    
+
 
     if (m_strPreAnimation != m_strCurrentAnimation)
         m_fTrackPosition = 0.f;
@@ -204,11 +231,13 @@ void CPlayerAugusta::Ready_Positions(const PLAYER_DESC* pDesc)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    _float3 vRadian = {
-        XMConvertToRadians(pDesc->vRotation.x),
-        XMConvertToRadians(pDesc->vRotation.y),
-        XMConvertToRadians(pDesc->vRotation.z) };
-    m_pTransformCom->Rotation_Quaternion(vRadian);
+
+
+    //_float3 vRadian = {
+    //    XMConvertToRadians(pDesc->vRotation.x),
+    //    XMConvertToRadians(pDesc->vRotation.y),
+    //    XMConvertToRadians(pDesc->vRotation.z) };
+    //m_pTransformCom->Rotation_Quaternion(vRadian);
 }
 
 

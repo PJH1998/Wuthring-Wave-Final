@@ -95,7 +95,8 @@ void CLevel_Test::Render()
 void CLevel_Test::Ready_Layer_PlayerManager()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
-    vScale = { 1.f, 1.f, 1.f };
+    //vScale = { 1.f, 1.f, 1.f };
+    vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { -20.f, 50.f, -180.f };
 
@@ -117,8 +118,8 @@ void CLevel_Test::Ready_Layer_PlayerManager()
 
 
     // 4. Controller 생성.
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerController"),
-        ENUM_CLASS(m_eCurLevel), TEXT("Layer_PlayerController"), &Desc)))
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerManager"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
         CRASH("Failed Ready Layer Augusta");
 }
 
