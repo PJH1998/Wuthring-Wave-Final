@@ -31,7 +31,7 @@ private:
 	map<_string, class CState*> m_States;
 
 public:
-	static CStateMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath) override;
+	static CStateMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath);
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 

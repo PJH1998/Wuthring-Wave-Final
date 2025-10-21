@@ -43,7 +43,7 @@ void CStateMachine::Load_Data(const _char* pFilePath)
         _string strStateName = csvData[i][0];
         _string strAnimName = csvData[i][1];
 
-        m_StateInfos[strStateName] = strAnimName;
+        //m_StateInfos[strStateName] = strAnimName;
 
         
     }
