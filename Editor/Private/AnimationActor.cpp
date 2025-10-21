@@ -48,7 +48,11 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     }
 
     // Default는 0번 애니메이션 실행.
+#ifdef _DEBUG
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
+#endif // _DEBUG
+
+    
 
     m_IsPlayAnimation = true;
 

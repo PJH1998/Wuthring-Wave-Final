@@ -436,8 +436,8 @@ void CModelLoader::Save_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
 
-	ImVec2 vMinSize = ImVec2(600, 400);  // 理쒖냼 ?ш린
-	ImVec2 vMaxSize = ImVec2(800, 400); // 理쒕? ?ш린
+	ImVec2 vMinSize = ImVec2(600, 400); 
+	ImVec2 vMaxSize = ImVec2(800, 400); 
 
 	if (ImGuiFileDialog::Instance()->Display("Save Model"
 		, ImGuiWindowFlags_NoCollapse

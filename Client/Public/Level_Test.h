@@ -16,10 +16,12 @@ public:
 	virtual		void			Render() override;
 
 private:
-	HRESULT Ready_Layer_Augusta();
+	void Ready_Layer_PlayerManager();
+	void Ready_Layer_Augusta();
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
+	class CGameSystem* m_pGameSystem = { nullptr };
 
 public:
 	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

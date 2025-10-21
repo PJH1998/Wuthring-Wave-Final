@@ -6,6 +6,7 @@
 
 //Dummy
 #include "EditDummy_Wolf.h"
+#include "EditDummy_Augusta.h"
 
 CLevel_Shader::CLevel_Shader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -43,8 +44,8 @@ HRESULT CLevel_Shader::Ready_Light()
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
     LightDesc.vAmbient = _float4(0.7f, 0.7f, 0.7f, 1.f);
-    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vDirection = _float4(0.2f, -0.5f, -0.3f, 0.f);
+    LightDesc.vDiffuse = _float4(0.8f, 0.8f, 1.f, 1.f);
+    LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
     LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
@@ -64,17 +65,17 @@ HRESULT CLevel_Shader::Ready_Interface()
 
 HRESULT CLevel_Shader::Ready_TestObjects()
 {
-    CEditDummy_Wolf::DUMMY_WOLF_DESC WolfDesc = {};
-    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f));
-    WolfDesc.PreTransformMatrix = PreTransformationMatrix;
+    CEditDummy_Augusta::DUMMY_AUGU_DESC AuguDesc = {};
+    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+    AuguDesc.PreTransformMatrix = PreTransformationMatrix;
 
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
-                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &WolfDesc)))
+                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
         CRASH("Failed Clone Dummy Wolf");
 
-    WolfDesc.vPosition = XMVectorSet(0.f, -120.f, 0.f, 1.f);
+    AuguDesc.vPosition = XMVectorSet(0.f, -120.f, 0.f, 1.f);
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
-                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &WolfDesc)))
+                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
         CRASH("Failed Clone Dummy Wolf");
 
     return S_OK;

@@ -29,10 +29,11 @@ public:
 	virtual	void		Late_Update(_float fTimeDelta) override;
 	virtual	void		Render() override;
 	virtual	void		Render_Shadow() override;
+	virtual void		Render_OutLine() override;
 
 private:
-	CModel*		m_pModelCom = { nullptr };
-	CShader*	m_pShaderCom = { nullptr };
+	CModel*				m_pModelCom = { nullptr };
+	CShader*			m_pShaderCom = { nullptr };
 
 private:
 	HRESULT				Ready_Components(_fmatrix PreTransformMatrix);
