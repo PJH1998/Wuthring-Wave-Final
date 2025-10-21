@@ -69,6 +69,10 @@ void CGameObject::Render_Shadow()
 {
 }
 
+void CGameObject::Render_OutLine()
+{
+}
+
 HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, const _wstring& strComponentTag, CComponent** ppOut, void* pArg)
 {
 	auto iter = m_Components.find(strComponentTag);

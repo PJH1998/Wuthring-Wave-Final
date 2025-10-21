@@ -24,7 +24,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
 
     return Out;
-}
+} 
 
 struct PS_IN
 {
