@@ -38,6 +38,7 @@ private:
 	_float							m_fDamp = {};			// °¨¼è °è¼ö
 
 private:
+	void							Mouse_Scroll(_float fTimeDelta);
 	//void							Spring();
 	void							Compute_CamPos();
 	void							Check_Ray();

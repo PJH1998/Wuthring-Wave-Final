@@ -39,6 +39,7 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	// 0. Cam Rotate
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)
 		__super::Mouse_Move_Up();
+	Mouse_Scroll(fTimeDelta);
 
 	// 1. Spring
 
@@ -60,6 +61,11 @@ void CSpringCamera_Edit::Render()
 {
 }
 
+void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
+{
+	m_fDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+}
+
 void CSpringCamera_Edit::Compute_CamPos()
 {
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
@@ -79,10 +85,13 @@ void CSpringCamera_Edit::Check_Ray()
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vMyPos, vMyPos + vLook * m_fDistance, &vOut))
+	{
 		cout << "맞음!" << endl;
-	else
-		cout << "안맞음!" << endl;
-	//m_pTransformCom->Set_State(STATE::POSITION, vPos - vLook * m_fDistance);
+		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
+	}
+	//else
+	//	cout << "안맞음!" << endl;
+
 }
 
 void CSpringCamera_Edit::Ready_Component()

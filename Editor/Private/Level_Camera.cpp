@@ -3,6 +3,7 @@
 
 #include "SpringCamera_Edit.h"
 #include "EditDummy_Wolf.h"
+#include "EditDummy_Map.h"
 
 #include	"Map_Interface.h"
 
@@ -71,15 +72,18 @@ void CLevel_Camera::Ready_Dummy()
 	_matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f));
 	WolfDesc.PreTransformMatrix = PreTransformationMatrix;
 
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"),
-	//	ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
-	//	CRASH("Failed Clone Dummy Wolf");
-
 	WolfDesc.fSpeedPerSec = 100.f;
 	WolfDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"),
 		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
 		CRASH("Failed Clone Dummy Wolf");
+
+	CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+	MapDesc.PreTransformMatrix = PreTransformationMatrix;
+	MapDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &MapDesc)))
+		CRASH("Failed Clone Dummy Map");
 }
 
 CLevel_Camera* CLevel_Camera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
