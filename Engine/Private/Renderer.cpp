@@ -3,6 +3,7 @@
 
 #include "GameInstance.h"
 #include "GameObject.h"
+#include "ShaderFilter.h"
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice },
@@ -27,8 +28,8 @@ HRESULT CRenderer::Initialize()
 		return E_FAIL;
 	if (FAILED(Ready_MRT()))
 		return E_FAIL;
-//	if (FAILED(Ready_Shadow_DSV()))
-
+	if (FAILED(Ready_Shader_Filter()))
+		return E_FAIL;
 
 	m_pVIBuffer = CVIBuffer_Rect::Create(m_pDevice, m_pContext);
 	if (nullptr == m_pVIBuffer)
@@ -66,6 +67,7 @@ void CRenderer::Render()
 {
 	Render_Priority();
 	Render_Shadow();
+	Render_Outline();
 	Render_NonBlend();
 	Render_Light();
 	Render_Combined();
@@ -74,6 +76,7 @@ void CRenderer::Render()
 	Render_Blur();
 	Render_Blend();
 	Render_Distortion();
+	Render_LUT();
 	Render_UI();
 	Render_Fade();
 
@@ -104,8 +107,8 @@ void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
 	D3D11_VIEWPORT Viewport = {};
 	Viewport.TopLeftX = 0.f;
 	Viewport.TopLeftY = 0.f;
-	Viewport.Width = iWinSizeX;
-	Viewport.Height = iWinSizeY;
+	Viewport.Width = static_cast<_float>(iWinSizeX);
+	Viewport.Height = static_cast<_float>(iWinSizeY);
 	Viewport.MinDepth = 0.f;
 	Viewport.MaxDepth = 1.f;
 
@@ -151,6 +154,24 @@ void CRenderer::Render_Shadow()
 	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 }
 
+void CRenderer::Render_Outline()
+{
+	if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+	   CRASH("Failed Begin MRT");
+
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_OutLine();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)].clear();
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_NonBlend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
@@ -172,28 +193,32 @@ void CRenderer::Render_NonBlend()
 void CRenderer::Render_Light()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
 	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Render Fail")
+		CRASH("Failed Bind WorldMatrix");
 	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Render Fail")
+		CRASH("Failed Bind ViewMatrix");
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Render Fail")
+		CRASH("Failed Bind ProjMatrix");
 	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
-		CRASH("Render Fail")
+		CRASH("Failed Bind ViewMatrixInv");
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
-		CRASH("Render Fail")
+		CRASH("Failed Bind ProjMatrixInv");
 	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Render Fail")
+		CRASH("Failed Bind CamPosition");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
-		CRASH("Render Fail")
+		CRASH("Failed Bind RT_Normal");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
-		CRASH("Render Fail")
+		CRASH("Failed Bind RT_Depth");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Mat_Specular"), m_pShader, "g_Mat_SpecularTexture")))
-		CRASH("Render Fail")
+		CRASH("Failed Bind RT_Mat_Specular");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Mat_Ambient"), m_pShader, "g_Mat_AmbientTexture")))
-		CRASH("Render Fail")
+		CRASH("Failed Bind RT_Mat_Ambient");
+
+	//Toon Ramp Texture
+	if (FAILED(m_pFilter->Bind_Ramp_Texture(m_pShader, "g_RampTexture")))
+		return;
 
 	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
 
@@ -233,6 +258,9 @@ void CRenderer::Render_Combined()
 		CRASH("Failed Bind CSM Resource");
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
 		CRASH("Render Fail")
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::CONBINED))))
@@ -375,6 +403,9 @@ void CRenderer::Render_Blend()
 
 void CRenderer::Render_Distortion()
 {
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+		CRASH("Render Fail")
+
 	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
 		CRASH("Render Fail")
 	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
@@ -393,6 +424,22 @@ void CRenderer::Render_Distortion()
 		CRASH("Render Fail")
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DISTORTION));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_LUT()
+{
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+		CRASH("Failed Bind RT_Backbuffer");
+
+	if (FAILED(m_pFilter->Bind_LUT_Texture(m_pShader, "g_LUT_Texture", m_iLUT_Index, "g_iLutIndex")))
+		return;
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::LUT));
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
@@ -438,7 +485,7 @@ void CRenderer::Render_Debug()
 	}
 	m_DebugComponents.clear();
 
-	{   // ?붾쾭洹몄슜 ?뚮뜑?寃잛뿉 洹몃━湲?
+	{   
 
 		if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Debug"))))
 			CRASH("MRT_Debug");
@@ -560,7 +607,7 @@ HRESULT CRenderer::Ready_MRT()
 	
 #pragma endregion
 
-	// RENDERGROUP::SHADOW_MAP // ���߰�
+	// RENDERGROUP::SHADOW_MAP // 미구현
 #pragma region MRT_SHADOW_MAP
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow_Map"), TEXT("RT_LightDepth_Map"))))
 		ASSERT_CRASH(false);
@@ -626,10 +673,15 @@ HRESULT CRenderer::Ready_Shadow_DSV()
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D)))
 		CRASH("Shadow DSV Texture");
 
-	//if (FAILED(m_pDevice->CreateDepthStencilView(pTexture2D, nullptr, &m_pShadowDSV)))
-	//	CRASH("Shadow DSV");
-
 	Safe_Release(pTexture2D);
+
+	return S_OK;
+}
+
+HRESULT CRenderer::Ready_Shader_Filter()
+{
+	m_pFilter = CShaderFilter::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pFilter);
 
 	return S_OK;
 }
@@ -668,6 +720,7 @@ void CRenderer::Free()
 
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);
+	Safe_Release(m_pFilter);
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);

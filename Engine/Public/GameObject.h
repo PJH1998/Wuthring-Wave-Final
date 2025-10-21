@@ -29,6 +29,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta);
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
+	virtual		void			Render_OutLine();
 
 	// 異⑸룎 ?? 遺꾧린???곕씪 ?몄텧?섎뒗 ?⑥닔
 	// iLayer : ?곷???CollisionLayer

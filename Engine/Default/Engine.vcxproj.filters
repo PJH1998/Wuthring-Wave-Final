@@ -235,6 +235,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
+      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -432,9 +435,6 @@
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instamce\Mesh</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Point</Filter>
     </ClInclude>
@@ -477,6 +477,10 @@
     </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\public\ShaderFilter.h">
+      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -693,6 +697,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Mesh_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ShaderFilter.cpp">
+      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

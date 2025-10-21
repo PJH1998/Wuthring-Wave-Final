@@ -47,6 +47,7 @@ void CEditDummy_Augusta::Late_Update(_float fTimeDelta)
 {
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this);
 }
 
 void CEditDummy_Augusta::Render()
@@ -60,9 +61,9 @@ void CEditDummy_Augusta::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-		_bool HasNormal = { false };
+		_bool HasNormal = { true };
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-			HasNormal = true;
+			HasNormal = false;
 
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
@@ -83,6 +84,23 @@ void CEditDummy_Augusta::Render_Shadow()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pShaderCom->Begin(5);
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CEditDummy_Augusta::Render_OutLine()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pShaderCom->Begin(6);
 
 		m_pModelCom->Render(i);
 	}
