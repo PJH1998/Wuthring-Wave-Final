@@ -766,7 +766,7 @@
     </ClCompile>
     <ClCompile Include="..\private\ShaderFilter.cpp">
       <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
-    </ClInclude>
+	</ClCompile>
     <ClCompile Include="..\Private\AnimMachine.cpp">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
     </ClCompile>
