@@ -46,6 +46,7 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
 
 
+    m_pColliderCom->Set_Gravity(true);
 #endif // _DEBUG
 
     return S_OK;
@@ -60,8 +61,8 @@ void CPlayerAugusta::Priority_Update(_float fTimeDelta)
     
 
     // 2. 땅이면 Gravity 끄기.
-    if (m_pColliderCom->IsLand())
-        m_pColliderCom->Set_Gravity(false);
+  /*  if (m_pColliderCom->IsLand())
+        m_pColliderCom->Set_Gravity(false);*/
     
 }
 
@@ -76,6 +77,16 @@ void CPlayerAugusta::Update(_float fTimeDelta)
     }
 
     Change_State(fTimeDelta);
+
+
+    // 현재 위치 - 1Frame 이전 위치 값 계산
+    _vector vVelocity = m_pTransformCom->Get_Velocity();
+
+    // Collider 갱신
+    m_pColliderCom->Update(vVelocity);
+
+    if (m_strPreAnimation != m_strCurrentAnimation)
+        m_fTrackPosition = 0.f;
 }
 
 void CPlayerAugusta::Late_Update(_float fTimeDelta)
@@ -150,27 +161,14 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
     {
         m_strCurrentAnimation = "Jump_Walk_LF";
 
-        _float3 vNormal = {};
-        if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
-            m_pColliderCom->Set_Gravity(true);
+        //_float3 vNormal = {};
+        //if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
+        //    m_pColliderCom->Set_Gravity(true);
     }
         
 
     // 추가 이동량 지정.
     m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 100.f);
-
-    // 현재 위치 - 1Frame 이전 위치 값 계산
-    _vector vVelocity = m_pTransformCom->Get_Velocity();
-
-    // Collider 갱신
-    m_pColliderCom->Update(vVelocity);
-
-    
-    
-
-
-    if (m_strPreAnimation != m_strCurrentAnimation)
-        m_fTrackPosition = 0.f;
 }
 
 void CPlayerAugusta::Bind_Resources()
@@ -206,8 +204,8 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
     ColliderDesc.vPos = { 0.f, 0.f, 0.f };
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-    ColliderDesc.fHeight = 3.f;
-    ColliderDesc.fRadius = 2.f;
+    ColliderDesc.fHeight = 10.f;
+    ColliderDesc.fRadius = 20.f;
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
