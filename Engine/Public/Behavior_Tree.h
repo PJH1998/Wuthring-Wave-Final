@@ -11,6 +11,10 @@ public:
 	{
 		CBlackBoard* pBlackBoard;
 	}BEHAVIOR_TREE_DESC;
+	enum BT_TYPE
+	{
+		ACTION, SELECTOR, SEQUENCE
+	};
 
 private:
 	CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -31,6 +35,9 @@ public:
 private:
 	CBT_Node* m_pRoot = { nullptr };
 	CBlackBoard* m_pBlackBoard = {nullptr};
+
+private:
+	void Load_Tree_Graph(ifstream& File);
 
 public:
 	static CBehavior_Tree* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CBT_Node* pRoot);

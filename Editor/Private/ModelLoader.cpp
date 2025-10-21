@@ -392,7 +392,7 @@ void CModelLoader::Load_File()
 							}
 							_string SaveFilePath = "../../Client/Bin/Resource/Map/Temp";
 
-							//?ш린???ｌ뼱?쇰릺??嫄????寃쎈줈 => ?뚯씪 ?대쫫 ?쇱빞??
+							
 
 
 							_string FileName = entry.path().filename().string();
@@ -436,8 +436,8 @@ void CModelLoader::Save_File()
 
 	ImGuiFileDialog::Instance()->OpenDialog("Save Model", "Export File", ".dat", config);
 
-	ImVec2 vMinSize = ImVec2(600, 400);  // 理쒖냼 ?ш린
-	ImVec2 vMaxSize = ImVec2(800, 400); // 理쒕? ?ш린
+	ImVec2 vMinSize = ImVec2(600, 400); 
+	ImVec2 vMaxSize = ImVec2(800, 400);
 
 	if (ImGuiFileDialog::Instance()->Display("Save Model"
 		, ImGuiWindowFlags_NoCollapse
