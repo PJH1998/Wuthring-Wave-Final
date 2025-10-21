@@ -132,9 +132,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vector vShade = g_ShadeTexture.Sample(DefaultSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vDiffuse * vShade * vSpecular;
+    Out.vColor = vDiffuse * vShade;// * vSpecular;
     
-///////// Shadow ï¿½ï¿½ï¿½ï¿½ /////////
+///////// Shadow Àû¿ë /////////
 
     int iCascadeIndex = 0;
     
@@ -148,8 +148,8 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
    
     float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
    
-    //float fSlopeFactor = (1.f - fDot); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Î°ï¿½, ï¿½Ü¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ï¿½ï¿½
-    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    //float fSlopeFactor = (1.f - fDot); // ¿¬»ê ºñ¿ë ½Î°Ô, ´Ü¼ø ºûÀÌ ½ºÃÄ µé¾î¿Ã¼ö·Ï Ä¿Áö°Ô
+    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // ¸éÀÇ ±â¿ï±â¸¦ °è»êÇÑ ¹°¸®Àû ¿¬»ê
 
     float BlendFactor = 0.f;
     
@@ -158,14 +158,14 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     // Blend Cascade
-    if (iCascadeIndex < 3)          // Cascade ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    if (iCascadeIndex < 3)          // Cascade ±¸¿ª ¸¶Áö¸· Á¦¿Ü
     {
         int iBlendCascadeIndex = iCascadeIndex + 1;
     
         float CurrentNear = g_vClipDistances[iCascadeIndex];
         float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
         
-        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Blend ï¿½Ò°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ( 0.15 == 0.85 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ )
+        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // ¾î´À±¸°£ºÎÅÍ Blend ÇÒ°ÇÁö °áÁ¤ ( 0.15 == 0.85 ±¸°£ºÎÅÍ )
         
         BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
         
@@ -187,7 +187,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 2);      // 2 == Kernel size
     }
     
-    // ï¿½ï¿½ï¿½ï¿½ Cascade
+    // ÇöÀç Cascade
     {
         vector vShadowPos;
         matrix matShadowLightVP;

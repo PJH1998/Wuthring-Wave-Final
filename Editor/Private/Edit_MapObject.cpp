@@ -166,13 +166,17 @@ void CEdit_MapObject::Render()
 
     for (_uint i = 0; i < m_pModelComArray[m_iLODIndex]->Get_NumMesh(); ++i)
     {
+        _bool HasNormal = { true };
         if (m_TexMode)
         {
-            //Ŀ���� �ؽ��� ���� ����ŷ �̹��� ��� ����� �ȵ�.
+            
             if (m_pDiffuseTextureCom[i])
                 m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture",0);
+
             if (m_pNormalTextureCom[i])
-                m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture");
+                if(FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
+                    HasNormal = false;
+
             if (m_pMaskTextureCom[i])
                 m_pMaskTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture");
             else
@@ -184,16 +188,13 @@ void CEdit_MapObject::Render()
         {
             m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-            _bool HasNormal = { true };
-
             if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                 HasNormal = false;
-
-            m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
             if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         }
+        m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
@@ -571,10 +572,13 @@ void CEdit_MapObject::About_Texture()
     {
         IGFD::FileDialogConfig config;
 
-        //config.path = "C:/Users/dnheu/source/repos";
-        config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
-        //洹몃븣洹몃븣 諛붽퓭?쇨린.
-        //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Json_Texture";
+        
+        //config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
+
+        //When Many Model Need Same texture, use this
+        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/";
+        //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/The_False_Sovereign/Rock/SM_Tab_Roc_04AH/Mat/Tex/T_Tab_Roc_25A_D.png";
+
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         _char Text[32] = {};
@@ -651,7 +655,7 @@ void CEdit_MapObject::About_Texture()
             ImGui::EndCombo();
         }
 
-        //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/Rock/SM_Sev_Roc_15AM/Mat/Tex/T4_Com2_Roc_05A_D.png";
+        //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/The_False_Sovereign/Rock/SM_Tab_Roc_04AH/Mat/Tex/T_Tab_Roc_25A_D.png";
 
         if (ImGui::BeginCombo("Diffuse", m_SelectedDiffuseName[m_iSelectedMesh].c_str()))
         {

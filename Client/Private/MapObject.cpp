@@ -110,7 +110,6 @@ void CMapObject::Ready_Component(void* pArg)
 
 	for (_uint i = 0; i < V; ++i)
 	{
-
 		_wstring ModelCom = Model;
 		ModelCom.pop_back();
 		ModelCom += to_wstring(i);
@@ -175,8 +174,11 @@ void CMapObject::Free()
 	__super::Free();
 
 	Safe_Release(m_pShaderCom);
+	Safe_Release(m_pRigidbodyCom);
+
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);
+
 	m_pModelComArray.clear();
-	Safe_Release(m_pRigidbodyCom);
+
 }

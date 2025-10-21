@@ -13,11 +13,6 @@ CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 void CParser::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
 {
-    m_pGameInstance->Add_Work([=]() {
-        m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject"),
-            CMapObject::Create(m_pDevice, m_pContext));
-        });
-
     _char FileDrive[MAX_PATH] = {};
     _char FileDir[MAX_PATH] = {};
     _char FileName[MAX_PATH] = {};

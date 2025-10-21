@@ -80,9 +80,6 @@ HRESULT CLevel_Test::Ready_Layer_Augusta()
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
-    m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
-        CMapObject::Create(m_pDevice, m_pContext));
-
     _char FileDrive[MAX_PATH] = {};
     _char FileDir[MAX_PATH] = {};
     _char FileName[MAX_PATH] = {};

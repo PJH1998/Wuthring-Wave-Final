@@ -52,6 +52,8 @@ private:
 
 	class CEdit_Brush* m_pBrush = { nullptr };
 
+	class CShader_Interface* pShaderInterface = { nullptr };
+
 
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;

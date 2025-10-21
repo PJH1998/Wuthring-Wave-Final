@@ -7,6 +7,7 @@
 #include"Edit_PreViewModel.h"
 #include"Edit_LightObject.h"
 #include"Edit_Brush.h"
+#include"Shader_Interface.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -35,6 +36,7 @@ HRESULT CLevel_Map::Initialize()
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
     //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
+    pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -72,7 +74,7 @@ void CLevel_Map::Update(_float fTimeDelta)
     }
 
     Make_MousePos();
-
+    pShaderInterface->Update_Shadow();
     if (m_pGameInstance->Get_DIKeyState(DIK_GRAVE) == KEYSTATE::PRESS && m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
         m_pPickedObject = nullptr;
 }
@@ -401,7 +403,7 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-    string FolderPath = "../../Client/Bin/Resource/Map/";
+    string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;
 
@@ -508,7 +510,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
     //m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
 
     //?몄뒪?댁뒪 紐⑤뜽
-    
+
     /*m_pGameInstance->Add_Work([&](){
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
             CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
@@ -516,19 +518,19 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
-        CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
+            CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
         });
     m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"), 
-        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"),
+            CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
         });
 
     m_pGameInstance->Add_Work([&]() {
 
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
-        CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
+        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
+            CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
         });
 
 
@@ -536,10 +538,10 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
             CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
-       
+
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
             CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
-        
+
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
             CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
 
@@ -553,18 +555,16 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
             CEdit_MapObject::Create(m_pDevice, m_pContext));
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
-            CEdit_LightObject::Create(m_pDevice, m_pContext));
         });
 
-    m_pGameInstance->Add_Work([&]() {
+    m_pGameInstance->Wait_Thread_End();
+
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
+        CEdit_LightObject::Create(m_pDevice, m_pContext));
+
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
-        });
-
-
-    m_pGameInstance->Wait_Thread_End();
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
         CEdit_Brush::Create(m_pDevice, m_pContext));
@@ -739,6 +739,6 @@ void CLevel_Map::Free()
             Safe_Release(pGameObject);
         Pair.second.clear();
     }
-    
+    Safe_Release(pShaderInterface);
     m_SaveObjects.clear();
 }

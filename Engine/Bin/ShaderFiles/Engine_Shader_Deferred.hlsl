@@ -132,7 +132,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vector vShade = g_ShadeTexture.Sample(DefaultSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vDiffuse * vShade * vSpecular;
+    Out.vColor = vDiffuse * vShade;// * vSpecular;
     
 ///////// Shadow Àû¿ë /////////
 
