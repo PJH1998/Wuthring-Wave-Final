@@ -48,6 +48,12 @@ void CParser::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
 
 void CParser::Read_Map_Dat(const _string pFilePath, LEVEL eLevel)
 {
+
+    _matrix PreTransformMatrix = XMMatrixIdentity();
+    //_float fSize = 0.01f;
+    _float fSize = 0.1f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
     ifstream File(pFilePath, ios::binary);
 
     if (!File.is_open())
@@ -116,10 +122,6 @@ void CParser::Read_Map_Dat(const _string pFilePath, LEVEL eLevel)
     else
     {
         _uint NameLength;
-
-        _matrix PreTransformMatrix = XMMatrixIdentity();
-        _float fSize = 0.01f;
-        PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
         CMapObject::MAP_LOAD Desc{};
 

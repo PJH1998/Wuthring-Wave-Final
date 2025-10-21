@@ -475,9 +475,10 @@ void CEdit_MapObject::Export_MaterialData()
 
             if(m_ExportAllLOD)
             {
-                for (_uint i = 0; i < m_iNumLOD; ++i)
+                for (_uint i = 1; i <= m_iNumLOD; ++i)
                 {
-                    ofstream File(strFolderName + to_string(i++) + FileExt);
+                    _string JsonName = strFolderName + to_string(i) + FileExt;
+                    ofstream File(JsonName);
                     File << Totaljson.dump(4);
                     File.close();
                 }

@@ -78,11 +78,16 @@ void CMapObject::Render()
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
 	_uint iNumMesh = m_pModelComArray[m_iNumLOD]->Get_NumMesh();
+
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		_bool HasNormal = { true };
 		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 
+		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			HasNormal = false;
+
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 		m_pShaderCom->Begin(m_iShaderPassIndex);

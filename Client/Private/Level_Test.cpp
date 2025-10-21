@@ -13,7 +13,7 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    Ready_Layer_Map("C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
+    Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
     Ready_Layer_Augusta();
 
