@@ -55,7 +55,6 @@ HRESULT CLevel_Test::Initialize()
     }
 	File.close();
 
-    //Ready_Layer_Augusta();
     Ready_Layer_PlayerManager();
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
@@ -113,7 +112,9 @@ void CLevel_Test::Ready_Layer_PlayerManager()
 
     // 2. Galbrena 정의
 
+
     // 3. Player 정의
+
 
     // 4. Controller 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerController"),
@@ -121,30 +122,6 @@ void CLevel_Test::Ready_Layer_PlayerManager()
         CRASH("Failed Ready Layer Augusta");
 }
 
-void CLevel_Test::Ready_Layer_Augusta()
-{
-    _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
-	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
-	_wstring wstrComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
-    _uint iShaderPath = 0;
-
-    CAnimationDummy::ANIMATION_ACTOR_DESC Desc{};
-    Desc.fSpeedPerSec = 10.f;
-    Desc.fRotationPerSec = XMConvertToRadians(90.f);
-    Desc.strModelTag = wStrModelTag;
-    Desc.strShaderTag = wstrShaderTag; 
-    Desc.strComputeShaderTag = wstrComputeShaderTag;
-    Desc.iShaderPath = iShaderPath;
-    Desc.vScale = _float3(1.f, 1.f, 1.f);
-    Desc.vRotation = _float3(0.f, 0.f, 0.f);
-    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
-    
-    Desc.eLevel = m_eCurLevel;
-
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Dummy_Augusta"),
-        ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc)))
-        CRASH("Failed Ready Layer Augusta");
-}
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
