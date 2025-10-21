@@ -213,10 +213,6 @@ void CRenderer::Render_Light()
 		CRASH("Failed Bind RT_Normal");
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
 		CRASH("Failed Bind RT_Depth");
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Mat_Specular"), m_pShader, "g_Mat_SpecularTexture")))
-		CRASH("Failed Bind RT_Mat_Specular");
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Mat_Ambient"), m_pShader, "g_Mat_AmbientTexture")))
-		CRASH("Failed Bind RT_Mat_Ambient");
 
 	//Toon Ramp Texture
 	if (FAILED(m_pFilter->Bind_Ramp_Texture(m_pShader, "g_RampTexture")))
@@ -535,14 +531,6 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Depth"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
-	/* RenderTarget Mat_Specular */
-	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Mat_Specular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
-	   ASSERT_CRASH(false);
-
-	/* RenderTarget Mat_Ambient */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Mat_Ambient"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
-		ASSERT_CRASH(false);
-
 	/* RenderTarget Shade */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Shade"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
@@ -594,10 +582,6 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Normal"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Depth"))))
-		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Mat_Specular"))))
-		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Mat_Ambient"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
