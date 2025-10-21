@@ -15,7 +15,7 @@ public:
 
 	typedef struct tagPlayerDesc : public CActor::ACTOR_DESC
 	{
-		class CPlayerManager* pController = { nullptr };
+		class CPlayerParty* pController = { nullptr };
 		vector<pair<_wstring, _wstring>> PartPrototypes;
 		_float3 vScale = { 1.f, 1.f, 1.f};
 		_float3 vRotation = { 0.f, 0.f, 0.f };
@@ -44,7 +44,7 @@ public:
 public:
 
 protected:
-	class CPlayerManager* m_pController = { nullptr }; // 走番切
+	class CPlayerParty* m_pController = { nullptr }; // 走番切
 
 	
 

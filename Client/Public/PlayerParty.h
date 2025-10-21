@@ -4,7 +4,7 @@
 
 NS_BEGIN(Client)
 // Player Container들을 관리 감독하는 컨트롤러
-class CPlayerManager final : public CGameObject
+class CPlayerParty final : public CGameObject
 {
 public:
 	enum PLAYERTYPE
@@ -16,18 +16,18 @@ public:
 	};
 
 public:
-	typedef struct tagPlayerControllerDesc
+	typedef struct tagPlayerPartyDesc
 	{
 		LEVEL eCurLevel = {LEVEL::END };
 		_uint iPlayerCount = {};
 		vector<PLAYER_SPEC> PlayerSpecs = {};
-	}PLAYER_CONTROLLER_DESC;
+	}PLAYER_PARTY_DESC;
 
 #pragma region 기본 함수들
 public:
-	explicit CPlayerManager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CPlayerManager(const CPlayerManager& Prototype);
-	virtual ~CPlayerManager() = default;
+	explicit CPlayerParty(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CPlayerParty(const CPlayerParty& Prototype);
+	virtual ~CPlayerParty() = default;
 
 
 public:
@@ -53,10 +53,10 @@ private:
 	_uint m_iPrevPlayerIdx = {};
 
 private:
-	HRESULT Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc);
+	HRESULT Ready_Players(const PLAYER_PARTY_DESC* pDesc);
 
 public:
-	static		CPlayerManager* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CPlayerParty* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void Free() override;
 

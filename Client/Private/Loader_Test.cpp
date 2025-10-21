@@ -7,7 +7,7 @@
 #include "MonsterTest.h"
 
 #include "PlayerAugusta.h"
-#include "PlayerManager.h"
+#include "PlayerParty.h"
 
 
 #pragma region BehaviorTree
@@ -225,10 +225,10 @@ HRESULT CLoader_Test::Load_Component()
 HRESULT CLoader_Test::Load_PlayerController()
 {
     
-    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerManager");
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerParty");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrControllerTag
-        , CPlayerManager::Create(m_pDevice, m_pContext))))
+        , CPlayerParty::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
     return S_OK;

@@ -163,7 +163,7 @@
     <ClInclude Include="..\Public\PlayerAugusta.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerManager.h">
+    <ClInclude Include="..\Public\PlayerParty.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\StateMachine.h">
@@ -247,7 +247,7 @@
     <ClCompile Include="..\Private\PlayerAugusta.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerManager.cpp">
+    <ClCompile Include="..\Private\PlayerParty.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\StateMachine.cpp">

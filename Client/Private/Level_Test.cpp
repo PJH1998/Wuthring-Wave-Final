@@ -5,7 +5,7 @@
 #include "MonsterTest.h"
 
 #include "GameSystem.h"
-#include "PlayerManager.h"
+#include "PlayerParty.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -55,7 +55,7 @@ HRESULT CLevel_Test::Initialize()
     }
 	File.close();
 
-    Ready_Layer_PlayerManager();
+    Ready_Layer_PlayerParty();
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
@@ -92,24 +92,24 @@ void CLevel_Test::Render()
 {
 }
 
-void CLevel_Test::Ready_Layer_PlayerManager()
+void CLevel_Test::Ready_Layer_PlayerParty()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
     //vScale = { 1.f, 1.f, 1.f };
-    vScale = { 0.01f, 0.01f, 0.01f };
+    vScale = { 0.1f, 0.1f, 0.1f };
     vRotation = { 0.f, 0.f, 0.f };
-    vPosition = { -20.f, 50.f, -180.f };
+    vPosition = { -14.1f, 50.f, -180.f };
 
-    CPlayerManager::PLAYER_CONTROLLER_DESC Desc{};
+    CPlayerParty::PLAYER_PARTY_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
-    Desc.iPlayerCount = CPlayerManager::PLAYERTYPE::TYPE_END;
+    Desc.iPlayerCount = CPlayerParty::PLAYERTYPE::TYPE_END;
 
     // 0. vector 크기 정의
-    Desc.PlayerSpecs.resize(CPlayerManager::PLAYERTYPE::TYPE_END);
+    Desc.PlayerSpecs.resize(CPlayerParty::PLAYERTYPE::TYPE_END);
 
     // 1. Augusta 정의.
-    Desc.PlayerSpecs[CPlayerManager::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayerManager::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
 
     // 2. Galbrena 정의
 
@@ -118,7 +118,7 @@ void CLevel_Test::Ready_Layer_PlayerManager()
 
 
     // 4. Controller 생성.
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerManager"),
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerParty"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
         CRASH("Failed Ready Layer Augusta");
 }

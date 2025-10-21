@@ -17,7 +17,6 @@ typedef struct tagPartSpec
 
 namespace PlayerData
 {
-
     static const _tchar* AUGUSTA_ACTOR_TAG = TEXT("Prototype_GameObject_Actor_Augusta");
 
     static CPlayer::PLAYER_DESC GetAugustaCloneData(_float3 vScale, _float3 vRotation, _float3 vPostion, LEVEL eLevel)

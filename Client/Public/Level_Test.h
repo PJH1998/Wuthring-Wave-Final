@@ -16,7 +16,7 @@ public:
 	virtual		void			Render() override;
 
 private:
-	void Ready_Layer_PlayerManager();
+	void Ready_Layer_PlayerParty();
 	void Ready_Layer_Augusta();
 
 private:
