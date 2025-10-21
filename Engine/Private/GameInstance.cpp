@@ -426,14 +426,6 @@ HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCame
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
 }
-void CGameInstance::Change_Distance(_float fDistance)
-{
-	m_pCamera_Manager->Change_Distance(fDistance);
-}
-void CGameInstance::Change_FixedDistance(_float fFixedDistance)
-{
-	m_pCamera_Manager->Change_FixedDistance(fFixedDistance);
-}
 _float CGameInstance::Get_CurrentCamera_Near()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Near();

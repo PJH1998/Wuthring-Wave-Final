@@ -109,22 +109,6 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
     return S_OK;
 }
 
-void CCamera_Manager::Change_Distance(_float fDistance)
-{
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_Distance(fDistance);
-}
-
-void CCamera_Manager::Change_FixedDistance(_float fFixedDistance)
-{
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_FixedDistance(fFixedDistance);
-}
-
 _float CCamera_Manager::Get_CurrentCamera_Near()
 {
     if (nullptr == m_pMainCamera || true == m_isFree)

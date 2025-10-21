@@ -24,6 +24,7 @@ HRESULT CSpringCamera_Edit::Initialize_Clone(void* pArg)
 	Ready_Component();
 
 	m_fDistance = 100.f;
+	m_fFixedDistance = 100.f;
 
     return S_OK;
 }
@@ -40,6 +41,7 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)
 		__super::Mouse_Move_Up();
 	Mouse_Scroll(fTimeDelta);
+	Lerp_Distance(fTimeDelta);
 
 	// 1. Spring
 
@@ -61,9 +63,16 @@ void CSpringCamera_Edit::Render()
 {
 }
 
+void CSpringCamera_Edit::Lerp_Distance(_float fTimeDelta)
+{
+	if (0.1f < fabsf(m_fFixedDistance - m_fDistance))
+		m_fDistance += (m_fFixedDistance - m_fDistance) * fTimeDelta;// *m_fLerpSpeed;
+
+}
+
 void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
 {
-	m_fDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
 }
 
 void CSpringCamera_Edit::Compute_CamPos()
@@ -81,10 +90,12 @@ void CSpringCamera_Edit::Compute_CamPos()
 
 void CSpringCamera_Edit::Check_Ray()
 {
-	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vStartPos = XMLoadFloat4(&m_vTargetPosition);
+	_vector vDir = vCamPos - vStartPos;
+	//_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 	_float4 vOut;
-	if (true == m_pGameInstance->Ray_Cast(vMyPos, vMyPos + vLook * m_fDistance, &vOut))
+	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
 	{
 		cout << "¸ÂÀ½!" << endl;
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));

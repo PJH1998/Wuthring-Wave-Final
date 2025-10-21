@@ -134,8 +134,6 @@ public:
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
 	void			Play_Action(const _wstring& strActionTag);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
-	void			Change_Distance(_float fDistance);
-	void			Change_FixedDistance(_float fFixedDistance);
 	_float			Get_CurrentCamera_Near();
 	_float			Get_CurrentCamera_Far();
 #pragma endregion

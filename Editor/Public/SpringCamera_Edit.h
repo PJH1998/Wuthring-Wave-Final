@@ -16,7 +16,11 @@ private:
 	virtual ~CSpringCamera_Edit() = default;
 
 public:
-	void		Update_Target(const _fvector& TargetPos, _float fOffsetY) { XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; };
+	void							Set_Distance(_float fDistance) { m_fDistance += fDistance; }
+	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
+
+	void							Update_Target(const _fvector& TargetPos, _float fOffsetY)
+	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; };
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -29,8 +33,13 @@ public:
 
 private:
 	CCollider*					m_pColliderCom = { nullptr };
-	_float4						m_vTargetPosition = {};
+	_float4						m_vTargetPosition = {};		// Target Pos
+	_float4						m_vCurrentPosition = {};		// Current CamPos
 	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
+
+	// Distance Lerp
+	_float							m_fFixedDistance = {};
+	_float							m_fLerpSpeed = {};
 
 	// Spring
 	_bool							m_isSpring = { false };
@@ -38,6 +47,7 @@ private:
 	_float							m_fDamp = {};			// °¨¼è °è¼ö
 
 private:
+	void							Lerp_Distance(_float fTimeDelta);
 	void							Mouse_Scroll(_float fTimeDelta);
 	//void							Spring();
 	void							Compute_CamPos();

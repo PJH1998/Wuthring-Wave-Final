@@ -105,5 +105,7 @@ CBlackBoard* CBlackBoard::Create()
 void CBlackBoard::Free()
 {
 	__super::Free();
+#ifdef _DEBUG
 	Clear_Data();
+#endif
 }

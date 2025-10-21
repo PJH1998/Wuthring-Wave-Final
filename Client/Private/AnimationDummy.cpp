@@ -46,8 +46,9 @@ HRESULT CAnimationDummy::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
+#ifdef _DEBUG
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
-
+#endif
     m_IsPlayAnimation = true;
 
 

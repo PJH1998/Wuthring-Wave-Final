@@ -148,14 +148,19 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 
 	_vector vDir = vEndPos - vStartPos;
 
-	RRayCast ray(StartPos, (EndPos - StartPos).Normalized());
+	RRayCast ray(StartPos, (EndPos - StartPos));
 	RayCastResult result;
 
 	_float fOriginFraction = result.mFraction;
 	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
 
 	if (nullptr != pOut)
-		XMStoreFloat4(pOut, vStartPos + (result.mFraction) * vDir);
+	{
+		_float fDistanceOffset = 0.8f;
+		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
+		cout << result.mFraction << endl;
+		//result.mSubShapeID2
+	}
 
 	return fOriginFraction > result.mFraction && result.mFraction > 0.f ? true : false;
 }
