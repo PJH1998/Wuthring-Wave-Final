@@ -41,8 +41,13 @@ public:
 
 #pragma endregion
 
+public:
+	// 협주게이지?
+	void Ensemble_Skill(PLAYERTYPE iPlayerType);
+
 private:
 	vector<CPlayer*> m_Players; // 연주자들
+
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_uint m_iCurrentPlayerIdx = {};
 	_uint m_iPrevPlayerIdx = {};

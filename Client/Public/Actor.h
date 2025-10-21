@@ -1,4 +1,5 @@
 #pragma once
+#include "Client_Define.h"
 #include "ContainerObject.h"
 
 NS_BEGIN(Client)
@@ -8,10 +9,11 @@ public:
 	typedef struct tagActorDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		LEVEL eCurLevel = { LEVEL::END };
-		_wstring strShaderTag = {};
-		_wstring strComputeShaderTag = {};
-		_wstring strModelTag = {};
-		_uint iShaderPath;
+		pair<LEVEL, _wstring> shaderData = {};
+		pair<LEVEL, _wstring> computeShaderData = {};
+		pair<LEVEL, _wstring> colliderData = {};
+		pair<LEVEL, _wstring> rigidBodyData = {};
+		pair<LEVEL, _wstring> modelData = {};
 	}ACTOR_DESC;
 
 
@@ -32,18 +34,19 @@ public:
 
 #pragma endregion
 
-
 protected:
 	class CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
+	class CCollider* m_pColliderCom = { nullptr };
+	class CRigidbody* m_pRigidBodyCom = { nullptr };
+	vector<_uint> m_ShaderPaths = {}; // 동적으로 변해야함 => 객체 모델마다 Mesh 개수가다름
 	LEVEL m_eCurLevel = { LEVEL::END };
-	_uint m_iShaderPath = {};
 	_float m_fTrackPosition = {};
 
-
 private:
-	HRESULT Ready_Components(const ACTOR_DESC* pDesc);
+	// void Ready_Components(const ACTOR_DESC* pDesc);
+
 
 public:
 	virtual		CGameObject* Clone(void* pArg) = 0;

@@ -1,6 +1,7 @@
 #include "ClientPch.h"
 #include "PlayerController.h"
 #include "Player.h"
+#include "PlayerAugusta.h"
 
 #pragma region 기본 함수
 CPlayerController::CPlayerController(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -33,8 +34,18 @@ HRESULT CPlayerController::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     // 1. Players 초기화.
-    if (FAILED(Ready_Players(pDesc)))
-        return E_FAIL;
+    //if (FAILED(Ready_Players(pDesc)))
+    //    return E_FAIL;
+
+    CPlayer::PLAYER_DESC Desc{};
+    Desc = PlayerData::GetAugustaCloneData({1.f, 1.f, 1.f}
+    , { 0.f, 0.f, 0.f }, { -14.1f, 50.f, -180.f }, m_eCurLevel);
+
+    m_Players.resize(PLAYERTYPE::TYPE_END);
+    m_Players[PLAYERTYPE::AUGUSTA] = dynamic_cast<CPlayer*>(
+        m_pGameInstance->Clone_Prototype(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta")
+            , PROTOTYPE::GAMEOBJECT, &Desc));
+
 
 
 
@@ -44,18 +55,24 @@ HRESULT CPlayerController::Initialize_Clone(void* pArg)
 void CPlayerController::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
+    m_Players[m_iCurrentPlayerIdx]->Priority_Update(fTimeDelta);
 
-    //m_Players[m_iCurrentPlayerIdx]->Priority_Update(fTimeDelta);
+    //m_pAugusta->Priority_Update(fTimeDelta);
+    
 }
 
 void CPlayerController::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
+    m_Players[m_iCurrentPlayerIdx]->Update(fTimeDelta);
+    //m_pAugusta->Update(fTimeDelta);
 }
 
 void CPlayerController::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
+    m_Players[m_iCurrentPlayerIdx]->Late_Update(fTimeDelta);
+    //m_pAugusta->Late_Update(fTimeDelta);
 }
 
 void CPlayerController::Render()
@@ -67,8 +84,21 @@ void CPlayerController::Render_Shadow()
 {
 
 }
+
 #pragma endregion
 
+void CPlayerController::Ensemble_Skill(PLAYERTYPE iPlayerType)
+{
+    switch (iPlayerType)
+    {
+    case PLAYERTYPE::AUGUSTA:
+        break;
+    case PLAYERTYPE::GALBRENA:
+        break;
+    case PLAYERTYPE::PLAYER:
+        break;
+    }
+}
 
 HRESULT CPlayerController::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
 {
@@ -78,7 +108,7 @@ HRESULT CPlayerController::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
     m_Players.resize(PLAYERTYPE::TYPE_END);
 
     
-    CPlayer::PLAYER_DESC PlayerCloneDesc;
+    CPlayer::PLAYER_DESC PlayerDesc;
     CPlayer* pPlayer = { nullptr };
 
     // 2. 캐릭터 별 데이터 초기화
@@ -88,24 +118,34 @@ HRESULT CPlayerController::Ready_Players(const PLAYER_CONTROLLER_DESC* pDesc)
         {
         case PLAYERTYPE::AUGUSTA:
         {
-            PlayerCloneDesc = PlayerData::GetAugustaData();
-            PlayerCloneDesc.pController = this; // Controller Pointer만 전달?
-
+            PlayerDesc = pDesc->PlayerSpecs[PLAYERTYPE::AUGUSTA].PlayerDesc;
+            PlayerDesc.pController = this; // Controller Pointer만 전달?
             pPlayer = dynamic_cast<CPlayer*>(m_pGameInstance->Clone_Prototype(
                 ENUM_CLASS(m_eCurLevel),
                 pDesc->PlayerSpecs[i].strActorTag,
                 PROTOTYPE::GAMEOBJECT,
-                &PlayerCloneDesc));
+                &PlayerDesc));
 
             ASSERT_CRASH(pPlayer);
+
+            /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
+                , TEXT("Layer_Augusta"), pPlayer)))
+                CRASH("Augusta");*/
             m_Players[i] = pPlayer;
+            Safe_AddRef(pPlayer);
         }
             break;
         case PLAYERTYPE::GALBRENA:
             break;
+        case PLAYERTYPE::PLAYER:
+            break;
+        default:
+            break;
         }
     }
 
+    // 기본 0번 Augusta
+    m_iCurrentPlayerIdx = PLAYERTYPE::AUGUSTA;
 
     return S_OK;
 }

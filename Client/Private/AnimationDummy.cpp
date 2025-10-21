@@ -50,14 +50,10 @@ HRESULT CAnimationDummy::Initialize_Clone(void* pArg)
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 #endif // _DEBUG
 
-    
 
     m_IsPlayAnimation = true;
-
-
-    
-	m_strCurrentAnimation = "Blend_BasePose";
-    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 1.f);
+	m_strCurrentAnimation = "Pose";
+    m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
 
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
     
@@ -119,8 +115,7 @@ void CAnimationDummy::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-        //if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
-        //    return E_FAIL;
+        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
@@ -282,14 +277,14 @@ void CAnimationDummy::Bind_Resources()
 HRESULT CAnimationDummy::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
 {
     // Shader
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strShaderTag,
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), pDesc->strShaderTag,
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
     {
         CRASH("Failed Ready_ComShader");
         return E_FAIL;
     }
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(m_eCurLevel), pDesc->strComputeShaderTag,
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), pDesc->strComputeShaderTag,
         TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
     {
         CRASH("Failed Ready_ComShader");
@@ -330,7 +325,7 @@ CAnimationDummy* CAnimationDummy::Create(ID3D11Device* pDevice, ID3D11DeviceCont
         MSG_BOX("Failed to Create : CAnimationDummy");
         Safe_Release(pInstance);
     }
-
+    
     return pInstance;
 }
 

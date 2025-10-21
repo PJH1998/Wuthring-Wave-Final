@@ -62,7 +62,6 @@ void CMainApp::Post_Update()
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
-			// Level???랁븯吏 ?딆? 媛앹껜??Release
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				return;
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));
@@ -94,7 +93,6 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	// Docking 湲곕낯 ?ㅼ젙
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
@@ -162,6 +160,19 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Shader_VtxAnimMesh");
+
+	SHADER_MACRO eShaderMacro = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+	string strEntryPoint = "CSMain";
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute AnimMesh Shader");
 
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

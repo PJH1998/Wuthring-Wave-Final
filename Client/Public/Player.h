@@ -5,10 +5,23 @@ NS_BEGIN(Client)
 class CPlayer abstract : public CActor
 {
 public:
+	typedef struct tagPlayerStat
+	{
+		_float fHp = {};
+		_float fEnergyRate = {};
+		_float fAttack = {};
+	}PLAYER_STAT;
+
+
 	typedef struct tagPlayerDesc : public CActor::ACTOR_DESC
 	{
 		class CPlayerController* pController = { nullptr };
-		vector<_wstring> m_PartPrototypeTags;
+		vector<pair<_wstring, _wstring>> PartPrototypes;
+		_float3 vScale = { 1.f, 1.f, 1.f};
+		_float3 vRotation = { 0.f, 0.f, 0.f };
+		_float3 vPostion = { 0.f, 0.f, 0.f };
+		PLAYER_STAT eStat = {};
+
 	}PLAYER_DESC;
 
 

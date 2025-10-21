@@ -4,6 +4,9 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
+#include "GameSystem.h"
+#include "PlayerController.h"
+
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
 {
@@ -52,8 +55,8 @@ HRESULT CLevel_Test::Initialize()
     }
 	File.close();
 
-    Ready_Layer_Augusta();
-
+    //Ready_Layer_Augusta();
+    Ready_Layer_PlayerController();
 
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
@@ -90,7 +93,35 @@ void CLevel_Test::Render()
 {
 }
 
-HRESULT CLevel_Test::Ready_Layer_Augusta()
+void CLevel_Test::Ready_Layer_PlayerController()
+{
+    _float3 vScale{}, vRotation{}, vPosition{};
+    vScale = { 1.f, 1.f, 1.f };
+    vRotation = { 0.f, 0.f, 0.f };
+    vPosition = { -20.f, 50.f, -180.f };
+
+    CPlayerController::PLAYER_CONTROLLER_DESC Desc{};
+    Desc.eCurLevel = m_eCurLevel;
+    Desc.iPlayerCount = CPlayerController::PLAYERTYPE::TYPE_END;
+
+    // 0. vector 크기 정의
+    Desc.PlayerSpecs.resize(CPlayerController::PLAYERTYPE::TYPE_END);
+
+    // 1. Augusta 정의.
+    Desc.PlayerSpecs[CPlayerController::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayerController::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+
+    // 2. Galbrena 정의
+
+    // 3. Player 정의
+
+    // 4. Controller 생성.
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerController"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_PlayerController"), &Desc)))
+        CRASH("Failed Ready Layer Augusta");
+}
+
+void CLevel_Test::Ready_Layer_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
 	_wstring wstrShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
@@ -104,15 +135,15 @@ HRESULT CLevel_Test::Ready_Layer_Augusta()
     Desc.strShaderTag = wstrShaderTag; 
     Desc.strComputeShaderTag = wstrComputeShaderTag;
     Desc.iShaderPath = iShaderPath;
-    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
-    Desc.vRotation = _float3(0.f, 0.f, 0.f);
     Desc.vScale = _float3(1.f, 1.f, 1.f);
+    Desc.vRotation = _float3(0.f, 0.f, 0.f);
+    Desc.vPostion = _float3(-14.1f, 50.f, -180.f);
+    
     Desc.eLevel = m_eCurLevel;
 
-    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Actor_Augusta"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc);
-
-    return S_OK;
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Dummy_Augusta"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_Augusta"), &Desc)))
+        CRASH("Failed Ready Layer Augusta");
 }
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -131,4 +162,5 @@ CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 void CLevel_Test::Free()
 {
     __super::Free();
+    Safe_Release(m_pGameSystem);
 }
