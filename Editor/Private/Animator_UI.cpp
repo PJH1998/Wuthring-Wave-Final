@@ -292,13 +292,6 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
         m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha, 
         fFixedLerpRatio
     );
-    //_float3 vResultPos = {};
-    // ksta : cmr 넣으면 이부분 제거 및 변경 필요
-    //XMStoreFloat3(&vResultPos, XMVectorLerp(
-    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
-    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
-    //    fFixedLerpRatio)
-    //);
 
     _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 

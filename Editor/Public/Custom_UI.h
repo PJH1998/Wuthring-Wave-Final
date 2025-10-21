@@ -3,6 +3,8 @@
 #include "Editor_Define.h"
 #include "UIObject.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
+
 
 
 NS_BEGIN(Engine)
@@ -78,6 +80,7 @@ public:
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
+	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* Get_InstDesc() { return &m_InstanceDescs; }
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 private:
@@ -99,7 +102,7 @@ private:
 
 	_float4x4				m_CombinedWorldMatrix		= {};
 	//vector// 인스턴스별 정보 저장해야함
-
+	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> m_InstanceDescs = {};
 
 	// 현재 사용중일 텍스쳐 정보, texcoord 값, 나인섹터 기준점 등의 정보.. 필요할수도 있음
 

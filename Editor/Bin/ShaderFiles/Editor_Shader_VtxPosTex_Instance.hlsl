@@ -212,10 +212,18 @@ struct VS_IN_INSTANCE
 
 struct VS_OUT
 {
-    float4 vPosition    : SV_POSITION;
-    float2 vTexcoord    : TEXCOORD0;
-    float4 vWorldPos    : TEXCOORD1;
-    float4 vProjPos     : TEXCOORD2;
+    float4 vPosition        : SV_POSITION;
+    float2 vTexcoord        : TEXCOORD0;
+    float4 vWorldPos        : TEXCOORD1;
+    float4 vProjPos         : TEXCOORD2;
+    
+    float2 vSInstCoordX     : TEXCOORD3;
+    float2 vSInstCoordY     : TEXCOORD4;
+    float2 vClipTexcoordX   : TEXCOORD5;
+    float2 vClipTexcoordY   : TEXCOORD6;
+    
+    float2 vSInstPos        : TEXCOORD7;
+    float2 vSInstSca        : TEXCOORD8;
 };
 
 
@@ -239,6 +247,8 @@ struct VS_OUT
 //    return Out;
 //}
 
+
+// 왜안나옴?
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
     VS_OUT Out = (VS_OUT) 0;
@@ -249,7 +259,7 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
     
-    float4x4 matDestTransform =
+    float4x4 matAdditionalTransform =
     {
         In.vSInstRight,
         In.vSInstUp,
@@ -257,12 +267,39 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
         In.vSInstTrans,
     };
     
-    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matDestTransform);
+    /*
     
-    Out.vPosition = mul(vWorldPos, matWVP);
+    cpu로부터 전달받은 float4 값들로 행렬 정의 후
+    해당 행렬을 곱할때는 문제가 생기고, 곱하지 않을 때는 괜찮음.
+    
+    근데 문제가 전달받는 행렬을 항등행렬로 줘도 똑같이 문제가 생김
+    대체 왜?
+    
+    ksta : 
+    
+    */
+    
+    // 밑에 두 개 계산 순서를 바꿔봐야하나
+    
+    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matWVP);
+    float4 vWorldPosMod = vWorldPos;// mul(vWorldPos, matAdditionalTransform);
+    //float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
+    //float4 vWorldPos = float4(In.vPosition, 1.f);
+    
+    Out.vPosition = vWorldPosMod;
     Out.vTexcoord = In.vTexcoord;
     Out.vWorldPos = vWorldPos;
     Out.vProjPos = Out.vPosition;   
+    
+    Out.vSInstPos = In.vSInstTrans.xy;
+    Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+    // 이후 픽셀에서 사용
+    
+    // Pixel에서 사용 위해 바로 Output
+    Out.vSInstCoordX   = In.vSInstCoordX;
+    Out.vSInstCoordY   = In.vSInstCoordY;
+    Out.vClipTexcoordX = In.vClipTexcoordX;
+    Out.vClipTexcoordY = In.vClipTexcoordY;
     
     return Out;
 }
@@ -273,40 +310,52 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 // ==============================
 struct PS_IN
 {
-    float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
-    float4 vWorldPos : TEXCOORD1;
-    float4 vProjPos : TEXCOORD2;
+    float4 vPosition        : SV_POSITION;
+    float2 vTexcoord        : TEXCOORD0;
+    float4 vWorldPos        : TEXCOORD1;
+    float4 vProjPos         : TEXCOORD2;
+    
+    float2 vSInstCoordX     : TEXCOORD3;        // [각 인스턴스] 가 사용할 원본 텍스쳐 상의 Texcoord 정보 (아틀라스, 스프라이트 등 사용 목적)
+    float2 vSInstCoordY     : TEXCOORD4;        // [각 인스턴스] 가 사용할 원본 텍스쳐 상의 Texcoord 정보 (아틀라스, 스프라이트 등 사용 목적)
+    float2 vClipTexcoordX   : TEXCOORD5;        // [각 인스턴스] 가 사용할 본인이 차지하는 공간 상에서 Visible 하게 해 줄 범위. (체력 바 게이지 등에 사용 목적)
+    float2 vClipTexcoordY   : TEXCOORD6;        // [각 인스턴스] 가 사용할 본인이 차지하는 공간 상에서 Visible 하게 해 줄 범위. (체력 바 게이지 등에 사용 목적)
+    
+    float2 vSInstPos        : TEXCOORD7;
+    float2 vSInstSca        : TEXCOORD8;
 };
 
 struct PS_OUT
 {
-    float4 vColor : SV_TARGET0;
-    
+    float4 vColor           : SV_TARGET0;
 };
+
+// 여러 적들의 HP바를 한번에 그리는 등에 사용하기 위해, 인스턴스마다 제각각,
+// 본인 좌표 및 크기를 기준으로 클리핑을 적용한다.
+bool Calc_InstClip(float2 CoordPos, float2 InstPos, float2 InstScale, float2 ClipX /* 0~1 */, float2 ClipY /* 0~1 */) // true 일 시 Clip (discard)
+{
+}
+
+/*
+
+float2 vSInstCoordX     : TEXCOORD3;
+float2 vSInstCoordY     : TEXCOORD4;
+float2 vClipTexcoordX   : TEXCOORD5;
+float2 vClipTexcoordY   : TEXCOORD6;
+
+이 4가지 데이터를 이용하여 실제 적용되도록 만들기 필요.
+
+*/
+
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
+    // ksta : 위에 확인하고 해결되면 원래대로 되돌리고 여기도 확인할 것
+    //Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
     Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
-    
-    return Out;
-}
-
-PS_OUT PS_MAIN_BLEND(PS_IN In) //?
-{
-    PS_OUT Out = (PS_OUT) 0;
-    
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float2 vTexcoord;
-    
-    vTexcoord.x = (In.vProjPos.x / In.vProjPos.w) * 0.5f + 0.5f;
-    vTexcoord.y = (In.vProjPos.y / In.vProjPos.w) * -0.5f + 0.5f;
-    //vector vDepthDesc = g_DepthTexture.Sample(DefaultSampler, vTexcoord);
-    
-    Out.vColor.a = Out.vColor.a; // * saturate(vDepthDesc.y - In.vProjPos.w);
     
     return Out;
 }
@@ -314,8 +363,11 @@ PS_OUT PS_MAIN_BLEND(PS_IN In) //?
 PS_OUT PS_CUTOUT_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
         
     if (Out.vColor.a <= g_CutoutAlphaDiscard)
         discard;
@@ -327,8 +379,11 @@ PS_OUT PS_CUTOUT_UI(PS_IN In)
 PS_OUT PS_ALPHAENABLED_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     // 범위 내에 없으면 discard
@@ -341,7 +396,8 @@ PS_OUT PS_ALPHAENABLED_UI(PS_IN In)
 PS_OUT PS_GRADIENT_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
 
     
     // gradient 목적지 좌표 구함.
@@ -408,7 +464,7 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     float finalAlphaRatio   = (g_InverseScreenDiscard)? alphaRatio : (1.f - alphaRatio); // inverse 여부 반영    
     
      
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     Out.vColor.a *= finalAlphaRatio;
@@ -419,7 +475,8 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
 PS_OUT PS_NINESECTOR_UI(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
 
     
     // gradient 목적지 좌표 구함.
@@ -497,13 +554,18 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
     float2 border = g_SectorBorder * g_UIScale;
     float2 localPos = In.vTexcoord * vSize;
 
+
     // 9-slice 계산된 UV
     float2 resultUV = Calc_NineSectorUV(localPos, vSize, border, g_ImageSize);
     
     
     
     
-    Out.vColor = g_Texture.Sample(DefaultSampler, resultUV);
+    float2 finalUV;
+    finalUV.x = lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, resultUV.x);
+    finalUV.y = lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, resultUV.y);
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, finalUV);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     Out.vColor.a *= finalAlphaRatio;

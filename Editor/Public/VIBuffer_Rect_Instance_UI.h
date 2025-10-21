@@ -9,15 +9,12 @@ public:
 	typedef struct tagRectSingleInstanceDesc
 	{
 		// 단일 인스턴스에게 부여할 정보
-		_float4 vSInstRight	= {};					// 현재 객체의 Pivot 에 따른 상대좌표
-		_float4 vSInstUp	= {};
-		_float4 vSInstLook	= {};
-		_float4 vSInstTrans	= {};
-
+		_float4 vSInstRight	= { 1.f, 0.f, 0.f ,0.f };					// 현재 객체의 Pivot 에 따른 상대좌표
+		_float4 vSInstUp	= { 0.f, 1.f, 0.f ,0.f };
+		_float4 vSInstLook	= { 0.f, 0.f, 1.f ,0.f };
+		_float4 vSInstTrans	= { 0.f, 0.f, 0.f ,1.f };
 		_float2 vTexcoordX = {0, 0} ;
 		_float2 vTexcoordY = {1, 1} ;
-
-		// hp 등을 위해 클리핑을 위한 비율값도 필요할수도
 		_float2 vClipTexcoordX = { 0, 0 }; // based on local space, per single instance
 		_float2 vClipTexcoordY = { 1, 1 }; // based on local space, per single instance
 

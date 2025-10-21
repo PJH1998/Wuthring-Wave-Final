@@ -173,9 +173,6 @@
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h">
       <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Custom_UI_Instance.h">
-      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Editor_Define_UI.h">
       <Filter>01. Level\UI</Filter>
     </ClInclude>
@@ -258,9 +255,6 @@
     </ClCompile>
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp">
       <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\private\Custom_UI_Instance.cpp">
-      <Filter>01. Level\UI\Temp Props\Temp Object</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

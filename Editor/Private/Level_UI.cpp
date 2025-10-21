@@ -116,7 +116,7 @@ void CLevel_UI::Update(_float fTimeDelta)
     
     Update_SaveLoad();
     Update_Inspector();
-
+    Update_InstanceEditor();
 
     Update_AnimEditor(fTimeDelta);
     Update_ObjectParents();
@@ -1058,7 +1058,6 @@ void CLevel_UI::Update_Inspector()
     }
 #pragma endregion
 
-
 #pragma region [Other] AnimEdit Toggle
 
     if (ImGui::CollapsingHeader("Animation Editor"))
@@ -1069,11 +1068,7 @@ void CLevel_UI::Update_Inspector()
 
 #pragma endregion
 
-    
     ImGui::End();
-
-
-
 }
 
 void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
@@ -1401,6 +1396,237 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
 
 
+}
+
+void CLevel_UI::Update_InstanceEditor()
+{
+    if (m_pCurObj == nullptr ||
+        !dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance)
+        return;
+
+    ImGui::Begin("Instance Editor");
+
+#pragma region [Instance] Transform
+
+    // ==============================
+    // * [Instance] Transform
+    // ==============================
+    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_InstDesc();
+    static _uint iInstSelected = 0;
+
+    static _float4 vSInstRight = { 1.f, 0.f, 0.f ,0.f };
+    static _float4 vSInstUp    = { 0.f, 1.f, 0.f ,0.f };
+    static _float4 vSInstLook  = { 0.f, 0.f, 1.f ,0.f };
+    static _float4 vSInstTrans = { 0.f, 0.f, 0.f ,1.f };
+    // to transform
+    static _float3 curInstPos = {};
+    static _float3 curInstRot = {};
+    static _float3 curInstSca = {};
+
+    static _float2 vTexcoordX = { 0, 0 };
+    static _float2 vTexcoordY = { 1, 1 };
+    static _float2 vClipTexcoordX = { 0, 0 };
+    static _float2 vClipTexcoordY = { 1, 1 };
+
+
+
+    if (static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance &&
+        ImGui::CollapsingHeader("[Instance] Transform"))
+    {
+        // Add Instance
+        if (ImGui::Button("Add"))
+        {
+            CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC tDesc = {};
+            pDescs->push_back(tDesc);
+            m_pSelectedInstance = &pDescs->back();
+        }
+        ImGui::SameLine();
+        if (m_pSelectedInstance &&
+            ImGui::Button("Unselect"))
+        {
+            m_pSelectedInstance = nullptr;
+        }
+
+        if (ImGui::CollapsingHeader("Danger Section##Instance Danger"))
+        {
+            if (!pDescs->empty() &&
+                ImGui::Button("Delete"))
+                pDescs->erase(pDescs->begin() + pDescs->size() - 1);
+        }
+
+        if (m_pSelectedInstance)
+        {
+            // 선적용
+            _matrix matTransform = _matrix(
+                XMLoadFloat4(&vSInstRight),
+                XMLoadFloat4(&vSInstUp),
+                XMLoadFloat4(&vSInstLook),
+                XMLoadFloat4(&vSInstTrans)
+            );
+
+            _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
+            _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
+            XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, matTransform);
+
+            _float4x4	matStoreObjQuaternion = {};	// 쿼터니언
+            XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
+
+            XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
+            vStoreObjRotation = MAT_TO_ROT(matStoreObjQuaternion);
+            XMStoreFloat3(&vStoreObjScale, vXMObjScale);
+
+
+            // 대입하여 보여줌
+            curInstPos = vStoreObjPosition;
+            curInstRot = vStoreObjRotation;
+            curInstSca = vStoreObjScale;
+
+
+
+            // ==============================
+            // * ImgUI
+            // ==============================
+            ImGui::Text("Inst Transform");
+            ImGui::Separator();
+
+            static _float fSensitivity = 1.f;
+            ImGui::Text("Sensitivity");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Sensitivity", &fSensitivity, 0.001f, 0.001f, 10.f);
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Reset Menu"))
+            {
+                vector<_float2> targetImgSize = static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecSize;
+
+                if (ImGui::MenuItem("Reset Position")) { curInstPos = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Rotation")) { curInstRot = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Scale")) { curInstSca = { targetImgSize[0].x, targetImgSize[0].y, 1.f }; }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Transform")) {
+                    curInstPos = { 0.f, 0.f, 0.f };
+                    curInstRot = { 0.f, 0.f, 0.f };
+                    curInstSca = { 1.f, 1.f, 1.f };
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::Separator();
+
+            ImGui::PushItemWidth(60);
+
+            // Position Ctrl
+            ImGui::Text("Position");
+            ImGui::DragFloat("X##pos", &curInstPos.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##pos", &curInstPos.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##pos", &curInstPos.z, fSensitivity);
+            ImGui::Separator();
+
+            // Rotation Ctrl
+            ImGui::Text("Rotation");
+            ImGui::DragFloat("X##rot", &curInstRot.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##rot", &curInstRot.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##rot", &curInstRot.z, fSensitivity);
+            ImGui::Separator();
+
+            // Scale Ctrl
+            ImGui::Text("Scale");
+            ImGui::DragFloat("X##sca", &curInstSca.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##sca", &curInstSca.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##sca", &curInstSca.z, fSensitivity);
+            ImGui::Separator();
+
+            ImGui::PopItemWidth();
+
+            // 적용
+            _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&curInstPos));
+            _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(curInstRot.x), TO_RAD(curInstRot.y), TO_RAD(curInstRot.z));
+            _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&curInstSca));
+
+            _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
+            _float4x4 matEditResult; XMStoreFloat4x4(&matEditResult, matXMEditResult);
+
+            vSInstRight = XMFLOAT4(matEditResult.m[0][0], matEditResult.m[0][1], matEditResult.m[0][2], matEditResult.m[0][3]);
+            vSInstUp    = XMFLOAT4(matEditResult.m[1][0], matEditResult.m[1][1], matEditResult.m[1][2], matEditResult.m[1][3]);
+            vSInstLook  = XMFLOAT4(matEditResult.m[2][0], matEditResult.m[2][1], matEditResult.m[2][2], matEditResult.m[2][3]);
+            vSInstTrans = XMFLOAT4(matEditResult.m[3][0], matEditResult.m[3][1], matEditResult.m[3][2], matEditResult.m[3][3]);
+
+            m_pSelectedInstance->vSInstRight        =vSInstRight ;
+            m_pSelectedInstance->vSInstUp           =vSInstUp    ;
+            m_pSelectedInstance->vSInstLook         =vSInstLook  ;
+            m_pSelectedInstance->vSInstTrans        =vSInstTrans ;
+            m_pSelectedInstance->vTexcoordX         =vTexcoordX  ;
+            m_pSelectedInstance->vTexcoordY         =vTexcoordY  ;
+            m_pSelectedInstance->vClipTexcoordX     =vClipTexcoordX  ;
+            m_pSelectedInstance->vClipTexcoordY     =vClipTexcoordY  ;
+        }
+
+    }
+#pragma endregion
+
+    // ==============================
+    // * Additional Desc
+    // ==============================
+
+
+
+
+
+    // ==============================
+    // * Instance List
+    // ==============================
+    if (ImGui::CollapsingHeader("Instance List"))
+    {
+        // 목록
+        if (pDescs->empty())
+            ImGui::Selectable("(Empty)#InstEdit", false);
+
+        for (_uint i = 0; i < pDescs->size(); i++)
+        {
+            _string strLabel = "Instance [" + to_string(i + 1) + "]";
+
+
+            // 이거 안나오는거 해결해보고 값 들어가는지 학인해보고 원인 유추
+            if (ImGui::Selectable(strLabel.c_str(), iInstSelected == i))
+            {
+                m_pSelectedInstance = &(*pDescs)[i];
+
+                vSInstRight     = m_pSelectedInstance->vSInstRight;
+                vSInstUp        = m_pSelectedInstance->vSInstUp;
+                vSInstLook      = m_pSelectedInstance->vSInstLook;
+                vSInstTrans     = m_pSelectedInstance->vSInstTrans;
+                vTexcoordX      = m_pSelectedInstance->vTexcoordX;
+                vTexcoordY      = m_pSelectedInstance->vTexcoordY;
+                vClipTexcoordX  = m_pSelectedInstance->vClipTexcoordX;
+                vClipTexcoordY  = m_pSelectedInstance->vClipTexcoordY;
+
+                _matrix matNewTransform = _matrix(
+                    XMLoadFloat4(&vSInstRight),
+                    XMLoadFloat4(&vSInstUp),
+                    XMLoadFloat4(&vSInstLook),
+                    XMLoadFloat4(&vSInstTrans)
+                );
+
+                _vector		vXMNewObjPosition = {}, vXMNewObjQuaternion = {}, vXMNewObjScale = {};
+                _float3		vStoreNewObjPosition = {}, vStoreNewObjRotation = {}, vStoreNewObjScale = {};
+                XMMatrixDecompose(&vXMNewObjScale, &vXMNewObjQuaternion, &vXMNewObjPosition, matNewTransform);
+
+                _float4x4	matStoreNewObjQuaternion = {};	// 쿼터니언
+                XMStoreFloat4x4(&matStoreNewObjQuaternion, QUAT_TO_MAT(vXMNewObjQuaternion));
+
+                XMStoreFloat3(&vStoreNewObjPosition, vXMNewObjPosition);
+                vStoreNewObjRotation = MAT_TO_ROT(matStoreNewObjQuaternion);
+                XMStoreFloat3(&vStoreNewObjScale, vXMNewObjScale);
+
+
+                // 대입하여 보여줌
+                curInstPos = vStoreNewObjPosition;
+                curInstRot = vStoreNewObjRotation;
+                curInstSca = vStoreNewObjScale;
+            }
+        }
+    }
+
+    ImGui::End();
 }
 
 void CLevel_UI::Update_ObjectParents()

@@ -21,7 +21,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	//m_vPivot = pInstDesc->vPivot;
 
 	m_iNumIndexPerInstance = 6;
-	m_iInstanceVertexStride = sizeof(VTXINSTANCE_PARTICLE);
+	m_iInstanceVertexStride = sizeof(VTXUIINSTANCE);
 	m_iNumInstance = pInstDesc->iNumInstance;
 	m_iNumVertices = 4;
 	m_iVertexStride = sizeof(VTXPOSTEX);
@@ -40,7 +40,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	VBDesc.StructureByteStride = m_iVertexStride;
 
 
-	VTXUIINSTANCE* pVertices = new VTXUIINSTANCE[m_iNumVertices];
+	VTXPOSTEX* pVertices = new VTXPOSTEX[m_iNumVertices];
 
 	pVertices[0].vPosition = _float3(-0.5f, 0.5f, 0.f);
 	pVertices[0].vTexcoord = _float2(0.f, 0.f);
@@ -96,6 +96,11 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	m_VBInstanceDesc.MiscFlags = 0;
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
+
+	// 빈 값이라도 할당해야 터지지 않음.
+	m_pVBInstanceVertices = new VTXUIINSTANCE[m_iNumInstance];
+	ZeroMemory(m_pVBInstanceVertices, sizeof(VTXUIINSTANCE) * m_iNumInstance);
+
 	return S_OK;
 }
 
@@ -105,7 +110,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	return S_OK;
-}
+}	
 
 void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SINGLE_INST_DESC>& vecDescs)
 {
@@ -116,7 +121,9 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
 	VTXUIINSTANCE* pVertices = static_cast<VTXUIINSTANCE*>(SubResource.pData);
 
-	for (size_t i = 0; i < m_iNumInstance; i++)
+	_uint iNumAvailableInstance = min(m_iNumInstance, static_cast<_uint>(vecDescs.size()));
+
+	for (size_t i = 0; i < iNumAvailableInstance; i++)
 	{
 		// 여기서 각 Instance의 위치 등 정보 전달`
 		pVertices[i].vSInstRight	= vecDescs[i].vSInstRight;

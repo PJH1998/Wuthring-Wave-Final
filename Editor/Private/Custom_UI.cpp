@@ -34,6 +34,36 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
     __super::Begin();
 
+
+    // ksta del : 테스트용
+    for (_uint i = 0; i < 1; i++)
+    {
+        if (static_cast<CUSTOM_UI_DESC*>(pArg)->isInstance)
+        {
+            CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC pTestDesc = {};
+            pTestDesc.vTexcoordX = _float2{ 0.0f, 0.5f };
+            pTestDesc.vTexcoordY = _float2{ 0.0f, 1.0f };
+
+            //_float3 vPos = { 0.f + 15.f * i, 0.f + 15.f * i, 0.f };
+            //_float3 vRot = { };
+            //_float3 vSca = { 1.f, 1.f, 1.f };
+            //_matrix mPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vPos));
+            //_matrix mRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vRot));
+            //_matrix mSca = XMMatrixScalingFromVector(XMLoadFloat3(&vSca));
+            //_matrix mResult = mSca * mRot * mPos;
+            //_float4x4 mResultStore; XMStoreFloat4x4(&mResultStore, mResult);
+            _float4x4 mResultStore; XMStoreFloat4x4(&mResultStore, XMMatrixIdentity());
+
+            pTestDesc.vSInstRight = { mResultStore._11, mResultStore._12, mResultStore._13, mResultStore._14 };
+            pTestDesc.vSInstUp    = { mResultStore._21, mResultStore._22, mResultStore._23, mResultStore._24 };
+            pTestDesc.vSInstLook  = { mResultStore._31, mResultStore._32, mResultStore._33, mResultStore._34 };
+            pTestDesc.vSInstTrans = { mResultStore._41, mResultStore._42, mResultStore._43, mResultStore._44 };
+
+            m_InstanceDescs.push_back(pTestDesc);
+        }
+
+    }
+
 	return S_OK;
 }
 
@@ -43,8 +73,10 @@ void CCustom_UI::Priority_Update(_float fTimeDelta)
 
 void CCustom_UI::Update(_float fTimeDelta)
 {
-    //if (m_tUIDesc.isInstance)
-    //    dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, );
+    if (m_tUIDesc.isInstance)
+    {
+        dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_InstanceDescs);
+    }
 
     m_pAnimator_UICom->Update(fTimeDelta);
 
@@ -138,17 +170,18 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
-        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-        return E_FAIL;
-
     if (!isInstance) {
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
+            TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+            return E_FAIL;
         if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
             TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
             return E_FAIL;
     }
     else if (isInstance) {
-
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
+            TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+            return E_FAIL;
         if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
             TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
             return E_FAIL;

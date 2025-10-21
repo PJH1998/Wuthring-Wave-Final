@@ -9,6 +9,8 @@ NS_BEGIN(Editor)
 
 class CLevel_UI final : public CLevel
 {
+#pragma region Structs
+
 public:
 	// for Editor
 	typedef struct tagHierarchyObjectDesc
@@ -69,6 +71,7 @@ public:
 		vector<UI_INFO_DESC>	vecUIInfoDescs = {};
 	} CUSTOM_UITREE_DESC;
 
+#pragma endregion
 
 private:
 	explicit CLevel_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -89,6 +92,7 @@ private:
 	void				Update_SaveLoad();
 	void				Update_Inspector();
 	void				Update_AnimEditor(_float fTimeDelta);
+	void				Update_InstanceEditor();
 
 	void				Update_ObjectParents();
 	void				Update_ObjectChilds();
@@ -106,7 +110,7 @@ private:
 
 
 	// for Update_SaveLoad
-	_bool						m_isOn_SaveLoad = false;
+	_bool						m_isOn_SaveLoad = true;
 
 
 	// for Update_Hierarchy
@@ -115,7 +119,7 @@ private:
 
 	// for Update_AnimEditor
 	// ¤¤AnimEditor
-	_bool						m_isOn_AnimEdit = false;
+	_bool						m_isOn_AnimEdit = true;
 	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
 
 	vector<UI_ANIM_KEYFRAME_DESC> m_vecUIKeyFrameDescs = {};	// Temp Keyframe
@@ -125,9 +129,10 @@ private:
 
 	// ¤¤AnimList
 	_bool						m_isPlayAnimation = false;
-
 	UI_ANIM_DESC*				m_pSelectedUIAnim = { nullptr };
 
+	// ¤¤Instance
+	CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC*	m_pSelectedInstance = { nullptr };
 
 public:
 	static CLevel_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -136,6 +141,7 @@ public:
 
 NS_END
 
+#pragma region json
 
 inline json vec_to_json(const std::vector<_float3>& vec)
 {
@@ -304,3 +310,4 @@ inline void from_json(const json& j, CLevel_UI::CUSTOM_UITREE_DESC& d)
 	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
 }
 
+#pragma endregion
