@@ -92,6 +92,7 @@ void CMapObject::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
 		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 
 		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
