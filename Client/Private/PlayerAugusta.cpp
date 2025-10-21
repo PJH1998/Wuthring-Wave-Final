@@ -70,8 +70,6 @@ void CPlayerAugusta::Update(_float fTimeDelta)
 {
     CPlayer::Update(fTimeDelta);
 
-   
-
     Change_State(fTimeDelta);
 
     // 현재 위치 - 1Frame 이전 위치 값 계산
@@ -164,7 +162,6 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
         XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
 
         OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
-
 
         //_float3 vNormal = {};
         //if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.

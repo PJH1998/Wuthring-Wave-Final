@@ -164,8 +164,6 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	{
 		_float fDistanceOffset = 0.8f;
 		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
-		cout << result.mFraction << endl;
-		//result.mSubShapeID2
 	}
 
 	return fOriginFraction > result.mFraction && result.mFraction > 0.f ? true : false;

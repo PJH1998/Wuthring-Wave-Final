@@ -71,7 +71,7 @@ void CCollider::Update(const _fvector& vVelocity)
 		Velocity += XMVectorSet(0.f, -9.81f, 0.f, 0.f);
 	else
 		Slide(Velocity);
-	
+
 	m_pCharacterVirtual->SetLinearVelocity(Velocity);
 	m_pGameInstance->Add_Virtual(m_pCharacterVirtual, m_iCollisionLayer);
 }

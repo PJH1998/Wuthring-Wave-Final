@@ -1,22 +1,22 @@
-#include "EditorPch.h"
-#include "SpringCamera_Edit.h"
+#include "ClientPch.h"
+#include "SpringCamera.h"
 
-CSpringCamera_Edit::CSpringCamera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CSpringCamera::CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCamera { pDevice, pContext }
 {
 }
 
-CSpringCamera_Edit::CSpringCamera_Edit(const CSpringCamera_Edit& Prototype)
+CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 	: CCamera { Prototype }
 {
 }
 
-HRESULT CSpringCamera_Edit::Initialize_Prototype()
+HRESULT CSpringCamera::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CSpringCamera_Edit::Initialize_Clone(void* pArg)
+HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		CRASH("Camera");
@@ -31,17 +31,16 @@ HRESULT CSpringCamera_Edit::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CSpringCamera_Edit::Priority_Update(_float fTimeDelta)
+void CSpringCamera::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CSpringCamera_Edit::Update(_float fTimeDelta)
+void CSpringCamera::Update(_float fTimeDelta)
 {
 	XMStoreFloat4(&m_vPrePosition, m_pTransformCom->Get_State(STATE::POSITION));
 
 	// 0. Cam Rotate
-	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::PRESS)
-		__super::Mouse_Move_Up();
+	__super::Mouse_Move_Up();
 	Mouse_Scroll(fTimeDelta);
 	Lerp_Distance(fTimeDelta);
 
@@ -59,31 +58,30 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	Check_Ray();
 }
 
-void CSpringCamera_Edit::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
+void CSpringCamera::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
 {
 }
 
-void CSpringCamera_Edit::Late_Update(_float fTimeDelta)
+void CSpringCamera::Late_Update(_float fTimeDelta)
 {
 }
 
-void CSpringCamera_Edit::Render()
+void CSpringCamera::Render()
 {
 }
 
-void CSpringCamera_Edit::Lerp_Distance(_float fTimeDelta)
+void CSpringCamera::Lerp_Distance(_float fTimeDelta)
 {
 	if (0.1f < fabsf(m_fFixedDistance - m_fDistance))
 		m_fDistance += (m_fFixedDistance - m_fDistance) * fTimeDelta;// *m_fLerpSpeed;
-
 }
 
-void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
+void CSpringCamera::Mouse_Scroll(_float fTimeDelta)
 {
 	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
 }
 
-void CSpringCamera_Edit::Spring(_float fTimeDelta)
+void CSpringCamera::Spring(_float fTimeDelta)
 {
 	_vector vVelocity = XMLoadFloat4(&m_vCurrentPosition) - XMLoadFloat4(&m_vPrePosition);
 	
@@ -98,7 +96,7 @@ void CSpringCamera_Edit::Spring(_float fTimeDelta)
 	//m_pTransformCom->LookAt(XMLoadFloat4(&m_vTargetPosition));
 }
 
-void CSpringCamera_Edit::Compute_CamPos()
+void CSpringCamera::Compute_CamPos()
 {
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 
@@ -110,22 +108,19 @@ void CSpringCamera_Edit::Compute_CamPos()
 	XMStoreFloat4(&m_vCurrentPosition, XMVectorSetW(vTargetPos - vLook * m_fDistance , 1.f));
 }
 
-void CSpringCamera_Edit::Check_Ray()
+void CSpringCamera::Check_Ray()
 {
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vStartPos = XMLoadFloat4(&m_vTargetPosition);
 	_vector vDir = vCamPos - vStartPos;
-	//_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
 	
-	//else
-	//	cout << "¾È¸ÂÀ½!" << endl;
-
 }
 
-void CSpringCamera_Edit::Ready_Component()
+void CSpringCamera::Ready_Component()
 {
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -139,33 +134,33 @@ void CSpringCamera_Edit::Ready_Component()
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 }
 
-CSpringCamera_Edit* CSpringCamera_Edit::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CSpringCamera_Edit* pInstance = new CSpringCamera_Edit(pDevice, pContext);
+	CSpringCamera* pInstance = new CSpringCamera(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
-		MSG_BOX("Failed to Create : SpringCamera_Edit");
+		MSG_BOX("Failed to Create : SpringCamera");
 		Safe_Release(pInstance);
 	}
 
     return pInstance;
 }
 
-CGameObject* CSpringCamera_Edit::Clone(void* pArg)
+CGameObject* CSpringCamera::Clone(void* pArg)
 {
-	CSpringCamera_Edit* pClone = new CSpringCamera_Edit(*this);
+	CSpringCamera* pClone = new CSpringCamera(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
-		MSG_BOX("Failed to Create : SpringCamera_Edit (Clone)");
+		MSG_BOX("Failed to Create : SpringCamera (Clone)");
 		Safe_Release(pClone);
 	}
 
 	return pClone;
 }
 
-void CSpringCamera_Edit::Free()
+void CSpringCamera::Free()
 {
 	__super::Free();
 

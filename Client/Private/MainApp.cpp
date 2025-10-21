@@ -10,6 +10,8 @@
 #include "Level_GamePlay.h"
 #include "Level_Test.h"
 
+#include "SpringCamera.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -190,6 +192,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Model_Wolf"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreMatrix, "../Bin/Resource/Dummy/Wolf/Wolf.dat"))))
 		CRASH("Model Dummy");
+
+	// SpringCamera
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SpringCamera"),
+		CSpringCamera::Create(m_pDevice, m_pContext))))
+		CRASH("SpringCamera");
 }
 
 void CMainApp::Start_Level()

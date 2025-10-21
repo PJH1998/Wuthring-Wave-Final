@@ -6,14 +6,14 @@ class CTransform;
 class CCollider;
 NS_END
 
-NS_BEGIN(Editor)
+NS_BEGIN(Client)
 
-class CSpringCamera_Edit final : public CCamera
+class CSpringCamera final : public CCamera
 {
 private:
-	explicit CSpringCamera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CSpringCamera_Edit(const CSpringCamera_Edit& Prototype);
-	virtual ~CSpringCamera_Edit() = default;
+	explicit CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CSpringCamera(const CSpringCamera& Prototype);
+	virtual ~CSpringCamera() = default;
 
 public:
 	void							Set_Distance(_float fDistance) { m_fDistance += fDistance; }
@@ -58,7 +58,7 @@ private:
 	void							Ready_Component();
 
 public:
-	static		CSpringCamera_Edit*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CSpringCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject*				Clone(void* pArg) override;
 	virtual		void							Free() override;
 };

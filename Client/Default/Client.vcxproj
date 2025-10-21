@@ -186,6 +186,7 @@
     <ClInclude Include="..\Public\PlayerParty.h" />
     <ClInclude Include="..\Public\PlayerAugusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
+    <ClInclude Include="..\Public\SpringCamera.h" />
     <ClInclude Include="..\Public\State.h" />
     <ClInclude Include="..\Public\StateMachine.h" />
     <ClInclude Include="Client.h" />
@@ -220,6 +221,7 @@
     <ClCompile Include="..\Private\PlayerParty.cpp" />
     <ClCompile Include="..\Private\PlayerAugusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
+    <ClCompile Include="..\Private\SpringCamera.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
     <ClCompile Include="..\Private\StateMachine.cpp" />
     <ClCompile Include="Client.cpp">
