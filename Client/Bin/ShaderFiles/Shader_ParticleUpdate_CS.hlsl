@@ -6,16 +6,22 @@
 struct ParticleState
 {
     float4 Right;
-    float4 Up;          //스프라이트 값 넣어줭야함.
-    float4 Look;        //스트레치드 빌보드 Vel 값 넣어주고있음.
+    float4 Up;          
+    float4 Look;       
     float4 Pos;
+    
     float2 LifeTime;
+    float2 Delay;
+    
+    float4 VelTail;         //x,y,z = Vel / w = Tail
+    
+    float Phase;
 };
 
 struct ParticleStatic
 {
     float4 DefaultPos;
-    float Speed; float3 _pad0;
+    float Speed; float3 _pad0; 
 };
 
 
@@ -138,13 +144,13 @@ void main(uint3 tid : SV_DispatchThreadID)
     {
         float4 Velocity = (g_ParticleState[i].Pos - PreviousPos) / DeltaTime;
 
-        g_ParticleState[i].Look = Velocity;
+        g_ParticleState[i].VelTail = Velocity;
         
         float fSpeed = length(Velocity);
         
         float tailLen = clamp(fSpeed * fStretchWeight, fStretchRange.x, fStretchRange.y);
         
-        g_ParticleState[i].Look.w = tailLen;
+        g_ParticleState[i].VelTail.w = tailLen;
     }
     
     // Sprite 화성화
@@ -153,13 +159,13 @@ void main(uint3 tid : SV_DispatchThreadID)
         //
         float4 Velocity = (g_ParticleState[i].Pos - PreviousPos) / DeltaTime;
 
-        float fSpeed = length(Velocity) * g_ParticleStatic[i].Speed;
+        float fSpeed = length(Velocity);
         
-        float fPhase = g_ParticleState[i].Up.x;         //앞으로 Up.x에는 이 값 고정적으로 내보낼것
+        float fPhase = g_ParticleState[i].Phase;     
         
         fPhase += (fSpriteDefault + fSpriteWeight * fSpeed) * DeltaTime;
         
-        g_ParticleState[i].Up.x = fPhase;
+        g_ParticleState[i].Phase = fPhase;
     }
     
     //}
@@ -169,8 +175,8 @@ void main(uint3 tid : SV_DispatchThreadID)
         {
             g_ParticleState[i].LifeTime.x = 0;
             g_ParticleState[i].Pos = g_ParticleStatic[i].DefaultPos;
-            g_ParticleState[i].Look = float4(0.f, 0.f, 0.f, 0.f);
-            g_ParticleState[i].Up.x = 0.f;
+            g_ParticleState[i].VelTail = float4(0.f, 0.f, 0.f, 0.f);
+            g_ParticleState[i].Phase = 0.f;
         }
     }
     else

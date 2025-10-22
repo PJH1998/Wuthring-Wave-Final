@@ -102,16 +102,14 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-		//SRV?곗씠??珥덇린 ?꾩튂 ??μ슜
 		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
 	}
 	
-	//SRV??踰꾪띁 ?앹꽦
 	D3D11_BUFFER_DESC SRV_BufferDesc = {};
 	SRV_BufferDesc.StructureByteStride = sizeof(PARTICLE_SRV);
 	SRV_BufferDesc.ByteWidth = SRV_BufferDesc.StructureByteStride * m_iNumInstance;
-	SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//遺덈?
-	SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//由ъ냼??
+	SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				
+	SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		
 	SRV_BufferDesc.CPUAccessFlags = 0; 
 	SRV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
@@ -191,18 +189,11 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	//UAV ?대줎?먯꽌 ?앹꽦?댁쨾?쇳븿 (?묎컳? ?ㅼ젙媛믪쓣 媛吏??뚰떚?댁쓣 ?대줎?댁꽌 ?щ윭媛?留뚮뱾?덉쓣 ?? 媛숈? UAV瑜?怨듭쑀?섎㈃ 紐⑤뱺 ?뚰떚?댁씠 ?숈씪???吏곸엫??媛吏寃???)
-	// SRV? CB???꾨줈?좏??낆뿉???앹꽦?댁쨾????
-	// SRV??遺덈???媛쒕퀎?몄뒪?댁뒪 媛믩뱾?대씪 ?꾨줈?좏??낆뿉 留뚮뱾?댁꽌 ?대줎?쇰━ 怨듭쑀?대룄 臾몄젣 ?놁쓬,
-	// CB??蹂?섎뒗 媛?(??꾨뜽?) 媛숈? 蹂?섎뱾???ㅼ뼱媛吏留? 留??꾨젅?꾨쭏??留? ?몃㏊?쇰줈 媛??ㅼ젙?댁쨾?쇳븯???꾨줈?좏??낆뿉 留뚮뱾?대룄 ?곴??놁쓬
-
-	
-	//?ш린??UAV 踰꾪띁 留뚮뱾怨? 由ъ냼?ㅻ럭 留뚮뱾?댁쨾?쇳븿.
 	D3D11_BUFFER_DESC UAV_BufferDesc = {};
 	UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
 	UAV_BufferDesc.ByteWidth = UAV_BufferDesc.StructureByteStride * m_iNumInstance;
-	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						//UAV???뷀뤃??
-	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			//?ㅻⅨ怨녹뿉?쒕룄 ?쎌쓣嫄곕㈃  | D3D11_BIND_SHADER_RESOURCE ?댁쨾?쇳븿
+	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						
+	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			
 	UAV_BufferDesc.CPUAccessFlags = 0;			
 	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;	
 
@@ -213,7 +204,6 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, &UAVInitialDesc, &m_pUABuffer)))
 		return E_FAIL;
 
-	//UAV 踰꾪띁瑜??듯빐 由ъ냼?ㅻ럭 ?앹꽦
 	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
 	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
 	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
@@ -223,6 +213,9 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 
 	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
 		return E_FAIL;
+
+
+
 
 	return S_OK;
 }

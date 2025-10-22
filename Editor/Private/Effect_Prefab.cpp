@@ -27,7 +27,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
     m_strMyTag = pDesc->strPrefabTag;
 
-    Root_Test();
+   // Root_Test();
 
     return S_OK;
 }

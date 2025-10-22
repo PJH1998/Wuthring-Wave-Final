@@ -15,6 +15,9 @@ struct VS_IN
     float3 vPosition : POSITION;   
     row_major float4x4 TransformMatrix : WORLD;
     float2 vLifeTime : TEXCOORD0;
+    float fDelay : TEXCOORD1;
+    float4 vVelTail : TEXCOORD2;
+    float fPhase : TEXCOORD3;
 };
 
 struct VS_OUT
@@ -22,8 +25,9 @@ struct VS_OUT
     float4 vPosition : POSITION;
     float fSize : PSIZE;
     float2 vLifeTime : TEXCOORD0;
-    float4 vVelocity : TEXCOORD1;
-    float fPhase : TEXCOORD2;
+    float fDelay : TEXCOORD1;
+    float4 vVelTail : TEXCOORD2;
+    float fPhase : TEXCOORD3;
 };
 
 VS_OUT VS_MAIN(VS_IN In)
@@ -39,8 +43,9 @@ VS_OUT VS_MAIN(VS_IN In)
     
     Out.fSize = length(In.TransformMatrix._11_12_13);
     Out.vLifeTime = In.vLifeTime;
-    Out.vVelocity = In.TransformMatrix._31_32_33_34;        //x,y,z는 Velocity , w 에 tailLen을 컴셰에서 담아둠.
-    Out.fPhase = In.TransformMatrix._21;                    //컴셰에서 저장한 값 UP.x에있음
+    Out.vVelTail = In.vVelTail;
+    Out.fPhase = In.fPhase;
+    Out.fDelay = In.fDelay;
     
     return Out;     
 }
@@ -50,8 +55,9 @@ struct GS_IN
     float4 vPosition : POSITION;
     float fSize : PSIZE;
     float2 vLifeTime : TEXCOORD0;
-    float4 vVelocity : TEXCOORD1;
-    float fPhase : TEXCOORD2;
+    float fDelay : TEXCOORD1;
+    float4 vVelTail : TEXCOORD2;
+    float fPhase : TEXCOORD3;
 };
 
 struct GS_OUT
@@ -60,6 +66,7 @@ struct GS_OUT
     float2 vTexcoord : TEXCOORD0;
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
+    float fDelay : TEXCOORD3;
 };
 
 [maxvertexcount(6)]
@@ -115,12 +122,12 @@ void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     
     vViewDir = g_vCamPosition - In[0].vPosition;
     
-    float tailLen = In[0].vVelocity.w;      //컴셰에서  float tailLen = clamp(fSpeed * 가중치, 최소, 최대) 계산해서 저장해놓은 값이 w     
+    float tailLen = In[0].vVelTail.w;      //컴셰에서  float tailLen = clamp(fSpeed * 가중치, 최소, 최대) 계산해서 저장해놓은 값이 w     
     
-    float fSpeed = length(In[0].vVelocity.xyz);     //혹시라도 스피드 값이 거의 없는 얘들은 따로 처리해주고자 스피드 확인
+    float fSpeed = length(In[0].vVelTail.xyz);     //혹시라도 스피드 값이 거의 없는 얘들은 따로 처리해주고자 스피드 확인
     
     if (fSpeed > 0.f)
-        vLook = vector(normalize(In[0].vVelocity.xyz), 0.f);
+        vLook = vector(normalize(In[0].vVelTail.xyz), 0.f);
     else
         vLook = vViewDir;
     
@@ -166,9 +173,10 @@ void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 struct PS_IN
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;    
+    float2 vTexcoord : TEXCOORD0;
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
+    float fDelay : TEXCOORD3;
 };
 
 struct PS_OUT
