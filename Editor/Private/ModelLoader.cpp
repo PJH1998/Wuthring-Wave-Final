@@ -392,7 +392,7 @@ void CModelLoader::Load_File()
 							}
 							_string SaveFilePath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock";
 
-							//?ш린???ｌ뼱?쇰릺??嫄????寃쎈줈 => ?뚯씪 ?대쫫 ?쇱빞??
+							
 
 
 							_string FileName = entry.path().filename().string();
