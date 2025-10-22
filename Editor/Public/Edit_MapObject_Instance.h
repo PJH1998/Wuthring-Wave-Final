@@ -16,9 +16,12 @@ public:
 	typedef struct tagMapLoad
 	{
 		_char ModelName[MAX_PATH] = {};
+		_uint iShaderPassIndex;
 		_float4x4* WorldMatrix = { nullptr };
 		_uint iNumInstance;
+		_float4 m_WolrdPos;
 	}MAP_LOAD;
+
 private:
 	CEdit_MapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CEdit_MapObject_Instance(const CEdit_MapObject_Instance& Prototype);
@@ -41,13 +44,16 @@ public:
 
 private:
 	void Ready_Events();
+
 private:
-	//class CModel* m_pModelCom = { nullptr };
+	vector<CModel_Instance*> m_pModelComArray;
 	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
 
 private:
+	_char m_ModelName[MAX_PATH];
+
 	_uint m_iShaderPassIndex = {};
 	_uint m_iNumInstance = {};
 	_uint m_iPickedInstance = {};
@@ -56,6 +62,7 @@ private:
 	_float4* m_pScale= { nullptr };
 	_float4* m_pTranslation = { nullptr };
 
+	MAP_LOAD InstanceDesc = {};
 public:
 	static CEdit_MapObject_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

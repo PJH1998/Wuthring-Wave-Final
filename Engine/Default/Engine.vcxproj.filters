@@ -263,6 +263,7 @@
       <UniqueIdentifier>{52fb9c3d-da95-4aa5-ad13-b270ec1b26dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Point">
+      <UniqueIdentifier>{d53700ab-232b-46f4-b717-d1c2e4b1d9ed}</UniqueIdentifier>
       <UniqueIdentifier>{2f2b1745-bbed-4df1-ae61-6b63d263e6ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\CollideComponent">

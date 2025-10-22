@@ -90,7 +90,7 @@ _bool CPicking::isPicked(_float3* pOut)
 	return true;
 }
 
-_bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels)
+_bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels,_float4* pOutMousePos)
 {
 
 	_uint MousePos = m_ptMouse.y * m_iWinSizeX + m_ptMouse.x;
@@ -127,7 +127,7 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 
 	MouseWorldPos = XMVector3TransformCoord(MouseWorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::PROJ));
 	MouseWorldPos = XMVector3TransformCoord(MouseWorldPos, m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW));
-
+	XMStoreFloat4(pOutMousePos, MouseWorldPos);
 	_float4 TempPoint = {};
 	_int PixelRange = {};
 	_uint ViewPorts = { 0 };
@@ -158,8 +158,6 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 			break;
 		}
 	}
-	//if (m_WorldPoints)
-	//	Safe_Delete_Array(m_WorldPoints);
 
 	m_WorldPoints.clear();
 	_uint Index = {};
@@ -175,6 +173,9 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 				continue;
 
 			TempPoint = m_pPoints[SampleY * m_iWinSizeX + SampleX];
+
+			if (TempPoint.w == 0.f)
+				continue;
 
 			_vector TempWorldPos = {};
 
@@ -192,7 +193,6 @@ _bool CPicking::Get_Points(_float fRange, vector<_float4>& pOut,_uint* NumPixels
 			_float4 Temp;
 			XMStoreFloat4(&Temp, TempWorldPos);
 			m_WorldPoints.push_back(Temp);
-			//XMStoreFloat4(&m_WorldPoints[Index++], TempWorldPos);
 		}
 	}
 	if (m_WorldPoints.empty())

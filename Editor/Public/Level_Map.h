@@ -31,10 +31,11 @@ public:
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
-
 	void Make_MousePos();
-
 	void Container_Info();
+
+	void Load_Foliage();
+
 public:
 	static _float3 m_vWorldPos;
 	static _float3 m_vWorldDir;
@@ -51,6 +52,8 @@ private:
 
 	class CEdit_Brush* m_pBrush = { nullptr };
 
+	class CShader_Interface* pShaderInterface = { nullptr };
+
 
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
@@ -58,6 +61,7 @@ private:
 	_float m_fNearDistance_Instance = {FLT_MAX};
 
 	vector<_string> m_ModelPaths;
+	vector<_string> m_FoliagePaths;
 	_wstring m_szPreViewModelName;
 	_bool m_LoadMenu = { false };
 public:

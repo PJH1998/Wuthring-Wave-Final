@@ -2,9 +2,15 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D g_DiffuseTexture;
+texture2D g_DiffuseTexture[2];
 texture2D g_NormalTexture;
+texture2D g_MaskDiffuseTexture;
 texture2D g_MaskTexture[4] : register(t8);
+
+vector g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
+vector g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
+
+bool g_HasNormal = false;
 
 struct VS_IN
 {
@@ -91,25 +97,44 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
-    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    //if (Out.vDiffuse.a < 0.1f)
-    //    discard;
     
-    Out.vNormal = In.vNormal * 0.5f + 0.5f;
-
+    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
+    
+    //Out.vDiffuse = vDiffuse * (1.f - vMask) + (vMaskDiffiuse * float4(0.1f, 0.f, 1.f, 1.f)) * vMask;
+    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
+    if(Out.vDiffuse.a <0.1f)
+        discard;
+    
+    float3 vNormal;
+    
+    if (g_HasNormal)
+    {
+        vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vNormal = vNormalDesc.xyz * 2.f - 1.f;
+        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+    
+        vNormal = mul(vNormal, WorldMatrix);
+    }
+    else
+        vNormal = In.vNormal.xyz;
+        
+    Out.vNormal = vector(vNormal * 0.5f + 0.5f, 0.f);
+    Out.vSpecular = g_vMatrlSpecular;
+    Out.vAmbient = g_vMatrlAmbient;
     
     return Out;
 }
-
 PS_OUT_LIGHT PS_MAIN_TEST(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
     Out.vDiffuse = float4(0.f, 0.f, 0.f, 1.f);
     
-    //if (Out.vDiffuse.a < 0.1f)
-    //    discard;
+    if (Out.vDiffuse.a < 0.1f)
+        discard;
     
     Out.vNormal = In.vNormal * 0.5f + 0.5f;
     

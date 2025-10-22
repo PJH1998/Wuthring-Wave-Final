@@ -280,6 +280,9 @@
     <ClInclude Include="..\Public\EditDummy_Map.h">
       <Filter>03. GameObject\Dummy\Map</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Sonora.h">
+      <Filter>03. GameObject\MapObject</Filter>
+	</ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
@@ -411,6 +414,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\EditDummy_Map.cpp">
       <Filter>03. GameObject\Dummy\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
