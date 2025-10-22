@@ -13,8 +13,8 @@ public:
 		_float4 vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
 		_float4 vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
 		_float4 vSInstTrans		= { 0.f, 0.f, 0.f ,1.f };
-		_float2 vTexcoordX		= { 0.f, 1.f} ;
-		_float2 vTexcoordY		= { 0.f, 1.f} ;
+		_float2 vSInstCoordX	= { 0.f, 1.f} ;
+		_float2 vSInstCoordY	= { 0.f, 1.f} ;
 		_float2 vClipTexcoordX	= { 0.f, 1.f };						// based on local space, per single instance
 		_float2 vClipTexcoordY	= { 0.f, 1.f };						// based on local space, per single instance
 
@@ -35,7 +35,7 @@ public:
 	virtual HRESULT Initialize_Prototype(const INSTANCE_DESC* pDesc) override;
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 	// virtual HRESULT Bind_Resources() override;
-	// virtual HRESULT Render() override;
+	virtual HRESULT Render() override;
 
 public:
 	void Update_Instances(_float fTimeDelta, vector<SINGLE_INST_DESC>& vecDescs);
@@ -46,6 +46,7 @@ private:
 	//_bool					m_isLoop = {};
 
 	SINGLE_INST_DESC*		m_pInstanceDesc = {};
+	_uint					m_iNumAvailableInstance = 0;
 
 public:
 	static CVIBuffer_Rect_Instance_UI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc);

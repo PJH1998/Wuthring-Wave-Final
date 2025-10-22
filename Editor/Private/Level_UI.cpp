@@ -1553,8 +1553,8 @@ void CLevel_UI::Update_InstanceEditor()
             m_pSelectedInstance->vSInstUp           = vSInstUp    ;
             m_pSelectedInstance->vSInstLook         = vSInstLook  ;
             m_pSelectedInstance->vSInstTrans        = vSInstTrans ;
-            m_pSelectedInstance->vTexcoordX         = vTexcoordX  ;
-            m_pSelectedInstance->vTexcoordY         = vTexcoordY  ;
+            m_pSelectedInstance->vSInstCoordX       = vTexcoordX  ;
+            m_pSelectedInstance->vSInstCoordY       = vTexcoordY  ;
             m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
             m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
         }
@@ -1593,8 +1593,8 @@ void CLevel_UI::Update_InstanceEditor()
                 vSInstUp        = m_pSelectedInstance->vSInstUp;
                 vSInstLook      = m_pSelectedInstance->vSInstLook;
                 vSInstTrans     = m_pSelectedInstance->vSInstTrans;
-                vTexcoordX      = m_pSelectedInstance->vTexcoordX;
-                vTexcoordY      = m_pSelectedInstance->vTexcoordY;
+                vTexcoordX      = m_pSelectedInstance->vSInstCoordX;
+                vTexcoordY      = m_pSelectedInstance->vSInstCoordY;
                 vClipTexcoordX  = m_pSelectedInstance->vClipTexcoordX;
                 vClipTexcoordY  = m_pSelectedInstance->vClipTexcoordY;
 
