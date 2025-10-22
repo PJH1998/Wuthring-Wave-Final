@@ -1,9 +1,7 @@
 ﻿#include"Editorpch.h"
 #include "Edit_MapObject.h"
-#include"Model_Instance.h"
-#include"Mesh_Instance.h"
 #include"Event_Level.h"
-#include "AnimationActor.h"
+//#include "AnimationActor.h"
 #include"Level_Map.h"
 #include"Map_Interface.h"
 
@@ -44,9 +42,12 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iNumLOD = m_pModelComArray.size()-1;
 
 
-    for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+    /*for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+    {
         Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
-    /*m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));*/
+    }*/
+    //박스 모델에서 종합해서 최종 크기.
+    //m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
@@ -163,7 +164,7 @@ void CEdit_MapObject::Update(_float fTimeDelta)
         }
     }
 #endif
-    m_pModelCom = m_pModelComArray[m_iLODIndex];
+    //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
@@ -173,20 +174,25 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 
 void CEdit_MapObject::Render()
 {
-    //�Ⱥ��̴� �� ����
+    //_uint DrawModel = m_iLODIndex;
+    _uint DrawModel = 0;
+    
+    if (DrawModel > m_iNumLOD)
+        DrawModel = m_iNumLOD;
+
     Bind_Resources();
 
-    for (_uint i = 0; i < m_pModelComArray[m_iLODIndex]->Get_NumMesh(); ++i)
+    for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
     {
         _bool HasNormal = { true };
         if (m_TexMode)
         {
-            
+
             if (m_pDiffuseTextureCom[i])
-                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture",0);
+                m_pDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0);
 
             if (m_pNormalTextureCom[i])
-                if(FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
+                if (FAILED(m_pNormalTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_NormalTexture")))
                     HasNormal = false;
 
             if (m_pMaskTextureCom[i])
@@ -194,23 +200,23 @@ void CEdit_MapObject::Render()
             else
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
             if (m_pMaskDiffuseTextureCom[i])
-                m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 1);
+                m_pMaskDiffuseTextureCom[i]->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture");
         }
         else
         {
-            m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+            m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                 HasNormal = false;
 
-            if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
                 m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         }
         m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
-        m_pModelComArray[m_iLODIndex]->Render(i);
+        m_pModelComArray[DrawModel]->Render(i);
     }
 }
 

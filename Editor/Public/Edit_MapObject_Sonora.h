@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include"StaticObject.h"
+#include"Edit_MapObject.h"
 
 
 NS_BEGIN(Engine)
@@ -11,28 +11,8 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CEdit_MapObject_Sonora : public CStaticObject
+class CEdit_MapObject_Sonora : public CEdit_MapObject
 {
-public:
-	enum OBJECTTYPE { DEFAULT, SONORA, END };
-
-	typedef struct tagMapLoad
-	{
-		_char ModelName[MAX_PATH] = {};
-		_uint iShaderPassIndex = {};
-		_float4x4* WorldMatrix = { nullptr };
-		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
-		OBJECTTYPE eObjectType;
-	}MAP_LOAD;
-
-	typedef struct tagMapSave
-	{
-		_uint m_iNameLength;
-		_char ModelName[MAX_PATH] = {};
-		_uint iShaderPassIndex;
-		_float4x4 WorldMatrix;
-	}OBJECT_SAVE;
-
 protected:
 	CEdit_MapObject_Sonora(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CEdit_MapObject_Sonora(const CEdit_MapObject_Sonora& Prototype);
@@ -59,92 +39,6 @@ public:
 	void Quit_Child(CEdit_MapObject_Sonora* pObject);
 	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
 	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
-
-private:
-	void Export_MaterialData();
-	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
-	void About_Parent();
-	void About_Transform();
-	void About_Texture();
-
-private:
-	CModel* m_pModelCom = { nullptr };
-	class CShader* m_pShaderCom = { nullptr };
-
-	vector<CModel*> m_pModelComArray;
-	CRigidbody* m_pRigidbodyCom = { nullptr };
-	CEdit_MapObject_Sonora* m_pParent = { nullptr };
-	list<CEdit_MapObject_Sonora*> m_ChildObjects;
-
-	CEdit_MapObject_Sonora* m_pPickedChild = { nullptr };
-	_bool m_IsSetParent = { false };
-	_bool m_IsParent = { false };
-	vector<CTexture*> m_pDiffuseTextureCom;
-	vector<CTexture*> m_pNormalTextureCom;
-	vector<CTexture*> m_pMaskTextureCom;
-	vector<CTexture*> m_pMaskDiffuseTextureCom;
-
-
-	class CMap_Interface* m_pMapInterface = {nullptr};
-
-	_bool m_ExportAllLOD = { true };
-	_float4x4 m_ChildLocalMat = {};
-private:
-
-	_char m_ModelName[MAX_PATH];
-
-	_uint m_iShaderPassIndex = {};
-	_float3 m_vScale = {};
-	_float3 m_vRotation = {};
-	_float3 m_vTranslation = {};
-
-	_float3 m_vNewScale = {};
-	_float3 m_vNewRotation = {};
-	_float3 m_vNewTranslation = {};
-
-	_bool m_IsCustomTexture = { false };
-	_bool m_IsLoaded = { false };
-	_bool m_MakeJson = { false };
-	_bool m_TexMode = { false };
-	
-	//
-	vector<_string> m_EntireDiffuseTextureName;
-	vector<_string> m_EntireNormalTextureName;
-	vector<_string> m_EntireMaskTextureName;
-
-	
-	vector<_string> m_SelectedDiffuseTexturePath;
-	vector<_string> m_SelectedNormalTexturePath;
-	vector<_string> m_SelectedMaskTexturePath;
-	vector<_string> m_SelectedMaskDiffusePath;
-
-	_string m_SelectedDiffuse;
-	_string m_SelectedNormal;
-	_string m_SelectedMask;
-	_string m_SelectedMaskDiffuse;
-
-	
-	vector<_string >m_SelectedDiffuseName;
-	vector<_string >m_SelectedNormalName;
-	vector<_string> m_SelectedMaskTextureName;
-	vector<_string> m_SelectedMaskDiffuseName;
-
-	
-	_string m_iSelectedMeshName;
-	_uint m_iSelectedMesh={};
-
-	_uint* m_iSelectedDiffuseIndex;
-	_uint* m_iSelectedNormalIndex;
-	_uint* m_iSelectedMaskIndex;
-	_uint* m_iSelectedMaskDiffuseIndex;
-	
-	_uint m_iNumObject = {};
-
-
-	_uint m_iLevel = {};
-	OBJECTTYPE m_eObjectType = { END };
-private:
-	static _uint g_iNumObjects;
 
 public:
 	static CEdit_MapObject_Sonora* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
