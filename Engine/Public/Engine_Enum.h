@@ -37,6 +37,6 @@ namespace Engine
 	// Collide Timing
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
-	
+	enum class EFFECT_TYPE { PARTICLE, MESH, END };
 }
 #endif // Engine_Enum_h__

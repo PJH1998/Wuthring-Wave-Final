@@ -91,7 +91,7 @@ namespace Engine
 		_float3		vNormal;
 		_float3		vTangent;
 		_float3		vBinormal;
-		_uint4			vBlendIndex;
+		_uint4		vBlendIndex;
 		_float4		vBlendWeight;
 		_float2		vTexcoord;
 
@@ -115,13 +115,28 @@ namespace Engine
 		_float4		vTranslation;
 	}VTXINSTANCE_MESH;
 
-	typedef struct tagVertexInstanceParticle
+	typedef struct tagVertexInstanceFXMesh
 	{
 		_float4		vRight;
 		_float4		vUp;
 		_float4		vLook;
 		_float4		vTranslation;
 		_float2		vLifeTime;
+	}VTXINSTACNE_FXMESH;
+
+	typedef struct tagVertexInstanceParticle
+	{
+		_float4		vRight;
+		_float4		vUp;
+		_float4		vLook;
+		_float4		vTranslation;
+
+		_float2		vLifeTime;
+		_float2		fDelay = { 0.f, 0.f };
+
+		_float4		vVelTail = { 0.f, 0.f, 0.f, 0.f};			//x,y,z = Vel / w = TailLen
+
+		_float		fPhase = 0.f;
 	}VTXINSTANCE_PARTICLE;
 
 	typedef struct tagVertexParticle
@@ -141,7 +156,7 @@ namespace Engine
 
 	typedef struct tagVertexPointParticle
 	{
-		static const _uint iNumElements = { 6 };
+		static const _uint iNumElements = { 9 };
 		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 
@@ -151,6 +166,11 @@ namespace Engine
 			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
 			
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 1, 72, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+
+			{ "TEXCOORD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 80, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+
+			{ "TEXCOORD", 3, DXGI_FORMAT_R32_FLOAT, 1, 96, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 		};
 	}VTXPOINTPARTICLE;
 
@@ -170,6 +190,25 @@ namespace Engine
 			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
 		};
 	}VTXMESHINSTANCE;
+
+	typedef struct tagVertexFXMeshInstance
+	{
+		static const _uint iNumElements = { 10 };
+		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] = {
+			{ "POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "NORMAL",		0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TANGENT",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "BINORMAL",	0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0},
+			{ "TEXCOORD",	0, DXGI_FORMAT_R32G32_FLOAT,	0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0},
+
+			{ "WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0,  D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+			{ "WORLD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+
+			{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1},
+		};
+	}VTXFXMESHINSTANCE;
 }
 
 

@@ -1,4 +1,4 @@
-Ôªø#pragma once
+#pragma once
 
 #include "VIBuffer_Instance.h"
 
@@ -13,11 +13,22 @@ public:
 		_float2		vSpeed;
 		_float2		vLifeTime;
 		_bool		IsLoop;
-		// if 0 ~ 1
+
+		//Ω∫∆Æ∑πƒ° ∫Ù∫∏µÂ º≥¡§∞™ 
+		_bool		IsStretch = false;
+		_float		fStretchWeight = 1.f;
+		_float2		fStretchRange = { 1.f, 1.f };
+
+		//Ω∫«¡∂Û¿Ã∆Æ ¿ÃπÃ¡ˆ º≥¡§∞™
+		_bool		IsSprite = false;
+		_float		fSpriteWeight = 1.f;
+		_float		fDefualtSpeed = 2.5f;			//Ω∫«¡∂Û¿Ã∆Æ ¿ÃπÃ¡ˆ∞° πŸ≤Ó¥¬ º”µµ ±‚∫ª∞™.
+
+		//∞°¡ﬂƒ°
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
-		_float		fGravity = 9.8f;	//?ÏÑèÌäÇÊÄ®Ï¢ä?
+		_float		fGravity = 9.8f;
 	}POINT_INSTANCE_DESC;
 
 private:
@@ -26,24 +37,28 @@ private:
 	virtual ~CVIBuffer_Point_Instance() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype(const INSTANCE_DESC* pDesc) override;
+	virtual HRESULT Initialize_Prototype(const INSTANCE_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 	virtual HRESULT Bind_Resources() override;
 	virtual HRESULT Render() override;
 
-	void Bind_CSResources(class CComputeShader* pCShader, _float fTimeDelta);
+	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // πŸ≤‹ ¿œ ¿÷¿ª ∞ÊøÏ ø©±‚ø° ∞™ √ﬂ∞°«ÿº≠ πŸ≤„¡‡æﬂ«‘.
+	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
+	void Bind_CSResources(class CComputeShader* pCShader);
 
-public:
-	void Spread(_float fTimeDelta);
-	void Drop(_float fTimeDelta);
-	void Rotation(_float fTimeDelta);
+//public:
+//	void Spread(_float fTimeDelta);
+//	void Drop(_float fTimeDelta);
+//	void Rotation(_float fTimeDelta);
 
 private:
-	_float3					m_vPivot = {};
+	_float3					m_vPivot = {};			//æÓ¬˜«« ƒƒºŒ∑Œ ∞ËªÍ«œ¥¬µ• « ø‰æ¯æÓ∫∏¿”.
 	_float*					m_pSpeeds = {};
 	_bool					m_isLoop = {};
 
-	ID3D11Buffer*		m_pCBBuffer = {};
+	ID3D11Buffer*		m_pOptionCBBuffer = {};
+	ID3D11Buffer*		m_pSpeedCBBuffer = {};
+
 	ID3D11Buffer*		m_pSRVBuffer = {};
 	ID3D11Buffer*       m_pUABuffer = {};
 
