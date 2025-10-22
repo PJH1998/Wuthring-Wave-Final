@@ -22,13 +22,13 @@ private:
 	virtual ~CEditDummy_Wolf() = default;
 
 public:
-	virtual	HRESULT		Initialize_Prototype() override;
-	virtual	HRESULT		Initialize_Clone(void* pArg) override;
-	virtual	void		Priority_Update(_float fTimeDelta) override;
-	virtual	void		Update(_float fTimeDelta) override;
-	virtual	void		Late_Update(_float fTimeDelta) override;
-	virtual	void		Render() override;
-	virtual	void		Render_Shadow() override;
+	virtual		HRESULT		Initialize_Prototype() override;
+	virtual		HRESULT		Initialize_Clone(void* pArg) override;
+	virtual		void		Priority_Update(_float fTimeDelta) override;
+	virtual		void		Update(_float fTimeDelta) override;
+	virtual		void		Late_Update(_float fTimeDelta) override;
+	virtual		void		Render() override;
+	virtual		void		Render_Shadow() override;
 
 private:
 	CModel*				m_pModelCom = { nullptr };

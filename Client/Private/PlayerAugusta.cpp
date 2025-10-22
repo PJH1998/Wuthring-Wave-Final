@@ -2,6 +2,11 @@
 #include "PlayerAugusta.h"
 #include "PlayerParty.h"
 
+#include "AugustaStand1_Action01.h"
+#include "AugustaStand1_Action02.h"
+#include "AugustaRun_F.h"
+#include "AugustaStop_Run_L.h"
+
 CPlayerAugusta::CPlayerAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPlayer{ pDevice, pContext }
 {
@@ -38,15 +43,38 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     // 4. 위치 설정.
     Ready_Positions(pDesc);
 
-    // 4. Parts추가
+    // State 등록.
+    m_pStateMachineCom->Add_State("Stand1_Action01", CAugustaStand1_Action01::Create({ this, "Stand1_Action01", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Stand1_Action02", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Run_F", CAugustaRun_F::Create({ this, "Run_F", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Stop_Run_L", CAugustaStop_Run_L::Create({ this, "Stop_Run_L", 1.f, 0.f }));
+
+    // 플레이어 키인풋 등록.
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::A), DIK_A);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::S), DIK_S);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D), DIK_D);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::SPACE), DIK_SPACE);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::Q), DIK_Q);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::E), DIK_E);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::R), DIK_R);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::T), DIK_T);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LSHIFT), DIK_LSHIFT);
+
+    // 마우스 키인풋 등록
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
+
+    m_pStateMachineCom->Change_State("Stand1_Action01");
+
+    // 5. Parts추가
     // Ready_PartObjects(pDesc);
     
+    m_pColliderCom->Set_Gravity(true);
 #ifdef _DEBUG
     m_strCurrentAnimation = "Pose";
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
-
-
-    m_pColliderCom->Set_Gravity(true);
 #endif // _DEBUG
 
     return S_OK;
@@ -58,28 +86,30 @@ void CPlayerAugusta::Priority_Update(_float fTimeDelta)
 
     // 1. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
-    
-
-    // 2. 땅이면 Gravity 끄기.
-  /*  if (m_pColliderCom->IsLand())
-        m_pColliderCom->Set_Gravity(false);*/
-    
 }
 
 void CPlayerAugusta::Update(_float fTimeDelta)
 {
     CPlayer::Update(fTimeDelta);
 
-    Change_State(fTimeDelta);
+    // 1. 키 입력 갱신.
+    //m_pInputControllerCom->Update();
 
-    // 현재 위치 - 1Frame 이전 위치 값 계산
-    _vector vVelocity = m_pTransformCom->Get_Velocity();
+    // 2. 상태 머신 갱신
+    //m_pStateMachineCom->Update(fTimeDelta);
 
     if (m_IsPlayAnimation)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
+
+    Change_State(fTimeDelta);
+
+    // 현재 위치 - 1Frame 이전 위치 값 계산
+    _vector vVelocity = m_pTransformCom->Get_Velocity();
+
+    
 
     // Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -160,12 +190,9 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
 
         _float4 vVelocity = {};
         XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
-
+#ifdef _DEBUG
         OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
-
-        //_float3 vNormal = {};
-        //if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
-        //    m_pColliderCom->Set_Gravity(true);
+#endif
     }
         
 
@@ -201,9 +228,19 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
+        , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
+        CRASH("Model");
+
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->controllerData.first)
+        , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
+        CRASH("Model");
+
+
+
+
     
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.pOwner = this;
     ColliderDesc.vPos = { 0.f, 5.f, 0.f };
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
@@ -212,14 +249,11 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
-    
-
-
 }
 
 void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)
 {
-    m_pController = pDesc->pController;
+    m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
@@ -294,4 +328,5 @@ CGameObject* CPlayerAugusta::Clone(void* pArg)
 void CPlayerAugusta::Free()
 {
     CPlayer::Free();
+    
 }

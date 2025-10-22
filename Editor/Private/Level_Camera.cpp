@@ -78,7 +78,7 @@ void CLevel_Camera::Ready_Dummy()
 		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
 		CRASH("Failed Clone Dummy Wolf");
 
-	PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f));
+	PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.05f, 0.05f, 0.05f, 1.f));
 	CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
 	MapDesc.PreTransformMatrix = PreTransformationMatrix;
 	MapDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);

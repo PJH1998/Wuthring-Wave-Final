@@ -20,7 +20,7 @@ class CASM_Interface final : public CInterface_Edit
 	{
 		INT,
 		FLOAT,
-		STRING,
+		MASK,
 		BOOL,
 		VECTOR3,
 		VECTOR4
@@ -34,6 +34,13 @@ class CASM_Interface final : public CInterface_Edit
 		//VAR pValue;
 		void* pValue;
 	}ASM_VALUE;
+
+	typedef struct ConditionTag
+	{
+		_string strValue;
+		_string strCondition;
+		_string strConst;
+	}CONDITION_TAG;
 
 #pragma region GraphEditor_Definition
 
@@ -56,11 +63,19 @@ class CASM_Interface final : public CInterface_Edit
 		const GraphEditor::Link GetLink(GraphEditor::LinkIndex index) override;
 	}BT_DELEGATE;
 
+	//struct MyLink : public GraphEditor::Link
+	//{
+	//	_string strCondition;
+	//};
+
 	struct MyNode : public GraphEditor::Node
 	{
 		_string strName;
 		float x, y;
+		BT_TYPE eType;
+		_uint iTargetState;
 		vector<GraphEditor::Link> Transitions;
+		CONDITION_TAG Conditions;
 	};
 #pragma endregion
 
@@ -70,48 +85,77 @@ private:
 
 public:
 	virtual	HRESULT		Initialize();
-	void				Update_ASM();
+	void				Update_ASM(_float fTimeDelta);
 
 	
 
 private:
 	ASM_MENU			m_eCurrentMenu = { ASM_MENU::BEHAVIOR_TREE };
+	_bool					m_isShowLoadFile = {false};
+	_bool					m_isShowSaveFile = {false};
+	_string					m_strFileName;
 
 #pragma region BehaviorTree_GraphEdit
-	BT_DELEGATE				m_BehaviorTreeGraphDelegate;
-	GraphEditor::Options	m_BehaviorTreeGraphOptions;
-	GraphEditor::ViewState	m_BehaviorTreeViewState;
+	BT_DELEGATE						m_BehaviorTreeGraphDelegate;
+	GraphEditor::Options			m_BehaviorTreeGraphOptions;
+	GraphEditor::ViewState			m_BehaviorTreeViewState;
 
-	vector<MyNode>			m_Nodes;
-	std::vector<GraphEditor::Link> m_Links;
-	GraphEditor::Template	m_Templates[2];
+	vector<MyNode>					m_Nodes;
+	std::vector<GraphEditor::Link>	m_Links;
+	//GraphEditor::Template	m_Templates[4]{};
+	vector<GraphEditor::Template>	m_Templates;
 
-	_int m_iCurrentNodeIndex { -1 };
-	_uint m_iNodeCount{};
+	_int							m_iCurrentNodeIndex { -1 };
+	_uint							m_iNodeCount{};
+	BT_TYPE							m_eNodeType{};
 #pragma endregion
 
-	CBehavior_Tree*		m_pBehaviorTree = { nullptr };
-	CBlackBoard*		m_pBlackBoard = {nullptr};
+	CBehavior_Tree*					m_pBehaviorTree = { nullptr };
+	CBlackBoard*					m_pBlackBoard = {nullptr};
 
-	DATA_TYPE			m_eDataType{};
+	DATA_TYPE						m_eDataType{};
+	_bool							m_isConditionCreate{};
 
 #pragma region INPUT_VALUE
 	//map<const _string, pair<DATA_TYPE, VAR>> m_ValueContainer;
+	_string m_strValueKey;
 	map<const _string, pair<DATA_TYPE, void*>> m_ValueContainer;
 	_string m_strValueTag;
 	_int m_iInputTemp{};
 	_float m_fInputTemp{};
-	_string m_strInputTemp;
+	_uint m_uInputTemp;
 	_bool m_bInputTemp{};
 	_float3 m_v3InputTemp{};
 	_float4 m_v4InputTemp{};
+
+	_char m_strValueName[MAX_PATH];
+	_char m_strConditionName[MAX_PATH];
+	_char m_strConstName[MAX_PATH];
+
+	set<_string> m_RequireValueKey;
+	set<_string> m_RequireConditionKey;
 #pragma endregion
 
 private:
 	void				Menu_BehaviorTree();
 	void				Graph_BehaviorTree();
+	void				Node_Info();
 	void				Delete_Link();
+	_bool				Allowed_LInkEx(GraphEditor::Link& tLink);
+	void				Delete_Transitions(const GraphEditor::Link& tLink);
+	void				BehaviorTree_Setting();
 	void				BlackBoard_Setting();
+
+	void				Create_Template(BT_TYPE eType, _uint iOutputCount = 1);
+
+	void				Initialize_BT();
+	void				Save_BT_Data();
+	void				Save_Nodes(ofstream& File, _uint& iIndex);
+	void				Load_BT_Data();
+
+#ifdef _DEBUG
+	void				Safe_Delete_Variable(const _string& strVariableTag);
+#endif
 
 	void				Menu_AnimMachine();
 	void				Graph_AnimMachine();

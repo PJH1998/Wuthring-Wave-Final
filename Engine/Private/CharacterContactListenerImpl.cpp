@@ -1,6 +1,8 @@
 ﻿#include "EnginePch.h"
 #include "CharacterContactListenerImpl.h"
 
+#include "CollideComponent.h"
+
 CharacterContactListenerImpl::CharacterContactListenerImpl()
 {
 }
@@ -33,12 +35,28 @@ void CharacterContactListenerImpl::OnContactRemoved(const CharacterVirtual* inCh
 
 void CharacterContactListenerImpl::OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	ioSettings.mCanPushCharacter = false;
+	ioSettings.mCanPushCharacter = true;
+
+	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inCharacter->GetUserData());
+	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inOtherCharacter->GetUserData());
+
+	ContactManifold Manifold;
+	ZeroMemory(&Manifold, sizeof(ContactManifold));
+
+	pSrcData->pComponent->OnCollide_Enter(m_pBodyInterface->GetObjectLayer(inOtherCharacter->GetInnerBodyID()), pDstData->pDesc, Manifold);
 }
 
 void CharacterContactListenerImpl::OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	ioSettings.mCanPushCharacter = false;
+	ioSettings.mCanPushCharacter = true;
+
+	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inCharacter->GetUserData());
+	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inOtherCharacter->GetUserData());
+
+	ContactManifold Manifold;
+	ZeroMemory(&Manifold, sizeof(ContactManifold));
+
+	pSrcData->pComponent->OnCollide_During(m_pBodyInterface->GetObjectLayer(inOtherCharacter->GetInnerBodyID()), pDstData->pDesc, Manifold);
 }
 
 void CharacterContactListenerImpl::OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2)

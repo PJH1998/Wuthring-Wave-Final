@@ -27,6 +27,8 @@ namespace PlayerData
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));
+        Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
+        Desc.controllerData = make_pair(eLevel, TEXT("Prototype_Component_Controller_Augusta"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;

@@ -55,6 +55,7 @@ public:
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);
 	void				Update(_float fTimeDelta);
+	void				Late_Update();
 #ifdef _DEBUG
 	void				Render();
 	void				DrawShape(const Shape* pShape);
@@ -70,7 +71,7 @@ private:
 	TempAllocator*		m_pAllocator = { nullptr };
 	JobSystem*			m_pJobSystem = { nullptr };
 	PhysicsSystem*		m_pPhysicsSystem = { nullptr };
-	ContactListener*	m_pContactListener = { nullptr };
+	class CContactListenerImpl*	m_pContactListener = { nullptr };
 
 	PhysicsSettings		m_PhysicsSetting;
 	CharacterVirtual::ExtendedUpdateSettings m_ExtendedUpdateSetting;

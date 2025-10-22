@@ -10,3 +10,5 @@ float g_fWeights[13] =
 };
 
 float g_fLUT_Size = 16.f;
+
+int g_iSampleSize = 16;

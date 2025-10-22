@@ -112,6 +112,9 @@
     <Filter Include="02. Level\UI">
       <UniqueIdentifier>{42d34b8c-5305-4308-a1e3-60659450ace7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State">
+      <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -199,16 +202,7 @@
     <ClInclude Include="..\Public\PlayerParty.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\StateMachine.h">
-      <Filter>04. Component\00. State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\State.h" />
-    <ClInclude Include="..\Public\PlayerController.h">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Parameter.h">
-      <Filter>04. Component\02. Parameter</Filter>
-    </ClInclude>
+    
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
@@ -238,6 +232,22 @@
     </ClInclude>
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MonsterBody.h" />
+    <ClInclude Include="..\Public\AugustaBaseState.h">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaRun_F.h">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStand1_Action01.h">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStand1_Action02.h">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStop_Run_L.h">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -310,16 +320,6 @@
     <ClCompile Include="..\Private\PlayerParty.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\StateMachine.cpp">
-      <Filter>04. Component\00. State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\State.cpp" />
-    <ClCompile Include="..\Private\PlayerController.cpp">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Parameter.cpp">
-      <Filter>04. Component\02. Parameter</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
@@ -353,7 +353,22 @@
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Loader.cpp" />
+    <ClCompile Include="..\private\MonsterBody.cpp" />
+    <ClCompile Include="..\Private\AugustaBaseState.cpp">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaRun_F.cpp">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStand1_Action01.cpp">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStand1_Action02.cpp">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStop_Run_L.cpp">
+      <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -391,6 +406,12 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

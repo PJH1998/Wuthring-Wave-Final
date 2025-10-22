@@ -25,8 +25,10 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 	virtual		void			Render_Shadow() override;
-	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
-	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
+
+	void						OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void						OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void						OnCollide_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 

@@ -34,6 +34,7 @@ private:
 	ID3D11DeviceContext*										m_pContext = { nullptr };
 	class CGameInstance*										m_pGameInstance = { nullptr };
 	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
+	class CMesh_Controller*										m_pMesh_Controller = { nullptr };
 
 	//InputText?먯꽌 諛쏆쓣 ?꾨━???쒓렇
 	_char														m_PrefabTag[MAX_PATH];

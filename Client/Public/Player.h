@@ -15,7 +15,9 @@ public:
 
 	typedef struct tagPlayerDesc : public CActor::ACTOR_DESC
 	{
-		class CPlayerParty* pController = { nullptr };
+		class CPlayerParty* pOwner = { nullptr };
+		pair<LEVEL, _wstring> stateMachineData = {};
+		pair<LEVEL, _wstring> controllerData = {};
 		vector<pair<_wstring, _wstring>> PartPrototypes;
 		_float3 vScale = { 1.f, 1.f, 1.f};
 		_float3 vRotation = { 0.f, 0.f, 0.f };
@@ -23,7 +25,7 @@ public:
 		PLAYER_STAT eStat = {};
 
 	}PLAYER_DESC;
-
+	
 
 #pragma region 기본 함수
 protected:
@@ -39,13 +41,29 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 	virtual void	Render_Shadow() override;
+
+
 #pragma endregion
 
+#pragma region STATE에서 사용
 public:
+	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
+	_bool Check_AnyInput(_uint iKeyFlag);
+	_bool Check_AllInput(_uint iKeyFlag);
+
+#pragma endregion
+
+
+
 
 protected:
-	class CPlayerParty* m_pController = { nullptr }; // 지휘자
+	class CPlayerParty* m_pOwner = { nullptr };
+	class CInputController* m_pInputControllerCom = { nullptr };
+	class CStateMachine* m_pStateMachineCom = { nullptr };
+	
 
+protected:
+	_bool m_IsLockOn = { false };
 	
 
 public:

@@ -115,15 +115,17 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Update(fTimeDelta);
 	
 	m_pCamera_Manager->Update(fTimeDelta);
+	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
+	m_pPhysicsManager->Update(fTimeDelta);
+	m_pPhysicsManager->Late_Update();
+
+	m_pObject_Manager->Late_Update(fTimeDelta);
+
+	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
-	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
 	m_pOctoTree->Update();
-	
-	m_pPhysicsManager->Update(fTimeDelta);
-
-	m_pObject_Manager->Late_Update(fTimeDelta);
 
 	m_pPooling_Manager->Update_Pooling();
 
@@ -554,9 +556,9 @@ _bool CGameInstance::isPicked(_float3* pOut)
 {
 	return m_pPicking->isPicked(pOut);
 }
-_bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels)
+_bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos)
 {
-	return m_pPicking->Get_Points(fRange, pOut,NumPixels);
+	return m_pPicking->Get_Points(fRange, pOut,NumPixels,pOutMousePos);
 }
 #pragma endregion
 

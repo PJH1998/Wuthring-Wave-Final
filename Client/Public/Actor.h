@@ -17,7 +17,7 @@ public:
 	}ACTOR_DESC;
 
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region ê¸°ë³¸ í•¨ìˆ˜
 protected:
 	explicit CActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CActor(const CActor& Prototype);
@@ -40,7 +40,7 @@ protected:
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
 	class CRigidbody* m_pRigidBodyCom = { nullptr };
-	vector<_uint> m_ShaderPaths = {}; // µ¿ÀûÀ¸·Î º¯ÇØ¾ßÇÔ => °´Ã¼ ¸ðµ¨¸¶´Ù Mesh °³¼ö°¡´Ù¸§
+	vector<_uint> m_ShaderPaths = {}; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½ => ï¿½ï¿½Ã¼ ï¿½ðµ¨¸ï¿½ï¿½ï¿½ Mesh ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¸ï¿½
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_float m_fTrackPosition = {};
 
