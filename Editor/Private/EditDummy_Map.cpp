@@ -73,7 +73,7 @@ void CEditDummy_Map::Render_Shadow()
 
 HRESULT CEditDummy_Map::Ready_Component(_fmatrix PreTransformMatrix)
 {
-	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat");
+	m_pModelCom = CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Map/Rock/SM_Sev_Roc_01AL/SM_Sev_Roc_01AL_LOD0.dat");
 	ASSERT_CRASH(m_pModelCom);
 
 	m_pShaderCom = CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements);

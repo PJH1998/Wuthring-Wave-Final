@@ -42,7 +42,7 @@ void CShader_Interface::Set_ShadowBias()
 	if (ImGui::CollapsingHeader("SLOPE_SCALE"))
 	{
 		//Setting_Bias("SLOPE_SCALE", &m_fSlopeScale);
-		ImGui::InputFloat("SLOPE_SCALE", &m_fSlopeScale);
+		ImGui::InputFloat("SCALE", &m_fSlopeScale);
 	}
 
 	m_pGameInstance->Bind_RawValue_Renderer("g_fShadowBais", &m_fBias, sizeof(_float4));

@@ -1,25 +1,31 @@
 #include "EnginePch.h"
 #include "ShaderFilter.h"
-#include "Texture.h"
-#include "Shader.h"
+#include "GameInstance.h"
+
 
 CShaderFilter::CShaderFilter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice { pDevice }
     , m_pContext { pContext }
+    , m_pGameInstance { CGameInstance::GetInstance()}
 {
     Safe_AddRef(m_pDevice);
     Safe_AddRef(m_pContext);
+    Safe_AddRef(m_pGameInstance);
 }
 
 HRESULT CShaderFilter::Initialize()
 {
     m_iNumLUT_Textures = 5;
+    m_iNumKernel = 16;
 
     if (FAILED(Ready_Shader_Filters()))
         CRASH("Failed Ready Shader Filters");
 
     if (FAILED(Ready_LUT_SRV()))
         CRASH("Failed Ready LUT_SRV");
+
+    if (FAILED(Ready_SSAO_SampleVector()))
+        CRASH("Failed Ready SampleVector");
 
     return S_OK;
 }
@@ -56,6 +62,22 @@ HRESULT CShaderFilter::Bind_LUT_Texture(CShader* pShader, const _char* pConstant
     return S_OK;
 }
 
+HRESULT CShaderFilter::Bind_Noise_Texture(CShader* pShader, const _char* pConstantName)
+{
+    if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(pShader, pConstantName)))
+        CRASH("Failed Bind RampTexture");
+
+    return S_OK;
+}
+
+HRESULT CShaderFilter::Bind_Sample_Vector(CShader* pShader, const _char* pConstantName)
+{
+    if (FAILED(pShader->Bind_Value(pConstantName, m_SSAO_SampleVector.data(), sizeof(_float4) * m_iNumKernel)))
+        CRASH("Failed Bind Sample Vector");
+
+    return S_OK;
+}
+
 HRESULT CShaderFilter::Ready_Shader_Filters()
 {
     m_pRampTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/T_Color_Ramp_320001.png"), 1);
@@ -63,6 +85,9 @@ HRESULT CShaderFilter::Ready_Shader_Filters()
 
     m_pLUT_Texture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/LUT_%d.png"), m_iNumLUT_Textures);
     ASSERT_CRASH(m_pLUT_Texture);
+
+    m_pNoiseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/SSAO_Noise.png"), 1);
+    ASSERT_CRASH(m_pNoiseTexture);
 
     return S_OK;
 }
@@ -124,6 +149,25 @@ HRESULT CShaderFilter::Ready_LUT_SRV()
     return S_OK;
 }
 
+HRESULT CShaderFilter::Ready_SSAO_SampleVector()
+{
+    for (_uint i = 0; i < m_iNumKernel; i++)
+    {
+        _float fX = m_pGameInstance->Rand(-1.f, 1.f);
+        _float fY = m_pGameInstance->Rand(-1.f, 1.f);
+        _float fZ = m_pGameInstance->Rand_Normal();
+
+        _vector vSample = XMVector3Normalize(XMVectorSet(fX, fY, fZ, 0.f));
+        
+        _float fScale = static_cast<_float>( i ) / static_cast<_float>( m_iNumKernel );
+        fScale = 0.1f + ( 0.9f * pow(fScale,2) );
+
+        m_SSAO_SampleVector.push_back(XMVectorScale(vSample, fScale));
+    }
+
+    return S_OK;
+}
+
 CShaderFilter* CShaderFilter::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CShaderFilter* pInstance = new CShaderFilter(pDevice, pContext);
@@ -139,9 +183,11 @@ void CShaderFilter::Free()
 {
     __super::Free();
 
+    Safe_Release(m_pGameInstance);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
     Safe_Release(m_pRampTexture);
     Safe_Release(m_pLUT_Texture);
     Safe_Release(m_pLUT_SRV);
+    Safe_Release(m_pNoiseTexture);
 }
