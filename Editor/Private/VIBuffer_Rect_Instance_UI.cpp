@@ -21,7 +21,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	//m_vPivot = pInstDesc->vPivot;
 
 	m_iNumIndexPerInstance = 6;
-	m_iInstanceVertexStride = sizeof(VTXUIINSTANCE);
+	m_iInstanceVertexStride = sizeof(SINGLE_INST_DESC);
 	m_iNumInstance = pInstDesc->iNumInstance;
 	m_iNumVertices = 4;
 	m_iVertexStride = sizeof(VTXPOSTEX);
@@ -97,9 +97,29 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
 
-	// 빈 값이라도 할당해야 터지지 않음.
+	// 빈 값이라도 할당해야 터지지 않음..? ksta
 	m_pVBInstanceVertices = new VTXUIINSTANCE[m_iNumInstance];
-	ZeroMemory(m_pVBInstanceVertices, sizeof(VTXUIINSTANCE) * m_iNumInstance);
+	for (size_t i = 0; i < m_iNumInstance; i++)
+	{
+		VTXUIINSTANCE* pInstanceVertices = static_cast<VTXUIINSTANCE*>(m_pVBInstanceVertices);
+
+		pInstanceVertices[i].vPosition = {};
+		pInstanceVertices[i].vTexcoord = {};
+
+		pInstanceVertices[i].vSInstRight	= { 1.f, 0.f, 0.f ,0.f };
+		pInstanceVertices[i].vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
+		pInstanceVertices[i].vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
+		pInstanceVertices[i].vSInstTrans	= { 0.f, 0.f, 0.f ,1.f };
+
+		pInstanceVertices[i].vSInstCoordX	= { 0.f, 1.f} ;
+		pInstanceVertices[i].vSInstCoordY	= { 0.f, 1.f} ;
+
+		pInstanceVertices[i].vClipTexcoordX = { 0.f, 1.f };			
+		pInstanceVertices[i].vClipTexcoordY = { 0.f, 1.f };			
+		
+		
+	}
+
 
 	return S_OK;
 }
@@ -116,7 +136,7 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 {
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-	VTXUIINSTANCE* pInstanceVertices = static_cast<VTXUIINSTANCE*>(m_pVBInstanceVertices);
+	VTXUIINSTANCE* pInstanceVertices = static_cast<VTXUIINSTANCE*>(m_pVBInstanceVertices);	
 
 	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
 	VTXUIINSTANCE* pVertices = static_cast<VTXUIINSTANCE*>(SubResource.pData);

@@ -248,7 +248,6 @@ struct VS_OUT
 //}
 
 
-// 왜안나옴?
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
     VS_OUT Out = (VS_OUT) 0;
@@ -259,34 +258,22 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
     
-    float4x4 matAdditionalTransform =
-    {
-        In.vSInstRight,
-        In.vSInstUp,
-        In.vSInstLook,
-        In.vSInstTrans,
-    };
+    float4x4 matAdditionalTransform = float4x4(
+        In.vSInstRight, 
+        In.vSInstUp,    
+        In.vSInstLook,  
+        In.vSInstTrans  
+        
+        //1, 0, 0, 0,
+        //0, 1, 0, 0,
+        //0, 0, 1, 0,
+        //0, 0, 0, 1
+    );
     
-    /*
+    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
+    vWorldPos = mul(vWorldPos, matWVP);
     
-    cpu로부터 전달받은 float4 값들로 행렬 정의 후
-    해당 행렬을 곱할때는 문제가 생기고, 곱하지 않을 때는 괜찮음.
-    
-    근데 문제가 전달받는 행렬을 항등행렬로 줘도 똑같이 문제가 생김
-    대체 왜?
-    
-    ksta : 
-    
-    */
-    
-    // 밑에 두 개 계산 순서를 바꿔봐야하나
-    
-    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matWVP);
-    float4 vWorldPosMod = vWorldPos;// mul(vWorldPos, matAdditionalTransform);
-    //float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
-    //float4 vWorldPos = float4(In.vPosition, 1.f);
-    
-    Out.vPosition = vWorldPosMod;
+    Out.vPosition = vWorldPos;
     Out.vTexcoord = In.vTexcoord;
     Out.vWorldPos = vWorldPos;
     Out.vProjPos = Out.vPosition;   
@@ -303,6 +290,10 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     
     return Out;
 }
+
+
+
+
 
 
 // ==============================
@@ -354,8 +345,8 @@ PS_OUT PS_MAIN(PS_IN In)
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
     // ksta : 위에 확인하고 해결되면 원래대로 되돌리고 여기도 확인할 것
-    //Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
-    Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+    //Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
     
     return Out;
 }

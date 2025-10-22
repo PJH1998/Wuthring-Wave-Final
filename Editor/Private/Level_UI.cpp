@@ -1550,14 +1550,14 @@ void CLevel_UI::Update_InstanceEditor()
             vSInstLook  = XMFLOAT4(matEditResult.m[2][0], matEditResult.m[2][1], matEditResult.m[2][2], matEditResult.m[2][3]);
             vSInstTrans = XMFLOAT4(matEditResult.m[3][0], matEditResult.m[3][1], matEditResult.m[3][2], matEditResult.m[3][3]);
 
-            m_pSelectedInstance->vSInstRight        =vSInstRight ;
-            m_pSelectedInstance->vSInstUp           =vSInstUp    ;
-            m_pSelectedInstance->vSInstLook         =vSInstLook  ;
-            m_pSelectedInstance->vSInstTrans        =vSInstTrans ;
-            m_pSelectedInstance->vTexcoordX         =vTexcoordX  ;
-            m_pSelectedInstance->vTexcoordY         =vTexcoordY  ;
-            m_pSelectedInstance->vClipTexcoordX     =vClipTexcoordX  ;
-            m_pSelectedInstance->vClipTexcoordY     =vClipTexcoordY  ;
+            m_pSelectedInstance->vSInstRight        = vSInstRight ;
+            m_pSelectedInstance->vSInstUp           = vSInstUp    ;
+            m_pSelectedInstance->vSInstLook         = vSInstLook  ;
+            m_pSelectedInstance->vSInstTrans        = vSInstTrans ;
+            m_pSelectedInstance->vTexcoordX         = vTexcoordX  ;
+            m_pSelectedInstance->vTexcoordY         = vTexcoordY  ;
+            m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
+            m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
         }
 
     }

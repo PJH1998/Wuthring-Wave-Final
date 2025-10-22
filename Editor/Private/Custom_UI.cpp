@@ -41,7 +41,7 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
         if (static_cast<CUSTOM_UI_DESC*>(pArg)->isInstance)
         {
             CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC pTestDesc = {};
-            pTestDesc.vTexcoordX = _float2{ 0.0f, 0.5f };
+            pTestDesc.vTexcoordX = _float2{ 0.0f, 1.0f };
             pTestDesc.vTexcoordY = _float2{ 0.0f, 1.0f };
 
             //_float3 vPos = { 0.f + 15.f * i, 0.f + 15.f * i, 0.f };

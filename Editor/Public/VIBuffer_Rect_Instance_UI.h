@@ -9,14 +9,14 @@ public:
 	typedef struct tagRectSingleInstanceDesc
 	{
 		// 단일 인스턴스에게 부여할 정보
-		_float4 vSInstRight	= { 1.f, 0.f, 0.f ,0.f };					// 현재 객체의 Pivot 에 따른 상대좌표
-		_float4 vSInstUp	= { 0.f, 1.f, 0.f ,0.f };
-		_float4 vSInstLook	= { 0.f, 0.f, 1.f ,0.f };
-		_float4 vSInstTrans	= { 0.f, 0.f, 0.f ,1.f };
-		_float2 vTexcoordX = {0, 0} ;
-		_float2 vTexcoordY = {1, 1} ;
-		_float2 vClipTexcoordX = { 0, 0 }; // based on local space, per single instance
-		_float2 vClipTexcoordY = { 1, 1 }; // based on local space, per single instance
+		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };					// 현재 객체의 Pivot 에 따른 상대좌표
+		_float4 vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
+		_float4 vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
+		_float4 vSInstTrans		= { 0.f, 0.f, 0.f ,1.f };
+		_float2 vTexcoordX		= { 0.f, 1.f} ;
+		_float2 vTexcoordY		= { 0.f, 1.f} ;
+		_float2 vClipTexcoordX	= { 0.f, 1.f };						// based on local space, per single instance
+		_float2 vClipTexcoordY	= { 0.f, 1.f };						// based on local space, per single instance
 
 	}SINGLE_INST_DESC;
 
