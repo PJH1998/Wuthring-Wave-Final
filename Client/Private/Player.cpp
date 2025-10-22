@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "Player.h"
+#include "InputController.h"
 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -58,7 +59,36 @@ void CPlayer::Render_Shadow()
 {
 }
 
+#pragma region STATE에서 사용
+_bool CPlayer::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
+{
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, fRootMotionRate);
+    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    return IsPlayAnimationEnd;
+}
+
+_bool CPlayer::Check_AnyInput(KEYINPUT eKeyInput)
+{
+    return _bool();
+}
+
+_bool CPlayer::Check_AllInput(KEYINPUT eKeyInput)
+{
+    return _bool();
+}
+
+/* 캐스팅 해서 보내야됨. */
+#pragma endregion
+
+
+
+
+
+
+
 void CPlayer::Free()
 {
     CActor::Free();
+    Safe_Release(m_pInputControllerCom);
+    Safe_Release(m_pStateMachineCom);
 }

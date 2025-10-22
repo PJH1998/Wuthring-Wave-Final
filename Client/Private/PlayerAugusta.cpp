@@ -2,6 +2,9 @@
 #include "PlayerAugusta.h"
 #include "PlayerParty.h"
 
+#include "AugustaStand1_Action01.h"
+#include "AugustaStand1_Action02.h"
+
 CPlayerAugusta::CPlayerAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPlayer{ pDevice, pContext }
 {
@@ -38,15 +41,37 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     // 4. 위치 설정.
     Ready_Positions(pDesc);
 
-    // 4. Parts추가
+    // State 등록.
+    m_pStateMachineCom->Add_State("Stand1_Action01", CAugustaStand1_Action01::Create({ this, "Stand1_Action01", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Stand1_Action02", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Move_F", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
+
+    // 플레이어 키인풋 등록.
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::A), DIK_A);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::S), DIK_S);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D), DIK_D);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::SPACE), DIK_SPACE);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::Q), DIK_Q);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::E), DIK_E);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::R), DIK_R);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::T), DIK_T);
+    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LSHIFT), DIK_LSHIFT);
+
+    // 마우스 키인풋 등록
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
+    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
+
+    m_pStateMachineCom->Change_State("Stand1_Action01");
+
+    // 5. Parts추가
     // Ready_PartObjects(pDesc);
     
+    m_pColliderCom->Set_Gravity(true);
 #ifdef _DEBUG
     m_strCurrentAnimation = "Pose";
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);
-
-
-    m_pColliderCom->Set_Gravity(true);
 #endif // _DEBUG
 
     return S_OK;
@@ -58,12 +83,6 @@ void CPlayerAugusta::Priority_Update(_float fTimeDelta)
 
     // 1. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
-    
-
-    // 2. 땅이면 Gravity 끄기.
-  /*  if (m_pColliderCom->IsLand())
-        m_pColliderCom->Set_Gravity(false);*/
-    
 }
 
 void CPlayerAugusta::Update(_float fTimeDelta)
@@ -75,6 +94,9 @@ void CPlayerAugusta::Update(_float fTimeDelta)
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
+   
+    
+    //m_pStateMachineCom->Update(fTimeDelta);
 
     Change_State(fTimeDelta);
 
@@ -198,6 +220,17 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
+        , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
+        CRASH("Model");
+
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->controllerData.first)
+        , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
+        CRASH("Model");
+
+
+
+
     
     CCollider::COLLIDER_DESC ColliderDesc{};
     ColliderDesc.pOwner = this;
@@ -216,7 +249,7 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
 
 void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)
 {
-    m_pController = pDesc->pController;
+    m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
@@ -291,4 +324,5 @@ CGameObject* CPlayerAugusta::Clone(void* pArg)
 void CPlayerAugusta::Free()
 {
     CPlayer::Free();
+    
 }

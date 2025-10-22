@@ -70,14 +70,17 @@
     <Filter Include="04. Component">
       <UniqueIdentifier>{e4041359-2c23-4a5b-9c25-80592f1929d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="04. Component\00. State">
-      <UniqueIdentifier>{f4babc20-5042-4cd9-a2e4-06091bd1ed5b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="04. Component\01. Controller">
-      <UniqueIdentifier>{1d16436e-bf6c-4cb1-934f-005edd36cacd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="04. Component\02. Parameter">
       <UniqueIdentifier>{14238100-86c1-4f12-b809-a3f7e50efe7f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Augusta">
+      <UniqueIdentifier>{d78c1913-5c41-4229-9204-57332d263ceb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State">
+      <UniqueIdentifier>{adfda7e0-062c-4321-a731-9708c4d6f5b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Augusta">
+      <UniqueIdentifier>{1f7fd6fd-9eb2-4537-809e-d14095deed53}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -160,21 +163,26 @@
     <ClInclude Include="..\public\Player_Define.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerAugusta.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\PlayerParty.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\StateMachine.h">
-      <Filter>04. Component\00. State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\State.h" />
-    <ClInclude Include="..\Public\PlayerController.h">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Parameter.h">
+    <ClInclude Include="..\Public\PlayerParameter.h">
       <Filter>04. Component\02. Parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerAugusta.h">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStand1_Action01.h">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStand1_Action02.h">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaBaseState.h">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaMove_F.h">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -244,21 +252,26 @@
     <ClCompile Include="..\Private\Player.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerAugusta.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\PlayerParty.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\StateMachine.cpp">
-      <Filter>04. Component\00. State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\State.cpp" />
-    <ClCompile Include="..\Private\PlayerController.cpp">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Parameter.cpp">
+    <ClCompile Include="..\Private\PlayerParameter.cpp">
       <Filter>04. Component\02. Parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerAugusta.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStand1_Action01.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStand1_Action02.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaBaseState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaMove_F.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

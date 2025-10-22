@@ -6,8 +6,11 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
+#include "StateMachine.h"
+
 #include "PlayerAugusta.h"
 #include "PlayerParty.h"
+
 
 
 #pragma region BehaviorTree
@@ -242,9 +245,24 @@ HRESULT CLoader_Test::Load_Augusta()
     _float fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
+    // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
+
+
+    // 2. StateMachine 초기화
+    _wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Augusta";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+        CStateMachine::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerState Machine");
+
+    // Controller 초기화
+    _wstring wstrControllerTag = L"Prototype_Component_Controller_Augusta";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wstrControllerTag,
+        CInputController::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerInput Controller");
+
 
 
     _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");

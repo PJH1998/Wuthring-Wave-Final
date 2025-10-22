@@ -9,7 +9,12 @@ namespace Client
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
 
-	enum class KEYINPUT {
+	enum class PLAYER_STATE : unsigned int {
+		NONE = 0, IDLE, WALK, RUN, ATTACK,
+		END
+	};
+
+	enum class KEYINPUT : unsigned int {
 		NONE = 1 << 0, 
 		W = 1 << 1, 
 		S = 1 << 2,

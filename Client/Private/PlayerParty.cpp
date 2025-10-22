@@ -114,7 +114,7 @@ HRESULT CPlayerParty::Ready_Players(const PLAYER_PARTY_DESC* pDesc)
         case PLAYERTYPE::AUGUSTA:
         {
             PlayerDesc = pDesc->PlayerSpecs[PLAYERTYPE::AUGUSTA].PlayerDesc;
-            PlayerDesc.pController = this; // Controller Pointer만 전달?
+            PlayerDesc.pOwner = this; // Controller Pointer만 전달?
             pPlayer = dynamic_cast<CPlayer*>(m_pGameInstance->Clone_Prototype(
                 ENUM_CLASS(m_eCurLevel),
                 pDesc->PlayerSpecs[i].strActorTag,
