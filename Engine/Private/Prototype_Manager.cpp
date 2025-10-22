@@ -71,7 +71,7 @@ CBase* CPrototype_Manager::Clone_Prototype(_uint iPrototypeLevelID, const _wstri
     }
 
     return pClone;
-}
+    }
 
 HRESULT CPrototype_Manager::Clear_Resource(_uint iClearLevelID)
 {

@@ -1,13 +1,12 @@
 ﻿#pragma once
-#include "Component.h"
+#include "CollideComponent.h"
 
 NS_BEGIN(Engine)
 
-class ENGINE_DLL CCollider final : public CComponent
+class ENGINE_DLL CCollider final : public CCollideComponent
 {
 public:
 	typedef struct tagColliderDesc {
-		class CGameObject* pOwner = { nullptr };
 		_float3			vPos;
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		EMotionType	eType;
@@ -22,6 +21,8 @@ private:
 	virtual ~CCollider() = default;
 
 public:
+	// Datat (void*)
+	void								Set_Desc(void* pData) { m_tCollisionData.pDesc = pData; }
 	// Collider 움직임 -> Transform에 적용
 	void								Sync_Position(class CTransform* pTransform);
 	// 땅을 타고 있는지 Check
@@ -36,8 +37,8 @@ public:
 	virtual		HRESULT				Render() override;
 
 private:
-	class CGameObject*			m_pOwner = { nullptr };
 	Ref<CharacterVirtual>		m_pCharacterVirtual = { nullptr };
+	COLLISION_DATA				m_tCollisionData = {};
 
 	_uint								m_iCollisionLayer = {};
 

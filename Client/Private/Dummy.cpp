@@ -23,7 +23,7 @@ HRESULT CDummy::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	Ready_Component();
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-20.f, 20.f), 0.f, 0.f, 1.f));
 
 	return S_OK;
 }
@@ -98,6 +98,21 @@ void CDummy::Render_Shadow()
 	}
 }
 
+void CDummy::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	int a = 0;
+}
+
+void CDummy::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	int a = 0;
+}
+
+void CDummy::OnCollide_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	int a = 0;
+}
+
 void CDummy::Ready_Component()
 {
 	// Com_Shader
@@ -128,14 +143,27 @@ void CDummy::Ready_Component()
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
-	//XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
+	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
 	ColliderDesc.fHeight = 10.f;
 	ColliderDesc.fRadius = 20.f; //m_pGameInstance->Rand(5.f, 20.f);
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+
+	// Collide Callback Func Setting
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
+			OnCollide_Enter(iLayer, pDesc, inManifold);
+		});
+	// Collide Callback Func Setting
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
+		OnCollide_During(iLayer, pDesc, inManifold);
+		});
+	// Collide Callback Func Setting
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& inManifold) {
+		OnCollide_Remove(iLayer, pDesc, inManifold);
+		});
 }
 
 CDummy* CDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -14,9 +14,11 @@
 #include "Navigation.h"
 #include "Rigidbody.h"
 #include "Collider.h"
-#include"Model_Instance.h"
+#include "Model_Instance.h"
+#include "VIBuffer_Mesh.h"
 
 #include "Behavior_Tree.h"
+#include "AnimMachine.h"
 // ==================
 
 NS_BEGIN(Engine)

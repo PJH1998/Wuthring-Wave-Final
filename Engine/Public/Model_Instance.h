@@ -31,13 +31,13 @@ public:
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType);
 	
 private:
-	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
+	MODELTYPE								m_eType = { MODELTYPE::NONANIM };
 
 	_uint									m_iNumMeshes = {};
 	vector<class CMesh_Instance*>			m_Meshes;
 
 	_uint									m_iNumMaterials = {};
-	vector<class CMeshMaterial*>	m_Materials;
+	vector<class CMeshMaterial*>			m_Materials;
 
 	_float4x4								m_PreTransformMatrix = {};
 	_float m_MinPos[3] = { FLT_MAX,FLT_MAX ,FLT_MAX };

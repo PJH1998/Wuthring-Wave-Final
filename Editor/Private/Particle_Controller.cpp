@@ -13,9 +13,6 @@ CParticle_Controller::CParticle_Controller(ID3D11Device* pDevice, ID3D11DeviceCo
 
 HRESULT CParticle_Controller::Initialize()
 {
-    //?띿뒪泥?遺덈윭?ㅺ린
-    //Texture_Loading("TEST1", TEXT("../../Client/Bin/Resource/Effect/Texture/T_Spark_300012.png"));
-
     Load_AllTextureFromFolder("../../Client/Bin/Resource/Effect/Texture");
 
     return S_OK;
@@ -70,26 +67,20 @@ void CParticle_Controller::Load_AllTextureFromFolder(const _string& strFolderPat
                 PARTICLE_TEXTURE Desc{};
                 CTexture* pTexture = {};
 
-                // ?뺤옣???쒖쇅???뚯씪紐?
                 _string strTextureTag = entry.path().stem().string();
 
-                //?뚯씪紐낆쑝濡??띿뒪泥??대쫫 吏??
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
 
-                //?뚯씪紐낆쑝濡??띿뒪泥?而댄룷?뚰듃 ?대쫫 吏??
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
-                //?뚯씪寃쎈줈 wstring 蹂??
                 _wstring wstrFilePath = StringToWString(filePath);
    
-                //?띿뒪泥?而댄룷?뚰듃 ?앹꽦
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
                     pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
 
-                //?앹꽦???띿뒪泥?二쇱냼 ?깅줉, 誘몃━蹂닿린 ?꾩슱?ㅻ㈃ 二쇱냼濡?SRV媛?몄??쇳빐????ν빐以섏빞??
                 Desc.pTexture = pTexture;
                 //Safe_AddRef(pTexture);
 
@@ -106,10 +97,15 @@ void CParticle_Controller::Particle_Tab()
         if (ImGui::Begin("Particle Info"))
         {
        
-                //?뚰떚???ㅼ젙媛?VIBuffer
                 if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGui::Checkbox("Loop", &(m_pSelectedVBDesc->IsLoop));
+                    ImGui::Checkbox("Stretch", &(m_pSelectedVBDesc->IsStretch));
+                    if (ImGui::Checkbox("Sprite", &(m_pSelectedVBDesc->IsSprite)))
+                    {
+                        m_pSelectedParticleDesc->IsSprite = m_pSelectedVBDesc->IsSprite;
+                    }
+
 
                     ImGui::Text("NumInstance");
                     ImGui::PushItemWidth(100);
@@ -135,6 +131,42 @@ void CParticle_Controller::Particle_Tab()
                     ImGui::DragFloat("##Gravity", &(m_pSelectedVBDesc->fGravity), 0.1f, 0.f, 9.8f);
      
                     ImGui::PopItemWidth();
+
+                    ImGui::Separator();
+
+                    ////////////////////////////////// 
+                    if (m_pSelectedVBDesc->IsStretch)
+                    {
+                        ImGui::Text("StretchWeight");
+                        ImGui::SameLine();
+                        ImGui::DragFloat("##StretchWeight", &(m_pSelectedVBDesc->fStretchWeight), 0.1f, 0.f, 1.f);
+
+                        ImGui::Text("StretchMin/Max");
+                        ImGui::PushItemWidth(60);
+                        ImGui::InputFloat("##StretchMin", &(m_pSelectedVBDesc->fStretchRange.x));
+                        ImGui::SameLine();
+                        ImGui::InputFloat("##StretchMax", &(m_pSelectedVBDesc->fStretchRange.y));
+                        ImGui::PopItemWidth();
+
+                        ImGui::Separator();
+                    }
+                    ////////////////////////////////// 
+
+                    ////////////////////////////////// 
+                    if (m_pSelectedVBDesc->IsSprite)
+                    {
+                        ImGui::Text("SpriteWeight");
+                        ImGui::PushItemWidth(100);
+                        ImGui::DragFloat("##SpriteWeight", &(m_pSelectedVBDesc->fSpriteWeight), 0.1f, 0.f, 1.f);
+                        ImGui::PopItemWidth();
+
+                        ImGui::Text("DefaultSpeed");
+                        ImGui::PushItemWidth(100);
+                        ImGui::DragFloat("##DefaultSpeed", &(m_pSelectedVBDesc->fDefualtSpeed), 0.1f, 0.f, 2.5f);
+                        ImGui::PopItemWidth();
+
+                        ImGui::Separator();
+                    }
 
                     ImGui::Text("Center");
                     ImGui::PushItemWidth(60);
@@ -187,8 +219,12 @@ void CParticle_Controller::Particle_Tab()
 
                 if (ImGui::CollapsingHeader("Particle", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-              /*      ImGui::Checkbox("Spread", &(m_pSelectedParticleDesc->bSpread));
-                    ImGui::Checkbox("Drop", &(m_pSelectedParticleDesc->bDrop));*/
+                    ImGui::Checkbox("Root", &(m_pSelectedParticleDesc->IsRootOn));
+
+                    ImGui::Text("ShaderPass");
+                    ImGui::PushItemWidth(100);
+                    ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass));
+                    ImGui::PopItemWidth();
 
                     ImGui::Text("Size");
                     ImGui::PushItemWidth(60);
@@ -208,38 +244,34 @@ void CParticle_Controller::Particle_Tab()
                     ImGui::InputFloat("##ParticlePosZ", &(m_pSelectedParticleDesc->vPos.z));
                     ImGui::PopItemWidth();
 
-                    ImGui::Text("Color");
-                    ImGui::PushItemWidth(60);
-                    ImGui::InputFloat("##ParticleColorX", &(m_pSelectedParticleDesc->vColor.x));
-                    ImGui::SameLine();
-                    ImGui::InputFloat("##ParticleColorY", &(m_pSelectedParticleDesc->vColor.y));
-                    ImGui::SameLine();
-                    ImGui::InputFloat("##ParticleColorZ", &(m_pSelectedParticleDesc->vColor.z));
-                    ImGui::PopItemWidth();
-
                     ImGui::Text("LifeTime");
                     ImGui::PushItemWidth(60);
                     ImGui::InputFloat("##ParticleLifeTimeX", &(m_pSelectedParticleDesc->vLifeTime.x));
                     ImGui::SameLine();
                     ImGui::InputFloat("##ParticleLifeTimeY", &(m_pSelectedParticleDesc->vLifeTime.y));
                     ImGui::PopItemWidth();
+
+                    if (ImGui::ColorEdit4("Color", m_fColor, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview))
+                    {
+                        m_pSelectedParticleDesc->vColor = _float4(m_fColor[0], m_fColor[1], m_fColor[2], m_fColor[3]);
+                    }
+
+                    ImGui::Separator();
+                   
+              
+                    if (m_pSelectedParticleDesc->IsSprite)
+                    {
+                        ImGui::Text("Row / Col");
+                        ImGui::PushItemWidth(60);
+                        ImGui::InputInt("##Row", &(m_pSelectedParticleDesc->iRows));
+                        ImGui::SameLine();
+                        ImGui::InputInt("##Col", &(m_pSelectedParticleDesc->iCols));
+                        ImGui::PopItemWidth();
+                    }
                 }
 
                 //if (ImGui::Button("Apply"))
                 //{
-                //    //?붿뒪?щ┰?섎쭔 ??ν븯怨? 二쇱냼???곕줈 ??ν븷 ?꾩슂 ?놁쓣 嫄?媛숈쓬.
-                //    //??ν븳 ?붿뒪?щ┰?섏쑝濡?媛??섏젙?댁꽌 ?ㅺ퀬 ?덇퀬, Apply 踰꾪듉 ?꾨Ⅴ硫??댁쟾??留뚮뱾?대넃? ?뚰떚???뚭눼 ?쒗궎怨? ?ㅼ떆 ?ъ깮??
-
-                //    //吏湲??좏깮?섏뼱?덈뒗 ?뚰떚?댁쓽 ?쒓렇 ?꾩슂
-                //    //吏湲??좏깮?섏뼱 ?덈뒗 ?뚰떚???쒓렇??Desc 2媛??꾩슂.
-                //    //踰꾪띁 癒쇱? 留뚮뱾怨? ?뚰떚??留뚮뱾?댁빞??
-
-
-                //    //?앹꽦?대넃? 踰꾪띁 ?먰삎 ??젣
-                //    //Desc???덈뒗 ?뺣낫濡??덈줈??踰꾪띁 ?앹꽦
-
-                //    //?뚰떚???대옒???대줎 ????Desc濡??대줎
-                //    //?댁쟾???앹꽦???뚰떚?댁? 洹몃깷 鍮꾪솢?깊솕留??쒖폒以섎룄 ?좉굅 媛숈쓬.
                 //    CParticle* pParticle = {};
                 //    _wstring ParticleTag = {};
 
@@ -290,7 +322,6 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
 {
     if (ImGui::Begin("Particle Base"))
     {
-        //?띿뒪泥??대?吏 ?ㅼ젙
         if (ImGui::BeginCombo("Texture", "")) {
             for (size_t i = 0; i < m_Textures.size(); i++)
             {
@@ -313,7 +344,6 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
         {
             if (ImGui::Button("Create"))
             {
-                //湲곕낯踰좎씠?ㅻ줈 ?앹꽦
                 _tchar ParticleTag[MAX_PATH] = {};
                 CParticle::PARTICLE_DESC ParticleDesc{};
                 CVIBuffer_Point_Instance::POINT_INSTANCE_DESC VIBufferDesc{};
@@ -326,7 +356,6 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
                 ParticleDesc.strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
                 ParticleDesc.strVIBufferTag += ParticleTag;
            
-                //踰꾪띁 理쒖냼 ?ㅼ젙 媛?
                 VIBufferDesc.iNumInstance = 1;
                 VIBufferDesc.vSize = _float2(5.f, 5.f);
 
@@ -338,7 +367,6 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
 
                 tParticleDesc = ParticleDesc;
 
-                //珥덇린??
                 m_ParticleTag[0] = _T('\0');
 
                 IsCreate = true;
@@ -374,8 +402,15 @@ void CParticle_Controller::UpdateSelected_ParticleFormTag(_wstring ParticleTag)
         m_pSelectedVBDesc = &iterVBDesc->second;
     }
 
-    if(m_pSelectedParticleDesc != nullptr)
+    if (m_pSelectedParticleDesc != nullptr)
+    {
         m_bSelectedParticle = true;
+
+        m_fColor[0] = m_pSelectedParticleDesc->vColor.x;
+        m_fColor[1] = m_pSelectedParticleDesc->vColor.y;
+        m_fColor[2] = m_pSelectedParticleDesc->vColor.z;
+        m_fColor[3] = m_pSelectedParticleDesc->vColor.w;
+    }
 }
 
 CParticle::PARTICLE_DESC* CParticle_Controller::Get_ParticleDesc(_wstring& ParticleTag)
@@ -409,7 +444,6 @@ void CParticle_Controller::Remove_Desc(const _wstring& DescTag)
 
     if (iterParticleDesc != m_tParticleDesc.end())
     {
-        //?뱀떆 媛숈? ?대쫫?쇰줈 ?ㅼ떆留뚮뱾?댁??붽굅 ?鍮꾪빐??吏?뚯쨾?쇳븯?? ?꾩슂?놁쓣嫄?媛숈쑝硫?吏?뚮룄 ?좊벏.
         m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterParticleDesc->second.strVIBufferTag);
 
         m_tParticleDesc.erase(iterParticleDesc);
@@ -422,11 +456,15 @@ void CParticle_Controller::Remove_Desc(const _wstring& DescTag)
         m_tVBDesc.erase(iterVBDesc);
     }
 
-    //珥덇린??
     m_iSelectedParticle = 0;
     m_bSelectedParticle = false;
     m_pSelectedParticleDesc = nullptr;
     m_pSelectedVBDesc = nullptr;
+   
+    m_fColor[0] = 0.f;
+    m_fColor[1] = 0.f;
+    m_fColor[2] = 0.f;
+    m_fColor[3] = 0.f;
 }
 
 //CParticle::PARTICLE_DESC CParticle_Controller::Find_Particle(_tchar ParticleTag)

@@ -112,6 +112,9 @@
     <Filter Include="02. Level\UI">
       <UniqueIdentifier>{42d34b8c-5305-4308-a1e3-60659450ace7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\MonsterTest\Body">
+      <UniqueIdentifier>{d2355fc4-038d-49ca-91f7-20deddf40ace}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -239,6 +242,9 @@
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\MonsterBody.h">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -353,7 +359,9 @@
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Loader.cpp" />
+    <ClCompile Include="..\private\MonsterBody.cpp">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -391,6 +399,12 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
+		<Filter>96. ShaderFiles</Filter>
+	</FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

@@ -27,6 +27,7 @@
     <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\BlackBoard.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\CollideComponent.h" />
     <ClInclude Include="..\public\CSM.h" />
     <ClInclude Include="..\Public\BT_Action.h" />
     <ClInclude Include="..\Public\BT_Node.h" />
@@ -103,8 +104,9 @@
     <ClInclude Include="..\Public\VIBuffer.h" />
     <ClInclude Include="..\Public\VIBuffer_Cell.h" />
     <ClInclude Include="..\Public\VIBuffer_Cube.h" />
-    <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h" />
+    <ClInclude Include="..\Public\VIBuffer_Mesh.h" />
+    <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect.h" />
   </ItemGroup>
@@ -116,6 +118,7 @@
     <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\BlackBoard.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\CollideComponent.cpp" />
     <ClCompile Include="..\private\CSM.cpp" />
     <ClCompile Include="..\Private\BT_Action.cpp" />
     <ClCompile Include="..\Private\BT_Node.cpp" />
@@ -189,12 +192,14 @@
     <ClCompile Include="..\Private\VIBuffer.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cell.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cube.cpp" />
-    <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Mesh.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />

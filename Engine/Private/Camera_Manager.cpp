@@ -143,7 +143,6 @@ void CCamera_Manager::Update(_float fTimeDelta)
 	if (nullptr == m_pMainCamera || true == m_isFree)
 	{
 		m_pFreeCamera->Update(fTimeDelta);
-		m_pFreeCamera->Update_Matrix();
 	}
 	else
 	{
@@ -151,6 +150,20 @@ void CCamera_Manager::Update(_float fTimeDelta)
 			m_pMainCamera->Update(fTimeDelta);
 		else
 			Compute_Action(fTimeDelta);
+	}
+}
+
+void CCamera_Manager::Late_Update(_float fTimeDelta)
+{
+	if (nullptr == m_pMainCamera || true == m_isFree)
+	{
+		m_pFreeCamera->Late_Update(fTimeDelta);
+		m_pFreeCamera->Update_Matrix();
+	}
+	else
+	{
+		if (false == m_isPlayAction)
+			m_pMainCamera->Late_Update(fTimeDelta);
 
 		m_pMainCamera->Update_Matrix();
 	}

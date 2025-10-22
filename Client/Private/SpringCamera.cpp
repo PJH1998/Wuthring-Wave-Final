@@ -132,6 +132,15 @@ void CSpringCamera::Ready_Component()
 	ColliderDesc.fRadius = 5.f; //m_pGameInstance->Rand(5.f, 20.f);
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+
+	// Com_Rigidbody
+	CRigidbody::BOXBODY_DESC RigidDesc = {};
+	RigidDesc.eType = EMotionType::Kinematic;
+	RigidDesc.eShape = SHAPE::BOX;
+	RigidDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::CAMERA);
+	RigidDesc.vExtent = _float3(100.f, 100.f, 100.f);
+	XMStoreFloat3(&RigidDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
 }
 
 CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

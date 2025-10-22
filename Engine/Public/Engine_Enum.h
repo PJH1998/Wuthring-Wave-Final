@@ -10,10 +10,12 @@ namespace Engine
 	enum class POINTS { A, B, C, END};
 	enum class LINE { AB, BC, CA, END };
 
+	// Input
 	enum class KEYSTATE { DOWN, PRESS, UP, END };
 	enum class MOUSEKEYSTATE { LB, RB, WB, END };
 	enum class MOUSEMOVESTATE { X, Y, WHEEL, END };
 
+	// Render
 	enum class TEXTURETYPE { DIFFUSE, NORMAL, MASK, END };
 	enum class MODELTYPE { NONANIM, ANIM, MAP };
 	enum class PROTOTYPE { GAMEOBJECT, COMPONENT };
@@ -26,11 +28,15 @@ namespace Engine
 	enum class EVENT { STATIC, NONSTATIC, END};
 
 	enum class SHADER_DEFFERED { RD_DEBUG, RD_DEBUG_CSM, CONBINED, DIRECTIONAL, POINT, BLUR_X, BLUR_Y, DISTORTION, LUT };
+	
+	// Collide
 	// BroadPhase Layer
 	enum class BPLAYER { NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
 	enum class SHAPE { SPHERE, BOX, CAPSULE, CONVEXHULL, MESH };
+	// Collide Timing
+	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
-	
+	enum class EFFECT_TYPE { PARTICLE, MESH, END };
 }
 #endif // Engine_Enum_h__

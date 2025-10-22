@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "Actor.h"
 
 NS_BEGIN(Engine)
 class CShader;
@@ -11,12 +11,13 @@ NS_END
 
 NS_BEGIN(Client)
 
-class CMonsterTest final : public CGameObject
+class CMonsterTest final : public CActor
 {
 public:
 	typedef struct tagMonsterTestDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		const _tchar* szPrototypeModelTag;
+		const _char* pAnimationTag;
 	}MONSTERTEST_DESC;
 
 private:
@@ -38,22 +39,18 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 private:
-	CShader*				m_pShaderCom = { nullptr };
-	CModel*					m_pModelCom = { nullptr };
 	//CRigidbody*			m_pRigidbodyCom = { nullptr };
 	//CCollider*				m_pColliderCom = { nullptr };
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
-	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 
-	CTransform*				m_pTargetTransformCom = { nullptr };
+	//CTransform*				m_pTargetTransformCom = { nullptr };
 
 	_uint					m_iState{};
 	_int					m_iHP{};
-	_bool					m_isAnimationFinished{};
-	_string					m_strCurrentAnimTag;
 
 private:
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
+	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
 public:
 	static		CMonsterTest*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

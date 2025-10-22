@@ -21,10 +21,10 @@ HRESULT CVIBuffer_Instance::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CVIBuffer_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
-{
-	return S_OK;;
-}
+//HRESULT CVIBuffer_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
+//{
+//	return S_OK;;
+//}
 
 HRESULT CVIBuffer_Instance::Initialize_Clone(void* pArg)
 {
