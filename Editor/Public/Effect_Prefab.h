@@ -7,9 +7,9 @@ class CEffect_Prefab : public CGameObject
 {
 public:
 	typedef struct PrefabDesc {
-		_wstring strPrefabTag; //?섏쨷?????쒓렇濡??留곹깭洹?吏?뺥븷嫄곗엫
-		_int	ChildrenCount; //?먯떇 ??
-		//?먯떇???뺣낫 ?꾩슂
+		_wstring strPrefabTag; 
+		_int	ChildrenCount; 
+	
 	}PREFAB_DESC;
 
 private:
@@ -29,6 +29,10 @@ public:
 	void Add_Children(void* pArg, EFFECT_TYPE eType);
 	void Remove_Children(_wstring& ChildrenTag);
 
+
+public:
+	void Root_Test();
+
 public:
 	_int Get_Children_Count();
 	_wstring Get_Children_Tag(_int iIndex);
@@ -38,12 +42,15 @@ public:
 	};
 
 private:
-	_wstring							m_strMyTag;	 //???꾩떆??
+
+	_wstring							 m_strMyTag;	 
 	
-	//?먯떇??
+
+	const _float4x4*					 m_pRootMatirx = {};
+
+
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	
-	//?먯떇???ъ깮愿由??대뼸寃??좎? 議곌툑 ??援ъ긽?대킄??醫뗭쓣??
 	//map<const _wstring, float>				m_ChildrenDesc; 
 
 public:

@@ -264,6 +264,9 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\AnimState">
       <UniqueIdentifier>{a9d127fd-08d8-4cb3-b4cb-bbbe35b6f3ff}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\NewFilter1">
+      <UniqueIdentifier>{52fb9c3d-da95-4aa5-ad13-b270ec1b26dc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

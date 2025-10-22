@@ -31,7 +31,7 @@ public:
 #endif
 
 private:
-	_float4x4* m_TransformMatrices = { nullptr };
+	_float4x4*						m_TransformMatrices = { nullptr };
 
 private:
 	_uint							m_iMaterialIndex = {};

@@ -18,6 +18,7 @@ _uint CBase::Release()
 
         delete this;
 
+
         return 0;
     }
 

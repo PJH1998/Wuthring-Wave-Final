@@ -58,7 +58,7 @@ void CEffect_Controller::Prefab_Tab()
                 m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prefab"), pPrefab);
 
                 m_Prefabs.emplace(PrefabTag, pPrefab);
-                //Safe_AddRef(pPrefab);
+                //Safe_AddRef(pPrefab); 
 
     
                 m_bTagFlag = false;
@@ -190,8 +190,12 @@ void CEffect_Controller::Prefab_Tab()
                         UpdateSelected_ChildrenFromIndex();
                     }
 
+                    //선택된 자식들과 관련된 컨트롤러 활성화
                     if (m_IsParticle)
                         m_pParticle_Controller->Update();
+
+                    if (m_IsMeshEffect)
+                        m_pMesh_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -209,6 +213,30 @@ void CEffect_Controller::Prefab_Tab()
 
                            m_pSelectedPrefab->Add_Children(pParticleDesc, EFFECT_TYPE::PARTICLE);
 
+                       }
+
+                       if (m_IsMeshEffect)
+                       {
+                           CEffect_Mesh::EFFECTMESH_DESC* pEffectMeshDesc = m_pMesh_Controller->Get_EffectMeshDesc(m_strChildrenTag);
+                           CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* pFXVBDesc = m_pMesh_Controller->Get_VBMeshDesc(m_strChildrenTag);
+
+                           //이전에 만들어져있던 매쉬버퍼 원형 삭제
+                           m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), pEffectMeshDesc->strVIBufferTag);
+
+                           //매쉬버퍼 원형 생성 해줘야하는데 Dat 경로가 필요함..
+                           _char szDatPath[MAX_PATH] = {};
+                           strcpy_s(szDatPath, sizeof(szDatPath), "../../Client/Bin"); 
+                           strcat_s(szDatPath, sizeof(szDatPath), pFXVBDesc->DatFilePath);  // DatFilePath -> "/Resource/.." 부터 시작함.
+
+                           _fmatrix DefaultMatrix = XMMatrixIdentity();
+                           m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), pEffectMeshDesc->strVIBufferTag,
+                               CVIBuffer_Mesh::Create(m_pDevice, m_pContext, szDatPath, DefaultMatrix, pFXVBDesc));
+
+                           //선택한 프리팹이 이전에 가지고 있던 자식 삭제
+                           m_pSelectedPrefab->Remove_Children(pEffectMeshDesc->strMyTag);
+
+                           //이전에 가지고 있던 자식과 동일한 이름, 다른 Desc로 신규 자식 생성
+                           m_pSelectedPrefab->Add_Children(pEffectMeshDesc, EFFECT_TYPE::MESH);
                        }
                     }
 
@@ -274,6 +302,15 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
+    else if (dynamic_cast<CEffect_Mesh*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+    {
+        m_IsParticle = false;
+        m_IsMeshEffect = true;
+        m_IsTrailMesh = false;
+
+        m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
+    }
+
 }
 
 void CEffect_Controller::Reset_TabInfo()

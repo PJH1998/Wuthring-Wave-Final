@@ -21,7 +21,7 @@ protected:
 
 public:
 	virtual HRESULT		Initialize_Prototype();
-	virtual HRESULT		Initialize_Prototype(const INSTANCE_DESC* pDesc);
+	//virtual HRESULT		Initialize_Prototype(const INSTANCE_DESC* pDesc);
 	virtual HRESULT		Initialize_Clone(void* pArg) override;
 	virtual HRESULT		Render() override;
 

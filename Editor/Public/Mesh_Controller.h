@@ -16,6 +16,7 @@ public:
 	typedef struct MeshDatTag {
 		_char szName[MAX_PATH] = {};
 		_tchar strMeshTag[MAX_PATH] = {};
+		_char szDatPath[MAX_PATH] = {};
 		//매쉬는 미리보기 어떻게 못하나 ?
 	}MESH_TAG;
 
@@ -41,10 +42,14 @@ public:
 
 	void EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffectMeshDesc, _bool& IsCreate);
 
-	
-
 public:
 	void Set_EffectMeshTag(const _char* szEffectMeshTag);
+	void UpdateSelected_FXMeshFormTag(_wstring FMMeshTag);
+
+	CEffect_Mesh::EFFECTMESH_DESC* Get_EffectMeshDesc(_wstring& EffectMeshTag);
+	CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* Get_VBMeshDesc(_wstring& VBMesTag);
+
+	void Remove_Desc(const _wstring& DescTag);
 
 	//void UpdateSelected_ParticleFormTag(_wstring ParticleTag);
 	//
@@ -71,8 +76,14 @@ private:
 	_char														m_EffectMeshTag[MAX_PATH] = {};
 	_bool														m_bTagFlag = false;
 
+	_bool														m_IsRoot = false;
+
+	map<const _wstring, CVIBuffer_Mesh::MESH_FXINSTANCE_DESC>	m_tVBMeshDesc = {};
 	map<const _wstring, CEffect_Mesh::EFFECTMESH_DESC>			m_tEffectMeshDesc = {};
 
+	_bool														m_bSelectedMesh = false;
+	CEffect_Mesh::EFFECTMESH_DESC*								m_pSelectedEffectMeshDesc = { nullptr };
+	CVIBuffer_Mesh::MESH_FXINSTANCE_DESC*						m_pSelectedVBFXDesc = { nullptr };
 
 	//_int														m_iSelectedParticle = 0;
 	//_bool														m_bSelectedParticle = false;

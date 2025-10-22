@@ -31,6 +31,6 @@ namespace Engine
 	// Body Shape
 	enum class SHAPE { SPHERE, BOX, CAPSULE, CONVEXHULL, MESH };
 
-	
+	enum class EFFECT_TYPE { PARTICLE, MESH, END };
 }
 #endif // Engine_Enum_h__

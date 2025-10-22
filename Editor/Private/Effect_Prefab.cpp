@@ -27,6 +27,8 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
     m_strMyTag = pDesc->strPrefabTag;
 
+    Root_Test();
+
     return S_OK;
 }
 
@@ -73,17 +75,25 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 
     switch (eType)
     {
-    case Editor::EFFECT_TYPE::PARTICLE:
+    case EFFECT_TYPE::PARTICLE:
         pParticleDesc = static_cast<CParticle::PARTICLE_DESC*>(pArg);
         strChildrenTag = pParticleDesc->strMyTag;
+
+        if (pParticleDesc->IsRootOn)
+            pParticleDesc->RootMatrix = m_pRootMatirx;
+
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
-    case Editor::EFFECT_TYPE::MESH:
+    case EFFECT_TYPE::MESH:
         pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
         strChildrenTag = pMeshDesc->strMyTag;
+
+        if (pMeshDesc->IsRootOn)
+            pMeshDesc->RootMatrix = m_pRootMatirx;
+
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
-    case Editor::EFFECT_TYPE::END:
+    case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
         break;
     }
@@ -103,6 +113,13 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
 
    Safe_Release(iter->second);
    m_EffectChildren.erase(iter);
+}
+
+void CEffect_Prefab::Root_Test()
+{
+   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
+
+   m_pRootMatirx = pModel->Get_BoneMatrixPtr("Bone_Skirt051_M");
 }
 
 _int CEffect_Prefab::Get_Children_Count()

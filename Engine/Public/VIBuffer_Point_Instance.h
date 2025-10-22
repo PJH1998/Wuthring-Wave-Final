@@ -13,7 +13,18 @@ public:
 		_float2		vSpeed;
 		_float2		vLifeTime;
 		_bool		IsLoop;
-		// if 0 ~ 1
+
+		//스트레치 빌보드 설정값 
+		_bool		IsStretch = false;
+		_float		fStretchWeight = 1.f;
+		_float2		fStretchRange = { 1.f, 1.f };
+
+		//스프라이트 이미지 설정값
+		_bool		IsSprite = false;
+		_float		fSpriteWeight = 1.f;
+		_float		fDefualtSpeed = 2.5f;			//스프라이트 이미지가 바뀌는 속도 기본값.
+
+		//가중치
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
@@ -26,24 +37,28 @@ private:
 	virtual ~CVIBuffer_Point_Instance() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype(const INSTANCE_DESC* pDesc) override;
+	virtual HRESULT Initialize_Prototype(const INSTANCE_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 	virtual HRESULT Bind_Resources() override;
 	virtual HRESULT Render() override;
 
-	void Bind_CSResources(class CComputeShader* pCShader, _float fTimeDelta);
+	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // 바꿀 일 있을 경우 여기에 값 추가해서 바꿔줘야함.
+	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
+	void Bind_CSResources(class CComputeShader* pCShader);
 
-public:
-	void Spread(_float fTimeDelta);
-	void Drop(_float fTimeDelta);
-	void Rotation(_float fTimeDelta);
+//public:
+//	void Spread(_float fTimeDelta);
+//	void Drop(_float fTimeDelta);
+//	void Rotation(_float fTimeDelta);
 
 private:
-	_float3					m_vPivot = {};
+	_float3					m_vPivot = {};			//어차피 컴셰로 계산하는데 필요없어보임.
 	_float*					m_pSpeeds = {};
 	_bool					m_isLoop = {};
 
-	ID3D11Buffer*		m_pCBBuffer = {};
+	ID3D11Buffer*		m_pOptionCBBuffer = {};
+	ID3D11Buffer*		m_pSpeedCBBuffer = {};
+
 	ID3D11Buffer*		m_pSRVBuffer = {};
 	ID3D11Buffer*       m_pUABuffer = {};
 

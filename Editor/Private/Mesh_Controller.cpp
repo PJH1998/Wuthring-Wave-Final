@@ -73,6 +73,7 @@ void CMesh_Controller::Load_AllTextureFromFolder(const _string& strFolderPath)
     }
 }
 
+//이름만 읽어서 리스트박스에 이름 띄우는 용도로만 사용하자. 
 void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
 {
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -86,6 +87,7 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
             if (extension == ".Dat" || extension == ".dat")
             {
                 MESH_TAG Desc = {};
+                CVIBuffer_Mesh::MESH_FXINSTANCE_DESC FXMeshDesc = {};
 
                 // 확장자 제외한 파일명
                 _string strMeshTag = entry.path().stem().string();
@@ -99,15 +101,23 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strMeshTag, MAX_PATH);
 
-                //파일경로 wstring 변환
-                _wstring wstrFilePath = StringToWString(filePath);
+                _string DefaultPath = "/Resource/Effect/EffectMesh/Dat/";
 
-                //매쉬버퍼 컴포넌트 생성
-                _fmatrix DefualtMatrix = XMMatrixIdentity();
+                DefaultPath += fileName;
 
-                m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strMeshTag,
-                   CVIBuffer_Mesh::Create(m_pDevice, m_pContext, filePath.c_str(), DefualtMatrix));
+                strcpy_s(Desc.szDatPath, sizeof(Desc.szDatPath), DefaultPath.c_str());
 
+                ////매쉬버퍼 컴포넌트 생성
+                //_fmatrix DefualtMatrix = XMMatrixIdentity();
+
+                //FXMeshDesc.vSize = _float2(1.f, 1.f);
+                //FXMeshDesc.iNumInstance = 1;
+
+                //m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strMeshTag,
+                //   CVIBuffer_Mesh::Create(m_pDevice, m_pContext, filePath.c_str(), DefualtMatrix, &FXMeshDesc));
+
+
+                //m_tVBMeshDesc.emplace(strMeshTag, FXMeshDesc);
                 m_MeshVBTag.push_back(Desc);
             }
         }
@@ -116,6 +126,179 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
 
 void CMesh_Controller::EffectMesh_Tab()
 {
+    if (m_bSelectedMesh)
+    {
+        if (ImGui::Begin("FXMesh Info"))
+        {
+
+            //파티클 설정값 VIBuffer
+            if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                /////////////////////////////////////// 체크박스
+                ImGui::Checkbox("Loop", &(m_pSelectedVBFXDesc->IsLoop));
+
+                if (ImGui::Checkbox("SpawnRing", &(m_pSelectedVBFXDesc->IsSpawnRing)))
+                {
+                    //선택됐으니 다른 얘들 꺼주자
+                    m_pSelectedVBFXDesc->IsSpawnBox = false;
+                }
+
+                ImGui::Checkbox("RingAngle", &(m_pSelectedVBFXDesc->IsRingAngle));
+
+                if (ImGui::Checkbox("SpawnBox", &(m_pSelectedVBFXDesc->IsSpawnBox)))
+                {
+                    m_pSelectedVBFXDesc->IsSpawnRing = false;
+                }
+                ImGui::Separator();
+                ///////////////////////////////////////
+
+                ImGui::Text("NumInstance");
+                ImGui::PushItemWidth(100);
+                ImGui::DragInt("##NumInstance", (int*)&(m_pSelectedVBFXDesc->iNumInstance));
+                ImGui::PopItemWidth();
+
+                ImGui::PushItemWidth(200);
+
+                /////////////////////////////////////// 가중치 설정
+                ImGui::Separator();
+                ImGui::Text("SpreadWeight");
+                ImGui::SameLine();
+                ImGui::DragFloat("##SpreadW", &(m_pSelectedVBFXDesc->fSpreadWeight), 0.1f, 0.f, 1.f);
+
+                ImGui::Text("DropWeight");
+                ImGui::SameLine();
+                ImGui::DragFloat("##DorpW", &(m_pSelectedVBFXDesc->fDropWeight), 0.1f, 0.f, 1.f);
+
+                ImGui::Text("RotationWeight");
+                ImGui::SameLine();
+                ImGui::DragFloat("##RotationW", &(m_pSelectedVBFXDesc->fRotationWeight), 0.1f, 0.f, 1.f);
+
+                ImGui::PopItemWidth();
+                ImGui::Separator();
+                ///////////////////////////////////////
+         
+                if (m_pSelectedVBFXDesc->IsSpawnRing)
+                {
+                    /////////////////////////////////////// 링 스폰시 설정값
+                    ImGui::Text("RMin/RMax");
+                    ImGui::PushItemWidth(60);
+                    ImGui::InputFloat("##RMin", &(m_pSelectedVBFXDesc->fRmin));
+                    ImGui::SameLine();
+                    ImGui::InputFloat("##RMax", &(m_pSelectedVBFXDesc->fRmax));
+                    ImGui::PopItemWidth();
+
+                    ImGui::Text("Degree Start/End");
+                    ImGui::PushItemWidth(60);
+                    ImGui::InputFloat("##DegreeX", &(m_pSelectedVBFXDesc->fDegreeAngle.x));
+                    ImGui::SameLine();
+                    ImGui::InputFloat("##DegreeY", &(m_pSelectedVBFXDesc->fDegreeAngle.y));
+                    ImGui::PopItemWidth();
+                    ImGui::Separator();
+                    ///////////////////////////////////////
+                }
+
+                ImGui::Checkbox("InWard", &(m_pSelectedVBFXDesc->IsInWard));
+                /////////////////////////////////////// 방향 설정
+
+                ImGui::Text("Pitch");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##Pitch", &(m_pSelectedVBFXDesc->fPitch));
+                ImGui::PopItemWidth();
+                ImGui::Separator();
+                ///////////////////////////////////////
+        
+                ImGui::Text("Center");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##CenterX", &(m_pSelectedVBFXDesc->vCenter.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##CenterY", &(m_pSelectedVBFXDesc->vCenter.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##CenterZ", &(m_pSelectedVBFXDesc->vCenter.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Size");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##SizeX", &(m_pSelectedVBFXDesc->vSize.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##SizeY", &(m_pSelectedVBFXDesc->vSize.y));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Range");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##RangeX", &(m_pSelectedVBFXDesc->vRange.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##RangeY", &(m_pSelectedVBFXDesc->vRange.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##RangeZ", &(m_pSelectedVBFXDesc->vRange.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Pivot");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##PivotX", &(m_pSelectedVBFXDesc->vPivot.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##PivotY", &(m_pSelectedVBFXDesc->vPivot.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##PivotZ", &(m_pSelectedVBFXDesc->vPivot.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Speed");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##SppedX", &(m_pSelectedVBFXDesc->vSpeed.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##SppedY", &(m_pSelectedVBFXDesc->vSpeed.y));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("LifeTime");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##LifeTimeX", &(m_pSelectedVBFXDesc->fLifeTime));
+        /*        ImGui::SameLine();
+                ImGui::InputFloat("##LifeTimeY", &(m_pSelectedVBFXDesc->vLifeTime.y));*/
+                ImGui::PopItemWidth();
+            }
+
+            if (ImGui::CollapsingHeader("Particle", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                /*      ImGui::Checkbox("Spread", &(m_pSelectedEffectMeshDesc->bSpread));
+                      ImGui::Checkbox("Drop", &(m_pSelectedEffectMeshDesc->bDrop));*/
+                ImGui::Checkbox("Root", &(m_pSelectedEffectMeshDesc->IsRootOn));
+
+                ImGui::Text("Size");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##ParticleSizeX", &(m_pSelectedEffectMeshDesc->vSize.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticleSizeY", &(m_pSelectedEffectMeshDesc->vSize.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticleSizeZ", &(m_pSelectedEffectMeshDesc->vSize.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Position");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##ParticlePosX", &(m_pSelectedEffectMeshDesc->vPos.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticlePosY", &(m_pSelectedEffectMeshDesc->vPos.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticlePosZ", &(m_pSelectedEffectMeshDesc->vPos.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("Color");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##ParticleColorX", &(m_pSelectedEffectMeshDesc->vColor.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticleColorY", &(m_pSelectedEffectMeshDesc->vColor.y));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticleColorZ", &(m_pSelectedEffectMeshDesc->vColor.z));
+                ImGui::PopItemWidth();
+
+                ImGui::Text("LifeTime");
+                ImGui::PushItemWidth(60);
+                ImGui::InputFloat("##ParticleLifeTimeX", &(m_pSelectedEffectMeshDesc->vLifeTime.x));
+                ImGui::SameLine();
+                ImGui::InputFloat("##ParticleLifeTimeY", &(m_pSelectedEffectMeshDesc->vLifeTime.y));
+                ImGui::PopItemWidth();
+            }
+            ImGui::End();
+        }
+    }
 
 }
 
@@ -160,6 +343,9 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
             ImGui::EndCombo();
         }
 
+        //Root 설정
+        if(ImGui::Checkbox("Root", &m_IsRoot))
+
         ImGui::Separator();
         if (m_iSelectedTexture >= 0) {
             ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
@@ -173,19 +359,53 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 _tchar EffectMeshTag[MAX_PATH] = {};
                 CEffect_Mesh::EFFECTMESH_DESC EffectMeshDesc{};
+                CVIBuffer_Mesh::MESH_FXINSTANCE_DESC VBFXMhesDesc{};
 
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_EffectMeshTag, strlen(m_EffectMeshTag), EffectMeshTag, MAX_PATH);
 
                 //EffectMeshDesc.strMyTag = EffectMeshTag;
+
+                //이펙트 매쉬 이름 및 클론할 컴포넌트 이름들
+                EffectMeshDesc.strMyTag = EffectMeshTag;
                 EffectMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 EffectMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
 
                 //이펙트매쉬(오브젝트)가 가질 디폴트 설정값.
                 EffectMeshDesc.vLifeTime.y = 10.f;
                 EffectMeshDesc.vPos = _float3(0.f, 0.f, 0.f);
-                EffectMeshDesc.vSize = _float3(1.f, 1.f, 1.f);
+                EffectMeshDesc.vSize = _float3(0.5f, 0.5f, 0.5f);
                 EffectMeshDesc.fShaderPass = 0;
 
+                //인스턴싱매쉬 디폴트 설정값. 여기서 미리 원형 생성을 해줘야함.
+                _fmatrix DefualtMatrix = XMMatrixIdentity();
+                VBFXMhesDesc.vSize = _float2(1.f, 1.f);
+                VBFXMhesDesc.iNumInstance = 1;
+                
+                _char szDatPath[MAX_PATH] = {};
+
+                strcpy_s(szDatPath, sizeof(szDatPath), "../../Client/Bin");
+                strcat_s(szDatPath, sizeof(szDatPath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
+
+                //원형 생성
+                m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag,
+                CVIBuffer_Mesh::Create(m_pDevice, m_pContext, szDatPath, DefualtMatrix, &VBFXMhesDesc));
+                
+                //원형이 읽은 Dat 경로 VB에 저장해줘야할거 같음.
+                strcpy_s(VBFXMhesDesc.DatFilePath, sizeof(VBFXMhesDesc.DatFilePath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
+
+                ////Desc에 VBMesh 이름 저장?
+                //_tchar strFXMehsTag[MAX_PATH] = {};
+                //MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_MeshVBTag[m_iSelectedMeshVBTag].szName, strlen(m_MeshVBTag[m_iSelectedMeshVBTag].szName), strFXMehsTag, MAX_PATH);
+               
+                m_tVBMeshDesc.emplace(EffectMeshTag, VBFXMhesDesc);
+
+                if (m_IsRoot)
+                {
+                    EffectMeshDesc.IsRootOn = true;
+                    m_IsRoot = false;
+                }
+
+                //매쉬이펙트 와 매쉬VB태그를 맞춰야할지는 고민해보자.
                 m_tEffectMeshDesc.emplace(EffectMeshTag, EffectMeshDesc);
 
                 tEffectMeshDesc = EffectMeshDesc;
@@ -198,7 +418,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
                 m_bTagFlag = false;
             }
         }
-
+       
         ImGui::End();
     }
 
@@ -209,6 +429,72 @@ void CMesh_Controller::Set_EffectMeshTag(const _char* szEffectMeshTag)
     strcat_s(m_EffectMeshTag, szEffectMeshTag);
 
     m_bTagFlag = true;
+}
+
+void CMesh_Controller::UpdateSelected_FXMeshFormTag(_wstring FXMeshTag)
+{
+    auto iterEffectMeshDesc = m_tEffectMeshDesc.find(FXMeshTag);
+    
+    if (iterEffectMeshDesc == m_tEffectMeshDesc.end())
+        m_pSelectedEffectMeshDesc = nullptr;
+    else
+        m_pSelectedEffectMeshDesc = &iterEffectMeshDesc->second;
+
+    auto iterVBFXDesc = m_tVBMeshDesc.find(FXMeshTag);
+    
+    if (iterVBFXDesc == m_tVBMeshDesc.end())
+        m_pSelectedVBFXDesc = nullptr;
+    else
+        m_pSelectedVBFXDesc = &iterVBFXDesc->second;
+
+    if (m_pSelectedEffectMeshDesc != nullptr)
+        m_bSelectedMesh = true;
+
+}
+
+CEffect_Mesh::EFFECTMESH_DESC* CMesh_Controller::Get_EffectMeshDesc(_wstring& EffectMeshTag)
+{
+    auto iter = m_tEffectMeshDesc.find(EffectMeshTag);
+
+    if (iter == m_tEffectMeshDesc.end())
+        return nullptr;
+
+    return &iter->second;
+}
+
+CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* CMesh_Controller::Get_VBMeshDesc(_wstring& VBMesTag)
+{
+    auto iter = m_tVBMeshDesc.find(VBMesTag);
+
+    if (iter == m_tVBMeshDesc.end())
+        return nullptr;
+
+    return &iter->second;
+}
+
+void CMesh_Controller::Remove_Desc(const _wstring& DescTag)
+{
+    auto iterEffectMeshDesc = m_tEffectMeshDesc.find(DescTag);
+
+    if (iterEffectMeshDesc != m_tEffectMeshDesc.end())
+    {
+        //혹시 같은 이름으로 다시 만들어지는거 대비해서 지워줘야할거 같음.
+        m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterEffectMeshDesc->second.strVIBufferTag);
+
+        m_tEffectMeshDesc.erase(iterEffectMeshDesc);
+    }
+
+    auto iterVBFXDesc = m_tVBMeshDesc.find(DescTag);
+
+    if (iterVBFXDesc != m_tVBMeshDesc.end())
+    {
+        m_tVBMeshDesc.erase(iterVBFXDesc);
+    }
+
+    //초기화
+    m_bSelectedMesh = false;
+    m_pSelectedEffectMeshDesc = nullptr;
+    m_pSelectedVBFXDesc = nullptr;
 }
 
 CMesh_Controller* CMesh_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

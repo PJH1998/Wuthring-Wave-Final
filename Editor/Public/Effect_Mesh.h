@@ -6,7 +6,7 @@ NS_BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Mesh;
-//class CComputeShader;
+class CComputeShader;
 NS_END
 
 NS_BEGIN(Editor)
@@ -25,7 +25,6 @@ public:
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float3 vColor = { 0.f, 0.f, 0.f };
 		_float2	vLifeTime = { 5.f, 10.f};
-
 	}EFFECTMESH_DESC;
 
 private:
@@ -42,19 +41,22 @@ public:
 	virtual void Render();
 
 private:
+	void Root_Transform();
+
+private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
-	//CComputeShader*			m_pComputeShader = { nullptr };
+	CComputeShader*				m_pComputeShaderCom = { nullptr };
 
 	_float						m_fShaderPass = 0;
 	_float3						m_vPos = {};
 	_float3						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
-	//매쉬 움직임 처리는 어떻게 ? 음... 고민해봐야할듯
-	//_bool						m_IsSpread = false;
-	//_bool						m_IsDrop = false;
+	_bool						m_IsRoot = false;
+	const _float4x4*			m_ParentMatrix = { nullptr };
+	_float4x4					m_ComBindMatrix = {  };
 
 private:
 	HRESULT Ready_Components(EFFECTMESH_DESC& Desc);

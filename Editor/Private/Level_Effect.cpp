@@ -28,8 +28,8 @@ HRESULT CLevel_Effect::Initialize()
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
     //매쉬 그리기용 셰이더
-    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxMesh"),
-        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXMesh_Instance.hlsl"), VTXFXMESHINSTANCE::Elements, VTXFXMESHINSTANCE::iNumElements));
 
     //파티클 연산용 셰이더
     SHADER_MACRO eShaderMacro = {
@@ -43,6 +43,21 @@ HRESULT CLevel_Effect::Initialize()
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
+
+
+    //FX매쉬 연산용 셰이더
+
+    SHADER_MACRO eShaderMacroMesh = {
+      {"THREAD_X", "64" }
+      ,{"THREAD_Y", "1" }
+      ,{"THREAD_Z", "1" }
+      , { NULL, NULL }
+    };
+
+    string strEntryPointMesh = "main";
+
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_FXMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_FXMeshUpdate_CS.hlsl"), eShaderMacroMesh, strEntryPointMesh));
 
     //이펙트 툴
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);

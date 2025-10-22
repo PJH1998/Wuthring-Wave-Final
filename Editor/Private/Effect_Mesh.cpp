@@ -35,6 +35,10 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
+    m_IsRoot = pDesc->IsRootOn;
+    
+    if (m_IsRoot)
+        m_ParentMatrix = pDesc->RootMatrix;
     //임시처리
     m_isActivate = true;
 
@@ -50,6 +54,11 @@ void CEffect_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+    if(m_IsRoot)
+        Root_Transform();
+
+
+    m_pVIBufferCom->Bind_CSResources(m_pComputeShaderCom, fTimeDelta);
     //움직임 처리 어떻게 ?
    /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
@@ -81,9 +90,21 @@ void CEffect_Mesh::Render()
     m_pVIBufferCom->Render();
 }
 
+//Test
+void CEffect_Mesh::Root_Transform()
+{
+    _matrix RootMatrix = XMLoadFloat4x4(m_ParentMatrix);
+
+    for (size_t i = 0; i < 3; i++)
+        RootMatrix.r[i] = XMVector3Normalize(RootMatrix.r[i]);
+
+    XMStoreFloat4x4(&m_ComBindMatrix,
+        (m_pTransformCom->Get_WorldMatrix() * RootMatrix));
+}
+
 HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
 {
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxMesh"),
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -96,14 +117,25 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
+    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_FXMesh"),
+        TEXT("Com_CShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+        return E_FAIL;
 
     return S_OK;
 }
 
 HRESULT CEffect_Mesh::Bind_ShaderResources()
 {
-    if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
+    if (!m_IsRoot)
+    {
+        if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+            return E_FAIL;
+    }
+    else
+    {
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+            return E_FAIL;
+    }
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
@@ -150,4 +182,5 @@ void CEffect_Mesh::Free()
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShaderCom);
 }

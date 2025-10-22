@@ -12,11 +12,13 @@ CVIBuffer_Point_Instance::CVIBuffer_Point_Instance(const CVIBuffer_Point_Instanc
 	, m_vPivot{ Prototype.m_vPivot }
 	, m_pSpeeds{ Prototype.m_pSpeeds }
 	, m_isLoop{ Prototype.m_isLoop }
-	, m_pCBBuffer { Prototype.m_pCBBuffer}
+	, m_pOptionCBBuffer { Prototype.m_pOptionCBBuffer }
+	, m_pSpeedCBBuffer { Prototype.m_pSpeedCBBuffer }
 	, m_pSRV { Prototype.m_pSRV }
 	, m_pSRVBuffer { Prototype.m_pSRVBuffer}
 {
-	Safe_AddRef(m_pCBBuffer);
+	Safe_AddRef(m_pOptionCBBuffer);
+	Safe_AddRef(m_pSpeedCBBuffer);
 	Safe_AddRef(m_pSRVBuffer);
 	Safe_AddRef(m_pSRV);
 }
@@ -66,7 +68,6 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_pVBInstanceVertices = new VTXINSTANCE_PARTICLE[m_iNumInstance];
 	m_pSpeeds = new _float[m_iNumInstance];
 
-	//SRV???ㅼ뼱媛??뺣낫 援ъ“泥댁뿉 媛쒖닔留뚰겮 ???
 	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
 	for (size_t i = 0; i < m_iNumInstance; i++)
@@ -76,7 +77,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 		m_pSpeeds[i] = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
-		//SRV?곗씠?곗슜 ???
+
 		pSRV[i].fSpeed = m_pSpeeds[i];
 
 		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
@@ -88,6 +89,16 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 			m_pGameInstance->Rand(pPointDesc->vCenter.z - pPointDesc->vRange.z * 0.5f, pPointDesc->vCenter.z + pPointDesc->vRange.z * 0.5f),
 			1.f
 		);
+
+		//_float3	vPivot;
+		//_float fSpeed;
+		//_float fLifeTime;
+		//_bool IsLoop;
+
+		//_float fSpreadWeight = 0;
+		//_float fDropWeight = 0;
+		//_float fRotationWeight = 0;
+
 
 		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
@@ -122,33 +133,55 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	if (FAILED(m_pDevice->CreateShaderResourceView(m_pSRVBuffer, &SRVDesc, &m_pSRV)))
 		return E_FAIL;
 
-	//CB 踰꾪띁 ?앹꽦
-	PARTICLE_CB* pCB = new PARTICLE_CB;
-	pCB->fTimeDelta = 0.1f;
-	pCB->vPivot = m_vPivot;
-	pCB->IsLoop = m_isLoop ? 1 : 0;
-	pCB->fSpreadWeight = pPointDesc->fSpreadWeight;
-	pCB->fDropWeight = pPointDesc->fDropWeight;
-	pCB->fRotationWeight = pPointDesc->fRotationWeight;
-	pCB->fGravity = pPointDesc->fGravity;
+	PARTICLE_DefaultCB* pOptionCB = new PARTICLE_DefaultCB;
+	pOptionCB->vPivot = m_vPivot;
+	pOptionCB->IsLoop = m_isLoop ? 1 : 0;
+	pOptionCB->IsStretch = pPointDesc->IsStretch ? 1 : 0;
+	pOptionCB->IsSprite = pPointDesc->IsSprite ? 1 : 0;
+
+	D3D11_BUFFER_DESC CB_OptionBufferDesc = {};
+	CB_OptionBufferDesc.StructureByteStride = 0;
+	CB_OptionBufferDesc.ByteWidth = sizeof(PARTICLE_DefaultCB);				 //16����Ʈ ����� ���� ����ü �ʿ�
+	CB_OptionBufferDesc.Usage = D3D11_USAGE_DYNAMIC ;							//���ֺ���? ���� ����?
+	CB_OptionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;				//�� ����
+	CB_OptionBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	CB_OptionBufferDesc.MiscFlags = 0;
 
 
-	D3D11_BUFFER_DESC CB_BufferDesc = {};
-	CB_BufferDesc.StructureByteStride = 0;
-	CB_BufferDesc.ByteWidth = sizeof(PARTICLE_CB);				 //16諛붿씠??諛곗닔濡?留욎텣 援ъ“泥??꾩슂
-	CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC ;					//?먯＜蹂??
-	CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//酉??놁쓬
-	CB_BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	CB_BufferDesc.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA CBOptionInitialData{};
+	CBOptionInitialData.pSysMem = pOptionCB;
 
-
-	D3D11_SUBRESOURCE_DATA CBInitialData{};
-	CBInitialData.pSysMem = pCB;
-
-	if (FAILED(m_pDevice->CreateBuffer(&CB_BufferDesc, &CBInitialData, &m_pCBBuffer)))
+	if (FAILED(m_pDevice->CreateBuffer(&CB_OptionBufferDesc, &CBOptionInitialData, &m_pOptionCBBuffer)))
 		return E_FAIL;
 
-	Safe_Delete(pCB);
+	Safe_Delete(pOptionCB);
+
+	PARTICLE_SPEEDCB* pSpeedCB = new PARTICLE_SPEEDCB;
+	pSpeedCB->fTimeDelta = 0.1f; //���߿�
+	pSpeedCB->fSpreadWeight = pPointDesc->fSpreadWeight;
+	pSpeedCB->fDropWeight = pPointDesc->fDropWeight;
+	pSpeedCB->fRotationWeight = pPointDesc->fRotationWeight;
+	pSpeedCB->fGravity = pPointDesc->fGravity;
+	pSpeedCB->fStretchWeight = pPointDesc->fStretchWeight;
+	pSpeedCB->fStretchRange = pPointDesc->fStretchRange;
+	pSpeedCB->fSpriteDefault = pPointDesc->fDefualtSpeed;
+	pSpeedCB->fSpriteWeight = pPointDesc->fSpriteWeight;
+	
+	D3D11_BUFFER_DESC CB_SpeedBufferDesc = {};
+	CB_SpeedBufferDesc.StructureByteStride = 0;
+	CB_SpeedBufferDesc.ByteWidth = sizeof(PARTICLE_SPEEDCB);				
+	CB_SpeedBufferDesc.Usage = D3D11_USAGE_DYNAMIC;							
+	CB_SpeedBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;				
+	CB_SpeedBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	CB_SpeedBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA CBSpeedInitialData{};
+	CBSpeedInitialData.pSysMem = pSpeedCB;
+
+	if (FAILED(m_pDevice->CreateBuffer(&CB_SpeedBufferDesc, &CBSpeedInitialData, &m_pSpeedCBBuffer)))
+		return E_FAIL;
+
+	Safe_Delete(pSpeedCB);
 
 	return S_OK;
 }
@@ -224,19 +257,39 @@ HRESULT CVIBuffer_Point_Instance::Render()
 	return S_OK;
 }
 
-void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader, _float fTimeDelta)
+void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
+{
+}
+
+void CVIBuffer_Point_Instance::Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc)
 {
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-	m_pContext->Map(m_pCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+	m_pContext->Map(m_pSpeedCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
 
-	PARTICLE_CB* pCB = static_cast<PARTICLE_CB*>(SubResource.pData);
+	PARTICLE_SPEEDCB* pCB = static_cast<PARTICLE_SPEEDCB*>(SubResource.pData);
 
 	pCB->fTimeDelta = fTimeDelta;
 
-	m_pContext->Unmap(m_pCBBuffer, 0);
+	if (SpeedDesc != nullptr)
+	{
+		//�Ѱ��� ������ ����
+		pCB->fDropWeight = SpeedDesc->fDropWeight;
+		pCB->fSpreadWeight = SpeedDesc->fSpreadWeight;
+		pCB->fRotationWeight = SpeedDesc->fRotationWeight;
+		pCB->fGravity = SpeedDesc->fGravity;
+		pCB->fStretchWeight = SpeedDesc->fStretchWeight;
+		pCB->fStretchRange = SpeedDesc->fStretchRange;
+	}
 
-	pCShader->Set_ConstantBuffer("CB", m_pCBBuffer);
+	m_pContext->Unmap(m_pSpeedCBBuffer, 0);
+}
+
+void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader)
+{
+	pCShader->Set_ConstantBuffer("OptionCB", m_pOptionCBBuffer);
+
+	pCShader->Set_ConstantBuffer("SpeedCB", m_pSpeedCBBuffer);
 
 	pCShader->Set_SRV("g_ParticleStatic", m_pSRV);
 
@@ -248,105 +301,106 @@ void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader, _float
 	m_pContext->CopyResource(m_pVBInstance, m_pUABuffer);
 }
 
-void CVIBuffer_Point_Instance::Spread(_float fTimeDelta)
-{
-	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-
-	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-
-	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-
-	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-
-
-	for (size_t i = 0; i < m_iNumInstance; i++)
-	{
-		_vector	vMoveDir = XMVector3Normalize(XMVectorSetW(XMLoadFloat4(&pVertices[i].vTranslation) - XMLoadFloat3(&m_vPivot), 0.f));
-
-		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
-		pVertices[i].vLifeTime.x += fTimeDelta;
-
-		if (true == m_isLoop)
-		{
-			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-			{
-				pVertices[i].vLifeTime.x = 0.f;
-				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-			}
-		}
-	}
-
-	m_pContext->Unmap(m_pVBInstance, 0);
-}
-
-void CVIBuffer_Point_Instance::Drop(_float fTimeDelta)
-{
-	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-
-	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-
-	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-
-	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-
-
-	for (size_t i = 0; i < m_iNumInstance; i++)
-	{
-		_vector	vMoveDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-
-		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
-		pVertices[i].vLifeTime.x += fTimeDelta;
-
-		if (true == m_isLoop)
-		{
-			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-			{
-				pVertices[i].vLifeTime.x = 0.f;
-				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-			}
-		}
-	}
-
-	m_pContext->Unmap(m_pVBInstance, 0);
-}
-
-void CVIBuffer_Point_Instance::Rotation(_float fTimeDelta)
-{
-	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-
-	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-
-	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-
-	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-
-	for (size_t i = 0; i < m_iNumInstance; i++)
-	{
-		_vector vTranslation = XMLoadFloat4(&pVertices[i].vTranslation);
-		_vector vPivot = XMLoadFloat3(&m_vPivot);
-
-		_vector vLocal = vTranslation - vPivot;
-
-		_vector vAxis = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-		_float fAngle = m_pSpeeds[i] * fTimeDelta;
-
-		_matrix matRot = XMMatrixRotationAxis(vAxis, fAngle);
-		vLocal = XMVector3TransformNormal(vLocal, matRot);
-
-		vTranslation = vLocal + vPivot;
-
-		pVertices[i].vLifeTime.x += fTimeDelta;
-
-		if (true == m_isLoop)
-		{
-			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-			{
-				pVertices[i].vLifeTime.x = 0.f;
-				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-			}
-		}
-	}
-}
+//�ļη� ���� ó���ؼ� ���� �ʿ�����
+//void CVIBuffer_Point_Instance::Spread(_float fTimeDelta)
+//{
+//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+//
+//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
+//
+//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+//
+//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
+//
+//
+//	for (size_t i = 0; i < m_iNumInstance; i++)
+//	{
+//		_vector	vMoveDir = XMVector3Normalize(XMVectorSetW(XMLoadFloat4(&pVertices[i].vTranslation) - XMLoadFloat3(&m_vPivot), 0.f));
+//
+//		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
+//		pVertices[i].vLifeTime.x += fTimeDelta;
+//
+//		if (true == m_isLoop)
+//		{
+//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
+//			{
+//				pVertices[i].vLifeTime.x = 0.f;
+//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
+//			}
+//		}
+//	}
+//
+//	m_pContext->Unmap(m_pVBInstance, 0);
+//}
+//
+//void CVIBuffer_Point_Instance::Drop(_float fTimeDelta)
+//{
+//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+//
+//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
+//
+//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+//
+//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
+//
+//
+//	for (size_t i = 0; i < m_iNumInstance; i++)
+//	{
+//		_vector	vMoveDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+//
+//		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
+//		pVertices[i].vLifeTime.x += fTimeDelta;
+//
+//		if (true == m_isLoop)
+//		{
+//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
+//			{
+//				pVertices[i].vLifeTime.x = 0.f;
+//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
+//			}
+//		}
+//	}
+//
+//	m_pContext->Unmap(m_pVBInstance, 0);
+//}
+//
+//void CVIBuffer_Point_Instance::Rotation(_float fTimeDelta)
+//{
+//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+//
+//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
+//
+//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+//
+//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
+//
+//	for (size_t i = 0; i < m_iNumInstance; i++)
+//	{
+//		_vector vTranslation = XMLoadFloat4(&pVertices[i].vTranslation);
+//		_vector vPivot = XMLoadFloat3(&m_vPivot);
+//
+//		_vector vLocal = vTranslation - vPivot;
+//
+//		_vector vAxis = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+//		_float fAngle = m_pSpeeds[i] * fTimeDelta;
+//
+//		_matrix matRot = XMMatrixRotationAxis(vAxis, fAngle);
+//		vLocal = XMVector3TransformNormal(vLocal, matRot);
+//
+//		vTranslation = vLocal + vPivot;
+//
+//		pVertices[i].vLifeTime.x += fTimeDelta;
+//
+//		if (true == m_isLoop)
+//		{
+//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
+//			{
+//				pVertices[i].vLifeTime.x = 0.f;
+//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
+//			}
+//		}
+//	}
+//}
 
 CVIBuffer_Point_Instance* CVIBuffer_Point_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc)
 {
@@ -384,7 +438,8 @@ void CVIBuffer_Point_Instance::Free()
 	}
 
 	Safe_Release(m_pSRV);
-	Safe_Release(m_pCBBuffer);
+	Safe_Release(m_pOptionCBBuffer);
+	Safe_Release(m_pSpeedCBBuffer);
 	Safe_Release(m_pSRVBuffer);
 	Safe_Release(m_pUABuffer);
 	Safe_Release(m_pUAV);

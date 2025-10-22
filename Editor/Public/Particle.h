@@ -23,9 +23,12 @@ public:
 		_int	fShaderPass = 0.f;
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
-		_float3 vColor = { 0.f, 0.f, 0.f };
+		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
 		_float2	vLifeTime = { 5.f, 10.f};
 
+		_bool	IsSprite = false;
+		_int    iRows = 0;
+		_int	iCols = 0;
 		//_bool	bSpread = false;
 		//_bool	bDrop = false;
 	}PARTICLE_DESC;
@@ -44,19 +47,27 @@ public:
 	virtual void Render();
 
 private:
+	void Root_Transform();
+	void Bind_CS_SpriteInfo();
+	
+
+private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CVIBuffer_Point_Instance*	m_pVIBufferCom = { nullptr };
 	CComputeShader*				m_pComputeShader = { nullptr };
 
-	_float						m_fShaderPass = 0;
+	_int						m_iShaderPass = 0;
 	_float3						m_vPos = {};
-	_float3						m_vColor = {};
+	_float4						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
-	//?곗궛?? 媛以묒튂? ?쇰떒 ?쇰ℓ濡?遺덊??낆쑝濡??吏곸씠寃??숈옉 泥섎━留?
-	//_bool						m_IsSpread = false;
-	//_bool						m_IsDrop = false;
+	_bool						m_IsSprite = false;
+	_int						m_iRow = {};
+	_int						m_iCol = {};
+
+	_bool						m_IsRoot = false;
+	const _float4x4*			m_ParentMatrix = { nullptr };
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);
