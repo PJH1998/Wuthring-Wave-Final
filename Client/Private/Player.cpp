@@ -67,14 +67,14 @@ _bool CPlayer::Play_Animation(const _string& strAnimName, _float fTimeDelta, _fl
     return IsPlayAnimationEnd;
 }
 
-_bool CPlayer::Check_AnyInput(KEYINPUT eKeyInput)
+_bool CPlayer::Check_AnyInput(_uint iKeyFlag)
 {
-    return _bool();
+    return m_pInputControllerCom->Check_AnyInput(iKeyFlag);
 }
 
-_bool CPlayer::Check_AllInput(KEYINPUT eKeyInput)
+_bool CPlayer::Check_AllInput(_uint iKeyFlag)
 {
-    return _bool();
+    return m_pInputControllerCom->Check_AllInput(iKeyFlag);
 }
 
 /* 캐스팅 해서 보내야됨. */

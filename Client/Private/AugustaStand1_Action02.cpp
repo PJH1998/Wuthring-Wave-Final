@@ -9,11 +9,8 @@ HRESULT CAugustaStand1_Action02::Initialize(const STATE_DATA& StateData)
 	CAugustaBaseState::Initialize(StateData);
 
 	// 2. 전환조건 등록
-	Add_Transition("Stand1_Action01", [this]()-> bool {
-		if (m_IsAnimationEnd)
-			return true;
-		return false;
-		});
+	Ready_Transitions();
+	
 
 	return S_OK;
 }
@@ -38,6 +35,22 @@ void CAugustaStand1_Action02::OnExit()
 }
 
 
+
+void CAugustaStand1_Action02::Ready_Transitions()
+{
+	Add_Transition("Stand1_Action01", [this]()-> bool {
+		if (m_IsAnimationEnd)
+			return true;
+		return false;
+		});
+
+	Add_Transition("Run_F", [this]()-> bool {
+		// 하나라도 이동이 있었다면?
+		if (m_pPlayer->Check_AnyInput(m_iMoveKey))
+			return true;
+		return false;
+		});
+}
 
 CAugustaStand1_Action02* CAugustaStand1_Action02::Create(const STATE_DATA& stateData)
 {

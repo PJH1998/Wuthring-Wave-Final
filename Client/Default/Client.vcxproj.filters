@@ -181,7 +181,10 @@
     <ClInclude Include="..\Public\AugustaBaseState.h">
       <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaMove_F.h">
+    <ClInclude Include="..\Public\AugustaRun_F.h">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStop_Run_L.h">
       <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
@@ -270,7 +273,10 @@
     <ClCompile Include="..\Private\AugustaBaseState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaMove_F.cpp">
+    <ClCompile Include="..\Private\AugustaRun_F.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStop_Run_L.cpp">
       <Filter>03. GameObject\Actor\Player\State\Augusta</Filter>
     </ClCompile>
   </ItemGroup>

@@ -2,11 +2,11 @@
 #include "AugustaBaseState.h"
 
 NS_BEGIN(Client)
-class CAugustaMove_F final : public CAugustaBaseState
+class CAugustaStop_Run_L final : public CAugustaBaseState
 {
 private:
-	explicit CAugustaMove_F() = default;
-	virtual ~CAugustaMove_F() = default;
+	explicit CAugustaStop_Run_L() = default;
+	virtual ~CAugustaStop_Run_L() = default;
 
 public:
     virtual HRESULT Initialize(const STATE_DATA& StateData);
@@ -19,7 +19,7 @@ private:
 	void Ready_Transitions();
 
 public:
-	static CAugustaMove_F* Create(const STATE_DATA& stateData);
+	static CAugustaStop_Run_L* Create(const STATE_DATA& stateData);
 	virtual void Free()override;
 };
 NS_END

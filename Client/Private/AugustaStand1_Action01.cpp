@@ -7,30 +7,7 @@ HRESULT CAugustaStand1_Action01::Initialize(const STATE_DATA& StateData)
 	CAugustaBaseState::Initialize(StateData);
 
 	// 2. Transition 등록
-	Add_Transition("Stand1_Action02", [this]()-> bool {
-			if (m_IsAnimationEnd)
-				return true;
-			return false;
-		});
-
-	//Add_Transition("Run_F", [this]()-> bool {
-	//		// 하나라도 이동이 있었다면?
-	//		if (m_pPlayer->Check_AnyInput(m_iMoveKey))
-	//			return true;
-	//		return false;
-	//	});
-
-	//Add_Transition("Attack01", [this]()-> bool {
-	//		// 왼쪽 클릭을 했다면?
-	//		_uint iMouseLB =static_cast<_uint>(MOUSEKEYSTATE::LB);
-	//		if (m_pPlayer->Check_AnyInput(iMouseLB))
-	//			return true;
-	//		return false;
-	//	});
-
-
-	
-	
+	Ready_Transitions();
 	return S_OK;
 }
 
@@ -57,7 +34,18 @@ void CAugustaStand1_Action01::OnExit()
 
 void CAugustaStand1_Action01::Ready_Transitions()
 {
+	Add_Transition("Stand1_Action02", [this]()-> bool {
+		if (m_IsAnimationEnd)
+			return true;
+		return false;
+		});
 
+	Add_Transition("Run_F", [this]()-> bool {
+			// 하나라도 이동이 있었다면?
+			if (m_pPlayer->Check_AnyInput(m_iMoveKey))
+				return true;
+			return false;
+		});
 }
 
 CAugustaStand1_Action01* CAugustaStand1_Action01::Create(const STATE_DATA& stateData)

@@ -48,9 +48,9 @@ public:
 #pragma region STATE에서 사용
 public:
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
-	_bool Check_AnyInput(KEYINPUT  eKeyInput);
-	_bool Check_AllInput(KEYINPUT eKeyInput);
-	
+	_bool Check_AnyInput(_uint iKeyFlag);
+	_bool Check_AllInput(_uint iKeyFlag);
+
 #pragma endregion
 
 
@@ -61,6 +61,9 @@ protected:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	
+
+protected:
+	_bool m_IsLockOn = { false };
 	
 
 public:

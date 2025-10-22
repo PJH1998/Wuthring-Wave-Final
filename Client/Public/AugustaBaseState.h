@@ -12,7 +12,7 @@ public:
     virtual void OnUpdate(_float fTimeDelta) override; // Update
     virtual void OnExit() override; // Exit ½Ã
     virtual void Change_State(class CStateMachine* pStateMachine, const _string& strStateName) override;
-
+    
 
 protected:
     CPlayerAugusta* m_pPlayer = { nullptr };

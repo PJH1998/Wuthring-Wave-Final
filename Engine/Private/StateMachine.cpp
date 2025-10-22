@@ -36,15 +36,17 @@ void CStateMachine::Update(_float fTimeDelta)
     // 1. 전환조건 체크
     _string strNextState = m_States[m_iCurrentStateIndex]->Check_Transition(this);
 
-    // 2. 전환 State이름이 들어왔다면?
+    // 3. 전환 State이름이 들어왔다면?
     if (!strNextState.empty())
     {
         Change_State(strNextState);
         return;
     }
 
-    // 3. 아무 일도 없다면? 현재 값 업데이트
+    // 2. 아무 일도 없다면? 현재 값 업데이트
     m_States[m_iCurrentStateIndex]->OnUpdate(fTimeDelta);
+
+   
 }
 
 // State에서 StateMachine에 호출.

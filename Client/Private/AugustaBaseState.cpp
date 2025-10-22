@@ -47,7 +47,7 @@ void CAugustaBaseState::Ready_KeyBind()
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::S);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::D);
 
-    // 
+    
 }
 
 void CAugustaBaseState::Free()

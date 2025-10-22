@@ -4,6 +4,8 @@
 
 #include "AugustaStand1_Action01.h"
 #include "AugustaStand1_Action02.h"
+#include "AugustaRun_F.h"
+#include "AugustaStop_Run_L.h"
 
 CPlayerAugusta::CPlayerAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPlayer{ pDevice, pContext }
@@ -44,7 +46,8 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     // State 등록.
     m_pStateMachineCom->Add_State("Stand1_Action01", CAugustaStand1_Action01::Create({ this, "Stand1_Action01", 1.f, 0.f }));
     m_pStateMachineCom->Add_State("Stand1_Action02", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
-    m_pStateMachineCom->Add_State("Move_F", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Run_F", CAugustaRun_F::Create({ this, "Run_F", 1.f, 0.f }));
+    m_pStateMachineCom->Add_State("Stop_Run_L", CAugustaStop_Run_L::Create({ this, "Stop_Run_L", 1.f, 0.f }));
 
     // 플레이어 키인풋 등록.
     m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W);
@@ -89,16 +92,19 @@ void CPlayerAugusta::Update(_float fTimeDelta)
 {
     CPlayer::Update(fTimeDelta);
 
-    if (m_IsPlayAnimation)
+    // 1. 키 입력 갱신.
+    m_pInputControllerCom->Update();
+
+    // 2. 상태 머신 갱신
+    m_pStateMachineCom->Update(fTimeDelta);
+
+    /*if (m_IsPlayAnimation)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    }
-   
-    
-    //m_pStateMachineCom->Update(fTimeDelta);
+    }*/
 
-    Change_State(fTimeDelta);
+    //Change_State(fTimeDelta);
 
     // 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
