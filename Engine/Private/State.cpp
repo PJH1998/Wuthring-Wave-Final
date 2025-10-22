@@ -3,9 +3,8 @@
 #include "StateMachine.h"
 
 
-HRESULT CState::Initialize(const STATE_DATA& StateData)
+HRESULT CState::Initialize(class CGameObject* pOwner)
 {
-    m_StateData = StateData;
     return S_OK;
 }
 
@@ -14,6 +13,7 @@ void CState::OnEnter()
     m_fTrackPosition = 0.f;
     m_IsAnimationEnd = false;
 }
+
 
 void CState::OnUpdate(_float fTimeDelta)
 {
@@ -26,35 +26,19 @@ void CState::OnExit()
 
 }
 
-void CState::Change_State(CStateMachine* pStateMachine, const _string& strStateName)
+void CState::Change_State(CStateMachine* pStateMachine, _uint iCategory, _uint iSubState)
 {
-    pStateMachine->Change_State(strStateName);
+    pStateMachine->Change_State(iCategory, iSubState);
 }
 
 
-// Transition에 해당되면 전환
-const _string& CState::Check_Transition(CStateMachine* pStateMachine)
+
+void CState::Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
 {
-    for (auto& condition : m_InputTransitions)
-    {
-        if (condition.second())
-        {
-            //pStateMachine->Change_State(condition.first);
-            return condition.first;
-        }
-    }
-
-    return "";
+    m_Animations.emplace(iType, ANIM_DATA{ strAnimName, fSpeed, fEscapeTrackPosition, fRootMotionRate, IsRootMotion });
 }
-
-void CState::Add_Transition(const _string& strStateName, InputCondition condition)
-{
-    m_InputTransitions.emplace_back(make_pair(strStateName, condition));
-}
-
 
 void CState::Free()
 {
     CBase::Free();
-    m_InputTransitions.clear();
 }

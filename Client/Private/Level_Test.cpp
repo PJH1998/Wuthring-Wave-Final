@@ -5,7 +5,7 @@
 #include "MonsterTest.h"
 
 #include "GameSystem.h"
-#include "PlayerParty.h"
+#include "Player.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -68,16 +68,16 @@ void CLevel_Test::Ready_Layer_PlayerParty()
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { -14.1f, 50.f, -180.f };
 
-    CPlayerParty::PLAYER_PARTY_DESC Desc{};
+    CPlayer::PLAYER_PARTY_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
-    Desc.iPlayerCount = CPlayerParty::PLAYERTYPE::TYPE_END;
+    Desc.iPlayerCount = CPlayer::CHARACTERTYPE::TYPE_END;
 
     // 0. vector 크기 정의
-    Desc.PlayerSpecs.resize(CPlayerParty::PLAYERTYPE::TYPE_END);
+    Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
 
     // 1. Augusta 정의.
-    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
 
     // 2. Galbrena 정의
 

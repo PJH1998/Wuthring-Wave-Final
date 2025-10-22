@@ -8,8 +8,8 @@
 
 #include "StateMachine.h"
 
-#include "PlayerAugusta.h"
-#include "PlayerParty.h"
+#include "Augusta.h"
+#include "Player.h"
 
 
 
@@ -118,7 +118,7 @@ HRESULT CLoader_Test::Load_PlayerController()
     _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerParty");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrControllerTag
-        , CPlayerParty::Create(m_pDevice, m_pContext))))
+        , CPlayer::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
     return S_OK;
@@ -156,7 +156,7 @@ HRESULT CLoader_Test::Load_Augusta()
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrActorTag
-        , CPlayerAugusta::Create(m_pDevice, m_pContext))))
+        , CAugusta::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
     

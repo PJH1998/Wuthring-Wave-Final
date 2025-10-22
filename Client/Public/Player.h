@@ -1,37 +1,34 @@
 #pragma once
-#include "Actor.h"
+#include "Player_Define.h"
+#include "GameObject.h"
+
 NS_BEGIN(Client)
-// 플레이어 캐릭터의 부모 객체.
-class CPlayer abstract : public CActor
+// Player Container들을 관리 감독하는 컨트롤러
+class CPlayer final : public CGameObject
 {
 public:
-	typedef struct tagPlayerStat
+	enum CHARACTERTYPE
 	{
-		_float fHp = {};
-		_float fEnergyRate = {};
-		_float fAttack = {};
-	}PLAYER_STAT;
+		AUGUSTA = 0,
+		GALBRENA = 1,
+		PLAYER = 2,
+		TYPE_END
+	};
 
-
-	typedef struct tagPlayerDesc : public CActor::ACTOR_DESC
+public:
+	typedef struct tagPlayerPartyDesc
 	{
-		class CPlayerParty* pOwner = { nullptr };
-		pair<LEVEL, _wstring> stateMachineData = {};
-		pair<LEVEL, _wstring> controllerData = {};
-		vector<pair<_wstring, _wstring>> PartPrototypes;
-		_float3 vScale = { 1.f, 1.f, 1.f};
-		_float3 vRotation = { 0.f, 0.f, 0.f };
-		_float3 vPostion = { 0.f, 0.f, 0.f };
-		PLAYER_STAT eStat = {};
+		LEVEL eCurLevel = {LEVEL::END };
+		_uint iPlayerCount = {};
+		vector<PLAYER_SPEC> PlayerSpecs = {};
+	}PLAYER_PARTY_DESC;
 
-	}PLAYER_DESC;
-	
-
-#pragma region 기본 함수
-protected:
+#pragma region 기본 함수들
+public:
 	explicit CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CPlayer(const CPlayer& Prototype);
 	virtual ~CPlayer() = default;
+
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -40,35 +37,29 @@ public:
 	virtual	void	Update(_float fTimeDelta) override;
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
-	virtual void	Render_Shadow() override;
-
-
-#pragma endregion
-
-#pragma region STATE에서 사용
-public:
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
-	_bool Check_AnyInput(_uint iKeyFlag);
-	_bool Check_AllInput(_uint iKeyFlag);
+	virtual	void	Render_Shadow() override;
 
 #pragma endregion
 
+public:
+	// 협주게이지?
+	void Ensemble_Skill(CHARACTERTYPE iPlayerType);
 
+private:
+	vector<class CCharacter*> m_Characters; // 연주자들
 
+	LEVEL m_eCurLevel = { LEVEL::END };
+	_uint m_iCurrentPlayerIdx = {};
+	_uint m_iPrevPlayerIdx = {};
 
-protected:
-	class CPlayerParty* m_pOwner = { nullptr };
-	class CInputController* m_pInputControllerCom = { nullptr };
-	class CStateMachine* m_pStateMachineCom = { nullptr };
-	
-
-protected:
-	_bool m_IsLockOn = { false };
-	
+private:
+	HRESULT Ready_Players(const PLAYER_PARTY_DESC* pDesc);
 
 public:
-	virtual		CGameObject* Clone(void* pArg) = 0;
+	static		CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void Free() override;
+
 
 };
 NS_END

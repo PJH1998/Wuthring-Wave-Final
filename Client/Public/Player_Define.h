@@ -1,11 +1,11 @@
 #pragma once
 #include "Client_Define.h"
-#include "Player.h"
+#include "Character.h"
 
 typedef struct tagPlayerSpec
 {
 	_wstring strActorTag = {};
-    CPlayer::PLAYER_DESC PlayerDesc{};
+    CCharacter::CHARACTER_DESC CharacterDesc{};
 }PLAYER_SPEC;
 
 typedef struct tagPartSpec
@@ -19,9 +19,9 @@ namespace PlayerData
 {
     static const _tchar* AUGUSTA_ACTOR_TAG = TEXT("Prototype_GameObject_Actor_Augusta");
 
-    static CPlayer::PLAYER_DESC GetAugustaCloneData(_float3 vScale, _float3 vRotation, _float3 vPostion, LEVEL eLevel)
+    static CCharacter::CHARACTER_DESC GetAugustaCloneData(_float3 vScale, _float3 vRotation, _float3 vPostion, LEVEL eLevel)
     {
-        CPlayer::PLAYER_DESC Desc;
+        CCharacter::CHARACTER_DESC Desc;
         Desc.eCurLevel = eLevel;
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));

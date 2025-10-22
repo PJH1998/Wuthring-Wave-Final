@@ -662,7 +662,7 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f);
-    ImVec2 windowSize = ImVec2(600.f, 120.f);
+    ImVec2 windowSize = ImVec2(600.f, 170.f);
     
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
@@ -671,13 +671,16 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGui::Text("Animation Name : %s", m_Selected_AnimationTag.c_str());
 
+#ifdef _DEBUG
+    if (!m_Selected_AnimationTag.empty())
+        ImGui::Text("Duration : %.2f", m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag));
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
-#ifdef _DEBUG
         if (!m_Selected_AnimationTag.empty())
             m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
-#endif
     }
+#endif
+    
 
     _bool IsChanged = { false };
     
@@ -755,11 +758,11 @@ void CAnimationTool::Export_StateAnimationMap_ToCSV()
 
             _string strStateTag = "StateName";
             _string strAnimTag = "AnimName";
-            _string strTimeTag = {};
-            outFile << strStateTag << "," <<strAnimTag << "\n";
+            _string strTimeTag = "Duration";
+            outFile << strStateTag << "," << strAnimTag << "," << strTimeTag << "\n";
 
             for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
-                outFile << animName << "," << animName << "\n";
+                outFile << animName << "," << animName << "," << to_string(m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(animName)) <<"\n";
             // 2. 파일 쓰기.
 
 

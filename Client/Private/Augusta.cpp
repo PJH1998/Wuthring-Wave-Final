@@ -1,74 +1,57 @@
 #include "ClientPch.h"
-#include "PlayerAugusta.h"
-#include "PlayerParty.h"
+#include "Augusta.h"
+#include "Player.h"
+#include "SpringCamera.h"
 
-#include "AugustaStand1_Action01.h"
-#include "AugustaStand1_Action02.h"
-#include "AugustaRun_F.h"
-#include "AugustaStop_Run_L.h"
+#include "AugustaStateFactory.h"
+#include "AugustaState_Enum.h"
 
-CPlayerAugusta::CPlayerAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CPlayer{ pDevice, pContext }
+
+CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+    : CCharacter{ pDevice, pContext }
 {
 }
 
-CPlayerAugusta::CPlayerAugusta(const CPlayerAugusta& Prototype)
-    : CPlayer(Prototype)
+CAugusta::CAugusta(const CAugusta& Prototype)
+    : CCharacter(Prototype)
 {
 }
 
-HRESULT CPlayerAugusta::Initialize_Prototype()
+HRESULT CAugusta::Initialize_Prototype()
 {
-    if (FAILED(CPlayer::Initialize_Prototype()))
+    if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
 
     return S_OK;
 }
 
-HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
+HRESULT CAugusta::Initialize_Clone(void* pArg)
 {
-    PLAYER_DESC* pDesc = static_cast<PLAYER_DESC*>(pArg);
+    CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
     // 1. Player
-    if (FAILED(CPlayer::Initialize_Clone(pDesc)))
+    if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
     m_eCurLevel = pDesc->eCurLevel;
     // 2. Components
     Ready_Components(pDesc);
 
-    // 3. ë³€ìˆ˜ ì„¤ì •
+    // 3. º¯¼ö ¼³Á¤
     Ready_Variables(pDesc);
     
-    // 4. ìœ„ì¹˜ ì„¤ì •.
+    // 4. À§Ä¡ ¼³Á¤.
     Ready_Positions(pDesc);
 
-    // State ë“±ë¡.
-    m_pStateMachineCom->Add_State("Stand1_Action01", CAugustaStand1_Action01::Create({ this, "Stand1_Action01", 1.f, 0.f }));
-    m_pStateMachineCom->Add_State("Stand1_Action02", CAugustaStand1_Action02::Create({ this, "Stand1_Action02", 1.f, 0.f }));
-    m_pStateMachineCom->Add_State("Run_F", CAugustaRun_F::Create({ this, "Run_F", 1.f, 0.f }));
-    m_pStateMachineCom->Add_State("Stop_Run_L", CAugustaStop_Run_L::Create({ this, "Stop_Run_L", 1.f, 0.f }));
+    // State µî·Ï.
+    CAugustaStateFactory::Register_AugustaStates(m_pStateMachineCom, this);
+    CAugustaStateFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
-    // í”Œë ˆì´ì–´ í‚¤ì¸í’‹ ë“±ë¡.
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::A), DIK_A);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::S), DIK_S);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D), DIK_D);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::SPACE), DIK_SPACE);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::Q), DIK_Q);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::E), DIK_E);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::R), DIK_R);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::T), DIK_T);
-    m_pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LSHIFT), DIK_LSHIFT);
+    // ÃÊ±â State¸¦ Idle·Î ¼³Á¤ (HSM)
+    m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
+        static_cast<_uint>(EAugustaGroundState::IDLE));
 
-    // ë§ˆìš°ìŠ¤ í‚¤ì¸í’‹ ë“±ë¡
-    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
-    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
-    m_pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
-
-    m_pStateMachineCom->Change_State("Stand1_Action01");
-
-    // 5. Partsì¶”ê°€
+    // 5. PartsÃß°¡
     // Ready_PartObjects(pDesc);
     
     m_pColliderCom->Set_Gravity(true);
@@ -80,56 +63,54 @@ HRESULT CPlayerAugusta::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CPlayerAugusta::Priority_Update(_float fTimeDelta)
+void CAugusta::Priority_Update(_float fTimeDelta)
 {
-    CPlayer::Priority_Update(fTimeDelta);
+    CCharacter::Priority_Update(fTimeDelta);
 
-    // 1. ì´ì „ ìœ„ì¹˜ ì €ìž¥
+    // 1. ÀÌÀü À§Ä¡ ÀúÀå
     m_pTransformCom->Save_PreviousPosition();
+
+    // 2. Å°ÀÔ·Â °»½Å.
+    m_pInputControllerCom->Update();
 }
 
-void CPlayerAugusta::Update(_float fTimeDelta)
+void CAugusta::Update(_float fTimeDelta)
 {
-    CPlayer::Update(fTimeDelta);
+    CCharacter::Update(fTimeDelta);
 
-    // 1. í‚¤ ìž…ë ¥ ê°±ì‹ .
-    //m_pInputControllerCom->Update();
+    // 2. »óÅÂ ¸Ó½Å °»½Å
+    m_pStateMachineCom->Update(fTimeDelta);
 
-    // 2. ìƒíƒœ ë¨¸ì‹  ê°±ì‹ 
-    //m_pStateMachineCom->Update(fTimeDelta);
-
-    if (m_IsPlayAnimation)
+   /* if (m_IsPlayAnimation)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
-    Change_State(fTimeDelta);
+    Change_State(fTimeDelta);*/
 
-    // í˜„ìž¬ ìœ„ì¹˜ - 1Frame ì´ì „ ìœ„ì¹˜ ê°’ ê³„ì‚°
+    // ÇöÀç À§Ä¡ - 1Frame ÀÌÀü À§Ä¡ °ª °è»ê
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-    
-
-    // Collider ê°±ì‹  => Jolt ìžì²´ì—ì„œë„ fTimeDelta ê°’ì„ ì ìš©í•˜ê³  ìžˆê¸° ë•Œë¬¸ì— 
+    // Collider °»½Å => Jolt ÀÚÃ¼¿¡¼­µµ fTimeDelta °ªÀ» Àû¿ëÇÏ°í ÀÖ±â ¶§¹®¿¡ 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     if (m_strPreAnimation != m_strCurrentAnimation)
         m_fTrackPosition = 0.f;
 }
 
-void CPlayerAugusta::Late_Update(_float fTimeDelta)
+void CAugusta::Late_Update(_float fTimeDelta)
 {
-    CPlayer::Late_Update(fTimeDelta);
+    CCharacter::Late_Update(fTimeDelta);
 
-    // Collider ì¶©ëŒ ì²˜ë¦¬í›„ ìœ„ì¹˜ì— ë§žì¶˜ë‹¤.
+    // Collider Ãæµ¹ Ã³¸®ÈÄ À§Ä¡¿¡ ¸ÂÃá´Ù.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
 }
 
-void CPlayerAugusta::Render()
+void CAugusta::Render()
 {
     Bind_Resources();
 
@@ -152,53 +133,53 @@ void CPlayerAugusta::Render()
     }
 }
 
-void CPlayerAugusta::Render_Shadow()
+void CAugusta::Render_Shadow()
 {
 }
 
-void CPlayerAugusta::Change_State(_float fTimeDelta)
-{
-    _vector vTranslate = {};
-    if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_F";
-        vTranslate = m_pTransformCom->Get_State(STATE::LOOK) * -1.f;
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_B";
-        vTranslate = m_pTransformCom->Get_State(STATE::LOOK);
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_LF";
-        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT);
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Run_RF";
-        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT) * -1.f;
-    }
+//void CAugusta::Change_State(_float fTimeDelta)
+//{
+//    _vector vTranslate = {};
+//    if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+//    {
+//        m_strCurrentAnimation = "Run_F";
+//        vTranslate = m_pTransformCom->Get_State(STATE::LOOK) * -1.f;
+//    }
+//    if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+//    {
+//        m_strCurrentAnimation = "Run_B";
+//        vTranslate = m_pTransformCom->Get_State(STATE::LOOK);
+//    }
+//    if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+//    {
+//        m_strCurrentAnimation = "Run_LF";
+//        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT);
+//    }
+//    if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+//    {
+//        m_strCurrentAnimation = "Run_RF";
+//        vTranslate = m_pTransformCom->Get_State(STATE::RIGHT) * -1.f;
+//    }
+//
+//
+//    if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::UP)
+//        m_strCurrentAnimation = "Move_F";
+//
+//    if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
+//    {
+//        m_strCurrentAnimation = "Jump_Walk_LF";
+//
+//        _float4 vVelocity = {};
+//        XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
+//        OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
+//    }
+//        
+//
+//    // Ãß°¡ ÀÌµ¿·® ÁöÁ¤.
+//    m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 30.f);
+//}
 
-
-    if (m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::UP)
-        m_strCurrentAnimation = "Move_F";
-
-    if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::PRESS)
-    {
-        m_strCurrentAnimation = "Jump_Walk_LF";
-
-        _float4 vVelocity = {};
-        XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
-        OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
-    }
-        
-
-    // ì¶”ê°€ ì´ë™ëŸ‰ ì§€ì •.
-    m_pTransformCom->Go_Force(XMVector3Normalize(vTranslate), fTimeDelta * 30.f);
-}
-
-void CPlayerAugusta::Bind_Resources()
+void CAugusta::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
@@ -211,7 +192,7 @@ void CPlayerAugusta::Bind_Resources()
 
 }
 
-void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
+void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 {
     // 1. Components
     if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -249,7 +230,7 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
         CRASH("Collider");
 }
 
-void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)
+void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
     m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
@@ -258,7 +239,7 @@ void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CPlayerAugusta::Ready_Positions(const PLAYER_DESC* pDesc)
+void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPostion), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -272,7 +253,7 @@ void CPlayerAugusta::Ready_Positions(const PLAYER_DESC* pDesc)
 }
 
 
-void CPlayerAugusta::Ready_PartObjects(const PLAYER_DESC* pDesc)
+void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
 
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
@@ -297,34 +278,34 @@ void CPlayerAugusta::Ready_PartObjects(const PLAYER_DESC* pDesc)
     
 }
 
-CPlayerAugusta* CPlayerAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CPlayerAugusta* pInstance = new CPlayerAugusta(pDevice, pContext);
+    CAugusta* pInstance = new CAugusta(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CPlayerAugusta");
+        MSG_BOX("Failed to Create : CAugusta");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CPlayerAugusta::Clone(void* pArg)
+CGameObject* CAugusta::Clone(void* pArg)
 {
-    CPlayerAugusta* pInstance = new CPlayerAugusta(*this);
+    CAugusta* pInstance = new CAugusta(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Clone Failed : CPlayerAugusta");
+        MSG_BOX("Clone Failed : CAugusta");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CPlayerAugusta::Free()
+void CAugusta::Free()
 {
-    CPlayer::Free();
+    CCharacter::Free();
     
 }

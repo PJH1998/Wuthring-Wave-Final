@@ -115,6 +115,33 @@
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Augusta">
+      <UniqueIdentifier>{1ddcb2b8-3bfd-4a31-90e1-cf1db119a67f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground">
+      <UniqueIdentifier>{567088f8-1f86-4097-9c5f-1dcb6b362676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Climb">
+      <UniqueIdentifier>{554f916e-4c05-48d6-9e5d-82c84a9002a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Character">
+      <UniqueIdentifier>{0252e64a-f082-483b-a7ae-960a8b2eb974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air">
+      <UniqueIdentifier>{e38fea36-5785-4b90-a943-9cc6ebb32ed5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit">
+      <UniqueIdentifier>{3476a60f-14fe-48ba-9302-f11a878bf10a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Define">
+      <UniqueIdentifier>{806d4e3d-1d67-441f-acc9-bc13257d5457}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Augusta">
+      <UniqueIdentifier>{c62777b3-e6bc-4792-aaa5-644abc24fffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground\Augusta">
+      <UniqueIdentifier>{b0c3516c-97c2-418f-b34b-408390c86852}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -190,19 +217,12 @@
     <ClInclude Include="..\Public\Actor.h">
       <Filter>03. GameObject\Actor</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Player.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\Player_Define.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerAugusta.h">
+    <ClInclude Include="..\Public\Player.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerParty.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
-    
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
@@ -234,20 +254,53 @@
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClInclude>
     <ClInclude Include="..\public\MonsterBody.h" />
-    <ClInclude Include="..\Public\AugustaBaseState.h">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClInclude Include="..\Public\Augusta.h">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaRun_F.h">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClInclude Include="..\Public\AugustaStateFactory.h">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaStand1_Action01.h">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClInclude Include="..\Public\Character.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaStand1_Action02.h">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClInclude Include="..\Public\GroundState.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaStop_Run_L.h">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClInclude Include="..\Public\ClimbState.h">
+      <Filter>03. GameObject\Actor\Player\State\Climb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CharacterState.h">
+      <Filter>03. GameObject\Actor\Player\State\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AirState.h">
+      <Filter>03. GameObject\Actor\Player\State\Air</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\HitState.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\StateCategory_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaState_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundRun.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSprint.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundIdle.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundWalk.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -314,12 +367,6 @@
     <ClCompile Include="..\Private\Player.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerAugusta.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerParty.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
@@ -354,20 +401,47 @@
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
     <ClCompile Include="..\private\MonsterBody.cpp" />
-    <ClCompile Include="..\Private\AugustaBaseState.cpp">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClCompile Include="..\Private\Augusta.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaRun_F.cpp">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClCompile Include="..\Private\AugustaStateFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaStand1_Action01.cpp">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClCompile Include="..\Private\Character.cpp">
+      <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaStand1_Action02.cpp">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClCompile Include="..\Private\AirState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaStop_Run_L.cpp">
-      <Filter>03. GameObject\Actor\Player\State</Filter>
+    <ClCompile Include="..\Private\CharacterState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GroundState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\HitState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ClimbState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Climb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundRun.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundWalk.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

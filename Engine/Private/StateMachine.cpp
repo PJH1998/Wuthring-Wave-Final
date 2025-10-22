@@ -3,7 +3,7 @@
 #include "State.h"
 
 
-#pragma region ±âº» ÇÔ¼öµé
+#pragma region
 CStateMachine::CStateMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CComponent{ pDevice, pContext }
 {
@@ -12,10 +12,13 @@ CStateMachine::CStateMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 CStateMachine::CStateMachine(const CStateMachine& Prototype)
     : CComponent(Prototype)
     , m_States{ Prototype.m_States }
-    , m_StateMap { Prototype.m_StateMap }
+    , m_CurrentStateKey{ Prototype.m_CurrentStateKey }
+    , m_pCurrentState{ Prototype.m_pCurrentState }
 {
-    for (auto& pState : m_States)
-        Safe_AddRef(pState);
+    for (auto& pair : m_States)
+        Safe_AddRef(pair.second);
+
+    Safe_AddRef(m_pCurrentState);
 }
 
 
@@ -33,40 +36,43 @@ HRESULT CStateMachine::Initialize_Clone(void* pArg)
 
 void CStateMachine::Update(_float fTimeDelta)
 {
-    // 1. ÀüÈ¯Á¶°Ç Ã¼Å©
-    _string strNextState = m_States[m_iCurrentStateIndex]->Check_Transition(this);
-
-    // 3. ÀüÈ¯ StateÀÌ¸§ÀÌ µé¾î¿Ô´Ù¸é?
-    if (!strNextState.empty())
+    // í˜„ìž¬ State Update
+    // State ë‚´ë¶€ì—ì„œ Check_StateTransition()ì„ í†µí•´ Change_State í˜¸ì¶œ
+    if (nullptr != m_pCurrentState)
     {
-        Change_State(strNextState);
+        m_pCurrentState->OnUpdate(fTimeDelta);
+    }
+}
+
+void CStateMachine::Change_State(_uint iCategory, _uint iSubState)
+{
+    Change_State(StateKey(iCategory, iSubState));
+}
+
+void CStateMachine::Change_State(const StateKey& key)
+{
+    auto iter = m_States.find(key);
+    if (iter == m_States.end())
         return;
+
+    if (nullptr != m_pCurrentState)
+    {
+        m_pCurrentState->OnExit();
     }
 
-    // 2. ¾Æ¹« ÀÏµµ ¾ø´Ù¸é? ÇöÀç °ª ¾÷µ¥ÀÌÆ®
-    m_States[m_iCurrentStateIndex]->OnUpdate(fTimeDelta);
-
-   
+    m_CurrentStateKey = key;
+    m_pCurrentState = iter->second;
+    m_pCurrentState->OnEnter(); // pArgë¥¼ ì „ë‹¬í•˜ë©° Enter í˜¸ì¶œ
 }
 
-// State¿¡¼­ StateMachine¿¡ È£Ãâ.
-void CStateMachine::Change_State(const _string& strStateName)
+void CStateMachine::Add_State(_uint iCategory, _uint iSubState, CState* pState)
 {
-    // 1. ÇöÀç StateÀÇ Á¾·á Ã³¸® ÁøÇà.
-    _uint iPrevStateIndex = m_iCurrentStateIndex;
-    m_States[iPrevStateIndex]->OnExit();
-
-    // 2. ÇöÀç State º¯°æ.
-    m_iCurrentStateIndex = m_StateMap[strStateName];
-    m_States[m_iCurrentStateIndex]->OnEnter();
+    Add_State(StateKey(iCategory, iSubState), pState);
 }
 
-void CStateMachine::Add_State(const _string& strStateName, CState* pState)
+void CStateMachine::Add_State(const StateKey& key, CState* pState)
 {
-    // 1. ¸Ê¿¡ Ã£¾ÆÁÖ±â.
-    m_StateMap.emplace(strStateName, m_States.size());
-    // 2. State ³Ö¾îÁÖ±â.
-    m_States.emplace_back(pState);
+    m_States.emplace(key, pState);
 }
 
 
@@ -79,7 +85,7 @@ CStateMachine* CStateMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext*
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CPlayerParty");
+        MSG_BOX("Failed to Create : CStateMachine");
         Safe_Release(pInstance);
     }
 
@@ -102,9 +108,7 @@ CComponent* CStateMachine::Clone(void* pArg)
 void CStateMachine::Free()
 {
     CComponent::Free();
-    for (auto& pState : m_States)
-        Safe_Release(pState);
+    for (auto& pair : m_States)
+        Safe_Release(pair.second);
     m_States.clear();
-
-    m_StateMap.clear();
 }
