@@ -100,7 +100,7 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 	case ACTION:
 	{
 		const NodeDat tData = m_NodesDatas[iIndex];
-		BT_Node = CBT_Action::Create([&tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+		BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 			
 			if(pBlackBoard->Get_Condition("isAnimationRunning"))
 				return CBT_Node::BT_STATE::RUNNING;
