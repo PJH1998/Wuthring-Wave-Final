@@ -48,11 +48,12 @@ HRESULT CLevel_Logo::Initialize()
 	DummyDesc.fSpeedPerSec = 10.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
 		CRASH("Dummy");
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
+	//	CRASH("Dummy");
 	
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_ShadowDummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
 		CRASH("ShadowDummy");
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
-	//	CRASH("Dummy");
+
 
 	//Safe_Release(pRigidBody);
 
@@ -91,6 +92,11 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 }

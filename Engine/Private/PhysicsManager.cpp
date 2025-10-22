@@ -54,6 +54,11 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 	m_Virtuals[iObjectLayer].push_back(pVirtual);
 }
 
+void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pCVCCollision->Remove(pVirtual);
+}
+
 void CPhysicsManager::Clear_Resource()
 {
 	//m_pPhysicsSystem->GetBodyInterface().
@@ -86,9 +91,6 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	ASSERT_CRASH(m_pObjectLayerFilter);
 	m_pObjectVsBPFilter = new ObjectVsBroadPhaseLayerFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectVsBPFilter);
-	// Contact Listener ?앹꽦
-	m_pContactListener = new CContactListenerImpl();
-	ASSERT_CRASH(m_pContactListener);
 
 	// Virtual Container ?숈쟻 ?좊떦
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
@@ -142,6 +144,13 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	}
 }
 
+void CPhysicsManager::Late_Update()
+{
+	if (nullptr == m_pContactListener)
+		return;
+	m_pContactListener->Remove_Update();
+}
+
 _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {
 	RVec3 StartPos = LoadVec3(vStartPos);
@@ -149,14 +158,17 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 
 	_vector vDir = vEndPos - vStartPos;
 
-	RRayCast ray(StartPos, (EndPos - StartPos).Normalized());
+	RRayCast ray(StartPos, (EndPos - StartPos));
 	RayCastResult result;
 
 	_float fOriginFraction = result.mFraction;
 	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
 
 	if (nullptr != pOut)
-		XMStoreFloat4(pOut, vStartPos + (result.mFraction) * vDir);
+	{
+		_float fDistanceOffset = 0.8f;
+		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
+	}
 
 	return fOriginFraction > result.mFraction && result.mFraction > 0.f ? true : false;
 }
@@ -187,6 +199,10 @@ void CPhysicsManager::SetUp_PhysicsSystem()
 		m_iMaxBodyPairs, m_iMaxContactConstraints,
 		*m_pBPLayer, *m_pObjectVsBPFilter, *m_pObjectLayerFilter);
 	m_pPhysicsSystem->SetPhysicsSettings(m_PhysicsSetting);
+
+	// Contact Listener Create / SetUp
+	m_pContactListener = new CContactListenerImpl(&m_pPhysicsSystem->GetBodyInterface());
+	ASSERT_CRASH(m_pContactListener);
 	m_pPhysicsSystem->SetContactListener(m_pContactListener);
 
 	// Character Contact Listener

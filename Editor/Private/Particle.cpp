@@ -26,7 +26,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Components(*pDesc)))
         return E_FAIL;
 
-    m_fShaderPass = pDesc->fShaderPass;
+    m_iShaderPass = pDesc->fShaderPass;
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
 
@@ -35,7 +35,20 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
-    //?꾩떆泥섎━
+
+    m_IsRoot = pDesc->IsRootOn;
+
+    if (m_IsRoot)
+        m_ParentMatrix = pDesc->RootMatrix;
+
+    if (m_IsSprite = pDesc->IsSprite)
+    {
+
+        m_iRow = pDesc->iRows;
+        m_iCol = pDesc->iCols;
+    }
+   // m_isActivate = true;
+
 
     return S_OK;
 }
@@ -49,14 +62,14 @@ void CParticle::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);
+    m_pVIBufferCom->Bind_CS_Speed(fTimeDelta);
+    m_pVIBufferCom->Bind_CSResources(m_pComputeShader);
 
-    m_vLifeTime.x += fTimeDelta;
-
-    if (m_vLifeTime.x >= m_vLifeTime.y)
-        m_isActivate = false;
-
-    //?쇱씠?꾪????앸굹硫?鍮꾪솢?깊솕
+//   m_vLifeTime.x += fTimeDelta;
+//
+//   if (m_vLifeTime.x >= m_vLifeTime.y)
+//       m_isActivate = false;
+//
 }
 
 void CParticle::Late_Update(_float fTimeDelta)
@@ -72,11 +85,19 @@ void CParticle::Render()
     if (FAILED(Bind_ShaderResources()))
         return;
 
-    m_pShaderCom->Begin(0);
+    m_pShaderCom->Begin(m_iShaderPass);
 
     m_pVIBufferCom->Bind_Resources();
 
     m_pVIBufferCom->Render();
+}
+
+void CParticle::Root_Transform()
+{
+}
+
+void CParticle::Bind_CS_SpriteInfo()
+{
 }
 
 HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
@@ -116,6 +137,18 @@ HRESULT CParticle::Bind_ShaderResources()
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
+
+    if (m_IsSprite)
+    {
+        if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Bind_Value("g_iRow", &m_iRow, sizeof(_int))))
+            return E_FAIL;
+
+        if (FAILED(m_pShaderCom->Bind_Value("g_iCol", &m_iCol, sizeof(_int))))
+            return E_FAIL;
+    }
 
     return S_OK;
 }

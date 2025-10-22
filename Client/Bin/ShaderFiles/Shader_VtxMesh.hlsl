@@ -70,10 +70,6 @@ struct PS_OUT_LIGHT
     float4 vDiffuse : SV_TARGET0;
     float4 vNormal : SV_TARGET1;
     float4 vDepth : SV_TARGET2;
-//    float4 vEmissive : SV_TARGET3;
-//    float4 vDistortion : SV_TARGET4;
-    float4 vSpecular : SV_TARGET3;
-    float4 vAmbient : SV_TARGET4;
 };
 
 
@@ -115,9 +111,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vNormal = float4(vNormal, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-
-    Out.vSpecular = g_vMatrlSpecular;
-    Out.vAmbient = g_vMatrlAmbient;
     
     return Out;
 }
@@ -168,8 +161,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.w = 1.f;
-    Out.vSpecular = g_vMatrlSpecular;
-    Out.vAmbient = g_vMatrlAmbient;
     
     Out.vDepth.z = 1.f;
     
@@ -198,7 +189,7 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
     return Out;
 }
 
-/*======================================================SHADOW_FRONT======================================================*/
+/*======================================================SHADOW_BEGIN======================================================*/
 
 struct VS_OUT_SHADOW
 {
@@ -265,7 +256,7 @@ void PS_SHADOW(PS_IN_SHADOW In)
 /*======================================================SHADOW_END======================================================*/
 
 
-/*======================================================OUTLINE_START======================================================*/
+/*======================================================OUTLINE_BEGIN======================================================*/
 
 struct VS_OUT_OUTLINE
 {
@@ -278,14 +269,18 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     
     matrix matVP;
     
+    matrix matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    
     matVP = mul(g_ViewMatrix, g_ProjMatrix);
     
-    vector vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-    vector vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
+    vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
+    vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vector vOutLinePos = vWorldPos + (vNormal * 0.05f);
+    vNormal = float4(vNormal.x, vNormal.y, 0.f, 0.f);
+   
+    vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
     
-    Out.vPosition = mul(float4(vOutLinePos), matVP);
+    Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     
     return Out;
 }
@@ -304,7 +299,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 {
     PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
 
-    Out.vColor = float4(0.5f, 0.24f, 0.f, 1.f);
+    Out.vColor = float4(0.3f, 0.15f, 0.f, 1.f);
     
     return Out;
 }

@@ -1,6 +1,7 @@
 #include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+matrix g_CamViewMatrix, g_CamProjMatrix;
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
 float g_fLightFar;
 vector g_vCamPosition;
@@ -9,25 +10,31 @@ Texture2D g_Texture;
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_DepthTexture;
-Texture2D g_Mat_SpecularTexture;
-Texture2D g_Mat_AmbientTexture;
 
 Texture2D g_ShadeTexture;
 Texture2D g_SpecularTexture;
 Texture2D g_LightDepthTexture;
 Texture2D g_EmissiveTexture;
-Texture2D g_BlurTexture;
-Texture2D g_BackBufferTexture;
 Texture2D g_DistortionTexture;
+
+Texture2D g_BackBufferTexture;
+
+Texture2D g_SsaoTexture;
+
+Texture2D g_BlurBeginTexture;
+Texture2D g_BlurTexture;
 Texture2D g_BlurEndTexture;
 
 Texture2D g_RampTexture;
+Texture2D g_NoiseTexture;
+vector g_vSampleVector[16];
+float g_fDepthSigam = 0.5f;
 
 Texture2DArray<float> g_ShadowMap : register(t0);
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.7f;
+float g_fLutLerpIntensity = 0.f;
 
 cbuffer CSMDatas : register(b1)
 {
@@ -131,10 +138,11 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     vector vShade = g_ShadeTexture.Sample(DefaultSampler, In.vTexcoord);
     vector vSpecular = g_SpecularTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = vDiffuse * vShade; //* vSpecular;
+    Out.vColor = vDiffuse * (vShade * vSSao);
     
-///////// Shadow 적용 /////////
+///////// Shadow Begin /////////
 
     int iCascadeIndex = 0;
     
@@ -148,8 +156,8 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
    
     float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
    
-    //float fSlopeFactor = (1.f - fDot); // 연산 비용 싸게, 단순 빛이 스쳐 들어올수록 커지게
-    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // 면의 기울기를 계산한 물리적 연산
+    //float fSlopeFactor = (1.f - fDot); // Row
+    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // High
 
     float BlendFactor = 0.f;
     
@@ -158,14 +166,14 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     // Blend Cascade
-    if (iCascadeIndex < 3)          // Cascade 구역 마지막 제외
+    if (iCascadeIndex < 3)          // Max Cascade Check
     {
         int iBlendCascadeIndex = iCascadeIndex + 1;
     
         float CurrentNear = g_vClipDistances[iCascadeIndex];
         float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
         
-        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // 어느구간부터 Blend 할건지 결정 ( 0.15 == 0.85 구간부터 )
+        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;                     // Cascade Blend Distance ( Begin ratio 0.85)
         
         BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
         
@@ -184,10 +192,10 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
         float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
-        fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 2);      // 2 == Kernel size
+        fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1);      // 2 == Kernel size
     }
     
-    // 현재 Cascade
+    // Current Cascade
     {
         vector vShadowPos;
         matrix matShadowLightVP;
@@ -207,7 +215,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
         float fDepth = vShadowPos.z - fBias;
     
-        float fShadow = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vTexcood, fDepth), iCascadeIndex, 2);
+        float fShadow = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vTexcood, fDepth), iCascadeIndex, 1);
 
         float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
 
@@ -236,88 +244,53 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 
     float fY = saturate(dot(normalize(g_vLightDirection.xyz * -1.f), vNormal.xyz));
 
-    fY = max(0.5f, fY);
+    fY = max(0.2f, fY);
     
     float fShade = g_RampTexture.Sample(PointSampler, float2(0.5f, fY)).r;
-
- //   if (fShade <= radians(30.f))
- //   {
- //       float fRatio = max(0.f, fShade) / radians(30.f);
- //       
- //       fShade = lerp(0.8f, 1.f, fRatio);
- //   }   
- //   else
- //       fShade = 1.f;
 
     Out.vShade.xyz = fShade;
     Out.vShade.w = 1.f;
         
-    //int iShade = fShade * 4;
+    //vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    //fShade = iShade / 4.f;
+    //vector vWorldPos;
+    //vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    //vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    //vWorldPos.z = DepthDesc.x;
+    //vWorldPos.w = 1.f;
     
-    
-    //Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
-    //Out.vShade.w = 1.f;
-//    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
+    //vWorldPos *= DepthDesc.y;
 
-
-    //vector vReflect = reflect(normalize(g_vLightDirection), vNormal);
-    //float Rim = saturate(dot(vNormal, vCamDir));
+    //vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
     
-    //if(Rim > 0.3f)
-    //    Rim = 1.f;
+    //float fViewZ = vWorldPos.z;
     
+    //vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
-    //Out.vSpecular = float4(pow(1.f - Rim, 5.f) * float3(1.f, 1.f, 1.f), 1.f);
-    //float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vCamDir)), 0.f), 50.f);
+    //vector vCamDir = g_vCamPosition - vWorldPos;
     
-//    float fShade = max(dot(normalize(vCamDir), vNormal), 0.f);
-//    
-//    Out.vShade = g_RampTexture.Sample(DefaultSampler, float2(0.f, fShade));
+    //bool IsOutline = false;
     
-    //Out.vSpecular = g_vLightSpecular * g_vMtrlSpecular * (g_vLightDiffuse * fSpecular);
+    ////if (DepthDesc.z == 1.f)
+    ////{
+    ////    IsOutline = Outline_Normal(1920.f, 1080.f, g_NormalTexture, DefaultSampler, In.vTexcoord, vNormal.xyz, radians(15.f));
+    ////}
     
-    vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    ////float fDot = dot(normalize(vCamDir), vNormal);
     
-    vector vWorldPos;
-    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = DepthDesc.x;
-    vWorldPos.w = 1.f;
+    ////if(fDot <= radians(15.f))
+    ////{
+    ////    if (vWorldPos.z <= 300.f)
+    ////    {
+    ////        if (DepthDesc.z == 1.f && DepthDesc.x != 1.f)
+    ////            IsOutline = Outline(1920.f, 1080.f, g_DepthTexture, DefaultSampler, In.vTexcoord, fViewZ, 5.f, g_ProjMatrixInv);
+    ////    }
+    ////}
     
-    vWorldPos *= DepthDesc.y;
-
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    //Out.vSpecular = 1.f;
     
-    float fViewZ = vWorldPos.z;
-    
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-    vector vCamDir = g_vCamPosition - vWorldPos;
-    
-    bool IsOutline = false;
-    
-    //if (DepthDesc.z == 1.f)
-    //{
-    //    IsOutline = Outline_Normal(1920.f, 1080.f, g_NormalTexture, DefaultSampler, In.vTexcoord, vNormal.xyz, radians(15.f));
-    //}
-    
-    //float fDot = dot(normalize(vCamDir), vNormal);
-    
-    //if(fDot <= radians(15.f))
-    //{
-    //    if (vWorldPos.z <= 300.f)
-    //    {
-    //        if (DepthDesc.z == 1.f && DepthDesc.x != 1.f)
-    //            IsOutline = Outline(1920.f, 1080.f, g_DepthTexture, DefaultSampler, In.vTexcoord, fViewZ, 5.f, g_ProjMatrixInv);
-    //    }
-    //}
-    
-    Out.vSpecular = 1.f;
-    
-    if (IsOutline == true)
-        Out.vSpecular = float4(0.35f, 0.1f, 0.f, 1.f);
+    //if (IsOutline == true)
+    //    Out.vSpecular = float4(0.35f, 0.1f, 0.f, 1.f);
     
     return Out;
 }
@@ -330,7 +303,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     return Out;
 }
 
-PS_OUT_BACKBUFFER PS_BLUR_X(PS_IN In)
+PS_OUT_BACKBUFFER PS_GAUSSIAN_BLUR_X(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
@@ -338,10 +311,11 @@ PS_OUT_BACKBUFFER PS_BLUR_X(PS_IN In)
     
     float fTexel = 1.f / g_fWidth;
     
+    [unroll]
     for (int i = -6; i < 7; ++i)
     {
         float2 vTexcoord = float2(In.vTexcoord.x + i * fTexel, In.vTexcoord.y);
-        vColor += g_EmissiveTexture.Sample(ClampSampler, vTexcoord) * g_fWeights[i + 6];
+        vColor += g_BlurBeginTexture.Sample(ClampSampler, vTexcoord) * g_fWeights[i + 6];
     }
     
     Out.vColor = vColor;
@@ -349,15 +323,16 @@ PS_OUT_BACKBUFFER PS_BLUR_X(PS_IN In)
     return Out;
 }
 
-PS_OUT_BACKBUFFER PS_BLUR_Y(PS_IN In)
+PS_OUT_BACKBUFFER PS_GAUSSIAN_BLUR_Y(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    float2 vTexcoord;
-    vector vColor;
+    float2 vTexcoord = 0.f;
+    vector vColor = 0.f;
     
     float fTexel = 1.f / g_fHeight;
     
+    [unroll]
     for (int i = -6; i < 7; ++i)
     {
         vTexcoord.x = In.vTexcoord.x;
@@ -365,13 +340,135 @@ PS_OUT_BACKBUFFER PS_BLUR_Y(PS_IN In)
         
         vColor += g_BlurTexture.Sample(ClampSampler, vTexcoord) * g_fWeights[i + 6];
     }
+
+    Out.vColor = vColor;
     
-    vColor.a = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+
+    float fTexel = 1.f / g_fWidth;
     
-    vector vFinalColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    vector vOriginColor = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord);
+    if(fDepth == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
     
-    Out.vColor = vFinalColor + vColor;
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = vNormal * 2.f - 1.f;
     
+    vector vColor = 0.f;
+    float fTotalWeight = 0.f;
+    
+    
+    
+    
+    [unroll]
+    for (int i = -2; i <= 2; ++i)
+    {
+        float2 vTexcoord = float2(In.vTexcoord.x + i * fTexel, In.vTexcoord.y);
+        
+        vector vNeighborColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
+        
+        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).x;
+        
+        if (fNeighborDepth == 0.f)
+        {
+            vColor += vNeighborColor;
+            fTotalWeight += 1.f;
+            continue;
+        }
+        
+        vector vNeighborNormal = g_NormalTexture.Sample(ClampSampler, vTexcoord);
+        vNeighborNormal = vNeighborNormal * 2.f - 1.f;
+        
+        float fDepthDist = abs((fDepth - fNeighborDepth));
+        float fDepthWeight = exp((fDepthDist * fDepthDist * -1.f) / (2.f * g_fDepthSigam * g_fDepthSigam));
+        
+        float fNormalWeight = dot(vNormal, vNeighborNormal) * 0.5f + 0.5f;
+        
+        float fDistWeight = exp((i * i * -1.f) / (2.f * g_fWeights[i] * g_fWeights[i]));
+        
+        float fFinalWeight = fDepthWeight * fNormalWeight * fDistWeight;
+        
+        vColor += vNeighborColor * fFinalWeight;
+        fTotalWeight += fFinalWeight;
+    }
+    
+    Out.vColor = vColor / fTotalWeight;
+    
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+
+    float fTexel = 1.f / g_fHeight;
+    
+    vector vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    if (fDepth == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = vNormal * 2.f - 1.f;
+    
+    vector vColor = 0.f;
+    float fTotalWeight = 0.f;
+    
+ 
+    [unroll]
+    for (int i = -2; i <= 2; ++i)
+    {
+        float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y + i * fTexel);
+        
+        vector vNeighborColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
+        
+        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).x;
+        
+        if (fNeighborDepth == 0.f)
+        {
+            vColor += vNeighborColor;
+            fTotalWeight += 1.f;
+            continue;
+        }
+        
+        vector vNeighborNormal = g_NormalTexture.Sample(ClampSampler, vTexcoord);
+        vNeighborNormal = vNeighborNormal * 2.f - 1.f;
+        
+        float fDepthDist = abs((fDepth - fNeighborDepth));
+        float fDepthWeight = exp((fDepthDist * fDepthDist * -1.f) / (2.f * g_fDepthSigam * g_fDepthSigam));
+        
+        float fNormalWeight = dot(vNormal, vNeighborNormal) * 0.5f + 0.5f;
+       
+        float fDistWeight = exp((i * i * -1.f) / (2.f * g_fWeights[i] * g_fWeights[i]));
+        
+        float fFinalWeight = fDepthWeight * fNormalWeight * fDistWeight;
+       
+        vColor += vNeighborColor * fFinalWeight;
+        fTotalWeight += fFinalWeight;
+    }
+
+    Out.vColor = vColor / fTotalWeight;
+
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_BLUR_RETURN(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    Out.vColor = g_BlurEndTexture.Sample(DefaultSampler, In.vTexcoord);
+
     return Out;
 }
 
@@ -399,6 +496,76 @@ PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
     
     return Out;
 }
+
+PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+
+    vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    vector vWorldPos;
+    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    vWorldPos.z = DepthDesc.x;
+    vWorldPos.w = 1.f;
+    
+    vWorldPos *= DepthDesc.y;
+
+    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    
+    vector vViewPos = vWorldPos;
+    
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
+    vNormal = mul(vNormal, g_CamViewMatrix);
+    
+    vector vNoiseNormal = g_NoiseTexture.Sample(PointSampler, In.vTexcoord * 8.f);
+    vNoiseNormal = normalize(vector(vNoiseNormal.xyz * 2.f - 1.f, 0.f));
+    
+    float Occlusion = 0.f;
+       
+    [unroll]
+    for (int i = 0; i < g_iSampleSize; ++i)
+    {
+        Occlusion +=  1.f - SSAO_Factor(g_DepthTexture, DefaultSampler, g_vSampleVector[i], vNoiseNormal, vNormal, vViewPos, g_CamProjMatrix, 5.f);
+    }
+    
+    Occlusion = 1.f - (Occlusion / g_iSampleSize);
+    
+    Out.vColor.xyz = Occlusion;
+    Out.vColor.w = 1.f;
+    
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    float2 vUV;
+    
+    float fSpaceSize = 1.f / g_fLUT_Size;
+    float fScale = (g_fLUT_Size - 1.f) / g_fLUT_Size;
+    
+    float fIndex = clamp(floor(vOriginColor.b * g_fLUT_Size), 0, g_fLUT_Size - 1.f);
+    float fOffsetX = fIndex * (fSpaceSize);
+    
+    float fScaleX = vOriginColor.r * fScale;
+    
+    vUV.x = fScaleX * fSpaceSize + fOffsetX;
+    vUV.y = vOriginColor.g;
+    
+    vector vLUT_Color = g_LUT_Texture.Sample(DefaultSampler, float3(vUV, g_iLutIndex));
+    
+    vector vFinalColr = lerp(vOriginColor, vLUT_Color, g_fLutLerpIntensity);
+    
+    Out.vColor = float4(vFinalColr.rgb, 1.f);
+
+    return Out;
+}
+
 
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {
@@ -434,30 +601,6 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
    
     Out.vColor = vColor;
     
-    return Out;
-}
-
-PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
-{
-    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
-    
-    vector vOriginColor = g_BackBufferTexture.Sample(PointSampler, In.vTexcoord);
-    
-    float fLUT_Index = floor(vOriginColor.b * g_fLUT_Size);
-    
-    float fStartU = fLUT_Index / g_fLUT_Size;
-    
-    float fU = vOriginColor.r / g_fLUT_Size;
-    
-    fU = fU + fStartU;
-    float fV = vOriginColor.g;
-    
-    vector vLUT_Color = g_LUT_Texture.Sample(PointSampler, float3(fU, fV, g_iLutIndex)).bgra;
-    
-    vector vFinalColr = lerp(vOriginColor, vLUT_Color, g_fLutLerpIntensity);
-    
-    Out.vColor = float4(vFinalColr.rgb, 1.f);
-
     return Out;
 }
 
@@ -515,7 +658,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LIGHT_POINT();
     }
-    pass Blur_X // 5
+    pass G_Blur_X // 5
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -523,9 +666,9 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_BLUR_X();
+        PixelShader = compile ps_5_0 PS_GAUSSIAN_BLUR_X();
     }
-    pass Blur_Y // 6
+    pass G_Blur_Y // 6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -533,10 +676,41 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_BLUR_Y();
+        PixelShader = compile ps_5_0 PS_GAUSSIAN_BLUR_Y();
+    }
+    pass SSAO_Blur_X // 7
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SSAO_BLUR_X();
+    }
+    pass SSAO_Blur_Y // 8
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SSAO_BLUR_Y();
     }
     
-    pass Distortion // 7
+    pass BLUR_Retuurn // 9
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BLUR_RETURN();
+    }
+    
+    pass Distortion // 10
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -547,7 +721,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DISTORTION();
     }
     
-    pass LUT // 8
+    pass LUT // 11
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -557,5 +731,15 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LUT();
     }
-   
+    
+    pass SSAO   // 12
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SSAO();
+    }
 }

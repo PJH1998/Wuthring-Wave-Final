@@ -11,12 +11,12 @@
 #include "Jolt/Physics/Collision/Shape/MeshShape.h"
 
 CRigidbody::CRigidbody(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CComponent { pDevice, pContext }
+	: CCollideComponent { pDevice, pContext }
 {
 }
 
 CRigidbody::CRigidbody(const CRigidbody& Prototype)
-	: CComponent { Prototype }
+	: CCollideComponent{ Prototype }
 {
 }
 
@@ -30,7 +30,6 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 	ASSERT_CRASH(pArg);
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
-	m_pOwner = pDesc->pOwner;
 
 	RefConst<Shape> BodyShape;
 
@@ -65,7 +64,6 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 	}
 	case SHAPE::MESH:
 	{
-		// Mesh???곕줈 泥섎━
 		Make_MeshShape(pArg);
 		return S_OK;
 	}
@@ -77,8 +75,6 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 		Ready_Body(pDesc, BodyShape);
 	else if(BODYTYPE::CHARACTER == pDesc->eBodyType)
 		Ready_Character(pDesc, BodyShape);
-	else if (BODYTYPE::VIRTUAL == pDesc->eBodyType)
-		Ready_Virtual(pDesc, BodyShape);
 
 	return S_OK;
 }
@@ -101,6 +97,8 @@ void CRigidbody::Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta)
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, Matrix);
 
 	m_pBodyInterface->MoveKinematic(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), fTimeDelta);
+
+	//m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vTranslation), EActivation::Activate);
 }
 
 void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
@@ -203,11 +201,12 @@ void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
 	mp.ScaleToMass(1.f);
 
 	bodySetting.mMassPropertiesOverride = mp;
-	// 愿??(吏곸젒 ?ㅼ젙??吏덈웾 ?ъ슜?섎뒗 ?명똿)
+	// Custom Mass SetUp (Default Mass X)
 	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
 
-	// GameObject(Owner) -> UserData濡??꾨떖
-	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
+	// SetUp UserData (CollisionData)
+	m_tCollisionData.pComponent = this;
+	bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);
 
 	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
 	m_BodyID = m_pBody->GetID();
@@ -221,22 +220,11 @@ void CRigidbody::Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShap
 	CharacterSetting.mGravityFactor = 1.f;
 	CharacterSetting.mShape = BodyShape;
 
-	m_pCharacter = m_pGameInstance->Register_Character(CharacterSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
+	m_pCharacter = m_pGameInstance->Register_Character(CharacterSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
 	ASSERT_CRASH(m_pCharacter);
 	m_pCharacter->AddToPhysicsSystem();
 
 	m_BodyID = m_pCharacter->GetBodyID();
-}
-
-void CRigidbody::Ready_Virtual(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
-{
-	CharacterVirtualSettings VirtualSetting;
-	VirtualSetting.mShape = BodyShape;
-	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
-	VirtualSetting.mInnerBodyShape = BodyShape;
-
-	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
-	ASSERT_CRASH(m_pCharacterVirtual);
 }
 
 CRigidbody* CRigidbody::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -269,10 +257,12 @@ void CRigidbody::Free()
 {
 	__super::Free();
 
-	m_pOwner = nullptr;
+	m_tCollisionData.pComponent = nullptr;
+	m_tCollisionData.pDesc = nullptr;
 
+	if(nullptr != m_pBody)
+		m_pBodyInterface->RemoveBody(m_BodyID);
 	if (nullptr != m_pCharacter)
 		m_pCharacter->RemoveFromPhysicsSystem();
 	Safe_Delete(m_pCharacter);
-	Safe_Delete(m_pCharacterVirtual);
 }

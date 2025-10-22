@@ -20,7 +20,7 @@ HRESULT CLevel_ASM::Initialize()
 void CLevel_ASM::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Animation State Machine"));
-    m_pASM_Interface->Update_ASM();
+    m_pASM_Interface->Update_ASM(fTimeDelta);
 }
 
 void CLevel_ASM::Render()

@@ -1,8 +1,6 @@
 #include "EnginePch.h"
 #include "State.h"
 #include "StateMachine.h"
-#include "ComputeShader.h"
-#include "Model.h"
 
 
 HRESULT CState::Initialize(const STATE_DATA& StateData)

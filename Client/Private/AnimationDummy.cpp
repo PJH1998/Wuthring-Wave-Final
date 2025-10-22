@@ -50,7 +50,6 @@ HRESULT CAnimationDummy::Initialize_Clone(void* pArg)
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 #endif // _DEBUG
 
-
     m_IsPlayAnimation = true;
 	m_strCurrentAnimation = "Pose";
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, 0.f, &m_fTrackPosition, true, 1.f);

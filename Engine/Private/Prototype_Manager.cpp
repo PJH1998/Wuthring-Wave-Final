@@ -21,8 +21,8 @@ HRESULT CPrototype_Manager::Initialize(_uint iNumLevel)
 
 HRESULT CPrototype_Manager::Add_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, CBase* pPrototype)
 {
-    if (nullptr == pPrototype || m_iNumLevel <= iPrototypeLevelID)
-        return E_FAIL;
+	if (nullptr == pPrototype || m_iNumLevel <= iPrototypeLevelID)
+		CRASH("None Prototype");
 
     auto iter = m_Prototypes[iPrototypeLevelID].find(strPrototypeTag);
     if (iter != m_Prototypes[iPrototypeLevelID].end())
@@ -71,7 +71,7 @@ CBase* CPrototype_Manager::Clone_Prototype(_uint iPrototypeLevelID, const _wstri
     }
 
     return pClone;
-}
+    }
 
 HRESULT CPrototype_Manager::Clear_Resource(_uint iClearLevelID)
 {

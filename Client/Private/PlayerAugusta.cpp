@@ -93,18 +93,18 @@ void CPlayerAugusta::Update(_float fTimeDelta)
     CPlayer::Update(fTimeDelta);
 
     // 1. 키 입력 갱신.
-    m_pInputControllerCom->Update();
+    //m_pInputControllerCom->Update();
 
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta);
+    //m_pStateMachineCom->Update(fTimeDelta);
 
-    /*if (m_IsPlayAnimation)
+    if (m_IsPlayAnimation)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    }*/
+    }
 
-    //Change_State(fTimeDelta);
+    Change_State(fTimeDelta);
 
     // 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -239,7 +239,6 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
 
     
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.pOwner = this;
     ColliderDesc.vPos = { 0.f, 5.f, 0.f };
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
@@ -248,9 +247,6 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
-    
-
-
 }
 
 void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)

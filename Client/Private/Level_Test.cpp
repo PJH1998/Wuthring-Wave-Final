@@ -57,6 +57,11 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_PlayerParty();
 
+	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
+	//DummyDesc.fSpeedPerSec = 10.f;
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
+	//	CRASH("Dummy");
+
 	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
 	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
     //MobDesc.fSpeedPerSec = 5.f;

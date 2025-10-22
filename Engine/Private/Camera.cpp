@@ -66,13 +66,6 @@ void CCamera::Update_Matrix()
 	m_pGameInstance->Set_TransformState(D3DTS::PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar));
 }
 
-void CCamera::Lerp_Distance(_float fTimeDelta)
-{
-	if (0.1f < fabsf(m_fFixedDistance - m_fDistance))
-		m_fDistance += (m_fFixedDistance - m_fDistance) * fTimeDelta;// *m_fLerpSpeed;
-	
-}
-
 void CCamera::Key_Move(_float fTimeDelta)
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_UP) == KEYSTATE::PRESS)

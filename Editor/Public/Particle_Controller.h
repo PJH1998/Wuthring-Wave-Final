@@ -18,7 +18,7 @@ private:
 	explicit CParticle_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CParticle_Controller() = default;
 
-#pragma region 湲곕낯
+#pragma region
 public:
 	HRESULT Initialize();
 	void Update();
@@ -35,6 +35,7 @@ public:
 
 	void Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticleDesc, _bool& IsCreate);
 
+public:
 	void UpdateSelected_ParticleFormTag(_wstring ParticleTag);
 	
 	CParticle::PARTICLE_DESC* Get_ParticleDesc(_wstring& ParticleTag);
@@ -63,6 +64,8 @@ private:
 	_bool														m_bSelectedParticle = false;
 	CParticle::PARTICLE_DESC*									m_pSelectedParticleDesc = { nullptr };
 	CVIBuffer_Point_Instance::POINT_INSTANCE_DESC*				m_pSelectedVBDesc = { nullptr };
+
+	_float														m_fColor[4] = {0.f, 0.f, 0.f, 1.f};		
 
 public:
 	static CParticle_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

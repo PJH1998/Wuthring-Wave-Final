@@ -1,16 +1,15 @@
 ﻿#pragma once
-#include "Component.h"
+#include "CollideComponent.h"
 
 NS_BEGIN(Engine)
 
-class ENGINE_DLL CRigidbody final : public CComponent
+class ENGINE_DLL CRigidbody final : public CCollideComponent
 {
 public:
-	enum BODYTYPE { BODY, CHARACTER, VIRTUAL };
+	enum BODYTYPE { BODY, CHARACTER };
 public:
 #pragma region DESC
 	typedef struct tagRigidbodyDesc {
-		class CGameObject* pOwner = { nullptr };
 		SHAPE			eShape;
 		_float3			vPos;
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
@@ -20,16 +19,16 @@ public:
 	}RIGIDBODY_DESC;
 
 	typedef struct tagSphereBodyDesc : public RIGIDBODY_DESC {
-		_float				fRadius; // 援?諛섏?由?
+		_float				fRadius;
 	}SPHEREBODY_DESC;
 
 	typedef struct tagBoxBodyDesc : public RIGIDBODY_DESC {
-		_float3			vExtent; // Box 媛?異?蹂?諛섏?由?
+		_float3			vExtent;
 	}BOXBODY_DESC;
 
 	typedef struct tagCapsuleBodyDesc : public RIGIDBODY_DESC {
-		_float				fHeight; // 罹≪뒓 紐명넻 ?믪씠
-		_float				fRadius; // 罹≪뒓 援?遺遺?諛섏?由?
+		_float				fHeight;
+		_float				fRadius; 
 	}CAPSULEBODY_DESC;
 
 	typedef struct tagConvexHullBodyDesc : public RIGIDBODY_DESC {
@@ -64,12 +63,11 @@ public:
 	_bool							IsLand(_float3* pNormalOut = nullptr);
 
 private:
-	class CGameObject*		m_pOwner = { nullptr };
+	COLLISION_DATA			m_tCollisionData = {};
 	Body*							m_pBody = {nullptr};
 	BodyID						m_BodyID;
 	BodyInterface*				m_pBodyInterface = { nullptr };
 
-	CharacterVirtual*			m_pCharacterVirtual = { nullptr };
 	Character*					m_pCharacter = { nullptr };
 	//Ref<Character>			m_pCharacter = { nullptr };
 
@@ -83,7 +81,6 @@ private:
 
 	void							Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape);
 	void							Ready_Character(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape);
-	void							Ready_Virtual(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape);
 
 public:
 	static		CRigidbody*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
