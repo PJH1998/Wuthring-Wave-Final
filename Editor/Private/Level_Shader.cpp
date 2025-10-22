@@ -7,6 +7,7 @@
 //Dummy
 #include "EditDummy_Wolf.h"
 #include "EditDummy_Augusta.h"
+#include "EditDummy_Map.h"
 
 CLevel_Shader::CLevel_Shader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }
@@ -77,6 +78,16 @@ HRESULT CLevel_Shader::Ready_TestObjects()
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
                                                        ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &AuguDesc)))
         CRASH("Failed Clone Dummy Wolf");
+
+    CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+    PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
+        * XMMatrixTranslationFromVector(XMVectorSet(0.f, -100.f, 0.f, 1.f));
+    MapDesc.PreTransformMatrix = PreTransformationMatrix;
+
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+                                                       ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
+        CRASH("Failed Clone Dummy Wolf");
+
 
     return S_OK;
 }
