@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "UIObject.h"
 
 #include "Transform.h"
@@ -65,7 +65,7 @@ void CUIObject::Render()
 
 HRESULT CUIObject::Begin()
 {
-	// ·ÎÄÃ¿¡ Á¤ÀÇµÈ ÁÂÇ¥ ¹× Å©±â °ªÀ» ½ÇÁ¦ Transform ¿¡ Àû¿ëÇÔ.
+	// æ¿¡ì’–ëº„???ëº¤ì“½??é†«ëš°ëª´ è«›??Ñˆë¦° åª›ë¯ªì“£ ?ã…¼ì £ Transform ???ê³¸ìŠœ??
 
 	m_pTransformCom->Scale(_float3(m_fSizeX, m_fSizeY, 1.f));
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_fX - m_iWinSizeX * 0.5f, -m_fY + m_iWinSizeY * 0.5f, 0.f, 1.f));

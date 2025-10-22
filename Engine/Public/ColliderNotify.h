@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "AnimNotify.h"
 
 NS_BEGIN(Engine)
@@ -15,7 +15,7 @@ public:
 #endif // _DEBUG
 
 public:
-	// ColliderNotify´Â Æ¯¼öÇÏ°Ô. Set_CallBackÀ» ÇÏ³ª ´õ¸¸µç´Ù.
+	// ColliderNotify???ë±€ë‹”?ì„ì¾¶. Set_CallBack???ì„êµ¹ ?ë¶¾ì­”?ì¢Šë–.
 	//void Set_Callback(const function<void(const _wstring&, _bool)>& callback);
 	
 

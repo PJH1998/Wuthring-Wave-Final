@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 
@@ -10,49 +10,49 @@ private:
     explicit CComputeShader(CComputeShader& Prototype);
     virtual ~CComputeShader() = default;
 
-#pragma region ±âº» ÇÔ¼öµé
+#pragma region æ¹²ê³•ë‚¯ ?â‘¥ë‹”??
 public:
-    // .hlsl ÆÄÀÏÀ» ·ÎµåÇÏ°í .cso ÆÄÀÏÀ» ¸¸µç µÚ ¸®ÇÃ·º¼Ç Á¤º¸¸¦ ÆÄ½ÌÇÕ´Ï´Ù.
+    // .hlsl ?ëš¯ì”ª??æ¿¡ì’•ë±¶?ì„í€¬ .cso ?ëš¯ì”ª??ï§ëš®ë±º ??ç”±Ñ‹ëµ†?ë±ë€¡ ?ëº£ë‚«ç‘œ??ëš¯ë–›?â‘¸ë•²??
     virtual HRESULT Initialize_Prototype(const _tchar* pFilePath, const SHADER_MACRO& eShaderMacro, const _string& strEntryPoint);
     virtual HRESULT Initialize_Clone(void* pArg);
 #pragma endregion
 
 public:
-    // numThreads ÄÄÆÄÀÏ Á¤º¸¸¦ °¡Á®¿É´Ï´Ù.
+    // numThreads è€ŒëŒ„ë™†???ëº£ë‚«ç‘œ?åª›Â€?ëª„ìƒƒ?ëˆë–.
     const COMPUTESHADER_INFO& Get_ThreadInfo() const { return m_ThreadInfo; }
 
 public:
-    // ÀÌ¸§À¸·Î ¸®¼Ò½º¸¦ ¹ÙÀÎµùÇÕ´Ï´Ù.
+    // ?ëŒ€ì««?ì‡°ì¤ˆ ç”±ÑŠëƒ¼?ã…»? è«›ë¶¿ì”¤?â‘ºë¹€?ëˆë–.
     void Set_SRV(const string& strName, ID3D11ShaderResourceView* pSRV);
     void Set_UAV(const string& strName, ID3D11UnorderedAccessView* pUAV);
     void Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB);
 
-    // °è»ê ¼ÎÀÌ´õ¸¦ ½ÇÇàÇÕ´Ï´Ù.
+    // æ€¨ê¾©ê¶› ?ê³—ì” ?ë¶¾? ?ã…½ë»¾?â‘¸ë•²??
     void Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ);
 
 
 private:
-    // ¼ÎÀÌ´õ ·Îµù ½Ã ¸®¼Ò½º Á¤º¸¸¦ ¹Ì¸® ºĞ¼®ÇÕ´Ï´Ù.
+    // ?ê³—ì” ??æ¿¡ì’•ëµ« ??ç”±ÑŠëƒ¼???ëº£ë‚«ç‘œ?èª˜ëªƒâ” éºê¾©ê½?â‘¸ë•²??
     HRESULT Ready_Reflection(ID3DBlob* pCSBlob);
 
-    // »ç¿ëÀÌ ³¡³­ ¸®¼Ò½º¸¦ Á¤¸®ÇÕ´Ï´Ù.
+    // ?ÑŠìŠœ???ì•¸ê¶ƒ ç”±ÑŠëƒ¼?ã…»? ?ëº£â”?â‘¸ë•²??
     void Clear_Resources();
 
 private:
     ID3D11ComputeShader* m_pComputeShader = nullptr;
 
-    // ½ÇÁ¦ »ç¿ëÇÏ±â À§ÇØ¼­ numThreads Á¤º¸¸¦ ÀúÀåÇÕ´Ï´Ù.
+    // ?ã…¼ì £ ?ÑŠìŠœ?ì„ë¦° ?ê¾ªë¹??numThreads ?ëº£ë‚«ç‘œ??Â€?Î½ë¹€?ëˆë–.
     COMPUTESHADER_INFO m_ThreadInfo = {};
 
-    // ¸®ÇÃ·º¼ÇÀ¸·Î ¾ò¾î¿Â ¸®¼Ò½º Á¤º¸ (ÀÌ¸§ -> ¹ÙÀÎµù ½½·Ô ¹øÈ£)
+    // ç”±Ñ‹ëµ†?ë±ë€¡?ì‡°ì¤ˆ ?ì‚´ë¼±??ç”±ÑŠëƒ¼???ëº£ë‚« (?ëŒ€ì«« -> è«›ë¶¿ì”¤???Ñ‰â€™ è¸°ëŠìƒ‡)
     map<string, _uint>          m_SRV_BindPoints;
     map<string, _uint>          m_UAV_BindPoints;
     map<string, _uint>          m_CB_BindPoints;
 
-    // Dispatch Á÷Àü¿¡ ½ÇÁ¦ ¹ÙÀÎµùÇÒ ¸®¼Ò½º ¸ñ·Ï (½½·Ô ¹øÈ£ -> ¸®¼Ò½º Æ÷ÀÎÅÍ)
-    map<_uint, ID3D11ShaderResourceView*>    m_SRVs_To_Bind; // Dispatch ÇÒ¶§ ¹ÙÀÎµù µË´Ï´Ù.
-    map<_uint, ID3D11UnorderedAccessView*>   m_UAVs_To_Bind; // Dispatch ÇÒ¶§ ¹ÙÀÎµù µË´Ï´Ù.
-    map<_uint, ID3D11Buffer*>                m_CBs_To_Bind;  // Dispatch ÇÒ¶§ ¹ÙÀÎµù µË´Ï´Ù.
+    // Dispatch ï§ê³¸ìŸ¾???ã…¼ì £ è«›ë¶¿ì”¤?â‘ºë¸· ç”±ÑŠëƒ¼??ï§â‘¸ì¤‰ (?Ñ‰â€™ è¸°ëŠìƒ‡ -> ç”±ÑŠëƒ¼???ÑŠì”¤??
+    map<_uint, ID3D11ShaderResourceView*>    m_SRVs_To_Bind; // Dispatch ?ì¢Šë¸£ è«›ë¶¿ì”¤???â‘¸ë•²??
+    map<_uint, ID3D11UnorderedAccessView*>   m_UAVs_To_Bind; // Dispatch ?ì¢Šë¸£ è«›ë¶¿ì”¤???â‘¸ë•²??
+    map<_uint, ID3D11Buffer*>                m_CBs_To_Bind;  // Dispatch ?ì¢Šë¸£ è«›ë¶¿ì”¤???â‘¸ë•²??
 
 public:
     static CComputeShader* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath, const SHADER_MACRO& eShaderMacro, _string strEntryPoint);

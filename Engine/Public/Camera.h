@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -18,13 +18,9 @@ protected:
 	virtual ~CCamera() = default;
 
 public:
-	void							Set_Distance(_float fDistance) { m_fDistance += fDistance; }
 	_float							Get_Distance() { return m_fDistance; }
-	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
-
-#ifdef _DEBUG
-	_float*							Get_DistancePtr() { return &m_fFixedDistance; }
-#endif // _DEBUG
+	_float							Get_Near() { return m_fNear; }
+	_float							Get_Far() { return m_fFar; }
 
 
 public:
@@ -45,8 +41,6 @@ protected:
 	_float							m_fMouseSensor{};
 
 	_float							m_fDistance = {};
-	_float							m_fFixedDistance = {};
-	_float							m_fLerpSpeed = {};
 
 protected:
 	void							Lerp_Distance(_float fTimeDelta);

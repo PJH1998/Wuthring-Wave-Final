@@ -1,8 +1,11 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Base.h"
 
 NS_BEGIN(Engine)
+
+class CShaderFilter;
+class CTexture;
 
 class CRenderer final : public CBase
 {
@@ -17,34 +20,42 @@ public:
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
+	void		Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
+	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 #endif
 
 private:
-	ID3D11Device*						m_pDevice = { nullptr };
-	ID3D11DeviceContext*				m_pContext = { nullptr };
-	class CGameInstance*				m_pGameInstance = { nullptr };
-	ID3D11DepthStencilView*				m_pShadowDSV = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
+	ID3D11DeviceContext*		m_pContext = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
 
-	list<class CGameObject*>			m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	list<class CGameObject*>	m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 
-	class CShader*						m_pShader = { nullptr };
-	class CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
+	class CShader*					m_pShader = { nullptr };
+	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };
 
 	_float4x4							m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint								m_iWinSizeX{}, m_iWinSizeY{};
 
+	//TEST
+	CShaderFilter*						m_pFilter = { nullptr };
+	_uint								m_iLUT_Index = {};
+
+	recursive_mutex				m_RecursiveMutex;
+
 #ifdef _DEBUG
-	list<class CComponent*>				m_DebugComponents;
+	list<class CComponent*>	m_DebugComponents;
 	_bool								m_isRenderDebug = { true };
 #endif
 
 private:
-	// Viewport Size º¯°æ
+	// Viewport Size 
 	void		Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:
 	void		Render_Priority();
 	void		Render_Shadow();
+	void		Render_Outline();
 	void		Render_NonBlend();
 	void		Render_Light();
 	void		Render_Combined();
@@ -54,6 +65,7 @@ private:
 	void        Render_Blur();
 	void		Render_Blend();
 	void        Render_Distortion();
+	void		Render_LUT();
 	void		Render_UI();
 	void		Render_Fade();
 
@@ -65,6 +77,7 @@ private:
 	HRESULT		Ready_RT();
 	HRESULT		Ready_MRT();
 	HRESULT		Ready_Shadow_DSV();
+	HRESULT		Ready_Shader_Filter();
 
 public:
 	static		CRenderer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

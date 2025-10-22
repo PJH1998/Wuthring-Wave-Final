@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+癤�#include "EditorPch.h"
 #include "Level_Animation.h"
 
 #include "Event_Level.h"
@@ -13,7 +13,6 @@ HRESULT CLevel_Animation::Initialize()
 {
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
-    /* 임시 쉐이더 추가. */
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
             , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -22,8 +21,6 @@ HRESULT CLevel_Animation::Initialize()
         return E_FAIL;
     }
 
-    // hlsl 과 맞춘다. => 이 값은 뼈 개수와 상관없이 거의 고정
-    // 한 번에 작업을 처리할 한 팀의 스레드가 몇명인가를 정의.
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }

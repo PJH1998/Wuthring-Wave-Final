@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -12,8 +12,8 @@ public:
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		EMotionType	eType;
 		_uint				iLayer;
-		_float				fHeight;		// Ä¸½¶ ¸öÅë ³ôÀÌ
-		_float				fRadius;		// Ä¸½¶ ±¸ ºÎºĞ ¹İÁö¸§
+		_float				fHeight;		// Capsule Height
+		_float				fRadius;		// Capsule Radius
 	}COLLIDER_DESC;
 
 private:
@@ -22,10 +22,11 @@ private:
 	virtual ~CCollider() = default;
 
 public:
+	// Collider ì›€ì§ì„ -> Transformì— ì ìš©
 	void								Sync_Position(class CTransform* pTransform);
-
+	// ë•…ì„ íƒ€ê³  ìˆëŠ”ì§€ Check
 	_bool								IsLand(_float3* pNormalOut = nullptr);
-
+	// Gravity On/Off
 	void								Set_Gravity(_bool isGravity) { m_isGravity = isGravity; }
 
 public:
@@ -36,13 +37,14 @@ public:
 
 private:
 	class CGameObject*			m_pOwner = { nullptr };
-	CharacterVirtual*				m_pCharacterVirtual = { nullptr };
+	Ref<CharacterVirtual>		m_pCharacterVirtual = { nullptr };
 
 	_uint								m_iCollisionLayer = {};
 
 	_bool								m_isGravity = { true };
 
 private:
+	// ê²½ì‚¬ë¡œì—ì„œ ì´ë™ì†ë„ ë³€í™” -> Slideë¡œ ë³´ì •
 	Vec3								Slide(const Vec3& Velocity);
 
 public:

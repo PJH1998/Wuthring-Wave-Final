@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -12,6 +12,7 @@ protected:
 
 public:
 	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
+	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:
 	virtual		HRESULT		Initialize_Prototype() { return S_OK; };
@@ -23,7 +24,7 @@ public:
 	virtual		void			Render_Shadow() {};
 
 protected:
-	// LOD °³¼ö
+	// LOD ê°œìˆ˜
 	_uint		m_iNumLOD = {};
 	// LOD Index
 	_uint		m_iLODIndex = {};

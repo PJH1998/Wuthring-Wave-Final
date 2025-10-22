@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Dummy.h"
 
 
@@ -57,6 +57,7 @@ void CDummy::Late_Update(_float fTimeDelta)
 	m_pGameInstance->Use_Gizmo(m_pTransformCom);
 
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 }
 
 void CDummy::Render()
@@ -80,6 +81,23 @@ void CDummy::Render()
 #endif
 }
 
+void CDummy::Render_Shadow()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pShaderCom->Begin(5);
+
+		m_pModelCom->Render(i);
+	}
+}
+
 void CDummy::Ready_Component()
 {
 	// Com_Shader
@@ -87,7 +105,7 @@ void CDummy::Ready_Component()
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
 
 	// Com_Model
-	Add_Component(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Wolf"),
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Model_Wolf"),
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr);
 
 	// Com_Rigidbody

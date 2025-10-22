@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Level_Loading.h"
 
 #include "Event_Level.h"
@@ -38,7 +38,7 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
-    if (true == m_isFinished || true == m_pGameInstance->IsWorkFinish())
+    if (true == m_pGameInstance->IsWorkFinish())
     {
 		cout << "Loading End" << endl;
         CHANGE_LEVEL_EVENT event{ m_eNextLevel, false };

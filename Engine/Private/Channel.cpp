@@ -80,10 +80,8 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 {
 	if (m_iNumKeyFrame == 2)
 	{
-		int x = 10;
 		return;
-	}
-		
+	}		
 
 	if (0.f == fCurrentTrackPosition)
 		*pCurrentFrameIndex = 0;
@@ -121,15 +119,9 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 
 		// 1. 이전 뼈의 정보를 가져옵니다.
 		_matrix PrevMatrix = XMLoadFloat4x4(Bones[m_iBoneIndex]->Get_TransformationMatrix());
-
-		//// 2. 고유의 움직임을 추가로 적용하는 것.
-		_matrix FinalMatrix = LerpMatrix * PrevMatrix;
+		// 2. 고유의 움직임을 추가로 적용하는 것.
+		_matrix FinalMatrix = PrevMatrix * LerpMatrix;
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
-
-		//Bones[m_iBoneIndex]->Set_TransformationMatrix(LerpMatrix);
-		// Bip001LHand
-
-
 	}
 	
 }

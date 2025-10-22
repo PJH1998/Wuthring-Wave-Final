@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Animation.h"
 
 #include "Channel.h"
@@ -38,7 +38,7 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 		string type = notifyObject["NotifyType"].get<string>();
 		CAnimNotify* pAnimNotify = { nullptr };
 
-		// 1. °´Ã¼ »ı¼º
+		// 1. åª›ì•¹ê»œ ?ì•¹ê½¦
 		if (type == "Sound")
 			pAnimNotify = CSoundNotify::From_Json(notifyObject);
 		else if (type == "Collider")
@@ -51,10 +51,8 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 			// EffectNotify
 			pAnimNotify->Set_EffectCallback(EffectCallback);
 		}
-		// 2. ¹®Á¦ »ı±â¸é Crash ¹ß»ı.
 		ASSERT_CRASH(pAnimNotify);
 
-		// 3. °ü¸® ÄÁÅ×ÀÌ³Ê¿¡ ³Ö¾îµÎ±â.
 		m_AnimNotifies.emplace_back(pAnimNotify);
 	}
 }
@@ -70,7 +68,6 @@ void CAnimation::Sort_Notify()
 		});
 }
 
-// ¾Ö´Ï¸ŞÀÌ¼Ç¿¡ µî·ÏµÈ Notify¸¦ TrackPosition º°·Î Á¤·Ä.
 void CAnimation::Sort_AnimNotify()
 {
 	if (0 == m_AnimNotifies.size())
@@ -106,7 +103,60 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 	}
 
 	m_CurrentFrameIndices.resize(m_iNumChannels);
-	
+
+	// Ribbon ì• ë‹ˆë©”
+//#ifdef _DEBUG
+//	_string strNames[5] = {"Rib_Attack01", "Rib_Attack02", "Rib_Attack03", "Rib_Move_F", "Rib_Move_B"};
+//
+//	string strName = m_szName;
+//	_wstring Prefix = L"Animation Name : " + StringToWString(m_szName) + L"\n";
+//
+//	for (auto& str : strNames)
+//	{
+//		if (strName == str)
+//		{
+//			OutputDebugString(Prefix.c_str());
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() == 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame == 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//			}
+//
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() < 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame < 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//			}
+//
+//			for (size_t i = 0; i < m_iNumChannels; ++i)
+//			{
+//				_wstring boneName = StringToWString(m_Channels[i]->Get_Name()) + L"\n";
+//
+//				if (m_Channels[i]->Get_NumKeyframes() > 2)
+//				{
+//					OutputDebugString(TEXT("Key Frame > 2 : "));
+//					OutputDebugString(boneName.c_str());
+//				}
+//
+//			}
+//
+//			Prefix = L"Animation Name : " + StringToWString(m_szName) + L" / End \n";
+//			OutputDebugString(Prefix.c_str());
+//		}
+//	}
+//#endif // _DEBUG
+
+
 
 	return S_OK;
 }
@@ -132,10 +182,32 @@ _bool CAnimation::Update_TransformationMatrices(_float fTimeDelta, const vector<
 	return false;
 }
 
-_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//_bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vector<class CBone*>& Bones, _float* pTrackPosition)
+//{
+//	if (nullptr != pTrackPosition)
+//		*pTrackPosition = m_fCurrentTrackPosition;
+//
+//	if (m_fCurrentTrackPosition > m_fDuration)
+//	{
+//		m_fCurrentTrackPosition = 0.f;
+//		return true;
+//	}
+//
+//
+//	for (size_t i = 0; i < m_iNumChannels; ++i)
+//	{
+//		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
+//	}
+//
+//	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+//
+//	return false;
+//}
+
+// TrackPositionï¿½ï¿½ ï¿½ÜºÎ¿ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ => Rib TrackPositionï¿½ï¿½ ï¿½âº» TrackPositionï¿½ï¿½ Syncï¿½ï¿½ ï¿½Â½ï¿½ï¿½Ï´ï¿½.
+_bool CAnimation::Update_RibTransformationMatrices(_float fTrackPosition, const vector<class CBone*>& Bones, _float* pTrackPosition)
 {
-	if (nullptr != pTrackPosition)
-		*pTrackPosition = m_fCurrentTrackPosition;
+	m_fCurrentTrackPosition = fTrackPosition;
 
 	if (m_fCurrentTrackPosition > m_fDuration)
 	{
@@ -144,14 +216,10 @@ _bool CAnimation::Update_RibTransformationMatrices(_float fTimeDelta, const vect
 	}
 
 
-
-
 	for (size_t i = 0; i < m_iNumChannels; ++i)
 	{
 		m_Channels[i]->Update_RibTransformationMatrix(m_fCurrentTrackPosition, Bones, &m_CurrentFrameIndices[i]);
 	}
-
-	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	return false;
 }
@@ -168,8 +236,8 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 		return true;
 	}
 
-	// Notfiy ÇöÀç ÀÎµ¦½º°¡ size¸¦ ³ÑÁö ¾Ê°í, TrackPositionÀÌ Notify¿¡ ÇØ´çÇÑ´Ù¸é? 
-	// Notify¿¡ ÇØ´çÇÏ´Â ÇÔ¼ö¸¦ ½ÇÇàÇÏ¶ó.
+	// Notfiy ?ê¾©ì˜± ?ëªƒëœ³?ã…º? sizeç‘œ??ì„? ?ë”„í€¬, TrackPosition??Notify???ëŒ€ë–¦?ì’•ë–ï§? 
+	// Notify???ëŒ€ë–¦?ì„ë’— ?â‘¥ë‹”ç‘œ??ã…½ë»¾?ì„ì”ª.
 	
 	//while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 	//	m_Notifies[m_iNotifyIndex++].Func();
@@ -225,7 +293,7 @@ _bool CAnimation::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition
 		m_AnimNotifies[m_iNotifyIndex++]->Execute();
 
 	/* 
-	* ¿ø·¡ ¿©±â¿¡ Animation °»½Å ·ÎÁ÷ÀÌ Á¸Àç.
+	* ?ë¨®ì˜’ ?Ñˆë¦°??Animation åª›ê¹†ë–Š æ¿¡ì’–ì­…??è­°ëŒì˜±.
 	*/
 
 	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Target_Manager.h"
 
 #include "Shader.h"
@@ -74,6 +74,11 @@ HRESULT CTarget_Manager::Bind_Shader_Resource(const _wstring& strTargetTag, CSha
 
 HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV, _bool isClear)
 {
+	ID3D11ShaderResourceView* pSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {
+		nullptr
+	};
+	m_pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
+
 	list<CRenderTarget*>* pMRTs = Find_MRT(strMRTTag);
 	if (nullptr == pMRTs)
 		return E_FAIL;

@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -9,25 +9,23 @@ class ENGINE_DLL CModel final : public CComponent
 public:
 	enum BUFFER
 	{
-		BUFFER_BONE_HIERARCHY = 0,
-		BUFFER_KEY_FRAME = 1,
-		BUFFER_ANIM_INFO = 2,
-		BUFFER_INVERSEBIND_POSE = 3,
-		BUFFER_FINAL_BONEMATRIX = 4,
-		BUFFER_ANIM_INFOCB = 5, // constant
-		BUFFER_STAGING = 6,
-		BUFFER_BONE_CHANNEL = 7,
+		BUFFER_KEY_FRAME = 0,
+		BUFFER_ANIM_INFO = 1,
+		BUFFER_INVERSEBIND_POSE = 2,
+		BUFFER_FINAL_BONEMATRIX = 3,
+		BUFFER_ANIM_INFOCB = 4, // constant
+		BUFFER_STAGING = 5,
+		BUFFER_BONE_CHANNEL = 6,
 		BUFFER_END
 	};
 
 
 	enum SRV
 	{
-		SRV_BONE_HIERARCHY = 0,
-		SRV_KEY_FRAME = 1,
-		SRV_ANIM_INFO = 2,
-		SRV_BONE_CHANNEL = 3,
-		SRV_INVERSEBIND_POSE = 4,
+		SRV_KEY_FRAME = 0,
+		SRV_ANIM_INFO = 1,
+		SRV_BONE_CHANNEL = 2,
+		SRV_INVERSEBIND_POSE = 3,
 		SRV_FINAL_BONEMATRIX = 5,
 		SRV_END
 	};
@@ -46,6 +44,7 @@ private:
 public:
 	_uint								Get_NumMesh() { return m_iNumMeshes; }
 	void								Sync_RootNode(class CTransform* pOwnerTransform, class CNavigation* pOwnerNavigation, _float fTimeDelta);
+	void								Sync_RootNode(class CTransform* pOwnerTransform, _float fTimeDelta);
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
@@ -57,6 +56,7 @@ public:
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
+	void Render_Gizmo(_fmatrix TransformMatrix);
 #endif
 
 public:
@@ -80,9 +80,10 @@ public:
 	// Compute Shader
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
+	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
-	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta);
+	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition);
 
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
@@ -109,7 +110,7 @@ private:
 	_uint									m_iNumAnimations = {};
 	_string								m_strPreAnimation;
 	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shaderø° ¿¸¥ﬁ«“∂ß¥¬ _uint ¿¸¥ﬁ«ÿæﬂ«‘
+	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader???Íæ®Îññ?Ï¢äÎ∏£??_uint ?Íæ®Îññ?ÎåÅÎπû??
 
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
@@ -117,18 +118,24 @@ private:
 
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
+	_uint m_iSelectIndex = { 0 };
 #endif
 	
 
 
-#pragma region Compute Shader ±∏«ˆ øÎ 
+#pragma region Compute Shader Êè¥—ãÏÅΩ ??
 private:
 	void ApplyComputeResults_ToBones();
+	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 
 private:
 	vector<ID3D11Buffer*> m_Buffers = {};
 	vector<ID3D11ShaderResourceView*> m_SRVs = {};
 	vector<ID3D11UnorderedAccessView*> m_UAVs = {};
+
+	
+	_bool m_isRibAnimation = { false };
+
 #pragma endregion
 
 

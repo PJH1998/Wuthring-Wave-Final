@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Camera.h"
 
 #include "GameInstance.h"
@@ -66,13 +66,6 @@ void CCamera::Update_Matrix()
 	m_pGameInstance->Set_TransformState(D3DTS::PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar));
 }
 
-void CCamera::Lerp_Distance(_float fTimeDelta)
-{
-	if (0.1f < fabsf(m_fFixedDistance - m_fDistance))
-		m_fDistance += (m_fFixedDistance - m_fDistance) * fTimeDelta;// *m_fLerpSpeed;
-	
-}
-
 void CCamera::Key_Move(_float fTimeDelta)
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_UP) == KEYSTATE::PRESS)
@@ -93,10 +86,14 @@ void CCamera::Mouse_Move()
 
 void CCamera::Mouse_Move_Up()
 {
-	m_pTransformCom->Turn(XMVectorSet(0.f, 1.f, 0.f, 0.f), m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::X) * m_fMouseSensor);
+	_float fTurnValueX = m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::X) * m_fMouseSensor;
+	_float fTurnValueY = m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::Y) * m_fMouseSensor;
+	
+	m_pTransformCom->Turn_Quaternion(XMQuaternionRotationRollPitchYaw(0.f, fTurnValueX, 0.f));
 
+	// Camera 위 아래 방향 전환 시, Camera 시야가 위를 바라볼 때 뒤로 넘어가지 않도록 조정
 	_vector vPreLook = m_pTransformCom->Get_State(STATE::LOOK);
-	m_pTransformCom->Turn(m_pTransformCom->Get_State(STATE::RIGHT), m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::Y) * m_fMouseSensor);
+	m_pTransformCom->Turn_Quaternion(XMQuaternionRotationAxis(m_pTransformCom->Get_State(STATE::RIGHT), fTurnValueY));
 	_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
 	vLook = XMVector4Normalize(vLook);
 	_vector vUp = XMVectorSet(0.f, 1.f, 0.f, 0.f);

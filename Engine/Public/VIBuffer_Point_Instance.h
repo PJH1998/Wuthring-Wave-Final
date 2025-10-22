@@ -1,4 +1,5 @@
 #pragma once
+
 #include "VIBuffer_Instance.h"
 
 NS_BEGIN(Engine)
@@ -16,7 +17,7 @@ public:
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
-		_float		fGravity = 9.8f;	//¼öÄ¡°í¹Î
+		_float		fGravity = 9.8f;
 	}POINT_INSTANCE_DESC;
 
 private:

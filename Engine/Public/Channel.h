@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -16,7 +16,7 @@ public:
 
 #ifdef _DEBUG
 public:
-	const _string& Get_Name() const { return m_szName; }
+	const _char* Get_Name() const { return m_szName; }
 #endif // _DEBUG
 
 

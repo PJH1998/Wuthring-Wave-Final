@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include "Base.h"
 
 NS_BEGIN(Client)
@@ -11,13 +11,13 @@ private:
 
 public:
 	HRESULT				Initialize();
-	void				Post_Update();						// ∑π∫ß ¿¸»Ø
+	void				Post_Update();						// ?ÎçàÍ∫º ?Íæ™ÏÜö
 	void				Update(_float fTimeDelta);
 	void				Render();
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };
-	class CParser*					m_pParser = { nullptr };
+	class CGameSystem*			m_pGameSystem = { nullptr };
 	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
@@ -27,7 +27,7 @@ private:
 
 	ImGuiID						m_iDockSpaceID = {};
 
-	// Frame »Æ¿ŒøÎ
+	// Frame ?Î∫§Ïî§??
 	_float							m_fTimeAcc = {};
 	_uint							m_iCnt = {};
 	_uint							m_iFrame = {};

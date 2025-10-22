@@ -1,23 +1,32 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Client)
 
 class CParser final : public CBase
 {
-	DECLARE_SINGLETON(CParser)
 private:
-	explicit CParser();
+	explicit CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CParser() = default;
 
 public:
-	// File°æ·Î, 
-	void							Create_Map_Model(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, LEVEL eLevel);
+	// File Model
+	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	// Load CSV File (Excel)
+	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
+
+public:
+	HRESULT						Initialize();
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
+	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11DeviceContext*	m_pContext = { nullptr };
+
+	vector<vector<_string>> m_Data;
 
 public:
+	static		CParser*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;
 };
 

@@ -176,7 +176,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_EffectMeshTag, strlen(m_EffectMeshTag), EffectMeshTag, MAX_PATH);
 
-                EffectMeshDesc.strMyTag = EffectMeshTag;
+                //EffectMeshDesc.strMyTag = EffectMeshTag;
                 EffectMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 EffectMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
 

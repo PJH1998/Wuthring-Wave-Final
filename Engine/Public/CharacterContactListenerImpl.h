@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Engine_Define.h"
 
 class CharacterContactListenerImpl : public CharacterContactListener
@@ -7,31 +7,31 @@ public:
 	explicit CharacterContactListenerImpl();
 	explicit CharacterContactListenerImpl(BodyInterface* pInterface);
 	virtual ~CharacterContactListenerImpl() = default;
-	// Ä³¸¯ÅÍ°¡ ÀÎ½ÄÇÏ´Â ¹°Ã¼ÀÇ ¼Óµµ¸¦ Á¶Á¤ÇÒ ¶§ »ç¿ë
-	// ÄÁº£ÀÌ¾î º§Æ® À§¿¡ ÀÖÀ» ¶§ Ä³¸¯ÅÍ°¡ º§Æ® ÀÌµ¿¼Óµµ¸¦ ¹İ¿µÇØ ¿òÁ÷ÀÏ ¶§ »ç¿ë
+	// ï§¦ë¨®â”ƒ?ê³Œ? ?ëª„ë–‡?ì„ë’— è‡¾ì‡±ê»œ???ë¾ë£„ç‘œ?è­°ê³—ì ™?????ÑŠìŠœ
+	// è€Œâ‘¤ì¿‹?ëŒë¼± è¸°â‘¦ë“ƒ ?ê¾©ë¿‰ ?ë‰ì“£ ??ï§¦ë¨®â”ƒ?ê³Œ? è¸°â‘¦ë“ƒ ?ëŒ€ë£?ë¾ë£„ç‘œ?è«›ì„ìº???Â€ï§ê³¸ì”ª ???ÑŠìŠœ
 	virtual void						OnAdjustBodyVelocity(const CharacterVirtual* inCharacter, const Body& inBody2, Vec3& ioLinearVelocity, Vec3& ioAngularVelocity) { /* Do nothing, the linear and angular velocity are already filled in */ }
-	// Æ¯Á¤ Body¿Í Ãæµ¹ ½Ã, True ¹İÈ¯
+	// ?ë±€ì ™ Body?Â€ ç•°â‘¸ë£ ?? True è«›ì„‘ì†š
 	virtual _bool						OnContactValidate(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) { return true; }
-	// Æ¯Á¤ Character¿Í Ãæµ¹ ½Ã, True ¹İÈ¯
+	// ?ë±€ì ™ Character?Â€ ç•°â‘¸ë£ ?? True è«›ì„‘ì†š
 	virtual _bool						OnCharacterContactValidate(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2) { return true; }
 	
-	// Character°¡ Body¿Í Ãæµ¹ Begin½Ã È£Ãâ
+	// Characteråª›Â€ Body?Â€ ç•°â‘¸ë£ Begin???ëª„í…§
 	virtual void						OnContactAdded(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override;
-	// Character°¡ Body¿Í Ãæµ¹ OnGoing½Ã È£Ãâ
+	// Characteråª›Â€ Body?Â€ ç•°â‘¸ë£ OnGoing???ëª„í…§
 	virtual void						OnContactPersisted(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override;
-	// Character°¡ Body¿Í Ãæµ¹ End½Ã È£Ãâ
+	// Characteråª›Â€ Body?Â€ ç•°â‘¸ë£ End???ëª„í…§
 	virtual void						OnContactRemoved(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2) override;
 
-	// Character°¡ Character¿Í Ãæµ¹ Begin½Ã È£Ãâ
+	// Characteråª›Â€ Character?Â€ ç•°â‘¸ë£ Begin???ëª„í…§
 	virtual void						OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override;
-	// Character°¡ Character¿Í Ãæµ¹ OnGoing½Ã È£Ãâ
+	// Characteråª›Â€ Character?Â€ ç•°â‘¸ë£ OnGoing???ëª„í…§
 	virtual void						OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings) override;
-	// Character°¡ Character¿Í Ãæµ¹ End½Ã È£Ãâ
+	// Characteråª›Â€ Character?Â€ ç•°â‘¸ë£ End???ëª„í…§
 	virtual void						OnCharacterContactRemoved(const CharacterVirtual* inCharacter, const CharacterID& inOtherCharacterID, const SubShapeID& inSubShapeID2) override;
 
-	// Character¿Í Body°¡ Ãæµ¹ ÇßÀ» ¶§, ¹°¸® ¿¬»ê ½Ã µé¾î¿À´Â ÇÔ¼ö
+	// Character?Â€ Bodyåª›Â€ ç•°â‘¸ë£ ?ë‰ì“£ ?? è‡¾ì‡°â” ?ê³—ê¶› ???ã…¼ë¼±?ã…»ë’— ?â‘¥ë‹”
 	virtual void						OnContactSolve(const CharacterVirtual* inCharacter, const BodyID& inBodyID2, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) { /* Default do nothing */ }
-	// Character¿Í Character°¡ Ãæµ¹ ÇßÀ» ¶§, ¹°¸® ¿¬»ê ½Ã µé¾î¿À´Â ÇÔ¼ö
+	// Character?Â€ Characteråª›Â€ ç•°â‘¸ë£ ?ë‰ì“£ ?? è‡¾ì‡°â” ?ê³—ê¶› ???ã…¼ë¼±?ã…»ë’— ?â‘¥ë‹”
 	virtual void						OnCharacterContactSolve(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, Vec3Arg inContactVelocity, const PhysicsMaterial* inContactMaterial, Vec3Arg inCharacterVelocity, Vec3& ioNewCharacterVelocity) { /* Default do nothing */ }
 
 private:

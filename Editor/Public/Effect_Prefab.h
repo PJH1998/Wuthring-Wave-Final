@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "GameObject.h"
 
 NS_BEGIN(Editor)
@@ -7,9 +7,9 @@ class CEffect_Prefab : public CGameObject
 {
 public:
 	typedef struct PrefabDesc {
-		_wstring strPrefabTag; //³ªÁß¿¡ ÀÌ ÅÂ±×·Î Ç®¸µÅÂ±× ÁöÁ¤ÇÒ°ÅÀÓ
-		_int	ChildrenCount; //ÀÚ½Ä ¼ö
-		//ÀÚ½Äµé Á¤º¸ ÇÊ¿ä
+		_wstring strPrefabTag; //?ì„ì¨·?????ì’“ë ‡æ¿¡??Â€ï§ê³¹ê¹­æ´¹?ï§Â€?ëº¥ë¸·å«„ê³—ì—«
+		_int	ChildrenCount; //?ë¨¯ë–‡ ??
+		//?ë¨¯ë–‡???ëº£ë‚« ?ê¾©ìŠ‚
 	}PREFAB_DESC;
 
 private:
@@ -38,12 +38,12 @@ public:
 	};
 
 private:
-	_wstring							m_strMyTag;	 //Åø ÀÓ½Ã¿ë
+	_wstring							m_strMyTag;	 //???ê¾©ë–†??
 	
-	//ÀÚ½Äµé
+	//?ë¨¯ë–‡??
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	
-	//ÀÚ½Äµé Àç»ı°ü¸® ¾î¶»°Ô ÇÒÁö Á¶±İ ´õ ±¸»óÇØºÁµµ ÁÁÀ»µí
+	//?ë¨¯ë–‡???ÑŠê¹®æ„¿Â€ç”±??ëŒ€ë¼¸å¯ƒ??ì¢? è­°ê³Œíˆ‘ ??æ´ÑŠê¸½?ëŒ€í‚„??é†«ë—­ì“£??
 	//map<const _wstring, float>				m_ChildrenDesc; 
 
 public:

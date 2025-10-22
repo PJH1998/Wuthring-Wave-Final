@@ -1,12 +1,12 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Effect_Prefab.h"
 
 NS_BEGIN(Editor)
 
-//ÇÁ¸®ÆÕ °ü¸® ÇØÁÖ°íÀÚ ÇÔ
-//ÇÁ¸®ÆÕ Desc ÃßÃâ
-//(ÇÁ¸®ÆÕ ÀÌ¸§, ÀÚ½Ä Á¤º¸, ÀÚ½ÄµéÀÇ Àç»ıÅ¸ÀÓ Á¤º¸)
+//?ê¾¨â”??æ„¿Â€ç”±??ëŒï¼œæ€¨ì¢ì˜„ ??
+//?ê¾¨â”??Desc ç•°ë¶¿í…§
+//(?ê¾¨â”???ëŒ€ì««, ?ë¨¯ë–‡ ?ëº£ë‚«, ?ë¨¯ë–‡?ã…¼ì“½ ?ÑŠê¹®?Â€???ëº£ë‚«)
 
 class CEffect_Controller :public CBase
 {
@@ -14,7 +14,7 @@ private:
 	explicit CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CEffect_Controller() = default;
 
-#pragma region ±âº»
+#pragma region æ¹²ê³•ë‚¯
 public:
 	HRESULT Initialize();
 	void Update();
@@ -36,22 +36,22 @@ private:
 	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
 	class CMesh_Controller*										m_pMesh_Controller = { nullptr };
 
-	//InputText¿¡¼­ ¹ŞÀ» ÇÁ¸®ÆÕ ÅÂ±×
+	//InputText?ë¨¯ê½Œ è«›ì†ì“£ ?ê¾¨â”???ì’“ë ‡
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
 
-	//InputText¿¡¼­ ¹ŞÀ» ÀÚ½Ä ÅÂ±×
+	//InputText?ë¨¯ê½Œ è«›ì†ì“£ ?ë¨¯ë–‡ ?ì’“ë ‡
 	_char														m_ChildrenTag[MAX_PATH];
 	_bool														m_bChildrenTagFlag = false;
 	_bool														m_bChildrenCreatFlag = false;
 	EFFECT_TYPE													m_eChildrenType = EFFECT_TYPE::END;
 
-	//Åø¿¡¼­ ÇöÀç ¼±ÅÃÇÑ ÇÁ¸®ÆÕ Á¤º¸
+	//?ëŒë¿‰???ê¾©ì˜± ?ì¢ê¹®???ê¾¨â”???ëº£ë‚«
 	_int														m_iSelectedPrefab = 0;
 	_bool														m_bSelectedPrefab = false;
 	class CEffect_Prefab*										m_pSelectedPrefab = { nullptr };
 
-	//Åø¿¡¼­ ÇöÀç ¼±ÅÃÇÑ ÇÁ¸®ÆÕÀÇ ÀÚ½Ä Á¤º¸
+	//?ëŒë¿‰???ê¾©ì˜± ?ì¢ê¹®???ê¾¨â”?ë±€ì“½ ?ë¨¯ë–‡ ?ëº£ë‚«
 	_int														m_iSelectedChildren = 0;
 	_wstring													m_strChildrenTag = {};
 	_bool														m_IsParticle = false;
@@ -61,10 +61,10 @@ private:
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
 
-	// ÇÁ¸®ÆÕ Á¤º¸ ¾î¶»°Ô »Ì¾Æ¼­ ¸¸µé°ÇÁö Á» °í¹ÎÇØºÁ¾ßÇÒ°Å°°À½.
-	// ÇÁ¸®ÆÕÀÌ ÀÚ½ÄµéÀÇ Á¤º¸¸¦ ¾Ë¾Æ¾ßÇÔ. Áï, Å¬·ĞÇÒ ¶§ Desc°¡ ÇÊ¿äÇÔ.
-	// ¹öÆÛ´Â ¿ÜºÎ¿¡¼­ Desc¸¦ ÅëÇØ ¿øÇü »ı¼ºÇØ³õ°í (ÇÁ¸®ÆÕ ¸¸µé±â Àü¿¡ ¸ÕÀúÇØ³ö¾ßÇÔ)
-	// ÀÌÈÄ ÇÁ¸®ÆÕ Å¬·Ğ ÇÏ¸é¼­ ÀÚ½Äµé »ı¼º ÇÒ ¶§ ÆÄÆ¼Å¬, ¸Å½¬ µîÀÇ Desc°¡ ÇÊ¿ä
+	// ?ê¾¨â”???ëº£ë‚« ?ëŒ€ë¼¸å¯ƒ?ï§’ë¬’ë¸˜??ï§ëš®ë±¾å«„ëŒ? é†«Â€ æ€¨ì¢Š??ëŒ€í‚„?ì‡³ë¸·å«„ê³Œì»³??
+	// ?ê¾¨â”?ë±€ì”  ?ë¨¯ë–‡?ã…¼ì“½ ?ëº£ë‚«ç‘œ??ëš¯ë¸˜?ì‡³ë¸¿. ï§? ?ëŒ€ì¤????Descåª›Â€ ?ê¾©ìŠ‚??
+	// è¸°ê¾ªë???ëªƒ??ë¨¯ê½Œ Descç‘œ??ë“¯ë¹ ?ë¨°ì‚ ?ì•¹ê½¦?ëŒ€ë„ƒæ€¨?(?ê¾¨â”??ï§ëš®ë±¾æ¹²??ê¾©ë¿‰ ç™’ì‡±??ëŒ€ë„„?ì‡³ë¸¿)
+	// ?ëŒ„ì‘ ?ê¾¨â”???ëŒ€ì¤ ?ì„ãˆƒ???ë¨¯ë–‡???ì•¹ê½¦ ?????ëš°ë–š?? ï§ã…¼ë© ?ê¹†ì“½ Descåª›Â€ ?ê¾©ìŠ‚
 
 public:
 	static CEffect_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

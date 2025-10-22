@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+癤�#include "Editorpch.h"
 #include "Effect_Prefab.h"
 #include "Particle.h"
 #include "Effect_Mesh.h"
@@ -41,7 +41,6 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
 void CEffect_Prefab::Update(_float fTimeDelta)
 {
-    //자식들 설정값에 따라 Activate 활성화 해줘야함.
 
     for (auto& Children : m_EffectChildren)
     {
@@ -61,15 +60,11 @@ void CEffect_Prefab::Late_Update(_float fTimeDelta)
 
 void CEffect_Prefab::Render()
 {
-    //랜더 없어도 될듯
+
 }
 
 void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 {
-    //자식들 추가 (파티클이면 파티클 Desc필요)
-    //자식 추가할 때 파티클인지 뭔지 알아야할거 같은데?
-    //타입을 받아오면 될거같긴한데, 그러면 추후 프리팹 데이터 파일에서 자식들 타입을 각각 다 설정해서 저장해줘야할거 같은데.
-    // EX) 파티클 Desc 안에 자신의 태그(이름임, 프로토타입원형이름 x 파일이름으로 쓸 예정) , 타입도 추가해줘야하나 ?
 
     CGameObject* pChildren = {};
     _wstring strChildrenTag = {};
@@ -103,7 +98,6 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
 {
    auto iter = m_EffectChildren.find(ChildrenTag);
 
-   //잘못된 키값
    if (iter == m_EffectChildren.end())
        return;
 
@@ -177,7 +171,6 @@ void CEffect_Prefab::Free()
 {
     __super::Free();
 
-    //자식 삭제
     for (auto& Children : m_EffectChildren)
         Safe_Release(Children.second);
 

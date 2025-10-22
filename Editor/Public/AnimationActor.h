@@ -1,11 +1,10 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ContainerObject.h"
 NS_BEGIN(Editor)
 class CAnimationActor final : public CContainerObject
 {
 public:
-	// »ý¼º½Ã Shader Tag¿Í Model Tag Àü´Þ.
 	typedef struct tagAnimationActorDesc : CContainerObject::GAMEOBJECT_DESC
 	{
 		LEVEL eLevel = {};
@@ -16,12 +15,10 @@ public:
 
 		_uint iShaderPath = {};
 
-		// ÃÊ±â Transform ¼³Á¤
 		_float3 vPostion = {};
 		_float3 vRotation = {};
 		_float3 vScale = {};
 
-		// ¹«±âµµ ÀåÂø °¡´ÉÇÏ°Ô?..
 	}ANIMATION_ACTOR_DESC;
 
 private:
@@ -49,6 +46,9 @@ public:
 	const _string& Get_CurrentAnimationNames() const;
 	const _float Get_CurrentAnimationDuration() const;
 
+	//Bone GUI ì—°ê²°
+	HRESULT Bind_Bone_to_GUI();
+
 	void Change_CurrentAnimation(_string strAnimName) { m_strCurrentAnimation = strAnimName; }
 	void Set_TrackPosition(_float fTrackPosition);
 	void Set_PlayAnimation(_bool IsPlay);
@@ -56,7 +56,7 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
-	// Å×½ºÆ® ÄÝ¹é ÇÔ¼ö.
+	
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
 #endif // _DEBUG
@@ -74,7 +74,7 @@ private:
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 
-	_float m_fTimeDelta = {}; // Stop »óÅÂ¿¡¼­µµ PlayAnimation µ¿ÀÛÀ» À§ÇÔ.
+	_float m_fTimeDelta = {};
 
 	_string m_strModelDatPath = {}; // 
 

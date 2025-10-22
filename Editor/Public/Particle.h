@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Editor_Define.h"
 #include "GameObject.h"
 
@@ -54,7 +54,7 @@ private:
 	_float3						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
-	//¿¬»êÀÚ? °¡ÁßÄ¡? ÀÏ´Ü ¾ß¸Å·Î ºÒÅ¸ÀÔÀ¸·Î ¿òÁ÷ÀÌ°Ô µ¿ÀÛ Ã³¸®¸¸
+	//?ê³—ê¶›?? åª›Â€ä»¥ë¬’íŠ‚? ?ì‡°ë–’ ?ì‡°â„“æ¿¡?éºëŠ??ë‚†ì‘æ¿¡??Â€ï§ê³¸ì” å¯ƒ??ìˆˆì˜‰ ï§£ì„â”ï§?
 	//_bool						m_IsSpread = false;
 	//_bool						m_IsDrop = false;
 

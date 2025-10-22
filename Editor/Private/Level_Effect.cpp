@@ -47,6 +47,7 @@ HRESULT CLevel_Effect::Initialize()
     //이펙트 툴
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
+
     //파티클 움직임 및 위치같은 설정들 보기 위해 플레이어 띄울려고 추가함. 영훈오빠가 만든 애니메이션 툴
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 

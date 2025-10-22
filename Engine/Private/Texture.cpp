@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Texture.h"
 
 #include "Shader.h"
@@ -23,7 +23,7 @@ HRESULT CTexture::Initialize_Prototype(const _tchar* pFilePath, _uint iNumTextur
 
     _tchar      szExt[MAX_PATH] = {};
 
-    // Path Split => È®ÀåÀÚ¸¸ ÃßÃâ
+    // Path Split => ?ëº¤ì˜£?ë¨®ì­” ç•°ë¶¿í…§
     _wsplitpath_s(pFilePath, nullptr, 0, nullptr, 0, nullptr, 0, szExt, MAX_PATH);
 
     for (size_t i = 0; i < m_iNumTextures; ++i)
@@ -44,7 +44,7 @@ HRESULT CTexture::Initialize_Prototype(const _tchar* pFilePath, _uint iNumTextur
             MSG_BOX("TGA");
             return E_FAIL;
         }
-        else // dds¿Ü Window°¡ Áö¿øÇÏ´Â ÆÄÀÏ
+        else // dds??Windowåª›Â€ ï§žÂ€?ë¨°ë¸¯???ëš¯ì”ª
         {
             hr = CreateWICTextureFromFile(m_pDevice, szFileName, nullptr, &pSRV);
         }

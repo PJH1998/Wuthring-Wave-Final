@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "FreeCamera.h"
 
 #include "GameInstance.h"
@@ -48,12 +48,20 @@ void CFreeCamera::Update(_float fTimeDelta)
 	if (ImGui::Button("Move", ImVec2(50.f, 20.f)))
 		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vPosition), 1.f));
 
+	_float3 vCamPos = {};
+	XMStoreFloat3(&vCamPos, m_pTransformCom->Get_State(STATE::POSITION));
+	ImGui::PushID(1000);
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&vCamPos), "%.2f");
+	ImGui::PopID();
+
 	ImGui::End();
 #endif
 }
 
 void CFreeCamera::Late_Update(_float fTimeDelta)
 {
+
+
 }
 
 void CFreeCamera::Render()
