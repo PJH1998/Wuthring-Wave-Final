@@ -35,7 +35,7 @@ public:
 
 	typedef struct tagCustomUISectorDesc {
 		_float2		vSectorBorder = {}; // pixel
-		_float		fUIScale = {};		// ui ¹èÀ²
+		_float		fUIScale = {};		// ui ï¿½ï¿½ï¿½ï¿½
 	} UI_SECTOR_DESC;
 
 
@@ -49,8 +49,8 @@ public:
 		_uint		iUIType = {};			// ?â‘¥ë‹š ï§¡ìŒì”¤ï§Â€, è¸°ê¾ªë“‰?ëª„?, ï§¤ì’–ê¸½??æ´Ñ‹ì½éºÂ€?ëª„? æ´Ñ‰í…‡?
 		_wstring	strParentName = {};
 
-		_bool		isInverseScreenDiscard = false;	// ±×¸± ±¸¿ª ¹İÀü
-		_float		fCutout = 0.3f;					// (1:ÄÆ¾Æ¿ô »ç¿ë ½Ã) ¾ËÆÄ°ª ±âÁØ
+		_bool		isInverseScreenDiscard = false;	// ï¿½×¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		_float		fCutout = 0.3f;					// (1:ï¿½Æ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½) ï¿½ï¿½ï¿½Ä°ï¿½ ï¿½ï¿½ï¿½ï¿½
 		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
 
 		vector<_wstring> vecChildNames = {};
@@ -101,7 +101,7 @@ private:
 	_uint					m_iCurTexIndex				= {};
 
 	_float4x4				m_CombinedWorldMatrix		= {};
-	//vector// ÀÎ½ºÅÏ½ºº° Á¤º¸ ÀúÀåÇØ¾ßÇÔ
+	//vector// ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½
 	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> m_InstanceDescs = {};
 
 	// ?ê¾©ì˜± ?ÑŠìŠœä»¥ë¬’ì”ª ?ë¿ë’ªçˆ¾??ëº£ë‚«, texcoord åª›? ?ì„ì”¤?ë±ê½£ æ¹²ê³—????ê¹†ì“½ ?ëº£ë‚«.. ?ê¾©ìŠ‚?ì¢ë‹”???ë‰ì“¬
