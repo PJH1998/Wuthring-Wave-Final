@@ -85,6 +85,9 @@
     <Filter Include="03. GameObject\Camera\Spring">
       <UniqueIdentifier>{ede301d8-870a-4741-b3fc-ef4ad81d9087}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\MonsterTest\Body">
+      <UniqueIdentifier>{d2355fc4-038d-49ca-91f7-20deddf40ace}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -185,6 +188,9 @@
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\MonsterBody.h">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -271,6 +277,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MonsterBody.cpp">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

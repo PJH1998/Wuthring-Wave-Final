@@ -19,8 +19,19 @@ public:
 	void							Set_Distance(_float fDistance) { m_fDistance += fDistance; }
 	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
 
+	// SetUp Target Pos, Offset Y
 	void							Update_Target(const _fvector& TargetPos, _float fOffsetY)
-	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; };
+	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; }
+	// Spring (Distance Adjust) - Lerp
+	// 목표 Distance, 도달 시간
+	void							Use_Spring(_float fDestination, _float fDuration)
+	{
+		if (true == m_isSpring)
+			return;
+		m_fDestination = fDestination;
+		m_fSpringDuration = fDuration;
+		m_isSpring = true;
+	}
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -45,7 +56,8 @@ private:
 	// Spring
 	_bool							m_isSpring = { false };
 	_float							m_fStiffness = {};		// Spring Force
-	_float							m_fDamp = {};			// 감쇠 계수
+	_float							m_fDestination = {};	// Spring Destination
+	_float							m_fSpringDuration = {};
 
 private:
 	void							Lerp_Distance(_float fTimeDelta);

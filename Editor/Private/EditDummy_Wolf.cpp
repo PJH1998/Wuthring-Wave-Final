@@ -51,6 +51,10 @@ void CEditDummy_Wolf::Update(_float fTimeDelta)
 	else
 		m_pTransformCom->Change_Speed(20.f);
 
+	// Spring Test
+	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN)
+		m_pSpringCamera->Use_Spring(50.f, 0.5f);
+
 	Key_Move(fTimeDelta);
 
 	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);

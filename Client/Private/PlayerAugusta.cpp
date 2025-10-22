@@ -161,8 +161,9 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
         _float4 vVelocity = {};
         XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
 
+#ifdef _DEBUG
         OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
-
+#endif 
         //_float3 vNormal = {};
         //if (!m_pColliderCom->IsLand(&vNormal)) // 벽타기에 쓸 수 있다.
         //    m_pColliderCom->Set_Gravity(true);
@@ -203,7 +204,6 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
 
     
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.pOwner = this;
     ColliderDesc.vPos = { 0.f, 5.f, 0.f };
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
@@ -212,9 +212,6 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
-    
-
-
 }
 
 void CPlayerAugusta::Ready_Variables(const PLAYER_DESC* pDesc)

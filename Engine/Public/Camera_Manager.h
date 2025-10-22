@@ -24,7 +24,8 @@ public:
 
 public:
 	HRESULT			Initialize(_uint iNumLevel);
-	void				Update(_float fTimeDelta);	// PipeLine??Camera Matrix 媛깆떊
+	void				Update(_float fTimeDelta);	// PipeLine Camera Matrix Update
+	void				Late_Update(_float fTimeDelta);
 
 	HRESULT			Clear_Resource(_uint iCurrentLevelID);
 

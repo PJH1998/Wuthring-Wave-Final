@@ -64,3 +64,4 @@ EngineSDK/*
 !Engine/ThirdPartyLib/Jolt_d.pdb
 !Engine/ThirdPartyLib/ImGuiLib.pdb
 !Engine/ThirdPartyLib/ImGuiLib_d.pdb
+Editor/Bin/Resource/BTtest

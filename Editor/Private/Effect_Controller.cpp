@@ -190,7 +190,6 @@ void CEffect_Controller::Prefab_Tab()
                         UpdateSelected_ChildrenFromIndex();
                     }
 
-                    //¼±ÅÃµÈ ÀÚ½Äµé°ú °ü·ÃµÈ ÄÁÆ®·Ñ·¯ È°¼ºÈ­
                     if (m_IsParticle)
                         m_pParticle_Controller->Update();
 
@@ -220,22 +219,19 @@ void CEffect_Controller::Prefab_Tab()
                            CEffect_Mesh::EFFECTMESH_DESC* pEffectMeshDesc = m_pMesh_Controller->Get_EffectMeshDesc(m_strChildrenTag);
                            CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* pFXVBDesc = m_pMesh_Controller->Get_VBMeshDesc(m_strChildrenTag);
 
-                           //ÀÌÀü¿¡ ¸¸µé¾îÁ®ÀÖ´ø ¸Å½¬¹öÆÛ ¿øÇü »èÁ¦
                            m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), pEffectMeshDesc->strVIBufferTag);
-
-                           //¸Å½¬¹öÆÛ ¿øÇü »ý¼º ÇØÁà¾ßÇÏ´Âµ¥ Dat °æ·Î°¡ ÇÊ¿äÇÔ..
+               
                            _char szDatPath[MAX_PATH] = {};
                            strcpy_s(szDatPath, sizeof(szDatPath), "../../Client/Bin"); 
-                           strcat_s(szDatPath, sizeof(szDatPath), pFXVBDesc->DatFilePath);  // DatFilePath -> "/Resource/.." ºÎÅÍ ½ÃÀÛÇÔ.
+                           strcat_s(szDatPath, sizeof(szDatPath), pFXVBDesc->DatFilePath);  // DatFilePath -> "/Resource/.." 
 
                            _fmatrix DefaultMatrix = XMMatrixIdentity();
                            m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), pEffectMeshDesc->strVIBufferTag,
                                CVIBuffer_Mesh::Create(m_pDevice, m_pContext, szDatPath, DefaultMatrix, pFXVBDesc));
 
-                           //¼±ÅÃÇÑ ÇÁ¸®ÆÕÀÌ ÀÌÀü¿¡ °¡Áö°í ÀÖ´ø ÀÚ½Ä »èÁ¦
+                            //í…ŒìŠ¤íŠ¸
                            m_pSelectedPrefab->Remove_Children(pEffectMeshDesc->strMyTag);
 
-                           //ÀÌÀü¿¡ °¡Áö°í ÀÖ´ø ÀÚ½Ä°ú µ¿ÀÏÇÑ ÀÌ¸§, ´Ù¸¥ Desc·Î ½Å±Ô ÀÚ½Ä »ý¼º
                            m_pSelectedPrefab->Add_Children(pEffectMeshDesc, EFFECT_TYPE::MESH);
                        }
                     }

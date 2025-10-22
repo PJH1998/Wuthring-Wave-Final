@@ -18,6 +18,7 @@
 #include "VIBuffer_Mesh.h"
 
 #include "Behavior_Tree.h"
+#include "AnimMachine.h"
 // ==================
 
 NS_BEGIN(Engine)
