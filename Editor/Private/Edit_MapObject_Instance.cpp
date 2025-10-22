@@ -1,4 +1,4 @@
-#include"Editorpch.h"
+ï»¿#include"Editorpch.h"
 #include "Edit_MapObject_Instance.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
@@ -31,6 +31,7 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
+    Ready_Events();
 
     m_iShaderPassIndex = 0;
     MODELTYPE::MAP;
@@ -64,9 +65,6 @@ void CEdit_MapObject_Instance::Late_Update(_float fTimeDelta)
 void CEdit_MapObject_Instance::Render()
 {
     Bind_Resources();
-
-    //m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-    
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
@@ -107,8 +105,8 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
     _matrix Scale, Rotation, Translation;
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, PickedMatrix);
 
-    //»çÀÌÁî°¡ Á¡Á¡ ÀÛ¾ÆÁü. ³ªÁß¿¡ ¼öÁ¤ÇÒ°Í.
-    //m_pScale¿¡´Ù°¡ ÀúÀåÇÑ µÚ ¹öÆ° ´©¸£¸é Àû¿ëµÇ°Ô ÇÏ¸é ¾È¹Ù²ğµí.
+    //?ÑŠì” ï§ë‡? ?ë¨¯ì  ?ë¬’ë¸˜ï§? ?ì„ì¨·???ì„ì ™?ì¢‰ì¾¬.
+    //m_pScale?ë¨®ë–åª›Â€ ?Â€?Î½ë¸³ ??è¸°ê¾ªë“‰ ?ê¾¨â…¤ï§??ê³¸ìŠœ?ì„ì¾¶ ?ì„ãˆƒ ?ëˆì»®?ë¶¾ë².
     ImGui::Text("Size");
     {
         ImGui::PushItemWidth(90.0f);
@@ -122,12 +120,12 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
 
     ImGui::Text("Turn_Quaternion");
     {
-        //·ÎÅ×ÀÌ¼ÇÀÌ °è¼Ó ¾÷µ¥ÀÌÆ® µÇ¾î¼­ °ªÀÌ ÃÊ±âÈ­µÊ.
+        //æ¿¡ì’—ë€’?ëŒë€¡??æ€¨ê¾©ëƒ½ ?ë‚…ëœ²?ëŒ„ë“ƒ ?ì„ë¼±??åª›ë¯ªì”  ç¥ë‡ë¦°?ë¶¾ë§–.
         ImGui::PushItemWidth(90.0f);
         //_float3 DegreeRotation = _float3(XMConvertToDegrees(m_pRotation[m_iPickedInstance].x), XMConvertToDegrees(m_pRotation[m_iPickedInstance].y), XMConvertToDegrees(m_pRotation[m_iPickedInstance].z));
         _float4 DegreeRotation = m_pRotation[m_iPickedInstance];
         
-        //µğ±×¸® °¢µµ·Î 0µµ¿¡¼­ 360µµ±îÁö.
+        //?ë¶½ë ‡ç”±?åª›ê³·ë£„æ¿¡?0?ê¾©ë¿‰??360?ê¾§í‰´ï§Â€.
 
         ImGui::InputFloat("Yaw",    &DegreeRotation.x, 0.1f, 0.1f); ImGui::SameLine();
         ImGui::InputFloat("Picth",  &DegreeRotation.y, 0.1f, 0.1f); ImGui::SameLine();
@@ -154,6 +152,7 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
     
     XMStoreFloat4x4(&m_pInstanceMatrix[m_iPickedInstance], PickedMatrix);
 
+#ifdef _DEBUG
     if (ImGui::Button("OK"))
         m_pModelCom->Change_InstanceInfo(m_iPickedInstance, PickedMatrix);
 
@@ -166,36 +165,27 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
         }
     }
     ImGui::EndChildFrame();
-
-    //LOD°¡ ÃÑ 4´Ü°è·Î ³ª´µ¾îÁ®ÀÖ´Âµ¥ ÀÌ°Å ¾î¶»°Ô ÇÒ °ÇÁö »ı°¢.
-    //Á¦ÀÏ °£´ÜÇÑ ¹æ¹ı => ÄõµåÆ®¸®¿¡¼­ Å©±â¿¡ ºñ·ÊÇØ¼­ ·»´õÇÒ ¶§ ¸ğµ¨ °¥¾Æ³¢±â.
-    //=> ÀÎ½ºÅÏ½ÌÇÑ ¸Ş½¬µéÀº °¢ ¸ÅÆ®¸¯½º¸¶´Ù ºñ±³ÇØ¼­ ¸Ş½¬ ¹¹ ¾µÁö °áÁ¤ÇØ¾ßÇÒµí?
+#endif
+    //LODåª›Â€ ç¥?4?â‘£í€æ¿¡??ì„ë‡?ëŒì¡‡?ëˆë’—???ë‹¿êµ… ?ëŒ€ë¼¸å¯ƒ???å«„ëŒ? ?ì•·ì»–.
+    //?ì’–ì”ª åª›ê¾¨ë–’??è«›â‘¸ì¾¿ => è‘ì‡°ë±¶?ëªƒâ”?ë¨¯ê½Œ ?Ñˆë¦°??é®ê¾¨??ëŒê½Œ ?ëš®ëœ‘????ï§â‘¤ëœ½ åª›ë‰ë¸˜?ì‡¨ë¦°.
+    //=> ?ëª„ë’ª?ëŒë–›??ï§ë¶¿ë©?ã…¼? åª›?ï§ã…½ë“ƒç”±?ë’ªï§ëˆë– é®ê¾§íƒ³?ëŒê½Œ ï§ë¶¿ë© è¸??ëª„? å¯ƒê³—ì ™?ëŒë¹?ì¢Šë²?
 
 }
 
 HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
-    //ÀÌ ºÎºĞ ³ªÁß¿¡ .Dat·ÎµåÇÒ¶§ µ¥ÀÌÅÍÈ­ ½ÃÄÑ¼­ ·Îµå ½ÃÅ³°Í.
-    //ifstream File();
-    CMesh_Instance::MESH_INST_DESC Desc{};
-    m_iNumInstance = Desc.iNumInstance = 2;
-    _float4x4* pMatrix = new _float4x4[Desc.iNumInstance];
-    _matrix TT =XMMatrixScalingFromVector(XMVectorSet(20.f,10.f,1.f,0.f)) * XMMatrixTranslationFromVector(XMVectorSet(10.f, 0.f, 0.f, 1.f));
-    memcpy(&pMatrix[0], &TT, sizeof(_float4x4));
-    TT = XMMatrixTranslationFromVector(XMVectorSet(-10.f, 30.f, 0.f, 1.f));
-    memcpy(&pMatrix[1], &TT, sizeof(_float4x4));
-    m_pInstanceMatrix = Desc.pTransformMatrix = pMatrix;
+    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
+    CMesh_Instance::MESH_INST_DESC Desc{};
+    Desc.iNumInstance= m_iNumInstance = pDesc->iNumInstance;
+    Desc.pTransformMatrix = pDesc->WorldMatrix;
+    
     _vector vScale, vRotation, vTranslation;
     m_pRotation = new _float4[m_iNumInstance];
+    m_pInstanceMatrix = Desc.pTransformMatrix;
 
-    //È¸Àü°ªÀº ¹Ì¸® ÀúÀå
-    for (_uint i = 0; i < m_iNumInstance; ++i)
-    {
-        XMStoreFloat4(&m_pRotation[i], XMVectorSet(0.f, 0.f, 0.f, 0.f));
-    }
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Model_Wolf_Instance"),
+    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
         return E_FAIL;
 
@@ -210,6 +200,11 @@ void CEdit_MapObject_Instance::Bind_Resources()
 {
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+}
+
+void CEdit_MapObject_Instance::Ready_Events()
+{
+    //m_pGameInstance->Subscribe()
 }
 
 CEdit_MapObject_Instance* CEdit_MapObject_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

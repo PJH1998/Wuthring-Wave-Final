@@ -1,6 +1,6 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "MainApp.h"
-#include "Parser.h"
+#include "GameSystem.h"
 
 #include "Event_Level.h"
 
@@ -11,9 +11,11 @@
 #include "Level_Test.h"
 #include "Level_Test_UI.h"
 
+#include "SpringCamera.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
-	m_pParser { CParser::GetInstance() }
+	m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
 }
@@ -35,13 +37,16 @@ HRESULT CMainApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ¿¬µ¿
+	// ImGui Context Setting
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
 	SetUp_CollisionLayer();
 	// Jolt PhysicsSystem SetUp
 	m_pGameInstance->SetUp_PhysicsSystem();
+
+	// Game System Ready
+	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
 
 	Ready_Prototype_ForStatic();
 	Ready_Event();
@@ -52,13 +57,16 @@ HRESULT CMainApp::Initialize()
 
 void CMainApp::Post_Update()
 {
-	// Level ÀüÈ¯
+	// Level Change
 	if (true == m_isChangeLevel)
 	{
+		// Wait Thread End
+		m_pGameInstance->Wait_Thread_End();
+
 		m_isChangeLevel = false;
 		if (true == m_isLoad)
 		{
-			// Level¿¡ ¼ÓÇÏÁö ¾ÊÀº °´Ã¼µé Release
+			// Level???ëžë¸¯ï§žÂ€ ?ë”†? åª›ì•¹ê»œ??Release
 			if (FAILED(m_pGameInstance->Clear_Memory()))
 				return;
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));
@@ -93,7 +101,6 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	// Docking ±âº» ¼³Á¤
 	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
@@ -166,6 +173,19 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_UI_VtxPosTex");
+		
+	SHADER_MACRO eShaderMacro = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+	string strEntryPoint = "CSMain";
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute AnimMesh Shader");
 
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -176,11 +196,22 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		CCollider::Create(m_pDevice, m_pContext))))
 		CRASH("Collider");
+
+	_fmatrix PreMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Model_Wolf"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreMatrix, "../Bin/Resource/Dummy/Wolf/Wolf.dat"))))
+		CRASH("Model Dummy");
+
+	// SpringCamera
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SpringCamera"),
+		CSpringCamera::Create(m_pDevice, m_pContext))))
+		CRASH("SpringCamera");
 }
 
 void CMainApp::Start_Level()
 {
-	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
 }
 
@@ -205,6 +236,6 @@ void CMainApp::Free()
 	Safe_Release(m_pContext);
 
 	m_pGameInstance->Release_Engine();
-	Safe_Release(m_pParser);
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pGameInstance);
 }

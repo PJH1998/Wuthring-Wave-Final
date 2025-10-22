@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -47,8 +47,8 @@ public:
 	HRESULT		Bind_Matrix(class CShader* pShader, const _char* ConstantName);
 
 public:
-	void			Scale(_float3 vScale);		// vScale ∞™¿∏∑Œ ≈©±‚ ¡∂¡§
-	void			Scaling(_float3 vScale);		// vScale ∞™∏∏≈≠ πË¿≤ ¡∂¡§
+	void			Scale(_float3 vScale);		// vScale Ï°∞Ï†ï
+	void			Scaling(_float3 vScale);		// vScale Î∞∞Ïú® Ï°∞Ï†ï
 
 	void			Go_Straight(_float fTimeDelta);
 	void			Go_Backward(_float fTimeDelta);
@@ -64,22 +64,32 @@ public:
 	void			Rotation(const _fvector& vAxis, _float fRadian);
 	void			Turn(const _fvector& vAxis, _float fTimeDelta);
 	void			Turn_Dir(const _fvector& vDir, _float fTimeDelta);
+	void			Turn_Quaternion(const _fvector& vQuaternion);
 	void			Turn_Quaternion(const _float3& vRadian, _float fTimeDelta);
-	void			Quaternion(const _float3& vRadian);
-	void			Quaternion(const _fvector& vQuaternion);
+	void			Rotation_Quaternion(const _float3& vRadian);
+	void			Rotation_Quaternion(const _fvector& vQuaternion);
 
 	void			LookAt(const _fvector& vAt);
 	void			LookAt_KeepUp(const _fvector& vAt);
 	void			LookDir(const _fvector& vDir);
+	// Dir Î∞©Ìñ•ÏúºÎ°ú Î≥¥Í∞ÑÌïòÏó¨ ÎèàÎã§.
 	void			LookLerp(const _fvector& vDir, _float fTimeDelta, _float fRate = 1.f);
 	void			Chase(const _fvector& vTargetPos, _float fTimeDelta, _float fLimit);
+
+	// ÌñâÎ†¨ ÏÇ¨Ïù¥ Î≥¥Í∞Ñ
+	void			Lerp(const _fmatrix& StartMatrix, const _fmatrix& EndMatrix, _float fRatio);
+
+	// Ïù¥Ï†Ñ ÏúÑÏπò Ï†ÄÏû•.
+	void			Save_PreviousPosition() { XMStoreFloat4(&m_vPreviousPosition,Get_State(STATE::POSITION)); }
+	// Ïù¥Ï†Ñ ÏúÑÏπòÏôÄ ÌòÑÏû¨ ÏúÑÏπò Ï∞®Ïù¥ Î∞òÌôò
+	_fvector		Get_Velocity() { return Get_State(STATE::POSITION) - XMLoadFloat4(&m_vPreviousPosition); }
 
 private:
 	_float4x4		m_WorldMatrix = {};
 
 	_float			m_fSpeedPerSec = {};
 	_float			m_fRotationPerSec = {};
-	_float3		m_vAngle = {};
+	_float4		m_vPreviousPosition = {};	
 
 public:
 	static		CTransform*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

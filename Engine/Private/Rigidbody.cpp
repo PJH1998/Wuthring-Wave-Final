@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Rigidbody.h"
 
 #include "GameInstance.h"
@@ -65,7 +65,7 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 	}
 	case SHAPE::MESH:
 	{
-		// Mesh´Â µû·Î Ã³¸®
+		// Mesh???ê³•ì¤ˆ ï§£ì„Žâ”
 		Make_MeshShape(pArg);
 		return S_OK;
 	}
@@ -110,7 +110,7 @@ void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
 	m_pBodyInterface->GetPositionAndRotation(m_BodyID, vPos, vRotation);
 
 	_vector vQuaternion = XMVectorSet(vRotation.GetX(), vRotation.GetY(), vRotation.GetZ(), vRotation.GetW());
-	pTransform->Quaternion(vQuaternion);
+	pTransform->Rotation_Quaternion(vQuaternion);
 	pTransform->Set_State(STATE::POSITION, XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
 }
 
@@ -203,10 +203,10 @@ void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
 	mp.ScaleToMass(1.f);
 
 	bodySetting.mMassPropertiesOverride = mp;
-	// °ü¼º (Á÷Á¢ ¼³Á¤ÇÑ Áú·® »ç¿ëÇÏ´Â ¼¼ÆÃ)
+	// æ„¿Â€??(ï§žê³¸ì ’ ?ã…¼ì ™??ï§žëˆì›¾ ?ÑŠìŠœ?ì„Žë’— ?ëª…ë˜¿)
 	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
 
-	// GameObject(Owner) -> UserData·Î Àü´Þ
+	// GameObject(Owner) -> UserDataæ¿¡??ê¾¨ë––
 	bodySetting.mUserData = reinterpret_cast<uint64>(m_pOwner);
 
 	m_pBody = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);

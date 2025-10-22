@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 #include "CollisionLayer.h"
@@ -20,9 +20,9 @@ private:
 
 public:
 #pragma region Init
-	// Physics System ÃÊ±âÈ­
+	// Physics System ì„¸íŒ…
 	void				SetUp_PhysicsSystem();
-	// Object -> BroadPhase ¸ÊÇÎ
+	// Object -> BroadPhase ë§µí•‘
 	void				SetUp_ObjectToBP(_uint iObjectLayer, _uint iBPLayer) {
 		ASSERT_CRASH(nullptr != m_pBPLayer);
 		m_pBPLayer->SetUp_ObjectToBP(iObjectLayer, iBPLayer);
@@ -39,14 +39,16 @@ public:
 	};
 #pragma endregion
 
-	// Body »ı¼º
+	// Body ìƒì„±
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	// Character »ı¼º
+	// Character ìƒì„±
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	// CharacterVirtual »ı¼º
-	CharacterVirtual*	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	// CharacterVirtual ìƒì„±
+	Ref<CharacterVirtual>	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+
+	void					Remove_Virtual(CharacterVirtual* pVirtual);
 
 	void					Clear_Resource();
 
@@ -58,6 +60,7 @@ public:
 	void				DrawShape(const Shape* pShape);
 #endif
 
+	_bool				Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };
@@ -92,7 +95,7 @@ private:
 #ifdef _DEBUG
 	DebugRenderer*	m_pDebugRenderer = { nullptr };
 	BodyManager::DrawSettings m_DrawSetting;
-	_bool					m_isRenderAll = { true };
+	_bool					m_isRenderAll = { false };
 #endif
 
 public:

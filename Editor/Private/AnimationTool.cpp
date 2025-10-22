@@ -1,11 +1,11 @@
-#include "EditorPch.h"
+Ôªø#include "EditorPch.h"
 #include "AnimationTool.h"
 #include "ModelLoader.h"
 #include "AnimationActor.h"
 #include "AnimNotifyTool.h"
 
 
-#pragma region ±‚∫ª «‘ºˆµÈ
+#pragma region Í∏∞Î≥∏Ìï®ÏàòÎì§
 CAnimationTool::CAnimationTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
     , m_pContext{ pContext }
@@ -20,12 +20,10 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 {
     m_eCurLevel = eLevel;
 
-    // 1. FBX ∆ƒ¿œ¿ª Dat»≠ «ÿ¡÷¥¬ Loader ª˝º∫.
     m_pLoader = CModelLoader::Create();
 
-    // 2. Animation Notify∏¶ µÓ∑œ π◊ ∞¸∏Æ«œ¥¬ ≈¨∑°Ω∫
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-   
+    
 
     return S_OK;
 }
@@ -34,24 +32,23 @@ void CAnimationTool::Render()
 {
     Render_Editor();
     
-    // Animation Notify∞° Visible ªÛ≈¬∂Û∏È?
     if (m_IsVisibleNotify)
     {
-        // ¿˙¿Â Ω√ ∏µ® Tag∑Œ ¿˙¿Â«“ ∂ß Folder∏∏ ¿˙¿Â«“±Ó?
         _string strModelDirPath = m_ModelDirPaths[m_wSelected_PrototypeModelTag];
         ASSERT_CRASH(m_pAnimNotifyTool);
         m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, strModelDirPath, m_fDuration);
         m_pAnimNotifyTool->Render();
     }
+
+    // EditState ÏÑ§Ï†ïÎêú Í±∏Î°ú.
+    RenderUI_EditState();
         
 }
 
 void CAnimationTool::Render_Editor()
 {
-    // 0. Debug Render => «ˆ¿Á ªÛ≈¬∏¶ √‚∑¬.
     Render_DebugWindow();
 
-    // 1. æÀ∆ƒ∞™ ¡∂¿˝«ÿº≠ ≈ı∏Ì«œ∞‘ ∏∏µÈ ºˆ ¿÷¿Ω.
     ImGui::Begin(u8"Editor", NULL, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar
         | ImGuiWindowFlags_AlwaysVerticalScrollbar);
 
@@ -64,7 +61,6 @@ void CAnimationTool::Render_Editor()
     style.Colors[ImGuiCol_WindowBg] = NewColor;
     ImGui::NewLine();
 
-    // 2. MenuTabBar ±∏«ˆ
     Render_Menu();
 
     ImGui::End();
@@ -77,11 +73,9 @@ void CAnimationTool::Render_DebugWindow()
     ImVec2 windowPos = ImVec2(300.f, g_iWinSizeY - 300.f);
     ImVec2 windowSize = ImVec2(300.f, 300.f);
 
-    // Cond_Once: √÷√  «— π¯∏∏ ¿ßƒ° ¿˚øÎ °Ê ¿Ã»ƒ µÂ∑°±◊ ∞°¥…
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
 
-    // NoCollapse∏∏ ¿Ø¡ˆ, ¿Ãµø ∞°¥…«œ∞‘
     ImGui::Begin("Debug", nullptr, ImGuiWindowFlags_NoCollapse);
 
     _float4 camPos = {};
@@ -90,8 +84,7 @@ void CAnimationTool::Render_DebugWindow()
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 
-    // «ˆ¿Á º±≈√µ» ∆ƒ¿œ ≈∏¿‘ «•Ω√
-    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "NONE"};
+    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "SAVE_STATE", "NONE"};
     ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
 
     switch (m_eMode)
@@ -162,6 +155,13 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::EDIT_ANIMATION;
         }
 
+      /*  if (ImGui::BeginTabItem("SaveState"))
+        {
+            RenderUI_EditState();
+            ImGui::EndTabItem();
+            m_eMode = MODE::SAVE_STATE;
+        }*/
+
         ImGui::EndTabBar();
     }
 
@@ -169,20 +169,16 @@ void CAnimationTool::Render_Menu()
 
 void CAnimationTool::RenderUI_ConvertFbx()
 {
-    // 1. ¡˜¡¢ «œ≥™ º±≈√«ÿº≠ FBX ∆ƒ¿œ¿ª DAT»≠ «—¥Ÿ. => ¿œ∫Œ.
     m_pLoader->Update();
 }
 
 void CAnimationTool::RenderUI_CreateActor()
 {
-    // 1. º±≈√«— Dat ∆ƒ¿œ¿ª Load«œ±‚. => Prototype ª˝º∫.
-    // øÏº±. GameObject∏¶ ªı∑Œ ∏∏µÈ∞Ì Prototype µÓ∑œ.
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Prototype", tab_bar_flags))
     {
         if (ImGui::BeginTabItem("Model"))
         {
-            // 2. «ˆ¿Á ª˝º∫µ» «¡∑Œ≈‰≈∏¿‘ ∏Ò∑œ¿ª ∫∏ø©¡÷±‚.
             RenderUI_ModelPrototype();
             ImGui::EndTabItem();
         }
@@ -191,10 +187,8 @@ void CAnimationTool::RenderUI_CreateActor()
     
 }
 
-//º±≈√µ» ∞¥√º¿« æ÷¥œ∏ﬁ¿Ãº« ¿¸√º ∏Ò∑œ¿ª »Æ¿Œ«œ∞Ì æ÷¥œ∏ﬁ¿Ãº«ø° ¥Î«— ¿€æ˜¿ª ¡¯«‡.
 void CAnimationTool::RenderUI_EditAnimation()
 {
-     // 1. ª˝º∫µ» Prototype ∏Ò∑œµÈ¿ª »Æ¿Œ«œ±‚.
     _wstring objTag = {};
     _wstring modelTag = {};
 
@@ -203,35 +197,216 @@ void CAnimationTool::RenderUI_EditAnimation()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+    // 1. Ïï°ÌÑ∞ ÏÑ†ÌÉù.
     for (auto& actorName : m_ActorNames)
     {
         if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // º±≈√ ¡§∫∏¿˙¿Â.
             m_Selected_AnimActorTag = actorName;
             m_wSelected_AnimActorTag = StringToWString(actorName);
         }
     }
     ImGui::EndChild();
 
-    // æ÷¥œ∏ﬁ¿Ãº« ∏Ò∑œ√¢±Ó¡ˆ¥¬ ∞∞¿∫ ¿⁄Ωƒ ∞≥√º∑Œ ª˝º∫.
     ImGui::SameLine();
+
+    // 3. Ïï°ÌÑ∞Ïùò Animation List Ï≤¥ÌÅ¨.
     if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
         RenderUI_AnimationList();
+
+
+}
+
+void CAnimationTool::RenderUI_FromState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("FROM");
+        ImGui::BeginChild("FromState", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedFromStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+   
+}
+
+void CAnimationTool::RenderUI_ToState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("TO");
+        
+        ImGui::BeginChild("ToState", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedToStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+    
+}
+
+void CAnimationTool::RenderUI_Transitions()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Transitions");
+
+        ImGui::BeginChild("Transition", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_StateTransitions)
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedToStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+
+
+}
+
+void CAnimationTool::RenderUI_OptionState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Option");
+        ImGui::BeginChild("Option", ImVec2(400, 0), true);
+        {
+            // 1. TrackPosition ÏÑ§Ï†ï
+
+            static float fTrackPosition = { 0.f };
+            ImGui::InputFloat("TrackPosition", &fTrackPosition, 0.f, 0.f, "%.2f");
+
+           
+
+            // 2. Ìï®Ïàò ÏÑ§Ï†ï.
+            static char textBuffer[256] = "";
+            ImGui::InputText("Function Name", textBuffer, sizeof(textBuffer));
+
+            _string strTransition = {};
+            if (ImGui::Button("Add Transition"))
+            {
+                if (fTrackPosition > m_fDuration)
+                    MSG_BOX("Duration Over");
+
+                stringstream ss;
+                ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
+                    << "," << to_string(fTrackPosition) << "," << textBuffer;
+                strTransition = ss.str();
+                m_StateTransitions.emplace_back(strTransition);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Delete Back"))
+            {
+                m_StateTransitions.pop_back();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Delete Front"))
+            {
+                m_StateTransitions.pop_front();
+            }
+
+            if (ImGui::Button("Clear Transition"))
+            {
+                m_StateTransitions.clear();
+            }
+
+            
+#ifdef _DEBUG
+            Export_StateTransition_To_CSV();
+#endif
+
+            
+            
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+    
+}
+
+
+
+void CAnimationTool::RenderUI_EditState()
+{
+    // StateTransition ÏÑ§Ï†ïÌïòÍ∏∞.
+    if (!m_IsStateTransition)
+        return;
+
+
+    ImVec2 windowPos = ImVec2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f);
+    ImVec2 windowSize = ImVec2(1700.f, 700.f);
+
+    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+    // ÌòÑÏû¨ ÏÑ†ÌÉùÎêú Actor Î™®Îç∏Ïóê ÎåÄÌïú Ï†ïÎ≥¥Î°ú ÏÉàÏ∞Ω ÎùÑÏö∞Í∏∞.
+    ImGui::Begin("State_Transition");
+
+
+    RenderUI_FromState();
+
+    ImGui::SameLine();
+    RenderUI_ToState();
+
+    ImGui::SameLine();
+    RenderUI_Transitions();
+
+    ImGui::SameLine();
+    RenderUI_OptionState();
+
+
+
+
+    ImGui::End();
+    
 }
 
 void CAnimationTool::LoadDat()
 {
-    // 1. Load«œ∞Ì Loadµ» «¡∑Œ≈‰≈∏¿‘ ¿Ã∏ß¿ª ¿˙¿Â«ÿµŒ±‚.
     _wstring wStrModelName = {};
 
     _string strModelName = "Prototype_Component_Model_";
-
+    
     _string strModelPath = {};
     string basePathString = {};
 
-    // 2. ImGuiø°º≠ ∆ƒ¿œ¿ª ø¿«¬«ÿº≠ «ÿ¥Á ∆ƒ¿œ¿ª ¿ÃøÎ«ÿº≠ Prototype Model µø¿˚¿∏∑Œ ª˝º∫
     CModel* pModelCom = { nullptr };
 
 
@@ -247,8 +422,8 @@ void CAnimationTool::LoadDat()
         ImGuiFileDialog::Instance()->OpenDialog("DAT File Load", "Import File", ".dat", config);
     }
   
-    ImVec2 vMinSize = ImVec2(600, 400);  // √÷º“ ≈©±‚
-    ImVec2 vMaxSize = ImVec2(800, 400); // √÷¥Î ≈©±‚
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
 
     if (ImGuiFileDialog::Instance()->Display(
         "DAT File Load", ImGuiWindowFlags_NoCollapse
@@ -258,38 +433,29 @@ void CAnimationTool::LoadDat()
             _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
             strModelPath = ImGuiFileDialog::Instance()->GetCurrentFileName();
 
-            // Dir ªÛ¥Î ∞Ê∑Œ∑Œ ¿˙¿Â.
-
-
-            // .dat ¿ﬂ∂Û≥ª±‚.
             size_t lastDotPos = strModelPath.find_last_of('.');
             if (lastDotPos != string::npos) {
-                // 0π¯¬∞ ¿ßƒ°∫Œ≈Õ '.' ¿ßƒ°±Ó¡ˆ πÆ¿⁄ø≠¿ª ¿ﬂ∂Û≥¿¥œ¥Ÿ.
                 strModelName += strModelPath.substr(0, lastDotPos);
                 
             }
             else
             {
-                MSG_BOX("∞Ê∑Œ ¿ﬂ∏¯µ ");
                 return;
             }
 
             _matrix		PreTransformMatrix = XMMatrixIdentity();
-            _float fSize = 0.1f;
+            //_float fSize = 1.f;
+            _float fSize = 0.01f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
             wStrModelName = StringToWString(strModelName);
 
-            // Model Prototype ª˝º∫.
             HRESULT hr = Add_Prototype_AnimModel(wStrModelName, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str());
             if (FAILED(hr))
             {
-                MSG_BOX("∞Ê∑Œ ¿ﬂ∏¯µ«æ˙∞≈≥™, ¡ﬂ∫π ª˝º∫.");
                 return;
             }
 
-            // 3. ª˝º∫¿Ã øœ∑·µ«æ˙¿∏∏È « ø‰«— ¡§∫∏µÈ¿ª ¿˙¿Â.
-            
             size_t lastSlashPos = strFilePath.find_last_of("/\\");
             string directoryPath = "";
             if (lastDotPos != string::npos)
@@ -307,7 +473,6 @@ void CAnimationTool::LoadDat()
 
 void CAnimationTool::RenderUI_ModelPrototype()
 {
-    // 1. ª˝º∫µ» Prototype ∏Ò∑œµÈ¿ª »Æ¿Œ«œ±‚.
     _wstring objTag = {};
     _wstring modelTag = {};
 
@@ -337,40 +502,72 @@ void CAnimationTool::RenderUI_ModelPrototype()
 
 void CAnimationTool::RenderUI_AnimationList()
 {
-    ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
+    
+    ImGui::BeginChild("Right pane", ImVec2(400, 0.f), true);
 
-    // 1. Animation ∏Ò∑œ.
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+
+    
+#ifdef _DEBUG
     for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
     {
+        // 1. Ïï†ÎãàÎ©îÏù¥ÏÖòÏùÑ ÏÑ†ÌÉùÌñàÏùÑ Í≤ΩÏö∞ÏóêÎäî Ïï†ÎãàÎ©îÏù¥ÏÖò Í∞ÅÍ∞ÅÏóê ÎåÄÌïú DetailÌïú ÏÑ§Ï†ï.
         if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // «ˆ¿Á º±≈√«— æ÷¥œ∏ﬁ¿Ãº« ¿Ã∏ß ¿˙¿Â.
             m_Selected_AnimationTag = animName;
 
-            // º±≈√µ…∂ß∏∏ ¿˙¿Â.
             m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
             m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
 
-            // Animation Tool¿Ã ƒ—¡Æ¿÷¥¬ ªÛ≈¬∑Œ NotifyTool¿ª ¿€æ˜«“ øπ¡§¿Ãπ«∑Œ
-            // Animation¿Ã ∫Ø∞Êµ…∂ß∏∂¥Ÿ? => NotifyToolø° «ÿ¥Á ¡§∫∏∏¶ ¿¸¥ﬁ«ÿ¡÷æÓæﬂ«’¥œ¥Ÿ. NotifyTool¿Ã ƒ—¡Æ¿÷¥Ÿ∏È?
             if (m_IsVisibleNotify)
             {
                 m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
-                // ±◊∏Æ∞Ì Animation¿Ã πŸ≤Ó∏È «ˆ¿Á º≥¡§µ» Notify ¡§∫∏∏¶ ≥Ø∑¡æﬂ«—¥Ÿ.
                 m_pAnimNotifyTool->Clear();
             }
-                
         }
+        // Îã§Ïùå Ìï≠Î™©ÏùÑ ÏúÑÌï¥ idÎ•º Ï¶ùÍ∞ÄÏãúÌÇµÎãàÎã§.
+        id++;
     }
+
+    
+
+
+
+    ImGui::SameLine();
+
+#endif 
     ImGui::EndChild();
 
-    // 2. º±≈√«— Animation Detail √≥∏Æ∏¶ ¿ß«— ±‚¥… √ﬂ∞°.
+    // Ïï†ÎãàÎ©îÏù¥ÏÖò ÏÉÅÏÑ∏ Ï†ïÎ≥¥ Ï°∞Ï†à.
     Render_Animation_Detail();
+
+
+#ifdef _DEBUG
+    ImGui::SameLine();
+
+    ImGui::BeginChild("State pane", ImVec2(400, 0.f), true);
+
+
+    // ÌòÑÏû¨ State Î™©Î°ùÏùÑ .csvÎ°ú ÎÇ¥Î≥¥ÎÉÖÎãàÎã§.
+    Export_StateAnimationMap_ToCSV();
+
+    if (ImGui::Button("State Transition Visible"))
+    {
+        m_IsStateTransition = !m_IsStateTransition;
+    }
+
+    ImGui::EndChild();
+    
+    
+#endif // _DEBUG
+
+
 }
+
+
 
 
 void CAnimationTool::Render_Model_Detail()
@@ -403,8 +600,8 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fSpeedPerSec = fSpeedPerSec;
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
-        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh"); // ¿œ¥‹ «œµÂƒ⁄µ˘..
-        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"); // ¿œ¥‹ «œµÂƒ⁄µ˘..
+        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh"); // ?Ïá∞Îñí ?ÏÑéÎ±∂ËÇÑÎ∂æÎµ´..
+        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"); // ?Ïá∞Îñí ?ÏÑéÎ±∂ËÇÑÎ∂æÎµ´..
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
@@ -414,43 +611,38 @@ void CAnimationTool::Render_Model_Detail()
         _wstring wstrObjTag = TEXT("Prototype_GameObject_Actor_");
         
 
-        // ∏∂¡ˆ∏∑ ∏µ® ¿Ã∏ß∏∏ ¿ﬂ∂Û≥ª±‚.
         size_t last_dot_pos = m_wSelected_PrototypeModelTag.find_last_of('_');
         if (last_dot_pos != std::string::npos) {
             wstrObjTag += m_wSelected_PrototypeModelTag.substr(last_dot_pos + 1, m_wSelected_PrototypeModelTag.size());
         }
         else
         {
-            MSG_BOX("∞Ê∑Œ ¿ﬂ∏¯µ ");
+            MSG_BOX("Í≤ΩÎ°úÏóê ÏóÜÏäµÎãàÎã§.");
             return;
         }
 
 
-        // 1. Animation ActorøÎ Prototype ª˝º∫
         if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
             , wstrObjTag
             , CAnimationActor::Create(m_pDevice, m_pContext))))
         {
-            MSG_BOX("Animation Actor Prototype ª˝º∫ Ω«∆–");
+            MSG_BOX("Animation Actor Prototype");
             return;
         }
 
-        // 2. ª˝º∫«— Prototype Clone
         CAnimationActor* pActor = dynamic_cast<CAnimationActor*>(
             m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel)
             , wstrObjTag, PROTOTYPE::GAMEOBJECT, &Desc));
         ASSERT_CRASH(pActor);
 
 
-        // 3. ª˝º∫«— ∞¥√º ∑π¿ÃæÓø° √ﬂ∞°
         if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel)
             , TEXT("Layer_Actor"), pActor)))
         {
-            MSG_BOX("Animation Actor √ﬂ∞°. ª˝º∫ Ω«∆–");
+            MSG_BOX("Animation Actor ÏóÜÏäµÎãàÎã§. ");
             return;
         }
 
-        // 4. ª˝º∫¿Ã øœ∑·µ«æ˙¿∏∏È ∞¸∏Æ«“ ºˆ ¿÷∞‘ «ÿæﬂ«‘. ª˝º∫«“ ∂ß ¿˙¿Â.
         m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
@@ -463,20 +655,18 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::EndChild();
 }
 
-// º±≈√«— æ÷¥œ∏ﬁ¿Ãº«ø° ¥Î«— µ≈◊¿œ«— ¡§∫∏∏¶ ∞°¡Æø¿±‚.
 void CAnimationTool::Render_Animation_Detail()
 {
-    // 1. «ˆ¿Á TrackPosition ¿˙¿Â.
+#ifdef _DEBUG
     if (!m_Selected_AnimationTag.empty())
         m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
+#endif
 
-
-    // 2. TrackBar ¡∂¿˝ UI ∏∏µÈ±‚?
     _float minTrackPos = 0.f;
     _float maxTrackPos = m_fDuration;
 
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f); // æ∆∑°ø° ∞Ì¡§?
+    ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f);
     ImVec2 windowSize = ImVec2(600.f, 120.f);
     
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
@@ -488,9 +678,10 @@ void CAnimationTool::Render_Animation_Detail()
 
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
-        // º≥¡§µ» TrackPosition¿ª ¿¸¥ﬁ«’¥œ¥Ÿ.
+#ifdef _DEBUG
         if (!m_Selected_AnimationTag.empty())
             m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
+#endif
     }
 
     _bool IsChanged = { false };
@@ -516,22 +707,119 @@ void CAnimationTool::Render_Animation_Detail()
         m_IsPlayAnimation = true;
     }
 
+#ifdef _DEBUG
     if (IsChanged)
         m_AnimationActors[m_wSelected_AnimActorTag]->Set_PlayAnimation(m_IsPlayAnimation);
+#endif
 
     if (ImGui::Button("Notify Visible"))
         m_IsVisibleNotify = !m_IsVisibleNotify;
 
+    // Ïù¥Í±∞Î•º ÎàåÎ†ÄÏùÑÎïå ÌòÑÏû¨ ActorÏôÄ ActorTag, ActorÏùò Animation Ï†ïÎ≥¥Îì§ÏùÑ Ï†ïÌï† Ïàò ÏûàÎã§.
+    /*ImGui::SameLine();
 
+    if (ImGui::Button("State Transition Visible"))
+    {
+        m_IsStateTransition = !m_IsStateTransition;
+    }*/
     
 
     ImGui::End();
 }
 
-
-
 #pragma endregion
 
+
+#ifdef _DEBUG
+void CAnimationTool::Export_StateAnimationMap_ToCSV()
+{
+    // ÌòÑÏû¨ Ïï†ÎãàÎ©îÏù¥ÏÖò Î™©Î°ùÏùÑ ÎÇ¥Î≥¥ÎÉÖÎãàÎã§. 
+
+    if (ImGui::Button("Save AnimStateList"))
+    {
+        IGFD::FileDialogConfig config;
+        config.path = "../../Client/Bin/Resource/Model";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+        string basePathString = config.path;
+        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+    }
+
+
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
+
+    if (ImGuiFileDialog::Instance()->Display(
+        "Save Csv", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize)) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            
+            // 1. ÌååÏùº Ïó¥Í∏∞
+            std::ofstream outFile(strFilePath);
+
+            _string strStateTag = "StateName";
+            _string strAnimTag = "AnimName";
+            _string strTimeTag = {};
+            outFile << strStateTag << "," <<strAnimTag << "\n";
+
+            for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+                outFile << animName << "," << animName << "\n";
+            // 2. ÌååÏùº Ïì∞Í∏∞.
+
+
+            outFile.close();
+
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+
+}
+void CAnimationTool::Export_StateTransition_To_CSV()
+{
+    if (ImGui::Button("Save Transition"))
+    {
+        IGFD::FileDialogConfig config;
+        config.path = "../../Client/Bin/Resource/Model";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+        string basePathString = config.path;
+        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+    }
+
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
+
+    if (ImGuiFileDialog::Instance()->Display(
+        "Save Csv", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize)) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            // 1. ÌååÏùº Ïó¥Í∏∞
+            std::ofstream outFile(strFilePath);
+
+            // 2. ÌååÏùº Ïì∞Í∏∞.
+            
+            outFile << "From State" << "," << "ToState" << "\n";
+
+            for (auto& strTransition : m_StateTransitions)
+            {
+                outFile << strTransition;
+            }
+
+            for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+                outFile << animName << "," << animName << "\n";
+
+
+            outFile.close();
+
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+#endif // _DEBUG
 
 
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)

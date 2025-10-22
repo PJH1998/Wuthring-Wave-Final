@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "EditorApp.h"
 
 #include "Event_Level.h"
@@ -9,6 +9,13 @@
 #include "Level_Effect.h"
 #include "Level_Map.h"
 #include "Level_UI.h"
+#include "Level_ASM.h"
+#include "Level_Camera.h"
+
+//Dummy
+#include "EditDummy_Wolf.h"
+#include "EditDummy_Augusta.h"
+#include "EditDummy_Map.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -33,7 +40,7 @@ HRESULT CEditorApp::Initialize()
 	if (FAILED(m_pGameInstance->Ready_Engine(EngineDesc, &m_pDevice, &m_pContext)))
 		return E_FAIL;
 
-	// ImGui Context ¿¬µ¿
+	// ImGui Context ?ê³•ë£ž
 	ImGui::SetCurrentContext(m_pGameInstance->Get_ImGuiContext());
 
 	// Jolt Collision Layer SetUp
@@ -41,19 +48,17 @@ HRESULT CEditorApp::Initialize()
 	// Jolt PhysicsSystem SetUp
 	m_pGameInstance->SetUp_PhysicsSystem();
 
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		CRigidbody::Create(m_pDevice, m_pContext))))
-		CRASH("Rigidbody");
-
 	Ready_Event();
+	Ready_Prototype_ForStatic();
 	Start_Level();
+	Ready_Dummies();
 
 	return S_OK;
 }
 
 void CEditorApp::Post_Update()
 {
-	// Level ÀüÈ¯
+	// Level ?ê¾ªì†š
 	if (true == m_isChangeLevel)
 	{
 		m_isChangeLevel = false;
@@ -81,6 +86,12 @@ void CEditorApp::Post_Update()
 			break;
 		case LEVEL::UI:
 			pLevel = CLevel_UI::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::CAMERA:
+			pLevel = CLevel_Camera::Create(m_pDevice, m_pContext);
+			break;
+		case LEVEL::STATEMACHINE:
+			pLevel = CLevel_ASM::Create(m_pDevice, m_pContext);
 			break;
 		}
 
@@ -124,6 +135,16 @@ void CEditorApp::Update(_float fTimeDelta)
 		CHANGE_LEVEL_EVENT event{ LEVEL::UI, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
+	if (ImGui::Button("Camera", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::CAMERA, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if(ImGui::Button("State Machine", ImVec2(100.f, 50.f)))
+	{
+		CHANGE_LEVEL_EVENT event{LEVEL::STATEMACHINE, true};
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
 
 	
 	ImGui::End();
@@ -148,13 +169,16 @@ void CEditorApp::SetUp_CollisionLayer()
 	// Object To BroadPhase
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 
 	// Object VS Object
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(COLLISIONLAYER::MAP));
 
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 }
 
@@ -167,6 +191,30 @@ void CEditorApp::Ready_Event()
 			m_eNextLevel = event.eNextLevel;
 			m_isLoad = event.isLoad;
 		});
+}
+
+
+	void CEditorApp::Ready_Prototype_ForStatic()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		CRigidbody::Create(m_pDevice, m_pContext))))
+		CRASH("Rigidbody");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
+		CCollider::Create(m_pDevice, m_pContext))))
+		CRASH("Collider");
+}
+
+void CEditorApp::Ready_Dummies()
+{
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Wolf"), CEditDummy_Wolf::Create(m_pDevice, m_pContext))))
+	   CRASH("Failed Add Prototype Dummy Wolf");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"), CEditDummy_Augusta::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Augu");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"), CEditDummy_Map::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Map");
 }
 
 void CEditorApp::Start_Level()

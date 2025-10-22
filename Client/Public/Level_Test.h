@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Level.h"
 
 NS_BEGIN(Client)
@@ -11,9 +11,17 @@ private:
 	virtual ~CLevel_Test() = default;
 
 public:
-	virtual		HRESULT		Initialize() override;
+	virtual		HRESULT			Initialize() override;
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
+
+private:
+	void Ready_Layer_PlayerParty();
+	void Ready_Layer_Augusta();
+
+private:
+	LEVEL m_eCurLevel = { LEVEL::TEST };
+	class CGameSystem* m_pGameSystem = { nullptr };
 
 public:
 	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

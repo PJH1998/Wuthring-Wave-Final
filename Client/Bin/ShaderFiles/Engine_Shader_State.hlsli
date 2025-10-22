@@ -19,7 +19,11 @@ sampler ClampSampler = sampler_state
     AddressV = clamp;
 };
 
-
+SamplerComparisonState ShadowSampler
+{
+    filter = comparison_min_mag_mip_linear;
+    ComparisonFunc = LESS_EQUAL;
+};
 // Rasterize 
 RasterizerState RS_Default
 {
@@ -38,6 +42,13 @@ RasterizerState RS_Wire
 RasterizerState RS_Cull_None
 {
     CullMode = none;
+};
+
+RasterizerState RS_Cull_Front
+{
+    FillMode = solid;
+    CullMode = front;
+    FrontCounterClockwise = false;
 };
 
 // Depth

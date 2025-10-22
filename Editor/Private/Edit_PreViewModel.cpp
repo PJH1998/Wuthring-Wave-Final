@@ -1,4 +1,4 @@
-#include"EditorPch.h"
+﻿#include"EditorPch.h"
 #include "Edit_PreViewModel.h"
 
 CEdit_PreViewModel::CEdit_PreViewModel(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -11,12 +11,12 @@ CEdit_PreViewModel::CEdit_PreViewModel(const CEdit_PreViewModel& Prototype)
 {
 }
 
-HRESULT CEdit_PreViewModel::Initialize_Prototype()
+HRESULT CEdit_PreViewModel::Initialize_Prototype(_uint iLevel)
 {
     if (FAILED(__super::Initialize_Clone(nullptr)))
         int a = 0;
-
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh"),
+    m_iLevel = iLevel;
+    if (FAILED(__super::Add_Component(iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
@@ -33,8 +33,13 @@ void CEdit_PreViewModel::Update(_float fTimeDelta)
 
 void CEdit_PreViewModel::Late_Update(_float fTimeDelta, _wstring ModelName)
 {
+#ifdef _DEBUG
     m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
-    m_szModelName = ModelName;
+    _wstring Name = ModelName;
+    Name.pop_back();
+    m_szModelName = Name + to_wstring(0);
+#endif 
+
 
     m_fViewTime += fTimeDelta;
     if (0.f <= m_fViewTime && m_fViewTime < 2.f)
@@ -75,7 +80,7 @@ void CEdit_PreViewModel::Render()
     switch (m_eViewType)
     {
     case X:
-        eyepos = XMVectorSet(-vMaxExt.x *2.f , vMaxExt.y * 0.5f, 0.f, 1.f);
+        eyepos = XMVectorSet(-vMaxExt.x * 2.f, vMaxExt.y * 0.5f, 0.f, 1.f);
         break;
     case Y:
         eyepos = XMVectorSet(vMaxExt.x * 0.5f, -vMaxExt.y * 2.f, vMaxExt.z * 0.5f, 1.f);
@@ -95,6 +100,8 @@ void CEdit_PreViewModel::Render()
         pModel->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
         pModel->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 
+        if (FAILED(pModel->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         m_pShaderCom->Begin(4);
         pModel->Render(i);
     }
@@ -102,18 +109,18 @@ void CEdit_PreViewModel::Render()
 
 void CEdit_PreViewModel::Add_Model(_wstring ModelName)
 {
-    _wstring ModelCom = TEXT("Com_") + ModelName;
-    
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelName,
+    _wstring ModelCom = L"Com_"s + ModelName;
+
+    if (FAILED(Add_Component(m_iLevel, ModelName,
         ModelCom, reinterpret_cast<CComponent**>(&m_Models[ModelName]), nullptr)))
-        int a = 0;
+        CRASH("Clone Failed");
 }
 
-CEdit_PreViewModel* CEdit_PreViewModel::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_PreViewModel* CEdit_PreViewModel::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iLevel)
 {
     CEdit_PreViewModel* pInstance = new CEdit_PreViewModel(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype()))
+    if (FAILED(pInstance->Initialize_Prototype(iLevel)))
     {
         MSG_BOX("Failed to Create : CEdit_PreViewModel");
         Safe_Release(pInstance);

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameObject.h"
 NS_BEGIN(Engine)
 class CModel;
@@ -15,7 +15,7 @@ private:
 	virtual ~CEdit_PreViewModel() = default;
 
 public:
-	virtual		HRESULT			Initialize_Prototype();
+	virtual		HRESULT			Initialize_Prototype(_uint iLevel);
 	virtual		void			Priority_Update(_float fTimeDelta);
 	virtual		void			Update(_float fTimeDelta);
 	void			Late_Update(_float fTimeDelta, _wstring ModelName);
@@ -31,8 +31,9 @@ private:
 
 	_float m_fViewTime = {};
 	VIEWTYPE m_eViewType = {X};
+	_uint m_iLevel = {};
 public:
-	static CEdit_PreViewModel* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CEdit_PreViewModel* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iLevel = ENUM_CLASS(LEVEL::MAP));
 	virtual CGameObject* Clone(void* pArg)override { return nullptr; }
 	virtual void Free()override;
 };

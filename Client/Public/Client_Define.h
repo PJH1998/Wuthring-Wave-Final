@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../Default/framework.h"
 #include <process.h>

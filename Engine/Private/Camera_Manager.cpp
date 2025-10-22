@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Camera_Manager.h"
 
 #include "GameInstance.h"
@@ -109,20 +109,20 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
     return S_OK;
 }
 
-void CCamera_Manager::Change_Distance(_float fDistance)
+_float CCamera_Manager::Get_CurrentCamera_Near()
 {
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_Distance(fDistance);
+    if (nullptr == m_pMainCamera || true == m_isFree)
+        return m_pFreeCamera->Get_Near();
+    else
+        return m_pMainCamera->Get_Near();
 }
 
-void CCamera_Manager::Change_FixedDistance(_float fFixedDistance)
+_float CCamera_Manager::Get_CurrentCamera_Far()
 {
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_FixedDistance(fFixedDistance);
+    if (nullptr == m_pMainCamera || true == m_isFree)
+        return m_pFreeCamera->Get_Far();
+    else
+        return m_pMainCamera->Get_Far();
 }
 
 HRESULT CCamera_Manager::Initialize(_uint iNumLevel)
@@ -181,7 +181,7 @@ void CCamera_Manager::Compute_Action(_float fTimeDelta)
 {
     _float fDuration = m_CameraActions[m_strActionTag][m_iActionIndex].fDuration;
     m_fCurrentTrackPosition += fTimeDelta;
-    // 1°³ÀÇ Action ¿Ï·á
+    // 1åª›ì’–ì“½ Action ?ê¾¨ì¦º
     if (m_fCurrentTrackPosition > fDuration)
     {
         m_fCurrentTrackPosition = 0.f;
@@ -226,7 +226,7 @@ void CCamera_Manager::Ready_FreeCamera()
 	CCamera::CAMERA_DESC CameraDesc = {};
 	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
-	CameraDesc.fFar = 100000.f;
+	CameraDesc.fFar = 5000.f;
 	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
 	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
 	CameraDesc.fSpeedPerSec = 1000.f;

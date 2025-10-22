@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Level_UI.h"
 
 #include "Event_Level.h"
@@ -10,13 +10,15 @@
 #include "VIBuffer_Rect_Instance_UI.h"
 
 
-// ÀÓ½Ã·Î ¿©±â¿¡ ¸ÅÅ©·Î·Î..
+#define         STR2WSTR(str)                                   _wstring(str.begin(), str.end())
+#define         WSTR2STR(wstr)                                  _string(wstr.begin(), wstr.end())
+
 #define         STR_ONLYFILENAME(str)                           std::filesystem::path(str).stem().string();
 
 #define			TO_RAD(DEGREE)									XMConvertToRadians(DEGREE)
 #define			TO_DEG(RADIAN)									XMConvertToDegrees(RADIAN)
 
-#define			IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// ÀÌ»ó and ¹Ì¸¸
+#define			IS_BETWEEN(condition, minValue, maxValue)		(((minValue) <= (condition)) && ((condition) < (maxValue)))	// ?ëŒê¸½ and èª˜ëªƒì­”
 
 #define			ROT_TO_QUAT(ROT_X, ROT_Y, ROT_Z)				XMQuaternionRotationRollPitchYaw(ROT_X, ROT_Y, ROT_Z)
 #define			MAT_TO_ROT(FLOAT4X4)							_float3{TO_DEG(asin(-FLOAT4X4._32)), TO_DEG(atan2(FLOAT4X4._31, FLOAT4X4._33)), TO_DEG(atan2(FLOAT4X4._12, FLOAT4X4._22))}
@@ -58,7 +60,7 @@ HRESULT CLevel_UI::Initialize()
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
     // VIBuffer_Rect_Instance_UI
-    // ÀÓ½Ã ¼±¾ğ. ³ªÁß¿¡ instance °¹¼ö º¯°æ ÇÊ¿ä ½Ã º¯°æ
+    // ï¿½Ó½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ß¿ï¿½ instance ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
     tRectInstDesc.iNumInstance = 500U;
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
@@ -85,10 +87,10 @@ HRESULT CLevel_UI::Initialize()
     LIGHT_DESC			LightDesc{};
 
     LightDesc.eType = LIGHT_DESC::TYPE::DIRECTION;
-    LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);	// Light ¹æÇâ
-    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);		// Light »ö»ó ¹× ¹à±âÀÇ ¼¼±â
-    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);	// Light È¯°æ±¤À¸·Î °¡Á¤. ÃÖ¼Ò ¹à±â º¸Àå¿¡ °ü¿©.
-    LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);		// Light ¹İ»ç±¤.
+    LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);	// Light è«›â‘ºë¼¢
+    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);		// Light ?ë±ê¸½ è«›?è«›ì•·ë¦°???ë©¸ë¦°
+    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);	// Light ?ì„ê¼æ„¿ë¬’ì‘æ¿¡?åª›Â€?? ï§¤ì’–ëƒ¼ è«›ì•·ë¦° è¹‚ëŒì˜£??æ„¿Â€??
+    LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);		// Light è«›ì„ê¶—æ„¿?
 
     if (FAILED(m_pGameInstance->Add_Light(L"Light_Default", LightDesc)))
         return E_FAIL;
@@ -133,14 +135,14 @@ void CLevel_UI::Render()
 
 void CLevel_UI::Update_Picking()
 {
-    // ÇÇÅ· ¼±ÅÃ..?
+    // ?ì‡³ê¶§ ?ì¢ê¹®..?
     //m_pGameInstance->isPicked();
 }
 
 void CLevel_UI::Update_MenuWindow()
 {
     // ============================== 
-    // ÀÌ¹ÌÁö ·ÎµåÇØ¼­ UI°´Ã¼·Î Ãß°¡ÇÏ´Â Ã¢
+    // ?ëŒ€?ï§Â€ æ¿¡ì’•ë±¶?ëŒê½Œ UIåª›ì•¹ê»œæ¿¡?ç•°ë¶½??ì„ë’— ï§¡?
     // ============================== 
 
     ImGui::Begin("Editor");
@@ -174,7 +176,7 @@ void CLevel_UI::Update_MenuWindow()
 
     if (ImGuiFileDialog::Instance()->Display("UI_Image_Load"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
@@ -183,7 +185,7 @@ void CLevel_UI::Update_MenuWindow()
             strFileName = StringToWString(fileName);
 
 
-            // »ó´ë°æ·Î
+            // ?ê³·?å¯ƒìˆì¤ˆ
             _tchar curPath[256] = {};
             _wgetcwd(curPath, 256);
             filesystem::path basePath = curPath;
@@ -200,7 +202,7 @@ void CLevel_UI::Update_MenuWindow()
             tCustomUIDesc.strFileName = strFileName;
             tCustomUIDesc.isInstance = isInstance;
 
-            // »ı¼º ÈÄ ·ÎÄÃ ÄÁÅ×ÀÌ³Ê¿¡ Ãß°¡
+            // ?ì•¹ê½¦ ??æ¿¡ì’–ëº„ è€Œâ‘¦ë€’?ëŒ€ê¼«??ç•°ë¶½?
             CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
             //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::UI), L"Layer_UI_Custom", pCustomObj)))
             //    CRASH(Failed to add Custom_UI gameobject.);
@@ -244,7 +246,7 @@ void CLevel_UI::Update_MenuWindow()
 void CLevel_UI::Update_Hierarchy()
 {
     // ============================== 
-    // À¯»ç ÇÏÀÌ¾î¶óÅ° Ã¢, ·ÎµåµÈ °´Ã¼ ¼±ÅÃ °¡´ÉÇÏµµ·Ï
+    // ?ì¢ê¶— ?ì„ì” ?ëŒ€ì”ª??ï§¡? æ¿¡ì’•ë±¶??åª›ì•¹ê»œ ?ì¢ê¹® åª›Â€?Î½ë¸¯?ê¾¨ì¤‰
     // ============================== 
 
     ImGui::Begin("Hierarchy");
@@ -304,23 +306,23 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Separator();
 
-    // ¸Å ÇÁ·¹ÀÓ¸¶´Ù º¤ÅÍ¸¦ ÅëÇØ ºÎ¸ğ ±¸Á¶¸¦ ÆÄ¾ÇÇÏ°í,
-    // ±×°É ÄÁÅ×ÀÌ³Ê¿¡ ´ãÀº µÚ, ÇÏÀÌ¾î¶óÅ°¿¡¼­ Ç¥½Ã?
+    // ï§??ê¾¨ì …?ê¾¨ì­??è¸°â‰«ê½£ç‘œ??ë“¯ë¹ éºÂ€ï§?æ´ÑŠâ€œç‘œ??ëš¯ë¸™?ì„í€¬,
+    // æ´¹ë©¸êµ¬ è€Œâ‘¦ë€’?ëŒ€ê¼«???ëŒ? ?? ?ì„ì” ?ëŒ€ì”ª?ã…¼ë¿‰???ì’–ë–†?
 
     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
 
-    // ÇÏÀÌ¾î¶óÅ° ¸ŞÀÎ
+    // ?ì„ì” ?ëŒ€ì”ª??ï§ë¶¿ì”¤
     for (auto& ui : m_vecCustomUIs)
     {
         CCustom_UI* pUI = ui.pCustomUI;
         CCustom_UI::CUSTOM_UI_DESC desc = pUI->Get_UIDesc();
 
-        // ºÎ¸ğ°¡ ¾ø´Â (ÃÖ»óÀ§) °´Ã¼¸¸ ¸ÕÀú Ç¥½Ã
+        // éºÂ€ï§â‘£? ?ë…¿ë’— (ï§¤ì’–ê¸½?? åª›ì•¹ê»œï§?ç™’ì‡±? ?ì’–ë–†
         if (desc.strParentName.empty())
             Update_Hierarchy_CheckTree(pUI, flags);
     }
 
-    // ºÎ¸ğÀÌ¸§Àº ÀÖÁö¸¸ ÇØ´ç ºÎ¸ğ°¡ ¾ø´Â °æ¿ì º°µµ UI·Î Ç¥½Ã
+    // éºÂ€ï§â‘¥ì” ç”±ê¾©? ?ë‰?ï§??ëŒ€ë–¦ éºÂ€ï§â‘£? ?ë…¿ë’— å¯ƒìŒìŠ¦ è¹‚ê¾¨ë£„ UIæ¿¡??ì’–ë–†
     ImGuiTreeNodeFlags flags_missingParent = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Selected;
     if (ImGui::CollapsingHeader("Missing Parent Objects", flags_missingParent))
     {
@@ -331,10 +333,10 @@ void CLevel_UI::Update_Hierarchy()
             static _int iSelected = -1;
             _uint iIndex = 0;
 
-            // ºÎ¸ğ ÀÌ¸§ÀÌ ¾ø´Â °æ¿ì Ã¼Å©X (À§¿¡¼­ ÀÌ¹Ì Ã£¾ÒÀ¸¹Ç·Î)
+            // éºÂ€ï§??ëŒ€ì««???ë…¿ë’— å¯ƒìŒìŠ¦ ï§£ëŒ„ê²•X (?ê¾©ë¿‰???ëŒ€? ï§¡ì– ë¸¯?ì‡°?æ¿¡?
             if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
                 break;
-            // ÇØ´çÇÏ´Â ºÎ¸ğ°¡ ÀÖ´ÂÁö °Ë»ç
+            // ?ëŒ€ë–¦?ì„ë’— éºÂ€ï§â‘£? ?ëˆë’—ï§Â€ å¯ƒÂ€??
             for (auto& otherui : m_vecCustomUIs)
                 if (otherui.pCustomUI->Get_UIDesc().strUIName ==
                     ui.pCustomUI->Get_UIDesc().strParentName)
@@ -370,18 +372,18 @@ void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeF
     _string strLabel = WStringToString(desc.strUIName);
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
-        // Å¬¸¯ ½Ã ¼±ÅÃ.
+        // ?ëŒ€â”ƒ ???ì¢ê¹®.
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
             m_pCurObj = pParentUI;
 
-        // m_vecCustomUIs ÀüÃ¼¸¦ µ¹¸é¼­, ºÎ¸ğ ÀÌ¸§ÀÌ ÀÏÄ¡ÇÏ´Â °´Ã¼¸¦ Ã£À½
+        // m_vecCustomUIs ?ê¾©ê»œç‘œ??ëš®ãˆƒ?? éºÂ€ï§??ëŒ€ì««???ì‡±íŠ‚?ì„ë’— åª›ì•¹ê»œç‘œ?ï§¡ì– ì“¬
         for (auto& ui : m_vecCustomUIs)
         {
             CCustom_UI* pChild = ui.pCustomUI;
             CCustom_UI::CUSTOM_UI_DESC childDesc = pChild->Get_UIDesc();
 
             if (childDesc.strParentName == desc.strUIName)
-                Update_Hierarchy_CheckTree(pChild, flags); // Àç±Í È£Ãâ
+                Update_Hierarchy_CheckTree(pChild, flags); // ?Ñˆ? ?ëª„í…§
         }
 
         ImGui::TreePop();
@@ -532,7 +534,7 @@ void CLevel_UI::Update_SaveLoad()
     // ==============================
     if (ImGuiFileDialog::Instance()->Display("UI_Info_Load"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _wstring strFilePath = StringToWString(filePath);
@@ -581,7 +583,7 @@ void CLevel_UI::Update_SaveLoad()
     // ==============================
     if (ImGuiFileDialog::Instance()->Display("UI_Anim_Save"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             Update_ObjectChilds();
 
@@ -615,7 +617,7 @@ void CLevel_UI::Update_SaveLoad()
     // ==============================
     if (ImGuiFileDialog::Instance()->Display("UI_Anim_Load"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _wstring strFilePath = StringToWString(filePath);
@@ -643,7 +645,7 @@ void CLevel_UI::Update_SaveLoad()
                 }
                 else
                 {
-                    ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // ºÒ·¯¿Â ¾Ö´Ï¸ŞÀÌ¼ÇÀ¸·Î ÇÒ´ç
+                    ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // ï¿½Ò·ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
 
                     m_vecUIKeyFrameDescs.clear();
                     m_pSelectedKeyFrameDesc = nullptr;
@@ -665,7 +667,7 @@ void CLevel_UI::Update_SaveLoad()
     // =============================='
     if (ImGuiFileDialog::Instance()->Display("UI_Tree_Save"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             Update_ObjectChilds();
 
@@ -684,14 +686,14 @@ void CLevel_UI::Update_SaveLoad()
                 UI_INFO_DESC tCurUIInfoDesc = {};
                 tCurUIInfoDesc.tUIDesc = dynamic_cast<CCustom_UI*>(tCustomUIDesc.pCustomUI)->Get_UIDesc();
                 
-                // (Info Desc) Transform Á¤º¸ °è»ê ¹× ´ëÀÔ
+                // (Info Desc) Transform ?ëº£ë‚« æ€¨ê¾©ê¶› è«›??Â€??
                 CTransform* pTargetTransform = static_cast<CTransform*>(tCustomUIDesc.pCustomUI->Get_Component(L"Com_Transform"));
 
                 _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
                 _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
                 XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, pTargetTransform->Get_WorldMatrix());
 
-                _float4x4	matStoreObjQuaternion = {};	// ÄõÅÍ´Ï¾ğ
+                _float4x4	matStoreObjQuaternion = {};	// è‘ì‡³ê½£?ë‰ë¼µ
                 XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
 
                 XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
@@ -702,7 +704,7 @@ void CLevel_UI::Update_SaveLoad()
                 tCurUIInfoDesc.vRot = vStoreObjRotation;
                 tCurUIInfoDesc.vSca = vStoreObjScale;
 
-                // Info Desc ´ëÀÔ
+                // Info Desc ?Â€??
                 tTreeDesc.vecUIInfoDescs.push_back(tCurUIInfoDesc);
             }
 
@@ -722,7 +724,7 @@ void CLevel_UI::Update_SaveLoad()
     // ==============================
     if (ImGuiFileDialog::Instance()->Display("UI_Tree_Load"))
     {
-        if (ImGuiFileDialog::Instance()->IsOk())    // ÆÄÀÏ ¼±ÅÃ ½Ã
+        if (ImGuiFileDialog::Instance()->IsOk())    // ?ëš¯ì”ª ?ì¢ê¹® ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
@@ -737,7 +739,7 @@ void CLevel_UI::Update_SaveLoad()
             }
 
 
-            // »ó´ë°æ·Î
+            // ?ê³·?å¯ƒìˆì¤ˆ
             _tchar curPath[256] = {};
             _wgetcwd(curPath, 256);
             filesystem::path basePath = curPath;
@@ -750,7 +752,7 @@ void CLevel_UI::Update_SaveLoad()
             from_json(jUITreeData, tLoadTreeDesc);
 
 
-            // ·ÎµåµÈ ¸ğµç µ¥ÀÌÅÍ »èÁ¦
+            // æ¿¡ì’•ë±¶??ï§â‘¤ë±º ?ê³—ì” ????ì £
             m_pCurObj = nullptr;
             m_vCurObjPos = {}; m_vCurObjRot = {}; m_vCurObjSca = {};
             for (auto& customUI : m_vecCustomUIs)
@@ -758,7 +760,7 @@ void CLevel_UI::Update_SaveLoad()
             m_vecCustomUIs.clear();
 
 
-            // ±× µÚ ·Îµå..
+            // æ´¹???æ¿¡ì’•ë±¶..
             for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
             {
                 UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
@@ -800,14 +802,14 @@ void CLevel_UI::Update_SaveLoad()
 void CLevel_UI::Update_Inspector()
 {
     // ============================== 
-    // À¯»ç ÀÎ½ºÆåÅÍ Ã¢, ÄÄÆ÷³ÍÆ® Á¶ÀÛ °¡´ÉÇÏµµ·Ï
+    // ?ì¢ê¶— ?ëª„ë’ª?ìˆ‰ê½£ ï§¡? è€ŒëŒ„ë£·?ëš°ë“ƒ è­°ê³—ì˜‰ åª›Â€?Î½ë¸¯?ê¾¨ì¤‰
     // ============================== 
 
 
     if (m_pCurObj == nullptr)
         return;
 
-    // ¼±ÅÃÁßÀÎ ¿ÀºêÁ§Æ® °ª ºÒ·¯¿Í¼­ Transform ¼öÁ¤ °¡´ÉÇÏµµ·Ï
+    // ?ì¢ê¹®ä»¥ë¬’ì”¤ ?ã…»íˆ•?ì•ºë“ƒ åª›?éºëˆìœ­?Â€??Transform ?ì„ì ™ åª›Â€?Î½ë¸¯?ê¾¨ì¤‰
 
     ImGui::Begin("Inspector");
     
@@ -820,21 +822,21 @@ void CLevel_UI::Update_Inspector()
     {
         if (m_pPreObj != m_pCurObj ||
             m_isPlayAnimation)
-            // ¾Æ´Ï¸é ´ë»óÀÇ ºÎ¸ğ°¡ ¹Ù²î¾úÀ» ¶§?
+            // ?ê¾¨ë•²ï§??Â€?ê³¸ì“½ éºÂ€ï§â‘£? è«›ë¶¾Â€ëš¯ë¿€????
         {
             
             _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
             _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
             XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, pTargetTransform->Get_WorldMatrix());
 
-            _float4x4	matStoreObjQuaternion = {};	// ÄõÅÍ´Ï¾ğ
+            _float4x4	matStoreObjQuaternion = {};	// è‘ì‡³ê½£?ë‰ë¼µ
             XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
 
             XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
             vStoreObjRotation = MAT_TO_ROT(matStoreObjQuaternion);
             XMStoreFloat3(&vStoreObjScale, vXMObjScale);
 
-            // ´ëÀÔÇÏ¿© º¸¿©ÁÜ
+            // ?Â€?ë‚‡ë¸¯??è¹‚ëŒë¿¬ä»¥?
             m_vCurObjPos = vStoreObjPosition;
             m_vCurObjRot = vStoreObjRotation;
             m_vCurObjSca = vStoreObjScale;
@@ -899,7 +901,7 @@ void CLevel_UI::Update_Inspector()
 
         _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
 
-        // UI ³»ÀÇ Begin ¶§¹®¿¡ Àû¿ë ¾ÈµÇ´Âµí. ÀÓ½Ã·Î ºñÈ°¼ºÈ­ÇÔ
+        // UI ?ëŒì“½ Begin ?ëš®Ğ¦???ê³¸ìŠœ ?ëˆë¦º?ë¶¾ë². ?ê¾©ë–†æ¿¡?é®ê¾ªì†¢?ê¹Šì†•??
         if (!m_isPlayAnimation)
             pTargetTransform->Set_WorldMatrix(matXMEditResult);
     }
@@ -927,7 +929,7 @@ void CLevel_UI::Update_Inspector()
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
 
 
-        // ±âÁ¸ °ª ¹İ¿µ
+        // æ¹²ê³—ã€ˆ åª›?è«›ì„ìº
         _string strUIName = _string(tDesc.strUIName.begin(), tDesc.strUIName.end());
         strcpy_s(szUIName, strUIName.c_str());
 
@@ -940,9 +942,6 @@ void CLevel_UI::Update_Inspector()
         isInverseScreenDiscard = tDesc.isInverseScreenDiscard;
         fCutout = tDesc.fCutout;
 
-
-        // °ª ¼öÁ¤ UI
-        // szUIName
         ImGui::Text("UI Name");
         ImGui::InputText("##UI Name", szUIName, 256);
 
@@ -1038,7 +1037,7 @@ void CLevel_UI::Update_Inspector()
         }
 
 
-        // ´Ù½Ã °ª ÇÒ´ç
+        // ?ã…¼ë–† åª›??ì¢Šë–¦
         _string strEditedUIName = szUIName;
         tDesc.strUIName = _wstring(strEditedUIName.begin(), strEditedUIName.end());
 
@@ -1084,7 +1083,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
     static _int iMaxTexIndex = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().iNumFiles;
     static _float fAlpha = 0.f;
 
-    static _float2 vScreenLT = {};			// Ç¥½ÃµÉ È­¸é»óÀÇ ÁÂÇ¥ Á¦ÇÑ. (¿ì»ó 0, 0 / ÁÂÇÏ È­¸éÅ©±â)
+    static _float2 vScreenLT = {};			// Ç¥ï¿½Ãµï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½. (ï¿½ï¿½ï¿½ï¿½ 0, 0 / ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½Å©ï¿½ï¿½)
     static _float2 vScreenRB = { g_iWinSizeX, g_iWinSizeY };
     static _float4 vBlendToOuterWidth = {};
 
@@ -1143,13 +1142,13 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
         {
             for (_uint i = 0; i < IM_ARRAYSIZE(szLerpTypeNames); i++)
             {
-                // ÇöÀç ¼±ÅÃ ¿©ºÎ
+                // ?ê¾©ì˜± ?ì¢ê¹® ?Ñ‰?
                 _bool isSelected = (m_iLerpType == i);
 
                 if (ImGui::Selectable(szLerpTypeNames[i], isSelected))
-                    m_iLerpType = i; // ¼±ÅÃ ½Ã °ª ¾÷µ¥ÀÌÆ®
+                    m_iLerpType = i; // ?ì¢ê¹® ??åª›??ë‚…ëœ²?ëŒ„ë“ƒ
 
-                // ¼±ÅÃµÈ Ç×¸ñ¿¡ Ã¼Å© Ç¥½Ã
+                // ?ì¢ê¹®????ã‰??ï§£ëŒ„ê²• ?ì’–ë–†
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
             }
@@ -1456,7 +1455,7 @@ void CLevel_UI::Update_InstanceEditor()
 
         if (m_pSelectedInstance)
         {
-            // ¼±Àû¿ë
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             _matrix matTransform = _matrix(
                 XMLoadFloat4(&vSInstRight),
                 XMLoadFloat4(&vSInstUp),
@@ -1468,7 +1467,7 @@ void CLevel_UI::Update_InstanceEditor()
             _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
             XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, matTransform);
 
-            _float4x4	matStoreObjQuaternion = {};	// ÄõÅÍ´Ï¾ğ
+            _float4x4	matStoreObjQuaternion = {};	// ï¿½ï¿½ï¿½Í´Ï¾ï¿½
             XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
 
             XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
@@ -1476,7 +1475,7 @@ void CLevel_UI::Update_InstanceEditor()
             XMStoreFloat3(&vStoreObjScale, vXMObjScale);
 
 
-            // ´ëÀÔÇÏ¿© º¸¿©ÁÜ
+            // ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             curInstPos = vStoreObjPosition;
             curInstRot = vStoreObjRotation;
             curInstSca = vStoreObjScale;
@@ -1537,7 +1536,7 @@ void CLevel_UI::Update_InstanceEditor()
 
             ImGui::PopItemWidth();
 
-            // Àû¿ë
+            // ï¿½ï¿½ï¿½ï¿½
             _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&curInstPos));
             _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(curInstRot.x), TO_RAD(curInstRot.y), TO_RAD(curInstRot.z));
             _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&curInstSca));
@@ -1576,7 +1575,7 @@ void CLevel_UI::Update_InstanceEditor()
     // ==============================
     if (ImGui::CollapsingHeader("Instance List"))
     {
-        // ¸ñ·Ï
+        // ï¿½ï¿½ï¿½ï¿½
         if (pDescs->empty())
             ImGui::Selectable("(Empty)#InstEdit", false);
 
@@ -1585,7 +1584,7 @@ void CLevel_UI::Update_InstanceEditor()
             _string strLabel = "Instance [" + to_string(i + 1) + "]";
 
 
-            // ÀÌ°Å ¾È³ª¿À´Â°Å ÇØ°áÇØº¸°í °ª µé¾î°¡´ÂÁö ÇĞÀÎÇØº¸°í ¿øÀÎ À¯Ãß
+            // ï¿½Ì°ï¿½ ï¿½È³ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Ø°ï¿½ï¿½Øºï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½î°¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (ImGui::Selectable(strLabel.c_str(), iInstSelected == i))
             {
                 m_pSelectedInstance = &(*pDescs)[i];
@@ -1610,7 +1609,7 @@ void CLevel_UI::Update_InstanceEditor()
                 _float3		vStoreNewObjPosition = {}, vStoreNewObjRotation = {}, vStoreNewObjScale = {};
                 XMMatrixDecompose(&vXMNewObjScale, &vXMNewObjQuaternion, &vXMNewObjPosition, matNewTransform);
 
-                _float4x4	matStoreNewObjQuaternion = {};	// ÄõÅÍ´Ï¾ğ
+                _float4x4	matStoreNewObjQuaternion = {};	// ï¿½ï¿½ï¿½Í´Ï¾ï¿½
                 XMStoreFloat4x4(&matStoreNewObjQuaternion, QUAT_TO_MAT(vXMNewObjQuaternion));
 
                 XMStoreFloat3(&vStoreNewObjPosition, vXMNewObjPosition);
@@ -1618,7 +1617,7 @@ void CLevel_UI::Update_InstanceEditor()
                 XMStoreFloat3(&vStoreNewObjScale, vXMNewObjScale);
 
 
-                // ´ëÀÔÇÏ¿© º¸¿©ÁÜ
+                // ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 curInstPos = vStoreNewObjPosition;
                 curInstRot = vStoreNewObjRotation;
                 curInstSca = vStoreNewObjScale;
@@ -1632,7 +1631,7 @@ void CLevel_UI::Update_InstanceEditor()
 void CLevel_UI::Update_ObjectParents()
 {
     // ==============================
-    // * ºÎ¸ğ ¿ÀºêÁ§Æ® ¾÷µ¥ÀÌÆ®
+    // * éºÂ€ï§??ã…»íˆ•?ì•ºë“ƒ ?ë‚…ëœ²?ëŒ„ë“ƒ
     // ==============================
 
     for (auto& UIObject : m_vecCustomUIs)
@@ -1661,8 +1660,8 @@ void CLevel_UI::Update_ObjectParents()
 void CLevel_UI::Update_ObjectChilds()
 {
     // ==============================
-    // * ÀÚ½Ä ¿ÀºêÁ§Æ® ¾÷µ¥ÀÌÆ®
-    // (Client¸¦ À§ÇÔ, Editor ¿¡¼­´Â ¹Ì»ç¿ë. ÀúÀå ½Ã¿¡¸¸ »ç¿ë)
+    // * ?ë¨¯ë–‡ ?ã…»íˆ•?ì•ºë“ƒ ?ë‚…ëœ²?ëŒ„ë“ƒ
+    // (Clientç‘œ??ê¾ªë¸¿, Editor ?ë¨¯ê½Œ??èª˜ëª„ê¶—?? ?Â€???ì’–ë¿‰ï§??ÑŠìŠœ)
     // ==============================
 
     for (auto& UIObject : m_vecCustomUIs)
@@ -1670,8 +1669,8 @@ void CLevel_UI::Update_ObjectChilds()
         CCustom_UI::CUSTOM_UI_DESC tDesc = UIObject.pCustomUI->Get_UIDesc();
         vector<_wstring> vecChilds = {};
 
-        // ¸ğµç °´Ã¼¸¦ ¼øÈ¸ÇÏ¸ç, ÇØ´ç °´Ã¼¸¦ ºÎ¸ğ·Î °¡Áø ÀÚ½ÄÀÌ ÀÖ´Ù¸é
-        // ÇØ´ç ÀÚ½ÄÀÇ ÀÌ¸§À» ºÎ¸ğ¿¡ Ãß°¡.
+        // ï§â‘¤ë±º åª›ì•¹ê»œç‘œ??ì’—ì‰¶?ì„Å‰, ?ëŒ€ë–¦ åª›ì•¹ê»œç‘œ?éºÂ€ï§â‘¤ì¤ˆ åª›Â€ï§??ë¨¯ë–‡???ëˆë–ï§?
+        // ?ëŒ€ë–¦ ?ë¨¯ë–‡???ëŒ€ì««??éºÂ€ï§â‘¥ë¿‰ ç•°ë¶½?.
 
         for (auto& compareUIObject : m_vecCustomUIs)
         {
@@ -1687,7 +1686,7 @@ void CLevel_UI::Update_ObjectChilds()
 void CLevel_UI::Update_SelectedKeyframeDesc()
 {
     //_bool isCheck = false;
-    //È®ÀÎÇÒ°Í;
+    //È®ï¿½ï¿½ï¿½Ò°ï¿½;
     
     if (m_pCurObj == nullptr || m_pSelectedKeyFrameDesc == nullptr)
         return;

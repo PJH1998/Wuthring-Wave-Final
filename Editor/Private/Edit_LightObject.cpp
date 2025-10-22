@@ -1,4 +1,4 @@
-#include"EditorPch.h"
+﻿#include"EditorPch.h"
 #include "Edit_LightObject.h"
 
 CEdit_LightObject::CEdit_LightObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -26,7 +26,9 @@ HRESULT CEdit_LightObject::Initialize_Clone(void* pArg)
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+#ifdef _DEBUG
 	m_LightDesc = m_pGameInstance->Get_LightDesc_For_Map(TEXT("Test"));
+#endif
 	return S_OK;
 }
 
@@ -86,4 +88,5 @@ CGameObject* CEdit_LightObject::Clone(void* pArg)
 void CEdit_LightObject::Free()
 {
 	__super::Free();
+	m_LightDesc = nullptr;
 }

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "GameObject.h"
 #include "GameInstance.h"
 
@@ -69,6 +69,10 @@ void CGameObject::Render_Shadow()
 {
 }
 
+void CGameObject::Render_OutLine()
+{
+}
+
 HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, const _wstring& strComponentTag, CComponent** ppOut, void* pArg)
 {
 	auto iter = m_Components.find(strComponentTag);
@@ -76,6 +80,7 @@ HRESULT CGameObject::Add_Component(_uint iPrototypeLevelID, const _wstring& strP
 		return E_FAIL;
 
 	CBase* pClone = m_pGameInstance->Clone_Prototype(iPrototypeLevelID, strPrototypeTag, PROTOTYPE::COMPONENT, pArg);
+
 	ASSERT_CRASH(pClone);
 
 	CComponent* pComponent = static_cast<CComponent*>(pClone);

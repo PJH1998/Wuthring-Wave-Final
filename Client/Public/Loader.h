@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -24,7 +24,7 @@ protected:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 	CGameInstance*			m_pGameInstance = { nullptr };
-	class CParser*				m_pParser = { nullptr };
+	class CGameSystem*		m_pGameSystem = { nullptr };
 
 	_float							m_fProgress = {};
 

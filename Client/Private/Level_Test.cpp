@@ -1,6 +1,11 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Level_Test.h"
 #include "MapObject.h"
+#include "AnimationDummy.h"
+#include "MonsterTest.h"
+
+#include "GameSystem.h"
+#include "PlayerParty.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext)
@@ -9,52 +14,76 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
-    //ifstream File("../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", ios::binary);
+	// SetUp OctoTree
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-    //if (!File.is_open())
-    //{
-    //    CRASH("File Load Fail");
-    //}
-    //_uint NameLength = {};
-    //CMapObject::MAP_LOAD Desc{};
+    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
 
-    //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-    //{
-    //    memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-    //    File.read(Desc.ModelName, NameLength);
+    if (!File.is_open())
+    {
+        CRASH("File Load Fail");
+    }
+    _uint NameLength = {};
+    CMapObject::MAP_LOAD Desc{};
 
-    //    File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-    //    _float4x4 Matrix = {};
-    //    File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-    //    Desc.WorldMatrix = &Matrix;
 
-    //    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-    //    _tchar Name[MAX_PATH] = {};
-    //    MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
-    //    lstrcat(Model, Name);
+    while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+    {
+        memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+        File.read(Desc.ModelName, NameLength);
 
-    //    _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
-    //    strcat_s(ModelPath, Desc.ModelName);
-    //    strcat_s(ModelPath, "/");
-    //    strcat_s(ModelPath, Desc.ModelName);
-    //    strcat_s(ModelPath, ".dat");
+        File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+        _float4x4 Matrix = {};
+        File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+        Desc.WorldMatrix = &Matrix;
 
-    //    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), Model,
-    //        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, XMMatrixIdentity(), ModelPath));
+        _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+        _tchar Name[MAX_PATH] = {};
+        MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
+        lstrcat(Model, Name);
 
-    //    _tchar PrototypeObject[MAX_PATH] = TEXT("Prototype_GameObject_MapObject_");
-    //    lstrcat(PrototypeObject, Name);
+        _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
+        strcat_s(ModelPath, Desc.ModelName);
+        strcat_s(ModelPath, "/");
+        strcat_s(ModelPath, Desc.ModelName);
+        strcat_s(ModelPath, ".dat");
 
-    //    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), PrototypeObject,
-    //        CMapObject::Create(m_pDevice, m_pContext));
+        m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
 
-    //    m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), PrototypeObject
-    //        , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
-    //}
+        //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
+        //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
+    }
+	File.close();
 
+    Ready_Layer_PlayerParty();
+
+	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
+	//DummyDesc.fSpeedPerSec = 10.f;
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
+	//	CRASH("Dummy");
+
+	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
+	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
+    //MobDesc.fSpeedPerSec = 5.f;
+    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
+	//	CRASH("FalseSoverign");
+	//
+	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
+	//	CRASH("Dummy");
 
     /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
         CRASH("Dummy");*/
+
+    LIGHT_DESC LightDesc{};
+    LightDesc.eType = LIGHT_DESC::DIRECTION;
+    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+    LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
+    LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+    LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+    m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+    m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+    m_pGameInstance->SetUp_ShadowNF();
 
     return S_OK;
 }
@@ -67,6 +96,38 @@ void CLevel_Test::Update(_float fTimeDelta)
 void CLevel_Test::Render()
 {
 }
+
+void CLevel_Test::Ready_Layer_PlayerParty()
+{
+    _float3 vScale{}, vRotation{}, vPosition{};
+    //vScale = { 1.f, 1.f, 1.f };
+    vScale = { 0.1f, 0.1f, 0.1f };
+    vRotation = { 0.f, 0.f, 0.f };
+    vPosition = { -14.1f, 50.f, -180.f };
+
+    CPlayerParty::PLAYER_PARTY_DESC Desc{};
+    Desc.eCurLevel = m_eCurLevel;
+    Desc.iPlayerCount = CPlayerParty::PLAYERTYPE::TYPE_END;
+
+    // 0. vector 크기 정의
+    Desc.PlayerSpecs.resize(CPlayerParty::PLAYERTYPE::TYPE_END);
+
+    // 1. Augusta 정의.
+    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].PlayerDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayerParty::PLAYERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+
+    // 2. Galbrena 정의
+
+
+    // 3. Player 정의
+
+
+    // 4. Controller 생성.
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerParty"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
+        CRASH("Failed Ready Layer Augusta");
+}
+
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -84,4 +145,5 @@ CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 void CLevel_Test::Free()
 {
     __super::Free();
+    Safe_Release(m_pGameSystem);
 }

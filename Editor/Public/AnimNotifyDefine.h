@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 #include "EnginePch.h"
-// ¾î¶² ÅÂ±×¸¦ È°¼ºÈ­ ÇÏ´ÂÁö¿¡ ´ëÇØ¼­¸¸ ÁöÁ¤ 
+// ?ëŒ€ë¼¡ ?ì’“ë ‡ç‘œ??ì’–ê½¦???ì„ë’—ï§Â€???Â€?ëŒê½Œï§?ï§Â€??
 
 typedef struct tagBaseNotifiy
 {
@@ -19,24 +19,24 @@ typedef struct tagEffectNotify : BASENOTIFY
 	// 1. Effect Type
 	_string strEffectTag;
 
-	// 2. Bone »ç¿ë ¿©ºÎ
+	// 2. Bone ?ÑŠìŠœ ?Ñ‰?
 	_bool IsUseBone = { false };
 	_string strBoneName = "";
 
-	// 3. ÀÚ¼¼ÇÑ ¼³Á¤°ªÀº Àººñ°¡ ¼³Á¤ÇÕ½Ã´Ù.. => Å¬·¡½º ¼³°è µû¶ó ³Ê¹« ´Ş¶óÁü.
+	// 3. ?ë¨¯ê½­???ã…¼ì ™åª›ë¯ª? ?Â€é®ê¾§? ?ã…¼ì ™?â‘¹ë–†??. => ?ëŒ€ì˜’???ã…ºí€ ?ê³•ì”ª ?ëˆĞ¢ ?Ñ‰ì”ªï§?
 	
 }EFFECTNOTIFY;
 
 typedef struct tagColliderNotify : BASENOTIFY
 {
-	// 1. ²ô°í ÄÑ°í ±â´É¸¸ ÀÖÀ¸¸é µÉµí.
+	// 1. ?ê¾§í€¬ è€³ì’“í€¬ æ¹²ê³•ë’«ï§??ë‰ì‘ï§??ì¢Šë².
 	_string strColliderTag;
 	_bool IsActive = { false }; 
 }COLLIDERNOTIFY;
 
 typedef struct tagLightNotify : BASENOTIFY
 {
-	// 1. ²ô°í ÄÑ°í ±â´É¸¸ ÀÖÀ¸¸é µÉµí.
+	// 1. ?ê¾§í€¬ è€³ì’“í€¬ æ¹²ê³•ë’«ï§??ë‰ì‘ï§??ì¢Šë².
 	_string strLightTag;
 	_bool IsActive = { false };
 }LIGHTNOTIFY;

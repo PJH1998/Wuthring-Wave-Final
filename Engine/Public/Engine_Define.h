@@ -1,4 +1,4 @@
-#ifndef Engine_Define_h__
+﻿#ifndef Engine_Define_h__
 #define Engine_Define_h__
 
 #pragma warning(disable: 4251)
@@ -55,6 +55,9 @@ using json = nlohmann::json;
 #include "Jolt/Physics/Body/BodyCreationSettings.h"
 #include "Jolt/Physics/Character/Character.h"
 #include "Jolt/Physics/Character/CharacterVirtual.h"
+#include "Jolt/Physics/Collision/CastResult.h"
+#include "Jolt/Physics/Collision/RayCast.h"
+#include "Jolt/Physics/Collision/NarrowPhaseQuery.h"
 #include "Jolt/Core/Factory.h"
 #include "Jolt/Core/JobSystemThreadPool.h"
 #include "Jolt/Core/JobSystemSingleThreaded.h"
@@ -92,9 +95,13 @@ namespace Engine
 
 	const unsigned int g_iMaxWidth = 8192;
 	const unsigned int g_iMaxHeight = 4608;
+
+	const unsigned int g_iNumCascade = 4;
+	const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };
+	const float g_fLODGap = { 1500.f };
 }
 
-#define MAX_DEPTH 8
+#define MAX_DEPTH 5
 
 #include "Engine_Enum.h"
 #include "Engine_Macro.h"

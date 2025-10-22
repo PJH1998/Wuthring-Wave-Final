@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -10,19 +10,19 @@ private:
 	virtual ~CSound_Manager() = default;
 
 public:
-	// »ç¿îµå ÆÄÀÏ Load (Sound File ÀúÀåÇÒ Key, Sound File °æ·Î)
+	// ?ÑŠìŠ«???ëš¯ì”ª Load (Sound File ?Â€?Î½ë¸· Key, Sound File å¯ƒìˆì¤ˆ)
 	HRESULT		Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath);
-	// »ç¿îµå Àç»ı (Sound File ÀúÀåÇÒ Key, »ç¿ëÇÒ ChannelID, ¼³Á¤ÇÒ º¼·ı °ª)
+	// ?ÑŠìŠ«???ÑŠê¹® (Sound File ?Â€?Î½ë¸· Key, ?ÑŠìŠœ??ChannelID, ?ã…¼ì ™??è¹‚ì‡°â…· åª›?
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop);
-	// BGM Àç»ı (Sound File ÀúÀåÇÒ Key, »ç¿ëÇÒ ChannelID, ¼³Á¤ÇÒ º¼·ı °ª) = °è¼Ó Àç»ıÇÑ´Ù
+	// BGM ?ÑŠê¹® (Sound File ?Â€?Î½ë¸· Key, ?ÑŠìŠœ??ChannelID, ?ã…¼ì ™??è¹‚ì‡°â…· åª›? = æ€¨ê¾©ëƒ½ ?ÑŠê¹®?ì’•ë–
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop);
-	// ³²´Â Channel¿¡¼­ Àç»ı
+	// ?â‘¤ë’— Channel?ë¨¯ê½Œ ?ÑŠê¹®
 	void			Play_Other(const _wstring& strSoundTag, _float fVolume);
-	// Æ¯Á¤ Ã¤³Î¿¡¼­ Àç»ıÇÏ°í ÀÖ´Â »ç¿îµå Á¤Áö
+	// ?ë±€ì ™ ï§¢ê¾¨ê¼¸?ë¨¯ê½Œ ?ÑŠê¹®?ì„í€¬ ?ëˆë’— ?ÑŠìŠ«???ëº¤?
 	void			Stop_Sound(_uint iChannelID);
-	// ¸ğµç »ç¿îµå Á¤Áö
+	// ï§â‘¤ë±º ?ÑŠìŠ«???ëº¤?
 	void			Stop_All();
-	// Æ¯Á¤ Ã¤³Î »ç¿îµå º¼·ı Á¶Àı
+	// ?ë±€ì ™ ï§¢ê¾¨ê¼¸ ?ÑŠìŠ«??è¹‚ì‡°â…· è­°ê³—ì …
 	void			Set_ChannelVolume(_uint iChannelID, _float fVolume);
 
 public:
@@ -32,11 +32,11 @@ public:
 private:
 	_uint													m_iNumChannels = {};
 
-	// »ç¿îµå ¸®¼Ò½º º¸°ü ÄÁÅ×ÀÌ³Ê
+	// ?ÑŠìŠ«??ç”±ÑŠëƒ¼??è¹‚ë‹¿? è€Œâ‘¦ë€’?ëŒ€ê¼«
 	map<const _wstring, FMOD_SOUND*>		m_Sounds;
-	// Àç»ıÇÏ´Â »ç¿îµå¸¦ °ü¸®ÇÒ °´Ã¼ (ÇÒ´çµÈ Ã¤³Î ¼ö ¸¸Å­ ¹è¿­·Î »ı¼º)
+	// ?ÑŠê¹®?ì„ë’— ?ÑŠìŠ«?ì’•? æ„¿Â€ç”±Ñ‹ë¸· åª›ì•¹ê»œ (?ì¢Šë–¦??ï§¢ê¾¨ê¼¸ ??ï§ëš°ê²® è«›ê³—ë¿´æ¿¡??ì•¹ê½¦)
 	FMOD_CHANNEL** m_pChannels = { nullptr };
-	// »ç¿îµå, Ã¤³Î °´Ã¼ ¹× ÀåÄ¡¸¦ °ü¸®ÇÏ´Â °´Ã¼
+	// ?ÑŠìŠ«?? ï§¢ê¾¨ê¼¸ åª›ì•¹ê»œ è«›??Î¼íŠ‚ç‘œ?æ„¿Â€ç”±Ñ‹ë¸¯??åª›ì•¹ê»œ
 	FMOD_SYSTEM* m_pSystem = { nullptr };
 
 private:

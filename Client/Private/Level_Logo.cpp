@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Level_Logo.h"
 
 #include "Event_Level.h"
@@ -12,6 +12,9 @@ CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Logo::Initialize()
 {
+	// SetUp OctoTree
+	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
 	// Rigidbody Sample
 	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
 	BoxBodyDesc.eShape = SHAPE::BOX;
@@ -45,7 +48,9 @@ HRESULT CLevel_Logo::Initialize()
 	DummyDesc.fSpeedPerSec = 10.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
 		CRASH("Dummy");
-
+	
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_ShadowDummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
+		CRASH("ShadowDummy");
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"))))
 	//	CRASH("Dummy");
 
@@ -55,10 +60,13 @@ HRESULT CLevel_Logo::Initialize()
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
 	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-	LightDesc.vDirection = _float4(1.f, -1.f, 1.f, 0.f);
+	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	m_pGameInstance->SetUp_ShadowNF();
+
     return S_OK;
 }
 

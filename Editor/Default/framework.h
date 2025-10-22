@@ -1,14 +1,14 @@
-﻿// header.h: 표준 시스템 포함 파일
-// 또는 프로젝트 특정 포함 파일이 들어 있는 포함 파일입니다.
+﻿// header.h: ?쒖? ?쒖뒪???ы븿 ?뚯씪
+// ?먮뒗 ?꾨줈?앺듃 ?뱀젙 ?ы븿 ?뚯씪???ㅼ뼱 ?덈뒗 ?ы븿 ?뚯씪?낅땲??
 //
 
 #pragma once
 
 #include "targetver.h"
-#define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용을 Windows 헤더에서 제외합니다.
-// Windows 헤더 파일
+#define WIN32_LEAN_AND_MEAN             // 嫄곗쓽 ?ъ슜?섏? ?딅뒗 ?댁슜??Windows ?ㅻ뜑?먯꽌 ?쒖쇅?⑸땲??
+// Windows ?ㅻ뜑 ?뚯씪
 #include <windows.h>
-// C 런타임 헤더 파일입니다.
+// C ?고????ㅻ뜑 ?뚯씪?낅땲??
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>

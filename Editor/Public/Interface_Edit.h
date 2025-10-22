@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
 
-class CInterface_Edit final : public CBase
+class CInterface_Edit abstract : public CBase
 {
 protected:
 	explicit CInterface_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -14,7 +14,7 @@ public:
 
 protected:
 	class CGameInstance*	m_pGameInstance = { nullptr };
-	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11Device*			m_pDevice = { nullptr };
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 
 public:

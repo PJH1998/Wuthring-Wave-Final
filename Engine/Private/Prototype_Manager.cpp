@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Prototype_Manager.h"
 
 #include "GameObject.h"
@@ -21,17 +21,20 @@ HRESULT CPrototype_Manager::Initialize(_uint iNumLevel)
 
 HRESULT CPrototype_Manager::Add_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, CBase* pPrototype)
 {
-    if (nullptr == pPrototype || m_iNumLevel <= iPrototypeLevelID)
-        return E_FAIL;
+	if (nullptr == pPrototype || m_iNumLevel <= iPrototypeLevelID)
+		CRASH("None Prototype");
 
     auto iter = m_Prototypes[iPrototypeLevelID].find(strPrototypeTag);
-	if (iter != m_Prototypes[iPrototypeLevelID].end())
-	{
-		Safe_Release(pPrototype);
+    if (iter != m_Prototypes[iPrototypeLevelID].end())
+    {
+        Safe_Release(pPrototype);
         return E_FAIL;
 	}
 
-    m_Prototypes[iPrototypeLevelID].emplace(strPrototypeTag, pPrototype);
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_Prototypes[iPrototypeLevelID].emplace(strPrototypeTag, pPrototype);
+	}
 
     return S_OK;
 }

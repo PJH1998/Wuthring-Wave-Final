@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #ifndef Engine_Function_h__
 #define Engine_Function_h__
 
@@ -6,9 +6,6 @@
 
 namespace Engine
 {
-	// ÅÛÇÃ¸´Àº ±â´ÉÀÇ Á¤ÇØÁ®ÀÖÀ¸³ª ÀÚ·áÇüÀº Á¤ÇØÁ®ÀÖÁö ¾ÊÀº °Í
-	// ±â´ÉÀ» ÀÎ½ºÅÏ½ºÈ­ ÇÏ±â À§ÇÏ¿© ¸¸µé¾îµÎ´Â Æ²
-
 	template<typename T>
 	void	Safe_Delete(T& Pointer)
 	{
@@ -87,10 +84,20 @@ namespace Engine
 		return str;
 	}
 
+	inline XMFLOAT4 ComputeAtlasUV(float fTextureSizeX, float fTextureSizeY, float fLeft, float fRight, float Top, float Bottom)
+	{
+		float fStartU = ( fLeft ) / ( fTextureSizeX );
+		float fStartV = ( Top ) / ( fTextureSizeY );
+		float fEndU = ( fRight ) / ( fTextureSizeY );
+		float fEndV = ( Bottom ) / ( fTextureSizeY );
+
+		return XMFLOAT4(fStartU, fStartV, fEndU, fEndV);
+	}
+
 #ifdef _DEBUG
 	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
 	{
-		// Ãâ·ÂÃ¢¿¡¼­ Debug È®ÀÎ ÇÏ±â.
+		// ç•°ì’•ì °ï§¡ìŒë¿‰??Debug ?ëº¤ì”¤ ?ì„ë¦°.
 		
 		_wstring strDebug = strPrePix + L" : " +  to_wstring(fVector.x) + L", " + to_wstring(fVector.y) + L", " + to_wstring(fVector.z) + L", " + to_wstring(fVector.w) + L"\n";
 		OutputDebugString(strDebug.c_str());
@@ -98,7 +105,7 @@ namespace Engine
 
 	inline void OutPutDebugFloat(_wstring strPrePix, _float fValue)
 	{
-		// Ãâ·ÂÃ¢¿¡¼­ Debug È®ÀÎ ÇÏ±â.
+		// ç•°ì’•ì °ï§¡ìŒë¿‰??Debug ?ëº¤ì”¤ ?ì„ë¦°.
 
 		_wstring strDebug = strPrePix + L" : " + to_wstring(fValue) + L"\n";
 		OutputDebugString(strDebug.c_str());
@@ -132,7 +139,7 @@ namespace Engine
 	inline Quat LoadQuat(const _fvector& vQuat) { return Quat(vQuat.m128_f32[0], vQuat.m128_f32[1], vQuat.m128_f32[2], vQuat.m128_f32[3]); }
 	inline _float4 StoreQuat(const Quat& vQuat) { return _float4(vQuat.GetX(), vQuat.GetY(), vQuat.GetZ(), vQuat.GetW()); }
 	
-	// BoundingBox Local -> World µ¿±âÈ­
+	// BoundingBox Local -> World ?ìˆ†ë¦°??
 	inline void Sync_BoundingBox(BoundingBox* pBox, _fmatrix WorldMatrix) { pBox->Transform(*pBox, WorldMatrix); }
 }
 

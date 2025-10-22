@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "PhysicsManager.h"
 
 #include "ContactListenerImpl.h"
@@ -32,14 +32,14 @@ Character* CPhysicsManager::Register_Character(const CharacterSettings& Characte
 	return new Character(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 }
 
-CharacterVirtual* CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
 {
-	CharacterVirtual* pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
+	Ref<CharacterVirtual> pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 	ASSERT_CRASH(pInstance);
 
 	// Character VS Character Collision SetUp
 	pInstance->SetCharacterVsCharacterCollision(m_pCVCCollision);
-	// Chararcter VS Character Collision¿¡ µî·Ï
+	// Chararcter VS Character Collision???ê¹…ì¤‰
 	m_pCVCCollision->Add(pInstance);
 	// CharacterContactListener SetUp
 	pInstance->SetListener(m_pCharacterContactListener);
@@ -52,6 +52,11 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 	ASSERT_CRASH(pVirtual);
 
 	m_Virtuals[iObjectLayer].push_back(pVirtual);
+}
+
+void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pCVCCollision->Remove(pVirtual);
 }
 
 void CPhysicsManager::Clear_Resource()
@@ -78,19 +83,19 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_pJobSystem = new JobSystemThreadPool(2048, 8, m_iMaxJob - 1);
 	ASSERT_CRASH(m_pJobSystem);
 
-	// Layer »ý¼º
+	// Layer ?ì•¹ê½¦
 	m_pBPLayer = new BPLayer(iNumObjectLayer);
 	ASSERT_CRASH(m_pBPLayer);
-	// Filter »ý¼º
+	// Filter ?ì•¹ê½¦
 	m_pObjectLayerFilter = new ObjectLayerPairFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectLayerFilter);
 	m_pObjectVsBPFilter = new ObjectVsBroadPhaseLayerFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectVsBPFilter);
-	// Contact Listener »ý¼º
+	// Contact Listener ?ì•¹ê½¦
 	m_pContactListener = new CContactListenerImpl();
 	ASSERT_CRASH(m_pContactListener);
 
-	// Virtual Container µ¿Àû ÇÒ´ç
+	// Virtual Container ?ìˆˆìŸ» ?ì¢Šë–¦
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
 	// CharacterVirtual VS CharacterVirtual Collision
 	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
@@ -103,16 +108,18 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
-	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.2f, 0.f);
 
 	return S_OK;
 }
 
 void CPhysicsManager::Update(_float fTimeDelta)
 {
+#ifdef _DEBUG
 	if (m_pGameInstance->Get_DIKeyState(DIK_DELETE) == KEYSTATE::DOWN)
 		m_isRenderAll = !m_isRenderAll;
-
+#endif
 	m_pPhysicsSystem->Update(fTimeDelta, 1, m_pAllocator, m_pJobSystem);
 
 	for (_uint i = 0; i < m_iNumObjectLayer; ++i)
@@ -140,6 +147,28 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	}
 }
 
+_bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
+{
+	RVec3 StartPos = LoadVec3(vStartPos);
+	RVec3 EndPos = LoadVec3(vEndPos);
+
+	_vector vDir = vEndPos - vStartPos;
+
+	RRayCast ray(StartPos, (EndPos - StartPos));
+	RayCastResult result;
+
+	_float fOriginFraction = result.mFraction;
+	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
+
+	if (nullptr != pOut)
+	{
+		_float fDistanceOffset = 0.8f;
+		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
+	}
+
+	return fOriginFraction > result.mFraction && result.mFraction > 0.f ? true : false;
+}
+
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
@@ -159,7 +188,7 @@ void CPhysicsManager::DrawShape(const Shape* pShape)
 
 void CPhysicsManager::SetUp_PhysicsSystem()
 {
-	// PhysicsSystem »ý¼º
+	// PhysicsSystem ?ì•¹ê½¦
 	m_pPhysicsSystem = new PhysicsSystem();
 	m_pPhysicsSystem->Init(
 		m_iNumBodies, m_iNumBodyMutexes, 

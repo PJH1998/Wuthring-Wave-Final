@@ -1,5 +1,5 @@
-// ==============================
-// * ¿¡µðÅÍ¿¡¼­¸¸ »ç¿ëÇÒ ÀÓ½Ã UI ¿ÀºêÁ§Æ®
+ï»¿// ==============================
+// * ?ë¨®ëµ’?ê³—ë¿‰?ì’•ì­” ?ÑŠìŠœ???ê¾©ë–† UI ?ã…»íˆ•?ì•ºë“ƒ
 // ==============================
 
 #include "EditorPch.h"
@@ -35,7 +35,7 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
     __super::Begin();
 
 
-    // ksta del : Å×½ºÆ®¿ë
+    // ksta del : ï¿½×½ï¿½Æ®ï¿½ï¿½
     for (_uint i = 0; i < 1; i++)
     {
         if (static_cast<CUSTOM_UI_DESC*>(pArg)->isInstance)
@@ -104,11 +104,6 @@ void CCustom_UI::Render()
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
         CRASH("Binding_Matrix_Failed");
 
-
-
-    // ksta IF : Å°ÇÁ·¹ÀÓ °ü·Ã º¯¼ö´Â ¸Å ÇÁ·¹ÀÓ¸¶´Ù, Animator_UI ÄÄÆ÷³ÍÆ®¿¡¼­ °ª °»½ÅÁß
-
-
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
         CRASH("Binding_Matrix_Failed");
     if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
@@ -116,7 +111,7 @@ void CCustom_UI::Render()
     if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
         CRASH("Binding_Value_Failed");
 
-    // ÀÌ¹ÌÁö Å©±â ³Ñ°ÜÁÖ±â
+    // ï¿½Ì¹ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½Ö±ï¿½
     if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
         CRASH("Binding_Value_Failed");
     if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
@@ -146,7 +141,7 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 
     const   _uint       iDestLevel  = ENUM_CLASS(LEVEL::UI);
 
-    // ÅØ½ºÃÄ ÇÁ·ÎÅäÅ¸ÀÔÈ­
+    // ?ë¿ë’ªçˆ¾??ê¾¨ì¤ˆ?ì¢??ë‚‡ì†•
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
         CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
@@ -206,14 +201,14 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strFileName   = pDesc->strFileName;
     m_tUIDesc.iNumFiles     = pDesc->iNumFiles;
 
-    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // ºñ¾îÀÖ´Ù¸é ÃÊ±â°ªÀ¸·Î strFileName »ç¿ë
+    m_tUIDesc.strUIName     = ((pDesc->strUIName).empty())? m_tUIDesc.strFileName : pDesc->strUIName; // é®ê¾©ë¼±?ëˆë–Žï§Ž?ç¥ë‡ë¦°åª›ë¯ªì‘æ¿¡?strFileName ?ÑŠìŠœ
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
     m_tUIDesc.fCutout       = pDesc->fCutout;
     m_tUIDesc.iPassType     = pDesc->iPassType;		// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
-    // ¿øº» ÀÌ¹ÌÁö Size °¡Á®¿À±â.
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ Size ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     uint iIndex = 0;
     while (true)
     {

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Collider.h"
 #include "GameInstance.h"
 
@@ -71,7 +71,7 @@ void CCollider::Update(const _fvector& vVelocity)
 		Velocity += XMVectorSet(0.f, -9.81f, 0.f, 0.f);
 	else
 		Slide(Velocity);
-	
+
 	m_pCharacterVirtual->SetLinearVelocity(Velocity);
 	m_pGameInstance->Add_Virtual(m_pCharacterVirtual, m_iCollisionLayer);
 }
@@ -122,8 +122,10 @@ CComponent* CCollider::Clone(void* pArg)
 
 void CCollider::Free()
 {
+	m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+
 	__super::Free();
 
-	Safe_Delete(m_pCharacterVirtual);
+	m_pCharacterVirtual = nullptr;
 	m_pOwner = nullptr;
 }

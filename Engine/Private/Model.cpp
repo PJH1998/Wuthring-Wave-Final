@@ -28,7 +28,8 @@ CModel::CModel(const CModel& Prototype)
 	m_iNumAnimations { Prototype.m_iNumAnimations },
 	m_AnimationNameToIndex { Prototype.m_AnimationNameToIndex},
 	m_Buffers {Prototype.m_Buffers},
-	m_SRVs { Prototype.m_SRVs }
+	m_SRVs { Prototype.m_SRVs },
+	m_isRibAnimation { Prototype.m_isRibAnimation }
 {
 	for (auto& pMesh : m_Meshes)
 		Safe_AddRef(pMesh);
@@ -87,6 +88,19 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, CNavigation* pOwnerNavig
 	}
 }
 
+void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
+{
+	//_vector vPrePosition = pOwnerTransform->Get_State(STATE::POSITION);
+
+	_matrix matWorld = pOwnerTransform->Get_WorldMatrix();
+	_matrix ResultMatrix = m_RootMatrix * pOwnerTransform->Get_WorldMatrix();
+
+	_vector vScale, vRotation, vPosition;
+	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);
+
+	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
+}
+
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 {
 	auto iter = find_if(m_Bones.begin(), m_Bones.end(), [&](CBone* pBone)->_bool {
@@ -133,20 +147,21 @@ HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;
 	ImGuiTreeNodeFlags iFlag = 0;
-	if((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
+	if ((iNextBoneIndex >= m_Bones.size()) || (m_Bones[iNextBoneIndex]->Get_ParentIndex() != iBoneIndex))
 		iFlag |= ImGuiTreeNodeFlags_Leaf;
 	else
 		iFlag |= (ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_DefaultOpen);
 
-	if(ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
+	if (ImGui::TreeNodeEx(m_Bones[iBoneIndex]->Get_Name(), iFlag))
 	{
 		//Selecting Interaction 
-		if(ImGui::IsItemClicked())
+		if (ImGui::IsItemClicked())
 		{
 			std::cout << "selected : " << m_Bones[iBoneIndex]->Get_Name() << std::endl;
+			m_iSelectIndex = iBoneIndex;
 		}
 
-		while(iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
+		while (iNextBoneIndex < m_Bones.size() && m_Bones[iNextBoneIndex]->Get_ParentIndex() == iBoneIndex)
 		{
 			Bind_Bone_to_GUI(iNextBoneIndex, TransformMatrix);
 		}
@@ -156,6 +171,12 @@ HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 	iBoneIndex = iNextBoneIndex;
 	return S_OK;
 }
+void CModel::Render_Gizmo(_fmatrix TransformMatrix)
+{
+	_fmatrix BoneLocalMatrix = XMLoadFloat4x4(m_Bones[m_iSelectIndex]->Get_CombinedTransformationMatrix());
+	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
+}
+
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
@@ -231,6 +252,7 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 		if (FAILED(Ready_Animation(pFilePath)))
 			return E_FAIL;
 	}
+
 	if (FAILED(Ready_Mesh(InputFile)))
 		return E_FAIL;
 	if (FAILED(Ready_Material(pFilePath)))
@@ -248,8 +270,6 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 			return E_FAIL;
 
 	}
-	
-
 	return S_OK;
 }
 
@@ -257,8 +277,10 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 {
 	if (MODELTYPE::ANIM == m_eType)
 	{
+		// 1. Instance 전용 버퍼 생성.
 		if (FAILED(Ready_Instance_Buffers()))
 			return E_FAIL;
+
 	}
 	
 
@@ -339,24 +361,9 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
 
-#ifdef _DEBUG
-	_float4 fValue = {};
-	OutputDebugString(TEXT("Play_Animation CPU \n"));
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
-
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
-#endif
-
 	return false;
 }
+
 
 _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
 {
@@ -365,9 +372,17 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	auto iter = m_Animations.find(strAnimationName);
 	if (iter == m_Animations.end())
-		return S_OK;
+		return false;
 
-#pragma region 1. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	// RootMotion에서 바뀐 애니메이션에 대한 로직 처리.
+	if (m_strPreAnimation != strAnimationName)
+	{
+		m_isChangeAnimation = true;
+		m_strPreAnimation = strAnimationName;
+		Clear_Animation(strAnimationName);
+	}
+
+
 	// 1. 현재 애니메이션의 Track Position 업데이트
 	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
 	_float fTrackPosition = 0.f;
@@ -376,97 +391,48 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;
 
-	// 3. 상수 버퍼(CB) 업데이트
-	//    - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
-	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
-	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
 
-	// 애니메이션 정보 CB 구조체 => 현재 AnimIndex와 TrackPosition을 소유.
-	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
-	pAnimCBInfo->fTrackPosition = fTrackPosition;
-	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
+   // 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
 
-	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
-
-
-	// 4. Compute Shader에 리소스 바인딩
-//    - ComputeShader.h/cpp의 Set 함수들을 사용
-	pComputeShaderCom->Set_SRV("g_BoneHierarchy", m_SRVs[SRV_BONE_HIERARCHY]); // 아직 .hlsl에 없음
-	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
-	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
-	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
-	pComputeShaderCom->Set_SRV("g_InverseBindPose", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
-	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
-	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
+	// Root Node Translation 조정
+	if (true == isRootMotion)
+		Compute_RootAnimation(fRootMotionRate);
 	
 
-#pragma region 이 부분이 너무 빡셈.. Dispatch
-
-	// EX) 뼈 504개, 팀 크기 64명
-	
-	// 5. Compute Shader 실행 (Dispatch)
-	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
-	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
-	_uint iNumBones = static_cast<_uint>(m_Bones.size());
-	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
-	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
-#pragma endregion
-
-	
-	
-	// 6. 중간 결과 적용.(일단 RootAnimation CombinedTransofrmationMatrix는 그대로 적용)
-	ApplyComputeResults_ToBones();
-
-	// 7. Rib 애니메이션 재생 후 뼈에 정보 전달.
-	//_string strRibAnimationName = "Rib_" + strAnimationName;
-	//Play_RibAnimation_GPU(strRibAnimationName, fTimeDelta);
-
-	
-#pragma endregion
-
-	
-	
-
-	// 8. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
 	if (bIsAnimationEnd)
 	{
 		Clear_Animation(strAnimationName);
 		return true; // 애니메이션 종료
 	}
 
-	// Root Node Translation 조정
-	if (true == isRootMotion)
-		Compute_RootAnimation(fRootMotionRate);
+	// 5. Combined는 한번만.
+	for (_uint i = 0; i < m_Bones.size(); i++)
+	{
+		/*if (true == isRootMotion && i == m_iRootBoneIndex)
+			Compute_RootAnimation(fRootMotionRate);*/
 
+		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+	}
 
-	// Combined는 한번만.
-	for (auto& pBone : m_Bones)
-		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-
-
-#ifdef _DEBUG
 	
-	/*OutputDebugString(TEXT("Play_Animation GPU "));
-	
-	_wstring strAnimDebug = StringToWString(strAnimationName) + L"\n";
-	OutputDebugString(strAnimDebug.c_str());
 
-	_float4 fValue = {};
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[0], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Right : "), fValue);
+	return false;
+}
 
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[1], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Up : "), fValue);
+_bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+{
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return false;
 
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[2], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Look : "), fValue);
+	if (m_strPreAnimation != strAnimationName)
+	{
+		m_isChangeAnimation = true;
+		m_strPreAnimation = strAnimationName;
+	}
 
-	memcpy(&fValue, m_Bones[3]->Get_TransformationMatrix()->m[3], sizeof(_float4));
-	OutPutDebugFloat4(TEXT("Bip001 Pos : "), fValue);
-
-
-	OutPutDebugFloat(TEXT("Track Position : "), fTrackPosition);*/
-#endif
 
 	return false;
 }
@@ -483,51 +449,30 @@ void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeD
 
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-
+	
 }
 
-void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTimeDelta)
+void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition)
 {
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 		return;
 
-	iter->second->Update_RibTransformationMatrices(fTimeDelta, m_Bones);
+	iter->second->Update_RibTransformationMatrices(fTrackPosition, m_Bones);
 
-
-#ifdef _DEBUG
-	// Bone Name�� ������ ���ٸ�?
-	for (size_t i = 0; i < m_Bones.size(); ++i)
-	{
-		
-		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
-		{
-			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-			OutPutDebugMatrix(TEXT("Bip001RHand Play Rib Animation Matrix"), mat);
-
-			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
-			{
-				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Rib Animation Matrix");
-				OutPutDebugMatrix(strBoneName, mat);
-				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-			}
-		}
-	}
-#endif // _DEBUG
-
-	//for (auto& pBone : m_Bones)
-	//	pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+	for (auto& pBone : m_Bones)
+		pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
 {
 	if (strAnimationName == "")
 		return;
+
 	m_isChangeAnimation = true;
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
+	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 }
 
@@ -585,74 +530,171 @@ void CModel::ApplyComputeResults_ToBones()
 		return;
 
 	// 3. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
-	vector<_float4x4> vLocalMatrices(m_Bones.size()); // UP의 w가 -7.4가 나옴.
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
 	memcpy(vLocalMatrices.data(), MappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
 
 	// 4. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
 	for (size_t i = 0; i < m_Bones.size(); ++i)
 	{
-		/* Prev Final 곱하기?*/
-		//_matrix FinalMatrix = XMLoadFloat4x4(m_Bones[i]->Get_TransformationMatrix()) * XMLoadFloat4x4(&vLocalMatrices[i]);
 		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
 		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
-
-#ifdef _DEBUG
-		// Bone Name�� ������ ���ٸ�?
-		if (0 == strcmp(m_Bones[i]->Get_Name(), "Bip001RHand"))
-		{
-			_float4x4 mat = *m_Bones[i]->Get_TransformationMatrix();
-			OutPutDebugMatrix(TEXT("Bip001RHand Play Animation Matrix : "), mat);
-
-			_uint iParentIndex = m_Bones[i]->Get_ParentIndex();
-			while (0 != strcmp(m_Bones[m_Bones[iParentIndex]->Get_ParentIndex()]->Get_Name(), "Bip001Spine1"))
-			{
-				_float4x4 mat = *m_Bones[iParentIndex]->Get_TransformationMatrix();
-				_wstring strBoneName = StringToWString(m_Bones[iParentIndex]->Get_Name()) + TEXT(" Play Animation Matrix");
-				OutPutDebugMatrix(strBoneName, mat);
-				iParentIndex = m_Bones[iParentIndex]->Get_ParentIndex();
-			}
-		}
-#endif // _DEBUG
-
-		
 	}
 
 	// 5. Unmap으로 마무리합니다.
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
+void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
+{
+	ASSERT_CRASH(pComputeShaderCom);
+
+	// 1. 상수 버퍼(CB) 업데이트
+	// - 셰이더에서 현재 애니메이션 정보를 찾기 위한 인덱스와 현재 재생 시간을 전달
+	D3D11_MAPPED_SUBRESOURCE MappedSubResource;
+	m_pContext->Map(m_Buffers[BUFFER_ANIM_INFOCB], 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedSubResource);
+
+	_bool IsRibAnimUsed = false;
+	// 애니메이션 정보 CB 구조체 => 현재 AnimIndex와 TrackPosition을 소유.
+	ANIMATION_CBINFO* pAnimCBInfo = static_cast<ANIMATION_CBINFO*>(MappedSubResource.pData);
+ 	pAnimCBInfo->fTrackPosition = fTrackPosition;
+	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
+	pAnimCBInfo->IsRibAnimUsed = false;
+	pAnimCBInfo->iRibbonAnimIndex = 0;
+
+
+	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
+	_string strRibAnimationName = "Rib_" + strAnimationName;
+	auto iter = m_Animations.find(strRibAnimationName);
+	if (iter == m_Animations.end())
+	{
+		IsRibAnimUsed = false;
+	}
+	else
+	{
+		IsRibAnimUsed = true;
+		pAnimCBInfo->iRibbonAnimIndex = m_AnimationNameToIndex[strRibAnimationName];
+	}
+
+	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
+	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
+
+	// 3. Compute Shader에 리소스 바인딩
+	pComputeShaderCom->Set_SRV("g_AllKeyframes", m_SRVs[SRV_KEY_FRAME]);
+	pComputeShaderCom->Set_SRV("g_AllAnimInfos", m_SRVs[SRV_ANIM_INFO]);
+	pComputeShaderCom->Set_SRV("g_ChannelInfos", m_SRVs[SRV_BONE_CHANNEL]);
+	pComputeShaderCom->Set_SRV("g_InverseBindPoses", m_SRVs[SRV_INVERSEBIND_POSE]); // 아직 .hlsl에 없음
+	pComputeShaderCom->Set_UAV("g_OutLocalMatrices", m_UAVs[UAV_FINAL_BONEMATRIX]);
+	pComputeShaderCom->Set_ConstantBuffer("AnimationInfoCB", m_Buffers[BUFFER_ANIM_INFOCB]);
+
+	// EX) 뼈 504개, 팀 크기 64명
+	// 4. Compute Shader 실행 (Dispatch)
+	// - 총 뼈 개수만큼 스레드를 생성하도록 스레드 그룹 수를 조절
+	// - 예: 셰이더 스레드 그룹 크기가 64일 때, (총 뼈 개수 + 63) / 64
+	_uint iNumBones = static_cast<_uint>(m_Bones.size());
+	_uint iGroupCount = (iNumBones + (pComputeShaderCom->Get_ThreadInfo().iThreadGroupX - 1)) / pComputeShaderCom->Get_ThreadInfo().iThreadGroupX;
+	pComputeShaderCom->Dispatch(iGroupCount, 1, 1);
+
+	// 5. GPU의 출력 버퍼(m_pFinalBoneMatrix_Buffer) 내용을 Staging 버퍼로 복사합니다.
+	m_pContext->CopyResource(m_Buffers[BUFFER_STAGING], m_Buffers[BUFFER_FINAL_BONEMATRIX]);
+
+	// 6. Staging 버퍼를 CPU가 읽을 수 있도록 Map 합니다.
+	D3D11_MAPPED_SUBRESOURCE ReadMappedSubResource;
+	HRESULT hr = m_pContext->Map(m_Buffers[BUFFER_STAGING], 0, D3D11_MAP_READ, 0, &ReadMappedSubResource);
+	if (FAILED(hr))
+		return;
+
+	// 7. 맵핑된 메모리에서 로컬 행렬 데이터를 CPU 변수로 복사합니다.
+	vector<_float4x4> vLocalMatrices(m_Bones.size());
+	memcpy(vLocalMatrices.data(), ReadMappedSubResource.pData, sizeof(_float4x4) * m_Bones.size());
+
+	// 8. m_Bones 배열에 GPU가 계산한 최신 로컬 행렬을 적용합니다.
+	for (size_t i = 0; i < m_Bones.size(); ++i)
+	{
+		_matrix FinalMatrix = XMLoadFloat4x4(&vLocalMatrices[i]);
+		m_Bones[i]->Set_TransformationMatrix(FinalMatrix);
+	}
+
+	// 9. Unmap으로 마무리합니다.  
+	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
+}
+
 void CModel::Compute_RootAnimation(_float fRootMotionRate)
 {
+	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
 
-	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
-	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
+	// 2. 스켈레톤의 루트 본은 '제자리'에서 (Scale, Rotation)만 하도록
+	_matrix RootBoneLocalMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, XMVectorSet(0.f, 0.f, 0.f, 1.f));
+	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneLocalMatrix);
 
-	// Axis 조정 (-y => +z)
-	_float fTemp = vTranslation.m128_f32[2];
-	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
-	vTranslation.m128_f32[2] = vTranslation.m128_f32[1] * -1.f;
-	vTranslation.m128_f32[1] = fTemp * -1.f;
+	// 축 변환 쿼터니언 생성
+	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
-	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
+	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환
+	_vector vConvertedTranslation = XMVector3Transform(vTranslation, matConversion);
+	_vector vConvertedRotation = XMQuaternionMultiply(qConversion, vRotation);
+
+	// 이동 변화량 계산
+	_vector vLocalTranslate = vConvertedTranslation - XMLoadFloat4(&m_vPreRootPosition);
+	// 회전 변화량 계산
+	_vector vRotationDelta = XMQuaternionMultiply(vConvertedRotation, XMQuaternionInverse(XMLoadFloat4(&m_vPreRootRotation)));
+
+
+	// 애니메이션 변경 시 순간이동 방지
 	if (true == m_isChangeAnimation)
 	{
 		m_isChangeAnimation = false;
-		XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+		vLocalTranslate = XMVectorSet(0.f, 0.f, 0.f, 1.f); 
+		vRotationDelta = XMQuaternionIdentity();           
 	}
 
-	//_float fDistance = XMVector4Length(vTranslation - XMLoadFloat4(&m_vPreRootPosition)).m128_f32[0];
-	//// 전 위치와 크게 벗어나면 예외처리
-	//if (fDistance > 150.f)
-	//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+	// 행렬은 이제 '엔진 좌표계' 기준.
+	m_RootMatrix = XMMatrixAffineTransformation(
+		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
+		vRotationDelta,                  // 회전 델타
+		vLocalTranslate * fRootMotionRate // 이동 델타
+	);
 
-	//m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vRotation, (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * 0.1f);
-	m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * fRootMotionRate);
-	
-	XMStoreFloat4(&m_vPreRootRotation, vRotation);
-	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.
+	XMStoreFloat4(&m_vPreRootPosition, vConvertedTranslation);
+	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
 }
+
+//void CModel::Compute_RootAnimation(_float fRootMotionRate)
+//{
+//	_vector vScale{}, vRotation{}, vTranslation{};
+//	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
+//
+//	_matrix RootBoneMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f));
+//	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneMatrix);
+//
+//	// Axis 조정 (-y => +z)
+//	// 이거 빼면 제생각에. 안해도 되지않을까 설정을
+//	// 우리가 생각하는 정면은 +z인데 블렌더에서는 -y라서 문제다.
+//	_float fTemp = vTranslation.m128_f32[2];
+//	vTranslation.m128_f32[0] = vTranslation.m128_f32[0] * -1.f;
+//	vTranslation.m128_f32[2] = vTranslation.m128_f32[1];
+//	vTranslation.m128_f32[1] = fTemp;
+//
+//	
+//
+//	// Animation 변경 시, PreRootPosition을 변경된 Animation 처음 KeyFrame Root Position으로 변경
+//	if (true == m_isChangeAnimation)
+//	{
+//		m_isChangeAnimation = false;
+//		XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+//	}
+//
+//	m_RootMatrix = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), (vTranslation - XMLoadFloat4(&m_vPreRootPosition)) * fRootMotionRate);
+//	
+//	XMStoreFloat4(&m_vPreRootRotation, vRotation);
+//	XMStoreFloat4(&m_vPreRootPosition, vTranslation);
+//}
+
+
 
 HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 {
@@ -783,6 +825,8 @@ HRESULT CModel::Ready_Animation(const _char* pFilePath)
 }
 
 
+
+// Prototype에서 Shared Buffers 생성.
 HRESULT CModel::Ready_Shared_Buffers()
 {
 	ASSERT_CRASH(m_pDevice);
@@ -798,7 +842,6 @@ HRESULT CModel::Ready_Shared_Buffers()
 	m_UAVs.resize(UAV_END);
 
 	//  --- 1. 데이터 수집을 위한 vector 준비 ---
-
 	vector<ANIMINFO>        vAllAnimInfos;		  // Depth1
 	vector<GPU_CHANNELINFO> vAllChannelBoneInfos; // Depth2
 	vector<GPU_KEYFRAME>    vAllKeyframes;        // Depth3
@@ -813,6 +856,8 @@ HRESULT CModel::Ready_Shared_Buffers()
 		animInfo.iStartChannelIndexOffset = static_cast<_uint>(vAllChannelBoneInfos.size()); // 순차 탐색 AnimInfo에서 0부터 재생.
 		animInfo.iNumChannels = static_cast<_uint>(pAnimation->Get_Channels().size());  // 모든 채널의 개수
 		animInfo.fDuration = pAnimation->Get_Duration();
+
+		
 
 		// Depth2에 대한 설정.
 		for (const auto& pChannel : pAnimation->Get_Channels())
@@ -841,7 +886,10 @@ HRESULT CModel::Ready_Shared_Buffers()
 
 
 	// --- 2. 수집된 데이터로 실제 GPU 버퍼 생성 ---
+
+
 	D3D11_BUFFER_DESC bufferDesc = {};
+	// 2-1. 애니메이션 키프레임 정보 버퍼.
 	bufferDesc.ByteWidth = sizeof(GPU_KEYFRAME) * static_cast<_uint>(vAllKeyframes.size());
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -870,8 +918,6 @@ HRESULT CModel::Ready_Shared_Buffers()
 	if (FAILED(hr)) return E_FAIL;
 	hr = m_pDevice->CreateShaderResourceView(m_Buffers[BUFFER_BONE_CHANNEL], nullptr, &m_SRVs[SRV_BONE_CHANNEL]);
 	if (FAILED(hr)) return E_FAIL;
-
-	
 
 	return S_OK;
 }
@@ -973,5 +1019,7 @@ void CModel::Free()
 	for (auto& pUAV : m_UAVs)
 		Safe_Release(pUAV);
 	m_UAVs.clear();
+
+	
 
 }

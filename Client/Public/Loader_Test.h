@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Loader.h"
 
 NS_BEGIN(Client)
@@ -17,6 +17,13 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
+	HRESULT				Load_Component();
+
+	HRESULT				Load_PlayerController();
+	HRESULT				Load_Augusta();	
+
+private:
+	LEVEL m_eCurLevel = { LEVEL::TEST };
 
 public:
 	static		CLoader_Test*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

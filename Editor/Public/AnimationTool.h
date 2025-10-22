@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
@@ -11,7 +11,8 @@ private:
 		CONVERT_FBX_TO_DAT = 0, 
 		LOAD_DAT = 1, 
 		CREATE_ACTOR = 2,
-		EDIT_ANIMATION = 3, // ¾Ö´Ï¸ÞÀÌ¼Ç ¼öÁ¤. (Notify)?
+		EDIT_ANIMATION = 3, 
+		SAVE_STATE = 4,
 		END
 	};
 
@@ -21,7 +22,7 @@ private:
 	virtual ~CAnimationTool() = default;
 
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region 
 public:
 	HRESULT	Initialize(LEVEL eLevel);
 	void Update();
@@ -34,13 +35,20 @@ private:
 	void Render_Editor();
 	void Render_DebugWindow();
 	void Render_Menu();
-
+	void RenderUI_EditState();
 
 private:
 	// 2 Depth Menu
 	void RenderUI_ConvertFbx();
 	void RenderUI_CreateActor();
 	void RenderUI_EditAnimation();
+
+	void RenderUI_FromState();
+	void RenderUI_ToState();
+	void RenderUI_Transitions();
+	void RenderUI_OptionState();
+	
+	
 
 private:
 	// 3 Depth Menu
@@ -53,6 +61,7 @@ private:
 	void Render_Model_Detail();
 	void Render_Animation_Detail();
 
+
 	
 	
 
@@ -64,10 +73,11 @@ private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
 	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
+	
 
-	// Prototype¿¡ ÀúÀåÇÏ°í ÀÌ¸§¸¸ °¡Á®¿É´Ï´Ù.
-	list<_string> m_ModelNames; // ¸ðµ¨ ÄÄÆ÷³ÍÆ® 
-	list<_string> m_ActorNames; // ½Ç »ý¼º °´Ã¼. 
+	list<_string> m_ModelNames;
+	list<_string> m_ActorNames;
+	list<_string> m_StateTransitions; // Transition ì €ìž¥í•  ì •ë³´.
 
 	typedef map<const _wstring, class CAnimationActor*> ANIMATIONACTORS;
 	ANIMATIONACTORS m_AnimationActors;
@@ -75,7 +85,6 @@ private:
 	typedef map<const _wstring, const _string> MODELPATHS;
 	MODELPATHS	m_ModelDirPaths;
 
-	// »ý¼ºÇÑ °´Ã¼¿¡ ´ëÇÑ µ¿ÀûÁ¦¾î¸¦ ¾î¶»°ÔÇÒ±î?
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
@@ -83,18 +92,27 @@ private:
 	_string m_Selected_AnimActorTag = {};
 
 
+	_string m_SelectedFromStateTag = {};
+	_string m_SelectedToStateTag = {};
+
 private:
 	_string m_Selected_AnimationTag = {};
 	_float m_fTrackPosition = {};
 	_float m_fDuration = {};
 	_bool m_IsVisibleNotify = { false };
 	_bool m_IsPlayAnimation = { true };
+	_bool m_IsStateTransition = { false };
 	
 private:
 	_float m_fEditorAlpha = { 1.f };
 
 private:
-	// ÇïÆÛ ÇÔ¼ö
+#ifdef _DEBUG
+	void Export_StateAnimationMap_ToCSV();
+	void Export_StateTransition_To_CSV();
+#endif
+
+private:
 	HRESULT Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath);
 
 	

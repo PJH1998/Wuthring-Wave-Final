@@ -1,7 +1,5 @@
+
 #pragma once
-
-#include "Editor_Define_UI.h"
-
 #include "Level.h"
 #include "Custom_UI.h"
 
@@ -21,10 +19,10 @@ public:
 
 
 	// for Output
-	// ³ªÁß¿¡ *_Struct.h ·Î ¿Å°Ü¾ß ÇÒ µí?
+	// ?ì„ì¨·??*_Struct.h æ¿¡???êº¼??????
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		_uint			iKeyframeIndex = {};			// Á¤º¸°¡ ´ã±æ Å°ÇÁ·¹ÀÓ Á¤º¸
+		_uint			iKeyframeIndex = {};			// ?ëº£ë‚«åª›Â€ ?ë‹¿ë§Œ ?ã…½ë´½?ë‰ì—« ?ëº£ë‚«
 		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
@@ -34,7 +32,7 @@ public:
 		_float3			vSca = {};
 
 
-		_float2			vScreenLT = {};			// Ç¥½ÃµÉ È­¸é»óÀÇ ÁÂÇ¥ Á¦ÇÑ. (¿ì»ó 0, 0 / ÁÂÇÏ È­¸éÅ©±â)
+		_float2			vScreenLT = {};			// Ç¥ï¿½Ãµï¿½ È­ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç¥ ï¿½ï¿½ï¿½ï¿½. (ï¿½ï¿½ï¿½ 0, 0 / ï¿½ï¿½ï¿½ï¿½ È­ï¿½ï¿½Å©ï¿½ï¿½)
 		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
 
 		_float4			vBlendToOuterWidth = {};
@@ -43,9 +41,9 @@ public:
 
 	typedef struct tagUIAnimDesc
 	{
-		CCustom_UI::CUSTOM_UI_DESC		tUIDesc = {};	// FilePath, FileName, NumTex (¾î¶² ÅØ½ºÃÄ¿ëÀÎÁö¸¦ À§ÇÔ)
+		CCustom_UI::CUSTOM_UI_DESC		tUIDesc = {};	// FilePath, FileName, NumTex (ï¿½î¶² ï¿½Ø½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 
-		// Å°ÇÁ·¹ÀÓ, Å°ÇÁ·¹ÀÓº° Çà·ÄÁ¤º¸, º¸°£¹æ¹ı, ±æÀÌ µî..
+		// ?ã…½ë´½?ë‰ì—«, ?ã…½ë´½?ë‰ì—«è¹‚??ë°ì ¹?ëº£ë‚«, è¹‚ë‹¿ì»™è«›â‘¸ì¾¿, æ¹²ëª„ì”  ??.
 		_wstring				strAnimName = {};
 		//_uint					iNumKeyFrame = {};
 
@@ -118,7 +116,7 @@ private:
 
 
 	// for Update_AnimEditor
-	// ¤¤AnimEditor
+	// ï¿½ï¿½AnimEditor
 	_bool						m_isOn_AnimEdit = true;
 	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
 
@@ -127,11 +125,11 @@ private:
 	_int						m_iLerpType = 0;
 	_bool						m_isAnimLoop = true;
 
-	// ¤¤AnimList
+	// ?í€®nimList
 	_bool						m_isPlayAnimation = false;
 	UI_ANIM_DESC*				m_pSelectedUIAnim = { nullptr };
 
-	// ¤¤Instance
+	// ï¿½ï¿½Instance
 	CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC*	m_pSelectedInstance = { nullptr };
 
 public:
