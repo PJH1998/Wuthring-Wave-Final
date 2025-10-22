@@ -9,8 +9,6 @@ Texture2D g_Texture;
 Texture2D g_DiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_DepthTexture;
-Texture2D g_Mat_SpecularTexture;
-Texture2D g_Mat_AmbientTexture;
 
 Texture2D g_ShadeTexture;
 Texture2D g_SpecularTexture;
@@ -27,7 +25,7 @@ Texture2DArray<float> g_ShadowMap : register(t0);
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.7f;
+float g_fLutLerpIntensity = 0.f;
 
 cbuffer CSMDatas : register(b1)
 {
@@ -134,7 +132,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     Out.vColor = vDiffuse * vShade;// * vSpecular;
     
-///////// Shadow Àû¿ë /////////
+///////// Shadow ï¿½ï¿½ï¿½ï¿½ /////////
 
     int iCascadeIndex = 0;
     
@@ -148,8 +146,8 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
    
     float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
    
-    //float fSlopeFactor = (1.f - fDot); // ¿¬»ê ºñ¿ë ½Î°Ô, ´Ü¼ø ºûÀÌ ½ºÃÄ µé¾î¿Ã¼ö·Ï Ä¿Áö°Ô
-    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // ¸éÀÇ ±â¿ï±â¸¦ °è»êÇÑ ¹°¸®Àû ¿¬»ê
+    //float fSlopeFactor = (1.f - fDot); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Î°ï¿½, ï¿½Ü¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ï¿½ï¿½
+    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     float BlendFactor = 0.f;
     
@@ -158,14 +156,14 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     // Blend Cascade
-    if (iCascadeIndex < 3)          // Cascade ±¸¿ª ¸¶Áö¸· Á¦¿Ü
+    if (iCascadeIndex < 3)          // Cascade ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     {
         int iBlendCascadeIndex = iCascadeIndex + 1;
     
         float CurrentNear = g_vClipDistances[iCascadeIndex];
         float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
         
-        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // ¾î´À±¸°£ºÎÅÍ Blend ÇÒ°ÇÁö °áÁ¤ ( 0.15 == 0.85 ±¸°£ºÎÅÍ )
+        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;         // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Blend ï¿½Ò°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ( 0.15 == 0.85 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ )
         
         BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
         
@@ -187,7 +185,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         fShadowBlend = SampleShadowPCF(g_ShadowMap, ShadowSampler, float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 2);      // 2 == Kernel size
     }
     
-    // ÇöÀç Cascade
+    // ï¿½ï¿½ï¿½ï¿½ Cascade
     {
         vector vShadowPos;
         matrix matShadowLightVP;
@@ -240,84 +238,49 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     
     float fShade = g_RampTexture.Sample(PointSampler, float2(0.5f, fY)).r;
 
- //   if (fShade <= radians(30.f))
- //   {
- //       float fRatio = max(0.f, fShade) / radians(30.f);
- //       
- //       fShade = lerp(0.8f, 1.f, fRatio);
- //   }   
- //   else
- //       fShade = 1.f;
-
     Out.vShade.xyz = fShade;
     Out.vShade.w = 1.f;
         
-    //int iShade = fShade * 4;
+    //vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    //fShade = iShade / 4.f;
+    //vector vWorldPos;
+    //vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
+    //vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
+    //vWorldPos.z = DepthDesc.x;
+    //vWorldPos.w = 1.f;
     
-    
-    //Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
-    //Out.vShade.w = 1.f;
-//    Out.vShade = g_vLightDiffuse * saturate(fShade + (g_vLightAmbient * g_vMtrlAmbient));
+    //vWorldPos *= DepthDesc.y;
 
-
-    //vector vReflect = reflect(normalize(g_vLightDirection), vNormal);
-    //float Rim = saturate(dot(vNormal, vCamDir));
+    //vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
     
-    //if(Rim > 0.3f)
-    //    Rim = 1.f;
+    //float fViewZ = vWorldPos.z;
     
+    //vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
     
-    //Out.vSpecular = float4(pow(1.f - Rim, 5.f) * float3(1.f, 1.f, 1.f), 1.f);
-    //float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vCamDir)), 0.f), 50.f);
+    //vector vCamDir = g_vCamPosition - vWorldPos;
     
-//    float fShade = max(dot(normalize(vCamDir), vNormal), 0.f);
-//    
-//    Out.vShade = g_RampTexture.Sample(DefaultSampler, float2(0.f, fShade));
+    //bool IsOutline = false;
     
-    //Out.vSpecular = g_vLightSpecular * g_vMtrlSpecular * (g_vLightDiffuse * fSpecular);
+    ////if (DepthDesc.z == 1.f)
+    ////{
+    ////    IsOutline = Outline_Normal(1920.f, 1080.f, g_NormalTexture, DefaultSampler, In.vTexcoord, vNormal.xyz, radians(15.f));
+    ////}
     
-    vector DepthDesc = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord);
+    ////float fDot = dot(normalize(vCamDir), vNormal);
     
-    vector vWorldPos;
-    vWorldPos.x = In.vTexcoord.x * 2.f - 1.f;
-    vWorldPos.y = In.vTexcoord.y * -2.f + 1.f;
-    vWorldPos.z = DepthDesc.x;
-    vWorldPos.w = 1.f;
+    ////if(fDot <= radians(15.f))
+    ////{
+    ////    if (vWorldPos.z <= 300.f)
+    ////    {
+    ////        if (DepthDesc.z == 1.f && DepthDesc.x != 1.f)
+    ////            IsOutline = Outline(1920.f, 1080.f, g_DepthTexture, DefaultSampler, In.vTexcoord, fViewZ, 5.f, g_ProjMatrixInv);
+    ////    }
+    ////}
     
-    vWorldPos *= DepthDesc.y;
-
-    vWorldPos = mul(vWorldPos, g_ProjMatrixInv);
+    //Out.vSpecular = 1.f;
     
-    float fViewZ = vWorldPos.z;
-    
-    vWorldPos = mul(vWorldPos, g_ViewMatrixInv);
-    
-    vector vCamDir = g_vCamPosition - vWorldPos;
-    
-    bool IsOutline = false;
-    
-    //if (DepthDesc.z == 1.f)
-    //{
-    //    IsOutline = Outline_Normal(1920.f, 1080.f, g_NormalTexture, DefaultSampler, In.vTexcoord, vNormal.xyz, radians(15.f));
-    //}
-    
-    //float fDot = dot(normalize(vCamDir), vNormal);
-    
-    //if(fDot <= radians(15.f))
-    //{
-    //    if (vWorldPos.z <= 300.f)
-    //    {
-    //        if (DepthDesc.z == 1.f && DepthDesc.x != 1.f)
-    //            IsOutline = Outline(1920.f, 1080.f, g_DepthTexture, DefaultSampler, In.vTexcoord, fViewZ, 5.f, g_ProjMatrixInv);
-    //    }
-    //}
-    
-    Out.vSpecular = 1.f;
-    
-    if (IsOutline == true)
-        Out.vSpecular = float4(0.35f, 0.1f, 0.f, 1.f);
+    //if (IsOutline == true)
+    //    Out.vSpecular = float4(0.35f, 0.1f, 0.f, 1.f);
     
     return Out;
 }
@@ -441,18 +404,22 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
-    vector vOriginColor = g_BackBufferTexture.Sample(PointSampler, In.vTexcoord);
+    vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    float fLUT_Index = floor(vOriginColor.b * g_fLUT_Size);
+    float2 vUV;
     
-    float fStartU = fLUT_Index / g_fLUT_Size;
+    float fSpaceSize = 1.f / g_fLUT_Size;
+    float fScale = (g_fLUT_Size - 1.f) / g_fLUT_Size;
     
-    float fU = vOriginColor.r / g_fLUT_Size;
+    float fIndex = clamp(floor(vOriginColor.b * g_fLUT_Size), 0, g_fLUT_Size - 1.f);
+    float fOffsetX = fIndex * (fSpaceSize);
     
-    fU = fU + fStartU;
-    float fV = vOriginColor.g;
+    float fScaleX = vOriginColor.r * fScale;
     
-    vector vLUT_Color = g_LUT_Texture.Sample(PointSampler, float3(fU, fV, g_iLutIndex)).bgra;
+    vUV.x = fScaleX * fSpaceSize + fOffsetX;
+    vUV.y = vOriginColor.g;
+    
+    vector vLUT_Color = g_LUT_Texture.Sample(DefaultSampler, float3(vUV, g_iLutIndex));
     
     vector vFinalColr = lerp(vOriginColor, vLUT_Color, g_fLutLerpIntensity);
     

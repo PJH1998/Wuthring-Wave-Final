@@ -145,6 +145,10 @@ namespace Engine
 		_uint  iRibbonAnimIndex;
 	}ANIMATION_CBINFO;
 
+	typedef struct tagCollisionData {
+		class CCollideComponent* pComponent = { nullptr };
+		void* pDesc = { nullptr };
+	}COLLISION_DATA;
 }
 
 

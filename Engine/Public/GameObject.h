@@ -16,7 +16,7 @@ protected:
 	virtual ~CGameObject() = default;
 
 public:
-	class CComponent*			Get_Component(const _wstring& strComponentTag);
+	class CComponent*	Get_Component(const _wstring& strComponentTag);
 	_bool						IsActivate() { return m_isActivate; }
 	void						SetActivate(_bool isActivate) { m_isActivate = isActivate; }
 	_uint						Get_ID() { return m_iObjectID; }
@@ -31,15 +31,7 @@ public:
 	virtual		void			Render_Shadow();
 	virtual		void			Render_OutLine();
 
-	// 異⑸룎 ?? 遺꾧린???곕씪 ?몄텧?섎뒗 ?⑥닔
-	// iLayer : ?곷???CollisionLayer
-	// pOther : ?곷?
-	// Manifold : 異⑸룎 吏?? normal, 寃뱀튇 ?뺣룄瑜?媛뽮퀬 ?덉쓬
-	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
-	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
-	virtual		void			OnCollide_End(_uint iLayer, CGameObject* pOther) {}
-
-	// Pooling?? Spawn????珥덇린???⑥닔
+	// Pooling Spawn CallBack
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 protected:
@@ -50,7 +42,7 @@ protected:
 
 	map<const _wstring, class CComponent*>	m_Components;
 
-	// ?쒖꽦??愿??Bool 蹂??
+	// Activate
 	_bool							m_isActivate = { true };
 	// Object ID
 	_uint							m_iObjectID = {};

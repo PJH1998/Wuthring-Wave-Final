@@ -27,6 +27,7 @@
     <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\BlackBoard.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\CollideComponent.h" />
     <ClInclude Include="..\public\CSM.h" />
     <ClInclude Include="..\Public\BT_Action.h" />
     <ClInclude Include="..\Public\BT_Node.h" />
@@ -116,6 +117,7 @@
     <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\BlackBoard.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\CollideComponent.cpp" />
     <ClCompile Include="..\private\CSM.cpp" />
     <ClCompile Include="..\Private\BT_Action.cpp" />
     <ClCompile Include="..\Private\BT_Node.cpp" />

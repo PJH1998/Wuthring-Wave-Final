@@ -24,6 +24,11 @@ private:
 	LEVEL							m_eNextLevel = { LEVEL::END };
 	_bool							m_isLoad = { false };
 
+	// Frame
+	_uint							m_iFrame = {};
+	_float							m_fTimeAcc = {};
+	_uint							m_iCnt = {};
+
 private:
 	void				SetUp_CollisionLayer();
 	void				Ready_Event();

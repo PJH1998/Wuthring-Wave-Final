@@ -23,7 +23,8 @@ HRESULT CActor::Initialize_Prototype()
 
 HRESULT CActor::Initialize_Clone(void* pArg)
 {
-    if (FAILED(CContainerObject::Initialize_Clone(pArg)))
+    ACTOR_DESC* pDesc = static_cast<ACTOR_DESC*>(pArg);
+    if (FAILED(CContainerObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
     return S_OK;
@@ -50,8 +51,12 @@ void CActor::Render()
 }
 #pragma endregion
 
-
 void CActor::Free()
 {
     CContainerObject::Free();
+    Safe_Release(m_pModelCom);
+    Safe_Release(m_pShaderCom);
+    Safe_Release(m_pComputeShaderCom);
+    Safe_Release(m_pRigidBodyCom);
+    Safe_Release(m_pColliderCom);
 }

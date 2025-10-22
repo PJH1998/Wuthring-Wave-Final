@@ -23,7 +23,7 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
     m_pLoader = CModelLoader::Create();
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-   
+    
 
     return S_OK;
 }
@@ -39,6 +39,9 @@ void CAnimationTool::Render()
         m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimationTag, strModelDirPath, m_fDuration);
         m_pAnimNotifyTool->Render();
     }
+
+    // EditState 설정된 걸로.
+    RenderUI_EditState();
         
 }
 
@@ -58,7 +61,6 @@ void CAnimationTool::Render_Editor()
     style.Colors[ImGuiCol_WindowBg] = NewColor;
     ImGui::NewLine();
 
-    // 2. MenuTabBar 援ы쁽
     Render_Menu();
 
     ImGui::End();
@@ -82,7 +84,7 @@ void CAnimationTool::Render_DebugWindow()
     ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
 
 
-    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "NONE"};
+    const char* typeNames[] = { "CONVERT_FBX", "LOAD_DAT", "CREATE_ACTOR","EDIT_ANIMATION", "SAVE_STATE", "NONE"};
     ImGui::Text("MODE : %s", typeNames[ENUM_CLASS(m_eMode)]);
 
     switch (m_eMode)
@@ -153,6 +155,13 @@ void CAnimationTool::Render_Menu()
             m_eMode = MODE::EDIT_ANIMATION;
         }
 
+      /*  if (ImGui::BeginTabItem("SaveState"))
+        {
+            RenderUI_EditState();
+            ImGui::EndTabItem();
+            m_eMode = MODE::SAVE_STATE;
+        }*/
+
         ImGui::EndTabBar();
     }
 
@@ -160,20 +169,16 @@ void CAnimationTool::Render_Menu()
 
 void CAnimationTool::RenderUI_ConvertFbx()
 {
-    // 1. 吏곸젒 ?섎굹 ?좏깮?댁꽌 FBX ?뚯씪??DAT???쒕떎. => ?쇰?.
     m_pLoader->Update();
 }
 
 void CAnimationTool::RenderUI_CreateActor()
 {
-    // 1. ?좏깮??Dat ?뚯씪??Load?섍린. => Prototype ?앹꽦.
-    // ?곗꽑. GameObject瑜??덈줈 留뚮뱾怨?Prototype ?깅줉.
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("Prototype", tab_bar_flags))
     {
         if (ImGui::BeginTabItem("Model"))
         {
-            // 2. ?꾩옱 ?앹꽦???꾨줈?좏???紐⑸줉??蹂댁뿬二쇨린.
             RenderUI_ModelPrototype();
             ImGui::EndTabItem();
         }
@@ -192,6 +197,7 @@ void CAnimationTool::RenderUI_EditAnimation()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+    // 1. 액터 선택.
     for (auto& actorName : m_ActorNames)
     {
         if (ImGui::Selectable(actorName.c_str(), id == iSelectedIndex))
@@ -204,8 +210,192 @@ void CAnimationTool::RenderUI_EditAnimation()
     ImGui::EndChild();
 
     ImGui::SameLine();
+
+    // 3. 액터의 Animation List 체크.
     if (iSelectedIndex >= 0 && iSelectedIndex < m_ActorNames.size())
         RenderUI_AnimationList();
+
+
+}
+
+void CAnimationTool::RenderUI_FromState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("FROM");
+        ImGui::BeginChild("FromState", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedFromStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+   
+}
+
+void CAnimationTool::RenderUI_ToState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("TO");
+        
+        ImGui::BeginChild("ToState", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedToStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+    
+}
+
+void CAnimationTool::RenderUI_Transitions()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Transitions");
+
+        ImGui::BeginChild("Transition", ImVec2(400, 0), true);
+        {
+            static int iSelectedIndex = -1;
+            _uint id = 0;
+
+            for (auto& stateName : m_StateTransitions)
+            {
+                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                {
+                    iSelectedIndex = id;
+                    m_SelectedToStateTag = stateName;
+                }
+                id++;
+            }
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+
+
+}
+
+void CAnimationTool::RenderUI_OptionState()
+{
+    ImGui::BeginGroup();
+    {
+        ImGui::Text("Option");
+        ImGui::BeginChild("Option", ImVec2(400, 0), true);
+        {
+            // 1. TrackPosition 설정
+
+            static float fTrackPosition = { 0.f };
+            ImGui::InputFloat("TrackPosition", &fTrackPosition, 0.f, 0.f, "%.2f");
+
+           
+
+            // 2. 함수 설정.
+            static char textBuffer[256] = "";
+            ImGui::InputText("Function Name", textBuffer, sizeof(textBuffer));
+
+            _string strTransition = {};
+            if (ImGui::Button("Add Transition"))
+            {
+                if (fTrackPosition > m_fDuration)
+                    MSG_BOX("Duration Over");
+
+                stringstream ss;
+                ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
+                    << "," << to_string(fTrackPosition) << "," << textBuffer;
+                strTransition = ss.str();
+                m_StateTransitions.emplace_back(strTransition);
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Delete Back"))
+            {
+                m_StateTransitions.pop_back();
+            }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Delete Front"))
+            {
+                m_StateTransitions.pop_front();
+            }
+
+            if (ImGui::Button("Clear Transition"))
+            {
+                m_StateTransitions.clear();
+            }
+
+            
+#ifdef _DEBUG
+            Export_StateTransition_To_CSV();
+#endif
+
+            
+            
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+    
+}
+
+
+
+void CAnimationTool::RenderUI_EditState()
+{
+    // StateTransition 설정하기.
+    if (!m_IsStateTransition)
+        return;
+
+
+    ImVec2 windowPos = ImVec2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f);
+    ImVec2 windowSize = ImVec2(1700.f, 700.f);
+
+    ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+    ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+    // 현재 선택된 Actor 모델에 대한 정보로 새창 띄우기.
+    ImGui::Begin("State_Transition");
+
+
+    RenderUI_FromState();
+
+    ImGui::SameLine();
+    RenderUI_ToState();
+
+    ImGui::SameLine();
+    RenderUI_Transitions();
+
+    ImGui::SameLine();
+    RenderUI_OptionState();
+
+
+
+
+    ImGui::End();
+    
 }
 
 void CAnimationTool::LoadDat()
@@ -213,7 +403,7 @@ void CAnimationTool::LoadDat()
     _wstring wStrModelName = {};
 
     _string strModelName = "Prototype_Component_Model_";
-
+    
     _string strModelPath = {};
     string basePathString = {};
 
@@ -266,8 +456,6 @@ void CAnimationTool::LoadDat()
                 return;
             }
 
-            // 3. ?앹꽦???꾨즺?섏뿀?쇰㈃ ?꾩슂???뺣낫?ㅼ쓣 ???
-            
             size_t lastSlashPos = strFilePath.find_last_of("/\\");
             string directoryPath = "";
             if (lastDotPos != string::npos)
@@ -285,7 +473,6 @@ void CAnimationTool::LoadDat()
 
 void CAnimationTool::RenderUI_ModelPrototype()
 {
-    // 1. ?앹꽦??Prototype 紐⑸줉?ㅼ쓣 ?뺤씤?섍린.
     _wstring objTag = {};
     _wstring modelTag = {};
 
@@ -315,14 +502,18 @@ void CAnimationTool::RenderUI_ModelPrototype()
 
 void CAnimationTool::RenderUI_AnimationList()
 {
-    ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
+    
+    ImGui::BeginChild("Right pane", ImVec2(400, 0.f), true);
 
     static int iSelectedIndex = -1;
     _uint id = 0;
 
+
+    
 #ifdef _DEBUG
     for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
     {
+        // 1. 애니메이션을 선택했을 경우에는 애니메이션 각각에 대한 Detail한 설정.
         if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
@@ -336,14 +527,47 @@ void CAnimationTool::RenderUI_AnimationList()
                 m_pAnimNotifyTool->Process_Notify(m_AnimationActors[m_wSelected_AnimActorTag], m_Selected_AnimActorTag, "", m_fDuration);
                 m_pAnimNotifyTool->Clear();
             }
-                
         }
+        // 다음 항목을 위해 id를 증가시킵니다.
+        id++;
     }
-    ImGui::EndChild();
-#endif 
 
+    
+
+
+
+    ImGui::SameLine();
+
+#endif 
+    ImGui::EndChild();
+
+    // 애니메이션 상세 정보 조절.
     Render_Animation_Detail();
+
+
+#ifdef _DEBUG
+    ImGui::SameLine();
+
+    ImGui::BeginChild("State pane", ImVec2(400, 0.f), true);
+
+
+    // 현재 State 목록을 .csv로 내보냅니다.
+    Export_StateAnimationMap_ToCSV();
+
+    if (ImGui::Button("State Transition Visible"))
+    {
+        m_IsStateTransition = !m_IsStateTransition;
+    }
+
+    ImGui::EndChild();
+    
+    
+#endif // _DEBUG
+
+
 }
+
+
 
 
 void CAnimationTool::Render_Model_Detail()
@@ -431,21 +655,18 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::EndChild();
 }
 
-// ?좏깮???좊땲硫붿씠?섏뿉 ????뷀뀒?쇳븳 ?뺣낫瑜?媛?몄삤湲?
 void CAnimationTool::Render_Animation_Detail()
 {
 #ifdef _DEBUG
-    // 1. ?꾩옱 TrackPosition ???
     if (!m_Selected_AnimationTag.empty())
         m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
 #endif
 
-    // 2. TrackBar 議곗젅 UI 留뚮뱾湲?
     _float minTrackPos = 0.f;
     _float maxTrackPos = m_fDuration;
 
     ImGuiIO& io = ImGui::GetIO();
-    ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f); // ?꾨옒??怨좎젙?
+    ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f);
     ImVec2 windowSize = ImVec2(600.f, 120.f);
     
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
@@ -494,16 +715,111 @@ void CAnimationTool::Render_Animation_Detail()
     if (ImGui::Button("Notify Visible"))
         m_IsVisibleNotify = !m_IsVisibleNotify;
 
+    // 이거를 눌렀을때 현재 Actor와 ActorTag, Actor의 Animation 정보들을 정할 수 있다.
+    /*ImGui::SameLine();
 
+    if (ImGui::Button("State Transition Visible"))
+    {
+        m_IsStateTransition = !m_IsStateTransition;
+    }*/
     
 
     ImGui::End();
 }
 
-
-
 #pragma endregion
 
+
+#ifdef _DEBUG
+void CAnimationTool::Export_StateAnimationMap_ToCSV()
+{
+    // 현재 애니메이션 목록을 내보냅니다. 
+
+    if (ImGui::Button("Save AnimStateList"))
+    {
+        IGFD::FileDialogConfig config;
+        config.path = "../../Client/Bin/Resource/Model";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+        string basePathString = config.path;
+        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+    }
+
+
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
+
+    if (ImGuiFileDialog::Instance()->Display(
+        "Save Csv", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize)) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+            
+            // 1. 파일 열기
+            std::ofstream outFile(strFilePath);
+
+            _string strStateTag = "StateName";
+            _string strAnimTag = "AnimName";
+            _string strTimeTag = {};
+            outFile << strStateTag << "," <<strAnimTag << "\n";
+
+            for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+                outFile << animName << "," << animName << "\n";
+            // 2. 파일 쓰기.
+
+
+            outFile.close();
+
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+
+
+}
+void CAnimationTool::Export_StateTransition_To_CSV()
+{
+    if (ImGui::Button("Save Transition"))
+    {
+        IGFD::FileDialogConfig config;
+        config.path = "../../Client/Bin/Resource/Model";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+        string basePathString = config.path;
+        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+    }
+
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
+
+    if (ImGuiFileDialog::Instance()->Display(
+        "Save Csv", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize)) {
+        if (ImGuiFileDialog::Instance()->IsOk()) {
+            _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            // 1. 파일 열기
+            std::ofstream outFile(strFilePath);
+
+            // 2. 파일 쓰기.
+            
+            outFile << "From State" << "," << "ToState" << "\n";
+
+            for (auto& strTransition : m_StateTransitions)
+            {
+                outFile << strTransition;
+            }
+
+            for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+                outFile << animName << "," << animName << "\n";
+
+
+            outFile.close();
+
+        }
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+#endif // _DEBUG
 
 
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)

@@ -115,15 +115,17 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Update(fTimeDelta);
 	
 	m_pCamera_Manager->Update(fTimeDelta);
+	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
+	m_pPhysicsManager->Update(fTimeDelta);
+	m_pPhysicsManager->Late_Update();
+
+	m_pObject_Manager->Late_Update(fTimeDelta);
+
+	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
-	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
 	m_pOctoTree->Update();
-	
-	m_pPhysicsManager->Update(fTimeDelta);
-
-	m_pObject_Manager->Late_Update(fTimeDelta);
 
 	m_pPooling_Manager->Update_Pooling();
 
@@ -430,14 +432,6 @@ HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCame
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
 }
-void CGameInstance::Change_Distance(_float fDistance)
-{
-	m_pCamera_Manager->Change_Distance(fDistance);
-}
-void CGameInstance::Change_FixedDistance(_float fFixedDistance)
-{
-	m_pCamera_Manager->Change_FixedDistance(fFixedDistance);
-}
 _float CGameInstance::Get_CurrentCamera_Near()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Near();
@@ -495,6 +489,10 @@ Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSett
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
+}
+void CGameInstance::Remove_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pPhysicsManager->Remove_Virtual(pVirtual);
 }
 _bool CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {

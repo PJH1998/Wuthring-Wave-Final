@@ -74,7 +74,7 @@ private:
 	_float m_fTrackPosition = {};
 	_bool m_IsPlayAnimation = { true };
 
-	_float m_fTimeDelta = {}; // Stop ?곹깭?먯꽌??PlayAnimation ?숈옉???꾪븿.
+	_float m_fTimeDelta = {}; 
 
 	_string m_strModelDatPath = {}; // 
 

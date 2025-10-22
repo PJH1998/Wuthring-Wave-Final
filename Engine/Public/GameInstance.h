@@ -135,8 +135,6 @@ public:
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
 	void			Play_Action(const _wstring& strActionTag);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
-	void			Change_Distance(_float fDistance);
-	void			Change_FixedDistance(_float fFixedDistance);
 	_float			Get_CurrentCamera_Near();
 	_float			Get_CurrentCamera_Far();
 #pragma endregion
@@ -157,6 +155,7 @@ public:
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG
 	void				DrawShape(const Shape* pShape);

@@ -109,22 +109,6 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
     return S_OK;
 }
 
-void CCamera_Manager::Change_Distance(_float fDistance)
-{
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_Distance(fDistance);
-}
-
-void CCamera_Manager::Change_FixedDistance(_float fFixedDistance)
-{
-    if (nullptr == m_pMainCamera)
-        return;
-
-    m_pMainCamera->Set_FixedDistance(fFixedDistance);
-}
-
 _float CCamera_Manager::Get_CurrentCamera_Near()
 {
     if (nullptr == m_pMainCamera || true == m_isFree)
@@ -159,7 +143,6 @@ void CCamera_Manager::Update(_float fTimeDelta)
 	if (nullptr == m_pMainCamera || true == m_isFree)
 	{
 		m_pFreeCamera->Update(fTimeDelta);
-		m_pFreeCamera->Update_Matrix();
 	}
 	else
 	{
@@ -167,6 +150,20 @@ void CCamera_Manager::Update(_float fTimeDelta)
 			m_pMainCamera->Update(fTimeDelta);
 		else
 			Compute_Action(fTimeDelta);
+	}
+}
+
+void CCamera_Manager::Late_Update(_float fTimeDelta)
+{
+	if (nullptr == m_pMainCamera || true == m_isFree)
+	{
+		m_pFreeCamera->Late_Update(fTimeDelta);
+		m_pFreeCamera->Update_Matrix();
+	}
+	else
+	{
+		if (false == m_isPlayAction)
+			m_pMainCamera->Late_Update(fTimeDelta);
 
 		m_pMainCamera->Update_Matrix();
 	}

@@ -175,9 +175,6 @@
     <Filter Include="01. Utility\97. Physics\Layer">
       <UniqueIdentifier>{d6cabcc6-7bc6-4408-abb3-c926ce1058eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\04. Component\Rigidbody">
-      <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\97. Physics\DebugRender">
       <UniqueIdentifier>{d33959ee-f5a6-480b-94ec-95df486464f9}</UniqueIdentifier>
     </Filter>
@@ -201,9 +198,6 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\Shader\ComputeShader">
       <UniqueIdentifier>{c88a01cf-f161-4e6d-ae5c-73a301dcb49d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Utility\04. Component\Collider">
-      <UniqueIdentifier>{e90640a9-0e57-4dd6-aade-72e7e4bcb042}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\97. Physics\ContactListener\Virtual">
       <UniqueIdentifier>{99751cc9-1385-48d7-808c-2ebc28706e30}</UniqueIdentifier>
@@ -264,6 +258,16 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Point">
       <UniqueIdentifier>{d53700ab-232b-46f4-b717-d1c2e4b1d9ed}</UniqueIdentifier>
+      <UniqueIdentifier>{2f2b1745-bbed-4df1-ae61-6b63d263e6ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\CollideComponent">
+      <UniqueIdentifier>{220e5f10-2e49-415d-ad4a-b4c72fd0f4f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\CollideComponent\Collider">
+      <UniqueIdentifier>{e90640a9-0e57-4dd6-aade-72e7e4bcb042}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\CollideComponent\Rigidbody">
+      <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -444,9 +448,6 @@
     <ClInclude Include="..\Public\CollisionLayer.h">
       <Filter>01. Utility\97. Physics\Layer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Rigidbody.h">
-      <Filter>01. Utility\04. Component\Rigidbody</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\DebugRender.h">
       <Filter>01. Utility\97. Physics\DebugRender</Filter>
     </ClInclude>
@@ -470,9 +471,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Model_Instance.h">
       <Filter>01. Utility\04. Component\Model_Instance</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Collider.h">
-      <Filter>01. Utility\04. Component\Collider</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\CharacterContactListenerImpl.h">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
@@ -519,7 +517,6 @@
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\public\ShaderFilter.h">
       <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
     </ClInclude>
@@ -534,6 +531,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Point.h">
       <Filter>01. Utility\04. Component\VIBuffer\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Collider.h">
+      <Filter>01. Utility\04. Component\CollideComponent\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Rigidbody.h">
+      <Filter>01. Utility\04. Component\CollideComponent\Rigidbody</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CollideComponent.h">
+      <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -693,9 +699,6 @@
     <ClCompile Include="..\Private\CollisionLayer.cpp">
       <Filter>01. Utility\97. Physics\Layer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Rigidbody.cpp">
-      <Filter>01. Utility\04. Component\Rigidbody</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\DebugRender.cpp">
       <Filter>01. Utility\97. Physics\DebugRender</Filter>
     </ClCompile>
@@ -716,9 +719,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Model_Instance.cpp">
       <Filter>01. Utility\04. Component\Model_Instance</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Collider.cpp">
-      <Filter>01. Utility\04. Component\Collider</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\CharacterContactListenerImpl.cpp">
       <Filter>01. Utility\97. Physics\ContactListener\Virtual</Filter>
@@ -779,6 +779,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Point.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Collider.cpp">
+      <Filter>01. Utility\04. Component\CollideComponent\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Rigidbody.cpp">
+      <Filter>01. Utility\04. Component\CollideComponent\Rigidbody</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CollideComponent.cpp">
+      <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
