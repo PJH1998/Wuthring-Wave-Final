@@ -85,8 +85,11 @@
     <Filter Include="03. GameObject\Camera\Spring">
       <UniqueIdentifier>{ede301d8-870a-4741-b3fc-ef4ad81d9087}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. GameObject\MonsterTest\Body">
-      <UniqueIdentifier>{d2355fc4-038d-49ca-91f7-20deddf40ace}</UniqueIdentifier>
+    <Filter Include="03. GameObject\Actor\MonsterTest">
+      <UniqueIdentifier>{2c3f6197-3925-414b-870c-256facfb484c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\MonsterTest\Body">
+      <UniqueIdentifier>{d7e75425-bf2a-4075-ae89-359a76262565}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +159,6 @@
     <ClInclude Include="..\Public\GameSystem.h">
       <Filter>01. GameSystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\AnimationDummy.h">
       <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
@@ -188,8 +190,11 @@
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MonsterTest.h">
+      <Filter>03. GameObject\Actor\MonsterTest</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\MonsterBody.h">
-      <Filter>02. GameObject\MonsterTest\Body</Filter>
+      <Filter>03. GameObject\Actor\MonsterTest\Body</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -249,7 +254,6 @@
     <ClCompile Include="..\Private\GameSystem.cpp">
       <Filter>01. GameSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp">
       <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
@@ -278,8 +282,11 @@
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MonsterTest.cpp">
+      <Filter>03. GameObject\Actor\MonsterTest</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\MonsterBody.cpp">
-      <Filter>02. GameObject\MonsterTest\Body</Filter>
+      <Filter>03. GameObject\Actor\MonsterTest\Body</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -310,8 +317,8 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>

@@ -133,8 +133,8 @@ void CASM_Interface::Node_Info()
 	{
 		ImGui::Text("to: %d slot %d -> from: %d slot %d", tLink.mInputNodeIndex, tLink.mInputSlotIndex, tLink.mOutputNodeIndex, tLink.mOutputSlotIndex);
 	}
-	if(0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.length() && 
-		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.length() &&
+	if(0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.length() || 
+		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.length() ||
 		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.length())
 	{
 		ImGui::Text("%s - %s - %s", m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.c_str(),
@@ -376,7 +376,7 @@ void CASM_Interface::BlackBoard_Setting()
 	case Editor::CASM_Interface::MASK:
 	{
 		ImGui::InputScalar("mask", ImGuiDataType_U32, &m_uInputTemp);
-		ImGui::Text("%d", (1 << m_uInputTemp));
+		ImGui::Text("%u", (1 << m_uInputTemp));
 		break;
 	}
 	case Editor::CASM_Interface::BOOL:
