@@ -116,6 +116,7 @@ public:
 	void		Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
+	void		IsSSAO(_bool IsSSAO);
 #endif
 #pragma endregion
 

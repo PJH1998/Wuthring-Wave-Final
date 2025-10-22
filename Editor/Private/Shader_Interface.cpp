@@ -16,7 +16,7 @@ void CShader_Interface::Update_Shadow()
 {
 	Set_ShadowBias();
 	Setting_LUT();
-	Set_SSAO_Sigma();
+	Set_SSAO();
 }
 
 void CShader_Interface::Set_ShadowBias()
@@ -53,13 +53,25 @@ void CShader_Interface::Set_ShadowBias()
 	ImGui::End();
 }
 
-void CShader_Interface::Set_SSAO_Sigma()
+void CShader_Interface::Set_SSAO()
 {
 	ImGui::Begin("SSAO");
 
-	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.01f, 0.01f, 10.f);
+	if(ImGui::Button("ON"))
+		m_pGameInstance->IsSSAO(true);
+	
+	ImGui::SameLine();
 
-	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigam", &m_fSigmaWeight, sizeof(_float));
+	if (ImGui::Button("OFF"))
+		m_pGameInstance->IsSSAO(false);
+
+	ImGui::InputFloat("RADIUS", &m_fRadius);
+	
+
+	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
+
+	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
+	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigma", &m_fSigmaWeight, sizeof(_float));
 	ImGui::End();
 }
 

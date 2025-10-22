@@ -383,6 +383,10 @@ HRESULT CGameInstance::Bind_RawValue_Renderer(const _char* pConstantName, void* 
 {
 	return m_pRenderer->Bind_RawValue(pConstantName, pValue, iLength);
 }
+void CGameInstance::IsSSAO(_bool IsSSAO)
+{
+	m_pRenderer->IsSSAO(IsSSAO);
+}
 #endif
 #pragma endregion
 

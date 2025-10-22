@@ -227,9 +227,16 @@ void CRenderer::Render_Light()
 
 void CRenderer::Render_SSAO()
 {
+
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
 		CRASH("Render Fail");
-
+#ifdef _DEBUG
+	if (false == m_IsSSAO)
+	{
+		m_pGameInstance->End_MRT();
+		return;
+	}
+#endif
 	if (FAILED(m_pShader->Bind_Matrix("g_CamViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Render Fail");
 
@@ -250,7 +257,8 @@ void CRenderer::Render_SSAO()
 
 	m_pGameInstance->End_MRT();
 
-//	SSAO_Blur();
+	//GaussianBlur_RenderTager(TEXT("RT_SSAO"), TEXT("MRT_SSAO"), BLUR_TYPE::GAUSSIAN);
+	SSAO_Blur();
 }
 
 void CRenderer::Render_Combined()
@@ -515,10 +523,6 @@ void CRenderer::GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
 		CRASH("Render Fail");
 
-	if(FAILED(m_pGameInstance->Bind_RenderTarget(pBlurRenderTarget, m_pShader, "g_BlurCombinedTexture")))
-		CRASH("Render Fail");
-
-
 	if (FAILED(m_pShader->Begin(iShaderPass)))
 		CRASH("Render Fail")
 
@@ -544,11 +548,16 @@ void CRenderer::GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const 
 
 void CRenderer::SSAO_Blur()
 {
+	_float fFar = m_pGameInstance->Get_CurrentCamera_Far();
+
+	if (FAILED(m_pShader->Bind_Value("g_fFar", &fFar, sizeof(_float))))
+		CRASH("Failed Bind Far");
+
 #pragma region BLUR_X
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_SsaoTexture")))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_BlurBeginTexture")))
 		CRASH("Render Fail");
 
 	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
@@ -597,9 +606,7 @@ void CRenderer::SSAO_Blur()
 	m_pVIBuffer->Render();
 
 	m_pGameInstance->End_MRT();
-
 #pragma region BLUR_END
-
 }
 
 #ifdef _DEBUG
@@ -689,11 +696,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Blur */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Blur"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Blur"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Blur_End*/
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BlurEnd"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BlurEnd"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Distortion */

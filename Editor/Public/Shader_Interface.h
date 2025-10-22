@@ -14,15 +14,18 @@ public:
 	void				Update_Shadow();
 	void				Setting_LUT();
 	void				Set_ShadowBias();
-	void				Set_SSAO_Sigma();
-
+	void				Set_SSAO();
+	
 private:
 	_float				m_fBias[4] = {};
 	_float				m_fMinBias[4] = {};
 	_float				m_fSlopeScale = {};
 	_uint				m_iLUT_Index = {};
 	_float				m_fLUT_Intensity = {};
-	_float				m_fSigmaWeight = {};
+	_float				m_fSigmaWeight = {0.001f};
+	_float				m_fRadius = { 10.f };
+	_bool				IsSSAO = {};
+
 private:
 	void				Setting_Bias(const _char* pName, _float* pFloat);
 

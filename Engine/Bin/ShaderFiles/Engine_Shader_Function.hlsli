@@ -137,7 +137,9 @@ float SSAO_Factor(Texture2D DepthTexture, sampler Sample, vector vSampleNormal, 
     if(Distance >= 0.f)
         return 1.f;
     
-    Occlusion = smoothstep(0.f, 1.f, fRadius / (SampleDepth - vProjPos.w));
+    float fFinalRadius = fRadius * (1.f + vViewPos.z * 0.1f);
+    
+    Occlusion = smoothstep(0.f, 1.f, fFinalRadius / (SampleDepth - vProjPos.w));
     
     return Occlusion;
 }

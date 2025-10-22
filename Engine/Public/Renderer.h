@@ -25,6 +25,7 @@ public:
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	void		Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
 	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
+	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 #endif
 
 private:
@@ -49,6 +50,7 @@ private:
 #ifdef _DEBUG
 	list<class CComponent*>			m_DebugComponents;
 	_bool							m_isRenderDebug = { true };
+	_bool							m_IsSSAO = { true };
 #endif
 
 private:
