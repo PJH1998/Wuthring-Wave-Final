@@ -190,7 +190,9 @@ void CPlayerAugusta::Change_State(_float fTimeDelta)
 
         _float4 vVelocity = {};
         XMStoreFloat4(&vVelocity, m_pTransformCom->Get_Velocity());
+#ifdef _DEBUG
         OutPutDebugFloat4(TEXT("Jump Velocity"), vVelocity);
+#endif
     }
         
 
