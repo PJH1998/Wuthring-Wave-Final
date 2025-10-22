@@ -116,8 +116,6 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	
 	m_pCamera_Manager->Update(fTimeDelta);
 	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
-	m_pOctoTree->Update();
-	
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
@@ -127,6 +125,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPipeLine->Update();
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
+	m_pOctoTree->Update();
 
 	m_pPooling_Manager->Update_Pooling();
 
