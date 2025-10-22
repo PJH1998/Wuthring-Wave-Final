@@ -149,6 +149,8 @@ void CASM_Interface::Node_Info()
 	}
 	if(BT_TYPE::ACTION == m_Nodes[m_iCurrentNodeIndex].eType)
 	{
+		ImGui::InputScalar("TargetState", ImGuiDataType_U32, &m_Nodes[m_iCurrentNodeIndex].iTargetState);
+		ImGui::Text("%u", (1 << m_Nodes[m_iCurrentNodeIndex].iTargetState));
 		if(!m_isConditionCreate && ImGui::Button("Create Condition"))
 		{
 			m_isConditionCreate = true;
@@ -585,6 +587,7 @@ void CASM_Interface::Save_Nodes(ofstream& File, _uint& iIndex)
 		Node["NumTransition"] = m_Nodes[i].Transitions.size();
 		Node["Editor_PosX"] = m_Nodes[i].x;
 		Node["Editor_PosY"] = m_Nodes[i].y;
+		Node["TargetState"] = m_Nodes[i].iTargetState;
 		Node["Transitions"] = json::array();
 		for(size_t j = 0; j < m_Nodes[i].Transitions.size(); j++)
 		{
@@ -667,6 +670,7 @@ void CASM_Interface::Load_BT_Data()
 				MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
 				tNode.Transitions = Transition;
 				tNode.Conditions = Conditions;
+				//tNode.iTargetState = NodeData["TargetState"];
 				m_Nodes.push_back(tNode);
 				break;
 			}

@@ -78,11 +78,7 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 
 		size_t iNumCondition = NodeData["NumCondition"];
 		CONDITION_TAG Condition {NodeData["ValueName"], NodeData["ConditionName"], NodeData["ConstName"]};
-		/*for(auto& Cond : NodeData["Conditions"])
-		{
-			CONDITION_TAG Condition;
-			Conditions.push_back(Condition);
-		}*/
+
 		NodeDat tNode;
 		tNode.eType = eType;
 		tNode.Transition = Transition;

@@ -17,6 +17,7 @@
 #include"Model_Instance.h"
 
 #include "Behavior_Tree.h"
+#include "AnimMachine.h"
 // ==================
 
 NS_BEGIN(Engine)

@@ -73,6 +73,7 @@ class CASM_Interface final : public CInterface_Edit
 		_string strName;
 		float x, y;
 		BT_TYPE eType;
+		_uint iTargetState;
 		vector<GraphEditor::Link> Transitions;
 		CONDITION_TAG Conditions;
 	};

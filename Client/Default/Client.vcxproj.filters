@@ -61,6 +61,9 @@
     <Filter Include="02. GameObject\MonsterTest">
       <UniqueIdentifier>{41486888-d776-4dc3-922d-fe6dff0765b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. GameObject\MonsterTest\Body">
+      <UniqueIdentifier>{d2355fc4-038d-49ca-91f7-20deddf40ace}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -135,6 +138,9 @@
     <ClInclude Include="..\Public\MonsterTest.h">
       <Filter>02. GameObject\MonsterTest</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\MonsterBody.h">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -198,6 +204,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\MonsterTest.cpp">
       <Filter>02. GameObject\MonsterTest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MonsterBody.cpp">
+      <Filter>02. GameObject\MonsterTest\Body</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
