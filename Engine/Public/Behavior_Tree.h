@@ -61,6 +61,7 @@ private:
 	CBlackBoard* m_pBlackBoard = {nullptr};
 
 	vector<NodeDat> m_NodesDatas;
+	vector<_string> m_RequireKey;
 
 private:
 	void Load_Tree_Graph(const _char* BehaviorTreeDataPath);

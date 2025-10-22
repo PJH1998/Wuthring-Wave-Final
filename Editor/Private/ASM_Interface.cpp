@@ -35,9 +35,10 @@ HRESULT CASM_Interface::Initialize()
 
 	m_pBlackBoard = CBlackBoard::Create();
 
-	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
-	BTDesc.pBlackBoard = m_pBlackBoard;
-	m_pBehaviorTree->Initialize_Clone(&BTDesc);
+	//CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
+	//BTDesc.pBlackBoard = m_pBlackBoard;
+	//m_pBehaviorTree->Initialize_Clone(&BTDesc);
+	//Safe_AddRef(m_pBlackBoard);
 
 	Initialize_BT();
 
@@ -161,6 +162,18 @@ void CASM_Interface::Node_Info()
 		}
 		if(m_isConditionCreate)
 		{
+			if(ImGui::RadioButton("Int", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 0)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Float", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 1)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Mask", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 2)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Bool", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 3)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Vec3", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 4)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("Vec4", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 5)){}
+
 			ImGui::InputText("Value", m_strValueName, MAX_PATH);
 			ImGui::InputText("Condition", m_strConditionName, MAX_PATH);
 			ImGui::InputText("Const", m_strConstName, MAX_PATH);
@@ -168,8 +181,17 @@ void CASM_Interface::Node_Info()
 			{
 				CONDITION_TAG tCondition;
 				tCondition.strValue = m_strValueName;
+				if(tCondition.strValue.length() != 0)
+					m_RequireValueKey.insert(m_strValueName);
+				else
+					m_Nodes[m_iCurrentNodeIndex].eDataType = DATA_TYPE::DATA_END;
+
 				tCondition.strCondition = m_strConditionName;
+				if(tCondition.strCondition.length() != 0)
+					m_RequireConditionKey.insert(m_strConditionName);
 				tCondition.strConst = m_strConstName;
+				if(tCondition.strConst.length() != 0)
+					m_RequireConstKey.insert(m_strConstName);
 
 				m_Nodes[m_iCurrentNodeIndex].Conditions = tCondition;
 				m_isConditionCreate = false;
@@ -181,6 +203,30 @@ void CASM_Interface::Node_Info()
 			}
 		}
 	}
+	if(ImGui::CollapsingHeader("Require Key"))
+	{
+		ImGui::BeginTable("Key Property", 3, ImGuiTableFlags_BordersInnerV);
+		ImGui::TableNextColumn();
+		ImGui::Text("Value");
+		for(auto strKey : m_RequireValueKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::TableNextColumn();
+		ImGui::Text("Condition");
+		for(auto strKey : m_RequireConditionKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::TableNextColumn();
+		ImGui::Text("Const");
+		for(auto strKey : m_RequireConstKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::EndTable();
+	}
+	ImGui::Text("end");
 }
 
 void CASM_Interface::Delete_Link()
@@ -237,19 +283,19 @@ void CASM_Interface::BehaviorTree_Setting()
 		{
 		case Editor::CASM_Interface::ACTION:
 		{
-			MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
 		case Editor::CASM_Interface::SELECTOR:
 		{
-			MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
 		case Editor::CASM_Interface::SEQUENCE:
 		{
-			MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
@@ -459,13 +505,6 @@ void CASM_Interface::BlackBoard_Setting()
 			CRASH(m_ValueContainer[szValueTag].first);
 		//m_strValueKey = m_strValueTag; 대입 시 m_strValueKey이 size 0 인 상태로 복사됨.
 		m_strValueKey = szValueTag;
-//#ifdef _DEBUG
-//		cout << "a: \"" << m_strValueKey << "\" size=" << m_strValueKey.size() << "\n";
-//		cout << "b: \"" << m_strValueTag << "\" size=" << m_strValueTag.size() << "\n";
-//		cout << "&a=" << (const void*)&m_strValueKey << " &b=" << (const void*)&m_strValueTag << "\n";
-//		cout << "a.data=" << static_cast<const void*>(m_strValueKey.data())
-//			<< " b.data=" << static_cast<const void*>(m_strValueTag.data()) << "\n";
-//#endif // _DEBUG
 
 	}
 #ifdef _DEBUG
@@ -609,6 +648,21 @@ void CASM_Interface::Save_Nodes(ofstream& File, _uint& iIndex)
 
 		Output["Nodes"].push_back(Node);
 	}
+	Output["A_ValueKey"] = json::array();
+	for(auto& strKey : m_RequireValueKey)
+	{
+		Output["A_ValueKey"].push_back(strKey);
+	}
+	Output["A_ConditionKey"] = json::array();
+	for(auto& strKey : m_RequireConditionKey)
+	{
+		Output["A_ConditionKey"].push_back(strKey);
+	}
+	Output["A_ConstKey"] = json::array();
+	for(auto& strKey : m_RequireConstKey)
+	{
+		Output["A_ConstKey"].push_back(strKey);
+	}
 	File << Output.dump(4);
 }
 
@@ -661,13 +715,14 @@ void CASM_Interface::Load_BT_Data()
 			
 			_float x{NodeData["Editor_PosX"]}, y{NodeData["Editor_PosY"]};
 			_string szNodeName;
+			_uint iTargetState = NodeData["TargetState"];
 			szNodeName = "Count";
 			szNodeName += to_string(m_iNodeCount).c_str();
 			switch(eType)
 			{
 			case Editor::CASM_Interface::ACTION:
 			{
-				MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				tNode.Conditions = Conditions;
 				//tNode.iTargetState = NodeData["TargetState"];
@@ -676,14 +731,14 @@ void CASM_Interface::Load_BT_Data()
 			}
 			case Editor::CASM_Interface::SELECTOR:
 			{
-				MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				m_Nodes.push_back(tNode);
 				break;
 			}
 			case Editor::CASM_Interface::SEQUENCE:
 			{
-				MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				m_Nodes.push_back(tNode);
 				break;
@@ -694,6 +749,19 @@ void CASM_Interface::Load_BT_Data()
 
 			Create_Template(eType, iNumTransition);
 			++m_iNodeCount;
+		}
+
+		for(auto& strKey : BT_Data["A_ValueKey"])
+		{
+			m_RequireValueKey.insert(strKey);
+		}
+		for(auto& strKey : BT_Data["A_ConditionKey"])
+		{
+			m_RequireConditionKey.insert(strKey);
+		}
+		for(auto& strKey : BT_Data["A_ConstKey"])
+		{
+			m_RequireConstKey.insert(strKey);
 		}
 
 		file.close();
@@ -809,6 +877,7 @@ void CASM_Interface::Free()
 {
 	__super::Free();
 	Safe_Release(m_pBehaviorTree);
+	Safe_Release(m_pBlackBoard);
 	Clear_Container();
 }
 

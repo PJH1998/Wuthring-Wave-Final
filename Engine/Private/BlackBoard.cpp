@@ -76,17 +76,34 @@ void* CBlackBoard::Get_Data(const _string& strDataTag)
 		return nullptr;
 }
 
-HRESULT CBlackBoard::Add_Condition(const _string& strDataTag, function<_bool()> Condition)
+HRESULT CBlackBoard::Add_Condition(const _string& stFuncTag, function<_bool()> Condition)
 {
-	m_Conditions.emplace(make_pair(strDataTag, Condition)); return S_OK;
+	if(!Find_Condition(stFuncTag))
+		return E_FAIL;
+
+	m_Conditions.emplace(make_pair(stFuncTag, Condition)); 
+	return S_OK;
 }
 
 _bool CBlackBoard::Get_Condition(const _string& strFuncTag)
 {
-	if(m_Conditions.find(strFuncTag) == m_Conditions.end())
+	if(Find_Condition(strFuncTag))
 		CRASH(m_Conditions.find(strFuncTag))
 
 	return m_Conditions[strFuncTag]();
+}
+
+_bool CBlackBoard::Necessary_Key_Check(vector<_string>& RequireKey)
+{
+	for(auto& strKey : RequireKey)
+		if(Find_Data(strKey))
+			return true;
+
+	for(auto& strKey : RequireKey)
+		if(Find_Condition(strKey))
+			return true;
+
+	return false;
 }
 
 #ifdef _DEBUG
@@ -189,6 +206,11 @@ void CBlackBoard::Clear_Data()
 _bool CBlackBoard::Find_Data(const _string& strDataTag)
 {
 	return m_Datas.find(strDataTag) != m_Datas.end();
+}
+
+_bool CBlackBoard::Find_Condition(const _string& strDataTag)
+{
+	return  m_Conditions.find(strDataTag) != m_Conditions.end();
 }
 
 //CBlackBoard::ACCESSOR* CBlackBoard::Find(StringID uKey)

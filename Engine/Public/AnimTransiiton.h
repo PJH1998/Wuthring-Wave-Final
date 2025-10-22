@@ -18,7 +18,7 @@ public:
 
 private:
 	_string m_strNextState;
-	CONDITION Conditions;
+	CONDITION m_Conditions;
 
 public:
 	static CAnimTransiiton* Create(ifstream& File);

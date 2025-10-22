@@ -23,7 +23,8 @@ class CASM_Interface final : public CInterface_Edit
 		MASK,
 		BOOL,
 		VECTOR3,
-		VECTOR4
+		VECTOR4,
+		DATA_END
 	};
 
 	//typedef std::variant<std::monostate, _int, _float, _string, _bool, _float3, _float4> VAR;
@@ -74,6 +75,7 @@ class CASM_Interface final : public CInterface_Edit
 		float x, y;
 		BT_TYPE eType;
 		_uint iTargetState;
+		DATA_TYPE eDataType;
 		vector<GraphEditor::Link> Transitions;
 		CONDITION_TAG Conditions;
 	};
@@ -134,6 +136,7 @@ private:
 
 	set<_string> m_RequireValueKey;
 	set<_string> m_RequireConditionKey;
+	set<_string> m_RequireConstKey;
 #pragma endregion
 
 private:

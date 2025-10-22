@@ -36,7 +36,13 @@ HRESULT CBehavior_Tree::Initialize_Clone(void* pArg)
 	m_pBlackBoard = pDesc->pBlackBoard;
 	if(m_pBlackBoard == nullptr)
 		return E_FAIL;
-    
+
+	if(false == m_pBlackBoard->Necessary_Key_Check(m_RequireKey))
+	{
+		CRASH(m_RequireKey.data())
+		return E_FAIL;
+	}
+	m_RequireKey.clear();
 	return S_OK;
 }
 
@@ -85,6 +91,20 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 		tNode.Conditions = Condition;
 		m_NodesDatas.push_back(tNode);
 	}
+
+	for(auto& strKey : BT_Data["A_ValueKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+	for(auto& strKey : BT_Data["A_ConditionKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+	for(auto& strKey : BT_Data["A_ConstKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+
 	File.close();
 }
 

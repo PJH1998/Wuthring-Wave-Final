@@ -12,21 +12,33 @@ HRESULT CAnimTransiiton::Initialize_Prototype(ifstream& File)
 
 _bool CAnimTransiiton::Can_Transit()
 {
-    return _bool();
+    for(auto& Func : m_Conditions)
+        if(Func())
+            return true;
+
+    return false;
 }
 
 CAnimTransiiton* CAnimTransiiton::Create(ifstream& File)
 {
-    return nullptr;
+    CAnimTransiiton* pInstance = new CAnimTransiiton();
+    if(FAILED(pInstance->Initialize_Prototype(File)))
+    {
+        MSG_BOX("Failed to Created : CAnimTransiiton");
+        Safe_Release(pInstance);
+    }
+    return pInstance;
 }
 
 #ifdef _DEBUG
 CAnimTransiiton* CAnimTransiiton::Create()
 {
-    return nullptr;
+    CAnimTransiiton* pInstance = new CAnimTransiiton();
+    return pInstance;
 }
 #endif // _DEBUG
 
 void CAnimTransiiton::Free()
 {
+    __super::Free();
 }
