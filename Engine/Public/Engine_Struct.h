@@ -43,7 +43,8 @@ namespace Engine
 		_float fTrackPosition;
 		function<void()> Func;
 		tagNotify(_float _fTrackPosition, function<void()> _Func)
-			: fTrackPosition{ _fTrackPosition }, Func{ _Func } {};
+			: fTrackPosition{ _fTrackPosition }, Func{ _Func } {
+		};
 	}NOTIFY;
 
 	typedef struct tagKeyFrame
@@ -74,28 +75,69 @@ namespace Engine
 		_uint		iType;
 	}CELL;
 
+	typedef struct EffectDesc
+	{
+		_wstring	strMyTag;
+		EFFECT_TYPE eMyType = EFFECT_TYPE::END;
+		_bool		IsRootOn = false;
+		const _float4x4*  RootMatrix = {};
+	}EFFECT_DESC;
 
-	typedef struct ParticleSRV
+	typedef struct ParticleSRV	
 	{
 		_float4 DefaultPos; 
+
 		_float  fSpeed;
 		_float	_pad0[3];
+
 	}PARTICLE_SRV;
 
-	typedef struct ParticleCB
+	typedef struct ParticleOptionCB	
 	{
 		_float3 vPivot;		
-		_float  fTimeDelta;
+		_uint	IsLoop;	
+		
+		_uint	IsStretch;
+		_uint	IsSprite;
+		_float	_pad[2];
+	}PARTICLE_DefaultCB;
 
-		_uint	IsLoop;		// 0?대㈃ false, 1?대㈃ true
+	typedef struct ParticleSpeedCB
+	{
+		_float  fTimeDelta;
 		_float	fSpreadWeight;
 		_float  fDropWeight;
 		_float  fRotationWeight;
 
 		_float	fGravity;
-		_float	_pad[3];
-	}PARTICLE_CB;
+		_float	fStretchWeight;
+		_float2 fStretchRange;
 
+		_float  fSpriteWeight;
+		_float  fSpriteDefault;
+		_float  _pad[2];
+	}PARTICLE_SPEEDCB;
+
+	typedef struct FXMeshSRV
+	{
+		_float4 DefaultPos;
+
+		_float fSpeed;						
+		_float3 vColor;
+
+	}FXMESH_SRV;
+
+	typedef struct FXMeshCB
+	{
+		_float3 vPivot;
+		_float fTimeDelta;
+
+		_uint IsLoop;
+		_float fSpreadWeight;
+		_float fDropWeight;
+		_float fRotattionWeight;
+
+	}FXMESH_CB;
 
 	typedef struct tagShaderMacro {
 		D3D_SHADER_MACRO tagX;
@@ -115,7 +157,7 @@ namespace Engine
 		_uint  iStartChannelIndexOffset; // Channel ?쒖옉 (?꾩쟻 ?몃뜳??  
 		_uint  iNumChannels; // ???대┰???ы븿??梨꾨꼸(堉???媛쒖닔
 		_float fDuration;
-		uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
+		_uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
 	}ANIMINFO;
 
 	// 梨꾨꼸 ?뺣낫 援ъ“泥?=> Depth2
