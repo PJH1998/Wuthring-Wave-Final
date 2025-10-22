@@ -227,27 +227,6 @@ struct VS_OUT
 };
 
 
-
-//VS_OUT VS_MAIN(VS_IN In)
-//{
-//    VS_OUT Out = (VS_OUT) 0;
-//    
-//    /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
-//        
-//    float4x4 matWV, matWVP;
-//    
-//    matWV = mul(g_WorldMatrix, g_ViewMatrix);
-//    matWVP = mul(matWV, g_ProjMatrix);
-//    
-//    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
-//    Out.vTexcoord = In.vTexcoord;
-//    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-//    Out.vProjPos = Out.vPosition;
-//    
-//    return Out;
-//}
-
-
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
     VS_OUT Out = (VS_OUT) 0;
@@ -259,23 +238,11 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     matWVP = mul(matWV, g_ProjMatrix);
     
     
-    
-    // 증상 정리
-    
-    // 1-1. 외부에서 행렬을 받아오면 원근 느낌으로 찢어지며 출력
-    // 1-2. 내부에서 항등행렬을 정의해두면 상하반전 두 이미지가 겹쳐보이며 출력
-    // 1-3. 내부에서 UV까지 정의해두면 한 모양의 정방향 이미지만 풀력
-    
-    
     float4x4 matAdditionalTransform = float4x4(
         In.vSInstRight,
         In.vSInstUp,
         In.vSInstLook,
-        In.vSInstTrans  
-        //1, 0, 0, 0,
-        //0, 1, 0, 0,
-        //0, 0, 1, 0,
-        //0, 0, 0, 1
+        In.vSInstTrans
     );
     
     float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
@@ -288,9 +255,6 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
-    
-    
-    
     // 이후 픽셀에서 사용
     
     // Pixel에서 사용 위해 바로 Output
@@ -298,44 +262,6 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     Out.vSInstCoordY = In.vSInstCoordY;
     Out.vClipTexcoordX = In.vClipTexcoordX;
     Out.vClipTexcoordY = In.vClipTexcoordY;
-    
-    
-    
-    
-    
-    // Origin
-    
-    /*
-    float4x4 matAdditionalTransform = float4x4(
-        In.vSInstRight, 
-        In.vSInstUp,    
-        In.vSInstLook,  
-        In.vSInstTrans  
-        
-        //1, 0, 0, 0,
-        //0, 1, 0, 0,
-        //0, 0, 1, 0,
-        //0, 0, 0, 1
-    );
-    
-    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
-    vWorldPos = mul(vWorldPos, matWVP);
-    
-    Out.vPosition = vWorldPos;
-    Out.vTexcoord = In.vTexcoord;
-    Out.vWorldPos = vWorldPos;
-    Out.vProjPos = Out.vPosition;   
-    
-    Out.vSInstPos = In.vSInstTrans.xy;
-    Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
-    // 이후 픽셀에서 사용
-    
-    // Pixel에서 사용 위해 바로 Output
-    Out.vSInstCoordX   = In.vSInstCoordX;
-    Out.vSInstCoordY   = In.vSInstCoordY;
-    Out.vClipTexcoordX = In.vClipTexcoordX;
-    Out.vClipTexcoordY = In.vClipTexcoordY;
-    */
     
     return Out;
 }

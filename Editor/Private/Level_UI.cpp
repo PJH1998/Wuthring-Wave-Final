@@ -1429,8 +1429,7 @@ void CLevel_UI::Update_InstanceEditor()
 
 
 
-    if (static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance &&
-        ImGui::CollapsingHeader("[Instance] Transform"))
+    if (ImGui::CollapsingHeader("[Instance] Transform"))
     {
         // Add Instance
         if (ImGui::Button("Add"))
@@ -1455,7 +1454,7 @@ void CLevel_UI::Update_InstanceEditor()
 
         if (m_pSelectedInstance)
         {
-            // ������
+            // Extracting Float3 Editable Values from Instance.
             _matrix matTransform = _matrix(
                 XMLoadFloat4(&vSInstRight),
                 XMLoadFloat4(&vSInstUp),
@@ -1467,7 +1466,7 @@ void CLevel_UI::Update_InstanceEditor()
             _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
             XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, matTransform);
 
-            _float4x4	matStoreObjQuaternion = {};	// ���ʹϾ�
+            _float4x4	matStoreObjQuaternion = {};	// quat
             XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
 
             XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
@@ -1475,7 +1474,7 @@ void CLevel_UI::Update_InstanceEditor()
             XMStoreFloat3(&vStoreObjScale, vXMObjScale);
 
 
-            // �����Ͽ� ������
+            // Apply to Editor
             curInstPos = vStoreObjPosition;
             curInstRot = vStoreObjRotation;
             curInstSca = vStoreObjScale;
@@ -1536,7 +1535,7 @@ void CLevel_UI::Update_InstanceEditor()
 
             ImGui::PopItemWidth();
 
-            // ����
+            // Apply Values to [Instance]
             _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&curInstPos));
             _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(curInstRot.x), TO_RAD(curInstRot.y), TO_RAD(curInstRot.z));
             _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&curInstSca));
@@ -1553,10 +1552,10 @@ void CLevel_UI::Update_InstanceEditor()
             m_pSelectedInstance->vSInstUp           = vSInstUp    ;
             m_pSelectedInstance->vSInstLook         = vSInstLook  ;
             m_pSelectedInstance->vSInstTrans        = vSInstTrans ;
-            m_pSelectedInstance->vSInstCoordX       = vTexcoordX  ;
-            m_pSelectedInstance->vSInstCoordY       = vTexcoordY  ;
-            m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
-            m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
+            //m_pSelectedInstance->vSInstCoordX       = vTexcoordX  ;
+            //m_pSelectedInstance->vSInstCoordY       = vTexcoordY  ;
+            //m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
+            //m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
         }
 
     }
@@ -1565,7 +1564,57 @@ void CLevel_UI::Update_InstanceEditor()
     // ==============================
     // * Additional Desc
     // ==============================
+    if (ImGui::CollapsingHeader("[Instance] Desc Change"))
+    {
+        if (m_pSelectedInstance)
+        {
+            // vSInstCoordX	    : float2 data, for slicing atlas / sprite style images.
+            // vSInstCoordY	    : float2 data, for slicing atlas / sprite style images.
+            // vClipTexcoordX   : float2 data, for discarding pixel based on local space. like as HP Bar Value.
+            // vClipTexcoordY   : float2 data, for discarding pixel based on local space. like as HP Bar Value.
+            ImGui::PushItemWidth(90.f);
 
+            ImGui::Text("Slice by ImagePos");
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+                ImGui::SetTooltip("for slicing atlas / sprite style images.");
+            
+            ImGui::Text("Pos X Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosStartX", &m_pSelectedInstance->vSInstCoordX.x, 0.001f ,0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosEndX", &m_pSelectedInstance->vSInstCoordX.y, 0.001f ,0.0f, 1.0f);
+            
+            ImGui::Text("Pos Y Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosStartY", &m_pSelectedInstance->vSInstCoordY.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosEndY", &m_pSelectedInstance->vSInstCoordY.y, 0.001f, 0.0f, 1.0f);
+            
+            
+            ImGui::Separator();
+            ImGui::Text("Discard by LocalPos");
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+                ImGui::SetTooltip("for discarding pixel based on local space. like as HP Bar Value.");
+            
+            ImGui::Text("Pos X Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosStartX", &m_pSelectedInstance->vClipTexcoordX.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosEndX", &m_pSelectedInstance->vClipTexcoordX.y, 0.001f, 0.0f, 1.0f);
+            
+            ImGui::Text("Pos Y Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosStartY", &m_pSelectedInstance->vClipTexcoordY.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosEndY", &m_pSelectedInstance->vClipTexcoordY.y, 0.001f, 0.0f, 1.0f);
+
+            ImGui::PopItemWidth();
+        }
+        else
+        {
+            ImGui::Text("Instance not selected.");
+        }
+    }
 
 
 

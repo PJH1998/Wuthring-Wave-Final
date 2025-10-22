@@ -103,9 +103,6 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	{
 		SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
 
-		//pInstanceVertices[i].vPosition = {};
-		//pInstanceVertices[i].vTexcoord = {};
-
 		pInstanceVertices[i].vSInstRight	= { 1.f, 0.f, 0.f ,0.f };
 		pInstanceVertices[i].vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
 		pInstanceVertices[i].vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
@@ -116,9 +113,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 
 		pInstanceVertices[i].vClipTexcoordX = { 0.f, 1.f };			
 		pInstanceVertices[i].vClipTexcoordY = { 0.f, 1.f };
-		
 	}
-
 
 	return S_OK;
 }
@@ -137,7 +132,7 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 
 	SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
 
-	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource); // ksta : ONLY WORKS WITH "D3D11_MAP_WRITE_DISCARD", "D3D11_MAP_WRITE_NO_OVERWRITE" CANNOT REWRITE IMAGE CORRECTLY.
+	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource); // ksta : "D3D11_MAP_WRITE_DISCARD", "D3D11_MAP_WRITE_NO_OVERWRITE"
 	SINGLE_INST_DESC* pVertices = static_cast<SINGLE_INST_DESC*>(SubResource.pData);
 
 	m_iNumAvailableInstance = min(m_iNumInstance, static_cast<_uint>(vecDescs.size()));
@@ -201,5 +196,11 @@ CComponent* CVIBuffer_Rect_Instance_UI::Clone(void* pArg)
 
 void CVIBuffer_Rect_Instance_UI::Free()
 {
-	__super::Free();
+	//__super::Free();
+
+	CVIBuffer::Free();
+
+	if (!m_isClone)
+		Safe_Delete_Array(m_pVBInstanceVertices);
+	Safe_Release(m_pVBInstance);
 }
