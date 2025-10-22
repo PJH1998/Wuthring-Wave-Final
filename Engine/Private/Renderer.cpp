@@ -43,6 +43,8 @@ HRESULT CRenderer::Initialize()
 	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(static_cast<_float>( m_iWinSizeX ), static_cast<_float>( m_iWinSizeY ), 0.f, 1.f));
 
+	m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"));
+	m_pGameInstance->End_MRT();
 #ifdef _DEBUG
 	if (FAILED(m_pGameInstance->Ready_Debug_RT(TEXT("RT_Diffuse"), 150.0f, 150.0f, 300.f, 300.f)))
 		return E_FAIL;
@@ -72,7 +74,7 @@ void CRenderer::Render()
 	Render_Outline();
 	Render_NonBlend();
 	Render_Light();
-	Render_SSAO();
+	//Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
 	//Render_Emissive();
