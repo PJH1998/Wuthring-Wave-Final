@@ -149,11 +149,20 @@ void CEditorApp::Update(_float fTimeDelta)
 	
 	ImGui::End();
 
-	//if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
-	//{
-	//	CHANGE_LEVEL_EVENT event{ LEVEL::ANIMATION, true };
-	//	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-	//}
+	ImGui::Begin("Frame");
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "Frame : %d", m_iFrame);
+	ImGui::Text(szFrame);
+	ImGui::End();
+
+	m_fTimeAcc += fTimeDelta;
+	++m_iCnt;
+	if (m_fTimeAcc > 1.f)
+	{
+		m_fTimeAcc = 0.f;
+		m_iFrame = m_iCnt;
+		m_iCnt = 0;
+	}
 }
 
 void CEditorApp::Render()

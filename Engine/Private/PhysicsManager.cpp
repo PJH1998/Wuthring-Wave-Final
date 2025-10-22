@@ -91,9 +91,6 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	ASSERT_CRASH(m_pObjectLayerFilter);
 	m_pObjectVsBPFilter = new ObjectVsBroadPhaseLayerFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectVsBPFilter);
-	// Contact Listener ?앹꽦
-	m_pContactListener = new CContactListenerImpl();
-	ASSERT_CRASH(m_pContactListener);
 
 	// Virtual Container ?숈쟻 ?좊떦
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
@@ -147,6 +144,13 @@ void CPhysicsManager::Update(_float fTimeDelta)
 	}
 }
 
+void CPhysicsManager::Late_Update()
+{
+	if (nullptr == m_pContactListener)
+		return;
+	m_pContactListener->Remove_Update();
+}
+
 _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut)
 {
 	RVec3 StartPos = LoadVec3(vStartPos);
@@ -195,6 +199,10 @@ void CPhysicsManager::SetUp_PhysicsSystem()
 		m_iMaxBodyPairs, m_iMaxContactConstraints,
 		*m_pBPLayer, *m_pObjectVsBPFilter, *m_pObjectLayerFilter);
 	m_pPhysicsSystem->SetPhysicsSettings(m_PhysicsSetting);
+
+	// Contact Listener Create / SetUp
+	m_pContactListener = new CContactListenerImpl(&m_pPhysicsSystem->GetBodyInterface());
+	ASSERT_CRASH(m_pContactListener);
 	m_pPhysicsSystem->SetContactListener(m_pContactListener);
 
 	// Character Contact Listener

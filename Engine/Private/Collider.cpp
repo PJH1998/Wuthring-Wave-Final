@@ -5,12 +5,12 @@
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
 
 CCollider::CCollider(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CComponent { pDevice, pContext }
+	: CCollideComponent { pDevice, pContext }
 {
 }
 
 CCollider::CCollider(const CCollider& Prototype)
-	: CComponent { Prototype }
+	: CCollideComponent{ Prototype }
 {
 }
 
@@ -41,25 +41,26 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	ASSERT_CRASH(pArg);
 
 	COLLIDER_DESC* pDesc = static_cast<COLLIDER_DESC*>(pArg);
-	m_pOwner = pDesc->pOwner;
 	m_iCollisionLayer = pDesc->iLayer;
 
 	RefConst<Shape> BodyShape;
 
+	// Create Shape
 	using namespace JPH;
 	BodyShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
 	ASSERT_CRASH(BodyShape);
 
+	// SetUp CharacterVitual
 	CharacterVirtualSettings VirtualSetting;
 	VirtualSetting.mShape = BodyShape;
 	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
 	VirtualSetting.mInnerBodyShape = BodyShape;
 	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
 
-	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), m_pOwner);
+	// Create CharacterVirtual
+	m_tCollisionData.pComponent = this;
+	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
 	ASSERT_CRASH(m_pCharacterVirtual);
-
-	m_pCharacterVirtual->SetUserData(reinterpret_cast<uint64>(m_pOwner));
 
     return S_OK;
 }
@@ -127,5 +128,6 @@ void CCollider::Free()
 	__super::Free();
 
 	m_pCharacterVirtual = nullptr;
-	m_pOwner = nullptr;
+	m_tCollisionData.pComponent = nullptr;
+	m_tCollisionData.pDesc = nullptr;
 }

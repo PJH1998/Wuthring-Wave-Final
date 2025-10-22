@@ -1,7 +1,7 @@
 ﻿#include "EnginePch.h"
 #include "ContactListenerImpl.h"
 
-#include "GameObject.h"
+#include "CollideComponent.h"
 
 CContactListenerImpl::CContactListenerImpl()
 {
@@ -16,6 +16,22 @@ CContactListenerImpl::~CContactListenerImpl()
 {
 }
 
+void CContactListenerImpl::Remove_Update()
+{
+	for (auto& Pair : m_RemoveIDs)
+	{
+		COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(m_pBodyInterface->GetUserData(Pair.first));
+		COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(m_pBodyInterface->GetUserData(Pair.second));
+
+		ContactManifold Manifold;
+		ZeroMemory(&Manifold, sizeof(ContactManifold));
+
+		pSrcData->pComponent->OnCollide_Remove(m_pBodyInterface->GetObjectLayer(Pair.second), pDstData->pDesc, Manifold);
+		pDstData->pComponent->OnCollide_Remove(m_pBodyInterface->GetObjectLayer(Pair.first), pSrcData->pDesc, Manifold);
+	}
+	m_RemoveIDs.clear();
+}
+
 ValidateResult CContactListenerImpl::OnContactValidate(const Body& inBody1, const Body& inBody2, RVec3Arg inBaseOffset, const CollideShapeResult& inCollisionResult)
 {
     return ValidateResult();
@@ -23,34 +39,26 @@ ValidateResult CContactListenerImpl::OnContactValidate(const Body& inBody1, cons
 
 void CContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 {
-	CGameObject* pSrc = reinterpret_cast<CGameObject*>(inBody1.GetUserData());
-	CGameObject* pDst = reinterpret_cast<CGameObject*>(inBody2.GetUserData());
+	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inBody1.GetUserData());
+	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inBody2.GetUserData());
 
-	if(nullptr != pSrc)
-		pSrc->OnCollide_Enter(inBody2.GetObjectLayer(), pDst, inManifold);
-	if(nullptr != pDst)
-		pDst->OnCollide_Enter(inBody1.GetObjectLayer(), pSrc, inManifold);
+	pSrcData->pComponent->OnCollide_Enter(inBody2.GetObjectLayer(), pDstData->pDesc, inManifold);
+	pDstData->pComponent->OnCollide_Enter(inBody1.GetObjectLayer(), pSrcData->pDesc, inManifold);
 }
 
 void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 {
-	CGameObject* pSrc = reinterpret_cast<CGameObject*>(inBody1.GetUserData());
-	CGameObject* pDst = reinterpret_cast<CGameObject*>(inBody2.GetUserData());
+	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inBody1.GetUserData());
+	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inBody2.GetUserData());
 
-	if (nullptr != pSrc)
-		pSrc->OnCollide_OnGoing(inBody2.GetObjectLayer(), pDst, inManifold);
-	if (nullptr != pDst)
-		pDst->OnCollide_OnGoing(inBody1.GetObjectLayer(), pSrc, inManifold);
+	pSrcData->pComponent->OnCollide_During(inBody2.GetObjectLayer(), pDstData->pDesc, inManifold);
+	pDstData->pComponent->OnCollide_During(inBody1.GetObjectLayer(), pSrcData->pDesc, inManifold);
 }
 
 void CContactListenerImpl::OnContactRemoved(const SubShapeIDPair& inSubShapePair)
 {
-	//CGameObject* pSrc = reinterpret_cast<CGameObject*>(m_pBodyInterface->GetUserData(inSubShapePair.GetBody1ID()));
-	//CGameObject* pDst = reinterpret_cast<CGameObject*>(m_pBodyInterface->GetUserData(inSubShapePair.GetBody2ID()));
-	//
-	//m_pBodyInterface->GetObjectLayer()
-	//if (nullptr != pSrc)
-	//	pSrc->OnCollide_End(inBody2.GetObjectLayer(), pDst);
-	//if (nullptr != pDst)
-	//	pDst->OnCollide_End(inBody1.GetObjectLayer(), pSrc);
+	pair<BodyID, BodyID> PairID;
+	PairID.first = inSubShapePair.GetBody1ID();
+	PairID.second = inSubShapePair.GetBody2ID();
+	m_RemoveIDs.push_back(PairID);
 }

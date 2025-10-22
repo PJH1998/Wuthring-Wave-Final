@@ -2,8 +2,8 @@
 #include "Camera.h"
 
 NS_BEGIN(Engine)
-class CTransform;
 class CCollider;
+class CRigidbody;
 NS_END
 
 NS_BEGIN(Editor)
@@ -19,8 +19,21 @@ public:
 	void							Set_Distance(_float fDistance) { m_fDistance += fDistance; }
 	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
 
+	// SetUp Target Pos, Offset Y
 	void							Update_Target(const _fvector& TargetPos, _float fOffsetY)
 	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; };
+	// Spring (Distance Adjust) - Lerp
+	// 목표 Distance, 도달 시간
+	void							Use_Spring(_float fDestination, _float fDuration)
+	{
+		if (true == m_isSpring)
+			return;
+		m_fDestination = fDestination;
+		m_fSpringDuration = fDuration;
+		m_isSpring = true;
+	}
+	// Lock-On
+	void							Lock_On() { m_isLockOn = !m_isLockOn; }
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -32,10 +45,11 @@ public:
 	virtual		void				Render() override;
 
 private:
+	// Detect Collider
 	CCollider*					m_pColliderCom = { nullptr };
+	CRigidbody*				m_pRigidbodyCom = { nullptr };
+
 	_float4						m_vTargetPosition = {};		// Target Pos
-	_float4						m_vPrePosition = {};			// PrePosition
-	_float4						m_vCurrentPosition = {};		// Current CamPos
 	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
 
 	// Distance Lerp
@@ -45,7 +59,11 @@ private:
 	// Spring
 	_bool							m_isSpring = { false };
 	_float							m_fStiffness = {};		// Spring Force
-	_float							m_fDamp = {};			// 감쇠 계수
+	_float							m_fDestination = {};	// Spring Destination
+	_float							m_fSpringDuration = {};
+
+	// Lock-On
+	_bool							m_isLockOn = { false };
 
 private:
 	void							Lerp_Distance(_float fTimeDelta);
