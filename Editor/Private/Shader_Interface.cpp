@@ -16,6 +16,7 @@ void CShader_Interface::Update_Shadow()
 {
 	Set_ShadowBias();
 	Setting_LUT();
+	Set_SSAO_Sigma();
 }
 
 void CShader_Interface::Set_ShadowBias()
@@ -49,6 +50,16 @@ void CShader_Interface::Set_ShadowBias()
 	m_pGameInstance->Bind_RawValue_Renderer("g_fMinShadowBias", &m_fMinBias, sizeof(_float4));
 	m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
 	
+	ImGui::End();
+}
+
+void CShader_Interface::Set_SSAO_Sigma()
+{
+	ImGui::Begin("SSAO");
+
+	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.01f, 0.01f, 10.f);
+
+	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigam", &m_fSigmaWeight, sizeof(_float));
 	ImGui::End();
 }
 

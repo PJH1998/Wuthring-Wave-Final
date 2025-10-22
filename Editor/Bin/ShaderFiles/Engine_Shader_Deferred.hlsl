@@ -352,7 +352,13 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
 
     float fTexel = 1.f / g_fWidth;
     
-    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).y;
+    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    vector vOriginColor = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord);
+    if(fDepth == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
     
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = vNormal * 2.f - 1.f;
@@ -360,25 +366,29 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
     vector vColor = 0.f;
     float fTotalWeight = 0.f;
     
-    vector vOriginColor = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    
     
     [unroll]
     for (int i = -2; i <= 2; ++i)
     {
         float2 vTexcoord = float2(In.vTexcoord.x + i * fTexel, In.vTexcoord.y);
-        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
+        
+        vector vNeighborColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
+        
+        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).x;
+        
         if (fNeighborDepth == 0.f)
         {
-            vColor += vOriginColor;
+            vColor += vNeighborColor;
             fTotalWeight += 1.f;
             continue;
         }
         
-        vector vNeighborColor = g_SsaoTexture.Sample(ClampSampler, vTexcoord);
         vector vNeighborNormal = g_NormalTexture.Sample(ClampSampler, vTexcoord);
         vNeighborNormal = vNeighborNormal * 2.f - 1.f;
         
-        float fDepthDist = abs((fDepth - fNeighborDepth) / 5000.f);
+        float fDepthDist = abs((fDepth - fNeighborDepth));
         float fDepthWeight = exp((fDepthDist * fDepthDist * -1.f) / (2.f * g_fDepthSigam * g_fDepthSigam));
         
         float fNormalWeight = dot(vNormal, vNeighborNormal) * 0.5f + 0.5f;
@@ -402,32 +412,40 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
 
     float fTexel = 1.f / g_fHeight;
     
-    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).y;
-    
+    vector vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    float fDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).x;
+    if (fDepth == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = vNormal * 2.f - 1.f;
     
     vector vColor = 0.f;
     float fTotalWeight = 0.f;
     
-    vector vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
-    
+ 
     [unroll]
     for (int i = -2; i <= 2; ++i)
     {
         float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y + i * fTexel);
-        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
+        
+        vector vNeighborColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
+        
+        float fNeighborDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).x;
+        
         if (fNeighborDepth == 0.f)
         {
-            vColor += vOriginColor;
-            
+            vColor += vNeighborColor;
+            fTotalWeight += 1.f;
             continue;
         }
         
         vector vNeighborNormal = g_NormalTexture.Sample(ClampSampler, vTexcoord);
         vNeighborNormal = vNeighborNormal * 2.f - 1.f;
         
-        float fDepthDist = abs((fDepth - fNeighborDepth) / 5000.f);
+        float fDepthDist = abs((fDepth - fNeighborDepth));
         float fDepthWeight = exp((fDepthDist * fDepthDist * -1.f) / (2.f * g_fDepthSigam * g_fDepthSigam));
         
         float fNormalWeight = dot(vNormal, vNeighborNormal) * 0.5f + 0.5f;
@@ -435,9 +453,7 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
         float fDistWeight = exp((i * i * -1.f) / (2.f * g_fWeights[i] * g_fWeights[i]));
         
         float fFinalWeight = fDepthWeight * fNormalWeight * fDistWeight;
-        
-        vector vNeighborColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
-
+       
         vColor += vNeighborColor * fFinalWeight;
         fTotalWeight += fFinalWeight;
     }
