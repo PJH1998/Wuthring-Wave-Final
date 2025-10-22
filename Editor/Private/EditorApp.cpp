@@ -178,7 +178,7 @@ void CEditorApp::SetUp_CollisionLayer()
 	// Object To BroadPhase
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
-	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::SENSOR));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 
 	// Object VS Object
@@ -188,6 +188,7 @@ void CEditorApp::SetUp_CollisionLayer()
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::NON_MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::SENSOR));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 }
 

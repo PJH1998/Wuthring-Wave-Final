@@ -39,6 +39,10 @@ ValidateResult CContactListenerImpl::OnContactValidate(const Body& inBody1, cons
 
 void CContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 {
+	if (ENUM_CLASS(BPLAYER::SENSOR) == static_cast<BroadPhaseLayer::Type>(inBody1.GetBroadPhaseLayer()) ||
+		ENUM_CLASS(BPLAYER::SENSOR) == static_cast<BroadPhaseLayer::Type>(inBody2.GetBroadPhaseLayer()))
+		ioSettings.mIsSensor = true;
+
 	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inBody1.GetUserData());
 	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inBody2.GetUserData());
 
@@ -48,6 +52,10 @@ void CContactListenerImpl::OnContactAdded(const Body& inBody1, const Body& inBod
 
 void CContactListenerImpl::OnContactPersisted(const Body& inBody1, const Body& inBody2, const ContactManifold& inManifold, ContactSettings& ioSettings)
 {
+	if (ENUM_CLASS(BPLAYER::SENSOR) == static_cast<BroadPhaseLayer::Type>(inBody1.GetBroadPhaseLayer()) ||
+		ENUM_CLASS(BPLAYER::SENSOR) == static_cast<BroadPhaseLayer::Type>(inBody2.GetBroadPhaseLayer()))
+		ioSettings.mIsSensor = true;
+
 	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inBody1.GetUserData());
 	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inBody2.GetUserData());
 

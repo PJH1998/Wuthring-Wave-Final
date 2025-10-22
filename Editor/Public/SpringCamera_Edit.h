@@ -10,6 +10,8 @@ NS_BEGIN(Editor)
 
 class CSpringCamera_Edit final : public CCamera
 {
+public:
+	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, CUTSCENE };
 private:
 	explicit CSpringCamera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CSpringCamera_Edit(const CSpringCamera_Edit& Prototype);
@@ -26,11 +28,11 @@ public:
 	// 목표 Distance, 도달 시간
 	void							Use_Spring(_float fDestination, _float fDuration)
 	{
-		if (true == m_isSpring)
+		if (CAMERA_STATE::SPRING == m_eCameraState)
 			return;
 		m_fDestination = fDestination;
 		m_fSpringDuration = fDuration;
-		m_isSpring = true;
+		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
 	void							Lock_On() { m_isLockOn = !m_isLockOn; }
@@ -44,9 +46,11 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 
+	void							OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
 private:
+	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
 	// Detect Collider
-	CCollider*					m_pColliderCom = { nullptr };
 	CRigidbody*				m_pRigidbodyCom = { nullptr };
 
 	_float4						m_vTargetPosition = {};		// Target Pos
@@ -57,7 +61,6 @@ private:
 	_float							m_fLerpSpeed = {};
 
 	// Spring
-	_bool							m_isSpring = { false };
 	_float							m_fStiffness = {};		// Spring Force
 	_float							m_fDestination = {};	// Spring Destination
 	_float							m_fSpringDuration = {};
