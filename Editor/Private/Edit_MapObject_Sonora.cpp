@@ -1,5 +1,5 @@
 ﻿#include"Editorpch.h"
-#include "Edit_MapObject.h"
+#include "Edit_MapObject_Sonora.h"
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
 #include"Event_Level.h"
@@ -7,19 +7,19 @@
 #include"Level_Map.h"
 #include"Map_Interface.h"
 
-_uint CEdit_MapObject::g_iNumObjects = {};
+_uint CEdit_MapObject_Sonora::g_iNumObjects = {};
 
-CEdit_MapObject::CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_MapObject_Sonora::CEdit_MapObject_Sonora(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CStaticObject(pDevice, pContext)
 {
 }
 
-CEdit_MapObject::CEdit_MapObject(const CEdit_MapObject& Prototype)
+CEdit_MapObject_Sonora::CEdit_MapObject_Sonora(const CEdit_MapObject_Sonora& Prototype)
     :CStaticObject(Prototype)
 {
 }
 
-HRESULT CEdit_MapObject::Initialize_Prototype()
+HRESULT CEdit_MapObject_Sonora::Initialize_Prototype()
 {
     if (FAILED(__super::Initialize_Prototype()))
         return E_FAIL;
@@ -27,7 +27,7 @@ HRESULT CEdit_MapObject::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
+HRESULT CEdit_MapObject_Sonora::Initialize_Clone(void* pArg)
 {
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
@@ -55,7 +55,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_vRotation = m_vNewRotation = _float3(0.f, 0.f, 0.f);
     m_vNewTranslation = m_vTranslation;
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
-
+    m_eObjectType = pDesc->eObjectType;
     MODELTYPE::MAP;
 
     _char Tag[MAX_PATH] = "NonInteraction";
@@ -118,15 +118,15 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iSelectedMeshName = "Mesh : 0";
 
 
-    m_iNumObject = CEdit_MapObject::g_iNumObjects++;
+    m_iNumObject = CEdit_MapObject_Sonora::g_iNumObjects++;
     return S_OK;
 }
 
-void CEdit_MapObject::Priority_Update(_float fTimeDelta)
+void CEdit_MapObject_Sonora::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CEdit_MapObject::Update(_float fTimeDelta)
+void CEdit_MapObject_Sonora::Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
     if (!ImGui::GetIO().WantCaptureMouse)
@@ -155,12 +155,12 @@ void CEdit_MapObject::Update(_float fTimeDelta)
     m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
 
-void CEdit_MapObject::Late_Update(_float fTimeDelta)
+void CEdit_MapObject_Sonora::Late_Update(_float fTimeDelta)
 {
     m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CEdit_MapObject::Render()
+void CEdit_MapObject_Sonora::Render()
 {
     //�Ⱥ��̴� �� ����
     Bind_Resources();
@@ -203,12 +203,12 @@ void CEdit_MapObject::Render()
     }
 }
 
-void CEdit_MapObject::Render_Shadow()
+void CEdit_MapObject_Sonora::Render_Shadow()
 {
 
 }
 
-void CEdit_MapObject::Set_ImGuiOption()
+void CEdit_MapObject_Sonora::Set_ImGuiOption()
 {
 #ifdef _DEBUG
     ImGui::Text(m_ModelName);
@@ -245,7 +245,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 }
 
 
-HRESULT CEdit_MapObject::Ready_Component(void* pArg)
+HRESULT CEdit_MapObject_Sonora::Ready_Component(void* pArg)
 {
     m_pGameInstance->Wait_Thread_End();
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
@@ -286,14 +286,14 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
     return S_OK;
 }
 
-void CEdit_MapObject::Bind_Resources()
+void CEdit_MapObject_Sonora::Bind_Resources()
 {
     m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 }
 
-void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
+void CEdit_MapObject_Sonora::Add_Child(CEdit_MapObject_Sonora* pObject)
 {
     _bool Same = { true };
 
@@ -318,14 +318,14 @@ void CEdit_MapObject::Add_Child(CEdit_MapObject* pObject)
     pObject->m_IsSetParent = false;
 }
 
-void CEdit_MapObject::Quit_Child(CEdit_MapObject* pObject)
+void CEdit_MapObject_Sonora::Quit_Child(CEdit_MapObject_Sonora* pObject)
 {
     m_ChildObjects.remove(pObject);
     if (m_ChildObjects.empty())
         m_IsParent = false;
 }
 
-void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
+void CEdit_MapObject_Sonora::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 {
     XMStoreFloat4x4(&m_ChildLocalMat, m_pTransformCom->Get_WorldMatrix() * XMMatrixInverse(nullptr, ParentMatrix));
     _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * ParentMatrix;
@@ -333,7 +333,7 @@ void CEdit_MapObject::Make_ChildLocalMatrix(_fmatrix ParentMatrix)
 }
 
 
-void CEdit_MapObject::Export_MaterialData()
+void CEdit_MapObject_Sonora::Export_MaterialData()
 {
 
     //理쒖쥌 ?대뜑 寃쎈줈.
@@ -499,7 +499,7 @@ void CEdit_MapObject::Export_MaterialData()
     }
 }
 
-void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation)
+void CEdit_MapObject_Sonora::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation)
 {
     _matrix NewChildWolrd = XMLoadFloat4x4(&m_ChildLocalMat) * Matrix;
     m_pTransformCom->Set_WorldMatrix(NewChildWolrd);
@@ -511,7 +511,7 @@ void CEdit_MapObject::Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, 
         pChild->Child_UpdateMatrix(m_pTransformCom->Get_WorldMatrix(), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation), 1.f), XMVectorSetW(XMLoadFloat3(&m_vNewTranslation) - XMLoadFloat3(&m_vTranslation), 1.f));
 }
 
-void CEdit_MapObject::About_Parent()
+void CEdit_MapObject_Sonora::About_Parent()
 {
     if (ImGui::Button("Set Parent"))
     {
@@ -555,7 +555,7 @@ void CEdit_MapObject::About_Parent()
     }
 }
 
-void CEdit_MapObject::About_Transform()
+void CEdit_MapObject_Sonora::About_Transform()
 {
     m_pMapInterface->Set_Transform(m_pTransformCom);
 
@@ -567,7 +567,7 @@ void CEdit_MapObject::About_Transform()
         Make_ChildLocalMatrix(dynamic_cast<CTransform*>(m_pParent->Get_Component(TEXT("Com_Transform")))->Get_WorldMatrix());
 }
 
-void CEdit_MapObject::About_Texture()
+void CEdit_MapObject_Sonora::About_Texture()
 {
     if (m_IsCustomTexture)
     {
@@ -835,9 +835,9 @@ void CEdit_MapObject::About_Texture()
 
 }
 
-CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_MapObject_Sonora* CEdit_MapObject_Sonora::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CEdit_MapObject* pInstance = new CEdit_MapObject(pDevice, pContext);
+    CEdit_MapObject_Sonora* pInstance = new CEdit_MapObject_Sonora(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
@@ -848,9 +848,9 @@ CEdit_MapObject* CEdit_MapObject::Create(ID3D11Device* pDevice, ID3D11DeviceCont
     return pInstance;
 }
 
-CGameObject* CEdit_MapObject::Clone(void* pArg)
+CGameObject* CEdit_MapObject_Sonora::Clone(void* pArg)
 {
-    CEdit_MapObject* pInstance = new CEdit_MapObject(*this);
+    CEdit_MapObject_Sonora* pInstance = new CEdit_MapObject_Sonora(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
@@ -861,7 +861,7 @@ CGameObject* CEdit_MapObject::Clone(void* pArg)
     return pInstance;
 }
 
-void CEdit_MapObject::Free()
+void CEdit_MapObject_Sonora::Free()
 {
     __super::Free();
 

@@ -11,7 +11,7 @@ NS_END
 
 
 NS_BEGIN(Editor)
-class CEdit_MapObject : public CStaticObject
+class CEdit_MapObject_Sonora : public CStaticObject
 {
 public:
 	enum OBJECTTYPE { DEFAULT, SONORA, END };
@@ -34,9 +34,9 @@ public:
 	}OBJECT_SAVE;
 
 protected:
-	CEdit_MapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CEdit_MapObject(const CEdit_MapObject& Prototype);
-	virtual ~CEdit_MapObject() = default;
+	CEdit_MapObject_Sonora(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CEdit_MapObject_Sonora(const CEdit_MapObject_Sonora& Prototype);
+	virtual ~CEdit_MapObject_Sonora() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype();
@@ -55,8 +55,8 @@ public:
 
 	_char* Get_ModelName() { return m_ModelName; }
 
-	void Add_Child(CEdit_MapObject* pObject);
-	void Quit_Child(CEdit_MapObject* pObject);
+	void Add_Child(CEdit_MapObject_Sonora* pObject);
+	void Quit_Child(CEdit_MapObject_Sonora* pObject);
 	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
 	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
 
@@ -73,10 +73,10 @@ private:
 
 	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
-	CEdit_MapObject* m_pParent = { nullptr };
-	list<CEdit_MapObject*> m_ChildObjects;
+	CEdit_MapObject_Sonora* m_pParent = { nullptr };
+	list<CEdit_MapObject_Sonora*> m_ChildObjects;
 
-	CEdit_MapObject* m_pPickedChild = { nullptr };
+	CEdit_MapObject_Sonora* m_pPickedChild = { nullptr };
 	_bool m_IsSetParent = { false };
 	_bool m_IsParent = { false };
 	vector<CTexture*> m_pDiffuseTextureCom;
@@ -147,7 +147,7 @@ private:
 	static _uint g_iNumObjects;
 
 public:
-	static CEdit_MapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CEdit_MapObject_Sonora* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
 	virtual void Free()override;
 

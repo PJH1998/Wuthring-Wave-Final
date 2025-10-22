@@ -216,7 +216,7 @@ void CLevel_Map::Menu_Model_Load()
                 strcpy_s(Desc.ModelName, FileName);
                 //m_pGameInstance->Clone_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-                    , m_iLevel, TEXT("Layer_Test"), &Desc);
+                    , m_iLevel, TEXT("Layer_MapObject"), &Desc);
             }
             if (ImGui::IsItemHovered())
             {
@@ -373,6 +373,7 @@ void CLevel_Map::Menu_Save_Load()
                                 File.read(Desc.ModelName, NameLength);
 
                                 File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+
                                 _float4x4 Matrix = {};
                                 File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                                 Desc.WorldMatrix = &Matrix;

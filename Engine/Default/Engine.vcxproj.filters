@@ -254,13 +254,16 @@
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\99. Renderer\ShaderFilter">
-      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>	
+      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine">
       <UniqueIdentifier>{a54d431a-e7ed-4546-9ff3-5fdefe162fda}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\AnimState">
       <UniqueIdentifier>{a9d127fd-08d8-4cb3-b4cb-bbbe35b6f3ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Point">
+      <UniqueIdentifier>{d53700ab-232b-46f4-b717-d1c2e4b1d9ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -513,12 +516,8 @@
     <ClInclude Include="..\public\CSM.h">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Mesh_Instance.h">
-      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\public\ShaderFilter.h">
@@ -529,6 +528,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\AnimState.h">
       <Filter>01. Utility\04. Component\AnimMachine\AnimState</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Mesh_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Point.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Point</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -757,7 +762,6 @@
     <ClCompile Include="..\private\CSM.cpp">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClCompile>
@@ -766,12 +770,15 @@
     </ClCompile>
     <ClCompile Include="..\private\ShaderFilter.cpp">
       <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="..\Private\AnimMachine.cpp">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AnimState.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\AnimState</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Point.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Point</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
