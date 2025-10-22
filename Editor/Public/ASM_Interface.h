@@ -74,7 +74,7 @@ class CASM_Interface final : public CInterface_Edit
 		float x, y;
 		BT_TYPE eType;
 		vector<GraphEditor::Link> Transitions;
-		vector<CONDITION_TAG> Conditions;
+		CONDITION_TAG Conditions;
 	};
 #pragma endregion
 
@@ -147,6 +147,7 @@ private:
 
 	void				Create_Template(BT_TYPE eType, _uint iOutputCount = 1);
 
+	void				Initialize_BT();
 	void				Save_BT_Data();
 	void				Save_Nodes(ofstream& File, _uint& iIndex);
 	void				Load_BT_Data();

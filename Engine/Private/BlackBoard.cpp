@@ -84,7 +84,7 @@ HRESULT CBlackBoard::Add_Condition(const _string& strDataTag, function<_bool()> 
 _bool CBlackBoard::Get_Condition(const _string& strFuncTag)
 {
 	if(m_Conditions.find(strFuncTag) == m_Conditions.end())
-		return -1;
+		CRASH(m_Conditions.find(strFuncTag))
 
 	return m_Conditions[strFuncTag]();
 }

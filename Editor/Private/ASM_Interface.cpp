@@ -30,14 +30,16 @@ HRESULT CASM_Interface::Initialize()
 	//m_Nodes.push_back(tNode);
 	m_BehaviorTreeGraphDelegate.pInterface = this;
 
-	CBT_Selector* pRoot = CBT_Selector::Create();
-	m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, pRoot);
+	//CBT_Selector* pRoot = CBT_Selector::Create();
+	m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, nullptr);
 
 	m_pBlackBoard = CBlackBoard::Create();
 
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = m_pBlackBoard;
 	m_pBehaviorTree->Initialize_Clone(&BTDesc);
+
+	Initialize_BT();
 
 	return S_OK;
 }
@@ -78,7 +80,8 @@ void CASM_Interface::Update_ASM(_float fTimeDelta)
 	}
 
 #ifdef _DEBUG
-	m_pBehaviorTree->BlackBoardInfo();
+	m_pBlackBoard->Bind_Data_to_GUI();
+	//m_pBehaviorTree->BlackBoardInfo();
 	//ImGui::ShowMetricsWindow();
 #endif // _DEBUG
 	m_BehaviorTreeGraphDelegate.GetTemplateCount();
@@ -130,10 +133,15 @@ void CASM_Interface::Node_Info()
 	{
 		ImGui::Text("to: %d slot %d -> from: %d slot %d", tLink.mInputNodeIndex, tLink.mInputSlotIndex, tLink.mOutputNodeIndex, tLink.mOutputSlotIndex);
 	}
-	for(const auto& tCondition : m_Nodes[m_iCurrentNodeIndex].Conditions)
+	if(0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.length() && 
+		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.length() &&
+		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.length())
 	{
-		ImGui::Text("%s - %s - %s", tCondition.strValue.c_str(), tCondition.strCondition.c_str(), tCondition.strConst.c_str());
+		ImGui::Text("%s - %s - %s", m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.c_str(),
+									m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.c_str(),
+									m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.c_str());
 	}
+	
 	if(ImGui::Button("Add Slot"))
 	{
 		if(BT_TYPE::ACTION != m_Nodes[m_iCurrentNodeIndex].eType)
@@ -161,12 +169,12 @@ void CASM_Interface::Node_Info()
 				tCondition.strCondition = m_strConditionName;
 				tCondition.strConst = m_strConstName;
 
-				m_Nodes[m_iCurrentNodeIndex].Conditions.push_back(tCondition);
+				m_Nodes[m_iCurrentNodeIndex].Conditions = tCondition;
 				m_isConditionCreate = false;
 			}
 			if(ImGui::Button("Delete Condition"))
 			{
-				m_Nodes[m_iCurrentNodeIndex].Conditions.pop_back();
+				m_Nodes[m_iCurrentNodeIndex].Conditions = CONDITION_TAG{};
 				m_isConditionCreate = false;
 			}
 		}
@@ -516,6 +524,23 @@ void CASM_Interface::Create_Template(BT_TYPE eType, _uint iOutputCount)
 	m_Templates.push_back(tTemplate);
 }
 
+void CASM_Interface::Initialize_BT()
+{
+	m_Nodes.clear();
+	m_Links.clear();
+	m_Templates.clear();
+	m_iNodeCount = 0;
+
+	_string szNodeName;
+	szNodeName = "Count";
+	szNodeName += to_string(m_iNodeCount).c_str();
+	MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, BT_TYPE::SELECTOR};
+	m_Nodes.push_back(tNode);
+
+	Create_Template(BT_TYPE::SELECTOR);
+	++m_iNodeCount;
+}
+
 void CASM_Interface::Save_BT_Data()
 {
 	IGFD::FileDialogConfig config;
@@ -573,16 +598,11 @@ void CASM_Interface::Save_Nodes(ofstream& File, _uint& iIndex)
 
 		//함수 키워드
 		// To do...
-		Node["NumCondition"] = m_Nodes[i].Conditions.size();
-		Node["Conditions"] = json::array();
-		for(size_t j = 0; j < m_Nodes[i].Conditions.size(); ++j)
-		{
-			json Condition;
-			Condition["ValueName"] = m_Nodes[i].Conditions[j].strValue;
-			Condition["ConditionName"] = m_Nodes[i].Conditions[j].strCondition;
-			Condition["ConstName"] = m_Nodes[i].Conditions[j].strConst;
-			Node["Conditions"].push_back(Condition);
-		}
+		//Node["NumCondition"] = m_Nodes[i].Conditions.size();
+		Node["ValueName"] = m_Nodes[i].Conditions.strValue;
+		Node["ConditionName"] = m_Nodes[i].Conditions.strCondition;
+		Node["ConstName"] = m_Nodes[i].Conditions.strConst;
+		
 
 		Output["Nodes"].push_back(Node);
 	}
@@ -633,13 +653,9 @@ void CASM_Interface::Load_BT_Data()
 				m_Links.push_back(tLink);
 			}
 
-			size_t iNumCondition = NodeData["NumCondition"];
-			vector<CONDITION_TAG> Conditions;
-			for(auto& Cond : NodeData["Conditions"])
-			{
-				CONDITION_TAG Condition{Cond["ValueName"], Cond["ConditionName"], Cond["ConstName"]};
-				Conditions.push_back(Condition);
-			}
+			//size_t iNumCondition = NodeData["NumCondition"];
+			CONDITION_TAG Conditions{NodeData["ValueName"], NodeData["ConditionName"], NodeData["ConstName"]};
+			
 			_float x{NodeData["Editor_PosX"]}, y{NodeData["Editor_PosY"]};
 			_string szNodeName;
 			szNodeName = "Count";
