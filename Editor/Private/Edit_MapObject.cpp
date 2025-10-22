@@ -43,8 +43,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     m_iNumLOD = m_pModelComArray.size()-1;
 
-    /*Sync_BoundingBox(m_pModelCom->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
-    m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));*/
+
+    for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+        Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
+    /*m_pGameInstance->Add_To_OctoTree(this, m_pModelCom->Get_BoundingBox(0));*/
     _vector vScale, vRotation, vTranslation;
 
     XMMatrixDecompose(&vScale, &vRotation, &vTranslation, m_pTransformCom->Get_WorldMatrix());
@@ -133,20 +135,29 @@ void CEdit_MapObject::Update(_float fTimeDelta)
     {
         if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
         {
-
             if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
             {
-                //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
-
-                _float fDistance = {};
-                //?붾뱶??諛붽퓭?쇳븿.
-                _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
-                _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
-                if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+                _bool IsIn = { false };
+                for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
                 {
-                    MAP_PICK event(this, fDistance);
+                    IsIn = m_pGameInstance->IsIn_WorldSpace(m_pModelComArray[0]->Get_BoundingBox(i));
+                    if (IsIn)
+                        break;
+                }
+                if (IsIn)
+                {
+                    //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
 
-                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+                    _float fDistance = {};
+                    //?붾뱶??諛붽퓭?쇳븿.
+                    _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
+                    _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
+                    if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+                    {
+                        MAP_PICK event(this, fDistance);
+
+                        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+                    }
                 }
             }
         }
