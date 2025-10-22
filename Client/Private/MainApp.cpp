@@ -86,9 +86,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
-			case LEVEL::TEST_UI:
-				pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
-				break;
+			//case LEVEL::TEST_UI:
+			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+			//	break;
 			}
 			ASSERT_CRASH(pLevel);
 

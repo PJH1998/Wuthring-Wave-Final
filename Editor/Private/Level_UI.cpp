@@ -1218,7 +1218,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             {
                 UI_ANIM_KEYFRAME_DESC tTempDesc = {
                     (_uint)iKeyFrame,
-                    m_iLerpType,
+                    (_uint)m_iLerpType,
                     (_uint)iTexIndex,
                     fAlpha,
                     m_vCurObjPos,
