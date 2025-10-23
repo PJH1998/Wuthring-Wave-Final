@@ -42,7 +42,7 @@ private:
 
 	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
-
+	_float							m_fWinSizeX{}, m_fWinSizeY{};
 	//TEST
 	CShaderFilter*					m_pFilter = { nullptr };
 	_uint							m_iLUT_Index = {};

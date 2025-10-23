@@ -24,6 +24,9 @@ HRESULT CRenderer::Initialize()
 	m_iWinSizeX = static_cast<_uint>(ViewPort.Width);
 	m_iWinSizeY = static_cast<_uint>(ViewPort.Height);
 
+	m_fWinSizeX = ( ViewPort.Width );
+	m_fWinSizeY = ( ViewPort.Height );
+
 	if (FAILED(Ready_RT()))
 		return E_FAIL;
 	if (FAILED(Ready_MRT()))
@@ -569,11 +572,6 @@ void CRenderer::GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const 
 
 void CRenderer::SSAO_Blur()
 {
-	_float fFar = m_pGameInstance->Get_CurrentCamera_Far();
-
-	if (FAILED(m_pShader->Bind_Value("g_fFar", &fFar, sizeof(_float))))
-		CRASH("Failed Bind Far");
-
 #pragma region BLUR_X
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
 		CRASH("Render Fail");
@@ -581,7 +579,7 @@ void CRenderer::SSAO_Blur()
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_BlurBeginTexture")))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
+	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_fWinSizeX, sizeof(_float))))
 		CRASH("Render Fail");
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_X))))
@@ -601,7 +599,7 @@ void CRenderer::SSAO_Blur()
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_iWinSizeY, sizeof(_float))))
+	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_fWinSizeY, sizeof(_float))))
 		CRASH("Render Fail");
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_Y))))
