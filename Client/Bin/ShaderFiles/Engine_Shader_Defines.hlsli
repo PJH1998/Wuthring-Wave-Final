@@ -16,4 +16,4 @@ float g_fSSAOWeights[9] =
 
 float g_fLUT_Size = 16.f;
 
-int g_iSampleSize = 16;
+int g_iSampleSize = 8;

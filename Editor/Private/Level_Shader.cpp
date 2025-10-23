@@ -88,7 +88,6 @@ HRESULT CLevel_Shader::Ready_TestObjects()
                                                        ENUM_CLASS(LEVEL::SHADER), TEXT("Layer_Dummy"), &MapDesc)))
         CRASH("Failed Clone Dummy Wolf");
 
-
     return S_OK;
 }
 

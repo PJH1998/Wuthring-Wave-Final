@@ -16,7 +16,7 @@ CShaderFilter::CShaderFilter(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 HRESULT CShaderFilter::Initialize()
 {
     m_iNumLUT_Textures = 5;
-    m_iNumKernel = 32;
+    m_iNumKernel = 8;
 
     if (FAILED(Ready_Shader_Filters()))
         CRASH("Failed Ready Shader Filters");
