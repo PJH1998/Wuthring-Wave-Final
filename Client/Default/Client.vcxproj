@@ -113,13 +113,13 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ClientPch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$ClientPch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -140,7 +140,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ClientPch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$ClientPch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -148,7 +148,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -164,8 +164,11 @@
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h" />
     <ClInclude Include="..\Public\AnimationDummy.h" />
-    <ClInclude Include="..\Public\Parameter.h" />
-    <ClInclude Include="..\Public\PlayerController.h" />
+    <ClInclude Include="..\Public\AugustaBaseState.h" />
+    <ClInclude Include="..\Public\AugustaRun_F.h" />
+    <ClInclude Include="..\Public\AugustaStand1_Action01.h" />
+    <ClInclude Include="..\Public\AugustaStand1_Action02.h" />
+    <ClInclude Include="..\Public\AugustaStop_Run_L.h" />
     <ClInclude Include="..\public\Player_Define.h" />
     <ClInclude Include="..\Public\ClientPch.h" />
     <ClInclude Include="..\Public\Client_Define.h" />
@@ -215,8 +218,6 @@
     <ClInclude Include="..\Public\PlayerAugusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
-    <ClInclude Include="..\Public\State.h" />
-    <ClInclude Include="..\Public\StateMachine.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -228,6 +229,11 @@
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
+    <ClCompile Include="..\Private\AugustaBaseState.cpp" />
+    <ClCompile Include="..\Private\AugustaRun_F.cpp" />
+    <ClCompile Include="..\Private\AugustaStand1_Action01.cpp" />
+    <ClCompile Include="..\Private\AugustaStand1_Action02.cpp" />
+    <ClCompile Include="..\Private\AugustaStop_Run_L.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -235,8 +241,6 @@
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Private\Parameter.cpp" />
-    <ClCompile Include="..\Private\PlayerController.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
@@ -278,8 +282,6 @@
     <ClCompile Include="..\Private\PlayerAugusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
-    <ClCompile Include="..\Private\State.cpp" />
-    <ClCompile Include="..\Private\StateMachine.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

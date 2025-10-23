@@ -14,12 +14,15 @@ NS_BEGIN(Editor)
 class CEdit_MapObject : public CStaticObject
 {
 public:
+	enum OBJECTTYPE { DEFAULT, SONORA, END };
+
 	typedef struct tagMapLoad
 	{
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };
 		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
+		OBJECTTYPE eObjectType;
 	}MAP_LOAD;
 
 	typedef struct tagMapSave
@@ -44,11 +47,11 @@ public:
 	virtual		void			Render();
 	virtual		void			Render_Shadow();
 
-	void Set_ImGuiOption();
+	virtual void Set_ImGuiOption();
 
 	HRESULT Ready_Component(void* pArg = nullptr);
 
-	void Bind_Resources();
+	virtual void Bind_Resources();
 
 	_char* Get_ModelName() { return m_ModelName; }
 
@@ -57,14 +60,14 @@ public:
 	void Make_ChildLocalMatrix(_fmatrix ParentMatrix);
 	void Set_ShaderPass(_uint i) { m_iShaderPassIndex = i; }
 
-private:
+protected:
 	void Export_MaterialData();
 	void Child_UpdateMatrix(_fmatrix Matrix, _fvector vParentsPos, _fvector vDeltaTranslation);
 	void About_Parent();
 	void About_Transform();
 	void About_Texture();
 
-private:
+protected:
 	CModel* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
 
@@ -86,7 +89,7 @@ private:
 
 	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
-private:
+protected:
 
 	_char m_ModelName[MAX_PATH];
 
@@ -139,8 +142,10 @@ private:
 
 
 	_uint m_iLevel = {};
-private:
+	OBJECTTYPE m_eObjectType = { END };
+protected:
 	static _uint g_iNumObjects;
+
 public:
 	static CEdit_MapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

@@ -5,7 +5,7 @@
 #include "ColliderNotify.h"
 
 
-#pragma region 湲곕낯 ?⑥닔??
+#pragma region 
 CAnimNotifyTool::CAnimNotifyTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
     , m_pContext { pContext }

@@ -31,8 +31,35 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
 
     if (FAILED(Ready_Component(pArg)))
         return E_FAIL;
+
     Ready_Events();
 
+    MAP_CREATE event(m_ModelName, this);
+    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
+
+    m_pGameInstance->Subscribe< MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), [this](const MAP_SAVE& event) {
+
+        //event.File.write(reinterpret_cast<const char*>(&InstanceDesc), sizeof(MAP_LOAD));
+
+        _uint Length = strlen(m_ModelName);
+        event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
+        event.File.write(m_ModelName, Length);
+
+        m_iShaderPassIndex = 0;
+        event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+
+
+        _vector Pos = m_pTransformCom->Get_State(STATE::POSITION);
+        event.File.write(reinterpret_cast<const _char*>(&Pos), sizeof(_float4));
+
+        //_float4x4* pInstances = new _float4x4[m_iNumInstance];
+        event.File.write(reinterpret_cast<const char*>(&m_iNumInstance), sizeof(_uint));
+
+        event.File.write(reinterpret_cast<const char*>(InstanceDesc.WorldMatrix), sizeof(_float4x4) * m_iNumInstance);
+
+        });
+    
+    m_iShaderPassIndex = 0;
     m_iShaderPassIndex = 0;
     MODELTYPE::MAP;
     return S_OK;
@@ -68,7 +95,17 @@ void CEdit_MapObject_Instance::Render()
 
     for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
     {
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture",i,TEXTURETYPE::DIFFUSE);
+        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+        _bool HasNormal = { true };
+
+        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            HasNormal = false;
+
+        m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+
+        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+            m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
         m_pModelCom->Render(i);
@@ -82,6 +119,7 @@ void CEdit_MapObject_Instance::Render_Shadow()
 
 void CEdit_MapObject_Instance::Set_ImGuiOption()
 {
+    return;
     ImGuiID PickID = ImGui::GetID("MapPick");
     char Pick_buffer[30];
     sprintf_s(Pick_buffer, "%d", m_iPickedInstance);
@@ -175,15 +213,15 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
 HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+    InstanceDesc = *pDesc;
 
     CMesh_Instance::MESH_INST_DESC Desc{};
     Desc.iNumInstance= m_iNumInstance = pDesc->iNumInstance;
     Desc.pTransformMatrix = pDesc->WorldMatrix;
     
-    _vector vScale, vRotation, vTranslation;
-    m_pRotation = new _float4[m_iNumInstance];
-    m_pInstanceMatrix = Desc.pTransformMatrix;
+    strcpy_s(m_ModelName, pDesc->ModelName);
 
+    m_pRotation = new _float4[m_iNumInstance];
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
@@ -193,6 +231,7 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
+    m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat4(&pDesc->m_WolrdPos), 1.f));
     return S_OK;
 }
 
@@ -238,6 +277,6 @@ void CEdit_MapObject_Instance::Free()
     __super::Free();
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
-    Safe_Delete_Array(m_pInstanceMatrix);
+    //마지막으로 깐 놈들 지우려면 이터레이터 이용해서 second 지우고 erase. 뒤에서부터 쭉~ 되게. 맵으로 추출할 때는 IsActive활성화 된 놈만.
     Safe_Delete_Array(m_pRotation);
 }

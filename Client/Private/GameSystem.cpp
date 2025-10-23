@@ -20,6 +20,11 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
+void CGameSystem::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
+{
+	return m_pParser->Create_Map_Model(pFilePath, eLevel);
+}
+
 void CGameSystem::Free()
 {
 	__super::Free();

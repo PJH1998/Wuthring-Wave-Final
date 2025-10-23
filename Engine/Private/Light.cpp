@@ -37,8 +37,8 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 		iPassIndex = ENUM_CLASS(SHADER_DEFFERED::POINT);
 	}
 
-	pVIBuffer->Bind_Resources();
 	pShader->Begin(iPassIndex);
+	pVIBuffer->Bind_Resources();
 	pVIBuffer->Render();
 
 	return S_OK;

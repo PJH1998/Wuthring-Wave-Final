@@ -41,6 +41,7 @@ private:
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	vector<CModel*> m_pModelComArray;
 
+	_uint m_iShaderPassIndex = {};
 private:
 	void						Ready_Component(void* pArg);
 

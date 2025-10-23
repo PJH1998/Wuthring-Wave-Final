@@ -16,44 +16,7 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-
-    ifstream File("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", ios::binary);
-
-    if (!File.is_open())
-    {
-        CRASH("File Load Fail");
-    }
-    _uint NameLength = {};
-    CMapObject::MAP_LOAD Desc{};
-
-
-    while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-    {
-        memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-        File.read(Desc.ModelName, NameLength);
-
-        File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-        _float4x4 Matrix = {};
-        File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-        Desc.WorldMatrix = &Matrix;
-
-        _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-        _tchar Name[MAX_PATH] = {};
-        MultiByteToWideChar(CP_ACP, 0, Desc.ModelName, -1, Name, strlen(Desc.ModelName));
-        lstrcat(Model, Name);
-
-        _char ModelPath[MAX_PATH] = "../../Client/Bin/Resource/Map/";
-        strcat_s(ModelPath, Desc.ModelName);
-        strcat_s(ModelPath, "/");
-        strcat_s(ModelPath, Desc.ModelName);
-        strcat_s(ModelPath, ".dat");
-
-        m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
-
-        //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MapObject")
-        //    , ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), &Desc);
-    }
-	File.close();
+    Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
     Ready_Layer_PlayerParty();
 
@@ -128,6 +91,136 @@ void CLevel_Test::Ready_Layer_PlayerParty()
         CRASH("Failed Ready Layer Augusta");
 }
 
+HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
+{
+    _char FileDrive[MAX_PATH] = {};
+    _char FileDir[MAX_PATH] = {};
+    _char FileName[MAX_PATH] = {};
+    _char FileExt[MAX_PATH] = {};
+
+    _splitpath_s(pFilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+    _string PasingDir = FileDir;
+    if (strlen(FileName) > 0)
+    {
+        PasingDir += FileName;
+        PasingDir += FileExt;
+        Read_Map_Dat(pFilePath);
+    }
+    else
+    {
+        for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
+            if (!entry.is_regular_file())
+                continue;
+
+            if (entry.path().extension() != ".dat")
+                continue;
+
+            _string strFilePath = entry.path().string();
+            Read_Map_Dat(strFilePath);
+        }
+    }
+    return S_OK;
+}
+
+void CLevel_Test::Read_Map_Dat(const _string pFilePath)
+{
+    ifstream File(pFilePath, ios::binary);
+
+    if (!File.is_open())
+    {
+        MSG_BOX("Load Failed");
+    }
+    if (pFilePath.find("Instance") != std::string::npos)
+    {
+        return;
+
+        //CMapObject::MAP_LOAD Desc{};
+
+        //_matrix PreTransformMatrix = XMMatrixIdentity();
+        //_float fSize = 0.01f;
+        //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+        //CMapObject_Instance::MAP_LOAD Desc{};
+        //Desc.iNumInstance;
+        //Desc.ModelName;
+        //Desc.m_WolrdPos;
+        //Desc.WorldMatrix;
+
+        //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+        //{
+        //    memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+        //    File.read(Desc.ModelName, NameLength);
+
+        //    File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+        //    File.read(reinterpret_cast<char*>(&Desc.m_WolrdPos), sizeof(_float4));
+
+        //    File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
+        //    _float4x4* pMatrix = new _float4x4[Desc.iNumInstance];
+        //    File.read(reinterpret_cast<char*>(pMatrix), sizeof(_float4x4) * Desc.iNumInstance);
+
+        //    Safe_Delete_Array(pMatrix);
+
+        //    _wstring PrototypeName = TEXT("Prototype_Component_Model_Instance_");
+
+        //    //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
+        //    _wstring ModelName = StringToWString(Desc.ModelName);
+
+
+        //    ModelName.pop_back();
+        //    _string ProjectPath = filesystem::current_path().parent_path().parent_path().string();
+        //    ProjectPath += "/Client/Bin/Resource/Map";
+        //    for (const auto& entry : filesystem::recursive_directory_iterator(ProjectPath)) {
+        //        if (entry.is_regular_file()) {
+        //            if (entry.path().string().find("json") != std::string::npos)
+        //                continue;
+        //            if (entry.path().string().find(WStringToString(ModelName)) != std::string::npos)
+        //            {
+        //                _string ModelPath = entry.path().string();
+
+        //                m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry.path().stem().string()), Path = ModelPath]() {
+        //                    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), Model,
+        //                        CModel_Instance::Create(pDevice, pContext, PreTransformMatrix, Path.c_str()))))
+        //                        CRASH("Failed");
+        //                    });
+        //            }
+        //        }
+        //    }
+        //}
+
+    }
+    else
+    {
+        _uint NameLength;
+
+        _matrix PreTransformMatrix = XMMatrixIdentity();
+        _float fSize = 0.01f;
+        PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+        CMapObject::MAP_LOAD Desc{};
+
+        while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+        {
+            memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+            File.read(Desc.ModelName, NameLength);
+
+            File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+            _float4x4 Matrix = {};
+            File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+            Desc.WorldMatrix = &Matrix;
+            _wstring PrototypeName = TEXT("Prototype_Component_Model_");
+
+            //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
+            _wstring ModelName = StringToWString(Desc.ModelName);
+
+            //m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
+            //    ENUM_CLASS(m_eCurLevel), TEXT("Layer_Map"), &Desc);
+			m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
+				PROTOTYPE::GAMEOBJECT , &Desc);
+        }
+    }
+    File.close();
+}
 
 CLevel_Test* CLevel_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
