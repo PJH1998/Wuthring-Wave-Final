@@ -2,14 +2,19 @@
 
 namespace Client
 {
-	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, END };
+	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
 	enum class COLLISIONLAYER { NONE, MAP, PLAYER, CHARACTER, CAMERA, ATTACK, SKILL, ENEMY, ENEMY_ATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
 
-	enum class KEYINPUT {
+	enum class PLAYER_STATE : unsigned int {
+		NONE = 0, IDLE, WALK, RUN, ATTACK,
+		END
+	};
+
+	enum class KEYINPUT : unsigned int {
 		NONE = 1 << 0, 
 		W = 1 << 1, 
 		S = 1 << 2,
@@ -30,6 +35,10 @@ namespace Client
 		FRONT, BACK, LEFT, RIGHT, UP, DOWN, END
 	};
 
+	enum class UI_EVENT_TYPE {
+		CLICK, HOVER, SCROLL, END
+	};
+	
 	enum class TEST_STATE{
 		NONE				= 0,
 		MOVE_FORWARD		= 1 << 0,

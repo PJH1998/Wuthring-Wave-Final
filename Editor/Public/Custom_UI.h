@@ -3,12 +3,15 @@
 #include "Editor_Define.h"
 #include "UIObject.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
+
 
 
 NS_BEGIN(Engine)
 class CShader;
 class CTexture;
 class CVIBuffer_Rect;
+class CVIBuffer_Rect_Instance_UI;
 NS_END
 
 NS_BEGIN(Editor)
@@ -19,12 +22,25 @@ NS_BEGIN(Editor)
 
 class CCustom_UI final : public CUIObject
 {
+#pragma region enum class & struct
+
 public:
 	enum class UI_TYPE {
 		NONE, BUTTON, INTERACT, END
 	};
 
-	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC {
+	typedef struct tagCustomUISizeDesc {
+		vector<_float2>	vecSize = {};
+	} UI_SIZE_DESC;
+
+	typedef struct tagCustomUISectorDesc {
+		_float2		vSectorBorder = {}; // pixel
+		_float		fUIScale = {};		// ui ����
+	} UI_SECTOR_DESC;
+
+
+
+	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC, UI_SECTOR_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
 		_uint		iNumFiles = 1;
@@ -33,11 +49,19 @@ public:
 		_uint		iUIType = {};			// ?⑥닚 李쎌씤吏, 踰꾪듉?몄?, 理쒖긽??援ы쁽遺?몄? 援щ텇?
 		_wstring	strParentName = {};
 
-		vector<_wstring> vecChildNames = {};
+		_bool		isInverseScreenDiscard = false;	// �׸� ���� ����
+		_float		fCutout = 0.3f;					// (1:�ƾƿ� ��� ��) ���İ� ����
+		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
 
+		vector<_wstring> vecChildNames = {};
 		CGameObject* pParentObject = nullptr;
+
+
+		_bool		isInstance = false;
 	} CUSTOM_UI_DESC;
 
+
+#pragma endregion
 
 
 private:
@@ -47,7 +71,7 @@ private:
 
 public:
 	virtual HRESULT			Initialize_Prototype()					override;
-	virtual HRESULT			Initialize_Clone(void* pArg)					override;
+	virtual HRESULT			Initialize_Clone(void* pArg)			override;
 	virtual void			Priority_Update(_float fTimeDelta)		override;
 	virtual void			Update(_float fTimeDelta)				override;
 	virtual void			Late_Update(_float fTimeDelta)			override;
@@ -56,6 +80,7 @@ public:
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
+	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* Get_InstDesc() { return &m_InstanceDescs; }
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 private:
@@ -67,16 +92,17 @@ private:
 
 private:
 	CShader*				m_pShaderCom				= { nullptr };
-	CVIBuffer_Rect*			m_pVIBufferCom				= { nullptr };
+	CVIBuffer*				m_pVIBufferCom				= { nullptr };
 	CTexture*				m_pTextureCom				= { nullptr };
-
 	CAnimator_UI*			m_pAnimator_UICom			= { nullptr };
+
 
 	CUSTOM_UI_DESC			m_tUIDesc					= {};
 	_uint					m_iCurTexIndex				= {};
 
 	_float4x4				m_CombinedWorldMatrix		= {};
-
+	//vector// �ν��Ͻ��� ���� �����ؾ���
+	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> m_InstanceDescs = {};
 
 	// ?꾩옱 ?ъ슜以묒씪 ?띿뒪爾??뺣낫, texcoord 媛? ?섏씤?뱁꽣 湲곗????깆쓽 ?뺣낫.. ?꾩슂?좎닔???덉쓬
 
@@ -92,48 +118,84 @@ NS_END
 
 
 
+#pragma region json
+
 inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 {
 	json childNames = json::array();
 	for (const auto& v : d.vecChildNames)
 	{
 		json data = {};
-		to_json(data, _string(v.begin(), v.end()));
+		to_json(data, WStringToString(v));
 		childNames.push_back(data);
 	}
 
+	json vecImgSizes = json::array();
+	for (const auto& v : d.vecSize)
+	{
+		json data = {};
+		data = { v.x, v.y };
+		vecImgSizes.push_back(data);
+	}
+
 	j = {
-		{ "strFilePath", _string(d.strFilePath.begin(), d.strFilePath.end()) },
-		{ "strFileName", _string(d.strFileName.begin(), d.strFileName.end()) },
+		{ "strFilePath", WStringToString(d.strFilePath) },
+		{ "strFileName", WStringToString(d.strFileName) },
 		{ "iNumFiles", d.iNumFiles },
 
-		{ "strUIName",  _string(d.strUIName.begin(), d.strUIName.end()) },
+		{ "strUIName",  WStringToString(d.strUIName) },
 		{ "iUIType", d.iUIType },
-		{ "strParentName", _string(d.strParentName.begin(), d.strParentName.end()) },
+		{ "strParentName", WStringToString(d.strParentName) },
 
-		{ "vecChildNames", childNames }
+		{ "isInverseScreenDiscard", d.isInverseScreenDiscard },
+		{ "fCutout", d.fCutout },
+		{ "iPassType", d.iPassType },
+
+		{ "vecChildNames", childNames },
+
+
+		// descs (size, sector)
+		{ "vecSize", vecImgSizes },
+		{ "vSectorBorder", {
+			d.vSectorBorder.x,
+			d.vSectorBorder.y
+			}
+		},
+		{ "fUIScale", d.fUIScale },
+
 	};
 }
 
 inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 {
 	_string strFilePath		= j["strFilePath"].get<_string>();
-	d.strFilePath			= _wstring(strFilePath.begin(), strFilePath.end());
+	d.strFilePath			= StringToWString(strFilePath);
 	_string strFileName		= j["strFileName"].get<_string>();
-	d.strFileName			= _wstring(strFileName.begin(), strFileName.end());
+	d.strFileName			= StringToWString(strFileName);
 	d.iNumFiles				= j["iNumFiles"];
 
 	_string strUIName		= j["strUIName"].get<_string>();
-	d.strUIName				= _wstring(strUIName.begin(), strUIName.end());
+	d.strUIName				= StringToWString(strUIName);
 	d.iUIType				= j["iUIType"];
 	_string strParentName	= j["strParentName"].get<_string>();
-	d.strParentName			= _wstring(strParentName.begin(), strParentName.end());
+	d.strParentName			= StringToWString(strParentName);
+
+
+	d.isInverseScreenDiscard= j["isInverseScreenDiscard"];
+	d.fCutout				= j["fCutout"];
+	d.iPassType				= j["iPassType"];
 
 	for (const auto& element : j["vecChildNames"])
 	{
 		_string strChildName = element.get<_string>();
-		d.vecChildNames.push_back(_wstring(strChildName.begin(), strChildName.end()));
+		d.vecChildNames.push_back(StringToWString(strChildName));
 	}
+
+	// descs
+	for (const auto& element : j["vecSize"])
+		d.vecSize.push_back(_float2{ element[0], element[1] });
+	d.vSectorBorder			= _float2( j["vSectorBorder"][0], j["vSectorBorder"][1] );
+	d.fUIScale				= j["fUIScale"];
 }
 
 inline void to_json(json& j, const vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
@@ -160,3 +222,5 @@ inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)
 	}
 }
 
+
+#pragma endregion

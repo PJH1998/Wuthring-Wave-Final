@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Level.h"
 #include "Custom_UI.h"
 
@@ -6,6 +6,8 @@ NS_BEGIN(Editor)
 
 class CLevel_UI final : public CLevel
 {
+#pragma region Structs
+
 public:
 	// for Editor
 	typedef struct tagHierarchyObjectDesc
@@ -28,17 +30,23 @@ public:
 		_float3			vRot = {};			// Euler
 		_float3			vSca = {};
 
+
+		_float2			vScreenLT = {};			// ǥ�õ� ȭ����� ��ǥ ����. (��� 0, 0 / ���� ȭ��ũ��)
+		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+
+		_float4			vBlendToOuterWidth = {};
+
 	} UI_ANIM_KEYFRAME_DESC;
 
 	typedef struct tagUIAnimDesc
 	{
-		CCustom_UI::CUSTOM_UI_DESC	tUIDesc = {};	// FilePath, FileName, NumTex (?대뼡 ?띿뒪爾먯슜?몄?瑜??꾪븿)
+		CCustom_UI::CUSTOM_UI_DESC		tUIDesc = {};	// FilePath, FileName, NumTex (� �ؽ��Ŀ������� ����)
 
 		// ?ㅽ봽?덉엫, ?ㅽ봽?덉엫蹂??됰젹?뺣낫, 蹂닿컙諛⑸쾿, 湲몄씠 ??.
 		_wstring				strAnimName = {};
 		//_uint					iNumKeyFrame = {};
 
-		vector<UI_ANIM_KEYFRAME_DESC> vecKeyFrames = {};
+		vector<UI_ANIM_KEYFRAME_DESC>	vecKeyFrames = {};
 
 		//_uint					iLerpType = {};
 		_bool					isLoop = false;
@@ -60,6 +68,7 @@ public:
 		vector<UI_INFO_DESC>	vecUIInfoDescs = {};
 	} CUSTOM_UITREE_DESC;
 
+#pragma endregion
 
 private:
 	explicit CLevel_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -80,10 +89,12 @@ private:
 	void				Update_SaveLoad();
 	void				Update_Inspector();
 	void				Update_AnimEditor(_float fTimeDelta);
+	void				Update_InstanceEditor();
 
 	void				Update_ObjectParents();
 	void				Update_ObjectChilds();
 
+	void				Update_SelectedKeyframeDesc();
 
 private:
 	class CGameObject*			m_pCurObj = { nullptr };
@@ -96,7 +107,7 @@ private:
 
 
 	// for Update_SaveLoad
-	_bool						m_isOn_SaveLoad = false;
+	_bool						m_isOn_SaveLoad = true;
 
 
 	// for Update_Hierarchy
@@ -104,8 +115,8 @@ private:
 
 
 	// for Update_AnimEditor
-	// ?퀮nimEditor
-	_bool						m_isOn_AnimEdit = false;
+	// ��AnimEditor
+	_bool						m_isOn_AnimEdit = true;
 	vector<UI_ANIM_DESC>		m_vecUIAnims = {};
 
 	vector<UI_ANIM_KEYFRAME_DESC> m_vecUIKeyFrameDescs = {};	// Temp Keyframe
@@ -115,9 +126,10 @@ private:
 
 	// ?퀮nimList
 	_bool						m_isPlayAnimation = false;
-
 	UI_ANIM_DESC*				m_pSelectedUIAnim = { nullptr };
 
+	// ��Instance
+	CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC*	m_pSelectedInstance = { nullptr };
 
 public:
 	static CLevel_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -126,6 +138,7 @@ public:
 
 NS_END
 
+#pragma region json
 
 inline json vec_to_json(const std::vector<_float3>& vec)
 {
@@ -147,6 +160,11 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 		{ "vecPos", { d.vPos.x, d.vPos.y, d.vPos.z } },
 		{ "vecRot", { d.vRot.x, d.vRot.y, d.vRot.z } },
 		{ "vecSca", { d.vSca.x, d.vSca.y, d.vSca.z } },
+
+		{ "vScreenLT", { d.vScreenLT.x, d.vScreenLT.y } },
+		{ "vScreenRB", { d.vScreenRB.x, d.vScreenRB.y } },
+
+		{ "vBlendToOuterWidth", { d.vBlendToOuterWidth.x, d.vBlendToOuterWidth.y, d.vBlendToOuterWidth.z, d.vBlendToOuterWidth.w} }
 	};
 }
 
@@ -161,6 +179,14 @@ inline void from_json(const json& j, CLevel_UI::UI_ANIM_KEYFRAME_DESC& d)
 	d.vPos = { j["vecPos"][0], j["vecPos"][1], j["vecPos"][2] };
 	d.vRot = { j["vecRot"][0], j["vecRot"][1], j["vecRot"][2] };
 	d.vSca = { j["vecSca"][0], j["vecSca"][1], j["vecSca"][2] };
+
+	d.vScreenLT = _float2(j["vScreenLT"][0], j["vScreenLT"][1]);
+	d.vScreenRB = _float2(j["vScreenRB"][0], j["vScreenRB"][1]);
+
+	d.vBlendToOuterWidth = _float4(
+		j["vBlendToOuterWidth"][0], j["vBlendToOuterWidth"][1], 
+		j["vBlendToOuterWidth"][2], j["vBlendToOuterWidth"][3]
+	);
 }
 
 inline void to_json(json& j, const vector<CLevel_UI::UI_ANIM_KEYFRAME_DESC>& vec)
@@ -197,7 +223,7 @@ inline void to_json(json& j, const CLevel_UI::UI_ANIM_DESC& d)
 
 	j = json{
 		{ "tUIDesc", j_tUIDesc },
-		{ "strAnimName", _string(d.strAnimName.begin(), d.strAnimName.end()) },
+		{ "strAnimName", WStringToString(d.strAnimName) },
 		{ "iNumKeyFrame", d.vecKeyFrames.size()},
 		{ "vecKeyFrames", vecKeyFrames },
 		//{ "iLerpType", d.iLerpType },
@@ -213,7 +239,7 @@ inline void from_json(const json& j, CLevel_UI::UI_ANIM_DESC& d)
 	//d.iLerpType		= j["iLerpType"];
 	d.isLoop		= j["isLoop"];
 	_string strAnimName = j["strAnimName"].get<_string>();
-	d.strAnimName	= _wstring(strAnimName.begin(), strAnimName.end());
+	d.strAnimName	= StringToWString(strAnimName);
 }
 
 inline void to_json(json& j, const CLevel_UI::UI_INFO_DESC& d)
@@ -268,7 +294,7 @@ inline void to_json(json& j, const CLevel_UI::CUSTOM_UITREE_DESC& d)
 	to_json(vecUIInfoDescs, d.vecUIInfoDescs);
 
 	j = {
-		{ "strTreeName", _string(d.strTreeName.begin(), d.strTreeName.end()) },
+		{ "strTreeName", WStringToString(d.strTreeName) },
 		//{ "iNumUIDescs", d.vecUIDescs.size() },
 		{ "vecUIInfoDescs", vecUIInfoDescs }
 	};
@@ -277,7 +303,8 @@ inline void to_json(json& j, const CLevel_UI::CUSTOM_UITREE_DESC& d)
 inline void from_json(const json& j, CLevel_UI::CUSTOM_UITREE_DESC& d)
 {
 	_string strTreeName = j["strTreeName"].get<_string>();
-	d.strTreeName = _wstring(strTreeName.begin(), strTreeName.end());
+	d.strTreeName = StringToWString(strTreeName);
 	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
 }
 
+#pragma endregion

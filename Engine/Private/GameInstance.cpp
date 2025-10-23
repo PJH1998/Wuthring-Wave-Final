@@ -383,6 +383,14 @@ HRESULT CGameInstance::Bind_RawValue_Renderer(const _char* pConstantName, void* 
 {
 	return m_pRenderer->Bind_RawValue(pConstantName, pValue, iLength);
 }
+void CGameInstance::IsSSAO(_bool IsSSAO)
+{
+	m_pRenderer->IsSSAO(IsSSAO);
+}
+void CGameInstance::IsSSAO_Blur(_bool IsBlur)
+{
+	m_pRenderer->IsSSAO_Blur(IsBlur);
+}
 #endif
 #pragma endregion
 
@@ -556,9 +564,9 @@ _bool CGameInstance::isPicked(_float3* pOut)
 {
 	return m_pPicking->isPicked(pOut);
 }
-_bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels)
+_bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos)
 {
-	return m_pPicking->Get_Points(fRange, pOut,NumPixels);
+	return m_pPicking->Get_Points(fRange, pOut,NumPixels,pOutMousePos);
 }
 #pragma endregion
 

@@ -22,6 +22,9 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta)override;
 	virtual		void			Render()override;
 
+
+
+	void Set_ModelName(const _wstring& pModelName);
 private:
 	void Bind_Resources();
 	void Ready_Components();
@@ -33,10 +36,12 @@ private:
 	_uint m_iNumInstance = {};
 	_float3 m_vMousePos = {};
 	_float4* m_pPoints= {nullptr};
-
+	_tchar m_ModelName[MAX_PATH] = {};
 
 	_uint m_iMinNum = {};
 	_uint m_iMaxNum = {};
+	_float m_vMinRotation = {};
+	_float m_vMaxRotation = {};
 public:
 	static CEdit_Brush* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) { return nullptr; }

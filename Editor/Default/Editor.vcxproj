@@ -119,7 +119,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Debug;../ThirdPartyLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib_d.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -137,7 +137,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../Public;../../EngineSDK/Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>EditorPch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$EditorPch.pch</PrecompiledHeaderOutputFile>
@@ -148,7 +148,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;../ThirdPartyLib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../EngineSDK/Lib/Release;../ThirdPartyLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Engine.lib;d3d11.lib;dxguid.lib;ImGuiLib.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <FxCompile>
@@ -179,8 +179,10 @@
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
     <ClInclude Include="..\Public\Edit_Brush.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Sonora.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
+    <ClInclude Include="..\Public\Effect_Mesh.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
@@ -195,10 +197,13 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Mesh_Controller.h" />
     <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
+    <ClInclude Include="..\Public\Editor_Define_UI.h" />
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
     <ClInclude Include="Editor.h" />
@@ -227,8 +232,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
+    <ClCompile Include="..\Private\Effect_Mesh.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
@@ -242,10 +249,12 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Mesh_Controller.cpp" />
     <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
     <ClCompile Include="Editor.cpp" />
@@ -259,6 +268,10 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex_Instance.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>

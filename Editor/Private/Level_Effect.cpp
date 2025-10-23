@@ -1,10 +1,10 @@
-ï»¿#include "EditorPch.h"
+#include "EditorPch.h"
 #include "Level_Effect.h"
 #include "Event_Level.h"
 #include "Effect_Controller.h"
 #include "Particle.h"
+#include "Effect_Mesh.h"
 #include "ComputeShader.h"
-
 #include "AnimationTool.h"
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -20,12 +20,18 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"),
         CParticle::Create(m_pDevice, m_pContext));
 
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"),
+        CEffect_Mesh::Create(m_pDevice, m_pContext));
+
+    //ÆÄÆ¼Å¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
+    //¸Å½¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXMesh_Instance.hlsl"), VTXFXMESHINSTANCE::Elements, VTXFXMESHINSTANCE::iNumElements));
 
-    // hlsl æ€¨?ï§ìšŽí…£?? => ??åª›ë¯ª? å ‰?åª›ì’–ë‹”?Â€ ?ê³´??ë†ì”  å«„ê³—ì“½ æ€¨ì¢Žì ™
-// ??è¸°ë‰ë¿‰ ?ë¬’ë¾½??ï§£ì„Žâ”?????Â€???ã…»ì …?ì’“? ï§ë‰–ì±¸?ë©¸?ç‘œ??ëº¤ì“½.
+    //ÆÄÆ¼Å¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -38,15 +44,48 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_Particle"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
 
-    //m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
+
+    //FX¸Å½¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
+
+    SHADER_MACRO eShaderMacroMesh = {
+      {"THREAD_X", "64" }
+      ,{"THREAD_Y", "1" }
+      ,{"THREAD_Z", "1" }
+      , { NULL, NULL }
+    };
+
+    string strEntryPointMesh = "main";
+
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_FXMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_FXMeshUpdate_CS.hlsl"), eShaderMacroMesh, strEntryPointMesh));
+
+    //ÀÌÆåÆ® Åø
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
-    //?ëš°ë–š???Â€ï§žê³¸ì—« è«›??ê¾©íŠ‚åª›ìˆˆ? ?ã…¼ì ™??è¹‚ë‹¿ë¦° ?ê¾ªë¹ ?ëš®ì …?ëŒë¼± ?ê¾©ìŠ±?ã…ºí€¬ ç•°ë¶½???
+
+    //ÆÄÆ¼Å¬ ¿òÁ÷ÀÓ ¹× À§Ä¡°°Àº ¼³Á¤µé º¸±â À§ÇØ ÇÃ·¹ÀÌ¾î ¶ç¿ï·Á°í Ãß°¡ÇÔ. ¿µÈÆ¿Àºü°¡ ¸¸µç ¾Ö´Ï¸ÞÀÌ¼Ç Åø
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
             , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    {
+        CRASH("Failed Load AnimMesh Shader");
+        return E_FAIL;
+    }
+
+    //¾Ö´Ï¸ÞÀÌ¼Ç ¿¬»ê¿ë ¼ÎÀÌ´õ
+    SHADER_MACRO eShaderMacroB = {
+    {"THREAD_X", "64" }
+    ,{"THREAD_Y", "1" }
+    ,{"THREAD_Z", "1" }
+    , { NULL, NULL }
+    };
+
+    string strEntryPointB = "CSMain";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+            , eShaderMacroB, strEntryPointB))))
     {
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
@@ -59,7 +98,7 @@ void CLevel_Effect::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Effect"));
 
-    m_pEffect_Controller->Update();
+        m_pEffect_Controller->Update();
 
    
 }

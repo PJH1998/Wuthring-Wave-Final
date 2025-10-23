@@ -16,6 +16,8 @@ public:
 	virtual		void			Render() override;
 
 private:
+	HRESULT Ready_Layer_Map(const _char* pFilePath);
+	void Read_Map_Dat(const _string pFilePath);
 	void Ready_Layer_PlayerParty();
 	void Ready_Layer_Augusta();
 

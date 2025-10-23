@@ -27,9 +27,7 @@ namespace Engine
 
 	enum class EVENT { STATIC, NONSTATIC, END};
 
-	enum class SHADER_DEFFERED { RD_DEBUG, RD_DEBUG_CSM, CONBINED, DIRECTIONAL, POINT, BLUR_X, BLUR_Y, DISTORTION, LUT };
-	
-	// Collide
+	enum class SHADER_DEFFERED { RD_DEBUG, RD_DEBUG_CSM, COMBINED, DIRECTIONAL, POINT, GAUSSIAN_BLUR_X, GAUSSIAN_BLUR_Y, SSAO_BLUR_X, SSAO_BLUR_Y, BLUR_COMBINED, DISTORTION, LUT, SSAO};
 	// BroadPhase Layer
 	enum class BPLAYER { NONE, NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
@@ -37,6 +35,6 @@ namespace Engine
 	// Collide Timing
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
-	
+	enum class EFFECT_TYPE { PARTICLE, MESH, END };
 }
 #endif // Engine_Enum_h__

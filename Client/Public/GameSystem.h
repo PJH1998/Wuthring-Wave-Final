@@ -17,6 +17,7 @@ public:
 
 #pragma region Parser
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
 #pragma endregion
 
 
