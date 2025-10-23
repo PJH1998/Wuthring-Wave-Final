@@ -54,8 +54,7 @@ public:
 	void							Sync_Rigidbody(class CTransform* pTransform);
 
 public:
-	void							Change_Layer(_uint iLayer) { m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(iLayer)); }
-	void							Activate(_bool isActivate) { true == isActivate ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID); }
+	void							Change_Layer(_uint iLayer);
 	void							OnGravity(_bool isGravity) { m_pBodyInterface->SetGravityFactor(m_BodyID, isGravity); }
 
 	void							Force(const _float3& vForce) { m_pBodyInterface->AddForce(m_BodyID, LoadVec3(vForce)); }
@@ -64,13 +63,17 @@ public:
 	_bool							IsLand(_float3* pNormalOut = nullptr);
 
 private:
+	SHAPE						m_eShape = {};
 	COLLISION_DATA			m_tCollisionData = {};
 	Body*							m_pBody = {nullptr};
 	BodyID						m_BodyID;
+	Body**						m_ppMeshBodies = { nullptr };
+	BodyID*						m_pMeshBodyIDs = { nullptr };
+	_uint							m_iNumMesh = {};
+
 	BodyInterface*				m_pBodyInterface = { nullptr };
 
 	Character*					m_pCharacter = { nullptr };
-	//Ref<Character>			m_pCharacter = { nullptr };
 
 private:
 	const JPH::Array<Vec3>					ConvertToArrayVec3(class CModel* pModel);

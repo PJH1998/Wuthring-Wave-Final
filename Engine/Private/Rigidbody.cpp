@@ -30,11 +30,11 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 	ASSERT_CRASH(pArg);
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
-
+	m_eShape = pDesc->eShape;
 	RefConst<Shape> BodyShape;
 
 	using namespace JPH;
-	switch (pDesc->eShape)
+	switch (m_eShape)
 	{
 	case SHAPE::SPHERE:
 	{
@@ -112,6 +112,17 @@ void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
 	pTransform->Set_State(STATE::POSITION, XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
 }
 
+void CRigidbody::Change_Layer(_uint iLayer)
+{
+	if (SHAPE::MESH == m_eShape)
+	{
+		for(_uint i = 0; i < m_iNumMesh; ++i)
+			m_pBodyInterface->SetObjectLayer(m_pMeshBodyIDs[i], ObjectLayer(iLayer));
+	}
+	else
+		m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(iLayer));
+}
+
 _bool CRigidbody::IsLand(_float3* pNormalOut)
 {
 	if (nullptr == m_pCharacter)
@@ -166,9 +177,12 @@ void CRigidbody::Make_MeshShape(void* pArg)
 {
 	MESHBODY_DESC* pDesc = static_cast<MESHBODY_DESC*>(pArg);
 
-	_uint iNumMesh = pDesc->pModel->Get_NumMesh();
+	m_iNumMesh = pDesc->pModel->Get_NumMesh();
 
-	for (_uint i = 0; i < iNumMesh; ++i)
+	m_ppMeshBodies = new Body*[m_iNumMesh];
+	m_pMeshBodyIDs = new BodyID[m_iNumMesh];
+
+	for (_uint i = 0; i < m_iNumMesh; ++i)
 	{
 		RefConst<Shape> BodyShape;
 
@@ -187,7 +201,8 @@ void CRigidbody::Make_MeshShape(void* pArg)
 		// SetUp UserData (CollisionData)
 		m_tCollisionData.pComponent = this;
 		bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);
-		ASSERT_CRASH(m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface));
+		m_ppMeshBodies[i] = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
+		m_pMeshBodyIDs[i] = m_ppMeshBodies[i]->GetID();
 	}
 }
 
@@ -263,8 +278,20 @@ void CRigidbody::Free()
 	m_tCollisionData.pComponent = nullptr;
 	m_tCollisionData.pDesc = nullptr;
 
-	if(nullptr != m_pBody)
-		m_pBodyInterface->RemoveBody(m_BodyID);
+	// Body Clear
+	if (true == m_isClone)
+	{
+		if (SHAPE::MESH == m_eShape)
+		{
+			for (_uint i = 0; i < m_iNumMesh; ++i)
+				m_pBodyInterface->RemoveBody(m_pMeshBodyIDs[i]);
+			Safe_Delete_Array(m_pMeshBodyIDs);
+			Safe_Delete_Array(m_ppMeshBodies);
+		}
+		else
+			m_pBodyInterface->RemoveBody(m_BodyID);
+	}
+
 	if (nullptr != m_pCharacter)
 		m_pCharacter->RemoveFromPhysicsSystem();
 	Safe_Delete(m_pCharacter);
