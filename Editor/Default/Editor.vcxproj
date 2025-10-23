@@ -172,6 +172,7 @@
     <ClInclude Include="..\public\EditDummy.h" />
     <ClInclude Include="..\public\EditDummy_Augusta.h" />
     <ClInclude Include="..\Public\EditDummy_Map.h" />
+    <ClInclude Include="..\Public\EditDummy_Target.h" />
     <ClInclude Include="..\public\EditDummy_Wolf.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="..\private\EditDummy.cpp" />
     <ClCompile Include="..\private\EditDummy_Augusta.cpp" />
     <ClCompile Include="..\Private\EditDummy_Map.cpp" />
+    <ClCompile Include="..\Private\EditDummy_Target.cpp" />
     <ClCompile Include="..\private\EditDummy_Wolf.cpp" />
     <ClCompile Include="..\Private\EditorApp.cpp" />
     <ClCompile Include="..\Private\EditorPch.cpp">

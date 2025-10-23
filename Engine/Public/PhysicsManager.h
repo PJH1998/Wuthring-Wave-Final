@@ -76,12 +76,13 @@ private:
 	PhysicsSettings		m_PhysicsSetting;
 	CharacterVirtual::ExtendedUpdateSettings m_ExtendedUpdateSetting;
 
-	BPLayer*										m_pBPLayer = { nullptr };
-	ObjectLayerPairFilterImpl*				m_pObjectLayerFilter = { nullptr };
-	ObjectVsBroadPhaseLayerFilterImpl*	m_pObjectVsBPFilter = { nullptr };
+	BPLayer*											m_pBPLayer = { nullptr };
+	ObjectLayerPairFilterImpl*					m_pObjectLayerFilter = { nullptr };
+	ObjectVsBroadPhaseLayerFilterImpl*		m_pObjectVsBPFilter = { nullptr };
 
-	CharacterVsCharacterCollisionSimple* m_pCVCCollision = { nullptr };
-	CharacterContactListener* m_pCharacterContactListener = { nullptr };
+	CharacterVsCharacterCollisionSimple*	m_pCVCCollision = { nullptr };
+	CharacterContactListener*					m_pCharacterContactListener = { nullptr };
+	SpecifiedBroadPhaseLayerFilter*			m_pRayFilter = { nullptr };
 
 	_uint		m_iNumBodies = { 10240 };
 	_uint		m_iNumBodyMutexes = {}; // Autodetect

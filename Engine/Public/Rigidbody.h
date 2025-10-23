@@ -54,6 +54,7 @@ public:
 	void							Sync_Rigidbody(class CTransform* pTransform);
 
 public:
+	void							Change_Layer(_uint iLayer) { m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(iLayer)); }
 	void							Activate(_bool isActivate) { true == isActivate ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID); }
 	void							OnGravity(_bool isGravity) { m_pBodyInterface->SetGravityFactor(m_BodyID, isGravity); }
 

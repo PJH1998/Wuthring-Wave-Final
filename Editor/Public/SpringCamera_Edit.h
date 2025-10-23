@@ -35,7 +35,19 @@ public:
 		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
-	void							Lock_On() { m_isLockOn = !m_isLockOn; }
+	void							Lock_On()
+	{
+		if (CAMERA_STATE::LOCKON == m_eCameraState)
+		{
+			m_eCameraState = CAMERA_STATE::TARGET;
+			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		}
+		else if (CAMERA_STATE::TARGET == m_eCameraState)
+		{
+			m_eCameraState = CAMERA_STATE::LOCKON;
+			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
+		}
+	}
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -46,10 +58,11 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 
-	void							OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void							OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 private:
 	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
+	_float4						m_vLookPosition = {};
 	// Detect Collider
 	CRigidbody*				m_pRigidbodyCom = { nullptr };
 
@@ -66,14 +79,26 @@ private:
 	_float							m_fSpringDuration = {};
 
 	// Lock-On
-	_bool							m_isLockOn = { false };
+	vector<CTransform*>		m_TargetTransforms;
+	CTransform*				m_pTargetTransform = { nullptr };
+	_float							m_fLockOnOffsetY = {};
 
 private:
+	// Default
 	void							Lerp_Distance(_float fTimeDelta);
 	void							Mouse_Scroll(_float fTimeDelta);
+	
+	// Spring
 	void							Spring(_float fTimeDelta);
+	
+	// Target
 	void							Compute_CamPos();
 	void							Check_Ray();
+
+	// LockOn
+	_vector						Lerp_Quat(_float fTimeDelta);				// Quat Lerp
+	void							Sorting_Target();								// Target Transforms Sort (Distance Less)
+	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 
 private:
 	void							Ready_Component();

@@ -31,7 +31,7 @@ namespace Engine
 	
 	// Collide
 	// BroadPhase Layer
-	enum class BPLAYER { NON_MOVE, MOVE, DEBRIS, SENSOR, END };
+	enum class BPLAYER { NONE, NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
 	enum class SHAPE { SPHERE, BOX, CAPSULE, CONVEXHULL, MESH };
 	// Collide Timing

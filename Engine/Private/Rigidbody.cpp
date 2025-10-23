@@ -184,6 +184,9 @@ void CRigidbody::Make_MeshShape(void* pArg)
 			ObjectLayer(pDesc->iLayer)																// Collision Layer
 		);
 
+		// SetUp UserData (CollisionData)
+		m_tCollisionData.pComponent = this;
+		bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);
 		ASSERT_CRASH(m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface));
 	}
 }
