@@ -250,7 +250,7 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     
     Out.vPosition = vWorldPos;
     Out.vTexcoord = In.vTexcoord;
-    Out.vWorldPos = vWorldPos;
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
     Out.vProjPos = Out.vPosition;
     
     Out.vSInstPos = In.vSInstTrans.xy;
@@ -315,13 +315,28 @@ float2 vClipTexcoordY   : TEXCOORD6;
 
 PS_OUT PS_MAIN(PS_IN In)
 {
+    // Apply InstCoord for atlas / sprite style
     PS_OUT Out = (PS_OUT) 0;
-    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x), // 이걸로 In.vSInstCoord 범위에 따라.. 이용?
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
-    // ksta : 위에 확인하고 해결되면 원래대로 되돌리고 여기도 확인할 것
+    // Apply ClipTexcoord for clipped ui. like as HP Bar
+    // Calc Clip Space
+    float2 clipX = float2 ( lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),    // 예시로 텍스쳐를 0.2 ~ 0.8 범위만 쓰는데, 클립 범위는 0.5 ~ 1.0 이라면
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y) );  // 0.2 ~ 0.8 범위 내에서의 0.5 및 1.0을 클립 범위로 삼음. ( result : 0.5 ~ 0.8 )
+    float2 clipY = float2 ( lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y) );
+    // discard
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
+    
+    
+        
+    // In.vSInstCoordX.x 와 In.vSInstCoordX.y 사이의 값을 0~1로 생각하여
+    // In.vClipTexcoordX.x, y 가 그 기준으로 밖에 있다면 discard.
+    
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
-    //Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
     
     return Out;
 }
@@ -331,7 +346,13 @@ PS_OUT PS_CUTOUT_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
-    
+    float2 clipX = float2 ( lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),  
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y) );
+    float2 clipY = float2 ( lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y) );
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
         
@@ -347,6 +368,13 @@ PS_OUT PS_ALPHAENABLED_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
     
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
@@ -364,6 +392,13 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
 
     
     // gradient 목적지 좌표 구함.
@@ -443,6 +478,13 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
 
     
     // gradient 목적지 좌표 구함.
