@@ -48,6 +48,7 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+	_bool								isTrackPositionOver(const _string& strAnimName , _float fTargetTrackPos);
 
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }

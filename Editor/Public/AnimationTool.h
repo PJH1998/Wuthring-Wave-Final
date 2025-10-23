@@ -85,6 +85,8 @@ private:
 	typedef map<const _wstring, const _string> MODELPATHS;
 	MODELPATHS	m_ModelDirPaths;
 
+	class CAnimMachine* m_pAnimMachineCom = { nullptr };
+
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
@@ -102,6 +104,8 @@ private:
 	_bool m_IsVisibleNotify = { false };
 	_bool m_IsPlayAnimation = { true };
 	_bool m_IsStateTransition = { false };
+
+	_uint m_iTransitionTargetState{};
 	
 private:
 	_float m_fEditorAlpha = { 1.f };

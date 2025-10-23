@@ -129,6 +129,11 @@ const vector<_uint>& CModel::Get_Indices(_uint iIndex)
 	return m_Meshes[iIndex]->Get_Indices();
 }
 
+_bool CModel::isTrackPositionOver(const _string& strAnimName, _float fTargetTrackPos)
+{
+	return m_Animations[strAnimName]->isTrackPositionOver(fTargetTrackPos);
+}
+
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
 {

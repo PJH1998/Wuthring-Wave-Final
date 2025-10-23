@@ -31,23 +31,30 @@ HRESULT CAnimMachine::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CAnimMachine::Handle_Input(CModel* pModelCom, _uint iIndex, _uint* pState)
+//void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex)
+void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string strAnimTag)
 {
-	if(iIndex >= m_AnimStates.size())
+	//if(iIndex >= m_AnimStates.size())
+	if(m_AnimStates.end() == m_AnimStates.find(strAnimTag))
 		return;
-	if(iIndex != m_iCurrentStateIndex)
+	//if(iIndex != m_iCurrentStateIndex)
+	if(0 != m_strCurrentAnimTag.compare(strAnimTag))
 	{
-        m_AnimStates[m_iCurrentStateIndex]->Exit(pModelCom, pState);
-		// Enter 새로운 상태
-		m_AnimStates[iIndex]->Enter(pModelCom, pState, &m_strCurrentAnimTag);
-		m_iCurrentStateIndex = iIndex;
+        //m_AnimStates[m_iCurrentStateIndex]->Exit(pModelCom, pState);
+		//// Enter 새로운 상태
+		//m_AnimStates[iIndex]->Enter(pModelCom, pState, &m_strCurrentAnimTag);
+		//m_iCurrentStateIndex = iIndex;
+		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
+		m_AnimStates[strAnimTag]->Enter(pModelCom, pState, &m_strCurrentAnimTag);
+
 	}
 }
 
-void CAnimMachine::Update(_float fTimeDelata, CModel* pModelCom, _uint* pState)
+void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _float fTimeDelata)
 {
 	// 1. 현재 상태 업데이트
-	m_AnimStates[m_iCurrentStateIndex]->Update(fTimeDelata, this, pState, &m_strCurrentAnimTag);
+	//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
+	m_AnimStates[m_strCurrentAnimTag]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 
 	// 2. 애니메이션 재생
 	_bool Result = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, nullptr);
@@ -55,7 +62,7 @@ void CAnimMachine::Update(_float fTimeDelata, CModel* pModelCom, _uint* pState)
 	//Result : 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 
 	// 3. 결과 피드백
-	m_AnimStates[m_iCurrentStateIndex]->Feedback(Result, pState, this, pModelCom);
+	//m_AnimStates[m_iCurrentStateIndex]->Feedback(Result, pState, this, pModelCom);
 }
 
 void CAnimMachine::Reset()

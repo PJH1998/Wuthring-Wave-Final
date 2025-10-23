@@ -15,6 +15,7 @@ public:
 	const vector<class CChannel*>& Get_Channels() const { return m_Channels; }
 	void				Set_CurrentTrackPosition(_float fTrackPos) { m_fCurrentTrackPosition = fTrackPos; m_iNotifyIndex = 0; }
 	_float				Get_Duration() { return m_fDuration; }
+	_bool				isTrackPositionOver(_float fTargetTrackPos) { return m_fCurrentTrackPosition > fTargetTrackPos; }
 #ifdef _DEBUG
 	_float*				Get_TrackPositionPtr() { return &m_fCurrentTrackPosition; }
 	

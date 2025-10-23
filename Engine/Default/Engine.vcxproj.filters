@@ -555,7 +555,7 @@
     <ClInclude Include="..\Public\CollideComponent.h">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\AnimTransiiton.h">
+    <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClInclude>
   </ItemGroup>
@@ -812,7 +812,7 @@
     <ClCompile Include="..\Private\CollideComponent.cpp">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\AnimTransiiton.cpp">
+    <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClCompile>
   </ItemGroup>

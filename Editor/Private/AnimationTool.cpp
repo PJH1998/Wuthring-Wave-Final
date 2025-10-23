@@ -3,6 +3,7 @@
 #include "ModelLoader.h"
 #include "AnimationActor.h"
 #include "AnimNotifyTool.h"
+#include "AnimMachine.h"
 
 
 #pragma region 기본함수들
@@ -24,6 +25,7 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
     
+    m_pAnimMachineCom = CAnimMachine::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -316,6 +318,11 @@ void CAnimationTool::RenderUI_OptionState()
             // 2. 함수 설정.
             static char textBuffer[256] = "";
             ImGui::InputText("Function Name", textBuffer, sizeof(textBuffer));
+
+            //3. 조건이 되어질 상태
+            ImGui::Text("%u", (1 << m_iTransitionTargetState));
+            ImGui::InputScalar("Target State", ImGuiDataType_U32, &m_iTransitionTargetState);
+
 
             _string strTransition = {};
             if (ImGui::Button("Add Transition"))
@@ -851,6 +858,7 @@ void CAnimationTool::Free()
     CBase::Free();
     Safe_Release(m_pLoader);
     Safe_Release(m_pAnimNotifyTool);
+    Safe_Release(m_pAnimMachineCom);
     Safe_Release(m_pDevice);
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
