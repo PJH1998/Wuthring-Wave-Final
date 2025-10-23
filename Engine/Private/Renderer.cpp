@@ -74,7 +74,7 @@ void CRenderer::Render()
 	Render_Outline();
 	Render_NonBlend();
 	Render_Light();
-	//Render_SSAO();
+	Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
 	//Render_Emissive();
@@ -630,6 +630,9 @@ void CRenderer::Render_Debug()
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
 		m_isRenderDebug = !m_isRenderDebug;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
+		m_IsSSAO = !m_IsSSAO;
 
 	for (auto& pComponent : m_DebugComponents)
 	{
