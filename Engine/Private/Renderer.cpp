@@ -229,9 +229,9 @@ void CRenderer::Render_Light()
 
 void CRenderer::Render_SSAO()
 {
-
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
 		CRASH("Render Fail");
+
 #ifdef _DEBUG
 	if (false == m_IsSSAO)
 	{
@@ -239,6 +239,9 @@ void CRenderer::Render_SSAO()
 		return;
 	}
 #endif
+
+//	Setting_Viewport(static_cast<_float>( m_iWinSizeX ) * 0.5f, static_cast<_float>(m_iWinSizeY) * 0.5f);
+
 	if (FAILED(m_pShader->Bind_Matrix("g_CamViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Render Fail");
 
@@ -258,6 +261,8 @@ void CRenderer::Render_SSAO()
 	m_pVIBuffer->Render();
 
 	m_pGameInstance->End_MRT();
+
+//	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 
 	//GaussianBlur_RenderTager(TEXT("RT_SSAO"), TEXT("MRT_SSAO"), BLUR_TYPE::GAUSSIAN);
 #ifdef _DEBUG
