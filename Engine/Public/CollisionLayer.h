@@ -26,6 +26,7 @@ public:
 	{
 		switch ((BroadPhaseLayer::Type)inLayer)
 		{
+		case ENUM_CLASS(BPLAYER::NONE): return "NONE";
 		case ENUM_CLASS(BPLAYER::NON_MOVE): return "NON_MOVE";
 		case ENUM_CLASS(BPLAYER::MOVE):		return "MOVING";
 		case ENUM_CLASS(BPLAYER::DEBRIS):		return "DEBRIS";
