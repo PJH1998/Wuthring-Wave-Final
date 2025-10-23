@@ -319,7 +319,7 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
     vector vOriginNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
     vOriginNormal = normalize(float4(vOriginNormal.xyz * 2.f + 1.f, 0.f));
     
-    if (fOriginDepth == 0.f)
+    if (fOriginDepth == 0.f)            // 기록 안된 곳이면 Pass
     {
         Out.vColor = vOriginColor;
         return Out;
@@ -335,31 +335,22 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
         float2 vTexcoord = float2(In.vTexcoord.x + (x * fTexelSize), In.vTexcoord.y);
         vector vSampleColor = g_BlurBeginTexture.Sample(ClampSampler, vTexcoord);
         float fSampleDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
-        if (fSampleDepth == 0.f || vSampleColor.r == 1.f)
-        {
-            continue;
-        }
+        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) continue; // 샘플한 곳이 기록안됨 or 혹은 노이즈 빈 공간;
         
-        float fDepthDist = abs(fOriginDepth - fSampleDepth);
+        
+        float fDepthDist = abs(fOriginDepth - fSampleDepth);        // 깊이
         
         vector vSampleNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
         vSampleNormal = normalize(float4(vSampleNormal.xyz * 2.f + 1.f, 0.f));
     
-        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));
+        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));  // 노말 내적 값 0~1로
         
-        float fDistWeight = g_fSSAOWeights[x+6];
-        
-        if (fDepthDist <= g_fMinDepthDistance && vSampleColor.r != 1.f)
+        if (fDepthDist <= g_fMinDepthDistance)                          // 최소 비교 깊이 ( 상수 )
         {
-            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));// * (1.f - fDistWeight);
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));  // 기본적으로 섞을 색이 어두운 색 -> 노말 가중치에 따라 더 밝게 조절
             vColor += vFinalColor;
             fCount += 1.f;
         }
-        //if(fDepthDist <= 10.f && vSampleColor.r != 1.f)
-        //{
-        //    vColor += vSampleColor;
-        //    fCount += 1.f;
-        //}
     }
     
     if(fCount > 0.f)
@@ -411,11 +402,9 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
     
         float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));
         
-        float fDistWeight = g_fSSAOWeights[y + 6];
-        
-        if (fDepthDist <= g_fMinDepthDistance && vSampleColor.r != 1.f)
+        if (fDepthDist <= g_fMinDepthDistance)
         {
-            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));// * (1.f - fDistWeight);
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));
             vColor += vFinalColor;
             fCount += 1.f;
         }
