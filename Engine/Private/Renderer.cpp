@@ -258,6 +258,20 @@ void CRenderer::Render_SSAO()
 	m_pGameInstance->End_MRT();
 
 	//GaussianBlur_RenderTager(TEXT("RT_SSAO"), TEXT("MRT_SSAO"), BLUR_TYPE::GAUSSIAN);
+#ifdef _DEBUG
+	if (false == m_IsSSAO_Blur)
+	{
+		if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
+			CRASH("Render Fail");
+
+		m_pGameInstance->End_MRT();
+		if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
+			CRASH("Render Fail");
+
+		m_pGameInstance->End_MRT();
+		return;
+	}
+#endif
 	SSAO_Blur();
 }
 

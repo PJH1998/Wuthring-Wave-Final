@@ -387,6 +387,10 @@ void CGameInstance::IsSSAO(_bool IsSSAO)
 {
 	m_pRenderer->IsSSAO(IsSSAO);
 }
+void CGameInstance::IsSSAO_Blur(_bool IsBlur)
+{
+	m_pRenderer->IsSSAO_Blur(IsBlur);
+}
 #endif
 #pragma endregion
 

@@ -22,9 +22,12 @@ private:
 	_float				m_fSlopeScale = {};
 	_uint				m_iLUT_Index = {};
 	_float				m_fLUT_Intensity = {};
-	_float				m_fSigmaWeight = {0.001f};
+	_float				m_fSigmaWeight = {0.01f};
 	_float				m_fRadius = { 10.f };
 	_bool				IsSSAO = {};
+
+	_float				m_fMinDepthWeight = {0.1f};
+	_float				m_fMinNormalWeight = { 0.1f };
 
 private:
 	void				Setting_Bias(const _char* pName, _float* pFloat);

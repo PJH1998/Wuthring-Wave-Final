@@ -57,21 +57,33 @@ void CShader_Interface::Set_SSAO()
 {
 	ImGui::Begin("SSAO");
 
-	if(ImGui::Button("ON"))
+	if(ImGui::Button("SSAO_ON"))
 		m_pGameInstance->IsSSAO(true);
 	
 	ImGui::SameLine();
 
-	if (ImGui::Button("OFF"))
+	if (ImGui::Button("SSAO_OFF"))
 		m_pGameInstance->IsSSAO(false);
+
+	if (ImGui::Button("BLUR_ON"))
+		m_pGameInstance->IsSSAO_Blur(true);
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("BLUR_OFF"))
+		m_pGameInstance->IsSSAO_Blur(false);
+
 
 	ImGui::InputFloat("RADIUS", &m_fRadius);
 	
 
 	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
 
+	ImGui::InputFloat("MIN_DEPTH", &m_fMinDepthWeight);
+
 	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
 	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigma", &m_fSigmaWeight, sizeof(_float));
+	m_pGameInstance->Bind_RawValue_Renderer("g_fMinDepthDistance", &m_fMinDepthWeight, sizeof(_float));
 	ImGui::End();
 }
 

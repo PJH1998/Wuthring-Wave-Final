@@ -39,8 +39,6 @@ float RPB_Gradiant(float fViewDepth)
 {
     float DepthDDX = ddx(fViewDepth * 0.0001f);
     float DepthDDY = ddy(fViewDepth * 0.0001f);
-        
-//    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     float GradiantX = abs(DepthDDX);
     float GradiantY = abs(DepthDDY);

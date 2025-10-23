@@ -29,9 +29,12 @@ Texture2D g_BlurEndTexture;
 Texture2D g_RampTexture;
 Texture2D g_NoiseTexture;
 
-vector g_vSampleVector[16];
-float g_fDepthSigma = 0.1f;
+vector g_vSampleVector[32];
 float g_fSSAO_Radius = 10.f;
+float g_fDepthSigma = 0.01f;
+float g_fMinDepthDistance = 10.f;
+float g_fMinNormalWeight = 0.1f;
+
 
 Texture2DArray<float> g_ShadowMap : register(t0);
 Texture2DArray<float4> g_LUT_Texture : register(t1);
@@ -311,50 +314,52 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    float fTexel = 1.f / g_fWidth;
+    vector vOriginColor = g_BlurBeginTexture.Sample(PointSampler, In.vTexcoord);
+    float fOriginDepth = g_DepthTexture.Sample(PointSampler, In.vTexcoord).y;
+    vector vOriginNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
+    vOriginNormal = normalize(float4(vOriginNormal.xyz * 2.f + 1.f, 0.f));
     
-    vector vOriginColor = g_BlurBeginTexture.Sample(DefaultSampler, In.vTexcoord);
-    float fOriginDepth = g_DepthTexture.Sample(DefaultSampler, In.vTexcoord).y;
-    vector vOriginNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    if(fOriginDepth == 0.f)     // 기록 되지 않은 픽셀
+    if (fOriginDepth == 0.f)            // 기록 안된 곳이면 Pass
     {
-        Out.vColor = vOriginColor; // 1,1,1,1;
+        Out.vColor = vOriginColor;
         return Out;
     }
     
     vector vColor = 0.f;
-    float fTotalWeight = 0.f;
+    float fCount = 0.f;
     
-    float fSum = 0.f;
+    float fTexelSize = 1.f / 1920.f;
     [unroll]
-    for (int i = -4; i <= 4; ++i)
+    for (int x = -2; x <= 2; ++x)
     {
-        float2 vTexcoord = float2(In.vTexcoord.x + (i * fTexel), In.vTexcoord.y);
+        float2 vTexcoord = float2(In.vTexcoord.x + (x * fTexelSize), In.vTexcoord.y);
+        vector vSampleColor = g_BlurBeginTexture.Sample(ClampSampler, vTexcoord);
+        float fSampleDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
+        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) continue; // 샘플한 곳이 기록안됨 or 혹은 노이즈 빈 공간;
         
-        float fBlurDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
-       
-        vector vBlurColor = g_BlurBeginTexture.Sample(ClampSampler, vTexcoord);
-        vector vBlurNormal = g_NormalTexture.Sample(ClampSampler, vTexcoord);
         
-        float fSigma = g_fDepthSigma * (fOriginDepth * 0.5f + 1.0f);
-        float fDepthDist = abs(fOriginDepth - fBlurDepth);// / g_fFar;
+        float fDepthDist = abs(fOriginDepth - fSampleDepth);        // 깊이
         
-        float fDepthWeight = exp(-(fDepthDist * fDepthDist) / (2.f * g_fDepthSigma * g_fDepthSigma));
-
-        float fNormalWeight = dot(vOriginNormal, vBlurNormal) * 0.5f + 0.5f;
+        vector vSampleNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
+        vSampleNormal = normalize(float4(vSampleNormal.xyz * 2.f + 1.f, 0.f));
+    
+        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));  // 노말 내적 값 0~1로
         
-//        float fDistWeight = g_fSSAOWeights[i + 2];
-        
-        float fDistWeight = exp(-0.5f * (i * i) / (4.f * 4.f));
-        float fFinalWeight = fDepthWeight * fNormalWeight * fDistWeight;
-        
-        vColor += vBlurColor * fTotalWeight;
-        fTotalWeight += fFinalWeight;
+        if (fDepthDist <= g_fMinDepthDistance)                          // 최소 비교 깊이 ( 상수 )
+        {
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));  // 기본적으로 섞을 색이 어두운 색 -> 노말 가중치에 따라 더 밝게 조절
+            vColor += vFinalColor;
+            fCount += 1.f;
+        }
     }
     
-    Out.vColor.xyz = (vColor.xyz) / fTotalWeight;
-    Out.vColor.w = 1.f;
+    if(fCount > 0.f)
+    {  
+        Out.vColor = float4((vColor.xyz / fCount), 1.f);
+    }
+    else
+        Out.vColor = vOriginColor;
+    
     return Out;
 }
 
@@ -362,7 +367,55 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    float fTexel = 1.f / g_fHeight;
+    vector vOriginColor = g_BlurTexture.Sample(PointSampler, In.vTexcoord);
+    float fOriginDepth = g_DepthTexture.Sample(PointSampler, In.vTexcoord).y;
+    vector vOriginNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
+    vOriginNormal = normalize(float4(vOriginNormal.xyz * 2.f + 1.f, 0.f));
+    
+    if (fOriginDepth == 0.f)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+    
+    vector vColor = 0.f;
+    float fCount = 0.f;
+    
+    float fTexelSize = 1.f / 1080.f;
+    [unroll]
+    for (int y = -2; y <= 2; ++y)
+    {
+        float2 vTexcoord = float2(In.vTexcoord.x, In.vTexcoord.y + (y * fTexelSize));
+        vector vSampleColor = g_BlurTexture.Sample(ClampSampler, vTexcoord);
+        float fSampleDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
+        if (fSampleDepth == 0.f || vSampleColor.r == 1.f)
+        {
+            vColor += vOriginColor;
+            fCount += 1.f;
+            continue;
+        }
+         
+        float fDepthDist = abs(fOriginDepth - fSampleDepth);
+        
+        vector vSampleNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
+        vSampleNormal = normalize(float4(vSampleNormal.xyz * 2.f + 1.f, 0.f));
+    
+        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));
+        
+        if (fDepthDist <= g_fMinDepthDistance)
+        {
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));
+            vColor += vFinalColor;
+            fCount += 1.f;
+        }
+    }
+    
+    if (fCount > 0.f)
+    {
+        Out.vColor = float4((vColor.xyz / fCount), 1.f);
+    }
+    else
+        Out.vColor = vOriginColor;
     
     return Out;
 }
