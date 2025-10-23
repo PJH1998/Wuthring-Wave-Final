@@ -25,6 +25,7 @@ private:
 	_float				m_fSigmaWeight = {0.01f};
 	_float				m_fRadius = { 10.f };
 	_bool				IsSSAO = {};
+	_float				m_fMaxDistance = {10.f};
 
 	_float				m_fMinDepthWeight = {0.1f};
 	_float				m_fMinNormalWeight = { 0.1f };

@@ -30,9 +30,10 @@ Texture2D g_RampTexture;
 Texture2D g_NoiseTexture;
 
 vector g_vSampleVector[32];
-float g_fSSAO_Radius = 10.f;
+float g_fSSAO_Radius = 15.f;
+float g_fSSAO_MaxDistance = 50.f;
 float g_fDepthSigma = 0.01f;
-float g_fMinDepthDistance = 10.f;
+float g_fMinDepthDistance = 5.f;
 float g_fMinNormalWeight = 0.1f;
 
 
@@ -248,8 +249,9 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
 
     float fY = saturate(dot(normalize(g_vLightDirection.xyz * -1.f), vNormal.xyz));
-
-    fY = max(0.2f, fY);
+    
+    
+    //fY = max(0.2f, fY);
     
     float fShade = g_RampTexture.Sample(PointSampler, float2(0.5f, fY)).r;
 
@@ -328,37 +330,44 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
     vector vColor = 0.f;
     float fCount = 0.f;
     
-    float fTexelSize = 1.f / 1920.f;
+    float fTexelSize = 1.f / g_fWidth;
     [unroll]
     for (int x = -2; x <= 2; ++x)
     {
         float2 vTexcoord = float2(In.vTexcoord.x + (x * fTexelSize), In.vTexcoord.y);
         vector vSampleColor = g_BlurBeginTexture.Sample(ClampSampler, vTexcoord);
         float fSampleDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
-        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) continue; // 샘플한 곳이 기록안됨 or 혹은 노이즈 빈 공간;
-        
-        
-        float fDepthDist = abs(fOriginDepth - fSampleDepth);        // 깊이
-        
+            
+        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) // 샘플한 곳이 기록안됨 or 혹은 노이즈 빈 공간;
+        {
+            vColor += vOriginColor;
+            fCount += 1.f;
+            continue;
+        }
+         
+        float fDepthDist = abs(fOriginDepth - fSampleDepth); // 깊이
+     
         vector vSampleNormal = g_NormalTexture.Sample(PointSampler, In.vTexcoord);
         vSampleNormal = normalize(float4(vSampleNormal.xyz * 2.f + 1.f, 0.f));
-    
-        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));  // 노말 내적 값 0~1로
-        
+ 
+        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal)); // 노말 내적 값 0~1로
+     
         if (fDepthDist <= g_fMinDepthDistance)                          // 최소 비교 깊이 ( 상수 )
         {
-            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight));  // 기본적으로 섞을 색이 어두운 색 -> 노말 가중치에 따라 더 밝게 조절
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight)); // 기본적으로 섞을 색이 어두운 색 -> 노말 가중치에 따라 더 밝게 조절
             vColor += vFinalColor;
             fCount += 1.f;
         }
     }
-    
-    if(fCount > 0.f)
-    {  
+ 
+    if (fCount > 0.f)
+    {
         Out.vColor = float4((vColor.xyz / fCount), 1.f);
     }
     else
         Out.vColor = vOriginColor;
+        
+    Out.vColor = float4((vColor.xyz / fCount), 1.f);
     
     return Out;
 }
@@ -381,7 +390,8 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_Y(PS_IN In)
     vector vColor = 0.f;
     float fCount = 0.f;
     
-    float fTexelSize = 1.f / 1080.f;
+    float fTexelSize = 1.f / g_fHeight;
+    
     [unroll]
     for (int y = -2; y <= 2; ++y)
     {
@@ -484,7 +494,7 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     [unroll]
     for (int i = 0; i < g_iSampleSize; ++i)
     {
-        Occlusion += 1.f - SSAO_Factor(g_DepthTexture, DefaultSampler, g_vSampleVector[i], vNoiseNormal, vNormal, vViewPos, g_CamProjMatrix, g_fSSAO_Radius);
+        Occlusion += 1.f - SSAO_Factor(g_DepthTexture, PointClampSampler, g_vSampleVector[i], vNoiseNormal, vNormal, vViewPos, g_CamProjMatrix, g_fSSAO_Radius, g_fSSAO_MaxDistance);
     }
     
     Occlusion = 1.f - (Occlusion / g_iSampleSize);
