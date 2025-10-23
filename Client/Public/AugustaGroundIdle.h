@@ -19,6 +19,8 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
 
+    vector<ANIM_DATA> m_IdleStates = {};
+
 private:
     void Check_StateTransition();
     void Setup_Animations();

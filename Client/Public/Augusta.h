@@ -69,10 +69,9 @@ public:
 #pragma endregion
 
 
-private:
-	//void Change_State(_float fTimeDelta);
 
 private:
+
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

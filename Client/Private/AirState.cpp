@@ -4,7 +4,7 @@
 
 HRESULT CAirState::Initialize(class CGameObject* pOwner)
 {
-    if (FAILED(__super::Initialize(pOwner)))
+    if (FAILED(CCharacterState::Initialize(pOwner)))
         return E_FAIL;
 
     return S_OK;

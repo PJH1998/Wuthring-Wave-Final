@@ -302,6 +302,9 @@
     <ClInclude Include="..\Public\AugustaGroundWalk.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PlayerFactory.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -442,6 +445,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerFactory.cpp">
+      <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

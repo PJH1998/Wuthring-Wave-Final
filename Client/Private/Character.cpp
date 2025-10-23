@@ -1,6 +1,7 @@
 #include "ClientPch.h"
 #include "Character.h"
 #include "InputController.h"
+#include "SpringCamera.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -38,16 +39,25 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 
 void CCharacter::Priority_Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+    
     CActor::Priority_Update(fTimeDelta);
 }
 
 void CCharacter::Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+
     CActor::Update(fTimeDelta);
 }
 
 void CCharacter::Late_Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+
     CActor::Late_Update(fTimeDelta);
 }
 
@@ -59,7 +69,15 @@ void CCharacter::Render_Shadow()
 {
 }
 
+void CCharacter::Process_Input(CInputController* pInputControllerCom)
+{
+    m_pInputControllerCom = pInputControllerCom;
+    Safe_AddRef(m_pInputControllerCom);
+}
+
+
 #pragma region STATE에서 사용
+
 _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
 {
     ASSERT_CRASH(m_pModelCom);
@@ -91,11 +109,9 @@ void CCharacter::Change_State(_uint iCategory, _uint iSubState)
     m_pStateMachineCom->Change_State(iCategory, iSubState);
 }
 
+
 /* 캐스팅 해서 보내야됨. */
 #pragma endregion
-
-
-
 
 
 
@@ -105,4 +121,6 @@ void CCharacter::Free()
     CActor::Free();
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pStateMachineCom);
+    Safe_Release(m_pSpringCamera);
+    
 }

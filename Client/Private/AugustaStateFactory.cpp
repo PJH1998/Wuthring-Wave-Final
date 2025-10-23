@@ -2,7 +2,11 @@
 #include "AugustaStateFactory.h"
 #include "Augusta.h"
 #include "StateMachine.h"
-#include "InputController.h"
+
+#include "SpringCamera.h"
+
+// HSM State Enum
+#include "AugustaState_Enum.h"
 
 // HSM Ground 카테고리 State들
 #include "AugustaGroundIdle.h"
@@ -12,11 +16,8 @@
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
 
-// HSM State Enum
-#include "AugustaState_Enum.h"
 
-
-void CAugustaStateFactory::Register_AugustaStates(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
+void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
 {
     // === HSM enum 기반 State 등록 ===
     // enum 값을 index로 사용하여 타입 안정성 확보
@@ -32,21 +33,31 @@ void CAugustaStateFactory::Register_AugustaStates(CStateMachine* pStateMachineCo
     // TODO: Air, Climb, Hit 카테고리 State 추가
 }
 
-void CAugustaStateFactory::Register_KeyInputs(CInputController* pInputControllerCom, CAugusta* pPlayer)
+void CAugustaStateFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, class CAugusta* pPlayer, class CGameInstance* pGameInstance, class CSpringCamera** ppCamera)
 {
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::A), DIK_A);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::S), DIK_S);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D), DIK_D);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::SPACE), DIK_SPACE);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::Q), DIK_Q);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::E), DIK_E);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::R), DIK_R);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::T), DIK_T);
-    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LSHIFT), DIK_LSHIFT);
+     CSpringCamera::CAMERA_DESC CameraDesc{};
+     CameraDesc.fSpeedPerSec = 100.f;
+     CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+     CameraDesc.fFovy = XMConvertToRadians(60.f);
+     CameraDesc.fNear = 0.1f;
+     CameraDesc.fFar = 5000.f;
+     CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+     CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+     CameraDesc.fMouseSensor = 0.004f;
 
-    // 마우스 키입력 등록
-    pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
-    pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
-    pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
+     CSpringCamera* pSpringCamera = dynamic_cast<CSpringCamera*>(pGameInstance->Clone_Prototype(ENUM_CLASS(ePrototypeLevel)
+        , TEXT("Prototype_GameObject_SpringCamera"), PROTOTYPE::GAMEOBJECT
+        , &CameraDesc));
+
+     ASSERT_CRASH(pSpringCamera);
+    *ppCamera = pSpringCamera;
+
+    // Camera 등록.
+    pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), pSpringCamera);
+    Safe_AddRef(pSpringCamera);
+
+    pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
 }
+
+
+

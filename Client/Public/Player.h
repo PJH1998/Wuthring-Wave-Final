@@ -3,27 +3,40 @@
 #include "GameObject.h"
 
 NS_BEGIN(Client)
-// Player ContainerµéÀ» °ü¸® °¨µ¶ÇÏ´Â ÄÁÆ®·Ñ·¯
+// Player Container
 class CPlayer final : public CGameObject
 {
 public:
 	enum CHARACTERTYPE
 	{
+		NONE = -1,
 		AUGUSTA = 0,
 		GALBRENA = 1,
 		PLAYER = 2,
 		TYPE_END
 	};
 
+	enum SWITCH_STATE
+	{
+		SWITCH_NONE,     // ì „í™˜ ëŒ€ê¸° ì—†ìŒ
+		SWITCH_PENDING,  // ì „í™˜ ì¤€ë¹„ ì¤‘
+		SWITCH_READY     // ì „í™˜ ì¤€ë¹„ ì™„ë£Œ
+	};
+
 public:
 	typedef struct tagPlayerPartyDesc
 	{
 		LEVEL eCurLevel = {LEVEL::END };
-		_uint iPlayerCount = {};
-		vector<PLAYER_SPEC> PlayerSpecs = {};
-	}PLAYER_PARTY_DESC;
+		_float3 vPosition = {};
+		_float3 vScale = {};
+		_float3 vRotation = {};
 
-#pragma region ±âº» ÇÔ¼öµé
+		_uint iPlayerCount = {};
+		_wstring wStrInputControllerTag = {};
+		vector<PLAYER_SPEC> PlayerSpecs = {};
+	}PLAYER_DESC;
+
+#pragma region ê¸°ë³¸ í•¨ìˆ˜ë“¤.
 public:
 	explicit CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CPlayer(const CPlayer& Prototype);
@@ -42,18 +55,33 @@ public:
 #pragma endregion
 
 public:
-	// ÇùÁÖ°ÔÀÌÁö?
-	void Ensemble_Skill(CHARACTERTYPE iPlayerType);
+	void Change_CharacterCheck();
+	
+	void Change_Character(CHARACTERTYPE eNextCharacter);
+	void Sync_Transform();
+	
+public:
+	void Ensemble_Skill(CHARACTERTYPE eCharacter);
+	// Stateì—ì„œ í˜¸ì¶œ: Ensemble Skillì´ ëë‚¬ìŒì„ ì•Œë¦¼
+	void Notify_EnsembleEnd();
+
+	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
+	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
 private:
-	vector<class CCharacter*> m_Characters; // ¿¬ÁÖÀÚµé
-
+	vector<class CCharacter*> m_Characters; 
+	class CInputController* m_pInputControllerCom = { nullptr };
 	LEVEL m_eCurLevel = { LEVEL::END };
-	_uint m_iCurrentPlayerIdx = {};
-	_uint m_iPrevPlayerIdx = {};
+	_int m_iCurrentPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iPrevPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iEnsembleCharacterIdx = { CHARACTERTYPE::NONE };
+
+
 
 private:
-	HRESULT Ready_Players(const PLAYER_PARTY_DESC* pDesc);
+	HRESULT Ready_Players(const PLAYER_DESC* pDesc);
+	HRESULT Ready_Components(const PLAYER_DESC* pDesc);
+	
 
 public:
 	static		CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

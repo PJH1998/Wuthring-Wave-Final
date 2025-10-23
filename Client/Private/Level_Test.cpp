@@ -18,7 +18,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
     Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
-    Ready_Layer_PlayerParty();
+    Ready_Layer_Player();
 
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
@@ -54,13 +54,14 @@ HRESULT CLevel_Test::Initialize()
 void CLevel_Test::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Test"));
+    
 }
 
 void CLevel_Test::Render()
 {
 }
 
-void CLevel_Test::Ready_Layer_PlayerParty()
+void CLevel_Test::Ready_Layer_Player()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
     //vScale = { 1.f, 1.f, 1.f };
@@ -68,9 +69,13 @@ void CLevel_Test::Ready_Layer_PlayerParty()
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { -14.1f, 50.f, -180.f };
 
-    CPlayer::PLAYER_PARTY_DESC Desc{};
+    CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
+    Desc.vScale = vScale;
+    Desc.vRotation = vRotation;
+    Desc.vPosition = vPosition;
     Desc.iPlayerCount = CPlayer::CHARACTERTYPE::TYPE_END;
+    Desc.wStrInputControllerTag = TEXT("Prototype_Component_PlayerController");
 
     // 0. vector 크기 정의
     Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
@@ -82,14 +87,16 @@ void CLevel_Test::Ready_Layer_PlayerParty()
     // 2. Galbrena 정의
 
 
-    // 3. Player 정의
+    // 3.주인공 캐릭터 정의
 
 
-    // 4. Controller 생성.
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerParty"),
+    // 4. Player(Character 모음) 생성.
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
-        CRASH("Failed Ready Layer Augusta");
+        CRASH("Failed Ready Player");
 }
+
+
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {

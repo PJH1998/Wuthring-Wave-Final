@@ -36,7 +36,7 @@ HRESULT CLoader_Test::Initialize()
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 
-    m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     
     
 
@@ -53,7 +53,6 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-
     m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
@@ -112,10 +111,16 @@ HRESULT CLoader_Test::Load_Component()
     return S_OK;
 }
 
-HRESULT CLoader_Test::Load_PlayerController()
+HRESULT CLoader_Test::Load_Player()
 {
+
+    // Controller 초기화
+    _wstring wstrControllerTag = L"Prototype_Component_PlayerController";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wstrControllerTag,
+        CInputController::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerInput Controller");
     
-    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerParty");
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_Player");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrControllerTag
         , CPlayer::Create(m_pDevice, m_pContext))))
@@ -144,11 +149,7 @@ HRESULT CLoader_Test::Load_Augusta()
         CStateMachine::Create(m_pDevice, m_pContext))))
         CRASH("PlayerState Machine");
 
-    // Controller 초기화
-    _wstring wstrControllerTag = L"Prototype_Component_Controller_Augusta";
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wstrControllerTag,
-        CInputController::Create(m_pDevice, m_pContext))))
-        CRASH("PlayerInput Controller");
+   
 
 
 

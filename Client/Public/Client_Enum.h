@@ -28,7 +28,11 @@ namespace Client
 		R = 1 << 10, 
 		T = 1 << 11,
 		LSHIFT = 1 << 12,
-		SPACE = 1 << 13
+		SPACE = 1 << 13,
+		D1 = 1 << 14,
+		D2 = 1 << 15,
+		D3 = 1 << 16,
+		
 	};
 
 	enum class DIRECTION {
