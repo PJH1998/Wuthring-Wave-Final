@@ -21,17 +21,17 @@ public:
 
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		_uint			iKeyframeIndex = {};			// 정보가 담길 키프레임 정보
+		_uint			iKeyframeIndex = {};
 		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
-		_float			fAlpha = {};			// 0 ~ 1
+		_float			fAlpha = {};
 		_float3			vPos = {};
-		_float3			vRot = {};			// Euler
+		_float3			vRot = {};
 		_float3			vSca = {};
 
 
-		_float2			vScreenLT = {};			// 표시될 화면상의 좌표 제한. (우상 0, 0 / 좌하 화면크기)
+		_float2			vScreenLT = {};
 		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
 
 		_float4			vBlendToOuterWidth = {};

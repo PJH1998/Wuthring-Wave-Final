@@ -115,6 +115,9 @@
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Level\Loader\VIBuffer">
+      <UniqueIdentifier>{212f9fd5-3f73-4c1d-a296-1208dfe69bde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -202,7 +205,6 @@
     <ClInclude Include="..\Public\PlayerParty.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
@@ -248,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\AugustaStop_Run_L.h">
       <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +373,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaStop_Run_L.cpp">
       <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

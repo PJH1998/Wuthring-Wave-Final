@@ -1,15 +1,16 @@
-#pragma once
+癤�#pragma once
 
 #include "Client_Define.h"
 #include "UIObject.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
 
 
 NS_BEGIN(Engine)
 class CShader;
 class CTexture;
-//class CVIBuffer_Rect; 
-class CVIBuffer;		// 나중에 인스턴스같은거 쓸 수 있으므로, 유동 선택 가능하도록?
+class CVIBuffer_Rect;
+class CVIBuffer_Rect_Instance_UI;
 NS_END
 
 NS_BEGIN(Client)
@@ -20,29 +21,43 @@ NS_BEGIN(Client)
 
 class CCustom_UI abstract : public CUIObject
 {
+#pragma region enum class & structs
+
 public:
 	enum class UI_TYPE {
-		NONE, BUTTON, INTERACT, END // TEXT, FROM3D 등도 필요 
+		NONE, BUTTON, INTERACT, END
 	};
 
-	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC {
+	typedef struct tagCustomUISizeDesc {
+		vector<_float2>	vecSize = {};
+	} UI_SIZE_DESC;
+
+	typedef struct tagCustomUISectorDesc {
+		_float2		vSectorBorder = {}; // pixel
+		_float		fUIScale = {};		// ui 占쏙옙占쏙옙
+	} UI_SECTOR_DESC;
+
+	typedef struct tagCustomUIObjectDesc : public CUIObject::UI_DESC, UI_SIZE_DESC, UI_SECTOR_DESC {
 		_wstring	strFilePath = {};
 		_wstring	strFileName = {};
 		_uint		iNumFiles = 1;
 
 		_wstring	strUIName = {};
-		_uint		iUIType = {};			// 단순 창인지, 버튼인지, 최상위 구현부인지 구분?
+		_uint		iUIType = {};
 		_wstring	strParentName = {};
 
-		_bool		isInverseScreenDiscard = false;	// 그릴 구역 반전
-		_float		fCutout = 0.3f;					// (1:컷아웃 사용 시) 알파값 기준
-
-		_uint		iPassType = 2;			// 0 : Normal, 1 : Cutout, 2 : Transparent, 3 : SimpleGradient
+		_bool		isInverseScreenDiscard = false;
+		_float		fCutout = 0.3f;
+		_uint		iPassType = 2;
 
 		vector<_wstring> vecChildNames = {};
-
 		CGameObject* pParentObject = nullptr;
+
+
+		_bool		isInstance = false;
+		vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> vecInstanceDescs = {};
 	} CUSTOM_UI_DESC;
+
 
 
 
@@ -70,6 +85,8 @@ public:
 	} HIERARCHY_OBJ_DESC;
 
 
+#pragma endregion
+
 protected:
 	explicit				CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CCustom_UI(const CCustom_UI& Prototype);
@@ -95,7 +112,7 @@ public:
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 protected:
-	//HRESULT					Ready_Prototypes(void* pArg);
+	//HRESULT				Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Events();
 
@@ -118,9 +135,6 @@ protected:
 
 	vector<function<void()>>	m_vecFunctions[ENUM_CLASS(UI_EVENT_TYPE::END)] = {};
 
-	//std::function
-
-
 public:
 	virtual CGameObject*	Clone(void* pArg) = 0;
 	virtual void			Free() override;
@@ -129,8 +143,7 @@ public:
 NS_END
 
 
-
-
+#pragma region json
 
 inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 {
@@ -196,3 +209,7 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UITREE_DESC& d)
 	d.strTreeName = StringToWString(strTreeName);
 	from_json(j["vecUIInfoDescs"], d.vecUIInfoDescs);
 }
+
+#pragma endregion
+
+

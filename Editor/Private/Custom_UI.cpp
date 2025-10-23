@@ -115,7 +115,7 @@ void CCustom_UI::Render()
 
 
 
-    m_pShaderCom->Begin(m_tUIDesc.iPassType); // Gradient
+    m_pShaderCom->Begin(m_tUIDesc.iPassType);
 
     m_pVIBufferCom->Bind_Resources();
 

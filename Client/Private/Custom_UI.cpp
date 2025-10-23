@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Custom_UI.h"
 #include "Animator_UI.h"
 
@@ -46,7 +46,7 @@ void CCustom_UI::Update(_float fTimeDelta)
 {
     m_pAnimator_UICom->Update(fTimeDelta);
 
-    // ksta : ÀÌ°Å ºÎ¸ğ°¡ ÇÑ¹ø Update Å¸ÀÌ¹Ö¿¡ ½÷Áà¾ßÇÔ
+    // ksta : ì´ê±° ë¶€ëª¨ê°€ í•œë²ˆ Update íƒ€ì´ë°ì— ì´ì¤˜ì•¼í•¨
     //Update_CombinedMatrix();
 
     for (auto& child : m_vecChildObjects)
@@ -67,32 +67,38 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    _uint iShaderPassIndex = 2; // alphapass, back cull none
-
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
-        CRASH(Binding_Matrix_Failed);
+        CRASH("Binding_Matrix_Failed");
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-        CRASH(Binding_Matrix_Failed);
+        CRASH("Binding_Matrix_Failed");
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-        CRASH(Binding_Matrix_Failed);
-
-
-
-
-    // ksta IF : "g_AlphaStrength" ¿¡ ¸Å ÇÁ·¹ÀÓ¸¶´Ù Animator_UI ÄÄÆ÷³ÍÆ®¿¡¼­ °ª °»½ÅÁß
+        CRASH("Binding_Matrix_Failed");
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
-        CRASH(Binding_Shader_Failed);
+        CRASH("Binding_Matrix_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
+        CRASH("Binding_Value_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
+        CRASH("Binding_Value_Failed");
+
+    // ï¿½Ì¹ï¿½ï¿½ï¿½ Å©ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½Ö±ï¿½
+    if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
+        CRASH("Binding_Value_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
+        CRASH("Binding_Value_Failed");
+    if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
+        CRASH("Binding_Value_Failed");
 
 
-    m_pShaderCom->Begin(iShaderPassIndex);
+
+
+
+    m_pShaderCom->Begin(m_tUIDesc.iPassType);
 
     m_pVIBufferCom->Bind_Resources();
 
     m_pVIBufferCom->Render();
-
-
 
     for (auto& child : m_vecChildObjects)
         child->Render();
@@ -135,7 +141,7 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
 
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::UI);
 
-    // ÅØ½ºÃÄ ÇÁ·ÎÅäÅ¸ÀÔÈ­
+    // í…ìŠ¤ì³ í”„ë¡œí† íƒ€ì…í™”
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
         CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
@@ -144,6 +150,8 @@ HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
     return S_OK;
 }
 */
+
+//HRESULT CCustom_UI::Ready_Prototypes
 
 HRESULT CCustom_UI::Ready_Components(void* pArg)
 {
@@ -156,8 +164,8 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
 
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
 
-    // ksta : ÅØ½ºÃÄ µî ¾È¾²´Â ÃÖ»óÀ§ ÄÁÅ×ÀÌ³Ê°¡ È£ÃâµÉ ½Ã ¿©±â¼­ E_FAIL °É¸²
-    // VIBuffer_Rect µµ ±×·¸°í desc·Î Á¶Á¤ °¡´ÉÇØ¾ß ÇÒ µí rootdesc ÀÌ·±½ÄÀ¸·Î customuidesc »ó¼Ó¹Ş°Ô ÇØ¼­?
+    // ksta : í…ìŠ¤ì³ ë“± ì•ˆì“°ëŠ” ìµœìƒìœ„ ì»¨í…Œì´ë„ˆê°€ í˜¸ì¶œë  ì‹œ ì—¬ê¸°ì„œ E_FAIL ê±¸ë¦¼
+    // VIBuffer_Rect ë„ ê·¸ë ‡ê³  descë¡œ ì¡°ì • ê°€ëŠ¥í•´ì•¼ í•  ë“¯ rootdesc ì´ëŸ°ì‹ìœ¼ë¡œ customuidesc ìƒì†ë°›ê²Œ í•´ì„œ?
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Texture_Custom_" + strFileName),
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -203,8 +211,38 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.strUIName     = ((pDesc->strUIName).empty()) ? m_tUIDesc.strFileName : pDesc->strUIName;
     m_tUIDesc.iUIType       = pDesc->iUIType;
     m_tUIDesc.strParentName = pDesc->strParentName;
-
+    m_tUIDesc.fCutout       = pDesc->fCutout;
+    m_tUIDesc.iPassType     = pDesc->iPassType;
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
+
+    uint iIndex = 0;
+    while (true)
+    {
+        ID3D11ShaderResourceView* pSRV = m_pTextureCom->Get_SRV(iIndex);
+        if (pSRV == nullptr) break;
+        ID3D11Resource* pResource;
+        pSRV->GetResource(&pResource);
+        ID3D11Texture2D* pTexture;
+        if (pResource)
+        {
+            HRESULT hr = pResource->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTexture);
+            if (SUCCEEDED(hr) && pTexture)
+            {
+                D3D11_TEXTURE2D_DESC desc = {};
+                pTexture->GetDesc(&desc);
+                m_tUIDesc.vecSize.push_back(_float2{ (_float)desc.Width , (_float)desc.Height });
+                pTexture->Release();
+            }
+            pResource->Release();
+        }
+        iIndex++;
+    }
+
+    m_tUIDesc.vSectorBorder = pDesc->vSectorBorder;
+    m_tUIDesc.fUIScale      = pDesc->fUIScale;
+    m_tUIDesc.isInstance    = pDesc->isInstance;
+
+    m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
     return S_OK;
 }

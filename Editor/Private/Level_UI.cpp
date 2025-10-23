@@ -60,7 +60,6 @@ HRESULT CLevel_UI::Initialize()
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
     // VIBuffer_Rect_Instance_UI
-    // �ӽ� ����. ���߿� instance ���� ���� �ʿ� �� ����
     CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
     tRectInstDesc.iNumInstance = 500U;
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),

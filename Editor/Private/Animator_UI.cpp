@@ -189,7 +189,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     const _uint iLastKeyframeIndex  = (_uint)(m_pCurAnimDesc->vecKeyFrames.size() - 1);
     _uint       iKeyframeIndex      = 0;
 
-    // ?꾩옱 ?ㅽ봽?덉엫??vector ???몃뜳?ㅻ? 寃??
+    // 현재 키프레임의 vector 내 인덱스를 검색
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
         if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex > iKeyframe)
@@ -197,11 +197,11 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
         iKeyframeIndex = i;
     }
     
-    // lerp???ъ슜??媛믩뱾 ?좊떦
+    // lerp에 사용할 값들 할당
     for (_uint i = 0; i < 4; i++)
     {
-        // 1, 2 ?ъ엲媛믪쓣 ?ъ슜??寃?
-        // ?ㅻ쭔 ?몃뜳?ㅻ? 踰쀬뼱?섎뒗 寃쎌슦??????뺤쓽. ?대뒗 loop ?щ????곕씪 ?ㅻ쫫.
+        // 1, 2 사잇값을 사용할 것.
+        // 다만 인덱스를 벗어나는 경우에 대해 정의. 이는 loop 여부에 따라 다름.
         _uint iIndex = iKeyframeIndex + i - 1;
         if (iIndex < 0)
             iIndex = (isLoop) ? iLastKeyframeIndex : 0;
@@ -215,8 +215,6 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
         if (iKeyframeTimeStart == iKeyframeTimeEnd) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[(iIndex + 1) % m_pCurAnimDesc->vecKeyFrames.size()].iKeyframeIndex;
     }
 
-    // �Ҵ��� ���� �̿��Ͽ� ����, ��ȯ
-    // 1, 2 ������ Ű�������� �������� ratio �����Ͽ� ���ڸ� �ָ� �ɵ�?
     _float fKeyframeRatio = {};
 
     if ((iKeyframeTimeEnd - iKeyframeTimeStart) == 0)       fKeyframeRatio = 0;
@@ -235,27 +233,27 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
         return;
 
     // Calculate Frame..
-    const _uint     iKeyFrameRate       = 60; // 湲곗? 珥덈떦 ?꾨젅??
+    const _uint     iKeyFrameRate       = 60; // 기준 초당 프레임
     const _float    fSingleFrameTime    = 1.f / iKeyFrameRate;
 
-    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ?꾩옱 ?ㅽ봽?덉엫
+    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // 현재 키프레임
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
     {
         if (m_pCurAnimDesc->isLoop)
-            m_fElapsedTime = 0.f;                                           // 猷⑦봽 ?? 踰붿쐞 ?섏뼱媛硫?0?쇰줈
+            m_fElapsedTime = 0.f;                                           // 루프 시, 범위 넘어가면 0으로
     }
 
-    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // 理쒖쥌 ?꾩옱 ?ㅽ봽?덉엫
-    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // 理쒖쥌 ?꾩옱 ?ㅽ봽?덉엫 (int濡??대┝)
+    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // 최종 현재 키프레임
+    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // 최종 현재 키프레임 (int로 내림)
 
 
     // ==============================
     // * Calculate Ratio..
     // ==============================
-    _uint iFrame_LerpStart = {};        // ?꾨젅??媛?
-    _uint iFrame_LerpEnd = {};          // ?꾨젅??媛?
-    _uint iFrame_StartIndex = {};       // ?쒖닔 ?몃뜳??
-    _uint iFrame_EndIndex = {};         // ?쒖닔 ?몃뜳??
+    _uint iFrame_LerpStart = {};        // 프레임 값
+    _uint iFrame_LerpEnd = {};          // 프레임 값
+    _uint iFrame_StartIndex = {};       // 순수 인덱스
+    _uint iFrame_EndIndex = {};         // 순수 인덱스
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
@@ -280,7 +278,7 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
-    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // ?댁쟾 ?ㅽ봽?덉엫? ?꾩옱 ?ㅽ봽?덉엫 媛꾩쓽 理쒖쥌 蹂닿컙 鍮꾩쑉
+    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // 이전 키프레임와 현재 키프레임 간의 최종 보간 비율
 
 
     // ==============================
@@ -296,7 +294,7 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 
     _float3 vResultRot = {};
-    XMStoreFloat3(&vResultRot, XMVectorLerp(        // degree?쇱꽌 洹몃윴 寃?媛숈???. 
+    XMStoreFloat3(&vResultRot, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vRot),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vRot),
         fFixedLerpRatio)
