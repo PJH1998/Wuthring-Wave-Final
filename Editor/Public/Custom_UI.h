@@ -58,6 +58,7 @@ public:
 
 
 		_bool		isInstance = false;
+		vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> vecInstanceDescs = {};
 	} CUSTOM_UI_DESC;
 
 
@@ -78,10 +79,9 @@ public:
 	virtual void			Render()								override;
 
 public:
-	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
+	CUSTOM_UI_DESC&			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
-	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* Get_InstDesc() { return &m_InstanceDescs; }
-	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
+	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; }
 
 private:
 	HRESULT					Ready_Prototypes(void* pArg);
@@ -101,10 +101,6 @@ private:
 	_uint					m_iCurTexIndex				= {};
 
 	_float4x4				m_CombinedWorldMatrix		= {};
-	//vector// �ν��Ͻ��� ���� �����ؾ���
-	vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC> m_InstanceDescs = {};
-
-	// ?꾩옱 ?ъ슜以묒씪 ?띿뒪爾??뺣낫, texcoord 媛? ?섏씤?뱁꽣 湲곗????깆쓽 ?뺣낫.. ?꾩슂?좎닔???덉쓬
 
 public:
 	static CCustom_UI*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -138,6 +134,14 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		vecImgSizes.push_back(data);
 	}
 
+	json vecInstanceDescs = json::array();
+	for (const auto& v : d.vecInstanceDescs)
+	{
+		json data = {};
+		to_json(data, v);
+		vecInstanceDescs.push_back(data);
+	}
+
 	j = {
 		{ "strFilePath", WStringToString(d.strFilePath) },
 		{ "strFileName", WStringToString(d.strFileName) },
@@ -152,7 +156,8 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 		{ "iPassType", d.iPassType },
 
 		{ "vecChildNames", childNames },
-
+		{ "isInstance", d.isInstance },
+		{ "vecInstanceDescs", vecInstanceDescs },
 
 		// descs (size, sector)
 		{ "vecSize", vecImgSizes },
@@ -162,7 +167,6 @@ inline void to_json(json& j, const CCustom_UI::CUSTOM_UI_DESC& d)
 			}
 		},
 		{ "fUIScale", d.fUIScale },
-
 	};
 }
 
@@ -189,6 +193,14 @@ inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 	{
 		_string strChildName = element.get<_string>();
 		d.vecChildNames.push_back(StringToWString(strChildName));
+	}
+	d.isInstance = j["isInstance"];
+
+	for (const auto& element : j["vecInstanceDescs"])
+	{
+		Editor::CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC tDesc = {};
+		from_json(element, tDesc);
+		d.vecInstanceDescs.push_back(tDesc);
 	}
 
 	// descs

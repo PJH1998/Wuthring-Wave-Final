@@ -221,6 +221,12 @@ void CLevel_UI::Update_MenuWindow()
                 1
             ));
 
+            if (isInstance)
+            {
+                vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = &dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecInstanceDescs;
+                pDescs->push_back(CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC());
+            }
+
         }
         ImGuiFileDialog::Instance()->Close();
     }
@@ -246,7 +252,7 @@ void CLevel_UI::Update_MenuWindow()
 void CLevel_UI::Update_Hierarchy()
 {
     // ============================== 
-    // ?좎궗 ?섏씠?대씪??李? 濡쒕뱶??媛앹껜 ?좏깮 媛?ν븯?꾨줉
+    // * Hierarchy
     // ============================== 
 
     ImGui::Begin("Hierarchy");
@@ -739,7 +745,7 @@ void CLevel_UI::Update_SaveLoad()
             }
 
 
-            // ?곷?寃쎈줈
+            // relative path
             _tchar curPath[256] = {};
             _wgetcwd(curPath, 256);
             filesystem::path basePath = curPath;
@@ -752,7 +758,7 @@ void CLevel_UI::Update_SaveLoad()
             from_json(jUITreeData, tLoadTreeDesc);
 
 
-            // 濡쒕뱶??紐⑤뱺 ?곗씠????젣
+            // clear current data
             m_pCurObj = nullptr;
             m_vCurObjPos = {}; m_vCurObjRot = {}; m_vCurObjSca = {};
             for (auto& customUI : m_vecCustomUIs)
@@ -760,7 +766,7 @@ void CLevel_UI::Update_SaveLoad()
             m_vecCustomUIs.clear();
 
 
-            // 洹???濡쒕뱶..
+            // add 
             for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
             {
                 UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
@@ -786,6 +792,7 @@ void CLevel_UI::Update_SaveLoad()
 
                 _matrix matWorld = matScale * matRot * matTrans;
                 static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+
 
 
                 m_vecCustomUIs.push_back(tObjDesc);
@@ -1410,7 +1417,7 @@ void CLevel_UI::Update_InstanceEditor()
     // ==============================
     // * [Instance] Transform
     // ==============================
-    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_InstDesc();
+    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = &dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecInstanceDescs;
     static _uint iInstSelected = 0;
 
     static _float4 vSInstRight = { 1.f, 0.f, 0.f ,0.f };
@@ -1575,7 +1582,7 @@ void CLevel_UI::Update_InstanceEditor()
             ImGui::PushItemWidth(90.f);
 
             ImGui::Text("Slice by ImagePos");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                 ImGui::SetTooltip("for slicing atlas / sprite style images.");
             
             ImGui::Text("Pos X Range | ");
@@ -1593,7 +1600,7 @@ void CLevel_UI::Update_InstanceEditor()
             
             ImGui::Separator();
             ImGui::Text("Discard by LocalPos");
-            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
                 ImGui::SetTooltip("for discarding pixel based on local space. like as HP Bar Value.");
             
             ImGui::Text("Pos X Range | ");
