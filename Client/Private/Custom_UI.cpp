@@ -211,7 +211,6 @@ HRESULT CCustom_UI::Ready_Events()
     m_pGameInstance->Subscribe<ONSCROLL_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnScrollUI",
         [this](const ONSCROLL_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
 
-
     return S_OK;
 }
 

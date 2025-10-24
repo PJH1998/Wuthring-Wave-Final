@@ -55,6 +55,9 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 void CUI_HUD::Late_Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+
     __super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
 }
 

@@ -205,9 +205,6 @@
     <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
       <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="99. Define">
-      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\Behavior_Tree">
       <UniqueIdentifier>{cd02884e-a999-444f-82f6-47109afae285}</UniqueIdentifier>
     </Filter>
@@ -277,6 +274,9 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\State">
       <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="99. Define">
+      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
