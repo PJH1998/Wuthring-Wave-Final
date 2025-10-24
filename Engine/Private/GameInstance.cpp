@@ -244,6 +244,10 @@ HRESULT CGameInstance::Open_Level(_uint iNextLevelID, CLevel* pLevel)
 {
 	return m_pLevel_Manager->Open_Level(iNextLevelID, pLevel);
 }
+HRESULT CGameInstance::Clear_CurrentLevel_Resources(_uint iNextLevel)
+{
+	return m_pLevel_Manager->Clear_CurrentLevel_Resources(iNextLevel);
+}
 #pragma endregion
 
 #pragma region PROTOTYPE_MANAGER

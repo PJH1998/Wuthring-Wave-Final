@@ -60,6 +60,7 @@ public:
 public:
 	_uint				Get_CurrentLevel();
 	HRESULT			Open_Level(_uint iNextLevelID, class CLevel* pLevel);
+	HRESULT			Clear_CurrentLevel_Resources(_uint iNextLevel);
 #pragma endregion
 
 #pragma region PROTOTYPE_MANAGER
@@ -168,8 +169,8 @@ public:
 #pragma region EVENTBUS
 public:
 	template<typename TEvent>
-	void Subscribe(_uint iLevelID, const _wstring& strEventTag, function<void(const TEvent&)> handler) { m_pEventBus->Subscribe(iLevelID, strEventTag, handler); }
-	void Publish(_uint iLevelID, const _wstring& strEventTag, const class CEvent& event) { m_pEventBus->Publish(iLevelID, strEventTag, event); }
+	void Subscribe(_uint iStatic, const _wstring& strEventTag, function<void(const TEvent&)> handler) { m_pEventBus->Subscribe(iStatic, strEventTag, handler); }
+	void Publish(_uint iStatic, const _wstring& strEventTag, const class CEvent& event) { m_pEventBus->Publish(iStatic, strEventTag, event); }
 	void Unscribe() { m_pEventBus->Unscribe(); };
 #pragma endregion
 	
@@ -228,14 +229,14 @@ public:
 	HRESULT				Begin_CSM();
 	HRESULT				End_CSM();
 #ifdef _DEBUG
-	void				Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	void					Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
 
 public:
-	HRESULT			Clear_Resource(_uint iLevelID);
-	HRESULT			Clear_Memory();
-	void			Release_Engine();
+	HRESULT				Clear_Resource(_uint iLevelID);
+	HRESULT				Clear_Memory();
+	void					Release_Engine();
 
 private:
 	class CGraphic_Device*		m_pGraphic_Device = { nullptr };

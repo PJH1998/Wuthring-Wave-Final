@@ -62,9 +62,17 @@ void CEditorApp::Post_Update()
 	// Level ?꾪솚
 	if (true == m_isChangeLevel)
 	{
+		// Wait Thread End
+		m_pGameInstance->Wait_Thread_End();
+
 		m_isChangeLevel = false;
+
+		// Memory Clear (Sound, Camera, Light, ETC)
 		if (FAILED(m_pGameInstance->Clear_Memory()))
 			return;
+
+		if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(m_eNextLevel))))
+			CRASH("Clear Resource");
 
 		CLevel* pLevel = { nullptr };
 

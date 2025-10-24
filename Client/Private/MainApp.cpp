@@ -64,15 +64,23 @@ void CMainApp::Post_Update()
 		m_pGameInstance->Wait_Thread_End();
 
 		m_isChangeLevel = false;
+
+		// Memory Clear (Sound, Camera, Light, ETC)
+		if (FAILED(m_pGameInstance->Clear_Memory()))
+			return;
+
 		if (true == m_isLoad)
 		{
-			// Level???랁븯吏 ?딆? 媛앹껜??Release
-			if (FAILED(m_pGameInstance->Clear_Memory()))
-				return;
+			if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(LEVEL::LOADING))))
+				CRASH("Clear Resource");
+
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));
 		}
 		else
 		{
+			if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(m_eNextLevel))))
+				CRASH("Clear Resource");
+
 			CLevel* pLevel = { nullptr };
 
 			switch (m_eNextLevel)
@@ -214,7 +222,7 @@ void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
-	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
+	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }
 
 CMainApp* CMainApp::Create()
