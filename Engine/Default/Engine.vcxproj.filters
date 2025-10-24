@@ -278,6 +278,9 @@
     <Filter Include="99. Define">
       <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\03. GameObject\UI\Manager">
+      <UniqueIdentifier>{d7b0bd10-3ee3-4d42-b8b7-84303dab6dc6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -563,6 +566,9 @@
     <ClInclude Include="..\Public\StateMachine.h">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Manager.h">
+      <Filter>01. Utility\03. GameObject\UI\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -823,6 +829,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\StateMachine.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Manager.cpp">
+      <Filter>01. Utility\03. GameObject\UI\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

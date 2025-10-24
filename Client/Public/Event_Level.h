@@ -18,8 +18,8 @@ typedef struct tagLoadingEnd : public CEvent
 
 
 // UI Test
-// 1. �켱 Subscribe�� ���� EventBus���� �̺�Ʈ�� ���� �����ϵ���.
-// 2. ���� Publish �� ������ ���ǵ� event ������ ���� ���� �Ҵ�. �̴� ���ڿ� ������ ������ �ϴ� ��
+// 1. 우선 Subscribe를 통해 EventBus에서 이벤트의 감지 가능하도록. (이벤트가 오기를 대기. 구독)
+// 2. 이후 Publish 시 생성자 정의된 event 전달을 통해 변수 할당. 이는 인자와 동일한 역할을 하는 듯 (이벤트를 신청. 발송)
 typedef struct tagOnClickUI : public CEvent
 {
 	

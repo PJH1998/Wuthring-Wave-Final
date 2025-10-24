@@ -4,6 +4,9 @@
 
 #include "Event_Level.h"
 
+//#define KSTA_UICLICKTEST
+#define KSTA_UIEVENTTEST
+
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)
 {
@@ -29,7 +32,6 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
     Bind_Description(pArg);
     
-    
     __super::Begin();
 
     return S_OK;
@@ -37,6 +39,8 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
 void CCustom_UI::Priority_Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
 
     for (auto& child : m_vecChildObjects)
         child->Priority_Update(fTimeDelta);
@@ -44,6 +48,11 @@ void CCustom_UI::Priority_Update(_float fTimeDelta)
 
 void CCustom_UI::Update(_float fTimeDelta)
 {
+    if (!m_isActivate)
+        return;
+
+
+
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
@@ -52,6 +61,28 @@ void CCustom_UI::Update(_float fTimeDelta)
 
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
+
+    Update_CacheTransform(fTimeDelta);
+
+
+#ifdef KSTA_UICLICKTEST
+
+    if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+    {
+        if (Check_IsInSpace())
+        {
+            std::cout << "Clicked!" << std::endl;
+        }
+
+        for (auto& child : m_vecChildObjects)
+        {
+            if (Check_IsInSpace())
+                std::cout << "Clicked!" << std::endl;
+        }
+    }
+
+#endif // KSTA_UICLICKTEST
+
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -95,8 +126,6 @@ void CCustom_UI::Render()
 
 
 
-
-
         m_pShaderCom->Begin(m_tUIDesc.iPassType);
 
         m_pVIBufferCom->Bind_Resources();
@@ -131,6 +160,84 @@ void CCustom_UI::OnEvent(_uint iEventType)
 {
     for (auto& func : m_vecFunctions[iEventType])
         func();
+}
+
+_bool CCustom_UI::Check_IsInSpace()
+{
+
+
+#define ISINSPACE(CURSORPOS, RECT_CENTERPOS, RECT_SCALE)    (( (CURSORPOS).x >= ((RECT_CENTERPOS).x - (RECT_SCALE).x / 2.f) &&   \
+                                                               (CURSORPOS).x <= ((RECT_CENTERPOS).x + (RECT_SCALE).x / 2.f) &&   \
+                                                               (CURSORPOS).y >= ((RECT_CENTERPOS).y - (RECT_SCALE).y / 2.f) &&   \
+                                                               (CURSORPOS).y <= ((RECT_CENTERPOS).y + (RECT_SCALE).y / 2.f)) )   \
+
+    _bool isIn_InteractableSpace = false;
+    POINT tCursorPos = m_pGameInstance->Get_MousePoint();
+    tCursorPos.x = tCursorPos.x - 1920.f / 2.f;
+    tCursorPos.y = (1080.f - tCursorPos.y) - 1080.f / 2.f;
+
+
+    if (!m_tUIDesc.isInstance)
+    {
+        if (ISINSPACE(tCursorPos, m_vecCachedUITransform[0][POS], m_vecCachedUITransform[0][SCA]))
+            isIn_InteractableSpace = true;
+    }
+    else
+    {
+        for (_uint i = 0 ; i < m_vecCachedUITransform.size(); i++)
+        {
+            if (ISINSPACE(tCursorPos, m_vecCachedUITransform[i][POS], m_vecCachedUITransform[i][SCA]))
+            {
+                isIn_InteractableSpace = true;
+                break;
+            }
+        }
+    }
+
+    return isIn_InteractableSpace;
+}
+
+void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculated Transform Martix. for Optimizing.
+{
+    // Calculating Time Rate. Const.
+    const _float fCachingTimeRate = 0.1f;
+    m_cachingTimeElapsed += fTimeDelta;
+    if (m_cachingTimeElapsed >= fCachingTimeRate)
+        m_cachingTimeElapsed = 0.f;
+    else
+        return;
+
+
+    if (!m_tUIDesc.isInstance)
+    {
+        _vector vPos, vQuat, vSca;
+        XMMatrixDecompose(&vSca, &vQuat, &vPos, XMLoadFloat4x4(&m_CombinedWorldMatrix));
+        XMStoreFloat4(&m_vecCachedUITransform[0][POS], vPos);
+        XMStoreFloat4(&m_vecCachedUITransform[0][ROT], vQuat);
+        XMStoreFloat4(&m_vecCachedUITransform[0][SCA], vSca);
+    }
+    else
+    {
+        for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+        {
+            auto& instDesc = m_tUIDesc.vecInstanceDescs[i];
+
+            _float4 instMat[4] = { instDesc.vSInstRight, instDesc.vSInstUp, instDesc.vSInstLook, instDesc.vSInstTrans };
+            _matrix instRelativeMat = XMMatrixSet(
+                instMat[0].x, instMat[0].y, instMat[0].z, instMat[0].w,
+                instMat[1].x, instMat[1].y, instMat[1].z, instMat[1].w,
+                instMat[2].x, instMat[2].y, instMat[2].z, instMat[2].w,
+                instMat[3].x, instMat[3].y, instMat[3].z, instMat[3].w
+            );
+            _matrix combinedInstanceMatrix = instRelativeMat * XMLoadFloat4x4(&m_CombinedWorldMatrix);
+
+            _vector vPos, vQuat, vSca;
+            XMMatrixDecompose(&vSca, &vQuat, &vPos, combinedInstanceMatrix);
+            XMStoreFloat4(&m_vecCachedUITransform[i][POS], vPos);
+            XMStoreFloat4(&m_vecCachedUITransform[i][ROT], vQuat);
+            XMStoreFloat4(&m_vecCachedUITransform[i][SCA], vSca);
+        }
+    }
 }
 
 /*
@@ -205,11 +312,19 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
 HRESULT CCustom_UI::Ready_Events()
 {
     m_pGameInstance->Subscribe<ONCLICK_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnClickUI",
-        [this](const ONCLICK_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK)); });
+        [this](const ONCLICK_UI_EVENT event)    {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK)); });
     m_pGameInstance->Subscribe<ONHOVER_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnHoverUI",
-        [this](const ONHOVER_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER));});
+        [this](const ONHOVER_UI_EVENT event)    {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER));});
     m_pGameInstance->Subscribe<ONSCROLL_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnScrollUI",
-        [this](const ONSCROLL_UI_EVENT event){OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
+        [this](const ONSCROLL_UI_EVENT event)   {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
+
+#ifdef KSTA_UIEVENTTEST
+
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK),     [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " CLICKED!" << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER),     [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " HOVERED!" << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::SCROLL),    [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " SCROLLED!" << std::endl; });
+
+#endif // KSTA_UIEVENTTEST
 
     return S_OK;
 }
@@ -230,6 +345,7 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.iPassType     = pDesc->iPassType;
     m_tUIDesc.vecChildNames = pDesc->vecChildNames;
 
+    // Get & Store Raw Image Size from SRV.
     uint iIndex = 0;
     while (true)
     {
@@ -257,6 +373,9 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.fUIScale      = pDesc->fUIScale;
     m_tUIDesc.isInstance    = pDesc->isInstance;
 
+    _uint iCacheTransformAmount = (m_tUIDesc.isInstance)? pDesc->vecInstanceDescs.size() : 1;
+    m_vecCachedUITransform.resize(iCacheTransformAmount);
+    
     m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
     return S_OK;

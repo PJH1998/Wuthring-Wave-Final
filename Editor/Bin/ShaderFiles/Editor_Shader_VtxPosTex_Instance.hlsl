@@ -206,8 +206,8 @@ struct VS_IN_INSTANCE
     
     float2 vSInstCoordX     : TEXCOORD5;
     float2 vSInstCoordY     : TEXCOORD6;
-    float2 vClipTexcoordX   : TEXCOORD7;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
-    float2 vClipTexcoordY   : TEXCOORD8;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
+    float2 vClipTexcoordX   : TEXCOORD7;
+    float2 vClipTexcoordY   : TEXCOORD8;
 };
 
 struct VS_OUT

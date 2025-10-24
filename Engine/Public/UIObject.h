@@ -25,6 +25,13 @@ public:
 	virtual		void				Render();
 
 protected:
+	virtual		void				OnEvent(_uint iEventType);
+
+	virtual		_bool				Check_IsInSpace() = 0;
+	virtual		void				Set_Active(_bool isActive)		{ m_isActivate = isActive; };
+
+
+protected:
 	_float					m_fX{}, m_fY{}, m_fSizeX{}, m_fSizeY{};
 	_float4x4				m_ViewMatrix = {};
 	_float4x4				m_ProjMatrix = {};

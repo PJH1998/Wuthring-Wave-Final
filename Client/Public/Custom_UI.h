@@ -104,8 +104,11 @@ public:
 	CCustom_UI*				Find_ChildObject(_wstring strChildName);
 
 	void					Add_EventFunction(_uint iEventType, function<void()> function);
-	void					OnEvent(_uint iEventType);
-	
+	void					OnEvent(_uint iEventType)				override;
+
+	_bool					Check_IsInSpace()						override;
+	void					Update_CacheTransform(_float fTimeDelta);
+
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
@@ -136,6 +139,12 @@ protected:
 	vector<CCustom_UI*>		m_vecChildObjects = {};
 
 	vector<function<void()>>	m_vecFunctions[ENUM_CLASS(UI_EVENT_TYPE::END)] = {};
+
+private:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
+	_float					m_cachingTimeElapsed = {};
+	enum CACHED_TRANSFORM {POS, ROT, SCA, END};
+	vector<array<_float4, CACHED_TRANSFORM::END>>	m_vecCachedUITransform = {};
+
 
 public:
 	virtual CGameObject*	Clone(void* pArg) = 0;
