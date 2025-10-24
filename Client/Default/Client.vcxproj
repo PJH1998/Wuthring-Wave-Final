@@ -169,6 +169,8 @@
     <ClInclude Include="..\Public\AugustaStand1_Action01.h" />
     <ClInclude Include="..\Public\AugustaStand1_Action02.h" />
     <ClInclude Include="..\Public\AugustaStop_Run_L.h" />
+    <ClInclude Include="..\Public\Factory.h" />
+    <ClInclude Include="..\Public\MonsterDummy.h" />
     <ClInclude Include="..\public\Player_Define.h" />
     <ClInclude Include="..\Public\ClientPch.h" />
     <ClInclude Include="..\Public\Client_Define.h" />
@@ -242,6 +244,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Dummy.cpp" />
+    <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
@@ -260,6 +263,7 @@
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\private\MonsterBody.cpp" />
+    <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">

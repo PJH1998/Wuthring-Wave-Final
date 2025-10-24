@@ -115,6 +115,9 @@
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="94. Factory">
+      <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -202,7 +205,6 @@
     <ClInclude Include="..\Public\PlayerParty.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
@@ -248,6 +250,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\AugustaStop_Run_L.h">
       <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MonsterDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -368,6 +376,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaStop_Run_L.cpp">
       <Filter>03. GameObject\Actor\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

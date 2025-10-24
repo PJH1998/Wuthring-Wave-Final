@@ -8,8 +8,9 @@
 #include "PlayerParty.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CLevel(pDevice,pContext)
+    :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevel_Test::Initialize()
@@ -19,6 +20,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
     Ready_Layer_PlayerParty();
+	Ready_Dummy();
 
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
@@ -92,6 +94,11 @@ void CLevel_Test::Ready_Layer_PlayerParty()
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PlayerParty"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
         CRASH("Failed Ready Layer Augusta");
+}
+
+void CLevel_Test::Ready_Dummy()
+{
+	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 0.f, 20.f), XMMatrixScaling(0.001f, 0.001f, 0.001f));
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
