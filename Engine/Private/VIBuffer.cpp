@@ -28,6 +28,7 @@ HRESULT CVIBuffer::Initialize_Prototype()
 
 HRESULT CVIBuffer::Initialize_Clone(void* pArg)
 {
+
     return S_OK;
 }
 

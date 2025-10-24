@@ -105,6 +105,8 @@ void CParticle_Controller::Particle_Tab()
                     {
                         m_pSelectedParticleDesc->IsSprite = m_pSelectedVBDesc->IsSprite;
                     }
+                    ImGui::Checkbox("Delay", &(m_pSelectedVBDesc->IsDelay));
+                    ImGui::Separator();
 
 
                     ImGui::Text("NumInstance");
@@ -134,7 +136,7 @@ void CParticle_Controller::Particle_Tab()
 
                     ImGui::Separator();
 
-                    ////////////////////////////////// 
+                    ////////////////////////////////// 스트레치 빌보드 설정
                     if (m_pSelectedVBDesc->IsStretch)
                     {
                         ImGui::Text("StretchWeight");
@@ -152,7 +154,7 @@ void CParticle_Controller::Particle_Tab()
                     }
                     ////////////////////////////////// 
 
-                    ////////////////////////////////// 
+                    //////////////////////////////////  스프라이트 설정
                     if (m_pSelectedVBDesc->IsSprite)
                     {
                         ImGui::Text("SpriteWeight");
@@ -167,6 +169,18 @@ void CParticle_Controller::Particle_Tab()
 
                         ImGui::Separator();
                     }
+                    //////////////////////////////////
+
+                    ////////////////////////////////// 딜레이 설정
+                    if (m_pSelectedVBDesc->IsDelay)
+                    {
+                        ImGui::Text("Delay");
+                        ImGui::PushItemWidth(100);
+                        ImGui::DragFloat("##Delay", &(m_pSelectedVBDesc->fDelay.y), 0.1f, 0.f, 3.f);
+                        ImGui::PopItemWidth();
+                        ImGui::Separator();
+                    }
+                    //////////////////////////////////
 
                     ImGui::Text("Center");
                     ImGui::PushItemWidth(60);
@@ -223,7 +237,7 @@ void CParticle_Controller::Particle_Tab()
 
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
-                    ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass));
+                    ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
 
                     ImGui::Text("Size");
@@ -501,7 +515,5 @@ void CParticle_Controller::Free()
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 
-    for (auto& pTexture : m_Textures)
-        Safe_Release(pTexture.pTexture);
     m_Textures.clear();
 }

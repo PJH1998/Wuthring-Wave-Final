@@ -21,10 +21,10 @@ HRESULT CVIBuffer_Instance::Initialize_Prototype()
     return S_OK;
 }
 
-//HRESULT CVIBuffer_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
-//{
-//	return S_OK;;
-//}
+HRESULT CVIBuffer_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
+{
+	return S_OK;;
+}
 
 HRESULT CVIBuffer_Instance::Initialize_Clone(void* pArg)
 {
@@ -75,5 +75,6 @@ void CVIBuffer_Instance::Free()
 
 	if (m_isClone)
 		Safe_Delete_Array(m_pVBInstanceVertices);
+
 	Safe_Release(m_pVBInstance);
 }

@@ -5,7 +5,7 @@
 NS_BEGIN(Engine)
 class CShader;
 class CTexture;
-class CVIBuffer_Mesh;
+class CVIBuffer_FXMesh_Instance;
 class CComputeShader;
 NS_END
 
@@ -46,7 +46,7 @@ private:
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
-	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
+	CVIBuffer_FXMesh_Instance*				m_pVIBufferCom = { nullptr };
 	CComputeShader*				m_pComputeShaderCom = { nullptr };
 
 	_float						m_fShaderPass = 0;

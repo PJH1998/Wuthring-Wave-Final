@@ -24,6 +24,9 @@ public:
 		_float		fSpriteWeight = 1.f;
 		_float		fDefualtSpeed = 2.5f;			//스프라이트 이미지가 바뀌는 속도 기본값.
 
+		_bool		IsDelay = false;
+		_float2		fDelay = { 0.f, 0.f };
+
 		//가중치
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
@@ -45,6 +48,7 @@ public:
 	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // 바꿀 일 있을 경우 여기에 값 추가해서 바꿔줘야함.
 	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
 	void Bind_CSResources(class CComputeShader* pCShader);
+	void Reset_UAV();
 
 //public:
 //	void Spread(_float fTimeDelta);
@@ -61,6 +65,7 @@ private:
 
 	ID3D11Buffer*		m_pSRVBuffer = {};
 	ID3D11Buffer*       m_pUABuffer = {};
+	ID3D11Buffer*		m_pDefaultUAVBufer = {};
 
 	ID3D11ShaderResourceView*	m_pSRV = {};
 	ID3D11UnorderedAccessView*	m_pUAV = {};

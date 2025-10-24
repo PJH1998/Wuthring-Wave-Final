@@ -15,7 +15,7 @@ struct VS_IN
     float3 vPosition : POSITION;   
     row_major float4x4 TransformMatrix : WORLD;
     float2 vLifeTime : TEXCOORD0;
-    float fDelay : TEXCOORD1;
+    float2 fDelay : TEXCOORD1;
     float4 vVelTail : TEXCOORD2;
     float fPhase : TEXCOORD3;
 };
@@ -25,7 +25,7 @@ struct VS_OUT
     float4 vPosition : POSITION;
     float fSize : PSIZE;
     float2 vLifeTime : TEXCOORD0;
-    float fDelay : TEXCOORD1;
+    float2 fDelay : TEXCOORD1;
     float4 vVelTail : TEXCOORD2;
     float fPhase : TEXCOORD3;
 };
@@ -55,7 +55,7 @@ struct GS_IN
     float4 vPosition : POSITION;
     float fSize : PSIZE;
     float2 vLifeTime : TEXCOORD0;
-    float fDelay : TEXCOORD1;
+    float2 fDelay : TEXCOORD1;
     float4 vVelTail : TEXCOORD2;
     float fPhase : TEXCOORD3;
 };
@@ -66,7 +66,7 @@ struct GS_OUT
     float2 vTexcoord : TEXCOORD0;
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
-    float fDelay : TEXCOORD3;
+    float2 fDelay : TEXCOORD3;
 };
 
 [maxvertexcount(6)]
@@ -86,21 +86,25 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Out[0].vTexcoord = float2(0.f, 0.f);
     Out[0].vLifeTime = In[0].vLifeTime;    
     Out[0].fPhase = In[0].fPhase;
+    Out[0].fDelay = In[0].fDelay;
     
     Out[1].vPosition = mul(In[0].vPosition - vRight + vUp, matVP);
     Out[1].vTexcoord = float2(1.f, 0.f);
     Out[1].vLifeTime = In[0].vLifeTime;
     Out[1].fPhase = In[0].fPhase;
+    Out[1].fDelay = In[0].fDelay;
     
     Out[2].vPosition = mul(In[0].vPosition - vRight - vUp, matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     Out[2].vLifeTime = In[0].vLifeTime;
     Out[2].fPhase = In[0].fPhase;
+    Out[2].fDelay = In[0].fDelay;
     
     Out[3].vPosition = mul(In[0].vPosition + vRight - vUp, matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     Out[3].vLifeTime = In[0].vLifeTime;    
     Out[3].fPhase = In[0].fPhase;
+    Out[3].fDelay = In[0].fDelay;
     
     Vertices.Append(Out[0]);
     Vertices.Append(Out[1]);
@@ -126,7 +130,7 @@ void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     
     float fSpeed = length(In[0].vVelTail.xyz);     //혹시라도 스피드 값이 거의 없는 얘들은 따로 처리해주고자 스피드 확인
     
-    if (fSpeed > 0.f)
+    if (fSpeed > 0.1f)
         vLook = vector(normalize(In[0].vVelTail.xyz), 0.f);
     else
         vLook = vViewDir;
@@ -142,21 +146,25 @@ void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Out[0].vTexcoord = float2(0.f, 0.f);
     Out[0].vLifeTime = In[0].vLifeTime;
     Out[0].fPhase = In[0].fPhase;
+    Out[1].fDelay = In[0].fDelay;
     
     Out[1].vPosition = mul(In[0].vPosition - vRight + vUp, matVP);
     Out[1].vTexcoord = float2(1.f, 0.f);
     Out[1].vLifeTime = In[0].vLifeTime;
     Out[1].fPhase = In[0].fPhase;
+    Out[1].fDelay = In[0].fDelay;
     
     Out[2].vPosition = mul(In[0].vPosition - vRight - vUp + float4(Look, 0.f), matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     Out[2].vLifeTime = In[0].vLifeTime;
     Out[2].fPhase = In[0].fPhase;
+    Out[2].fDelay = In[0].fDelay;
     
     Out[3].vPosition = mul(In[0].vPosition + vRight - vUp + float4(Look, 0.f), matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     Out[3].vLifeTime = In[0].vLifeTime;
     Out[3].fPhase = In[0].fPhase;
+    Out[3].fDelay = In[0].fDelay;
     
     Vertices.Append(Out[0]);
     Vertices.Append(Out[1]);
@@ -176,7 +184,7 @@ struct PS_IN
     float2 vTexcoord : TEXCOORD0;
     float2 vLifeTime : TEXCOORD1;
     float fPhase : TEXCOORD2;
-    float fDelay : TEXCOORD3;
+    float2 fDelay : TEXCOORD3;
 };
 
 struct PS_OUT
@@ -200,6 +208,9 @@ PS_OUT PS_MAIN(PS_IN In)
 PS_OUT PS_SPRITE(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
+    
+    if (In.fDelay.y == 1.f)      //안그려도 됨
+        discard;
     
     float fPhase = In.fPhase;
     int CellCount = g_iRow * g_iCol;                      // 2x2 면 4개
@@ -266,7 +277,7 @@ technique11 DefaultTechnique
     //3
     pass StretchSpritePass
     {
-        SetRasterizerState(RS_Default);
+        SetRasterizerState(RS_Default); 
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();

@@ -15,10 +15,10 @@
 #include "Rigidbody.h"
 #include "Collider.h"
 #include "Model_Instance.h"
-#include "VIBuffer_Mesh.h"
-
+#include "VIBuffer_FXMesh_Instance.h"
 #include "Behavior_Tree.h"
 #include "AnimMachine.h"
+#include "VIBuffer_Mesh.h"
 // ==================
 
 NS_BEGIN(Engine)

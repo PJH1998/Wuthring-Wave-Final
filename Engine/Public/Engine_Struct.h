@@ -88,7 +88,8 @@ namespace Engine
 		_float4 DefaultPos; 
 
 		_float  fSpeed;
-		_float	_pad0[3];
+		_float  fDelay;
+		_float	_pad0[2];
 
 	}PARTICLE_SRV;
 
@@ -99,7 +100,8 @@ namespace Engine
 		
 		_uint	IsStretch;
 		_uint	IsSprite;
-		_float	_pad[2];
+		_uint   IsDelay;
+		_float	_pad;
 	}PARTICLE_DefaultCB;
 
 	typedef struct ParticleSpeedCB
@@ -124,7 +126,6 @@ namespace Engine
 
 		_float fSpeed;						
 		_float3 vColor;
-
 	}FXMESH_SRV;
 
 	typedef struct FXMeshCB

@@ -130,6 +130,15 @@
     <Filter Include="03. GameObject\Dummy\Map">
       <UniqueIdentifier>{c0abfd4d-8622-45a6-8c1d-49ec5cf5026a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\TrailMesh_Controller">
+      <UniqueIdentifier>{efd448f7-af3a-4925-88dc-5ae7a3652045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh">
+      <UniqueIdentifier>{04a9b020-ab0c-441f-94d2-06b0a6e4d851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Load_Controller">
+      <UniqueIdentifier>{0182cffd-05d2-48b1-832b-37a4b99f7a27}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -274,6 +283,15 @@
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\TrailMesh_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Load_Controller.h">
+      <Filter>01. Level\Effect\Load_Controller</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -401,6 +419,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\EditDummy_Map.cpp">
       <Filter>03. GameObject\Dummy\Map</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\TrailMesh_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Load_Controller.cpp">
+      <Filter>01. Level\Effect\Load_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

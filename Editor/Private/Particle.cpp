@@ -65,11 +65,14 @@ void CParticle::Update(_float fTimeDelta)
     m_pVIBufferCom->Bind_CS_Speed(fTimeDelta);
     m_pVIBufferCom->Bind_CSResources(m_pComputeShader);
 
-//   m_vLifeTime.x += fTimeDelta;
-//
-//   if (m_vLifeTime.x >= m_vLifeTime.y)
-//       m_isActivate = false;
-//
+   m_vLifeTime.x += fTimeDelta;
+
+   if (m_vLifeTime.x >= m_vLifeTime.y)
+   {
+       m_isActivate = false;
+       m_vLifeTime.x = 0.f;
+       m_pVIBufferCom->Reset_UAV();
+   }
 }
 
 void CParticle::Late_Update(_float fTimeDelta)

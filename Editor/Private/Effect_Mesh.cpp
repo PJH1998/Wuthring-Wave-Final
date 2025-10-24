@@ -40,7 +40,7 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
     if (m_IsRoot)
         m_ParentMatrix = pDesc->RootMatrix;
     //임시처리
-    m_isActivate = true;
+    /*m_isActivate = true;*/
 
     return S_OK;
 }
@@ -62,11 +62,11 @@ void CEffect_Mesh::Update(_float fTimeDelta)
     //움직임 처리 어떻게 ?
    /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
-   // m_vLifeTime.x += fTimeDelta;
-   //
-   // if (m_vLifeTime.x >= m_vLifeTime.y)
-   //     m_isActivate = false;
-   //
+    m_vLifeTime.x += fTimeDelta;
+   
+    if (m_vLifeTime.x >= m_vLifeTime.y)
+        m_isActivate = false;
+   
     //라이프타임 끝나면 비활성화
 }
 

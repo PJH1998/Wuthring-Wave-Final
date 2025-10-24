@@ -195,6 +195,7 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Load_Controller.h" />
     <ClInclude Include="..\Public\Mesh_Controller.h" />
     <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
@@ -202,6 +203,8 @@
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
+    <ClInclude Include="..\Public\TrailMesh_Controller.h" />
+    <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -243,6 +246,7 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Load_Controller.cpp" />
     <ClCompile Include="..\Private\Mesh_Controller.cpp" />
     <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
@@ -250,6 +254,8 @@
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
+    <ClCompile Include="..\Private\TrailMesh_Controller.cpp" />
+    <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>
