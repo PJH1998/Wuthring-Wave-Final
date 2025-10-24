@@ -30,10 +30,10 @@ Texture2D g_RampTexture;
 Texture2D g_NoiseTexture;
 
 vector g_vSampleVector[32];
-float g_fSSAO_Radius = 10.f;
-float g_fSSAO_MaxDistance = 5.f;
+float g_fSSAO_Radius = 15.f;
+float g_fSSAO_MaxDistance = 50.f;
 float g_fDepthSigma = 0.01f;
-float g_fMinDepthDistance = 10.f;
+float g_fMinDepthDistance = 5.f;
 float g_fMinNormalWeight = 0.1f;
 
 
