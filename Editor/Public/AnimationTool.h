@@ -107,9 +107,11 @@ private:
 
 	TRANSITION_DATA m_tTransitionInfo{};
 
-	map<_string, vector<TRANSITION_DATA>> m_TransitionDatas;
+	vector<TRANSITION_DATA> m_TransitionDatas;
 	_int m_iTransitionInfoSelectedIndex = {-1};
 	_char m_szConditionName[MAX_PATH] = {};
+
+	_bool m_isShowImport_ST_Dialog = {};
 #pragma endregion
 
 	_wstring m_wSelected_PrototypeModelTag = {};
@@ -137,6 +139,7 @@ private:
 #ifdef _DEBUG
 	void Export_StateAnimationMap_ToCSV();
 	void Export_StateTransition_To_CSV();
+	void Import_StateTransition_From_Json();
 #endif
 
 private:

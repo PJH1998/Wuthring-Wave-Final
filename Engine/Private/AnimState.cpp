@@ -9,13 +9,11 @@ HRESULT CAnimState::Initialize(const _string& strAnimationTag, ANIMSTATE_DESC& S
 {
 	m_StateData = StateDesc;
 	m_strAnimationTag = strAnimationTag;
-	m_iConstAnimRunning = m_StateData.iConstAnimRunning;
     return S_OK;
 }
 void CAnimState::Set_Data(ANIMSTATE_DESC& StateDesc)
 {
 	m_StateData = StateDesc;
-	m_iConstAnimRunning = m_StateData.iConstAnimRunning;
 }
 void CAnimState::Render_GUI()
 {
@@ -27,7 +25,7 @@ void CAnimState::Render_GUI()
 		ImGui::Text("RootMotionRate: %.3f", m_StateData.fRootMotionRate);
 		ImGui::Text("TransitTrackPos: %.3f", m_StateData.fTransitTrackPos);
 		ImGui::Text("AnimationSpeed: %.3f", m_StateData.fAnimationSpeed);
-		ImGui::Text("RootMotionRate: %u", m_iConstAnimRunning);
+		//ImGui::Text("RootMotionRate: %u", m_iConstAnimRunning);
 	}
 }
 #endif
@@ -99,10 +97,11 @@ CAnimState* CAnimState::Create(const _string& strAnimationTag, ANIMSTATE_DESC& S
     return pInstance;
 }
 #endif
-CAnimState* CAnimState::Create(json& jsonParset)
+
+CAnimState* CAnimState::Create(json& jsonParser)
 {
 	CAnimState* pInstance = new CAnimState();
-	if(FAILED(pInstance->Initialize(jsonParset)))
+	if(FAILED(pInstance->Initialize(jsonParser)))
 	{
 		MSG_BOX("Failed to Created : CAnimState");
 		Safe_Release(pInstance);
@@ -113,4 +112,9 @@ CAnimState* CAnimState::Create(json& jsonParset)
 void CAnimState::Free()
 {
     __super::Free();
+
+	for(auto& pTransition : m_Transitions)
+		Safe_Release(pTransition);
+
+	m_Transitions.clear();
 }

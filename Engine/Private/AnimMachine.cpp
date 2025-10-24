@@ -22,6 +22,11 @@ HRESULT CAnimMachine::Initialize_Prototype(/*const _char* AnimMachineDataPath*/)
     return S_OK;
 }
 
+HRESULT CAnimMachine::Initialize_Prototype(const _char* AnimMachineDataPath)
+{
+	return S_OK;
+}
+
 HRESULT CAnimMachine::Initialize_Clone(void* pArg)
 {
 	ANIMMACNINE_DESC* pDesc = (ANIMMACNINE_DESC*)pArg;
@@ -84,7 +89,7 @@ void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 {
 	for(auto& strAnimationName : AnimationNames)
 	{
-		CAnimState::ANIMSTATE_DESC Temp{};
+		CAnimState::ANIMSTATE_DESC Temp{ false, true, 0.1f, 0.f, 1.f };
 		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
 	}
 }
@@ -96,7 +101,7 @@ void CAnimMachine::Clear_States()
 	m_AnimStates.clear();
 }
 
-void CAnimMachine::Add_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed, _uint iConstAnimRunning)
+void CAnimMachine::Add_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed)
 {
 	if(m_AnimStates.find(strAnimName) == m_AnimStates.end())
 		return;
@@ -107,7 +112,7 @@ void CAnimMachine::Add_StateData(_string& strAnimName, _bool isBlend, _bool isRo
 	AnimStateDesc.fRootMotionRate = fRootMotionRate;
 	AnimStateDesc.fTransitTrackPos = fTransitTrackPos;
 	AnimStateDesc.fAnimationSpeed = fAnimationSpeed;
-	AnimStateDesc.iConstAnimRunning = iConstAnimRunning;
+	//AnimStateDesc.iConstAnimRunning = iConstAnimRunning;
 
 	m_AnimStates[strAnimName]->Set_Data(AnimStateDesc);
 
@@ -121,7 +126,6 @@ _bool CAnimMachine::Render_CurrentStateGUI(_string& strCurrentAnim)
 	m_AnimStates[strCurrentAnim]->Render_GUI();
 	return true;
 }
-#endif
 
 CAnimMachine* CAnimMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -132,6 +136,18 @@ CAnimMachine* CAnimMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext* p
         Safe_Release(pInstance);
     }
     return pInstance;
+}
+#endif
+
+CAnimMachine* CAnimMachine::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* AnimMachineDataPath)
+{
+	CAnimMachine* pInstance = new CAnimMachine(pDevice, pContext);
+	if(FAILED(pInstance->Initialize_Prototype(AnimMachineDataPath)))
+	{
+		MSG_BOX("Failed to Created : CAnimMachine");
+		Safe_Release(pInstance);
+	}
+	return pInstance;
 }
 
 CComponent* CAnimMachine::Clone(void* pArg)
@@ -161,7 +177,7 @@ void CAnimMachine::Save_AnimDatas(json& jsonOutput)
 	jsonOutput["AnimStates"] = json::array();
 	for(auto& Pair : m_AnimStates)
 	{
-		json AnimState = json::object();
+		json AnimState;
 		AnimState["Name"] = Pair.first;
 		CAnimState::ANIMSTATE_DESC DataDesc = Pair.second->Get_StateData();
 
@@ -170,7 +186,7 @@ void CAnimMachine::Save_AnimDatas(json& jsonOutput)
 		AnimState["fRootMotionRate"] = DataDesc.fRootMotionRate;
 		AnimState["fTransitTrackPos"] = DataDesc.fTransitTrackPos;
 		AnimState["fAnimationSpeed"] = DataDesc.fAnimationSpeed;
-		AnimState["Transitions"] = json::array();
+		//AnimState["Transitions"] = json::array();
 
 		jsonOutput["AnimStates"].push_back(AnimState);
 	}
@@ -178,6 +194,18 @@ void CAnimMachine::Save_AnimDatas(json& jsonOutput)
 
 void CAnimMachine::Load_AnimDatas(json& jsonInput)
 {
-
+	for(auto& AnimState : jsonInput["AnimStates"])
+	{
+		_string StateName = AnimState["Name"];
+		CAnimState::ANIMSTATE_DESC DataDesc
+		{
+			AnimState["isBlend"],
+			AnimState["isRootMotion"],
+			AnimState["fRootMotionRate"],
+			AnimState["fTransitTrackPos"],
+			AnimState["fAnimationSpeed"]
+		};
+		m_AnimStates.emplace(StateName, CAnimState::Create(StateName, DataDesc));
+	}
 }
 #endif

@@ -297,12 +297,14 @@ void CAnimationTool::RenderUI_Transitions()
             //}
             if(false == m_TransitionDatas.empty())
             {
-                for(auto& tTransition : m_TransitionDatas[m_SelectedFromStateTag])
+                for(auto& tTransition : m_TransitionDatas)
                 {
-                    if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
+                    if(0 == m_SelectedFromStateTag.compare(tTransition.strFrom))
                     {
-                        iSelectedIndex = id;
-
+                        if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
+                        {
+                            iSelectedIndex = id;
+                        }
                     }
                     id++;
                 }
@@ -358,7 +360,7 @@ void CAnimationTool::RenderUI_OptionState()
                 fTrackPosition
                 };
                 //pair<_string, TRANSITION_DATA> Pair = {m_SelectedFromStateTag, T_Data};
-                m_TransitionDatas[m_SelectedFromStateTag].push_back(T_Data);
+                m_TransitionDatas.push_back(T_Data);
             }
 
             ImGui::SameLine();
@@ -398,10 +400,16 @@ void CAnimationTool::RenderUI_OptionState()
 
             if(ImGui::Button("Add Data"))
             {
-                m_pAnimMachineCom->Add_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed, m_iConstAnimRunning);
+                m_pAnimMachineCom->Add_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
             }
 
             Export_StateTransition_To_CSV();
+            if(ImGui::Button("Load Json"))
+            {
+                m_isShowImport_ST_Dialog = true;
+            }
+            if(m_isShowImport_ST_Dialog)
+                Import_StateTransition_From_Json();
 #endif
 
             
@@ -417,7 +425,7 @@ void CAnimationTool::RenderUI_TransitionInfo()
 {
     ImGui::Begin("Transition Info");
 
-    auto& SelectData = m_TransitionDatas[m_SelectedFromStateTag][m_iTransitionInfoSelectedIndex];
+    auto& SelectData = m_TransitionDatas[m_iTransitionInfoSelectedIndex];
 
     ImGui::Text("From: %s", SelectData.strFrom.c_str());
     ImGui::Text("To: %s", SelectData.strTo.c_str());
@@ -476,7 +484,7 @@ void CAnimationTool::RenderUI_EditState()
 
     ImGui::End();
     
-    if(false == m_TransitionDatas.empty() && false == m_TransitionDatas[m_SelectedFromStateTag].empty())
+    if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
         RenderUI_TransitionInfo();
 }
 
@@ -867,7 +875,7 @@ void CAnimationTool::Export_StateTransition_To_CSV()
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
         string basePathString = config.path;
         //ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
-        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".json", config);
+        ImGuiFileDialog::Instance()->OpenDialog("Save Json", "Export File", ".json", config);
     }
 
     ImVec2 vMinSize = ImVec2(600, 400);
@@ -900,19 +908,16 @@ void CAnimationTool::Export_StateTransition_To_CSV()
 
             Output["Transitions"] = json::array();
 
-            for(auto& Pair : m_TransitionDatas)
+            for(auto& tTransitionData : m_TransitionDatas)
             {
-                for(auto& tTransitionData : Pair.second)
-                {
-                    json Transition;
-                    Transition["From"] = tTransitionData.strFrom;
-                    Transition["To"] = tTransitionData.strTo;
-                    Transition["Target State"] = tTransitionData.iTargetState;
-                    //다음 애니메이션의 해당 트랙 위치로 변환
-                    Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
+                json Transition;
+                Transition["From"] = tTransitionData.strFrom;
+                Transition["To"] = tTransitionData.strTo;
+                Transition["Target State"] = tTransitionData.iTargetState;
+                //다음 애니메이션의 해당 트랙 위치로 변환
+                Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
 
-                    Output["Transitions"].push_back(Transition);
-                }
+                Output["Transitions"].push_back(Transition);
             }
 
             outFile << Output.dump(4);
@@ -921,6 +926,41 @@ void CAnimationTool::Export_StateTransition_To_CSV()
 
         }
         ImGuiFileDialog::Instance()->Close();
+    }
+}
+void CAnimationTool::Import_StateTransition_From_Json()
+{
+    IGFD::FileDialogConfig config;
+    config.path = "../../Client/Bin/Resource/Model";
+    config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+    ImGuiFileDialog::Instance()->OpenDialog("ASM File Load", "Import File", ".json", config);
+    ImVec2 vMinSize = ImVec2(600, 400);
+    ImVec2 vMaxSize = ImVec2(800, 400);
+    if(ImGuiFileDialog::Instance()->Display(
+        "ASM File Load", ImGuiWindowFlags_NoCollapse
+        , vMinSize
+        , vMaxSize))
+    {
+        _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+        _string strFileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+
+        ifstream file(strFilePath.c_str());
+        if(false == file.is_open())
+            CRASH("Load File Open");
+
+        json ASM_Data;
+        file >> ASM_Data;
+
+        m_pAnimMachineCom->Load_AnimDatas(ASM_Data);
+
+        for(auto& jsonTransition : ASM_Data["Transitions"])
+        {
+
+        }
+
+        file.close();
+        ImGuiFileDialog::Instance()->Close();
+        m_isShowImport_ST_Dialog = false;
     }
 }
 #endif // _DEBUG

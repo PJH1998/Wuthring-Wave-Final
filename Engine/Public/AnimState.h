@@ -18,7 +18,6 @@ public:
 		_float fRootMotionRate;
 		_float fTransitTrackPos;
 		_float fAnimationSpeed;
-		_uint iConstAnimRunning;
 	}ANIMSTATE_DESC;
 protected:
 	explicit CAnimState() = default;
@@ -46,7 +45,6 @@ public:
 
 private:
 	_string m_strAnimationTag;
-	_uint m_iConstAnimRunning{};
 
 	_float m_fCurrentTrackPositon{};
 
@@ -58,7 +56,7 @@ public:
 #ifdef _DEBUG
 	static CAnimState* Create(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc);
 #endif
-	static CAnimState* Create(json& jsonParset);
+	static CAnimState* Create(json& jsonParser);
 	//virtual CAnimState* Clone() PURE;
 	virtual void Free() override;
 };

@@ -20,6 +20,7 @@ private:
 
 public:
 	virtual HRESULT		Initialize_Prototype(/*const _char* AnimMachineDataPath*/) override;
+	virtual HRESULT		Initialize_Prototype(const _char* AnimMachineDataPath);
 	virtual HRESULT		Initialize_Clone(void* pArg) override;
 
 	//void Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex);
@@ -37,8 +38,7 @@ public:
 						_bool isRootMotion,
 						_float fRootMotionRate,
 						_float fTransitTrackPos,
-						_float fAnimationSpeed,
-						_uint iConstAnimRunning);
+						_float fAnimationSpeed);
 	_bool Render_CurrentStateGUI(_string& strCurrentAnim);
 
 	void Save_AnimDatas(json& jsonOutput);
@@ -53,7 +53,10 @@ private:
 	_uint m_iCurrentStateIndex{};
 
 public:
+#ifdef _DEBUG
 	static CAnimMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext /*, const _char* AnimMachineDataPath*/);
+#endif
+	static CAnimMachine* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext , const _char* AnimMachineDataPath);
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 
