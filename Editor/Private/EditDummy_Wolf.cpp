@@ -46,10 +46,14 @@ void CEditDummy_Wolf::Priority_Update(_float fTimeDelta)
 
 void CEditDummy_Wolf::Update(_float fTimeDelta)
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_LSHIFT) == KEYSTATE::PRESS)
-		m_pTransformCom->Change_Speed(200.f);
-	else
-		m_pTransformCom->Change_Speed(20.f);
+#ifdef _DEBUG
+    if (m_pGameInstance->Get_DIKeyState(DIK_LSHIFT) == KEYSTATE::PRESS)
+        m_pTransformCom->Change_Speed(200.f);
+    else
+        m_pTransformCom->Change_Speed(20.f);
+#endif // DEBUG
+
+	
 
 	// Spring Test
 	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN)

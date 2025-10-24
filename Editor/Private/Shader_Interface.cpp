@@ -46,9 +46,13 @@ void CShader_Interface::Set_ShadowBias()
 		ImGui::InputFloat("SCALE", &m_fSlopeScale);
 	}
 
+#ifdef _DEBUG
 	m_pGameInstance->Bind_RawValue_Renderer("g_fShadowBais", &m_fBias, sizeof(_float4));
 	m_pGameInstance->Bind_RawValue_Renderer("g_fMinShadowBias", &m_fMinBias, sizeof(_float4));
 	m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
+#endif // _DEBUG
+
+
 	
 	ImGui::End();
 }
@@ -59,7 +63,11 @@ void CShader_Interface::Set_SSAO_Sigma()
 
 	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.01f, 0.01f, 10.f);
 
+#ifdef _DEBUG
 	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigam", &m_fSigmaWeight, sizeof(_float));
+#endif // _DEBUG
+
+
 	ImGui::End();
 }
 
@@ -87,11 +95,16 @@ void CShader_Interface::Setting_LUT()
 	{
 		for (_uint i = 0; i < 5; ++i)
 		{
+
+#ifdef _DEBUG
 			if (ImGui::Selectable(to_string(i).c_str()))
 			{
 				m_iLUT_Index = i;
 				m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
 			}
+#endif // _DEBUG
+
+			
 		}
 
 		ImGui::EndCombo();
@@ -106,7 +119,11 @@ void CShader_Interface::Setting_LUT()
 
 	}
 
+#ifdef _DEBUG
 	m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
+#endif // _DEBUG
+
+
 	
 	ImGui::End();
 

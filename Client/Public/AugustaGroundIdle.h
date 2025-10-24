@@ -22,8 +22,12 @@ private:
     vector<ANIM_DATA> m_IdleStates = {};
 
 private:
-    void Check_StateTransition();
     void Setup_Animations();
+    void Update_IdleAnimations(_float fTimeDelta);
+    void LockOnUpdate_IdleAnimations(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta);
+    void LockOn_StateTransition(_float fTimeDelta);
+    
 
 public:
     static CAugustaGroundIdle* Create(class CGameObject* pOwner);

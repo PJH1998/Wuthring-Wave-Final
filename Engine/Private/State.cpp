@@ -33,6 +33,11 @@ void CState::Change_State(CStateMachine* pStateMachine, _uint iCategory, _uint i
 
 
 
+_bool CState::Is_EscapePossible()
+{
+    return m_fTrackPosition > m_Animations[m_iCurrentAnimIdx].fEscapeTrackPosition;
+}
+
 void CState::Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
 {
     m_Animations.emplace(iType, ANIM_DATA{ strAnimName, fSpeed, fEscapeTrackPosition, fRootMotionRate, IsRootMotion });

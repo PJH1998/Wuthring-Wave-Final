@@ -9,6 +9,8 @@ namespace Client
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
 
+	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
+
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
 		END

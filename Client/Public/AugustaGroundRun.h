@@ -23,8 +23,12 @@ private:
     _float3 m_vMoveDirection = {};
 
     void Setup_Animations();
-    void Update_RunAnimation();
-    void Check_StateTransition();
+
+    void LockOnUpdate_RunAnimation(_float fTimeDelta);
+    void LockOnCheck_StateTransition(_float fTimeDelta);
+
+    void Update_RunAnimation(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta);
 
 
 public:

@@ -14,7 +14,7 @@ public:
         _string strAnimName = {};
         _float fSpeed = {};
         _float fEscapeTrackPosition = {};
-        _float fRootMotionRate = { 0.1f };
+        _float fRootMotionRate = { 1.f };
         _bool IsRootMotion = { true };
     }ANIM_DATA;
 
@@ -43,7 +43,8 @@ protected:
    
 
 protected:
-    void Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
+    _bool Is_EscapePossible();
+    void Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true);
 
 public:
     virtual void Free() override;

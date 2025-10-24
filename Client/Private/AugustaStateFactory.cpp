@@ -12,9 +12,14 @@
 #include "AugustaGroundIdle.h"
 #include "AugustaGroundWalk.h"
 #include "AugustaGroundRun.h"
+#include "AugustaGroundLand.h"
 #include "AugustaGroundSprint.h"
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
+
+// Air 카테고리 State들
+#include "AugustaAirJump.h"
+#include "AugustaAirFall.h"
 
 
 void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
@@ -23,14 +28,17 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     // enum 값을 index로 사용하여 타입 안정성 확보
 
     // Ground 카테고리 하위 State들
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::IDLE), CAugustaGroundIdle::Create(pPlayer));
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::WALK), CAugustaGroundWalk::Create(pPlayer));
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::RUN), CAugustaGroundRun::Create(pPlayer));
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::SPRINT), CAugustaGroundSprint::Create(pPlayer));
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pPlayer));
-    pStateMachineCom->Add_State(static_cast<_uint>(EStateCategory::GROUND), static_cast<_uint>(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pPlayer, "Hack"));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE), CAugustaGroundIdle::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::WALK), CAugustaGroundWalk::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN), CAugustaGroundRun::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND), CAugustaGroundLand::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT), CAugustaGroundSprint::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pPlayer, "Hack"));
 
-    // TODO: Air, Climb, Hit 카테고리 State 추가
+    // Air 하위 State들
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL), CAugustaAirFall::Create(pPlayer));
 }
 
 void CAugustaStateFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, class CAugusta* pPlayer, class CGameInstance* pGameInstance, class CSpringCamera** ppCamera)

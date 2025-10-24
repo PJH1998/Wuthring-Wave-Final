@@ -43,10 +43,10 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
 
     // 초기 State 설정.
+    m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
 
-    
     
     
     
@@ -79,11 +79,11 @@ void CAugusta::Update(_float fTimeDelta)
     // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    if (m_strPreAnimation != m_strCurrentAnimation)
-        m_fTrackPosition = 0.f;
+    //if (m_strPreAnimation != m_strCurrentAnimation)
+    //    m_fTrackPosition = 0.f;
 
     // 5. Camera 갱신 => 위치 따라오게
-    //m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
 
 }
 

@@ -20,15 +20,13 @@ public:
 
 
 protected:
-    // 지상 상태 공통 로직
     void Apply_Gravity(_float fTimeDelta);
     void Check_GroundCollision();
 
     
 
 public:
-    // 하위 상태 전환
-    void Change_SubState(const _string& strSubStateName, class CStateMachine* pStateMachine);
+    //void Change_SubState(const _string& strSubStateName, class CStateMachine* pStateMachine);
 
     virtual void Free() override;
 };

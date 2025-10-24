@@ -227,7 +227,7 @@ void CAnimationTool::RenderUI_FromState()
         {
             static int iSelectedIndex = -1;
             _uint id = 0;
-
+#ifdef _DEBUG
             for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
             {
                 if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
@@ -237,6 +237,9 @@ void CAnimationTool::RenderUI_FromState()
                 }
                 id++;
             }
+#endif // _DEBUG
+
+
         }
         ImGui::EndChild();
     }
@@ -255,6 +258,7 @@ void CAnimationTool::RenderUI_ToState()
             static int iSelectedIndex = -1;
             _uint id = 0;
 
+#ifdef _DEBUG
             for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
             {
                 if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
@@ -264,6 +268,9 @@ void CAnimationTool::RenderUI_ToState()
                 }
                 id++;
             }
+#endif // _DEBUG
+
+
         }
         ImGui::EndChild();
     }

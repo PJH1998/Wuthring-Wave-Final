@@ -51,17 +51,6 @@ void CGroundState::Check_GroundCollision()
     // TODO: 지면 충돌 체크
 }
 
-void CGroundState::Change_SubState(const _string& strSubStateName, CStateMachine* pStateMachine)
-{
-    //// 하위 상태 전환
-    //if (nullptr != m_pCurrentSubState)
-    //{
-    //    m_pCurrentSubState->OnExit();
-    //}
-
-    // 새로운 하위 상태로 전환 (StateMachine을 통해)
-}
-
 void CGroundState::Free()
 {
     CCharacterState::Free();

@@ -56,7 +56,6 @@ public:
 
 public:
 	void Change_CharacterCheck();
-	
 	void Change_Character(CHARACTERTYPE eNextCharacter);
 	void Sync_Transform();
 	

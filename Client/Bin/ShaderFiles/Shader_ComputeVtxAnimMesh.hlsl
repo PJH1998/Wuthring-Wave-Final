@@ -402,10 +402,10 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
         
         // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
-        float4 finalScale = actionSRT.scale * ribbonSRT.scale;
-        float4 finalRotation = mul_quaternion(actionSRT.rotation, ribbonSRT.rotation);
-        float4 finalTranslation = actionSRT.translation +
-                                 (ribbonSRT.translation - float4(0, 0, 0, 1)); // delta 적용
+        float4 finalScale = ribbonSRT.scale * actionSRT.scale;
+        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
+        float4 finalTranslation = ribbonSRT.translation +
+                                 (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
         result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
     }
     else

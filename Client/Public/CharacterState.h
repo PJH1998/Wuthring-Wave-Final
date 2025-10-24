@@ -20,8 +20,8 @@ protected:
     _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta);
 
 protected:
-    // 입력 키 ( State 마다 사용할 변수)
-    _uint m_iMoveKey = {};
+    _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)
+    ACTORDIR m_eDir = {};   // 방향 변수
 
 public:
     virtual void Free() override;

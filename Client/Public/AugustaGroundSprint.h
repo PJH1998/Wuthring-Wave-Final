@@ -18,10 +18,13 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _float m_fSprintTime = { 0.f };  // Sprint 지속 시간
 
-    void Update_SprintSpeed(_float fTimeDelta);
-    void Check_StateTransition();
+    void Setup_Animations();
+
+    void LockOnUpdate_SprintAnimation(_float fTimeDelta);
+    void LockOnCheck_StateTransition(_float fTimeDelta);  
+    void Update_SprintAnimation(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta);
 
 public:
     static CAugustaGroundSprint* Create(class CGameObject* pOwner);

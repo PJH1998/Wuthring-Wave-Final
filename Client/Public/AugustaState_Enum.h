@@ -14,7 +14,8 @@ enum class EAugustaGroundState : _uint
 	RUN,			// 달리기 (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
 	SPRINT,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
-	SKILL,			// 스킬 (Skill_Hack, Skill_Rise, SkillQTE, Burst*)
+	SKILL,			// 스킬 (Skill)
+	LAND,			// 착지 (Land)
 	GROUND_END
 };
 
@@ -54,7 +55,8 @@ enum class EAugustaHitState : _uint
 
 
 #pragma region DEPTH2
-// Animation 변경용 변수
+
+#pragma region GROUND
 enum class EIdleType : _uint
 {
 	STAND1_ACTION01 = 0,
@@ -71,7 +73,7 @@ enum class EIdleType : _uint
 
 enum class ERunType : _uint
 {
-	RUN_B = 0, 
+	RUN_B = 0,
 	RUN_BASEPOSE,
 	RUN_F,
 	RUN_LB,
@@ -87,6 +89,34 @@ enum class ERunType : _uint
 	END
 };
 
+enum class ELandType : _uint
+{
+	LAND_LIGHT = 0,     // 약한 착지
+	LAND_HEAVY, // 강한 착지
+	LAND_ROLL,      // 착지후 구르기.
+	LANDSLIDE_F, // 매달린 애니메이션.
+	LAND_ROLL_ATTACK01_2,
+	LANDSLIDE_B,
+	LANDSLIDE_SPRINT_LOOP,
+	LANDSLIDE_SPRINT_POSE_F,
+	LANDSLIDE_SPRINT_START,
+	END
+};
+
+
+enum class ESprintType : _uint
+{
+	STOP_SPRINT_L = 0,
+	STOP_SPRINT_R,
+	MOVE_B,
+	MOVE_F,
+	MOVE_LIMIT_B,
+	MOVE_LIMIT_F,
+	END
+
+
+};
+
 enum class ESkillType : _uint
 {
 	HACK = 0,
@@ -96,6 +126,33 @@ enum class ESkillType : _uint
 	BURST,
 	END
 };
+#pragma endregion
+
+#pragma region AIR
+enum class EJumpType : _uint
+{
+	JUMP_LOOP = 0,
+	JUMP_RUN_LF, // 앞으로
+	JUMP_RUN_RF,
+	JUMP_SECOND_B, // 더블 점프
+	JUMP_SECOND_F,
+	JUMP_WALK_LF, // 제자리
+	JUMP_WALK_RF,
+	END
+};
+
+enum class EFallType : _uint
+{
+	FALL_LOOP = 0,
+	FALL_LOOP_FAST,
+	END
+
+};
+#pragma endregion
+
+
+
+
 #pragma endregion
 
 

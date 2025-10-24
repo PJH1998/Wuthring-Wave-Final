@@ -387,14 +387,24 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
 	_float fTrackPosition = 0.f;
 
+	
+
 	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;
 
-
-   // 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
 	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
+   // 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
+	//FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
 
+//#ifdef _DEBUG
+//	if (strAnimationName == "Stand1_Turn_L90D")
+//		OutPutDebugMatrix(TEXT("TurnL90D"), *m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix());
+//
+//	if (strAnimationName == "Stand1_Turn_R90D")
+//		OutPutDebugMatrix(TEXT("TurnR90D"), *m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix());
+//		
+//#endif // _DEBUG
 	// Root Node Translation 조정
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate);
@@ -439,29 +449,30 @@ _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta,
 
 
 
-void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta)
-{
-	auto iter = m_Animations.find(strRibAnimationName);
-	if (iter == m_Animations.end())
-		return;
+//void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta)
+//{
+//	auto iter = m_Animations.find(strRibAnimationName);
+//	if (iter == m_Animations.end())
+//		return;
+//
+//	iter->second->Update_TransformationMatrices(fTimeDelta, m_Bones);
+//
+//	for (auto& pBone : m_Bones)
+//		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+//	
+//}
 
-	iter->second->Update_TransformationMatrices(fTimeDelta, m_Bones);
-
-	for (auto& pBone : m_Bones)
-		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
-	
-}
-
-void CModel::Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition)
+void CModel::Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition)
 {
 	auto iter = m_Animations.find(strRibAnimationName);
 	if (iter == m_Animations.end())
 		return;
 
 	iter->second->Update_RibTransformationMatrices(fTrackPosition, m_Bones);
+	//iter->second->Update_TransformationMatrices(fTrackPosition, m_Bones);
 
 	for (auto& pBone : m_Bones)
-		pBone->Update_RibCombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosition)
@@ -630,6 +641,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 
 	// 축 변환 쿼터니언 생성
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환
@@ -640,6 +652,9 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	_vector vLocalTranslate = vConvertedTranslation - XMLoadFloat4(&m_vPreRootPosition);
 	// 회전 변화량 계산
 	_vector vRotationDelta = XMQuaternionMultiply(vConvertedRotation, XMQuaternionInverse(XMLoadFloat4(&m_vPreRootRotation)));
+
+
+
 
 
 	// 애니메이션 변경 시 순간이동 방지

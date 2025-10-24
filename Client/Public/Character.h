@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Actor.h"
 NS_BEGIN(Client)
 // 플레이어 캐릭터의 부모 객체.
@@ -64,12 +65,20 @@ public:
 #pragma region STATE 조건에 사용
 public:
 	void Process_Input(class CInputController* pInputControllerCom);
-
+	
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
 	_bool Check_AnyInput(_uint iKeyFlag);
 	_bool Check_AllInput(_uint iKeyFlag);
 	_bool Is_LockOn();
+	_bool Is_Land(_float3* pNormal = nullptr);
 	void Change_State(_uint iCategory, _uint iSubState);
+
+	ACTORDIR Calculate_Direction();
+	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
+	void Move_Fall(_float fTimeDelta, _float fSpeed);
+	_float Get_DistanceToGround();
+
+	
 	
 #pragma endregion
 

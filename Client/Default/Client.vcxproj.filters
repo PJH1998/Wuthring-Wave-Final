@@ -136,11 +136,11 @@
     <Filter Include="03. GameObject\Actor\Player\State\Define">
       <UniqueIdentifier>{806d4e3d-1d67-441f-acc9-bc13257d5457}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\Player\State\Augusta">
-      <UniqueIdentifier>{c62777b3-e6bc-4792-aaa5-644abc24fffb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\Actor\Player\State\Ground\Augusta">
       <UniqueIdentifier>{b0c3516c-97c2-418f-b34b-408390c86852}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air\Augusta">
+      <UniqueIdentifier>{c6688f7b-5cae-41f6-9482-7c488931a29a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -305,6 +305,15 @@
     <ClInclude Include="..\Public\PlayerFactory.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -448,6 +457,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\PlayerFactory.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,9 +10,14 @@ class CAugusta final : public CCharacter
 private:
 	struct StateTransitionContext
 	{
+		ESprintType m_eSprintType = ESprintType::END;
 		EIdleType  m_eIdleType = EIdleType::END;
 		ERunType m_eRunType = ERunType::END;
 		ESkillType m_eSkillToPlay = ESkillType::END;
+		EJumpType m_eJumpType = EJumpType::END;
+		ELandType m_eLandType = ELandType::END;
+		EFallType m_eFallType = EFallType::END;
+		
 
 		// 컨텍스트 사용 뒤 초기화
 		void Clear()
@@ -20,6 +25,10 @@ private:
 			m_eSkillToPlay = ESkillType::END;
 			m_eIdleType = EIdleType::END;
 			m_eRunType = ERunType::END;
+			m_eJumpType = EJumpType::END;
+			m_eSprintType = ESprintType::END;
+			m_eLandType = ELandType::END;
+			m_eFallType = EFallType::END;
 		};
 	};
 
