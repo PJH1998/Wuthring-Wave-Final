@@ -94,6 +94,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
     // Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
+
     // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
@@ -120,6 +121,11 @@ void CAugusta::Render()
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
     }
+
+#ifdef _DEBUG
+    m_pColliderCom->Render();
+#endif // _DEBUG
+
 }
 
 void CAugusta::Render_Shadow()
@@ -162,12 +168,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
         CRASH("Controller");*/
 
-
-
-
     
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = { 0.f, 5.f, 0.f };
+    ColliderDesc.vPos = { 0.f, 0.f, 0.f };
+    ColliderDesc.vOffset = {0.f, 6.7f, 0.f};
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
     ColliderDesc.fHeight = 5.f;

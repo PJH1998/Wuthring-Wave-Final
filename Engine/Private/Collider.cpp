@@ -56,7 +56,8 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting;
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
+	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(70.f);
 	VirtualSetting.mShape = m_pShape;
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);
 

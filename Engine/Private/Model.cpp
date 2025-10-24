@@ -365,7 +365,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 }
 
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
@@ -393,21 +393,13 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;
 
+	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
 	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
-   // 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	//FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
-
-//#ifdef _DEBUG
-//	if (strAnimationName == "Stand1_Turn_L90D")
-//		OutPutDebugMatrix(TEXT("TurnL90D"), *m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix());
-//
-//	if (strAnimationName == "Stand1_Turn_R90D")
-//		OutPutDebugMatrix(TEXT("TurnR90D"), *m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix());
-//		
-//#endif // _DEBUG
 	// Root Node Translation 조정
 	if (true == isRootMotion)
-		Compute_RootAnimation(fRootMotionRate);
+		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
+	else
+		m_RootMatrix = XMMatrixIdentity();
 	
 
 	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
@@ -420,9 +412,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
 	{
-		/*if (true == isRootMotion && i == m_iRootBoneIndex)
-			Compute_RootAnimation(fRootMotionRate);*/
-
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 	}
 
@@ -484,7 +473,7 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
-	//m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
+	m_RootMatrix = XMMatrixIdentity();
 }
 
 BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
@@ -629,7 +618,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
-void CModel::Compute_RootAnimation(_float fRootMotionRate)
+void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRotation, _bool isRootMotionTranslate)
 {
 	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
@@ -653,8 +642,12 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate)
 	// 회전 변화량 계산
 	_vector vRotationDelta = XMQuaternionMultiply(vConvertedRotation, XMQuaternionInverse(XMLoadFloat4(&m_vPreRootRotation)));
 
+	// RootMotion 회전 껐으면 0으로.
+	if (!isRootMotionRotation)
+		vRotationDelta = XMQuaternionIdentity();
 
-
+	if (!isRootMotionTranslate)
+		vLocalTranslate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 
 
 	// 애니메이션 변경 시 순간이동 방지
@@ -901,7 +894,6 @@ HRESULT CModel::Ready_Shared_Buffers()
 
 
 	// --- 2. 수집된 데이터로 실제 GPU 버퍼 생성 ---
-
 
 	D3D11_BUFFER_DESC bufferDesc = {};
 	// 2-1. 애니메이션 키프레임 정보 버퍼.

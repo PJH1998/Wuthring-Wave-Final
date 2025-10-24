@@ -78,7 +78,7 @@ public:
 	_bool								Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	// Compute Shader
-	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
+	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
@@ -141,7 +141,7 @@ private:
 
 
 private:
-	void								Compute_RootAnimation(_float fRootMotionRate);
+	void								Compute_RootAnimation(_float fRootMotionRate, _bool IsRootMotionRotation = true, _bool IsRootMotionTranslate = true);
 
 private:
 	HRESULT							Ready_Bone(ifstream& InputFile, _int iParentIndex);

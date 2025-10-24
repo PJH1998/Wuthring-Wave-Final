@@ -21,6 +21,10 @@
 #include "AugustaAirJump.h"
 #include "AugustaAirFall.h"
 
+// Climb State들
+#include "AugustaClimbMove.h"
+#include "AugustaClimbExit.h"
+
 
 void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
 {
@@ -39,6 +43,10 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     // Air 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL), CAugustaAirFall::Create(pPlayer));
+
+    // Climb 하위 State들
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE), CAugustaClimbMove::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_EXIT), CAugustaClimbExit::Create(pPlayer));
 }
 
 void CAugustaStateFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, class CAugusta* pPlayer, class CGameInstance* pGameInstance, class CSpringCamera** ppCamera)

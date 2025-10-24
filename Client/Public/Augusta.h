@@ -10,13 +10,24 @@ class CAugusta final : public CCharacter
 private:
 	struct StateTransitionContext
 	{
+		// Ground
 		ESprintType m_eSprintType = ESprintType::END;
 		EIdleType  m_eIdleType = EIdleType::END;
 		ERunType m_eRunType = ERunType::END;
 		ESkillType m_eSkillToPlay = ESkillType::END;
-		EJumpType m_eJumpType = EJumpType::END;
 		ELandType m_eLandType = ELandType::END;
+
+		// Air
+		EJumpType m_eJumpType = EJumpType::END;
 		EFallType m_eFallType = EFallType::END;
+
+		// Climb
+		EClimbIdleType m_eClimbIdleType = EClimbIdleType::END;
+		EClimbMoveType m_eClimbMoveType = EClimbMoveType::END;
+		_bool m_IsClimbSecondStep = { false };
+
+		EClimbExitType m_eClimbExitType = EClimbExitType::END;
+		
 		
 
 		// 컨텍스트 사용 뒤 초기화
@@ -29,6 +40,10 @@ private:
 			m_eSprintType = ESprintType::END;
 			m_eLandType = ELandType::END;
 			m_eFallType = EFallType::END;
+			m_eClimbIdleType = EClimbIdleType::END;
+			m_eClimbMoveType = EClimbMoveType::END;
+			m_eClimbExitType = EClimbExitType::END;
+			m_IsClimbSecondStep = false;
 		};
 	};
 

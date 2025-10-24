@@ -108,7 +108,7 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     if (m_IsAnimationEnd && !m_pAugusta->Is_Land(&vNormal))
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
         return;
     }
 
