@@ -25,6 +25,9 @@ public:
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	void		Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
 	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
+	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
+	void		IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
+
 #endif
 
 private:
@@ -39,7 +42,7 @@ private:
 
 	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
-
+	_float							m_fWinSizeX{}, m_fWinSizeY{};
 	//TEST
 	CShaderFilter*					m_pFilter = { nullptr };
 	_uint							m_iLUT_Index = {};
@@ -49,6 +52,8 @@ private:
 #ifdef _DEBUG
 	list<class CComponent*>			m_DebugComponents;
 	_bool							m_isRenderDebug = { true };
+	_bool							m_IsSSAO = { true };
+	_bool							m_IsSSAO_Blur = { true };
 #endif
 
 private:

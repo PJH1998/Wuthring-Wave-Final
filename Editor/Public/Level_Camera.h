@@ -1,6 +1,10 @@
 #pragma once
 #include "Level.h"
 
+NS_BEGIN(Engine)
+class CRigidbody;
+NS_END
+
 NS_BEGIN(Editor)
 
 class CLevel_Camera final : public CLevel
@@ -16,15 +20,20 @@ public:
 
 private:
 	class CMap_Interface*		m_pMapInterface = { nullptr };
+	class CCamera_Interface*	m_pCameraInterface = { nullptr };
 
 	class CSpringCamera_Edit*	m_pSpringCamera = { nullptr };
 
 private:
 	_bool						m_isMapInterface = { false };
 
+	// Test¿ë Ground
+	CRigidbody*			m_pGround = { nullptr };
+
 private:
 	void						Ready_Camera();
 	void						Ready_Dummy();
+	void						Ready_Ground();
 
 public:
 	static		CLevel_Camera* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

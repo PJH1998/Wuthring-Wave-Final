@@ -48,6 +48,9 @@ HRESULT CLevel_Test::Initialize()
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_ShadowNF();
 
+	// Test
+	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+
     return S_OK;
 }
 

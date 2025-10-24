@@ -138,10 +138,10 @@ HRESULT CEditDummy_Wolf::Ready_Camera()
 
 	m_pSpringCamera->Initialize_Clone(&CameraDesc);
 
-	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), m_pSpringCamera);
+	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Camera_Spring"), m_pSpringCamera);
 	Safe_AddRef(m_pSpringCamera);
 
-	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
+	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Camera_Spring"));
 
 	return S_OK;
 }

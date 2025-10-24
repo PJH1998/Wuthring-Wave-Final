@@ -97,6 +97,9 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	// CharacterVirtual VS CharacterVirtual Collision
 	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
 
+	// RayFilter
+	m_pRayFilter = new SpecifiedBroadPhaseLayerFilter(static_cast<BroadPhaseLayer>(ENUM_CLASS(BPLAYER::NON_MOVE)));
+
 #ifdef _DEBUG
 	m_pDebugRenderer = new CDebugRender(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pDebugRenderer);
@@ -162,7 +165,7 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	RayCastResult result;
 
 	_float fOriginFraction = result.mFraction;
-	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result);
+	m_pPhysicsSystem->GetNarrowPhaseQuery().CastRay(ray, result, *m_pRayFilter);
 
 	if (nullptr != pOut)
 	{
@@ -182,10 +185,10 @@ void CPhysicsManager::Render()
 	m_pPhysicsSystem->DrawBodies(m_DrawSetting, m_pDebugRenderer);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
-void CPhysicsManager::DrawShape(const Shape* pShape)
+void CPhysicsManager::DrawShape(const Shape* pShape, RMat44 Matrix)
 {
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
-	pShape->Draw(m_pDebugRenderer, RMat44::sIdentity(), Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
+	pShape->Draw(m_pDebugRenderer, Matrix, Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
 #endif
@@ -235,6 +238,7 @@ void CPhysicsManager::Free()
 	Safe_Delete(m_pBPLayer);
 	Safe_Delete(m_pObjectLayerFilter);
 	Safe_Delete(m_pObjectVsBPFilter);
+	Safe_Delete(m_pRayFilter);
 	Safe_Delete(m_pCVCCollision);
 #ifdef _DEBUG
 	Safe_Delete(m_pDebugRenderer);
