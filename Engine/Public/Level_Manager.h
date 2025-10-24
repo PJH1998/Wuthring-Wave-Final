@@ -19,7 +19,7 @@ public:
 	HRESULT				Open_Level(_uint iCurrentLevel, CLevel* pCurrentLevel);
 	void					Update_Level(_float fTimeDelta);
 	HRESULT				Render();
-	HRESULT				Clear_Resources();
+	HRESULT				Clear_CurrentLevel_Resources(_uint iNextLevel);
 
 private:
 	_uint					m_iCurrentLevel		= {};

@@ -15,17 +15,17 @@ public:
 	
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames);
 	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
-	void				Play_Action(const _wstring& strActionTag);
+	void			Play_Action(const _wstring& strActionTag);
 
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 
-	_float				Get_CurrentCamera_Near();
-	_float				Get_CurrentCamera_Far();
+	_float			Get_CurrentCamera_Near();
+	_float			Get_CurrentCamera_Far();
 
 public:
 	HRESULT			Initialize(_uint iNumLevel);
-	void				Update(_float fTimeDelta);	// PipeLine Camera Matrix Update
-	void				Late_Update(_float fTimeDelta);
+	void			Update(_float fTimeDelta);	// PipeLine Camera Matrix Update
+	void			Late_Update(_float fTimeDelta);
 
 	HRESULT			Clear_Resource(_uint iCurrentLevelID);
 

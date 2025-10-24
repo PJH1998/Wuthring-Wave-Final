@@ -19,6 +19,13 @@ sampler ClampSampler = sampler_state
     AddressV = clamp;
 };
 
+sampler PointClampSampler = sampler_state
+{
+    filter = min_mag_mip_point;
+    AddressU = clamp;
+    AddressV = clamp;
+};
+
 SamplerComparisonState ShadowSampler
 {
     filter = comparison_min_mag_mip_linear;

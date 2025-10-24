@@ -39,8 +39,6 @@ float RPB_Gradiant(float fViewDepth)
 {
     float DepthDDX = ddx(fViewDepth * 0.0001f);
     float DepthDDY = ddy(fViewDepth * 0.0001f);
-        
-//    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     float GradiantX = abs(DepthDDX);
     float GradiantY = abs(DepthDDY);
@@ -110,19 +108,20 @@ bool Outline_Normal(float fWinSizeX, float fWinSizeY, Texture2D NormalTexture, s
     return false;
 }
 
-float SSAO_Factor(Texture2D DepthTexture, sampler Sample, vector vSampleNormal, vector vNoiseVector, vector vViewNormal, vector vViewPos, matrix ProjMatrix, float fRadius)
+float SSAO_Factor(Texture2D DepthTexture, sampler Sample, vector vSampleNormal, vector vNoiseVector, vector vViewNormal, vector vViewPos, matrix ProjMatrix, float fRadius, float fMaxDistance)
 {
     float Occlusion = 0.f;
     
     float3 vTangent = normalize(vNoiseVector.xyz - (vViewNormal.xyz * dot(vNoiseVector, vViewNormal)));
     float3 vNormal = vViewNormal.xyz;
-    float3 vBinormal = cross(vNormal, vTangent);
+    float3 vBinormal = cross(vTangent, vNormal);
     
     float3x3 TBN = float3x3(vTangent, vBinormal, vNormal);
     
-    vector vSamplePos = vViewPos + vector((mul(vSampleNormal.xyz, TBN) * fRadius), 0.f);
+    vector vSamplePos = vViewPos + vector((mul(vSampleNormal.xyz, TBN) * fRadius), 1.f);
     
     vector vProjPos = mul(vSamplePos, ProjMatrix);
+    float fRandomZ = vProjPos.w;
     
     float2 vSampleUV;
     vSampleUV.x = (vProjPos.x / vProjPos.w) * 0.5f + 0.5f;
@@ -130,14 +129,16 @@ float SSAO_Factor(Texture2D DepthTexture, sampler Sample, vector vSampleNormal, 
     
     float SampleDepth = DepthTexture.Sample(Sample, vSampleUV).y;
     
-    if(SampleDepth == 0.f)
+    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
         return 1.f;
     
-    float Distance = (SampleDepth - vProjPos.w);
-    if(Distance >= 0.f)
-        return 1.f;
+    float Distance = abs(SampleDepth - fRandomZ);
     
-    Occlusion = smoothstep(0.f, 1.f, fRadius / (SampleDepth - vProjPos.w));
+    Occlusion = smoothstep(0.f, fMaxDistance, Distance);
+    
+    float fNormalWeight = saturate(dot(vViewNormal, normalize(vViewPos - vSamplePos)));
+    
+    Occlusion *= fNormalWeight;
     
     return Occlusion;
 }

@@ -16,7 +16,7 @@ void CShader_Interface::Update_Shadow()
 {
 	Set_ShadowBias();
 	Setting_LUT();
-	Set_SSAO_Sigma();
+	Set_SSAO();
 }
 
 void CShader_Interface::Set_ShadowBias()
@@ -53,13 +53,40 @@ void CShader_Interface::Set_ShadowBias()
 	ImGui::End();
 }
 
-void CShader_Interface::Set_SSAO_Sigma()
+void CShader_Interface::Set_SSAO()
 {
 	ImGui::Begin("SSAO");
 
-	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.01f, 0.01f, 10.f);
+	if(ImGui::Button("SSAO_ON"))
+		m_pGameInstance->IsSSAO(true);
+	
+	ImGui::SameLine();
 
-	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigam", &m_fSigmaWeight, sizeof(_float));
+	if (ImGui::Button("SSAO_OFF"))
+		m_pGameInstance->IsSSAO(false);
+
+	if (ImGui::Button("BLUR_ON"))
+		m_pGameInstance->IsSSAO_Blur(true);
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("BLUR_OFF"))
+		m_pGameInstance->IsSSAO_Blur(false);
+
+
+	ImGui::InputFloat("RADIUS", &m_fRadius);
+	
+	ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+
+
+	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
+
+	ImGui::InputFloat("MIN_DEPTH", &m_fMinDepthWeight);
+
+	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
+	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_MaxDistance", &m_fMaxDistance, sizeof(_float));
+	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigma", &m_fSigmaWeight, sizeof(_float));
+	m_pGameInstance->Bind_RawValue_Renderer("g_fMinDepthDistance", &m_fMinDepthWeight, sizeof(_float));
 	ImGui::End();
 }
 
