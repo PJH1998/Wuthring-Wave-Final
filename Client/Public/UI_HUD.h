@@ -25,6 +25,7 @@ public:
 
 private:
 	HRESULT					Load_ChildObjects(_wstring strFilePath);
+	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
 
 private:
 	HRESULT					Ready_Components(void* pArg);

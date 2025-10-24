@@ -340,7 +340,7 @@ void CLevel_UI::Update_Hierarchy()
 
             // 遺紐??대쫫???녿뒗 寃쎌슦 泥댄겕X (?꾩뿉???대? 李얠븯?쇰?濡?
             if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
-                break;
+                continue;
             // ?대떦?섎뒗 遺紐④? ?덈뒗吏 寃??
             for (auto& otherui : m_vecCustomUIs)
                 if (otherui.pCustomUI->Get_UIDesc().strUIName ==

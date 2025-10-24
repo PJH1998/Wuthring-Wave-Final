@@ -30,7 +30,6 @@ HRESULT CLoader_Test_UI::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Prototype(); Complete_Load(); });
-
     m_pGameInstance->Wait_Thread_End();
 
     return S_OK;
@@ -45,7 +44,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
 
     vector<CCustom_UI::CUSTOM_UITREE_DESC> vecDescs = {};       // parsed data from json
 
-    // * Json Parse                 // texture load moved. from uiobject
+    // * Json Parse                 // for pre-loading textures
     // UI_HUD
     _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
     vecDescs.push_back(Load_Tree(strFilePath_UI_HUD));

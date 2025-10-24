@@ -116,7 +116,7 @@ CCustom_UI* CCustom_UI::Find_ChildObject(_wstring strChildName)
         if (child->Get_UIDesc().strUIName == strChildName)
             return child;
 
-        Find_ChildObject(strChildName);
+        return child->Find_ChildObject(strChildName);
     }
 
     return nullptr;

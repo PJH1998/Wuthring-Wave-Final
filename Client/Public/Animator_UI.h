@@ -100,7 +100,14 @@ public:
 
 NS_END
 
-inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC & d)
+
+#pragma region json
+
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC& d);
+inline void from_json(const json& j, vector<CAnimator_UI::UI_ANIM_KEYFRAME_DESC>& vec);
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_DESC& d);
+
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
 	d.iKeyframeIndex = j["iKeyframeIndex"];
 
@@ -134,4 +141,15 @@ inline void from_json(const json& j, vector<CAnimator_UI::UI_ANIM_KEYFRAME_DESC>
 	}
 }
 
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_DESC& d)
+{
+	from_json(j["vecKeyFrames"], d.vecKeyFrames);
+	from_json(j["tUIDesc"], d.tUIDesc);
 
+	//d.iLerpType		= j["iLerpType"];
+	d.isLoop = j["isLoop"];
+	_string strAnimName = j["strAnimName"].get<_string>();
+	d.strAnimName = StringToWString(strAnimName);
+}
+
+#pragma endregion

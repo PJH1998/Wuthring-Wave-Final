@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "UI_HUD.h"
+#include "Animator_UI.h"
 
 // 얘는 오브젝트 매니저의 통제를 받음.
 // 자식들은 얘의 통제를 받음. 삭제 포함.
@@ -26,9 +27,16 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     Ready_Components(pArg);
     __super::Ready_Events();
 
-    // Load from json
-    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
+    // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
+    _wstring strFilePath = 
+        L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
     Load_ChildObjects(strFilePath);
+
+    // Load Animations from json.
+    vector<_wstring> vecAnimFilePaths = {   // 로드할 애니메이션은 여기에 추가
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/TestHUDAnim3.json"
+    };
+    Load_Animations(vecAnimFilePaths);
 
     return S_OK;
 }
@@ -57,27 +65,23 @@ void CUI_HUD::Render()
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
 {
-    //_uint iDestLevel =  m_pGameInstance->Get_CurrentLevel();
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+    const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
-
+    // parse json
     ifstream file(strFilePath);
     json jUITreeData = {};
-    if (file.is_open()) {
-        file >> jUITreeData;
-    }
-
-    // json load
+    if (file.is_open()) { file >> jUITreeData; }
     CUSTOM_UITREE_DESC tLoadTreeDesc = {};
     from_json(jUITreeData, tLoadTreeDesc);
 
-    // 그 뒤 로드..
+    // load objects
     vector<CGameObject*> vecLoadObjects = {};
     for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
     {
         UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
 
-        // Transform 값을 가져온 뒤, 행렬화하여 반영하고, 자식 오브젝트로써 추가한다.
+        // Transform 값을 가져온 뒤, 행렬화하여 반영하고, (임시로) 자식 오브젝트로써 추가한다.
         _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
         _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
         _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
@@ -106,11 +110,8 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         _matrix matWorld = matScale * matRot * matTrans;
         static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
     }
-
     
-    // 근데 자식인 줄은 어찌 알고? 일단 추가한 뒤, 전부 부모 재정리하고, 그 뒤에 부모관계 아닌 애들만 걸러내기?
-
-    // 자식관계 재정의
+    // re-define childs of objects
     for (auto& child : m_vecChildObjects)
     {
         CUSTOM_UI_DESC tChildDesc = child->Get_UIDesc();
@@ -126,7 +127,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         }
     }
 
-    // 아무도 본인을 자식으로 가진 애가 없는 애 = 얘의 진짜 자식
+    // re-define childs of this(container)
     vector<CCustom_UI*> vecTrueChildObjects = {};
     for (auto& child : m_vecChildObjects)
     {
@@ -152,6 +153,32 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
             vecTrueChildObjects.push_back(child);
     }
     m_vecChildObjects = move(vecTrueChildObjects);
+
+    return S_OK;
+}
+
+HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
+{
+    for (auto& animPath : vecAnimFilePath)
+    {
+        // parse json
+        ifstream file(animPath);
+        json jUIAnimData = {};
+        if (file.is_open()) { file >> jUIAnimData; }
+        CAnimator_UI::UI_ANIM_DESC tLoadAnimDesc = {};
+        from_json(jUIAnimData, tLoadAnimDesc);
+
+        CCustom_UI* pTargetObject = Find_ChildObject(tLoadAnimDesc.tUIDesc.strUIName);
+        
+        if (!pTargetObject)
+            CRASH("Cannot find targetobject");
+        CAnimator_UI* pTargetAnimator = dynamic_cast<CAnimator_UI*>(pTargetObject->Get_Component(L"Com_Animator_UI"));
+
+        pTargetAnimator->Insert_Animation(tLoadAnimDesc);
+
+        // ksta del : 테스트용
+        pTargetAnimator->Change_Animation(L"TestHUDAnim3");
+    }
 
     return S_OK;
 }
