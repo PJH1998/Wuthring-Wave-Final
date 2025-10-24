@@ -48,7 +48,6 @@ StructuredBuffer<GPUKeyFrame> g_AllKeyframes : register(t0);
 StructuredBuffer<AnimInfo> g_AllAnimInfos : register(t1);
 StructuredBuffer<GPUChannelInfo> g_ChannelInfos : register(t2);
 
-
 // 출력(Output) 버퍼 - 이제 '로컬' 행렬을 출력합니다.
 RWStructuredBuffer<matrix_rm> g_OutLocalMatrices : register(u0);
 

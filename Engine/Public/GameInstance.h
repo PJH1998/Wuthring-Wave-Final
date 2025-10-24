@@ -94,6 +94,7 @@ public:
 
 #pragma region TARGET_MANAGER
 	ID3D11Resource* Get_RT_Resource(const _wstring& strTargetTag);
+	ID3D11ShaderResourceView* Get_RT_SRV(const _wstring& strTargetTag);
 	HRESULT		Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
@@ -232,6 +233,19 @@ public:
 #endif
 #pragma endregion
 
+#pragma region RCS_MANAGER
+	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
+	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
+	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	HRESULT					Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
+	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
+	HRESULT					Begin_RCS(const _wstring& strRCSTag);
+	void					Clear_RCS(const _wstring& strRCSTag);
+#ifdef _DEBUG
+	HRESULT					Debug_Render_RCS();
+#endif
+#pragma endregion
+
 public:
 	HRESULT			Clear_Resource(_uint iLevelID);
 	HRESULT			Clear_Memory();
@@ -260,6 +274,7 @@ private:
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CCSM*					m_pCSM = { nullptr };
+	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

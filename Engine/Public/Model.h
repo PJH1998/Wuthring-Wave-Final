@@ -133,7 +133,6 @@ private:
 	vector<ID3D11ShaderResourceView*> m_SRVs = {};
 	vector<ID3D11UnorderedAccessView*> m_UAVs = {};
 
-	
 	_bool m_isRibAnimation = { false };
 
 #pragma endregion

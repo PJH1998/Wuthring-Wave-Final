@@ -4,7 +4,7 @@
 
 NS_BEGIN(Engine)
 
-class CShaderFilter;
+class CRendererSubResource;
 class CTexture;
 
 class CRenderer final : public CBase
@@ -44,7 +44,7 @@ private:
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
 	_float							m_fWinSizeX{}, m_fWinSizeY{};
 	//TEST
-	CShaderFilter*					m_pFilter = { nullptr };
+	CRendererSubResource*			m_pSubResource = { nullptr };
 	_uint							m_iLUT_Index = {};
 
 	recursive_mutex					m_RecursiveMutex;
@@ -71,7 +71,6 @@ private:
 	void				Render_NonLight();
 	void				Render_Emissive();
 	void				Render_DistortionObject();
-	void				Render_Blur();
 	void				Render_Blend();
 	void				Render_Distortion();
 	void				Render_LUT();
@@ -87,8 +86,10 @@ private:
 private:
 	HRESULT				Ready_RT();
 	HRESULT				Ready_MRT();
+	HRESULT				Ready_SubResource();
+	HRESULT				Ready_RCS();
+
 	HRESULT				Ready_Shadow_DSV();
-	HRESULT				Ready_Shader_Filter();
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
