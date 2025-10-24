@@ -185,10 +185,10 @@ void CPhysicsManager::Render()
 	m_pPhysicsSystem->DrawBodies(m_DrawSetting, m_pDebugRenderer);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
-void CPhysicsManager::DrawShape(const Shape* pShape)
+void CPhysicsManager::DrawShape(const Shape* pShape, RMat44 Matrix)
 {
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
-	pShape->Draw(m_pDebugRenderer, RMat44::sIdentity(), Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
+	pShape->Draw(m_pDebugRenderer, Matrix, Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
 #endif

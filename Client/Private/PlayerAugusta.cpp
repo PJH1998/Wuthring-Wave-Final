@@ -150,6 +150,10 @@ void CPlayerAugusta::Render()
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
     }
+
+#ifdef _DEBUG
+	m_pColliderCom->Render();
+#endif
 }
 
 void CPlayerAugusta::Render_Shadow()
@@ -241,7 +245,8 @@ void CPlayerAugusta::Ready_Components(const PLAYER_DESC* pDesc)
 
     
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = { 0.f, 5.f, 0.f };
+    ColliderDesc.vPos = { 0.f, 0.f, 0.f };
+	ColliderDesc.vOffset = { 0.f, 6.7f, 0.f };
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
     ColliderDesc.fHeight = 5.f;

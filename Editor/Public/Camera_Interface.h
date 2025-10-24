@@ -13,6 +13,9 @@ public:
 	virtual		HRESULT					Initialize() override;
 
 public:
+
+
+public:
 	static		CCamera_Interface*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void						Free() override;
 };

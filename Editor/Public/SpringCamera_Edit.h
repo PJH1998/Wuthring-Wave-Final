@@ -72,6 +72,7 @@ private:
 	// Distance Lerp
 	_float							m_fFixedDistance = {};
 	_float							m_fLerpSpeed = {};
+	_float							m_fMinDistance = {};
 
 	// Spring
 	_float							m_fStiffness = {};		// Spring Force
@@ -96,9 +97,10 @@ private:
 	void							Check_Ray();
 
 	// LockOn
-	_vector						Lerp_Quat(_float fTimeDelta);				// Quat Lerp
+	void							Lerp_Move(_float fTimeDelta);				// Quat Lerp
 	void							Sorting_Target();								// Target Transforms Sort (Distance Less)
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
+	void							Dynamic_Distance();
 
 private:
 	void							Ready_Component();

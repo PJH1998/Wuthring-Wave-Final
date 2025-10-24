@@ -58,7 +58,7 @@ public:
 	void				Late_Update();
 #ifdef _DEBUG
 	void				Render();
-	void				DrawShape(const Shape* pShape);
+	void				DrawShape(const Shape* pShape, RMat44 Matrix);
 #endif
 
 	_bool				Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);

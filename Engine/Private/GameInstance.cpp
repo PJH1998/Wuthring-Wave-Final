@@ -507,9 +507,9 @@ _bool CGameInstance::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos
 	return m_pPhysicsManager->Ray_Cast(vStartPos, vEndPos, pOut);
 }
 #ifdef _DEBUG
-void CGameInstance::DrawShape(const Shape* pShape)
+void CGameInstance::DrawShape(const Shape* pShape, RMat44 Matrix)
 {
-	m_pPhysicsManager->DrawShape(pShape);
+	m_pPhysicsManager->DrawShape(pShape, Matrix);
 }
 #endif
 #pragma endregion

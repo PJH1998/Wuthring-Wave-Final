@@ -28,6 +28,7 @@ HRESULT CEditDummy_Target::Initialize_Clone(void* pArg)
 
 	if (FAILED(Ready_Component(pDesc->PreTransformMatrix)))
 		return E_FAIL;
+	m_pColliderCom->Set_Gravity(false);
 
 	return S_OK;
 }
@@ -38,12 +39,14 @@ void CEditDummy_Target::Priority_Update(_float fTimeDelta)
 
 void CEditDummy_Target::Update(_float fTimeDelta)
 {
-	_vector vVelocity = XMVectorSet(0.f, 0.f, 0.f, 0.f);
+	_vector vVelocity = XMVectorSet(0.f, -9.8f, 0.f, 0.f);
 	m_pColliderCom->Update(vVelocity);
 }
 
 void CEditDummy_Target::Late_Update(_float fTimeDelta)
 {
+	m_pColliderCom->Sync_Position(m_pTransformCom);
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
@@ -67,6 +70,10 @@ void CEditDummy_Target::Render()
 		m_pShaderCom->Begin(0);
 		m_pModelCom->Render(i);
 	}
+
+#ifdef _DEBUG
+	m_pColliderCom->Render();
+#endif
 }
 
 void CEditDummy_Target::Render_Shadow()
@@ -84,7 +91,7 @@ HRESULT CEditDummy_Target::Ready_Component(_fmatrix PreTransformMatrix)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 20.f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 10.f;

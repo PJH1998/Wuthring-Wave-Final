@@ -27,6 +27,7 @@ HRESULT CRigidbody::Initialize_Prototype()
 
 HRESULT CRigidbody::Initialize_Clone(void* pArg)
 {
+	m_isClone = true;
 	ASSERT_CRASH(pArg);
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
@@ -82,10 +83,10 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 HRESULT CRigidbody::Render()
 {
 #ifdef _DEBUG
-	if(nullptr != m_pBody)
-		m_pGameInstance->DrawShape(m_pBody->GetShape());
-	if (nullptr != m_pCharacter)
-		m_pGameInstance->DrawShape(m_pCharacter->GetShape());
+	//if(nullptr != m_pBody)
+	//	m_pGameInstance->DrawShape(m_pBody->GetShape());
+	//if (nullptr != m_pCharacter)
+	//	m_pGameInstance->DrawShape(m_pCharacter->GetShape());
 #endif
 	return S_OK;
 }
@@ -221,7 +222,10 @@ void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
 	bodySetting.mMassPropertiesOverride = mp;
 	// Custom Mass SetUp (Default Mass X)
 	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
-
+	
+	if(EMotionType::Kinematic == pDesc->eType)
+		bodySetting.mIsSensor = true;
+	
 	// SetUp UserData (CollisionData)
 	m_tCollisionData.pComponent = this;
 	bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);

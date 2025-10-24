@@ -8,13 +8,11 @@
 
 #define MAX_LOADSTRING 100
 
-// ?꾩뿭 蹂??
 HWND g_hWnd;
 HINSTANCE g_hInst;
-WCHAR szTitle[MAX_LOADSTRING];                  // ?쒕ぉ ?쒖떆以??띿뒪?몄엯?덈떎.
-WCHAR szWindowClass[MAX_LOADSTRING];            // 湲곕낯 李??대옒???대쫫?낅땲??
+WCHAR szTitle[MAX_LOADSTRING];                 
+WCHAR szWindowClass[MAX_LOADSTRING];            
 
-// ??肄붾뱶 紐⑤뱢???ы븿???⑥닔???좎뼵???꾨떖?⑸땲??
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -28,7 +26,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    // TODO: ?ш린??肄붾뱶瑜??낅젰?⑸땲??
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 

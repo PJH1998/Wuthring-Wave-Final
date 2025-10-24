@@ -3,6 +3,7 @@
 #include "GameInstance.h"
 
 #include "Jolt/Physics/Collision/Shape/CapsuleShape.h"
+#include "Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h"
 
 CCollider::CCollider(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCollideComponent { pDevice, pContext }
@@ -38,6 +39,7 @@ HRESULT CCollider::Initialize_Prototype()
 
 HRESULT CCollider::Initialize_Clone(void* pArg)
 {
+	m_isClone = true;
 	ASSERT_CRASH(pArg);
 
 	COLLIDER_DESC* pDesc = static_cast<COLLIDER_DESC*>(pArg);
@@ -47,16 +49,20 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	// Create Shape
 	using namespace JPH;
-	BodyShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
-	ASSERT_CRASH(BodyShape);
+	
+	m_pShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
+	ASSERT_CRASH(m_pShape);
 
-	// SetUp CharacterVitual
+	m_vOffset = pDesc->vOffset;
+	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting;
-	VirtualSetting.mShape = BodyShape;
-	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
-	VirtualSetting.mInnerBodyShape = BodyShape;
 	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
+	VirtualSetting.mShape = m_pShape;
+	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);
 
+	//VirtualSetting.mInnerBodyShape = BodyShape;
+	//VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
+	
 	// Create CharacterVirtual
 	m_tCollisionData.pComponent = this;
 	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
@@ -79,6 +85,15 @@ void CCollider::Update(const _fvector& vVelocity)
 
 HRESULT CCollider::Render()
 {
+#ifdef _DEBUG
+	if (nullptr != m_pShape)
+	{
+		RMat44 Matrix = RMat44::sIdentity();
+		Vec3 vPos = m_pCharacterVirtual->GetPosition() + m_pCharacterVirtual->GetShapeOffset();
+		Matrix.SetColumn4(3, Vec4(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
+		m_pGameInstance->DrawShape(m_pShape, Matrix);
+	}
+#endif
     return S_OK;
 }
 
@@ -123,11 +138,15 @@ CComponent* CCollider::Clone(void* pArg)
 
 void CCollider::Free()
 {
-	m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+	if (true == m_isClone)
+	{
+		m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+		m_pCharacterVirtual = nullptr;
+		m_pShape = nullptr;
+	}
 
 	__super::Free();
 
-	m_pCharacterVirtual = nullptr;
 	m_tCollisionData.pComponent = nullptr;
 	m_tCollisionData.pDesc = nullptr;
 }
