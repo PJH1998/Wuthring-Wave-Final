@@ -22,15 +22,13 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 {
     //__super::Initialize_Clone(pArg);
 
+    CGameObject::Initialize_Clone(pArg);
     Ready_Components(pArg);
     __super::Ready_Events();
 
     // Load from json
-    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/UI_HUD.json";
+    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Test9SecInstanceTree2.json";
     Load_ChildObjects(strFilePath);
-
-    
-
 
     return S_OK;
 }
@@ -59,6 +57,10 @@ void CUI_HUD::Render()
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
 {
+    //_uint iDestLevel =  m_pGameInstance->Get_CurrentLevel();
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+
+
     ifstream file(strFilePath);
     json jUITreeData = {};
     if (file.is_open()) {
@@ -75,17 +77,25 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
     {
         UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
 
+        // Transform 값을 가져온 뒤, 행렬화하여 반영하고, 자식 오브젝트로써 추가한다.
         _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
         _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
         _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
 
-        CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));
-        // 로컬에 저장
-        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj));
+        CGameObject* pCustomObj = nullptr;
+        switch (tLoadUIInfoDesc.tUIDesc.iUIType)
+        {
+        case ENUM_CLASS(UI_TYPE::NONE):   pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));  break;
+        case ENUM_CLASS(UI_TYPE::BUTTON): pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc)); break;
+        default:            break;
+        }
+        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // 로컬에 저장.. 근데 자식인 줄은 어찌 알고? 일단 추가한 뒤, 전부 부모 재정리하고, 그 뒤에 부모관계 아닌 애들만 걸러내기?
+        
+
 
         HIERARCHY_OBJ_DESC tObjDesc = { };
         tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-        tObjDesc.strObjName = _wstring(tLoadUIInfoDesc.tUIDesc.strFileName.begin(), tLoadUIInfoDesc.tUIDesc.strFileName.end());
+        tObjDesc.strObjName = tLoadUIInfoDesc.tUIDesc.strUIName;
 
         _matrix matScale = XMMatrixScaling(vCurObjSca.x, vCurObjSca.y, vCurObjSca.z);
         _matrix matRotX = XMMatrixRotationX(DegreesToRadians(vCurObjRot.x));

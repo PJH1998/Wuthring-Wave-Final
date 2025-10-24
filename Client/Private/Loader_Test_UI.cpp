@@ -29,6 +29,10 @@ HRESULT CLoader_Test_UI::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
+    m_pGameInstance->Add_Work([this]() {Load_Prototype(); Complete_Load(); });
+
+    m_pGameInstance->Wait_Thread_End();
+
     return S_OK;
 }
 
@@ -37,6 +41,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
     // ==============================
     cout << "Texture" << endl;
     // ==============================
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     vector<CCustom_UI::CUSTOM_UITREE_DESC> vecDescs = {};       // parsed data from json
 
@@ -52,8 +57,6 @@ HRESULT CLoader_Test_UI::Load_Texture()
             const   _wstring    strFilePath = infoDesc.tUIDesc.strFilePath;
             const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
             const   _uint       iNumFiles   = infoDesc.tUIDesc.iNumFiles;
-            
-            const   _uint       iDestLevel  = m_pGameInstance->Get_CurrentLevel();
 
             infoDesc.tUIDesc.strFilePath;
             if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
@@ -70,8 +73,7 @@ HRESULT CLoader_Test_UI::Load_Model()
     // ==============================
     cout << "Model" << endl;
     // ==============================
-    
-    const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     // VIBuffer_Rect
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
@@ -93,8 +95,7 @@ HRESULT CLoader_Test_UI::Load_Shader()
     // ==============================
     cout << "Shader" << endl;
     // ==============================
-
-    const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     // Shader
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
@@ -114,9 +115,7 @@ HRESULT CLoader_Test_UI::Load_Object()
     // ==============================
     cout << "Object" << endl;
     // ==============================
-
-    const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
-
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     // * Components Load
     // Animator_UI
@@ -130,16 +129,30 @@ HRESULT CLoader_Test_UI::Load_Object()
     // Custom UI
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button",
         CUI_Button::Create(m_pDevice, m_pContext))))
-        OutputDebugString(L"[Loader_Test_UI:Load_Object] Custom_UI Load Failed. The CUI_Button may have already been loaded.\n");
+        OutputDebugString(L"[Loader_Test_UI:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image",
         CUI_Image::Create(m_pDevice, m_pContext))))
         OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
         CUI_Text::Create(m_pDevice, m_pContext))))
-        OutputDebugString(L"[Loader_Test_UI::Load_Object] Custom_UI Load Failed. The CUI_Text may have already been loaded.\n");
+        OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
 
 
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test_UI::Load_Prototype()
+{
+    // ==============================
+    cout << "[UI Custom] Prototype" << endl;
+    // ==============================
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
+        CUI_HUD::Create(m_pDevice, m_pContext))))
+        OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
     return S_OK;
 }

@@ -42,7 +42,7 @@ void CUI_Button::Late_Update(_float fTimeDelta)
 
 void CUI_Button::Render()
 {
-    __super::Render();                      // Nothing.
+    __super::Render();                      // Binding Shader Variables Continuously.
 }
 
 HRESULT CUI_Button::Ready_Components(void* pArg)

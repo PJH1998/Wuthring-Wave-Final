@@ -8,9 +8,11 @@ CLevel_Test_UI::CLevel_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CLevel_Test_UI::Initialize()
 {
+    // HUD 게임오브젝트 추가
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
-
-
+    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD", iDestLevel, L"Layer_Custom_UI")))
+        CRASH("Create HUD FAILED.");
 
     return S_OK;
 }

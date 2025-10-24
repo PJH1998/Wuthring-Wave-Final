@@ -140,9 +140,7 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 
 	for (size_t i = 0; i < m_iNumAvailableInstance; i++)
 	{
-
-
-		// 여기서 각 Instance의 위치 등 정보 전달`
+		// 여기서 각 Instance의 위치 등 정보 전달
 		pVertices[i].vSInstRight	= vecDescs[i].vSInstRight;
 		pVertices[i].vSInstUp		= vecDescs[i].vSInstUp   ;
 		pVertices[i].vSInstLook		= vecDescs[i].vSInstLook ;

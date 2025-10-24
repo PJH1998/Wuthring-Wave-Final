@@ -745,11 +745,11 @@ void CLevel_UI::Update_SaveLoad()
 
 
             // relative path
-            _tchar curPath[256] = {};
-            _wgetcwd(curPath, 256);
-            filesystem::path basePath = curPath;
-            filesystem::path targetPath = filePath;
-            filesystem::path relativePath = filesystem::relative(targetPath, basePath);
+            //_tchar curPath[256] = {};
+            //_wgetcwd(curPath, 256);
+            //filesystem::path basePath = curPath;
+            //filesystem::path targetPath = filePath;
+            //filesystem::path relativePath = filesystem::relative(targetPath, basePath);
 
 
             // json load

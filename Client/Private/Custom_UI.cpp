@@ -44,10 +44,11 @@ void CCustom_UI::Priority_Update(_float fTimeDelta)
 
 void CCustom_UI::Update(_float fTimeDelta)
 {
-    m_pAnimator_UICom->Update(fTimeDelta);
+    if (m_tUIDesc.isInstance)
+        dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
-    // ksta : 이거 부모가 한번 Update 타이밍에 쏴줘야함
-    //Update_CombinedMatrix();
+    if (m_pAnimator_UICom)
+        m_pAnimator_UICom->Update(fTimeDelta);
 
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
@@ -67,38 +68,41 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
-        CRASH("Binding_Matrix_Failed");
+    if (m_pShaderCom)
+    {
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
+            CRASH("Binding_Matrix_Failed");
 
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-        CRASH("Binding_Matrix_Failed");
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-        CRASH("Binding_Matrix_Failed");
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+            CRASH("Binding_Matrix_Failed");
+        if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+            CRASH("Binding_Matrix_Failed");
 
-    if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
-        CRASH("Binding_Matrix_Failed");
-    if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
-        CRASH("Binding_Value_Failed");
-    if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
-        CRASH("Binding_Value_Failed");
+        if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_Texture", m_iCurTexIndex)))
+            CRASH("Binding_Matrix_Failed");
+        if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
+            CRASH("Binding_Value_Failed");
+        if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
+            CRASH("Binding_Value_Failed");
 
-    // �̹��� ũ�� �Ѱ��ֱ�
-    if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
-        CRASH("Binding_Value_Failed");
-    if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
-        CRASH("Binding_Value_Failed");
-    if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
-        CRASH("Binding_Value_Failed");
-
-
+        // �̹��� ũ�� �Ѱ��ֱ�
+        if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
+            CRASH("Binding_Value_Failed");
+        if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
+            CRASH("Binding_Value_Failed");
+        if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
+            CRASH("Binding_Value_Failed");
 
 
 
-    m_pShaderCom->Begin(m_tUIDesc.iPassType);
 
-    m_pVIBufferCom->Bind_Resources();
 
-    m_pVIBufferCom->Render();
+        m_pShaderCom->Begin(m_tUIDesc.iPassType);
+
+        m_pVIBufferCom->Bind_Resources();
+
+        m_pVIBufferCom->Render();
+    }
 
     for (auto& child : m_vecChildObjects)
         child->Render();
@@ -162,7 +166,10 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _wstring	    strFileName = pDesc->strFileName;
     const _uint         iNumFiles = pDesc->iNumFiles;
 
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
+    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
+    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+    const   _bool       isInstance = pDesc->isInstance;
+
 
     // ksta : 텍스쳐 등 안쓰는 최상위 컨테이너가 호출될 시 여기서 E_FAIL 걸림
     // VIBuffer_Rect 도 그렇고 desc로 조정 가능해야 할 듯 rootdesc 이런식으로 customuidesc 상속받게 해서?
@@ -170,13 +177,22 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
         TEXT("Com_Texture_Custom_") + strFileName, reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
-        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-        return E_FAIL;
-
-    if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
-        TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
-        return E_FAIL;
+    if (!isInstance) {
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
+            TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+            return E_FAIL;
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
+            TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
+            return E_FAIL;
+    }
+    else if (isInstance) {
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
+            TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+            return E_FAIL;
+        if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
+            TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
+            return E_FAIL;
+    }
     
     CAnimator_UI::ANIMATOR_UI_DESC tAnimatorUIDesc = { this };
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
@@ -264,15 +280,14 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 void CCustom_UI::Free()
 {
     m_pGameInstance->Unscribe();
-
-    for (auto& child : m_vecChildObjects)
-        Safe_Release(child);
-    m_vecChildObjects.clear();
-
-    __super::Free();
+    __super::Free(); 
 
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pVIBufferCom);
     Safe_Release(m_pTextureCom); 
     Safe_Release(m_pAnimator_UICom);
+
+    for (auto& child : m_vecChildObjects)
+        Safe_Release(child);
+    m_vecChildObjects.clear();
 }

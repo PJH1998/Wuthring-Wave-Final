@@ -147,23 +147,63 @@ NS_END
 
 inline void from_json(const json& j, CCustom_UI::CUSTOM_UI_DESC& d)
 {
-	_string strFilePath = j["strFilePath"].get<_string>();
-	d.strFilePath = StringToWString(strFilePath);
-	_string strFileName = j["strFileName"].get<_string>();
-	d.strFileName = StringToWString(strFileName);
-	d.iNumFiles = j["iNumFiles"];
+#pragma region old
+	//_string strFilePath = j["strFilePath"].get<_string>();
+	//d.strFilePath = StringToWString(strFilePath);
+	//_string strFileName = j["strFileName"].get<_string>();
+	//d.strFileName = StringToWString(strFileName);
+	//d.iNumFiles = j["iNumFiles"];
+	//
+	//_string strUIName = j["strUIName"].get<_string>();
+	//d.strUIName = StringToWString(strUIName);
+	//d.iUIType = j["iUIType"];
+	//_string strParentName = j["strParentName"].get<_string>();
+	//d.strParentName = StringToWString(strParentName);
+	//
+	//for (const auto& element : j["vecChildNames"])
+	//{
+	//	_string strChildName = element.get<_string>();
+	//	d.vecChildNames.push_back(StringToWString(strChildName));
+	//}
+#pragma endregion
 
-	_string strUIName = j["strUIName"].get<_string>();
-	d.strUIName = StringToWString(strUIName);
-	d.iUIType = j["iUIType"];
-	_string strParentName = j["strParentName"].get<_string>();
-	d.strParentName = StringToWString(strParentName);
+	_string strFilePath		= j["strFilePath"].get<_string>();
+	d.strFilePath			= StringToWString(strFilePath);
+	_string strFileName		= j["strFileName"].get<_string>();
+	d.strFileName			= StringToWString(strFileName);
+	d.iNumFiles				= j["iNumFiles"];
+
+	_string strUIName		= j["strUIName"].get<_string>();
+	d.strUIName				= StringToWString(strUIName);
+	d.iUIType				= j["iUIType"];
+	_string strParentName	= j["strParentName"].get<_string>();
+	d.strParentName			= StringToWString(strParentName);
+
+
+	d.isInverseScreenDiscard= j["isInverseScreenDiscard"];
+	d.fCutout				= j["fCutout"];
+	d.iPassType				= j["iPassType"];
 
 	for (const auto& element : j["vecChildNames"])
 	{
 		_string strChildName = element.get<_string>();
 		d.vecChildNames.push_back(StringToWString(strChildName));
 	}
+	d.isInstance = j["isInstance"];
+
+	for (const auto& element : j["vecInstanceDescs"])
+	{
+		Client::CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC tDesc = {};
+		from_json(element, tDesc);
+		d.vecInstanceDescs.push_back(tDesc);
+	}
+
+	// descs
+	for (const auto& element : j["vecSize"])
+		d.vecSize.push_back(_float2{ element[0], element[1] });
+	d.vSectorBorder			= _float2( j["vSectorBorder"][0], j["vSectorBorder"][1] );
+	d.fUIScale				= j["fUIScale"];
+
 }
 
 inline void from_json(const json& j, vector<CCustom_UI::CUSTOM_UI_DESC>& vec)

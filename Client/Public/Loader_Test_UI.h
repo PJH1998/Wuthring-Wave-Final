@@ -19,6 +19,8 @@ private:
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
 
+	HRESULT				Load_Prototype();
+
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_Tree(_string strFilePath);
 
