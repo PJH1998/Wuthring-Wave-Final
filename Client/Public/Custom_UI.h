@@ -111,6 +111,8 @@ public:
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
+	void					Add_Child(CCustom_UI* pChildUI)		{ m_vecChildObjects.push_back(pChildUI); }
+
 protected:
 	//HRESULT				Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);

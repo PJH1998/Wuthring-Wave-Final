@@ -375,6 +375,7 @@ void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeF
     CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
 
     _string strLabel = WStringToString(desc.strUIName);
+    if (strLabel == "") strLabel = " ";
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
         // ?대┃ ???좏깮.

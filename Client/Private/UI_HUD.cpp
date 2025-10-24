@@ -27,7 +27,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     __super::Ready_Events();
 
     // Load from json
-    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/Test9SecInstanceTree2.json";
+    _wstring strFilePath = L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
     Load_ChildObjects(strFilePath);
 
     return S_OK;
@@ -89,8 +89,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         case ENUM_CLASS(UI_TYPE::BUTTON): pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc)); break;
         default:            break;
         }
-        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // 로컬에 저장.. 근데 자식인 줄은 어찌 알고? 일단 추가한 뒤, 전부 부모 재정리하고, 그 뒤에 부모관계 아닌 애들만 걸러내기?
-        
+        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // 로컬에 저장.. 
 
 
         HIERARCHY_OBJ_DESC tObjDesc = { };
@@ -107,6 +106,52 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         _matrix matWorld = matScale * matRot * matTrans;
         static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
     }
+
+    
+    // 근데 자식인 줄은 어찌 알고? 일단 추가한 뒤, 전부 부모 재정리하고, 그 뒤에 부모관계 아닌 애들만 걸러내기?
+
+    // 자식관계 재정의
+    for (auto& child : m_vecChildObjects)
+    {
+        CUSTOM_UI_DESC tChildDesc = child->Get_UIDesc();
+        for (auto& otherChild : m_vecChildObjects)
+        {
+            CUSTOM_UI_DESC tOtherChildDesc = otherChild->Get_UIDesc();
+
+            for (auto& childName : tChildDesc.vecChildNames)
+            {
+                if (childName == tOtherChildDesc.strUIName)
+                    child->Add_Child(otherChild);
+            }
+        }
+    }
+
+    // 아무도 본인을 자식으로 가진 애가 없는 애 = 얘의 진짜 자식
+    vector<CCustom_UI*> vecTrueChildObjects = {};
+    for (auto& child : m_vecChildObjects)
+    {
+        _bool isChild = false;
+
+        const CUSTOM_UI_DESC& tChildDesc = child->Get_UIDesc();
+        for (auto& otherChild : m_vecChildObjects)
+        {
+            const CUSTOM_UI_DESC& tOtherChildDesc = otherChild->Get_UIDesc();
+
+            // child를 자식으로 가졌는가?
+            for (auto& otherChildName : tOtherChildDesc.vecChildNames)
+            {
+                // 가졌다면, 자식으로 판정, 즉시 break.
+                if (otherChildName == tChildDesc.strUIName)
+                    isChild = true; break;
+            }
+            if (isChild)  break;
+        }
+
+        // 아무도 자식으로 가지지 않았다면, 컨테이너 UI의 부모로 판단.
+        if (!isChild)
+            vecTrueChildObjects.push_back(child);
+    }
+    m_vecChildObjects = move(vecTrueChildObjects);
 
     return S_OK;
 }

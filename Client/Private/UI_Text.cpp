@@ -42,7 +42,7 @@ void CUI_Text::Late_Update(_float fTimeDelta)
 
 void CUI_Text::Render()
 {
-    __super::Render();                      // Nothing.
+    __super::Render();                      // Binding Shader Variables Continuously.
 }
 
 HRESULT CUI_Text::Ready_Components(void* pArg)
