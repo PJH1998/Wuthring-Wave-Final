@@ -32,6 +32,12 @@ public:
 	_matrix	Get_WorldMatrix_Inv() { return XMMatrixInverse(nullptr, XMLoadFloat4x4(&m_WorldMatrix)); }
 	void		Set_WorldMatrix(const _fmatrix& Matrix) { XMStoreFloat4x4(&m_WorldMatrix, Matrix); }
 
+	_vector	Get_Quaternion() {
+		_vector vScale{}, vQuat{}, vTrans{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, XMLoadFloat4x4(&m_WorldMatrix));
+		return vQuat;
+	}
+
 #ifdef _DEBUG
 	void			Change_Speed(_float fSpeed) { m_fSpeedPerSec = fSpeed; }
 #endif

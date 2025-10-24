@@ -7,11 +7,12 @@
 #include "GameObject.h"
 #include "Animator_UI.h"
 
+#include "VIBuffer_Rect_Instance_UI.h"
 
 
-// ?꾩떆濡??ш린??留ㅽ겕濡쒕줈..
 #define         STR2WSTR(str)                                   _wstring(str.begin(), str.end())
 #define         WSTR2STR(wstr)                                  _string(wstr.begin(), wstr.end())
+
 #define         STR_ONLYFILENAME(str)                           std::filesystem::path(str).stem().string();
 
 #define			TO_RAD(DEGREE)									XMConvertToRadians(DEGREE)
@@ -47,11 +48,24 @@ HRESULT CLevel_UI::Initialize()
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader Load Failed. The Shader may have already been loaded.\n");
+    
+    // Shader_Instance
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Editor_Shader_VtxPosTex_Instance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
     // VIBuffer_Rect
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
         CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+
+    // VIBuffer_Rect_Instance_UI
+    // �ӽ� ����. ���߿� instance ���� ���� �ʿ� �� ����
+    CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
+    tRectInstDesc.iNumInstance = 500U;
+    if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
+        CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
+        OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
     // Animator_UI
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
@@ -104,12 +118,13 @@ void CLevel_UI::Update(_float fTimeDelta)
     
     Update_SaveLoad();
     Update_Inspector();
-
+    Update_InstanceEditor();
 
     Update_AnimEditor(fTimeDelta);
     Update_ObjectParents();
 
 
+    Update_SelectedKeyframeDesc();
 }
 
 void CLevel_UI::Render()
@@ -149,6 +164,16 @@ void CLevel_UI::Update_MenuWindow()
     // ===== [Logic] Load FilePath, Create & Store CustomUI =====
     _wstring strFilePath = {}, strFileName = {};
 
+    static _int isInstanceSelected = 0; // 0 = false, 1 = true
+    ImGui::Text("UI Type");
+    if (ImGui::RadioButton("Normal", isInstanceSelected == 0))
+        isInstanceSelected = 0;
+    if (ImGui::RadioButton("Instance", isInstanceSelected == 1))
+        isInstanceSelected = 1;
+    _bool isInstance = (isInstanceSelected == 1);
+
+    ImGui::Separator();
+
     if (ImGuiFileDialog::Instance()->Display("UI_Image_Load"))
     {
         if (ImGuiFileDialog::Instance()->IsOk())    // ?뚯씪 ?좏깮 ??
@@ -156,8 +181,8 @@ void CLevel_UI::Update_MenuWindow()
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
 
-            strFilePath = STR2WSTR(filePath);
-            strFileName = STR2WSTR(fileName);
+            strFilePath = StringToWString(filePath);
+            strFileName = StringToWString(fileName);
 
 
             // ?곷?寃쎈줈
@@ -175,6 +200,7 @@ void CLevel_UI::Update_MenuWindow()
             tCustomUIDesc.fY = g_iWinSizeY / 2.f;
             tCustomUIDesc.strFilePath = relativePath.wstring();
             tCustomUIDesc.strFileName = strFileName;
+            tCustomUIDesc.isInstance = isInstance;
 
             // ?앹꽦 ??濡쒖뺄 而⑦뀒?대꼫??異붽?
             CGameObject* pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::UI), L"Prototype_GameObject_Custom_UI", PROTOTYPE::GAMEOBJECT, &tCustomUIDesc));
@@ -183,10 +209,18 @@ void CLevel_UI::Update_MenuWindow()
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-            tObjDesc.strObjName = STR2WSTR(fileName);
+            tObjDesc.strObjName = StringToWString(fileName);
 
             m_vecCustomUIs.push_back(tObjDesc);
             m_pCurObj = pCustomObj;
+
+            CTransform* pObjTransformCom = dynamic_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"));
+            pObjTransformCom->Scale( _float3(
+                dynamic_cast<CCustom_UI*>(pCustomObj)->Get_UIDesc().vecSize[0].x,
+                dynamic_cast<CCustom_UI*>(pCustomObj)->Get_UIDesc().vecSize[0].y,
+                1
+            ));
+
         }
         ImGuiFileDialog::Instance()->Close();
     }
@@ -233,7 +267,7 @@ void CLevel_UI::Update_Hierarchy()
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
         static _char szUIName[256] = {};
         
-        _string strUIName = WSTR2STR(tDesc.strUIName);
+        _string strUIName = WStringToString(tDesc.strUIName);
         strcpy_s(szUIName, strUIName.c_str());
 
         ImGui::Text("Name ");
@@ -242,7 +276,7 @@ void CLevel_UI::Update_Hierarchy()
         {
             _string strEditUIName = szUIName;
             
-            tDesc.strUIName = STR2WSTR(strEditUIName);
+            tDesc.strUIName = StringToWString(strEditUIName);
             dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
         }
         ImGui::SameLine();
@@ -317,7 +351,7 @@ void CLevel_UI::Update_Hierarchy()
             if (isParentMissing)
             {
                 _wstring wstrUIName = ui.pCustomUI->Get_UIDesc().strUIName;
-                _string strUIName = WSTR2STR(wstrUIName);
+                _string strUIName = WStringToString(wstrUIName);
                 if (ImGui::Selectable(strUIName.c_str(), iSelected == iIndex))
                     m_pCurObj = ui.pCustomUI;
             }
@@ -335,7 +369,7 @@ void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeF
 {
     CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
 
-    _string strLabel = WSTR2STR(desc.strUIName);
+    _string strLabel = WStringToString(desc.strUIName);
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
         // ?대┃ ???좏깮.
@@ -474,10 +508,10 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
-            _wstring strFileName = STR2WSTR(fileName);
+            _wstring strFileName = StringToWString(fileName);
 
             UI_INFO_DESC tCurUIInfoDesc = {};
 
@@ -503,7 +537,7 @@ void CLevel_UI::Update_SaveLoad()
         if (ImGuiFileDialog::Instance()->IsOk())    // ?뚯씪 ?좏깮 ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             ifstream file(strFilePath);
             json jUIInfoData = {};
@@ -525,7 +559,7 @@ void CLevel_UI::Update_SaveLoad()
 
             HIERARCHY_OBJ_DESC tObjDesc = { };
             tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-            tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.strFileName);
+            tObjDesc.strObjName = tLoadUIInfoDesc.strFileName;
 
             _matrix matScale = XMMatrixScaling(vSca.x, vSca.y, vSca.z);
             _matrix matRotX = XMMatrixRotationX(TO_RAD(vRot.x));
@@ -554,13 +588,13 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             UI_ANIM_DESC tAnimDesc = {};
 
             tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
             _string strAnimName = _string(szAnimName);
-            tAnimDesc.strAnimName = STR2WSTR(strAnimName);
+            tAnimDesc.strAnimName = StringToWString(strAnimName);
             //tAnimDesc.iLerpType = m_iLerpType;
             tAnimDesc.isLoop = m_isAnimLoop;
 
@@ -586,7 +620,7 @@ void CLevel_UI::Update_SaveLoad()
         if (ImGuiFileDialog::Instance()->IsOk())    // ?뚯씪 ?좏깮 ??
         {
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             ifstream file(strFilePath);
             json jUIAnimData = {};
@@ -611,7 +645,12 @@ void CLevel_UI::Update_SaveLoad()
                 }
                 else
                 {
-                    ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // 遺덈윭???좊땲硫붿씠?섏쑝濡??좊떦
+                    ObjAnimatorCom->Change_Animation(tLoadAnimDesc.strAnimName); // �ҷ��� �ִϸ��̼����� �Ҵ�
+
+                    m_vecUIKeyFrameDescs.clear();
+                    m_pSelectedKeyFrameDesc = nullptr;
+                    for (auto& keyframe : tLoadAnimDesc.vecKeyFrames)
+                        m_vecUIKeyFrameDescs.push_back(keyframe);
                 }
             }
             else
@@ -633,12 +672,12 @@ void CLevel_UI::Update_SaveLoad()
             Update_ObjectChilds();
 
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-            _wstring strFilePath = STR2WSTR(filePath);
+            _wstring strFilePath = StringToWString(filePath);
 
             CUSTOM_UITREE_DESC tTreeDesc = {};
 
             _string strTreeName = _string(szTreeName);
-            tTreeDesc.strTreeName = STR2WSTR(strTreeName);
+            tTreeDesc.strTreeName = StringToWString(strTreeName);
 
 
             for (auto& tCustomUIDesc : m_vecCustomUIs)
@@ -690,8 +729,8 @@ void CLevel_UI::Update_SaveLoad()
             _string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
             _string fileName = STR_ONLYFILENAME(ImGuiFileDialog::Instance()->GetCurrentFileName());
 
-            _wstring strFilePath = STR2WSTR(filePath);
-            _wstring strFileName = STR2WSTR(fileName);
+            _wstring strFilePath = StringToWString(filePath);
+            _wstring strFileName = StringToWString(fileName);
 
             ifstream file(strFilePath);
             json jUITreeData = {};
@@ -736,7 +775,7 @@ void CLevel_UI::Update_SaveLoad()
 
                 HIERARCHY_OBJ_DESC tObjDesc = { };
                 tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-                tObjDesc.strObjName = STR2WSTR(tLoadUIInfoDesc.tUIDesc.strFileName);
+                tObjDesc.strObjName = tLoadUIInfoDesc.tUIDesc.strFileName;
 
                 _matrix matScale = XMMatrixScaling(m_vCurObjSca.x, m_vCurObjSca.y, m_vCurObjSca.z);
                 _matrix matRotX = XMMatrixRotationX(TO_RAD(m_vCurObjRot.x));
@@ -814,9 +853,11 @@ void CLevel_UI::Update_Inspector()
 
             if (ImGui::BeginMenu("Reset Menu"))
             {
+                vector<_float2> targetImgSize = static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecSize;
+
                 if (ImGui::MenuItem("Reset Position"))  { m_vCurObjPos = { 0.f, 0.f, 0.f }; }
                 if (ImGui::MenuItem("Reset Rotation"))  { m_vCurObjRot = { 0.f, 0.f, 0.f }; }
-                if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { 100.f, 100.f, 1.f }; }
+                if (ImGui::MenuItem("Reset Scale"))     { m_vCurObjSca = { targetImgSize[0].x, targetImgSize[0].y, 1.f}; }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Reset Transform")) {
                     m_vCurObjPos = { 0.f, 0.f, 0.f };
@@ -871,10 +912,20 @@ void CLevel_UI::Update_Inspector()
 
     if (ImGui::CollapsingHeader("Edit UI Desciption"))
     {
-        static _char szUIName[256] = {};
-        static _uint iUIType = {};
-        static _char szParentName[256] = {};
+        static _char    szUIName[256] = {};
+        static _uint    iUIType = {};
+        static _char    szParentName[256] = {};
         
+        static _uint    iPassType = 2;
+        static _float2  vScreenLT = {};
+        static _float2  vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+        static _bool    isInverseScreenDiscard = false;
+        static _float   fCutout = 0.3f;
+
+        static _float2  vSectorBorder = {};
+        static _float   fUIScale = 1.f;
+        
+
         CCustom_UI::CUSTOM_UI_DESC tDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
 
 
@@ -887,14 +938,16 @@ void CLevel_UI::Update_Inspector()
         _string strParentName = _string(tDesc.strParentName.begin(), tDesc.strParentName.end());
         strcpy_s(szParentName, strParentName.c_str());
 
+        iPassType = tDesc.iPassType;
+        isInverseScreenDiscard = tDesc.isInverseScreenDiscard;
+        fCutout = tDesc.fCutout;
 
-
-        // 媛??섏젙 UI
         ImGui::Text("UI Name");
         ImGui::InputText("##UI Name", szUIName, 256);
 
         ImGui::Separator();
 
+        // iUIType
         ImGui::Text("UI Type");
         const char* szUITypeNames[] = { "NONE", "BUTTON", "INTERACT" };
         const _uint iTypeCount = ENUM_CLASS(CCustom_UI::UI_TYPE::END);
@@ -916,9 +969,72 @@ void CLevel_UI::Update_Inspector()
 
         ImGui::Separator();
 
+        // szParentName
         ImGui::Text("Parent Name");
         ImGui::InputText("##Parent Name", szParentName, 256);
 
+        ImGui::Separator();
+
+        // iPassType
+        ImGui::Text("Pass Type");
+        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec"};
+        const _uint iPassTypeCount = 5;
+        const char* szCurrentPassItem = szPassTypeNames[iPassType];
+
+        if (ImGui::BeginCombo("##Pass Type", szCurrentPassItem))
+        {
+            for (_uint i = 0; i < iPassTypeCount; ++i)
+            {
+                const _bool isSelected = (iPassType == i);
+                if (ImGui::Selectable(szPassTypeNames[i], isSelected))
+                    iPassType = i;
+
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::Separator();
+
+        // isInverseScreenDiscard
+        ImGui::Text("isInverseScreenDiscard");
+        ImGui::Checkbox("##isInverseScreenDiscard", &isInverseScreenDiscard);
+        ImGui::Separator();
+
+
+        // fCutout
+        if (iPassType == 1)
+        {
+            ImGui::Text("Cutout Rate");
+            ImGui::DragFloat("##CutoutRate", &fCutout, 0.001f, 0.f, 1.f);
+            ImGui::Separator();
+        }
+
+        // vSector, fScale
+        if (iPassType == 4)
+        {
+            // vSector
+            ImGui::PushItemWidth(90.f);
+
+            ImGui::Text("Sector Border");
+            ImGui::Text("X");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorBorderX", &vSectorBorder.x, 0.1f, 0.f, 0.f, "%.1f");
+            ImGui::SameLine();
+            ImGui::Text("Y");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorBorderY", &vSectorBorder.y, 0.1f, 0.f, 0.f, "%.1f");
+
+            ImGui::PopItemWidth();
+            ImGui::Separator();
+            
+            // fScale
+            ImGui::Text("UI Sector Scale");
+            ImGui::Text("Scale");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SectorScale", &fUIScale, 0.001f);
+        }
 
 
         // ?ㅼ떆 媛??좊떦
@@ -930,10 +1046,16 @@ void CLevel_UI::Update_Inspector()
         _string strEditedParentName = szParentName;
         tDesc.strParentName = _wstring(strEditedParentName.begin(), strEditedParentName.end());
 
+        tDesc.iPassType = iPassType;
+        tDesc.isInverseScreenDiscard  = isInverseScreenDiscard;
+        tDesc.fCutout = fCutout;
+
+        tDesc.vSectorBorder = vSectorBorder;
+        tDesc.fUIScale = fUIScale;
+
         dynamic_cast<CCustom_UI*>(m_pCurObj)->Set_UIDesc(tDesc);
     }
 #pragma endregion
-
 
 #pragma region [Other] AnimEdit Toggle
 
@@ -945,11 +1067,7 @@ void CLevel_UI::Update_Inspector()
 
 #pragma endregion
 
-    
     ImGui::End();
-
-
-
 }
 
 void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
@@ -960,9 +1078,15 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
     static _int iKeyFrame = 0;
     static _int iRecentKeyFrame = 0;
+
     static _int iTexIndex = 0;
     static _int iMaxTexIndex = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().iNumFiles;
     static _float fAlpha = 0.f;
+
+    static _float2 vScreenLT = {};			// ǥ�õ� ȭ������ ��ǥ ����. (���� 0, 0 / ���� ȭ��ũ��)
+    static _float2 vScreenRB = { g_iWinSizeX, g_iWinSizeY };
+    static _float4 vBlendToOuterWidth = {};
+
 
     static _int iAnimEditorSelected = -1;
     static _int iAnimListSelected = -1;
@@ -980,6 +1104,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
     if (ImGui::CollapsingHeader("Add Menu"))
     {
+        // iKeyFrame
         ImGui::Text("Keyframe Index");
         ImGui::InputInt("##KeyFrame Index", &iKeyFrame);
         if          (m_vecUIKeyFrameDescs.empty())  iKeyFrame = 0;
@@ -988,6 +1113,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
         ImGui::Separator();
 
+        // iTexIndex
         ImGui::Text("Texture Index (NumTex : %d)", iMaxTexIndex);
         ImGui::InputInt("##Texture Index", &iTexIndex);
         if          (iTexIndex < 0)                 iTexIndex = 0;
@@ -996,6 +1122,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
         ImGui::Separator();
 
+        // fAlpha
         ImGui::Text("Texture Alpha");
         ImGui::DragFloat("##Texture Alpha", &fAlpha, 0.001f, 0.f, 1.f);
 
@@ -1010,6 +1137,7 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             "CUBIC"
         };
 
+        // LerpType (m)
         if (ImGui::BeginCombo("Lerp Type##LerpType", szLerpTypeNames[m_iLerpType]))
         {
             for (_uint i = 0; i < IM_ARRAYSIZE(szLerpTypeNames); i++)
@@ -1029,22 +1157,76 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             
         ImGui::Separator();
 
+        // Loop (m)
         ImGui::Checkbox("Loop", &m_isAnimLoop);
 
         ImGui::Separator();
 
+        // vScreenLT, vScreenRB
+        ImGui::PushItemWidth(60.f);
+        ImGui::Text("Screen Clip");
+
+        ImGui::Text("LT | X");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipLT_X", &vScreenLT.x, 1.f, 0.f, vScreenRB.x);
+        ImGui::SameLine();
+        ImGui::Text("Y");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipLT_Y", &vScreenLT.y, 1.f, 0.f, vScreenRB.y);
+
+        ImGui::Text("RB | X");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipRB_X", &vScreenRB.x, 1.f, vScreenLT.x, g_iMaxWidth);
+        ImGui::SameLine();
+        ImGui::Text("Y");
+        ImGui::SameLine();
+        ImGui::DragFloat("##ClipRB_Y", &vScreenRB.y, 1.f, vScreenLT.y, g_iMaxHeight);
+        ImGui::SameLine();
+
+        ImGui::PopItemWidth();
+        ImGui::Separator();
+
+        // vBlendToOuterWidth 
+        ImGui::PushItemWidth(40.f);
+        ImGui::Text("Blend Outer Width");
+        ImGui::Text("L");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_L", &vBlendToOuterWidth.x, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("R");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_R", &vBlendToOuterWidth.y, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("T");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_T", &vBlendToOuterWidth.z, 1.f);
+        ImGui::SameLine();
+        ImGui::Text("B");
+        ImGui::SameLine();
+        ImGui::DragFloat("##Blend_B", &vBlendToOuterWidth.w, 1.f);
+        ImGui::SameLine();
+
+        ImGui::PopItemWidth();
+        ImGui::Separator();
+
+
+
+        // Add / Edit / Delete
         if (m_pSelectedKeyFrameDesc == nullptr)
         {
             if (ImGui::Button("Add Keyframe"))
             {
                 UI_ANIM_KEYFRAME_DESC tTempDesc = {
                     (_uint)iKeyFrame,
-                    m_iLerpType,
+                    (_uint)m_iLerpType,
                     (_uint)iTexIndex,
                     fAlpha,
                     m_vCurObjPos,
                     m_vCurObjRot,
-                    m_vCurObjSca
+                    m_vCurObjSca,
+                    vScreenLT,
+                    vScreenRB,
+                    vBlendToOuterWidth
                 };
 
                 m_vecUIKeyFrameDescs.push_back(tTempDesc);
@@ -1063,6 +1245,10 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 m_pSelectedKeyFrameDesc->vRot = m_vCurObjRot;
                 m_pSelectedKeyFrameDesc->vSca = m_vCurObjSca;
 
+                m_pSelectedKeyFrameDesc->vScreenLT = vScreenLT;
+                m_pSelectedKeyFrameDesc->vScreenRB = vScreenRB;
+                m_pSelectedKeyFrameDesc->vBlendToOuterWidth = vBlendToOuterWidth;
+
                 m_pSelectedKeyFrameDesc = nullptr;
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
             }
@@ -1071,6 +1257,23 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             {
                 m_pSelectedKeyFrameDesc = nullptr;
                 iRecentKeyFrame = m_vecUIKeyFrameDescs.back().iKeyframeIndex;
+            }
+            if (ImGui::CollapsingHeader("Danger Section##Danger Section"))
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+                if (ImGui::Button("Remove Keyframe"))
+                {
+                    for (_uint i = 0; i < m_vecUIKeyFrameDescs.size(); i++)
+                        if (&m_vecUIKeyFrameDescs[i] == m_pSelectedKeyFrameDesc)
+                        {
+                            m_vecUIKeyFrameDescs.erase(m_vecUIKeyFrameDescs.begin() + i);
+                            m_pSelectedKeyFrameDesc = nullptr;
+                            break;
+                        }
+                }
+                ImGui::PopStyleColor(3);
             }
         }
 
@@ -1107,6 +1310,10 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
                 m_vCurObjPos = m_pSelectedKeyFrameDesc->vPos;
                 m_vCurObjRot = m_pSelectedKeyFrameDesc->vRot;
                 m_vCurObjSca = m_pSelectedKeyFrameDesc->vSca;
+
+                vScreenLT = m_pSelectedKeyFrameDesc->vScreenLT;
+                vScreenRB = m_pSelectedKeyFrameDesc->vScreenRB;
+                vBlendToOuterWidth = m_pSelectedKeyFrameDesc->vBlendToOuterWidth;
             }
         }
 
@@ -1190,6 +1397,237 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
 }
 
+void CLevel_UI::Update_InstanceEditor()
+{
+    if (m_pCurObj == nullptr ||
+        !dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance)
+        return;
+
+    ImGui::Begin("Instance Editor");
+
+#pragma region [Instance] Transform
+
+    // ==============================
+    // * [Instance] Transform
+    // ==============================
+    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_InstDesc();
+    static _uint iInstSelected = 0;
+
+    static _float4 vSInstRight = { 1.f, 0.f, 0.f ,0.f };
+    static _float4 vSInstUp    = { 0.f, 1.f, 0.f ,0.f };
+    static _float4 vSInstLook  = { 0.f, 0.f, 1.f ,0.f };
+    static _float4 vSInstTrans = { 0.f, 0.f, 0.f ,1.f };
+    // to transform
+    static _float3 curInstPos = {};
+    static _float3 curInstRot = {};
+    static _float3 curInstSca = {};
+
+    static _float2 vTexcoordX = { 0, 0 };
+    static _float2 vTexcoordY = { 1, 1 };
+    static _float2 vClipTexcoordX = { 0, 0 };
+    static _float2 vClipTexcoordY = { 1, 1 };
+
+
+
+    if (static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance &&
+        ImGui::CollapsingHeader("[Instance] Transform"))
+    {
+        // Add Instance
+        if (ImGui::Button("Add"))
+        {
+            CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC tDesc = {};
+            pDescs->push_back(tDesc);
+            m_pSelectedInstance = &pDescs->back();
+        }
+        ImGui::SameLine();
+        if (m_pSelectedInstance &&
+            ImGui::Button("Unselect"))
+        {
+            m_pSelectedInstance = nullptr;
+        }
+
+        if (ImGui::CollapsingHeader("Danger Section##Instance Danger"))
+        {
+            if (!pDescs->empty() &&
+                ImGui::Button("Delete"))
+                pDescs->erase(pDescs->begin() + pDescs->size() - 1);
+        }
+
+        if (m_pSelectedInstance)
+        {
+            // ������
+            _matrix matTransform = _matrix(
+                XMLoadFloat4(&vSInstRight),
+                XMLoadFloat4(&vSInstUp),
+                XMLoadFloat4(&vSInstLook),
+                XMLoadFloat4(&vSInstTrans)
+            );
+
+            _vector		vXMObjPosition = {}, vXMObjQuaternion = {}, vXMObjScale = {};
+            _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
+            XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, matTransform);
+
+            _float4x4	matStoreObjQuaternion = {};	// ���ʹϾ�
+            XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
+
+            XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
+            vStoreObjRotation = MAT_TO_ROT(matStoreObjQuaternion);
+            XMStoreFloat3(&vStoreObjScale, vXMObjScale);
+
+
+            // �����Ͽ� ������
+            curInstPos = vStoreObjPosition;
+            curInstRot = vStoreObjRotation;
+            curInstSca = vStoreObjScale;
+
+
+
+            // ==============================
+            // * ImgUI
+            // ==============================
+            ImGui::Text("Inst Transform");
+            ImGui::Separator();
+
+            static _float fSensitivity = 1.f;
+            ImGui::Text("Sensitivity");
+            ImGui::SameLine();
+            ImGui::DragFloat("##Sensitivity", &fSensitivity, 0.001f, 0.001f, 10.f);
+            ImGui::Separator();
+
+            if (ImGui::BeginMenu("Reset Menu"))
+            {
+                vector<_float2> targetImgSize = static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecSize;
+
+                if (ImGui::MenuItem("Reset Position")) { curInstPos = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Rotation")) { curInstRot = { 0.f, 0.f, 0.f }; }
+                if (ImGui::MenuItem("Reset Scale")) { curInstSca = { targetImgSize[0].x, targetImgSize[0].y, 1.f }; }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reset Transform")) {
+                    curInstPos = { 0.f, 0.f, 0.f };
+                    curInstRot = { 0.f, 0.f, 0.f };
+                    curInstSca = { 1.f, 1.f, 1.f };
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::Separator();
+
+            ImGui::PushItemWidth(60);
+
+            // Position Ctrl
+            ImGui::Text("Position");
+            ImGui::DragFloat("X##pos", &curInstPos.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##pos", &curInstPos.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##pos", &curInstPos.z, fSensitivity);
+            ImGui::Separator();
+
+            // Rotation Ctrl
+            ImGui::Text("Rotation");
+            ImGui::DragFloat("X##rot", &curInstRot.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##rot", &curInstRot.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##rot", &curInstRot.z, fSensitivity);
+            ImGui::Separator();
+
+            // Scale Ctrl
+            ImGui::Text("Scale");
+            ImGui::DragFloat("X##sca", &curInstSca.x, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Y##sca", &curInstSca.y, fSensitivity);   ImGui::SameLine();
+            ImGui::DragFloat("Z##sca", &curInstSca.z, fSensitivity);
+            ImGui::Separator();
+
+            ImGui::PopItemWidth();
+
+            // ����
+            _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&curInstPos));
+            _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(curInstRot.x), TO_RAD(curInstRot.y), TO_RAD(curInstRot.z));
+            _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&curInstSca));
+
+            _matrix matXMEditResult = matXMEditScale * matXMEditRotation * matXMEditPosition;
+            _float4x4 matEditResult; XMStoreFloat4x4(&matEditResult, matXMEditResult);
+
+            vSInstRight = XMFLOAT4(matEditResult.m[0][0], matEditResult.m[0][1], matEditResult.m[0][2], matEditResult.m[0][3]);
+            vSInstUp    = XMFLOAT4(matEditResult.m[1][0], matEditResult.m[1][1], matEditResult.m[1][2], matEditResult.m[1][3]);
+            vSInstLook  = XMFLOAT4(matEditResult.m[2][0], matEditResult.m[2][1], matEditResult.m[2][2], matEditResult.m[2][3]);
+            vSInstTrans = XMFLOAT4(matEditResult.m[3][0], matEditResult.m[3][1], matEditResult.m[3][2], matEditResult.m[3][3]);
+
+            m_pSelectedInstance->vSInstRight        = vSInstRight ;
+            m_pSelectedInstance->vSInstUp           = vSInstUp    ;
+            m_pSelectedInstance->vSInstLook         = vSInstLook  ;
+            m_pSelectedInstance->vSInstTrans        = vSInstTrans ;
+            m_pSelectedInstance->vTexcoordX         = vTexcoordX  ;
+            m_pSelectedInstance->vTexcoordY         = vTexcoordY  ;
+            m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
+            m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
+        }
+
+    }
+#pragma endregion
+
+    // ==============================
+    // * Additional Desc
+    // ==============================
+
+
+
+
+
+    // ==============================
+    // * Instance List
+    // ==============================
+    if (ImGui::CollapsingHeader("Instance List"))
+    {
+        // ����
+        if (pDescs->empty())
+            ImGui::Selectable("(Empty)#InstEdit", false);
+
+        for (_uint i = 0; i < pDescs->size(); i++)
+        {
+            _string strLabel = "Instance [" + to_string(i + 1) + "]";
+
+
+            // �̰� �ȳ����°� �ذ��غ��� �� ������� �����غ��� ���� ����
+            if (ImGui::Selectable(strLabel.c_str(), iInstSelected == i))
+            {
+                m_pSelectedInstance = &(*pDescs)[i];
+
+                vSInstRight     = m_pSelectedInstance->vSInstRight;
+                vSInstUp        = m_pSelectedInstance->vSInstUp;
+                vSInstLook      = m_pSelectedInstance->vSInstLook;
+                vSInstTrans     = m_pSelectedInstance->vSInstTrans;
+                vTexcoordX      = m_pSelectedInstance->vTexcoordX;
+                vTexcoordY      = m_pSelectedInstance->vTexcoordY;
+                vClipTexcoordX  = m_pSelectedInstance->vClipTexcoordX;
+                vClipTexcoordY  = m_pSelectedInstance->vClipTexcoordY;
+
+                _matrix matNewTransform = _matrix(
+                    XMLoadFloat4(&vSInstRight),
+                    XMLoadFloat4(&vSInstUp),
+                    XMLoadFloat4(&vSInstLook),
+                    XMLoadFloat4(&vSInstTrans)
+                );
+
+                _vector		vXMNewObjPosition = {}, vXMNewObjQuaternion = {}, vXMNewObjScale = {};
+                _float3		vStoreNewObjPosition = {}, vStoreNewObjRotation = {}, vStoreNewObjScale = {};
+                XMMatrixDecompose(&vXMNewObjScale, &vXMNewObjQuaternion, &vXMNewObjPosition, matNewTransform);
+
+                _float4x4	matStoreNewObjQuaternion = {};	// ���ʹϾ�
+                XMStoreFloat4x4(&matStoreNewObjQuaternion, QUAT_TO_MAT(vXMNewObjQuaternion));
+
+                XMStoreFloat3(&vStoreNewObjPosition, vXMNewObjPosition);
+                vStoreNewObjRotation = MAT_TO_ROT(matStoreNewObjQuaternion);
+                XMStoreFloat3(&vStoreNewObjScale, vXMNewObjScale);
+
+
+                // �����Ͽ� ������
+                curInstPos = vStoreNewObjPosition;
+                curInstRot = vStoreNewObjRotation;
+                curInstSca = vStoreNewObjScale;
+            }
+        }
+    }
+
+    ImGui::End();
+}
+
 void CLevel_UI::Update_ObjectParents()
 {
     // ==============================
@@ -1243,6 +1681,24 @@ void CLevel_UI::Update_ObjectChilds()
         tDesc.vecChildNames = vecChilds;
         UIObject.pCustomUI->Set_UIDesc(tDesc);
     }
+}
+
+void CLevel_UI::Update_SelectedKeyframeDesc()
+{
+    //_bool isCheck = false;
+    //Ȯ���Ұ�;
+    
+    if (m_pCurObj == nullptr || m_pSelectedKeyFrameDesc == nullptr)
+        return;
+    CCustom_UI* curObj = dynamic_cast<CCustom_UI*>(m_pCurObj);
+    CShader* curObjShader = dynamic_cast<CShader*>(curObj->Get_Component(L"Com_Shader"));
+    
+    curObjShader->Bind_Value("g_AlphaStrength", &m_pSelectedKeyFrameDesc->fAlpha, sizeof(m_pSelectedKeyFrameDesc->fAlpha));
+    curObjShader->Bind_Value("g_ScreenLT", &m_pSelectedKeyFrameDesc->vScreenLT, sizeof(m_pSelectedKeyFrameDesc->vScreenLT));
+    curObjShader->Bind_Value("g_ScreenRB", &m_pSelectedKeyFrameDesc->vScreenRB, sizeof(m_pSelectedKeyFrameDesc->vScreenRB));
+    curObjShader->Bind_Value("g_BlendToOuterWidth", &m_pSelectedKeyFrameDesc->vBlendToOuterWidth, sizeof(m_pSelectedKeyFrameDesc->vBlendToOuterWidth));
+    
+
 }
 
 CLevel_UI* CLevel_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

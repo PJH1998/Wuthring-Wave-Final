@@ -16,6 +16,7 @@
 #include "EditDummy_Wolf.h"
 #include "EditDummy_Augusta.h"
 #include "EditDummy_Map.h"
+#include "EditDummy_Target.h"
 
 CEditorApp::CEditorApp()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -61,9 +62,17 @@ void CEditorApp::Post_Update()
 	// Level ?꾪솚
 	if (true == m_isChangeLevel)
 	{
+		// Wait Thread End
+		m_pGameInstance->Wait_Thread_End();
+
 		m_isChangeLevel = false;
+
+		// Memory Clear (Sound, Camera, Light, ETC)
 		if (FAILED(m_pGameInstance->Clear_Memory()))
 			return;
+
+		if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(m_eNextLevel))))
+			CRASH("Clear Resource");
 
 		CLevel* pLevel = { nullptr };
 
@@ -176,6 +185,7 @@ void CEditorApp::Render()
 void CEditorApp::SetUp_CollisionLayer()
 {
 	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::NONE), ENUM_CLASS(BPLAYER::NONE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::SENSOR));
@@ -183,12 +193,12 @@ void CEditorApp::SetUp_CollisionLayer()
 
 	// Object VS Object
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(COLLISIONLAYER::MAP));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
-	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::NON_MOVE));
-	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::SENSOR));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::SENSOR));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 }
 
@@ -225,6 +235,9 @@ void CEditorApp::Ready_Dummies()
 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"), CEditDummy_Map::Create(m_pDevice, m_pContext))))
 		CRASH("Failed Add Prototype Dummy Map");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Target"), CEditDummy_Target::Create(m_pDevice, m_pContext))))
+		CRASH("Failed Add Prototype Dummy Target");
 }
 
 void CEditorApp::Start_Level()

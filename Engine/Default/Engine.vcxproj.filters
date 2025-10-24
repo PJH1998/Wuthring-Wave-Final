@@ -263,6 +263,7 @@
       <UniqueIdentifier>{52fb9c3d-da95-4aa5-ad13-b270ec1b26dc}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Point">
+      <UniqueIdentifier>{d53700ab-232b-46f4-b717-d1c2e4b1d9ed}</UniqueIdentifier>
       <UniqueIdentifier>{2f2b1745-bbed-4df1-ae61-6b63d263e6ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\CollideComponent">
@@ -273,6 +274,9 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\CollideComponent\Rigidbody">
       <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\State">
+      <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
       <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
@@ -555,6 +559,13 @@
     <ClInclude Include="..\Public\CollideComponent.h">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\InputController.h" />
+    <ClInclude Include="..\Public\State.h">
+      <Filter>01. Utility\04. Component\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\StateMachine.h">
+      <Filter>01. Utility\04. Component\State</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClInclude>
@@ -811,6 +822,13 @@
     </ClCompile>
     <ClCompile Include="..\Private\CollideComponent.cpp">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\InputController.cpp" />
+    <ClCompile Include="..\Private\State.cpp">
+      <Filter>01. Utility\04. Component\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\StateMachine.cpp">
+      <Filter>01. Utility\04. Component\State</Filter>
     </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>

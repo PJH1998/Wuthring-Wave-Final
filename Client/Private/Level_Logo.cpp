@@ -15,28 +15,28 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-	// Rigidbody Sample
-	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
-	BoxBodyDesc.eShape = SHAPE::BOX;
-	BoxBodyDesc.vPos = _float3(10.f, 50.f, 0.f);
-	BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
-	BoxBodyDesc.eType = EMotionType::Dynamic;
-	BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	BoxBodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-	
-	m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
-	m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+	//// Rigidbody Sample
+	//CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+	//BoxBodyDesc.eShape = SHAPE::BOX;
+	//BoxBodyDesc.vPos = _float3(10.f, 50.f, 0.f);
+	//BoxBodyDesc.vExtent = _float3(0.5f, 15.f, 0.5f);
+	//BoxBodyDesc.eType = EMotionType::Dynamic;
+	//BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	//BoxBodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
 	//
-	CRigidbody::BOXBODY_DESC BoxBodyDesc2 = {};
-	BoxBodyDesc2.eShape = SHAPE::BOX;
-	BoxBodyDesc2.vPos = _float3(0.f, -50.f, 0.f);
-	XMStoreFloat4(&BoxBodyDesc2.vQuat, XMQuaternionRotationAxis(XMVectorSet(1.f, 0.f, 0.f, 0.f), XMConvertToRadians(30.f)));
-	BoxBodyDesc2.vExtent = _float3(100.f, 3.f, 100.f);
-	BoxBodyDesc2.eType = EMotionType::Static;
-	BoxBodyDesc2.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	
-	m_pRigidbody2 = CRigidbody::Create(m_pDevice, m_pContext);
-	m_pRigidbody2->Initialize_Clone(&BoxBodyDesc2);
+	//m_pRigidbody1 = CRigidbody::Create(m_pDevice, m_pContext);
+	//m_pRigidbody1->Initialize_Clone(&BoxBodyDesc);
+	////
+	//CRigidbody::BOXBODY_DESC BoxBodyDesc2 = {};
+	//BoxBodyDesc2.eShape = SHAPE::BOX;
+	//BoxBodyDesc2.vPos = _float3(0.f, -50.f, 0.f);
+	//XMStoreFloat4(&BoxBodyDesc2.vQuat, XMQuaternionRotationAxis(XMVectorSet(1.f, 0.f, 0.f, 0.f), XMConvertToRadians(30.f)));
+	//BoxBodyDesc2.vExtent = _float3(100.f, 3.f, 100.f);
+	//BoxBodyDesc2.eType = EMotionType::Static;
+	//BoxBodyDesc2.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	//
+	//m_pRigidbody2 = CRigidbody::Create(m_pDevice, m_pContext);
+	//m_pRigidbody2->Initialize_Clone(&BoxBodyDesc2);
 	//
 	//BoxBodyDesc2.vPos = _float3(10.f, 15.f, 0.f);
 	//BoxBodyDesc2.eType = EMotionType::Static;
@@ -92,6 +92,11 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIKeyState(DIK_F2) == KEYSTATE::DOWN)
 	{
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	{
+		CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
 }

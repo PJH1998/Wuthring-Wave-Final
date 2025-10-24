@@ -13,11 +13,6 @@ float Luminame(float3 vColor)
     return fWeight;
 }
 
-float Random(float2 vRange)
-{
-    return frac(sin(dot(vRange.xy, float2(12.9898, 78.233))) * 43758.5453123);
-}
-
 float SampleShadowPCF(Texture2DArray<float> ShadowMap, SamplerComparisonState Sampler, float3 UVDepth, int iCascadeIndex, int iNumWeight)
 {
     float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
@@ -44,8 +39,6 @@ float RPB_Gradiant(float fViewDepth)
 {
     float DepthDDX = ddx(fViewDepth * 0.0001f);
     float DepthDDY = ddy(fViewDepth * 0.0001f);
-        
-//    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
     
     float GradiantX = abs(DepthDDX);
     float GradiantY = abs(DepthDDY);
@@ -92,7 +85,7 @@ bool Outline(float fWinSizeX, float fWinSizeY, Texture2D DepthTexture, sampler S
 }
 
 
-bool Outline_Normal(float fWinSizeX, float fWinSizeY, Texture2D NormalTexture, sampler Sampler, float2 UV, float3 vCompareNormal, float fWeightRadians)
+bool Outline_Normal(float fWinSizeX, float fWinSizeY, Texture2D NormalTexture, sampler Sampler, float2 vUV, float3 vCompareNormal, float fWeightRadians)
 {
     float2 vTexelSize = float2((1.f / fWinSizeX), (1.f / fWinSizeX));
     
@@ -103,8 +96,8 @@ bool Outline_Normal(float fWinSizeX, float fWinSizeY, Texture2D NormalTexture, s
         for (int y = -1; y <= 1; ++y)
         {
             float2 vOffset = float2(x, y) * (vTexelSize);
-            float2 vTexcoord = UV + vOffset;
-            float3 NormalDesc = NormalTexture.Sample(Sampler, UV + vOffset).xyz;
+            float2 vTexcoord = vUV + vOffset;
+            float3 NormalDesc = NormalTexture.Sample(Sampler, vUV + vOffset).xyz;
             float3 vNormal = normalize(vector(NormalDesc.xyz * 2.f - 1.f, 0.f));
    
             if (dot(vNormal, vCompareNormal) <= fWeightRadians)
@@ -115,10 +108,59 @@ bool Outline_Normal(float fWinSizeX, float fWinSizeY, Texture2D NormalTexture, s
     return false;
 }
 
-float2 Compute_UV_Offset()
+float SSAO_Factor(Texture2D DepthTexture, sampler Sample, vector vSampleNormal, vector vNoiseVector, vector vViewNormal, vector vViewPos, matrix ProjMatrix, float fRadius, float fMaxDistance)
 {
-    float2 vOffest = 0.f;
+    float Occlusion = 0.f;
+    
+    float3 vTangent = normalize(vNoiseVector.xyz - (vViewNormal.xyz * dot(vNoiseVector, vViewNormal)));
+    float3 vNormal = vViewNormal.xyz;
+    float3 vBinormal = cross(vTangent, vNormal);
+    
+    float3x3 TBN = float3x3(vTangent, vBinormal, vNormal);
+    
+    vector vSamplePos = vViewPos + vector((mul(vSampleNormal.xyz, TBN) * fRadius), 1.f);
+    
+    vector vProjPos = mul(vSamplePos, ProjMatrix);
+    float fRandomZ = vProjPos.w;
+    
+    float2 vSampleUV;
+    vSampleUV.x = (vProjPos.x / vProjPos.w) * 0.5f + 0.5f;
+    vSampleUV.y = (vProjPos.y / vProjPos.w) * -0.5f + 0.5f;
+    
+    float SampleDepth = DepthTexture.Sample(Sample, vSampleUV).y;
+    
+    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
+        return 1.f;
+    
+    float Distance = abs(SampleDepth - fRandomZ);
+    
+    Occlusion = smoothstep(0.f, fMaxDistance, Distance);
+    
+    float fNormalWeight = saturate(dot(vViewNormal, normalize(vViewPos - vSamplePos)));
+    
+    Occlusion *= fNormalWeight;
+    
+    return Occlusion;
+}
+
+float Random(float2 St)
+{
+    return frac(sin(dot(St.xy, float2(12.9898, 78.233))) * 43758.5453123);
+}
+
+float Noise(float2 St)
+{
+    float2 i = floor(St);
+    float2 f = frac(St);
+    
+    float a = Random(i);
+    float b = Random(i + float2(1.0, 0.0));
+    float c = Random(i + float2(0.0, 1.0));
+    float d = Random(i + float2(1.0, 1.0));
 
     
-    return vOffest;
+    
+    float2 u = f * f * (3.0 - 2.0 * f);
+    
+    return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }

@@ -38,7 +38,7 @@ void CMonsterBody::Priority_Update(_float fTimeDelta)
 void CMonsterBody::Update(_float fTimeDelta)
 {
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	m_pAnimMachineCom->Update(fTimeDelta, m_pModelCom, m_pState);
+	m_pAnimMachineCom->Update( m_pModelCom, m_pState, fTimeDelta);
 
 	//m_isAnimationFinished = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelta, nullptr);
 }

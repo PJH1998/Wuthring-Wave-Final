@@ -67,6 +67,7 @@
     <ClInclude Include="..\Public\GameObject.h" />
     <ClInclude Include="..\Public\Graphic_Device.h" />
     <ClInclude Include="..\Public\GUIManager.h" />
+    <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\Input_Device.h" />
     <ClInclude Include="..\Public\Layer.h" />
     <ClInclude Include="..\Public\Level.h" />
@@ -80,6 +81,8 @@
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\public\ShaderFilter.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
+    <ClInclude Include="..\Public\State.h" />
+    <ClInclude Include="..\Public\StateMachine.h" />
     <ClInclude Include="..\Public\StaticObject.h" />
     <ClInclude Include="..\Public\Model.h" />
     <ClInclude Include="..\Public\Navigation.h" />
@@ -156,6 +159,7 @@
     <ClCompile Include="..\Private\GameObject.cpp" />
     <ClCompile Include="..\Private\Graphic_Device.cpp" />
     <ClCompile Include="..\Private\GUIManager.cpp" />
+    <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\Input_Device.cpp" />
     <ClCompile Include="..\Private\Layer.cpp" />
     <ClCompile Include="..\Private\Level.cpp" />
@@ -169,6 +173,8 @@
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\private\ShaderFilter.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
+    <ClCompile Include="..\Private\State.cpp" />
+    <ClCompile Include="..\Private\StateMachine.cpp" />
     <ClCompile Include="..\Private\StaticObject.cpp" />
     <ClCompile Include="..\Private\Model.cpp" />
     <ClCompile Include="..\Private\Navigation.cpp" />

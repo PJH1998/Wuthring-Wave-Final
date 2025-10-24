@@ -175,6 +175,9 @@ HRESULT CCamera_Manager::Clear_Resource(_uint iCurrentLevelID)
         Safe_Release(Pair.second);
     m_Cameras[iCurrentLevelID].clear();
 
+	Safe_Release(m_pMainCamera);
+	m_pMainCamera = nullptr;
+
     return S_OK;
 }
 

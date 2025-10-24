@@ -328,6 +328,7 @@ void CAnimationTool::RenderUI_OptionState()
             static float fTrackPosition = { 0.f };
             ImGui::InputFloat("TransitTrackPosition", &fTrackPosition, 0.f, 0.f, "%.3f");
 
+            // 2. Add Translation 설정.
            
 
             // 2. 함수 설정.
@@ -347,7 +348,7 @@ void CAnimationTool::RenderUI_OptionState()
 
                 stringstream ss;
                 ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
-                    << "," << to_string(fTrackPosition) << "," << textBuffer;
+                    << "," << to_string(fTrackPosition);
                 strTransition = ss.str();
                 m_StateTransitions.emplace_back(strTransition);
                 TRANSITION_DATA T_Data{

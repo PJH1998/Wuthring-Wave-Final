@@ -32,14 +32,16 @@ HRESULT CEdit_Brush::Initialize_Clone(void* pArg)
 
 void CEdit_Brush::Priority_Update(_float fTimeDelta)
 {
-    ImGui::Begin("Set Foliage Info");
+    //ImGui::Begin("Set Foliage Info");
 
     ImGui::InputFloat("Range : ", &m_fRange);
     ImGui::SliderFloat("Range Slider : ", &m_fRange, 1.f, 4000.f, "%.1f");
     ImGui::InputScalar("Instance Num Value : ", ImGuiDataType_U32, &m_iNumInstance);
     ImGui::SliderScalar("Instance Num Value Slider : ", ImGuiDataType_U32, &m_iNumInstance, &m_iMinNum, &m_iMaxNum, "%d");
 
-    ImGui::End();
+    ImGui::SliderFloat("Min Degree", &m_vMinRotation, 0.0f, 359.9f, "%.1f");
+    ImGui::SliderFloat("Max Degree", &m_vMaxRotation, 0.0f, 360.f, "%.1f");
+    //ImGui::End();
 }
 
 void CEdit_Brush::Update(_float fTimeDelta)
@@ -66,6 +68,11 @@ void CEdit_Brush::Render()
     m_pVIBufferCom->Render();
 }
 
+void CEdit_Brush::Set_ModelName(const _wstring& pModelName)
+{
+    lstrcpy(m_ModelName, pModelName.c_str());
+}
+
 void CEdit_Brush::Bind_Resources()
 {
     m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
@@ -90,28 +97,41 @@ void CEdit_Brush::Ready_Components()
 
 void CEdit_Brush::Foliage()
 {
+    if (wcslen(m_ModelName) == 0)
+        return;
+
     if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS)
     {
         vector<_float4> m_Points;
         _uint iNumPixels = {};
-        if (m_pGameInstance->Get_Points(m_fRange, m_Points, &iNumPixels))
+        _float4 MousePos = {};
+        if (m_pGameInstance->Get_Points(m_fRange, m_Points, &iNumPixels,&MousePos))
         {
             _float4x4* pTransformMatrix = new _float4x4[m_iNumInstance];
             for (_uint i = 0; i < m_iNumInstance; ++i)
             {
-                _uint RandNum = m_pGameInstance->Rand(0, m_Points.size() - 1);
+                _uint RandNum = {};
+                _float fRotation = {};
                 do {
                     RandNum = m_pGameInstance->Rand(0, m_Points.size() - 1);
+                    fRotation = m_pGameInstance->Rand(m_vMinRotation, m_vMaxRotation);
                 } while (m_Points[RandNum].w == 0);
-                //if (XMLoadFloat4(m_pGameInstance->Get_CamPos()) - XMLoadFloat4(&m_Points[RandNum]) == 0)
+
+                if(m_vMaxRotation==0.0f)
                     XMStoreFloat4x4(&pTransformMatrix[i], XMMatrixTranslationFromVector(XMLoadFloat4(&m_Points[RandNum])));
+                else
+                {
+                    
+                    _vector RotationQuat = XMQuaternionRotationNormal(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(fRotation));
+                    XMStoreFloat4x4(&pTransformMatrix[i], XMMatrixRotationQuaternion(RotationQuat) * XMMatrixTranslationFromVector(XMLoadFloat4(&m_Points[RandNum])));
+                }
             }
 
             CEdit_MapObject_Instance::MAP_LOAD Desc;
             Desc.WorldMatrix = pTransformMatrix;
             Desc.iNumInstance = m_iNumInstance;
-            strcpy_s(Desc.ModelName, WStringToString(TEXT("Prototype_Component_Model_Wolf_Instance")).c_str());
-
+            strcpy_s(Desc.ModelName, WStringToString(m_ModelName).c_str());
+            Desc.m_WolrdPos = MousePos;
             m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_GameObject_MapObject_Instance")
                 , ENUM_CLASS(LEVEL::MAP), TEXT("Layer_Instance"), &Desc);
             Safe_Delete_Array(pTransformMatrix);
