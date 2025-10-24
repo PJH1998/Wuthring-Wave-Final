@@ -236,6 +236,7 @@ void CAnimationTool::RenderUI_FromState()
                 {
                     iSelectedIndex = id;
                     m_SelectedFromStateTag = stateName;
+
                 }
                 id++;
             }
@@ -263,6 +264,7 @@ void CAnimationTool::RenderUI_ToState()
                 {
                     iSelectedIndex = id;
                     m_SelectedToStateTag = stateName;
+                    m_iTransitionInfoSelectedIndex = -1;
                 }
                 id++;
             }
@@ -284,15 +286,28 @@ void CAnimationTool::RenderUI_Transitions()
             static int iSelectedIndex = -1;
             _uint id = 0;
 
-            for (auto& stateName : m_StateTransitions)
+            //for (auto& stateName : m_StateTransitions)
+            //{
+            //    if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+            //    {
+            //        iSelectedIndex = id;
+            //        m_SelectedToStateTag = stateName;
+            //    }
+            //    id++;
+            //}
+            if(false == m_TransitionDatas.empty())
             {
-                if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
+                for(auto& tTransition : m_TransitionDatas[m_SelectedFromStateTag])
                 {
-                    iSelectedIndex = id;
-                    m_SelectedToStateTag = stateName;
+                    if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
+                    {
+                        iSelectedIndex = id;
+
+                    }
+                    id++;
                 }
-                id++;
             }
+            m_iTransitionInfoSelectedIndex = iSelectedIndex;
         }
         ImGui::EndChild();
     }
@@ -311,7 +326,7 @@ void CAnimationTool::RenderUI_OptionState()
             // 1. TrackPosition 설정
 
             static float fTrackPosition = { 0.f };
-            ImGui::InputFloat("TrackPosition", &fTrackPosition, 0.f, 0.f, "%.2f");
+            ImGui::InputFloat("TransitTrackPosition", &fTrackPosition, 0.f, 0.f, "%.3f");
 
            
 
@@ -335,6 +350,14 @@ void CAnimationTool::RenderUI_OptionState()
                     << "," << to_string(fTrackPosition) << "," << textBuffer;
                 strTransition = ss.str();
                 m_StateTransitions.emplace_back(strTransition);
+                TRANSITION_DATA T_Data{
+                m_SelectedFromStateTag,
+                m_SelectedToStateTag,
+                m_iTransitionTargetState,
+                fTrackPosition
+                };
+                //pair<_string, TRANSITION_DATA> Pair = {m_SelectedFromStateTag, T_Data};
+                m_TransitionDatas[m_SelectedFromStateTag].push_back(T_Data);
             }
 
             ImGui::SameLine();
@@ -356,6 +379,27 @@ void CAnimationTool::RenderUI_OptionState()
 
             
 #ifdef _DEBUG
+            if(ImGui::Button("AnimState Set"))
+            {
+                m_pAnimMachineCom->Create_AnimStates(m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames());
+            }
+            if(m_pAnimMachineCom->Render_CurrentStateGUI(m_SelectedFromStateTag))
+            {
+                ImGui::Checkbox("isBlend", &m_isBlend);
+                ImGui::SameLine();
+                ImGui::Checkbox("isRootMotion", &m_isRootMotion);
+                ImGui::InputFloat("RootMotionRate", &m_fRootMotionRate);
+                ImGui::InputFloat("TransitTrackPos", &m_fTransitTrackPos);
+                ImGui::InputFloat("AnimationSpeed", &m_fAnimationSpeed);
+                ImGui::Text("%u", (1 << m_iConstAnimRunning));
+                ImGui::InputScalar("ConstAnimRunningFlag", ImGuiDataType_U32, &m_iConstAnimRunning);
+            }
+
+            if(ImGui::Button("Add Data"))
+            {
+                m_pAnimMachineCom->Add_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed, m_iConstAnimRunning);
+            }
+
             Export_StateTransition_To_CSV();
 #endif
 
@@ -366,6 +410,34 @@ void CAnimationTool::RenderUI_OptionState()
     }
     ImGui::EndGroup();
     
+}
+
+void CAnimationTool::RenderUI_TransitionInfo()
+{
+    ImGui::Begin("Transition Info");
+
+    auto& SelectData = m_TransitionDatas[m_SelectedFromStateTag][m_iTransitionInfoSelectedIndex];
+
+    ImGui::Text("From: %s", SelectData.strFrom.c_str());
+    ImGui::Text("To: %s", SelectData.strTo.c_str());
+    ImGui::Text("TargetState: %u", SelectData.iTargetState);
+    ImGui::Text("Transit Target Position: %f", SelectData.fTargetTrackPos);
+    if(ImGui::CollapsingHeader("Conditions"))
+    {
+        for(auto& ConditionName : SelectData.ConditionConst)
+            ImGui::Text(ConditionName.c_str());
+    }
+    ImGui::InputText("Condition Name",m_szConditionName, MAX_PATH);
+    ImGui::SameLine();
+    if(ImGui::Button("Add Condition"))
+    {
+        SelectData.ConditionConst.push_back(m_szConditionName);
+    }
+    if(ImGui::Button("Remove Condition"))
+    {
+        SelectData.ConditionConst.pop_back();
+    }
+    ImGui::End();
 }
 
 
@@ -403,6 +475,8 @@ void CAnimationTool::RenderUI_EditState()
 
     ImGui::End();
     
+    if(false == m_TransitionDatas.empty() && false == m_TransitionDatas[m_SelectedFromStateTag].empty())
+        RenderUI_TransitionInfo();
 }
 
 void CAnimationTool::LoadDat()
@@ -791,14 +865,15 @@ void CAnimationTool::Export_StateTransition_To_CSV()
         config.path = "../../Client/Bin/Resource/Model";
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
         string basePathString = config.path;
-        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+        //ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".csv", config);
+        ImGuiFileDialog::Instance()->OpenDialog("Save Csv", "Export File", ".json", config);
     }
 
     ImVec2 vMinSize = ImVec2(600, 400);
     ImVec2 vMaxSize = ImVec2(800, 400);
 
     if (ImGuiFileDialog::Instance()->Display(
-        "Save Csv", ImGuiWindowFlags_NoCollapse
+        /*""Save Csv"*/"Save Json", ImGuiWindowFlags_NoCollapse
         , vMinSize
         , vMaxSize)) {
         if (ImGuiFileDialog::Instance()->IsOk()) {
@@ -809,16 +884,37 @@ void CAnimationTool::Export_StateTransition_To_CSV()
 
             // 2. 파일 쓰기.
             
-            outFile << "From State" << "," << "ToState" << "\n";
+            //outFile << "From State" << "," << "ToState" << "\n";
+            //
+            //for (auto& strTransition : m_StateTransitions)
+            //{
+            //    outFile << strTransition;
+            //}
+            //
+            //for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
+            //    outFile << animName << "," << animName << "\n";
 
-            for (auto& strTransition : m_StateTransitions)
+            json Output;
+            m_pAnimMachineCom->Save_AnimDatas(Output);
+
+            Output["Transitions"] = json::array();
+
+            for(auto& Pair : m_TransitionDatas)
             {
-                outFile << strTransition;
+                for(auto& tTransitionData : Pair.second)
+                {
+                    json Transition;
+                    Transition["From"] = tTransitionData.strFrom;
+                    Transition["To"] = tTransitionData.strTo;
+                    Transition["Target State"] = tTransitionData.iTargetState;
+                    //다음 애니메이션의 해당 트랙 위치로 변환
+                    Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
+
+                    Output["Transitions"].push_back(Transition);
+                }
             }
 
-            for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
-                outFile << animName << "," << animName << "\n";
-
+            outFile << Output.dump(4);
 
             outFile.close();
 

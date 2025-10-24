@@ -9,7 +9,26 @@ HRESULT CAnimState::Initialize(const _string& strAnimationTag, ANIMSTATE_DESC& S
 {
 	m_StateData = StateDesc;
 	m_strAnimationTag = strAnimationTag;
+	m_iConstAnimRunning = m_StateData.iConstAnimRunning;
     return S_OK;
+}
+void CAnimState::Set_Data(ANIMSTATE_DESC& StateDesc)
+{
+	m_StateData = StateDesc;
+	m_iConstAnimRunning = m_StateData.iConstAnimRunning;
+}
+void CAnimState::Render_GUI()
+{
+	if(ImGui::CollapsingHeader("Anim State Property"))
+	{
+		ImGui::Text("Animation: %s", m_strAnimationTag.c_str());
+		m_StateData.isBlend ? ImGui::Text("isBlend : true") : ImGui::Text("isBlend : false");
+		m_StateData.isRootMotion ? ImGui::Text("isRootMotion : true") : ImGui::Text("isRootMotion : false");
+		ImGui::Text("RootMotionRate: %.3f", m_StateData.fRootMotionRate);
+		ImGui::Text("TransitTrackPos: %.3f", m_StateData.fTransitTrackPos);
+		ImGui::Text("AnimationSpeed: %.3f", m_StateData.fAnimationSpeed);
+		ImGui::Text("RootMotionRate: %u", m_iConstAnimRunning);
+	}
 }
 #endif
 
@@ -21,7 +40,7 @@ HRESULT CAnimState::Initialize(json& jsonParser)
 void CAnimState::Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag)
 {
 	*pCurrentAnimTag = m_strAnimationTag;
-
+	
 }
 
 void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag, _float fTrackPosition/*, ANIMSTATE_DESC& StateData*/)
@@ -32,8 +51,8 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 	_string strNextAnimTag{};
 	for(auto& Transition : m_Transitions)
 	{
-		if(!pModelCom->isTrackPositionOver(m_strAnimationTag, Transition->Get_TransitEnablePos()))
-			continue;
+		//if(m_fCurrentTrackPositon > Transition->Get_TransitEnablePos())
+		//	continue;
 
 		if(Transition->Is_Transit(pOwnerState, strNextAnimTag))
 		{
@@ -45,6 +64,20 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState)
 {
 
+}
+
+_bool CAnimState::Play_Animation(CModel* pModelCom, _float fTimeDelta)
+{
+	return pModelCom->Play_Animation_CPU(m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon, 
+										m_StateData.isBlend, m_StateData.isRootMotion, m_StateData.fRootMotionRate);
+	//return pModelCom->Play_Animation_CPU(m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon);
+}
+
+_bool CAnimState::Play_Animation_GPU(CModel* pModelCom, CComputeShader* pComputeShaderCom, _float fTimeDelta)
+{
+	return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon, 
+										m_StateData.isRootMotion, m_StateData.fRootMotionRate);
+	//return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon);
 }
 
 //void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom)

@@ -47,7 +47,7 @@ private:
 	void RenderUI_ToState();
 	void RenderUI_Transitions();
 	void RenderUI_OptionState();
-	
+	void RenderUI_TransitionInfo();
 	
 
 private:
@@ -85,7 +85,32 @@ private:
 	typedef map<const _wstring, const _string> MODELPATHS;
 	MODELPATHS	m_ModelDirPaths;
 
+#pragma region ANIM_MACHINE_PROPERTY
+	typedef struct tagTransitionData
+	{
+		_string strFrom;
+		_string strTo;
+		//조건에 사용할 const flag변수
+		_uint iTargetState;
+		_float fTargetTrackPos;
+		vector<_string> ConditionConst;
+	}TRANSITION_DATA;
+
 	class CAnimMachine* m_pAnimMachineCom = { nullptr };
+	_uint m_iTransitionTargetState{};
+	_bool m_isBlend;
+	_bool m_isRootMotion;
+	_float m_fRootMotionRate;
+	_float m_fTransitTrackPos;
+	_float m_fAnimationSpeed;
+	_uint m_iConstAnimRunning;
+
+	TRANSITION_DATA m_tTransitionInfo{};
+
+	map<_string, vector<TRANSITION_DATA>> m_TransitionDatas;
+	_int m_iTransitionInfoSelectedIndex = {-1};
+	_char m_szConditionName[MAX_PATH] = {};
+#pragma endregion
 
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
@@ -105,8 +130,6 @@ private:
 	_bool m_IsPlayAnimation = { true };
 	_bool m_IsStateTransition = { false };
 
-	_uint m_iTransitionTargetState{};
-	
 private:
 	_float m_fEditorAlpha = { 1.f };
 

@@ -3,6 +3,7 @@
 
 NS_BEGIN(Engine)
 class CModel;
+class CComputeShader;
 
 class ENGINE_DLL CAnimMachine final : public CComponent
 {
@@ -11,16 +12,6 @@ public:
 	{
 		const _char* pAnimationTag;
 	}ANIMMACNINE_DESC;
-
-	typedef struct tagTransitionData
-	{
-		_string strFrom;
-		_string strTo;
-		_uint iTargetState;
-		_float fTransitEnablePos;
-		//_uint iNextStateIndex; strTo에서 직접 찾기
-
-	}TRANSITION_DESC;
 
 private:
 	explicit CAnimMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -34,8 +25,26 @@ public:
 	//void Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex);
 	void Handle_Input(CModel* pModelCom, _uint* pState,_string strAnimTag);
 	void Update(CModel* pModelCom, _uint* pState, _float fTimeDelata);
+	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom,_uint* pState, _float fTimeDelata);
 	
 	void Reset();
+
+#ifdef _DEBUG
+	void Create_AnimStates(const vector<_string>& AnimationNames);
+	void Clear_States();
+	void Add_StateData(_string& strAnimName,
+						_bool isBlend,
+						_bool isRootMotion,
+						_float fRootMotionRate,
+						_float fTransitTrackPos,
+						_float fAnimationSpeed,
+						_uint iConstAnimRunning);
+	_bool Render_CurrentStateGUI(_string& strCurrentAnim);
+
+	void Save_AnimDatas(json& jsonOutput);
+	void Load_AnimDatas(json& jsonInput);
+#endif // _DEBUG
+
 
 private:
 	_string m_strCurrentAnimTag;
