@@ -121,10 +121,8 @@ void CComputeShader::Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB
         m_CBs_To_Bind[iter->second] = pCB;
 }
 
-
 void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ)
 {
-    
     m_pContext->CSSetShader(m_pComputeShader, nullptr, 0);
 
     for (auto& Pair : m_SRVs_To_Bind)
@@ -133,7 +131,7 @@ void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY
         m_pContext->CSSetUnorderedAccessViews(Pair.first, 1, &Pair.second, nullptr);
     for (auto& Pair : m_CBs_To_Bind)
         m_pContext->CSSetConstantBuffers(Pair.first, 1, &Pair.second);
- 
+
     m_pContext->Dispatch(iThreadGroupCountX, iThreadGroupCountY, iThreadGroupCountZ);
 
     Clear_Resources();

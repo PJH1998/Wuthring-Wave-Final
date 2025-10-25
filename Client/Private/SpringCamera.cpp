@@ -86,7 +86,8 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 1. 거리 제한으로 인한 간격 보정
 	Compute_CamPos();
 	// 2. Ray Cast 이용하여 지형, 오브젝트와 충돌
-	Check_Ray();
+	if(CAMERA_STATE::LOCKON != m_eCameraState)
+		Check_Ray();
 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
