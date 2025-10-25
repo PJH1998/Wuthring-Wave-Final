@@ -5,6 +5,7 @@
 
 #include "AugustaStateFactory.h"
 #include "AugustaState_Enum.h"
+#include "AugustaBayonet.h"
 
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -38,8 +39,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
-
-    // Ready_PartObjects(pDesc); // Parts 추가.
+    Ready_PartObjects(pDesc); // Parts 추가.
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
     CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
 
@@ -53,13 +53,17 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     
     
     m_pColliderCom->Set_Gravity(true);
+
+    // 기본적으로 무기 Activate 끄기?
+    m_pAugustaBayonet->SetActivate(false);
+
     return S_OK;
 }
 
 void CAugusta::Priority_Update(_float fTimeDelta)
 {
-    // 1. Activate가 False인 경우 업데이트 하지 않음.
-    CCharacter::Priority_Update(fTimeDelta);
+    if (!m_isActivate)
+        return;
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -71,18 +75,23 @@ void CAugusta::Priority_Update(_float fTimeDelta)
         m_pSpringCamera->Lock_On();
     }
         
-        
-
+    // 4. Parts 갱신
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Priority_Update(fTimeDelta);
+    }
     
 }
 
 void CAugusta::Update(_float fTimeDelta)
 {
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
-    CCharacter::Update(fTimeDelta);
+    if (!m_isActivate)
+        return;
 
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta);
+    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
 
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
@@ -90,24 +99,45 @@ void CAugusta::Update(_float fTimeDelta)
     // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    //if (m_strPreAnimation != m_strCurrentAnimation)
-    //    m_fTrackPosition = 0.f;
-
     // 5. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
-}
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 0.5f);
 
+    // 6. 파츠 갱신.?
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Update(fTimeDelta);
+    }
+
+#ifdef _DEBUG
+    _float4 vPos = {};
+    XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    OutPutDebugFloat4(TEXT("Position : "), vPos);
+#endif // _DEBUG
+
+
+}
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    CCharacter::Late_Update(fTimeDelta);
+    // 파츠 갱신
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Late_Update(fTimeDelta);
+    }
+
 
     // Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
 
+    
+
     // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
+
+    
 }
 
 void CAugusta::Render()
@@ -142,6 +172,17 @@ void CAugusta::Render_Shadow()
 {
 }
 
+// AnimName이 같은걸로 매핑되어있음.
+void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        
+        break;
+    }
+}
+
 void CAugusta::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
@@ -174,19 +215,16 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
 
-  /*  if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->controllerData.first)
-        , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
-        CRASH("Controller");*/
 
     
     // 계산에 사용할 값 지정.
-    m_fColliderRadius = 4.f;
-    m_fColliderHeight = 5.f;
-    m_vColliderOffSet = { 0.f, 6.7f, 0.f };
+    m_fColliderRadius = 0.4f;
+    m_fColliderHeight = 0.5f;
+    m_vColliderOffSet = { 0.f, 0.67f, 0.f };
 
 
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = { 0.f, 0.f, 0.f };
+    ColliderDesc.vPos = pDesc->vPosition;
     ColliderDesc.vOffset = m_vColliderOffSet;
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
@@ -223,18 +261,36 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
 
+    _float3 vScale = {};
+    _float3 vRotation = {};
+    _float3 vPosition = {};
+
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
     {
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
+        CWeapon::WEAPON_DESC Desc{};
         switch (i)
         {
-        case PARTTYPE::PART_WEAPON:
+        case PARTTYPE::PART_BAYONET:
+            
+            vScale = { 1.f, 1.f, 1.f };
+            vPosition = { 0.f, 0.f, 0.f };
+            Desc = PlayerData::GetAugustaBayonetCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+            Desc.pParentTransform = m_pTransformCom;
+            ASSERT_CRASH(Desc.pSocketMatrix);
+            
+
             // WeaponDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
-                , strPrototypeName, nullptr)))
+                , strPrototypeName, &Desc)))
                 CRASH("Weapon");
+
+            m_pAugustaBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pAugustaBayonet);
+            Safe_AddRef(m_pAugustaBayonet);
             break;
 
         case PARTTYPE::PART_SHIELD:
@@ -274,4 +330,5 @@ CGameObject* CAugusta::Clone(void* pArg)
 void CAugusta::Free()
 {
     CCharacter::Free();
+    Safe_Release(m_pAugustaBayonet);
 }

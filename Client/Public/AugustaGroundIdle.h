@@ -12,6 +12,10 @@ private:
         JUMP = 0,
         SPRINT,
         MOVE,
+        ATTACK,
+        SKILL_Q,
+        SKILL_E,
+        SKILL_R,
         END
     };
 
@@ -33,8 +37,9 @@ private:
 
 private:
     virtual void Handle_Input() override;
-    void Update_PhysicsCheck(_float fTimeDelta);
+    
     void Update_IdleAnimations(_float fTimeDelta);
+    void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void LockOn_StateTransition(_float fTimeDelta);
 

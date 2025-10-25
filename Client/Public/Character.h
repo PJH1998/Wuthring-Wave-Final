@@ -64,11 +64,13 @@ public:
 
 #pragma region STATE 조건에 사용
 public:
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
+
 	void Process_Input(class CInputController* pInputControllerCom);
 	
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
-	_bool Check_AnyInput(_uint iKeyFlag);
-	_bool Check_AllInput(_uint iKeyFlag);
+	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
+	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Is_LockOn();
 	_bool Is_Land(_float3* pNormal = nullptr);
 	void Change_State(_uint iCategory, _uint iSubState);
@@ -82,6 +84,8 @@ public:
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 	void Set_Gravity(_bool IsGravity);
+
+
 
 	
 	

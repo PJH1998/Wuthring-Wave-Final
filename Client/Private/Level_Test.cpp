@@ -69,7 +69,7 @@ void CLevel_Test::Ready_Layer_Player()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
     //vScale = { 1.f, 1.f, 1.f };
-    vScale = { 0.1f, 0.1f, 0.1f };
+    vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { -14.1f, 50.f, -180.f };
 
@@ -89,7 +89,6 @@ void CLevel_Test::Ready_Layer_Player()
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
 
     // 2. Galbrena 정의
-
 
     // 3.주인공 캐릭터 정의
 

@@ -46,13 +46,16 @@ void CAugustaGroundIdle::OnUpdate(_float fTimeDelta)
     // 1. Idle 업데이트
     Update_IdleAnimations(fTimeDelta);
 
-    // 2. LockOn 여부 확인 및 상태 전환.
+    // 2. 물리 체크
+    Check_Physics(fTimeDelta);
+
+    // 3. LockOn 여부 확인 및 상태 전환.
     if (m_pAugusta->Is_LockOn())
         LockOn_StateTransition(fTimeDelta);
     else
         Check_StateTransition(fTimeDelta);
 
-    // 3. 상태 초기화
+    // 4. 상태 초기화
     State_Reset();
     
 }
@@ -67,13 +70,22 @@ void CAugustaGroundIdle::Handle_Input()
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[SPRINT] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+
+    // AttackState에서 판별.
+    m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
+
 
 // Idle 간의 전환 지정.
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+}
+
+void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
+{
+
 }
 
 // Idles 조건이 아닌 것들.
@@ -91,6 +103,14 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+    // 기본 공격
+    //if (m_States[ATTACK])
+    //{
+    //    m_pAugusta->GetStateContextForWrite().m_eAttackType = EAttackType::ATTACK01;
+    //    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK)); // 상위, 하위 상태
+    //    return;
+    //}
 
     // Sprint
     if (m_States[SPRINT])
@@ -134,6 +154,8 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     }
 
 }
+
+
 
 void CAugustaGroundIdle::LockOn_StateTransition(_float fTimeDelta)
 {

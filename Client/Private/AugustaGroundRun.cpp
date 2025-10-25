@@ -79,6 +79,11 @@ void CAugustaGroundRun::Handle_Input()
     m_States[RUN_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
     m_States[RUN_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
     m_States[RUN_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+    
+    // 공격 상태가 아니라 공격 판정 상태로 전달.
+    m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+   
 }
 
 
@@ -89,8 +94,10 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
 {
     // 0. 애니메이션 실행부터
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
-    // 회전 및 이동.
+
+    // 1. 회전 및 이동.
     m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 5.f);
+
 }
 
 void CAugustaGroundRun::Check_Physics()
@@ -139,6 +146,13 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+    //if (m_States[ATTACK])
+    //{
+    //    m_pAugusta->GetStateContextForWrite().m_eAttackType = EAttackType::ATTACK01;
+    //    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK)); // 상위, 하위 상태
+    //    return;
+    //}
   
     // 뛰다가 Sprint
     if (m_States[SPRINT])

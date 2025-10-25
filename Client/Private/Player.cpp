@@ -113,8 +113,6 @@ void CPlayer::Late_Update(_float fTimeDelta)
 
     // 3. 키입력에서 바꾸는 입력이 확인 되었으면?
     Change_CharacterCheck();
-
-
 }
 void CPlayer::Render()
 {

@@ -83,22 +83,22 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
 {
     ASSERT_CRASH(m_pModelCom);
     _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-
-    if (true == IsRootMotion)
-        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    // 현재 활성화된 파츠 Animation 실행.
+    
     return IsPlayAnimationEnd;
 }
 
-_bool CCharacter::Check_AnyInput(_uint iKeyFlag)
+_bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
     ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AnyInput(iKeyFlag);
+    return m_pInputControllerCom->Check_AnyInput(iKeyFlag, eKeyState);
 }
 
-_bool CCharacter::Check_AllInput(_uint iKeyFlag)
+_bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
     ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AllInput(iKeyFlag);
+    return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
 }
 
 _bool CCharacter::Is_LockOn()

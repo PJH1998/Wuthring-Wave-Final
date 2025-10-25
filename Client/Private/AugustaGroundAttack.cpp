@@ -11,7 +11,8 @@ HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
     m_pAugusta = dynamic_cast<CAugusta*>(pOwner);
     ASSERT_CRASH(m_pAugusta);
 
-    
+    // 애니메이션 리스트 셋업.
+    SetUp_Animations();
 
     return S_OK;
 }
@@ -21,18 +22,40 @@ void CAugustaGroundAttack::OnEnter()
 {
     CGroundState::OnEnter();
 
-    // 첫 공격 시작 (Attack01)
-    if (m_iComboCount == 0)
-    {
-        // TODO: Play Attack01 animation
-    }
+    // 1. 복사본 Context 받아오기
+    const auto context = m_pAugusta->TakeStateContext();
+
+    // 2. 복사본에서 필요한 값 읽기
+    EAttackType eAttackType = context.m_eAttackType;
+
+    // 3. 애니메이션 세팅.
+    m_iCurrentAnimIdx = ENUM_CLASS(eAttackType);
+
+    // 4. Attack 상태 초기화
+    State_Reset();
+
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
 {
     CGroundState::OnUpdate(fTimeDelta);
 
-    Update_ComboChain();
+    // 0. 입력 확인
+    Handle_Input();
+
+    // 1. Attack 업데이트
+    Update_AttackAnimations(fTimeDelta);
+
+    // 2. 물리 체크
+    Check_Physics(fTimeDelta);
+
+    // 3. LockOn 여부 확인 및 상태 전환
+    if (m_pAugusta->Is_LockOn())
+        LockOn_StateTransition(fTimeDelta);
+    else
+        Check_StateTransition(fTimeDelta);
+
+    State_Reset();
 }
 
 void CAugustaGroundAttack::OnExit()
@@ -41,29 +64,85 @@ void CAugustaGroundAttack::OnExit()
 
     // 콤보 카운트 초기화
     m_iComboCount = 0;
-    m_bCanCombo = false;
 }
 
-void CAugustaGroundAttack::Update_ComboChain()
+void CAugustaGroundAttack::Handle_Input()
 {
-    // TODO: 콤보 시스템
-    // Attack01 → Attack02 → Attack03 → Attack04
-    // 애니메이션 특정 구간에서 m_bCanCombo = true
-    // 마우스 입력 들어오면 다음 콤보로 전환
+    // ATTACK_PENDING(강공 발생 조건)
+    EAttackType eAttackType = static_cast<EAttackType>(m_iCurrentAnimIdx);
 
-    // if (m_bCanCombo && 마우스입력)
-    // {
-    //     m_iComboCount++;
-    //     if (m_iComboCount == 1) Play("Attack02");
-    //     else if (m_iComboCount == 2) Play("Attack03");
-    //     else if (m_iComboCount == 3) Play("Attack04");
-    // }
+    m_States[HEAVY_ATTACK_PENDING] = eAttackType == EAttackType::ATTACK01 
+        && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS);
+
+
+
+    // 기본 공.
+    
+
+    // 스킬 체크
+    m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
+    m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+    m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+    
 }
 
-void CAugustaGroundAttack::Check_StateTransition()
+void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
-    // TODO: 공격 애니메이션 끝나고 추가 입력 없으면 Idle로
-    // TODO: 스킬 입력 (E, R 등) 들어오면 Skill로
+    // 1. 현재 애니메이션 재생
+
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+}
+
+void CAugustaGroundAttack::Check_Physics(_float fTimeDelta)
+{
+
+}
+
+void CAugustaGroundAttack::LockOn_StateTransition(_float fTimeDelta)
+{
+}
+
+void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
+{
+    // 1. 스킬 입력 (E, R 등) 들어오면 Skill로 => 우선순위 별.
+    // ... 추후 구현
+    // 2. Normal Attack의 경우 콤보 공격이 가능하게.
+    
+    if (m_States[HEAVY_ATTACK]) // 강공이 우선순위가 더 높음.
+    {
+
+    }
+
+
+    // 3. 공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
+    if (m_IsAnimationEnd)
+    {
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+        return;
+    }
+    
+    
+
+    
+}
+
+void CAugustaGroundAttack::SetUp_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK01),"Attack01", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK02),"Attack02", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK03),"Attack03", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK04),"Attack04", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_PULL), "Attack_Pull", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_SPSKILL),"Attack_SpSkill", 1.f, 0.f);
+}
+
+void CAugustaGroundAttack::State_Reset()
+{
+    for (_uint i = 0; i < ATTACKSTATE::END; ++i)
+        m_States[i] = false;
 }
 
 CAugustaGroundAttack* CAugustaGroundAttack::Create(class CGameObject* pOwner)

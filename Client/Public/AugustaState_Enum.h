@@ -117,6 +117,24 @@ enum class ESprintType : _uint
 
 };
 
+enum class EAttackType : _uint
+{
+	ATTACK01 = 0,
+	ATTACK02,
+	ATTACK03,
+	ATTACK04,
+	ATTACK_PENDING, // NormalAttack과 HeavyAttack 구별용도.
+	ATTACK_HEAVYHACK,
+	ATTACK_PULL,
+	ATTACK_SPEEDDRIVE,
+	ATTACK_SPSKILL,
+	SPATTACK01,
+	SPATTACK02,
+	SPATTACK03,
+	SPATTACKOMNI,
+	END
+};
+
 enum class ESkillType : _uint
 {
 	HACK = 0,
@@ -126,6 +144,8 @@ enum class ESkillType : _uint
 	BURST,
 	END
 };
+
+
 #pragma endregion
 
 #pragma region AIR
@@ -147,6 +167,17 @@ enum class EFallType : _uint
 	FALL_LOOP_FAST,
 	END
 
+};
+
+enum class EAirAttackType : _uint
+{
+	AIRATTACK_END = 0,
+	AIRATTACK_HACKDOWN_LOOP,
+	AIRATTACK_HACKDOWN_SP_END,
+	AIRATTACK_HACKDOWN_START,
+	AIRATTACK_LOOP,
+	AIRATTACK_START,
+	END
 };
 #pragma endregion
 

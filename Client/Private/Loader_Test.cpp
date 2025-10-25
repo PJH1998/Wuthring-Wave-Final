@@ -8,6 +8,7 @@
 
 #include "StateMachine.h"
 
+#include "AugustaBayonet.h"
 #include "Augusta.h"
 #include "Player.h"
 
@@ -35,7 +36,6 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     
     
@@ -133,7 +133,7 @@ HRESULT CLoader_Test::Load_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
-    _matrix		PreTransformMatrix = XMMatrixIdentity();
+    _matrix	PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
@@ -150,9 +150,7 @@ HRESULT CLoader_Test::Load_Augusta()
         CRASH("PlayerState Machine");
 
    
-
-
-
+    // 3. 객체 초기화
     _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
@@ -160,12 +158,24 @@ HRESULT CLoader_Test::Load_Augusta()
         , CAugusta::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
-    
-    /*if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , TEXT("Prototype_GameObject_Dummy_Augusta")
-        , CAnimationDummy::Create(m_pDevice, m_pContext))))
-        CRASH("Prototype Create Failed");*/
 
+    // 4. 파츠 초기화
+    wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/AugustaBayonet.dat";
+    fSize = 0.01f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+
+    // 1. 모델 초기화.
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    // 2. 객체 초기화.
+    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Augusta_Bayonet");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wstrBayonetTag
+        , CAugustaBayonet::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
 
     return S_OK;
 }
