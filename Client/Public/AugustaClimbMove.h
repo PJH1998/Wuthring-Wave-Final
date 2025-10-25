@@ -15,19 +15,21 @@ public:
     virtual void OnEnter() override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
+    
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_IsSecondStep = { false }; 
     _bool m_IsClimbed = { false };
+    _bool m_IsClimbStop = { false }; // 키입력이 없는 상황이면 Climb Stop
 
 private:
-    void Setup_Animations();
-
+    virtual void Handle_Input() override;
+    void Update_PhysicsCheck(_float fTimeDelta);
     void Update_ClimbAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
-
+    void Setup_Animations();
 
 
 

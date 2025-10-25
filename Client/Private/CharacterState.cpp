@@ -9,6 +9,8 @@ HRESULT CCharacterState::Initialize(class CGameObject* pOwner)
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::S);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::D);
 
+
+
     return S_OK;
 }
 

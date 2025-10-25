@@ -224,6 +224,7 @@ enum class EClimbExitType : _uint
 	CLIMB_UL2_STOP,
 	CLIMB_UR1_STOP,
 	CLIMB_UR2_STOP,
+	CLIMB_ONTOP, // 벽 넘는 탈출.(위에서)
 	CLIMB_MOVE, // 뒷 점프 탈출
 	END
 };

@@ -259,6 +259,23 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
     return false;
 }
 
+_bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal)
+{
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    
+    // 머리위쪽에 Ray 발사.
+    
+    _vector vStart = vPos + XMVectorSet(0.f, 12.f, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
+
+    _float4 vHitPoint = {};
+
+    return m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+}
+
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
     ASSERT_CRASH(m_pColliderCom);

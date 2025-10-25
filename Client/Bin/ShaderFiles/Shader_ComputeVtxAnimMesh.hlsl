@@ -134,6 +134,34 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
     return m;
 }
 
+//matrix matrix_rmFromSQT(float4 s, float4 q, float4 t)
+//{
+//    matrix_rm m;
+//    float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+
+//    m._11 = s.x * (1 - 2 * qy * qy - 2 * qz * qz);
+//    m._12 = s.x * (2 * qx * qy + 2 * qw * qz);
+//    m._13 = s.x * (2 * qx * qz - 2 * qw * qy);
+//    m._14 = 0;
+
+//    m._21 = s.y * (2 * qx * qy - 2 * qw * qz);
+//    m._22 = s.y * (1 - 2 * qx * qx - 2 * qz * qz);
+//    m._23 = s.y * (2 * qy * qz + 2 * qw * qx);
+//    m._24 = 0;
+
+//    m._31 = s.z * (2 * qx * qz + 2 * qw * qy);
+//    m._32 = s.z * (2 * qy * qz - 2 * qw * qx);
+//    m._33 = s.z * (1 - 2 * qx * qx - 2 * qy * qy);
+//    m._34 = 0;
+
+//    m._41 = t.x;
+//    m._42 = t.y;
+//    m._43 = t.z;
+//    m._44 = 1;
+	
+//    return m;
+//}
+
 matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
     matrix_rm resultMatrix;

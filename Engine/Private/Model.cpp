@@ -387,8 +387,6 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	//    (애니메이션 종료 여부 판단은 기존 로직 활용 가능)
 	_float fTrackPosition = 0.f;
 
-	
-
 	// 2. 현재 트랙 포지션을 가져옵니다. (트랙 포지션은 애니메이션 클래스에서 갱신을 받습니다.)
 	_bool bIsAnimationEnd = iter->second->Update_TrackPosition(fTimeDelta, &fTrackPosition);
 	*pTrackPosition = fTrackPosition;

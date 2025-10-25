@@ -40,8 +40,6 @@ void CAugustaClimbExit::OnEnter()
         IsGravity = true;
     
     m_pAugusta->Set_Gravity(IsGravity);
-
-
 }
 
 void CAugustaClimbExit::OnUpdate(_float fTimeDelta)
@@ -83,7 +81,8 @@ void CAugustaClimbExit::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UL2_STOP), "Climb_UL2_Stop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR1_STOP), "Climb_UR1_Stop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR2_STOP), "Climb_UR2_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 1.f, true, false);
+    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_ONTOP), "Climb_OnTop", 1.5f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 1.f, true, false); // 루트모션 회전 끄니까 됨.
 }
 
 // Climb에 관련된 Update
@@ -96,8 +95,8 @@ void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
     // Space 키를 눌렀다면?
     
 
-    // 0. Move 상태일때만 예외처리.
-    if (eClimbExitType == EClimbExitType::CLIMB_MOVE)
+    // 0. Move, OnTop상태일때만 예외처리.
+    if (eClimbExitType == EClimbExitType::CLIMB_MOVE || eClimbExitType == EClimbExitType::CLIMB_ONTOP)
     {
         m_IsClimbExit = true;
         return;
@@ -157,10 +156,6 @@ void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
             return;
         }
     }
-   
-
-    
-
 }
 
 void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
