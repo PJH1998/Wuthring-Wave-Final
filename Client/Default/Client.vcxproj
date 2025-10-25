@@ -167,6 +167,8 @@
     <ClInclude Include="..\Public\AnimationDummy.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
+    <ClInclude Include="..\Public\AugustaClimbExit.h" />
+    <ClInclude Include="..\Public\AugustaClimbMove.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
@@ -247,6 +249,8 @@
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
+    <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
+    <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />

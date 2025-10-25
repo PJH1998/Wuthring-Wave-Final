@@ -38,9 +38,11 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+
     // Ready_PartObjects(pDesc); // Parts 추가.
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
     CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
+
 
     // 초기 State 설정.
     m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
@@ -63,6 +65,15 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
     // 3. 키입력 갱신은 Player 객체에서 관리 중
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB)))
+    {
+        m_IsLockOn = !m_IsLockOn;
+        m_pSpringCamera->Lock_On();
+    }
+        
+        
+
+    
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -84,7 +95,6 @@ void CAugusta::Update(_float fTimeDelta)
 
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
-
 }
 
 void CAugusta::Late_Update(_float fTimeDelta)
@@ -93,6 +103,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
     // Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
+
 
     // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
@@ -120,6 +131,11 @@ void CAugusta::Render()
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
     }
+
+#ifdef _DEBUG
+    m_pColliderCom->Render();
+#endif // _DEBUG
+
 }
 
 void CAugusta::Render_Shadow()
@@ -162,16 +178,20 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
         CRASH("Controller");*/
 
-
-
-
     
+    // 계산에 사용할 값 지정.
+    m_fColliderRadius = 4.f;
+    m_fColliderHeight = 5.f;
+    m_vColliderOffSet = { 0.f, 6.7f, 0.f };
+
+
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = { 0.f, 5.f, 0.f };
+    ColliderDesc.vPos = { 0.f, 0.f, 0.f };
+    ColliderDesc.vOffset = m_vColliderOffSet;
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-    ColliderDesc.fHeight = 5.f;
-    ColliderDesc.fRadius = 4.f;
+    ColliderDesc.fHeight = m_fColliderHeight;
+    ColliderDesc.fRadius = m_fColliderRadius;
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");

@@ -6,6 +6,14 @@ NS_BEGIN(Client)
 // Idle State - Stand 관련 모든 애니메이션 관리
 class CAugustaGroundIdle final : public CGroundState
 {
+public:
+    enum KEY
+    {
+        SPACE = 0,
+        JUMP,
+        END
+    };
+
 private:
     explicit CAugustaGroundIdle() = default;
     virtual ~CAugustaGroundIdle() = default;
@@ -18,17 +26,19 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-
     vector<ANIM_DATA> m_IdleStates = {};
 
+    _bool m_keyInput[KEY::END] = {};
+
 private:
-    void Setup_Animations();
+    virtual void Handle_Input() override;
+    void Update_PhysicsCheck(_float fTimeDelta);
     void Update_IdleAnimations(_float fTimeDelta);
-    void LockOnUpdate_IdleAnimations(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void LockOn_StateTransition(_float fTimeDelta);
-    
 
+    void Setup_Animations();
+    void KeyInputReset();
 public:
     static CAugustaGroundIdle* Create(class CGameObject* pOwner);
     virtual void Free() override;

@@ -22,10 +22,6 @@ void CAirState::OnUpdate(_float fTimeDelta)
     Apply_AirGravity(fTimeDelta);
     Check_GroundLanding();
 
-    if (nullptr != m_pCurrentSubState)
-    {
-        m_pCurrentSubState->OnUpdate(fTimeDelta);
-    }
 }
 
 void CAirState::OnExit()

@@ -56,7 +56,7 @@ void CAugustaGroundLand::OnExit()
 
 void CAugustaGroundLand::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_LIGHT), "Land_Light", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
     CState::Add_Animations(ENUM_CLASS(ELandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
     CState::Add_Animations(ENUM_CLASS(ELandType::LAND_ROLL), "Land_Roll",   1.f, 22.f);
     CState::Add_Animations(ENUM_CLASS(ELandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);

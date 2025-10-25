@@ -26,11 +26,11 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 {
     CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
-    // 1. ���� ��ü �ʱ�ȭ
+    // 1. 
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-    // 2. ���� ��ü �ʱ�ȭ
+    // 2. 
     //m_pController = pDesc->pController;
 
 
@@ -78,11 +78,14 @@ void CCharacter::Process_Input(CInputController* pInputControllerCom)
 
 #pragma region STATE
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
+
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, fRootMotionRate);
-    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+
+    if (true == IsRootMotion)
+        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     return IsPlayAnimationEnd;
 }
 
@@ -178,24 +181,108 @@ void CCharacter::Move_Fall(_float fTimeDelta, _float fSpeed)
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }
 
-_float CCharacter::Get_DistanceToGround()
+void CCharacter::Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
-    _vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vEndPos = vCurrentPos - XMVectorSet(0.f, 100.f, 0.f, 0.f); // 아래로 쏜다.
+    m_pTransformCom->Go_Dir(vDir * fSpeed, fTimeDelta);
+}
 
-    _float4 vHitPoint = { };
+_float CCharacter::Get_DistanceToGround(_float fStartYOffset)
+{
+
+    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    //_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
+    //vStartPos.m128_f32[1] += fStartYOffset;
+    //_vector vEndPos = vCurrentPos - XMVectorSet(0.f, 100.f, 0.f, 0.f); // 아래로 쏜다.
+
+    //_float4 vHitPoint = { };
+    //_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
+
+    //if (bHit)
+    //{
+    //    _vector vHitPos = XMLoadFloat4(&vHitPoint);
+    //    _vector vDistance = vCurrentPos - vHitPos;
+    //    return XMVectorGetX(XMVector3Length(vDistance));
+    //}
+
+    //return 100.f; // 레이가 닿지 않으면 큰 값 반환 (공중)
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+    // 발 위치 계산 (Offset(6.7) - (Height/2 + Radius)(6.5) = 0.2)
+    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
+
+    // 발 위치에서 시작, 아래로 레이 발사
+    _vector vStartPos = vFootPos;
+    _vector vEndPos = vFootPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+
+    _float4 vHitPoint = {};
     _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
 
     if (bHit)
     {
         _vector vHitPos = XMLoadFloat4(&vHitPoint);
-        _vector vDistance = vCurrentPos - vHitPos;
+        _vector vDistance = vFootPos - vHitPos;
         return XMVectorGetX(XMVector3Length(vDistance));
     }
 
-    return 0.f; // 레이가 땅에 닿지 않으면 0.f 반환.
+    return 100.f; // 레이가 닿지 않으면 큰 값 반환
 }
+
+_bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
+{
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+    vLook = XMVector3Normalize(vLook);
+
+    // 가슴 높이에서 전방 Radius로 레이 발사
+    _vector vStart = vPos + XMVectorSet(0.f, 5.f, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * -5.f; // Collider Radius 고려.
+
+    _float4 vHitPoint = {};
+    _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+
+    if (bHit)
+    {
+        // 현재는 벽이 있는지만 체크 
+        if (pWallNormal)
+        {
+            // 임시로 Look의 반대 방향을 Normal로 설정
+            XMStoreFloat3(pWallNormal, vLook);
+        }
+        return true;
+    }
+
+
+    return false;
+}
+
+_bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal)
+{
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    
+    // 머리위쪽에 Ray 발사.
+    
+    _vector vStart = vPos + XMVectorSet(0.f, 12.f, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
+
+    _float4 vHitPoint = {};
+
+    return m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+}
+
+void CCharacter::Set_Gravity(_bool IsGravity)
+{
+    ASSERT_CRASH(m_pColliderCom);
+    m_pColliderCom->Set_Gravity(IsGravity);
+}
+
+
 
 
 #pragma endregion

@@ -21,7 +21,8 @@ protected:
     void Check_ClimbSurface();
     void Check_ClimbExit();
 
-    class CState* m_pCurrentSubState = { nullptr };
+protected:
+    _float3 m_vWallNormal = {};
 
 public:
     void Change_SubState(const _string& strSubStateName, class CStateMachine* pStateMachine);

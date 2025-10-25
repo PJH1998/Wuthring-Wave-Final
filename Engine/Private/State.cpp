@@ -38,9 +38,9 @@ _bool CState::Is_EscapePossible()
     return m_fTrackPosition > m_Animations[m_iCurrentAnimIdx].fEscapeTrackPosition;
 }
 
-void CState::Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate, _bool IsRootMotion)
+void CState::Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
-    m_Animations.emplace(iType, ANIM_DATA{ strAnimName, fSpeed, fEscapeTrackPosition, fRootMotionRate, IsRootMotion });
+    m_Animations.emplace(iType, ANIM_DATA{ strAnimName, fSpeed, fEscapeTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate });
 }
 
 void CState::Free()

@@ -25,7 +25,7 @@ public:
 	typedef struct tagPlayerStat
 	{
 		_float fHp = {};
-		_float fEnergyRate = {};
+		_float fEnsembleEnergy = {};
 		_float fAttack = {};
 	}CHARACTER_STAT;
 
@@ -66,17 +66,22 @@ public:
 public:
 	void Process_Input(class CInputController* pInputControllerCom);
 	
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
+	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	_bool Check_AnyInput(_uint iKeyFlag);
 	_bool Check_AllInput(_uint iKeyFlag);
 	_bool Is_LockOn();
 	_bool Is_Land(_float3* pNormal = nullptr);
 	void Change_State(_uint iCategory, _uint iSubState);
 
+
 	ACTORDIR Calculate_Direction();
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
-	_float Get_DistanceToGround();
+	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);
+	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
+	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+	void Set_Gravity(_bool IsGravity);
 
 	
 	
@@ -84,10 +89,12 @@ public:
 
 
 public:
-    void Add_EnsembleEnergy(_float fEnergy)  {  m_fEnsembleEnergy = min(m_fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
-    _bool Is_EnsembleFull() const { return m_fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
-    void Reset_EnsembleEnergy() { m_fEnsembleEnergy = 0.f; }
 	class CPlayer* Get_Owenr() { return m_pOwner; }
+	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
+    void Add_EnsembleEnergy(_float fEnergy)  { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
+    _bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
+    void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
+	
 
 protected:
 	class CPlayer* m_pOwner = { nullptr };
@@ -96,8 +103,12 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 
 
-	_float m_fEnsembleEnergy = {};
 	_float m_fMaxEnsembleEnergy = { 100.f };
+	_float m_fColliderRadius = {};
+	_float m_fColliderHeight = {};
+	_float3 m_vColliderOffSet = {};
+
+	CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
 protected:
 	_bool m_IsLockOn = { false };

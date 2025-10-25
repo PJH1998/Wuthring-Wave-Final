@@ -71,14 +71,13 @@ void CAugustaGroundRun::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_F), "Run_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_LB), "Run_LB", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_LF), "Run_LF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERunType::RUN_RB), "Run_RB", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERunType::RUN_RF), "Run_RF", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_POSE_R), "Run_Pose_R", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERunType::RUN_RB), "Run_RB", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERunType::RUN_RF), "Run_RF", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_TURNBACK), "Run_Turnback", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::STOP_RUN_L), "Stop_Run_L", 1.f, 0.f);
-    //CState::Add_Animations(static_cast<_uint>(ERunType::STOP_RUN_R), "Stop_Run_R", 1.f, 0.f);
 }
 
 void CAugustaGroundRun::LockOnUpdate_RunAnimation(_float fTimeDelta)
@@ -99,22 +98,37 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 {
  
     ERunType eRunType = static_cast<ERunType>(m_iCurrentAnimIdx);
-
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
 
+    // Land Check
     _bool IsLand = m_pAugusta->Is_Land(&vNormal);
-    // 뛰고 있는데 땅이 아니라면? => 우선순위 젤 높음. 일정 오프셋은 무시?
+    // Wall인지?
+    _float3 vWallNormal = {};
+    _bool IsWall = m_pAugusta->Check_ClimbableWall(&vWallNormal);
+   
+    _float fOffsetY = 3.35f;
+    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround();
+    // 전방 벽감지.
+    if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W))&&
+        IsWall)
+    {
+        m_pAugusta->GetStateContextForWrite().m_eClimbMoveType = EClimbMoveType::CLIMB_U_1;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE)); // 상위, 하위 상태
+        return;
+    }
+    
     if (!IsLand )
     {
-        if (fDistanceToGround > 0.2f)
+        if (fDistanceToGround > 1.5f + fOffsetY)
         {
             m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
         }
         return;
     }
+
+   
 
     // 어떤 상태이건 Space를 누르면 바로 점프로 전환. => 그다음.
     if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE)))

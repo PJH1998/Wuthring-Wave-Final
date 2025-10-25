@@ -20,13 +20,6 @@ void CClimbState::OnUpdate(_float fTimeDelta)
 {
     CCharacterState::OnUpdate(fTimeDelta);
 
-    Check_ClimbSurface();
-    Check_ClimbExit();
-
-    if (nullptr != m_pCurrentSubState)
-    {
-        m_pCurrentSubState->OnUpdate(fTimeDelta);
-    }
 }
 
 void CClimbState::OnExit()
@@ -46,10 +39,7 @@ void CClimbState::Check_ClimbExit()
 
 void CClimbState::Change_SubState(const _string& strSubStateName, CStateMachine* pStateMachine)
 {
-    if (nullptr != m_pCurrentSubState)
-    {
-        m_pCurrentSubState->OnExit();
-    }
+
 }
 
 void CClimbState::Free()

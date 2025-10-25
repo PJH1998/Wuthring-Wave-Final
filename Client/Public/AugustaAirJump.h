@@ -18,10 +18,6 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-
-    // Run State가 관리하는 애니메이션 리스트
-    _float3 m_vMoveDirection = {};
-
     void Setup_Animations();
 
     void Update_JumpAnimation(_float fTimeDelta);

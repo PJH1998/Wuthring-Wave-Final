@@ -9,6 +9,8 @@ HRESULT CCharacterState::Initialize(class CGameObject* pOwner)
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::S);
     m_iMoveKey |= static_cast<_uint>(KEYINPUT::D);
 
+
+
     return S_OK;
 }
 
@@ -28,7 +30,7 @@ void CCharacterState::OnExit()
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta)
 {
     m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations[m_iCurrentAnimIdx].strAnimName, fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, &m_fTrackPosition
-        , m_Animations[m_iCurrentAnimIdx].fRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion);
+        , m_Animations[m_iCurrentAnimIdx].fRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion, m_Animations[m_iCurrentAnimIdx].IsRootMotionRotate, m_Animations[m_iCurrentAnimIdx].IsRootMotionTranslate);
 
     return m_IsAnimationEnd;
 }
