@@ -119,13 +119,14 @@ void CParser::Read_Map_Dat(const _string pFilePath, LEVEL eLevel)
         _uint NameLength;
 
         CMapObject::MAP_LOAD Desc{};
-
+        vector<_string> szExistModel;
         while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
         {
             memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
             File.read(Desc.ModelName, NameLength);
 
             File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+            File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
             _float4x4 Matrix = {};
             File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
             Desc.WorldMatrix = &Matrix;
@@ -147,13 +148,24 @@ void CParser::Read_Map_Dat(const _string pFilePath, LEVEL eLevel)
                     continue;
 
                 _string ModelPath = entry.path().string();
+                _string Name = entry.path().filename().string();
+                _bool IsExist = { false };
+                for (auto szName : szExistModel)
+                {
+                    if (!strcmp(szName.c_str(), Name.c_str()))
+                        IsExist = true;
+                }
+
+                if (IsExist)
+                    continue;
+
+                szExistModel.push_back(Name);
 
                 m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(entry.path().stem().string()), Path = ModelPath]() {
                     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), Model,
                         CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
                         CRASH("Failed");
                     });
-
             }
         }
     }
