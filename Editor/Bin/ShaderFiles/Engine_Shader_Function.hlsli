@@ -196,7 +196,7 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
     if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
         return 1.f;
     
-    float Distance = abs(SampleDepth - fRandomZ);
+    float Distance = abs(SampleDepth - vViewPos.z);
     
     Occlusion = smoothstep(0.f, fMaxDistance, Distance);
     

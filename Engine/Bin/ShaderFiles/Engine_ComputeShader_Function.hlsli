@@ -65,10 +65,28 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, 
     return vViewPos;
 }
 
+float4 Compute_ViewPosTexcoord(float2 vTexcoord, Texture2D DepthTexture, sampler Sampler, matrix ProjMatrixInv)
+{
+    float4 vViewPos = 0.f;
+    
+    float4 vDepthDesc = DepthTexture.SampleLevel(Sampler, vTexcoord, 0);
+    
+    vViewPos.x = vTexcoord.x * 2.f - 1.f;
+    vViewPos.y = vTexcoord.y * -2.f + 1.f;
+    vViewPos.z = vDepthDesc.x;
+    vViewPos.w = 1.f;
+    
+    vViewPos *= vDepthDesc.y;
+    
+    vViewPos = mul(vViewPos, ProjMatrixInv);
+    
+    return vViewPos;
+}
+
 float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord)
 {
     float4 vNormal = NormalTexture.SampleLevel(Sampler, vTexcoord, 0);
-    vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
+    vNormal = vector((vNormal.xyz * 2.f - 1.f), 0.f);
     
     return vNormal;
 }

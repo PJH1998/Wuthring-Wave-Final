@@ -94,7 +94,7 @@ HRESULT CRendererSubResource::Add_SSAO_BufferData(const _wstring& strRCSTag, _fl
     Data.fWidth = fWidth;
     Data.fHeight = fHeight;
     Data.iSampleSize = m_iNumKernel;
-    Data.fSSAO_Radius = 150.f;
+    Data.fSSAO_Radius = 5.f;
     Data.fSSAO_MaxDistance = 50.f;
 
     if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SSAO_DATA", reinterpret_cast<void*>(&Data), sizeof(SSAO_DATA))))

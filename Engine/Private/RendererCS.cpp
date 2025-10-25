@@ -77,7 +77,7 @@ void CRendererCS::Bind_Resources()
 {
 	for (auto& Pair : m_Buffers)
 		m_pComputeShader->Set_ConstantBuffer(Pair.first, Pair.second.second);
-	m_Buffers.clear();
+	//m_Buffers.clear();
 
 	for (auto& SRV : m_SRVs)
 		m_pComputeShader->Set_SRV(SRV.first, SRV.second);
@@ -142,10 +142,18 @@ HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT 
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
 		return E_FAIL;
 
+
+
 	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pTexture2D, nullptr, &m_UAV.second)))
 		return E_FAIL;
 
-	if (FAILED(m_pDevice->CreateShaderResourceView(m_pTexture2D, nullptr, &m_pComputeSRV)))
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Format = TextureDesc.Format;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	SRVDesc.Texture2D.MostDetailedMip = 0;
+	SRVDesc.Texture2D.MipLevels = 1;
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(m_pTexture2D, &SRVDesc, &m_pComputeSRV)))
 		return E_FAIL;
 
 	return S_OK;
