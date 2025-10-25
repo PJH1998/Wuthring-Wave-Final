@@ -17,7 +17,8 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
+    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1025_Final/");
+    Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
 
     Ready_Layer_Player();
 	Ready_Dummy();
@@ -218,6 +219,7 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
             File.read(Desc.ModelName, NameLength);
 
             File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+            File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
             _float4x4 Matrix = {};
             File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
             Desc.WorldMatrix = &Matrix;
