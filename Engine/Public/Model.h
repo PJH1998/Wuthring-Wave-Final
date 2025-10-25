@@ -82,8 +82,8 @@ public:
 
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
-	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
-	void								Play_RibAnimation_GPU(const _string& strRibAnimationName, _float fTrackPosition);
+	//void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
+	void								Play_RibAnimation(const _string& strRibAnimationName, _float fTrackPosition);
 
 
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
@@ -123,7 +123,7 @@ private:
 	
 
 
-#pragma region Compute Shader 援ы쁽 ??
+#pragma region Compute Shader
 private:
 	void ApplyComputeResults_ToBones();
 	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);

@@ -11,6 +11,20 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 {
 }
 
+_vector CSpringCamera::Get_LookVector_NoPitch()
+{
+	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+	vLook = XMVectorSetY(vLook, 0.f);
+	return XMVector3Normalize(vLook);
+}
+
+_vector CSpringCamera::Get_RightDirection_NoPitch()
+{
+	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+	vRight = XMVectorSetY(vRight, 0.f);  // Pitch Á¦°Å
+	return XMVector3Normalize(vRight);
+}
+
 HRESULT CSpringCamera::Initialize_Prototype()
 {
     return S_OK;

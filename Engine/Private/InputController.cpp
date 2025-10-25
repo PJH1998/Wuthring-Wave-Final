@@ -73,7 +73,6 @@ _bool CInputController::Check_AllInput(_uint eKeyInput)
 void CInputController::Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValue)
 {
     m_KeyboardMappings.emplace_back(make_pair(iKey, keyboardValue));
-    
 }
 
 /*

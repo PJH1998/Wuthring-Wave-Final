@@ -21,6 +21,7 @@ _bool CMap_Interface::Set_ShaderPass(CShader* pShader, _uint* ShaderPassIndex)
     ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
     ImGui::Text("ShaderPass");
 
+#ifdef _DEBUG
     for (_uint i = 0; i < pShader->Get_PassCount(); ++i)
     {
         if (!strcmp("DebugRender", pShader->Get_PassName(i)))
@@ -32,6 +33,9 @@ _bool CMap_Interface::Set_ShaderPass(CShader* pShader, _uint* ShaderPassIndex)
             break;
         }
     }
+#endif // _DEBUG
+
+
 
     ImGui::EndChildFrame();
 
