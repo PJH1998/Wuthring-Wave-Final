@@ -188,45 +188,52 @@ void CCharacter::Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed)
 
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
-
-    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-    //_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
-    //vStartPos.m128_f32[1] += fStartYOffset;
-    //_vector vEndPos = vCurrentPos - XMVectorSet(0.f, 100.f, 0.f, 0.f); // 아래로 쏜다.
-
-    //_float4 vHitPoint = { };
-    //_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
-
-    //if (bHit)
-    //{
-    //    _vector vHitPos = XMLoadFloat4(&vHitPoint);
-    //    _vector vDistance = vCurrentPos - vHitPos;
-    //    return XMVectorGetX(XMVector3Length(vDistance));
-    //}
-
-    //return 100.f; // 레이가 닿지 않으면 큰 값 반환 (공중)
     ASSERT_CRASH(m_pTransformCom);
 
     _vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
     // 발 위치 계산 (Offset(6.7) - (Height/2 + Radius)(6.5) = 0.2)
     _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
 
-    // 발 위치에서 시작, 아래로 레이 발사
-    _vector vStartPos = vFootPos;
-    _vector vEndPos = vFootPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+    // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
+    _vector vPositions[5] = {
+        vFootPos + vLook * m_fColliderRadius,                    // 앞
+        vFootPos + vRight * m_fColliderRadius,                   // 왼쪽
+        vFootPos,                                      // 중앙
+        vFootPos - vRight * m_fColliderRadius,                   // 오른쪽
+        vFootPos - vLook * m_fColliderRadius                     // 뒤
+    };
 
-    _float4 vHitPoint = {};
-    _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
 
-    if (bHit)
+    _float fMinDistance = 100.f;  // 가장 가까운 거리 저장
+    _bool bAnyHit = false;
+
+    // 3개 지점에서 각각 레이 발사
+    for (_uint i = 0; i < 5; ++i)
     {
-        _vector vHitPos = XMLoadFloat4(&vHitPoint);
-        _vector vDistance = vFootPos - vHitPos;
-        return XMVectorGetX(XMVector3Length(vDistance));
+        _vector vStartPos = vPositions[i];
+        _vector vEndPos = vStartPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+
+        _float4 vHitPoint = {};
+        _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
+
+        if (bHit)
+        {
+            bAnyHit = true;
+            _vector vHitPos = XMLoadFloat4(&vHitPoint);
+            _vector vDistance = vPositions[i] - vHitPos;
+            _float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+            // 가장 가까운 거리 저장
+            if (fDistance < fMinDistance)
+                fMinDistance = fDistance;
+        }
     }
 
-    return 100.f; // 레이가 닿지 않으면 큰 값 반환
+    return bAnyHit ? fMinDistance : 100.f;
+
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -238,8 +245,8 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
     vLook = XMVector3Normalize(vLook);
 
     // 가슴 높이에서 전방 Radius로 레이 발사
-    _vector vStart = vPos + XMVectorSet(0.f, 5.f, 0.f, 0.f);
-    _vector vEnd = vStart + vLook * -5.f; // Collider Radius 고려.
+    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * -(m_fColliderRadius + 1.f); // Collider Radius 고려.
 
     _float4 vHitPoint = {};
     _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
@@ -266,9 +273,8 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
     _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
     
-    // 머리위쪽에 Ray 발사.
-    
-    _vector vStart = vPos + XMVectorSet(0.f, 12.f, 0.f, 0.f);
+    // 머리위쪽에서 정면으로 Ray 발사.
+    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight + 3.f, 0.f, 0.f);
     _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
 
     _float4 vHitPoint = {};

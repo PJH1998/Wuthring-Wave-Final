@@ -31,6 +31,9 @@ void CAugustaGroundLand::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eLandType);
 
+    // 4. 상태 초기화
+    State_Reset();
+
 }
 
 void CAugustaGroundLand::OnUpdate(_float fTimeDelta)
@@ -38,15 +41,17 @@ void CAugustaGroundLand::OnUpdate(_float fTimeDelta)
     
     CGroundState::OnUpdate(fTimeDelta);
 
-    // 0. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    // 0. 키입력 제어
+    Handle_Input();
 
-    //  상태 제어.
+    // 1. 애니메이션 제어.
     Update_LandAnimation(fTimeDelta);
+
+    // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
    
-
-    
+    // 3. 상태 초기화
+    State_Reset();
 }
 
 void CAugustaGroundLand::OnExit()
@@ -54,33 +59,25 @@ void CAugustaGroundLand::OnExit()
     CGroundState::OnExit();
 }
 
-void CAugustaGroundLand::Setup_Animations()
-{
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_ROLL), "Land_Roll",   1.f, 22.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
-}
 
+
+void CAugustaGroundLand::Handle_Input()
+{
+    m_States[RUN] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+}
 
 void CAugustaGroundLand::Update_LandAnimation(_float fTimeDelta)
 {
- 
+    // 0. 애니메이션 실행부터
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 }
 
 void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 {
- 
-    ELandType eLandType = static_cast<ELandType>(m_iCurrentAnimIdx);
-    _float3 vNormal = {}; // 벽타기 전환 용도 Normal
-
     _bool IsEscapePossible = CState::Is_EscapePossible();
-    // Land 상태라는 것 자체가 땅에 닿았다는 의미.
-
-
-    if (IsEscapePossible && m_pAugusta->Check_AnyInput(m_iMoveKey))
+    if (IsEscapePossible && m_States[RUN])
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_BASEPOSE;
+        m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
         return;
     }
@@ -91,11 +88,22 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         return;
     }
-  
 }
 
 
+void CAugustaGroundLand::Setup_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
+    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(ELandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
+}
 
+void CAugustaGroundLand::State_Reset()
+{
+    for (_uint i = 0; i < LANDSTATE::END; ++i)
+        m_States[i] = false;
+}
 
 
 
