@@ -113,7 +113,7 @@ void CMonsterDummy::Ready_Component(const _fmatrix& PreTransformMatrix)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 7.5f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 9.f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 5.f;
