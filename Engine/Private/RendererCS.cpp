@@ -194,7 +194,7 @@ void CRendererCS::Free()
 		Safe_Release(SRV.second);
 	m_SRVs.clear();
 
-
+	Safe_Release(m_pComputeShader);
 	Safe_Release(m_pTexture2D);
 	Safe_Release(m_pComputeSRV);
 	Safe_Release(m_UAV.second);
