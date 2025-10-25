@@ -7,6 +7,14 @@ NS_BEGIN(Client)
 class CAugustaGroundSprint final : public CGroundState
 {
 private:
+    enum SPRINTSTATE
+    {
+        JUMP = 0,
+        MOVE,
+        END
+    };
+
+private:
     explicit CAugustaGroundSprint() = default;
     virtual ~CAugustaGroundSprint() = default;
 
@@ -18,13 +26,15 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
+    _bool m_States[END] = {};
 
-    void Setup_Animations();
-
-    void LockOnUpdate_SprintAnimation(_float fTimeDelta);
-    void LockOnCheck_StateTransition(_float fTimeDelta);  
+private:
+    virtual void Handle_Input() override;
     void Update_SprintAnimation(_float fTimeDelta);
+    void LockOnCheck_StateTransition(_float fTimeDelta);  
     void Check_StateTransition(_float fTimeDelta);
+    void Setup_Animations();
+    void State_Reset();
 
 public:
     static CAugustaGroundSprint* Create(class CGameObject* pOwner);

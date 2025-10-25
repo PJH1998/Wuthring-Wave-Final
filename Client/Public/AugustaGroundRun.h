@@ -7,6 +7,21 @@ NS_BEGIN(Client)
 class CAugustaGroundRun final : public CGroundState
 {
 private:
+    enum RUNSTATE // Transition에 사용하는 상태들을 정의 해두기.
+    {
+        JUMP = 0,
+        SPRINT = 1,
+        RUN_U = 2,
+        RUN_D = 3,
+        RUN_L = 4,
+        RUN_R = 5,
+        MOVE = 6,
+        WALL = 7,
+        LAND = 8,
+        END
+    };
+
+private:
     explicit CAugustaGroundRun() = default;
     virtual ~CAugustaGroundRun() = default;
 
@@ -21,15 +36,19 @@ private:
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
+    
 
-    void Setup_Animations();
+    _bool m_States[RUNSTATE::END] = {};
 
-    void LockOnUpdate_RunAnimation(_float fTimeDelta);
-    void LockOnCheck_StateTransition(_float fTimeDelta);
-
+private:
+    virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);
+    void Check_Physics();
+    void LockOnCheck_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
+    void Setup_Animations();
+    void State_Reset();
 
 public:
     static CAugustaGroundRun* Create(class CGameObject* pOwner);

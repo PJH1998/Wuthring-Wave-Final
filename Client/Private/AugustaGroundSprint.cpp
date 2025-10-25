@@ -32,59 +32,53 @@ void CAugustaGroundSprint::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eSprintType);
 
+    State_Reset();
 }
 
 void CAugustaGroundSprint::OnUpdate(_float fTimeDelta)
 {
     CGroundState::OnUpdate(fTimeDelta);
 
-    // 0. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    // 0. 키 입력
+    Handle_Input();
 
-    // 1. 방향 계산
-    m_eDir = m_pAugusta->Calculate_Direction();
-
+    // 1. 애니메이션 실행
+    Update_SprintAnimation(fTimeDelta);
+    
     // 2. 상태 제어.
     if (m_pAugusta->Is_LockOn())
-    {
-        LockOnUpdate_SprintAnimation(fTimeDelta);
         LockOnCheck_StateTransition(fTimeDelta);
-    }
-    else
-    {
-        Update_SprintAnimation(fTimeDelta);
+    else       
         Check_StateTransition(fTimeDelta);
-    }
+
+    // 3. 상태 초기화.
+    State_Reset();
 }
 
 void CAugustaGroundSprint::OnExit()
 {
     CGroundState::OnExit();
-
- 
 }
 
-void CAugustaGroundSprint::Setup_Animations()
+void CAugustaGroundSprint::Handle_Input()
 {
-    CState::Add_Animations(ENUM_CLASS(ESprintType::STOP_SPRINT_L), "Stop_Sprint_L", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESprintType::STOP_SPRINT_R), "Stop_Sprint_R", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_F), "Move_F", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_B), "Move_B", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
+    m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
+    m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }
 
-void CAugustaGroundSprint::LockOnUpdate_SprintAnimation(_float fTimeDelta)
+
+
+
+
+void CAugustaGroundSprint::Update_SprintAnimation(_float fTimeDelta)
 {
+    // 1. 방향 계산
+    m_eDir = m_pAugusta->Calculate_Direction();
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 }
 
 void CAugustaGroundSprint::LockOnCheck_StateTransition(_float fTimeDelta)
 {
-}
-
-void CAugustaGroundSprint::Update_SprintAnimation(_float fTimeDelta)
-{
-
 }
 
 void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
@@ -98,36 +92,49 @@ void CAugustaGroundSprint::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
         return;
     }
-    
+  
+
     switch (eSprintType)
     {
     case ESprintType::MOVE_F:
     {
         if (CState::Is_EscapePossible())
         {
-            if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE)))
+            if (m_States[JUMP])
             {
                 m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_WALK_LF;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
                 return;
             }
-            if (m_pAugusta->Check_AnyInput(m_iMoveKey))
+
+            if (m_States[MOVE])
             {
                 m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
                 return;
             }
         }
-        
     }
         break;
     }
 
-    
-    
-
 }
 
+void CAugustaGroundSprint::Setup_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(ESprintType::STOP_SPRINT_L), "Stop_Sprint_L", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ESprintType::STOP_SPRINT_R), "Stop_Sprint_R", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_F), "Move_F", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_B), "Move_B", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ESprintType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
+}
+
+void CAugustaGroundSprint::State_Reset()
+{
+    for (_uint i = 0; i < SPRINTSTATE::END; ++i)
+        m_States[i] = false;
+}
 
 CAugustaGroundSprint* CAugustaGroundSprint::Create(class CGameObject* pOwner)
 {
