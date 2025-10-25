@@ -515,6 +515,10 @@ void CGameInstance::DrawShape(const Shape* pShape, RMat44 Matrix)
 {
 	m_pPhysicsManager->DrawShape(pShape, Matrix);
 }
+void CGameInstance::DrawRay(const _fvector& vStartPos, const _fvector& vEndPos)
+{
+	m_pPhysicsManager->DrawRay(vStartPos, vEndPos);
+}
 #endif
 #pragma endregion
 

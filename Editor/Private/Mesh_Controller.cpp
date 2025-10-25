@@ -518,8 +518,7 @@ void CMesh_Controller::Free()
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 
-    for (auto& pTexture : m_Textures)
-        Safe_Release(pTexture.pTexture);
+    //for (auto& pTexture : m_Textures)
+    //    Safe_Release(pTexture.pTexture);
     m_Textures.clear();
-
 }

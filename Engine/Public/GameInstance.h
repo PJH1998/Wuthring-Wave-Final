@@ -161,7 +161,8 @@ public:
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG
-	void				DrawShape(const Shape* pShape, RMat44 Matrix);
+	void					DrawShape(const Shape* pShape, RMat44 Matrix);
+	void					DrawRay(const _fvector& vStartPos, const _fvector& vEndPos);
 #endif
 #pragma endregion
 

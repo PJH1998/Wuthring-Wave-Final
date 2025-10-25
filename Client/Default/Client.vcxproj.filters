@@ -142,6 +142,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Air\Augusta">
       <UniqueIdentifier>{c6688f7b-5cae-41f6-9482-7c488931a29a}</UniqueIdentifier>
     </Filter>
+        <Filter Include="94. Factory">
+      <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -314,6 +317,12 @@
     <ClInclude Include="..\Public\AugustaGroundLand.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MonsterDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -466,6 +475,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundLand.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

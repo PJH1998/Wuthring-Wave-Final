@@ -70,7 +70,7 @@ void CharacterContactListenerImpl::OnContactRemoved(const CharacterVirtual* inCh
 
 void CharacterContactListenerImpl::OnCharacterContactAdded(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	ioSettings.mCanPushCharacter = true;
+	ioSettings.mCanPushCharacter = false;
 
 	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inCharacter->GetUserData());
 	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inOtherCharacter->GetUserData());
@@ -85,7 +85,7 @@ void CharacterContactListenerImpl::OnCharacterContactAdded(const CharacterVirtua
 
 void CharacterContactListenerImpl::OnCharacterContactPersisted(const CharacterVirtual* inCharacter, const CharacterVirtual* inOtherCharacter, const SubShapeID& inSubShapeID2, RVec3Arg inContactPosition, Vec3Arg inContactNormal, CharacterContactSettings& ioSettings)
 {
-	ioSettings.mCanPushCharacter = true;
+	ioSettings.mCanPushCharacter = false;
 
 	COLLISION_DATA* pSrcData = reinterpret_cast<COLLISION_DATA*>(inCharacter->GetUserData());
 	COLLISION_DATA* pDstData = reinterpret_cast<COLLISION_DATA*>(inOtherCharacter->GetUserData());

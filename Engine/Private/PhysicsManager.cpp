@@ -191,6 +191,12 @@ void CPhysicsManager::DrawShape(const Shape* pShape, RMat44 Matrix)
 	pShape->Draw(m_pDebugRenderer, Matrix, Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
+void CPhysicsManager::DrawRay(const _fvector& vStartPos, const _fvector& vEndPos)
+{
+	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
+	m_pDebugRenderer->DrawLine(LoadVec3(vStartPos), LoadVec3(vEndPos), Color(255.f, 0.f, 0.f, 1.f));
+	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
+}
 #endif
 
 void CPhysicsManager::SetUp_PhysicsSystem()
