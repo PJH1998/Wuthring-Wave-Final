@@ -7,15 +7,6 @@ NS_BEGIN(Client)
 class CAugustaAirJump final : public CAirState
 {
 private:
-    enum JUMPSTATE
-    {
-        JUMP = 0,
-        LAND = 1,
-        MOVE = 2,
-        END
-    };
-
-private:
     explicit CAugustaAirJump() = default;
     virtual ~CAugustaAirJump() = default;
 
@@ -27,16 +18,10 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-
-    _bool m_States[JUMPSTATE::END] = {};
-
-private:
-    virtual void Handle_Input() override;
-    void Update_JumpAnimation(_float fTimeDelta);
-
-    void Check_Physics(_float fTimeDelta);
-    void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();
+
+    void Update_JumpAnimation(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta);
 
 
 public:

@@ -37,17 +37,17 @@ void CAugustaAirJump::OnUpdate(_float fTimeDelta)
 {
     CAirState::OnUpdate(fTimeDelta);
 
-    // 0. 키입력 체크
-    Handle_Input();
+    // 0. 애니메이션 플레이.
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
-    // 1. 애니메이션 플레이.
+    // 1. 방향 계산
+    m_eDir = m_pAugusta->Calculate_Direction();
+
     Update_JumpAnimation(fTimeDelta);
-
-    // 2. 물리 체크.
-    Check_Physics(fTimeDelta);
-
-    // 3. 전환 조건 체크.
     Check_StateTransition(fTimeDelta);
+
+
+    
 }
 
 void CAugustaAirJump::OnExit()
@@ -55,43 +55,47 @@ void CAugustaAirJump::OnExit()
     CAirState::OnExit();
 }
 
-
-
-void CAugustaAirJump::Handle_Input()
+void CAugustaAirJump::Setup_Animations()
 {
-    m_eDir = m_pAugusta->Calculate_Direction(); 
-    m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
-    m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
-}
-
-void CAugustaAirJump::Check_Physics(_float fTimeDelta)
-{
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_LOOP), "Jump_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_LF), "Jump_Run_LF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_RF), "Jump_Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_F),  "Jump_Second_F", 1.f, 0.f); // 더블 점프
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f); // 제자리 점프
 }
 
 // 점프에 관련된 Update
 void CAugustaAirJump::Update_JumpAnimation(_float fTimeDelta)
 {
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    
+    EJumpType eJumpType = static_cast<EJumpType>(m_iCurrentAnimIdx);
+    _float3 vNormal = {};
 
     // 1. 조작키에 따른 이동?
-    if (m_States[MOVE])
+    m_eDir = m_pAugusta->Calculate_Direction(); // 여기서 이미 키체크를 완료하고 방향 계산.
+    if (m_pAugusta->Check_AnyInput(m_iMoveKey))
+    {
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 2.5f);
+        return;
+    }
 
+    
+
+    //m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 5.f);
 }
-
-
 
 void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
 {
     EJumpType eJumpType = static_cast<EJumpType>(m_iCurrentAnimIdx);
-
+    _float3 vNormal = {};
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     // 1. 우선순위 제일 높음.
-    if (m_States[JUMP])
+    if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE)))
     {
-        // 더블 점프 라면?
+        // 더블 점프.
         if ((eJumpType == EJumpType::JUMP_WALK_LF) && IsEscapePossible)
         {
             m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_SECOND_F;
@@ -101,7 +105,7 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     }
 
     // 2. 점프 애니메이션이 끝났는데도 안닿았을경우?
-    if (m_IsAnimationEnd && !m_States[LAND])
+    if (m_IsAnimationEnd && !m_pAugusta->Is_Land(&vNormal))
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -109,7 +113,7 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     }
 
     // 점프 도중 땅에 닿으면?
-    if (m_States[LAND] && (m_fTrackPosition > 5.f)/* 최소 조건*/)
+    if (m_pAugusta->Is_Land(&vNormal) && (m_fTrackPosition > 5.f)/* 최소 조건*/)
     {
         m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
@@ -118,16 +122,7 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
 }
 
 
-void CAugustaAirJump::Setup_Animations()
-{
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_LOOP), "Jump_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_LF), "Jump_Run_LF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_RF), "Jump_Run_RF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 0.f); // 더블 점프
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f); // 제자리 점프
-}
+
 
 
 

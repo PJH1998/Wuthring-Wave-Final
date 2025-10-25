@@ -7,13 +7,6 @@ NS_BEGIN(Client)
 class CAugustaGroundLand final : public CGroundState
 {
 private:
-    enum LANDSTATE
-    {
-        RUN = 0,
-        END
-    };
-
-private:
     explicit CAugustaGroundLand() = default;
     virtual ~CAugustaGroundLand() = default;
 
@@ -28,14 +21,11 @@ private:
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
-    _bool m_States[LANDSTATE::END] = {};
 
-private:
-    virtual void Handle_Input() override;
+    void Setup_Animations();
     void Update_LandAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
-    void Setup_Animations();
-    void State_Reset();
+
 
 public:
     static CAugustaGroundLand* Create(class CGameObject* pOwner);

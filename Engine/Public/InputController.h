@@ -21,8 +21,8 @@ public:
 	
 
 public:
-	_bool Check_AnyInput(_uint iKeyInput, KEYSTATE eState = KEYSTATE::PRESS); // OR
-	_bool Check_AllInput(_uint iKeyInput, KEYSTATE eState = KEYSTATE::PRESS); // AND
+	_bool Check_AnyInput(_uint iKeyInput); // OR
+	_bool Check_AllInput(_uint iKeyInput); // AND
 	
 public:
 	void Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValue);

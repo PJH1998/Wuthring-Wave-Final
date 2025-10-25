@@ -7,12 +7,6 @@ NS_BEGIN(Client)
 class CAugustaGroundSkill final : public CGroundState
 {
 private:
-    enum SKILLSTATE
-    {
-
-    };
-
-private:
     explicit CAugustaGroundSkill() = default;
     virtual ~CAugustaGroundSkill() = default;
 
@@ -26,7 +20,6 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _string m_strSkillType = {};  // "Hack", "Rise", "Strike", "QTE", "Burst"
 
-private:
     void Check_StateTransition();
 
 public:
