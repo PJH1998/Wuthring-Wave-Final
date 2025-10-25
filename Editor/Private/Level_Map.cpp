@@ -8,7 +8,7 @@
 #include"Edit_LightObject.h"
 #include"Edit_Brush.h"
 #include"Shader_Interface.h"
-
+#include"AnimationTool.h"
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
 _float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
@@ -37,6 +37,33 @@ HRESULT CLevel_Map::Initialize()
 
     //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
     pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
+
+    LEVEL m_eCurLevel = LEVEL::MAP;
+    //m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
+
+    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+    //    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+    //        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+    //{
+    //    CRASH("Failed Load AnimMesh Shader");
+    //    return E_FAIL;
+    //}
+
+    //SHADER_MACRO eShaderMacro = {
+    //    {"THREAD_X", "64" }
+    //    ,{"THREAD_Y", "1" }
+    //    ,{"THREAD_Z", "1" }
+    //    , { NULL, NULL }
+    //};
+
+    //string strEntryPoint = "CSMain";
+    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+    //    CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+    //        , eShaderMacro, strEntryPoint))))
+    //{
+    //    CRASH("Failed Load AnimMesh Shader");
+    //    return E_FAIL;
+    //}
 
     return S_OK;
 }
@@ -71,6 +98,10 @@ void CLevel_Map::Update(_float fTimeDelta)
     case Editor::CLevel_Map::MENU_OBJECTLOAD:
         Menu_Model_Load();
         break;
+    case Editor::CLevel_Map::MENU_OBJECTTYPE:
+        Menu_Object_Type();
+        break;
+        
     }
 
     Make_MousePos();
@@ -81,6 +112,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
 void CLevel_Map::Render()
 {
+    //m_pAnimationTool->Render();
 }
 
 void CLevel_Map::Menu_Select()
@@ -98,7 +130,7 @@ void CLevel_Map::Menu_Select()
         if (ImGui::MenuItem("Light")) {
             m_eMenu == MENU_LIGHT ? m_eMenu = END : m_eMenu = MENU_LIGHT;
         }
-
+        
         if (ImGui::MenuItem("Map Save & Load")) {
             m_eMenu == MENU_MAPSAVELOAD ? m_eMenu = END : m_eMenu = MENU_MAPSAVELOAD;
         }
@@ -106,7 +138,9 @@ void CLevel_Map::Menu_Select()
         if(ImGui::MenuItem("Object Load")) {
             m_eMenu == MENU_OBJECTLOAD ? m_eMenu = END : m_eMenu = MENU_OBJECTLOAD;
         }
-
+        if (ImGui::MenuItem("Object Type")) {
+            m_eMenu == MENU_OBJECTTYPE ? m_eMenu = END : m_eMenu = MENU_OBJECTTYPE;
+        }
         _float4 CamPos = *m_pGameInstance->Get_CamPos();
         _char szCamPos[64] = {};
         sprintf_s(szCamPos, "Cam Pos - X : %.1f, Y : %.1f, Z : %.1f", CamPos.x, CamPos.y, CamPos.z);
@@ -214,6 +248,7 @@ void CLevel_Map::Menu_Model_Load()
                 XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
                 Desc.WorldMatrix = &DefaultMatrix;
                 strcpy_s(Desc.ModelName, FileName);
+                Desc.eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(m_eObjectType);
                 //m_pGameInstance->Clone_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                     , m_iLevel, TEXT("Layer_MapObject"), &Desc);
@@ -232,6 +267,25 @@ void CLevel_Map::Menu_Model_Load()
         ImGui::EndTable();
     }
 
+    ImGui::End();
+}
+
+void CLevel_Map::Menu_Object_Type()
+{
+    ImGui::Begin("Type");
+
+    const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
+    if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
+    {
+        for (_uint i = 0; i < CEdit_MapObject::OBJECTTYPE::END; ++i)
+        {
+            if (ImGui::Selectable(pObejceTType[i]))
+            {
+                m_eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(i);
+            }
+        }
+        ImGui::EndCombo();
+    }
     ImGui::End();
 }
 
@@ -361,10 +415,6 @@ void CLevel_Map::Menu_Save_Load()
                         {
                             _uint NameLength;
 
-                            _matrix PreTransformMatrix = XMMatrixIdentity();
-                            _float fSize = 0.01f;
-                            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
-
                             CEdit_MapObject::MAP_LOAD Desc{};
 
                             while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
@@ -373,11 +423,12 @@ void CLevel_Map::Menu_Save_Load()
                                 File.read(Desc.ModelName, NameLength);
 
                                 File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+                                File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CEdit_MapObject::OBJECTTYPE));
 
                                 _float4x4 Matrix = {};
                                 File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                                 Desc.WorldMatrix = &Matrix;
-
+                                
                                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                                     , m_iLevel, TEXT("Layer_Test"), &Desc);
 
@@ -404,13 +455,15 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-    //string FolderPath = "../../Client/Bin/Resource/Map/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock/Common/1025/";
     string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/";
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;
 
     _matrix PreTransformMatrix = XMMatrixIdentity();
-    _float fSize = 0.1f;
+    _float fSize = 0.01f;
+    //_float fSize = 0.02f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
     _int version={};
@@ -418,7 +471,7 @@ void CLevel_Map::Load_Objects()
     _wstring LastVersionName;
     _string LastVersionPath;
 
-
+    //마지막 폴더 못읽음. 프로토타입 안생김.
     for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
         if (entry.is_regular_file()) {
             if (entry.path().string().find("MapData") != std::string::npos)
@@ -485,12 +538,27 @@ void CLevel_Map::Load_Objects()
         }
     }
 
-    m_pGameInstance->Wait_Thread_End();
+    if (!LastVersionName.empty())
+    {
+        if (LastVersionName.find(TEXT("Foliage")) != std::string::npos)
+        {
+            m_FoliageNames.push_back(LastVersionName + to_wstring(0));
+            m_FoliagePaths.push_back(LastVersionPath);
+        }
+        else
+        {
+            m_PrototypeNames.push_back(LastVersionName + to_wstring(0));
+            m_ModelPaths.push_back(LastVersionPath);
+        }
+    }
 
+    m_pGameInstance->Wait_Thread_End();
+    
     for (_uint i = 0; i < m_PrototypeNames.size(); ++i)
     {
         m_pPreViewObject->Add_Model(m_PrototypeNames[i]);
     }
+
 
     for (_uint i = 0; i < m_FoliageNames.size(); ++i)
     {
@@ -742,5 +810,7 @@ void CLevel_Map::Free()
         Pair.second.clear();
     }
     Safe_Release(pShaderInterface);
+    Safe_Release(m_pAnimationTool);
+    
     m_SaveObjects.clear();
 }

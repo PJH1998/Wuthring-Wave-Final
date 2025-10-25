@@ -72,7 +72,7 @@ struct GS_OUT
 [maxvertexcount(6)]
 void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 {
-    GS_OUT Out[4];
+    GS_OUT Out[4] = (GS_OUT[4]) 0;
     
     vector vRight, vUp, vLook;
     

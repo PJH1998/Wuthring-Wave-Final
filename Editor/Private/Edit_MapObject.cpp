@@ -42,10 +42,10 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iNumLOD = m_pModelComArray.size()-1;
 
 
-    /*for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+    for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
     {
         Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
-    }*/
+    }
     //박스 모델에서 종합해서 최종 크기.
     //m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
@@ -58,7 +58,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_vRotation = m_vNewRotation = _float3(0.f, 0.f, 0.f);
     m_vNewTranslation = m_vTranslation;
     m_iShaderPassIndex = pDesc->iShaderPassIndex;
-
+    m_eObjectType = pDesc->eObjectType;
     MODELTYPE::MAP;
 
     _char Tag[MAX_PATH] = "NonInteraction";
@@ -86,7 +86,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         if (m_iShaderPassIndex == 3)
             m_iShaderPassIndex = 0;
         event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
-
+        event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
         _float4x4 WorldMatrix;
         XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
@@ -138,14 +138,14 @@ void CEdit_MapObject::Update(_float fTimeDelta)
         {
             if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
             {
-                _bool IsIn = { false };
+            /*    _bool IsIn = { false };
                 for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
                 {
                     IsIn = m_pGameInstance->IsIn_WorldSpace(m_pModelComArray[0]->Get_BoundingBox(i));
                     if (IsIn)
                         break;
-                }
-                if (IsIn)
+                }*/
+                //if (IsIn)
                 {
                     //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
 
@@ -174,8 +174,8 @@ void CEdit_MapObject::Late_Update(_float fTimeDelta)
 
 void CEdit_MapObject::Render()
 {
-    //_uint DrawModel = m_iLODIndex;
-    _uint DrawModel = 0;
+    _uint DrawModel = m_iLODIndex;
+    //_uint DrawModel = 0;
     
     if (DrawModel > m_iNumLOD)
         DrawModel = m_iNumLOD;
@@ -229,7 +229,22 @@ void CEdit_MapObject::Set_ImGuiOption()
 {
 #ifdef _DEBUG
     ImGui::Text(m_ModelName);
+    ImGui::SameLine();
 
+    //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
+
+    const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
+    if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
+    {
+        for (_uint i = 0; i < CEdit_MapObject::OBJECTTYPE::END; ++i)
+        {
+            if (ImGui::Selectable(pObejceTType[i]))
+            {
+                m_eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(i);
+            }
+        }
+        ImGui::EndCombo();
+    }
 
     About_Parent();
 
@@ -296,6 +311,16 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
     if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
+    
+    /*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    RigidbodyDesc.eShape = SHAPE::MESH;
+    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    RigidbodyDesc.eType = EMotionType::Static;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+    RigidbodyDesc.pModel = m_pModelComArray[0];
+
+    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);*/
 
     m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
     m_pGameInstance->Wait_Thread_End();
@@ -595,8 +620,12 @@ void CEdit_MapObject::About_Texture()
 
         //When Many Model Need Same texture, use this
         config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/";
-        //m_SelectedDiffuseTexturePath[m_iSelectedMesh] = "C:/Users/dnheu/source/repos/Wuthering_Wave_Final/Client/Bin/Resource/Map/The_False_Sovereign/Rock/SM_Tab_Roc_04AH/Mat/Tex/T_Tab_Roc_25A_D.png";
-
+        
+        for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+        {
+            //m_SelectedDiffuseTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Tex/T_Tab_Roc_25A_D.png";
+            //m_SelectedNormalTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Tex/T_Tab_Roc_25A_N.png";
+        }
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 
         _char Text[32] = {};
@@ -833,17 +862,6 @@ void CEdit_MapObject::About_Texture()
         m_pMapInterface->Display_Textures(m_pMaskTextureCom[m_iSelectedMesh]);
         ImGui::SameLine();
         m_pMapInterface->Display_Textures(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
- 
-        //ImGui::SameLine();
-        //if (m_pNormalTextureCom[m_iSelectedMesh])
-        //    ImGui::Image((ImTextureID)m_pNormalTextureCom[m_iSelectedMesh]->Get_SRV(0), ImageSize);
-
-        //if (m_pMaskTextureCom[m_iSelectedMesh])
-        //    ImGui::Image((ImTextureID)m_pMaskTextureCom[m_iSelectedMesh]->Get_SRV(0), ImageSize);
-
-        //ImGui::SameLine();
-        //if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
-        //    ImGui::Image((ImTextureID)m_pMaskDiffuseTextureCom[m_iSelectedMesh]->Get_SRV(0), ImageSize);
 
         ImGui::End();
 

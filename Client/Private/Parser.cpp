@@ -46,7 +46,7 @@ void CParser::Read_Map_Dat(const _string pFilePath, LEVEL eLevel)
 
     _matrix PreTransformMatrix = XMMatrixIdentity();
     //_float fSize = 0.01f;
-    _float fSize = 0.1f;
+    _float fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
     ifstream File(pFilePath, ios::binary);
