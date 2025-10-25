@@ -30,6 +30,8 @@ public:
 	_bool								IsLand(_float3* pNormalOut = nullptr);
 	// Gravity On/Off
 	void								Set_Gravity(_bool isGravity) { m_isGravity = isGravity; }
+	// Set Pos
+	void								Set_Position(const _fvector& vPos) { m_pCharacterVirtual->SetPosition(LoadVec3(vPos)); }
 
 public:
 	virtual		HRESULT				Initialize_Prototype() override;

@@ -123,7 +123,6 @@ void CSpringCamera_Edit::Lerp_Distance(_float fTimeDelta)
 {
 	if (0.1f < fabsf(m_fFixedDistance - m_fDistance))
 		m_fDistance += (m_fFixedDistance - m_fDistance) * fTimeDelta * m_fLerpSpeed;
-
 }
 
 void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
@@ -160,12 +159,11 @@ void CSpringCamera_Edit::Compute_CamPos()
 void CSpringCamera_Edit::Check_Ray()
 {
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
-	//_vector vCamPos = XMLoadFloat4(&m_vCurrentPosition);
+
 	_vector vStartPos = XMLoadFloat4(&m_vLookPosition);
 	_float4 vOut;
 	if (true == m_pGameInstance->Ray_Cast(vStartPos, vCamPos, &vOut))
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&vOut));
-
 }
 
 void CSpringCamera_Edit::Lerp_Move(_float fTimeDelta)
@@ -237,7 +235,6 @@ void CSpringCamera_Edit::Ready_Component()
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
 	RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
-	//RigidbodyDesc.vExtent = _float3(100.f, 100.f, 100.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"), 
@@ -281,4 +278,5 @@ void CSpringCamera_Edit::Free()
 
 	Safe_Release(m_pRigidbodyCom);
 	m_TargetTransforms.clear();
+	m_pTargetTransform = nullptr;
 }

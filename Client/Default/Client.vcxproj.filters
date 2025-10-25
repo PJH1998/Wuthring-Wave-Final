@@ -145,6 +145,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Climb\Augusta">
       <UniqueIdentifier>{43d5313d-7a97-47ea-a6b0-12113f159a63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="94. Factory">
+      <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -323,6 +326,13 @@
     <ClInclude Include="..\Public\AugustaClimbExit.h">
       <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MonsterDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
+    </ClInclude>
+    
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -481,6 +491,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaClimbExit.cpp">
       <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

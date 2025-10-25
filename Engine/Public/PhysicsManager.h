@@ -59,6 +59,7 @@ public:
 #ifdef _DEBUG
 	void				Render();
 	void				DrawShape(const Shape* pShape, RMat44 Matrix);
+	void				DrawRay(const _fvector& vStartPos, const _fvector& vEndPos);
 #endif
 
 	_bool				Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);

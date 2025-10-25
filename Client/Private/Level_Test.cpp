@@ -8,8 +8,9 @@
 #include "Player.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    :CLevel(pDevice,pContext)
+    :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevel_Test::Initialize()
@@ -19,7 +20,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Map("../Bin/Resource/Map/MapData/Client_ShadowTest_NonInteraction.dat");
 
     Ready_Layer_Player();
-
+	Ready_Dummy();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
@@ -99,7 +100,10 @@ void CLevel_Test::Ready_Layer_Player()
         CRASH("Failed Ready Player");
 }
 
-
+void CLevel_Test::Ready_Dummy()
+{
+	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 0.f, 20.f), XMMatrixScaling(0.001f, 0.001f, 0.001f));
+}
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
