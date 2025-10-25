@@ -24,6 +24,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     //__super::Initialize_Clone(pArg);
 
     CGameObject::Initialize_Clone(pArg);
+    m_vecCachedUITransform.resize(1);
     Ready_Components(pArg);
     __super::Ready_Events();
 

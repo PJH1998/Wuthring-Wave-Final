@@ -266,6 +266,8 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Separator();
 
+    static _bool isActiveCurObject = true;
+
     // quick edit UIName
     if (m_pCurObj)
     {
@@ -274,6 +276,12 @@ void CLevel_UI::Update_Hierarchy()
         
         _string strUIName = WStringToString(tDesc.strUIName);
         strcpy_s(szUIName, strUIName.c_str());
+
+        if (ImGui::Checkbox("##CurObjectToggle", &isActiveCurObject))
+        {
+            m_pCurObj->SetActivate(isActiveCurObject);
+        }
+        ImGui::SameLine();
 
         ImGui::Text("Name ");
         ImGui::SameLine();
@@ -339,7 +347,8 @@ void CLevel_UI::Update_Hierarchy()
             _uint iIndex = 0;
 
             // 遺紐??대쫫???녿뒗 寃쎌슦 泥댄겕X (?꾩뿉???대? 李얠븯?쇰?濡?
-            if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
+            if (ui.pCustomUI->Get_UIDesc().strParentName.empty() ||
+                ui.pCustomUI->Get_UIDesc().strParentName == ui.pCustomUI->Get_UIDesc().strUIName)
                 continue;
             // ?대떦?섎뒗 遺紐④? ?덈뒗吏 寃??
             for (auto& otherui : m_vecCustomUIs)
@@ -358,7 +367,10 @@ void CLevel_UI::Update_Hierarchy()
                 _wstring wstrUIName = ui.pCustomUI->Get_UIDesc().strUIName;
                 _string strUIName = WStringToString(wstrUIName);
                 if (ImGui::Selectable(strUIName.c_str(), iSelected == iIndex))
+                {
                     m_pCurObj = ui.pCustomUI;
+                    isActiveCurObject = static_cast<CCustom_UI*>(m_pCurObj)->Get_Active();
+                }
             }
         }
     }
@@ -1238,6 +1250,26 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
                 m_vecUIKeyFrameDescs.push_back(tTempDesc);
             }
+            
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button,          ImVec4(0.0f, 0.0f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    ImVec4(0.0f, 0.0f, 0.9f, 1.0f));
+            if (ImGui::Button("Instant Load Anim"))
+            {
+                UI_ANIM_DESC tAnimDesc = {};
+                tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+                tAnimDesc.strAnimName = L"Instant Animation";
+                tAnimDesc.isLoop = m_isAnimLoop;
+                for (auto& keyframeDesc : m_vecUIKeyFrameDescs)
+                    tAnimDesc.vecKeyFrames.push_back(keyframeDesc);
+
+                if (pTargetAnimator->Find_Animation(tAnimDesc.strAnimName))
+                    pTargetAnimator->Remove_Animation(tAnimDesc.strAnimName);
+
+                pTargetAnimator->Insert_Animation(tAnimDesc);
+            }
+            ImGui::PopStyleColor(3);
         }
         else
         {
@@ -1324,6 +1356,8 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             }
         }
 
+
+
     }
 
 #pragma endregion
@@ -1353,6 +1387,17 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             ImGui::SameLine();
             if (ImGui::Button("Deselect##AnimList Deselect"))
                 m_pSelectedUIAnim = nullptr;
+            ImGui::SameLine();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+            if (ImGui::Button("Delete##AnimList AnimDelete"))
+            {
+                pTargetAnimator->Remove_Animation(m_pSelectedUIAnim->strAnimName);
+                m_pSelectedUIAnim = nullptr;
+            }
+            ImGui::PopStyleColor(3);
         }
 
 

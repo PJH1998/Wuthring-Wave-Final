@@ -23,6 +23,7 @@
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
+#include "UI_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -99,6 +100,10 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH( m_pCSM );
+
+	m_pUI_Manager = CUI_Manager::Create();
+	ASSERT_CRASH(m_pUI_Manager);
+
 
 	return S_OK;
 }
@@ -666,6 +671,23 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+// find UI
+// Check_Interaction....
+
+
+HRESULT	CGameInstance::Add_RootUI(CUIObject* rootUI)
+{
+	return m_pUI_Manager->Add_RootUI(rootUI);
+}
+
+void	CGameInstance::Clear_RootUI()
+{
+	m_pUI_Manager->Clear_RootUI();
+}
+#pragma endregion
+
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -722,6 +744,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pPhysicsManager);
+	Safe_Release(m_pUI_Manager);
 
 	Release();
 }

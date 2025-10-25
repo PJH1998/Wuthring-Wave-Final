@@ -35,8 +35,6 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 
 void CAnimator_UI::Update(_float fTimeDelta)
 {
-    Update_Animation(fTimeDelta);
-
     m_fElapsedTime += fTimeDelta;
 }
 
@@ -47,6 +45,7 @@ void CAnimator_UI::Late_Update(_float fTimeDelta)
 
 HRESULT CAnimator_UI::Render()
 {
+    Update_Animation();
 	return S_OK;
 }
 
@@ -227,10 +226,23 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     return vResult;
 }
 
-void CAnimator_UI::Update_Animation(_float fTimeDelta)
+void CAnimator_UI::Update_Animation()
 {
-    if (m_pCurAnimDesc == nullptr)
+    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
         return;
+
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+
+    if (m_pCurAnimDesc == nullptr)
+    {
+        CLevel_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
+
+        pTargetShader->Bind_Value("g_AlphaStrength", &tDesc.fAlpha, sizeof(tDesc.fAlpha));
+        pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
+        pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
+        pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+        return;
+    }
 
     // Calculate Frame..
     const _uint     iKeyFrameRate       = 60; // 기준 초당 프레임
@@ -334,7 +346,6 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
     
-    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
     pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
     pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
     pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));

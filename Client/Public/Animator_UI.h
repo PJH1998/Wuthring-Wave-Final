@@ -82,7 +82,7 @@ private:
 
 	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// 키프레임을 넣으면 현재 애니메이션의 현재 position에 맞는 값을 반환 (catmull-rom 적용)
 
-	void		Update_Animation(_float fTimeDelta);
+	void		Update_Animation();
 
 private:
 	vector<UI_ANIM_DESC>		m_vecAnimationDescs = {};

@@ -24,11 +24,17 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta);
 	virtual		void				Render();
 
-protected:
-	virtual		void				OnEvent(_uint iEventType);
+	virtual		_bool				Check_OnInteract(_uint iEventInteractType, _uint iInstanceIndex = 0);	// returns local variable that presents event state.
 
-	virtual		_bool				Check_IsInSpace() = 0;
+protected:
+	virtual		void				OnEvent(_uint iEventType);			// calls event functions
+
+	virtual		void				Update_InputState();						// updates local variable that presents event state.
+	virtual		_bool				Check_IsInSpace();
+
+public:
 	virtual		void				Set_Active(_bool isActive)		{ m_isActivate = isActive; };
+	virtual		_bool				Get_Active() { return m_isActivate; };
 
 
 protected:
@@ -37,6 +43,9 @@ protected:
 	_float4x4				m_ProjMatrix = {};
 
 	_float					m_iWinSizeX{}, m_iWinSizeY{};
+
+	_bool					m_isHovered = false;
+	_bool					m_isClicked = false;
 
 protected:
 	HRESULT Begin();

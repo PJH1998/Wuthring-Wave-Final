@@ -233,6 +233,13 @@ public:
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+public:
+	HRESULT				Add_RootUI(class CUIObject* rootUI);
+	void				Clear_RootUI();
+#pragma endregion
+
+
 public:
 	HRESULT				Clear_Resource(_uint iLevelID);
 	HRESULT				Clear_Memory();
@@ -261,6 +268,7 @@ private:
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CCSM*					m_pCSM = { nullptr };
+	class CUI_Manager*			m_pUI_Manager = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

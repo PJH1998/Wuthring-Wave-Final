@@ -106,8 +106,13 @@ public:
 	void					Add_EventFunction(_uint iEventType, function<void()> function);
 	void					OnEvent(_uint iEventType)				override;
 
-	_bool					Check_IsInSpace()						override;
+	_bool					Check_OnInteract(_uint iEventInteractType, _uint iInstanceIndex = 0)	override;
+	
+public:
+	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
+private:
 	void					Update_CacheTransform(_float fTimeDelta);
+	void					Update_InputState()						override;
 
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
@@ -120,10 +125,9 @@ protected:
 	//HRESULT				Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Events();
-
 	HRESULT					Bind_Description(void* pArg);
-
-	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
+	
+	_bool					Check_IsInSpace()						override;
 
 protected:
 	CShader*				m_pShaderCom			= { nullptr };
@@ -140,10 +144,13 @@ protected:
 
 	vector<function<void()>>	m_vecFunctions[ENUM_CLASS(UI_EVENT_TYPE::END)] = {};
 
-private:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
+protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
 	_float					m_cachingTimeElapsed = {};
 	enum CACHED_TRANSFORM {POS, ROT, SCA, END};
 	vector<array<_float4, CACHED_TRANSFORM::END>>	m_vecCachedUITransform = {};
+
+	_uint					m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
+	_uint					m_iInputInstanceIndex = UINT_MAX;
 
 
 public:

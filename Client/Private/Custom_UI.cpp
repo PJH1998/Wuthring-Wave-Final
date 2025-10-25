@@ -1,4 +1,5 @@
-﻿#include "ClientPch.h"
+﻿#include "UIObject.h"
+#include "ClientPch.h"
 #include "Custom_UI.h"
 #include "Animator_UI.h"
 
@@ -59,10 +60,12 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (m_pAnimator_UICom)
         m_pAnimator_UICom->Update(fTimeDelta);
 
+    Update_InputState();
+    Update_CacheTransform(fTimeDelta);
+
+
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
-
-    Update_CacheTransform(fTimeDelta);
 
 
 #ifdef KSTA_UICLICKTEST
@@ -99,6 +102,8 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
+    m_pAnimator_UICom->Render();    // Updates Shader Variables.
+
     if (m_pShaderCom)
     {
         if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
@@ -158,13 +163,32 @@ void CCustom_UI::Add_EventFunction(_uint iEventType, function<void()> function)
 
 void CCustom_UI::OnEvent(_uint iEventType)
 {
+    if (iEventType == ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT))
+        int i = 10;
+
     for (auto& func : m_vecFunctions[iEventType])
         func();
 }
 
+_bool CCustom_UI::Check_OnInteract(_uint iEventInteractType, _uint iInstanceIndex)
+{
+    _bool isSame_InteractType = false;
+    _bool isSame_InstanceIndex = false;
+
+    if (iEventInteractType == m_iInputState)
+        isSame_InteractType = true;
+
+    if (!m_tUIDesc.isInstance ||
+        iInstanceIndex == m_iInputInstanceIndex)
+        isSame_InstanceIndex = true;
+
+    _bool isInteracted = (isSame_InteractType && isSame_InstanceIndex);
+
+    return isInteracted;
+}
+
 _bool CCustom_UI::Check_IsInSpace()
 {
-
 
 #define ISINSPACE(CURSORPOS, RECT_CENTERPOS, RECT_SCALE)    (( (CURSORPOS).x >= ((RECT_CENTERPOS).x - (RECT_SCALE).x / 2.f) &&   \
                                                                (CURSORPOS).x <= ((RECT_CENTERPOS).x + (RECT_SCALE).x / 2.f) &&   \
@@ -189,10 +213,14 @@ _bool CCustom_UI::Check_IsInSpace()
             if (ISINSPACE(tCursorPos, m_vecCachedUITransform[i][POS], m_vecCachedUITransform[i][SCA]))
             {
                 isIn_InteractableSpace = true;
+                m_iInputInstanceIndex = i;
                 break;
             }
         }
     }
+
+    //if (!isIn_InteractableSpace)
+    //    m_iInputInstanceIndex = UINT_MAX;
 
     return isIn_InteractableSpace;
 }
@@ -311,18 +339,48 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
 
 HRESULT CCustom_UI::Ready_Events()
 {
-    m_pGameInstance->Subscribe<ONCLICK_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnClickUI",
-        [this](const ONCLICK_UI_EVENT event)    {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK)); });
-    m_pGameInstance->Subscribe<ONHOVER_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnHoverUI",
-        [this](const ONHOVER_UI_EVENT event)    {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER));});
-    m_pGameInstance->Subscribe<ONSCROLL_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnScrollUI",
-        [this](const ONSCROLL_UI_EVENT event)   {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
+    m_pGameInstance->Subscribe<ONCLICKENTER_UI_EVENT>   (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickEnterUI",
+        [this](const ONCLICKENTER_UI_EVENT event)
+        {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), event.iInstanceIndex))  
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER)); });
+
+    m_pGameInstance->Subscribe<ONCLICKING_UI_EVENT>     (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickingUI",
+        [this](const ONCLICKING_UI_EVENT event)
+        {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICKING), event.iInstanceIndex))     
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICKING)); });
+
+    m_pGameInstance->Subscribe<ONCLICKEXIT_UI_EVENT>    (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickExitUI",
+        [this](const ONCLICKEXIT_UI_EVENT event)        
+        {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT), event.iInstanceIndex))   
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT)); });
+
+    m_pGameInstance->Subscribe<ONHOVERENTER_UI_EVENT>   (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverEnterUI",
+        [this](const ONHOVERENTER_UI_EVENT event)       
+        {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), event.iInstanceIndex))  
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER));});
+
+    m_pGameInstance->Subscribe<ONHOVERING_UI_EVENT>     (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoveringUI",
+        [this](const ONHOVERING_UI_EVENT event)         
+        {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), event.iInstanceIndex))     
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVERING));});
+
+    m_pGameInstance->Subscribe<ONHOVEREXIT_UI_EVENT>    (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverExitUI",
+        [this](const ONHOVEREXIT_UI_EVENT event)        
+        {if ( (m_iInputState == ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT)))   // 나갈때는 Check_IsInSpace 체크를 하면 안됨. 나갔으니까 당연히 false 떨어짐;
+        OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT));});
+
+    //m_pGameInstance->Subscribe<ONSCROLL_UI_EVENT>(ENUM_CLASS(STATIC::NONE), L"Event_OnScrollUI",
+    //    [this](const ONSCROLL_UI_EVENT event)   {OnEvent(ENUM_CLASS(UI_EVENT_TYPE::SCROLL));});
 
 #ifdef KSTA_UIEVENTTEST
 
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK),     [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " CLICKED!" << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER),     [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " HOVERED!" << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::SCROLL),    [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " SCROLLED!" << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER),   [this]() {std::cout << "[CCustom_UI] [CLK-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICKING),      [this]() {std::cout << "[CCustom_UI] [CLI--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT),    [this]() {std::cout << "[CCustom_UI] [CLI-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER),   [this]() {std::cout << "[CCustom_UI] [HOV-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVERING),      [this]() {std::cout << "[CCustom_UI] [HOV--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT),    [this]() {std::cout << "[CCustom_UI] [HOV-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    //Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::SCROLL),    [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " SCROLLED!" << std::endl; });
 
 #endif // KSTA_UIEVENTTEST
 
@@ -393,6 +451,84 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
         _matrix LoadCombinedMatrix = XMLoadFloat4x4(&m_CombinedWorldMatrix);
         child->Update_CombinedMatrix(&LoadCombinedMatrix);
     }
+}
+
+void CCustom_UI::Update_InputState()
+{
+    if (!m_isActivate)
+    {
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
+        return;
+    }
+
+
+    _bool isIn = Check_IsInSpace();
+
+
+    // Check Click
+    if (!m_isClicked &&
+        m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
+        isIn)
+    {
+        m_isHovered = false;
+        m_isClicked = true;
+        // click enter..
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickEnterUI", ONCLICKENTER_UI_EVENT(m_iInputInstanceIndex));
+    }
+    else if (m_isClicked &&
+        m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS &&
+        isIn)
+    {
+        m_isHovered = false;
+        m_isClicked = true;
+        // clicking..
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICKING);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickingUI", ONCLICKING_UI_EVENT(m_iInputInstanceIndex));
+    }
+    else if (m_isClicked &&
+        m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::UP)
+    {
+        m_isClicked = false;
+        // click exit..
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickExitUI", ONCLICKEXIT_UI_EVENT(m_iInputInstanceIndex));
+    }
+    else if (!m_isClicked)
+    {
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
+    }
+
+
+    // Check Hover
+    if (m_isClicked == true)     // click이 hover보다 우선순위 높음
+        return;
+
+    if (isIn)
+    {
+        if (!m_isHovered)
+        {
+            m_isHovered = true;
+            // hover enter
+            m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER);
+            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverEnterUI", ONHOVERENTER_UI_EVENT(m_iInputInstanceIndex));
+        }
+        else
+        {
+            // hovering
+            m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVERING);
+            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoveringUI", ONHOVERING_UI_EVENT(m_iInputInstanceIndex));
+        }
+    }
+    else if (m_isHovered)
+    {
+        m_isHovered = false;
+        // hover exit
+        m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT);
+        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverExitUI", ONHOVEREXIT_UI_EVENT(m_iInputInstanceIndex)); // 이 시점에 이미 m_iInputState 가 0인데?
+    }
+
+
 }
 
 void CCustom_UI::Free()

@@ -77,8 +77,14 @@ void CCustom_UI::Update(_float fTimeDelta)
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
 {
-    //if (!m_isActive)
-    //    return;
+    if (!m_isActivate)
+        return;
+
+    if (m_tUIDesc.pParentObject && static_cast<CCustom_UI*>(m_tUIDesc.pParentObject)->Get_Active() == false)
+        return;
+
+
+
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
@@ -86,8 +92,10 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    //__super::Begin();
 
+    //__super::Begin();
+    m_pAnimator_UICom->Render();    // Updates Shader Variables.
+    
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
         CRASH("Binding_Matrix_Failed");
 

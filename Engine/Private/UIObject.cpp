@@ -63,8 +63,22 @@ void CUIObject::Render()
 	return;
 }
 
+_bool CUIObject::Check_OnInteract(_uint iEventInteractType, _uint iInstanceIndex)
+{
+	return _bool();
+}
+
 void CUIObject::OnEvent(_uint iEventType)
 {
+}
+
+void CUIObject::Update_InputState()
+{
+}
+
+_bool CUIObject::Check_IsInSpace()
+{
+	return _bool();
 }
 
 HRESULT CUIObject::Begin()

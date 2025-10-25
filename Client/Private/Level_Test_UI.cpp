@@ -11,8 +11,23 @@ HRESULT CLevel_Test_UI::Initialize()
     // HUD 게임오브젝트 추가
     const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
 
-    if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD", iDestLevel, L"Layer_Custom_UI")))
-        CRASH("Create HUD FAILED.");
+    const _wstring strLayertag_UI = L"Layer_Custom_UI";
+    const _wstring strPrototypeTag_UI[] = {
+         L"Prototype_GameObject_Custom_UI_Container_HUD"
+    };
+
+
+    for (auto& strPrototypeTag : strPrototypeTag_UI)
+    {
+        CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+        if (FAILED(m_pGameInstance->Add_RootUI(pTargetUI)))
+            CRASH("Failed to Add RootUI to UI_Manager.");
+        if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+            CRASH("Failed to Add RootUI to Object_Manager.");
+    }
+
+    //if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD", iDestLevel, L"Layer_Custom_UI")))
+    //    CRASH("Create HUD FAILED.");
 
     return S_OK;
 }
@@ -41,5 +56,7 @@ CLevel_Test_UI* CLevel_Test_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 
 void CLevel_Test_UI::Free()
 {
+    m_pGameInstance->Clear_RootUI();
+
     __super::Free();
 }

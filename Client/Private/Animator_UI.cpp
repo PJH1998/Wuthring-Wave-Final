@@ -35,8 +35,6 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 
 void CAnimator_UI::Update(_float fTimeDelta)
 {
-    Update_Animation(fTimeDelta);
-
     m_fElapsedTime += fTimeDelta;
 }
 
@@ -47,6 +45,7 @@ void CAnimator_UI::Late_Update(_float fTimeDelta)
 
 HRESULT CAnimator_UI::Render()
 {
+    Update_Animation();
     return S_OK;
 }
 
@@ -226,10 +225,33 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     return vResult;
 }
 
-void CAnimator_UI::Update_Animation(_float fTimeDelta)
+void CAnimator_UI::Update_Animation()
 {
-    if (m_pCurAnimDesc == nullptr)
+    // if target doesnt have selected animation, binds default value to shader.
+    // if not, it will be affected by pre-played animations.
+    // 
+    // 현재 애니메이션이 없다면, 기본값을 셰이더에 할당.
+    // 안하면 그 이전에 다른 UI에서 할당된 값을 그대로 따라가기에, 의도치 않게 다른 오브젝트도 영향을 받음.
+
+
+    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
         return;
+
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+
+    if (m_pCurAnimDesc == nullptr)
+    {
+        UI_ANIM_KEYFRAME_DESC tDesc = {};
+
+        pTargetShader->Bind_Value("g_AlphaStrength", &tDesc.fAlpha, sizeof(tDesc.fAlpha));
+        pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
+        pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
+        pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+        return;
+    }
+
+
+
 
     // Calculate Frame..
     const _uint     iKeyFrameRate = 60; // 기준 초당 프레임
