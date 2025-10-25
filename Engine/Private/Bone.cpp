@@ -31,10 +31,11 @@ void CBone::Update_RibCombinedTransformationMatrix(const _fmatrix& PreTransforma
 {
 	if (-1 == m_iParentBoneIndex)
 	{
-		_matrix		PreRibTransformMatrix = XMMatrixIdentity();
+		/*_matrix		PreRibTransformMatrix = XMMatrixIdentity();
 		_float fSize = 0.1f;
 		PreRibTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
-		XMStoreFloat4x4(&m_CombinedTransformationMatrix, PreRibTransformMatrix);
+		XMStoreFloat4x4(&m_CombinedTransformationMatrix, PreRibTransformMatrix);*/
+		XMStoreFloat4x4(&m_CombinedTransformationMatrix, PreTransformationMatrix * XMLoadFloat4x4(&m_TransformationMatrix));
 		return;
 	}
 	XMStoreFloat4x4(&m_CombinedTransformationMatrix,

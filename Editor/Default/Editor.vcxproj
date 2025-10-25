@@ -172,6 +172,7 @@
     <ClInclude Include="..\public\EditDummy.h" />
     <ClInclude Include="..\public\EditDummy_Augusta.h" />
     <ClInclude Include="..\Public\EditDummy_Map.h" />
+    <ClInclude Include="..\Public\EditDummy_Target.h" />
     <ClInclude Include="..\public\EditDummy_Wolf.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
@@ -202,6 +203,7 @@
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\Public\Editor_Define_UI.h" />
+    <ClInclude Include="..\Public\Sequencer.h" />
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
@@ -223,6 +225,7 @@
     <ClCompile Include="..\private\EditDummy.cpp" />
     <ClCompile Include="..\private\EditDummy_Augusta.cpp" />
     <ClCompile Include="..\Private\EditDummy_Map.cpp" />
+    <ClCompile Include="..\Private\EditDummy_Target.cpp" />
     <ClCompile Include="..\private\EditDummy_Wolf.cpp" />
     <ClCompile Include="..\Private\EditorApp.cpp" />
     <ClCompile Include="..\Private\EditorPch.cpp">
@@ -252,6 +255,7 @@
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\Private\Sequencer.cpp" />
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />

@@ -2,6 +2,7 @@
 #include "GameSystem.h"
 
 #include "Parser.h"
+#include "Factory.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -13,6 +14,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 {
 	m_pParser = CParser::Create(pDevice, pContext);
 	ASSERT_CRASH(m_pParser);
+
+	m_pFactory = CFactory::Create(pDevice, pContext);
+	ASSERT_CRASH(m_pFactory);
 }
 
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
@@ -25,9 +29,15 @@ void CGameSystem::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
 	return m_pParser->Create_Map_Model(pFilePath, eLevel);
 }
 
+void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)
+{
+	m_pFactory->Create_MonsterDummy(eLayerLevel, vPos, PreTransformationMatrix);
+}
+
 void CGameSystem::Free()
 {
 	__super::Free();
 
 	Safe_Release(m_pParser);
+	Safe_Release(m_pFactory);
 }

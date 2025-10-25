@@ -60,6 +60,7 @@ public:
 public:
 	_uint				Get_CurrentLevel();
 	HRESULT			Open_Level(_uint iNextLevelID, class CLevel* pLevel);
+	HRESULT			Clear_CurrentLevel_Resources(_uint iNextLevel);
 #pragma endregion
 
 #pragma region PROTOTYPE_MANAGER
@@ -94,6 +95,7 @@ public:
 
 #pragma region TARGET_MANAGER
 	ID3D11Resource* Get_RT_Resource(const _wstring& strTargetTag);
+	ID3D11ShaderResourceView* Get_RT_SRV(const _wstring& strTargetTag);
 	HRESULT		Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor);
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
@@ -116,6 +118,8 @@ public:
 	void		Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
+	void		IsSSAO(_bool IsSSAO);
+	void		IsSSAO_Blur(_bool IsBlur);
 #endif
 #pragma endregion
 
@@ -158,7 +162,8 @@ public:
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG
-	void				DrawShape(const Shape* pShape);
+	void					DrawShape(const Shape* pShape, RMat44 Matrix);
+	void					DrawRay(const _fvector& vStartPos, const _fvector& vEndPos);
 #endif
 #pragma endregion
 
@@ -166,8 +171,8 @@ public:
 #pragma region EVENTBUS
 public:
 	template<typename TEvent>
-	void Subscribe(_uint iLevelID, const _wstring& strEventTag, function<void(const TEvent&)> handler) { m_pEventBus->Subscribe(iLevelID, strEventTag, handler); }
-	void Publish(_uint iLevelID, const _wstring& strEventTag, const class CEvent& event) { m_pEventBus->Publish(iLevelID, strEventTag, event); }
+	void Subscribe(_uint iStatic, const _wstring& strEventTag, function<void(const TEvent&)> handler) { m_pEventBus->Subscribe(iStatic, strEventTag, handler); }
+	void Publish(_uint iStatic, const _wstring& strEventTag, const class CEvent& event) { m_pEventBus->Publish(iStatic, strEventTag, event); }
 	void Unscribe() { m_pEventBus->Unscribe(); };
 #pragma endregion
 	
@@ -226,14 +231,27 @@ public:
 	HRESULT				Begin_CSM();
 	HRESULT				End_CSM();
 #ifdef _DEBUG
-	void				Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+	void					Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
+#endif
+#pragma endregion
+
+#pragma region RCS_MANAGER
+	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
+	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
+	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	HRESULT					Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
+	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
+	HRESULT					Begin_RCS(const _wstring& strRCSTag);
+	void					Clear_RCS(const _wstring& strRCSTag);
+#ifdef _DEBUG
+	HRESULT					Debug_Render_RCS();
 #endif
 #pragma endregion
 
 public:
-	HRESULT			Clear_Resource(_uint iLevelID);
-	HRESULT			Clear_Memory();
-	void			Release_Engine();
+	HRESULT				Clear_Resource(_uint iLevelID);
+	HRESULT				Clear_Memory();
+	void					Release_Engine();
 
 private:
 	class CGraphic_Device*		m_pGraphic_Device = { nullptr };
@@ -258,6 +276,7 @@ private:
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CCSM*					m_pCSM = { nullptr };
+	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

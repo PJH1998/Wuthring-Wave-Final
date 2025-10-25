@@ -9,6 +9,7 @@ public:
 	typedef struct tagColliderDesc {
 		_float3			vPos;
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
+		_float3			vOffset;
 		EMotionType	eType;
 		_uint				iLayer;
 		_float				fHeight;		// Capsule Height
@@ -29,6 +30,8 @@ public:
 	_bool								IsLand(_float3* pNormalOut = nullptr);
 	// Gravity On/Off
 	void								Set_Gravity(_bool isGravity) { m_isGravity = isGravity; }
+	// Set Pos
+	void								Set_Position(const _fvector& vPos) { m_pCharacterVirtual->SetPosition(LoadVec3(vPos)); }
 
 public:
 	virtual		HRESULT				Initialize_Prototype() override;
@@ -44,6 +47,8 @@ private:
 
 	_bool								m_isGravity = { true };
 
+	_float3							m_vOffset = {};
+	RefConst<Shape>				m_pShape = { nullptr };
 private:
 	// 경사로에서 이동속도 변화 -> Slide로 보정
 	Vec3								Slide(const Vec3& Velocity);

@@ -4,7 +4,7 @@
 
 NS_BEGIN(Engine)
 
-class CShaderFilter;
+class CRendererSubResource;
 class CTexture;
 
 class CRenderer final : public CBase
@@ -25,6 +25,9 @@ public:
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	void		Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
 	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
+	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
+	void		IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
+
 #endif
 
 private:
@@ -39,9 +42,9 @@ private:
 
 	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
-
+	_float							m_fWinSizeX{}, m_fWinSizeY{};
 	//TEST
-	CShaderFilter*					m_pFilter = { nullptr };
+	CRendererSubResource*			m_pSubResource = { nullptr };
 	_uint							m_iLUT_Index = {};
 
 	recursive_mutex					m_RecursiveMutex;
@@ -49,6 +52,8 @@ private:
 #ifdef _DEBUG
 	list<class CComponent*>			m_DebugComponents;
 	_bool							m_isRenderDebug = { true };
+	_bool							m_IsSSAO = { true };
+	_bool							m_IsSSAO_Blur = { true };
 #endif
 
 private:
@@ -66,7 +71,6 @@ private:
 	void				Render_NonLight();
 	void				Render_Emissive();
 	void				Render_DistortionObject();
-	void				Render_Blur();
 	void				Render_Blend();
 	void				Render_Distortion();
 	void				Render_LUT();
@@ -82,8 +86,10 @@ private:
 private:
 	HRESULT				Ready_RT();
 	HRESULT				Ready_MRT();
+	HRESULT				Ready_SubResource();
+	HRESULT				Ready_RCS();
+
 	HRESULT				Ready_Shadow_DSV();
-	HRESULT				Ready_Shader_Filter();
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

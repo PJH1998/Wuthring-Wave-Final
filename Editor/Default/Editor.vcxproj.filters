@@ -133,6 +133,12 @@
     <Filter Include="03. GameObject\Dummy\Map">
       <UniqueIdentifier>{c0abfd4d-8622-45a6-8c1d-49ec5cf5026a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Dummy\Target">
+      <UniqueIdentifier>{022955cb-36e1-47b4-90d3-440b456680b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Camera\Sequencer">
+      <UniqueIdentifier>{11fc27fe-040e-443a-b82b-7ad88739045e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -280,11 +286,17 @@
     <ClInclude Include="..\Public\EditDummy_Map.h">
       <Filter>03. GameObject\Dummy\Map</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\EditDummy_Target.h">
+      <Filter>03. GameObject\Dummy\Target</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Edit_MapObject_Sonora.h">
       <Filter>03. GameObject\MapObject</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Sequencer.h">
+      <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -415,8 +427,14 @@
     <ClCompile Include="..\Private\EditDummy_Map.cpp">
       <Filter>03. GameObject\Dummy\Map</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\EditDummy_Target.cpp">
+      <Filter>03. GameObject\Dummy\Target</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Sequencer.cpp">
+      <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
