@@ -9,6 +9,7 @@
 #include	"Map_Interface.h"
 #include	"Camera_Interface.h"
 
+#include "Sequencer.h"
 
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel { pDevice, pContext }
@@ -23,6 +24,8 @@ HRESULT CLevel_Camera::Initialize()
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
+	
+	m_pSequencer = CSequencer::Create();
 
     return S_OK;
 }
@@ -41,6 +44,8 @@ void CLevel_Camera::Update(_float fTimeDelta)
 			m_pMapInterface->Add_MapObject();
 
 	ImGui::End();
+
+	m_pSequencer->Update(fTimeDelta);
 }
 
 void CLevel_Camera::Render()
@@ -134,4 +139,6 @@ void CLevel_Camera::Free()
 	Safe_Release(m_pSpringCamera);
 	Safe_Release(m_pMapInterface);
 	Safe_Release(m_pCameraInterface);
+
+	Safe_Release(m_pSequencer);
 }
