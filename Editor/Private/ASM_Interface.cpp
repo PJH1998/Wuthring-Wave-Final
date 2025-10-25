@@ -31,7 +31,7 @@ HRESULT CASM_Interface::Initialize()
 	m_BehaviorTreeGraphDelegate.pInterface = this;
 
 	//CBT_Selector* pRoot = CBT_Selector::Create();
-	m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, nullptr);
+	//m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, nullptr);
 
 	m_pBlackBoard = CBlackBoard::Create();
 
@@ -142,7 +142,7 @@ void CASM_Interface::Node_Info()
 									m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.c_str(),
 									m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.c_str());
 	}
-	
+	ImGui::InputText("NodeName", m_Nodes[m_iCurrentNodeIndex].strName.data(), MAX_PATH);
 	if(ImGui::Button("Add Slot"))
 	{
 		if(BT_TYPE::ACTION != m_Nodes[m_iCurrentNodeIndex].eType)
@@ -335,7 +335,11 @@ void CASM_Interface::BehaviorTree_Setting()
 	{
 		m_isShowLoadFile = true;
 	}
-	
+	if(ImGui::Button("Bind to Component"))
+	{
+		m_isShowLoadFile = true;
+		m_isLoadtoComponent = true;
+	}
 	if(m_isShowSaveFile)
 		Save_BT_Data();
 	if(m_isShowLoadFile)
@@ -766,6 +770,14 @@ void CASM_Interface::Load_BT_Data()
 
 		file.close();
 		ImGuiFileDialog::Instance()->Close();
+		if(m_isLoadtoComponent)
+		{
+			if(nullptr != m_pBehaviorTree)
+				Safe_Release(m_pBehaviorTree);
+
+			m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, strFilePath.c_str());
+			m_isLoadtoComponent = false;
+		}
 		m_isShowLoadFile = false;
 	}
 }

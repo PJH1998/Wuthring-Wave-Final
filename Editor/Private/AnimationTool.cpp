@@ -295,23 +295,26 @@ void CAnimationTool::RenderUI_Transitions()
             //    }
             //    id++;
             //}
-            if(false == m_TransitionDatas.empty())
+            
+            for(auto& tTransition : m_TransitionDatas)
             {
-                for(auto& tTransition : m_TransitionDatas)
+                if(0 == m_SelectedFromStateTag.compare(tTransition.strFrom))
                 {
-                    if(0 == m_SelectedFromStateTag.compare(tTransition.strFrom))
+                    if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
                     {
-                        if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
-                        {
-                            iSelectedIndex = id;
-                        }
+                        iSelectedIndex = id;
+                        m_iTransitionInfoSelectedIndex = iSelectedIndex;
                     }
-                    id++;
                 }
+                id++;
             }
-            m_iTransitionInfoSelectedIndex = iSelectedIndex;
+            
+            
         }
         ImGui::EndChild();
+
+        if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
+            RenderUI_TransitionInfo();
     }
     ImGui::EndGroup();
 
@@ -328,7 +331,8 @@ void CAnimationTool::RenderUI_OptionState()
             // 1. TrackPosition 설정
 
             static float fTrackPosition = { 0.f };
-            ImGui::InputFloat("TransitTrackPosition", &fTrackPosition, 0.f, 0.f, "%.3f");
+            ImGui::InputFloat("Transit Target Position", &fTrackPosition, 0.f, 0.f, "%.3f");
+            ImGui::InputFloat("Transit Enable Position", &m_iTransitionEnablePos, 0.f, 0.f, "%.3f");
 
             // 2. Add Translation 설정.
            
@@ -337,10 +341,11 @@ void CAnimationTool::RenderUI_OptionState()
             static char textBuffer[256] = "";
             ImGui::InputText("Function Name", textBuffer, sizeof(textBuffer));
 
-            //3. 조건이 되어질 상태
+            //3. 우선 순위
+            ImGui::InputScalar("Priority", ImGuiDataType_U32, &m_iTransitionPriority);
+            //4. 조건이 되어질 상태
             ImGui::Text("%u", (1 << m_iTransitionTargetState));
             ImGui::InputScalar("Target State", ImGuiDataType_U32, &m_iTransitionTargetState);
-
 
             _string strTransition = {};
             if (ImGui::Button("Add Transition"))
@@ -353,11 +358,15 @@ void CAnimationTool::RenderUI_OptionState()
                     << "," << to_string(fTrackPosition);
                 strTransition = ss.str();
                 m_StateTransitions.emplace_back(strTransition);
+
+
                 TRANSITION_DATA T_Data{
                 m_SelectedFromStateTag,
                 m_SelectedToStateTag,
+                m_iTransitionPriority,
                 m_iTransitionTargetState,
-                fTrackPosition
+                fTrackPosition,
+                m_iTransitionEnablePos
                 };
                 //pair<_string, TRANSITION_DATA> Pair = {m_SelectedFromStateTag, T_Data};
                 m_TransitionDatas.push_back(T_Data);
@@ -374,10 +383,16 @@ void CAnimationTool::RenderUI_OptionState()
             {
                 m_StateTransitions.pop_front();
             }
+            if(ImGui::Button("Delete Selection"))
+            {
+                m_TransitionDatas.erase(m_TransitionDatas.begin() + m_iTransitionInfoSelectedIndex);
+                m_iTransitionInfoSelectedIndex = -1;
+            }
 
             if (ImGui::Button("Clear Transition"))
             {
                 m_StateTransitions.clear();
+                m_TransitionDatas.clear();
             }
 
             
@@ -400,7 +415,7 @@ void CAnimationTool::RenderUI_OptionState()
 
             if(ImGui::Button("Add Data"))
             {
-                m_pAnimMachineCom->Add_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
+                m_pAnimMachineCom->Reset_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
             }
 
             Export_StateTransition_To_CSV();
@@ -423,30 +438,38 @@ void CAnimationTool::RenderUI_OptionState()
 
 void CAnimationTool::RenderUI_TransitionInfo()
 {
-    ImGui::Begin("Transition Info");
+    //ImGui::Begin("Transition Info");
+    //ImGui::Text("Transition Info");
+    ImGui::BeginChild("Transition Info", ImVec2(400, 0), true);
+    {
+        ImGui::Text("Transition Count : %u", m_TransitionDatas.size());
+        ImGui::Separator();
+        auto& SelectData = m_TransitionDatas[m_iTransitionInfoSelectedIndex];
 
-    auto& SelectData = m_TransitionDatas[m_iTransitionInfoSelectedIndex];
-
-    ImGui::Text("From: %s", SelectData.strFrom.c_str());
-    ImGui::Text("To: %s", SelectData.strTo.c_str());
-    ImGui::Text("TargetState: %u", SelectData.iTargetState);
-    ImGui::Text("Transit Target Position: %f", SelectData.fTargetTrackPos);
-    if(ImGui::CollapsingHeader("Conditions"))
-    {
-        for(auto& ConditionName : SelectData.ConditionConst)
-            ImGui::Text(ConditionName.c_str());
+        ImGui::Text("From: %s", SelectData.strFrom.c_str());
+        ImGui::Text("To: %s", SelectData.strTo.c_str());
+        ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
+        ImGui::InputScalar("TargetState", ImGuiDataType_U32, &SelectData.iTargetState);
+        ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
+        ImGui::InputFloat("Transit Enable Position",&SelectData.fTransitEnablePos);
     }
-    ImGui::InputText("Condition Name",m_szConditionName, MAX_PATH);
-    ImGui::SameLine();
-    if(ImGui::Button("Add Condition"))
-    {
-        SelectData.ConditionConst.push_back(m_szConditionName);
-    }
-    if(ImGui::Button("Remove Condition"))
-    {
-        SelectData.ConditionConst.pop_back();
-    }
-    ImGui::End();
+    ImGui::EndChild();
+    //if(ImGui::CollapsingHeader("Conditions"))
+    //{
+    //    for(auto& ConditionName : SelectData.ConditionConst)
+    //        ImGui::Text(ConditionName.c_str());
+    //}
+    //ImGui::InputText("Condition Name",m_szConditionName, MAX_PATH);
+    //ImGui::SameLine();
+    //if(ImGui::Button("Add Condition"))
+    //{
+    //    SelectData.ConditionConst.push_back(m_szConditionName);
+    //}
+    //if(ImGui::Button("Remove Condition"))
+    //{
+    //    SelectData.ConditionConst.pop_back();
+    //}
+    //ImGui::End();
 }
 
 
@@ -483,9 +506,6 @@ void CAnimationTool::RenderUI_EditState()
 
 
     ImGui::End();
-    
-    if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
-        RenderUI_TransitionInfo();
 }
 
 void CAnimationTool::LoadDat()
@@ -913,9 +933,11 @@ void CAnimationTool::Export_StateTransition_To_CSV()
                 json Transition;
                 Transition["From"] = tTransitionData.strFrom;
                 Transition["To"] = tTransitionData.strTo;
+                Transition["Priority"] = tTransitionData.iPriority;
                 Transition["Target State"] = tTransitionData.iTargetState;
                 //다음 애니메이션의 해당 트랙 위치로 변환
                 Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
+                Transition["Transit Enable Pos"] = tTransitionData.fTransitEnablePos;
 
                 Output["Transitions"].push_back(Transition);
             }
@@ -950,12 +972,18 @@ void CAnimationTool::Import_StateTransition_From_Json()
 
         json ASM_Data;
         file >> ASM_Data;
-
+        m_pAnimMachineCom->Clear_States();
         m_pAnimMachineCom->Load_AnimDatas(ASM_Data);
 
         for(auto& jsonTransition : ASM_Data["Transitions"])
         {
-
+            TRANSITION_DATA tTransition{
+                jsonTransition["From"],
+                jsonTransition["To"],
+                jsonTransition["Target State"],
+                jsonTransition["Transit Target Pos"]
+            };
+            m_TransitionDatas.push_back(tTransition);
         }
 
         file.close();

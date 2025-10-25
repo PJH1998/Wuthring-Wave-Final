@@ -95,6 +95,7 @@ private:
 	ASM_MENU			m_eCurrentMenu = { ASM_MENU::BEHAVIOR_TREE };
 	_bool					m_isShowLoadFile = {false};
 	_bool					m_isShowSaveFile = {false};
+	_bool					m_isLoadtoComponent = {false};
 	_string					m_strFileName;
 
 #pragma region BehaviorTree_GraphEdit

@@ -17,7 +17,7 @@ CAnimMachine::CAnimMachine(const CAnimMachine& Prototype)
 {
 }
 
-HRESULT CAnimMachine::Initialize_Prototype(/*const _char* AnimMachineDataPath*/)
+HRESULT CAnimMachine::Initialize_Prototype()
 {
     return S_OK;
 }
@@ -37,7 +37,7 @@ HRESULT CAnimMachine::Initialize_Clone(void* pArg)
 }
 
 //void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex)
-void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string strAnimTag)
+void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAnimTag)
 {
 	//if(iIndex >= m_AnimStates.size())
 	if(m_AnimStates.end() == m_AnimStates.find(strAnimTag))
@@ -68,7 +68,7 @@ void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _float fTimeDelata)
 	//Result : 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
-	//m_AnimStates[m_iCurrentStateIndex]->Feedback(Result, pState, this, pModelCom);
+	m_AnimStates[m_strCurrentAnimTag]->Feedback(Result, pState, this, pModelCom);
 }
 
 void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, _uint* pState, _float fTimeDelata)
@@ -87,6 +87,7 @@ void CAnimMachine::Reset()
 #ifdef _DEBUG
 void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 {
+	Clear_States();
 	for(auto& strAnimationName : AnimationNames)
 	{
 		CAnimState::ANIMSTATE_DESC Temp{ false, true, 0.1f, 0.f, 1.f };
@@ -101,7 +102,7 @@ void CAnimMachine::Clear_States()
 	m_AnimStates.clear();
 }
 
-void CAnimMachine::Add_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed)
+void CAnimMachine::Reset_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed)
 {
 	if(m_AnimStates.find(strAnimName) == m_AnimStates.end())
 		return;
@@ -205,7 +206,7 @@ void CAnimMachine::Load_AnimDatas(json& jsonInput)
 			AnimState["fTransitTrackPos"],
 			AnimState["fAnimationSpeed"]
 		};
-		m_AnimStates.emplace(StateName, CAnimState::Create(StateName, DataDesc));
+		m_AnimStates.emplace(StateName, CAnimState::Create(AnimState, jsonInput["Transitions"]));
 	}
 }
 #endif

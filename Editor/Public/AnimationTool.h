@@ -91,13 +91,20 @@ private:
 		_string strFrom;
 		_string strTo;
 		//조건에 사용할 const flag변수
+		_uint iPriority;
 		_uint iTargetState;
 		_float fTargetTrackPos;
-		vector<_string> ConditionConst;
+		// 현재 애니메이션에서 변환할 수 있는 트랙위치
+		_float fTransitEnablePos;
+		//vector<_string> ConditionConst;
 	}TRANSITION_DATA;
 
 	class CAnimMachine* m_pAnimMachineCom = { nullptr };
+	_uint m_iTransitionPriority{};
 	_uint m_iTransitionTargetState{};
+	_float m_iTransitionEnablePos{};
+
+	//AnimState Data
 	_bool m_isBlend;
 	_bool m_isRootMotion;
 	_float m_fRootMotionRate;

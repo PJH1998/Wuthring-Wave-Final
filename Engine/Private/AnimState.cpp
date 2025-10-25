@@ -30,8 +30,20 @@ void CAnimState::Render_GUI()
 }
 #endif
 
-HRESULT CAnimState::Initialize(json& jsonParser)
+HRESULT CAnimState::Initialize(json& jsonParser, json& jsonTransitions)
 {
+	m_strAnimationTag = jsonParser["Name"];
+	m_StateData.isBlend = jsonParser["isBlend"];
+	m_StateData.isRootMotion = jsonParser["isRootMotion"];
+	m_StateData.fRootMotionRate = jsonParser["fRootMotionRate"];
+	m_StateData.fTransitTrackPos = jsonParser["fTransitTrackPos"];
+	m_StateData.fAnimationSpeed = jsonParser["fAnimationSpeed"];
+
+	for(auto& jsonTransition : jsonTransitions)
+	{
+		if(0 == m_strAnimationTag.compare(jsonTransition["From"]))
+			m_Transitions.push_back(CAnimTransition::Create(jsonTransition));
+	}
 	return S_OK;
 }
 
@@ -47,12 +59,13 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 
 	//_int iNextIndex{};
 	_string strNextAnimTag{};
+	_float fNextTargetTrackPos{};
 	for(auto& Transition : m_Transitions)
 	{
-		//if(m_fCurrentTrackPositon > Transition->Get_TransitEnablePos())
-		//	continue;
+		if(m_fCurrentTrackPositon < Transition->Get_TransitEnablePos())
+			continue;
 
-		if(Transition->Is_Transit(pOwnerState, strNextAnimTag))
+		if(Transition->Is_Transit(pOwnerState, strNextAnimTag, fNextTargetTrackPos))
 		{
 			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag);
 		}
@@ -78,13 +91,13 @@ _bool CAnimState::Play_Animation_GPU(CModel* pModelCom, CComputeShader* pCompute
 	//return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon);
 }
 
-//void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom)
-//{
-//	if(isAnimationFinished)
-//	{
-//		*pOwnerState &= ~(m_StateData.iConstAnimRunning);
-//	}
-//}
+void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom)
+{
+	if(isAnimationFinished)
+	{
+		//pAnimMachineCom->Handle_Input(pModelCom, pOwnerState, strNextAnimTag);
+	}
+}
 #ifdef _DEBUG
 CAnimState* CAnimState::Create(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc)
 {
@@ -98,10 +111,10 @@ CAnimState* CAnimState::Create(const _string& strAnimationTag, ANIMSTATE_DESC& S
 }
 #endif
 
-CAnimState* CAnimState::Create(json& jsonParser)
+CAnimState* CAnimState::Create(json& jsonParser, json& jsonTransitions)
 {
 	CAnimState* pInstance = new CAnimState();
-	if(FAILED(pInstance->Initialize(jsonParser)))
+	if(FAILED(pInstance->Initialize(jsonParser, jsonTransitions)))
 	{
 		MSG_BOX("Failed to Created : CAnimState");
 		Safe_Release(pInstance);

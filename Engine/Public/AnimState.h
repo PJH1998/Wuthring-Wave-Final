@@ -30,13 +30,13 @@ public:
 	const ANIMSTATE_DESC Get_StateData() { return m_StateData; }
 #endif
 
-	virtual HRESULT		Initialize(json& jsonParser);
+	virtual HRESULT		Initialize(json& jsonParser, json& jsonTransitions);
 	virtual void		Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag);
 	virtual void		Update(CAnimMachine* pAnimMachine, CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag, _float fTrackPosition/*, ANIMSTATE_DESC& StateData*/);
 	virtual void		Exit(CModel* pModelCom, _uint* pOwnerState);
 	virtual _bool		Play_Animation(CModel* pModelCom, _float fTimeDelta);
 	virtual _bool		Play_Animation_GPU(CModel* pModelCom, CComputeShader* pComputeShaderCom, _float fTimeDelta);
-	//virtual void Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom);
+	virtual void		Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMachine* pAnimMachineCom, CModel* pModelCom);
 	//virtual void Reset() PURE;
 
 #ifdef _DEBUG
@@ -56,7 +56,7 @@ public:
 #ifdef _DEBUG
 	static CAnimState* Create(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc);
 #endif
-	static CAnimState* Create(json& jsonParser);
+	static CAnimState* Create(json& jsonState, json& jsonTransitions);
 	//virtual CAnimState* Clone() PURE;
 	virtual void Free() override;
 };

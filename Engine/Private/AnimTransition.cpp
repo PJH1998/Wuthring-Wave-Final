@@ -7,24 +7,29 @@ CAnimTransition::CAnimTransition()
 
 HRESULT CAnimTransition::Initialize_Prototype(json& jsonParser)
 {
-    m_strNextState =  jsonParser["NextState"];
-    for(auto& strCondition : jsonParser["Conditions"])
-    {
+    m_strNextState =  jsonParser["To"];
+    //for(auto& strCondition : jsonParser["Conditions"])
 
-    }
-
+    //m_iTargetState = jsonParser["Target State"];
+    m_iTargetState = (1U << jsonParser["Target State"]);
+    m_fTargetTrackPos = jsonParser["Transit Target Pos"];
     return S_OK;
 }
 
-_bool CAnimTransition::Is_Transit(const _uint* pOwnerState, _string& strNextState)
+_bool CAnimTransition::Is_Transit(const _uint* pOwnerState, _string& strNextState, _float& fTargetTrackPos)
 {
-    for(auto& Func : m_Conditions)
-        if(Func(pOwnerState))
-        {
-            strNextState = m_strNextState;
-            return true;
-        }
+    if(*pOwnerState & m_iTargetState)
+    {
+        //for(auto& Func : m_Conditions)
+        //    if(Func(pOwnerState))
+        //    {
+        //        return false;
+        //    }
 
+        strNextState = m_strNextState;
+        fTargetTrackPos = m_fTargetTrackPos;
+        return true;
+    }
     return false;
 }
 
