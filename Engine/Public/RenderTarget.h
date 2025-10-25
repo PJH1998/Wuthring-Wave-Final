@@ -12,9 +12,9 @@ private:
 public:
 	ID3D11RenderTargetView*             Get_RTV() { return m_pRTV; }
 	ID3D11Texture2D*					Get_Resource() { return m_pTexture2D; }
+	ID3D11ShaderResourceView*           Get_SRV() { return m_pSRV; }
 
 #ifdef _DEBUG
-	ID3D11ShaderResourceView*           Get_SRV() { return m_pSRV; }
 #endif
 
 public:

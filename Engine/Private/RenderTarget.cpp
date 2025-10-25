@@ -89,7 +89,7 @@ HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
 
 	ImGui::End();
 
-	return E_NOTIMPL;
+	return S_OK;
 }
 #endif
 

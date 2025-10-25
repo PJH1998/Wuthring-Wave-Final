@@ -28,8 +28,8 @@ public:
 #endif
 
 private:
-	ID3DX11Effect*						m_pEffect = { nullptr };
-	vector<ID3D11InputLayout*>	m_InputLayouts;
+	ID3DX11Effect*							m_pEffect = { nullptr };
+	vector<ID3D11InputLayout*>				m_InputLayouts;
 	_uint									m_iNumPasses = {};
 
 public:
