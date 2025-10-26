@@ -99,6 +99,7 @@ private:
 	DebugRenderer*	m_pDebugRenderer = { nullptr };
 	BodyManager::DrawSettings m_DrawSetting;
 	_bool					m_isRenderAll = { false };
+	vector<pair<_float3, _float3>>	m_RayPoint;
 #endif
 
 public:

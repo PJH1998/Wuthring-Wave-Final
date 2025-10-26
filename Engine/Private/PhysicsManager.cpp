@@ -159,6 +159,13 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	RVec3 StartPos = LoadVec3(vStartPos);
 	RVec3 EndPos = LoadVec3(vEndPos);
 
+#ifdef _DEBUG
+	_float3 vSP{}, vEP{};
+	XMStoreFloat3(&vSP, vStartPos);
+	XMStoreFloat3(&vEP, vEndPos);
+	m_RayPoint.push_back(make_pair(vSP, vEP));
+#endif
+
 	_vector vDir = vEndPos - vStartPos;
 
 	RRayCast ray(StartPos, (EndPos - StartPos));
@@ -179,6 +186,11 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
+	// Ray Render
+	for (size_t i = 0; i < m_RayPoint.size(); ++i)
+		DrawRay(XMLoadFloat3(&m_RayPoint[i].first), XMLoadFloat3(&m_RayPoint[i].second));
+	m_RayPoint.clear();
+
 	if (false == m_isRenderAll)
 		return;
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
