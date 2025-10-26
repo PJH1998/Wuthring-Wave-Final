@@ -33,6 +33,8 @@ void CAugustaGroundRun::OnEnter()
 
     // 4. 현재 상태 초기화
     State_Reset();
+
+    m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
@@ -63,6 +65,7 @@ void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
 void CAugustaGroundRun::OnExit()
 {
     CGroundState::OnExit();
+    m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaGroundRun::Handle_Input()

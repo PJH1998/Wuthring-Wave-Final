@@ -245,8 +245,10 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
     vLook = XMVector3Normalize(vLook);
 
     // 가슴 높이에서 전방 Radius로 레이 발사
-    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
-    _vector vEnd = vStart + vLook * - (m_fColliderRadius + 2.f); // Collider Radius 고려.
+
+    _float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
+    _vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
+    _vector vEnd = vStart + vLook * - (m_fColliderRadius + 0.1f); // Collider Radius 고려.
 
     _float4 vHitPoint = {};
     _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);

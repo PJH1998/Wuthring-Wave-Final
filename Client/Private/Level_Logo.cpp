@@ -74,15 +74,15 @@ HRESULT CLevel_Logo::Initialize()
 void CLevel_Logo::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Logo"));
-	//m_pRigidbody->AddForce(_float3(1000000.f, 10000000.f, 0.f));
-	if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
-	{
-		m_pRigidbody1->OnGravity(false);
-	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_H) == KEYSTATE::DOWN)
-	{
-		m_pRigidbody1->OnGravity(true);
-	}
+	////m_pRigidbody->AddForce(_float3(1000000.f, 10000000.f, 0.f));
+	//if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
+	//{
+	//	m_pRigidbody1->OnGravity(false);
+	//}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_H) == KEYSTATE::DOWN)
+	//{
+	//	m_pRigidbody1->OnGravity(true);
+	//}
 
     if (m_pGameInstance->Get_DIKeyState(DIK_F1) == KEYSTATE::DOWN)
     {

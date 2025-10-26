@@ -109,7 +109,18 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 #endif
 
 	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.008f, 0.f);
-	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, 0.01f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.01f, 0.f);
+	//m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3(0.f, -0.01f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = { 0.f, -0.5f, 0.f };
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = { 0.f, -0.2f, 0.f };
+	m_ExtendedUpdateSetting.mWalkStairsStepUp = Vec3{ 0.f, 0.05f, 0.f };
+	m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3{ 0.f, 0.1f, 0.f }; // 아래로 내려갈대 여유
+
+	m_ExtendedUpdateSetting.mWalkStairsMinStepForward = 0.005f;
+	m_ExtendedUpdateSetting.mWalkStairsStepForwardTest = 0.1f;
+	m_ExtendedUpdateSetting.mWalkStairsCosAngleForwardContact = 0.99f; // 각도 허용치
+	
+
 
 	return S_OK;
 }
