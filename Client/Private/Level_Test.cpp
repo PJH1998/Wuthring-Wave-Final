@@ -128,6 +128,9 @@ HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
             if (!entry.is_regular_file())
                 continue;
 
+            if (entry.path().string().find("Prototype") != std::string::npos)
+                continue;
+
             if (entry.path().extension() != ".dat")
                 continue;
 
@@ -229,9 +232,12 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
             //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
             _wstring ModelName = StringToWString(Desc.ModelName);
 
-            m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
-                ,PROTOTYPE::GAMEOBJECT, &Desc);
+            m_pGameInstance->Add_Work([&, pDesc = Desc]() mutable {
+                m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
+                    , PROTOTYPE::GAMEOBJECT, &pDesc);
+                });
         }
+        m_pGameInstance->Wait_Thread_End();
     }
     File.close();
 }

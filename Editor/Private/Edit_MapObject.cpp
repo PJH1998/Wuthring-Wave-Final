@@ -79,7 +79,11 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
         
         event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
-        
+        auto iter = event.ModelName.find(m_ModelName);
+
+        if (iter == event.ModelName.end())
+            event.ModelName.insert(m_ModelName);
+
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
@@ -312,15 +316,15 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
     
-    /*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    RigidbodyDesc.eShape = SHAPE::MESH;
-    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    RigidbodyDesc.eType = EMotionType::Static;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    RigidbodyDesc.pModel = m_pModelComArray[0];
+    //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+    //RigidbodyDesc.eShape = SHAPE::MESH;
+    //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+    //RigidbodyDesc.eType = EMotionType::Static;
+    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+    //RigidbodyDesc.pModel = m_pModelComArray[0];
 
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);*/
+    //Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+    //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
     m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
     m_pGameInstance->Wait_Thread_End();

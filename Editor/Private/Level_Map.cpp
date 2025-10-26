@@ -39,7 +39,7 @@ HRESULT CLevel_Map::Initialize()
     pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
 
     LEVEL m_eCurLevel = LEVEL::MAP;
-    m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
+    //m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
     //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
     //    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
@@ -91,7 +91,6 @@ HRESULT CLevel_Map::Initialize()
     }
 
     return S_OK;
-    return S_OK;
 }
 
 void CLevel_Map::Update(_float fTimeDelta)
@@ -138,7 +137,7 @@ void CLevel_Map::Update(_float fTimeDelta)
 
 void CLevel_Map::Render()
 {
-    m_pAnimationTool->Render();
+    //m_pAnimationTool->Render();
 }
 
 void CLevel_Map::Menu_Select()
@@ -339,9 +338,10 @@ void CLevel_Map::Menu_Save_Load()
                 MapName += "_";
                 MapName += Pair.first;
                 MapName += ".dat";
+                unordered_set<_string> Test;
                 ofstream File(MapName, ios::binary);
 
-                MAP_SAVE event(File);
+                MAP_SAVE event(File, Test);
                 if (Pair.first.find("Instance") != std::string::npos)
                     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
                 else
@@ -369,14 +369,34 @@ void CLevel_Map::Menu_Save_Load()
                 MapName += Pair.first;
                 MapName += ".dat";
                 ofstream File(MapName, ios::binary);
+                unordered_set<_string> Test;
 
-                MAP_SAVE event(File);
+                MAP_SAVE event(File, Test);
                 if (Pair.first.find("Instance") != std::string::npos)
                     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
                 else
                     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 
                 File.close();
+
+                string PrototypeSave = config.path;
+                PrototypeSave += exportText;
+                PrototypeSave += "/";
+                if (!filesystem::exists(PrototypeSave))
+                    filesystem::create_directories(PrototypeSave);
+                PrototypeSave += exportText;
+                PrototypeSave += "_";
+                PrototypeSave += "_Prototype.dat";
+                ofstream File2(PrototypeSave, ios::binary);
+
+                for (const auto& Data : Test)
+                {
+                    //_uint i = strlen(Data.c_str());
+                    _uint StrSize = strlen(Data.c_str());
+                    File2.write(reinterpret_cast<const _char*>(&StrSize), sizeof(_uint));
+                    File2.write(reinterpret_cast<const _char*>(Data.c_str()), StrSize);
+                }
+                File2.close();
             }
         }
         ImGui::EndMenu();
@@ -386,6 +406,25 @@ void CLevel_Map::Menu_Save_Load()
     ImGui::MenuItem("Load", nullptr, &m_LoadMenu);
     if (m_LoadMenu)
     {
+        ImGui::Begin("Map Save & Load");
+
+        //ifstream File("../../Client/Bin/Resource/Map/MapData/Save_Test.dat", ios::binary);
+        //_uint NameLength = {};
+
+        //vector<_string> TestName;
+        //_char Name[MAX_PATH] = {};
+        //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+        //{
+        //    memset(Name, 0, sizeof(Name));
+
+        //    
+        //    File.read(reinterpret_cast<_char*>(&Name), NameLength);
+        //    TestName.push_back(Name);
+        //    int a = 0;
+        //}
+
+        //File.close();
+
 
         ImGuiFileDialog::Instance()->OpenDialog("Map File Load", "Import File", ".dat", config);
 
@@ -395,9 +434,13 @@ void CLevel_Map::Menu_Save_Load()
                 for (const auto& entry : filesystem::recursive_directory_iterator(DatFolderPath)) {
                     if (entry.is_regular_file())
                     {
+
                         _string strFilePath = entry.path().string();
+                        if (strFilePath.find("Prototype") != std::string::npos)
+                            continue;
+
                         ifstream File(strFilePath, ios::binary);
-                        
+
                         if (!File.is_open())
                         {
                             MSG_BOX("Load Failed");
@@ -454,7 +497,7 @@ void CLevel_Map::Menu_Save_Load()
                                 _float4x4 Matrix = {};
                                 File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                                 Desc.WorldMatrix = &Matrix;
-                                
+
                                 m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
                                     , m_iLevel, TEXT("Layer_Test"), &Desc);
 
@@ -473,6 +516,7 @@ void CLevel_Map::Menu_Save_Load()
                 ImGuiFileDialog::Instance()->Close();
             }
         }
+        ImGui::End();
     }
 }
 
