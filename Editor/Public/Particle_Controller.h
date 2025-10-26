@@ -40,6 +40,8 @@ public:
 	
 	CParticle::PARTICLE_DESC* Get_ParticleDesc(_wstring& ParticleTag);
 	CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* Get_VBDesc(_wstring& VBTag);
+	void	Set_ParticleDesc(_wstring& ParticleTag, CParticle::PARTICLE_DESC& ParticleDesc);
+	void	Set_VBDesc(_wstring& ParticleTag, CVIBuffer_Point_Instance::POINT_INSTANCE_DESC& ParticlVBeDesc);
 
 	void Set_ParticleTag(const _char* szParticleTag);
 

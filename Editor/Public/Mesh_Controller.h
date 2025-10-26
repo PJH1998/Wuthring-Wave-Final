@@ -48,6 +48,8 @@ public:
 
 	CEffect_Mesh::EFFECTMESH_DESC* Get_EffectMeshDesc(_wstring& EffectMeshTag);
 	CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* Get_VBMeshDesc(_wstring& VBMesTag);
+	void Set_EffectMeshDesc(_wstring& MeshTag, CEffect_Mesh::EFFECTMESH_DESC& MeshDesc);
+	void Set_MeshVBDesc(_wstring& MeshTag, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC& MeshVBDesc);
 
 	void Remove_Desc(const _wstring& DescTag);
 

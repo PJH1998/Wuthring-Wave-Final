@@ -50,11 +50,13 @@ public:
 
 	//컴셰로 계산처리 해야할듯
 	void Bind_CSResources(class CComputeShader* pCShader, _float fTimeDelta);
+	void Reset_UAV();
 
 private:
 	ID3D11Buffer* m_pCBBuffer = {};
 	ID3D11Buffer* m_pSRVBuffer = {};
 	ID3D11Buffer* m_pUAVBuffer = {};
+	ID3D11Buffer* m_pDefaultUAVBufer = {};
 
 	ID3D11ShaderResourceView* m_pSRV = {};
 	ID3D11UnorderedAccessView* m_pUAV = {};

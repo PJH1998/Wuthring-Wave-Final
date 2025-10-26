@@ -73,7 +73,6 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_isActivate = false;
         m_fColorSweep = 0.f;
     }
-    
     //라이프타임 끝나면 비활성화
 }
 
@@ -95,6 +94,13 @@ void CTrail_Mesh::Render()
     m_pVIBufferCom->Bind_Resources();
 
     m_pVIBufferCom->Render();
+}
+
+void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+    m_fSweep = 0.f;
+    m_isActivate = true;
+    m_fColorSweep = 0.f;
 }
 
 //Test

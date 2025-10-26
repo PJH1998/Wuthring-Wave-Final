@@ -34,7 +34,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
 
    // Root_Test();
 
-    m_isActivate = true;
+    m_isActivate = false;
 
     return S_OK;
 }
@@ -161,10 +161,12 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 
     //활성화 한번
     Reset_Prefab_Info();
-    pChildren->SetActivate(true);
+    _matrix DefaultMat = {};
+    pChildren->Reset(DefaultMat, nullptr);
 
     m_EffectChildren.emplace(strChildrenTag, pChildren);
     m_vFrames.push_back(FrameDesc);
+
 }
 
 void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
@@ -247,13 +249,16 @@ void CEffect_Prefab::Reset_Prefab_Info()
     {
         Frame.bActivated = false;
     }
-
     m_fCurrentTime = 0.f;
 
     //일단처리
     m_vLifeTime.x = 0.f;
-
     m_isActivate = true;
+
+    _matrix DefaultMat = {};
+
+    for (auto& Children : m_EffectChildren)
+        Children.second->Reset(DefaultMat, nullptr);
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

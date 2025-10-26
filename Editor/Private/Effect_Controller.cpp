@@ -1,9 +1,6 @@
 ﻿#include "EditorPch.h"
 #include "Effect_Controller.h"
-#include "Effect_Prefab.h"
-#include "Particle_Controller.h"
-#include "Mesh_Controller.h"
-#include "TrailMesh_Controller.h"
+
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -20,6 +17,7 @@ HRESULT CEffect_Controller::Initialize()
     m_pParticle_Controller = CParticle_Controller::Create(m_pDevice, m_pContext);
     m_pMesh_Controller = CMesh_Controller::Create(m_pDevice, m_pContext);
     m_pTrailMesh_Controller = CTrailMesh_Controller::Create(m_pDevice, m_pContext);
+    m_pLoad_Controller = CLoad_Controller::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 
     return S_OK;
 }
@@ -42,6 +40,17 @@ void CEffect_Controller::Prefab_Tab()
     {
         if (ImGui::InputText("PrefabTag", m_PrefabTag, IM_ARRAYSIZE(m_PrefabTag), ImGuiInputTextFlags_EnterReturnsTrue))
             m_bTagFlag = true;
+
+        m_pLoad_Controller->Prefab_Load_Tab(&m_IsLoad);
+
+        if (m_IsLoad)
+        {
+            Load_Prefab();
+            m_IsLoad = false;
+            m_pLoad_Controller->Reset_Load();
+        }
+
+        ImGui::SameLine(0.f, 30.f);
 
         if (m_bTagFlag)
         {
@@ -73,6 +82,8 @@ void CEffect_Controller::Prefab_Tab()
                 m_PrefabTag[0] = _T('\0');
             }
         }
+
+        ImGui::NewLine();
 
         if (!m_Prefabs.empty())
         {
@@ -106,6 +117,7 @@ void CEffect_Controller::Prefab_Tab()
                 }
             }
 
+
             if (m_pSelectedPrefab != nullptr)
             {
                 
@@ -122,6 +134,7 @@ void CEffect_Controller::Prefab_Tab()
 
                         m_eChildrenType = EFFECT_TYPE::PARTICLE;
                     }
+                    ImGui::SameLine(0.f, 20.f);
 
                     if (ImGui::Button("Mesh"))
                     {
@@ -129,14 +142,13 @@ void CEffect_Controller::Prefab_Tab()
                             
                         m_eChildrenType = EFFECT_TYPE::MESH;
                     }
-
+                    ImGui::SameLine(0.f, 20.f);
                     if (ImGui::Button("Trail"))
                     {
                         m_pTrailMesh_Controller->Set_TrailMeshTag(m_ChildrenTag);
 
                         m_eChildrenType = EFFECT_TYPE::TRAIL;
                     }
-
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
                     {
@@ -151,6 +163,7 @@ void CEffect_Controller::Prefab_Tab()
                             //선택된 프리팹 Desc 저장, 프리팹 내부에서 자식 추가할 때 본인 Frame은 저장하고있음. 이 Desc는 추후 데이터 뽑기용.
                             CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
                             Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+                            Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::PARTICLE;
                             
                             m_pSelectedPrefabDesc->ChildrenCount += 1;
                             m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
@@ -174,6 +187,7 @@ void CEffect_Controller::Prefab_Tab()
 
                             CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
                             Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+                            Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::MESH;
 
                             m_pSelectedPrefabDesc->ChildrenCount += 1;
                             m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
@@ -197,6 +211,7 @@ void CEffect_Controller::Prefab_Tab()
 
                             CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
                             Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+                            Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::TRAIL;
 
                             m_pSelectedPrefabDesc->ChildrenCount += 1;
                             m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
@@ -210,6 +225,16 @@ void CEffect_Controller::Prefab_Tab()
                     }
 
                 }
+
+                if (ImGui::Button("Load Children"))
+                {
+                    IGFD::FileDialogConfig config;
+                    config.path = "../../Client/Bin/Resource/Effect/Prefab";
+                    config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+                    ImGuiFileDialog::Instance()->OpenDialog("Load Effect", "Import", ".json", config);
+                }
+                Load_Children_To_Json();
 
                 if (m_pSelectedPrefab->Get_Children_Count() > 0)    
                 {
@@ -300,7 +325,7 @@ void CEffect_Controller::Prefab_Tab()
 
                                 m_pParticle_Controller->Remove_Desc(m_strChildrenTag);
 
-                                Reset_TabInfo();
+                                Reset_ChildrenInfo();
                             }
 
                             if (m_IsMeshEffect)
@@ -309,10 +334,17 @@ void CEffect_Controller::Prefab_Tab()
 
                                 m_pMesh_Controller->Remove_Desc(m_strChildrenTag);
 
-                                Reset_TabInfo();
+                                Reset_ChildrenInfo();
                             }
 
-                            //트레일 삭제 기능 추가해줘야함
+                            if (m_IsTrailMesh)
+                            {
+                                m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
+
+                                m_pTrailMesh_Controller->Remove_Desc(m_strChildrenTag);
+
+                                Reset_ChildrenInfo();
+                            }
                         }
                     }
                   
@@ -358,6 +390,8 @@ void CEffect_Controller::UpdateSelected_PrefabFromIndex()
         return;
 
     m_pSelectedPrefabDesc = &iterDesc->second;
+
+    Reset_ChildrenInfo();
 }
 
 void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
@@ -414,15 +448,14 @@ void CEffect_Controller::Selected_Prefab_Info()
             //여기서 현재 프리팹에 Frame 수정해줘야할거 같은데 
             m_pSelectedPrefab->Set_FrameDesc(m_pSelectedPrefabFrame);
         }
-
+        ImGui::SameLine(0.f, 30.f);
         if (ImGui::Button("Reset Frame"))
         {
             m_pSelectedPrefab->Reset_Prefab_Info();
         }
     }
 
-    //Save 테스트
-    if (m_pSelectedPrefabDesc != nullptr)
+    if (m_pSelectedPrefabDesc != nullptr && m_pSelectedPrefab->Get_Children_Count() > 0)
     {
         if (ImGui::Button("Save Prefab"))
         {
@@ -446,20 +479,39 @@ void CEffect_Controller::Selected_Prefab_Info()
             ImGuiFileDialog::Instance()->Close();
         }
     }
+
+    ImGui::SameLine(0.f, 20.f);
+
+    if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
+    {
+        Save_SelectedChildren_To_Json();
+    }
 }
 
-void CEffect_Controller::Reset_TabInfo()
+void CEffect_Controller::Reset_ChildrenInfo()
 {
+    //자식들 정보 초기화
     m_ChildrenTag[0] = _T('\0');
     m_bChildrenCreatFlag = false;
     m_bChildrenTagFlag = false;
     m_eChildrenType = EFFECT_TYPE::END;
     m_iSelectedChildren = 0;
     m_strChildrenTag = TEXT("");
-
     m_IsParticle = false;
     m_IsMeshEffect = false;
     m_IsTrailMesh = false;
+}
+
+void CEffect_Controller::Reset_PrefabInfo()
+{
+    //프리팹 정보 초기화
+    m_iSelectedPrefab = 0;
+    m_bSelectedPrefab = false;
+    m_pSelectedPrefab = nullptr;
+
+    m_pSelectedPrefab = nullptr;
+    m_pSelectedPrefabDesc = nullptr;
+    m_pSelectedPrefabFrame = nullptr;
 }
 
 void CEffect_Controller::Remove_Prefab()
@@ -483,7 +535,8 @@ void CEffect_Controller::Remove_Prefab()
     }
 
     m_pSelectedPrefab = nullptr;
-    Reset_TabInfo();
+    Reset_PrefabInfo();
+    Reset_ChildrenInfo();
 }
 
 void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
@@ -608,7 +661,6 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
             jsonVBStream << MeshVBJson.dump(2);
             jsonVBStream.close();
  
-
             //매쉬오브젝트 저장
             pMeshDesc = m_pMesh_Controller->Get_EffectMeshDesc(Prefab->second.FrameDesc[i].strChildrenTag);
 
@@ -617,7 +669,7 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
             MeshPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
             MeshPath += ".json";
 
-            ofstream jsonOBStream(DefaultPath);
+            ofstream jsonOBStream(MeshPath);
 
             json MeshJson;
 
@@ -659,20 +711,17 @@ void CEffect_Controller::Particle_VB_To_Json(json& ParticleVBJson, CVIBuffer_Poi
     VBCenterJson.push_back(pVBDesc->vCenter.x);
     VBCenterJson.push_back(pVBDesc->vCenter.y);
     VBCenterJson.push_back(pVBDesc->vCenter.z);
-
     ParticleVBJson["Center"] = VBCenterJson;
 
     json VBRangeJson = json::array();
     VBRangeJson.push_back(pVBDesc->vRange.x);
     VBRangeJson.push_back(pVBDesc->vRange.y);
     VBRangeJson.push_back(pVBDesc->vRange.z);
-
     ParticleVBJson["Range"] = VBRangeJson;
 
     json VBSize = json::array();
     VBSize.push_back(pVBDesc->vSize.x);
     VBSize.push_back(pVBDesc->vSize.y);
-
     ParticleVBJson["Size"] = VBSize;
 
     //Pivot 저장
@@ -680,20 +729,17 @@ void CEffect_Controller::Particle_VB_To_Json(json& ParticleVBJson, CVIBuffer_Poi
     PivotJson.push_back(pVBDesc->vPivot.x);
     PivotJson.push_back(pVBDesc->vPivot.y);
     PivotJson.push_back(pVBDesc->vPivot.z);
-
     ParticleVBJson["Pivot"] = PivotJson;
 
     //Speed저장
     json SpeedJson = json::array();
     SpeedJson.push_back(pVBDesc->vSpeed.x);
     SpeedJson.push_back(pVBDesc->vSpeed.y);
-
     ParticleVBJson["Speed"] = SpeedJson;
 
     json VBLifeTime = json::array();
     VBLifeTime.push_back(pVBDesc->vLifeTime.x);
     VBLifeTime.push_back(pVBDesc->vLifeTime.y);
-
     ParticleVBJson["LifeTime"] = VBLifeTime;
 
     //Loop저장
@@ -702,29 +748,25 @@ void CEffect_Controller::Particle_VB_To_Json(json& ParticleVBJson, CVIBuffer_Poi
     //스트레치 빌보드시 옵션 저장
     ParticleVBJson["Stretch"] = pVBDesc->IsStretch;
 
-    if (pVBDesc->IsStretch)
-    {
-        ParticleVBJson["Stretch_Weight"] = pVBDesc->fStretchWeight;
+    ParticleVBJson["Stretch_Weight"] = pVBDesc->fStretchWeight;
 
-        json StretchRang = json::array();
-        StretchRang.push_back(pVBDesc->fStretchRange.x);
-        StretchRang.push_back(pVBDesc->fStretchRange.y);
-    }
+    json StretchRang = json::array();
+    StretchRang.push_back(pVBDesc->fStretchRange.x);
+    StretchRang.push_back(pVBDesc->fStretchRange.y);
+    ParticleVBJson["Stretch_Range"] = StretchRang;
+    
 
     ParticleVBJson["Sprite"] = pVBDesc->IsSprite;
 
-    if (pVBDesc->IsSprite)
-    {
-        ParticleVBJson["Sprite"] = pVBDesc->fSpriteWeight;
-        ParticleVBJson["Sprite_DefulatSpeed"] = pVBDesc->fDefualtSpeed;
-    }
+    ParticleVBJson["Sprite_Weight"] = pVBDesc->fSpriteWeight;
+    ParticleVBJson["Sprite_DefulatSpeed"] = pVBDesc->fDefualtSpeed;
+    
 
     ParticleVBJson["Delay"] = pVBDesc->IsDelay;
 
     json DelayTimeJson = json::array();
     DelayTimeJson.push_back(pVBDesc->fDelay.x);
     DelayTimeJson.push_back(pVBDesc->fDelay.y);
-
     ParticleVBJson["Delay_Time"] = DelayTimeJson;
 
     ParticleVBJson["SpreadWeight"] = pVBDesc->fSpreadWeight;
@@ -880,7 +922,6 @@ void CEffect_Controller::Mesh_OB_To_Json(json& MeshJson, CEffect_Mesh::EFFECTMES
     ColorJson.push_back(pMeshDesc->vColor.x);
     ColorJson.push_back(pMeshDesc->vColor.y);
     ColorJson.push_back(pMeshDesc->vColor.z);
-    ColorJson.push_back(pMeshDesc->vColor.w);
     MeshJson["Color"] = ColorJson;
 
     json OBLifeTimeJson = json::array();
@@ -892,6 +933,10 @@ void CEffect_Controller::Mesh_OB_To_Json(json& MeshJson, CEffect_Mesh::EFFECTMES
 
 void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILMESH_DESC* pTrailDesc)
 {
+    TrailMesh["MyTag"] = WStringToString(pTrailDesc->strMyTag);
+    TrailMesh["MyType"] = pTrailDesc->eMyType;
+    TrailMesh["Root"] = pTrailDesc->IsRootOn;
+
     TrailMesh["TextureTag"] = WStringToString(pTrailDesc->strTextureTag);
     TrailMesh["ColorTextureTag"] = WStringToString(pTrailDesc->strColorTextureTag);
     TrailMesh["VIBufferTag"] = WStringToString(pTrailDesc->strVIBufferTag);
@@ -918,6 +963,388 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
     json LifeTimeJson = json::array();
     LifeTimeJson.push_back(pTrailDesc->vLifeTime.x);
     LifeTimeJson.push_back(pTrailDesc->vLifeTime.y);
+    TrailMesh["LifeTime"] = LifeTimeJson;
+}
+
+void CEffect_Controller::Load_Prefab()
+{
+    CEffect_Prefab::PREFAB_DESC PrefabDesc = {};
+    CEffect_Prefab* pPrefab = { nullptr };
+
+    m_pLoad_Controller->Get_Prefab_Desc(PrefabDesc);
+
+    //프리팹 Desc로 기본베이스 생성 후 아래 읽고 자식들 추가 해주는 작업 진행해줘야함.
+   pPrefab = static_cast<CEffect_Prefab*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Prefab"),
+        PROTOTYPE::GAMEOBJECT, &PrefabDesc));
+
+   m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prefab"), pPrefab);
+
+   m_Prefabs.emplace(PrefabDesc.strPrefabTag, pPrefab);
+   m_PrefabDesc.emplace(PrefabDesc.strPrefabTag, PrefabDesc);
+
+   m_pSelectedPrefab = pPrefab;
+
+   auto iter = m_PrefabDesc.find(PrefabDesc.strPrefabTag);
+   if (iter != m_PrefabDesc.end())
+       m_pSelectedPrefabDesc = &iter->second;
+
+    for (size_t i = 0; i < PrefabDesc.ChildrenCount; i++)
+    {
+        CEffect_Prefab::FRAME_DESC FrameDesc = {};
+
+        FrameDesc = PrefabDesc.FrameDesc[i];
+
+        if (FrameDesc.eChildrenType == EFFECT_TYPE::PARTICLE)
+        {
+            //VB, OB 둘다 처리
+            Load_Particle(FrameDesc.strChildrenTag);
+        }
+
+        if (FrameDesc.eChildrenType == EFFECT_TYPE::MESH)
+        {
+            Load_FXMesh(FrameDesc.strChildrenTag);
+        }
+
+        if (FrameDesc.eChildrenType == EFFECT_TYPE::TRAIL)
+        {
+            Load_TrailMesh(FrameDesc.strChildrenTag);
+        }
+    }
+}
+
+void CEffect_Controller::Load_Particle(const _wstring& ParticleTag)
+{
+    CVIBuffer_Point_Instance::POINT_INSTANCE_DESC ParticleVBDesc = {};
+    CParticle::PARTICLE_DESC ParticleDesc = {};
+    _wstring Tag = ParticleTag;
+
+    m_pLoad_Controller->Get_Particle_VB_Desc(Tag, ParticleVBDesc);
+    m_pLoad_Controller->Get_Particle_OB_Desc(Tag, ParticleDesc);
+
+    //VB 생성, Prefab 자식 추가
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), ParticleDesc.strVIBufferTag,
+        CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, &ParticleVBDesc));
+
+    m_pSelectedPrefab->Add_Children(&ParticleDesc, EFFECT_TYPE::PARTICLE);
+
+    //컨트롤러에 Desc 저장
+    m_pParticle_Controller->Set_ParticleDesc(Tag, ParticleDesc);
+    m_pParticle_Controller->Set_VBDesc(Tag, ParticleVBDesc);
+
+}
+
+void CEffect_Controller::Load_FXMesh(const _wstring& FXMeshTag)
+{
+    CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC FXMeshVBDesc = {};
+    CEffect_Mesh::EFFECTMESH_DESC FXMeshDesc = {};
+    _wstring Tag = FXMeshTag;
+
+    m_pLoad_Controller->Get_FXMesh_VB_Desc(Tag, FXMeshVBDesc);
+    m_pLoad_Controller->Get_FXMesh_OB_Desc(Tag, FXMeshDesc);
+
+    _matrix PreTansformMatrix = XMMatrixIdentity();
+
+    //VB생성
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), FXMeshDesc.strVIBufferTag,
+        CVIBuffer_FXMesh_Instance::Create(m_pDevice, m_pContext, FXMeshVBDesc.DatFilePath, PreTansformMatrix, &FXMeshVBDesc));
+
+    //Prefab 자식으로 추가
+    m_pSelectedPrefab->Add_Children(&FXMeshDesc, EFFECT_TYPE::MESH);
+
+    //컨트롤에 Desc 저장
+    m_pMesh_Controller->Set_EffectMeshDesc(Tag, FXMeshDesc);
+    m_pMesh_Controller->Set_MeshVBDesc(Tag, FXMeshVBDesc);
+}
+
+void CEffect_Controller::Load_TrailMesh(const _wstring& TrailMeshTag)
+{
+    CTrail_Mesh::TRAILMESH_DESC TrailDesc = {};
+    _wstring Tag = TrailMeshTag;
+
+    m_pLoad_Controller->Get_TrailMesh_Desc(Tag, TrailDesc);
+
+    m_pSelectedPrefab->Add_Children(&TrailDesc, EFFECT_TYPE::TRAIL);
+
+    m_pTrailMesh_Controller->Set_TrailMeshDesc(Tag, TrailDesc);
+}
+
+void CEffect_Controller::Save_SelectedChildren_To_Json()
+{
+    if (ImGui::Button("Save Children"))
+    {
+        IGFD::FileDialogConfig config;
+
+        config.path = "../../Client/Bin/Resource/Effect/Prefab/";
+        config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+        ImGuiFileDialog::Instance()->OpenDialog("Save Effect", "Export", ".json", config);
+    }
+    if (ImGuiFileDialog::Instance()->Display("Save Effect", ImGuiWindowFlags_NoCollapse))
+    {
+        if (ImGuiFileDialog::Instance()->IsOk())
+        {
+            _string strFilePath = {};
+            _string strFolderPath = {};
+
+            strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            size_t lastSlashPos = strFilePath.find_last_of("\\");
+
+            //마지막 문자열 빼고 폴더 경로만 가져오기. 
+            if (lastSlashPos != string::npos) {
+                strFolderPath += strFilePath.substr(0, lastSlashPos);
+            }
+
+            if (m_IsParticle)
+            {
+                //파티클 저장
+                CParticle::PARTICLE_DESC* pParticleDesc = {};
+                CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* pParticleVBDesc = {};
+
+                pParticleDesc = m_pParticle_Controller->Get_ParticleDesc(m_strChildrenTag);
+                pParticleVBDesc = m_pParticle_Controller->Get_VBDesc(m_strChildrenTag);
+
+                //VB저장
+                _string ParticleVBPath = {};
+                ParticleVBPath = strFolderPath;
+                ParticleVBPath += "/ParticleVB/";
+                ParticleVBPath += WStringToString(m_strChildrenTag);
+                ParticleVBPath += ".json";
+
+                ofstream VBjsonStream(ParticleVBPath);
+                json ParticleVBJson;
+
+                Particle_VB_To_Json(ParticleVBJson, pParticleVBDesc);
+
+                VBjsonStream << ParticleVBJson.dump(2);
+                VBjsonStream.close();
+
+                //OB 저장
+                _string ParticlePath = {};
+                ParticlePath = strFolderPath;
+                ParticlePath += "/Particle/";
+                ParticlePath += WStringToString(m_strChildrenTag);
+                ParticlePath += ".json";
+
+                ofstream OBjsonStream(ParticlePath);
+                json ParticleJson;
+
+                Particle_OB_To_Json(ParticleJson, pParticleDesc);
+
+                OBjsonStream << ParticleJson.dump(2);
+                OBjsonStream.close();
+            }
+            else if (m_IsMeshEffect)
+            {
+                //매쉬 저장
+                CEffect_Mesh::EFFECTMESH_DESC* pMeshDesc = {};
+                CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* pMeshVBDesc = {};
+
+                pMeshDesc = m_pMesh_Controller->Get_EffectMeshDesc(m_strChildrenTag);
+                pMeshVBDesc = m_pMesh_Controller->Get_VBMeshDesc(m_strChildrenTag);
+
+                //VB저장
+                _string MeshVBPath = {};
+                MeshVBPath = strFolderPath;
+                MeshVBPath += "/MeshVB/";
+                MeshVBPath += WStringToString(m_strChildrenTag);
+                MeshVBPath += ".json";
+
+                ofstream VBjsonStream(MeshVBPath);
+                json MeshVBJson;
+
+                Mesh_VB_To_Json(MeshVBJson, pMeshVBDesc);
+
+                VBjsonStream << MeshVBJson.dump(2);
+                VBjsonStream.close();
+
+                //OB저장
+                _string MeshPath = {};
+                MeshPath = strFolderPath;
+                MeshPath += "/Mesh/";
+                MeshPath += WStringToString(m_strChildrenTag);
+                MeshPath += ".json";
+
+                ofstream OBjsonStream(MeshPath);
+                json MeshJson;
+
+                Mesh_OB_To_Json(MeshJson, pMeshDesc);
+
+                OBjsonStream << MeshJson.dump(2);
+                OBjsonStream.close();
+            }
+            else if (m_IsTrailMesh)
+            {
+                //트레일저장
+                CTrail_Mesh::TRAILMESH_DESC* pTrailDesc = {};
+
+                pTrailDesc = m_pTrailMesh_Controller->Get_TrailMeshDesc(m_strChildrenTag);
+
+                _string TrailPath = {};
+                TrailPath = strFolderPath;
+                TrailPath += "/TrailMesh/";
+                TrailPath += WStringToString(m_strChildrenTag);
+                TrailPath += ".json";
+
+                ofstream JsonStream(TrailPath);
+                json TrailJson;
+
+                TrailMesh_To_Json(TrailJson, pTrailDesc);
+
+                JsonStream << TrailJson.dump(2);
+                JsonStream.close();
+            }
+        }
+
+        ImGuiFileDialog::Instance()->Close();
+    }
+}
+
+void CEffect_Controller::Load_Children_To_Json()
+{
+    if (ImGuiFileDialog::Instance()->Display("Load Effect", ImGuiWindowFlags_NoCollapse))
+    {
+        if (ImGuiFileDialog::Instance()->IsOk())
+        {
+            _string strFilePath = {};
+            _string strFolderPath = {};
+
+            strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+            size_t lastSlashPos = strFilePath.find_last_of("\\");
+
+            //마지막 문자열 빼고 폴더 경로만 가져오기. 
+            if (lastSlashPos != string::npos) {
+                strFolderPath += strFilePath.substr(0, lastSlashPos);
+            }
+
+            //폴더 경로 한번 더 빼줘야함.
+            lastSlashPos = strFolderPath.find_last_of("\\");
+            
+            if (lastSlashPos != string::npos) {
+                strFolderPath = strFolderPath.substr(0, lastSlashPos);
+            }
+
+            ifstream JsonStream(strFilePath.c_str());
+
+            if (!JsonStream.is_open())
+                return;
+
+            json ChilderenJson;
+            JsonStream >> ChilderenJson;
+            JsonStream.close();
+
+            //읽은 파일이 파티클, 매쉬, 트레일인지 먼저 체크해줘야함.
+            _string strChildrenTag = {};
+            EFFECT_TYPE eChildrenType = {};
+            
+            if (ChilderenJson.contains("MyTag"))
+                strChildrenTag = ChilderenJson["MyTag"].get<_string>();
+
+            if (ChilderenJson.contains("MyType"))
+                eChildrenType = static_cast<EFFECT_TYPE>(ChilderenJson["MyType"].get<double>());
+
+            //파티클 읽기.
+            if (eChildrenType == EFFECT_TYPE::PARTICLE)
+            {
+                //VB 읽고 로더 저장함.
+                _string ParticleVBPath = {};
+                ParticleVBPath = strFolderPath;
+                ParticleVBPath += "/ParticleVB/";
+                ParticleVBPath += strChildrenTag;
+                ParticleVBPath += ".json";
+
+                _wstring ParticleVBTag = StringToWString(strChildrenTag);
+
+                m_pLoad_Controller->Load_Particle_VB_FromJson(ParticleVBPath, ParticleVBTag);
+
+                //OB 읽고 로더에 저장
+                _string ParticleOBPath = {};
+                ParticleOBPath = strFolderPath;
+                ParticleOBPath += "/Particle/";
+                ParticleOBPath += strChildrenTag;
+                ParticleOBPath += ".json";
+
+                _wstring ParticleOBTag = StringToWString(strChildrenTag);
+
+                m_pLoad_Controller->Load_Particle_OB_FromJson(ParticleOBPath, ParticleOBTag);
+
+                //내부에서 로더에 저장한 Desc읽고 컨트롤러에 저장, 프리팹에 자식으로 생성
+                Load_Particle(ParticleOBTag);
+
+                //로더에 저장된
+                m_pLoad_Controller->Reset_Load();
+
+                //프리팹 Desc 갱신 필요
+                Load_Children_To_PrefabDesc(ParticleOBTag, eChildrenType);
+            }
+           
+            //매쉬 읽기
+            if (eChildrenType == EFFECT_TYPE::MESH)
+            {
+                //VB 읽고 로더 저장
+                _string FXMeshVBPath = {};
+                FXMeshVBPath = strFolderPath;
+                FXMeshVBPath += "/MeshVB/";
+                FXMeshVBPath += strChildrenTag;
+                FXMeshVBPath += ".json";
+
+                _wstring FXMeshVBTag = StringToWString(strChildrenTag);
+
+                m_pLoad_Controller->Load_FXMesh_VB_FromJson(FXMeshVBPath, FXMeshVBTag);
+
+                //OB 읽고 로더 저장
+                _string FXMeeshOBPath = {};
+                FXMeeshOBPath = strFolderPath;
+                FXMeeshOBPath += "/Mesh/";
+                FXMeeshOBPath += strChildrenTag;
+                FXMeeshOBPath += ".json";
+
+                _wstring FXMeshOBTag = StringToWString(strChildrenTag);
+
+                m_pLoad_Controller->Load_FXMesh_OB_FromJson(FXMeeshOBPath, FXMeshOBTag);
+
+                //로더에서 저장한 Desc 읽고 컨트롤러에 저장,
+                Load_FXMesh(FXMeshOBTag);
+
+                m_pLoad_Controller->Reset_Load();
+
+                Load_Children_To_PrefabDesc(FXMeshOBTag, eChildrenType);
+            }
+
+            //트레일 읽기
+            if (eChildrenType == EFFECT_TYPE::TRAIL)
+            {
+                _string TrailMesh = {};
+                TrailMesh = strFolderPath;
+                TrailMesh += "/TrailMesh/";
+                TrailMesh += strChildrenTag;
+                TrailMesh += ".json";
+
+                _wstring TrailMeshTag = StringToWString(strChildrenTag);
+
+                m_pLoad_Controller->Load_TrailMesh_FromJson(TrailMesh, TrailMeshTag);
+
+                Load_TrailMesh(TrailMeshTag);
+
+                m_pLoad_Controller->Reset_Load();
+
+                Load_Children_To_PrefabDesc(TrailMeshTag, eChildrenType);
+            }
+            ImGuiFileDialog::Instance()->Close();
+        }
+    }
+}
+
+void CEffect_Controller::Load_Children_To_PrefabDesc(_wstring& ChildrenTag, EFFECT_TYPE eChildrenType)
+{
+    CEffect_Prefab::FRAME_DESC Desc = {};
+    Desc.eChildrenType = eChildrenType;
+    Desc.strChildrenTag = ChildrenTag;
+
+    m_pSelectedPrefabDesc->ChildrenCount += 1;
+
+    m_pSelectedPrefabDesc->FrameDesc.push_back(Desc);
 }
 
 CEffect_Controller* CEffect_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -944,6 +1371,7 @@ void CEffect_Controller::Free()
     Safe_Release(m_pParticle_Controller);
     Safe_Release(m_pMesh_Controller);
     Safe_Release(m_pTrailMesh_Controller);
+    Safe_Release(m_pLoad_Controller);
 
     for (auto& Prefab : m_Prefabs)
         Safe_Release(Prefab.second);

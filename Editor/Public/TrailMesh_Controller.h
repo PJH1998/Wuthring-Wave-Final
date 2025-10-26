@@ -54,17 +54,9 @@ public:
 	void UpdateSelected_TrailMeshFormTag(_wstring FMMeshTag);
 
 	CTrail_Mesh::TRAILMESH_DESC* Get_TrailMeshDesc(_wstring& EffectMeshTag);
+	void Set_TrailMeshDesc(_wstring& TrailMeshTag, CTrail_Mesh::TRAILMESH_DESC& TrailDesc);
 
 	void Remove_Desc(const _wstring& DescTag);
-
-	//void UpdateSelected_ParticleFormTag(_wstring ParticleTag);
-	//
-	//CTrail_Mesh::EFFECTMESH_DESC* Get_ParticleDesc(_wstring& ParticleTag);
-	//CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* Get_VBDesc(_wstring& VBTag);
-
-	//void Set_ParticleTag(const _char* szParticleTag);
-	//
-	//void Remove_Desc(const _wstring& DescTag);
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -89,12 +81,10 @@ private:
 
 	_bool														m_IsRoot = false;
 
-	//map<const _wstring, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC>	m_tVBMeshDesc = {};
 	map<const _wstring, CTrail_Mesh::TRAILMESH_DESC>			m_tTrailMeshDesc = {};
 
 	_bool														m_bSelectedMesh = false;
 	CTrail_Mesh::TRAILMESH_DESC*								m_pSelectedTrailMeshDesc = { nullptr };
-	//CVIBuffer_Mesh::MESH_FXINSTANCE_DESC*			m_pSelectedVBFXDesc = { nullptr };
 
 public:
 	static CTrailMesh_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

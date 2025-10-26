@@ -288,6 +288,38 @@ void CMesh_Controller::EffectMesh_Tab()
                 ImGui::InputFloat("##FXMeshLifeTimeY", &(m_pSelectedEffectMeshDesc->vLifeTime.y));
                 ImGui::PopItemWidth();
             }
+
+            if (ImGui::CollapsingHeader("Base", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                vector<const _char*> szMeshTag = {};
+
+                for (auto iter = m_MeshVBTag.begin(); iter != m_MeshVBTag.end(); ++iter)
+                {
+                    szMeshTag.push_back(iter->szName);
+                }
+
+                //매쉬 리스트박스 띄우기
+                if (ImGui::ListBox("Effect Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
+                {
+                    m_pSelectedEffectMeshDesc->strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
+                }
+
+                //매쉬 기본 색상 텍스처 설정
+                if (ImGui::BeginCombo("Texture", "")) {
+                    for (size_t i = 0; i < m_Textures.size(); i++)
+                    {
+                        bool IsSelected = (m_iSelectedTexture == i);
+                        if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                            m_iSelectedTexture = i;
+
+                        if (IsSelected)
+                            ImGui::SetItemDefaultFocus();
+
+                    }
+                    m_pSelectedEffectMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                    ImGui::EndCombo();
+                }
+            }
             ImGui::End();
         }
     }
@@ -359,6 +391,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 //이펙트 매쉬 이름 및 클론할 컴포넌트 이름들
                 EffectMeshDesc.strMyTag = EffectMeshTag;
+                EffectMeshDesc.eMyType = EFFECT_TYPE::MESH;
                 EffectMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 EffectMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
 
@@ -462,6 +495,22 @@ CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* CMesh_Controller::Get_VBMeshDes
         return nullptr;
 
     return &iter->second;
+}
+
+void CMesh_Controller::Set_EffectMeshDesc(_wstring& MeshTag, CEffect_Mesh::EFFECTMESH_DESC& MeshDesc)
+{
+    CEffect_Mesh::EFFECTMESH_DESC Desc = {};
+    Desc = MeshDesc;
+
+    m_tEffectMeshDesc.emplace(MeshTag, Desc);
+}
+
+void CMesh_Controller::Set_MeshVBDesc(_wstring& MeshTag, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC& MeshVBDesc)
+{
+    CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC Desc = {};
+    Desc = MeshVBDesc;
+
+    m_tVBMeshDesc.emplace(MeshTag, MeshVBDesc); 
 }
 
 void CMesh_Controller::Remove_Desc(const _wstring& DescTag)

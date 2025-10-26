@@ -65,8 +65,11 @@ void CEffect_Mesh::Update(_float fTimeDelta)
     m_vLifeTime.x += fTimeDelta;
    
     if (m_vLifeTime.x >= m_vLifeTime.y)
+    {
         m_isActivate = false;
-   
+        m_vLifeTime.x = 0.f;
+        m_pVIBufferCom->Reset_UAV();
+    }
     //라이프타임 끝나면 비활성화
 }
 
@@ -88,6 +91,13 @@ void CEffect_Mesh::Render()
     m_pVIBufferCom->Bind_Resources();
 
     m_pVIBufferCom->Render();
+}
+
+void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+    m_isActivate = true;
+    m_vLifeTime.x = 0.f;
+    m_pVIBufferCom->Reset_UAV();
 }
 
 //Test

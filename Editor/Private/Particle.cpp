@@ -95,6 +95,13 @@ void CParticle::Render()
     m_pVIBufferCom->Render();
 }
 
+void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+    m_isActivate = true;
+    m_vLifeTime.x = 0.f;
+    m_pVIBufferCom->Reset_UAV();
+}
+
 void CParticle::Root_Transform()
 {
 }

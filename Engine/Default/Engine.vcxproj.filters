@@ -274,6 +274,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Mesh">
       <UniqueIdentifier>{da561277-f2b7-45b9-b933-b84b897fff21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Spectrum">
+      <UniqueIdentifier>{58425932-23ce-483e-883c-e023a4407ca6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -555,6 +558,9 @@
     <ClInclude Include="..\Public\VIBuffer_Mesh.h">
       <Filter>01. Utility\04. Component\VIBuffer\Mesh</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Spectrum.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -811,6 +817,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Mesh.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

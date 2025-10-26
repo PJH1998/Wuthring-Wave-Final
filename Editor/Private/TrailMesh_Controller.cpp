@@ -233,6 +233,64 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                 ImGui::InputFloat("##ParticleLifeTimeY", &(m_pSelectedTrailMeshDesc->vLifeTime.y));
                 ImGui::PopItemWidth();
             }
+
+            if (ImGui::CollapsingHeader("Base", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                vector<const _char*> szMeshTag = {};
+
+                for (auto iter = m_MeshVBTag.begin(); iter != m_MeshVBTag.end(); ++iter)
+                {
+                    szMeshTag.push_back(iter->szName);
+                }
+                //매쉬 리스트박스 띄우기
+                if (ImGui::ListBox("Trail Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
+                {
+                    m_pSelectedTrailMeshDesc->strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
+                }
+
+                //매쉬 기본 색상 텍스처 설정
+                if (ImGui::BeginCombo("Texture", "")) {
+                    for (size_t i = 0; i < m_Textures.size(); i++)
+                    {
+                        bool IsSelected = (m_iSelectedTexture == i);
+                        if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                            m_iSelectedTexture = i;
+
+                        if (IsSelected)
+                            ImGui::SetItemDefaultFocus();
+
+                    }
+                    m_pSelectedTrailMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+      
+                    ImGui::EndCombo();
+                }
+
+                ImGui::Separator();
+                if (m_iSelectedTexture >= 0) {
+                    ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
+                }
+
+                if (ImGui::BeginCombo("Color", "")) {
+                    for (size_t i = 0; i < m_ColorTextures.size(); i++)
+                    {
+                        bool IsSelected = (m_iSelectedColor == i);
+                        if (ImGui::Selectable(m_ColorTextures[i].szName, IsSelected))
+                            m_iSelectedColor = i;
+
+                        if (IsSelected)
+                            ImGui::SetItemDefaultFocus();
+                    }
+
+                    m_pSelectedTrailMeshDesc->strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
+
+                    ImGui::EndCombo();
+                }
+
+                ImGui::Separator();
+                if (m_iSelectedColor >= 0) {
+                    ImGui::Image((ImTextureID)m_ColorTextures[m_iSelectedColor].pTexture->Get_SRV(0), ImVec2(256, 256));
+                }
+            }
             ImGui::End();
         }
     }
@@ -313,6 +371,7 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
 
                 //이펙트 매쉬 이름 및 클론할 컴포넌트 이름들
                 TrailMeshDesc.strMyTag = TrailMeshTag;
+                TrailMeshDesc.eMyType = EFFECT_TYPE::TRAIL;
                 TrailMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 TrailMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
                 TrailMeshDesc.strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
@@ -386,6 +445,14 @@ CTrail_Mesh::TRAILMESH_DESC* CTrailMesh_Controller::Get_TrailMeshDesc(_wstring& 
         return nullptr;
 
     return &iter->second;
+}
+
+void CTrailMesh_Controller::Set_TrailMeshDesc(_wstring& TrailMeshTag, CTrail_Mesh::TRAILMESH_DESC& TrailDesc)
+{
+    CTrail_Mesh::TRAILMESH_DESC Desc = {};
+    Desc = TrailDesc;
+
+    m_tTrailMeshDesc.emplace(TrailMeshTag, Desc);
 }
 
 

@@ -1,6 +1,10 @@
 ﻿#pragma once
 #include "Base.h"
 #include "Effect_Prefab.h"
+#include "Particle_Controller.h"
+#include "Mesh_Controller.h"
+#include "TrailMesh_Controller.h"
+#include "Load_Controller.h"
 
 NS_BEGIN(Editor)
 
@@ -10,7 +14,7 @@ private:
 	explicit CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CEffect_Controller() = default;
 
-#pragma region 湲곕낯
+#pragma region 
 public:
 	HRESULT Initialize();
 	void Update();
@@ -26,7 +30,8 @@ public:
 public:
 	void Selected_Prefab_Info();
 
-	void Reset_TabInfo();
+	void Reset_ChildrenInfo();
+	void Reset_PrefabInfo();
 	void Remove_Prefab();
 
 public:
@@ -40,6 +45,20 @@ public:
 
 	void TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILMESH_DESC* pTrailDesc);
 
+public:
+	void Load_Prefab();
+
+	void Load_Particle(const _wstring& ParticleTag);
+
+	void Load_FXMesh(const _wstring& FXMeshTag);
+
+	void Load_TrailMesh(const _wstring& TrailMeshTag);
+
+public:
+	void Save_SelectedChildren_To_Json();
+	void Load_Children_To_Json();
+	void Load_Children_To_PrefabDesc(_wstring& ChildrenTag, EFFECT_TYPE eChildrenType);
+
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
 	ID3D11DeviceContext*										m_pContext = { nullptr };
@@ -47,6 +66,7 @@ private:
 	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
 	class CMesh_Controller*										m_pMesh_Controller = { nullptr };
 	class CTrailMesh_Controller*								m_pTrailMesh_Controller = { nullptr };
+	class CLoad_Controller*										m_pLoad_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -71,6 +91,8 @@ private:
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
+
+	_bool														m_IsLoad = false;
 
 public:
 	static CEffect_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

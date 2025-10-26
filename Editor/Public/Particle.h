@@ -24,7 +24,7 @@ public:
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
-		_float2	vLifeTime = { 5.f, 10.f};
+		_float2	vLifeTime = { 0.f, 10.f};
 
 		_bool	IsSprite = false;
 		_int    iRows = 0;
@@ -45,6 +45,9 @@ public:
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual void Render();
+	
+public:
+	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
 	void Root_Transform();
