@@ -57,16 +57,6 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
-#ifdef _DEBUG
-    if (m_pSocketMatrix)
-    {
-        _float4x4 socketMatrix = *m_pSocketMatrix;
-        // SocketMatrix가 단위행렬이면 Bone이 안 움직이는 것
-        OutPutDebugMatrix(TEXT("PropMatrix : "), socketMatrix);
-
-        OutPutDebugMatrix(TEXT("BayonetMatrix : "), m_CombinedMatrix);
-    }
-#endif // _DEBUG
 
 
 

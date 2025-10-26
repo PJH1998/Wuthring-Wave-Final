@@ -9,7 +9,13 @@ class CAugustaGroundSkill final : public CGroundState
 private:
     enum SKILLSTATE
     {
-
+       HACK = 0,
+       RISE,
+       RISE_ZERO,
+       STRIKE,
+       QTE,
+       IDLE,
+       END
     };
 
 private:
@@ -22,15 +28,22 @@ public:
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
+
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _string m_strSkillType = {};  // "Hack", "Rise", "Strike", "QTE", "Burst"
+    _bool m_States[SKILLSTATE::END] = {};
 
 private:
-    void Check_StateTransition();
+    virtual void Handle_Input() override;
+    void Update_SkillAnimations(_float fTimeDelta);
+    void Check_Physcis(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta) ;
+    
+    void SetUp_Animations();
+    void State_Reset();
 
 public:
-    static CAugustaGroundSkill* Create(class CGameObject* pOwner, const _string& skillType);
+    static CAugustaGroundSkill* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

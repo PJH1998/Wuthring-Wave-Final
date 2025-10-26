@@ -79,112 +79,8 @@ void CCharacter::Process_Input(CInputController* pInputControllerCom)
 #pragma region STATE
 
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
-{
-    ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    // 현재 활성화된 파츠 Animation 실행.
-    
-    return IsPlayAnimationEnd;
-}
 
-_bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
-{
-    ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AnyInput(iKeyFlag, eKeyState);
-}
 
-_bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
-{
-    ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
-}
-
-_bool CCharacter::Is_LockOn()
-{
-    return m_IsLockOn;
-}
-
-_bool CCharacter::Is_Land(_float3* pNormal)
-{
-    ASSERT_CRASH(m_pColliderCom);
-    return m_pColliderCom->IsLand(pNormal);
-}
-
-void CCharacter::Change_State(_uint iCategory, _uint iSubState)
-{
-    ASSERT_CRASH(m_pStateMachineCom);
-    m_pStateMachineCom->Change_State(iCategory, iSubState);
-}
-
-ACTORDIR CCharacter::Calculate_Direction()
-{
-    _bool bW = Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
-    _bool bS = Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
-    _bool bA = Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
-    _bool bD = Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
-
-    if (bW && bA)      return ACTORDIR::LU;
-    else if (bW && bD) return ACTORDIR::RU;
-    else if (bS && bA) return ACTORDIR::LD;
-    else if (bS && bD) return ACTORDIR::RD;
-    else if (bW)       return ACTORDIR::U;
-    else if (bS)       return ACTORDIR::D;
-    else if (bA)       return ACTORDIR::L;
-    else if (bD)       return ACTORDIR::R;
-
-    return ACTORDIR::END;
-}
-
-void CCharacter::Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
-{
-    ASSERT_CRASH(m_pSpringCamera);
-    ASSERT_CRASH(m_pTransformCom);
-
-    _vector vLook = m_pSpringCamera->Get_LookVector_NoPitch();
-    _vector vRight = m_pSpringCamera->Get_RightDirection_NoPitch();
-
-    vLook = XMVectorSetY(vLook, 0.f);
-    vRight = XMVectorSetY(vRight, 0.f);
-    vLook = XMVector3Normalize(vLook);
-    vRight = XMVector3Normalize(vRight);
-    _vector vMoveDir = XMVectorZero();
-
-    switch (eDir)
-    {
-    case ACTORDIR::U:   vMoveDir = vLook; break;        
-    case ACTORDIR::D:   vMoveDir = -vLook; break;       
-    case ACTORDIR::L:   vMoveDir = -vRight; break;      
-    case ACTORDIR::R:   vMoveDir = vRight; break;       
-    case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
-    case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
-    case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
-    case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
-        default: return;
-    }
-
-    vMoveDir = XMVectorSetY(vMoveDir, 0.f);
-    vMoveDir = XMVector3Normalize(vMoveDir);
-
-    // 이동 방향으로 회전 (부드러운 회전)
-    m_pTransformCom->LookLerp(vMoveDir * -1.f, fTimeDelta, 10.f);
-
-    m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
-    
-}
-
-// 떨어질 때 추가 값.
-void CCharacter::Move_Fall(_float fTimeDelta, _float fSpeed)
-{
-    _vector vMoveDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-    m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
-}
-
-void CCharacter::Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed)
-{
-    m_pTransformCom->Go_Dir(vDir * fSpeed, fTimeDelta);
-}
 
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
@@ -194,16 +90,15 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
     _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
-    // 발 위치 계산 (Offset(6.7) - (Height/2 + Radius)(6.5) = 0.2)
     _vector vFootPos = vCurrentPos + XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
 
     // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
     _vector vPositions[5] = {
-        vFootPos + vLook * m_fColliderRadius,                    // 앞
-        vFootPos + vRight * m_fColliderRadius,                   // 왼쪽
-        vFootPos,                                      // 중앙
-        vFootPos - vRight * m_fColliderRadius,                   // 오른쪽
-        vFootPos - vLook * m_fColliderRadius                     // 뒤
+        vFootPos + vLook * m_fColliderRadius,  // 앞
+        vFootPos + vRight * m_fColliderRadius, // 왼쪽
+        vFootPos,                              // 중앙
+        vFootPos - vRight * m_fColliderRadius, // 오른쪽
+        vFootPos - vLook * m_fColliderRadius   // 뒤
     };
 
 
@@ -235,6 +130,222 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
     return bAnyHit ? fMinDistance : 10.f;
 
 }
+
+_vector CCharacter::Get_LookVector()
+{
+    ASSERT_CRASH(m_pTransformCom);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    return vLook;
+}
+
+_bool CCharacter::Is_LockOn()
+{
+    return m_IsLockOn;
+}
+
+_bool CCharacter::Is_Land(_float3* pNormal)
+{
+    ASSERT_CRASH(m_pColliderCom);
+    return m_pColliderCom->IsLand(pNormal);
+}
+
+
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+{
+    ASSERT_CRASH(m_pModelCom);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    
+    // 현재 활성화된 파츠 Animation 실행.
+    
+    
+    
+    return IsPlayAnimationEnd;
+}
+
+_bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
+{
+    ASSERT_CRASH(m_pInputControllerCom);
+    return m_pInputControllerCom->Check_AnyInput(iKeyFlag, eKeyState);
+}
+
+_bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
+{
+    ASSERT_CRASH(m_pInputControllerCom);
+    return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
+}
+
+
+
+void CCharacter::Change_State(_uint iCategory, _uint iSubState)
+{
+    ASSERT_CRASH(m_pStateMachineCom);
+    m_pStateMachineCom->Change_State(iCategory, iSubState);
+}
+
+
+
+ACTORDIR CCharacter::Calculate_Direction()
+{
+    _bool bW = Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+    _bool bS = Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+    _bool bA = Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
+    _bool bD = Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+
+    if (bW && bA)      return ACTORDIR::LU;
+    else if (bW && bD) return ACTORDIR::RU;
+    else if (bS && bA) return ACTORDIR::LD;
+    else if (bS && bD) return ACTORDIR::RD;
+    else if (bW)       return ACTORDIR::U;
+    else if (bS)       return ACTORDIR::D;
+    else if (bA)       return ACTORDIR::L;
+    else if (bD)       return ACTORDIR::R;
+
+    return ACTORDIR::END;
+}
+
+_vector CCharacter::Calculate_Move_Direction(ACTORDIR eDir)
+{
+    ASSERT_CRASH(m_pSpringCamera);
+
+    _vector vLook = m_pSpringCamera->Get_LookVector_NoPitch();
+    _vector vRight = m_pSpringCamera->Get_RightVector_NoPitch();
+
+    switch (eDir)
+    {
+    case ACTORDIR::U:   return vLook;
+    case ACTORDIR::D:   return -vLook;
+    case ACTORDIR::L:   return -vRight;
+    case ACTORDIR::R:   return vRight;
+    case ACTORDIR::LU:  return XMVector3Normalize(vLook - vRight);
+    case ACTORDIR::LD:  return XMVector3Normalize(-vLook - vRight);
+    case ACTORDIR::RU:  return XMVector3Normalize(vLook + vRight);
+    case ACTORDIR::RD:  return XMVector3Normalize(-vLook + vRight);
+    default: return XMVectorZero();
+    }
+
+    return XMVectorZero();
+}
+
+// LockOn 시 이동
+void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
+{
+    if (!m_IsLockOn)
+        return;
+
+    ASSERT_CRASH(m_pSpringCamera);
+    ASSERT_CRASH(m_pTransformCom);
+    
+
+    // 1. 타겟 방향으로 회전 (매프레임)? => 타겟을 계속 봐야하잖아.
+    _float3 vTargetPos = m_pSpringCamera->Get_TargetPos(); // => 이런것만 수정하면
+    _vector vTarget = XMVectorSetW(XMLoadFloat3(&vTargetPos), 1.f);
+    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+
+    vToTarget = XMVectorSetY(vToTarget, 0.f);
+    m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
+    
+    // 2. 회전 후 Right / Look 가져오기.
+    _vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
+    _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+    _vector vMoveDir = XMVectorZero();
+
+    switch (eDir)
+    {
+    case ACTORDIR::U:   vMoveDir = vLook; break;
+    case ACTORDIR::D:   vMoveDir = -vLook; break;
+    case ACTORDIR::L:   vMoveDir = -vRight; break;
+    case ACTORDIR::R:   vMoveDir = vRight; break;
+    case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
+    case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
+    case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
+    case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
+    default: return;
+    }
+
+    vMoveDir = XMVectorSetY(vMoveDir, 0.f) * -1.f;
+    vMoveDir = XMVector3Normalize(vMoveDir);
+
+    // 2. 캐릭터를 카메라 Look 방향으로 회전.
+    //m_pTransformCom->LookLerp(vMoveDir * -1.f, fTimeDelta, 1.f);
+
+    // 4. 이동 적용
+    m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+}
+
+void CCharacter::Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
+{
+    ASSERT_CRASH(m_pSpringCamera);
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vLook = m_pSpringCamera->Get_LookVector_NoPitch();
+    _vector vRight = m_pSpringCamera->Get_RightVector_NoPitch();
+
+    vLook = XMVectorSetY(vLook, 0.f);
+    vRight = XMVectorSetY(vRight, 0.f);
+    vLook = XMVector3Normalize(vLook);
+    vRight = XMVector3Normalize(vRight);
+    _vector vMoveDir = XMVectorZero();
+
+    switch (eDir)
+    {
+    case ACTORDIR::U:   vMoveDir = vLook; break;        
+    case ACTORDIR::D:   vMoveDir = -vLook; break;       
+    case ACTORDIR::L:   vMoveDir = -vRight; break;      
+    case ACTORDIR::R:   vMoveDir = vRight; break;       
+    case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
+    case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
+    case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
+    case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
+        default: return;
+    }
+
+    vMoveDir = XMVectorSetY(vMoveDir, 0.f);
+    vMoveDir = XMVector3Normalize(vMoveDir);
+
+    // 이동 방향으로 회전 (부드러운 회전)
+    m_pTransformCom->LookLerp(vMoveDir * -1.f, fTimeDelta, 10.f);
+    m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+    
+}
+
+// 떨어질 때 추가 값.
+void CCharacter::Move_Fall(_float fTimeDelta, _float fSpeed)
+{
+    _vector vMoveDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
+    m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+}
+
+void CCharacter::Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed)
+{
+    m_pTransformCom->Go_Dir(vDir * fSpeed, fTimeDelta);
+}
+
+void CCharacter::Rotate_Direction(_fvector vDir)
+{
+    _vector vDirFlat = XMVectorSetY(vDir, 0.f);
+    vDirFlat = XMVector3Normalize(vDirFlat);
+
+    if (XMVector3Equal(vDirFlat, XMVectorZero()))
+        return;
+
+    m_pTransformCom->LookDir(vDirFlat);
+}
+
+void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
+{
+    _vector vDirFlat = XMVectorSetY(vDir, 0.f);
+    vDirFlat = XMVector3Normalize(vDirFlat);
+
+    if (XMVector3Equal(vDirFlat, XMVectorZero()))
+        return;
+
+    m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
+}
+
+
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 {

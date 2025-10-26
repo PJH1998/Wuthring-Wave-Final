@@ -12,7 +12,7 @@ enum class EAugustaGroundState : _uint
 	IDLE = 0,		// 대기 (Stand1, Stand2, Stand1_Action01~03, StandChange)
 	WALK,			// 걷기 (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
 	RUN,			// 달리기 (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	SPRINT,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
+	DASH,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
 	SKILL,			// 스킬 (Skill)
 	LAND,			// 착지 (Land)
@@ -74,18 +74,21 @@ enum class EIdleType : _uint
 enum class ERunType : _uint
 {
 	RUN_B = 0,
-	RUN_BASEPOSE,
 	RUN_F,
 	RUN_LB,
 	RUN_LF,
 	RUN_RB,
 	RUN_RF,
+	RUN_BASEPOSE,
 	RUN_POSE_F,
 	RUN_POSE_L,
 	RUN_POSE_R,
 	RUN_TURNBACK,
+	SPRINT_F,
 	STOP_RUN_L,
 	STOP_RUN_R,
+	STOP_SPRINT_L,
+	STOP_SPRINT_R,
 	END
 };
 
@@ -104,11 +107,9 @@ enum class ELandType : _uint
 };
 
 
-enum class ESprintType : _uint
+enum class EDashType : _uint
 {
-	STOP_SPRINT_L = 0,
-	STOP_SPRINT_R,
-	MOVE_B,
+	MOVE_B = 0, 
 	MOVE_F,
 	MOVE_LIMIT_B,
 	MOVE_LIMIT_F,
@@ -137,11 +138,11 @@ enum class EAttackType : _uint
 
 enum class ESkillType : _uint
 {
-	HACK = 0,
-	RISE,
-	STRIKE,
-	QTE,
-	BURST,
+	SKILL_HACK = 0,
+	SKILL_RISE,
+	SKILL_RISE_ZERO,
+	SKILL_STRIKE,
+	SKILLQTE,
 	END
 };
 

@@ -10,9 +10,14 @@ private:
     enum IDLESTATE
     {
         JUMP = 0,
+        DASH,
         SPRINT,
         MOVE,
         ATTACK,
+        MOVE_U,
+        MOVE_D,
+        MOVE_L,
+        MOVE_R,
         SKILL_Q,
         SKILL_E,
         SKILL_R,

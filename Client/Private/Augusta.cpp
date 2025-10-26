@@ -79,6 +79,8 @@ void CAugusta::Priority_Update(_float fTimeDelta)
         if (pPart.second->IsActivate())
             pPart.second->Priority_Update(fTimeDelta);
     }
+
+  
     
 }
 
@@ -100,7 +102,9 @@ void CAugusta::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 0.5f);
 
-    // 6. 파츠 갱신.?
+    
+
+    // 7. 파츠 갱신.?
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
