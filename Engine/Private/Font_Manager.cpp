@@ -64,11 +64,11 @@ void CFont_Manager::Free()
 {
 	__super::Free();
 
-	for (auto& Pair : m_Fonts)
-		Pair.second = nullptr;
+	//for (auto& Pair : m_Fonts)
+	//	Pair.second = nullptr;
 	m_Fonts.clear();
 
-	m_pFTLibrary = nullptr;
+	//m_pFTLibrary = nullptr;
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);

@@ -32,11 +32,11 @@ private:
 
 	// Thread
 	vector<thread>					m_Threads;
-	// Hardware?먯꽌 ?쒓났?섎뒗 CPU Core 媛쒖닔
+	// Hardware Supported CPU Core
 	_uint								m_iNumThread = {};
 	// Thread???좊떦???묒뾽??
 	queue<function<void()>>	m_Works;
-	// Mutex (Data 李몄“ ?? ?쒖꽌?濡?1媛쒖쓽 Thread留??묎렐 媛?ν븯寃??섎룄濡?
+	// Mutex (Data)
 	mutex								m_Mutex;
 	// Thread Wait ?곹깭 留뚮뱾湲??꾪븳 媛앹껜
 	condition_variable				m_CV;

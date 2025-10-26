@@ -25,6 +25,7 @@ void CSequencer::Get(_int index, _int** start, _int** end, _int* type, _uint* co
 
 void CSequencer::Add(_int iType)
 {
+	m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Item" });
 }
 
 const _char* CSequencer::GetItemTypeName(_int iIndex) const
@@ -40,6 +41,47 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 	case ENUM_CLASS(ITEM_TYPE::OBJECT):
 		return "Object";
 	}
+}
+
+void CSequencer::CustomDraw(_int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
+{
+	m_RampEdit.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	m_RampEdit.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	m_pDrawList->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
+
+	for (_int i = 0; i < 3; ++i)
+	{
+		ImVec2 ptA(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
+		ImVec2 ptB(legendRect.Max.x, legendRect.Min.y + (i + 1) * 14.f);
+		m_pDrawList->AddText(ptA, m_RampEdit.mbVisible[i] ? 0xFFFFFFFF : 0x80FFFFFF, m_pCustomDrawLabel[i]);
+		if (ImRect(ptA, ptB).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
+			m_RampEdit.mbVisible[i] = !m_RampEdit.mbVisible[i];
+	}
+
+	m_pDrawList->PopClipRect();
+
+	//ImGui::SetCursorScreenPos(customRect.Min);
+	//ImCurveEdit::Edit(m_RampEdit, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+}
+
+void CSequencer::CustomDrawCompact(_int iIndex, const ImRect& customRect, const ImRect& clippingRect)
+{
+	m_RampEdit.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	m_RampEdit.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	m_pDrawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
+	for (_int i = 0; i < 3; ++i)
+	{
+		for (_uint j = 0; j < m_RampEdit.mPointCount[i]; ++j)
+		{
+			_float fFrame = m_RampEdit.mPts[i][j].x;
+			if (fFrame < m_Items[iIndex].iFrameStart || fFrame > m_Items[iIndex].iFrameEnd)
+				continue;
+			_float fRatio = (fFrame - m_iFrameMin) / static_cast<_float>(m_iFrameMax - m_iFrameMin);
+			_float fX = ImLerp(customRect.Min.x, customRect.Max.x, fRatio);
+			m_pDrawList->AddLine(ImVec2(fX, customRect.Min.y + 6), ImVec2(fX, customRect.Max.y - 4), 0xAA000000, 4.f);
+		}
+	}
+	m_pDrawList->PopClipRect();
 }
 
 HRESULT CSequencer::Initialize()
@@ -63,9 +105,35 @@ void CSequencer::Update(_float fTimeDelta)
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
+	m_isRet = false;
 	Drawing();
 
 	ImGui::End();
+
+	Selectable_Item();
+}
+
+void CSequencer::Selectable_Item()
+{
+	if (-1 < m_iSelectedEntry)
+	{
+		ImGui::Begin("Select");
+
+		_char szEntry[MAX_PATH] = {};
+		sprintf_s(szEntry, MAX_PATH, "[Entry] : %d", m_iSelectedEntry);
+		ImGui::Text(szEntry);
+
+		ImGui::Text("[Frame]");
+		SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+		_char szFrame[MAX_PATH] = {};
+		sprintf_s(szFrame, MAX_PATH, "Start : %d / End : %d", item.iFrameStart, item.iFrameEnd);
+		ImGui::Text(szFrame);
+
+		ImGui::Text("[Label] : "); ImGui::SameLine();
+		ImGui::Text(item.szItemLabel);
+
+		ImGui::End();
+	}
 }
 
 void CSequencer::Drawing()
@@ -85,6 +153,8 @@ void CSequencer::Drawing()
 	m_iVisibleFrameCnt = static_cast<_int>(floorf((m_vCanvasSize.x - m_iLegendWidth) / m_fFramePixelWidth));
 	m_fBarWidthRatio = min(m_iVisibleFrameCnt / static_cast<_float>(m_iFrameCnt), 1.f);
 	m_fBarWidthInPixels = m_fBarWidthRatio * (m_vCanvasSize.x - m_iLegendWidth);
+	m_CustomDraws.clear();
+	m_CompactCustomDraws.clear();
 
 	Panning(m_iVisibleFrameCnt);
 	Expand(iControlHeight);
@@ -137,7 +207,7 @@ void CSequencer::Expand(_int iControllHeight)
 		ImVec2 vScrollBarSize(m_vCanvasSize.x, 14.f);
 		// Top Bar
 		ImGui::InvisibleButton("topBar", vHeaderSize);
-		m_pDrawList->AddRectFilled(m_vCanvasPos, m_vCanvasPos + vHeaderSize, 0xFFFF0000, 0);
+		m_pDrawList->AddRectFilled(m_vCanvasPos, m_vCanvasPos + vHeaderSize, 0xFFFF000, 0);
 
 		// Child Frame
 		m_vChildFramePos = ImGui::GetCursorScreenPos();
@@ -232,6 +302,14 @@ void CSequencer::DrawFrame()
 
 	m_pDrawList->PopClipRect();
 
+	// Custom Draw
+	for (auto& customDraw : m_CustomDraws)
+		CustomDraw(customDraw.iIndex, customDraw.CustomRect, customDraw.LegendRect, customDraw.ClippingRect, customDraw.LegendClippingRect);
+
+	for (auto& customDraw : m_CompactCustomDraws)
+		CustomDrawCompact(customDraw.iIndex, customDraw.CustomRect, customDraw.ClippingRect);
+
+
 	CopyPaste();
 }
 
@@ -258,7 +336,7 @@ void CSequencer::DrawLegend()
 		iCustomHeight += GetCustomHeight(i);
 	}
 
-	ImGuiIO& io = ImGui::GetIO();
+	//ImGuiIO& io = ImGui::GetIO();
 	// Slot BackGround
 	for (size_t i = 0; i < m_Items.size(); ++i)
 	{
@@ -303,7 +381,7 @@ void CSequencer::DrawSlot()
 		iCustomHeight = 0;
 		for (_int i = 0; i < m_iSelectedEntry; ++i)
 			iCustomHeight += GetCustomHeight(i);
-		m_pDrawList->AddRectFilled(ImVec2(m_vContentMin.x, m_vContentMin.y + m_iItemHeight * m_iSelectedEntry + iCustomHeight), ImVec2(m_vContentMin.x + m_vCanvasSize.x, m_vContentMin.y + m_iItemHeight * (m_iSelectedEntry - 1) + iCustomHeight), 0x801080FF, 1.f);
+		m_pDrawList->AddRectFilled(ImVec2(m_vContentMin.x, m_vContentMin.y + m_iItemHeight * m_iSelectedEntry + iCustomHeight), ImVec2(m_vContentMin.x + m_vCanvasSize.x, m_vContentMin.y + m_iItemHeight * (m_iSelectedEntry + 1) + iCustomHeight), 0x801080FF, 1.f);
 	}
 
 	for (size_t i = 0; i < m_Items.size(); ++i)
@@ -413,8 +491,8 @@ void CSequencer::Moving()
 			_int* pEnd = { nullptr };
 			Get(m_iMovingEntry, &pStart, &pEnd, nullptr, nullptr);
 			m_iSelectedEntry = m_iMovingEntry;
-			_int iLeft = *pStart;
-			_int iRight = *pEnd;
+			_int& iLeft = *pStart;
+			_int& iRight = *pEnd;
 
 			if (m_iMovingPart & 1)
 				iLeft += iDiffFrame;
@@ -545,12 +623,45 @@ void CSequencer::ScrollBar()
 					_float fBarRatio = fBarNewWidth / m_fBarWidthInPixels;
 					_float fPreviousFramePixelWidthTarget = m_fFramePixelWidthTarget;
 					m_fFramePixelWidthTarget = m_fFramePixelWidth = m_fFramePixelWidth / fBarRatio;
-					_int iNewVisibleFrameCnt = static_cast<_int>((m_vCanvasSize.x - m_iLegendWidth) / m_fFramePixelWidthTarget);
-					_int iLastFrame = m_iFirstFrame + iNewVisibleFrameCnt;
+					_int iNewVisibleFrameCnt = static_cast<_int>(m_iVisibleFrameCnt / fBarRatio);
+					_int iNewFirstFrame = m_iFirstFrame + iNewVisibleFrameCnt - m_iVisibleFrameCnt;
+					iNewFirstFrame = clamp(iNewFirstFrame, m_iFrameMin, max(m_iFrameMax - m_iVisibleFrameCnt, m_iFrameMin));
+					if (iNewFirstFrame == m_iFirstFrame)
+						m_fFramePixelWidth = m_fFramePixelWidthTarget = fPreviousFramePixelWidthTarget;
+					else
+						m_iFirstFrame = iNewFirstFrame;
 				}
 			}
 		}
+		else
+		{
+			if (true == m_isMovingScrollBar)
+			{
+				if (false == io.MouseDown[0])
+					m_isMovingScrollBar = true;
+				else
+				{
+					_float fFramesPerPixelInBar = m_fBarWidthInPixels / static_cast<_float>(m_iVisibleFrameCnt);
+					m_iFirstFrame = static_cast<_int>((io.MousePos.x - m_vPanningViewSource.x) / fFramesPerPixelInBar) - m_iPanningViewFrame;
+					m_iFirstFrame = clamp(m_iFirstFrame, m_iFrameMin, max(m_iFrameMax - m_iVisibleFrameCnt, m_iFrameMin));
+				}
+			}
+			else
+			{
+				if (ScrollBarThumb.Contains(io.MousePos) && ImGui::IsMouseClicked(0) && false == m_isMovingCurrentFrame && -1 == m_iMovingEntry)
+				{
+					m_isMovingScrollBar = true;
+					m_vPanningViewSource = io.MousePos;
+					m_iPanningViewFrame = -m_iFirstFrame;
+				}
+				if (false == m_isSizingRightBar && isOnRight && ImGui::IsMouseClicked(0))
+					m_isSizingRightBar = true;
+				if (false == m_isSizingLeftBar && isOnLeft && ImGui::IsMouseClicked(0))
+					m_isSizingLeftBar = true;
+			}
+		}
 	}
+	
 }
 
 void CSequencer::DrawLine(_int iFrame, _int iRegionHeight)

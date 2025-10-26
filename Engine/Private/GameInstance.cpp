@@ -748,6 +748,8 @@ HRESULT CGameInstance::Clear_Memory()
 
 void CGameInstance::Release_Engine()
 {
+	Wait_Thread_End();
+
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);

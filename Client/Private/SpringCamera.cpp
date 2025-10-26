@@ -15,10 +15,9 @@ void CSpringCamera::Update_Target(const _fvector& TargetPos, _float fOffsetY)
 {
 	m_fOffsetY = fOffsetY;
 
-	//if (fDistance < 0.05f)
-	//	return;
-	_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
-	XMStoreFloat4(&m_vTargetPosition, vPos);
+	// Lerp
+	//_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
+	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
 _vector CSpringCamera::Get_LookVector_NoPitch()
@@ -49,7 +48,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fDistance = 10.f;
 	m_fFixedDistance = 10.f;
-	m_fLerpSpeed = 0.15f;
+	m_fLerpSpeed = 0.5f;
 	m_fMinDistance = 3.f;
 	m_fMaxDistance = 15.f;
 
