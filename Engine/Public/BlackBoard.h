@@ -29,13 +29,13 @@ public:
 		DATA_END
 	};
 
-	template<class T> constexpr DATA_TYPE DeduceType();
-	template<> inline constexpr DATA_TYPE DeduceType<_int>() { return DATA_TYPE::INT; }
-	template<> inline constexpr DATA_TYPE DeduceType<_float>() { return DATA_TYPE::FLOAT; }
-	template<> inline constexpr DATA_TYPE DeduceType<_uint>() { return DATA_TYPE::MASK; }
-	template<> inline constexpr DATA_TYPE DeduceType<_bool>() { return DATA_TYPE::BOOL; }
-	template<> inline constexpr DATA_TYPE DeduceType<_float3>() { return DATA_TYPE::VECTOR3; }
-	template<> inline constexpr DATA_TYPE DeduceType<_float4>() { return DATA_TYPE::VECTOR4; }
+	template<class T> constexpr DATA_TYPE DeduceType(T value) { return DATA_TYPE::DATA_END; }
+	template<> inline constexpr DATA_TYPE DeduceType<_int>(_int value) { return DATA_TYPE::INT; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float>(_float value) { return DATA_TYPE::FLOAT; }
+	template<> inline constexpr DATA_TYPE DeduceType<_uint>(_uint value) { return DATA_TYPE::MASK; }
+	template<> inline constexpr DATA_TYPE DeduceType<_bool>(_bool value) { return DATA_TYPE::BOOL; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float3>(_float3 value) { return DATA_TYPE::VECTOR3; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float4>(_float4 value) { return DATA_TYPE::VECTOR4; }
 #pragma endregion
 	/*typedef struct tFieldAccessor
 	{
@@ -44,7 +44,6 @@ public:
 		std::function<_bool(const _variant& in)> setter;
 	}ACCESSOR;*/
 
-	typedef map<_string, pair<DATA_TYPE, void*>> BLACKBOARD_DATA;
 	//typedef map<StringID, ACCESSOR> BLACKBOARD_DATA;
 
 private:
@@ -74,6 +73,7 @@ public:
 
 
 private:
+	typedef map<_string, pair<DATA_TYPE, void*>> BLACKBOARD_DATA;
 	BLACKBOARD_DATA			m_Datas;
 	map<const _string, function<_bool()>> m_Conditions;
 

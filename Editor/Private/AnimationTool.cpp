@@ -236,7 +236,7 @@ void CAnimationTool::RenderUI_FromState()
                 {
                     iSelectedIndex = id;
                     m_SelectedFromStateTag = stateName;
-
+                    //m_iTransitionInfoSelectedIndex = -1;
                 }
                 id++;
             }
@@ -264,7 +264,6 @@ void CAnimationTool::RenderUI_ToState()
                 {
                     iSelectedIndex = id;
                     m_SelectedToStateTag = stateName;
-                    m_iTransitionInfoSelectedIndex = -1;
                 }
                 id++;
             }
@@ -313,8 +312,8 @@ void CAnimationTool::RenderUI_Transitions()
         }
         ImGui::EndChild();
 
-        if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
-            RenderUI_TransitionInfo();
+        //if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
+        //    RenderUI_TransitionInfo();
     }
     ImGui::EndGroup();
 
@@ -344,7 +343,8 @@ void CAnimationTool::RenderUI_OptionState()
             //3. 우선 순위
             ImGui::InputScalar("Priority", ImGuiDataType_U32, &m_iTransitionPriority);
             //4. 조건이 되어질 상태
-            ImGui::Text("%u", (1 << m_iTransitionTargetState));
+            _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
+            ImGui::Text("%u", iStateFlag);
             ImGui::InputScalar("Target State", ImGuiDataType_U32, &m_iTransitionTargetState);
 
             _string strTransition = {};
@@ -406,16 +406,16 @@ void CAnimationTool::RenderUI_OptionState()
                 ImGui::Checkbox("isBlend", &m_isBlend);
                 ImGui::SameLine();
                 ImGui::Checkbox("isRootMotion", &m_isRootMotion);
+                ImGui::SameLine();
+                ImGui::Checkbox("isLoop", &m_isLoopCheck);
                 ImGui::InputFloat("RootMotionRate", &m_fRootMotionRate);
                 ImGui::InputFloat("TransitTrackPos", &m_fTransitTrackPos);
                 ImGui::InputFloat("AnimationSpeed", &m_fAnimationSpeed);
-                ImGui::Text("%u", (1 << m_iConstAnimRunning));
-                ImGui::InputScalar("ConstAnimRunningFlag", ImGuiDataType_U32, &m_iConstAnimRunning);
             }
 
-            if(ImGui::Button("Add Data"))
+            if(ImGui::Button("Reset Data"))
             {
-                m_pAnimMachineCom->Reset_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
+                m_pAnimMachineCom->Reset_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_isLoopCheck, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
             }
 
             Export_StateTransition_To_CSV();
@@ -438,9 +438,9 @@ void CAnimationTool::RenderUI_OptionState()
 
 void CAnimationTool::RenderUI_TransitionInfo()
 {
-    //ImGui::Begin("Transition Info");
+    ImGui::Begin("Transition Info");
     //ImGui::Text("Transition Info");
-    ImGui::BeginChild("Transition Info", ImVec2(400, 0), true);
+    //ImGui::BeginChild("Transition Info", ImVec2(400, 0), true);
     {
         ImGui::Text("Transition Count : %u", m_TransitionDatas.size());
         ImGui::Separator();
@@ -449,11 +449,11 @@ void CAnimationTool::RenderUI_TransitionInfo()
         ImGui::Text("From: %s", SelectData.strFrom.c_str());
         ImGui::Text("To: %s", SelectData.strTo.c_str());
         ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
-        ImGui::InputScalar("TargetState", ImGuiDataType_U32, &SelectData.iTargetState);
+        ImGui::Text("TargetState: %u", SelectData.iTargetState);
         ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
         ImGui::InputFloat("Transit Enable Position",&SelectData.fTransitEnablePos);
     }
-    ImGui::EndChild();
+    //ImGui::EndChild();
     //if(ImGui::CollapsingHeader("Conditions"))
     //{
     //    for(auto& ConditionName : SelectData.ConditionConst)
@@ -469,7 +469,7 @@ void CAnimationTool::RenderUI_TransitionInfo()
     //{
     //    SelectData.ConditionConst.pop_back();
     //}
-    //ImGui::End();
+    ImGui::End();
 }
 
 
@@ -503,7 +503,8 @@ void CAnimationTool::RenderUI_EditState()
     RenderUI_OptionState();
 
 
-
+    if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
+        RenderUI_TransitionInfo();
 
     ImGui::End();
 }
@@ -980,8 +981,10 @@ void CAnimationTool::Import_StateTransition_From_Json()
             TRANSITION_DATA tTransition{
                 jsonTransition["From"],
                 jsonTransition["To"],
+                jsonTransition["Priority"],
                 jsonTransition["Target State"],
-                jsonTransition["Transit Target Pos"]
+                jsonTransition["Transit Target Pos"],
+                jsonTransition["Transit Enable Pos"]
             };
             m_TransitionDatas.push_back(tTransition);
         }

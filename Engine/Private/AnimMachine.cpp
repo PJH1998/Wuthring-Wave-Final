@@ -37,7 +37,7 @@ HRESULT CAnimMachine::Initialize_Clone(void* pArg)
 }
 
 //void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex)
-void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAnimTag)
+void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAnimTag, _float fTargetTrackPos)
 {
 	//if(iIndex >= m_AnimStates.size())
 	if(m_AnimStates.end() == m_AnimStates.find(strAnimTag))
@@ -52,32 +52,32 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
 		m_AnimStates[strAnimTag]->Enter(pModelCom, pState, &m_strCurrentAnimTag);
 
+		//pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
 	}
 }
 
-void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _float fTimeDelata)
+void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
 	// 1. 현재 상태 업데이트
 	//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 	m_AnimStates[m_strCurrentAnimTag]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 
 	// 2. 애니메이션 재생
-	_float fCurTrackPos{};
 	//_bool Result = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &fCurTrackPos);
-	_bool Result = m_AnimStates[m_strCurrentAnimTag]->Play_Animation(pModelCom, fTimeDelata);
+	isAnimFinished = m_AnimStates[m_strCurrentAnimTag]->Play_Animation(pModelCom, fTimeDelata);
 	//Result : 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
-	m_AnimStates[m_strCurrentAnimTag]->Feedback(Result, pState, this, pModelCom);
+	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
-void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, _uint* pState, _float fTimeDelata)
+void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
 	m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 
-	_bool Result = m_AnimStates[m_strCurrentAnimTag]->Play_Animation_GPU(pModelCom, pComputeShaderCom, fTimeDelata);
-	//_bool Result = pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strCurrentAnimTag, fTimeDelata, &fCurTrackPos);
+	isAnimFinished = m_AnimStates[m_strCurrentAnimTag]->Play_Animation_GPU(pModelCom, pComputeShaderCom, fTimeDelata);
 
+	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
 void CAnimMachine::Reset()
@@ -102,7 +102,7 @@ void CAnimMachine::Clear_States()
 	m_AnimStates.clear();
 }
 
-void CAnimMachine::Reset_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed)
+void CAnimMachine::Reset_StateData(_string& strAnimName, _bool isBlend, _bool isRootMotion, _bool isLoop, _float fRootMotionRate, _float fTransitTrackPos, _float fAnimationSpeed)
 {
 	if(m_AnimStates.find(strAnimName) == m_AnimStates.end())
 		return;
@@ -110,6 +110,7 @@ void CAnimMachine::Reset_StateData(_string& strAnimName, _bool isBlend, _bool is
 	CAnimState::ANIMSTATE_DESC AnimStateDesc{};
 	AnimStateDesc.isBlend = isBlend;
 	AnimStateDesc.isRootMotion = isRootMotion;
+	AnimStateDesc.isLoop = isLoop;
 	AnimStateDesc.fRootMotionRate = fRootMotionRate;
 	AnimStateDesc.fTransitTrackPos = fTransitTrackPos;
 	AnimStateDesc.fAnimationSpeed = fAnimationSpeed;
@@ -184,6 +185,7 @@ void CAnimMachine::Save_AnimDatas(json& jsonOutput)
 
 		AnimState["isBlend"] = DataDesc.isBlend;
 		AnimState["isRootMotion"] = DataDesc.isRootMotion;
+		AnimState["isLoop"] = DataDesc.isLoop;
 		AnimState["fRootMotionRate"] = DataDesc.fRootMotionRate;
 		AnimState["fTransitTrackPos"] = DataDesc.fTransitTrackPos;
 		AnimState["fAnimationSpeed"] = DataDesc.fAnimationSpeed;
@@ -198,14 +200,15 @@ void CAnimMachine::Load_AnimDatas(json& jsonInput)
 	for(auto& AnimState : jsonInput["AnimStates"])
 	{
 		_string StateName = AnimState["Name"];
-		CAnimState::ANIMSTATE_DESC DataDesc
-		{
-			AnimState["isBlend"],
-			AnimState["isRootMotion"],
-			AnimState["fRootMotionRate"],
-			AnimState["fTransitTrackPos"],
-			AnimState["fAnimationSpeed"]
-		};
+		CAnimState::ANIMSTATE_DESC DataDesc{};
+		
+		DataDesc.isBlend = AnimState["isBlend"];
+		DataDesc.isRootMotion = AnimState["isRootMotion"];
+		DataDesc.isLoop = AnimState["isLoop"];
+		DataDesc.fRootMotionRate = AnimState["fRootMotionRate"];
+		DataDesc.fTransitTrackPos = AnimState["fTransitTrackPos"];
+		DataDesc.fAnimationSpeed = AnimState["fAnimationSpeed"];
+		
 		m_AnimStates.emplace(StateName, CAnimState::Create(AnimState, jsonInput["Transitions"]));
 	}
 }

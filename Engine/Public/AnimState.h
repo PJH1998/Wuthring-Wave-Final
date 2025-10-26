@@ -15,6 +15,7 @@ public:
 		//_float* pTrackPosition;
 		_bool isBlend;
 		_bool isRootMotion;
+		_bool isLoop;
 		_float fRootMotionRate;
 		_float fTransitTrackPos;
 		_float fAnimationSpeed;
@@ -48,10 +49,19 @@ private:
 
 	_float m_fCurrentTrackPositon{};
 
+	//애니메이션 데이터 원본
 	ANIMSTATE_DESC m_StateData{};
 
+	//상황에 따른 변동 변수
+	_bool	m_isBlend{};
+	_bool	m_isRootMotion{};
+	_bool	m_isLoop{};
+	_float	m_fRootMotionRate{};
+	_float	m_fTransitTrackPos{};
+	_float	m_fAnimationSpeed{};
+
 	vector<CAnimTransition*> m_Transitions;
-	
+
 public:
 #ifdef _DEBUG
 	static CAnimState* Create(const _string& strAnimationTag, ANIMSTATE_DESC& StateDesc);

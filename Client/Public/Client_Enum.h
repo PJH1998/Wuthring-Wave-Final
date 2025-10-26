@@ -53,6 +53,9 @@ namespace Client
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
+		BLOCK				= 1 << 14,
+		PARALYISIS			= 1 << 15,
+
 		ATTACK_1			= 1 << 16,
 		ATTACK_2			= 1 << 17,
 		ATTACK_3			= 1 << 18,
@@ -62,8 +65,7 @@ namespace Client
 		ATTACK_7			= 1 << 22,
 		ATTACK_8			= 1 << 23,
 
-		BLOCK				= 1 << 24,
-		PARALYISIS			= 1 << 25,
+
 
 		SPAWN = 1 << 29,
 		ANIMATION_PLAYING = 1 << 30,

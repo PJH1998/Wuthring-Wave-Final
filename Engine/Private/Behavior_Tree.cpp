@@ -81,6 +81,7 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 	{
 		BT_TYPE eType = NodeData["eType"];
 		size_t iNumTransition = NodeData["NumTransition"];
+		_uint iTargetState =  NodeData["TargetState"];
 		vector<Link> Transition;
 		for(auto& Transit : NodeData["Transitions"])
 		{
@@ -98,6 +99,7 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 		tNode.eType = eType;
 		tNode.Transition = Transition;
 		tNode.Conditions = Condition;
+		tNode.iTargetState = iTargetState == 0 ? 0 : (1 << (iTargetState - 1));
 		m_NodesDatas.push_back(tNode);
 	}
 
@@ -105,10 +107,14 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 	{
 		m_RequireKey.push_back(strKey);
 	}
+	m_RequireKey.push_back("iState");
+
 	for(auto& strKey : BT_Data["A_ConditionKey"])
 	{
 		m_RequireKey.push_back(strKey);
 	}
+	m_RequireKey.push_back("isAnimationRunning");
+
 	for(auto& strKey : BT_Data["A_ConstKey"])
 	{
 		m_RequireKey.push_back(strKey);

@@ -26,9 +26,9 @@ public:
 	virtual HRESULT		Initialize_Clone(void* pArg) override;
 
 	//void Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex);
-	void Handle_Input(CModel* pModelCom, _uint* pState,_string& strAnimTag);
-	void Update(CModel* pModelCom, _uint* pState, _float fTimeDelata);
-	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom,_uint* pState, _float fTimeDelata);
+	void Handle_Input(CModel* pModelCom, _uint* pState,_string& strAnimTag, _float fTargetTrackPos = 0.f);
+	void Update(CModel* pModelCom, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
+	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom,_uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	
 	void Reset();
 
@@ -38,6 +38,7 @@ public:
 	void Reset_StateData(_string& strAnimName,
 						_bool isBlend,
 						_bool isRootMotion,
+						_bool isLoop,
 						_float fRootMotionRate,
 						_float fTransitTrackPos,
 						_float fAnimationSpeed);

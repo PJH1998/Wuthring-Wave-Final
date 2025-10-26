@@ -10,9 +10,13 @@ HRESULT CAnimTransition::Initialize_Prototype(json& jsonParser)
     m_strNextState =  jsonParser["To"];
     //for(auto& strCondition : jsonParser["Conditions"])
 
+    m_iPriority = jsonParser["Priority"];
+    //저장방식 정립하면 변경하자.
+    _uint iTargetState = jsonParser["Target State"];
+    m_iTargetState = iTargetState == 0 ? 0 : (1 << (iTargetState - 1));
     //m_iTargetState = jsonParser["Target State"];
-    m_iTargetState = (1U << jsonParser["Target State"]);
     m_fTargetTrackPos = jsonParser["Transit Target Pos"];
+    m_fTransitEnablePos = jsonParser["Transit Enable Pos"];
     return S_OK;
 }
 

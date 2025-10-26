@@ -162,17 +162,17 @@ void CASM_Interface::Node_Info()
 		}
 		if(m_isConditionCreate)
 		{
-			if(ImGui::RadioButton("Int", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 0)){}
+			if(ImGui::RadioButton("_Int", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 0)){}
 			ImGui::SameLine();
-			if(ImGui::RadioButton("Float", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 1)){}
+			if(ImGui::RadioButton("_Float", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 1)){}
 			ImGui::SameLine();
-			if(ImGui::RadioButton("Mask", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 2)){}
+			if(ImGui::RadioButton("_Mask", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 2)){}
 			ImGui::SameLine();
-			if(ImGui::RadioButton("Bool", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 3)){}
+			if(ImGui::RadioButton("_Bool", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 3)){}
 			ImGui::SameLine();
-			if(ImGui::RadioButton("Vec3", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 4)){}
+			if(ImGui::RadioButton("_Vec3", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 4)){}
 			ImGui::SameLine();
-			if(ImGui::RadioButton("Vec4", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 5)){}
+			if(ImGui::RadioButton("_Vec4", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 5)){}
 
 			ImGui::InputText("Value", m_strValueName, MAX_PATH);
 			ImGui::InputText("Condition", m_strConditionName, MAX_PATH);
@@ -371,29 +371,29 @@ void CASM_Interface::BlackBoard_Setting()
 		switch(m_ValueContainer[m_strValueKey].first)
 		{
 		case Editor::CASM_Interface::INT:
-			ImGui::Text("Int");
+			ImGui::Text("_Int");
 			ImGui::InputInt(m_strValueKey.c_str(), static_cast<_int*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::FLOAT:
-			ImGui::Text("Float");
+			ImGui::Text("_Float");
 			ImGui::InputFloat(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::MASK:
 		{
-			ImGui::Text("Mask");
+			ImGui::Text("_Mask");
 			ImGui::InputScalar(m_strValueKey.c_str(), ImGuiDataType_U32, static_cast<_uint*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		}
 		case Editor::CASM_Interface::BOOL:
-			ImGui::Text("Bool");
+			ImGui::Text("_Bool");
 			ImGui::Checkbox(m_strValueKey.c_str(), static_cast<_bool*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR3:
-			ImGui::Text("Float3");
+			ImGui::Text("_Float3");
 			ImGui::InputFloat3(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR4:
-			ImGui::Text("Float4");
+			ImGui::Text("_Float4");
 			ImGui::InputFloat4(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		default:
@@ -589,7 +589,7 @@ void CASM_Interface::Initialize_BT()
 void CASM_Interface::Save_BT_Data()
 {
 	IGFD::FileDialogConfig config;
-	config.path = "../../Editor/Bin/Resource/";
+	config.path = "../../Client/Bin/Resource/Model";
 	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 	ImGuiFileDialog::Instance()->OpenDialog("BT File Save", "Export File", ".json", config);
 	ImVec2 vMinSize = ImVec2(600, 400);
@@ -673,7 +673,7 @@ void CASM_Interface::Save_Nodes(ofstream& File, _uint& iIndex)
 void CASM_Interface::Load_BT_Data()
 {
 	IGFD::FileDialogConfig config;
-	config.path = "../../Editor/Bin/Resource/";
+	config.path = "../../Client/Bin/Resource/Model";
 	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 	ImGuiFileDialog::Instance()->OpenDialog("BT File Load", "Import File", ".json", config);
 	ImVec2 vMinSize = ImVec2(600, 400);

@@ -22,6 +22,7 @@ void CAnimState::Render_GUI()
 		ImGui::Text("Animation: %s", m_strAnimationTag.c_str());
 		m_StateData.isBlend ? ImGui::Text("isBlend : true") : ImGui::Text("isBlend : false");
 		m_StateData.isRootMotion ? ImGui::Text("isRootMotion : true") : ImGui::Text("isRootMotion : false");
+		m_StateData.isLoop ? ImGui::Text("isLoop : true") : ImGui::Text("isLoop : false");
 		ImGui::Text("RootMotionRate: %.3f", m_StateData.fRootMotionRate);
 		ImGui::Text("TransitTrackPos: %.3f", m_StateData.fTransitTrackPos);
 		ImGui::Text("AnimationSpeed: %.3f", m_StateData.fAnimationSpeed);
@@ -35,6 +36,7 @@ HRESULT CAnimState::Initialize(json& jsonParser, json& jsonTransitions)
 	m_strAnimationTag = jsonParser["Name"];
 	m_StateData.isBlend = jsonParser["isBlend"];
 	m_StateData.isRootMotion = jsonParser["isRootMotion"];
+	m_StateData.isLoop = m_isLoop = jsonParser["isLoop"];
 	m_StateData.fRootMotionRate = jsonParser["fRootMotionRate"];
 	m_StateData.fTransitTrackPos = jsonParser["fTransitTrackPos"];
 	m_StateData.fAnimationSpeed = jsonParser["fAnimationSpeed"];
@@ -44,6 +46,12 @@ HRESULT CAnimState::Initialize(json& jsonParser, json& jsonTransitions)
 		if(0 == m_strAnimationTag.compare(jsonTransition["From"]))
 			m_Transitions.push_back(CAnimTransition::Create(jsonTransition));
 	}
+
+	//오름차순 정렬
+	sort(m_Transitions.begin(), m_Transitions.end(), [](CAnimTransition* Src, CAnimTransition* Dst)->_bool{
+		return Src->Get_Priority() < Dst->Get_Priority();
+		});
+
 	return S_OK;
 }
 
@@ -51,15 +59,27 @@ void CAnimState::Enter(CModel* pModelCom, _uint* pOwnerState, _string* pCurrentA
 {
 	*pCurrentAnimTag = m_strAnimationTag;
 	
+	//상태 전환 시 초기 데이터 복원
+	m_isBlend = m_StateData.isBlend;
+	m_isRootMotion = m_StateData.isRootMotion;
+	//m_isLoop = m_StateData.isLoop;
+	m_fRootMotionRate = m_StateData.fRootMotionRate;
+	m_fTransitTrackPos = m_StateData.fTransitTrackPos;
+	m_fAnimationSpeed = m_StateData.fAnimationSpeed;
 }
 
 void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _uint* pOwnerState, _string* pCurrentAnimTag, _float fTrackPosition/*, ANIMSTATE_DESC& StateData*/)
 {
 	//*pOwnerState |= ENUM_CLASS(TEST_STATE::ANIMATION_PLAYING);
 
-	//_int iNextIndex{};
 	_string strNextAnimTag{};
 	_float fNextTargetTrackPos{};
+	//루프가 아닌 애니메이션 자동 전환은 백터 맨 마지막에 설정
+	CAnimTransition* pTemp = nullptr;
+	if(false == m_Transitions.empty()) 
+		pTemp = m_Transitions.back();
+	if(pTemp && false == m_isLoop)
+		m_Transitions.pop_back();
 	for(auto& Transition : m_Transitions)
 	{
 		if(m_fCurrentTrackPositon < Transition->Get_TransitEnablePos())
@@ -67,9 +87,14 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 
 		if(Transition->Is_Transit(pOwnerState, strNextAnimTag, fNextTargetTrackPos))
 		{
-			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag);
+			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag/*, fNextTargetTrackPos*/);
+			if(pTemp && false == m_isLoop)
+				m_Transitions.push_back(pTemp);
+			return;
 		}
 	}
+	if(pTemp && false == m_isLoop)
+		m_Transitions.push_back(pTemp);
 }
 
 void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState)
@@ -79,15 +104,15 @@ void CAnimState::Exit(CModel* pModelCom, _uint* pOwnerState)
 
 _bool CAnimState::Play_Animation(CModel* pModelCom, _float fTimeDelta)
 {
-	return pModelCom->Play_Animation_CPU(m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon, 
-										m_StateData.isBlend, m_StateData.isRootMotion, m_StateData.fRootMotionRate);
+	return pModelCom->Play_Animation_CPU(m_strAnimationTag, fTimeDelta * m_fAnimationSpeed, &m_fCurrentTrackPositon, 
+										m_isBlend, m_isRootMotion, m_fRootMotionRate);
 	//return pModelCom->Play_Animation_CPU(m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon);
 }
 
 _bool CAnimState::Play_Animation_GPU(CModel* pModelCom, CComputeShader* pComputeShaderCom, _float fTimeDelta)
 {
-	return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon, 
-										m_StateData.isRootMotion, m_StateData.fRootMotionRate);
+	return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_fAnimationSpeed, &m_fCurrentTrackPositon, 
+										m_isRootMotion, m_fRootMotionRate);
 	//return pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strAnimationTag, fTimeDelta * m_StateData.fAnimationSpeed, &m_fCurrentTrackPositon);
 }
 
@@ -96,6 +121,18 @@ void CAnimState::Feedback(_bool isAnimationFinished, _uint* pOwnerState, CAnimMa
 	if(isAnimationFinished)
 	{
 		//pAnimMachineCom->Handle_Input(pModelCom, pOwnerState, strNextAnimTag);
+		if(m_Transitions.empty())
+		{
+
+		}
+		//루프가 아닌 애니메이션 자동 전환은 백터 맨 마지막에 설정
+		else if(false == m_isLoop)
+		{
+			_string strToState;
+			_float fTargetTrackPos{};
+			m_Transitions.back()->Get_ToStateData(strToState, fTargetTrackPos);
+			pAnimMachineCom->Handle_Input(pModelCom, pOwnerState, strToState, fTargetTrackPos);
+		}
 	}
 }
 #ifdef _DEBUG
@@ -128,6 +165,5 @@ void CAnimState::Free()
 
 	for(auto& pTransition : m_Transitions)
 		Safe_Release(pTransition);
-
 	m_Transitions.clear();
 }

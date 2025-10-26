@@ -88,9 +88,6 @@
     <Filter Include="03. GameObject\Actor\MonsterTest">
       <UniqueIdentifier>{2c3f6197-3925-414b-870c-256facfb484c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\MonsterTest\Body">
-      <UniqueIdentifier>{d7e75425-bf2a-4075-ae89-359a76262565}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI">
       <UniqueIdentifier>{e3e754ff-d915-4aa3-b5f5-0d09b20d656d}</UniqueIdentifier>
     </Filter>
@@ -216,9 +213,6 @@
     <ClInclude Include="..\Public\MonsterTest.h">
       <Filter>03. GameObject\Actor\MonsterTest</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\MonsterBody.h">
-      <Filter>03. GameObject\Actor\MonsterTest\Body</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\Animator_UI.h">
       <Filter>03. GameObject\UI\_Component</Filter>
     </ClInclude>
@@ -343,9 +337,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\MonsterTest.cpp">
       <Filter>03. GameObject\Actor\MonsterTest</Filter>
-    </ClCompile>
-    <ClCompile Include="..\private\MonsterBody.cpp">
-      <Filter>03. GameObject\Actor\MonsterTest\Body</Filter>
     </ClCompile>
     <ClCompile Include="..\private\Animator_UI.cpp">
       <Filter>03. GameObject\UI\_Component</Filter>

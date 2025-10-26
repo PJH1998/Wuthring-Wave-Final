@@ -101,6 +101,21 @@ void CLevel_Test::Ready_Dummy()
 	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 0.f, 20.f), XMMatrixScaling(0.001f, 0.001f, 0.001f));
 }
 
+void CLevel_Test::Ready_MonsterTest()
+{
+    CMonsterTest::MONSTERTEST_DESC MobDesc{};
+    MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
+    MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+    MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    MobDesc.fSpeedPerSec = 10.f;
+
+    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT(""),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+        CRASH("Failed Ready MonsterTest");
+}
+
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
     _char FileDrive[MAX_PATH] = {};
