@@ -29,6 +29,9 @@ private:
 
 private:
 	HRESULT					Ready_Components(void* pArg);
+
+private:
+	void					Update_Trigger(_float fTimeDelta);
 	
 private:
 

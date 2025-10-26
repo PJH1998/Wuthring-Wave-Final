@@ -85,6 +85,18 @@ public:
 	} HIERARCHY_OBJ_DESC;
 
 
+
+
+	// for Variable Shader
+	// 특수한 상황 (pass 5번) 에 비정형 값을 던져주어야 할 때 사용.
+	typedef struct tagVariantUIReadyDesc
+	{
+		vector<_float4x4>	matVariantValues = {};	// per instance
+		_uint		iShaderFlag = {};
+		_bool		isVariant = false;
+	} VARIANTREADY_UI_DESC;
+	 
+
 #pragma endregion
 
 protected:
@@ -118,6 +130,9 @@ private:
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
+	void					Set_VariantUIDesc(VARIANTREADY_UI_DESC tVarUIDesc)	{ 
+		m_cachedVariantUIDesc = tVarUIDesc;  
+	}
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 
 	void					Add_Child(CCustom_UI* pChildUI)		{ m_vecChildObjects.push_back(pChildUI); }
@@ -145,6 +160,8 @@ protected:
 
 	vector<function<void()>>	m_vecFunctions[ENUM_CLASS(UI_EVENT_TYPE::END)] = {};
 
+
+
 protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
 	_float					m_cachingTimeElapsed = {};
 	enum CACHED_TRANSFORM {POS, ROT, SCA, END};
@@ -153,6 +170,7 @@ protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐
 	_uint					m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
 	_uint					m_iInputInstanceIndex = 0;
 
+	VARIANTREADY_UI_DESC	m_cachedVariantUIDesc = {};
 
 public:
 	virtual CGameObject*	Clone(void* pArg) = 0;

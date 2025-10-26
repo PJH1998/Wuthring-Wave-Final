@@ -996,8 +996,8 @@ void CLevel_UI::Update_Inspector()
 
         // iPassType
         ImGui::Text("Pass Type");
-        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec"};
-        const _uint iPassTypeCount = 5;
+        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec", "Variant"};
+        const _uint iPassTypeCount = 6;
         const char* szCurrentPassItem = szPassTypeNames[iPassType];
 
         if (ImGui::BeginCombo("##Pass Type", szCurrentPassItem))

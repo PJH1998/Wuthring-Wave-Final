@@ -34,9 +34,6 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
     Bind_Description(pArg);
     
-
-    if (this->m_tUIDesc.strUIName == L"Root_HUD")
-        int i = 10;
     //__super::Begin();
 
     return S_OK;
@@ -95,6 +92,9 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+    if (m_tUIDesc.strUIName == L"Skill_Rover")
+        int i = 10;
+
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
 
@@ -104,26 +104,23 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-#ifdef KSTA_TESTDEL
-    //if (m_tUIDesc.strUIName == L"Icon_Augusta")
-    //    for (auto& instDesc : m_tUIDesc.vecInstanceDescs)
-    //    {
-    //        m_tUIDesc.vecInstanceDescs[0].matExtraData.m[0][0] = 0.3f;
-    //        m_tUIDesc.vecInstanceDescs[1].matExtraData.m[0][0] = 0.7f;
-    //    }
-#endif // KSTA_TESTDEL
+    if (!m_isActivate)
+        return;
 
+    if (m_tUIDesc.strUIName == L"Skill_Rover")
+        int i = 10;
 
+    if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
+        for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+            m_tUIDesc.vecInstanceDescs[i].matExtraData = m_cachedVariantUIDesc.matVariantValues[i];
 
-    m_pAnimator_UICom->Render();    // Updates Shader Variables.
+    m_pAnimator_UICom->Render();    // Updates Shader Keyframe Variables.
 
     if (m_pShaderCom)
     {
-#ifdef KSTA_TESTDEL
-        //_uint iFlag = 1;
-        //m_pShaderCom->Bind_Value("g_iVariantFlag", &iFlag, sizeof(iFlag));
-#endif // KSTA_TESTDEL
-
+        if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)        // 짬통 UI용. 어떤 유형의 UI에 쓸 건지의 Flag를 전역으로 던진다.
+            if (FAILED(m_pShaderCom->Bind_Value("g_iVariantFlag", &m_cachedVariantUIDesc.iShaderFlag, sizeof(m_cachedVariantUIDesc.iShaderFlag))))
+                CRASH("Binding_Value_Failed");
 
         if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
             CRASH("Binding_Matrix_Failed");
@@ -149,21 +146,8 @@ void CCustom_UI::Render()
             CRASH("Binding_Value_Failed");
 
 
-
-#ifdef KSTA_TESTDEL
-        //if (m_tUIDesc.strUIName == L"Icon_Augusta")
-        //    m_pShaderCom->Begin(5);
-        //else
-            m_pShaderCom->Begin(m_tUIDesc.iPassType);
-#endif // KSTA_TESTDEL
-
-#ifndef KSTA_TESTDEL
         m_pShaderCom->Begin(m_tUIDesc.iPassType);
-#endif // !KSTA_TESTDEL
-
-
         m_pVIBufferCom->Bind_Resources();
-
         m_pVIBufferCom->Render();
     }
 

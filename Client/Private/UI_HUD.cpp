@@ -53,6 +53,8 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
+    Update_Trigger(fTimeDelta);
+
     Update_CombinedMatrix();
 
     __super::Update(fTimeDelta);            // Update Animator_UI Component
@@ -136,38 +138,12 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
     }
 
     // re-define childs of this(container)
-    //vector<CCustom_UI*> vecTrueChildObjects = {};
-    //for (auto& child : m_vecChildObjects)
-    //{
-    //    _bool isChild = false;
-    //
-    //    const CUSTOM_UI_DESC& tChildDesc = child->Get_UIDesc();
-    //    for (auto& otherChild : m_vecChildObjects)
-    //    {
-    //        const CUSTOM_UI_DESC& tOtherChildDesc = otherChild->Get_UIDesc();
-    //
-    //        // child를 자식으로 가졌는가?
-    //        for (auto& otherChildName : tOtherChildDesc.vecChildNames)
-    //        {
-    //            // 가졌다면, 자식으로 판정, 즉시 break.
-    //            if (otherChildName == tChildDesc.strUIName)
-    //                isChild = true; break;
-    //        }
-    //        if (isChild)  break;
-    //    }
-    //
-    //    // 아무도 자식으로 가지지 않았다면, 컨테이너 UI의 부모로 판단.
-    //    if (!isChild)
-    //        vecTrueChildObjects.push_back(child);
-    //}
-
     vector<CCustom_UI*> vecTrueChildObjects = {};
     for (auto& child : m_vecChildObjects)
     {
         if (child->Get_UIDesc().strParentName.empty())
             vecTrueChildObjects.push_back(child);
     }
-
     
     m_vecChildObjects = move(vecTrueChildObjects);
 
@@ -203,6 +179,152 @@ HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
 HRESULT CUI_HUD::Ready_Components(void* pArg)
 {
     return S_OK;
+}
+
+void CUI_HUD::Update_Trigger(_float fTimeDelta)
+{
+    // 키보드를 눌러서 쿨타임이 도는 것을 테스트함.
+
+    // - 조건
+    // 
+    // 1, pass가 Variant (index : 5) 로 되어있어야 작동함.
+    // 
+    // 2. 아래 코드를 통해 쿨타임 정보가, Custom_UI 객체에서 셰이더로 전달 될 예정인, desc의 정보전달용 행렬 내의 [0][0]에 담음.
+    //   이는 인스턴스별로 전달되어, 인스턴스별로 갱신이 이루어짐..
+    // 
+    // 3. 해당하는 Custom_UI 내의 Render 함수에서, 드로우콜 전에 iShaderFlag 를, 셰이더 전역변수로 지정해 주어야 함.
+    //   이는 한 패스 내에서 여러 경우에 대응시키기 위해 준 플래그이며, Custom_UI가 들고있음.
+    //   hlsl 내의 최상단에서 종류 확인 가능 (원형 쿨타임 UI인지, 사각형인지 등)
+
+
+    enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
+    enum HUD_SKILL_INDEX    { SK_E, SK_R, SK_END };
+    enum UIFLAG             { UIFLAG_ERR, UIFLAG_COOLDOWN_CIRCLE, UIFLAG_COOLDOWN_RECT, UIFLAG_END };
+
+    static _uint    iSelectedCHIndex = 0;
+    static _float   fSkillCD[CH_END][SK_END] = {};                                                  // left cooldown
+    static _float   fChangeCD[CH_END] = {};                                                         // left cooldown
+
+    const _float    fMaxSkillCD[CH_END][SK_END] = { {15.f, 20.f}, {15.f, 20.f}, {15.f, 20.f} };     // const cooldown
+    const _float    fMaxChangeCD[CH_END] = { 2.f, 2.f, 2.f };                                       // const cooldown
+
+    CCustom_UI* pSkillUI[CH_END] = {                  // Skill Indicator UI per Character.
+        Find_ChildObject(L"Skill_Rover"),
+        Find_ChildObject(L"Skill_Auguata"),
+        Find_ChildObject(L"Skill_Galbrena")
+    };
+
+    CCustom_UI* pChangeUI[CH_END] = {                 // PartyFrame UI per Character.
+        Find_ChildObject(L"Icon_Rover"),
+        Find_ChildObject(L"Icon_Augusta"),
+        Find_ChildObject(L"Icon_Galbrena")
+    };
+
+
+    for (auto& chCD : fSkillCD)                             // update cooldown
+    {
+        for (auto& cd : chCD)
+        {
+            cd -= fTimeDelta;
+            if (cd <= 0) cd = 0;
+        }
+    }
+
+    for (auto& cd : fChangeCD)
+    {
+        cd -= fTimeDelta;
+        if (cd <= 0) cd = 0;
+    }
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::DOWN)           // trigger cooldowns
+    {
+        if (fChangeCD[0] == 0)
+        {
+            fChangeCD[0] = fMaxChangeCD[0];
+            pSkillUI[0]->Set_Active(true);
+            pSkillUI[1]->Set_Active(false);
+            pSkillUI[2]->Set_Active(false);
+        }
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::DOWN)
+    {
+        if (fChangeCD[1] == 0)
+        {
+            fChangeCD[1] = fMaxChangeCD[1];
+            pSkillUI[0]->Set_Active(false);
+            pSkillUI[1]->Set_Active(true);
+            pSkillUI[2]->Set_Active(false);
+        }
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_3) == KEYSTATE::DOWN)
+    {
+        if (fChangeCD[2] == 0)
+        {
+            fChangeCD[2] = fMaxChangeCD[2];
+            pSkillUI[0]->Set_Active(false);
+            pSkillUI[1]->Set_Active(false);
+            pSkillUI[2]->Set_Active(true);
+        }
+    }
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
+    {
+        if (fSkillCD[iSelectedCHIndex][SK_E] == 0)
+            fSkillCD[iSelectedCHIndex][SK_E] = fMaxSkillCD[iSelectedCHIndex][SK_E];
+    }
+    if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+    {
+        if (fSkillCD[iSelectedCHIndex][SK_R] == 0)
+            fSkillCD[iSelectedCHIndex][SK_R] = fMaxSkillCD[iSelectedCHIndex][SK_R];
+    }
+
+
+    // UI별로 캐릭터 갯수만큼 존재.
+
+    // 1. 스킬UI 에 방랑자 ER / 아우 ER / 갈브 ER 쿨타임 할당
+    // 2. 교체UI 에 방랑자 / 아우 / 갈브 쿨타임 할당
+    
+    // skill
+    for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
+    {
+        _float fCooldown_E = fSkillCD[i][SK_E];
+        _float fCooldown_R = fSkillCD[i][SK_R];
+        auto targetUI = pSkillUI[i];
+
+        vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+        vecVariantMat[0].m[0][0] = 1.f - (fCooldown_E / fMaxSkillCD[i][SK_E]);
+        vecVariantMat[1].m[0][0] = 1.f - (fCooldown_R / fMaxSkillCD[i][SK_R]);
+
+        CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+            vecVariantMat,
+            UIFLAG_COOLDOWN_CIRCLE,
+            true
+        };
+
+        targetUI->Set_VariantUIDesc(tVariantDesc);
+    }
+
+    // change
+    for (_uint i = 0; i < CH_END; i++)
+    {
+        _float fCooldown = fChangeCD[i];
+        auto targetUI = pChangeUI[i];
+
+        vector<_float4x4> vecVariantMat = { _float4x4() };
+        vecVariantMat[0].m[0][0] = 1.f - (fCooldown / fMaxChangeCD[i]);
+
+        CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+            vecVariantMat,
+            UIFLAG_COOLDOWN_RECT,
+            true
+        };
+
+        targetUI->Set_VariantUIDesc(tVariantDesc);
+    }
+
+
+    std::cout << "[UI_HUD][Update_Trigger] E : " << fSkillCD[iSelectedCHIndex][SK_E] << std::endl;
+    std::cout << "[UI_HUD][Update_Trigger] R : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
 }
 
 CUI_HUD* CUI_HUD::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
