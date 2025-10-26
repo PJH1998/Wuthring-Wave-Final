@@ -96,7 +96,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // 1. 회전 및 이동.
-    m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 5.f);
+    m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.5f);
 
 }
 
@@ -118,24 +118,24 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     ERunType eRunType = static_cast<ERunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 3.35f;
+    _float fOffsetY = 0.1f;
     _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
-    // 전방 벽감지.
-    if (m_States[RUN_U] && m_States[WALL])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eClimbMoveType = EClimbMoveType::CLIMB_U_1;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE)); // 상위, 하위 상태
-        return;
-    }
+    //// 전방 벽감지.
+    //if (m_States[RUN_U] && m_States[WALL])
+    //{
+    //    m_pAugusta->GetStateContextForWrite().m_eClimbMoveType = EClimbMoveType::CLIMB_U_1;
+    //    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE)); // 상위, 하위 상태
+    //    return;
+    //}
     
-    if (!m_States[LAND])
+    if (!m_States[LAND] && fDistanceToGround > 1.f)
     {
-        if (fDistanceToGround > 3.f)
-        {
-            m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
-            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-        }
+#ifdef _DEBUG
+        OutPutDebugFloat(TEXT("Land Normal Y : "), fDistanceToGround);
+#endif // DEBUG
+        m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
         return;
     }
 

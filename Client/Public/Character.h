@@ -64,6 +64,7 @@ public:
 
 #pragma region STATE 조건에 사용
 public:
+	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 
 	void Process_Input(class CInputController* pInputControllerCom);
@@ -84,6 +85,7 @@ public:
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 	void Set_Gravity(_bool IsGravity);
+	
 
 
 

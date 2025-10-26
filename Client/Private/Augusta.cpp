@@ -48,8 +48,6 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
-
-    
     
     
     m_pColliderCom->Set_Gravity(true);
@@ -108,13 +106,6 @@ void CAugusta::Update(_float fTimeDelta)
         if (pPart.second->IsActivate())
             pPart.second->Update(fTimeDelta);
     }
-
-#ifdef _DEBUG
-    _float4 vPos = {};
-    XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    OutPutDebugFloat4(TEXT("Position : "), vPos);
-#endif // _DEBUG
-
 
 }
 void CAugusta::Late_Update(_float fTimeDelta)
@@ -183,6 +174,16 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     }
 }
 
+void CAugusta::PartAcitvate(_uint iPartType, _bool IsActive)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pAugustaBayonet->SetActivate(IsActive);
+        break;
+    }
+}
+
 void CAugusta::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
@@ -214,8 +215,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
-
-
     
     // 계산에 사용할 값 지정.
     m_fColliderRadius = 0.4f;

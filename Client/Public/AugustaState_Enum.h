@@ -123,8 +123,8 @@ enum class EAttackType : _uint
 	ATTACK02,
 	ATTACK03,
 	ATTACK04,
-	ATTACK_PENDING, // NormalAttack과 HeavyAttack 구별용도.
 	ATTACK_HEAVYHACK,
+	ATTACK_PENDING, // NormalAttack과 HeavyAttack 구별용도.
 	ATTACK_PULL,
 	ATTACK_SPEEDDRIVE,
 	ATTACK_SPSKILL,
@@ -207,7 +207,6 @@ enum class EClimbMoveType : _uint
 	CLIMB_UL_2,
 	CLIMB_UR_1,
 	CLIMB_UR_2,
-	CLIMB_VAULT,
 	END
 };
 
@@ -257,6 +256,7 @@ enum class EClimbExitType : _uint
 	CLIMB_UR2_STOP,
 	CLIMB_ONTOP, // 벽 넘는 탈출.(위에서)
 	CLIMB_MOVE, // 뒷 점프 탈출
+	CLIMB_VAULT,
 	END
 };
 

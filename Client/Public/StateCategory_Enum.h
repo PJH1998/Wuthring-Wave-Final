@@ -1,6 +1,5 @@
 #pragma once
 
-
 NS_BEGIN(Client)
 
 #pragma region DEPTH 0

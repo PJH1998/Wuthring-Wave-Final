@@ -108,8 +108,8 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
-	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
-	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.02f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.008f, 0.f);
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, 0.01f, 0.f);
 
 	return S_OK;
 }

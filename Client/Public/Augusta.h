@@ -96,6 +96,7 @@ public:
 #pragma region 1. STATE 관리.
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
+	virtual void PartAcitvate(_uint iPartType, _bool IsActive) override;
 #pragma endregion
 
 
@@ -105,6 +106,14 @@ private:
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State마다 활성화?
+
+	
+#ifdef _DEBUG
+	// RayCast 저장
+	vector<pair<_float, _float>> m_RayCasts = {};
+#endif // _DEBUG
+
+
 
 private:
 	// Runtime 도중 필요한 값에 대한 준비.

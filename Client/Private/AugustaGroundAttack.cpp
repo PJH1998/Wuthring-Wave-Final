@@ -34,6 +34,9 @@ void CAugustaGroundAttack::OnEnter()
     // 4. Attack 상태 초기화
     State_Reset();
 
+    // 5. 무기 상태 Activate
+    m_pAugusta->PartAcitvate(CAugusta::PARTTYPE::PART_BAYONET, true);
+
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
@@ -64,33 +67,45 @@ void CAugustaGroundAttack::OnExit()
 
     // 콤보 카운트 초기화
     m_iComboCount = 0;
+
+    m_pAugusta->PartAcitvate(CAugusta::PARTTYPE::PART_BAYONET, false); 
 }
 
 void CAugustaGroundAttack::Handle_Input()
 {
-    // ATTACK_PENDING(강공 발생 조건)
+    
     EAttackType eAttackType = static_cast<EAttackType>(m_iCurrentAnimIdx);
 
-    m_States[HEAVY_ATTACK_PENDING] = eAttackType == EAttackType::ATTACK01 
-        && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS);
+    // HEAVY_ATTACK_PENDING(강공 발생 조건)
+    // Attack이 01이고 HeavyAttack인 경우.
+    m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAttackType::ATTACK01 
+        && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
 
-
-
-    // 기본 공.
-    
 
     // 스킬 체크
     m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
     m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+
+
+    if (eAttackType >= EAttackType::ATTACK01 && eAttackType <= EAttackType::ATTACK04)
+    {
+        if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS))
+            m_IsNextAttackInput = true;
+    }
+
+        
     
 }
 
 void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
-
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+
+    // 1타 모션일때 누르고 있다면?
+    if (m_States[HEAVY_ATTACK_PENDING])
+        m_fAttackPressTime += fTimeDelta;
 }
 
 void CAugustaGroundAttack::Check_Physics(_float fTimeDelta)
@@ -108,17 +123,36 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     // ... 추후 구현
     // 2. Normal Attack의 경우 콤보 공격이 가능하게.
     
-    if (m_States[HEAVY_ATTACK]) // 강공이 우선순위가 더 높음.
-    {
+    EAttackType eAttackType = static_cast<EAttackType>(m_iCurrentAnimIdx);
 
+    // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
+    if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime))
+    {
+        m_iCurrentAnimIdx = ENUM_CLASS(EAttackType::ATTACK_HEAVYHACK);
+        m_fAttackPressTime = 0.f;
+        return;
+    }
+        
+
+    
+    // 기본 공상태에서 Heavy_Attack_Pending이 아닌 경우?
+    if ((eAttackType == EAttackType::ATTACK01) && !m_States[HEAVY_ATTACK_PENDING] && m_IsNextAttackInput)
+    {
+        m_iComboCount++;
+        m_iCurrentAnimIdx = ENUM_CLASS(EAttackType::ATTACK01) + m_iComboCount;
+        m_fAttackPressTime = 0.f;
+        return;
     }
 
 
-    // 3. 공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
+ 
+    //공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
     {
         m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+        m_iComboCount = 0;
+        m_IsNextAttackInput = false;
         return;
     }
     

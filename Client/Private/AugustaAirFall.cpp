@@ -33,6 +33,8 @@ void CAugustaAirFall::OnEnter()
 
     State_Reset();
 
+    m_pAugusta->Set_Gravity(true);
+
 }
 
 void CAugustaAirFall::OnUpdate(_float fTimeDelta)
@@ -58,6 +60,7 @@ void CAugustaAirFall::OnUpdate(_float fTimeDelta)
 void CAugustaAirFall::OnExit()
 {
     CAirState::OnExit();
+    m_pAugusta->Set_Gravity(false);
 }
 
 void CAugustaAirFall::Handle_Input()
@@ -72,14 +75,14 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // 조금 더 가속 주기?
-    m_pAugusta->Move_Fall(fTimeDelta, 5.f);
+    m_pAugusta->Move_Fall(fTimeDelta, 0.5f);
 
     // 1. 조작키에 따른 이동?
-    if (m_States[MOVE])
+    /*if (m_States[MOVE])
     {
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 1.f);
         return;
-    }
+    }*/
 }
 
 void CAugustaAirFall::Check_Physics(_float fTimeDelta)

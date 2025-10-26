@@ -89,14 +89,10 @@ void CAugustaClimbExit::Handle_Input()
 // Climb에 관련된 Update
 void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
 {
-    
-    
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     _float3 vNormal = {};
-
     // Space 키를 눌렀다면?
-    
 
     // 0. Move, OnTop상태일때만 예외처리.
     if (m_States[BACKJUMP])
@@ -116,8 +112,6 @@ void CAugustaClimbExit::Check_Physics(_float fTimeDelta)
 
 void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
 {
-
-    
 
     EClimbExitType eClimbExitType = static_cast<EClimbExitType>(m_iCurrentAnimIdx);
 
@@ -202,7 +196,8 @@ void CAugustaClimbExit::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR1_STOP), "Climb_UR1_Stop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR2_STOP), "Climb_UR2_Stop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_ONTOP), "Climb_OnTop", 1.5f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 1.f, true, false); // 루트모션 회전 끄니까 됨.
+    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 3.f, true, false); // 루트모션 회전 끄니까 됨.
+    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_VAULT), "Climb_Vault", 2.f, 0.f); // 어찌보면 이것도 달출인데?
 }
 
 void CAugustaClimbExit::State_Reset()

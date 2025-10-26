@@ -31,6 +31,8 @@ void CAugustaAirJump::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eJumpType);
 
+    m_pAugusta->Set_Gravity(true);
+
 }
 
 void CAugustaAirJump::OnUpdate(_float fTimeDelta)
@@ -76,7 +78,7 @@ void CAugustaAirJump::Update_JumpAnimation(_float fTimeDelta)
 
     // 1. 조작키에 따른 이동?
     if (m_States[MOVE])
-        m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 2.5f);
+        m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.25f);
 
 }
 
@@ -123,10 +125,10 @@ void CAugustaAirJump::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_LOOP), "Jump_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_LF), "Jump_Run_LF", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_RUN_RF), "Jump_Run_RF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 0.f); // 더블 점프
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f); // 제자리 점프
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 0.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 0.f, 3.f); // 더블 점프
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f, 3.f); // 제자리 점프
 }
 
 

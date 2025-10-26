@@ -7,17 +7,18 @@ NS_BEGIN(Client)
 class CAugustaGroundAttack final : public CGroundState
 {
 private:
-    enum ATTACKSTATE
+    enum ATTACKSTATE // 내부에서 전환 가능한 상태.
     {
+        FIRST_ATTACK = 0,
+        SECOND_ATTACK,
+        THIRED_ATTACK,
+        LAST_ATTACK,
         HEAVY_ATTACK_PENDING,
-        ATTACK1,
-        ATTACK2,
-        ATTACK3,
-        ATTACK4,
         HEAVY_ATTACK,
-        SKILL_Q = 3,
-        SKILL_E = 4,
-        SKILL_R = 5,
+        SKILL_Q,
+        SKILL_E,
+        SKILL_R,
+        
         JUMP,
         END
     };
@@ -37,7 +38,10 @@ private:
     _uint m_iComboCount = { 0 };  // 현재 콤보 단계 (0~3)
 
     _float m_fAttackPressTime = { 0.f };
+    _float m_fAttackPressMaxTime = { 0.3f };
     _bool m_States[ATTACKSTATE::END] = {};
+    _bool m_IsNextAttackInput = { false };
+    
     
 
 private:
