@@ -148,6 +148,12 @@
     <Filter Include="94. Factory">
       <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Weapon">
+      <UniqueIdentifier>{f1e21b97-7a13-4226-b93f-ddaa894e0419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Augusta">
+      <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -332,7 +338,12 @@
     <ClInclude Include="..\Public\Factory.h">
       <Filter>94. Factory</Filter>
     </ClInclude>
-    
+    <ClInclude Include="..\Public\AugustaBayonet.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Weapon.h">
+      <Filter>03. GameObject\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -497,6 +508,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Factory.cpp">
       <Filter>94. Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaBayonet.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Weapon.cpp">
+      <Filter>03. GameObject\Weapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

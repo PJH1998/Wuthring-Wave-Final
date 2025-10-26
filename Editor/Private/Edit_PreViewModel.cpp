@@ -60,6 +60,9 @@ void CEdit_PreViewModel::Render()
 
     CModel* pModel = Pair->second;
 
+    for (_uint i = 0; i < pModel->Get_NumMesh(); ++i)
+        Sync_BoundingBox(pModel->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
+
     _float3 vMinExt = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 vMaxExt = _float3(FLT_MIN, FLT_MIN, FLT_MIN);
 
@@ -109,6 +112,14 @@ void CEdit_PreViewModel::Render()
 
 void CEdit_PreViewModel::Add_Model(_wstring ModelName)
 {
+    //m_pGameInstance->Add_Work([=, ModelCom = L"Com_"s + ModelName, Name = ModelName]() {
+
+    //    //_wstring ModelCom = L"Com_"s + ModelName;
+
+    //    if (FAILED(Add_Component(m_iLevel, Name,
+    //        ModelCom, reinterpret_cast<CComponent**>(&m_Models[Name]), nullptr)))
+    //        CRASH("Clone Failed");
+    //    });
     _wstring ModelCom = L"Com_"s + ModelName;
 
     if (FAILED(Add_Component(m_iLevel, ModelName,

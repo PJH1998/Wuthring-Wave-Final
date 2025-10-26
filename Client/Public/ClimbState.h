@@ -22,7 +22,7 @@ protected:
     void Check_ClimbExit();
 
 protected:
-    _float3 m_vWallNormal = {};
+    _float3 m_vHeadWallNormal = {};
 
 public:
     void Change_SubState(const _string& strSubStateName, class CStateMachine* pStateMachine);

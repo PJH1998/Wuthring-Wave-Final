@@ -23,6 +23,9 @@ protected:
     _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)
     ACTORDIR m_eDir = {};   // 방향 변수
 
+    _float3 m_vWallNormal = {}; // 정면 방향 WallNormal
+    _float3 m_vLandNormal = {};
+
 public:
     virtual void Free() override;
 };

@@ -7,6 +7,23 @@ NS_BEGIN(Client)
 class CAugustaClimbMove final : public CClimbState
 {
 private:
+    enum CLIMBSTATE
+    {
+        IS_CLIMBED = 0,
+        MOVE,
+        U,
+        D,
+        R,
+        L,
+        WALL,
+        ONTOP,
+        VAULT,
+        BACKJUMP,
+        LAND,
+        END
+    };
+
+private:
     explicit CAugustaClimbMove() = default;
     virtual ~CAugustaClimbMove() = default;
 
@@ -20,16 +37,18 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_IsSecondStep = { false }; 
-    _bool m_IsClimbed = { false };
-    _bool m_IsClimbStop = { false }; // 키입력이 없는 상황이면 Climb Stop
+    _bool m_States[CLIMBSTATE::END] = {};
 
 private:
     virtual void Handle_Input() override;
-    void Update_PhysicsCheck(_float fTimeDelta);
     void Update_ClimbAnimation(_float fTimeDelta);
+    void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
+    void Adjust_To_Wall(_float fTimeDelta);
+
     void Setup_Animations();
+    void State_Reset();
 
 
 

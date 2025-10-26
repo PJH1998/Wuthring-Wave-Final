@@ -11,6 +11,16 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 {
 }
 
+void CSpringCamera::Update_Target(const _fvector& TargetPos, _float fOffsetY)
+{
+	m_fOffsetY = fOffsetY;
+
+	//if (fDistance < 0.05f)
+	//	return;
+	_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
+	XMStoreFloat4(&m_vTargetPosition, vPos);
+}
+
 _vector CSpringCamera::Get_LookVector_NoPitch()
 {
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
@@ -37,14 +47,15 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	Ready_Component();
 
-	m_fDistance = 100.f;
-	m_fFixedDistance = 100.f;
-	m_fLerpSpeed = 1.5f;
-	m_fMinDistance = 100.f;
+	m_fDistance = 10.f;
+	m_fFixedDistance = 10.f;
+	m_fLerpSpeed = 0.15f;
+	m_fMinDistance = 3.f;
+	m_fMaxDistance = 15.f;
 
-	m_fStiffness = 3.f;
+	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 35.f;
+	m_fLockOnOffsetY = 3.5f;
 
     return S_OK;
 }
@@ -124,6 +135,8 @@ void CSpringCamera::Lerp_Distance(_float fTimeDelta)
 void CSpringCamera::Mouse_Scroll(_float fTimeDelta)
 {
 	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+
+	m_fFixedDistance = max(m_fMinDistance, min(m_fMaxDistance, m_fFixedDistance));
 }
 
 void CSpringCamera::Spring(_float fTimeDelta)

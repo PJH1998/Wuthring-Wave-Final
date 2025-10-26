@@ -11,6 +11,8 @@ namespace Client
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
 
+	enum class WEAPONTYPE { ANIM, NONANIM, END};
+
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
 		END

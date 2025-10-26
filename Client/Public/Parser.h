@@ -16,7 +16,8 @@ public:
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
 private:
-	void							Read_Map_Dat(const _string pFilePath, LEVEL eLevel);
+	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
+
 public:
 	HRESULT						Initialize();
 

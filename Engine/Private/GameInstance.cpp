@@ -23,6 +23,7 @@
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
+#include "RCS_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -64,9 +65,6 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pTargetManager = CTarget_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pTargetManager);
 
-	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
-	ASSERT_CRASH(m_pRenderer);
-
 	m_pLight_Manager = CLight_Manager::Create();
 	ASSERT_CRASH(m_pLight_Manager);
 
@@ -98,8 +96,13 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	ASSERT_CRASH(m_pFrustrum);
 
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
-	ASSERT_CRASH( m_pCSM );
+	ASSERT_CRASH(m_pCSM);
 
+	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pRCS_Manager);
+
+	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pRenderer);
 	return S_OK;
 }
 
@@ -324,6 +327,10 @@ void CGameInstance::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* p
 ID3D11Resource* CGameInstance::Get_RT_Resource(const _wstring& strTargetTag)
 {
 	return m_pTargetManager->Get_RT_Resource(strTargetTag);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_RT_SRV(const _wstring& strTargetTag)
+{
+	return m_pTargetManager->Get_RT_SRV(strTargetTag);
 }
 HRESULT CGameInstance::Add_RenderTarget(const _wstring& strTargetTag, _uint iWidth, _uint iHeight, DXGI_FORMAT eFormat, const _float4& vClearColor)
 {
@@ -670,6 +677,43 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 #endif
 #pragma endregion
 
+#pragma region RCS_MANAGER
+HRESULT CGameInstance::Add_RCS(const _wstring& strRCSTag, void* pDesc)
+{
+	return m_pRCS_Manager->Add_RCS(strRCSTag, pDesc);
+}
+HRESULT CGameInstance::Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength)
+{
+	return m_pRCS_Manager->Add_BufferData(strRCSTag, pConstantName, pData, iLength);
+}
+HRESULT CGameInstance::Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV)
+{
+	return m_pRCS_Manager->Add_SRVData(strRCSTag, pConstantName, pSRV);
+}
+HRESULT CGameInstance::Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName)
+{
+	return m_pRCS_Manager->Setting_UAV_Data(strRCSTag, pConstantName);
+}
+HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName)
+{
+	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName);
+}
+HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag)
+{
+	return m_pRCS_Manager->Begin_RCS(strRCSTag);
+}
+void CGameInstance::Clear_RCS(const _wstring& strRCSTag)
+{
+	m_pRCS_Manager->Clear_RCS(strRCSTag);
+}
+#ifdef _DEBUG
+HRESULT CGameInstance::Debug_Render_RCS()
+{
+	return m_pRCS_Manager->Debug_Render();
+}
+#endif
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -725,6 +769,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
+	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pPhysicsManager);
 
 	Release();

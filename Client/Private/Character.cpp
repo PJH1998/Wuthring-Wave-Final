@@ -83,22 +83,22 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
 {
     ASSERT_CRASH(m_pModelCom);
     _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-
-    if (true == IsRootMotion)
-        m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    // 현재 활성화된 파츠 Animation 실행.
+    
     return IsPlayAnimationEnd;
 }
 
-_bool CCharacter::Check_AnyInput(_uint iKeyFlag)
+_bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
     ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AnyInput(iKeyFlag);
+    return m_pInputControllerCom->Check_AnyInput(iKeyFlag, eKeyState);
 }
 
-_bool CCharacter::Check_AllInput(_uint iKeyFlag)
+_bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
     ASSERT_CRASH(m_pInputControllerCom);
-    return m_pInputControllerCom->Check_AllInput(iKeyFlag);
+    return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
 }
 
 _bool CCharacter::Is_LockOn()
@@ -188,45 +188,52 @@ void CCharacter::Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed)
 
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
-
-    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-    //_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
-    //vStartPos.m128_f32[1] += fStartYOffset;
-    //_vector vEndPos = vCurrentPos - XMVectorSet(0.f, 100.f, 0.f, 0.f); // 아래로 쏜다.
-
-    //_float4 vHitPoint = { };
-    //_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
-
-    //if (bHit)
-    //{
-    //    _vector vHitPos = XMLoadFloat4(&vHitPoint);
-    //    _vector vDistance = vCurrentPos - vHitPos;
-    //    return XMVectorGetX(XMVector3Length(vDistance));
-    //}
-
-    //return 100.f; // 레이가 닿지 않으면 큰 값 반환 (공중)
     ASSERT_CRASH(m_pTransformCom);
 
     _vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
     // 발 위치 계산 (Offset(6.7) - (Height/2 + Radius)(6.5) = 0.2)
-    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 1.f, 0.f, 0.f);
+    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
 
-    // 발 위치에서 시작, 아래로 레이 발사
-    _vector vStartPos = vFootPos;
-    _vector vEndPos = vFootPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+    // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
+    _vector vPositions[5] = {
+        vFootPos + vLook * m_fColliderRadius,                    // 앞
+        vFootPos + vRight * m_fColliderRadius,                   // 왼쪽
+        vFootPos,                                      // 중앙
+        vFootPos - vRight * m_fColliderRadius,                   // 오른쪽
+        vFootPos - vLook * m_fColliderRadius                     // 뒤
+    };
 
-    _float4 vHitPoint = {};
-    _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
 
-    if (bHit)
+    _float fMinDistance = 10.f;  // 가장 가까운 거리 저장
+    _bool bAnyHit = false;
+
+    // 5개 지점에서 각각 레이 발사
+    for (_uint i = 0; i < 5; ++i)
     {
-        _vector vHitPos = XMLoadFloat4(&vHitPoint);
-        _vector vDistance = vFootPos - vHitPos;
-        return XMVectorGetX(XMVector3Length(vDistance));
+        _vector vStartPos = vPositions[i];
+        _vector vEndPos = vStartPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+
+        _float4 vHitPoint = {};
+        _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
+
+        if (bHit)
+        {
+            bAnyHit = true;
+            _vector vHitPos = XMLoadFloat4(&vHitPoint);
+            _vector vDistance = vPositions[i] - vHitPos;
+            _float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+            // 가장 가까운 거리 저장
+            if (fDistance < fMinDistance)
+                fMinDistance = fDistance;
+        }
     }
 
-    return 100.f; // 레이가 닿지 않으면 큰 값 반환
+    return bAnyHit ? fMinDistance : 10.f;
+
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -238,20 +245,18 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
     vLook = XMVector3Normalize(vLook);
 
     // 가슴 높이에서 전방 Radius로 레이 발사
-    _vector vStart = vPos + XMVectorSet(0.f, 5.f, 0.f, 0.f);
-    _vector vEnd = vStart + vLook * -5.f; // Collider Radius 고려.
+
+    _float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
+    _vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
+    _vector vEnd = vStart + vLook * - (m_fColliderRadius + 0.1f); // Collider Radius 고려.
 
     _float4 vHitPoint = {};
     _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
 
+
     if (bHit)
     {
-        // 현재는 벽이 있는지만 체크 
-        if (pWallNormal)
-        {
-            // 임시로 Look의 반대 방향을 Normal로 설정
-            XMStoreFloat3(pWallNormal, vLook);
-        }
+        XMStoreFloat3(pWallNormal, vPos - XMLoadFloat4(&vHitPoint));
         return true;
     }
 
@@ -266,9 +271,8 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
     _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
     
-    // 머리위쪽에 Ray 발사.
-    
-    _vector vStart = vPos + XMVectorSet(0.f, 12.f, 0.f, 0.f);
+    // 머리위쪽에서 정면으로 Ray 발사.
+    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight * 1.7f, 0.f, 0.f);
     _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
 
     _float4 vHitPoint = {};

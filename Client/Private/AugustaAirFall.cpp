@@ -31,53 +31,68 @@ void CAugustaAirFall::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eFallType);
 
+    State_Reset();
+
+    m_pAugusta->Set_Gravity(true);
+
 }
 
 void CAugustaAirFall::OnUpdate(_float fTimeDelta)
 {
     CAirState::OnUpdate(fTimeDelta);
 
-    // 0. 애니메이션 플레이.
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    // 0. 키입력 체크
+    Handle_Input();
 
+    // 1. 애니메이션 갱신
     Update_FallAnimation(fTimeDelta);
+
+    // 2. 물리 체크
+    Check_Physics(fTimeDelta);
+
+    // 3. 전환 체크
     Check_StateTransition(fTimeDelta);
+
+    // 상태 리셋;
+    State_Reset();
 }
 
 void CAugustaAirFall::OnExit()
 {
     CAirState::OnExit();
+    m_pAugusta->Set_Gravity(false);
 }
 
-void CAugustaAirFall::Setup_Animations()
+void CAugustaAirFall::Handle_Input()
 {
-    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP), "Fall_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP_FAST), "Fall_Loop_Fast", 1.f, 0.f);
+    m_eDir = m_pAugusta->Calculate_Direction(); // 방향 계산.
+    m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }
-
 
 void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
 {
+    // 0. 애니메이션 플레이.
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+
     // 조금 더 가속 주기?
-    m_pAugusta->Move_Fall(fTimeDelta, 5.f);
+    m_pAugusta->Move_Fall(fTimeDelta, 0.5f);
 
     // 1. 조작키에 따른 이동?
-    m_eDir = m_pAugusta->Calculate_Direction(); // 여기서 이미 키체크를 완료하고 방향 계산.
-    if (m_pAugusta->Check_AnyInput(m_iMoveKey))
+    /*if (m_States[MOVE])
     {
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 1.f);
         return;
-    }
+    }*/
+}
+
+void CAugustaAirFall::Check_Physics(_float fTimeDelta)
+{
+    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
 }
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 {
-    EFallType eFallType = static_cast<EFallType>(m_iCurrentAnimIdx);
-
-    _float3 vNormal = {};
-    _bool IsLand = m_pAugusta->Is_Land(&vNormal);
-
-    if (IsLand)
+    if (m_States[LAND])
     {
         m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
@@ -87,7 +102,17 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 }
 
 
+void CAugustaAirFall::Setup_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP), "Fall_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP_FAST), "Fall_Loop_Fast", 1.f, 0.f);
+}
 
+void CAugustaAirFall::State_Reset()
+{
+    for (_uint i = 0; i < FALLSTATE::END; ++i)
+        m_States[i] = false;
+}
 
 
 

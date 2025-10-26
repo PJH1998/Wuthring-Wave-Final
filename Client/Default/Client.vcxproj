@@ -167,6 +167,7 @@
     <ClInclude Include="..\Public\AnimationDummy.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
+    <ClInclude Include="..\Public\AugustaBayonet.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
@@ -235,6 +236,7 @@
     <ClInclude Include="..\Public\Augusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
+    <ClInclude Include="..\Public\Weapon.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -249,6 +251,7 @@
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
+    <ClCompile Include="..\Private\AugustaBayonet.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
@@ -314,6 +317,7 @@
     <ClCompile Include="..\Private\Augusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
+    <ClCompile Include="..\Private\Weapon.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

@@ -57,9 +57,15 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting;
 	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(70.f);
-	VirtualSetting.mShape = m_pShape;
-	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(70.f);			// 허용 경사 각도
+	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
+	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);						// Shape Offset
+	VirtualSetting.mMaxStrength = 100.f;											// 다른 Body를 밀 수 있는 최대 힘
+	VirtualSetting.mCharacterPadding = 0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
+	VirtualSetting.mPenetrationRecoverySpeed = 1.f;							// 겹쳤을 때 복원 속도
+	VirtualSetting.mPredictiveContactDistance = 0.05f;							// 미리 충돌 감지하는 범위
+	VirtualSetting.mEnhancedInternalEdgeRemoval = true;					// 각진 부분 부드럽게
+	
 	//VirtualSetting.mInnerBodyShape = BodyShape;
 	//VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
 	
@@ -67,6 +73,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	m_tCollisionData.pComponent = this;
 	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
 	ASSERT_CRASH(m_pCharacterVirtual);
+
 
     return S_OK;
 }

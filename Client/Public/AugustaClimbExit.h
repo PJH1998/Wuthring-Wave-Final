@@ -7,6 +7,22 @@ NS_BEGIN(Client)
 class CAugustaClimbExit final : public CClimbState
 {
 private:
+    enum CLIMBSTATE
+    {
+        IS_CLIMBEXIT = 0,
+        LAND,
+        BACKJUMP,
+        ONTOP,
+        MOVE,
+        U,
+        D,
+        R,
+        L,
+        WALL,
+        END
+    };
+
+private:
     explicit CAugustaClimbExit() = default;
     virtual ~CAugustaClimbExit() = default;
 
@@ -20,11 +36,15 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_IsClimbExit = { false };
     _bool m_IsSecondStep = { false };
-private:
-    void Setup_Animations();
+    _bool m_States[CLIMBSTATE::END] = {};
 
+private:
+    virtual void Handle_Input() override;
     void Update_ClimbAnimation(_float fTimeDelta);
+    void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
+    void Setup_Animations();
+    void State_Reset();
 
 
 public:

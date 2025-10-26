@@ -22,9 +22,6 @@ void CAugustaClimbMove::OnEnter()
 {
     CClimbState::OnEnter();
 
-    // 0 .
-    m_pAugusta->Set_Gravity(false);
-
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
 
@@ -34,10 +31,14 @@ void CAugustaClimbMove::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eClimbMoveType);
 
-    // 벽 Normal 저장
+    // 4. 벽 Normal 저장
     m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
 
-    m_IsClimbed = true;
+    // 0 . 중력 끄기.
+    m_pAugusta->Set_Gravity(false);
+
+    // 5. 상태 초기화.
+    State_Reset();
 }
 
 void CAugustaClimbMove::OnUpdate(_float fTimeDelta)
@@ -51,23 +52,21 @@ void CAugustaClimbMove::OnUpdate(_float fTimeDelta)
     Update_ClimbAnimation(fTimeDelta);
     
     // 2. 물리 체크
-    Update_PhysicsCheck(fTimeDelta);
+    Check_Physics(fTimeDelta);
 
-    // 3. Animation Update
-    Update_ClimbAnimation(fTimeDelta);
-
-    // 4. 상태 전환 체크
+    // 3. 상태 전환 체크
     Check_StateTransition(fTimeDelta);
+
+    // 4. 상태 초기화
+    State_Reset();
 }
 
 void CAugustaClimbMove::OnExit()
 {
     CClimbState::OnExit();
     m_IsSecondStep = false;
-    m_IsClimbed = false;
 
-    m_pAugusta->Set_Gravity(true);
-    
+    //m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaClimbMove::Handle_Input()
@@ -75,71 +74,39 @@ void CAugustaClimbMove::Handle_Input()
     EClimbMoveType eClimbMoveType = static_cast<EClimbMoveType>(m_iCurrentAnimIdx);
 
     // 1. WASD 입력에 따라 등반 방향 결정
-    _bool bW = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
-    _bool bS = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
-    _bool bA = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
-    _bool bD = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+    m_States[U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+    m_States[D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+    m_States[R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A)); // 방향 반대.
+    m_States[L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D)); // 방향 반대
+    m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 
-    // 2. 두번째 재생 애니메이션이 아니고 애니메이션 실행이 종료되었다면? => 키입력이 있다면.
-    if (m_IsAnimationEnd && m_pAugusta->Check_AnyInput(m_iMoveKey))
-    {
-        if (!m_IsSecondStep)
-        {
-            // 3. 두번째 재생 애니메이션이 아니라면..
-            if (bW) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_U_2);
-            }
-            else if (bS) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_D_2);
-            }
-            else if (bD) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_L_2);
-            }
-            else if (bA) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_R_2);
-            }
-            m_IsClimbed = true;
-            m_IsSecondStep = true;
-            return;
-        }
-        if (m_IsSecondStep)
-        {
-            // 3. 두번째 재생 애니메이션이라면..
-            if (bW) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_U_1);
-            }
-            else if (bS) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_D_1);
-            }
-            else if (bD) {
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_L_1);
-            }
-            else if (bA) {
-                // 오른쪽으로 등반
-                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_R_1);
-            }
+    if (m_States[MOVE]) // 입력이 있었다면?
+        m_States[IS_CLIMBED] = true;
 
-            m_IsClimbed = true;
-            m_IsSecondStep = false;
-            return;
-        }
-    }
+    m_States[BACKJUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 }
 
-
-
-void CAugustaClimbMove::Update_PhysicsCheck(_float fTimeDelta)
-{
-    m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
-}
 
 
 // Climing Update
 void CAugustaClimbMove::Update_ClimbAnimation(_float fTimeDelta)
 {
-    if (m_IsClimbed)
+    if (m_States[IS_CLIMBED])
+    {
         CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    }
+        
 }
+
+void CAugustaClimbMove::Check_Physics(_float fTimeDelta)
+{
+    m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
+    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+
+    // 머리에서 쐈는데 안 맞으면?
+    m_States[ONTOP] = m_States[WALL] && (!m_pAugusta->Check_ClimbableWall_Above(1.f, &m_vHeadWallNormal));
+}
+
 
 void CAugustaClimbMove::Check_StateTransition(_float fTimeDelta)
 {
@@ -147,13 +114,10 @@ void CAugustaClimbMove::Check_StateTransition(_float fTimeDelta)
     EClimbMoveType eClimbMoveType = static_cast<EClimbMoveType>(m_iCurrentAnimIdx);
 
     // 0. 땅에 닿았다면?
-    _float3 vNormal = {};
-    _bool IsLand = m_pAugusta->Is_Land(&vNormal);
-
-    if (IsLand)
+    if (m_States[LAND])
     {
-        // 위를 바라보고 아래키 누르고있으면?
-        if (vNormal.y > 0.f && (eClimbMoveType == EClimbMoveType::CLIMB_D_1 || eClimbMoveType == EClimbMoveType::CLIMB_D_2))
+        // 아래 내려가면서 아래 상태라면?
+        if (m_vLandNormal.y > 1.f && (eClimbMoveType == EClimbMoveType::CLIMB_D_1 || eClimbMoveType == EClimbMoveType::CLIMB_D_2))
         {
             m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
@@ -162,15 +126,25 @@ void CAugustaClimbMove::Check_StateTransition(_float fTimeDelta)
     }
 
     // 1. 벽에서 떨어졌는지 체크
-    if (!m_pAugusta->Check_ClimbableWall())
+    if (!m_States[WALL])
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
         return;
     }
 
+    // 2. 위로 올라가는 중 벽 상단 도달 체크
+    if (eClimbMoveType == EClimbMoveType::CLIMB_U_1 || eClimbMoveType == EClimbMoveType::CLIMB_U_2)
+    {
+        if (m_fTrackPosition > 30.f && m_States[ONTOP])
+        {
+            m_pAugusta->GetStateContextForWrite().m_eClimbExitType = EClimbExitType::CLIMB_ONTOP; // 점프.
+            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_EXIT));
+        }
+    }
+
     // 2. Space 입력 → 벽에서 점프 (Exit)
-    if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE)))
+    if (m_States[BACKJUMP])
     {
         m_pAugusta->GetStateContextForWrite().m_eClimbExitType = EClimbExitType::CLIMB_MOVE; // 점프.
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_EXIT));
@@ -178,9 +152,50 @@ void CAugustaClimbMove::Check_StateTransition(_float fTimeDelta)
     }
 
     // 입력이 있다면?
-    m_IsClimbed = m_pAugusta->Check_AnyInput(m_iMoveKey);
+    // 2. 두번째 재생 애니메이션이 아니고 애니메이션 실행이 종료되었다면? => 키입력이 있다면.
+    if (m_IsAnimationEnd && m_States[MOVE])
+    {
+        if (!m_IsSecondStep)
+        {
+            // 3. 두번째 재생 애니메이션이 아니라면..
+            if (m_States[U]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_U_2);
+            }
+            else if (m_States[D]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_D_2);
+            }
+            else if (m_States[L]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_L_2);
+            }
+            else if (m_States[R]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_R_2);
+            }
+            m_IsSecondStep = true;
+            return;
+        }
+        if (m_IsSecondStep)
+        {
+            // 3. 두번째 재생 애니메이션이라면..
+            if (m_States[U]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_U_1);
+            }
+            else if (m_States[D]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_D_1);
+            }
+            else if (m_States[L]) {
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_L_1);
+            }
+            else if (m_States[R]) {
+                // 오른쪽으로 등반
+                m_iCurrentAnimIdx = ENUM_CLASS(EClimbMoveType::CLIMB_R_1);
+            }
 
-    //if (!m_pAugusta->Check_AnyInput(m_iMoveKey) && m_IsAnimationEnd)
+            m_IsSecondStep = false;
+            return;
+        }
+    }
+
+    //if (!m_States[MOVE] && m_IsAnimationEnd)
     //{
     //    // 교체할 Exit Type
     //    EClimbExitType eClimbExitType = { EClimbExitType::CLIMB_D1_STOP };
@@ -221,11 +236,17 @@ void CAugustaClimbMove::Check_StateTransition(_float fTimeDelta)
     //}
 }
 
+// 벽타기 조절.
+void CAugustaClimbMove::Adjust_To_Wall(_float fTimeDelta)
+{
+    
+}
+
 void CAugustaClimbMove::Setup_Animations()
 {
     // 올라가는 것부터?
-    CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_D_1), "Climb_D_1", 2.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_D_2), "Climb_D_2", 2.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_D_1), "Climb_D_1",   2.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_D_2), "Climb_D_2",   2.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_DL_1), "Climb_DL_1", 2.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_DL_2), "Climb_DL_2", 2.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_DR_1), "Climb_DR_1", 2.f, 0.f);
@@ -240,7 +261,12 @@ void CAugustaClimbMove::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_UL_2), "Climb_UL_2", 2.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_UR_1), "Climb_UR_1", 2.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_UR_2), "Climb_UR_2", 2.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbMoveType::CLIMB_VAULT), "Climb_Vault", 2.f, 0.f);
+}
+
+void CAugustaClimbMove::State_Reset()
+{
+    for (_uint i = 0; i < CLIMBSTATE::END; ++i)
+        m_States[i] = false;
 }
 
 

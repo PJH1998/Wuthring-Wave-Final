@@ -16,6 +16,7 @@ private:
 		ERunType m_eRunType = ERunType::END;
 		ESkillType m_eSkillToPlay = ESkillType::END;
 		ELandType m_eLandType = ELandType::END;
+		EAttackType m_eAttackType = EAttackType::END;
 
 		// Air
 		EJumpType m_eJumpType = EJumpType::END;
@@ -28,18 +29,19 @@ private:
 
 		EClimbExitType m_eClimbExitType = EClimbExitType::END;
 		
-		
-
 		// 컨텍스트 사용 뒤 초기화
 		void Clear()
 		{
 			m_eSkillToPlay = ESkillType::END;
 			m_eIdleType = EIdleType::END;
 			m_eRunType = ERunType::END;
-			m_eJumpType = EJumpType::END;
 			m_eSprintType = ESprintType::END;
 			m_eLandType = ELandType::END;
+			m_eAttackType = EAttackType::END;
+			
+			m_eJumpType = EJumpType::END;
 			m_eFallType = EFallType::END;
+
 			m_eClimbIdleType = EClimbIdleType::END;
 			m_eClimbMoveType = EClimbMoveType::END;
 			m_eClimbExitType = EClimbExitType::END;
@@ -66,17 +68,15 @@ public:
 	}
 
 #pragma endregion
-
-
 public:
 	enum PARTTYPE : _uint
 	{
-		PART_WEAPON = 0,
+		PART_BAYONET = 0, // 기본 대검.
 		PART_SHIELD = 1,
 		TYPE_END
 	};
 
-#pragma region 기본 함수
+#pragma region 0. 기본 함수
 protected:
 	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugusta(const CAugusta& Prototype);
@@ -93,12 +93,27 @@ public:
 #pragma endregion
 
 
+#pragma region 1. STATE 관리.
+public:
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
+	virtual void PartAcitvate(_uint iPartType, _bool IsActive) override;
+#pragma endregion
+
 
 private:
-
+	class CAugustaBayonet* m_pAugustaBayonet = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
+	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State마다 활성화?
+
+	
+#ifdef _DEBUG
+	// RayCast 저장
+	vector<pair<_float, _float>> m_RayCasts = {};
+#endif // _DEBUG
+
+
 
 private:
 	// Runtime 도중 필요한 값에 대한 준비.
