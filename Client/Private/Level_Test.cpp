@@ -72,7 +72,7 @@ void CLevel_Test::Ready_Layer_Player()
     //vScale = { 1.f, 1.f, 1.f };
     vScale = { 0.1f, 0.1f, 0.1f };
     vRotation = { 0.f, 0.f, 0.f };
-    vPosition = { -14.1f, 50.f, -180.f };
+    vPosition = { -14.1f, 100.f, -180.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
@@ -217,6 +217,8 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 
         CMapObject::MAP_LOAD Desc{};
 
+        _wstring PrototypeName = TEXT("Prototype_Component_Model_");
+
         while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
         {
             memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
@@ -227,18 +229,24 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
             _float4x4 Matrix = {};
             File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
             Desc.WorldMatrix = &Matrix;
-            _wstring PrototypeName = TEXT("Prototype_Component_Model_");
 
             //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
             _wstring ModelName = StringToWString(Desc.ModelName);
 
-            m_pGameInstance->Add_Work([&, pDesc = Desc]() mutable {
+            m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+                CMapObject::MAP_LOAD pDesc{};
+                strcpy_s(pDesc.ModelName, ModelName.c_str());
+                pDesc.iShaderPassIndex= ShaderPass;
+                pDesc.eObjectType = eObjectType;
+                pDesc.WorldMatrix = &Matrix;
+
                 m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
                     , PROTOTYPE::GAMEOBJECT, &pDesc);
                 });
         }
         m_pGameInstance->Wait_Thread_End();
     }
+    m_pGameInstance->Wait_Thread_End();
     File.close();
 }
 
