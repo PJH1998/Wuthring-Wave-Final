@@ -7,6 +7,7 @@
 
 //#define KSTA_UICLICKTEST
 #define KSTA_UIEVENTTEST
+#define KSTA_TESTDEL
 
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)
@@ -33,7 +34,10 @@ HRESULT CCustom_UI::Initialize_Clone(void* pArg)
 
     Bind_Description(pArg);
     
-    __super::Begin();
+
+    if (this->m_tUIDesc.strUIName == L"Root_HUD")
+        int i = 10;
+    //__super::Begin();
 
     return S_OK;
 }
@@ -51,8 +55,6 @@ void CCustom_UI::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
-
 
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
@@ -102,10 +104,27 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
+#ifdef KSTA_TESTDEL
+    //if (m_tUIDesc.strUIName == L"Icon_Augusta")
+    //    for (auto& instDesc : m_tUIDesc.vecInstanceDescs)
+    //    {
+    //        m_tUIDesc.vecInstanceDescs[0].matExtraData.m[0][0] = 0.3f;
+    //        m_tUIDesc.vecInstanceDescs[1].matExtraData.m[0][0] = 0.7f;
+    //    }
+#endif // KSTA_TESTDEL
+
+
+
     m_pAnimator_UICom->Render();    // Updates Shader Variables.
 
     if (m_pShaderCom)
     {
+#ifdef KSTA_TESTDEL
+        //_uint iFlag = 1;
+        //m_pShaderCom->Bind_Value("g_iVariantFlag", &iFlag, sizeof(iFlag));
+#endif // KSTA_TESTDEL
+
+
         if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
             CRASH("Binding_Matrix_Failed");
 
@@ -131,15 +150,25 @@ void CCustom_UI::Render()
 
 
 
+#ifdef KSTA_TESTDEL
+        //if (m_tUIDesc.strUIName == L"Icon_Augusta")
+        //    m_pShaderCom->Begin(5);
+        //else
+            m_pShaderCom->Begin(m_tUIDesc.iPassType);
+#endif // KSTA_TESTDEL
+
+#ifndef KSTA_TESTDEL
         m_pShaderCom->Begin(m_tUIDesc.iPassType);
+#endif // !KSTA_TESTDEL
+
 
         m_pVIBufferCom->Bind_Resources();
 
         m_pVIBufferCom->Render();
     }
 
-    for (auto& child : m_vecChildObjects)
-        child->Render();
+   for (auto& child : m_vecChildObjects)
+       child->Render();
 
 }
 
@@ -147,10 +176,14 @@ CCustom_UI* CCustom_UI::Find_ChildObject(_wstring strChildName)
 {
     for (auto& child : m_vecChildObjects)
     {
+        // 부모 검사
         if (child->Get_UIDesc().strUIName == strChildName)
             return child;
 
-        return child->Find_ChildObject(strChildName);
+        // 이후 자식 재귀검사
+        CCustom_UI* child2 = child->Find_ChildObject(strChildName);
+        if (child2 != nullptr)
+            return child2;
     }
 
     return nullptr;
@@ -163,9 +196,6 @@ void CCustom_UI::Add_EventFunction(_uint iEventType, function<void()> function)
 
 void CCustom_UI::OnEvent(_uint iEventType)
 {
-    if (iEventType == ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT))
-        int i = 10;
-
     for (auto& func : m_vecFunctions[iEventType])
         func();
 }
@@ -185,6 +215,11 @@ _bool CCustom_UI::Check_OnInteract(_uint iEventInteractType, _uint iInstanceInde
     _bool isInteracted = (isSame_InteractType && isSame_InstanceIndex);
 
     return isInteracted;
+}
+
+_bool CCustom_UI::Check_OnInteract(_wstring strChildName,_uint iEventInteractType, _uint iInstanceIndex)
+{
+    return Find_ChildObject(strChildName)->Check_OnInteract(iEventInteractType, iInstanceIndex);
 }
 
 _bool CCustom_UI::Check_IsInSpace()
@@ -234,7 +269,6 @@ void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculat
         m_cachingTimeElapsed = 0.f;
     else
         return;
-
 
     if (!m_tUIDesc.isInstance)
     {
@@ -374,12 +408,12 @@ HRESULT CCustom_UI::Ready_Events()
 
 #ifdef KSTA_UIEVENTTEST
 
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER),   [this]() {std::cout << "[CCustom_UI] [CLK-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICKING),      [this]() {std::cout << "[CCustom_UI] [CLI--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT),    [this]() {std::cout << "[CCustom_UI] [CLI-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER),   [this]() {std::cout << "[CCustom_UI] [HOV-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVERING),      [this]() {std::cout << "[CCustom_UI] [HOV--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
-    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT),    [this]() {std::cout << "[CCustom_UI] [HOV-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER),   [this]() {std::wcout << "[CCustom_UI] [CLK-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICKING),      [this]() {std::wcout << "[CCustom_UI] [CLK--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT),    [this]() {std::wcout << "[CCustom_UI] [CLK-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER),   [this]() {std::wcout << "[CCustom_UI] [HOV-I] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVERING),      [this]() {std::wcout << "[CCustom_UI] [HOV--] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
+    Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT),    [this]() {std::wcout << "[CCustom_UI] [HOV-O] [" << m_iInputInstanceIndex << "] " << m_tUIDesc.strUIName.c_str() << std::endl; });
     //Add_EventFunction(ENUM_CLASS(UI_EVENT_TYPE::SCROLL),    [this]() {std::cout << "[CCustom_UI] " << m_tUIDesc.strUIName.c_str() << " SCROLLED!" << std::endl; });
 
 #endif // KSTA_UIEVENTTEST
@@ -441,6 +475,9 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
 
 void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 {
+    if (this->m_tUIDesc.strUIName == L"Icon_Augusta")
+        int i = 10;
+
     if (pParentMatrix)
         XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix() * *pParentMatrix);
     else

@@ -34,8 +34,11 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 }
 
 void CAnimator_UI::Update(_float fTimeDelta)
-{
-    m_fElapsedTime += fTimeDelta;
+{ 
+    if (m_pCurAnimDesc)
+        m_fElapsedTime += fTimeDelta;
+    else
+        m_fElapsedTime = 0.f;
 }
 
 void CAnimator_UI::Late_Update(_float fTimeDelta)
@@ -355,7 +358,6 @@ void CAnimator_UI::Update_Animation()
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
 
-    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
     pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
     pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
     pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));

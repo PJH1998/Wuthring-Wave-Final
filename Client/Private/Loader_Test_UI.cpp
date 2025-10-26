@@ -46,7 +46,8 @@ HRESULT CLoader_Test_UI::Load_Texture()
 
     // * Json Parse                 // for pre-loading textures
     // UI_HUD
-    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
+    //_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
+    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD.json"; // ksta
     vecDescs.push_back(Load_Tree(strFilePath_UI_HUD));
 
     for (auto& treeDesc : vecDescs)

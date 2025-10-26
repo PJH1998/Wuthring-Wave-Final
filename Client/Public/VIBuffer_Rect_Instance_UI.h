@@ -19,6 +19,7 @@ public:
 		_float2 vClipTexcoordX	= { 0.f, 1.f };						// based on local space, per single instance
 		_float2 vClipTexcoordY	= { 0.f, 1.f };						// based on local space, per single instance
 
+		_float4x4 matExtraData = {};
 	}SINGLE_INST_DESC;
 
 	typedef struct tagRectInstanceUIDesc : public CVIBuffer_Instance::INSTANCE_DESC

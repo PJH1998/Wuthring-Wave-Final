@@ -235,7 +235,8 @@ public:
 
 #pragma region UI_MANAGER
 public:
-	HRESULT				Add_RootUI(class CUIObject* rootUI);
+	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);
+	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
 	void				Clear_RootUI();
 #pragma endregion
 

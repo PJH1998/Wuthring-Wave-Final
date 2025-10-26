@@ -21,7 +21,7 @@ HRESULT CUI_Button::Initialize_Clone(void* pArg)
     __super::Initialize_Clone(pArg);
 
     Ready_Components(pArg);
-
+    
 	return S_OK;
 }
 

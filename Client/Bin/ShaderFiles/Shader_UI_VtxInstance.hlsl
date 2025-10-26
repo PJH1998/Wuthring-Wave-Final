@@ -1,7 +1,7 @@
 // UI용
 #include "Engine_Shader_State.hlsli"
 
-
+#define PI      3.14159265359f
 
 // ==============================
 // * Global Variables
@@ -14,9 +14,9 @@ float g_AlphaStrength;
 
 
 // Gradient Variables
-float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f }; // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
-bool g_InverseScreenDiscard = false; // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
-float4 g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f }; // (좌, 우, 상, 하) (left, right, top, bottom)
+float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f };  // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
+bool g_InverseScreenDiscard = false;                                // 좌상단 끝이 0, 0 / 우하단 끝이 스크린X, 스크린Y 크기에 해당
+float4 g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f };                // (좌, 우, 상, 하) (left, right, top, bottom)
 float2 g_ScreenSize = { 1920.f, 1080.f };
 
 
@@ -29,6 +29,17 @@ float2 g_ImageSize = { 0.f, 0.f };
 float2 g_SectorBorder = { 0.f, 0.f }; // based on local texcoord.     for 9sector
 float g_UIScale = 1.f; // UI Scaler
 
+
+
+// Variant UI Variables
+#define UIFLAG_ERROR                0           // 플래그를 주지 않았을 때의 초기값
+#define UIFLAG_COOLDOWN_CIRCLE      1           // 반시계방향으로 나타나는 쿨타임 구현용
+#define UIFLAG_COOLDOWN_RECT        2           // 단순 사각형에서 내려오는 쿨타임 구현용
+#define UIFLAG_END                  3
+uint g_iVariantFlag = UIFLAG_ERROR;
+
+
+//float4 g_vVariantValues;        // 버텍스셰이더로 구조체 넘기기엔 부담스러우니, 다중 float로 전역에 던져 꺼내씀
 
 
 // ==============================
@@ -155,8 +166,13 @@ struct VS_IN_INSTANCE
     
     float2 vSInstCoordX : TEXCOORD5;
     float2 vSInstCoordY : TEXCOORD6;
-    float2 vClipTexcoordX : TEXCOORD7; // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
-    float2 vClipTexcoordY : TEXCOORD8; // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
+    float2 vClipTexcoordX : TEXCOORD7;
+    float2 vClipTexcoordY : TEXCOORD8;
+    
+    float4 mExtra0 : TEXCOORD9;
+    float4 mExtra1 : TEXCOORD10;
+    float4 mExtra2 : TEXCOORD11;
+    float4 mExtra3 : TEXCOORD12;
 };
 
 struct VS_OUT
@@ -173,6 +189,11 @@ struct VS_OUT
     
     float2 vSInstPos : TEXCOORD7;
     float2 vSInstSca : TEXCOORD8;
+    
+    float4 mExtra0 : TEXCOORD9;
+    float4 mExtra1 : TEXCOORD10;
+    float4 mExtra2 : TEXCOORD11;
+    float4 mExtra3 : TEXCOORD12;
 };
 
 
@@ -211,6 +232,10 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     Out.vSInstCoordY = In.vSInstCoordY;
     Out.vClipTexcoordX = In.vClipTexcoordX;
     Out.vClipTexcoordY = In.vClipTexcoordY;
+    Out.mExtra0 = In.mExtra0;
+    Out.mExtra1 = In.mExtra1;
+    Out.mExtra2 = In.mExtra2;
+    Out.mExtra3 = In.mExtra3;
     
     return Out;
 }
@@ -237,6 +262,11 @@ struct PS_IN
     
     float2 vSInstPos : TEXCOORD7;
     float2 vSInstSca : TEXCOORD8;
+    
+    float4 mExtra0 : TEXCOORD9;
+    float4 mExtra1 : TEXCOORD10;
+    float4 mExtra2 : TEXCOORD11;
+    float4 mExtra3 : TEXCOORD12;
 };
 
 struct PS_OUT
@@ -530,7 +560,86 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
     return Out;
 }
 
-
+PS_OUT PS_VARIENT_UI(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX= float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
+    
+    
+    // bind variables
+    float fCooldown = In.mExtra0.x;     // 0 ~ 1. instance 0 은 e, 1 은 r 에 대응
+    
+    
+    //switch (g_iVariantFlag)
+    //{
+    //    case UIFLAG_COOLDOWN_CIRCLE :
+    //    {
+    //        // circle cd
+    //        // g_fLeftCDRate 가 1 일때는 밝은 색으로
+    //        // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
+    //        
+    //        float2 center = float2(0.5f, 0.5f);
+    //        float2 dir = normalize(fixedUV - center);   // 중앙에서 목표 UV좌표로의 방향.
+    //        float angle = atan2(dir.y, dir.x);          // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
+    //        angle += PI / 2;                            // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
+    //        if (angle < 0) angle += 2 * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
+    //
+    //        float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
+    //
+    //        if (angle <= fCooldownAngle)
+    //        {
+    //            // 이미 지난 부분은 원래의 색으로
+    //            return Out;
+    //        }
+    //        else
+    //        {
+    //            // 지나지 않은 부분은 좀 더 하얀 색으로
+    //            Out.vColor.rgb *= 1.2f;
+    //            return Out;
+    //        }
+    //        
+    //    } break;
+    //    
+    //    case UIFLAG_COOLDOWN_RECT   :
+    //    {
+    //        // rect cd. 
+    //        // g_fLeftCDRate 가 1 일때는 어두운 색으로
+    //        // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
+    //        if (fixedUV.y > fCooldown)
+    //        {
+    //            // 밝게 표시될 부분
+    //            return Out;
+    //        }
+    //        else
+    //        {
+    //            // 어둡게 표시될 부분
+    //            Out.vColor *= 0.8f;
+    //            return Out;
+    //        }
+    //        
+    //        
+    //    } break;
+    //    
+    //    default:
+    //    {
+    //        Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    //        return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+    //    }
+    //}
+    
+    return Out;
+}
 
 // ==============================
 // * Technique (Pass)
@@ -589,4 +698,16 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_NINESECTOR_UI();
     }
+
+    pass VariantUIPass  // AlphaPass + a. for cooldown, etc. not designed for animation.
+    {                   // 쿨타임 등의 용도로 사용할 특수한 경우용 짬통 pass.. flag로 내부에서 사용할 것 나눔      
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_INSTANCE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_VARIENT_UI();
+    }
+
 }

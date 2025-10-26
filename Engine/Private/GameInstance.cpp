@@ -676,9 +676,14 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 // Check_Interaction....
 
 
-HRESULT	CGameInstance::Add_RootUI(CUIObject* rootUI)
+HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI)
 {
-	return m_pUI_Manager->Add_RootUI(rootUI);
+	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
+}
+
+CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Find_UIObject(strName_UI);
 }
 
 void	CGameInstance::Clear_RootUI()

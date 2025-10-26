@@ -30,14 +30,18 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
-        L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
+        //L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
+        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD.json";
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {   // 로드할 애니메이션은 여기에 추가
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/TestHUDAnim3.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
     };
     Load_Animations(vecAnimFilePaths);
+
+
+    //Find_ChildObject(L"UI_ParentTest")->Set_Active(false);
 
     return S_OK;
 }
@@ -64,7 +68,7 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 
 void CUI_HUD::Render()
 {
-    __super::Render();                      // Nothing.
+    //__super::Render();                      // Nothing. 렌더그룹 추가한 뒤 부터 렌더러에서 알아서 자식들까지 Render 돌림
 }
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
@@ -132,30 +136,39 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
     }
 
     // re-define childs of this(container)
+    //vector<CCustom_UI*> vecTrueChildObjects = {};
+    //for (auto& child : m_vecChildObjects)
+    //{
+    //    _bool isChild = false;
+    //
+    //    const CUSTOM_UI_DESC& tChildDesc = child->Get_UIDesc();
+    //    for (auto& otherChild : m_vecChildObjects)
+    //    {
+    //        const CUSTOM_UI_DESC& tOtherChildDesc = otherChild->Get_UIDesc();
+    //
+    //        // child를 자식으로 가졌는가?
+    //        for (auto& otherChildName : tOtherChildDesc.vecChildNames)
+    //        {
+    //            // 가졌다면, 자식으로 판정, 즉시 break.
+    //            if (otherChildName == tChildDesc.strUIName)
+    //                isChild = true; break;
+    //        }
+    //        if (isChild)  break;
+    //    }
+    //
+    //    // 아무도 자식으로 가지지 않았다면, 컨테이너 UI의 부모로 판단.
+    //    if (!isChild)
+    //        vecTrueChildObjects.push_back(child);
+    //}
+
     vector<CCustom_UI*> vecTrueChildObjects = {};
     for (auto& child : m_vecChildObjects)
     {
-        _bool isChild = false;
-
-        const CUSTOM_UI_DESC& tChildDesc = child->Get_UIDesc();
-        for (auto& otherChild : m_vecChildObjects)
-        {
-            const CUSTOM_UI_DESC& tOtherChildDesc = otherChild->Get_UIDesc();
-
-            // child를 자식으로 가졌는가?
-            for (auto& otherChildName : tOtherChildDesc.vecChildNames)
-            {
-                // 가졌다면, 자식으로 판정, 즉시 break.
-                if (otherChildName == tChildDesc.strUIName)
-                    isChild = true; break;
-            }
-            if (isChild)  break;
-        }
-
-        // 아무도 자식으로 가지지 않았다면, 컨테이너 UI의 부모로 판단.
-        if (!isChild)
+        if (child->Get_UIDesc().strParentName.empty())
             vecTrueChildObjects.push_back(child);
     }
+
+    
     m_vecChildObjects = move(vecTrueChildObjects);
 
     return S_OK;

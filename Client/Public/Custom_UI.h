@@ -107,6 +107,7 @@ public:
 	void					OnEvent(_uint iEventType)				override;
 
 	_bool					Check_OnInteract(_uint iEventInteractType, _uint iInstanceIndex = 0)	override;
+	_bool					Check_OnInteract(_wstring strChildName, _uint iEventInteractType, _uint iInstanceIndex = 0);
 	
 public:
 	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
@@ -150,7 +151,7 @@ protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐
 	vector<array<_float4, CACHED_TRANSFORM::END>>	m_vecCachedUITransform = {};
 
 	_uint					m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
-	_uint					m_iInputInstanceIndex = UINT_MAX;
+	_uint					m_iInputInstanceIndex = 0;
 
 
 public:

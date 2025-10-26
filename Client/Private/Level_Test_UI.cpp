@@ -20,7 +20,7 @@ HRESULT CLevel_Test_UI::Initialize()
     for (auto& strPrototypeTag : strPrototypeTag_UI)
     {
         CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-        if (FAILED(m_pGameInstance->Add_RootUI(pTargetUI)))
+        if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
             CRASH("Failed to Add RootUI to UI_Manager.");
         if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
             CRASH("Failed to Add RootUI to Object_Manager.");

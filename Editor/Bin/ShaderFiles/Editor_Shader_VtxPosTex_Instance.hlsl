@@ -208,6 +208,12 @@ struct VS_IN_INSTANCE
     float2 vSInstCoordY     : TEXCOORD6;
     float2 vClipTexcoordX   : TEXCOORD7;
     float2 vClipTexcoordY   : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
+
 };
 
 struct VS_OUT
@@ -224,6 +230,11 @@ struct VS_OUT
     
     float2 vSInstPos        : TEXCOORD7;
     float2 vSInstSca        : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
 };
 
 
@@ -262,6 +273,10 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     Out.vSInstCoordY = In.vSInstCoordY;
     Out.vClipTexcoordX = In.vClipTexcoordX;
     Out.vClipTexcoordY = In.vClipTexcoordY;
+    Out.mExtra0 = In.mExtra0;
+    Out.mExtra1 = In.mExtra1;
+    Out.mExtra2 = In.mExtra2;
+    Out.mExtra3 = In.mExtra3;
     
     return Out;
 }
@@ -288,6 +303,11 @@ struct PS_IN
     
     float2 vSInstPos        : TEXCOORD7;
     float2 vSInstSca        : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
 };
 
 struct PS_OUT
