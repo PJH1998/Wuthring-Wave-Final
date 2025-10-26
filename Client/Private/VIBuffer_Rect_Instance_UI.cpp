@@ -113,6 +113,8 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 
 		pInstanceVertices[i].vClipTexcoordX = { 0.f, 1.f };			
 		pInstanceVertices[i].vClipTexcoordY = { 0.f, 1.f };
+
+		pInstanceVertices[i].matExtraData	= { };
 	}
 
 	return S_OK;

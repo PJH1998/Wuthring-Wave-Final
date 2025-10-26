@@ -240,6 +240,7 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
     {
         if (fChangeCD[0] == 0)
         {
+            iSelectedCHIndex = 0;
             fChangeCD[0] = fMaxChangeCD[0];
             pSkillUI[0]->Set_Active(true);
             pSkillUI[1]->Set_Active(false);
@@ -250,6 +251,7 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
     {
         if (fChangeCD[1] == 0)
         {
+            iSelectedCHIndex = 1;
             fChangeCD[1] = fMaxChangeCD[1];
             pSkillUI[0]->Set_Active(false);
             pSkillUI[1]->Set_Active(true);
@@ -260,6 +262,7 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
     {
         if (fChangeCD[2] == 0)
         {
+            iSelectedCHIndex = 2;
             fChangeCD[2] = fMaxChangeCD[2];
             pSkillUI[0]->Set_Active(false);
             pSkillUI[1]->Set_Active(false);
@@ -292,8 +295,8 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
         auto targetUI = pSkillUI[i];
 
         vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-        vecVariantMat[0].m[0][0] = 1.f - (fCooldown_E / fMaxSkillCD[i][SK_E]);
-        vecVariantMat[1].m[0][0] = 1.f - (fCooldown_R / fMaxSkillCD[i][SK_R]);
+        vecVariantMat[0].m[0][0] = fCooldown_E / fMaxSkillCD[i][SK_E];
+        vecVariantMat[1].m[0][0] = fCooldown_R / fMaxSkillCD[i][SK_R];
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,

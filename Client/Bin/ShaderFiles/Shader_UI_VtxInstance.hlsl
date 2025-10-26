@@ -588,8 +588,12 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
             
+            float2 localUV;
+            localUV.x = saturate((fixedUV.x - In.vSInstCoordX.x) / (In.vSInstCoordX.y - In.vSInstCoordX.x));
+            localUV.y = saturate((fixedUV.y - In.vSInstCoordY.x) / (In.vSInstCoordY.y - In.vSInstCoordY.x));
+            
             float2 center = float2(0.5f, 0.5f);
-            float2 dir = normalize(fixedUV - center);   // 중앙에서 목표 UV좌표로의 방향.
+            float2 dir = normalize(localUV - center);   // 중앙에서 목표 UV좌표로의 방향.
             float angle = atan2(dir.y, dir.x);          // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
             angle += PI / 2;                            // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
             if (angle < 0) angle += 2 * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
@@ -599,12 +603,15 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (angle <= fCooldownAngle)
             {
                 // 이미 지난 부분은 원래의 색으로
+                Out.vColor.rgb *= 0.5f;
                 return Out;
             }
             else
             {
                 // 지나지 않은 부분은 좀 더 하얀 색으로
-                Out.vColor.rgb *= 0.2f;
+                if (fCooldown != 0.f)
+                    Out.vColor.rgb *= 0.95f;
+                
                 return Out;
             }
             
