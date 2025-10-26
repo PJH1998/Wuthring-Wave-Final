@@ -17,7 +17,7 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1025_Final/");
+    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_First/");
     Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
 
     Ready_Layer_Player();
@@ -127,6 +127,9 @@ HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
             if (!entry.is_regular_file())
                 continue;
 
+            if (entry.path().string().find("Prototype") != std::string::npos)
+                continue;
+
             if (entry.path().extension() != ".dat")
                 continue;
 
@@ -213,6 +216,8 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 
         CMapObject::MAP_LOAD Desc{};
 
+        _wstring PrototypeName = TEXT("Prototype_Component_Model_");
+
         while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
         {
             memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
@@ -223,15 +228,24 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
             _float4x4 Matrix = {};
             File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
             Desc.WorldMatrix = &Matrix;
-            _wstring PrototypeName = TEXT("Prototype_Component_Model_");
 
             //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
             _wstring ModelName = StringToWString(Desc.ModelName);
 
-            m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
-                ,PROTOTYPE::GAMEOBJECT, &Desc);
+            m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+                CMapObject::MAP_LOAD pDesc{};
+                strcpy_s(pDesc.ModelName, ModelName.c_str());
+                pDesc.iShaderPassIndex= ShaderPass;
+                pDesc.eObjectType = eObjectType;
+                pDesc.WorldMatrix = &Matrix;
+
+                m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
+                    , PROTOTYPE::GAMEOBJECT, &pDesc);
+                });
         }
+        m_pGameInstance->Wait_Thread_End();
     }
+    m_pGameInstance->Wait_Thread_End();
     File.close();
 }
 
