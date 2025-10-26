@@ -19,7 +19,7 @@ private:
 	HRESULT				Load_Object();
 	HRESULT				Load_MonsterTest();
 
-	HRESULT				Load_PlayerController();
+	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();	
 
 private:

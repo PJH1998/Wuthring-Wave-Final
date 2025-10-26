@@ -56,9 +56,19 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting;
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
+	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(70.f);
 	VirtualSetting.mShape = m_pShape;
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);
+
+	VirtualSetting.mEnhancedInternalEdgeRemoval = true; // 각진 부분 부드럽게.
+	
+	// 추가 부분.
+	VirtualSetting.mMaxStrength = 100.f;
+	VirtualSetting.mCharacterPadding = 0.02f;
+	VirtualSetting.mPenetrationRecoverySpeed = 1.f;
+	VirtualSetting.mPredictiveContactDistance = 0.1f;
+
 
 	//VirtualSetting.mInnerBodyShape = BodyShape;
 	//VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
@@ -67,6 +77,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	m_tCollisionData.pComponent = this;
 	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
 	ASSERT_CRASH(m_pCharacterVirtual);
+
 
     return S_OK;
 }

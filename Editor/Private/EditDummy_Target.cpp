@@ -73,6 +73,7 @@ void CEditDummy_Target::Render()
 
 #ifdef _DEBUG
 	m_pColliderCom->Render();
+	//m_pGameInstance->DrawRay(XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 200.f, 200.f, 1.f));
 #endif
 }
 

@@ -14,8 +14,8 @@ NS_BEGIN(Editor)
 class CEdit_MapObject : public CStaticObject
 {
 public:
-	enum OBJECTTYPE { DEFAULT, SONORA, END };
-
+	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, END };
+		
 	typedef struct tagMapLoad
 	{
 		_char ModelName[MAX_PATH] = {};

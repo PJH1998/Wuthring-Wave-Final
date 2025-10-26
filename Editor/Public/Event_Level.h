@@ -35,5 +35,6 @@ typedef struct tagMapCreate: public CEvent
 typedef struct tagMapSave : public CEvent
 {
 	ofstream& File;
-	tagMapSave(ofstream& _File) :File(_File){};
+	unordered_set<_string>& ModelName;
+	tagMapSave(ofstream& _File, unordered_set<_string>& _ModelName) :File(_File), ModelName(_ModelName) {};
 }MAP_SAVE;

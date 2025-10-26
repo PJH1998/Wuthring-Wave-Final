@@ -1,37 +1,47 @@
 #pragma once
-#include "Actor.h"
+#include "Player_Define.h"
+#include "GameObject.h"
+
 NS_BEGIN(Client)
-// «√∑π¿ÃæÓ ƒ≥∏Ø≈Õ¿« ∫Œ∏ ∞¥√º.
-class CPlayer abstract : public CActor
+// Player Container
+class CPlayer final : public CGameObject
 {
 public:
-	typedef struct tagPlayerStat
+	enum CHARACTERTYPE
 	{
-		_float fHp = {};
-		_float fEnergyRate = {};
-		_float fAttack = {};
-	}PLAYER_STAT;
+		NONE = -1,
+		AUGUSTA = 0,
+		GALBRENA = 1,
+		PLAYER = 2,
+		TYPE_END
+	};
 
-
-	typedef struct tagPlayerDesc : public CActor::ACTOR_DESC
+	enum SWITCH_STATE
 	{
-		class CPlayerParty* pOwner = { nullptr };
-		pair<LEVEL, _wstring> stateMachineData = {};
-		pair<LEVEL, _wstring> controllerData = {};
-		vector<pair<_wstring, _wstring>> PartPrototypes;
-		_float3 vScale = { 1.f, 1.f, 1.f};
-		_float3 vRotation = { 0.f, 0.f, 0.f };
-		_float3 vPostion = { 0.f, 0.f, 0.f };
-		PLAYER_STAT eStat = {};
+		SWITCH_NONE,     // Ï†ÑÌôò ÎåÄÍ∏∞ ÏóÜÏùå
+		SWITCH_PENDING,  // Ï†ÑÌôò Ï§ÄÎπÑ Ï§ë
+		SWITCH_READY     // Ï†ÑÌôò Ï§ÄÎπÑ ÏôÑÎ£å
+	};
 
+public:
+	typedef struct tagPlayerPartyDesc
+	{
+		LEVEL eCurLevel = {LEVEL::END };
+		_float3 vPosition = {};
+		_float3 vScale = {};
+		_float3 vRotation = {};
+
+		_uint iPlayerCount = {};
+		_wstring wStrInputControllerTag = {};
+		vector<PLAYER_SPEC> PlayerSpecs = {};
 	}PLAYER_DESC;
-	
 
-#pragma region ±‚∫ª «‘ºˆ
-protected:
+#pragma region Í∏∞Î≥∏ Ìï®ÏàòÎì§.
+public:
 	explicit CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CPlayer(const CPlayer& Prototype);
 	virtual ~CPlayer() = default;
+
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -40,35 +50,43 @@ public:
 	virtual	void	Update(_float fTimeDelta) override;
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
-	virtual void	Render_Shadow() override;
-
+	virtual	void	Render_Shadow() override;
 
 #pragma endregion
 
-#pragma region STATEø°º≠ ªÁøÎ
 public:
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true);
-	_bool Check_AnyInput(_uint iKeyFlag);
-	_bool Check_AllInput(_uint iKeyFlag);
+	void Change_CharacterCheck();
+	void Change_Character(CHARACTERTYPE eNextCharacter);
+	void Sync_Transform();
+	
+public:
+	void Ensemble_Skill(CHARACTERTYPE eCharacter);
+	// StateÏóêÏÑú Ìò∏Ï∂ú: Ensemble SkillÏù¥ ÎÅùÎÇ¨ÏùåÏùÑ ÏïåÎ¶º
+	void Notify_EnsembleEnd();
 
-#pragma endregion
+	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
+	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
-
-
-
-protected:
-	class CPlayerParty* m_pOwner = { nullptr };
+private:
+	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
-	class CStateMachine* m_pStateMachineCom = { nullptr };
-	
+	LEVEL m_eCurLevel = { LEVEL::END };
+	_int m_iCurrentPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iPrevPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iEnsembleCharacterIdx = { CHARACTERTYPE::NONE };
 
-protected:
-	_bool m_IsLockOn = { false };
+
+
+private:
+	HRESULT Ready_Players(const PLAYER_DESC* pDesc);
+	HRESULT Ready_Components(const PLAYER_DESC* pDesc);
 	
 
 public:
-	virtual		CGameObject* Clone(void* pArg) = 0;
+	static		CPlayer* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void Free() override;
+
 
 };
 NS_END

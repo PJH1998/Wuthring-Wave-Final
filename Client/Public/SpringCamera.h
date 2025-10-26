@@ -49,6 +49,10 @@ public:
 	}
 
 public:
+	_vector Get_LookVector_NoPitch();
+	_vector Get_RightDirection_NoPitch();
+
+public:
 	virtual		HRESULT			Initialize_Prototype() override;
 	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;

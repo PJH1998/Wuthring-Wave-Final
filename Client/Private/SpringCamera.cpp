@@ -11,6 +11,20 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 {
 }
 
+_vector CSpringCamera::Get_LookVector_NoPitch()
+{
+	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+	vLook = XMVectorSetY(vLook, 0.f);
+	return XMVector3Normalize(vLook);
+}
+
+_vector CSpringCamera::Get_RightDirection_NoPitch()
+{
+	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+	vRight = XMVectorSetY(vRight, 0.f);  // Pitch 제거
+	return XMVector3Normalize(vRight);
+}
+
 HRESULT CSpringCamera::Initialize_Prototype()
 {
     return S_OK;
@@ -23,14 +37,14 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	Ready_Component();
 
-	m_fDistance = 100.f;
-	m_fFixedDistance = 100.f;
-	m_fLerpSpeed = 1.5f;
-	m_fMinDistance = 100.f;
+	m_fDistance = 10.f;
+	m_fFixedDistance = 10.f;
+	m_fLerpSpeed = 0.15f;
+	m_fMinDistance = 10.f;
 
-	m_fStiffness = 3.f;
+	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 35.f;
+	m_fLockOnOffsetY = 3.5f;
 
     return S_OK;
 }
@@ -72,7 +86,8 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 1. 거리 제한으로 인한 간격 보정
 	Compute_CamPos();
 	// 2. Ray Cast 이용하여 지형, 오브젝트와 충돌
-	Check_Ray();
+	if(CAMERA_STATE::LOCKON != m_eCameraState)
+		Check_Ray();
 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 

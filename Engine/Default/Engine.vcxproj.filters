@@ -250,9 +250,6 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
       <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
-      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine">
       <UniqueIdentifier>{a54d431a-e7ed-4546-9ff3-5fdefe162fda}</UniqueIdentifier>
     </Filter>
@@ -277,6 +274,15 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\State">
       <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\RCS">
+      <UniqueIdentifier>{268ef3af-b64c-46f4-a94d-fb395fa5ca5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\RCS\RCS_Manager">
+      <UniqueIdentifier>{1174f9f7-70da-40ae-8982-f1d7a52bff08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\RendererSubResource">
+      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
       <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
@@ -538,8 +544,8 @@
     <ClInclude Include="..\Public\VIBuffer_Instance.h">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\ShaderFilter.h">
-      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
+    <ClInclude Include="..\public\RendererSubResource.h">
+      <Filter>01. Utility\99. Renderer\RendererSubResource</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AnimMachine.h">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
@@ -565,6 +571,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\StateMachine.h">
       <Filter>01. Utility\04. Component\State</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\RendererCS.h">
+      <Filter>01. Utility\99. Renderer\RCS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\RCS_Manager.h">
+      <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
     </ClInclude>
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
@@ -802,8 +814,8 @@
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Instance</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\ShaderFilter.cpp">
-      <Filter>01. Utility\99. Renderer\ShaderFilter</Filter>
+    <ClCompile Include="..\private\RendererSubResource.cpp">
+      <Filter>01. Utility\99. Renderer\RendererSubResource</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AnimMachine.cpp">
       <Filter>01. Utility\04. Component\AnimMachine</Filter>
@@ -830,6 +842,12 @@
     <ClCompile Include="..\Private\StateMachine.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\RendererCS.cpp">
+      <Filter>01. Utility\99. Renderer\RCS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\RCS_Manager.cpp">
+      <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClCompile>
@@ -847,12 +865,18 @@
     <None Include="..\..\Editor\Default\Editor.vcxproj.filters">
       <Filter>01. Utility\04. Component\Model\Animation</Filter>
     </None>
+    <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Cell.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Deferred.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

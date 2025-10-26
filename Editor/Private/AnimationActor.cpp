@@ -83,6 +83,9 @@ void CAnimationActor::Update(_float fTimeDelta)
     //if (m_IsPlayAnimation)
     //{
     //    m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, 0.01f);
+    //    _string strRibAnimation = "Rib_" + m_strCurrentAnimation;
+    //    //m_pModelCom->Play_RibAnimation(strRibAnimation, fTimeDelta);
+    //    m_pModelCom->Play_RibAnimation(strRibAnimation, m_fTrackPosition);
     //    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     //}
         
@@ -95,9 +98,6 @@ void CAnimationActor::Update(_float fTimeDelta)
     {
         m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 0.01f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-       /* _float4 vPos = {};
-        XMStoreFloat4(&vPos, m_pTransformCom->Get_State(STATE::POSITION));
-        OutPutDebugFloat4(TEXT("Position"), vPos);*/
     }
   
 

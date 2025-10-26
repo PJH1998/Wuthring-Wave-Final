@@ -159,16 +159,32 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Public\AirState.h" />
     <ClInclude Include="..\public\Animator_UI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h" />
     <ClInclude Include="..\Public\AnimationDummy.h" />
-    <ClInclude Include="..\Public\AugustaBaseState.h" />
-    <ClInclude Include="..\Public\AugustaRun_F.h" />
-    <ClInclude Include="..\Public\AugustaStand1_Action01.h" />
-    <ClInclude Include="..\Public\AugustaStand1_Action02.h" />
-    <ClInclude Include="..\Public\AugustaStop_Run_L.h" />
+    <ClInclude Include="..\Public\AugustaAirFall.h" />
+    <ClInclude Include="..\Public\AugustaAirJump.h" />
+    <ClInclude Include="..\Public\AugustaBayonet.h" />
+    <ClInclude Include="..\Public\AugustaClimbExit.h" />
+    <ClInclude Include="..\Public\AugustaClimbMove.h" />
+    <ClInclude Include="..\Public\AugustaGroundAttack.h" />
+    <ClInclude Include="..\Public\AugustaGroundIdle.h" />
+    <ClInclude Include="..\Public\AugustaGroundLand.h" />
+    <ClInclude Include="..\Public\AugustaGroundRun.h" />
+    <ClInclude Include="..\Public\AugustaGroundSkill.h" />
+    <ClInclude Include="..\Public\AugustaGroundSprint.h" />
+    <ClInclude Include="..\Public\AugustaGroundWalk.h" />
+    <ClInclude Include="..\Public\AugustaState_Enum.h" />
+    <ClInclude Include="..\Public\AugustaStateFactory.h" />
+    <ClInclude Include="..\Public\Character.h" />
+    <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\ClimbState.h" />
+    <ClInclude Include="..\Public\GroundState.h" />
+    <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\PlayerFactory.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\MonsterDummy.h" />
     <ClInclude Include="..\public\Player_Define.h" />
@@ -199,6 +215,7 @@
     <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
+    <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
@@ -215,36 +232,49 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Player.h" />
-    <ClInclude Include="..\Public\PlayerParty.h" />
-    <ClInclude Include="..\Public\PlayerAugusta.h" />
+    <ClInclude Include="..\Public\Augusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
+    <ClInclude Include="..\Public\Weapon.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Private\AirState.cpp" />
     <ClCompile Include="..\private\Animator_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
-    <ClCompile Include="..\Private\AugustaBaseState.cpp" />
-    <ClCompile Include="..\Private\AugustaRun_F.cpp" />
-    <ClCompile Include="..\Private\AugustaStand1_Action01.cpp" />
-    <ClCompile Include="..\Private\AugustaStand1_Action02.cpp" />
-    <ClCompile Include="..\Private\AugustaStop_Run_L.cpp" />
+    <ClCompile Include="..\Private\AugustaAirFall.cpp" />
+    <ClCompile Include="..\Private\AugustaAirJump.cpp" />
+    <ClCompile Include="..\Private\AugustaBayonet.cpp" />
+    <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
+    <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
+    <ClCompile Include="..\Private\Character.cpp" />
+    <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Private\ClimbState.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Dummy.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
+    <ClCompile Include="..\Private\GroundState.cpp" />
+    <ClCompile Include="..\Private\HitState.cpp" />
     <ClCompile Include="..\Private\Level_GamePlay.cpp" />
     <ClCompile Include="..\Private\Level_Loading.cpp" />
     <ClCompile Include="..\Private\Level_Logo.cpp" />
@@ -264,6 +294,8 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
+    <ClCompile Include="..\Private\AugustaStateFactory.cpp" />
+    <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -280,10 +312,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Player.cpp" />
-    <ClCompile Include="..\Private\PlayerParty.cpp" />
-    <ClCompile Include="..\Private\PlayerAugusta.cpp" />
+    <ClCompile Include="..\Private\Augusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
+    <ClCompile Include="..\Private\Weapon.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

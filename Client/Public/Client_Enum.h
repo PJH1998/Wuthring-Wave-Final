@@ -9,6 +9,10 @@ namespace Client
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
 
+	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
+
+	enum class WEAPONTYPE { ANIM, NONANIM, END};
+
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
 		END
@@ -28,7 +32,11 @@ namespace Client
 		R = 1 << 10, 
 		T = 1 << 11,
 		LSHIFT = 1 << 12,
-		SPACE = 1 << 13
+		SPACE = 1 << 13,
+		D1 = 1 << 14,
+		D2 = 1 << 15,
+		D3 = 1 << 16,
+		
 	};
 
 	enum class DIRECTION {

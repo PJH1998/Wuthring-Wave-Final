@@ -108,8 +108,19 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
-	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
-	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.2f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.008f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.01f, 0.f);
+	//m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3(0.f, -0.01f, 0.f);
+	//m_ExtendedUpdateSetting.mStickToFloorStepDown = { 0.f, -0.5f, 0.f };
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = { 0.f, -0.2f, 0.f };
+	m_ExtendedUpdateSetting.mWalkStairsStepUp = Vec3{ 0.f, 0.05f, 0.f };
+	m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3{ 0.f, 0.1f, 0.f }; // 아래로 내려갈대 여유
+
+	m_ExtendedUpdateSetting.mWalkStairsMinStepForward = 0.005f;
+	m_ExtendedUpdateSetting.mWalkStairsStepForwardTest = 0.1f;
+	m_ExtendedUpdateSetting.mWalkStairsCosAngleForwardContact = 0.99f; // 각도 허용치
+	
+
 
 	return S_OK;
 }
@@ -159,6 +170,13 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	RVec3 StartPos = LoadVec3(vStartPos);
 	RVec3 EndPos = LoadVec3(vEndPos);
 
+#ifdef _DEBUG
+	_float3 vSP{}, vEP{};
+	XMStoreFloat3(&vSP, vStartPos);
+	XMStoreFloat3(&vEP, vEndPos);
+	m_RayPoint.push_back(make_pair(vSP, vEP));
+#endif
+
 	_vector vDir = vEndPos - vStartPos;
 
 	RRayCast ray(StartPos, (EndPos - StartPos));
@@ -179,6 +197,11 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 #ifdef _DEBUG
 void CPhysicsManager::Render()
 {
+	// Ray Render
+	for (size_t i = 0; i < m_RayPoint.size(); ++i)
+		DrawRay(XMLoadFloat3(&m_RayPoint[i].first), XMLoadFloat3(&m_RayPoint[i].second));
+	m_RayPoint.clear();
+
 	if (false == m_isRenderAll)
 		return;
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
@@ -189,6 +212,12 @@ void CPhysicsManager::DrawShape(const Shape* pShape, RMat44 Matrix)
 {
 	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
 	pShape->Draw(m_pDebugRenderer, Matrix, Vec3(1.f, 1.f, 1.f), Color(0.f, 255.f, 0.f, 1.f), false, true);
+	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
+}
+void CPhysicsManager::DrawRay(const _fvector& vStartPos, const _fvector& vEndPos)
+{
+	static_cast<CDebugRender*>(m_pDebugRenderer)->Begin();
+	m_pDebugRenderer->DrawLine(LoadVec3(vStartPos), LoadVec3(vEndPos), Color(255.f, 0.f, 0.f, 1.f));
 	static_cast<CDebugRender*>(m_pDebugRenderer)->End();
 }
 #endif

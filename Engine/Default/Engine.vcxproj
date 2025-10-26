@@ -79,7 +79,9 @@
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
-    <ClInclude Include="..\public\ShaderFilter.h" />
+    <ClInclude Include="..\public\RCS_Manager.h" />
+    <ClInclude Include="..\public\RendererCS.h" />
+    <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\Public\State.h" />
     <ClInclude Include="..\Public\StateMachine.h" />
@@ -171,7 +173,9 @@
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
-    <ClCompile Include="..\private\ShaderFilter.cpp" />
+    <ClCompile Include="..\private\RCS_Manager.cpp" />
+    <ClCompile Include="..\private\RendererCS.cpp" />
+    <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
     <ClCompile Include="..\Private\StateMachine.cpp" />
@@ -208,11 +212,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />
+    <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Cell.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>
