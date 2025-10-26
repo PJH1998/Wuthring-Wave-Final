@@ -225,7 +225,7 @@ void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 #pragma endregion
 
 #pragma region FONT_MANAGER
-HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _tchar* pFilePath)
+HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePath)
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath);
 }

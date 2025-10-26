@@ -60,7 +60,6 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(70.f);
 	VirtualSetting.mShape = m_pShape;
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);
-
 	//VirtualSetting.mInnerBodyShape = BodyShape;
 	//VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
 	

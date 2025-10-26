@@ -321,7 +321,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../ThirdPartyLib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11d.lib;DirectXTKd.lib;ImGuiLib_d.lib;Jolt_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11d.lib;DirectXTKd.lib;ImGuiLib_d.lib;Jolt_d.lib;freetyped.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cd $(ProjectDir)../../
@@ -356,7 +356,7 @@ call Copy_D.bat
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <AdditionalLibraryDirectories>../ThirdPartyLib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11.lib;DirectXTK.lib;ImGuiLib.lib;Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxguid.lib;dinput8.lib;fmod_vc.lib;Effects11.lib;DirectXTK.lib;ImGuiLib.lib;Jolt.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>cd $(ProjectDir)../../
