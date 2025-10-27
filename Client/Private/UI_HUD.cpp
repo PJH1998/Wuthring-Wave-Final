@@ -637,19 +637,62 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
     static _bool isFirstUpdate = true;
+    
+    // 아래것들 정의해주고 넘겨줘야 함
+    // 에디터에서 만들 때 그만큼의 갯수 만들어주는 것 잊지말기
+    _float4     vSingleColor = { };
+    _bool       isSingleVisible = {};
+    _float      fSingleHeight = {};
+
+    _float4     vBackColor = { };
+    _bool       isBackVisible = {};
+    _float      fBackHeight = {};
+
 
     if (isFirstUpdate)
     {
         isFirstUpdate = false;
-        // 에너지바 캐릭터에 맞는걸로 교체
+
+        // 1. 에너지바 캐릭터에 맞는걸로 교체, 색상도 교체
 
 
+        // 2. 꿀렁이는 로직 생각해서 컨테이너로 만들던 뭐던 어케 만들어보기
 
+        
+        // 3. 반드시!!!!! 인스턴스 갯수, variant flag 제대로 준 것 맞는지 확인하기
+
+
+        // 4. 높이 조절을 위해 셰이더단에서 직접 픽셀의 조정이 필요 = 간단한 pixel shader 제작 필요
     }
 
+    vector<_float4x4> vecVariantMat = {};
+    vecVariantMat.resize(41);
+    vector<_float4x4> vecVariantBackMat = {};
+    vecVariantMat.resize(41);
+
+    for (uint i = 0; i < vecVariantMat.size(); i++)
+    {
+        *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor;
+        vecVariantMat[i]._21 = static_cast<_float>(isSingleVisible);
+        vecVariantMat[i]._22 = fSingleHeight;
+    }
+    for (uint i = 0; i < vecVariantBackMat.size(); i++)
+    {
+        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor;
+        vecVariantBackMat[i]._21 = static_cast<_float>(isBackVisible);
+        vecVariantBackMat[i]._22 = fBackHeight;
+    }
+
+    vecVariantMat.insert(vecVariantMat.end(),           // combine two vector. -> size = 41 + 41 = 82
+        make_move_iterator(vecVariantBackMat.begin()),
+        make_move_iterator(vecVariantBackMat.end()));
 
 
-
+    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+        vecVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+        true
+    };
 
 #ifdef KSTA_UI_ENERGYBARTEST
 

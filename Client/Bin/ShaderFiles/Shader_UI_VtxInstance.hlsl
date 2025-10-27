@@ -1,8 +1,8 @@
 // UI용
 #include "Engine_Shader_State.hlsli"
 
-#define PI      3.14159265359f
-
+#define PI          3.14159265359f
+#define _BOOL(x)    ((x) != 0.0f)
 // ==============================
 // * Global Variables
 // ==============================
@@ -746,7 +746,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // [VISIBLE] [HEIGHT] -
             // ==============================
             vector vColor = In.mExtra0.wyzw;
-            bool isVisible = In.mExtra1.x != 0.f;
+            bool isVisible = _BOOL(In.mExtra1.x);
             float fHeight = In.mExtra1.y;
             // border는 다 같은 이미지 여러 개 쓸 테니 여기 말고 전역으로 받는게 좋을 듯
             

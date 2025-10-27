@@ -322,7 +322,7 @@ void CLevel_UI::Update_Hierarchy()
     // 留??꾨젅?꾨쭏??踰≫꽣瑜??듯빐 遺紐?援ъ“瑜??뚯븙?섍퀬,
     // 洹멸구 而⑦뀒?대꼫???댁? ?? ?섏씠?대씪?ㅼ뿉???쒖떆?
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
+    ImGuiTreeNodeFlags flags = 0;// ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
 
     // ?섏씠?대씪??硫붿씤
     for (auto& ui : m_vecCustomUIs)
