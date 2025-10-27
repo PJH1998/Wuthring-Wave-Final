@@ -8,12 +8,13 @@ struct RampEdit : public ImCurveEdit::Delegate
 	RampEdit()
 	{
 		mPoints[0].push_back(ImVec2(20.f, 0.5f));
+		mPoints[0].push_back(ImVec2(30.f, 0.3f));
 		//mPts[0][0] = ImVec2(20.f, 0.5f);
 		//mPts[0][1] = ImVec2(20.f, 0.6f);
 		//mPts[0][2] = ImVec2(25.f, 0.2f);
 		//mPts[0][3] = ImVec2(70.f, 0.4f);
 		//mPts[0][4] = ImVec2(120.f, 1.f);
-		mPointCount[0] = 1;
+		mPointCount[0] = 2;
 		
 		//mPts[1][0] = ImVec2(-50.f, 0.2f);
 		//mPts[1][1] = ImVec2(33.f, 0.7f);
@@ -45,7 +46,6 @@ struct RampEdit : public ImCurveEdit::Delegate
 	size_t GetPointCount(size_t curveIndex)
 	{
 		return mPoints[curveIndex].size();
-		//return mPointCount[curveIndex];
 	}
 
 	uint32_t GetCurveColor(size_t curveIndex)
@@ -56,7 +56,6 @@ struct RampEdit : public ImCurveEdit::Delegate
 	ImVec2* GetPoints(size_t curveIndex)
 	{
 		return mPoints[curveIndex].data();
-		//return mPts[curveIndex];
 	}
 	virtual ImCurveEdit::CurveType GetCurveType(size_t curveIndex) const { return ImCurveEdit::CurveSmooth; }
 	virtual int EditPoint(size_t curveIndex, int pointIndex, ImVec2 value)
@@ -72,9 +71,6 @@ struct RampEdit : public ImCurveEdit::Delegate
 	}
 	virtual void AddPoint(size_t curveIndex, ImVec2 value)
 	{
-		//if (mPointCount[curveIndex] >= 8)
-		//	return;
-		//mPts[curveIndex][mPointCount[curveIndex]++] = value;
 		mPoints[curveIndex].push_back(value);
 		SortValues(curveIndex);
 	}
@@ -82,12 +78,15 @@ struct RampEdit : public ImCurveEdit::Delegate
 	virtual ImVec2& GetMin() { return mMin; }
 	virtual unsigned int GetBackgroundColor() { return 0; }
 
-	ImVec2		mPts[3][8];
+	//ImVec2		mPts[3][8];
 	vector<ImVec2>	mPoints[3];
 	size_t			mPointCount[3];
 	_bool			mbVisible[3];
 	ImVec2		mMin;
 	ImVec2		mMax;
+
+	_int			miSelectCurve = { -1 };
+	_int			miSelectPoint = { -1 };
 
 private:
 	void SortValues(size_t curveIndex)
@@ -157,7 +156,7 @@ public:
 
 	virtual void					Add(_int iType) override;
 	virtual const _char*		GetItemTypeName(_int iIndex) const override;
-	virtual size_t					GetCustomHeight(_int iIndex) { return m_Items[iIndex].isExpanded ? 300 : 0; }
+	virtual size_t					GetCustomHeight(_int iIndex) { return m_iSelectedEntry == iIndex && m_Items[iIndex].isExpanded ? 300 : 0; }
 
 	void							CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect);
 	void							CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& clippingRect);
@@ -166,18 +165,19 @@ public:
 	HRESULT							Initialize();
 	void								Update(_float fTimeDelta);
 
+#pragma region Private Varation
 private:
-	class CGameInstance*		m_pGameInstance = { nullptr };
+	class CGameInstance* m_pGameInstance = { nullptr };
 	ImGuiIO							io;
-	//RampEdit						m_RampEdit;
+
 	// Custom Draw Label
-	const _char*						m_pCustomDrawLabel[3] = {"Translation", "Rotation", "Scale"};
+	const _char* m_pCustomDrawLabel[3] = { "Translation", "Rotation", "Scale" };
 
 	// Sequence Option
 	_int								m_iSequenceOption = {};
 
 	// DrawList
-	ImDrawList*						m_pDrawList = { nullptr };
+	ImDrawList* m_pDrawList = { nullptr };
 
 	// Canvas
 	_bool								m_isExpanded = { true };
@@ -220,10 +220,10 @@ private:
 	_int								m_iPanningViewFrame = {};
 
 	// Entry
-	_int								m_iSelectedEntry = {-1};						// Select Entry(항목)
+	_int								m_iSelectedEntry = { -1 };						// Select Entry(항목)
 	_int								m_iDelEntry = { -1 };
 	_int								m_iDupEntry = { -1 };
-	
+
 	// PopUp
 	_bool								m_isPopUp = { false };
 
@@ -248,9 +248,14 @@ private:
 	_bool								m_isSizingLeftBar = { false };
 	_float								m_fMinBarWidth = {};
 
+#pragma endregion
+
 private:
 	// Selectable Item
 	void								Selectable_Item();
+	void								SetUp_Point(SEQUENCE_ITEM& item);
+	void								SetUp_Camera(SEQUENCE_ITEM& item);
+
 	void								Sorting_Item();
 	
 	// GUI

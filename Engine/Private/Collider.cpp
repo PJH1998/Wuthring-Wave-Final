@@ -49,8 +49,6 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	COLLIDER_DESC* pDesc = static_cast<COLLIDER_DESC*>(pArg);
 	m_iCollisionLayer = pDesc->iLayer;
 
-	RefConst<Shape> BodyShape;
-
 	// Create Shape
 	using namespace JPH;
 	
@@ -70,8 +68,8 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	VirtualSetting.mPredictiveContactDistance = 0.02f;							// 미리 충돌 감지하는 범위
 	VirtualSetting.mEnhancedInternalEdgeRemoval = true;					// 각진 부분 부드럽게
 	
-	//VirtualSetting.mInnerBodyShape = BodyShape;
-	//VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
+	VirtualSetting.mInnerBodyShape = m_pShape;
+	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
 	
 	// Create CharacterVirtual
 	m_tCollisionData.pComponent = this;

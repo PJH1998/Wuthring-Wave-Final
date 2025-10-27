@@ -194,10 +194,10 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
 	// 회전 보간
 	_float fLerp = {};
-	if (fDot < cos(XMConvertToRadians(40.f)))
+	if (fDot < cos(XMConvertToRadians(25.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);
 	else
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f * (cos(XMConvertToRadians(40.f) - fDot)));
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 5.f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 
