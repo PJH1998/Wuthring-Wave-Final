@@ -1,7 +1,8 @@
-﻿#include "Editorpch.h"
+﻿#include "ClientPch.h"
 #include "Effect_Prefab.h"
 #include "Particle.h"
 #include "Effect_Mesh.h"
+
 #include "Trail_Mesh.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -188,12 +189,12 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
     }
 }
 
-//void CEffect_Prefab::Root_Test()
-//{
-//   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
-//
-//   m_pRootMatirx = pModel->Get_BoneMatrixPtr("Bone_Skirt051_M");
-//}
+void CEffect_Prefab::Root_Test()
+{
+   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
+
+   m_pRootMatirx = pModel->Get_BoneMatrixPtr("Bone_Skirt051_M");
+}
 
 _int CEffect_Prefab::Get_Children_Count()
 {

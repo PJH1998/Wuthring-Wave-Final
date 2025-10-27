@@ -154,6 +154,21 @@
     <Filter Include="03. GameObject\Weapon\Augusta">
       <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect">
+      <UniqueIdentifier>{0bd0ad0c-ce59-4ec2-bbee-d7fe62618a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab">
+      <UniqueIdentifier>{7de5030d-0b84-4396-bbb5-777f1154b90a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Mesh">
+      <UniqueIdentifier>{b39dbc16-bc30-4fa1-aea8-98a87591433d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Particle">
+      <UniqueIdentifier>{a603c722-6de8-4dcb-88e8-22769541478c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\TrailMesh">
+      <UniqueIdentifier>{b989324b-06ed-4706-a874-5a898d9fca00}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -345,6 +360,18 @@
     <ClInclude Include="..\Public\Weapon.h">
       <Filter>03. GameObject\Weapon</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Mesh.h">
+      <Filter>03. GameObject\Effect\Prefab\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -516,6 +543,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\Weapon.cpp">
       <Filter>03. GameObject\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Prefab.cpp">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Mesh.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

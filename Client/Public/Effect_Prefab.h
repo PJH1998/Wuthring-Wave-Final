@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "GameObject.h"
 
-NS_BEGIN(Editor)
+NS_BEGIN(Client)
 
 class CEffect_Prefab : public CGameObject
 {
@@ -39,13 +39,15 @@ public:
 	void Remove_Children(_wstring& ChildrenTag);
 
 public:
-	//void Root_Test();
+	void Root_Test();
 
 public:
+	//툴에서 쓰던것들, 없어도 될거 같으면 지워주자
 	_int Get_Children_Count();
 	_wstring Get_Children_Tag(_int iIndex);
 
 	CGameObject* Get_Children(_wstring ChildrenTag);
+
 	_wstring	Get_MyTag() {
 		return m_strMyTag;
 	};
@@ -69,7 +71,6 @@ private:
 
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	vector<FRAME_DESC>					 m_vFrames;
-	//map<const _wstring, float>				m_ChildrenDesc; 
 
 public:
 	static CEffect_Prefab* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

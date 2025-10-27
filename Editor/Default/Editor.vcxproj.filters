@@ -147,7 +147,7 @@
     </Filter>
     <Filter Include="01. Level\Effect\Spectrum_Controller\Spectrum">
       <UniqueIdentifier>{dc01c551-693d-4efd-b197-55a3163b4754}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="03. GameObject\Dummy\Target">
       <UniqueIdentifier>{022955cb-36e1-47b4-90d3-440b456680b3}</UniqueIdentifier>
     </Filter>
@@ -188,9 +188,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Level_Shader.h">
       <Filter>01. Level\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Level_Effect.h">
-      <Filter>01. Level\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Map.h">
       <Filter>01. Level\Map</Filter>
@@ -321,9 +318,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Spectrum.h">
       <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Effect.h">
+      <Filter>01. Level\Effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -465,7 +465,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Spectrum.cpp">
       <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\EditDummy_Target.cpp">
       <Filter>03. GameObject\Dummy\Target</Filter>
     </ClCompile>
