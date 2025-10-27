@@ -20,6 +20,15 @@ ID3D11Texture2D* CTarget_Manager::Get_RT_Resource(const _wstring& strTargetTag)
 	return pRenderTarget->Get_Resource();
 }
 
+ID3D11ShaderResourceView* CTarget_Manager::Get_RT_SRV(const _wstring& strTargetTag)
+{
+	CRenderTarget* pRenderTarget = Find_RenderTarget(strTargetTag);
+	if (nullptr == pRenderTarget)
+		return nullptr;
+
+	return pRenderTarget->Get_SRV();
+}
+
 #ifdef _DEBUG
 ID3D11ShaderResourceView* CTarget_Manager::Get_Debug_RT_Resource(const _wstring& strTargetTag)
 {
@@ -78,6 +87,7 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencil
 		nullptr
 	};
 	m_pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
+	m_pContext->CSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
 
 	list<CRenderTarget*>* pMRTs = Find_MRT(strMRTTag);
 	if (nullptr == pMRTs)

@@ -1,3 +1,4 @@
+
 #pragma once
 #include "Base.h"
 
@@ -8,41 +9,45 @@ using InputCondition = function<bool()>;
 class ENGINE_DLL CState abstract : public CBase
 {
 public:
-    // ÃÊ±â¿¡ µî·ÏÇØ¾ß ÇÏ´Â Á¤º¸µé.
-    typedef struct tagStateData
+    typedef struct tagAnimData
     {
-        class CGameObject* pOwner = { nullptr };
         _string strAnimName = {};
         _float fSpeed = {};
-        _float fExitTrackPosition = {};
-        _float fRootMotionRate = { 0.1f };
+        _float fEscapeTrackPosition = {};
+        _float fRootMotionRate = { 1.f };
         _bool IsRootMotion = { true };
-    }STATE_DATA;
+        _bool IsRootMotionRotate = { true };
+        _bool IsRootMotionTranslate = { true };
+    }ANIM_DATA;
+
 
 protected:
     explicit CState() = default;
     virtual ~CState() = default;
 
 public:
-    virtual HRESULT Initialize(const STATE_DATA& StateData);
-    virtual void OnEnter(); // µé¾î°¬À» ½Ã.
+    virtual HRESULT Initialize(class CGameObject* pOwner);
+    virtual void OnEnter();
     virtual void OnUpdate(_float fTimeDelta); // Update
-    virtual void OnExit(); // Exit ½Ã
-    virtual void Change_State(class CStateMachine* pStateMachine, const _string& strStateName);
+    virtual void OnExit(); // Exit
+
+    // HSM: ê³„ì¸µì  State ì „í™˜ (Category + SubState)
+    virtual void Change_State(class CStateMachine* pStateMachine, _uint iCategory, _uint iSubState);
+    
     
 
-public:
-    const string& Check_Transition(class CStateMachine* pStateMachine);
 
 protected:
-    void Add_Transition(const _string& strStateName, InputCondition condition);
-
-protected:
-    STATE_DATA m_StateData = {};
     _float m_fTrackPosition = {};
     _bool m_IsAnimationEnd = { false };
-    vector<pair<_string, InputCondition>> m_InputTransitions;
-   
+    _uint m_iCurrentAnimIdx = {};
+    // í˜„ì¬ ì¬ìƒ ì¤‘ì¸ ì• ë‹ˆë©”ì´ì…˜
+    map<_uint, ANIM_DATA> m_Animations;  // ì´ Stateê°€ ì‚¬ìš©í•˜ëŠ” ì• ë‹ˆë©”ì´ì…˜ë“¤
+
+protected:
+    virtual void Handle_Input() {};
+    _bool Is_EscapePossible();
+    void Add_Animations(_uint iType, const _string& strAnimName, _float fSpeed, _float fEscapeTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 
 public:
     virtual void Free() override;

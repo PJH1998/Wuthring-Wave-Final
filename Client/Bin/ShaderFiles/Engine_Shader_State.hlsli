@@ -1,3 +1,7 @@
+
+#ifndef Engine_Shader_State_h__
+#define Engine_Shader_State_h__
+
 sampler DefaultSampler = sampler_state
 {
     filter = min_mag_mip_linear;
@@ -29,8 +33,11 @@ sampler PointClampSampler = sampler_state
 SamplerComparisonState ShadowSampler
 {
     filter = comparison_min_mag_mip_linear;
+    AddressU = clamp;
+    AddressV = clamp;
     ComparisonFunc = LESS_EQUAL;
 };
+
 // Rasterize 
 RasterizerState RS_Default
 {
@@ -114,3 +121,5 @@ BlendState BS_FXBlend
     DestBlend = DEST_ALPHA;
     BlendOp = Add;
 };
+
+#endif //Engine_Shader_State_h__

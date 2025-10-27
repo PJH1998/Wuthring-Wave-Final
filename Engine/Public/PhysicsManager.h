@@ -59,6 +59,7 @@ public:
 #ifdef _DEBUG
 	void				Render();
 	void				DrawShape(const Shape* pShape, RMat44 Matrix);
+	void				DrawRay(const _fvector& vStartPos, const _fvector& vEndPos);
 #endif
 
 	_bool				Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
@@ -98,6 +99,7 @@ private:
 	DebugRenderer*	m_pDebugRenderer = { nullptr };
 	BodyManager::DrawSettings m_DrawSetting;
 	_bool					m_isRenderAll = { false };
+	vector<pair<_float3, _float3>>	m_RayPoint;
 #endif
 
 public:

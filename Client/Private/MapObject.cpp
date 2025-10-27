@@ -99,7 +99,7 @@ void CMapObject::Render()
 void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-
+	
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
 	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
@@ -133,6 +133,7 @@ void CMapObject::Ready_Component(void* pArg)
 	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 	//RigidbodyDesc.pModel = m_pModelCom;
 	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
 	RigidbodyDesc.eShape = SHAPE::MESH;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	RigidbodyDesc.eType = EMotionType::Static;

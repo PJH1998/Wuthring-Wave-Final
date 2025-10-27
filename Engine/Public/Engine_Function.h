@@ -97,16 +97,12 @@ namespace Engine
 #ifdef _DEBUG
 	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
 	{
-		// 異쒕젰李쎌뿉??Debug ?뺤씤 ?섍린.
-		
 		_wstring strDebug = strPrePix + L" : " +  to_wstring(fVector.x) + L", " + to_wstring(fVector.y) + L", " + to_wstring(fVector.z) + L", " + to_wstring(fVector.w) + L"\n";
 		OutputDebugString(strDebug.c_str());
 	}
 
 	inline void OutPutDebugFloat(_wstring strPrePix, _float fValue)
 	{
-		// 異쒕젰李쎌뿉??Debug ?뺤씤 ?섍린.
-
 		_wstring strDebug = strPrePix + L" : " + to_wstring(fValue) + L"\n";
 		OutputDebugString(strDebug.c_str());
 	}

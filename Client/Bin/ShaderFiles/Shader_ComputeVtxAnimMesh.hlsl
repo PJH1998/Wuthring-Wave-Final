@@ -48,7 +48,6 @@ StructuredBuffer<GPUKeyFrame> g_AllKeyframes : register(t0);
 StructuredBuffer<AnimInfo> g_AllAnimInfos : register(t1);
 StructuredBuffer<GPUChannelInfo> g_ChannelInfos : register(t2);
 
-
 // 출력(Output) 버퍼 - 이제 '로컬' 행렬을 출력합니다.
 RWStructuredBuffer<matrix_rm> g_OutLocalMatrices : register(u0);
 
@@ -133,6 +132,34 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
 	
     return m;
 }
+
+//matrix matrix_rmFromSQT(float4 s, float4 q, float4 t)
+//{
+//    matrix_rm m;
+//    float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+
+//    m._11 = s.x * (1 - 2 * qy * qy - 2 * qz * qz);
+//    m._12 = s.x * (2 * qx * qy + 2 * qw * qz);
+//    m._13 = s.x * (2 * qx * qz - 2 * qw * qy);
+//    m._14 = 0;
+
+//    m._21 = s.y * (2 * qx * qy - 2 * qw * qz);
+//    m._22 = s.y * (1 - 2 * qx * qx - 2 * qz * qz);
+//    m._23 = s.y * (2 * qy * qz + 2 * qw * qx);
+//    m._24 = 0;
+
+//    m._31 = s.z * (2 * qx * qz + 2 * qw * qy);
+//    m._32 = s.z * (2 * qy * qz - 2 * qw * qx);
+//    m._33 = s.z * (1 - 2 * qx * qx - 2 * qy * qy);
+//    m._34 = 0;
+
+//    m._41 = t.x;
+//    m._42 = t.y;
+//    m._43 = t.z;
+//    m._44 = 1;
+	
+//    return m;
+//}
 
 matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
@@ -402,10 +429,10 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
         
         // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
-        float4 finalScale = actionSRT.scale * ribbonSRT.scale;
-        float4 finalRotation = mul_quaternion(actionSRT.rotation, ribbonSRT.rotation);
-        float4 finalTranslation = actionSRT.translation +
-                                 (ribbonSRT.translation - float4(0, 0, 0, 1)); // delta 적용
+        float4 finalScale = ribbonSRT.scale * actionSRT.scale;
+        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
+        float4 finalTranslation = ribbonSRT.translation +
+                                 (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
         result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
     }
     else

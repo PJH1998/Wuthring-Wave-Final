@@ -1,6 +1,7 @@
 #include "Engine_Shader_Defines.hlsli"
+#include "Engine_Shader_Function.hlsli"
 
-matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+//matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 float4 g_Color = 1.f;
 
 struct VS_IN

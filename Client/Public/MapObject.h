@@ -11,11 +11,15 @@ NS_BEGIN(Client)
 class CMapObject final: public CStaticObject
 {
 public:
+	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, END };
+
 	typedef struct tagMapLoad
 	{
+
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };
+		OBJECTTYPE eObjectType;
 	}MAP_LOAD;
 
 private:

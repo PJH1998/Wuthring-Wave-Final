@@ -20,10 +20,13 @@ public:
 	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
 #pragma endregion
 
-
+#pragma region Factory
+	void							Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix);
+#pragma endregion
 
 private:
 	class		CParser*		m_pParser = { nullptr };
+	class		CFactory*	m_pFactory = { nullptr };
 
 public:
 	virtual		void	Free() override;

@@ -2,14 +2,15 @@
 #include "Camera.h"
 
 NS_BEGIN(Engine)
-class CTransform;
-class CCollider;
+class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
 
 class CSpringCamera final : public CCamera
 {
+public:
+	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, CUTSCENE };
 private:
 	explicit CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CSpringCamera(const CSpringCamera& Prototype);
@@ -26,12 +27,32 @@ public:
 	// 목표 Distance, 도달 시간
 	void							Use_Spring(_float fDestination, _float fDuration)
 	{
-		if (true == m_isSpring)
+		if (CAMERA_STATE::SPRING == m_eCameraState)
 			return;
 		m_fDestination = fDestination;
 		m_fSpringDuration = fDuration;
-		m_isSpring = true;
+		m_eCameraState = CAMERA_STATE::SPRING;
 	}
+	// Lock-On
+	void							Lock_On()
+	{
+		if (CAMERA_STATE::LOCKON == m_eCameraState)
+		{
+			m_eCameraState = CAMERA_STATE::TARGET;
+			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		}
+		else if (CAMERA_STATE::TARGET == m_eCameraState)
+		{
+			m_eCameraState = CAMERA_STATE::LOCKON;
+			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
+		}
+	}
+
+public:
+	_float3 Get_TargetPos() { return m_vTargetPos; }
+	_float3	Get_LockOnVector(class CTransform* pTransform);
+	_vector Get_LookVector_NoPitch();
+	_vector Get_RightVector_NoPitch();
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -42,37 +63,60 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 
+	void							OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
 private:
-	CCollider*					m_pColliderCom = { nullptr };
+	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
+	_float4						m_vLookPosition = {};
+	// Detect Collider
+	CRigidbody*				m_pRigidbodyCom = { nullptr };
+
 	_float4						m_vTargetPosition = {};		// Target Pos
-	_float4						m_vPrePosition = {};			// PrePosition
-	_float4						m_vCurrentPosition = {};		// Current CamPos
 	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
 
 	// Distance Lerp
 	_float							m_fFixedDistance = {};
 	_float							m_fLerpSpeed = {};
+	_float							m_fMinDistance = {};
 
 	// Spring
-	_bool							m_isSpring = { false };
 	_float							m_fStiffness = {};		// Spring Force
 	_float							m_fDestination = {};	// Spring Destination
 	_float							m_fSpringDuration = {};
 
+	// Lock-On
+	vector<CTransform*>		m_TargetTransforms;
+	CTransform*				m_pTargetTransform = { nullptr };
+	_float					m_fLockOnOffsetY = {};
+
+	_float3					m_vTargetPos = {};
+
 private:
+	// Default
 	void							Lerp_Distance(_float fTimeDelta);
 	void							Mouse_Scroll(_float fTimeDelta);
+
+	// Spring
 	void							Spring(_float fTimeDelta);
+
+	// Target
 	void							Compute_CamPos();
 	void							Check_Ray();
 
+	// LockOn
+	void							Lerp_Move(_float fTimeDelta);				// Quat Lerp
+	void							Sorting_Target();								// Target Transforms Sort (Distance Less)
+	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
+	void							Dynamic_Distance();
+
+	
 private:
 	void							Ready_Component();
 
 public:
 	static		CSpringCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject*				Clone(void* pArg) override;
-	virtual		void							Free() override;
+	virtual		CGameObject*		Clone(void* pArg) override;
+	virtual		void					Free() override;
 };
 
 NS_END
