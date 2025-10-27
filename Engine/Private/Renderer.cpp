@@ -757,7 +757,7 @@ HRESULT CRenderer::Ready_RCS()
 {
 #pragma region SSAO_RCS
 	CRendererCS::RCS_DESC RCSDesc = {};
-	RCSDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader.hlsl");
+	RCSDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
 	RCSDesc.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
 	RCSDesc.strEntryPoint = "SSAO";
 	RCSDesc.iWidth = m_iWinSizeX;
@@ -785,7 +785,7 @@ HRESULT CRenderer::Ready_RCS()
 	
 #pragma region SSAO_BLUR_RCS
 	CRendererCS::RCS_DESC BlurDesc = {};
-	BlurDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader.hlsl");
+	BlurDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
 	BlurDesc.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
 	BlurDesc.strEntryPoint = "SSAO_BLUR";
 	BlurDesc.iWidth = m_iWinSizeX;
@@ -809,7 +809,25 @@ HRESULT CRenderer::Ready_RCS()
 
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
 		CRASH("Failed Add_SRVData");
+#pragma endregion
 
+#pragma region GAUSSIAN BLUR
+	CRendererCS::RCS_DESC GaussianRCS = {};
+	GaussianRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Blur.hlsl");
+	GaussianRCS.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	GaussianRCS.strEntryPoint = "GaussianBlur";
+	GaussianRCS.iWidth = m_iWinSizeX;
+	GaussianRCS.iHeight = m_iWinSizeY;
+	GaussianRCS.fDefinitionX = 8.f;
+	GaussianRCS.fDefinitionY = 8.f;
+	GaussianRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	GaussianRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
+
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR"), &GaussianRCS)))
+		CRASH("Failed Add RCS_SSAO");
+
+	if (FAILED(m_pGameInstance->Setting_UAV_Data(TEXT("RCS_GAUSSIAN_BLUR"), "OutputTexture")))
+		CRASH("Failed Setting_UAV_Data");
 #pragma endregion
 
 	return S_OK;

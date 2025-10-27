@@ -216,7 +216,8 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSAO.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Cell.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>

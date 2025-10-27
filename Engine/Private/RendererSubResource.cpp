@@ -21,7 +21,7 @@ HRESULT CRendererSubResource::Initialize()
     m_fRadius = 10.f;
     m_fMaxDistance = 50.f;
 
-    m_fSSAO_MinDepthDistance = 5.f;
+    m_fSSAO_MinDepthDistance = 10.f;
 
     m_vFogDepthDistance = _float2(1000.f, 5000.f);
     m_vFogHeightDistance = _float2(0.f, 100.f);
