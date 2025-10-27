@@ -4,6 +4,7 @@
 NS_BEGIN(Engine)
 class CModel;
 class CComputeShader;
+class CTransform;
 
 class ENGINE_DLL CAnimMachine final : public CComponent
 {
@@ -28,7 +29,7 @@ public:
 	//void Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex);
 	void Handle_Input(CModel* pModelCom, _uint* pState,_string& strAnimTag, _float fTargetTrackPos = 0.f);
 	void Update(CModel* pModelCom, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
-	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom,_uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
+	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	
 	void Reset();
 

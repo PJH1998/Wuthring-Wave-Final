@@ -46,14 +46,15 @@ void CMonsterTest::Priority_Update(_float fTimeDelta)
 void CMonsterTest::Update(_float fTimeDelta)
 {
 	// 1. 행동트리로 상태 갱신
-	m_pBehaviorTreeCom->tick(this);
+	//m_pBehaviorTreeCom->tick(this);
 
 	//for(auto& Pair : m_PartObjects)
 	//	Pair.second->Update(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, &m_iState, m_isAnimationFinished, fTimeDelta);
-	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 
 	//_vector vVelocity = m_pTransformCom->Get_Velocity();
 	//m_pColliderCom->Update(vVelocity / fTimeDelta);

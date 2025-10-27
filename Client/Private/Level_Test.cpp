@@ -115,8 +115,8 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
     MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
     MobDesc.fSpeedPerSec = 10.f;
-    MobDesc.vInitPosition = _float3(0.f, 0.f, 0.f);
-    MobDesc.pAnimationTag = "Born1";
+    MobDesc.vInitPosition = _float3(0.f, -8.f, 0.f);
+    MobDesc.pAnimationTag = "Stand1";
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
