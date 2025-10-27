@@ -69,11 +69,19 @@ void CCharacter::Render_Shadow()
 {
 }
 
-void CCharacter::Process_Input(CInputController* pInputControllerCom)
+void CCharacter::Set_InputController(CInputController* pInputControllerCom)
 {
     m_pInputControllerCom = pInputControllerCom;
     Safe_AddRef(m_pInputControllerCom);
 }
+
+void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
+{
+    m_pSpringCamera = pSpringCamera;
+    Safe_AddRef(pSpringCamera);
+}
+
+
 
 
 #pragma region STATE
@@ -409,7 +417,6 @@ void CCharacter::Free()
 {
     CActor::Free();
     Safe_Release(m_pInputControllerCom);
-    Safe_Release(m_pStateMachineCom);
     Safe_Release(m_pSpringCamera);
-    
+    Safe_Release(m_pStateMachineCom);
 }

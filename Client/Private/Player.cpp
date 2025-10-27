@@ -3,7 +3,9 @@
 #include "Character.h"
 #include "Augusta.h"
 #include "AugustaState_Enum.h"
+#include "SpringCamera.h"
 #include "PlayerFactory.h"
+
 
 #pragma region 기본 함수
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -43,16 +45,19 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Players(pDesc)))
         return E_FAIL;
 
-    // 3. Controller 공유
+    // 3. Camera 등록 및 InputController Key 등록.
+    CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
+    CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
+
+    // 4. 필요한 정보 공유
     for (auto& pCharacter : m_Characters)
     {
         if (nullptr != pCharacter)
-            pCharacter->Process_Input(m_pInputControllerCom);
+        {
+            pCharacter->Set_InputController(m_pInputControllerCom);
+            pCharacter->Set_SpringCamera(m_pSpringCamera);
+        }
     }
-
-
-    // 4. Factory 초기화
-    CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
     // 5. Transform 초기화
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
@@ -60,7 +65,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(pDesc->vScale);
 
     // 기본 NONE => 테스트용도 => 원래는 AUGUSTA로
-    m_iCurrentPlayerIdx = AUGUSTA;
+    m_iCurrentCharacterIdx = AUGUSTA;
 
 
     return S_OK;
@@ -74,12 +79,12 @@ void CPlayer::Priority_Update(_float fTimeDelta)
     m_pInputControllerCom->Update();
     
     // 2. 활성 캐릭터 업데이트
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Priority_Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
     // 3. Ensemble 캐릭터도 업데이트
     if (m_iEnsembleCharacterIdx != NONE && 
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
 
@@ -89,12 +94,12 @@ void CPlayer::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
     // 1. 현재 캐릭터 Update
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
         
     // 2. Ensemble 캐릭터도 업데이트
     if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
 }
 
@@ -103,15 +108,18 @@ void CPlayer::Late_Update(_float fTimeDelta)
     CGameObject::Late_Update(fTimeDelta);
 
     // 1. 캐릭터 업데이트
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Late_Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
     // 2. Ensemble 캐릭터 업데이트
     if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
 
-    // 3. 키입력에서 바꾸는 입력이 확인 되었으면?
+    // 3. Sync Transform;
+    Sync_Transform();
+
+    // 4. 키입력에서 바꾸는 입력이 확인 되었으면?
     Change_CharacterCheck();
 }
 void CPlayer::Render()
@@ -186,9 +194,9 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 
     
     // 1. 이전 캐릭터 비활성화
-    if (m_iCurrentPlayerIdx != CHARACTERTYPE::NONE)
+    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
     {
-        CCharacter* pPrevCharacter = m_Characters[m_iCurrentPlayerIdx];
+        CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
         CTransform* pPrevTransform = dynamic_cast<CTransform*>(
             pPrevCharacter->Get_Component(L"Com_Transform"));
 
@@ -217,7 +225,7 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
     // 4. 위치 동기화
     if (pNextTransform)
     {
-        if (m_iCurrentPlayerIdx == CHARACTERTYPE::NONE)
+        if (m_iCurrentCharacterIdx == CHARACTERTYPE::NONE)
         {
             // NONE에서 전환: Player Transform 사용
             if (m_pTransformCom)
@@ -239,8 +247,8 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
         pNextCollider->Sync_Position(pNextTransform);
 
     // 5. 인덱스 변경
-    m_iPrevPlayerIdx = m_iCurrentPlayerIdx;
-    m_iCurrentPlayerIdx = eNextCharacter;
+    m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
+    m_iCurrentCharacterIdx = eNextCharacter;
 
     // 6. Player Transform 업데이트
     if (m_pTransformCom && pNextTransform)
@@ -268,12 +276,12 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
     if (m_Characters[eNextCharacter] == nullptr) // 비어있다면?
         return;
 
-    if (m_iCurrentPlayerIdx == eNextCharacter) // 같은 캐릭터면?
+    if (m_iCurrentCharacterIdx == eNextCharacter) // 같은 캐릭터면?
         return;
 
     CCharacter* pCurrentCharacter = nullptr;
-    if (m_iCurrentPlayerIdx != CHARACTERTYPE::NONE)
-        pCurrentCharacter = m_Characters[m_iCurrentPlayerIdx];
+    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
+        pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
 
     // 1. 현재 캐릭터의 Ensemble Energy 체크
     _bool bUseEnsemble = false;
@@ -288,7 +296,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
     {
         // 이전 캐릭터를 다시 활성화 (스킬 사용 위해)
         pCurrentCharacter->SetActivate(true);
-        Ensemble_Skill(static_cast<CHARACTERTYPE>(m_iPrevPlayerIdx));
+        Ensemble_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
         pCurrentCharacter->Reset_EnsembleEnergy();
     }
 
@@ -296,10 +304,10 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
 
 void CPlayer::Sync_Transform()
 {
-    if (m_iCurrentPlayerIdx != TYPE_END)
+    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
     {
         CTransform* pTransform = dynamic_cast<CTransform*>(
-            m_Characters[m_iCurrentPlayerIdx]->Get_Component(L"Com_Transform"));
+            m_Characters[m_iCurrentCharacterIdx]->Get_Component(L"Com_Transform"));
         ASSERT_CRASH(pTransform);
         m_pTransformCom->Set_WorldMatrix(pTransform->Get_WorldMatrix());
     }
@@ -346,9 +354,9 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     }
 
     // 기본 0번 Augusta
-    //m_iCurrentPlayerIdx = CHARACTERTYPE::AUGUSTA;
+    //m_iCurrentCharacterIdx = CHARACTERTYPE::AUGUSTA;
     // 테스트로 None
-    m_iCurrentPlayerIdx = CHARACTERTYPE::NONE;
+    m_iCurrentCharacterIdx = CHARACTERTYPE::NONE;
 
     return S_OK;
 }
@@ -358,6 +366,8 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->eCurLevel)
         , pDesc->wStrInputControllerTag, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
         CRASH("Input Controller");
+
+
 
     return S_OK;
 }
@@ -395,5 +405,7 @@ void CPlayer::Free()
     for (auto& pPlayer : m_Characters)
         Safe_Release(pPlayer);
 
+    Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);
+    Safe_Release(m_pRigidbodyCom);
 }

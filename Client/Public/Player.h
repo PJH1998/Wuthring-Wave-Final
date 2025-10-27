@@ -70,9 +70,12 @@ public:
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
+	class CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CSpringCamera* m_pSpringCamera = { nullptr };
+	
 	LEVEL m_eCurLevel = { LEVEL::END };
-	_int m_iCurrentPlayerIdx = { CHARACTERTYPE::NONE };
-	_int m_iPrevPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
+	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iEnsembleCharacterIdx = { CHARACTERTYPE::NONE };
 
 

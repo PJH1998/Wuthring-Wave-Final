@@ -2,6 +2,7 @@
 #include "PlayerFactory.h"
 #include "Player.h"
 #include "InputController.h"
+#include "SpringCamera.h"
 
 void CPlayerFactory::Register_KeyInputs(CInputController* pInputControllerCom, CPlayer* pPlayer)
 {
@@ -25,4 +26,30 @@ void CPlayerFactory::Register_KeyInputs(CInputController* pInputControllerCom, C
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
+}
+
+void CPlayerFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, CPlayer* pPlayer, CGameInstance* pGameInstance, CSpringCamera** ppCamera)
+{
+    CSpringCamera::CAMERA_DESC CameraDesc{};
+    CameraDesc.fSpeedPerSec = 100.f;
+    CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    CameraDesc.fFovy = XMConvertToRadians(60.f);
+    CameraDesc.fNear = 0.1f;
+    CameraDesc.fFar = 5000.f;
+    CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+    CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+    CameraDesc.fMouseSensor = 0.004f;
+
+    CSpringCamera* pSpringCamera = dynamic_cast<CSpringCamera*>(pGameInstance->Clone_Prototype(ENUM_CLASS(ePrototypeLevel)
+        , TEXT("Prototype_GameObject_SpringCamera"), PROTOTYPE::GAMEOBJECT
+        , &CameraDesc));
+
+    ASSERT_CRASH(pSpringCamera);
+    *ppCamera = pSpringCamera;
+
+    // Camera µî·Ï.
+    pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), pSpringCamera);
+    Safe_AddRef(pSpringCamera);
+
+    pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
 }
