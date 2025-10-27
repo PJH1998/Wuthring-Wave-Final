@@ -3,6 +3,8 @@
 #include "Effect_Prefab.h"
 #include "Particle_Controller.h"
 #include "Mesh_Controller.h"
+#include "AnimationActor.h"
+#include "Model.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -323,6 +325,24 @@ void CEffect_Controller::Reset_TabInfo()
     m_IsTrailMesh = false;
 
 }
+
+void CEffect_Controller::Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc)
+{
+    if (nullptr == effectActorDesc.pAnimActor)
+    {
+        MSG_BOX("Anim Actor nullptr");
+        return;
+    }
+
+    // 있으면 정보를 채워준다.
+    m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
+    m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
+    m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
+    m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+
+}
+
+
 
 CEffect_Controller* CEffect_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
