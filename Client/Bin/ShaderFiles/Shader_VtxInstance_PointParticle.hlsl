@@ -72,7 +72,7 @@ struct GS_OUT
 [maxvertexcount(6)]
 void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 {
-    GS_OUT Out[4];
+    GS_OUT Out[4] = (GS_OUT[4]) 0;
     
     vector vRight, vUp, vLook;
     
@@ -93,18 +93,21 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     Out[1].vLifeTime = In[0].vLifeTime;
     Out[1].fPhase = In[0].fPhase;
     Out[1].fDelay = In[0].fDelay;
+
     
     Out[2].vPosition = mul(In[0].vPosition - vRight - vUp, matVP);
     Out[2].vTexcoord = float2(1.f, 1.f);
     Out[2].vLifeTime = In[0].vLifeTime;
     Out[2].fPhase = In[0].fPhase;
     Out[2].fDelay = In[0].fDelay;
+
     
     Out[3].vPosition = mul(In[0].vPosition + vRight - vUp, matVP);
     Out[3].vTexcoord = float2(0.f, 1.f);
     Out[3].vLifeTime = In[0].vLifeTime;    
     Out[3].fPhase = In[0].fPhase;
     Out[3].fDelay = In[0].fDelay;
+
     
     Vertices.Append(Out[0]);
     Vertices.Append(Out[1]);
@@ -120,7 +123,7 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 [maxvertexcount(6)]
 void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 {
-    GS_OUT Out[4];
+    GS_OUT Out[4] = (GS_OUT[4]) 0;
  
     vector vRight, vUp, vLook, vViewDir;
     

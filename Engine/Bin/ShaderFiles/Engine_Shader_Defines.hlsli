@@ -1,5 +1,4 @@
 #include "Engine_Shader_State.hlsli"
-#include "Engine_Shader_Function.hlsli"
 
 // Emissive ÃÖ¼ÒÄ¡
 float g_fEmissiveThreshold = 0.6f;
@@ -10,3 +9,8 @@ float g_fWeights[13] =
 };
 
 float g_fLUT_Size = 16.f;
+
+int g_iSampleSize = 8;
+
+float g_fSSAO_Radius = 15.f;
+float g_fSSAO_MaxDistance = 50.f;

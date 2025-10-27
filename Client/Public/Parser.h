@@ -15,6 +15,9 @@ public:
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
+private:
+	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
+
 public:
 	HRESULT						Initialize();
 

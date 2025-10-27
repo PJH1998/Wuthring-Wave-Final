@@ -70,6 +70,9 @@ struct PS_OUT_LIGHT
     float4 vDiffuse : SV_TARGET0;
     float4 vNormal : SV_TARGET1;
     float4 vDepth : SV_TARGET2;
+    float4 vEmissive : SV_TARGET3;
+    float4 vDistortion : SV_TARGET4;
+    float4 vMetallic : SV_TARGET5;
 };
 
 
@@ -112,6 +115,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
+    Out.vDepth.w = 1.f;
+    
     return Out;
 }
 
@@ -127,6 +132,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_ALPHA(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     Out.vDepth.z = 0.f;
+    
     Out.vDepth.w = 1.f;
     
     return Out;
@@ -144,6 +150,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     Out.vDiffuse *= float4(0.7f, 1.f, 0.7f, 1.f);
+    
     float3 vNormal;
     
     if(g_HasNormal)

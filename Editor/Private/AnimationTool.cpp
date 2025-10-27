@@ -227,7 +227,7 @@ void CAnimationTool::RenderUI_FromState()
         {
             static int iSelectedIndex = -1;
             _uint id = 0;
-
+#ifdef _DEBUG
             for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
             {
                 if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
@@ -237,6 +237,9 @@ void CAnimationTool::RenderUI_FromState()
                 }
                 id++;
             }
+#endif // _DEBUG
+
+
         }
         ImGui::EndChild();
     }
@@ -255,6 +258,7 @@ void CAnimationTool::RenderUI_ToState()
             static int iSelectedIndex = -1;
             _uint id = 0;
 
+#ifdef _DEBUG
             for (auto& stateName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
             {
                 if (ImGui::Selectable(stateName.c_str(), id == iSelectedIndex))
@@ -264,6 +268,9 @@ void CAnimationTool::RenderUI_ToState()
                 }
                 id++;
             }
+#endif // _DEBUG
+
+
         }
         ImGui::EndChild();
     }
@@ -311,12 +318,7 @@ void CAnimationTool::RenderUI_OptionState()
             static float fTrackPosition = { 0.f };
             ImGui::InputFloat("TrackPosition", &fTrackPosition, 0.f, 0.f, "%.2f");
 
-           
-
-            // 2. 함수 설정.
-            static char textBuffer[256] = "";
-            ImGui::InputText("Function Name", textBuffer, sizeof(textBuffer));
-
+            // 2. Add Translation 설정.
             _string strTransition = {};
             if (ImGui::Button("Add Transition"))
             {
@@ -325,7 +327,7 @@ void CAnimationTool::RenderUI_OptionState()
 
                 stringstream ss;
                 ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
-                    << "," << to_string(fTrackPosition) << "," << textBuffer;
+                    << "," << to_string(fTrackPosition);
                 strTransition = ss.str();
                 m_StateTransitions.emplace_back(strTransition);
             }
@@ -667,7 +669,7 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 100.f);
-    ImVec2 windowSize = ImVec2(600.f, 120.f);
+    ImVec2 windowSize = ImVec2(600.f, 170.f);
     
     ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
@@ -676,13 +678,16 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGui::Text("Animation Name : %s", m_Selected_AnimationTag.c_str());
 
+#ifdef _DEBUG
+    if (!m_Selected_AnimationTag.empty())
+        ImGui::Text("Duration : %.2f", m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag));
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
-#ifdef _DEBUG
         if (!m_Selected_AnimationTag.empty())
             m_AnimationActors[m_wSelected_AnimActorTag]->Set_TrackPosition(m_fTrackPosition);
-#endif
     }
+#endif
+    
 
     _bool IsChanged = { false };
     
@@ -760,11 +765,11 @@ void CAnimationTool::Export_StateAnimationMap_ToCSV()
 
             _string strStateTag = "StateName";
             _string strAnimTag = "AnimName";
-            _string strTimeTag = {};
-            outFile << strStateTag << "," <<strAnimTag << "\n";
+            _string strTimeTag = "Duration";
+            outFile << strStateTag << "," << strAnimTag << "," << strTimeTag << "\n";
 
             for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
-                outFile << animName << "," << animName << "\n";
+                outFile << animName << "," << animName << "," << to_string(m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(animName)) <<"\n";
             // 2. 파일 쓰기.
 
 

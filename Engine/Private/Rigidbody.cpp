@@ -27,14 +27,15 @@ HRESULT CRigidbody::Initialize_Prototype()
 
 HRESULT CRigidbody::Initialize_Clone(void* pArg)
 {
+	m_isClone = true;
 	ASSERT_CRASH(pArg);
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
-
+	m_eShape = pDesc->eShape;
 	RefConst<Shape> BodyShape;
 
 	using namespace JPH;
-	switch (pDesc->eShape)
+	switch (m_eShape)
 	{
 	case SHAPE::SPHERE:
 	{
@@ -82,10 +83,10 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 HRESULT CRigidbody::Render()
 {
 #ifdef _DEBUG
-	if(nullptr != m_pBody)
-		m_pGameInstance->DrawShape(m_pBody->GetShape());
-	if (nullptr != m_pCharacter)
-		m_pGameInstance->DrawShape(m_pCharacter->GetShape());
+	//if(nullptr != m_pBody)
+	//	m_pGameInstance->DrawShape(m_pBody->GetShape());
+	//if (nullptr != m_pCharacter)
+	//	m_pGameInstance->DrawShape(m_pCharacter->GetShape());
 #endif
 	return S_OK;
 }
@@ -96,9 +97,9 @@ void CRigidbody::Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta)
 
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, Matrix);
 
-	//m_pBodyInterface->MoveKinematic(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), fTimeDelta);
+	m_pBodyInterface->MoveKinematic(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), fTimeDelta);
 
-	m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vTranslation), EActivation::Activate);
+	//m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vTranslation), EActivation::Activate);
 }
 
 void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
@@ -110,6 +111,17 @@ void CRigidbody::Sync_Rigidbody(CTransform* pTransform)
 	_vector vQuaternion = XMVectorSet(vRotation.GetX(), vRotation.GetY(), vRotation.GetZ(), vRotation.GetW());
 	pTransform->Rotation_Quaternion(vQuaternion);
 	pTransform->Set_State(STATE::POSITION, XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f));
+}
+
+void CRigidbody::Change_Layer(_uint iLayer)
+{
+	if (SHAPE::MESH == m_eShape)
+	{
+		for(_uint i = 0; i < m_iNumMesh; ++i)
+			m_pBodyInterface->SetObjectLayer(m_pMeshBodyIDs[i], ObjectLayer(iLayer));
+	}
+	else
+		m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(iLayer));
 }
 
 _bool CRigidbody::IsLand(_float3* pNormalOut)
@@ -166,9 +178,12 @@ void CRigidbody::Make_MeshShape(void* pArg)
 {
 	MESHBODY_DESC* pDesc = static_cast<MESHBODY_DESC*>(pArg);
 
-	_uint iNumMesh = pDesc->pModel->Get_NumMesh();
+	m_iNumMesh = pDesc->pModel->Get_NumMesh();
 
-	for (_uint i = 0; i < iNumMesh; ++i)
+	m_ppMeshBodies = new Body*[m_iNumMesh];
+	m_pMeshBodyIDs = new BodyID[m_iNumMesh];
+
+	for (_uint i = 0; i < m_iNumMesh; ++i)
 	{
 		RefConst<Shape> BodyShape;
 
@@ -184,7 +199,11 @@ void CRigidbody::Make_MeshShape(void* pArg)
 			ObjectLayer(pDesc->iLayer)																// Collision Layer
 		);
 
-		ASSERT_CRASH(m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface));
+		// SetUp UserData (CollisionData)
+		m_tCollisionData.pComponent = this;
+		bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);
+		m_ppMeshBodies[i] = m_pGameInstance->Register_Body(bodySetting, &m_pBodyInterface);
+		m_pMeshBodyIDs[i] = m_ppMeshBodies[i]->GetID();
 	}
 }
 
@@ -203,7 +222,10 @@ void CRigidbody::Ready_Body(RIGIDBODY_DESC* pDesc, RefConst<Shape> BodyShape)
 	bodySetting.mMassPropertiesOverride = mp;
 	// Custom Mass SetUp (Default Mass X)
 	bodySetting.mOverrideMassProperties = EOverrideMassProperties::CalculateInertia;
-
+	
+	if(EMotionType::Kinematic == pDesc->eType)
+		bodySetting.mIsSensor = true;
+	
 	// SetUp UserData (CollisionData)
 	m_tCollisionData.pComponent = this;
 	bodySetting.mUserData = reinterpret_cast<uint64>(&m_tCollisionData);
@@ -260,8 +282,20 @@ void CRigidbody::Free()
 	m_tCollisionData.pComponent = nullptr;
 	m_tCollisionData.pDesc = nullptr;
 
-	if(nullptr != m_pBody)
-		m_pBodyInterface->RemoveBody(m_BodyID);
+	// Body Clear
+	if (true == m_isClone)
+	{
+		if (SHAPE::MESH == m_eShape)
+		{
+			for (_uint i = 0; i < m_iNumMesh; ++i)
+				m_pBodyInterface->RemoveBody(m_pMeshBodyIDs[i]);
+			Safe_Delete_Array(m_pMeshBodyIDs);
+			Safe_Delete_Array(m_ppMeshBodies);
+		}
+		else
+			m_pBodyInterface->RemoveBody(m_BodyID);
+	}
+
 	if (nullptr != m_pCharacter)
 		m_pCharacter->RemoveFromPhysicsSystem();
 	Safe_Delete(m_pCharacter);

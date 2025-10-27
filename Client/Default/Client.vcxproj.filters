@@ -85,6 +85,75 @@
     <Filter Include="03. GameObject\Camera\Spring">
       <UniqueIdentifier>{ede301d8-870a-4741-b3fc-ef4ad81d9087}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI">
+      <UniqueIdentifier>{e3e754ff-d915-4aa3-b5f5-0d09b20d656d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Component">
+      <UniqueIdentifier>{36a9bdb1-f2d6-45bb-8ba6-e1a46a663590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Parents">
+      <UniqueIdentifier>{1681211d-9f83-450e-accb-f92ebf1a5186}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers">
+      <UniqueIdentifier>{c2cc41b8-823a-4ba0-9c80-c969b92bedad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\HUD">
+      <UniqueIdentifier>{5722860c-32aa-4818-9bb3-f6f8c726f814}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
+      <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
+      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Shader">
+      <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Level\UI">
+      <UniqueIdentifier>{42d34b8c-5305-4308-a1e3-60659450ace7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State">
+      <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Augusta">
+      <UniqueIdentifier>{1ddcb2b8-3bfd-4a31-90e1-cf1db119a67f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground">
+      <UniqueIdentifier>{567088f8-1f86-4097-9c5f-1dcb6b362676}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Climb">
+      <UniqueIdentifier>{554f916e-4c05-48d6-9e5d-82c84a9002a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Character">
+      <UniqueIdentifier>{0252e64a-f082-483b-a7ae-960a8b2eb974}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air">
+      <UniqueIdentifier>{e38fea36-5785-4b90-a943-9cc6ebb32ed5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit">
+      <UniqueIdentifier>{3476a60f-14fe-48ba-9302-f11a878bf10a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Define">
+      <UniqueIdentifier>{806d4e3d-1d67-441f-acc9-bc13257d5457}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground\Augusta">
+      <UniqueIdentifier>{b0c3516c-97c2-418f-b34b-408390c86852}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air\Augusta">
+      <UniqueIdentifier>{c6688f7b-5cae-41f6-9482-7c488931a29a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Climb\Augusta">
+      <UniqueIdentifier>{43d5313d-7a97-47ea-a6b0-12113f159a63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="94. Factory">
+      <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon">
+      <UniqueIdentifier>{f1e21b97-7a13-4226-b93f-ddaa894e0419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Augusta">
+      <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -160,32 +229,122 @@
     <ClInclude Include="..\Public\Actor.h">
       <Filter>03. GameObject\Actor</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Player.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\Player_Define.h">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerAugusta.h">
+    <ClInclude Include="..\Public\Player.h">
       <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerParty.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\StateMachine.h">
-      <Filter>04. Component\00. State</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\State.h" />
-    <ClInclude Include="..\Public\PlayerController.h">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Parameter.h">
-      <Filter>04. Component\02. Parameter</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
     <ClInclude Include="..\public\MonsterBody.h" />
+    <ClInclude Include="..\public\Animator_UI.h">
+      <Filter>03. GameObject\UI\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Level_Test_UI.h">
+      <Filter>02. Level\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Loader_Test_UI.h">
+      <Filter>02. Level\Loader\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_HUD.h">
+      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Button.h">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Image.h">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Interact.h">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Text.h">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Custom_UI.h">
+      <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MonsterBody.h" />
+    <ClInclude Include="..\Public\Augusta.h">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaStateFactory.h">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Character.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GroundState.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ClimbState.h">
+      <Filter>03. GameObject\Actor\Player\State\Climb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\CharacterState.h">
+      <Filter>03. GameObject\Actor\Player\State\Character</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AirState.h">
+      <Filter>03. GameObject\Actor\Player\State\Air</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\HitState.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\StateCategory_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaState_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundRun.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundIdle.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundWalk.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerFactory.h">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaClimbMove.h">
+      <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaClimbExit.h">
+      <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MonsterDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaBayonet.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Weapon.h">
+      <Filter>03. GameObject\Weapon</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -204,9 +363,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\ClientPch.cpp">
       <Filter>99. Define</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Loader.cpp">
-      <Filter>02. Level\Loader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Loading.cpp">
       <Filter>02. Level\Loading</Filter>
@@ -254,26 +410,113 @@
     <ClCompile Include="..\Private\Player.cpp">
       <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\PlayerAugusta.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerParty.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\StateMachine.cpp">
-      <Filter>04. Component\00. State</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\State.cpp" />
-    <ClCompile Include="..\Private\PlayerController.cpp">
-      <Filter>04. Component\01. Controller</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Parameter.cpp">
-      <Filter>04. Component\02. Parameter</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
     <ClCompile Include="..\private\MonsterBody.cpp" />
+    <ClCompile Include="..\private\Animator_UI.cpp">
+      <Filter>03. GameObject\UI\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Level_Test_UI.cpp">
+      <Filter>02. Level\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Loader_Test_UI.cpp">
+      <Filter>02. Level\Loader\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_HUD.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Button.cpp">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Image.cpp">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Interact.cpp">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Text.cpp">
+      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Loader.cpp">
+      <Filter>02. Level\Loader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MonsterBody.cpp" />
+    <ClCompile Include="..\Private\Augusta.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaStateFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Character.cpp">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AirState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\CharacterState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Character</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GroundState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\HitState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ClimbState.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Climb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundRun.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundWalk.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerFactory.cpp">
+      <Filter>03. GameObject\Actor\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaClimbMove.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaClimbExit.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Climb\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaBayonet.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Weapon.cpp">
+      <Filter>03. GameObject\Weapon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -302,6 +545,14 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
@@ -314,5 +565,10 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

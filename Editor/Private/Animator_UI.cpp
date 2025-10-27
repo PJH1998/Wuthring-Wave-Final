@@ -181,13 +181,13 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     if (!m_pCurAnimDesc)
         return _float3();
 
-    _vector vPoses[4]               = {};
+    _vector     vPoses[4]           = {};
 
-    _uint iKeyframeTimeStart        = UINT_MAX;
-    _uint iKeyframeTimeEnd          = UINT_MAX;
+    _uint       iKeyframeTimeStart  = UINT_MAX;
+    _uint       iKeyframeTimeEnd    = UINT_MAX;
     const _bool isLoop              = m_pCurAnimDesc->isLoop;
-    const _uint iLastKeyframeIndex  = m_pCurAnimDesc->vecKeyFrames.size() - 1;
-    _uint iKeyframeIndex            = 0;
+    const _uint iLastKeyframeIndex  = (_uint)(m_pCurAnimDesc->vecKeyFrames.size() - 1);
+    _uint       iKeyframeIndex      = 0;
 
     // ?꾩옱 ?ㅽ봽?덉엫??vector ???몃뜳?ㅻ? 寃??
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
@@ -215,11 +215,12 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
         if (iKeyframeTimeStart == iKeyframeTimeEnd) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[(iIndex + 1) % m_pCurAnimDesc->vecKeyFrames.size()].iKeyframeIndex;
     }
 
-    // ?좊떦??媛믪쓣 ?댁슜?섏뿬 怨꾩궛, 諛섑솚
-    // ?ㅽ봽?덉엫 李⑥뿉 ?곕Ⅸ 媛꾧꺽??怨좊젮?댁뿬 怨꾩궛?댁빞 ?? XMVectorCatmullRom ???ㅽ봽?덉엫 媛꾧꺽??媛숈쓬???꾩젣湲??뚮Ц.
-    // 1, 2 ?ъ씠???ㅽ봽?덉엫??湲곗??쇰줈 ratio 怨꾩궛?섏뿬 ?몄옄瑜?二쇰㈃ ?좊벏?
+    // �Ҵ��� ���� �̿��Ͽ� ����, ��ȯ
+    // 1, 2 ������ Ű�������� �������� ratio �����Ͽ� ���ڸ� �ָ� �ɵ�?
+    _float fKeyframeRatio = {};
 
-    _float fKeyframeRatio = (_float)(iKeyframe - iKeyframeTimeStart) / (iKeyframeTimeEnd - iKeyframeTimeStart);
+    if ((iKeyframeTimeEnd - iKeyframeTimeStart) == 0)       fKeyframeRatio = 0;
+    else        fKeyframeRatio = (_float)(iKeyframe - iKeyframeTimeStart) / (iKeyframeTimeEnd - iKeyframeTimeStart);
 
     _vector vResultPos = XMVectorCatmullRom(vPoses[0], vPoses[1], vPoses[2], vPoses[3], fKeyframeRatio);
     _float3 vResult = {};
@@ -291,13 +292,6 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
         m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha, 
         fFixedLerpRatio
     );
-    //_float3 vResultPos = {};
-    // ksta : cmr ?ｌ쑝硫??대?遺??쒓굅 諛?蹂寃??꾩슂
-    //XMStoreFloat3(&vResultPos, XMVectorLerp(
-    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vPos),
-    //    XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vPos),
-    //    fFixedLerpRatio)
-    //);
 
     _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 
@@ -312,15 +306,41 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vSca),
-        fFixedLerpRatio)
-    );
+        fFixedLerpRatio
+    ));
+
+
+    _float2 vResultScreenLT = {};
+    XMStoreFloat2(&vResultScreenLT, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenLT),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenLT),
+        fFixedLerpRatio
+    ));
+
+    _float2 vResultScreenRB = {};
+    XMStoreFloat2(&vResultScreenRB, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenRB),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenRB),
+        fFixedLerpRatio
+    ));
+
+    _float4 vResultOuterWidth = {};
+    XMStoreFloat4(&vResultOuterWidth, XMVectorLerp(
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vBlendToOuterWidth),
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vBlendToOuterWidth),
+        fFixedLerpRatio
+    ));
 
     // ==============================
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
+    
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
     pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+    pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+    pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+    pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
     

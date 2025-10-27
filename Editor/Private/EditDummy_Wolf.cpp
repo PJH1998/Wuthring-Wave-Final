@@ -46,10 +46,14 @@ void CEditDummy_Wolf::Priority_Update(_float fTimeDelta)
 
 void CEditDummy_Wolf::Update(_float fTimeDelta)
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_LSHIFT) == KEYSTATE::PRESS)
-		m_pTransformCom->Change_Speed(200.f);
-	else
-		m_pTransformCom->Change_Speed(20.f);
+#ifdef _DEBUG
+    if (m_pGameInstance->Get_DIKeyState(DIK_LSHIFT) == KEYSTATE::PRESS)
+        m_pTransformCom->Change_Speed(200.f);
+    else
+        m_pTransformCom->Change_Speed(20.f);
+#endif // DEBUG
+
+	
 
 	// Spring Test
 	if (m_pGameInstance->Get_DIKeyState(DIK_T) == KEYSTATE::DOWN)
@@ -134,10 +138,10 @@ HRESULT CEditDummy_Wolf::Ready_Camera()
 
 	m_pSpringCamera->Initialize_Clone(&CameraDesc);
 
-	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), m_pSpringCamera);
+	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Camera_Spring"), m_pSpringCamera);
 	Safe_AddRef(m_pSpringCamera);
 
-	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
+	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Camera_Spring"));
 
 	return S_OK;
 }

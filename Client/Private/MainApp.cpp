@@ -9,6 +9,7 @@
 #include "Level_Logo.h"
 #include "Level_GamePlay.h"
 #include "Level_Test.h"
+#include "Level_Test_UI.h"
 
 #include "SpringCamera.h"
 
@@ -63,15 +64,23 @@ void CMainApp::Post_Update()
 		m_pGameInstance->Wait_Thread_End();
 
 		m_isChangeLevel = false;
+
+		// Memory Clear (Sound, Camera, Light, ETC)
+		if (FAILED(m_pGameInstance->Clear_Memory()))
+			return;
+
 		if (true == m_isLoad)
 		{
-			// Level???랁븯吏 ?딆? 媛앹껜??Release
-			if (FAILED(m_pGameInstance->Clear_Memory()))
-				return;
+			if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(LEVEL::LOADING))))
+				CRASH("Clear Resource");
+
 			m_pGameInstance->Open_Level(ENUM_CLASS(LEVEL::LOADING), CLevel_Loading::Create(m_pDevice, m_pContext, m_eNextLevel));
 		}
 		else
 		{
+			if (FAILED(m_pGameInstance->Clear_CurrentLevel_Resources(ENUM_CLASS(m_eNextLevel))))
+				CRASH("Clear Resource");
+
 			CLevel* pLevel = { nullptr };
 
 			switch (m_eNextLevel)
@@ -85,6 +94,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
+			//case LEVEL::TEST_UI:
+			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+			//	break;
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -128,20 +140,29 @@ void CMainApp::Render()
 void CMainApp::SetUp_CollisionLayer()
 {
 	// Object To BroadPhase
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::NONE), ENUM_CLASS(BPLAYER::NONE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::SENSOR));
 
 	// Object VS Object
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::MAP));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::MAP));
+
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
+
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::MOVE));
 }
 
 void CMainApp::Ready_Event()
@@ -165,6 +186,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Shader_VtxAnimMesh");
 
+	// Shader_UI_VtxPosTex ..Shader for UI
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_UI_VtxPosTex");
+		
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
 		,{"THREAD_Y", "1" }
@@ -203,7 +229,7 @@ void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
-	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Event_Change_Level"), event);
+	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }
 
 CMainApp* CMainApp::Create()

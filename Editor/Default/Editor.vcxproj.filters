@@ -79,6 +79,9 @@
     <Filter Include="96. Interface">
       <UniqueIdentifier>{38ba9fe0-934e-46d0-9236-736886be424d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\UI\Temp Props\Temp VIBuffer">
+      <UniqueIdentifier>{d88da4ce-b21b-485c-85ed-641ff34d1d1b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Mesh_Controller">
       <UniqueIdentifier>{9263d0e1-7d86-4ac4-9599-2ba75b735225}</UniqueIdentifier>
     </Filter>
@@ -144,6 +147,12 @@
     </Filter>
     <Filter Include="01. Level\Effect\Spectrum_Controller\Spectrum">
       <UniqueIdentifier>{dc01c551-693d-4efd-b197-55a3163b4754}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="03. GameObject\Dummy\Target">
+      <UniqueIdentifier>{022955cb-36e1-47b4-90d3-440b456680b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Camera\Sequencer">
+      <UniqueIdentifier>{11fc27fe-040e-443a-b82b-7ad88739045e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -234,6 +243,12 @@
     <ClInclude Include="..\Public\Interface_Edit.h">
       <Filter>96. Interface</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Editor_Define_UI.h">
+      <Filter>01. Level\UI</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
@@ -286,6 +301,12 @@
     <ClInclude Include="..\Public\EditDummy_Map.h">
       <Filter>03. GameObject\Dummy\Map</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\EditDummy_Target.h">
+      <Filter>03. GameObject\Dummy\Target</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Sonora.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
@@ -300,6 +321,9 @@
     </ClInclude>
     <ClInclude Include="..\Public\Spectrum.h">
       <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
+	</ClInclude>
+    <ClInclude Include="..\Public\Sequencer.h">
+      <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -327,9 +351,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Level_Edit.cpp">
       <Filter>01. Level\Edit</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Level_Shader.cpp">
-      <Filter>01. Level\Shader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Level_Effect.cpp">
       <Filter>01. Level\Effect</Filter>
@@ -379,8 +400,12 @@
     <ClCompile Include="..\Private\Interface_Edit.cpp">
       <Filter>96. Interface</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
-    <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Level_Shader.cpp">
+      <Filter>01. Level\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>01. Level\UI\Temp Props\Temp VIBuffer</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Effect_Mesh.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Mesh_Controller\Effect_Mesh</Filter>
     </ClCompile>
@@ -440,6 +465,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\Spectrum.cpp">
       <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
+	</ClCompile>
+    <ClCompile Include="..\Private\EditDummy_Target.cpp">
+      <Filter>03. GameObject\Dummy\Target</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Sequencer.cpp">
+      <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -449,5 +483,8 @@
     <ClCompile Include="..\Private\Particle.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller\Particle</Filter>
     </ClCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex_Instance.hlsl">
+      <Filter>01. Level\UI\Temp Props\Temp Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

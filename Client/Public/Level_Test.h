@@ -16,8 +16,11 @@ public:
 	virtual		void			Render() override;
 
 private:
-	void Ready_Layer_PlayerParty();
-	void Ready_Layer_Augusta();
+	HRESULT		Ready_Layer_Map(const _char* pFilePath);
+	void			Read_Map_Dat(const _string pFilePath);
+	void 			Ready_Layer_Player();
+	void			Ready_Dummy();
+	//void Ready_Layer_Augusta();
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };

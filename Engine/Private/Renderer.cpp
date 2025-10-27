@@ -3,7 +3,8 @@
 
 #include "GameInstance.h"
 #include "GameObject.h"
-#include "ShaderFilter.h"
+#include "RendererSubResource.h"
+#include "RendererCS.h"
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice },
@@ -24,11 +25,16 @@ HRESULT CRenderer::Initialize()
 	m_iWinSizeX = static_cast<_uint>(ViewPort.Width);
 	m_iWinSizeY = static_cast<_uint>(ViewPort.Height);
 
+	m_fWinSizeX = ( ViewPort.Width );
+	m_fWinSizeY = ( ViewPort.Height );
+
 	if (FAILED(Ready_RT()))
 		return E_FAIL;
 	if (FAILED(Ready_MRT()))
 		return E_FAIL;
-	if (FAILED(Ready_Shader_Filter()))
+	if (FAILED(Ready_SubResource()))
+		return E_FAIL;
+	if (FAILED(Ready_RCS()))
 		return E_FAIL;
 
 	m_pVIBuffer = CVIBuffer_Rect::Create(m_pDevice, m_pContext);
@@ -43,6 +49,8 @@ HRESULT CRenderer::Initialize()
 	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(static_cast<_float>( m_iWinSizeX ), static_cast<_float>( m_iWinSizeY ), 0.f, 1.f));
 
+	m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"));
+	m_pGameInstance->End_MRT();
 #ifdef _DEBUG
 	if (FAILED(m_pGameInstance->Ready_Debug_RT(TEXT("RT_Diffuse"), 150.0f, 150.0f, 300.f, 300.f)))
 		return E_FAIL;
@@ -72,12 +80,13 @@ void CRenderer::Render()
 	Render_Outline();
 	Render_NonBlend();
 	Render_Light();
+	Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
-	Render_Emissive();
-	Render_Blur();
-	Render_Blend();
-	Render_Distortion();
+	//Render_Emissive();
+	//Render_Blur();
+	//Render_Blend();
+	//Render_Distortion();
 	Render_LUT();
 	Render_UI();
 	Render_Fade();
@@ -215,7 +224,7 @@ void CRenderer::Render_Light()
 		CRASH("Failed Bind RT_Depth");
 
 	//Toon Ramp Texture
-	if (FAILED(m_pFilter->Bind_Ramp_Texture(m_pShader, "g_RampTexture")))
+	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
 
 	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
@@ -223,31 +232,89 @@ void CRenderer::Render_Light()
 	m_pGameInstance->End_MRT();
 }
 
+
+void CRenderer::Render_SSAO()
+{
+#ifdef _DEBUG
+	if (false == m_IsSSAO)
+	{
+		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO"));
+		return;
+	}
+
+#endif
+
+	if (FAILED(m_pSubResource->Add_SSAO_BufferData(TEXT("RCS_SSAO"), m_fWinSizeX, m_fWinSizeY)))
+		CRASH("Failed Add_SSAO_BufferData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO"))))
+		CRASH("Failed RCS_SSAO");
+
+	/*
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
+		CRASH("Render Fail");
+
+		#ifdef _DEBUG
+	if (false == m_IsSSAO)
+	{	
+		m_pGameInstance->End_MRT();
+		return;
+	}
+
+#endif
+
+	if (FAILED(m_pShader->Bind_Matrix("g_CamViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Matrix("g_CamProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pSubResource->Bind_Noise_Texture(m_pShader, "g_NoiseTexture")))
+		CRASH("Failed Bind_Noise_Texture");
+
+	if (FAILED(m_pSubResource->Bind_Sample_Vector(m_pShader, "g_vSampleVector")))
+		CRASH("Failed Bind Sample Vector");
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO))))
+		CRASH("Render Fail");
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+#ifdef _DEBUG
+	if (false == m_IsSSAO_Blur)
+	{
+		if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
+			CRASH("Render Fail");
+
+		m_pGameInstance->End_MRT();
+		if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
+			CRASH("Render Fail");
+
+		m_pGameInstance->End_MRT();
+		return;
+	}
+#endif*/
+//	SSAO_Blur();
+}
+
 void CRenderer::Render_Combined()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail")
 
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
-		CRASH("Render Fail")
-
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Diffuse"), m_pShader, "g_DiffuseTexture")))
 		CRASH("Render Fail")
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Shade"), m_pShader, "g_ShadeTexture")))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_ToonRim"), m_pShader, "g_ToonRimTexture")))
 		CRASH("Render Fail")
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Specular"), m_pShader, "g_SpecularTexture")))
-		CRASH("Render Fail")
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
-		CRASH("Failed Bind_DepthTexture")
+
+	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO"), m_pShader, "g_SsaoTexture")))
+		CRASH("Failed Bind_SsaoTexture");
+
+//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_SsaoTexture")))
+//		CRASH("Failed Bind_SsaoTexture");
 
 	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_ShadowMap")))
 		CRASH("Failed Bind_CSM_SRV");
@@ -255,13 +322,13 @@ void CRenderer::Render_Combined()
 	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vLightDirection")))
 		CRASH("Failed Bind CSM Resource");
 
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
-		CRASH("Render Fail");
-
 	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
+	
+	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 1)))
+		return;
 
-	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::CONBINED))))
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
 		CRASH("Render Fail")
 
 	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(1)))
@@ -327,63 +394,9 @@ void CRenderer::Render_DistortionObject()
 	m_pGameInstance->End_MRT();
 }
 
-void CRenderer::Render_Blur()
-{
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Emissive"), m_pShader, "g_EmissiveTexture")))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_X))))
-		CRASH("Render Fail")
-
-	m_pVIBuffer->Bind_Resources();
-	m_pVIBuffer->Render();
-
-	m_pGameInstance->End_MRT();
-
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_iWinSizeY, sizeof(_float))))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_Y))))
-		CRASH("Render Fail")
-
-	m_pVIBuffer->Bind_Resources();
-	m_pVIBuffer->Render();
-
-	m_pGameInstance->End_MRT();
-}
-
 void CRenderer::Render_Blend()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"), nullptr, false)))
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail")
 
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::BLEND)])
@@ -396,30 +409,18 @@ void CRenderer::Render_Blend()
 
 	m_RenderObjects[ENUM_CLASS(RENDERGROUP::BLEND)].clear();
 
-	m_pGameInstance->End_MRT();
+//	m_pGameInstance->End_MRT();
 }
 
 void CRenderer::Render_Distortion()
 {
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Render Fail")
-
-	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
-		CRASH("Render Fail")
-	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_iWinSizeY, sizeof(_float))))
-		CRASH("Render Fail")
+//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+//		CRASH("Render Fail")
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
 		CRASH("Render Fail")
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
-		CRASH("Render Fail")
+	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
+	//	CRASH("Render Fail")
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DISTORTION));
 
@@ -434,7 +435,7 @@ void CRenderer::Render_LUT()
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
 		CRASH("Failed Bind RT_Backbuffer");
 
-	if (FAILED(m_pFilter->Bind_LUT_Texture(m_pShader, "g_LUT_Texture", m_iLUT_Index, "g_iLutIndex")))
+	if (FAILED(m_pSubResource->Bind_LUT_Texture(m_pShader, "g_LUT_Texture", m_iLUT_Index, "g_iLutIndex")))
 		return;
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::LUT));
@@ -469,11 +470,125 @@ void CRenderer::Render_Fade()
 	m_RenderObjects[ENUM_CLASS(RENDERGROUP::FADE)].clear();
 }
 
+void CRenderer::GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType)
+{
+	_uint iShaderPass = eType == BLUR_TYPE::GAUSSIAN ? ENUM_CLASS(SHADER_DEFFERED::GAUSSIAN_BLUR_X) : 0;// ENUM_CLASS(SHADER_DEFFERED::BILATERAL_BLUR_X);
+
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(pBlurRenderTarget, m_pShader, "g_BlurBeginTexture")))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pShader->Begin(iShaderPass++)))
+		CRASH("Render Fail")
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_iWinSizeY, sizeof(_float))))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Begin(iShaderPass)))
+		CRASH("Render Fail")
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	if (FAILED(m_pGameInstance->Begin_MRT(pCombinedBlurMRT, nullptr, false)))
+		CRASH("Render Fail");
+
+	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_ADD))))
+		CRASH("Render Fail");
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::SSAO_Blur()
+{
+#pragma region BLUR_X
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_BlurBeginTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_fWinSizeX, sizeof(_float))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_X))))
+		CRASH("Render Fail");
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+#pragma endregion
+
+#pragma region BLUR_Y
+
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_fWinSizeY, sizeof(_float))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_Y))))
+		CRASH("Render Fail");
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+#pragma endregion
+
+#pragma region BLUR_RETURN
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"), nullptr, false)))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_RETURN))))
+		CRASH("Render Fail");
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+#pragma region BLUR_END
+}
+
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_PGDN) == KEYSTATE::DOWN)
 		m_isRenderDebug = !m_isRenderDebug;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
+		m_IsSSAO = !m_IsSSAO;
 
 	for (auto& pComponent : m_DebugComponents)
 	{
@@ -507,6 +622,8 @@ void CRenderer::Render_Debug()
 	if (FAILED(m_pGameInstance->Render_RT()))
 		CRASH("Render RT");
 
+	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
+		CRASH("Render RCS");
 
 	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
 		CRASH("ViewMatrix");
@@ -531,16 +648,16 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Depth"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget Metaliic */
+	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Metallic"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
 	/* RenderTarget Shade */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Shade"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_ToonRim"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
-	/* RenderTarget Speuclar */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Specular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
-		ASSERT_CRASH(false);
-
-	/* RenderTarget LightDepth_Map */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_LightDepth_Map"), g_iMaxWidth, g_iMaxHeight, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(1.f, 1.f, 1.f, 1.f))))
+	/* RenderTarget SSAO */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Back_Buffer */
@@ -552,11 +669,11 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Blur */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Blur"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Blur"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Blur_End*/
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BlurEnd"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_BlurEnd"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Distortion */
@@ -583,20 +700,33 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Depth"))))
 		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Emissive"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Distortion"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Object"), TEXT("RT_Metallic"))))
+		ASSERT_CRASH(false);
+
 #pragma endregion
 
 #pragma region MRT_LIGHT
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Shade"))))
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_ToonRim"))))
 		ASSERT_CRASH(false);
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Specular"))))
+	//if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_Shade"))))
+	//	ASSERT_CRASH(false);
+	//if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Light"), TEXT("RT_RIMLIGHT"))))
+	//	ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_SSAO
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_SSAO"), TEXT("RT_SSAO"))))
 		ASSERT_CRASH(false);
-	
 #pragma endregion
 
 	// RENDERGROUP::SHADOW_MAP // 미구현
 #pragma region MRT_SHADOW_MAP
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow_Map"), TEXT("RT_LightDepth_Map"))))
-		ASSERT_CRASH(false);
+	//if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow_Map"), TEXT("RT_LightDepth_Map"))))
+	//	ASSERT_CRASH(false);
 #pragma endregion
 
 #pragma region MRT_BACKBUFFER
@@ -606,8 +736,8 @@ HRESULT CRenderer::Ready_MRT()
 
 	// RENDERGROUP::EMISSIVE
 #pragma region MRT_EMISSIVE
-	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_BackBuffer"))))
-		ASSERT_CRASH(false);
+	//if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_BackBuffer"))))
+	//	ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 #pragma endregion
@@ -638,6 +768,40 @@ HRESULT CRenderer::Ready_MRT()
 	return S_OK;
 }
 
+HRESULT CRenderer::Ready_RCS()
+{
+#pragma region SSAO_RCS
+	CRendererCS::RCS_DESC RCSDesc = {};
+	RCSDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader.hlsl");
+	RCSDesc.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	RCSDesc.strEntryPoint = "SSAO";
+	RCSDesc.iWidth = m_iWinSizeX;
+	RCSDesc.iHeight = m_iWinSizeY;
+	RCSDesc.fDefinitionX = 8.f;
+	RCSDesc.fDefinitionY = 8.f;
+	RCSDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	RCSDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
+
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO"), &RCSDesc)))
+		CRASH("Failed Add RCS_SSAO");
+
+	if(FAILED(m_pGameInstance->Setting_UAV_Data(TEXT("RCS_SSAO"), "OutputTexture")))
+		CRASH("Failed Setting_UAV_Data");
+
+	if(FAILED(m_pSubResource->Add_SSAO_NoiseTexture(TEXT("RCS_SSAO"), "g_NoiseTexture")))
+		CRASH("Failed Add_SSAO_NoiseTexture");
+
+	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
+	   CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+		CRASH("Failed Add_SRVData");
+#pragma endregion
+	
+
+	return S_OK;
+}
+
 HRESULT CRenderer::Ready_Shadow_DSV()
 {
 	D3D11_TEXTURE2D_DESC TextureDesc = {};
@@ -664,10 +828,10 @@ HRESULT CRenderer::Ready_Shadow_DSV()
 	return S_OK;
 }
 
-HRESULT CRenderer::Ready_Shader_Filter()
+HRESULT CRenderer::Ready_SubResource()
 {
-	m_pFilter = CShaderFilter::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(m_pFilter);
+	m_pSubResource = CRendererSubResource::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pSubResource);
 
 	return S_OK;
 }
@@ -706,7 +870,7 @@ void CRenderer::Free()
 
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);
-	Safe_Release(m_pFilter);
+	Safe_Release(m_pSubResource);
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);

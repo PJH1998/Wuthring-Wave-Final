@@ -4,9 +4,12 @@
 #include "SpringCamera_Edit.h"
 #include "EditDummy_Wolf.h"
 #include "EditDummy_Map.h"
+#include "EditDummy_Target.h"
 
 #include	"Map_Interface.h"
+#include	"Camera_Interface.h"
 
+#include "Sequencer.h"
 
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel { pDevice, pContext }
@@ -17,8 +20,12 @@ HRESULT CLevel_Camera::Initialize()
 {
 	//Ready_Camera();
 	Ready_Dummy();
+	Ready_Ground();
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
+	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
+	
+	m_pSequencer = CSequencer::Create();
 
     return S_OK;
 }
@@ -37,6 +44,8 @@ void CLevel_Camera::Update(_float fTimeDelta)
 			m_pMapInterface->Add_MapObject();
 
 	ImGui::End();
+
+	m_pSequencer->Update(fTimeDelta);
 }
 
 void CLevel_Camera::Render()
@@ -78,13 +87,34 @@ void CLevel_Camera::Ready_Dummy()
 		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
 		CRASH("Failed Clone Dummy Wolf");
 
-	PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.05f, 0.05f, 0.05f, 1.f));
-	CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
-	MapDesc.PreTransformMatrix = PreTransformationMatrix;
-	MapDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
-		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &MapDesc)))
-		CRASH("Failed Clone Dummy Map");
+	CEditDummy_Target::DUMMY_TARGET_DESC TargetDesc = {};
+	TargetDesc.PreTransformMatrix = PreTransformationMatrix;
+	TargetDesc.vPosition = XMVectorSet(40.f, 0.f, 0.f, 1.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Target"),
+		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &TargetDesc)))
+		CRASH("Failed Clone Dummy Target");
+
+	// Dummy Map
+	//PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.05f, 0.05f, 0.05f, 1.f));
+	//CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
+	//MapDesc.PreTransformMatrix = PreTransformationMatrix;
+	//MapDesc.vPosition = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
+	//	ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &MapDesc)))
+	//	CRASH("Failed Clone Dummy Map");
+}
+
+void CLevel_Camera::Ready_Ground()
+{
+	CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
+	BoxBodyDesc.eShape = SHAPE::BOX;
+	BoxBodyDesc.vPos = _float3(0.f, -50.f, 0.f);
+	BoxBodyDesc.vExtent = _float3(1000.f, 10.f, 1000.f);
+	BoxBodyDesc.eType = EMotionType::Static;
+	BoxBodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	
+	m_pGround = CRigidbody::Create(m_pDevice, m_pContext);
+	m_pGround->Initialize_Clone(&BoxBodyDesc);
 }
 
 CLevel_Camera* CLevel_Camera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -104,6 +134,11 @@ void CLevel_Camera::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pGround);
+
 	Safe_Release(m_pSpringCamera);
 	Safe_Release(m_pMapInterface);
+	Safe_Release(m_pCameraInterface);
+
+	Safe_Release(m_pSequencer);
 }

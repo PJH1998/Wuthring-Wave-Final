@@ -6,8 +6,12 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 
-#include "PlayerAugusta.h"
-#include "PlayerParty.h"
+#include "StateMachine.h"
+
+#include "AugustaBayonet.h"
+#include "Augusta.h"
+#include "Player.h"
+
 
 
 #pragma region BehaviorTree
@@ -15,6 +19,7 @@
 #include "BT_Selector.h"
 #include "BT_Sequence.h"
 #pragma endregion
+#include"GameSystem.h"
 
 CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -23,14 +28,15 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
+	CoInitializeEx(nullptr, 0);
+
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-    m_pGameInstance->Add_Work([this]() {Load_PlayerController(); Complete_Load(); });
-    
+    m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     
     
 
@@ -41,60 +47,14 @@ HRESULT CLoader_Test::Initialize()
 HRESULT CLoader_Test::Load_Texture()
 {
 	cout << "Texture" << endl;
-
+    
     return S_OK;
 }
 
 HRESULT CLoader_Test::Load_Model()
 {
-    _matrix PreTransformMatrix;
-    _float fSize = 0.1f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
-
-    string FolderPath = "../../Client/Bin/Resource/Map/";
-
-    _int version = {};
-    _int Lastversion = {};
-    _wstring LastVersionName;
-    _string LastVersionPath;
-
-    for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
-        if (entry.is_regular_file()) {
-            if (entry.path().string().find("MapData") != std::string::npos)
-                continue;
-
-            if (entry.path().extension() == ".dat") {
-
-                _char FileDrive[MAX_PATH] = {};
-                _char FileDir[MAX_PATH] = {};
-                _char FileName[MAX_PATH] = {};
-                _char FileExt[MAX_PATH] = {};
-                _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-                _wstring baseName = StringToWString(FileName);
-
-                // LOD 마지막에 붙은 숫자 추출
-                size_t pos = baseName.find_last_not_of(L"0123456789");
-                _wstring namePart = baseName.substr(0, pos + 1);
-                _wstring numberPart = baseName.substr(pos + 1);
-                version = stoi(numberPart);
-
-                _wstring key = L"Prototype_Component_Model_" + namePart;
-                _string VersionPath = FileDir;
-                VersionPath += FileName;
-                VersionPath += ".dat";
-
-                _wstring PrototypeName = L"Prototype_Component_Model_";
-                PrototypeName += StringToWString(FileName);
-
-				m_pGameInstance->Add_Work([=]() {
-					if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), PrototypeName,
-						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, VersionPath.c_str()))))
-						CRASH("Prototype Create Failed");
-					});
-            }
-        }
-    }
+    m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
+    //m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/Kings_Load_1026_First/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
     //_fmatrix PreMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
@@ -152,13 +112,19 @@ HRESULT CLoader_Test::Load_Component()
     return S_OK;
 }
 
-HRESULT CLoader_Test::Load_PlayerController()
+HRESULT CLoader_Test::Load_Player()
 {
+
+    // Controller 초기화
+    _wstring wstrControllerTag = L"Prototype_Component_PlayerController";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wstrControllerTag,
+        CInputController::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerInput Controller");
     
-    _wstring wStrControllerTag = TEXT("Prototype_GameObject_PlayerParty");
+    _wstring wStrControllerTag = TEXT("Prototype_GameObject_Player");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrControllerTag
-        , CPlayerParty::Create(m_pDevice, m_pContext))))
+        , CPlayer::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
     return S_OK;
@@ -168,28 +134,49 @@ HRESULT CLoader_Test::Load_Augusta()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
-    _matrix		PreTransformMatrix = XMMatrixIdentity();
+    _matrix	PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
+    // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
 
 
+    // 2. StateMachine 초기화
+    _wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Augusta";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+        CStateMachine::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerState Machine");
+
+   
+    // 3. 객체 초기화
     _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wStrActorTag
-        , CPlayerAugusta::Create(m_pDevice, m_pContext))))
+        , CAugusta::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
-    
-    /*if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , TEXT("Prototype_GameObject_Dummy_Augusta")
-        , CAnimationDummy::Create(m_pDevice, m_pContext))))
-        CRASH("Prototype Create Failed");*/
 
+    // 4. 파츠 초기화
+    wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/AugustaBayonet.dat";
+    fSize = 0.01f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+
+    // 1. 모델 초기화.
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    // 2. 객체 초기화.
+    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Augusta_Bayonet");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wstrBayonetTag
+        , CAugustaBayonet::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
 
     return S_OK;
 }
