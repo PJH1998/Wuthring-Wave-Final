@@ -13,7 +13,7 @@
 #include "AugustaGroundWalk.h"
 #include "AugustaGroundRun.h"
 #include "AugustaGroundLand.h"
-#include "AugustaGroundSprint.h"
+#include "AugustaGroundDash.h"
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
 
@@ -36,9 +36,9 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::WALK), CAugustaGroundWalk::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN), CAugustaGroundRun::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND), CAugustaGroundLand::Create(pPlayer));
-    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT), CAugustaGroundSprint::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH), CAugustaGroundDash::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pPlayer));
-    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pPlayer, "Hack"));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pPlayer));
 
     // Air 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pPlayer));

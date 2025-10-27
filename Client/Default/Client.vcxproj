@@ -175,7 +175,7 @@
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
-    <ClInclude Include="..\Public\AugustaGroundSprint.h" />
+    <ClInclude Include="..\Public\AugustaGroundDash.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaStateFactory.h" />
@@ -259,7 +259,7 @@
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
-    <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />

@@ -64,6 +64,13 @@ public:
 
 #pragma region STATE 조건에 사용
 public:
+	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_vector Get_LookVector();
+	_bool Is_LockOn();
+	_bool Is_Land(_float3* pNormal = nullptr);
+
+	// LockOn 시 대상 타겟 바라보기?
+
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 
@@ -72,16 +79,20 @@ public:
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
-	_bool Is_LockOn();
-	_bool Is_Land(_float3* pNormal = nullptr);
+	
 	void Change_State(_uint iCategory, _uint iSubState);
 
-
 	ACTORDIR Calculate_Direction();
+
+	_vector Calculate_Move_Direction(ACTORDIR eDir);
+	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
 	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+
+	void Rotate_Direction(_fvector vDir);
+	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
+	
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 	void Set_Gravity(_bool IsGravity);
@@ -107,6 +118,7 @@ protected:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
+	class CTransform* m_pLockOnTargetTransform = { nullptr };
 
 
 	_float m_fMaxEnsembleEnergy = { 100.f };

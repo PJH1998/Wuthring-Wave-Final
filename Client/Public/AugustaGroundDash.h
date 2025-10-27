@@ -4,10 +4,10 @@
 NS_BEGIN(Client)
 
 // Augusta Sprint State - Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R 처리
-class CAugustaGroundSprint final : public CGroundState
+class CAugustaGroundDash final : public CGroundState
 {
 private:
-    enum SPRINTSTATE
+    enum DASHSTATE
     {
         JUMP = 0,
         MOVE,
@@ -15,8 +15,8 @@ private:
     };
 
 private:
-    explicit CAugustaGroundSprint() = default;
-    virtual ~CAugustaGroundSprint() = default;
+    explicit CAugustaGroundDash() = default;
+    virtual ~CAugustaGroundDash() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -37,7 +37,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundSprint* Create(class CGameObject* pOwner);
+    static CAugustaGroundDash* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

@@ -49,8 +49,9 @@ public:
 	}
 
 public:
+	_float3 Get_TargetPos() { return m_vTargetPos; }
 	_vector Get_LookVector_NoPitch();
-	_vector Get_RightDirection_NoPitch();
+	_vector Get_RightVector_NoPitch();
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -86,7 +87,9 @@ private:
 	// Lock-On
 	vector<CTransform*>		m_TargetTransforms;
 	CTransform*				m_pTargetTransform = { nullptr };
-	_float							m_fLockOnOffsetY = {};
+	_float					m_fLockOnOffsetY = {};
+
+	_float3					m_vTargetPos = {};
 
 private:
 	// Default
@@ -106,6 +109,7 @@ private:
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
 
+	
 private:
 	void							Ready_Component();
 

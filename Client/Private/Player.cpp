@@ -153,7 +153,7 @@ void CPlayer::Ensemble_Skill(CHARACTERTYPE eCharacter)
         // Augusta의 Ensemble Skill State로 전환
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(ESkillType::STRIKE));
+            ENUM_CLASS(ESkillType::SKILLQTE));
         break;
 
     case CHARACTERTYPE::GALBRENA:

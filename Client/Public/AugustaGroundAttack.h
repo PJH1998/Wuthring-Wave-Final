@@ -18,7 +18,7 @@ private:
         SKILL_Q,
         SKILL_E,
         SKILL_R,
-        
+        MOVE,
         JUMP,
         END
     };
@@ -38,7 +38,7 @@ private:
     _uint m_iComboCount = { 0 };  // 현재 콤보 단계 (0~3)
 
     _float m_fAttackPressTime = { 0.f };
-    _float m_fAttackPressMaxTime = { 0.3f };
+    _float m_fAttackPressMaxTime = { 0.5f };
     _bool m_States[ATTACKSTATE::END] = {};
     _bool m_IsNextAttackInput = { false };
     

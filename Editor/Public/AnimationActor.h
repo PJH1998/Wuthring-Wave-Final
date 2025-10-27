@@ -55,10 +55,12 @@ public:
 
 	void Register_AllNotifies(const _string& strFolderPath);
 
-
 	
 	void Collider_Active(const _wstring&, _bool IsActive);
 	void Effect_Active();
+
+	class CModel* Get_ModelCom() { return m_pModelCom; }
+	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
 #endif // _DEBUG
 
 

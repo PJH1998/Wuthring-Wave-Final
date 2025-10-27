@@ -11,7 +11,7 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 {
 }
 
-void CSpringCamera::Update_Target(const _fvector& TargetPos, _float fOffsetY)
+void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 {
 	m_fOffsetY = fOffsetY;
 
@@ -27,12 +27,13 @@ _vector CSpringCamera::Get_LookVector_NoPitch()
 	return XMVector3Normalize(vLook);
 }
 
-_vector CSpringCamera::Get_RightDirection_NoPitch()
+_vector CSpringCamera::Get_RightVector_NoPitch()
 {
 	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 	vRight = XMVectorSetY(vRight, 0.f);  // Pitch 제거
 	return XMVector3Normalize(vRight);
 }
+
 
 HRESULT CSpringCamera::Initialize_Prototype()
 {
@@ -193,10 +194,10 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
 	// 회전 보간
 	_float fLerp = {};
-	if (fDot < cos(XMConvertToRadians(25.f)))
+	if (fDot < cos(XMConvertToRadians(40.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);
 	else
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f * (cos(XMConvertToRadians(25.f) - fDot)));
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f * (cos(XMConvertToRadians(40.f) - fDot)));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 
@@ -209,7 +210,11 @@ void CSpringCamera::Sorting_Target()
 		});
 
 	if (0 < m_TargetTransforms.size())
+	{
 		m_pTargetTransform = m_TargetTransforms[0];
+		XMStoreFloat3(&m_vTargetPos, m_pTargetTransform->Get_State(STATE::POSITION));
+	}
+		
 }
 
 void CSpringCamera::Dual_Targeting(_float fTimeDelta)

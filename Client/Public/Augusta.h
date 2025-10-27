@@ -11,7 +11,7 @@ private:
 	struct StateTransitionContext
 	{
 		// Ground
-		ESprintType m_eSprintType = ESprintType::END;
+		EDashType m_eDashType = EDashType::END;
 		EIdleType  m_eIdleType = EIdleType::END;
 		ERunType m_eRunType = ERunType::END;
 		ESkillType m_eSkillToPlay = ESkillType::END;
@@ -35,7 +35,7 @@ private:
 			m_eSkillToPlay = ESkillType::END;
 			m_eIdleType = EIdleType::END;
 			m_eRunType = ERunType::END;
-			m_eSprintType = ESprintType::END;
+			m_eDashType = EDashType::END;
 			m_eLandType = ELandType::END;
 			m_eAttackType = EAttackType::END;
 			

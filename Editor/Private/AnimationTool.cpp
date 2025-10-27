@@ -3,6 +3,7 @@
 #include "ModelLoader.h"
 #include "AnimationActor.h"
 #include "AnimNotifyTool.h"
+#include "Effect_Controller.h"
 
 
 #pragma region 기본함수들
@@ -23,7 +24,6 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
     m_pLoader = CModelLoader::Create();
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
-    
 
     return S_OK;
 }
@@ -43,6 +43,29 @@ void CAnimationTool::Render()
     // EditState 설정된 걸로.
     RenderUI_EditState();
         
+}
+
+void CAnimationTool::Set_EffectContorller(CEffect_Controller* pEffectController)
+{
+    ASSERT_CRASH(pEffectController);
+    m_pEffectController = pEffectController;
+}
+
+void CAnimationTool::Export_AnimationData(CEffect_Controller* pEffectController)
+{
+    if (nullptr == m_pEffectController)
+    {
+        MSG_BOX("Nullptr EffectController");
+        return;
+    }
+        
+
+    EFFECTACTOR_DESC Desc{};
+    // 현재 선택된 객체의 포인터와 필요한 값. 전달.
+    Desc.pAnimActor = m_AnimationActors[m_wSelected_AnimActorTag];
+    Desc.fDuration = Desc.pAnimActor->Get_Duration(m_Selected_AnimationTag);
+    
+    m_pEffectController->Import_AnimationData(Desc);
 }
 
 void CAnimationTool::Render_Editor()
@@ -576,13 +599,13 @@ void CAnimationTool::Render_Model_Detail()
 {
     ImGui::BeginChild("Right pane", ImVec2(500, 0), true);
 
-    static float fPosition[3] = { 0.f, 180.f, -100.f };
+    static float fPosition[3] = { 0.f, 0.f, 0.f };
     ImGui::InputFloat3("Position", fPosition);
 
     static float fRotation[3] = { 0.f, 0.f, 0.f };
     ImGui::InputFloat3("Rotation", fRotation);
 
-    static float fScale[3] = { 1.f, 1.f, 1.f };
+    static float fScale[3] = { 0.01f, 0.01f, 0.01f };
     ImGui::InputFloat3("Scale", fScale);
 
     static float fSpeedPerSec = { 10.f };
@@ -719,6 +742,16 @@ void CAnimationTool::Render_Animation_Detail()
 
     if (ImGui::Button("Notify Visible"))
         m_IsVisibleNotify = !m_IsVisibleNotify;
+
+#ifdef _DEBUG
+    ImGui::SameLine();
+
+    if (ImGui::Button("Export Anim To Effect"))
+    {
+        Export_AnimationData(m_pEffectController);
+    }
+#endif // _DEBUG
+
 
     // 이거를 눌렀을때 현재 Actor와 ActorTag, Actor의 Animation 정보들을 정할 수 있다.
     /*ImGui::SameLine();
