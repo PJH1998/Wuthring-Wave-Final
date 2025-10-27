@@ -21,6 +21,8 @@ public:
 		const _char* pAnimationTag;
 	}MONSTERTEST_DESC;
 
+
+
 private:
 	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMonsterTest(const CMonsterTest& Prototype);
@@ -46,6 +48,14 @@ private:
 	//CTransform*				m_pTargetTransformCom = { nullptr };
 
 	_uint					m_iState{};
+	_bool					m_isDetecting{};
+	_float3					m_vTargetPosition{};
+
+	_float					m_fDistance{};
+	_float					m_fDodgeCoolTime{};
+	_float					m_fRightDot{};
+	_float					m_fFrontDot{};
+
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
 
@@ -53,6 +63,8 @@ private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
+
+	void						Reset_Condition();
 
 	_bool						isAnimationRunning() { return m_isAnimationFinished; }
 	_bool						isAttackEnable();

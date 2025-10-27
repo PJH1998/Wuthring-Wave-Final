@@ -151,7 +151,7 @@ void CASM_Interface::Node_Info()
 	if(BT_TYPE::ACTION == m_Nodes[m_iCurrentNodeIndex].eType)
 	{
 		ImGui::InputScalar("TargetState", ImGuiDataType_U32, &m_Nodes[m_iCurrentNodeIndex].iTargetState);
-		ImGui::Text("%u", (1 << m_Nodes[m_iCurrentNodeIndex].iTargetState));
+		ImGui::Text("%u", m_Nodes[m_iCurrentNodeIndex].iTargetState == 0 ? 0 : (1 << (m_Nodes[m_iCurrentNodeIndex].iTargetState - 1)));
 		if(!m_isConditionCreate && ImGui::Button("Create Condition"))
 		{
 			m_isConditionCreate = true;

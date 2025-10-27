@@ -46,6 +46,7 @@ void CMonsterTest::Priority_Update(_float fTimeDelta)
 
 void CMonsterTest::Update(_float fTimeDelta)
 {
+	Reset_Condition();
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
@@ -60,6 +61,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity);
+	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	
 }
 
@@ -68,7 +70,7 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
 	//for(auto& Pair : m_PartObjects)
 	//	Pair.second->Late_Update(fTimeDelta);
-
+	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
@@ -90,6 +92,7 @@ void CMonsterTest::Render()
 	}
 
 #ifdef _DEBUG
+
 	//m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
 #endif
@@ -97,10 +100,19 @@ void CMonsterTest::Render()
 
 void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-#ifdef _DEBUG
-	if(iLayer & ENUM_CLASS(COLLISIONLAYER::PLAYER))
-		cout << "Player On" << endl;
-#endif
+	//2025.10.27 플레이어 레이어 2번 호출됨
+	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+
+		m_isDetecting = true;
+		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+
+	}
+	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
+	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
+	else
+		m_isDetecting = false;
 }
 
 HRESULT CMonsterTest::Bind_Resources()
@@ -114,38 +126,19 @@ HRESULT CMonsterTest::Bind_Resources()
 
 void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 {
-
-	// Com_Rigidbody
-	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::MESH;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Static;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	//RigidbodyDesc.pModel = m_pModelCom;
-	//CRigidbody::CAPSULEBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::CAPSULE;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//RigidbodyDesc.fHeight = 10.f;
-	//RigidbodyDesc.fRadius = m_pGameInstance->Rand(5.f, 20.f);
-	//RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::VIRTUAL;
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
-
 	// Com_Rigidbody
 	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	RigidbodyDesc.vExtent = _float3(100.f, 40.f, 100.f);
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
+	RigidbodyDesc.vExtent = _float3(25.f, 13.f, 25.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	
 	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
 		CRASH("Rigidbody");
-	
+
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
@@ -153,10 +146,10 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.87f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 0.5f;
+	ColliderDesc.fHeight = 1.8f;
 	ColliderDesc.fRadius = 0.4f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
@@ -207,7 +200,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 		TEXT("MonsterTest/Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
-
+	
 }
 
 void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
@@ -224,9 +217,30 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 
 }
 
+void CMonsterTest::Reset_Condition()
+{
+	if(m_isAnimationFinished)
+		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	if(m_isDetecting)
+	{
+		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		_vector vDir = vTargetPos - vPosition;
+		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+		vDir = XMVector3Normalize(vDir);
+		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::LOOK)));
+		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::RIGHT)));
+#ifdef _DEBUG
+		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		cout << "distance: " << m_fDistance << endl;
+#endif
+	}
+
+}
+
 _bool CMonsterTest::isAttackEnable()
 {
-	return false;
+	return m_isDetecting;
 }
 
 _bool CMonsterTest::DodgeCooldown()
@@ -236,32 +250,32 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attadk1()
 {
-	return false;
+	return m_fDistance < 3.f;
 }
 
 _bool CMonsterTest::Attack2()
 {
-	return false;
+	return m_fDistance < 20.f;
 }
 
 _bool CMonsterTest::Back()
 {
-	return false;
+	return m_fFrontDot < 0.f;
 }
 
 _bool CMonsterTest::Front()
 {
-	return false;
+	return m_fFrontDot > 0.f;
 }
 
 _bool CMonsterTest::Left()
 {
-	return false;
+	return m_fRightDot < 0.f;
 }
 
 _bool CMonsterTest::Right()
 {
-	return false;
+	return m_fRightDot > 0.f;
 }
 
 CMonsterTest* CMonsterTest::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

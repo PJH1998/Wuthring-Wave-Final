@@ -47,7 +47,8 @@ namespace Client
 		CLICK, HOVER, SCROLL, END
 	};
 	
-	enum class TEST_STATE{
+	enum class  TEST_STATE : unsigned int
+	{
 		NONE				= 0,
 		MOVE_FORWARD		= 1 << 0,
 		MOVE_BACKWARD		= 1 << 1,
@@ -61,6 +62,7 @@ namespace Client
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
+		TURN				= 1 << 12,
 		BLOCK				= 1 << 14,
 		PARALYISIS			= 1 << 15,
 
@@ -72,6 +74,9 @@ namespace Client
 		ATTACK_6			= 1 << 21,
 		ATTACK_7			= 1 << 22,
 		ATTACK_8			= 1 << 23,
+		ATTACK_9			= 1 << 24,
+		ATTACK_10			= 1 << 25,
+		ATTACK_11			= 1 << 26,
 
 
 

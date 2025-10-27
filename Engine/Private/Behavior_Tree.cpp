@@ -132,17 +132,27 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 	case ACTION:
 	{
 		const NodeDat tData = m_NodesDatas[iIndex];
-		//Idle
+		
 		if(0 == tData.Conditions.ConditionName.length())
-			BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
-				return CBT_Node::BT_STATE::SUCCESS;
+			//Idle
+			if(0 == tData.iTargetState)
+			{
+				BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+					return CBT_Node::BT_STATE::SUCCESS;
+					});
+			}
+			//dead
+			else
+			{
+				BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+					if(pBlackBoard->Get_Condition("isAnimationRunning"))
+						return CBT_Node::BT_STATE::RUNNING;
+					_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+					if(*pState & tData.iTargetState)
+						return CBT_Node::BT_STATE::SUCCESS;
+					return CBT_Node::BT_STATE::FAILURE;
 				});
-		//else if(tData.Conditions.ConditionName.compare(""))
-		//{
-		//	BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
-		//		return CBT_Node::BT_STATE::SUCCESS;
-		//		});
-		//}
+			}
 		else
 			BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 			
