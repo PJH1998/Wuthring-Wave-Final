@@ -35,29 +35,31 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 
 	m_iHP = 1;
+
 	return S_OK;
 }
 
 void CMonsterTest::Priority_Update(_float fTimeDelta)
 {
-	
+	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CMonsterTest::Update(_float fTimeDelta)
 {
 	// 1. 행동트리로 상태 갱신
-	//m_pBehaviorTreeCom->tick(this);
+	m_pBehaviorTreeCom->tick(this);
 
 	//for(auto& Pair : m_PartObjects)
 	//	Pair.second->Update(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta);
-	m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	//m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 
-	//_vector vVelocity = m_pTransformCom->Get_Velocity();
-	//m_pColliderCom->Update(vVelocity / fTimeDelta);
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	m_pColliderCom->Update(vVelocity);
 	
 }
 
@@ -81,7 +83,7 @@ void CMonsterTest::Render()
 	for(_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-		//m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		m_pShaderCom->Begin(0);
 
 		m_pModelCom->Render(i);
@@ -132,32 +134,21 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
 	// Com_Rigidbody
-	//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	//RigidbodyDesc.eShape = SHAPE::BOX;
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	//RigidbodyDesc.vExtent = _float3(100.f, 40.f, 100.f);
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//
-	//if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
-	//	CRASH("Rigidbody");
-	//
-	//m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollide_During(iLayer, pDesc, Manifold);
-	//	});
-
-	// Com_Collider
-	//CCollider::COLLIDER_DESC ColliderDesc = {};
-	////XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//ColliderDesc.vPos = _float3(0.f, 0.f, 0.f);
-	//ColliderDesc.eType = EMotionType::Kinematic;
-	//ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-	//ColliderDesc.fHeight = 10.f;
-	//ColliderDesc.fRadius = 20.f; //m_pGameInstance->Rand(5.f, 20.f);
-	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
-	//	TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+	RigidbodyDesc.vExtent = _float3(100.f, 40.f, 100.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	
+	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+	
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_During(iLayer, pDesc, Manifold);
+		});
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -170,7 +161,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
-
+	
 	m_pColliderCom->Set_Desc(m_pTransformCom);
 
 
