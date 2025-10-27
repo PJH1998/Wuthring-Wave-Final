@@ -92,6 +92,8 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
+    if (!m_isActivate)
+        return;
 
     //__super::Begin();
     m_pAnimator_UICom->Render();    // Updates Shader Variables.

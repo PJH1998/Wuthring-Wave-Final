@@ -35,7 +35,10 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_ERROR                0           // 플래그를 주지 않았을 때의 초기값
 #define UIFLAG_COOLDOWN_CIRCLE      1           // 반시계방향으로 나타나는 쿨타임 구현용
 #define UIFLAG_COOLDOWN_RECT        2           // 단순 사각형에서 내려오는 쿨타임 구현용
-#define UIFLAG_END                  3
+#define UIFLAG_PLAYER_HP            3           // 플레이어 HP용
+#define UIFLAG_PLAYER_TRANSMIT      4  
+#define UIFLAG_END                  5
+
 uint g_iVariantFlag = UIFLAG_ERROR;
 
 
@@ -197,6 +200,50 @@ struct VS_OUT
 
 
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
+{
+    VS_OUT Out = (VS_OUT) 0;
+    // [ 인스턴싱용 ] 각 인스턴스별 Vertex 의 Out 정의
+    
+    float4x4 matWV, matWVP;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    
+    
+    float4x4 matAdditionalTransform = float4x4(
+        In.vSInstRight,
+        In.vSInstUp,
+        In.vSInstLook,
+        In.vSInstTrans
+    );
+    
+    float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
+    vWorldPos = mul(vWorldPos, matWVP);
+    
+    Out.vPosition = vWorldPos;
+    Out.vTexcoord = In.vTexcoord;
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    Out.vProjPos = Out.vPosition;
+    
+    Out.vSInstPos = In.vSInstTrans.xy;
+    Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+    // 이후 픽셀에서 사용
+    
+    // Pixel에서 사용 위해 바로 Output
+    Out.vSInstCoordX = In.vSInstCoordX;
+    Out.vSInstCoordY = In.vSInstCoordY;
+    Out.vClipTexcoordX = In.vClipTexcoordX;
+    Out.vClipTexcoordY = In.vClipTexcoordY;
+    Out.mExtra0 = In.mExtra0;
+    Out.mExtra1 = In.mExtra1;
+    Out.mExtra2 = In.mExtra2;
+    Out.mExtra3 = In.mExtra3;
+    
+    return Out;
+}
+
+
+VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
 {
     VS_OUT Out = (VS_OUT) 0;
     // [ 인스턴싱용 ] 각 인스턴스별 Vertex 의 Out 정의
@@ -576,15 +623,21 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
     
     
-    // bind variables
-    float fCooldown = In.mExtra0.x;     // 0 ~ 1. instance 0 은 e, 1 은 r 에 대응
+
     
     
     switch (g_iVariantFlag)
     {
         case UIFLAG_COOLDOWN_CIRCLE : // 1
         {
-            // circle cd
+            // ==============================
+            // * [1] Circle Cooldown
+            // ==============================
+            // * matrix info [size : 2] (skillbtn_e, skillbtn_r)
+            // [CDRATE] -
+            // ==============================
+            float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
             
@@ -619,24 +672,110 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         
         case UIFLAG_COOLDOWN_RECT   : // 2
         {
-            // rect cd. 
+            // ==============================
+            // * [2] Rect Cooldown (for PartyFrame)
+            // ==============================
+            // * matrix info [size : 3] (frame_rover, frame_augusta, frame_galbrena)
+            // [CDRATE] -
+            // ==============================
+            float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            
             // g_fLeftCDRate 가 1 일때는 어두운 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
             if (fixedUV.y < fCooldown)
             {
-                // 밝게 표시될 부분
+            // 밝게 표시될 부분
                 return Out;
             }
             else
             {
-                // 어둡게 표시될 부분
+            // 어둡게 표시될 부분
                 Out.vColor *= 0.8f;
                 return Out;
             }
+        }
+        case UIFLAG_PLAYER_HP:           // 3
+        {
+            // ==============================
+            // * [3] PlayerHP
+            // ==============================
+            // * matrix info [size : 2] (hp_background, hp_normal)
+            // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
+            // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
+            // [HPRATE] -
+            // ==============================
+            vector vColor1 = In.mExtra0.xyzw;
+            vector vColor2 = In.mExtra1.xyzw;
+            float fHPRatio = saturate(In.mExtra2.x);
             
+            // 9sector.. 
+            float2 vSize = {
+                length(g_WorldMatrix[0].xyz) * g_UIScale,
+                length(g_WorldMatrix[1].xyz) * g_UIScale,
+            };
             
+            float2 border = g_SectorBorder * g_UIScale;
+            float2 localPos = In.vTexcoord * vSize;
+                
+            float2 resultUV = Calc_NineSectorUV(localPos, vSize, border, g_ImageSize); // calced
+            float2 finalUV;
+            finalUV.x = lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, resultUV.x);
+            finalUV.y = lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, resultUV.y);
+            Out.vColor = g_Texture.Sample(DefaultSampler, finalUV);
+            // =====
+            
+            float2 HPclipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, 0.f),
+                                    lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, fHPRatio));
+            
+            if (fixedUV.x < HPclipX.x || fixedUV.x > HPclipX.y)
+                discard;
+            
+            //Out.vColor.rgb = vColor.rgb;
+            Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
+            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
+            
+            return Out;
         } break;
-        
+        case UIFLAG_PLAYER_TRANSMIT:      // 4
+        {
+            // ==============================
+            // * [4] PlayerEnergy
+            // ==============================
+            // * matrix info [size : 41 * 2] (energy * 41, background * 41)
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w] 
+            // [VISIBLE] [HEIGHT] -
+            // ==============================
+            vector vColor = In.mExtra0.wyzw;
+            bool isVisible = In.mExtra1.x != 0.f;
+            float fHeight = In.mExtra1.y;
+            // border는 다 같은 이미지 여러 개 쓸 테니 여기 말고 전역으로 받는게 좋을 듯
+            
+            // 픽셀 자체의 크기는 픽셀 셰이더에서 제어해야 할 듯
+            // 여기서는 height 값에 맞춰 9섹터만 지원하는 식으로
+            
+            if (!isVisible)
+                discard;
+            
+            // 9sector.. 
+            float2 vSize = {
+                length(g_WorldMatrix[0].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
+                length(g_WorldMatrix[1].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
+            };
+            
+            float2 border = g_SectorBorder * g_UIScale;
+            float2 localPos = In.vTexcoord * vSize;
+                
+            float2 resultUV = Calc_NineSectorUV(localPos, vSize, border, g_ImageSize); // calced
+            float2 finalUV;
+            finalUV.x = lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, resultUV.x);
+            finalUV.y = lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, resultUV.y);
+            Out.vColor = g_Texture.Sample(DefaultSampler, finalUV);
+            // =====
+            
+            Out.vColor.rgba *= vColor.rgba;  // 색상 추가
+            
+            return Out;
+        } break;
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
@@ -711,7 +850,7 @@ technique11 DefaultTechnique
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
 
-        VertexShader = compile vs_5_0 VS_INSTANCE();
+        VertexShader = compile vs_5_0 VS_INSTANCE_VARIANT();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_VARIENT_UI();
     }

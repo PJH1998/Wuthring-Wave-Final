@@ -31,9 +31,14 @@ private:
 	HRESULT					Ready_Components(void* pArg);
 
 private:
-	void					Update_Trigger(_float fTimeDelta);
+	void					Update_UI_Cooldown(_float fTimeDelta);
+	void					Update_UI_PlayerHPBar(_float fTimeDelta);
+	void					Update_UI_BossHPBar(_float fTimeDelta);
+	void					Update_UI_PlayerEnergyBar(_float fTimeDelta);
 	
 private:
+	_uint					m_iSelectedCHIndex = 0;
+	_uint					m_iEnergyBarMode = 0;
 
 public:
 	static CUI_HUD* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

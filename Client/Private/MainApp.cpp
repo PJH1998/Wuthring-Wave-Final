@@ -228,6 +228,7 @@ void CMainApp::Ready_Prototype_ForStatic()
 void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }

@@ -7,7 +7,6 @@
 
 //#define KSTA_UICLICKTEST
 #define KSTA_UIEVENTTEST
-#define KSTA_TESTDEL
 
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)
@@ -106,6 +105,9 @@ void CCustom_UI::Render()
 {
     if (!m_isActivate)
         return;
+
+    //if (m_tUIDesc.strUIName == L"Background_Dummy")
+    //    return;
 
     if (m_tUIDesc.strUIName == L"Skill_Rover")
         int i = 10;

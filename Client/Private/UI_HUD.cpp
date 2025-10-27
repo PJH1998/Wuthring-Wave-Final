@@ -2,6 +2,12 @@
 #include "UI_HUD.h"
 #include "Animator_UI.h"
 
+//#define KSTA_UI_COOLDOWNTEST
+//#define KSTA_UI_HPBARTEST
+//#define KSTA_UI_HPBARBOSSTEST
+#define KSTA_UI_ENERGYBARTEST
+
+
 // 얘는 오브젝트 매니저의 통제를 받음.
 // 자식들은 얘의 통제를 받음. 삭제 포함.
 CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -36,7 +42,8 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {   // 로드할 애니메이션은 여기에 추가
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
+        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
+
     };
     Load_Animations(vecAnimFilePaths);
 
@@ -53,7 +60,10 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
-    Update_Trigger(fTimeDelta);
+    Update_UI_Cooldown(fTimeDelta);
+    Update_UI_PlayerHPBar(fTimeDelta);
+    Update_UI_BossHPBar(fTimeDelta);
+    Update_UI_PlayerEnergyBar(fTimeDelta);
 
     Update_CombinedMatrix();
 
@@ -181,7 +191,7 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
     return S_OK;
 }
 
-void CUI_HUD::Update_Trigger(_float fTimeDelta)
+void CUI_HUD::Update_UI_Cooldown(_float fTimeDelta)
 {
     // 키보드를 눌러서 쿨타임이 도는 것을 테스트함.
 
@@ -196,12 +206,25 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
     //   이는 한 패스 내에서 여러 경우에 대응시키기 위해 준 플래그이며, Custom_UI가 들고있음.
     //   hlsl 내의 최상단에서 종류 확인 가능 (원형 쿨타임 UI인지, 사각형인지 등)
 
+    // - Variant 사용법
+    // 
+    // 1. 셰이더에서 Variant Pass 내 switch-case 문에 원하는 셰이더 제작
+    // 
+    // 2. 해당 효과를 사용할 UI에 CCustom_UI::VARIANTREADY_UI_DESC 만들어서
+    //   flag 정보와 사용할 정보 matVariantValues 에 포함하여 던짐 (인스턴스별로 정보를 적용해야 하기에 vector 컨테이너 사용)
+    //
+    // 3. pass는 반드시 Variant 로, flag 및 요구 인스턴스 갯수 잘 지정해주기
+
+
+    // 나중에 오른쪽에서부터 2~5개 내에서 유동적으로 변화 및 정렬되도록 하기
+    // 아우구스타 같은 캐릭터는 아이콘이 2개로 줄고 그런다는 듯
+
 
     enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
     enum HUD_SKILL_INDEX    { SK_E, SK_R, SK_END };
-    enum UIFLAG             { UIFLAG_ERR, UIFLAG_COOLDOWN_CIRCLE, UIFLAG_COOLDOWN_RECT, UIFLAG_END };
 
-    static _uint    iSelectedCHIndex = 0;
+    // ksta : 나중에 플레이어 정보 통합되면 거기로부터 받아올 정보
+                    m_iSelectedCHIndex;
     static _float   fSkillCD[CH_END][SK_END] = {};                                                  // left cooldown
     static _float   fChangeCD[CH_END] = {};                                                         // left cooldown
 
@@ -220,6 +243,14 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
         Find_ChildObject(L"Icon_Galbrena")
     };
 
+    static _bool    isFirstUpdate = true;               // Temp
+    if (isFirstUpdate)
+    {
+        isFirstUpdate = false;
+        pSkillUI[0]->Set_Active(true);
+        pSkillUI[1]->Set_Active(false);
+        pSkillUI[2]->Set_Active(false);
+    }
 
     for (auto& chCD : fSkillCD)                             // update cooldown
     {
@@ -235,50 +266,61 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
         cd -= fTimeDelta;
         if (cd <= 0) cd = 0;
     }
+    
+
+    switch (m_iSelectedCHIndex)
+    {
+    case CH_ROVER:
+        pSkillUI[0]->Set_Active(true);
+        pSkillUI[1]->Set_Active(false);
+        pSkillUI[2]->Set_Active(false);
+        break;
+    case CH_AUGUSTA:
+        pSkillUI[0]->Set_Active(false);
+        pSkillUI[1]->Set_Active(true);
+        pSkillUI[2]->Set_Active(false);
+        break;
+    case CH_GALBRENA:
+        pSkillUI[0]->Set_Active(false);
+        pSkillUI[1]->Set_Active(false);
+        pSkillUI[2]->Set_Active(true);
+        break;
+    }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::DOWN)           // trigger cooldowns
     {
         if (fChangeCD[0] == 0)
         {
-            iSelectedCHIndex = 0;
+            m_iSelectedCHIndex = 0;
             fChangeCD[0] = fMaxChangeCD[0];
-            pSkillUI[0]->Set_Active(true);
-            pSkillUI[1]->Set_Active(false);
-            pSkillUI[2]->Set_Active(false);
         }
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::DOWN)
     {
         if (fChangeCD[1] == 0)
         {
-            iSelectedCHIndex = 1;
+            m_iSelectedCHIndex = 1;
             fChangeCD[1] = fMaxChangeCD[1];
-            pSkillUI[0]->Set_Active(false);
-            pSkillUI[1]->Set_Active(true);
-            pSkillUI[2]->Set_Active(false);
         }
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_3) == KEYSTATE::DOWN)
     {
         if (fChangeCD[2] == 0)
         {
-            iSelectedCHIndex = 2;
+            m_iSelectedCHIndex = 2;
             fChangeCD[2] = fMaxChangeCD[2];
-            pSkillUI[0]->Set_Active(false);
-            pSkillUI[1]->Set_Active(false);
-            pSkillUI[2]->Set_Active(true);
         }
     }
 
     if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
     {
-        if (fSkillCD[iSelectedCHIndex][SK_E] == 0)
-            fSkillCD[iSelectedCHIndex][SK_E] = fMaxSkillCD[iSelectedCHIndex][SK_E];
+        if (fSkillCD[m_iSelectedCHIndex][SK_E] == 0)
+            fSkillCD[m_iSelectedCHIndex][SK_E] = fMaxSkillCD[m_iSelectedCHIndex][SK_E];
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
     {
-        if (fSkillCD[iSelectedCHIndex][SK_R] == 0)
-            fSkillCD[iSelectedCHIndex][SK_R] = fMaxSkillCD[iSelectedCHIndex][SK_R];
+        if (fSkillCD[m_iSelectedCHIndex][SK_R] == 0)
+            fSkillCD[m_iSelectedCHIndex][SK_R] = fMaxSkillCD[m_iSelectedCHIndex][SK_R];
     }
 
 
@@ -300,7 +342,7 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
-            UIFLAG_COOLDOWN_CIRCLE,
+            ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
             true
         };
 
@@ -318,7 +360,7 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
-            UIFLAG_COOLDOWN_RECT,
+            ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_RECT),
             true
         };
 
@@ -326,8 +368,294 @@ void CUI_HUD::Update_Trigger(_float fTimeDelta)
     }
 
 
-    std::cout << "[UI_HUD][Update_Trigger] E : " << fSkillCD[iSelectedCHIndex][SK_E] << std::endl;
-    std::cout << "[UI_HUD][Update_Trigger] R : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
+#ifdef KSTA_UI_COOLDOWNTEST
+    std::cout << "[UI_HUD][Update_UI_Cooldown] ============================== : " << std::endl;
+    std::cout << "[UI_HUD][Update_UI_Cooldown] 1 fChangeCD : " << fChangeCD[CH_ROVER] << std::endl;
+    std::cout << "[UI_HUD][Update_UI_Cooldown] 2 fChangeCD : " << fChangeCD[CH_AUGUSTA] << std::endl;
+    std::cout << "[UI_HUD][Update_UI_Cooldown] 3 fChangeCD : " << fChangeCD[CH_GALBRENA] << std::endl;
+    std::cout << "[UI_HUD][Update_UI_Cooldown] E fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_E] << std::endl;
+    std::cout << "[UI_HUD][Update_UI_Cooldown] R fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
+#endif // KSTA_UI_COOLDOWNTEST
+
+}
+
+void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
+{
+    // 플레이어의 HP 바를 갱신합니다.
+
+    // 1. 뒤따라오는 체력바까지 생각하여 인스턴스는 2종으로 사용함.
+    // 2. 색상은 셰이더를 통해, 원래 체력바와 뒤따라오는 체력바 2종을, 각각 2가지 색씩 사용하여 그라디언트되도록 구성
+
+    enum HUD_CHAR_INDEX { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
+    enum HUD_PLAYER_HPBAR { PLHP_BACK, PLHP_NORMAL, PLHP_END };
+
+    // ksta : 나중에 플레이어 정보 통합되면 거기로부터 받아올 정보
+    static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
+    static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
+    const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
+    static _bool isHit = false;
+    static _float fHPReduceLeftTime = 0.f;
+    
+
+    _float fPlayerHPRatio = fPlayerHP[m_iSelectedCHIndex] / fPlayerMaxHP[m_iSelectedCHIndex];
+    static _float fPlayerHPBackRatio = fPlayerHPRatio;
+
+    _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
+    _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
+
+    const _float fHPReduceTime = 0.5f;          // 줄어드는 소요시간은 0.5초정도?
+
+    const auto targetUI = Find_ChildObject(L"Inst_HPBar");
+
+
+    
+    if (fHPReduceLeftTime > 0)
+    {
+        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // 체력 비율 차이
+
+        if (diff > 0.f)
+        {
+            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // 줄어들 체력 비율
+
+            fPlayerHPBackRatio -= delta;                               
+            if (fPlayerHPBackRatio < fPlayerHPRatio)
+                fPlayerHPBackRatio = fPlayerHPRatio;
+        }
+
+        fHPReduceLeftTime -= fTimeDelta;
+        if (fHPReduceLeftTime < 0)
+            fHPReduceLeftTime = 0;
+    }
+    else
+    {
+        fPlayerHPBackRatio = fPlayerHPRatio;
+    }
+
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_P) == KEYSTATE::DOWN)       // [Test]
+    {
+        if (fPlayerHP[m_iSelectedCHIndex] == 0) fPlayerHP[m_iSelectedCHIndex] = fPlayerMaxHP[m_iSelectedCHIndex];
+        isHit = true;
+    }
+
+    if (isHit == true)
+    {
+
+        _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
+
+        // HP는 즉시 까임
+        fPlayerHP[m_iSelectedCHIndex] -= fRandDamage;
+        if (fPlayerHP[m_iSelectedCHIndex] < 0) fPlayerHP[m_iSelectedCHIndex] = 0;
+
+        fHPReduceLeftTime = fHPReduceTime;
+    }
+
+
+    // change
+    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11) = vHPColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11)    = vHPBackColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21) = vHPColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21)    = vHPBackColor;
+    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31)       = fPlayerHPRatio;
+    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31)     = fPlayerHPBackRatio;
+
+    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+        vecVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+        true
+    };
+    
+    targetUI->Set_VariantUIDesc(tVariantDesc);
+
+    isHit = false;
+
+
+
+#ifdef KSTA_UI_HPBARTEST
+    std::cout << "[UI_HUD][Update_UI_HPBar] ============================== : " << std::endl;
+    std::cout << "[UI_HUD][Update_UI_HPBar] 1 fPlayerHP     : " << fPlayerHPRatio << std::endl;
+    std::cout << "[UI_HUD][Update_UI_HPBar] 2 fPlayerHPBack : " << fPlayerHPBackRatio << std::endl;
+#endif // KSTA_UI_HPBARTEST
+
+}
+
+void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
+{
+
+
+
+    //if (pBoss == nullptr)
+    //    return;
+
+
+
+
+    enum HUD_BOSS_HPBAR{ BOHP_BACK, BOHP_NORMAL, BOHP_END };
+    enum HUD_BOSS_SABAR{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
+
+    // ksta : 나중에 보스 정보 통합되면 거기로부터 받아올 정보
+    static _float fBossHP = { 10000.f };            // boss hitpoint
+    static _float fBossBackHP = fBossBackHP;
+    const _float fBossMaxHP = { 10000.f };
+    
+    static _float fBossSA = { 4000.f };          // boss superarmor
+    static _float fBossBackSA = fBossSA;
+    const _float fBossMaxSA = { 4000.f };
+    static _bool isSABreak = false;
+
+
+
+
+    static _bool isHit = false;
+    static _float fHPReduceLeftTime = 0.f;
+
+    _float fBossHPRatio = fBossHP / fBossMaxHP;
+    _float fBossSARatio = fBossSA / fBossMaxSA;
+    static _float fBossHPBackRatio = fBossHPRatio;
+    static _float fBossSABackRatio = fBossSARatio;
+
+    const _float4 vHPColor1         = { 1.f, .7f, .1f, 1.f };
+    const _float4 vHPColor2         = { 1.f, .2f, .0f, 1.f };
+    const _float4 vHPBackColor1     = { .8f, .8f, .8f, 1.f };
+
+    const _float4 vSAColor          = { 1.f, 1.f, 1.f, 1.f };   // before armor break
+    const _float4 vSABreakColor     = { .9f, .8f, .3f, 1.f };
+    const _float4 vSABackColor      = { 1.f, 1.f, 1.f, .3f };   // after armor break
+    //const _float4 vSABreakBackColor = { .2f, .2f, .2f, 1.f };
+
+    const _float fHPReduceTime = 0.5f;          // 줄어드는 소요시간은 0.5초정도?
+
+    const auto targetUI = Find_ChildObject(L"Inst_BossHPBar");
+    const auto targetSAUI = Find_ChildObject(L"Inst_BossSABar");
+
+
+    if (fHPReduceLeftTime > 0)
+    {
+        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // 체력 비율 차이
+        _float fSADiff = fBossSABackRatio - fBossSARatio;              // 아머 비율 차이
+
+        if (fHPDiff > 0.f)
+        {
+            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // 줄어들 체력 비율
+
+            fBossHPBackRatio -= fHPDelta;
+            if (fBossHPBackRatio < fBossHPRatio)
+                fBossHPBackRatio = fBossHPRatio;
+        }
+        if (fSADiff > 0.f)
+        {
+            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // 줄어들 아머 비율
+
+            fBossSABackRatio -= fSADelta;
+            if (fBossSABackRatio < fBossSARatio)
+                fBossSABackRatio = fBossSARatio;
+        }
+
+        fHPReduceLeftTime -= fTimeDelta;
+        if (fHPReduceLeftTime < 0)
+            fHPReduceLeftTime = 0;
+    }
+    else
+    {
+        fBossHPBackRatio = fBossHPRatio;
+        fBossSABackRatio = fBossSARatio;
+    }
+
+
+    if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
+    {
+        if (fBossHP == 0) fBossHP = fBossMaxHP;
+        if (fBossSA == 0) fBossSA = fBossMaxSA;
+        isHit = true;
+    }
+
+    if (isHit == true)
+    {
+        _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
+        _float fRandSADamage = fRandDamage * 0.8f;
+
+        // HP는 즉시 까임
+        fBossHP -= fRandDamage;
+        fBossSA -= fRandSADamage;
+
+        if (fBossHP < 0) fBossHP = 0;
+        if (fBossSA < 0) fBossSA = 0;
+
+        fHPReduceLeftTime = fHPReduceTime;
+    }
+
+    // change
+    vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._11)    = vHPColor1;
+    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._11)      = vHPBackColor1;
+    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_NORMAL]._21)    = vHPColor2;
+    *reinterpret_cast<_float4*>(&vecVariantMat[BOHP_BACK]._21)      = vHPBackColor1;
+    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_NORMAL]._31)     = fBossHPRatio;
+    *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
+
+    vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)    = (isSABreak) ? vSABreakColor : vSAColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)  = vSABackColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21)    = (isSABreak) ? vSABreakColor : vSAColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)  = vSABackColor;
+    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)     = fBossSARatio;
+    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)   = fBossSABackRatio;
+
+
+    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+        vecVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+        true
+    };
+
+    CCustom_UI::VARIANTREADY_UI_DESC tVariantDescSA = {
+        vecVariantMatSA,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+        true
+    };
+
+    targetUI->Set_VariantUIDesc(tVariantDesc);
+    targetSAUI->Set_VariantUIDesc(tVariantDescSA);
+
+    isHit = false;
+
+
+
+#ifdef KSTA_UI_HPBARBOSSTEST
+    std::cout << "[UI_HUD][Update_UI_BossHPBar] ============================== : " << std::endl;
+    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossHP     : " << fBossHPRatio << std::endl;
+    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossHPBack : " << fBossHPBackRatio << std::endl;
+    std::cout << "[UI_HUD][Update_UI_BossHPBar] 1 fBossSA     : " << fBossSARatio << std::endl;
+    std::cout << "[UI_HUD][Update_UI_BossHPBar] 2 fBossSABack : " << fBossSABackRatio << std::endl;
+#endif // KSTA_UI_HPBARBOSSTEST
+
+
+
+}
+
+void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
+{
+    static _bool isFirstUpdate = true;
+
+    if (isFirstUpdate)
+    {
+        isFirstUpdate = false;
+        // 에너지바 캐릭터에 맞는걸로 교체
+
+
+
+    }
+
+
+
+
+
+#ifdef KSTA_UI_ENERGYBARTEST
+
+#endif // KSTA_UI_ENERGYBARTEST
+
+
 }
 
 CUI_HUD* CUI_HUD::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
