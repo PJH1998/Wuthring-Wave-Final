@@ -21,8 +21,8 @@ public:
 	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
 
 	// SetUp Target Pos, Offset Y
-	void							Update_Target(const _fvector& TargetPos, _float fOffsetY)
-	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; }
+	void							Update_Target(const _fvector& TargetPos, _float fOffsetY);
+
 	// Spring (Distance Adjust) - Lerp
 	// 목표 Distance, 도달 시간
 	void							Use_Spring(_float fDestination, _float fDuration)
@@ -49,8 +49,9 @@ public:
 	}
 
 public:
+	_float3 Get_TargetPos() { return m_vTargetPos; }
 	_vector Get_LookVector_NoPitch();
-	_vector Get_RightDirection_NoPitch();
+	_vector Get_RightVector_NoPitch();
 
 public:
 	virtual		HRESULT			Initialize_Prototype() override;
@@ -76,6 +77,7 @@ private:
 	_float							m_fFixedDistance = {};
 	_float							m_fLerpSpeed = {};
 	_float							m_fMinDistance = {};
+	_float							m_fMaxDistance = {};
 
 	// Spring
 	_float							m_fStiffness = {};		// Spring Force
@@ -85,7 +87,9 @@ private:
 	// Lock-On
 	vector<CTransform*>		m_TargetTransforms;
 	CTransform*				m_pTargetTransform = { nullptr };
-	_float							m_fLockOnOffsetY = {};
+	_float					m_fLockOnOffsetY = {};
+
+	_float3					m_vTargetPos = {};
 
 private:
 	// Default
@@ -105,6 +109,7 @@ private:
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
 
+	
 private:
 	void							Ready_Component();
 

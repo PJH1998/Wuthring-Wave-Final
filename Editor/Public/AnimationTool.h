@@ -29,6 +29,11 @@ public:
 	void Render();
 #pragma endregion
 
+public:
+	void Set_EffectContorller(class CEffect_Controller* pEffectController);
+	void Export_AnimationData(class CEffect_Controller* pEffectController);
+
+
 
 private:
 	// 1 Depth Menu
@@ -73,7 +78,7 @@ private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 	class CModelLoader* m_pLoader = { nullptr };
 	class CAnimNotifyTool* m_pAnimNotifyTool = { nullptr };
-	
+	class CEffect_Controller* m_pEffectController = { nullptr };
 
 	list<_string> m_ModelNames;
 	list<_string> m_ActorNames;

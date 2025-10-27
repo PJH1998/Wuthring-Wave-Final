@@ -103,7 +103,7 @@ void CLevel_Test::Ready_Layer_Player()
 
 void CLevel_Test::Ready_Dummy()
 {
-	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 0.f, 20.f), XMMatrixScaling(0.001f, 0.001f, 0.001f));
+	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 5.f, 50.f), XMMatrixScaling(0.0001f, 0.0001f, 0.0001f));
 }
 
 void CLevel_Test::Ready_MonsterTest()

@@ -228,7 +228,7 @@ void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 #pragma endregion
 
 #pragma region FONT_MANAGER
-HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _tchar* pFilePath)
+HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePath)
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath);
 }
@@ -748,6 +748,8 @@ HRESULT CGameInstance::Clear_Memory()
 
 void CGameInstance::Release_Engine()
 {
+	Wait_Thread_End();
+
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);

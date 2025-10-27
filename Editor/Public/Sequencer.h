@@ -3,26 +3,164 @@
 
 NS_BEGIN(Editor)
 
+struct RampEdit : public ImCurveEdit::Delegate
+{
+	RampEdit()
+	{
+		mPoints[0].push_back(ImVec2(20.f, 0.5f));
+		//mPts[0][0] = ImVec2(20.f, 0.5f);
+		//mPts[0][1] = ImVec2(20.f, 0.6f);
+		//mPts[0][2] = ImVec2(25.f, 0.2f);
+		//mPts[0][3] = ImVec2(70.f, 0.4f);
+		//mPts[0][4] = ImVec2(120.f, 1.f);
+		mPointCount[0] = 1;
+		
+		//mPts[1][0] = ImVec2(-50.f, 0.2f);
+		//mPts[1][1] = ImVec2(33.f, 0.7f);
+		//mPts[1][2] = ImVec2(80.f, 0.2f);
+		//mPts[1][3] = ImVec2(82.f, 0.8f);
+		mPointCount[1] = 0;
+		//
+		//
+		//mPts[2][0] = ImVec2(40.f, 0);
+		//mPts[2][1] = ImVec2(60.f, 0.1f);
+		//mPts[2][2] = ImVec2(90.f, 0.82f);
+		//mPts[2][3] = ImVec2(150.f, 0.24f);
+		//mPts[2][4] = ImVec2(200.f, 0.34f);
+		//mPts[2][5] = ImVec2(250.f, 0.12f);
+		mPointCount[2] = 0;
+		mbVisible[0] = mbVisible[1] = mbVisible[2] = true;
+		mMax = ImVec2(1.f, 1.f);
+		mMin = ImVec2(0.f, 0.f);
+	}
+	size_t GetCurveCount()
+	{
+		return 3;
+	}
+
+	bool IsVisible(size_t curveIndex)
+	{
+		return mbVisible[curveIndex];
+	}
+	size_t GetPointCount(size_t curveIndex)
+	{
+		return mPoints[curveIndex].size();
+		//return mPointCount[curveIndex];
+	}
+
+	uint32_t GetCurveColor(size_t curveIndex)
+	{
+		uint32_t cols[] = { 0xFF0000FF, 0xFF00FF00, 0xFFFF0000 };
+		return cols[curveIndex];
+	}
+	ImVec2* GetPoints(size_t curveIndex)
+	{
+		return mPoints[curveIndex].data();
+		//return mPts[curveIndex];
+	}
+	virtual ImCurveEdit::CurveType GetCurveType(size_t curveIndex) const { return ImCurveEdit::CurveSmooth; }
+	virtual int EditPoint(size_t curveIndex, int pointIndex, ImVec2 value)
+	{
+		mPoints[curveIndex][pointIndex] = ImVec2(value.x, value.y);
+		SortValues(curveIndex);
+		for (size_t i = 0; i < GetPointCount(curveIndex); i++)
+		{
+			if (mPoints[curveIndex][i].x == value.x)
+				return (int)i;
+		}
+		return pointIndex;
+	}
+	virtual void AddPoint(size_t curveIndex, ImVec2 value)
+	{
+		//if (mPointCount[curveIndex] >= 8)
+		//	return;
+		//mPts[curveIndex][mPointCount[curveIndex]++] = value;
+		mPoints[curveIndex].push_back(value);
+		SortValues(curveIndex);
+	}
+	virtual ImVec2& GetMax() { return mMax; }
+	virtual ImVec2& GetMin() { return mMin; }
+	virtual unsigned int GetBackgroundColor() { return 0; }
+
+	ImVec2		mPts[3][8];
+	vector<ImVec2>	mPoints[3];
+	size_t			mPointCount[3];
+	_bool			mbVisible[3];
+	ImVec2		mMin;
+	ImVec2		mMax;
+
+private:
+	void SortValues(size_t curveIndex)
+	{
+		//auto b = std::begin(mPts[curveIndex]);
+		//auto e = std::begin(mPts[curveIndex]) + GetPointCount(curveIndex);
+		auto b = std::begin(mPoints[curveIndex]);
+		auto e = std::begin(mPoints[curveIndex]) + GetPointCount(curveIndex);
+		std::sort(b, e, [](ImVec2 a, ImVec2 b) { return a.x < b.x; });
+	}
+};
+
 class CSequencer : public CBase, ImSequencer::SequenceInterface
 {
 public:
-	enum class ITEM_TYPE { CAMERA, SOUND, SCREEN, OBJECT };
+	enum class ITEM_TYPE { CAMERA, SOUND, SCREEN, OBJECT, END };
 
 	typedef struct tagSequenceItem {
 		ITEM_TYPE		eType;								// Sequence Item Type
 		_int				iFrameStart{}, iFrameEnd{};		// Frame Start / End
 		_bool				isExpanded{};						// Can Expand
+		_char				szItemLabel[MAX_PATH] = {};
+		RampEdit		mRampEdit;
+		tagSequenceItem(_int iType , _int _iFrameStart, _int _iFrameEnd, _bool _isExpanded, const _char* pLabel)
+			: iFrameStart {_iFrameStart}, iFrameEnd {_iFrameEnd}, isExpanded {_isExpanded}
+		{
+			strcpy_s(szItemLabel, MAX_PATH, pLabel);
+			switch (iType)
+			{
+			case ENUM_CLASS(ITEM_TYPE::CAMERA):
+				eType = ITEM_TYPE::CAMERA;
+				break;
+			case ENUM_CLASS(ITEM_TYPE::SOUND):
+				eType = ITEM_TYPE::SOUND;
+				break;
+			case ENUM_CLASS(ITEM_TYPE::SCREEN):
+				eType = ITEM_TYPE::SCREEN;
+				break;
+			case ENUM_CLASS(ITEM_TYPE::OBJECT):
+				eType = ITEM_TYPE::OBJECT;
+				break;
+			}
+		}
 	}SEQUENCE_ITEM;
+
+	typedef struct tagCustomDraw {
+		_int iIndex = {};
+		ImRect CustomRect;
+		ImRect LegendRect;
+		ImRect ClippingRect;
+		ImRect LegendClippingRect;
+		tagCustomDraw(_int _iIndex, const ImRect& _CustomRect, const ImRect& _LegendRect, const ImRect& _ClippingRect, const ImRect& _LegendClippingRect)
+			: iIndex { _iIndex }, CustomRect { _CustomRect }, LegendRect { _LegendRect }, ClippingRect { _ClippingRect }, LegendClippingRect { _LegendClippingRect }
+		{}
+	}CUSTOM_DRAW;
 
 private:
 	explicit CSequencer();
 	virtual ~CSequencer() = default;
 
 public:
-	_int	GetFrameMin() const override { return m_iFrameMin; }
-	_int	GetFrameMax() const override { return m_iFrameMax; }
-	_int	GetItemCount() const override { return m_Items.size(); }
-	void	Get(_int index, _int** start, _int** end, _int* type, _uint* color) override;
+	_int							GetFrameMin() const override { return m_iFrameMin; }
+	_int							GetFrameMax() const override { return m_iFrameMax; }
+	_int							GetItemCount() const override { return m_Items.size(); }
+	// Item Info Get
+	void							Get(_int index, _int** start, _int** end, _int* type, _uint* color) override;
+
+	virtual void					Add(_int iType) override;
+	virtual const _char*		GetItemTypeName(_int iIndex) const override;
+	virtual size_t					GetCustomHeight(_int iIndex) { return m_Items[iIndex].isExpanded ? 300 : 0; }
+
+	void							CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect);
+	void							CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& clippingRect);
 
 public:
 	HRESULT							Initialize();
@@ -30,9 +168,21 @@ public:
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };
+	ImGuiIO							io;
+	//RampEdit						m_RampEdit;
+	// Custom Draw Label
+	const _char*						m_pCustomDrawLabel[3] = {"Translation", "Rotation", "Scale"};
+
+	// Sequence Option
+	_int								m_iSequenceOption = {};
 
 	// DrawList
 	ImDrawList*						m_pDrawList = { nullptr };
+
+	// Canvas
+	_bool								m_isExpanded = { true };
+	ImVec2							m_vCanvasPos = {};
+	ImVec2							m_vCanvasSize = {};
 
 	// Frame Min / Max
 	_int								m_iFrameMin{}, m_iFrameMax{};
@@ -41,26 +191,86 @@ private:
 	vector<SEQUENCE_ITEM>	m_Items;
 	_int								m_iFirstFrame = {};
 
+	// Content
+	ImVec2							m_vContentMin = {};
+	ImVec2							m_vContentMax = {};
+	ImRect							m_ContentRect = {};
+	_float								m_fContentHeight = {};
+
 	// Draw Frame
 	_float								m_fFramePixelWidth = { 10.f };
 	_float								m_fFramePixelWidthTarget = { 10.f };
 	_int								m_iItemHeight = { 20 };						// Item 1개 당 Height
 	_int								m_iLegendWidth = { 200 };					// 범례(표시 내용) Width
 
+	ImVec2							m_vChildFramePos = {};
+	ImVec2							m_vChildFrameSize = {};
+
+	// Moving
 	_int								m_iMovingEntry = { -1 };
 	_int								m_iMovingPos = { -1 };
 	_int								m_iMovingPart = { -1 };
-
 	_bool								m_isMovingScrollBar = { false };
 	_bool								m_isMovingCurrentFrame = { false };
+	_bool								m_isRet = { false };
 
+	// Panning
 	_bool								m_isPanningView = { false };
 	ImVec2							m_vPanningViewSource = {};
 	_int								m_iPanningViewFrame = {};
 
+	// Entry
+	_int								m_iSelectedEntry = {-1};						// Select Entry(항목)
+	_int								m_iDelEntry = { -1 };
+	_int								m_iDupEntry = { -1 };
+	
+	// PopUp
+	_bool								m_isPopUp = { false };
+
+	// Header
+	_int								m_iModFrameCnt = { 10 };
+	_int								m_iHalfModFrameCnt = {};
+	_int								m_iFrameStep = { 1 };
+
+	// Custom Draw
+	vector<CUSTOM_DRAW>	m_CustomDraws;
+	vector<CUSTOM_DRAW>	m_CompactCustomDraws;
+
+	// Cursor
+	_float								m_fCursorWidth = { 8.f };
+
+	// ScrollBar
+	_bool								m_isScrollBar = { true };
+	_int								m_iVisibleFrameCnt = {};
+	_float								m_fBarWidthRatio = {};
+	_float								m_fBarWidthInPixels = {};
+	_bool								m_isSizingRightBar = { false };
+	_bool								m_isSizingLeftBar = { false };
+	_float								m_fMinBarWidth = {};
+
 private:
+	// Selectable Item
+	void								Selectable_Item();
+	void								Sorting_Item();
+	
+	// GUI
 	void								Drawing();
 	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => 화면 좌우 이동)
+	void								Expand(_int iControllHeight);	// Canvas Expand
+	void								DrawFrame();						// Sequence 프레임
+	void								DrawLegend();						// List
+	void								DrawSlot();							// Slot (Item)
+	void								Moving();							// Item Duration 조절 (Left, Right 잡아당기기)		
+	void								Cursor();								// Cursor (Frame 화면 붉은 선)
+	void								CopyPaste();							// Copy / Paste
+	void								ScrollBar();							// ScrollBar
+
+	// Header
+	void								DrawLine(_int iFrame, _int iRegionHeight);
+	void								DrawLineContent(_int iFrame, _int iRegionHeight);
+
+private:
+	_bool								SequencerAddDelButton(ImVec2 vPos, _bool isAdd = true);
 
 public:
 	static		CSequencer*	Create();

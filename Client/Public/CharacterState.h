@@ -16,6 +16,11 @@ public:
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
+public:
+    // LockOn 방향 계산
+    _vector Calculate_Attack_Direction(class CCharacter* pCharacter);
+    _vector Determine_Final_Direction(class CCharacter* pCharacter, _vector vInputDirection, _vector vLockOnDirection);
+
 protected:
     _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta);
 
@@ -25,6 +30,9 @@ protected:
 
     _float3 m_vWallNormal = {}; // 정면 방향 WallNormal
     _float3 m_vLandNormal = {};
+    _uint m_iPartType = {}; // 현재 State에서 실행해야할 PartType;
+
+    class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
 
 public:
     virtual void Free() override;

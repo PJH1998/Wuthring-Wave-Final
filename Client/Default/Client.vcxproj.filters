@@ -304,7 +304,7 @@
     <ClInclude Include="..\Public\AugustaGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaGroundSprint.h">
+    <ClInclude Include="..\Public\AugustaGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaGroundAttack.h">
@@ -477,7 +477,7 @@
     <ClCompile Include="..\Private\AugustaGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
+    <ClCompile Include="..\Private\AugustaGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp">
