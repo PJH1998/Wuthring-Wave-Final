@@ -17,6 +17,7 @@ class CMonsterTest final : public CActor
 public:
 	typedef struct tagMonsterTestDesc : public CActor::ACTOR_DESC
 	{
+		_float3 vInitPosition;
 		const _char* pAnimationTag;
 	}MONSTERTEST_DESC;
 
@@ -49,7 +50,7 @@ private:
 	_bool					m_isAnimationFinished{};
 
 private:
-	HRESULT						Bind_ShaderResources();
+	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 

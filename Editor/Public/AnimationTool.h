@@ -107,8 +107,9 @@ private:
 	_float m_iTransitionEnablePos{};
 
 	//AnimState Data
-	_bool m_isBlend;
 	_bool m_isRootMotion;
+	_bool	m_isRootMotionRotate{};
+	_bool	m_isRootMotionTranslate{};
 	_bool m_isLoopCheck;
 	_float m_fRootMotionRate;
 	_float m_fTransitTrackPos;

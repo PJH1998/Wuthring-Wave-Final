@@ -78,7 +78,7 @@ void* CBlackBoard::Get_Data(const _string& strDataTag)
 
 HRESULT CBlackBoard::Add_Condition(const _string& stFuncTag, function<_bool()> Condition)
 {
-	if(!Find_Condition(stFuncTag))
+	if(Find_Condition(stFuncTag))
 		return E_FAIL;
 
 	m_Conditions.emplace(make_pair(stFuncTag, Condition)); 
@@ -87,7 +87,7 @@ HRESULT CBlackBoard::Add_Condition(const _string& stFuncTag, function<_bool()> C
 
 _bool CBlackBoard::Get_Condition(const _string& strFuncTag)
 {
-	if(Find_Condition(strFuncTag))
+	if(!Find_Condition(strFuncTag))
 		CRASH(m_Conditions.find(strFuncTag))
 
 	return m_Conditions[strFuncTag]();
@@ -95,15 +95,28 @@ _bool CBlackBoard::Get_Condition(const _string& strFuncTag)
 
 _bool CBlackBoard::Necessary_Key_Check(vector<_string>& RequireKey)
 {
-	for(auto& strKey : RequireKey)
-		if(Find_Data(strKey))
-			return true;
+	auto iter = RequireKey.begin();
+	while(iter != RequireKey.end())
+	{
+		if(Find_Data(*iter))
+		{
+			iter = RequireKey.erase(iter);
+		}
+		else
+			iter++;
+	}
 
-	for(auto& strKey : RequireKey)
-		if(Find_Condition(strKey))
-			return true;
-
-	return false;
+	iter = RequireKey.begin();
+	while(iter != RequireKey.end())
+	{
+		if(Find_Condition(*iter))
+		{
+			iter = RequireKey.erase(iter);
+		}
+		else
+			iter++;
+	}
+	return RequireKey.empty();
 }
 
 #ifdef _DEBUG

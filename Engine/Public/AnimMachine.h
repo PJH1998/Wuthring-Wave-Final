@@ -36,8 +36,9 @@ public:
 	void Create_AnimStates(const vector<_string>& AnimationNames);
 	void Clear_States();
 	void Reset_StateData(_string& strAnimName,
-						_bool isBlend,
 						_bool isRootMotion,
+						_bool isRootMotionRotate,
+						_bool isRootMotionTranslate,
 						_bool isLoop,
 						_float fRootMotionRate,
 						_float fTransitTrackPos,
@@ -53,7 +54,18 @@ private:
 	_string m_strCurrentAnimTag;
 	//vector<class CAnimState*> m_AnimStates;
 	map<_string, class CAnimState*> m_AnimStates;
-	_uint m_iCurrentStateIndex{};
+	//_uint m_iCurrentStateIndex{};
+
+	_float m_fCurrentTrackPositon{};
+
+	//상황에 따른 변동 변수
+	_bool	m_isRootMotion{};
+	_bool	m_isRootMotionRotate{};
+	_bool	m_isRootMotionTranslate{};
+	_bool	m_isLoop{};
+	_float	m_fRootMotionRate{};
+	_float	m_fTransitTrackPos{};
+	_float	m_fAnimationSpeed{};
 
 public:
 #ifdef _DEBUG

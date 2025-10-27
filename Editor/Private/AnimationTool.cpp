@@ -410,9 +410,10 @@ void CAnimationTool::RenderUI_OptionState()
             }
             if(m_pAnimMachineCom->Render_CurrentStateGUI(m_SelectedFromStateTag))
             {
-                ImGui::Checkbox("isBlend", &m_isBlend);
-                ImGui::SameLine();
                 ImGui::Checkbox("isRootMotion", &m_isRootMotion);
+                ImGui::SameLine();
+                ImGui::Checkbox("isRootMotionRotate", &m_isRootMotionRotate);
+                ImGui::Checkbox("isRootMotionTranslate", &m_isRootMotionTranslate);
                 ImGui::SameLine();
                 ImGui::Checkbox("isLoop", &m_isLoopCheck);
                 ImGui::InputFloat("RootMotionRate", &m_fRootMotionRate);
@@ -422,7 +423,7 @@ void CAnimationTool::RenderUI_OptionState()
 
             if(ImGui::Button("Reset Data"))
             {
-                m_pAnimMachineCom->Reset_StateData(m_SelectedFromStateTag, m_isBlend, m_isRootMotion, m_isLoopCheck, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
+                m_pAnimMachineCom->Reset_StateData(m_SelectedFromStateTag, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_isLoopCheck, m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
             }
 
             Export_StateTransition_To_CSV();

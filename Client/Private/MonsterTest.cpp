@@ -27,19 +27,20 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 		return E_FAIL;*/
 	
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
+
+	m_pTransformCom->Scale(_float3(0.01f, 0.01f, 0.01f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
+
 	//Ready_PartObjects(pDesc);
 	Ready_Component(pDesc);
 
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, 0.f, 1.f));
 	m_iHP = 1;
 	return S_OK;
 }
 
 void CMonsterTest::Priority_Update(_float fTimeDelta)
 {
-
-	//for(auto& Pair : m_PartObjects)
-	//	Pair.second->Priority_Update(fTimeDelta);
+	
 }
 
 void CMonsterTest::Update(_float fTimeDelta)
@@ -52,10 +53,10 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 
-	// 
-	//m_isAnimationFinished = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelta, nullptr);
-	//m_pColliderCom->Update(vVelocity);
+	//_vector vVelocity = m_pTransformCom->Get_Velocity();
+	//m_pColliderCom->Update(vVelocity / fTimeDelta);
 	
 }
 
@@ -64,12 +65,14 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
 	//for(auto& Pair : m_PartObjects)
 	//	Pair.second->Late_Update(fTimeDelta);
+
+	m_pColliderCom->Sync_Position(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMonsterTest::Render()
 {
-	if(FAILED(Bind_ShaderResources()))
+	if(FAILED(Bind_Resources()))
 		CRASH("Falied to Bind Resources");
 
 
@@ -84,16 +87,20 @@ void CMonsterTest::Render()
 	}
 
 #ifdef _DEBUG
-	//m_pRigidbodyCom->Render();
+	//m_pRigidBodyCom->Render();
+	m_pColliderCom->Render();
 #endif
 }
 
 void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-
+#ifdef _DEBUG
+	if(iLayer & ENUM_CLASS(COLLISIONLAYER::PLAYER))
+		cout << "Player On" << endl;
+#endif
 }
 
-HRESULT CMonsterTest::Bind_ShaderResources()
+HRESULT CMonsterTest::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
@@ -124,21 +131,21 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
 	// Com_Rigidbody
-	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::BOX;
-	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
-		CRASH("Rigidbody");
-
-	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollide_During(iLayer, pDesc, Manifold);
-		});
+	//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	//RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	//RigidbodyDesc.eShape = SHAPE::BOX;
+	//RigidbodyDesc.eType = EMotionType::Kinematic;
+	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+	//RigidbodyDesc.vExtent = _float3(100.f, 40.f, 100.f);
+	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//
+	//if(FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
+	//	CRASH("Rigidbody");
+	//
+	//m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	//	OnCollide_During(iLayer, pDesc, Manifold);
+	//	});
 
 	// Com_Collider
 	//CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -154,12 +161,12 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 0.f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 0.87f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 10.f;
-	ColliderDesc.fRadius = 20.f; //m_pGameInstance->Rand(5.f, 20.f);
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
+	ColliderDesc.fHeight = 0.5f;
+	ColliderDesc.fRadius = 0.4f;
+	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
 
@@ -191,7 +198,6 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 #pragma region BlackBoard_Value_&_Condition
 	CBlackBoard* pBlackBoard = CBlackBoard::Create();
 	pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
-	//pBlackBoard->Add_Data("isAnimationFinished", CBlackBoard::DATA_TYPE::BOOL, &m_isAnimationFinished);
 	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
@@ -298,6 +304,4 @@ void CMonsterTest::Free()
 
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
-	//Safe_Release(m_pRigidbodyCom);
-	//Safe_Release(m_pColliderCom);
 }

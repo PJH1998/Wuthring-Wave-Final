@@ -12,6 +12,7 @@ CBehavior_Tree::CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 CBehavior_Tree::CBehavior_Tree(const CBehavior_Tree& Prototype)
 	:CComponent { Prototype }
 	,m_pRoot { Prototype.m_pRoot }
+	,m_RequireKey { Prototype.m_RequireKey }
 {
 	Safe_AddRef(m_pRoot);
 }
@@ -136,6 +137,12 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 			BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 				return CBT_Node::BT_STATE::SUCCESS;
 				});
+		//else if(tData.Conditions.ConditionName.compare(""))
+		//{
+		//	BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+		//		return CBT_Node::BT_STATE::SUCCESS;
+		//		});
+		//}
 		else
 			BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 			
