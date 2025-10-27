@@ -28,6 +28,13 @@ void CEffect_Controller::Update()
 {
     Prefab_Tab();
 
+    //const _float4x4* pBoneMatrix = { nullptr };
+    //// 사용법.
+    //if (m_AnimActorDesc.pAnimActor)
+    //    pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix("Bone_Skirt051_M");
+    //
+    //int x = 10;
+
 }
 
 void CEffect_Controller::Render()

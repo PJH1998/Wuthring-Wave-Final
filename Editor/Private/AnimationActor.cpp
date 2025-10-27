@@ -256,7 +256,7 @@ const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)
     if (nullptr == m_pModelCom)
     {
         MSG_BOX("Model nullptr");
-        return;
+        return nullptr;
     }
         
     const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
@@ -264,7 +264,7 @@ const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)
     if (nullptr == pBoneMatrix)
     {
         MSG_BOX("Bone Name Error");
-        return;
+        return nullptr;
     }
 
     return pBoneMatrix;
