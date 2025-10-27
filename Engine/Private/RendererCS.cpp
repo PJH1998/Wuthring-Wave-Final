@@ -100,7 +100,7 @@ HRESULT CRendererCS::Debug_Render(const _wstring& strRCS_Name)
 {
 	ImGui::Begin(WStringToString(strRCS_Name).c_str());
 
-	ImGui::Image(reinterpret_cast<ImTextureID>( m_pComputeSRV ), ImVec2(300.f, 300.f));
+	ImGui::Image(reinterpret_cast<ImTextureID>( m_pComputeSRV ), ImVec2(500.f, 500.f));
 
 	ImGui::End();
 
@@ -142,9 +142,13 @@ HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT 
 	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
 		return E_FAIL;
 
+	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 
+	UAVDesc.Format = TextureDesc.Format;
+	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	UAVDesc.Texture2D.MipSlice = 0;
 
-	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pTexture2D, nullptr, &m_UAV.second)))
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pTexture2D, &UAVDesc, &m_UAV.second)))
 		return E_FAIL;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
@@ -185,6 +189,7 @@ void CRendererCS::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pComputeShader);
 
 	for (auto& Pair : m_Buffers)
 		Safe_Release(Pair.second.second);

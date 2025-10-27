@@ -12,5 +12,5 @@ float g_fLUT_Size = 16.f;
 
 int g_iSampleSize = 8;
 
-float g_fSSAO_Radius = 15.f;
+float g_fSSAO_Radius = 1.f;
 float g_fSSAO_MaxDistance = 50.f;

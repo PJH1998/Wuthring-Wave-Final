@@ -16,6 +16,9 @@ private:
 	virtual ~CRCS_Manager() = default;
 
 public:
+	ID3D11ShaderResourceView* Get_RCS_SRV(const _wstring& strRCSTag);
+
+public:
 	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
 	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);

@@ -71,17 +71,17 @@ HRESULT CCSM::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const
 {
 	ASSERT_CRASH(pShader);
 
+	if (nullptr != pLightDirName && nullptr != m_pLightDesc)	// Renderer 호출용
+	{
+		if (FAILED(pShader->Bind_Value(pLightDirName, &m_pLightDesc->vDirection, sizeof(_float4))))
+			CRASH("Failed Light Dir");
+	}
+	
 	if (FAILED(pShader->Bind_Matrices(pViewName, &m_Matrices[ENUM_CLASS(D3DTS::VIEW)][0], m_iNumClip)))
 		CRASH("Failed CSM View Matrices");
 	
 	if (FAILED(pShader->Bind_Matrices(pProjName, &m_Matrices[ENUM_CLASS(D3DTS::PROJ)][0], m_iNumClip)))
 		CRASH("Failed CSM PROJ Matrices");
-
-	if(nullptr != pLightDirName && nullptr != m_pLightDesc)
-	{
-		if (FAILED(pShader->Bind_Value(pLightDirName, &m_pLightDesc->vDirection, sizeof(_float4))))
-			CRASH("Failed Light Dir");
-	}
 
 	return S_OK;
 }
@@ -105,7 +105,9 @@ HRESULT CCSM::Begin_CSM()
 
 	m_pContext->ClearDepthStencilView(m_pShadowDSV, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
-	m_pContext->OMSetRenderTargets(0, nullptr, m_pShadowDSV);
+	ID3D11RenderTargetView* pRTV = { nullptr };
+
+	m_pContext->OMSetRenderTargets(1, &pRTV, m_pShadowDSV);
 
 	return S_OK;
 }
