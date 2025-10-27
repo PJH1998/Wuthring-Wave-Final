@@ -47,37 +47,40 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 	}
 }
 
-void CSequencer::CustomDraw(_int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
+void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
 {
-	m_RampEdit.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
-	m_RampEdit.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	delegate.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
 	m_pDrawList->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
 
 	for (_int i = 0; i < 3; ++i)
 	{
 		ImVec2 ptA(legendRect.Min.x + 30, legendRect.Min.y + i * 14.f);
 		ImVec2 ptB(legendRect.Max.x, legendRect.Min.y + (i + 1) * 14.f);
-		m_pDrawList->AddText(ptA, m_RampEdit.mbVisible[i] ? 0xFFFFFFFF : 0x80FFFFFF, m_pCustomDrawLabel[i]);
+		m_pDrawList->AddText(ptA, delegate.mbVisible[i] ? 0xFFFFFFFF : 0x80FFFFFF, m_pCustomDrawLabel[i]);
 		if (ImRect(ptA, ptB).Contains(ImGui::GetMousePos()) && ImGui::IsMouseClicked(0))
-			m_RampEdit.mbVisible[i] = !m_RampEdit.mbVisible[i];
+			delegate.mbVisible[i] = !delegate.mbVisible[i];
 	}
 
 	m_pDrawList->PopClipRect();
 
-	ImGui::SetCursorScreenPos(customRect.Min);
-	ImCurveEdit::Edit(m_RampEdit, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+	if (m_iSelectedEntry == iIndex)
+	{
+		ImGui::SetCursorScreenPos(customRect.Min);
+		ImCurveEdit::Edit(delegate, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+	}
 }
 
-void CSequencer::CustomDrawCompact(_int iIndex, const ImRect& customRect, const ImRect& clippingRect)
+void CSequencer::CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& clippingRect)
 {
-	m_RampEdit.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
-	m_RampEdit.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	delegate.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
 	m_pDrawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
 	for (_int i = 0; i < 3; ++i)
 	{
-		for (_uint j = 0; j < m_RampEdit.mPointCount[i]; ++j)
+		for (_uint j = 0; j < delegate.mPointCount[i]; ++j)
 		{
-			_float fFrame = m_RampEdit.mPts[i][j].x;
+			_float fFrame = delegate.mPoints[i][j].x;
 			if (fFrame < m_Items[iIndex].iFrameStart || fFrame > m_Items[iIndex].iFrameEnd)
 				continue;
 			_float fRatio = (fFrame - m_iFrameMin) / static_cast<_float>(m_iFrameMax - m_iFrameMin);
@@ -331,10 +334,10 @@ void CSequencer::DrawFrame()
 
 	// Custom Draw
 	for (auto& customDraw : m_CustomDraws)
-		CustomDraw(customDraw.iIndex, customDraw.CustomRect, customDraw.LegendRect, customDraw.ClippingRect, customDraw.LegendClippingRect);
+		CustomDraw(m_Items[customDraw.iIndex].mRampEdit, customDraw.iIndex, customDraw.CustomRect, customDraw.LegendRect, customDraw.ClippingRect, customDraw.LegendClippingRect);
 
 	for (auto& customDraw : m_CompactCustomDraws)
-		CustomDrawCompact(customDraw.iIndex, customDraw.CustomRect, customDraw.ClippingRect);
+		CustomDrawCompact(m_Items[customDraw.iIndex].mRampEdit, customDraw.iIndex, customDraw.CustomRect, customDraw.ClippingRect);
 
 
 	CopyPaste();
