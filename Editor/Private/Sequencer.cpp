@@ -25,7 +25,11 @@ void CSequencer::Get(_int index, _int** start, _int** end, _int* type, _uint* co
 
 void CSequencer::Add(_int iType)
 {
-	m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Item" });
+	if(ENUM_CLASS(ITEM_TYPE::CAMERA) == iType)
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Item" });
+	else
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Item" });
+
 }
 
 const _char* CSequencer::GetItemTypeName(_int iIndex) const
@@ -60,8 +64,8 @@ void CSequencer::CustomDraw(_int iIndex, const ImRect& customRect, const ImRect&
 
 	m_pDrawList->PopClipRect();
 
-	//ImGui::SetCursorScreenPos(customRect.Min);
-	//ImCurveEdit::Edit(m_RampEdit, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+	ImGui::SetCursorScreenPos(customRect.Min);
+	ImCurveEdit::Edit(m_RampEdit, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
 }
 
 void CSequencer::CustomDrawCompact(_int iIndex, const ImRect& customRect, const ImRect& clippingRect)
@@ -105,12 +109,16 @@ void CSequencer::Update(_float fTimeDelta)
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
+
 	m_isRet = false;
 	Drawing();
 
 	ImGui::End();
 
 	Selectable_Item();
+
+	if(m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+		Sorting_Item();
 }
 
 void CSequencer::Selectable_Item()
@@ -130,10 +138,22 @@ void CSequencer::Selectable_Item()
 		ImGui::Text(szFrame);
 
 		ImGui::Text("[Label] : "); ImGui::SameLine();
-		ImGui::Text(item.szItemLabel);
+		ImGui::PushID(10);
+		ImGui::InputText("##", item.szItemLabel, MAX_PATH);
+		ImGui::PopID();
 
 		ImGui::End();
 	}
+}
+
+void CSequencer::Sorting_Item()
+{
+	if (0 == m_Items.size())
+		return;
+
+	sort(m_Items.begin(), m_Items.end(), [this](const SEQUENCE_ITEM& srcItem, const SEQUENCE_ITEM& dstItem)->_bool {
+		return srcItem.iFrameStart < dstItem.iFrameStart;
+		});
 }
 
 void CSequencer::Drawing()
@@ -143,9 +163,14 @@ void CSequencer::Drawing()
 	m_vCanvasPos = ImGui::GetCursorScreenPos();			// ImDrawList는 Screen 좌표계 사용
 	m_vCanvasSize = ImGui::GetContentRegionAvail();		// Canvas Size
 
+
+	//if (0 == m_Items.size())
+	//	return;
+
 	_int iControlHeight = m_Items.size() * m_iItemHeight;
-	if (0 == iControlHeight)
-		iControlHeight = 100;
+	for (_int i = 0; i < m_Items.size(); ++i)
+		iControlHeight += GetCustomHeight(i);
+
 	m_iFrameCnt = max(m_iFrameMax - m_iFrameMin, 1);
 
 	ImGui::BeginGroup();
@@ -217,7 +242,7 @@ void CSequencer::Expand(_int iControllHeight)
 		focused = ImGui::IsWindowFocused();
 
 		// Content Bar
-		ImGui::InvisibleButton("contentBar", ImVec2(m_vCanvasSize.x, static_cast<_float>(iControllHeight)));
+		ImGui::InvisibleButton("contentBar", ImVec2(m_vCanvasSize.x, 0 == iControllHeight ? 10 : static_cast<_float>(iControllHeight)));
 		m_vContentMin = ImGui::GetItemRectMin();
 		m_vContentMax = ImGui::GetItemRectMax();
 		m_ContentRect.Min = m_vContentMin;
@@ -283,6 +308,8 @@ void CSequencer::DrawFrame()
 	}
 
 	// Header Frame Number and Lines
+	m_iModFrameCnt = 10;
+	m_iFrameStep = 1;
 	while (m_iModFrameCnt * m_fFramePixelWidth < 150)
 	{
 		m_iModFrameCnt *= 2;
@@ -384,6 +411,7 @@ void CSequencer::DrawSlot()
 		m_pDrawList->AddRectFilled(ImVec2(m_vContentMin.x, m_vContentMin.y + m_iItemHeight * m_iSelectedEntry + iCustomHeight), ImVec2(m_vContentMin.x + m_vCanvasSize.x, m_vContentMin.y + m_iItemHeight * (m_iSelectedEntry + 1) + iCustomHeight), 0x801080FF, 1.f);
 	}
 
+	iCustomHeight = 0;
 	for (size_t i = 0; i < m_Items.size(); ++i)
 	{
 		_int* pStart = { nullptr };
@@ -638,7 +666,7 @@ void CSequencer::ScrollBar()
 			if (true == m_isMovingScrollBar)
 			{
 				if (false == io.MouseDown[0])
-					m_isMovingScrollBar = true;
+					m_isMovingScrollBar = false;
 				else
 				{
 					_float fFramesPerPixelInBar = m_fBarWidthInPixels / static_cast<_float>(m_iVisibleFrameCnt);

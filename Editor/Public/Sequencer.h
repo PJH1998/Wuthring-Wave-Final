@@ -90,7 +90,6 @@ private:
 		auto b = std::begin(mPts[curveIndex]);
 		auto e = std::begin(mPts[curveIndex]) + GetPointCount(curveIndex);
 		std::sort(b, e, [](ImVec2 a, ImVec2 b) { return a.x < b.x; });
-
 	}
 };
 
@@ -245,14 +244,15 @@ private:
 private:
 	// Selectable Item
 	void								Selectable_Item();
-
+	void								Sorting_Item();
+	
 	// GUI
 	void								Drawing();
 	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => 화면 좌우 이동)
 	void								Expand(_int iControllHeight);	// Canvas Expand
 	void								DrawFrame();						// Sequence 프레임
 	void								DrawLegend();						// List
-	void								DrawSlot();							// Slot
+	void								DrawSlot();							// Slot (Item)
 	void								Moving();							// Item Duration 조절 (Left, Right 잡아당기기)		
 	void								Cursor();								// Cursor (Frame 화면 붉은 선)
 	void								CopyPaste();							// Copy / Paste
