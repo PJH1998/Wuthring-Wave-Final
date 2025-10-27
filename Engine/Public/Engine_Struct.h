@@ -192,6 +192,13 @@ namespace Engine
 		class CCollideComponent* pComponent = { nullptr };
 		void* pDesc = { nullptr };
 	}COLLISION_DATA;
+
+	typedef struct tagSampleDesc
+	{
+		_float3 vPos = {};
+		_float fSpawnTime = {};
+
+	}SAMPLE_DESC;
 }
 
 

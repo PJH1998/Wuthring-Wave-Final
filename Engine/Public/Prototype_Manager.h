@@ -19,6 +19,7 @@
 #include "Behavior_Tree.h"
 #include "AnimMachine.h"
 #include "VIBuffer_Mesh.h"
+#include "VIBuffer_Spectrum.h"
 // ==================
 
 NS_BEGIN(Engine)

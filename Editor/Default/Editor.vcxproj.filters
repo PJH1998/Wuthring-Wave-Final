@@ -139,6 +139,12 @@
     <Filter Include="01. Level\Effect\Load_Controller">
       <UniqueIdentifier>{0182cffd-05d2-48b1-832b-37a4b99f7a27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Spectrum_Controller">
+      <UniqueIdentifier>{0c131423-5c6c-48ab-bfa3-5c0f120f37cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Spectrum_Controller\Spectrum">
+      <UniqueIdentifier>{dc01c551-693d-4efd-b197-55a3163b4754}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -292,6 +298,9 @@
     <ClInclude Include="..\Public\Load_Controller.h">
       <Filter>01. Level\Effect\Load_Controller</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Spectrum.h">
+      <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -428,6 +437,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Load_Controller.cpp">
       <Filter>01. Level\Effect\Load_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Spectrum.cpp">
+      <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
