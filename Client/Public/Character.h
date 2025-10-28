@@ -95,6 +95,9 @@ public:
 	void Rotate_Target();
 
 	void Set_Gravity(_bool IsGravity);
+
+	// 뼈 세팅?..
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {};
 	
 #pragma endregion
 
@@ -105,10 +108,19 @@ public:
 #pragma region UI Interface
 public:
 	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-	void Add_EnsembleEnergy(_float fEnergy) { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
-	_bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
-	void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
-	void Sync_UI();
+	void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
+	_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
+	void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
+
+	void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
+	_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
+	void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
+
+	void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
+	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
+	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
+
+	void Sync_UI(); // UI에 필요한 정보 초기화를 Player가 담당한다.
 #pragma endregion
 
 
@@ -123,8 +135,7 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // LockOn Target 용도.
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 
-
-	_float m_fMaxEnsembleEnergy = { 100.f };
+	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};

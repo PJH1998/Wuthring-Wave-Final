@@ -34,7 +34,7 @@ public:
 		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
-	void							Lock_On()
+	/*void							Lock_On()
 	{
 		if (CAMERA_STATE::LOCKON == m_eCameraState)
 		{
@@ -46,7 +46,7 @@ public:
 			m_eCameraState = CAMERA_STATE::LOCKON;
 			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
 		}
-	}
+	}*/
 
 	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
 	{
@@ -81,9 +81,6 @@ public:
 private:
 	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
 	_float4						m_vLookPosition = {};
-	// Detect Collider
-	CRigidbody*				m_pRigidbodyCom = { nullptr };
-
 	_float4						m_vTargetPosition = {};		// Target Pos
 	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
 

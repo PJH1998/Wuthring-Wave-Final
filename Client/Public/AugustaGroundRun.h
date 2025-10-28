@@ -19,6 +19,12 @@ private:
         RUN_L,
         RUN_R,
         SPRINT_F,
+        SKILL_E,
+        SKILL_Q,
+        SKILL_R,
+        UNIQUE_E, 
+        UNIQUE_R,
+        BURST_R,
         MOVE,
         END
     };

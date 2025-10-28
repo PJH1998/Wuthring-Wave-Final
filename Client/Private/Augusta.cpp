@@ -6,6 +6,7 @@
 #include "AugustaStateFactory.h"
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
 
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -41,7 +42,6 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
-    //CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
 
 
     // 초기 State 설정.
@@ -53,7 +53,10 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pColliderCom->Set_Gravity(true);
 
     // 기본적으로 무기 Activate 끄기?
-    m_pAugustaBayonet->SetActivate(false);
+    m_pBayonet->SetActivate(true);
+    m_pSkillWeapon->SetActivate(false);
+
+    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
     return S_OK;
 }
@@ -173,7 +176,7 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     switch (iPartType)
     {
     case PART_BAYONET:
-        
+        m_pBayonet->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
     }
 }
@@ -183,10 +186,33 @@ void CAugusta::PartAcitvate(_uint iPartType, _bool IsActive)
     switch (iPartType)
     {
     case PART_BAYONET:
-        m_pAugustaBayonet->SetActivate(IsActive);
+        m_pBayonet->SetActivate(IsActive);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->SetActivate(IsActive);
         break;
     }
 }
+
+void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    
+    const _float4x4* pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
+    if (nullptr == pSocketMatrix)
+        pSocketMatrix = &m_MatrixIdentity;
+    
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Set_SocketMatrix(pSocketMatrix);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
+    }
+}
+
 
 void CAugusta::Bind_Resources()
 {
@@ -291,12 +317,28 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
 
-            m_pAugustaBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
-            ASSERT_CRASH(m_pAugustaBayonet);
-            Safe_AddRef(m_pAugustaBayonet);
+            m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pBayonet);
+            Safe_AddRef(m_pBayonet);
             break;
 
-        case PARTTYPE::PART_SHIELD:
+        case PARTTYPE::PART_SKILLWEAPON:
+            vScale = { 1.f, 1.f, 1.f };
+            vPosition = { 0.f, 0.f, 0.f };
+            Desc = PlayerData::GetAugustaSkillWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+            Desc.pParentTransform = m_pTransformCom;
+            ASSERT_CRASH(Desc.pSocketMatrix);
+
+
+            // WeaponDesc
+            if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+                , strPrototypeName, &Desc)))
+                CRASH("Weapon");
+
+            m_pSkillWeapon = dynamic_cast<CAugustaSkillWeapon*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pSkillWeapon);
+            Safe_AddRef(m_pSkillWeapon);
             break;
         }
 
@@ -333,5 +375,6 @@ CGameObject* CAugusta::Clone(void* pArg)
 void CAugusta::Free()
 {
     CCharacter::Free();
-    Safe_Release(m_pAugustaBayonet);
+    Safe_Release(m_pBayonet);
+    Safe_Release(m_pSkillWeapon);
 }

@@ -99,8 +99,6 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if(CAMERA_STATE::LOCKON != m_eCameraState)
 		Check_Ray();
 
-	//m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-
 }
 
 void CSpringCamera::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
@@ -241,22 +239,6 @@ void CSpringCamera::Dynamic_Distance()
 
 void CSpringCamera::Ready_Component()
 {
-	// Com_Rigidbody
-	/*CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::BOX;
-	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-		CRASH("Rigidbody");
-
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollide_During(iLayer, pDesc, Manifold);
-		});*/
 }
 
 CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -289,7 +271,6 @@ void CSpringCamera::Free()
 {
 	__super::Free();
 
-	//Safe_Release(m_pRigidbodyCom);
 	//m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
 }

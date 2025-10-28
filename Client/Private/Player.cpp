@@ -154,7 +154,7 @@ void CPlayer::Change_CharacterCheck()
         Change_Character(CHARACTERTYPE::PLAYER);
 }
 
-void CPlayer::Ensemble_Skill(CHARACTERTYPE eCharacter)
+void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
     // 현재 캐릭터의 Ensemble Skill State로 전환
     CCharacter* pCharacter = m_Characters[eCharacter];
@@ -304,21 +304,21 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
     if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
         pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
 
-    // 1. 현재 캐릭터의 Ensemble Energy 체크
+    // 1. 현재 캐릭터의 Switch Gauge 체크
     _bool bUseEnsemble = false;
-    if (pCurrentCharacter && pCurrentCharacter->Is_EnsembleFull())
+    if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
         bUseEnsemble = true;
 
     // 2. 먼저 캐릭터 전환 실행
     Perform_CharacterSwitch(eNextCharacter);
 
-    // 3. 전환 후 이전 캐릭터의 Ensemble Skill 사용.
+    // 3. 전환 후 이전 캐릭터의 Switch Skill 사용.
     if (bUseEnsemble && pCurrentCharacter)
     {
         // 이전 캐릭터를 다시 활성화 (스킬 사용 위해)
         pCurrentCharacter->SetActivate(true);
-        Ensemble_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
-        pCurrentCharacter->Reset_EnsembleEnergy();
+        Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
+        pCurrentCharacter->Reset_SwitchGauge();
     }
 
 }

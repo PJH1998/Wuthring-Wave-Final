@@ -29,12 +29,11 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 {
     CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
-    // 1. 
+    // 0. Actor 초기화
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
-
-    // 2. 
-    //m_pController = pDesc->pController;
+    // 1. State 초기화
+    m_Stats = pDesc->eStat;
 
 
     return S_OK;
@@ -47,7 +46,7 @@ void CCharacter::Priority_Update(_float fTimeDelta)
     
     CActor::Priority_Update(fTimeDelta);
 
-    Sync_UI(); // 현재 스탯 정보들 전달.
+    
 }
 
 void CCharacter::Update(_float fTimeDelta)
@@ -453,6 +452,7 @@ void CCharacter::Set_Gravity(_bool IsGravity)
     ASSERT_CRASH(m_pColliderCom);
     m_pColliderCom->Set_Gravity(IsGravity);
 }
+
 
 
 

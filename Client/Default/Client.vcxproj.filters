@@ -353,6 +353,18 @@
     <ClInclude Include="..\Public\Client_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaSkillWeapon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGriffon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -526,6 +538,18 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
       <Filter>02. Level\Loader\VIBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaSkillWeapon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGriffon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

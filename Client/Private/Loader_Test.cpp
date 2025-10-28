@@ -9,6 +9,7 @@
 #include "StateMachine.h"
 
 #include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
 #include "Augusta.h"
 #include "Player.h"
 
@@ -160,9 +161,9 @@ HRESULT CLoader_Test::Load_Augusta()
 		CRASH("Prototype Create Failed");
 
 
-    // 4. 파츠 초기화
+#pragma region Parts
     wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
-    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/AugustaBayonet.dat";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
     fSize = 0.01f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
 
@@ -177,6 +178,25 @@ HRESULT CLoader_Test::Load_Augusta()
         , wstrBayonetTag
         , CAugustaBayonet::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
+
+
+    // 3. 모델 초기화
+    wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
+
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    // 4. 객체 초기화.
+    _wstring wstrSkillWeaponTag = TEXT("Prototype_GameObject_Augusta_SkillWeapon");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wstrSkillWeaponTag
+        , CAugustaSkillWeapon::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+#pragma endregion
+
+  
 
     return S_OK;
 }

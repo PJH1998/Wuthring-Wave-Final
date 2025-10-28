@@ -85,6 +85,14 @@ void CAugustaGroundRun::Handle_Input()
     m_States[RUN_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
     
 
+    m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+    m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
+    m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+
+    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pAugusta->Is_UniqueGaugeFull();
+    m_States[UNIQUE_R] = m_States[SKILL_R] && m_pAugusta->Is_UniqueGaugeFull();
+    m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
+
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
@@ -269,6 +277,14 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
+    // SKILL_E 누르면 
+    if (m_States[SKILL_E])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAirAttackType::AIRATTACK_HACKDOWN_START;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+        return;
+    }
+
     // Run => Attack
     if (m_States[ATTACK])
     {
@@ -295,7 +311,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     if (m_States[MOVE])
     {
         // 만약에 현재 상태가 Sprint 였으면? => 애니메이션 변경을 하지 않음.
-
         if (m_pAugusta->Is_LockOn())
         {
             if (m_States[RUN_U])
@@ -323,9 +338,8 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 
             return;
         }
-
         // 이동 값이 들어왔는데 Stop Run 상태라면?
-        if (eRunType == ERunType::STOP_RUN_L)
+        if (eRunType == ERunType::STOP_RUN_L || eRunType == ERunType::SPRINT_F)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_F);
             return;

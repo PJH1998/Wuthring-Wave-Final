@@ -14,13 +14,17 @@ private:
 		EDashType m_eDashType = EDashType::END;
 		EIdleType  m_eIdleType = EIdleType::END;
 		ERunType m_eRunType = ERunType::END;
-		ESkillType m_eSkillToPlay = ESkillType::END;
 		ELandType m_eLandType = ELandType::END;
+
 		EAttackType m_eAttackType = EAttackType::END;
+		ESkillType m_eSkillType = ESkillType::END;
+		EUniqueType m_eUniqueType = EUniqueType::END;
+		EBurstType m_eBurstType = EBurstType::END;
 
 		// Air
 		EJumpType m_eJumpType = EJumpType::END;
 		EFallType m_eFallType = EFallType::END;
+		EAirAttackType m_eAirAttackType = EAirAttackType::END;
 
 		// Climb
 		EClimbIdleType m_eClimbIdleType = EClimbIdleType::END;
@@ -32,15 +36,19 @@ private:
 		// 컨텍스트 사용 뒤 초기화
 		void Clear()
 		{
-			m_eSkillToPlay = ESkillType::END;
 			m_eIdleType = EIdleType::END;
 			m_eRunType = ERunType::END;
 			m_eDashType = EDashType::END;
 			m_eLandType = ELandType::END;
+
 			m_eAttackType = EAttackType::END;
+			m_eSkillType = ESkillType::END;
+			m_eUniqueType = EUniqueType::END;
+			m_eBurstType = EBurstType::END;
 			
 			m_eJumpType = EJumpType::END;
 			m_eFallType = EFallType::END;
+			m_eAirAttackType = EAirAttackType::END;
 
 			m_eClimbIdleType = EClimbIdleType::END;
 			m_eClimbMoveType = EClimbMoveType::END;
@@ -71,8 +79,9 @@ public:
 public:
 	enum PARTTYPE : _uint
 	{
-		PART_BAYONET = 0, // 기본 대검.
-		PART_SHIELD = 1,
+		PART_BAYONET = 0, // Bayonet
+		PART_SKILLWEAPON = 1, // SKill Weapon
+		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
 		TYPE_END
 	};
 
@@ -97,11 +106,14 @@ public:
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) override;
+
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 #pragma endregion
 
 
 private:
-	class CAugustaBayonet* m_pAugustaBayonet = { nullptr };
+	class CAugustaBayonet* m_pBayonet = { nullptr };
+	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
