@@ -1015,7 +1015,8 @@ void CAnimationTool::Export_StateTransition_To_CSV()
                 Transition["From"] = tTransitionData.strFrom;
                 Transition["To"] = tTransitionData.strTo;
                 Transition["Priority"] = tTransitionData.iPriority;
-                Transition["Target State"] = tTransitionData.iTargetState;
+                //Transition["Target State"] = /*tTransitionData.iTargetState == 0 ? 0 : */(1 << (tTransitionData.iTargetState));
+                Transition["Target State"] = (tTransitionData.iTargetState);
                 //다음 애니메이션의 해당 트랙 위치로 변환
                 Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
                 Transition["Transit Enable Pos"] = tTransitionData.fTransitEnablePos;
@@ -1058,11 +1059,12 @@ void CAnimationTool::Import_StateTransition_From_Json()
 
         for(auto& jsonTransition : ASM_Data["Transitions"])
         {
+            _uint iState = jsonTransition["Target State"];
             TRANSITION_DATA tTransition{
                 jsonTransition["From"],
                 jsonTransition["To"],
                 jsonTransition["Priority"],
-                jsonTransition["Target State"],
+                (1 << iState),
                 jsonTransition["Transit Target Pos"],
                 jsonTransition["Transit Enable Pos"]
             };
