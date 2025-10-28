@@ -60,7 +60,7 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
-    Update_UI_Cooldown(fTimeDelta);
+    Update_UI_SkillSection(fTimeDelta);
     Update_UI_PlayerHPBar(fTimeDelta);
     Update_UI_BossHPBar(fTimeDelta);
     Update_UI_PlayerEnergyBar(fTimeDelta);
@@ -191,7 +191,7 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
     return S_OK;
 }
 
-void CUI_HUD::Update_UI_Cooldown(_float fTimeDelta)
+void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
     // 키보드를 눌러서 쿨타임이 도는 것을 테스트함.
 
@@ -386,9 +386,6 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     // 1. 뒤따라오는 체력바까지 생각하여 인스턴스는 2종으로 사용함.
     // 2. 색상은 셰이더를 통해, 원래 체력바와 뒤따라오는 체력바 2종을, 각각 2가지 색씩 사용하여 그라디언트되도록 구성
 
-    enum HUD_CHAR_INDEX { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
-    enum HUD_PLAYER_HPBAR { PLHP_BACK, PLHP_NORMAL, PLHP_END };
-
     // ksta : 나중에 플레이어 정보 통합되면 거기로부터 받아올 정보
     static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
@@ -482,24 +479,17 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 {
-
-
-
     //if (pBoss == nullptr)
     //    return;
+    
 
-
-
-
-    enum HUD_BOSS_HPBAR{ BOHP_BACK, BOHP_NORMAL, BOHP_END };
-    enum HUD_BOSS_SABAR{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
 
     // ksta : 나중에 보스 정보 통합되면 거기로부터 받아올 정보
     static _float fBossHP = { 10000.f };            // boss hitpoint
     static _float fBossBackHP = fBossBackHP;
     const _float fBossMaxHP = { 10000.f };
     
-    static _float fBossSA = { 4000.f };          // boss superarmor
+    static _float fBossSA = { 4000.f };             // boss superarmor
     static _float fBossBackSA = fBossSA;
     const _float fBossMaxSA = { 4000.f };
     static _bool isSABreak = false;
@@ -595,12 +585,12 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     *reinterpret_cast<_float*>(&vecVariantMat[BOHP_BACK]._31)       = fBossHPBackRatio;
 
     vector<_float4x4> vecVariantMatSA = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)    = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)  = vSABackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21)    = (isSABreak) ? vSABreakColor : vSAColor;
-    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)  = vSABackColor;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)     = fBossSARatio;
-    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)   = fBossSABackRatio;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._11)  = (isSABreak) ? vSABreakColor : vSAColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._11)    = vSABackColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_NORMAL]._21)  = (isSABreak) ? vSABreakColor : vSAColor;
+    *reinterpret_cast<_float4*>(&vecVariantMatSA[BOSA_BACK]._21)    = vSABackColor;
+    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_NORMAL]._31)   = fBossSARatio;
+    *reinterpret_cast<_float*>(&vecVariantMatSA[BOSA_BACK]._31)     = fBossSABackRatio;
 
 
     CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
@@ -636,67 +626,303 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
-    static _bool isFirstUpdate = true;
-    
-    // 아래것들 정의해주고 넘겨줘야 함
-    // 에디터에서 만들 때 그만큼의 갯수 만들어주는 것 잊지말기
-    _float4     vSingleColor = { };
-    _bool       isSingleVisible = {};
-    _float      fSingleHeight = {};
 
-    _float4     vBackColor = { };
+    // ksta : 현재 공명회로 수치 나중에 받아올 것
+    static  _float fPlayerEnergy[CH_END]        = { 0.f, 0.f, 0.f };
+    const   _float fPlayerMaxEnergy[CH_END]     = { 100.f, 100.f, 100.f };
+
+    _float fCurPlayerEnergy         = fPlayerEnergy[m_iSelectedCHIndex];
+    _float fCurPlayerMaxEnergy      = fPlayerMaxEnergy[m_iSelectedCHIndex];
+
+    _float fCurPlayerEnergyRatio    = fCurPlayerEnergy / fCurPlayerMaxEnergy;
+    
+
+    _float4     vSingleColor[2] = {};   // for Gradiant
+    _float4     vExtraColor[2] = {};    // for Galbrena. 임마는 혼자 공명회로에 컬러 좌우로 두개씀
+    _bool       isSingleVisible = {};   //
+    //_float      fSingleHeight = {};   // vSpectrumHeights, vBackSpectrumHeights
+
+    _float4     vBackColor[2] = {};
     _bool       isBackVisible = {};
     _float      fBackHeight = {};
 
+    const auto targetUI = Find_ChildObject(L"Inst_EnergyItems");
 
-    if (isFirstUpdate)
+
+
+    // 테스트용 입력을 통한 값 변경
+    if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
     {
-        isFirstUpdate = false;
-
-        // 1. 에너지바 캐릭터에 맞는걸로 교체, 색상도 교체
-
-
-        // 2. 꿀렁이는 로직 생각해서 컨테이너로 만들던 뭐던 어케 만들어보기
-
+        _float fRandEnergy = m_pGameInstance->Rand(10.f, 40.f);
         
-        // 3. 반드시!!!!! 인스턴스 갯수, variant flag 제대로 준 것 맞는지 확인하기
-
-
-        // 4. 높이 조절을 위해 셰이더단에서 직접 픽셀의 조정이 필요 = 간단한 pixel shader 제작 필요
+        if (fPlayerEnergy[m_iSelectedCHIndex] < fPlayerMaxEnergy[m_iSelectedCHIndex])
+            fPlayerEnergy[m_iSelectedCHIndex] += fRandEnergy;
+        else if (fPlayerEnergy[m_iSelectedCHIndex] >= fPlayerMaxEnergy[m_iSelectedCHIndex])
+            fPlayerEnergy[m_iSelectedCHIndex] = 0;
+        
+        if (fPlayerEnergy[m_iSelectedCHIndex] > fPlayerMaxEnergy[m_iSelectedCHIndex])
+            fPlayerEnergy[m_iSelectedCHIndex] = fPlayerMaxEnergy[m_iSelectedCHIndex];
     }
+    if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
+    {
+        m_iEnergyBarMode++;
+        if (m_iEnergyBarMode >= 2)
+            m_iEnergyBarMode = 0;
+    }
+
+
+    enum HUD_PLAYER_ENERGYBAR { VALUE, TARGET, END };
+    enum HUD_PLAYER_ENCOLOR {           // 공명게이지 색상 구분용 프리셋
+        ENCL_ROVER_NORMAL, 
+        ENCL_AUGUSTA_NORMAL,
+        ENCL_AUGUSTA_ULT,
+        ENCL_GALBRENA_NORMAL_L,
+        ENCL_GALBRENA_NORMAL_R,
+        ENCL_GALBRENA_ULT,
+        ENCL_END
+    };
+    const _uint iNumSpectrums = 41;     // 스펙트럼의 각 요소 점 갯수는 최대 41개로 고정
+
+
+    // 컬러 프리셋 목록
+    vector<array<_float4, 2>> vecColorPreset;       // { start color (bottom), end color (top) }
+    vecColorPreset.resize(ENCL_END);
+
+    vecColorPreset[ENCL_ROVER_NORMAL]       = { _float4{0.961f, 0.192f, 0.502f, 1.f}, _float4{0.961f, 0.192f, 0.502f, .6f} };
+    vecColorPreset[ENCL_AUGUSTA_NORMAL]     = { _float4{0.769f, 0.631f, 0.933f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .6f} };
+    vecColorPreset[ENCL_AUGUSTA_ULT]        = { _float4{1.000f, 0.953f, 0.722f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .6f} };
+    vecColorPreset[ENCL_GALBRENA_NORMAL_L]  = { _float4{0.894f, 0.573f, 0.525f, 1.f}, _float4{0.922f, 0.490f, 0.486f, .6f} };
+    vecColorPreset[ENCL_GALBRENA_NORMAL_R]  = { _float4{0.682f, 0.769f, 0.980f, 1.f}, _float4{0.553f, 0.557f, 0.878f, .6f} };
+    vecColorPreset[ENCL_GALBRENA_ULT]       = { _float4{0.482f, 0.412f, 0.878f, 1.f}, _float4{0.867f, 0.824f, 0.957f, .6f} };
+
+
+
+    static vector<_float> vSpectrumHeights[END] = {};
+    vSpectrumHeights[VALUE].resize(iNumSpectrums);
+    vSpectrumHeights[TARGET].resize(iNumSpectrums);
+    static vector<_float> vBackSpectrumHeights[END] = {};
+    vBackSpectrumHeights[VALUE].resize(iNumSpectrums);
+    vBackSpectrumHeights[TARGET].resize(iNumSpectrums);
+
+    vector<_bool> vIsVisible = {};
+    vIsVisible.resize(iNumSpectrums);
+    //vIsVisible.assign(vIsVisible.size(), true);
+
+    // 추가로 뒤에서 가만히 있을 스펙트럼도 존재, 이는 현재 공명 게이지에 따라 단순히 마스킹만 될 것. 그러므로 값은 1.f 고정.
+    // 즉, 인스턴스 41개를 가진 객체 3개를 그리거나, 정보를 합쳐서 한번에 41*3개를 그리거나 할 듯
+
+    // 색상, 보일 부분 지정은 현재 선택중인 캐릭터 종류에 따라
+    // ksta : 1) 갈브레나 색상 나누는건 아래 행렬 저장시에 분기로 나눌 것 (완)
+    // ksta : 2) 게이지가 오르는 방향 또한 플레이어마다 다름. 이는 해당 분기에서 계산.
+    // ksta : 3) 캐릭터에 따라 추가자원이 있는 경우도 있음.(아우구스타 중간원, 칼. 갈브 왼게이지)
+    //          이는 전용 함수 따로 파서 거기서 계산.
+
+    switch (m_iSelectedCHIndex)
+    {
+    case CH_ROVER:     
+        {
+            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            { 
+                vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
+                vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1];
+
+                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // appling player energy
+                fill(vIsVisible.begin(), vIsVisible.end() - (41 - iVisibleBarRange), true);
+            }
+            else if (m_iEnergyBarMode == 1)     /* Ult    */  
+            { 
+                vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
+                vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1]; 
+
+                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 16.f);      // appling player energy
+                fill(vIsVisible.begin() + (16 - iVisibleBarRange), vIsVisible.end() - 25, true);
+                fill(vIsVisible.end() - 16, vIsVisible.end() - (16 - iVisibleBarRange), true);
+            }
+        }break;
+    case CH_AUGUSTA:   
+        {
+            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            { 
+                vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_NORMAL][0];       // color
+                vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_NORMAL][1]; 
+
+                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // appling player energy
+                fill(vIsVisible.begin(), 
+                    (iVisibleBarRange > 16)? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
+                fill(vIsVisible.end() - 16,
+                    vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
+
+            }
+            else if (m_iEnergyBarMode == 1)     /* Ult?   */  
+            { 
+                vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_ULT][0];          // color
+                vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_ULT][1]; 
+
+                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+                fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // appling player energy
+                fill(vIsVisible.begin(),
+                    (iVisibleBarRange > 16) ? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
+                fill(vIsVisible.end() - 16,
+                    vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
+            }
+        }break;
+    case CH_GALBRENA:  
+        {
+            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            { 
+                vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][0];   // color
+                vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][1];  
+                vExtraColor  [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][0]; 
+                vExtraColor  [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][1]; 
+
+                fill(vIsVisible.begin() + 11, vIsVisible.end() - 26, false);    // isvisible
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 26.f);      // appling player energy
+                fill(vIsVisible.end() - 26, vIsVisible.end() - 26 + iVisibleBarRange, true);
+            }
+            else if (m_iEnergyBarMode == 1)     /* Ult    */  
+            { 
+                vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_ULT][0];        // color
+                vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_ULT][1];       
+                vExtraColor  [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][0]; 
+                vExtraColor  [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_R][1]; 
+
+                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // appling player energy
+                fill(vIsVisible.begin(), vIsVisible.begin() + iVisibleBarRange, true);
+            }
+        }break;
+    }
+
+
+
+
+
+    vBackColor[0] = vSingleColor[0];
+    vBackColor[1] = vSingleColor[1];
+    vBackColor[0].w *= 0.4f;
+    vBackColor[1].w *= 0.4f;
+
+    // 랜덤 수치 할당
+    for (_uint i = 0; i < iNumSpectrums; ++i)
+    {
+        // 목표치에 천천히 접근 (부드럽게 변함)
+        vSpectrumHeights[VALUE][i] += (vSpectrumHeights[TARGET][i] - vSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
+        vBackSpectrumHeights[VALUE][i] += (vBackSpectrumHeights[TARGET][i] - vBackSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
+
+        // 일정 확률로 새로운 목표로 변경
+        if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
+            vSpectrumHeights[TARGET][i] = m_pGameInstance->Rand(1.f, 2.f);
+        if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
+            vBackSpectrumHeights[TARGET][i] = m_pGameInstance->Rand(1.f, 4.f);
+    }
+
 
     vector<_float4x4> vecVariantMat = {};
     vecVariantMat.resize(41);
     vector<_float4x4> vecVariantBackMat = {};
-    vecVariantMat.resize(41);
+    vecVariantBackMat.resize(41);
+    vector<_float4x4> vecVariantStaticMat = {};
+    vecVariantStaticMat.resize(41);
 
-    for (uint i = 0; i < vecVariantMat.size(); i++)
+
+    // 셰이더 전달용 행렬에 값 전달
+    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum. 앞에서 색 입혀지고 움직이는 그것.
     {
-        *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor;
-        vecVariantMat[i]._21 = static_cast<_float>(isSingleVisible);
-        vecVariantMat[i]._22 = fSingleHeight;
+        *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor[0];
+        *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSingleColor[1];
+        vecVariantMat[i]._31 = static_cast<_float>(vIsVisible[i]);
+        vecVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantBackMat.size(); i++)
+    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum.  뒤에서 알파 적용된 채로 움직이는 그것.
     {
-        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor;
-        vecVariantBackMat[i]._21 = static_cast<_float>(isBackVisible);
-        vecVariantBackMat[i]._22 = fBackHeight;
+        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor[0];
+        *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._21) = vBackColor[1];
+        vecVariantBackMat[i]._31 = static_cast<_float>(vIsVisible[i]);
+        //vecVariantBackMat[i]._31 = false;5
+        vecVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
+    }
+    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. 앞에서 공명게이지 덜 찼을 떄 움직이지 않는 그것.
+    {
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = _float4(1.f, 1.f, 1.f, .5f);   // 기본값 색상 사용.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = _float4(1.f, 1.f, 1.f, .5f);   // 기본값 색상 사용.
+        //vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisible[i]);                        // 게이지가 차지 않아 그려지지 않는 부분만 그림.
+        vecVariantStaticMat[i]._31 = false;                                                     // 게이지가 차지 않아 그려지지 않는 부분만 그림.
+        vecVariantStaticMat[i]._32 = 1.f;                                                       // 크기 1로 고정
     }
 
-    vecVariantMat.insert(vecVariantMat.end(),           // combine two vector. -> size = 41 + 41 = 82
-        make_move_iterator(vecVariantBackMat.begin()),
-        make_move_iterator(vecVariantBackMat.end()));
+    // 갈브레나 예외처리 - 좌우 색상 변경
+    if (m_iSelectedCHIndex == CH_GALBRENA)
+    {
+        if (m_iEnergyBarMode == 0)
+        {
+            for (uint i = 0; i < vecVariantMat.size(); i++)
+            {
+                if (i >= 15)
+                {
+                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraColor[0];
+                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraColor[1];
+                }
+            }
+            for (uint i = 0; i < vecVariantBackMat.size(); i++)
+            {
+                if (i >= 15)
+                {
+                    _float4 vExtraBackColor[2];
+                    vExtraBackColor[0] = vExtraColor[0];   vExtraBackColor[0].w = 0.5f;
+                    vExtraBackColor[1] = vExtraColor[1];   vExtraBackColor[1].w = 0.5f;
+                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraBackColor[0];
+                    *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraBackColor[1];
+                }
+            }
+        }
+    }
 
+    vecVariantBackMat.insert(vecVariantBackMat.end(),           // combine two vector. -> size = 41 + 41 = 82
+        make_move_iterator(vecVariantMat.begin()),
+        make_move_iterator(vecVariantMat.end()));
+    vecVariantBackMat.insert(vecVariantBackMat.end(),           // combine two vector. -> size = 82 + 41 = 123
+        make_move_iterator(vecVariantStaticMat.begin()),
+        make_move_iterator(vecVariantStaticMat.end()));
 
     CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
-        vecVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_HP),
+        vecVariantBackMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_TRANSMIT),
         true
     };
 
-#ifdef KSTA_UI_ENERGYBARTEST
+    targetUI->Set_VariantUIDesc(tVariantDesc);  // 인스턴스 123개용 정보 한번에 그리게끔 보냄
 
+#ifdef KSTA_UI_ENERGYBARTEST
+    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] ============================== : " << std::endl;
+    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] fPlayerEnergy : " << fPlayerEnergy[m_iSelectedCHIndex] << std::endl;
 #endif // KSTA_UI_ENERGYBARTEST
+
+}
+
+void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
+{
+    // 중앙 게이지, 칼날 두 개 존재
+
+
+
+}
+
+void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
+{
+    // 왼쪽 에코바 존재
+
 
 
 }

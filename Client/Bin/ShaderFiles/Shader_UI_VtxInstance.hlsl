@@ -261,8 +261,39 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
         In.vSInstTrans
     );
     
+    
+    
+    // Variant : 계산 전에 계산용 행렬에 값 반영하여 원하는 transform 을 적용
+    switch (g_iVariantFlag)
+    {
+        case UIFLAG_PLAYER_TRANSMIT:
+        {
+            // ==============================
+            // * [4] PlayerEnergy
+            // ==============================
+            
+            // fHeight 만큼 scale 늘리고 fHeight / 2 만큼 y 올려서 보정?
+            float fHeight = -In.mExtra2.y;
+            
+            matAdditionalTransform[1].xyz *= fHeight;                   // Y축
+            matAdditionalTransform[3].y += (fHeight - 1) * 0.5f;        // 이따만큼 올림
+            
+        } break;
+    }
+    
+    
+    
+    
     float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
     vWorldPos = mul(vWorldPos, matWVP);
+    
+    
+    
+    
+    
+    
+    
+    
     
     Out.vPosition = vWorldPos;
     Out.vTexcoord = In.vTexcoord;
@@ -272,7 +303,7 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
     // 이후 픽셀에서 사용
-    
+    \
     // Pixel에서 사용 위해 바로 Output
     Out.vSInstCoordX = In.vSInstCoordX;
     Out.vSInstCoordY = In.vSInstCoordY;
@@ -742,12 +773,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [4] PlayerEnergy
             // ==============================
             // * matrix info [size : 41 * 2] (energy * 41, background * 41)
-            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w] 
-            // [VISIBLE] [HEIGHT] -
+            // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
+            // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
+            // [VISIBLE] [HEIGHT]] -
             // ==============================
-            vector vColor = In.mExtra0.wyzw;
-            bool isVisible = _BOOL(In.mExtra1.x);
-            float fHeight = In.mExtra1.y;
+            vector vColor1 = In.mExtra0.wyzw;
+            vector vColor2 = In.mExtra1.wyzw;
+            bool isVisible = _BOOL(In.mExtra2.x);
+            float fHeight = In.mExtra2.y;
             // border는 다 같은 이미지 여러 개 쓸 테니 여기 말고 전역으로 받는게 좋을 듯
             
             // 픽셀 자체의 크기는 픽셀 셰이더에서 제어해야 할 듯
@@ -756,10 +789,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (!isVisible)
                 discard;
             
-            // 9sector.. 
+            // 9sector.. 123
             float2 vSize = {
-                length(g_WorldMatrix[0].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
-                length(g_WorldMatrix[1].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
+                length(g_WorldMatrix[0].xyz) * g_UIScale /* fHeight 이거 맞나 */,
+                length(g_WorldMatrix[1].xyz) * g_UIScale /* fHeight 이거 맞나 */,
             };
             
             float2 border = g_SectorBorder * g_UIScale;
@@ -772,7 +805,11 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor = g_Texture.Sample(DefaultSampler, finalUV);
             // =====
             
-            Out.vColor.rgba *= vColor.rgba;  // 색상 추가
+            
+            //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+            Out.vColor.rgb  = Out.vColor.rgb * lerp(vColor1, vColor2, fixedUV.y).rgb; // 색상 추가
+            Out.vColor.a    = saturate(Out.vColor.a * 1.5f);
+            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
             
             return Out;
         } break;
