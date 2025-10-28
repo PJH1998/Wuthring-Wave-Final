@@ -58,7 +58,8 @@ public:
 	void Change_CharacterCheck();
 	void Change_Character(CHARACTERTYPE eNextCharacter);
 	void Sync_Transform();
-	
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
 public:
 	void Ensemble_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
@@ -67,15 +68,30 @@ public:
 	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
+public:
+	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
+	class CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CSpringCamera* m_pSpringCamera = { nullptr };
+	
 	LEVEL m_eCurLevel = { LEVEL::END };
-	_int m_iCurrentPlayerIdx = { CHARACTERTYPE::NONE };
-	_int m_iPrevPlayerIdx = { CHARACTERTYPE::NONE };
+	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
+	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iEnsembleCharacterIdx = { CHARACTERTYPE::NONE };
 
 
+private:
+	// LockOn
+	vector<class CTransform*> m_TargetTransforms;
+	class CTransform* m_pTargetTransform = { nullptr };
+	_bool m_IsLockOn = { false };
+
+private:
+	void Sorting_Target();
+	void Toggle_LockOn();
 
 private:
 	HRESULT Ready_Players(const PLAYER_DESC* pDesc);

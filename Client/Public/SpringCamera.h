@@ -21,8 +21,8 @@ public:
 	void							Set_FixedDistance(_float fFixedDistance) { m_fFixedDistance = fFixedDistance; }
 
 	// SetUp Target Pos, Offset Y
-	void							Update_Target(const _fvector& TargetPos, _float fOffsetY)
-	{ XMStoreFloat4(&m_vTargetPosition, TargetPos); m_fOffsetY = fOffsetY; }
+	void							Update_Target(const _fvector& TargetPos, _float fOffsetY);
+
 	// Spring (Distance Adjust) - Lerp
 	// 목표 Distance, 도달 시간
 	void							Use_Spring(_float fDestination, _float fDuration)
@@ -48,9 +48,22 @@ public:
 		}
 	}
 
+	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
+	{
+		if (nullptr == pTargetTransform)
+		{
+			m_eCameraState = CAMERA_STATE::TARGET;
+			return;
+		}
+		else
+		{
+			m_eCameraState = CAMERA_STATE::LOCKON;
+			m_pTargetTransform = pTargetTransform;
+		}
+	}
+
 public:
 	_float3 Get_TargetPos() { return m_vTargetPos; }
-	_float3	Get_LockOnVector(class CTransform* pTransform);
 	_vector Get_LookVector_NoPitch();
 	_vector Get_RightVector_NoPitch();
 
@@ -78,6 +91,7 @@ private:
 	_float							m_fFixedDistance = {};
 	_float							m_fLerpSpeed = {};
 	_float							m_fMinDistance = {};
+	_float							m_fMaxDistance = {};
 
 	// Spring
 	_float							m_fStiffness = {};		// Spring Force

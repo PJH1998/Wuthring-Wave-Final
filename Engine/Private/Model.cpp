@@ -407,13 +407,15 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		return true; // 애니메이션 종료
 	}
 
+#
 	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
 	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 	}
 
-	
+
+
 
 	return false;
 }

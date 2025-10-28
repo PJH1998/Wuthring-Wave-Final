@@ -36,6 +36,7 @@ public:
 	}CONVEXHULLBODY_DESC;
 
 	typedef struct tagMeshBodyDesc : public RIGIDBODY_DESC {
+		_float3			vScale = _float3(1.f, 1.f, 1.f);
 		class CModel* pModel = { nullptr };
 	}MESHBODY_DESC;
 #pragma endregion
@@ -77,7 +78,7 @@ private:
 
 private:
 	const JPH::Array<Vec3>					ConvertToArrayVec3(class CModel* pModel);
-	const JPH::Array<Float3>				ConvertToArrayFloat3(class CModel* pModel, _uint iIndex);
+	const JPH::Array<Float3>				ConvertToArrayFloat3(class CModel* pModel, const _float3& vScale, _uint iIndex);
 	const JPH::Array<IndexedTriangle>	ConvertToArrayTri(class CModel* pModel, _uint iIndex);
 
 private:

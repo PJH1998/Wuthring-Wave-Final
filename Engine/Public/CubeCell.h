@@ -7,14 +7,14 @@ class CCubeCell final : public CBase
 {
 public:
 	enum class CORNER {
-		LFD,	// 醫뚰븯???욎そ
-		RFD,	// ?고븯???욎そ
-		RFU,	// ?곗긽???욎そ
-		LFU,	// 醫뚯긽???욎そ
-		LBD,	// 醫뚰븯???ㅼそ
-		RBD,	// ?고븯???ㅼそ
-		RBU,	// ?곗긽???ㅼそ
-		LBU,	// 醫뚯긽???ㅼそ
+		LFD,	// Left Forward Down
+		RFD,	// Right Forward Down
+		RFU,	// Right Forward Up
+		LFU,	// Left Forward Up
+		LBD,	// Left Backward Down
+		RBD,	// Right Backward Down
+		RBU,	// Right Backward Up
+		LBU,	// Left Backward Up
 		END
 	};
 
@@ -46,6 +46,8 @@ private:
 
 	_float3								m_Corners[ENUM_CLASS(CORNER::END)] = {};
 	_float									m_MinMax[ENUM_CLASS(MINMAX::END)] = {};
+
+	recursive_mutex					m_Mutex;
 
 private:
 	void									Compute_MinMax();

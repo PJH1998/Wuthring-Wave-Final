@@ -214,7 +214,9 @@ namespace Engine
 		_float2		vClipTexcoordX;
 		_float2		vClipTexcoordY;
 
-		static const _uint iNumElements = { 10 };
+		_float4x4	mExtraData;
+
+		static const _uint iNumElements = { 14 };
 		static constexpr D3D11_INPUT_ELEMENT_DESC Elements[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,		0, 0,	D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -229,6 +231,11 @@ namespace Engine
 			{ "TEXCOORD", 6, DXGI_FORMAT_R32G32_FLOAT,			1, 72,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },	// vTexcoordY
 			{ "TEXCOORD", 7, DXGI_FORMAT_R32G32_FLOAT,			1, 80,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },	// vClipTexcoordX
 			{ "TEXCOORD", 8, DXGI_FORMAT_R32G32_FLOAT,			1, 88,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },	// vClipTexcoordY
+
+			{ "TEXCOORD", 9,  DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 96,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "TEXCOORD", 10, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 112,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "TEXCOORD", 11, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 128,	D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+			{ "TEXCOORD", 12, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 144,	D3D11_INPUT_PER_INSTANCE_DATA, 1 }
 		};
 	}VTXUIINSTANCE;
 	// ==============================

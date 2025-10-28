@@ -18,22 +18,41 @@ typedef struct tagLoadingEnd : public CEvent
 
 
 // UI Test
-// 1. �켱 Subscribe�� ���� EventBus���� �̺�Ʈ�� ���� �����ϵ���.
-// 2. ���� Publish �� ������ ���ǵ� event ������ ���� ���� �Ҵ�. �̴� ���ڿ� ������ ������ �ϴ� ��
-typedef struct tagOnClickUI : public CEvent
-{
-	
-	tagOnClickUI() {};
-}ONCLICK_UI_EVENT;
+// 1. 우선 Subscribe를 통해 EventBus에서 이벤트의 감지 가능하도록. (이벤트가 오기를 대기. 구독)
+// 2. 이후 Publish 시 생성자 정의된 event 전달을 통해 변수 할당. 이는 인자와 동일한 역할을 하는 듯 (이벤트를 신청. 발송)
 
-typedef struct tagOnHoverUI : public CEvent
+typedef struct tagOnClickEnterUI : public CEvent
+{	// m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickEnterUI", ONCLICKENTER_UI_EVENT(iInstanceIndex));
+	_uint iInstanceIndex;
+	tagOnClickEnterUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONCLICKENTER_UI_EVENT;
+typedef struct tagOnClickingUI : public CEvent
 {
-	
-	tagOnHoverUI() {};
-}ONHOVER_UI_EVENT;
-
-typedef struct tagOnScrollUI : public CEvent
+	_uint iInstanceIndex;
+	tagOnClickingUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONCLICKING_UI_EVENT;
+typedef struct tagOnClickExitUI : public CEvent
 {
+	_uint iInstanceIndex;
+	tagOnClickExitUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONCLICKEXIT_UI_EVENT;
 
-	tagOnScrollUI() {};
-}ONSCROLL_UI_EVENT;
+typedef struct tagOnHoverEnterUI : public CEvent
+{
+	_uint iInstanceIndex;
+	tagOnHoverEnterUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONHOVERENTER_UI_EVENT;
+typedef struct tagOnHoveringUI : public CEvent
+{
+	_uint iInstanceIndex;
+	tagOnHoveringUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONHOVERING_UI_EVENT;
+typedef struct tagOnHoverExitUI : public CEvent
+{
+	_uint iInstanceIndex;
+	tagOnHoverExitUI(_uint iInstanceIndex = 0) : iInstanceIndex{ iInstanceIndex } {};
+}ONHOVEREXIT_UI_EVENT;
+//typedef struct tagOnScrollUI : public CEvent, UIEVENT_INSTNACE
+//{
+//	tagOnScrollUI(_uint iInstanceIndex) {};
+//}ONSCROLL_UI_EVENT;

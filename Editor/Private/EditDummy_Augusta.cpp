@@ -56,6 +56,9 @@ void CEditDummy_Augusta::Render()
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
+	_bool IsDynamicObject = true;
+	m_pShaderCom->Bind_Value("g_IsDynamicObject", &IsDynamicObject, sizeof(_bool));
+
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -65,6 +68,11 @@ void CEditDummy_Augusta::Render()
 		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
 			HasNormal = false;
 
+		_bool HasMetallic = { false };
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MetallicTexture", i, TEXTURETYPE::MASK)))
+			HasMetallic = true;
+
+		m_pShaderCom->Bind_Value("g_HasMetallic", &HasMetallic, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
 		m_pShaderCom->Begin(0);
