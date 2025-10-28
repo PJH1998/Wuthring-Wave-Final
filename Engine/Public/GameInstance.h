@@ -51,7 +51,7 @@ public:
 #pragma endregion
 
 #pragma region FONT_MANAGER
-	HRESULT		Add_Font(const _wstring& strFontTag, const _tchar* pFilePath);
+	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath);
 	HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 #pragma endregion
 
@@ -120,6 +120,7 @@ public:
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
 	void		IsSSAO_Blur(_bool IsBlur);
+	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
 #endif
 #pragma endregion
 
@@ -243,13 +244,14 @@ public:
 #pragma endregion
 
 #pragma region RCS_MANAGER
-	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
-	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
-	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
-	HRESULT					Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
-	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
-	HRESULT					Begin_RCS(const _wstring& strRCSTag);
-	void					Clear_RCS(const _wstring& strRCSTag);
+	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
+	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
+	HRESULT						Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	HRESULT						Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
+	HRESULT						Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
+	HRESULT						Begin_RCS(const _wstring& strRCSTag);
+	void						Clear_RCS(const _wstring& strRCSTag);
+	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag);
 #ifdef _DEBUG
 	HRESULT					Debug_Render_RCS();
 #endif

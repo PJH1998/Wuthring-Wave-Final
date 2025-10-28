@@ -11,17 +11,13 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 {
 }
 
-
-_float3 CSpringCamera::Get_LockOnVector(CTransform* pTransform)
+void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 {
-	_float3 vLockOnVector = {};
-	_vector vPlayerPos = pTransform->Get_State(STATE::POSITION);
-	_vector vTargetPos = XMLoadFloat3(&m_vTargetPos);
-	_vector vDirection = vTargetPos - vPlayerPos;
+	m_fOffsetY = fOffsetY;
 
-	vDirection = XMVector3Normalize(XMVectorSetY(vDirection, 0.f));
-	XMStoreFloat3(&vLockOnVector, vDirection);
-	return vLockOnVector;
+	// Lerp
+	//_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
+	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
 _vector CSpringCamera::Get_LookVector_NoPitch()
@@ -53,8 +49,9 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fDistance = 10.f;
 	m_fFixedDistance = 10.f;
-	m_fLerpSpeed = 0.15f;
-	m_fMinDistance = 10.f;
+	m_fLerpSpeed = 0.5f;
+	m_fMinDistance = 3.f;
+	m_fMaxDistance = 15.f;
 
 	m_fStiffness = 0.3f;
 
@@ -138,6 +135,8 @@ void CSpringCamera::Lerp_Distance(_float fTimeDelta)
 void CSpringCamera::Mouse_Scroll(_float fTimeDelta)
 {
 	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+
+	m_fFixedDistance = max(m_fMinDistance, min(m_fMaxDistance, m_fFixedDistance));
 }
 
 void CSpringCamera::Spring(_float fTimeDelta)
@@ -195,10 +194,10 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
 	// 회전 보간
 	_float fLerp = {};
-	if (fDot < cos(XMConvertToRadians(40.f)))
+	if (fDot < cos(XMConvertToRadians(25.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);
 	else
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f * (cos(XMConvertToRadians(40.f) - fDot)));
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 5.f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 

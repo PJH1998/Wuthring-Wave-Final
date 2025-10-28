@@ -71,6 +71,8 @@ void CCubeCell::Update(const _fvector& vCamPos)
 		_uint iLODIndex = {};
 		for (auto& pObject : m_Objects)
 		{
+			if (nullptr == pObject)
+				continue;
 			_float fDistance = pObject->Compute_Distance(vCamPos);
 			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 			pObject->Set_LOD(iLODIndex);
@@ -110,7 +112,10 @@ void CCubeCell::Add_Object(CStaticObject* pObject, const _float* pMinMax)
 		}
 	}
 
-	m_Objects.push_back(pObject);
+	{
+		lock_guard<recursive_mutex> lock(m_Mutex);
+		m_Objects.push_back(pObject);
+	}
 }
 
 void CCubeCell::Compute_MinMax()

@@ -19,8 +19,8 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 HRESULT CLevel_Camera::Initialize()
 {
 	//Ready_Camera();
-	Ready_Dummy();
-	Ready_Ground();
+	//Ready_Dummy();
+	//Ready_Ground();
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);

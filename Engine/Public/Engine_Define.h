@@ -66,6 +66,10 @@ using json = nlohmann::json;
 using namespace JPH;
 #pragma warning(pop)
 
+// FreeType
+#include "ft2build.h"
+#include FT_FREETYPE_H
+
 #include <vector>
 #include <list>
 #include <queue>

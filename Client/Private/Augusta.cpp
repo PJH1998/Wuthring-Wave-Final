@@ -67,7 +67,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
     // 3. 키입력 갱신은 Player 객체에서 관리 중
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::UP))
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
     {
         m_IsLockOn = !m_IsLockOn;
         m_pSpringCamera->Lock_On();
