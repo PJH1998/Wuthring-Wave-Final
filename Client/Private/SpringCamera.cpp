@@ -47,7 +47,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 	m_fDistance = 10.f;
 	m_fFixedDistance = 10.f;
 	m_fLerpSpeed = 0.5f;
-	m_fMinDistance = 3.f;
+	m_fMinDistance = 5.f;
 	m_fMaxDistance = 15.f;
 
 	m_fStiffness = 0.3f;

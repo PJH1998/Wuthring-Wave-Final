@@ -21,7 +21,7 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
 
     Ready_Layer_Player();
-	Ready_Dummy();
+	//Ready_Dummy();
     Ready_MonsterTest();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
