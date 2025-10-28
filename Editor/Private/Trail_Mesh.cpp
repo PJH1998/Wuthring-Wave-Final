@@ -43,13 +43,12 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 
     m_IsRoot = pDesc->IsRootOn;
     
-    if (m_IsRoot)
-        m_BoneMatrix = pDesc->RootMatrix;
-
-    m_ParentMatrix = pDesc->ParentMatrix;
     //임시처리
     m_isActivate = false;
     m_fColorSpeed = 1.f;
+
+    XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
+    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
 
     return S_OK;
 }
@@ -63,11 +62,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if(m_IsRoot)
-        Root_Transform();
-
     //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
-
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 
@@ -77,7 +72,6 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_isActivate = false;
         m_fColorSweep = 0.f;
     }
-    //라이프타임 끝나면 비활성화
 }
 
 void CTrail_Mesh::Late_Update(_float fTimeDelta)
@@ -103,30 +97,15 @@ void CTrail_Mesh::Render()
 void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
     m_fSweep = 0.f;
-    m_isActivate = true;
+    m_isActivate = false;
     m_fColorSweep = 0.f;
 }
 
-//Test
-void CTrail_Mesh::Root_Transform()
+void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
 {
-    if (*m_BoneMatrix == nullptr)
-        return;
-
-    _matrix BoneMatrix = XMLoadFloat4x4(*m_BoneMatrix);
-
-    _matrix ParentMatrix = XMLoadFloat4x4(*m_ParentMatrix);
-
-    //for (size_t i = 0; i < 3; i++)
-    //    ParentMatrix.r[i] = XMVector3Normalize(ParentMatrix.r[i]);
-
-    //for (size_t i = 0; i < 3; i++)
-    //    BoneMatrix.r[i] = XMVector3Normalize(BoneMatrix.r[i]); 
-
     XMStoreFloat4x4(&m_ComBindMatrix,
         m_pTransformCom->Get_WorldMatrix() *
-         BoneMatrix *
-        ParentMatrix);
+        WorldMatrix);
 }
 
 HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
@@ -153,16 +132,16 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
 
 HRESULT CTrail_Mesh::Bind_ShaderResources()
 {
-    if (!m_IsRoot)
-    {
-        if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-            return E_FAIL;
-    }
-    else
-    {
+    //if (!m_IsRoot)
+    //{
+    //    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+    //        return E_FAIL;
+    //}
+    //else
+    //{
         if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
             return E_FAIL;
-    }
+   /* }*/
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
@@ -184,6 +163,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Value("g_ColorSpeed", &m_fColorSweep, sizeof(_float))))
+        return E_FAIL;
+
+    if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fTime, sizeof(_float))))
         return E_FAIL;
 
     return S_OK;

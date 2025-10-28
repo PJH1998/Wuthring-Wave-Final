@@ -37,12 +37,11 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
 
     m_IsRoot = pDesc->IsRootOn;
     
-    if (m_IsRoot)
-        m_BoneMatrix = pDesc->RootMatrix;
+    m_isActivate = true;
 
-    m_ParentMatrix = pDesc->ParentMatrix;
+    XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
+    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
 
-    m_isActivate = false;
 
     return S_OK;
 }
@@ -56,13 +55,7 @@ void CEffect_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if(m_IsRoot)
-        Root_Transform();
-
-
     m_pVIBufferCom->Bind_CSResources(m_pComputeShaderCom, fTimeDelta);
-    //움직임 처리 어떻게 ?
-   /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
     m_vLifeTime.x += fTimeDelta;
    
@@ -97,31 +90,17 @@ void CEffect_Mesh::Render()
 
 void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    m_isActivate = true;
-    m_vLifeTime.x = 0.f;
-    m_pVIBufferCom->Reset_UAV();
+   m_isActivate = false;
+   m_vLifeTime.x = 0.f;
+   Root_Transform(WorldMatrix);
+   m_pVIBufferCom->Reset_UAV();
 }
 
-//Test
-void CEffect_Mesh::Root_Transform()
+void CEffect_Mesh::Root_Transform(_fmatrix WorldMatrix)
 {
-    if (*m_BoneMatrix == nullptr)
-        return;
-
-    _matrix BoneMatrix = XMLoadFloat4x4(*m_BoneMatrix);
-
-    _matrix ParentMatrix = XMLoadFloat4x4(*m_ParentMatrix);
-
-    for (size_t i = 0; i < 3; i++)
-        ParentMatrix.r[i] = XMVector3Normalize(ParentMatrix.r[i]);
-
-    for (size_t i = 0; i < 3; i++)
-        BoneMatrix.r[i] = XMVector3Normalize(BoneMatrix.r[i]);
-
     XMStoreFloat4x4(&m_ComBindMatrix,
-        (ParentMatrix
-            * BoneMatrix
-            * m_pTransformCom->Get_WorldMatrix()));
+        m_pTransformCom->Get_WorldMatrix() *
+        WorldMatrix);
 }
 
 HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
@@ -148,16 +127,8 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
 
 HRESULT CEffect_Mesh::Bind_ShaderResources()
 {
-    if (!m_IsRoot)
-    {
-        if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-            return E_FAIL;
-    }
-    else
-    {
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
-            return E_FAIL;
-    }
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+       return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;

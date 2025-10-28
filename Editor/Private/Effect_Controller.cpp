@@ -457,6 +457,7 @@ void CEffect_Controller::Selected_Prefab_Info()
         if (ImGui::Button("Reset Frame"))
         {
             m_pSelectedPrefab->Reset_Prefab_Info();
+            m_pSelectedPrefab->SetActivate(true);
         }
     }
 
@@ -501,7 +502,7 @@ void CEffect_Controller::Reset_ChildrenInfo()
     m_bChildrenTagFlag = false;
     m_eChildrenType = EFFECT_TYPE::END;
     m_iSelectedChildren = 0;
-    m_strChildrenTag = TEXT("");
+    m_strChildrenTag = TEXT(""); 
     m_IsParticle = false;
     m_IsMeshEffect = false;
     m_IsTrailMesh = false;
@@ -1380,16 +1381,10 @@ void CEffect_Controller::PrefabBinding_Tab()
         if (m_bBoneFlag)
         {
             if (ImGui::Button("Binding"))
-            {
-                const _float4x4* pBoneMatrix = { nullptr };
-                const _float4x4* pWorldMatrix = {};
+            {;
                 _string BoneName = m_BoneName;
 
-                pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
-                pWorldMatrix = m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
-
-                m_pSelectedPrefab->Set_BoneMatrixPtr(pBoneMatrix);
-                m_pSelectedPrefab->Set_SpawnMatrix(pWorldMatrix);
+                m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
 
                 m_bBoneFlag = false;
                 m_BoneName[0] = _T('\0');
@@ -1403,11 +1398,12 @@ void CEffect_Controller::PrefabBinding_Tab()
             m_AnimActorDesc.pAnimActor = nullptr;
             m_AnimActorDesc.pModelCom = nullptr;
             m_AnimActorDesc.strAnimName = "";
+            m_AnimActorDesc.pBoneMatrix = nullptr;
             m_bBoneFlag = false;
             m_BoneName[0] = _T('\0');
 
             m_pSelectedPrefab->SetActivate(false);
-            m_pSelectedPrefab->Reset_BoneMatrix();
+            m_pSelectedPrefab->Reset_SpawnMatrix();
         }
     
         ImGui::SameLine(0.f, 20.f);
@@ -1423,7 +1419,10 @@ void CEffect_Controller::PrefabBinding_Tab()
 
                 if (m_fTrackPosition >= fCurrentTrackPos)
                 {
-                    m_pSelectedPrefab->SetActivate(true);
+                    _float4x4 BoneMatrix = *m_AnimActorDesc.pBoneMatrix;
+
+                    m_pSelectedPrefab->Set_SpawnMatrix(BoneMatrix);
+                    m_pSelectedPrefab->Reset_Prefab_Info();
                     m_bTest = false;
                 }
             }

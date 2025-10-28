@@ -246,7 +246,7 @@
     </Filter>
     <Filter Include="01. Utility\99. Renderer\ShaderFilter">
       <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
       <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
     </Filter>
@@ -280,7 +280,7 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Spectrum">
       <UniqueIdentifier>{58425932-23ce-483e-883c-e023a4407ca6}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\State">
       <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
     </Filter>
@@ -298,6 +298,9 @@
     </Filter>
     <Filter Include="01. Utility\99. Renderer\RendererSubResource">
       <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\03. GameObject\Effect">
+      <UniqueIdentifier>{d56e481d-7107-4973-93c1-e2162ebe2634}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -582,7 +585,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Spectrum.h">
       <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\State.h">
       <Filter>01. Utility\04. Component\State</Filter>
@@ -598,6 +601,9 @@
     </ClInclude>
     <ClInclude Include="..\public\RCS_Manager.h">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect.h">
+      <Filter>01. Utility\03. GameObject\Effect</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -858,7 +864,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp">
       <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\State.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
@@ -874,6 +880,9 @@
     </ClCompile>
     <ClCompile Include="..\private\RCS_Manager.cpp">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect.cpp">
+      <Filter>01. Utility\03. GameObject\Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

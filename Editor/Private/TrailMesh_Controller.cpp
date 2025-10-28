@@ -108,7 +108,8 @@ void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPa
                 strcpy_s(Desc.szDatPath, sizeof(Desc.szDatPath), DefaultPath.c_str());
 
                 //매쉬버퍼 컴포넌트 생성
-                _fmatrix DefualtMatrix = XMMatrixIdentity() * XMMatrixRotationX(-90);
+                _fmatrix DefualtMatrix = XMMatrixIdentity();
+             /*   _fmatrix DefualtMatrix = XMMatrixIdentity() * XMMatrixRotationX(-90);*/
 
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strMeshTag,
                    CVIBuffer_Mesh::Create(m_pDevice, m_pContext, filePath.c_str(), DefualtMatrix));
@@ -257,10 +258,12 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                             m_iSelectedTexture = i;
 
                         if (IsSelected)
+                        {
                             ImGui::SetItemDefaultFocus();
-
+                            m_pSelectedTrailMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                        }
                     }
-                    m_pSelectedTrailMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+              
       
                     ImGui::EndCombo();
                 }
@@ -278,10 +281,11 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                             m_iSelectedColor = i;
 
                         if (IsSelected)
+                        {
                             ImGui::SetItemDefaultFocus();
+                            m_pSelectedTrailMeshDesc->strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
+                        }
                     }
-
-                    m_pSelectedTrailMeshDesc->strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
 
                     ImGui::EndCombo();
                 }

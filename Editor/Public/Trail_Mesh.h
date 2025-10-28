@@ -50,7 +50,7 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform();
+	void Root_Transform(_fmatrix WorldMatrix);
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
@@ -76,9 +76,9 @@ private:
 	_float3						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
+	_float						m_fTime = 0.f;
+
 	_bool						m_IsRoot = false;
-	const _float4x4**			m_BoneMatrix = { nullptr };
-	const _float4x4**			m_ParentMatrix = { nullptr };
 	_float4x4					m_ComBindMatrix = {  };
 
 private:

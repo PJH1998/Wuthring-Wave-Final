@@ -48,7 +48,7 @@ public:
 	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // 바꿀 일 있을 경우 여기에 값 추가해서 바꿔줘야함.
 	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
 	void Bind_CSResources(class CComputeShader* pCShader);
-	void Reset_UAV();
+	void Reset_UAV(class CComputeShader* pCShader);
 
 //public:
 //	void Spread(_float fTimeDelta);
@@ -66,6 +66,8 @@ private:
 	ID3D11Buffer*		m_pSRVBuffer = {};
 	ID3D11Buffer*       m_pUABuffer = {};
 	ID3D11Buffer*		m_pDefaultUAVBufer = {};
+
+	ID3D11Buffer*		m_pDebugBuffer = {};
 
 	ID3D11ShaderResourceView*	m_pSRV = {};
 	ID3D11UnorderedAccessView*	m_pUAV = {};

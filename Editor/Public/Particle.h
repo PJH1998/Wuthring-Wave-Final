@@ -50,7 +50,7 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform();
+	void Root_Transform(_fmatrix WorldMatrix);
 	void Bind_CS_SpriteInfo();
 	
 
@@ -69,10 +69,7 @@ private:
 	_int						m_iRow = {};
 	_int						m_iCol = {};
 
-	//_bool						m_IsRoot = false;
-	//const _float4x4**			m_BoneMatrix = { nullptr };
-	//const _float4x4*			m_ParentMatrix = { nullptr };
-	//_float4x4					m_ComBindMatrix = {  };
+	_float4x4					m_ComBindMatrix = {  };
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);

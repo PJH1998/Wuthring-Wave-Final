@@ -29,11 +29,10 @@ public:
 
     // 
     void Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ);
-
+    void Clear_Resources();
 
 private:
     HRESULT Ready_Reflection(ID3DBlob* pCSBlob);
-    void Clear_Resources();
 
 private:
     ID3D11ComputeShader* m_pComputeShader = nullptr;

@@ -16,6 +16,8 @@ private:
 		class CAnimationActor* pAnimActor = { nullptr };
 		_string strAnimName = {};
 		float fDuration = {};
+
+		const _float4x4* pBoneMatrix = { nullptr };
 	}ANIMACTOR_DSEC;
 
 private:

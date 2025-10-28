@@ -32,9 +32,6 @@ HRESULT CSpectrum::Initialize_Clone(void* pArg)
 
     m_IsRoot = pDesc->IsRootOn;
     
-    if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-
     //임시처리
     //m_isActivate = true;
 

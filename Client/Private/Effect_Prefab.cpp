@@ -126,7 +126,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
         if (pParticleDesc->IsRootOn)
             pParticleDesc->RootMatrix = m_pRootMatirx;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
     case EFFECT_TYPE::MESH:
         pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
@@ -138,7 +138,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
         if (pMeshDesc->IsRootOn)
             pMeshDesc->RootMatrix = m_pRootMatirx;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
     case EFFECT_TYPE::TRAIL:
         pTrailDesc = static_cast<CTrail_Mesh::TRAILMESH_DESC*>(pArg);
@@ -150,7 +150,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
         if (pTrailDesc->IsRootOn)
             pTrailDesc->RootMatrix = m_pRootMatirx;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_TrailMesh"), PROTOTYPE::GAMEOBJECT, pArg));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_TrailMesh"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
@@ -191,7 +191,7 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
 
 void CEffect_Prefab::Root_Test()
 {
-   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::EFFECT), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
+   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
 
    m_pRootMatirx = pModel->Get_BoneMatrixPtr("Bone_Skirt051_M");
 }

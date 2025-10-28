@@ -52,9 +52,8 @@ public:
 
 public:
 	void Set_FrameDesc(FRAME_DESC* pFrameDesc);
-	void Set_BoneMatrixPtr(const _float4x4* BoneMatrix);
-	void Set_SpawnMatrix(const _float4x4* SpawnMatrix);
-	void Reset_BoneMatrix();
+	void Set_SpawnMatrix(_float4x4 SpawnMatrix);
+	void Reset_SpawnMatrix();
 
 public:
 	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
@@ -63,9 +62,8 @@ private:
 
 	_wstring							 m_strMyTag;	 
 	
-
-	const _float4x4*					 m_pRootMatirx = {};
-	const _float4x4*                     m_SpawnMatrix = {};
+	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해주기. Reset
+	_float4x4							 m_SpawnMatrix = {};
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};

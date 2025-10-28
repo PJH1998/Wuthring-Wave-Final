@@ -9,7 +9,9 @@ float   g_Sweep;
 float   g_SweepWitdh;
 float   g_Soft = 0.3f;
 int     g_Dir;
+float   g_Time;
 
+float   g_MaskSpeed = 1.f;
 float   g_ColorSpeed = 0.4f;
 
 struct VS_IN
@@ -86,10 +88,17 @@ PS_OUT PS_TrailDefault(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
+    //float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
     
     //마스크 알파 값으로 잘라내기 처리, 만약 검정색이면 r로 해도 될듯함.
-    if (vMask.a < 0.3f)
+    //if (vMask.r < 0.3f)
+    //    discard;
+    
+    float2 MaskUV = In.vTexcoord;
+    MaskUV -= g_Sweep;
+    float4 vMask = g_MaskTexture.Sample(DefaultSampler, MaskUV);
+    
+    if(vMask.r < 0.3f)
         discard;
     
     float2 ColorUV = In.vTexcoord;
@@ -113,10 +122,10 @@ PS_OUT PS_TraillTest(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord );
     
     //마스크 알파 값으로 잘라내기 처리, 만약 검정색이면 r로 해도 될듯함.
-    if (vMask.a < 0.3f)
+    if (vMask.r < 0.3f)
         discard;
     
     float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
@@ -134,6 +143,47 @@ PS_OUT PS_TraillTest(PS_IN In)
     return Out;
 }
 
+// ==Test==
+PS_OUT PS_TraillDesh(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float2 UV = In.vTexcoord;
+    
+    UV.y -= g_MaskSpeed * g_Sweep;      //타임
+    UV.y = frac(UV.y);
+    
+    float4 mask = g_MaskTexture.Sample(DefaultSampler, UV);
+    
+    if(mask.r < 0.35f)
+        discard;
+    
+    Out.vColor = mask * 0.6f;
+    
+    return Out;
+}
+
+
+PS_OUT PS_TraillDeshB(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    
+    float2 UV = In.vTexcoord;
+    
+    UV.y += g_MaskSpeed * g_Sweep; //타임
+    UV.y = frac(UV.y);
+    
+    float4 mask = g_MaskTexture.Sample(DefaultSampler, UV);
+    
+    if (mask.r < 0.35f)
+        discard;
+    
+    Out.vColor = mask * 0.6f;
+    
+    return Out;
+}
+// ==Test==
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -157,4 +207,27 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_TraillTest();
     }
+
+    pass PS_TraillTest
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_TraillDesh();
+    }
+
+    pass PS_TraillTestB
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_TraillDeshB();
+    }
+
 }

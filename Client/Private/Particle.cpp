@@ -67,8 +67,6 @@ void CParticle::Update(_float fTimeDelta)
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
        m_isActivate = false;
-       m_vLifeTime.x = 0.f;
-       m_pVIBufferCom->Reset_UAV();
    }
 }
 
@@ -96,7 +94,7 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
     m_isActivate = true;
     m_vLifeTime.x = 0.f;
-    m_pVIBufferCom->Reset_UAV();
+    m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 }
 
 void CParticle::Root_Transform()

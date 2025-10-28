@@ -39,7 +39,6 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_iNumVertexBuffers = 2;
 	m_ePrimitiveType = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
-
 	D3D11_BUFFER_DESC		VBDesc{};
 	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
 	VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -97,6 +96,21 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
 	}
+
+	//초기화 전용 UAV버퍼 데이터, 클론끼리 공유해도 상관없음 초기값으로 되돌려주기 위한 값.
+	D3D11_BUFFER_DESC Default_UAV_BufferDesc = {};
+	Default_UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	Default_UAV_BufferDesc.ByteWidth = Default_UAV_BufferDesc.StructureByteStride * m_iNumInstance;
+	Default_UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	Default_UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	Default_UAV_BufferDesc.CPUAccessFlags = 0;
+	Default_UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
+	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
+
+	if (FAILED(m_pDevice->CreateBuffer(&Default_UAV_BufferDesc, &UAVInitialDesc, &m_pDefaultUAVBufer)))
+		return E_FAIL;
 	
 	D3D11_BUFFER_DESC SRV_BufferDesc = {};
 	SRV_BufferDesc.StructureByteStride = sizeof(PARTICLE_SRV);
@@ -174,21 +188,31 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	Safe_Delete(pSpeedCB);
 
-	//초기화 전용 UAV버퍼 데이터, 클론끼리 공유해도 상관없음 초기값으로 되돌려주기 위한 값.
-	D3D11_BUFFER_DESC Default_UAV_BufferDesc = {};
-	Default_UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
-	Default_UAV_BufferDesc.ByteWidth = Default_UAV_BufferDesc.StructureByteStride * m_iNumInstance;
-	Default_UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	Default_UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	Default_UAV_BufferDesc.CPUAccessFlags = 0;
-	Default_UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	//// ==디버깅 //
+	//D3D11_BUFFER_DESC bufferDesc = {};
+	//bufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	//bufferDesc.ByteWidth = sizeof(VTXINSTANCE_PARTICLE) * m_iNumInstance;
+	//bufferDesc.Usage = D3D11_USAGE_STAGING;
+	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
+	//if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_pDebugBuffer)))
+	//	return E_FAIL;
 
-	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
-	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
+	////==디버깅==
+	//m_pContext->CopyResource(m_pDebugBuffer, m_pDefaultUAVBufer);
 
-	if (FAILED(m_pDevice->CreateBuffer(&Default_UAV_BufferDesc, &UAVInitialDesc, &m_pDefaultUAVBufer)))
-		return E_FAIL;
+	//D3D11_MAPPED_SUBRESOURCE mapped{};
+
+	//m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+
+	//VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
+
+	//for (UINT i = 0; i < m_iNumInstance; ++i)
+	//{
+	//	pData[i].vTranslation;
+	//	pData[i];
+	//}
+
 
 	return S_OK;
 }
@@ -223,6 +247,15 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
 		return E_FAIL;
 
+	// ==디버깅 //
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	bufferDesc.ByteWidth = sizeof(VTXINSTANCE_PARTICLE) * m_iNumInstance;
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_pDebugBuffer)))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -299,9 +332,35 @@ void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader)
 	m_pContext->CopyResource(m_pVBInstance, m_pUABuffer);
 }
 
-void CVIBuffer_Point_Instance::Reset_UAV()
+void CVIBuffer_Point_Instance::Reset_UAV(class CComputeShader* pCShader)
 {
+	pCShader->Clear_Resources();
+
+	//UAV 내용을 기본값으로 롤백
 	m_pContext->CopyResource(m_pUABuffer, m_pDefaultUAVBufer);
+
+	// 카운터 0으로 초기화
+	//const UINT zero[4] = { 0,0,0,0 };
+	//m_pContext->ClearUnorderedAccessViewUint(m_pUAV, zero);
+
+	//// m_pVBInstacne도 초기화 진행.
+	//m_pContext->CopyResource(m_pVBInstance, m_pDefaultUAVBufer);
+
+	////==디버깅==
+	m_pContext->CopyResource(m_pDebugBuffer, m_pUABuffer);
+
+
+	D3D11_MAPPED_SUBRESOURCE mapped{};
+
+	m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+
+	VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
+
+	for (size_t i = 0; i < m_iNumInstance; i++)
+	{
+		pData[i];
+	}
+
 }
 
 CVIBuffer_Point_Instance* CVIBuffer_Point_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc)
