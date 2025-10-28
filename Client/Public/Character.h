@@ -71,7 +71,6 @@ public:
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // »À ¼¼ÆÃ
-
 	// LockOn
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
@@ -108,6 +107,8 @@ public:
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+
+
 
 	// Gravity
 	void Set_Gravity(_bool IsGravity);

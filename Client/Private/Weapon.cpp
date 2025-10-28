@@ -63,6 +63,11 @@ void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _flo
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 
+
+
+
+
+
 void CWeapon::Free()
 {
     CPartObject::Free();

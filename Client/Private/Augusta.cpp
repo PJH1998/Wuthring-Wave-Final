@@ -100,12 +100,9 @@ void CAugusta::Update(_float fTimeDelta)
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 5. Camera 갱신 => 위치 따라오게
-    //_float fOffsetY = m_fColliderHeight + m_fColliderRadius * 2.f;
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 3.f);
 
-    
-
-    // 7. 파츠 갱신.?
+    // 6. 파츠 갱신.?
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())

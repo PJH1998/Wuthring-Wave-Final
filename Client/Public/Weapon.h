@@ -43,11 +43,11 @@ protected:
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CTransform* m_pParentTransform = { nullptr };
 	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
+	
+	_float3 m_vRotationOffset = {};
 
 	const _float4x4* m_pSocketMatrix = { nullptr };
-
 	_float m_fTrackPosition = {};
-
 	_bool m_IsAnimationEnd = { false };
 private:
 	void Bind_Resources();

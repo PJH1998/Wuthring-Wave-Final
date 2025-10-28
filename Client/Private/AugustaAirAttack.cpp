@@ -37,9 +37,13 @@ void CAugustaAirAttack::OnEnter()
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
-    _string strBoneName = "WeaponProp02";
+    // 6. 무기에 Bone 붙이기. + Offset 추가.
+    _string strBoneName = "WeaponProp05";
     m_pAugusta->PartAcitvate(m_iPartType, true);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+    
+//    m_pAugusta->Apply_PartRotationOffset(m_iPartType, );
+    
 
     // 점공이니까 한번만? => 카메라 락온상태일때 뭔가 문제가 있다.
     m_pAugusta->Rotate_Target(); 
@@ -162,9 +166,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.3f, 20.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 0.1f, 20.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.3f, 20.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 0.1f, 20.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.f, 0.f, 1.f);
