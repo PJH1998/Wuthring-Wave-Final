@@ -94,9 +94,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
-			//case LEVEL::TEST_UI:
-			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
-			//	break;
+			case LEVEL::TEST_UI:
+				pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+				break;
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -144,17 +144,17 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
-	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::SENSOR));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(BPLAYER::SENSOR));
 
 	// Object VS Object
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::MAP));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::PLAYER));
+	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::MAP));
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::PLAYER)); //몬스터 인식 볼륨
+	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::PLAYER)); //몬스터 인식 볼륨
 
-	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::NON_MOVE));
@@ -163,7 +163,7 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 
-	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::CAMERA), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(BPLAYER::MOVE));
 }
 
 void CMainApp::Ready_Event()
@@ -229,6 +229,7 @@ void CMainApp::Ready_Prototype_ForStatic()
 void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }
@@ -252,8 +253,8 @@ void CMainApp::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+	Safe_Release(m_pGameSystem);
 
 	m_pGameInstance->Release_Engine();
-	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pGameInstance);
 }

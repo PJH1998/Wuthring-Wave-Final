@@ -2,10 +2,13 @@
 #include "Character.h"
 #include "InputController.h"
 #include "SpringCamera.h"
+#include "GameSystem.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
+    , m_pGameSystem { CGameSystem::GetInstance() }
 {
+    Safe_AddRef(m_pGameSystem);
 }
 
 CCharacter::CCharacter(const CCharacter& Prototype)
@@ -26,12 +29,11 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
 {
     CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
-    // 1. 
+    // 0. Actor 초기화
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
-
-    // 2. 
-    //m_pController = pDesc->pController;
+    // 1. State 초기화
+    m_Stats = pDesc->eStat;
 
 
     return S_OK;
@@ -43,6 +45,8 @@ void CCharacter::Priority_Update(_float fTimeDelta)
         return;
     
     CActor::Priority_Update(fTimeDelta);
+
+    
 }
 
 void CCharacter::Update(_float fTimeDelta)
@@ -69,28 +73,58 @@ void CCharacter::Render_Shadow()
 {
 }
 
-void CCharacter::Process_Input(CInputController* pInputControllerCom)
+#pragma region 객체 공유
+void CCharacter::Set_InputController(CInputController* pInputControllerCom)
 {
     m_pInputControllerCom = pInputControllerCom;
     Safe_AddRef(m_pInputControllerCom);
 }
 
+void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
+{
+    m_pSpringCamera = pSpringCamera;
+    Safe_AddRef(pSpringCamera);
+}
+
+#pragma endregion
+
 
 #pragma region STATE
 
 
+void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
+{
+    if (nullptr == pTargetTransform)
+    {
+        m_IsLockOn = false;
+        m_pTargetTransform = nullptr;
+        return;
+    }
+    else
+    {
+        // 1. TargetTransform은 항상 가져옵니다.
+        m_pTargetTransform = pTargetTransform;
+        // 2. LockOn은 상황따라
+        m_IsLockOn = IsLockOn;
+    }
+}
 
-
+_bool CCharacter::Is_LockOn()
+{
+    return m_IsLockOn;
+}
 
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
     ASSERT_CRASH(m_pTransformCom);
 
-    _vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    
+    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vCurrentPos = m_pColliderCom->Get_Position();
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
     _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
-    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
+    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
 
     // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
     _vector vPositions[5] = {
@@ -101,15 +135,14 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
         vFootPos - vLook * m_fColliderRadius   // 뒤
     };
 
-
-    _float fMinDistance = 10.f;  // 가장 가까운 거리 저장
+    _float fMinDistance = 3.f;  // 가장 가까운 거리 저장
     _bool bAnyHit = false;
 
     // 5개 지점에서 각각 레이 발사
     for (_uint i = 0; i < 5; ++i)
     {
         _vector vStartPos = vPositions[i];
-        _vector vEndPos = vStartPos - XMVectorSet(0.f, 10.f, 0.f, 0.f);
+        _vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
 
         _float4 vHitPoint = {};
         _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
@@ -126,22 +159,10 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
                 fMinDistance = fDistance;
         }
     }
-
-    return bAnyHit ? fMinDistance : 10.f;
-
+    return bAnyHit ? fMinDistance : 3.f;
 }
 
-_vector CCharacter::Get_LookVector()
-{
-    ASSERT_CRASH(m_pTransformCom);
-    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-    return vLook;
-}
 
-_bool CCharacter::Is_LockOn()
-{
-    return m_IsLockOn;
-}
 
 _bool CCharacter::Is_Land(_float3* pNormal)
 {
@@ -149,19 +170,50 @@ _bool CCharacter::Is_Land(_float3* pNormal)
     return m_pColliderCom->IsLand(pNormal);
 }
 
-
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+_bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 {
-    ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    
-    // 현재 활성화된 파츠 Animation 실행.
-    
-    
-    
-    return IsPlayAnimationEnd;
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+    vLook = XMVector3Normalize(vLook);
+
+    // 가슴 높이에서 전방 Radius로 레이 발사
+
+    _float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
+    _vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
+    _vector vEnd = vStart + vLook * -(m_fColliderRadius + 0.1f); // Collider Radius 고려.
+
+    _float4 vHitPoint = {};
+    _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+
+
+    if (bHit)
+    {
+        XMStoreFloat3(pWallNormal, vPos - XMLoadFloat4(&vHitPoint));
+        return true;
+    }
+
+
+    return false;
 }
+
+_bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal)
+{
+    ASSERT_CRASH(m_pTransformCom);
+
+    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+
+    // 머리위쪽에서 정면으로 Ray 발사.
+    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight * 1.7f, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
+
+    _float4 vHitPoint = {};
+
+    return m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+}
+
 
 _bool CCharacter::Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
@@ -173,6 +225,16 @@ _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 {
     ASSERT_CRASH(m_pInputControllerCom);
     return m_pInputControllerCom->Check_AllInput(iKeyFlag, eKeyState);
+}
+
+
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+{
+    ASSERT_CRASH(m_pModelCom);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+    m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+    
+    return IsPlayAnimationEnd;
 }
 
 
@@ -235,43 +297,33 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
 
     ASSERT_CRASH(m_pSpringCamera);
     ASSERT_CRASH(m_pTransformCom);
-    
 
-    // 1. 타겟 방향으로 회전 (매프레임)? => 타겟을 계속 봐야하잖아.
-    _float3 vTargetPos = m_pSpringCamera->Get_TargetPos(); // => 이런것만 수정하면
-    _vector vTarget = XMVectorSetW(XMLoadFloat3(&vTargetPos), 1.f);
-    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+    // 1. 회전.
+    Rotate_Target();
 
+    //// 2. 회전 후 Right / Look 가져오기.
+    //_vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
+    //_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+    //_vector vMoveDir = XMVectorZero();
 
-    vToTarget = XMVectorSetY(vToTarget, 0.f);
-    m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
-    
-    // 2. 회전 후 Right / Look 가져오기.
-    _vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
-    _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
-    _vector vMoveDir = XMVectorZero();
+    //switch (eDir)
+    //{
+    //case ACTORDIR::U:   vMoveDir = vLook; break;
+    //case ACTORDIR::D:   vMoveDir = -vLook; break;
+    //case ACTORDIR::L:   vMoveDir = -vRight; break;
+    //case ACTORDIR::R:   vMoveDir = vRight; break;
+    //case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
+    //case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
+    //case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
+    //case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
+    //default: return;
+    //}
 
-    switch (eDir)
-    {
-    case ACTORDIR::U:   vMoveDir = vLook; break;
-    case ACTORDIR::D:   vMoveDir = -vLook; break;
-    case ACTORDIR::L:   vMoveDir = -vRight; break;
-    case ACTORDIR::R:   vMoveDir = vRight; break;
-    case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
-    case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
-    case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
-    case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
-    default: return;
-    }
+    //vMoveDir = XMVectorSetY(vMoveDir, 0.f) * -1.f;
+    //vMoveDir = XMVector3Normalize(vMoveDir);
+    _vector vMoveDir = Calculate_Move_Direction(eDir);
 
-    vMoveDir = XMVectorSetY(vMoveDir, 0.f) * -1.f;
-    vMoveDir = XMVector3Normalize(vMoveDir);
-
-    // 2. 캐릭터를 카메라 Look 방향으로 회전.
-    //m_pTransformCom->LookLerp(vMoveDir * -1.f, fTimeDelta, 1.f);
-
-    // 4. 이동 적용
+    // 3. 이동 적용
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }
 
@@ -280,35 +332,11 @@ void CCharacter::Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta,
     ASSERT_CRASH(m_pSpringCamera);
     ASSERT_CRASH(m_pTransformCom);
 
-    _vector vLook = m_pSpringCamera->Get_LookVector_NoPitch();
-    _vector vRight = m_pSpringCamera->Get_RightVector_NoPitch();
-
-    vLook = XMVectorSetY(vLook, 0.f);
-    vRight = XMVectorSetY(vRight, 0.f);
-    vLook = XMVector3Normalize(vLook);
-    vRight = XMVector3Normalize(vRight);
-    _vector vMoveDir = XMVectorZero();
-
-    switch (eDir)
-    {
-    case ACTORDIR::U:   vMoveDir = vLook; break;        
-    case ACTORDIR::D:   vMoveDir = -vLook; break;       
-    case ACTORDIR::L:   vMoveDir = -vRight; break;      
-    case ACTORDIR::R:   vMoveDir = vRight; break;       
-    case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
-    case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
-    case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
-    case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
-        default: return;
-    }
-
-    vMoveDir = XMVectorSetY(vMoveDir, 0.f);
-    vMoveDir = XMVector3Normalize(vMoveDir);
+    _vector vMoveDir = Calculate_Move_Direction(eDir);
 
     // 이동 방향으로 회전 (부드러운 회전)
-    m_pTransformCom->LookLerp(vMoveDir * -1.f, fTimeDelta, 10.f);
+    m_pTransformCom->LookLerp(vMoveDir, fTimeDelta, 10.f);
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
-    
 }
 
 // 떨어질 때 추가 값.
@@ -347,48 +375,26 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-_bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
+
+
+void CCharacter::Rotate_Target()
 {
-    ASSERT_CRASH(m_pTransformCom);
+    // 1. 타겟이 없는 경우 Return
+    if (nullptr == m_pTargetTransform)
+        return;
 
-    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
-    vLook = XMVector3Normalize(vLook);
-
-    // 가슴 높이에서 전방 Radius로 레이 발사
-
-    _float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
-    _vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
-    _vector vEnd = vStart + vLook * - (m_fColliderRadius + 0.1f); // Collider Radius 고려.
-
-    _float4 vHitPoint = {};
-    _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+    // 2. 타겟이 있으면 즉시 회전.
+    _vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 
 
-    if (bHit)
-    {
-        XMStoreFloat3(pWallNormal, vPos - XMLoadFloat4(&vHitPoint));
-        return true;
-    }
+    vToTarget = XMVectorSetY(vToTarget, 0.f);
+    //m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
+    m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
+    //m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
-
-    return false;
-}
-
-_bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal)
-{
-    ASSERT_CRASH(m_pTransformCom);
-
-    _vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-    
-    // 머리위쪽에서 정면으로 Ray 발사.
-    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight * 1.7f, 0.f, 0.f);
-    _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
-
-    _float4 vHitPoint = {};
-
-    return m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
+    return;
 }
 
 void CCharacter::Set_Gravity(_bool IsGravity)
@@ -397,10 +403,27 @@ void CCharacter::Set_Gravity(_bool IsGravity)
     m_pColliderCom->Set_Gravity(IsGravity);
 }
 
+void CCharacter::Sync_Collider()
+{
+    m_IsSyncCollider = true;
+}
+
+
+
+
 
 
 
 #pragma endregion
+
+#pragma region UI
+void CCharacter::Sync_UI()
+{
+    // Character Info Sync 
+    m_pGameSystem->Sync_CharacterInfo(m_Stats);
+}
+#pragma endregion
+
 
 
 
@@ -408,8 +431,8 @@ void CCharacter::Set_Gravity(_bool IsGravity)
 void CCharacter::Free()
 {
     CActor::Free();
+    Safe_Release(m_pGameSystem);
     Safe_Release(m_pInputControllerCom);
-    Safe_Release(m_pStateMachineCom);
     Safe_Release(m_pSpringCamera);
-    
+    Safe_Release(m_pStateMachineCom);
 }

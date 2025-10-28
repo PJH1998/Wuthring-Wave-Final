@@ -44,7 +44,16 @@ namespace Client
 	};
 
 	enum class UI_EVENT_TYPE {
-		CLICK, HOVER, SCROLL, END
+		NONE, CLICK_ENTER, CLICKING, CLICK_EXIT, HOVER_ENTER, HOVERING, HOVER_EXIT, SCROLL, END
+	};
+
+	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용
+		UIFLAG_ERROR,				// default. outputs magenta
+		UIFLAG_COOLDOWN_CIRCLE,		// 원형 쿨타임 (skill)
+		UIFLAG_COOLDOWN_RECT,		// 사각형 쿨타임 (partyframe)
+		UIFLAG_PLAYER_HP,
+		UIFLAG_PLAYER_TRANSMIT,
+		UIFLAG_END
 	};
 	
 	enum class  TEST_STATE : unsigned int

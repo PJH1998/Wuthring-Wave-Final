@@ -27,6 +27,7 @@ public:
 	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 	void		IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
+	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
 
 #endif
 
@@ -65,20 +66,22 @@ private:
 	void				Render_Shadow();
 	void				Render_Outline();
 	void				Render_NonBlend();
-	void				Render_Light();
 	void				Render_SSAO();
+	void				Render_Light();
 	void				Render_Combined();
 	void				Render_NonLight();
 	void				Render_Emissive();
+	void				Render_Bloom();
 	void				Render_DistortionObject();
 	void				Render_Blend();
 	void				Render_Distortion();
 	void				Render_LUT();
+	void				Render_Fog();
 	void				Render_UI();
 	void				Render_Fade();
 
-	void				GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType);
-	void				SSAO_Blur();
+	//void				GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType);
+	//void				SSAO_Blur();
 #ifdef _DEBUG
 	void				Render_Debug();
 #endif

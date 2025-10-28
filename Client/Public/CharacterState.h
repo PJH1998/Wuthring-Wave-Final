@@ -16,11 +16,6 @@ public:
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
-public:
-    // LockOn 방향 계산
-    _vector Calculate_Attack_Direction(class CCharacter* pCharacter);
-    _vector Determine_Final_Direction(class CCharacter* pCharacter, _vector vInputDirection, _vector vLockOnDirection);
-
 protected:
     _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta);
 

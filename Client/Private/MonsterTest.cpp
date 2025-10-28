@@ -141,7 +141,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 	RigidbodyDesc.vExtent = _float3(25.f, 13.f, 25.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	

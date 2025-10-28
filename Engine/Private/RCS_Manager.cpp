@@ -11,6 +11,15 @@ CRCS_Manager::CRCS_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     Safe_AddRef(m_pContext);
 }
 
+ID3D11ShaderResourceView* CRCS_Manager::Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel)
+{
+    CRendererCS* pRCS = Find_RCS(strRCSTag);
+    if (nullptr == pRCS)
+        return nullptr;
+
+    return pRCS->Get_SRV(iMipLevel);
+}
+
 HRESULT CRCS_Manager::Add_RCS(const _wstring& strRCSTag, void* pDesc)
 {
     if (nullptr != Find_RCS(strRCSTag))
@@ -18,6 +27,8 @@ HRESULT CRCS_Manager::Add_RCS(const _wstring& strRCSTag, void* pDesc)
 
     CRendererCS* pRCS = CRendererCS::Create(m_pDevice, m_pContext, pDesc);
     ASSERT_CRASH(pRCS);
+
+    pRCS->Setting_UAV_Data("OutputTexture");
 
     m_RCSs.emplace(strRCSTag, pRCS);
 
@@ -57,36 +68,39 @@ HRESULT CRCS_Manager::Setting_UAV_Data(const _wstring& strRCSTag, const _char* p
     return S_OK;
 }
 
-HRESULT CRCS_Manager::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName)
+HRESULT CRCS_Manager::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel)
 {
     CRendererCS* pRCS = Find_RCS(strRCSTag);
     if (nullptr == pRCS)
         return E_FAIL;
 
-    return pShader->Bind_Texture(pConstantName, pRCS->Get_SRV());
+    return pShader->Bind_Texture(pConstantName, pRCS->Get_SRV(iMipLevel));
 }
 
-HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag)
+HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
-
     CRendererCS* pRCS = Find_RCS(strRCSTag);
     if (nullptr == pRCS)
         return E_FAIL;
 
-    pRCS->Clear();
-    pRCS->Bind_Resources();
-    pRCS->Dispatch();
+    pRCS->Clear(iMipLevel);
+    pRCS->Bind_Resources(iMipLevel);
+    pRCS->Dispatch(iMipLevel);
+
+    ID3D11SamplerState* pNullSampler[D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT] = { nullptr };
+    m_pContext->PSSetSamplers(0, D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT, pNullSampler);
+    m_pContext->CSSetSamplers(0, D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT, pNullSampler);
 
     return S_OK;
 }
 
-void CRCS_Manager::Clear_RCS(const _wstring& strRCSTag)
+void CRCS_Manager::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
     CRendererCS* pRCS = Find_RCS(strRCSTag);
     if (nullptr == pRCS)
         return;
 
-    pRCS->Clear();
+    pRCS->Clear(iMipLevel);
 }
 
 #ifdef _DEBUG

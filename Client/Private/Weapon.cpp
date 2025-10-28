@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "Weapon.h"
+#include "Character.h"
 
 CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject{ pDevice, pContext }
@@ -53,11 +54,12 @@ void CWeapon::Late_Update(_float fTimeDelta)
     CPartObject::Late_Update(fTimeDelta);
 }
 
+
 void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     ASSERT_CRASH(m_pModelCom);
     m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
-        m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+        m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 

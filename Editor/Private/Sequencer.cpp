@@ -49,8 +49,11 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 
 void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
 {
-	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	if (m_iSelectedEntry != iIndex)
+		return;
+
 	delegate.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
 	m_pDrawList->PushClipRect(legendClippingRect.Min, legendClippingRect.Max, true);
 
 	for (_int i = 0; i < 3; ++i)
@@ -64,23 +67,58 @@ void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& custo
 
 	m_pDrawList->PopClipRect();
 
-	if (m_iSelectedEntry == iIndex)
+	ImGui::SetCursorScreenPos(customRect.Min);
+	ImCurveEdit::Edit(delegate, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+
+	// Custom Rect ³»ºÎ MousePos Compute
+	_float fMouseX = (m_fFramePixelWidth * m_iFirstFrame + io.MousePos.x - customRect.Min.x) / m_fFramePixelWidth;
+	_float fMouseY = 1.f - (io.MousePos.y - customRect.Min.y) / (customRect.Max.y - customRect.Min.y);
+	// Point Click
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
 	{
-		ImGui::SetCursorScreenPos(customRect.Min);
-		ImCurveEdit::Edit(delegate, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
+
+		for (_uint i = 0; i < 3; ++i)
+		{
+			for (size_t j = 0; j < delegate.GetPointCount(i); ++j)
+			{
+				ImVec2 vPoint = delegate.GetPoints(i)[j];
+				if (fabsf(vPoint.x - fMouseX) < 1.f && fabsf(vPoint.y - fMouseY) < 0.1f)
+				{
+					delegate.miSelectCurve = i;
+					delegate.miSelectPoint = j;
+					return;
+				}
+			}
+		}
+	}
+	// Point Click Off
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::RB) == KEYSTATE::DOWN)
+	{
+		delegate.miSelectCurve = -1;
+		delegate.miSelectPoint = -1;
+	}
+	// Add Point
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::DOWN)
+	{
+		if (delegate.miSelectCurve > -1)
+			delegate.AddPoint(delegate.miSelectCurve, ImVec2(fMouseX, fMouseY));
 	}
 }
 
 void CSequencer::CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect& customRect, const ImRect& clippingRect)
 {
-	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
+	if (m_iSelectedEntry != iIndex)
+		return;
+
 	delegate.mMin = ImVec2(static_cast<_float>(m_iFrameMin), 0.f);
+	delegate.mMax = ImVec2(static_cast<_float>(m_iFrameMax), 1.f);
 	m_pDrawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
 	for (_int i = 0; i < 3; ++i)
 	{
 		for (_uint j = 0; j < delegate.mPointCount[i]; ++j)
 		{
 			_float fFrame = delegate.mPoints[i][j].x;
+			cout << fFrame << endl;
 			if (fFrame < m_Items[iIndex].iFrameStart || fFrame > m_Items[iIndex].iFrameEnd)
 				continue;
 			_float fRatio = (fFrame - m_iFrameMin) / static_cast<_float>(m_iFrameMax - m_iFrameMin);
@@ -134,8 +172,9 @@ void CSequencer::Selectable_Item()
 		sprintf_s(szEntry, MAX_PATH, "[Entry] : %d", m_iSelectedEntry);
 		ImGui::Text(szEntry);
 
-		ImGui::Text("[Frame]");
 		SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+
+		ImGui::Text("[Frame]");
 		_char szFrame[MAX_PATH] = {};
 		sprintf_s(szFrame, MAX_PATH, "Start : %d / End : %d", item.iFrameStart, item.iFrameEnd);
 		ImGui::Text(szFrame);
@@ -145,8 +184,44 @@ void CSequencer::Selectable_Item()
 		ImGui::InputText("##", item.szItemLabel, MAX_PATH);
 		ImGui::PopID();
 
+		ImGui::Text("==================================");
+
+		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
+			SetUp_Point(item);
+
+		if(ITEM_TYPE::CAMERA == item.eType)
+			SetUp_Camera(item);
+
 		ImGui::End();
 	}
+}
+
+void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
+{
+	ImGui::Begin("Point Setting");
+
+	// Translation
+	_int iSelectIndex = item.mRampEdit.miSelectPoint;
+	if (item.mRampEdit.miSelectCurve == 0)
+	{
+		ImGui::Text("[Translation]");
+		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mPositions[iSelectIndex]));
+	}
+	// Rotation
+	else if (item.mRampEdit.miSelectCurve == 1)
+	{
+		ImGui::Text("[Rotation]");
+		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mRotations[iSelectIndex]));
+	}
+
+	ImGui::End();
+}
+
+void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
+{
+	ImGui::Text("[Camera Setting]");
+
+
 }
 
 void CSequencer::Sorting_Item()
@@ -336,8 +411,8 @@ void CSequencer::DrawFrame()
 	for (auto& customDraw : m_CustomDraws)
 		CustomDraw(m_Items[customDraw.iIndex].mRampEdit, customDraw.iIndex, customDraw.CustomRect, customDraw.LegendRect, customDraw.ClippingRect, customDraw.LegendClippingRect);
 
-	for (auto& customDraw : m_CompactCustomDraws)
-		CustomDrawCompact(m_Items[customDraw.iIndex].mRampEdit, customDraw.iIndex, customDraw.CustomRect, customDraw.ClippingRect);
+	//for (auto& customDraw : m_CompactCustomDraws)
+	//	CustomDrawCompact(m_Items[customDraw.iIndex].mRampEdit, customDraw.iIndex, customDraw.CustomRect, customDraw.ClippingRect);
 
 
 	CopyPaste();
@@ -729,7 +804,7 @@ void CSequencer::DrawLineContent(_int iFrame, _int iRegionHeight)
 
 _bool CSequencer::SequencerAddDelButton(ImVec2 vPos, _bool isAdd)
 {
-	ImGuiIO& io = ImGui::GetIO();
+	//ImGuiIO& io = ImGui::GetIO();
 
 	ImRect BtnRect(vPos, ImVec2(vPos.x + 16, vPos.y + 16));
 	_bool isOverBtn = BtnRect.Contains(io.MousePos);

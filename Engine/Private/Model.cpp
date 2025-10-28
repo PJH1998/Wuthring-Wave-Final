@@ -408,13 +408,15 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 		return true; // 애니메이션 종료
 	}
 
+#
 	// 5. Combined는 한번만.
 	for (_uint i = 0; i < m_Bones.size(); i++)
 	{
 		m_Bones[i]->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 	}
 
-	
+
+
 
 	return false;
 }
@@ -628,8 +630,8 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	m_Bones[m_iRootBoneIndex]->Set_TransformationMatrix(RootBoneLocalMatrix);
 
 	// 축 변환 쿼터니언 생성
-	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2);
+	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);;
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환

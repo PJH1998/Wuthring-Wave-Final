@@ -39,7 +39,10 @@ void CAugustaGroundAttack::OnEnter()
 
     // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+
+    _string strBoneName = "WeaponProp02";
     m_pAugusta->PartAcitvate(m_iPartType, true);
+    m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
@@ -113,6 +116,9 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+
+    // Target이 존재한다면? => Auto Target
+    m_pAugusta->Rotate_Target();
 
     // 1타 모션일때 누르고 있다면?
     if (m_States[HEAVY_ATTACK_PENDING])

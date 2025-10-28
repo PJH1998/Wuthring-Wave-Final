@@ -4,17 +4,20 @@
 NS_BEGIN(Client)
 
 // Augusta Skill State - Skill_Hack, Skill_Rise, Skill_Strike, SkillQTE, Burst01 처리
+// Default Skill State
 class CAugustaGroundSkill final : public CGroundState
 {
 private:
     enum SKILLSTATE
     {
        HACK = 0,
-       RISE,
        RISE_ZERO,
-       STRIKE,
        QTE,
        IDLE,
+       RUN,
+       JUMP, 
+       LAND,
+       AIR_ATTACK,
        END
     };
 

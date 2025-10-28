@@ -32,7 +32,7 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
 	m_eShape = pDesc->eShape;
-	RefConst<Shape> BodyShape;
+	RefConst<Shape> BodyShape = { nullptr };
 
 	using namespace JPH;
 	switch (m_eShape)
