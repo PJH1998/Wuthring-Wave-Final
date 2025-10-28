@@ -116,8 +116,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	{
 
 		m_isDetecting = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
-		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+		//CTransform* pTransform = static_cast<CTransform*>(pOther);
+		//XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 
 	}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
