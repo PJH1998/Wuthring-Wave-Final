@@ -783,6 +783,7 @@ void CGameInstance::Release_Engine()
 {
 	Wait_Thread_End();
 
+	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
@@ -799,14 +800,13 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadow);
-	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
-	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pRCS_Manager);
-	Safe_Release(m_pPhysicsManager);
 	Safe_Release(m_pUI_Manager);
+	Safe_Release(m_pPhysicsManager);																									
+	Safe_Release(m_pGraphic_Device);
 
 	Release();
 }

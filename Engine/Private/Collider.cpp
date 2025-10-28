@@ -57,7 +57,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
-	CharacterVirtualSettings VirtualSetting;
+	CharacterVirtualSettings VirtualSetting = {};
 	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
 	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(120.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
