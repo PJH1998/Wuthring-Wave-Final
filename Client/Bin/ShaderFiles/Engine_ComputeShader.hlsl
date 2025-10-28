@@ -73,10 +73,10 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         
         float3 vRandomVector = mul(vSampleVector[i].xyz, TBN);
         
-        float4 vSampeDir = float4(vRandomVector, 0.f); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ vNormal ï¿½ï¿½ï¿½ï¿½ ï¿½Ý±ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½
+        float4 vSampeDir = float4(vRandomVector, 0.f); // »ùÇÃ º¤ÅÍ¸¦ vNormal ±âÁØ ¹Ý±¸ ÇüÅÂ·Î º¯Çü
        
-        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);      // Radius ï¿½ï¿½Å­ ï¿½Ìµï¿½
-        vSamplePos.w = 1.f;                                                         // ï¿½Ì»ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½å°¡ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½,,
+        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);      // Radius ¸¸Å­ ÀÌµ¿
+        vSamplePos.w = 1.f;                                                         // ÀÌ»óÇÑ °ªÀÌ µå°¡´Â°Å °°À½,,
         float fRandomZ = vSamplePos.z;
         
         float4 vProjPos = mul(vSamplePos, CamProjMatrix);
@@ -87,7 +87,7 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
             
         float SampleDepth = g_DepthTexture.SampleLevel(PointClampSampler, vSampleTexcoord, 0).y;
         
-        if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ï¿½È±×·ï¿½ï¿½ï¿½ï¿½Ö°Å³ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½Ö´Ù¸ï¿½
+        if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ¾È±×·ÁÁ®ÀÖ°Å³ª, ·£´ý À§Ä¡º¸´Ù µÚ¿¡ ÀÖ´Ù¸é
         {
             Occlusion = 1.f;
         }
@@ -97,11 +97,11 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
             
             float4 vSampleViewPos = Compute_ViewPosTexcoord(vSampleTexcoord, g_DepthTexture, DefaultSampler, ProjMatrixInv);
 
-            float fNormalWeight = saturate(dot(vNormal.xyz, normalize(vSampleViewPos.xyz - vViewPos.xyz))); // ï¿½ï¿½ï¿½ï¿½ ï¿½ë¸»ï¿½ï¿½ Sample ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            float fNormalWeight = saturate(dot(vNormal.xyz, normalize(vSampleViewPos.xyz - vViewPos.xyz))); // ÇöÀç ³ë¸»°ú Sample À§Ä¡±îÁöÀÇ ¹æÇâ º¤ÅÍ
             
-            float fDistWeight = smoothstep(fSSAO_MaxDistance, 0.f, fDistance); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï°ï¿½    
+            float fDistWeight = smoothstep(fSSAO_MaxDistance, 0.f, fDistance); // ±íÀÌ Â÷ÀÌ°¡ Å¬¼ö·Ï °­ÇÏ°Ô, ³·À»¼ö·Ï ¾àÇÏ°Ô    
 
-            //if(fNormalWeight <= 0.1f)                                    // ï¿½ï¿½ï¿½ï¿½ ï¿½ë¸»ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½Ö´Ù¸ï¿½
+            //if(fNormalWeight <= 0.1f)                                    // ¸¸¾à ³ë¸»¹æÇâ µÚ¿¡ ÀÖ´Ù¸é
             //    Occlusion = 1.f;
             //else
             {

@@ -83,6 +83,8 @@ public:
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; }
 
+	_bool					Is_ParentActivate();
+
 private:
 	HRESULT					Ready_Prototypes(void* pArg);
 	HRESULT					Ready_Components(void* pArg);

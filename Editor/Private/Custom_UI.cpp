@@ -92,7 +92,8 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    if (!m_isActivate)
+    if (!m_isActivate ||
+        Is_ParentActivate() == false)
         return;
 
     //__super::Begin();
@@ -130,6 +131,25 @@ void CCustom_UI::Render()
     m_pVIBufferCom->Bind_Resources();
 
     m_pVIBufferCom->Render();
+}
+
+_bool CCustom_UI::Is_ParentActivate()
+{
+    if (m_tUIDesc.pParentObject == nullptr)
+        return true;
+
+    CCustom_UI* pParent = static_cast<CCustom_UI*>(m_tUIDesc.pParentObject);
+
+    while (pParent)
+    {
+        if (!pParent->IsActivate())
+            return false;
+
+        CUSTOM_UI_DESC tParentDesc = pParent->Get_UIDesc();
+        pParent = static_cast<CCustom_UI*>(tParentDesc.pParentObject);
+    }
+
+    return true;
 }
 
 HRESULT CCustom_UI::Ready_Prototypes(void* pArg)

@@ -205,7 +205,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
         vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
         
-        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ w ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X
+        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // Á÷±³¶ó w ³ª´©±â X
  
         float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
@@ -223,7 +223,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
         vShadowPos = mul(vWorldPos, matShadowLightVP);
     
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ w ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X
+        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // Á÷±³¶ó w ³ª´©±â X
 
         float fBias = 0.f;
         
