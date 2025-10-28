@@ -50,7 +50,8 @@ private:
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
 	_float3					m_vTargetPosition{};
-
+	_float					m_fAttackCoolTime[10]{};
+	_float					m_fAttackAcc[10]{};
 	_float					m_fDistance{};
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
@@ -64,7 +65,7 @@ private:
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
-	void						Reset_Condition();
+	void						Reset_Condition(_float fTimeDelta);
 
 	_bool						isAnimationRunning() { return m_isAnimationFinished; }
 	_bool						isAttackEnable();

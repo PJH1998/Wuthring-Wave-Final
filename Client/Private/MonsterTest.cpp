@@ -30,7 +30,18 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Scale(_float3(0.01f, 0.01f, 0.01f));
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
-
+#pragma region ATTACK_STATE
+	m_fAttackCoolTime[0] = 1.f;
+	m_fAttackCoolTime[1] = 7.f;
+	m_fAttackCoolTime[2] = 7.f;
+	m_fAttackCoolTime[3] = 5.f;
+	m_fAttackCoolTime[4] = 7.f;
+	m_fAttackCoolTime[5] = 7.f;
+	m_fAttackCoolTime[6] = 7.f;
+	m_fAttackCoolTime[7] = 7.f;
+	m_fAttackCoolTime[8] = 4.f;
+	m_fAttackCoolTime[9] = 3.f;
+#pragma endregion
 	//Ready_PartObjects(pDesc);
 	Ready_Component(pDesc);
 
@@ -46,7 +57,7 @@ void CMonsterTest::Priority_Update(_float fTimeDelta)
 
 void CMonsterTest::Update(_float fTimeDelta)
 {
-	Reset_Condition();
+	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
@@ -217,7 +228,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 
 }
 
-void CMonsterTest::Reset_Condition()
+void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
 	if(m_isAnimationFinished)
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -235,7 +246,13 @@ void CMonsterTest::Reset_Condition()
 		cout << "distance: " << m_fDistance << endl;
 #endif
 	}
-
+	for(_uint i = 0; i < 10; ++i)
+	{
+		if(m_fAttackAcc[i] > 0.f)
+			m_fAttackAcc[i] -= fTimeDelta;
+	}
+	if(m_fDodgeCoolTime < 0.f)
+		m_fDodgeCoolTime -= fTimeDelta;
 }
 
 _bool CMonsterTest::isAttackEnable()
@@ -245,17 +262,26 @@ _bool CMonsterTest::isAttackEnable()
 
 _bool CMonsterTest::DodgeCooldown()
 {
-	return false;
+	_bool Result = m_fDodgeCoolTime <= 0.f;
+	if(Result)
+		m_fDodgeCoolTime = 7.f;
+	return Result;
 }
 
 _bool CMonsterTest::Attadk1()
 {
-	return m_fDistance < 3.f;
+	_bool Result = (m_fAttackAcc[0] <= 0.f) && m_fDistance < 3.f;
+	if(Result)
+		m_fAttackAcc[0] = m_fAttackCoolTime[0];
+	return Result;
 }
 
 _bool CMonsterTest::Attack2()
 {
-	return m_fDistance < 20.f;
+	_bool Result = (m_fAttackAcc[1] <= 0.f);
+	if(Result)
+		m_fAttackAcc[1] = m_fAttackCoolTime[1];
+	return Result;
 }
 
 _bool CMonsterTest::Back()
