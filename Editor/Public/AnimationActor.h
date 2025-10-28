@@ -60,6 +60,7 @@ public:
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
 	const _float4x4* Get_WorldMatrixPtr();
 
+	_float4 m_vInitPosition = {};
 #endif // _DEBUG
 
 

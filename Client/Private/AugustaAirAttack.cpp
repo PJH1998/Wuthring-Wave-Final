@@ -121,7 +121,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_SP_END)
         {
-            if (m_States[MOVE] && m_States[LAND])
+            if (m_States[MOVE] && fDistanceToGround < 0.2f)
             {
                 m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
@@ -141,7 +141,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
         if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_SP_END)
         {
-            if (m_pAugusta->Is_Land(&m_vLandNormal))
+            if (fDistanceToGround < 0.2f)
             {
                 m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
