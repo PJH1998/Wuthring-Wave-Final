@@ -391,6 +391,18 @@ void CRenderer::Render_Bloom()
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"))))
 		CRASH("Failed RCS_DOWNSAMPLE");
 
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), 0))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), 1)))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), 1))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), 2)))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
 #pragma region GAUSSIAN_BLUR_X
 	if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), m_fWinSizeX, m_fWinSizeY)))
 		CRASH("Failed Add_BufferData");
@@ -684,17 +696,6 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 #pragma endregion
-//
-//#pragma region MRT_BLUR
-//	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Blur"), TEXT("RT_Blur"))))
-//		ASSERT_CRASH(false);
-//#pragma endregion
-//
-//#pragma region MRT_BLUR_END
-//	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_BlurEnd"), TEXT("RT_BlurEnd"))))
-//		ASSERT_CRASH(false);
-//#pragma endregion
-
 	// RENDERGROUP::DISTORTION
 #pragma region MRT_DISTORTION
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_Distortion"))))
@@ -723,6 +724,7 @@ HRESULT CRenderer::Ready_RCS()
 	RCSDesc.fDefinitionX = 16.f;
 	RCSDesc.fDefinitionY = 16.f;
 	RCSDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	RCSDesc.iMipLevels = 1;
 	RCSDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO"), &RCSDesc)))
@@ -739,6 +741,7 @@ HRESULT CRenderer::Ready_RCS()
 	BlurDesc.fDefinitionX = 16.f;
 	BlurDesc.fDefinitionY = 16.f;
 	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurDesc.iMipLevels = 1;
 	BlurDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO_BLUR_X"), &BlurDesc)))
@@ -762,6 +765,7 @@ HRESULT CRenderer::Ready_RCS()
 	GaussianRCS.fDefinitionX = 16.f;
 	GaussianRCS.fDefinitionY = 16.f;
 	GaussianRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	GaussianRCS.iMipLevels = 1;
 	GaussianRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &GaussianRCS)))
@@ -785,6 +789,7 @@ HRESULT CRenderer::Ready_RCS()
 	DownSampleRCS.fDefinitionX = 16.f;
 	DownSampleRCS.fDefinitionY = 16.f;
 	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	DownSampleRCS.iMipLevels = 3;
 	DownSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOWNSAMPLE"), &DownSampleRCS)))
