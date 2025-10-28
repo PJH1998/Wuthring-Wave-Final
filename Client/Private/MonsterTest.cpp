@@ -116,8 +116,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	{
 
 		m_isDetecting = true;
-		//CTransform* pTransform = static_cast<CTransform*>(pOther);
-		//XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 
 	}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
@@ -142,7 +142,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 	RigidbodyDesc.vExtent = _float3(25.f, 13.f, 25.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 	

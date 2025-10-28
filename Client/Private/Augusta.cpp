@@ -80,8 +80,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
             pPart.second->Priority_Update(fTimeDelta);
     }
 
-  
-    
 }
 
 void CAugusta::Update(_float fTimeDelta)

@@ -276,6 +276,9 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
 
 void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
+		return;
+
     CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
     if (nullptr == pTargetTransform)
         return;
@@ -332,6 +335,9 @@ void CPlayer::Sync_Transform()
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+		return;
+
     CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
     if (nullptr == pTargetTransform)
         return;
@@ -450,7 +456,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eBodyType = CRigidbody::BODY;
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
     RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 

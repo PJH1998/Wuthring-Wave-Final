@@ -5,13 +5,13 @@ CBone::CBone()
 {
 }
 
-//CBone::CBone(const CBone& Copy)
-//	: m_TransformationMatrix { Copy.m_TransformationMatrix },
-//	m_CombinedTransformationMatrix { Copy.m_CombinedTransformationMatrix },
-//	m_iParentBoneIndex { Copy.m_iParentBoneIndex }
-//{
-//	strcpy_s(m_szName, MAX_PATH, Copy.m_szName);
-//}
+CBone::CBone(const CBone& Copy)
+	: m_TransformationMatrix { Copy.m_TransformationMatrix },
+	m_CombinedTransformationMatrix { Copy.m_CombinedTransformationMatrix },
+	m_iParentBoneIndex { Copy.m_iParentBoneIndex }
+{
+	strcpy_s(m_szName, MAX_PATH, Copy.m_szName);
+}
 
 HRESULT CBone::Initialize(const _char* pBoneName, const _fmatrix& TransformationMatrix, _int iParentBoneIndex)
 {

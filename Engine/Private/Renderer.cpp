@@ -78,11 +78,11 @@ void CRenderer::Render()
 	Render_Outline();
 	Render_NonBlend();
 	Render_Light();
-	Render_SSAO();
+	//Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
 	Render_Emissive();
-	Render_Bloom();
+	//Render_Bloom();
 	Render_Blend();
 	Render_Distortion();
 	Render_LUT();

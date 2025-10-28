@@ -23,7 +23,7 @@ public:
 	}ANIMSTATE_DESC;
 protected:
 	explicit CAnimState() = default;
-	//explicit CAnimState(const CAnimState& Copy);
+	explicit CAnimState(const CAnimState& Copy);
 	virtual ~CAnimState() = default;
 
 public:
