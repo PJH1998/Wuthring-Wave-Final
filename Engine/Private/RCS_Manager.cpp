@@ -28,6 +28,8 @@ HRESULT CRCS_Manager::Add_RCS(const _wstring& strRCSTag, void* pDesc)
     CRendererCS* pRCS = CRendererCS::Create(m_pDevice, m_pContext, pDesc);
     ASSERT_CRASH(pRCS);
 
+    pRCS->Setting_UAV_Data("OutputTexture");
+
     m_RCSs.emplace(strRCSTag, pRCS);
 
     return S_OK;
