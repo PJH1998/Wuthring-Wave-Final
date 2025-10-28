@@ -251,6 +251,29 @@ void CAnimationActor::Collider_Active(const _wstring&, _bool)
 void CAnimationActor::Effect_Active()
 {
 }
+const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)
+{
+    if (nullptr == m_pModelCom)
+    {
+        MSG_BOX("Model nullptr");
+        return nullptr;
+    }
+        
+    const _float4x4* pBoneMatrix = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
+
+    if (nullptr == pBoneMatrix)
+    {
+        MSG_BOX("Bone Name Error");
+        return nullptr;
+    }
+
+    return pBoneMatrix;
+}
+const _float4x4* CAnimationActor::Get_WorldMatrixPtr()
+{
+    return m_pTransformCom->Get_WorldMatrixPtr();
+}
+
 #endif
 
 // 1. 행렬 

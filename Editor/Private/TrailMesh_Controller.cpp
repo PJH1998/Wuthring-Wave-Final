@@ -108,7 +108,7 @@ void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPa
                 strcpy_s(Desc.szDatPath, sizeof(Desc.szDatPath), DefaultPath.c_str());
 
                 //매쉬버퍼 컴포넌트 생성
-                _fmatrix DefualtMatrix = XMMatrixIdentity();
+                _fmatrix DefualtMatrix = XMMatrixIdentity() * XMMatrixRotationX(-90);
 
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strMeshTag,
                    CVIBuffer_Mesh::Create(m_pDevice, m_pContext, filePath.c_str(), DefualtMatrix));

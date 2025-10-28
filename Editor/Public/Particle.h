@@ -69,8 +69,10 @@ private:
 	_int						m_iRow = {};
 	_int						m_iCol = {};
 
-	_bool						m_IsRoot = false;
-	const _float4x4*			m_ParentMatrix = { nullptr };
+	//_bool						m_IsRoot = false;
+	//const _float4x4**			m_BoneMatrix = { nullptr };
+	//const _float4x4*			m_ParentMatrix = { nullptr };
+	//_float4x4					m_ComBindMatrix = {  };
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);

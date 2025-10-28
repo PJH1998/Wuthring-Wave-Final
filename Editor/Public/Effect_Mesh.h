@@ -58,7 +58,8 @@ private:
 	_float2						m_vLifeTime = {};
 
 	_bool						m_IsRoot = false;
-	const _float4x4*			m_ParentMatrix = { nullptr };
+	const _float4x4**			m_BoneMatrix = { nullptr };
+	const _float4x4**			m_ParentMatrix = { nullptr };
 	_float4x4					m_ComBindMatrix = {  };
 
 private:

@@ -52,6 +52,9 @@ public:
 
 public:
 	void Set_FrameDesc(FRAME_DESC* pFrameDesc);
+	void Set_BoneMatrixPtr(const _float4x4* BoneMatrix);
+	void Set_SpawnMatrix(const _float4x4* SpawnMatrix);
+	void Reset_BoneMatrix();
 
 public:
 	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
@@ -62,6 +65,7 @@ private:
 	
 
 	const _float4x4*					 m_pRootMatirx = {};
+	const _float4x4*                     m_SpawnMatrix = {};
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};

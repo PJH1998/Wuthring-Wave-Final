@@ -145,7 +145,7 @@ void CSpectrum::Reset(const _fmatrix& WorldMatrix, void* pArg)
 //Test
 void CSpectrum::Root_Transform()
 {
-    _matrix RootMatrix = XMLoadFloat4x4(m_ParentMatrix);
+    _matrix RootMatrix = XMLoadFloat4x4(*m_ParentMatrix);
 
     for (size_t i = 0; i < 3; i++)
         RootMatrix.r[i] = XMVector3Normalize(RootMatrix.r[i]);

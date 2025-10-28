@@ -1,6 +1,9 @@
 ﻿#include "EditorPch.h"
 #include "Effect_Controller.h"
-
+#include "Effect_Prefab.h"
+#include "Particle_Controller.h"
+#include "Mesh_Controller.h"
+#include "AnimationActor.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -26,6 +29,8 @@ void CEffect_Controller::Update()
 {
     Prefab_Tab();
 
+    if (m_AnimActorDesc.pAnimActor != nullptr && m_pSelectedPrefab != nullptr)
+        PrefabBinding_Tab();
 }
 
 void CEffect_Controller::Render()
@@ -381,7 +386,7 @@ void CEffect_Controller::UpdateSelected_PrefabFromIndex()
         }
     }
 
-    m_pSelectedPrefab->SetActivate(true);
+    //m_pSelectedPrefab->SetActivate(true);
 
     //현재 선택된 프리팹의 Desc
     auto iterDesc = m_PrefabDesc.find(m_pSelectedPrefab->Get_MyTag());
@@ -1345,6 +1350,87 @@ void CEffect_Controller::Load_Children_To_PrefabDesc(_wstring& ChildrenTag, EFFE
     m_pSelectedPrefabDesc->ChildrenCount += 1;
 
     m_pSelectedPrefabDesc->FrameDesc.push_back(Desc);
+}
+
+void CEffect_Controller::Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc)
+{
+    if (nullptr == effectActorDesc.pAnimActor)
+    {
+        MSG_BOX("Anim Actor nullptr");
+        return;
+    }
+
+    // 있으면 정보를 채워준다.
+    m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
+    m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
+    m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
+    m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+}
+
+void CEffect_Controller::PrefabBinding_Tab()
+{
+    if (ImGui::Begin("Prefab_Binding"))
+    {
+        if (ImGui::InputText("Bone Name", m_BoneName, IM_ARRAYSIZE(m_BoneName), ImGuiInputTextFlags_EnterReturnsTrue))
+            m_bBoneFlag = true;
+ 
+        if(ImGui::DragFloat("TrackPosition", &m_fTrackPosition, 0.1f, 0.f, m_AnimActorDesc.fDuration));
+
+
+        if (m_bBoneFlag)
+        {
+            if (ImGui::Button("Binding"))
+            {
+                const _float4x4* pBoneMatrix = { nullptr };
+                const _float4x4* pWorldMatrix = {};
+                _string BoneName = m_BoneName;
+
+                pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
+                pWorldMatrix = m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+
+                m_pSelectedPrefab->Set_BoneMatrixPtr(pBoneMatrix);
+                m_pSelectedPrefab->Set_SpawnMatrix(pWorldMatrix);
+
+                m_bBoneFlag = false;
+                m_BoneName[0] = _T('\0');
+            }
+        }
+
+        if (ImGui::Button("Reset"))
+        {
+            //초기화
+            m_AnimActorDesc.fDuration = 0.f;
+            m_AnimActorDesc.pAnimActor = nullptr;
+            m_AnimActorDesc.pModelCom = nullptr;
+            m_AnimActorDesc.strAnimName = "";
+            m_bBoneFlag = false;
+            m_BoneName[0] = _T('\0');
+
+            m_pSelectedPrefab->SetActivate(false);
+            m_pSelectedPrefab->Reset_BoneMatrix();
+        }
+    
+        ImGui::SameLine(0.f, 20.f);
+
+        if (ImGui::Button("Action"))
+            m_bTest = true;
+
+        if (m_bTest)
+        {
+            if (m_fTrackPosition > -1.f)
+            {
+                _float fCurrentTrackPos = *m_AnimActorDesc.pAnimActor->Get_TrackPositionPtr(m_AnimActorDesc.strAnimName);
+
+                if (m_fTrackPosition >= fCurrentTrackPos)
+                {
+                    m_pSelectedPrefab->SetActivate(true);
+                    m_bTest = false;
+                }
+            }
+        }
+
+        ImGui::End();
+    }
 }
 
 CEffect_Controller* CEffect_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

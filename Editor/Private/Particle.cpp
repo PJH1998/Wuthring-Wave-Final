@@ -35,19 +35,14 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
-
-    m_IsRoot = pDesc->IsRootOn;
-
-    if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-
     if (m_IsSprite = pDesc->IsSprite)
     {
 
         m_iRow = pDesc->iRows;
         m_iCol = pDesc->iCols;
     }
-   // m_isActivate = true;
+
+    m_isActivate = false;
 
 
     return S_OK;

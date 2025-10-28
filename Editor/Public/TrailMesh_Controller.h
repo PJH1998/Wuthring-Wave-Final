@@ -71,7 +71,6 @@ private:
 	_int														m_iSelectedColor = -1;
 	_bool														m_ColorTexturePopOpend = false;
 
-
 	vector<MESH_TAG>											m_MeshVBTag = {};
 	_int														m_iSelectedMeshVBTag = -1;
 	_bool														m_bMeshVBTag = false;
@@ -80,6 +79,7 @@ private:
 	_bool														m_bTagFlag = false;
 
 	_bool														m_IsRoot = false;
+
 
 	map<const _wstring, CTrail_Mesh::TRAILMESH_DESC>			m_tTrailMeshDesc = {};
 

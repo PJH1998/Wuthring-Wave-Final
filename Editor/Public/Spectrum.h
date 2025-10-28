@@ -62,7 +62,7 @@ private:
 	_float						m_fMinDistance = 0.1f;
 
 	_bool						m_IsRoot = false;
-	const _float4x4*			m_ParentMatrix = { nullptr };
+	const _float4x4**			m_ParentMatrix = { nullptr };
 	_float4x4					m_ComBindMatrix = {  };
 
 	_float3						m_vPreviousPos = {};

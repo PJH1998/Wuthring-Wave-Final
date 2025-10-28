@@ -80,7 +80,8 @@ namespace Engine
 		_wstring	strMyTag;
 		EFFECT_TYPE eMyType = EFFECT_TYPE::END;
 		_bool		IsRootOn = false;
-		const _float4x4*  RootMatrix = {};
+		const _float4x4**  RootMatrix = {};
+		const _float4x4** ParentMatrix = {};
 	}EFFECT_DESC;
 
 	typedef struct ParticleSRV	

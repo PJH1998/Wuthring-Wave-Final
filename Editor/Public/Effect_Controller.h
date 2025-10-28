@@ -7,9 +7,17 @@
 #include "Load_Controller.h"
 
 NS_BEGIN(Editor)
-
 class CEffect_Controller :public CBase
 {
+private:
+	typedef struct tagAnimationActorDesc
+	{
+		class CModel* pModelCom = { nullptr };
+		class CAnimationActor* pAnimActor = { nullptr };
+		_string strAnimName = {};
+		float fDuration = {};
+	}ANIMACTOR_DSEC;
+
 private:
 	explicit CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CEffect_Controller() = default;
@@ -59,6 +67,10 @@ public:
 	void Load_Children_To_Json();
 	void Load_Children_To_PrefabDesc(_wstring& ChildrenTag, EFFECT_TYPE eChildrenType);
 
+public:
+	void Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc);
+	void PrefabBinding_Tab();
+
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
 	ID3D11DeviceContext*										m_pContext = { nullptr };
@@ -93,6 +105,14 @@ private:
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
 
 	_bool														m_IsLoad = false;
+
+	//프리팹에 바인딩할 애니메 정보 관련
+	ANIMACTOR_DSEC												m_AnimActorDesc = {};
+	_char														m_BoneName[MAX_PATH];
+	_bool														m_bBoneFlag = false;
+	_float														m_fTrackPosition = -1.f;
+	_bool														m_bTest = false;
+
 
 public:
 	static CEffect_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

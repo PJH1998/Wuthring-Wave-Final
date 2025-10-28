@@ -73,6 +73,7 @@ HRESULT CLevel_Effect::Initialize()
 
     //파티클 움직임 및 위치같은 설정들 보기 위해 플레이어 띄울려고 추가함. 영훈오빠가 만든 애니메이션 툴
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
+    m_pAnimation_Tool->Set_EffectContorller(m_pEffect_Controller);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")

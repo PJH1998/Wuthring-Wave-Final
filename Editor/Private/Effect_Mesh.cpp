@@ -38,9 +38,11 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
     m_IsRoot = pDesc->IsRootOn;
     
     if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-    //임시처리
-    /*m_isActivate = true;*/
+        m_BoneMatrix = pDesc->RootMatrix;
+
+    m_ParentMatrix = pDesc->ParentMatrix;
+
+    m_isActivate = false;
 
     return S_OK;
 }
@@ -103,13 +105,23 @@ void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 //Test
 void CEffect_Mesh::Root_Transform()
 {
-    _matrix RootMatrix = XMLoadFloat4x4(m_ParentMatrix);
+    if (*m_BoneMatrix == nullptr)
+        return;
+
+    _matrix BoneMatrix = XMLoadFloat4x4(*m_BoneMatrix);
+
+    _matrix ParentMatrix = XMLoadFloat4x4(*m_ParentMatrix);
 
     for (size_t i = 0; i < 3; i++)
-        RootMatrix.r[i] = XMVector3Normalize(RootMatrix.r[i]);
+        ParentMatrix.r[i] = XMVector3Normalize(ParentMatrix.r[i]);
+
+    for (size_t i = 0; i < 3; i++)
+        BoneMatrix.r[i] = XMVector3Normalize(BoneMatrix.r[i]);
 
     XMStoreFloat4x4(&m_ComBindMatrix,
-        (m_pTransformCom->Get_WorldMatrix() * RootMatrix));
+        (ParentMatrix
+            * BoneMatrix
+            * m_pTransformCom->Get_WorldMatrix()));
 }
 
 HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
