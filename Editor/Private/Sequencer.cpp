@@ -200,7 +200,19 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 {
 	ImGui::Begin("Point Setting");
 
-	ImGui::Text("[Point Setting]");
+	// Translation
+	_int iSelectIndex = item.mRampEdit.miSelectPoint;
+	if (item.mRampEdit.miSelectCurve == 0)
+	{
+		ImGui::Text("[Translation]");
+		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mPositions[iSelectIndex]));
+	}
+	// Rotation
+	else if (item.mRampEdit.miSelectCurve == 1)
+	{
+		ImGui::Text("[Rotation]");
+		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mRotations[iSelectIndex]));
+	}
 
 	ImGui::End();
 }

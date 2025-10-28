@@ -23,6 +23,7 @@
     <ClInclude Include="..\Public\AnimMachine.h" />
     <ClInclude Include="..\Public\AnimNotify.h" />
     <ClInclude Include="..\Public\AnimState.h" />
+    <ClInclude Include="..\public\AnimTransition.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\BlackBoard.h" />
@@ -123,6 +124,7 @@
     <ClCompile Include="..\Private\Animation.cpp" />
     <ClCompile Include="..\Private\AnimMachine.cpp" />
     <ClCompile Include="..\Private\AnimState.cpp" />
+    <ClCompile Include="..\private\AnimTransition.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\BlackBoard.cpp" />
@@ -224,7 +226,9 @@
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Sampling.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSAO.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Cell.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>

@@ -15,6 +15,8 @@ enum class EAugustaGroundState : _uint
 	DASH,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
 	SKILL,			// 스킬 (Skill)
+	BURST,			// Burst 상태
+	UNIQUE,			// 캐릭터 고유 상태. (Griffon 등등)
 	LAND,			// 착지 (Land)
 	GROUND_END
 };
@@ -139,10 +141,22 @@ enum class EAttackType : _uint
 enum class ESkillType : _uint
 {
 	SKILL_HACK = 0,
-	SKILL_RISE,
 	SKILL_RISE_ZERO,
-	SKILL_STRIKE,
 	SKILLQTE,
+	END
+};
+
+enum class EBurstType : _uint
+{
+	BURST01 = 0,
+	BURST_STAND,
+	END
+};
+
+enum class EUniqueType : _uint // 그리폰 등등..
+{
+	SKILL_STRIKE = 0,
+	SKILL_RISE,
 	END
 };
 

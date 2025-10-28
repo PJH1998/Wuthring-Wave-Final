@@ -21,7 +21,7 @@ HRESULT CRendererSubResource::Initialize()
     m_fRadius = 10.f;
     m_fMaxDistance = 50.f;
 
-    m_fSSAO_MinDepthDistance = 5.f;
+    m_fSSAO_MinDepthDistance = 10.f;
 
     m_vFogDepthDistance = _float2(1000.f, 5000.f);
     m_vFogHeightDistance = _float2(0.f, 100.f);
@@ -118,10 +118,13 @@ HRESULT CRendererSubResource::Add_SSAO_BufferData(const _wstring& strRCSTag, _fl
 
     if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SSAO_DATA", reinterpret_cast<void*>(&Data), sizeof(SSAO_DATA))))
         return E_FAIL;
-    
+
+    m_pDefaultSampler->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
+
     m_pContext->CSSetSamplers(1, 1, &m_pDefaultSampler);
     m_pContext->CSSetSamplers(2, 1, &m_pPointClampSampler);
     m_pContext->CSSetSamplers(3, 1, &m_pNoiseSampler);
+
 
     return S_OK;
 }
@@ -134,6 +137,18 @@ HRESULT CRendererSubResource::Add_SSAO_Blur_BufferData(const _wstring& strRCSTag
     Data.fHeight = fHeight;
 
     if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SSAO_BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(SSAO_BLUR_DATA))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CRendererSubResource::Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+{
+    BLUR_DATA Data = {};
+    Data.fWidth = fWidth;
+    Data.fHeight = fHeight;
+
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLUR_DATA))))
         return E_FAIL;
 
     return S_OK;
@@ -304,6 +319,7 @@ void CRendererSubResource::Free()
     Safe_Release(m_pLUT_SRV);
     Safe_Release(m_pNoiseTexture);
     Safe_Release(m_pFogNoiseTexture);
+    Safe_Release(m_pHighCloudTexture);
 
     Safe_Release(m_pDefaultSampler);
     Safe_Release(m_pPointClampSampler);

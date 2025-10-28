@@ -7,6 +7,7 @@ CBase::CBase()
 
 _uint CBase::AddRef()
 {
+	lock_guard<mutex> lock(m_BaseMutex);
     return ++m_iRefCnt;
 }
 

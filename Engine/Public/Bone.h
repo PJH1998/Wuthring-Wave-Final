@@ -7,6 +7,7 @@ class CBone final : public CBase
 {
 private:
 	explicit CBone();
+	explicit CBone(const CBone& Copy);
 	virtual ~CBone() = default;
 
 public:

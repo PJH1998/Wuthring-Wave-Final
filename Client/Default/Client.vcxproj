@@ -171,17 +171,22 @@
     <ClInclude Include="..\Public\AugustaBayonet.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
+    <ClInclude Include="..\Public\AugustaGriffon.h" />
+    <ClInclude Include="..\Public\AugustaAirAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
+    <ClInclude Include="..\Public\AugustaGroundBurst.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
+    <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaStateFactory.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\Public\HitState.h" />
@@ -217,7 +222,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\MapObject.h" />
-    <ClInclude Include="..\public\MonsterBody.h" />
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
@@ -260,18 +264,22 @@
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
+    <ClCompile Include="..\Private\AugustaAirAttack.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
+    <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
+    <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
@@ -306,7 +314,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
-    <ClCompile Include="..\private\MonsterBody.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />

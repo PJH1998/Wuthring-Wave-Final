@@ -56,7 +56,8 @@ namespace Client
 		UIFLAG_END
 	};
 	
-	enum class TEST_STATE{
+	enum class  TEST_STATE : unsigned int
+	{
 		NONE				= 0,
 		MOVE_FORWARD		= 1 << 0,
 		MOVE_BACKWARD		= 1 << 1,
@@ -70,6 +71,10 @@ namespace Client
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
+		TURN				= 1 << 12,
+		BLOCK				= 1 << 14,
+		PARALYISIS			= 1 << 15,
+
 		ATTACK_1			= 1 << 16,
 		ATTACK_2			= 1 << 17,
 		ATTACK_3			= 1 << 18,
@@ -78,9 +83,11 @@ namespace Client
 		ATTACK_6			= 1 << 21,
 		ATTACK_7			= 1 << 22,
 		ATTACK_8			= 1 << 23,
+		ATTACK_9			= 1 << 24,
+		ATTACK_10			= 1 << 25,
+		ATTACK_11			= 1 << 26,
 
-		BLOCK				= 1 << 24,
-		PARALYISIS			= 1 << 25,
+
 
 		SPAWN = 1 << 29,
 		ANIMATION_PLAYING = 1 << 30,

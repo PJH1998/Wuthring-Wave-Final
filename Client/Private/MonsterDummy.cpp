@@ -123,7 +123,6 @@ void CMonsterDummy::Ready_Component(const _fmatrix& PreTransformMatrix)
 	ASSERT_CRASH(m_pColliderCom);
 
 	m_pColliderCom->Set_Desc(m_pTransformCom);
-
 }
 
 CMonsterDummy* CMonsterDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

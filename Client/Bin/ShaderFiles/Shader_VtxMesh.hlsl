@@ -104,27 +104,33 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
             Out.vPBR.x = 1.f;
     }
     
-    float3 vNormal;
+    float4 vNormal;
     if(g_HasNormal)
     {
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
-        vNormal = normalize(float4(vNormalDesc.xyz * 2.f - 1.f, 0.f));
-        float3x3 WorldMatrix;
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        if (vNormalDesc.x > vNormalDesc.z || vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
         
-        WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-        vNormal = normalize(mul(vNormal, WorldMatrix));
-        vNormal = vNormal * 0.5f + 0.5f;
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
     }
     else
     {
-        vNormal = In.vNormal.xyz; 
+        vNormal = In.vNormal; 
         vNormal = vNormal * 0.5f + 0.5f;
         Out.vDepth.z = 1.f;
     }
     
-    
-    Out.vNormal = float4(vNormal, 1.f);
+    Out.vNormal = float4(vNormal.xyz, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
@@ -295,7 +301,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, 0.f, 0.f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.2f), 0.f);
    
     vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
     

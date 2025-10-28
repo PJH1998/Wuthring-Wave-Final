@@ -9,16 +9,10 @@
 #include "StateMachine.h"
 
 #include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
 #include "Augusta.h"
 #include "Player.h"
 
-
-
-#pragma region BehaviorTree
-#include "BT_Action.h"
-#include "BT_Selector.h"
-#include "BT_Sequence.h"
-#pragma endregion
 #include"GameSystem.h"
 
 CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -37,6 +31,7 @@ HRESULT CLoader_Test::Initialize()
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
     
 
@@ -101,13 +96,30 @@ HRESULT CLoader_Test::Load_Object()
     return S_OK;
 }
 
-HRESULT CLoader_Test::Load_Component()
+HRESULT CLoader_Test::Load_MonsterTest()
 {
-    cout << "Component" << endl;
+    cout << "MonsterTest" << endl;
 
-	//if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
-	//	CBehavior_Tree::Create(m_pDevice, m_pContext, pRoot))))
-	//	return E_FAIL;
+    // Prototype_Component_BehaviorTree_Test
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
+        CRASH("BehaviorTree Create Failed");
+
+    // Prototype_Component_AnimMachine_Test
+    if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Test"),
+        CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/Animation/FalseSovereign_StateMachine.json"))))
+        CRASH("Monster AnimMachine Create Failed");
+
+    // Prototype_Component_Model_FalseSovereign
+    _fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FalseSovereign"),
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereignTest.dat"))))
+        CRASH("Prototype Create Failed");
+
+    // Prototype_GameObject_MonsterTest
+    if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+        CMonsterTest::Create(m_pDevice, m_pContext))))
+        CRASH("MonsterTest Prototype Create Failed");
 
     return S_OK;
 }
@@ -136,7 +148,7 @@ HRESULT CLoader_Test::Load_Augusta()
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.01f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -160,11 +172,11 @@ HRESULT CLoader_Test::Load_Augusta()
 		CRASH("Prototype Create Failed");
 
 
-    // 4. 파츠 초기화
+#pragma region Parts
     wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
-    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/AugustaBayonet.dat";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
     fSize = 0.01f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -177,6 +189,25 @@ HRESULT CLoader_Test::Load_Augusta()
         , wstrBayonetTag
         , CAugustaBayonet::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
+
+
+    // 3. 모델 초기화
+    wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
+
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    // 4. 객체 초기화.
+    _wstring wstrSkillWeaponTag = TEXT("Prototype_GameObject_Augusta_SkillWeapon");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wstrSkillWeaponTag
+        , CAugustaSkillWeapon::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+#pragma endregion
+
+  
 
     return S_OK;
 }

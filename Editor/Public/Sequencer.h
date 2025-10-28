@@ -8,7 +8,7 @@ struct RampEdit : public ImCurveEdit::Delegate
 	RampEdit()
 	{
 		mPoints[0].push_back(ImVec2(20.f, 0.5f));
-		mPoints[0].push_back(ImVec2(30.f, 0.3f));
+		mPositions.push_back(_float3(0.f, 0.f, 0.f));
 		//mPts[0][0] = ImVec2(20.f, 0.5f);
 		//mPts[0][1] = ImVec2(20.f, 0.6f);
 		//mPts[0][2] = ImVec2(25.f, 0.2f);
@@ -20,6 +20,8 @@ struct RampEdit : public ImCurveEdit::Delegate
 		//mPts[1][1] = ImVec2(33.f, 0.7f);
 		//mPts[1][2] = ImVec2(80.f, 0.2f);
 		//mPts[1][3] = ImVec2(82.f, 0.8f);
+		mPoints[1].push_back(ImVec2(20.f, 0.2f));
+		mRotations.push_back(_float3(0.f, 0.f, 0.f));
 		mPointCount[1] = 0;
 		//
 		//
@@ -72,15 +74,20 @@ struct RampEdit : public ImCurveEdit::Delegate
 	virtual void AddPoint(size_t curveIndex, ImVec2 value)
 	{
 		mPoints[curveIndex].push_back(value);
+		if (0 == curveIndex)
+			mPositions.push_back(_float3(0.f, 0.f, 0.f));
+		else if(1 == curveIndex)
+			mRotations.push_back(_float3(0.f, 0.f, 0.f));
 		SortValues(curveIndex);
 	}
 	virtual ImVec2& GetMax() { return mMax; }
 	virtual ImVec2& GetMin() { return mMin; }
 	virtual unsigned int GetBackgroundColor() { return 0; }
 
-	//ImVec2		mPts[3][8];
 	vector<ImVec2>	mPoints[3];
-	size_t			mPointCount[3];
+	vector<_float3>		mPositions;
+	vector<_float3>		mRotations;
+	size_t			mPointCount[3] = {};
 	_bool			mbVisible[3];
 	ImVec2		mMin;
 	ImVec2		mMax;

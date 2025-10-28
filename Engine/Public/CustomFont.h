@@ -15,9 +15,9 @@ public:
 
 private:
 	ID3D11Device*				m_pDevice = { nullptr };
-	ID3D11DeviceContext*		m_pContext = { nullptr };
+	ID3D11DeviceContext*	m_pContext = { nullptr };
 
-	SpriteBatch*				m_pBatch = { nullptr };	// Font瑜?洹몃━湲??꾪븳 ?ш컖??踰꾪띁
+	SpriteBatch*					m_pBatch = { nullptr };	// Font瑜?洹몃━湲??꾪븳 ?ш컖??踰꾪띁
 	SpriteFont*					m_pFont = { nullptr };		// Font
 
 public:
