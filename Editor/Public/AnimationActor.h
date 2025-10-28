@@ -61,6 +61,8 @@ public:
 
 	class CModel* Get_ModelCom() { return m_pModelCom; }
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
+
+	_float4 m_vInitPosition = {};
 #endif // _DEBUG
 
 
