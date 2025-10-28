@@ -94,9 +94,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
-			//case LEVEL::TEST_UI:
-			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
-			//	break;
+			case LEVEL::TEST_UI:
+				pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+				break;
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -228,6 +228,7 @@ void CMainApp::Ready_Prototype_ForStatic()
 void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }

@@ -1,0 +1,26 @@
+{
+    "tUIDesc": {
+        "iNumFiles": 1,
+        "iUIType": 0,
+        "strFileName": "T_Icon_90001",
+        "strFilePath": "..\\..\\Client\\Bin\\Resource\\UI\\Test\\Icon\\T_Icon_90001.png",
+        "strParentName": "",
+        "strUIName": "T_Icon_90001",
+        "vecChildNames": []
+    },
+    "vPos": [
+        0.0,
+        0.0,
+        0.0
+    ],
+    "vRot": [
+        -0.0,
+        0.0,
+        -0.0
+    ],
+    "vSca": [
+        100.0,
+        100.0,
+        1.0
+    ]
+}

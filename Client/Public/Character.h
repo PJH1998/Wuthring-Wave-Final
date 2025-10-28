@@ -66,6 +66,7 @@ public:
 public:
 	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
 	_vector Get_LookVector();
+	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 	_bool Is_Land(_float3* pNormal = nullptr);
 
@@ -74,7 +75,8 @@ public:
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 
-	void Process_Input(class CInputController* pInputControllerCom);
+	void Set_InputController(class CInputController* pInputControllerCom);
+	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
@@ -95,7 +97,10 @@ public:
 	
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+	void Rotate_Target();
+
 	void Set_Gravity(_bool IsGravity);
+	
 	
 
 
@@ -118,7 +123,8 @@ protected:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
-	class CTransform* m_pLockOnTargetTransform = { nullptr };
+	class CTransform* m_pLockOnTargetTransform = { nullptr }; // LockOn Target 용도.
+	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 
 
 	_float m_fMaxEnsembleEnergy = { 100.f };

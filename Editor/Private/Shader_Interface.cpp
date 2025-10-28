@@ -83,14 +83,14 @@ void CShader_Interface::Set_SSAO()
 	ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
 
 
-	ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
+	//ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
 
-	ImGui::InputFloat("MIN_DEPTH", &m_fMinDepthWeight);
+	//ImGui::InputFloat("MIN_DEPTH", &m_fMinDepthWeight);
+	
+	m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
 
-	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
-	m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_MaxDistance", &m_fMaxDistance, sizeof(_float));
-	m_pGameInstance->Bind_RawValue_Renderer("g_fDepthSigma", &m_fSigmaWeight, sizeof(_float));
-	m_pGameInstance->Bind_RawValue_Renderer("g_fMinDepthDistance", &m_fMinDepthWeight, sizeof(_float));
+	//m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
+	//m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_MaxDistance", &m_fMaxDistance, sizeof(_float));
 	ImGui::End();
 }
 

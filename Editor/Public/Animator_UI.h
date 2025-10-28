@@ -56,7 +56,7 @@ private:
 
 	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// ??쎈늄??됱뿫???節뚯몵筌??袁⑹삺 ?醫딅빍筌롫뗄???륁벥 ?袁⑹삺 position??筌띿쉶??揶쏅???獄쏆꼹??(catmull-rom ?怨몄뒠)
 
-	void		Update_Animation(_float fTimeDelta);
+	void		Update_Animation();
 
 private:
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};

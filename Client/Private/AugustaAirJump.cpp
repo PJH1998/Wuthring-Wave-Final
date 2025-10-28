@@ -61,9 +61,15 @@ void CAugustaAirJump::OnExit()
 
 void CAugustaAirJump::Handle_Input()
 {
+    EJumpType eJumpType = static_cast<EJumpType>(m_iCurrentAnimIdx);
+
     m_eDir = m_pAugusta->Calculate_Direction(); 
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
+ 
+    // Double Jump
+    m_States[DOUBLE_JUMP] = eJumpType == EJumpType::JUMP_WALK_LF 
+        && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) && CState::Is_EscapePossible();
 }
 
 void CAugustaAirJump::Check_Physics(_float fTimeDelta)
@@ -91,15 +97,11 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     // 1. 우선순위 제일 높음.
-    if (m_States[JUMP])
+    if (m_States[DOUBLE_JUMP])
     {
-        // 더블 점프 라면?
-        if ((eJumpType == EJumpType::JUMP_WALK_LF) && IsEscapePossible)
-        {
-            m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_SECOND_F;
-            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
-            return;
-        }
+        m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_SECOND_F;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
+        return;
     }
 
     // 2. 점프 애니메이션이 끝났는데도 안닿았을경우?

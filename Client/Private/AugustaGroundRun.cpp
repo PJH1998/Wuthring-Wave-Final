@@ -136,7 +136,13 @@ void CAugustaGroundRun::LockOnCheck_StateTransition(_float fTimeDelta)
     _float fOffsetY = 0.1f;
     _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
-    if (!m_States[LAND] && fDistanceToGround > 1.f)
+    //if (!m_States[LAND] && fDistanceToGround > 1.f)
+    //{
+    //    m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
+    //    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+    //    return;
+    //}
+    if (!m_States[LAND] && fDistanceToGround > 0.2f) 
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -369,7 +375,7 @@ void CAugustaGroundRun::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_POSE_R), "Run_Pose_R", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::RUN_TURNBACK), "Run_Turnback", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERunType::SPRINT_F), "Sprint_F", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(ERunType::SPRINT_F), "Sprint_F", 1.35f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERunType::STOP_RUN_L), "Stop_Run_L", 1.f, 0.f); // 왼발로 멈추기.
     CState::Add_Animations(ENUM_CLASS(ERunType::STOP_SPRINT_L), "Stop_Sprint_L", 1.f, 0.f); // 왼발로 멈추기
 }

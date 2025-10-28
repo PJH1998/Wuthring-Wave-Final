@@ -85,7 +85,7 @@ HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
 {
 	ImGui::Begin(WStringToString(strRT_Name).c_str());
 
-	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(300.f, 300.f));
+	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(500.f, 500.f));
 
 	ImGui::End();
 

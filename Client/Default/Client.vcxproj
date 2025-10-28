@@ -161,7 +161,8 @@
   <ItemGroup>
     <ClInclude Include="..\Public\AirState.h" />
     <ClInclude Include="..\public\Animator_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h" />
     <ClInclude Include="..\Public\AnimationDummy.h" />
@@ -192,7 +193,8 @@
     <ClInclude Include="..\Public\Client_Define.h" />
     <ClInclude Include="..\Public\Client_Enum.h" />
     <ClInclude Include="..\public\Custom_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Dummy.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
@@ -202,14 +204,16 @@
     <ClInclude Include="..\Public\Level_Logo.h" />
     <ClInclude Include="..\Public\Level_Test.h" />
     <ClInclude Include="..\public\Level_Test_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Loader.h" />
     <ClInclude Include="..\Public\Loader_GamePlay.h" />
     <ClInclude Include="..\Public\Loader_Logo.h" />
     <ClInclude Include="..\Public\Loader_Test.h" />
     <ClInclude Include="..\public\Loader_Test_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\MapObject.h" />
@@ -218,24 +222,30 @@
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_HUD.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_Image.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_Interact.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_Text.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Player.h" />
     <ClInclude Include="..\Public\Augusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
+    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Weapon.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
@@ -245,7 +255,8 @@
   <ItemGroup>
     <ClCompile Include="..\Private\AirState.cpp" />
     <ClCompile Include="..\private\Animator_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
@@ -269,7 +280,8 @@
     </ClCompile>
     <ClCompile Include="..\Private\ClimbState.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Dummy.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
@@ -281,14 +293,16 @@
     <ClCompile Include="..\Private\Level_Logo.cpp" />
     <ClCompile Include="..\Private\Level_Test.cpp" />
     <ClCompile Include="..\private\Level_Test_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Logo.cpp" />
     <ClCompile Include="..\Private\Loader_Test.cpp" />
     <ClCompile Include="..\private\Loader_Test_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
@@ -299,24 +313,30 @@
     <ClCompile Include="..\Private\AugustaStateFactory.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_HUD.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_Image.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_Interact.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_Text.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Player.cpp" />
     <ClCompile Include="..\Private\Augusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Weapon.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -343,10 +363,12 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl" />
@@ -358,7 +380,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
     </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

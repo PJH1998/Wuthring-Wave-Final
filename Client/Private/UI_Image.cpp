@@ -42,7 +42,7 @@ void CUI_Image::Late_Update(_float fTimeDelta)
 
 void CUI_Image::Render()
 {
-    __super::Render();                      // Nothing.
+    __super::Render();                      // Binding Shader Variables Continuously.
 }
 
 HRESULT CUI_Image::Ready_Components(void* pArg)

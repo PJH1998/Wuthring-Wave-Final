@@ -69,11 +69,19 @@ void CCharacter::Render_Shadow()
 {
 }
 
-void CCharacter::Process_Input(CInputController* pInputControllerCom)
+void CCharacter::Set_InputController(CInputController* pInputControllerCom)
 {
     m_pInputControllerCom = pInputControllerCom;
     Safe_AddRef(m_pInputControllerCom);
 }
+
+void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
+{
+    m_pSpringCamera = pSpringCamera;
+    Safe_AddRef(pSpringCamera);
+}
+
+
 
 
 #pragma region STATE
@@ -137,6 +145,28 @@ _vector CCharacter::Get_LookVector()
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
     return vLook;
 }
+
+void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
+{
+    if (nullptr == pTargetTransform)
+    {
+        m_IsLockOn = false;
+        m_pTargetTransform = nullptr;
+        return;
+    }
+    else
+    {
+        // 1. TargetTransform은 항상 가져옵니다.
+        m_pTargetTransform = pTargetTransform;
+        // 2. LockOn은 상황따라
+        m_IsLockOn = IsLockOn;
+    }
+        
+
+    
+}
+
+
 
 _bool CCharacter::Is_LockOn()
 {
@@ -238,15 +268,19 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
     
 
     // 1. 타겟 방향으로 회전 (매프레임)? => 타겟을 계속 봐야하잖아.
-    _float3 vTargetPos = m_pSpringCamera->Get_TargetPos(); // => 이런것만 수정하면
-    _vector vTarget = XMVectorSetW(XMLoadFloat3(&vTargetPos), 1.f);
-    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+    //_float3 vTargetPos = m_pSpringCamera->Get_TargetPos(); // => 이런것만 수정하면
 
-
-    vToTarget = XMVectorSetY(vToTarget, 0.f);
-    m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
+    //_vector vTarget = XMVectorSetW(XMLoadFloat3(&vTargetPos), 1.f);
+    //_vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    //_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+    //_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+    //
+    //
+    //vToTarget = XMVectorSetY(vToTarget, 0.f);
+    //m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
     
+    Rotate_Target();
+
     // 2. 회전 후 Right / Look 가져오기.
     _vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
     _vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
@@ -391,6 +425,24 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
     return m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
 }
 
+void CCharacter::Rotate_Target()
+{
+    // 1. 타겟이 없는 경우 Return
+    if (nullptr == m_pTargetTransform)
+        return;
+
+    // 2. 타겟이 있으면 즉시 회전.
+    _vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+
+    vToTarget = XMVectorSetY(vToTarget, 0.f);
+    m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
+
+    return;
+}
+
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
     ASSERT_CRASH(m_pColliderCom);
@@ -409,7 +461,6 @@ void CCharacter::Free()
 {
     CActor::Free();
     Safe_Release(m_pInputControllerCom);
-    Safe_Release(m_pStateMachineCom);
     Safe_Release(m_pSpringCamera);
-    
+    Safe_Release(m_pStateMachineCom);
 }

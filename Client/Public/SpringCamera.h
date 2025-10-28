@@ -48,6 +48,20 @@ public:
 		}
 	}
 
+	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
+	{
+		if (nullptr == pTargetTransform)
+		{
+			m_eCameraState = CAMERA_STATE::TARGET;
+			return;
+		}
+		else
+		{
+			m_eCameraState = CAMERA_STATE::LOCKON;
+			m_pTargetTransform = pTargetTransform;
+		}
+	}
+
 public:
 	_float3 Get_TargetPos() { return m_vTargetPos; }
 	_vector Get_LookVector_NoPitch();
