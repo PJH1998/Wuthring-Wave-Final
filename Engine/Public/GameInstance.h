@@ -236,6 +236,13 @@ public:
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+public:
+	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);
+	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
+	void				Clear_RootUI();
+#pragma endregion
+
 #pragma region RCS_MANAGER
 	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
@@ -278,6 +285,7 @@ private:
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CCSM*					m_pCSM = { nullptr };
+	class CUI_Manager*			m_pUI_Manager = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 
 	_uint									m_iNumLevel = {};

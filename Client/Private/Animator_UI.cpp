@@ -13,7 +13,7 @@ CAnimator_UI::CAnimator_UI(const CAnimator_UI& Prototype)
 
 HRESULT CAnimator_UI::Initialize_Prototype()
 {
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT CAnimator_UI::Initialize_Clone(void* pArg)
@@ -25,7 +25,7 @@ HRESULT CAnimator_UI::Initialize_Clone(void* pArg)
 
 
 
-	return S_OK;
+    return S_OK;
 }
 
 void CAnimator_UI::Priority_Update(_float fTimeDelta)
@@ -34,10 +34,11 @@ void CAnimator_UI::Priority_Update(_float fTimeDelta)
 }
 
 void CAnimator_UI::Update(_float fTimeDelta)
-{
-    Update_Animation(fTimeDelta);
-
-    m_fElapsedTime += fTimeDelta;
+{ 
+    if (m_pCurAnimDesc)
+        m_fElapsedTime += fTimeDelta;
+    else
+        m_fElapsedTime = 0.f;
 }
 
 void CAnimator_UI::Late_Update(_float fTimeDelta)
@@ -47,7 +48,8 @@ void CAnimator_UI::Late_Update(_float fTimeDelta)
 
 HRESULT CAnimator_UI::Render()
 {
-	return S_OK;
+    Update_Animation();
+    return S_OK;
 }
 
 HRESULT CAnimator_UI::Insert_Animation(UI_ANIM_DESC& Desc)
@@ -98,7 +100,7 @@ HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
 
     if (!pDesc)
         return E_FAIL;
-    
+
     m_pCurAnimDesc = pDesc;
     m_fElapsedTime = 0;
 
@@ -135,7 +137,7 @@ CAnimator_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_wstring strAnimName)
             pDesc = &animDesc;
             break;
         }
-    
+
     return (pDesc) ? pDesc : nullptr;
 }
 
@@ -147,24 +149,23 @@ CAnimator_UI::UI_ANIM_DESC* CAnimator_UI::Find_Animation(_uint iAnimIndex)
     return &m_vecAnimationDescs[iAnimIndex];
 }
 
-// 회전 및 스케일용
 _float CAnimator_UI::Fix_LerpRatio(_float fIn, _uint iLerpType)
 {
     switch (static_cast<UI_LERPTYPE>(iLerpType))
     {
-    default:        
+    default:
     case UI_LERPTYPE::END:
     case UI_LERPTYPE::LINEAR:               return fIn;
 
-    //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
-    //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
+        //case UI_LERPTYPE_SPEED::MT:                   return sqrt(1.0f - 4.0f * pow(fIn - 0.5f, 2.0f));
+        //case UI_LERPTYPE_SPEED::MB:                   return 1.0f - sqrt(max(0.0f, 1.0f - 4.0f * pow(fIn - 0.5f, 2.0f)));
     case UI_LERPTYPE::LT:                   return sqrt(1.0f - pow(fIn - 1.0f, 2.0f));                          //
-    //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
-    //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
+        //case UI_LERPTYPE_SPEED::LB:                   return 1.0f - sqrt(1.0f - pow(fIn - 1.0f, 2.0f));;
+        //case UI_LERPTYPE_SPEED::RT:                   return sqrt(1.0f - pow(fIn, 2.0f));;
     case UI_LERPTYPE::RB:                   return 1.0f - sqrt(1.0f - pow(fIn, 2.0f));                          //
 
     case UI_LERPTYPE::CUBIC:                return fIn * fIn * (3.0f - 2.0f * fIn);
-    //case UI_LERPTYPE_SPEED::CUBICR:
+        //case UI_LERPTYPE_SPEED::CUBICR:
     }
 }
 
@@ -181,13 +182,13 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     if (!m_pCurAnimDesc)
         return _float3();
 
-    _vector     vPoses[4]           = {};
+    _vector     vPoses[4] = {};
 
-    _uint       iKeyframeTimeStart  = UINT_MAX;
-    _uint       iKeyframeTimeEnd    = UINT_MAX;
-    const _bool isLoop              = m_pCurAnimDesc->isLoop;
-    const _uint iLastKeyframeIndex  = static_cast<_uint>(m_pCurAnimDesc->vecKeyFrames.size() - 1);
-    _uint       iKeyframeIndex      = 0;
+    _uint       iKeyframeTimeStart = UINT_MAX;
+    _uint       iKeyframeTimeEnd = UINT_MAX;
+    const _bool isLoop = m_pCurAnimDesc->isLoop;
+    const _uint iLastKeyframeIndex = (_uint)(m_pCurAnimDesc->vecKeyFrames.size() - 1);
+    _uint       iKeyframeIndex = 0;
 
     // 현재 키프레임의 vector 내 인덱스를 검색
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
@@ -196,7 +197,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
             break;
         iKeyframeIndex = i;
     }
-    
+
     // lerp에 사용할 값들 할당
     for (_uint i = 0; i < 4; i++)
     {
@@ -209,15 +210,11 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
             iIndex = (isLoop) ? 0 : iLastKeyframeIndex;
 
         vPoses[i] = XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iIndex].vPos);
-        
-        if (i == 1) iKeyframeTimeStart  = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
-        if (i == 2) iKeyframeTimeEnd    = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+
+        if (i == 1) iKeyframeTimeStart = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
+        if (i == 2) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[iIndex].iKeyframeIndex;
         if (iKeyframeTimeStart == iKeyframeTimeEnd) iKeyframeTimeEnd = m_pCurAnimDesc->vecKeyFrames[(iIndex + 1) % m_pCurAnimDesc->vecKeyFrames.size()].iKeyframeIndex;
     }
-
-    // 할당한 값을 이용하여 계산, 반환
-    // 키프레임 차에 따른 간격도 고려해여 계산해야 함. XMVectorCatmullRom 는 키프레임 간격이 같음이 전제기 때문.
-    // 1, 2 사이의 키프레임을 기준으로 ratio 계산하여 인자를 주면 될듯?
 
     _float fKeyframeRatio = {};
 
@@ -231,14 +228,37 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     return vResult;
 }
 
-void CAnimator_UI::Update_Animation(_float fTimeDelta)
+void CAnimator_UI::Update_Animation()
 {
-    if (m_pCurAnimDesc == nullptr)
+    // if target doesnt have selected animation, binds default value to shader.
+    // if not, it will be affected by pre-played animations.
+    // 
+    // 현재 애니메이션이 없다면, 기본값을 셰이더에 할당.
+    // 안하면 그 이전에 다른 UI에서 할당된 값을 그대로 따라가기에, 의도치 않게 다른 오브젝트도 영향을 받음.
+
+
+    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
         return;
 
+    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+
+    if (m_pCurAnimDesc == nullptr)
+    {
+        UI_ANIM_KEYFRAME_DESC tDesc = {};
+
+        pTargetShader->Bind_Value("g_AlphaStrength", &tDesc.fAlpha, sizeof(tDesc.fAlpha));
+        pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
+        pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
+        pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+        return;
+    }
+
+
+
+
     // Calculate Frame..
-    const _uint     iKeyFrameRate       = 60; // 기준 초당 프레임
-    const _float    fSingleFrameTime    = 1.f / iKeyFrameRate;
+    const _uint     iKeyFrameRate = 60; // 기준 초당 프레임
+    const _float    fSingleFrameTime = 1.f / iKeyFrameRate;
 
     _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // 현재 키프레임
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
@@ -290,15 +310,15 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     // ==============================
     _uint iResultTexIndex = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iTexIndex;
     _float fResultAlpha = Calc_LerpRatio(
-        m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha, 
-        m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha, 
+        m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].fAlpha,
+        m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].fAlpha,
         fFixedLerpRatio
     );
 
     _float3 vResultPos = Calc_Lerp_Position_CMR(iCurFrame);
 
     _float3 vResultRot = {};
-    XMStoreFloat3(&vResultRot, XMVectorLerp(        // degree라서 그런 것 같은데.. 
+    XMStoreFloat3(&vResultRot, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vRot),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vRot),
         fFixedLerpRatio)
@@ -308,18 +328,43 @@ void CAnimator_UI::Update_Animation(_float fTimeDelta)
     XMStoreFloat3(&vResultSca, XMVectorLerp(
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vSca),
         XMLoadFloat3(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vSca),
-        fFixedLerpRatio)
-    );
+        fFixedLerpRatio
+    ));
+
+
+    _float2 vResultScreenLT = {};
+    XMStoreFloat2(&vResultScreenLT, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenLT),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenLT),
+        fFixedLerpRatio
+    ));
+
+    _float2 vResultScreenRB = {};
+    XMStoreFloat2(&vResultScreenRB, XMVectorLerp(
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vScreenRB),
+        XMLoadFloat2(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vScreenRB),
+        fFixedLerpRatio
+    ));
+
+    _float4 vResultOuterWidth = {};
+    XMStoreFloat4(&vResultOuterWidth, XMVectorLerp(
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].vBlendToOuterWidth),
+        XMLoadFloat4(&m_pCurAnimDesc->vecKeyFrames[iFrame_EndIndex].vBlendToOuterWidth),
+        fFixedLerpRatio
+    ));
 
     // ==============================
     // * Apply Results..
     // ==============================
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
-    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+
     pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+    pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+    pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+    pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
-    
+
     _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
     _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
     _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));

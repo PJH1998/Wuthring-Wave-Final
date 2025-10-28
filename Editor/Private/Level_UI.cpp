@@ -60,7 +60,6 @@ HRESULT CLevel_UI::Initialize()
         OutputDebugString(L"[CCustom_UI::Ready_Prototypes] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
     // VIBuffer_Rect_Instance_UI
-    // �ӽ� ����. ���߿� instance ���� ���� �ʿ� �� ����
     CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
     tRectInstDesc.iNumInstance = 500U;
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
@@ -221,6 +220,12 @@ void CLevel_UI::Update_MenuWindow()
                 1
             ));
 
+            if (isInstance)
+            {
+                vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = &dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecInstanceDescs;
+                pDescs->push_back(CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC());
+            }
+
         }
         ImGuiFileDialog::Instance()->Close();
     }
@@ -246,7 +251,7 @@ void CLevel_UI::Update_MenuWindow()
 void CLevel_UI::Update_Hierarchy()
 {
     // ============================== 
-    // ?좎궗 ?섏씠?대씪??李? 濡쒕뱶??媛앹껜 ?좏깮 媛?ν븯?꾨줉
+    // * Hierarchy
     // ============================== 
 
     ImGui::Begin("Hierarchy");
@@ -261,6 +266,8 @@ void CLevel_UI::Update_Hierarchy()
 
     ImGui::Separator();
 
+    static _bool isActiveCurObject = true;
+
     // quick edit UIName
     if (m_pCurObj)
     {
@@ -269,6 +276,12 @@ void CLevel_UI::Update_Hierarchy()
         
         _string strUIName = WStringToString(tDesc.strUIName);
         strcpy_s(szUIName, strUIName.c_str());
+
+        if (ImGui::Checkbox("##CurObjectToggle", &isActiveCurObject))
+        {
+            m_pCurObj->SetActivate(isActiveCurObject);
+        }
+        ImGui::SameLine();
 
         ImGui::Text("Name ");
         ImGui::SameLine();
@@ -309,7 +322,7 @@ void CLevel_UI::Update_Hierarchy()
     // 留??꾨젅?꾨쭏??踰≫꽣瑜??듯빐 遺紐?援ъ“瑜??뚯븙?섍퀬,
     // 洹멸구 而⑦뀒?대꼫???댁? ?? ?섏씠?대씪?ㅼ뿉???쒖떆?
 
-    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
+    ImGuiTreeNodeFlags flags = 0;// ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_Selected;
 
     // ?섏씠?대씪??硫붿씤
     for (auto& ui : m_vecCustomUIs)
@@ -334,8 +347,9 @@ void CLevel_UI::Update_Hierarchy()
             _uint iIndex = 0;
 
             // 遺紐??대쫫???녿뒗 寃쎌슦 泥댄겕X (?꾩뿉???대? 李얠븯?쇰?濡?
-            if (ui.pCustomUI->Get_UIDesc().strParentName.empty())
-                break;
+            if (ui.pCustomUI->Get_UIDesc().strParentName.empty() ||
+                ui.pCustomUI->Get_UIDesc().strParentName == ui.pCustomUI->Get_UIDesc().strUIName)
+                continue;
             // ?대떦?섎뒗 遺紐④? ?덈뒗吏 寃??
             for (auto& otherui : m_vecCustomUIs)
                 if (otherui.pCustomUI->Get_UIDesc().strUIName ==
@@ -353,7 +367,10 @@ void CLevel_UI::Update_Hierarchy()
                 _wstring wstrUIName = ui.pCustomUI->Get_UIDesc().strUIName;
                 _string strUIName = WStringToString(wstrUIName);
                 if (ImGui::Selectable(strUIName.c_str(), iSelected == iIndex))
+                {
                     m_pCurObj = ui.pCustomUI;
+                    isActiveCurObject = static_cast<CCustom_UI*>(m_pCurObj)->Get_Active();
+                }
             }
         }
     }
@@ -370,6 +387,7 @@ void CLevel_UI::Update_Hierarchy_CheckTree(CCustom_UI* pParentUI, ImGuiTreeNodeF
     CCustom_UI::CUSTOM_UI_DESC desc = pParentUI->Get_UIDesc();
 
     _string strLabel = WStringToString(desc.strUIName);
+    if (strLabel == "") strLabel = " ";
     if (ImGui::TreeNodeEx(strLabel.c_str(), flags))
     {
         // ?대┃ ???좏깮.
@@ -739,12 +757,12 @@ void CLevel_UI::Update_SaveLoad()
             }
 
 
-            // ?곷?寃쎈줈
-            _tchar curPath[256] = {};
-            _wgetcwd(curPath, 256);
-            filesystem::path basePath = curPath;
-            filesystem::path targetPath = filePath;
-            filesystem::path relativePath = filesystem::relative(targetPath, basePath);
+            // relative path
+            //_tchar curPath[256] = {};
+            //_wgetcwd(curPath, 256);
+            //filesystem::path basePath = curPath;
+            //filesystem::path targetPath = filePath;
+            //filesystem::path relativePath = filesystem::relative(targetPath, basePath);
 
 
             // json load
@@ -752,7 +770,7 @@ void CLevel_UI::Update_SaveLoad()
             from_json(jUITreeData, tLoadTreeDesc);
 
 
-            // 濡쒕뱶??紐⑤뱺 ?곗씠????젣
+            // clear current data
             m_pCurObj = nullptr;
             m_vCurObjPos = {}; m_vCurObjRot = {}; m_vCurObjSca = {};
             for (auto& customUI : m_vecCustomUIs)
@@ -760,7 +778,7 @@ void CLevel_UI::Update_SaveLoad()
             m_vecCustomUIs.clear();
 
 
-            // 洹???濡쒕뱶..
+            // add 
             for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
             {
                 UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
@@ -786,6 +804,7 @@ void CLevel_UI::Update_SaveLoad()
 
                 _matrix matWorld = matScale * matRot * matTrans;
                 static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
+
 
 
                 m_vecCustomUIs.push_back(tObjDesc);
@@ -977,8 +996,8 @@ void CLevel_UI::Update_Inspector()
 
         // iPassType
         ImGui::Text("Pass Type");
-        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec"};
-        const _uint iPassTypeCount = 5;
+        const char* szPassTypeNames[] = { "Normal", "Cutout", "Transparent", "Gradient", "Grad_9Sec", "Variant"};
+        const _uint iPassTypeCount = 6;
         const char* szCurrentPassItem = szPassTypeNames[iPassType];
 
         if (ImGui::BeginCombo("##Pass Type", szCurrentPassItem))
@@ -1231,6 +1250,26 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
 
                 m_vecUIKeyFrameDescs.push_back(tTempDesc);
             }
+            
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button,          ImVec4(0.0f, 0.0f, 0.8f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    ImVec4(0.0f, 0.0f, 0.9f, 1.0f));
+            if (ImGui::Button("Instant Load Anim"))
+            {
+                UI_ANIM_DESC tAnimDesc = {};
+                tAnimDesc.tUIDesc = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc();
+                tAnimDesc.strAnimName = L"Instant Animation";
+                tAnimDesc.isLoop = m_isAnimLoop;
+                for (auto& keyframeDesc : m_vecUIKeyFrameDescs)
+                    tAnimDesc.vecKeyFrames.push_back(keyframeDesc);
+
+                if (pTargetAnimator->Find_Animation(tAnimDesc.strAnimName))
+                    pTargetAnimator->Remove_Animation(tAnimDesc.strAnimName);
+
+                pTargetAnimator->Insert_Animation(tAnimDesc);
+            }
+            ImGui::PopStyleColor(3);
         }
         else
         {
@@ -1317,6 +1356,8 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             }
         }
 
+
+
     }
 
 #pragma endregion
@@ -1346,6 +1387,17 @@ void CLevel_UI::Update_AnimEditor(_float fTimeDelta)
             ImGui::SameLine();
             if (ImGui::Button("Deselect##AnimList Deselect"))
                 m_pSelectedUIAnim = nullptr;
+            ImGui::SameLine();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.8f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+            if (ImGui::Button("Delete##AnimList AnimDelete"))
+            {
+                pTargetAnimator->Remove_Animation(m_pSelectedUIAnim->strAnimName);
+                m_pSelectedUIAnim = nullptr;
+            }
+            ImGui::PopStyleColor(3);
         }
 
 
@@ -1410,7 +1462,7 @@ void CLevel_UI::Update_InstanceEditor()
     // ==============================
     // * [Instance] Transform
     // ==============================
-    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_InstDesc();
+    vector<CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC>* pDescs = &dynamic_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().vecInstanceDescs;
     static _uint iInstSelected = 0;
 
     static _float4 vSInstRight = { 1.f, 0.f, 0.f ,0.f };
@@ -1429,8 +1481,7 @@ void CLevel_UI::Update_InstanceEditor()
 
 
 
-    if (static_cast<CCustom_UI*>(m_pCurObj)->Get_UIDesc().isInstance &&
-        ImGui::CollapsingHeader("[Instance] Transform"))
+    if (ImGui::CollapsingHeader("[Instance] Transform"))
     {
         // Add Instance
         if (ImGui::Button("Add"))
@@ -1455,7 +1506,7 @@ void CLevel_UI::Update_InstanceEditor()
 
         if (m_pSelectedInstance)
         {
-            // ������
+            // Extracting Float3 Editable Values from Instance.
             _matrix matTransform = _matrix(
                 XMLoadFloat4(&vSInstRight),
                 XMLoadFloat4(&vSInstUp),
@@ -1467,7 +1518,7 @@ void CLevel_UI::Update_InstanceEditor()
             _float3		vStoreObjPosition = {}, vStoreObjRotation = {}, vStoreObjScale = {};
             XMMatrixDecompose(&vXMObjScale, &vXMObjQuaternion, &vXMObjPosition, matTransform);
 
-            _float4x4	matStoreObjQuaternion = {};	// ���ʹϾ�
+            _float4x4	matStoreObjQuaternion = {};	// quat
             XMStoreFloat4x4(&matStoreObjQuaternion, QUAT_TO_MAT(vXMObjQuaternion));
 
             XMStoreFloat3(&vStoreObjPosition, vXMObjPosition);
@@ -1475,7 +1526,7 @@ void CLevel_UI::Update_InstanceEditor()
             XMStoreFloat3(&vStoreObjScale, vXMObjScale);
 
 
-            // �����Ͽ� ������
+            // Apply to Editor
             curInstPos = vStoreObjPosition;
             curInstRot = vStoreObjRotation;
             curInstSca = vStoreObjScale;
@@ -1536,7 +1587,7 @@ void CLevel_UI::Update_InstanceEditor()
 
             ImGui::PopItemWidth();
 
-            // ����
+            // Apply Values to [Instance]
             _matrix matXMEditPosition = XMMatrixTranslationFromVector(XMLoadFloat3(&curInstPos));
             _matrix matXMEditRotation = XMMatrixRotationRollPitchYaw(TO_RAD(curInstRot.x), TO_RAD(curInstRot.y), TO_RAD(curInstRot.z));
             _matrix matXMEditScale = XMMatrixScalingFromVector(XMLoadFloat3(&curInstSca));
@@ -1553,10 +1604,10 @@ void CLevel_UI::Update_InstanceEditor()
             m_pSelectedInstance->vSInstUp           = vSInstUp    ;
             m_pSelectedInstance->vSInstLook         = vSInstLook  ;
             m_pSelectedInstance->vSInstTrans        = vSInstTrans ;
-            m_pSelectedInstance->vTexcoordX         = vTexcoordX  ;
-            m_pSelectedInstance->vTexcoordY         = vTexcoordY  ;
-            m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
-            m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
+            //m_pSelectedInstance->vSInstCoordX       = vTexcoordX  ;
+            //m_pSelectedInstance->vSInstCoordY       = vTexcoordY  ;
+            //m_pSelectedInstance->vClipTexcoordX     = vClipTexcoordX  ;
+            //m_pSelectedInstance->vClipTexcoordY     = vClipTexcoordY  ;
         }
 
     }
@@ -1565,7 +1616,57 @@ void CLevel_UI::Update_InstanceEditor()
     // ==============================
     // * Additional Desc
     // ==============================
+    if (ImGui::CollapsingHeader("[Instance] Desc Change"))
+    {
+        if (m_pSelectedInstance)
+        {
+            // vSInstCoordX	    : float2 data, for slicing atlas / sprite style images.
+            // vSInstCoordY	    : float2 data, for slicing atlas / sprite style images.
+            // vClipTexcoordX   : float2 data, for discarding pixel based on local space. like as HP Bar Value.
+            // vClipTexcoordY   : float2 data, for discarding pixel based on local space. like as HP Bar Value.
+            ImGui::PushItemWidth(90.f);
 
+            ImGui::Text("Slice by ImagePos");
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                ImGui::SetTooltip("for slicing atlas / sprite style images.");
+            
+            ImGui::Text("Pos X Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosStartX", &m_pSelectedInstance->vSInstCoordX.x, 0.001f ,0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosEndX", &m_pSelectedInstance->vSInstCoordX.y, 0.001f ,0.0f, 1.0f);
+            
+            ImGui::Text("Pos Y Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosStartY", &m_pSelectedInstance->vSInstCoordY.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##SliceImagePosEndY", &m_pSelectedInstance->vSInstCoordY.y, 0.001f, 0.0f, 1.0f);
+            
+            
+            ImGui::Separator();
+            ImGui::Text("Discard by LocalPos");
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+                ImGui::SetTooltip("for discarding pixel based on local space. like as HP Bar Value.");
+            
+            ImGui::Text("Pos X Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosStartX", &m_pSelectedInstance->vClipTexcoordX.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosEndX", &m_pSelectedInstance->vClipTexcoordX.y, 0.001f, 0.0f, 1.0f);
+            
+            ImGui::Text("Pos Y Range | ");
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosStartY", &m_pSelectedInstance->vClipTexcoordY.x, 0.001f, 0.0f, 1.0f);
+            ImGui::SameLine();
+            ImGui::DragFloat("##DiscardLocalPosEndY", &m_pSelectedInstance->vClipTexcoordY.y, 0.001f, 0.0f, 1.0f);
+
+            ImGui::PopItemWidth();
+        }
+        else
+        {
+            ImGui::Text("Instance not selected.");
+        }
+    }
 
 
 
@@ -1593,8 +1694,8 @@ void CLevel_UI::Update_InstanceEditor()
                 vSInstUp        = m_pSelectedInstance->vSInstUp;
                 vSInstLook      = m_pSelectedInstance->vSInstLook;
                 vSInstTrans     = m_pSelectedInstance->vSInstTrans;
-                vTexcoordX      = m_pSelectedInstance->vTexcoordX;
-                vTexcoordY      = m_pSelectedInstance->vTexcoordY;
+                vTexcoordX      = m_pSelectedInstance->vSInstCoordX;
+                vTexcoordY      = m_pSelectedInstance->vSInstCoordY;
                 vClipTexcoordX  = m_pSelectedInstance->vClipTexcoordX;
                 vClipTexcoordY  = m_pSelectedInstance->vClipTexcoordY;
 

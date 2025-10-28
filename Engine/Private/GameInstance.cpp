@@ -23,6 +23,7 @@
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
+#include "UI_Manager.h"
 #include "RCS_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
@@ -97,6 +98,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pCSM);
+
+	m_pUI_Manager = CUI_Manager::Create();
+	ASSERT_CRASH(m_pUI_Manager);
 
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
@@ -379,6 +383,9 @@ ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& s
 #pragma region RENDERER
 HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObject)
 {
+	if (pObject->IsActivate() == false)
+		int i = 10;
+
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
 #ifdef _DEBUG
@@ -681,6 +688,24 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI)
+{
+	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
+}
+
+CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Find_UIObject(strName_UI);
+}
+
+void	CGameInstance::Clear_RootUI()
+{
+	m_pUI_Manager->Clear_RootUI();
+}
+#pragma endregion
+
+
 #pragma region RCS_MANAGER
 HRESULT CGameInstance::Add_RCS(const _wstring& strRCSTag, void* pDesc)
 {
@@ -781,6 +806,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pPhysicsManager);
+	Safe_Release(m_pUI_Manager);
 
 	Release();
 }
