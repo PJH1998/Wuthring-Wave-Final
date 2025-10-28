@@ -624,7 +624,7 @@ void CAnimationTool::LoadDat()
             _matrix		PreTransformMatrix = XMMatrixIdentity();
             //_float fSize = 1.f;
             _float fSize = 0.01f;
-            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
             wStrModelName = StringToWString(strModelName);
 
