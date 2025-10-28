@@ -88,6 +88,7 @@ void CPlayer::Priority_Update(_float fTimeDelta)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
 
+
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -101,6 +102,12 @@ void CPlayer::Update(_float fTimeDelta)
     if (m_iEnsembleCharacterIdx != NONE &&
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
+
+    Sorting_Target(); // Update => 
+    Toggle_LockOn();
+    
+    // 3. Rigidbody Update => Camera 충돌 콜백 확인.
+    m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
@@ -267,6 +274,14 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
     }
 }
 
+void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+    if (nullptr == pTargetTransform)
+        return;
+    m_TargetTransforms.push_back(pTargetTransform);
+}
+
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
 {
     // 0. 유효성 검사
@@ -314,6 +329,69 @@ void CPlayer::Sync_Transform()
 
         
 }
+
+void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+    if (nullptr == pTargetTransform)
+        return;
+    m_TargetTransforms.push_back(pTargetTransform);
+}
+
+void CPlayer::Sorting_Target()
+{
+    sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
+        _float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrcTransform->Get_State(STATE::POSITION)));
+        _float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDstTransform->Get_State(STATE::POSITION)));
+        return fSrcDistance < fDstDistance;
+        });
+
+    if (0 < m_TargetTransforms.size())
+    {
+        m_pTargetTransform = m_TargetTransforms[0];
+    }
+
+    m_TargetTransforms.clear();
+}
+
+void CPlayer::Toggle_LockOn()
+{
+    // 1. TargetTransform이 없는경우 LockOn 초기화 필요.
+    if (nullptr == m_pTargetTransform)
+    {
+        if (m_IsLockOn)
+        {
+            m_IsLockOn = false;
+            m_pSpringCamera->Lock_On(nullptr, false);
+            m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+
+        }
+        // Transform 비우기.
+        return;
+    }
+
+    // 2. Auto Target 용도로 근처에 있는 Target의 Transform을 전달.
+    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(m_pTargetTransform, m_IsLockOn);
+    }
+
+
+    // 3. 키 토글을 누를 경우?
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
+    {
+        m_IsLockOn = !m_IsLockOn;
+    }
+
+    if (m_IsLockOn)
+    {
+        m_pSpringCamera->Lock_On(m_pTargetTransform, m_IsLockOn);
+        return;
+    }
+
+    m_pTargetTransform = nullptr;
+}
+
 
 HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
@@ -367,6 +445,22 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
         , pDesc->wStrInputControllerTag, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
         CRASH("Input Controller");
 
+
+    CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+    RigidbodyDesc.eBodyType = CRigidbody::BODY;
+    RigidbodyDesc.eShape = SHAPE::BOX;
+    RigidbodyDesc.eType = EMotionType::Kinematic;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+    RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
+    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+        CRASH("Rigidbody");
+
+    m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+        OnCollide_During(iLayer, pDesc, Manifold);
+    });
 
 
     return S_OK;
