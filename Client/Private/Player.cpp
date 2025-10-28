@@ -5,13 +5,16 @@
 #include "AugustaState_Enum.h"
 #include "SpringCamera.h"
 #include "PlayerFactory.h"
-
+#include "GameSystem.h"
 
 #pragma region 기본 함수
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
+    , m_pGameSystem { CGameSystem::GetInstance()}
 {
+    Safe_AddRef(m_pGameSystem);
 }
+
 
 CPlayer::CPlayer(const CPlayer& Prototype)
     : CGameObject(Prototype)
@@ -278,7 +281,10 @@ void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold&
 {
     CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
     if (nullptr == pTargetTransform)
+    {
         return;
+    }
+        
     m_TargetTransforms.push_back(pTargetTransform);
 }
 
@@ -363,7 +369,8 @@ void CPlayer::Toggle_LockOn()
         {
             m_IsLockOn = false;
             m_pSpringCamera->Lock_On(nullptr, false);
-            m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+            if (m_iCurrentCharacterIdx !=NONE)
+                m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
 
         }
         // Transform 비우기.
@@ -390,6 +397,7 @@ void CPlayer::Toggle_LockOn()
     }
 
     m_pTargetTransform = nullptr;
+    
 }
 
 
@@ -450,7 +458,8 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eBodyType = CRigidbody::BODY;
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
     RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
@@ -495,6 +504,7 @@ CGameObject* CPlayer::Clone(void* pArg)
 void CPlayer::Free()
 {
     CGameObject::Free();
+    Safe_Release(m_pGameSystem);
 
     for (auto& pPlayer : m_Characters)
         Safe_Release(pPlayer);

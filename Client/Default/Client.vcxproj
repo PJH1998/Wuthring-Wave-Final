@@ -182,6 +182,7 @@
     <ClInclude Include="..\Public\AugustaStateFactory.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\Public\HitState.h" />

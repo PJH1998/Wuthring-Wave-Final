@@ -84,6 +84,7 @@ private:
 
 
 private:
+	class CGameSystem* m_pGameSystem = { nullptr };
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };

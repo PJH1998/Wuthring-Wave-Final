@@ -2,10 +2,13 @@
 #include "Character.h"
 #include "InputController.h"
 #include "SpringCamera.h"
+#include "GameSystem.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
+    , m_pGameSystem { CGameSystem::GetInstance() }
 {
+    Safe_AddRef(m_pGameSystem);
 }
 
 CCharacter::CCharacter(const CCharacter& Prototype)
@@ -43,6 +46,8 @@ void CCharacter::Priority_Update(_float fTimeDelta)
         return;
     
     CActor::Priority_Update(fTimeDelta);
+
+    Sync_UI(); // 현재 스탯 정보들 전달.
 }
 
 void CCharacter::Update(_float fTimeDelta)
@@ -452,7 +457,18 @@ void CCharacter::Set_Gravity(_bool IsGravity)
 
 
 
+
+
 #pragma endregion
+
+#pragma region UI
+void CCharacter::Sync_UI()
+{
+    // Character Info Sync 
+    m_pGameSystem->Sync_CharacterInfo(m_Stats);
+}
+#pragma endregion
+
 
 
 
@@ -460,6 +476,7 @@ void CCharacter::Set_Gravity(_bool IsGravity)
 void CCharacter::Free()
 {
     CActor::Free();
+    Safe_Release(m_pGameSystem);
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);

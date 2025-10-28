@@ -22,12 +22,7 @@ public:
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
-	typedef struct tagPlayerStat
-	{
-		_float fHp = {};
-		_float fEnsembleEnergy = {};
-		_float fAttack = {};
-	}CHARACTER_STAT;
+
 
 
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -101,24 +96,26 @@ public:
 
 	void Set_Gravity(_bool IsGravity);
 	
-	
-
-
-
-	
-	
 #pragma endregion
 
 
 public:
 	class CPlayer* Get_Owenr() { return m_pOwner; }
+
+#pragma region UI Interface
+public:
 	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-    void Add_EnsembleEnergy(_float fEnergy)  { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
-    _bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
-    void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
+	void Add_EnsembleEnergy(_float fEnergy) { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
+	_bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
+	void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
+	void Sync_UI();
+#pragma endregion
+
+
 	
 
 protected:
+	class CGameSystem* m_pGameSystem = { nullptr };
 	class CPlayer* m_pOwner = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };

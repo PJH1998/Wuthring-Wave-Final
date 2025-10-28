@@ -34,6 +34,13 @@ void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fm
 	m_pFactory->Create_MonsterDummy(eLayerLevel, vPos, PreTransformationMatrix);
 }
 
+void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
+{
+	m_Stats = eCharacterStat;
+}
+
+
+
 void CGameSystem::Free()
 {
 	__super::Free();

@@ -350,6 +350,9 @@
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
       <Filter>02. Level\Loader\VIBuffer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Client_Struct.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
