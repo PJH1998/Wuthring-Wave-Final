@@ -71,6 +71,7 @@ private:
 	void				Render_Combined();
 	void				Render_NonLight();
 	void				Render_Emissive();
+	void				Render_Bloom();
 	void				Render_DistortionObject();
 	void				Render_Blend();
 	void				Render_Distortion();
