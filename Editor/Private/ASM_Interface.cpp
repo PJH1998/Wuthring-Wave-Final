@@ -31,13 +31,14 @@ HRESULT CASM_Interface::Initialize()
 	m_BehaviorTreeGraphDelegate.pInterface = this;
 
 	//CBT_Selector* pRoot = CBT_Selector::Create();
-	m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, nullptr);
+	//m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, nullptr);
 
 	m_pBlackBoard = CBlackBoard::Create();
 
-	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
-	BTDesc.pBlackBoard = m_pBlackBoard;
-	m_pBehaviorTree->Initialize_Clone(&BTDesc);
+	//CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
+	//BTDesc.pBlackBoard = m_pBlackBoard;
+	//m_pBehaviorTree->Initialize_Clone(&BTDesc);
+	//Safe_AddRef(m_pBlackBoard);
 
 	Initialize_BT();
 
@@ -133,15 +134,15 @@ void CASM_Interface::Node_Info()
 	{
 		ImGui::Text("to: %d slot %d -> from: %d slot %d", tLink.mInputNodeIndex, tLink.mInputSlotIndex, tLink.mOutputNodeIndex, tLink.mOutputSlotIndex);
 	}
-	if(0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.length() && 
-		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.length() &&
+	if(0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.length() || 
+		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.length() ||
 		0 != m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.length())
 	{
 		ImGui::Text("%s - %s - %s", m_Nodes[m_iCurrentNodeIndex].Conditions.strValue.c_str(),
 									m_Nodes[m_iCurrentNodeIndex].Conditions.strCondition.c_str(),
 									m_Nodes[m_iCurrentNodeIndex].Conditions.strConst.c_str());
 	}
-	
+	ImGui::InputText("NodeName", m_Nodes[m_iCurrentNodeIndex].strName.data(), MAX_PATH);
 	if(ImGui::Button("Add Slot"))
 	{
 		if(BT_TYPE::ACTION != m_Nodes[m_iCurrentNodeIndex].eType)
@@ -150,7 +151,7 @@ void CASM_Interface::Node_Info()
 	if(BT_TYPE::ACTION == m_Nodes[m_iCurrentNodeIndex].eType)
 	{
 		ImGui::InputScalar("TargetState", ImGuiDataType_U32, &m_Nodes[m_iCurrentNodeIndex].iTargetState);
-		ImGui::Text("%u", (1 << m_Nodes[m_iCurrentNodeIndex].iTargetState));
+		ImGui::Text("%u", m_Nodes[m_iCurrentNodeIndex].iTargetState == 0 ? 0 : (1 << (m_Nodes[m_iCurrentNodeIndex].iTargetState - 1)));
 		if(!m_isConditionCreate && ImGui::Button("Create Condition"))
 		{
 			m_isConditionCreate = true;
@@ -161,6 +162,18 @@ void CASM_Interface::Node_Info()
 		}
 		if(m_isConditionCreate)
 		{
+			if(ImGui::RadioButton("_Int", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 0)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("_Float", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 1)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("_Mask", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 2)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("_Bool", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 3)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("_Vec3", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 4)){}
+			ImGui::SameLine();
+			if(ImGui::RadioButton("_Vec4", reinterpret_cast<int*>(&m_Nodes[m_iCurrentNodeIndex].eDataType), 5)){}
+
 			ImGui::InputText("Value", m_strValueName, MAX_PATH);
 			ImGui::InputText("Condition", m_strConditionName, MAX_PATH);
 			ImGui::InputText("Const", m_strConstName, MAX_PATH);
@@ -168,8 +181,17 @@ void CASM_Interface::Node_Info()
 			{
 				CONDITION_TAG tCondition;
 				tCondition.strValue = m_strValueName;
+				if(tCondition.strValue.length() != 0)
+					m_RequireValueKey.insert(m_strValueName);
+				else
+					m_Nodes[m_iCurrentNodeIndex].eDataType = DATA_TYPE::DATA_END;
+
 				tCondition.strCondition = m_strConditionName;
+				if(tCondition.strCondition.length() != 0)
+					m_RequireConditionKey.insert(m_strConditionName);
 				tCondition.strConst = m_strConstName;
+				if(tCondition.strConst.length() != 0)
+					m_RequireConstKey.insert(m_strConstName);
 
 				m_Nodes[m_iCurrentNodeIndex].Conditions = tCondition;
 				m_isConditionCreate = false;
@@ -181,6 +203,30 @@ void CASM_Interface::Node_Info()
 			}
 		}
 	}
+	if(ImGui::CollapsingHeader("Require Key"))
+	{
+		ImGui::BeginTable("Key Property", 3, ImGuiTableFlags_BordersInnerV);
+		ImGui::TableNextColumn();
+		ImGui::Text("Value");
+		for(auto strKey : m_RequireValueKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::TableNextColumn();
+		ImGui::Text("Condition");
+		for(auto strKey : m_RequireConditionKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::TableNextColumn();
+		ImGui::Text("Const");
+		for(auto strKey : m_RequireConstKey)
+		{
+			ImGui::Text(strKey.c_str());
+		}
+		ImGui::EndTable();
+	}
+	ImGui::Text("end");
 }
 
 void CASM_Interface::Delete_Link()
@@ -237,19 +283,19 @@ void CASM_Interface::BehaviorTree_Setting()
 		{
 		case Editor::CASM_Interface::ACTION:
 		{
-			MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
 		case Editor::CASM_Interface::SELECTOR:
 		{
-			MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
 		case Editor::CASM_Interface::SEQUENCE:
 		{
-			MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType};
+			MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, 0.f, 0.f, m_eNodeType, 0, DATA_TYPE::DATA_END};
 			m_Nodes.push_back(tNode);
 			break;
 		}
@@ -289,7 +335,11 @@ void CASM_Interface::BehaviorTree_Setting()
 	{
 		m_isShowLoadFile = true;
 	}
-	
+	if(ImGui::Button("Bind to Component"))
+	{
+		m_isShowLoadFile = true;
+		m_isLoadtoComponent = true;
+	}
 	if(m_isShowSaveFile)
 		Save_BT_Data();
 	if(m_isShowLoadFile)
@@ -321,29 +371,29 @@ void CASM_Interface::BlackBoard_Setting()
 		switch(m_ValueContainer[m_strValueKey].first)
 		{
 		case Editor::CASM_Interface::INT:
-			ImGui::Text("Int");
+			ImGui::Text("_Int");
 			ImGui::InputInt(m_strValueKey.c_str(), static_cast<_int*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::FLOAT:
-			ImGui::Text("Float");
+			ImGui::Text("_Float");
 			ImGui::InputFloat(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::MASK:
 		{
-			ImGui::Text("Mask");
+			ImGui::Text("_Mask");
 			ImGui::InputScalar(m_strValueKey.c_str(), ImGuiDataType_U32, static_cast<_uint*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		}
 		case Editor::CASM_Interface::BOOL:
-			ImGui::Text("Bool");
+			ImGui::Text("_Bool");
 			ImGui::Checkbox(m_strValueKey.c_str(), static_cast<_bool*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR3:
-			ImGui::Text("Float3");
+			ImGui::Text("_Float3");
 			ImGui::InputFloat3(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		case Editor::CASM_Interface::VECTOR4:
-			ImGui::Text("Float4");
+			ImGui::Text("_Float4");
 			ImGui::InputFloat4(m_strValueKey.c_str(), static_cast<_float*>(m_ValueContainer[m_strValueKey].second));
 			break;
 		default:
@@ -376,7 +426,7 @@ void CASM_Interface::BlackBoard_Setting()
 	case Editor::CASM_Interface::MASK:
 	{
 		ImGui::InputScalar("mask", ImGuiDataType_U32, &m_uInputTemp);
-		ImGui::Text("%d", (1 << m_uInputTemp));
+		ImGui::Text("%u", (1 << m_uInputTemp));
 		break;
 	}
 	case Editor::CASM_Interface::BOOL:
@@ -459,13 +509,6 @@ void CASM_Interface::BlackBoard_Setting()
 			CRASH(m_ValueContainer[szValueTag].first);
 		//m_strValueKey = m_strValueTag; 대입 시 m_strValueKey이 size 0 인 상태로 복사됨.
 		m_strValueKey = szValueTag;
-//#ifdef _DEBUG
-//		cout << "a: \"" << m_strValueKey << "\" size=" << m_strValueKey.size() << "\n";
-//		cout << "b: \"" << m_strValueTag << "\" size=" << m_strValueTag.size() << "\n";
-//		cout << "&a=" << (const void*)&m_strValueKey << " &b=" << (const void*)&m_strValueTag << "\n";
-//		cout << "a.data=" << static_cast<const void*>(m_strValueKey.data())
-//			<< " b.data=" << static_cast<const void*>(m_strValueTag.data()) << "\n";
-//#endif // _DEBUG
 
 	}
 #ifdef _DEBUG
@@ -546,7 +589,7 @@ void CASM_Interface::Initialize_BT()
 void CASM_Interface::Save_BT_Data()
 {
 	IGFD::FileDialogConfig config;
-	config.path = "../../Editor/Bin/Resource/";
+	config.path = "../../Client/Bin/Resource/Model";
 	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 	ImGuiFileDialog::Instance()->OpenDialog("BT File Save", "Export File", ".json", config);
 	ImVec2 vMinSize = ImVec2(600, 400);
@@ -609,13 +652,28 @@ void CASM_Interface::Save_Nodes(ofstream& File, _uint& iIndex)
 
 		Output["Nodes"].push_back(Node);
 	}
+	Output["A_ValueKey"] = json::array();
+	for(auto& strKey : m_RequireValueKey)
+	{
+		Output["A_ValueKey"].push_back(strKey);
+	}
+	Output["A_ConditionKey"] = json::array();
+	for(auto& strKey : m_RequireConditionKey)
+	{
+		Output["A_ConditionKey"].push_back(strKey);
+	}
+	Output["A_ConstKey"] = json::array();
+	for(auto& strKey : m_RequireConstKey)
+	{
+		Output["A_ConstKey"].push_back(strKey);
+	}
 	File << Output.dump(4);
 }
 
 void CASM_Interface::Load_BT_Data()
 {
 	IGFD::FileDialogConfig config;
-	config.path = "../../Editor/Bin/Resource/";
+	config.path = "../../Client/Bin/Resource/Model";
 	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
 	ImGuiFileDialog::Instance()->OpenDialog("BT File Load", "Import File", ".json", config);
 	ImVec2 vMinSize = ImVec2(600, 400);
@@ -661,13 +719,14 @@ void CASM_Interface::Load_BT_Data()
 			
 			_float x{NodeData["Editor_PosX"]}, y{NodeData["Editor_PosY"]};
 			_string szNodeName;
+			_uint iTargetState = NodeData["TargetState"];
 			szNodeName = "Count";
 			szNodeName += to_string(m_iNodeCount).c_str();
 			switch(eType)
 			{
 			case Editor::CASM_Interface::ACTION:
 			{
-				MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Action", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				tNode.Conditions = Conditions;
 				//tNode.iTargetState = NodeData["TargetState"];
@@ -676,14 +735,14 @@ void CASM_Interface::Load_BT_Data()
 			}
 			case Editor::CASM_Interface::SELECTOR:
 			{
-				MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Selector", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				m_Nodes.push_back(tNode);
 				break;
 			}
 			case Editor::CASM_Interface::SEQUENCE:
 			{
-				MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType};
+				MyNode tNode = {"Sequence", m_Templates.size(), ImRect(), false, szNodeName, x, y, eType, iTargetState};
 				tNode.Transitions = Transition;
 				m_Nodes.push_back(tNode);
 				break;
@@ -696,8 +755,29 @@ void CASM_Interface::Load_BT_Data()
 			++m_iNodeCount;
 		}
 
+		for(auto& strKey : BT_Data["A_ValueKey"])
+		{
+			m_RequireValueKey.insert(strKey);
+		}
+		for(auto& strKey : BT_Data["A_ConditionKey"])
+		{
+			m_RequireConditionKey.insert(strKey);
+		}
+		for(auto& strKey : BT_Data["A_ConstKey"])
+		{
+			m_RequireConstKey.insert(strKey);
+		}
+
 		file.close();
 		ImGuiFileDialog::Instance()->Close();
+		if(m_isLoadtoComponent)
+		{
+			if(nullptr != m_pBehaviorTree)
+				Safe_Release(m_pBehaviorTree);
+
+			m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, strFilePath.c_str());
+			m_isLoadtoComponent = false;
+		}
 		m_isShowLoadFile = false;
 	}
 }
@@ -809,6 +889,7 @@ void CASM_Interface::Free()
 {
 	__super::Free();
 	Safe_Release(m_pBehaviorTree);
+	Safe_Release(m_pBlackBoard);
 	Clear_Container();
 }
 

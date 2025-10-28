@@ -29,13 +29,13 @@ public:
 		DATA_END
 	};
 
-	//template<class T> constexpr DATA_TYPE DeduceType();
-	//template<> inline constexpr DATA_TYPE DeduceType<_int>() { return DATA_TYPE::INT; }
-	//template<> inline constexpr DATA_TYPE DeduceType<_float>() { return DATA_TYPE::FLOAT; }
-	//template<> inline constexpr DATA_TYPE DeduceType<_uint>() { return DATA_TYPE::MASK; }
-	//template<> inline constexpr DATA_TYPE DeduceType<_bool>() { return DATA_TYPE::BOOL; }
-	//template<> inline constexpr DATA_TYPE DeduceType<_float3>() { return DATA_TYPE::VECTOR3; }
-	//template<> inline constexpr DATA_TYPE DeduceType<_float4>() { return DATA_TYPE::VECTOR4; }
+	template<class T> constexpr DATA_TYPE DeduceType(T value) { return DATA_TYPE::DATA_END; }
+	template<> inline constexpr DATA_TYPE DeduceType<_int>(_int value) { return DATA_TYPE::INT; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float>(_float value) { return DATA_TYPE::FLOAT; }
+	template<> inline constexpr DATA_TYPE DeduceType<_uint>(_uint value) { return DATA_TYPE::MASK; }
+	template<> inline constexpr DATA_TYPE DeduceType<_bool>(_bool value) { return DATA_TYPE::BOOL; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float3>(_float3 value) { return DATA_TYPE::VECTOR3; }
+	template<> inline constexpr DATA_TYPE DeduceType<_float4>(_float4 value) { return DATA_TYPE::VECTOR4; }
 #pragma endregion
 	/*typedef struct tFieldAccessor
 	{
@@ -44,7 +44,6 @@ public:
 		std::function<_bool(const _variant& in)> setter;
 	}ACCESSOR;*/
 
-	typedef map<_string, pair<DATA_TYPE, void*>> BLACKBOARD_DATA;
 	//typedef map<StringID, ACCESSOR> BLACKBOARD_DATA;
 
 private:
@@ -63,6 +62,8 @@ public:
 	HRESULT Add_Condition(const _string& strDataTag, function<_bool()> Condition);
 	_bool Get_Condition(const _string& strFuncTag);
 
+	_bool Necessary_Key_Check(vector<_string>& RequireKey);
+
 #ifdef _DEBUG
 	// 블랙보드에 바인딩 된 데이터 시각화
 	void Bind_Data_to_GUI();
@@ -72,12 +73,14 @@ public:
 
 
 private:
+	typedef map<_string, pair<DATA_TYPE, void*>> BLACKBOARD_DATA;
 	BLACKBOARD_DATA			m_Datas;
 	map<const _string, function<_bool()>> m_Conditions;
 
 private:
 	//_bool TypeMatches(DATA_TYPE eType, const _variant& Var);
 	_bool Find_Data(const _string& strDataTag);
+	_bool Find_Condition(const _string& strDataTag);
 	//ACCESSOR* Find(StringID uKey);
 	//const ACCESSOR* Find(StringID uKey) const;
 

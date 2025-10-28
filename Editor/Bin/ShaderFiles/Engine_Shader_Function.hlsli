@@ -288,9 +288,9 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
     
     float Distance = abs(SampleDepth - vViewPos.z);
     
-    Occlusion = smoothstep(0.f, fMaxDistance, Distance);
+    Occlusion = smoothstep(fMaxDistance, 0.f, Distance);
     
-    float fNormalWeight = saturate(dot(vViewNormal, normalize(vViewPos - vSamplePos)));
+    float fNormalWeight = saturate(dot(vViewNormal, normalize(vSamplePos - vViewPos)));
     
     Occlusion *= fNormalWeight;
     
