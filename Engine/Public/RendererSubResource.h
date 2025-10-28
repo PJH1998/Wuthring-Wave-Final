@@ -29,6 +29,12 @@ private:
 		_float	fHeight;
 		_float  Paddingblur;
 	}SSAO_BLUR_DATA;
+	
+	typedef struct tagBlurData {
+		_float	fWidth;
+		_float	fHeight;
+		_float2  Paddingblur;
+	}BLUR_DATA;
 
 private:
 	CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -49,6 +55,7 @@ public:
 	HRESULT						Bind_Fog_Resources(CShader* pShader);
 	HRESULT						Add_SSAO_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
+	HRESULT						Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_SSAO_NoiseTexture(const _wstring& strRCSTag, const _char* pConstantName);
 private:
 	CGameInstance*				m_pGameInstance = { nullptr };

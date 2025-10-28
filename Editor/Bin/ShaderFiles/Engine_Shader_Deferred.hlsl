@@ -157,7 +157,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     //Out.vColor.xyz = 1.f * Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vToonRim);
     
-    Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y));//    +(vRimColor * vToonRim.z);
+    Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
     Out.vColor.a = 1.f;
     
     float IsShadow = vPBRDesc.z;

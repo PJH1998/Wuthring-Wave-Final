@@ -723,21 +723,21 @@ HRESULT CGameInstance::Setting_UAV_Data(const _wstring& strRCSTag, const _char* 
 {
 	return m_pRCS_Manager->Setting_UAV_Data(strRCSTag, pConstantName);
 }
-HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName)
+HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName);
+	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName, iMipLevel);
 }
-HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag)
+HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Begin_RCS(strRCSTag);
+	return m_pRCS_Manager->Begin_RCS(strRCSTag, iMipLevel);
 }
-void CGameInstance::Clear_RCS(const _wstring& strRCSTag)
+void CGameInstance::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
-	m_pRCS_Manager->Clear_RCS(strRCSTag);
+	m_pRCS_Manager->Clear_RCS(strRCSTag, iMipLevel);
 }
-ID3D11ShaderResourceView* CGameInstance::Get_RCS_SRV(const _wstring& strRCSTag)
+ID3D11ShaderResourceView* CGameInstance::Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Get_RCS_SRV(strRCSTag);
+	return m_pRCS_Manager->Get_RCS_SRV(strRCSTag, iMipLevel);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Debug_Render_RCS()
@@ -783,13 +783,13 @@ void CGameInstance::Release_Engine()
 {
 	Wait_Thread_End();
 
+	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
-	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
-	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pTargetManager);
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
@@ -799,14 +799,14 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadow);
-	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
-	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pRCS_Manager);
-	Safe_Release(m_pPhysicsManager);
 	Safe_Release(m_pUI_Manager);
+	Safe_Release(m_pPhysicsManager);																									
+	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pGraphic_Device);
 
 	Release();
 }

@@ -41,7 +41,7 @@ void CAugustaAirAttack::OnEnter()
     m_pAugusta->PartAcitvate(m_iPartType, true);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
-    // 점공이니까 한번만?
+    // 점공이니까 한번만? => 카메라 락온상태일때 뭔가 문제가 있다.
     m_pAugusta->Rotate_Target(); 
 }
 

@@ -110,9 +110,21 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
         vNormal = normalize(float4(vNormalDesc.xyz * 2.f - 1.f, 0.f));
-        float3x3 WorldMatrix;
         
-        WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;;
+        float3 vInNormal = In.vNormal.xyz;
+        
+        float fDeterminant = dot(cross(vTangent, vBinormal), vInNormal);
+        if (fDeterminant < 0.f)
+        {
+            vInNormal = In.vBinormal.xyz * -1.f;
+            vBinormal = In.vNormal.xyz;
+        }
+        
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
         vNormal = normalize(mul(vNormal, WorldMatrix));
         vNormal = vNormal * 0.5f + 0.5f;
     }
@@ -295,7 +307,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, 0.f, 0.f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.2f), 0.f);
    
     vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
     
