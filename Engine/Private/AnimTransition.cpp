@@ -22,7 +22,7 @@ HRESULT CAnimTransition::Initialize_Prototype(json& jsonParser)
 
 _bool CAnimTransition::Is_Transit(const _uint* pOwnerState, _string& strNextState, _float& fTargetTrackPos)
 {
-    if(*pOwnerState & m_iTargetState)
+    if(*pOwnerState == m_iTargetState)
     {
         //for(auto& Func : m_Conditions)
         //    if(Func(pOwnerState))

@@ -50,6 +50,7 @@ private:
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
 	_float3					m_vTargetPosition{};
+	_float3					m_vTargetDir{};
 	_float					m_fAttackCoolTime[10]{};
 	_float					m_fAttackAcc[10]{};
 	_float					m_fDistance{};
@@ -67,11 +68,10 @@ private:
 
 	void						Reset_Condition(_float fTimeDelta);
 
-	_bool						isAnimationRunning() { return m_isAnimationFinished; }
+	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
-	_bool						Attadk1();
-	_bool						Attack2();
+	_bool						Attack(_uint iIndex, _float fInterval);
 	_bool						Back();
 	_bool						Front();
 	_bool						Left();

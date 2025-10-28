@@ -61,19 +61,17 @@ void CMonsterTest::Update(_float fTimeDelta)
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
-	//for(auto& Pair : m_PartObjects)
-	//	Pair.second->Update(fTimeDelta);
-
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
 	//m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-	
-	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
-	m_pColliderCom->Update(vVelocity);
+	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 	
+	// y축 수직 회전 lerp 사용할 함수 : CTransform->LookLerp
+	// y축 수직으로  look fix할 함수 : CTransform->LookDir
+
 }
 
 void CMonsterTest::Late_Update(_float fTimeDelta)
@@ -197,8 +195,8 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
-	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attadk1(); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack2(); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 30.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 3.f); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -236,11 +234,13 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	{
 		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
 		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		_vector vDir = vTargetPos - vPosition;
+		_vector vDir = vPosition - vTargetPos;
 		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
 		vDir = XMVector3Normalize(vDir);
-		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::LOOK)));
-		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, m_pTransformCom->Get_State(STATE::RIGHT)));
+		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 #ifdef _DEBUG
 		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
 		cout << "distance: " << m_fDistance << endl;
@@ -257,7 +257,21 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 _bool CMonsterTest::isAttackEnable()
 {
-	return m_isDetecting;
+	_bool Result = m_isDetecting;
+	for(_uint i = 0; i < 2; ++i)
+	{
+		if(m_fAttackAcc[i] < 0.f)
+		{
+			Result = true;
+			break;
+		}
+	}
+	//Result = m_isDetecting;
+	if(Result)
+	{
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	}
+	return Result;
 }
 
 _bool CMonsterTest::DodgeCooldown()
@@ -268,40 +282,32 @@ _bool CMonsterTest::DodgeCooldown()
 	return Result;
 }
 
-_bool CMonsterTest::Attadk1()
+_bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	_bool Result = (m_fAttackAcc[0] <= 0.f) && m_fDistance < 3.f;
+	_bool Result = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
 	if(Result)
-		m_fAttackAcc[0] = m_fAttackCoolTime[0];
-	return Result;
-}
-
-_bool CMonsterTest::Attack2()
-{
-	_bool Result = (m_fAttackAcc[1] <= 0.f);
-	if(Result)
-		m_fAttackAcc[1] = m_fAttackCoolTime[1];
+		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
 	return Result;
 }
 
 _bool CMonsterTest::Back()
 {
-	return m_fFrontDot < 0.f;
+	return m_fFrontDot < 0.f && fabs(m_fFrontDot) > 0.525f;
 }
 
 _bool CMonsterTest::Front()
 {
-	return m_fFrontDot > 0.f;
+	return m_fFrontDot > 0.f && fabs(m_fFrontDot) > 0.525f;
 }
 
 _bool CMonsterTest::Left()
 {
-	return m_fRightDot < 0.f;
+	return m_fRightDot < 0.f && fabs(m_fRightDot) > 0.525f;
 }
 
 _bool CMonsterTest::Right()
 {
-	return m_fRightDot > 0.f;
+	return m_fRightDot > 0.f && fabs(m_fRightDot) > 0.525f;
 }
 
 CMonsterTest* CMonsterTest::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

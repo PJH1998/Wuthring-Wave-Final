@@ -1064,7 +1064,7 @@ void CAnimationTool::Import_StateTransition_From_Json()
                 jsonTransition["From"],
                 jsonTransition["To"],
                 jsonTransition["Priority"],
-                (1 << iState),
+                (iState),
                 jsonTransition["Transit Target Pos"],
                 jsonTransition["Transit Enable Pos"]
             };
