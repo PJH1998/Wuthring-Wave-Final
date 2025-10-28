@@ -33,6 +33,8 @@ _bool CCollider::IsLand(_float3* pNormalOut)
 	if (nullptr != pNormalOut)
 		*pNormalOut = StoreFloat3(m_pCharacterVirtual->GetGroundNormal());
 
+	
+
 	return m_pCharacterVirtual->IsSupported();
 }
 

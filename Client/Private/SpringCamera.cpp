@@ -29,7 +29,7 @@ _vector CSpringCamera::Get_LookVector_NoPitch()
 _vector CSpringCamera::Get_RightVector_NoPitch()
 {
 	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
-	vRight = XMVectorSetY(vRight, 0.f);  // Pitch Á¦°Å
+	vRight = XMVectorSetY(vRight, 0.f);  // Pitch ï¿½ï¿½ï¿½ï¿½
 	return XMVector3Normalize(vRight);
 }
 
@@ -82,9 +82,9 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if (CAMERA_STATE::TARGET == m_eCameraState)
 		__super::Mouse_Move_Up();
 
-	// 1. °Å¸® Á¦ÇÑÀ¸·Î ÀÎÇÑ °£°Ý º¸Á¤
+	// 1. ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	Compute_CamPos();
-	// 2. Ray Cast ÀÌ¿ëÇÏ¿© ÁöÇü, ¿ÀºêÁ§Æ®¿Í Ãæµ¹
+	// 2. Ray Cast ï¿½Ì¿ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½æµ¹
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
 }
@@ -140,7 +140,7 @@ void CSpringCamera::Compute_CamPos()
 	m_fLockOnDistanceOffset = 0.f;
 	if(CAMERA_STATE::LOCKON ==  m_eCameraState)
 		Adjust_LockOn_Distance();
-	cout << "LDO : " << m_fLockOnDistanceOffset << endl;
+	//cout << "LDO : " << m_fLockOnDistanceOffset << endl;
 	_vector vCamPos = XMVectorSetW(vTargetPos - vLook * (m_fDistance + m_fLockOnDistanceOffset), 1.f);
 
 	m_pTransformCom->Set_State(STATE::POSITION, vCamPos);
@@ -159,21 +159,21 @@ void CSpringCamera::Check_Ray()
 
 void CSpringCamera::Lerp_Move(_float fTimeDelta)
 {
-	// ÇöÀç È¸Àü·®
+	// ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½
 	_vector vPreQuat = m_pTransformCom->Get_Quaternion();
 
-	// ÇöÀç Dir
+	// ï¿½ï¿½ï¿½ï¿½ Dir
 	_vector vDestinationDir = XMVector3Normalize(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition));
 
 	_vector vCamPos = XMLoadFloat4(&m_vLookPosition) - vDestinationDir * m_fDistance;
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
-	// ¸ñÇ¥ Dir
+	// ï¿½ï¿½Ç¥ Dir
 	m_pTransformCom->LookDir(vLookDir);
 	_vector vCurrentQuat = m_pTransformCom->Get_Quaternion();
 
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
-	// È¸Àü º¸°£
+	// È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	_float fLerp = {};
 	if (fDot < cos(XMConvertToRadians(25.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 2.5f);

@@ -18,16 +18,10 @@ public:
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
-	typedef struct tagPlayerStat
-	{
-		_float fHp = {};
-		_float fEnsembleEnergy = {};
-		_float fAttack = {};
-	}CHARACTER_STAT;
+
 
 
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -62,28 +56,46 @@ public:
 
 #pragma endregion
 
-#pragma region STATE 조건에 사용
+#pragma region 객체 공유
 public:
-	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
-	_vector Get_LookVector();
-	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
-	_bool Is_LockOn();
-	_bool Is_Land(_float3* pNormal = nullptr);
-
-	// LockOn 시 대상 타겟 바라보기?
-
-	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
-	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
-
+	// Object 
 	void Set_InputController(class CInputController* pInputControllerCom);
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
+#pragma endregion
+
+
+
+#pragma region STATE 조건에 사용
+public:
+	/* Parts */
+	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // 뼈 세팅
+
+	// LockOn
+	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
+	_bool Is_LockOn();
+
+	// Land Check
+	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_bool Is_Land(_float3* pNormal = nullptr);
 	
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	// Wall
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
+	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+
+	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
-	
-	void Change_State(_uint iCategory, _uint iSubState);
 
+	// Animation
+	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	
+	// Change State
+	void Change_State(_uint iCategory, _uint iSubState);
+	
+
+	// Move
 	ACTORDIR Calculate_Direction();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
@@ -92,19 +104,16 @@ public:
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
 	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);
 
+	// Rotate
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	
-	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
-	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 	void Rotate_Target();
 
+	// Gravity
 	void Set_Gravity(_bool IsGravity);
-	
-	
 
-
-
+	// Collider
+	void Sync_Collider();
 	
 	
 #pragma endregion
@@ -112,13 +121,30 @@ public:
 
 public:
 	class CPlayer* Get_Owenr() { return m_pOwner; }
+
+#pragma region UI Interface
+public:
 	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-    void Add_EnsembleEnergy(_float fEnergy)  { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
-    _bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
-    void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
+	void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
+	_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
+	void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
+
+	void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
+	_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
+	void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
+
+	void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
+	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
+	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
+
+	void Sync_UI(); // UI에 필요한 정보 초기화를 Player가 담당한다.
+#pragma endregion
+
+
 	
 
 protected:
+	class CGameSystem* m_pGameSystem = { nullptr };
 	class CPlayer* m_pOwner = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
@@ -126,11 +152,12 @@ protected:
 	class CTransform* m_pLockOnTargetTransform = { nullptr }; // LockOn Target 용도.
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 
-
-	_float m_fMaxEnsembleEnergy = { 100.f };
+	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+
+	_bool m_IsSyncCollider = { false };
 
 	CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };

@@ -24,7 +24,7 @@ public:
 	void							Update_Target(const _fvector& TargetPos, _float fOffsetY);
 
 	// Spring (Distance Adjust) - Lerp
-	// ¸ñÇ¥ Distance, µµ´Þ ½Ã°£
+	// ï¿½ï¿½Ç¥ Distance, ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 	void							Use_Spring(_float fDestination, _float fDuration)
 	{
 		if (CAMERA_STATE::SPRING == m_eCameraState)

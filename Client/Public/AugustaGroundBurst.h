@@ -5,25 +5,19 @@ NS_BEGIN(Client)
 
 // Augusta Skill State - Skill_Hack, Skill_Rise, Skill_Strike, SkillQTE, Burst01 처리
 // Default Skill State
-class CAugustaGroundSkill final : public CGroundState
+class CAugustaGroundBurst final : public CGroundState
 {
 private:
-    enum SKILLSTATE
+    enum BURSTSTATE
     {
-       HACK = 0,
-       RISE_ZERO,
-       QTE,
-       IDLE,
-       RUN,
-       JUMP, 
-       LAND,
-       AIR_ATTACK,
+       BURST01 = 0,
+       JUMP,
        END
     };
 
 private:
-    explicit CAugustaGroundSkill() = default;
-    virtual ~CAugustaGroundSkill() = default;
+    explicit CAugustaGroundBurst() = default;
+    virtual ~CAugustaGroundBurst() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -34,7 +28,7 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _bool m_States[SKILLSTATE::END] = {};
+    _bool m_States[BURSTSTATE::END] = {};
 
 private:
     virtual void Handle_Input() override;
@@ -46,7 +40,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundSkill* Create(class CGameObject* pOwner);
+    static CAugustaGroundBurst* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

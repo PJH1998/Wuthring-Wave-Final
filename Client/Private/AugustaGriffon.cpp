@@ -1,17 +1,17 @@
 #include "ClientPch.h"
-#include "AugustaBayonet.h"
+#include "AugustaGriffon.h"
 
-CAugustaBayonet::CAugustaBayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAugustaGriffon::CAugustaGriffon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CWeapon{ pDevice, pContext }
 {
 }
 
-CAugustaBayonet::CAugustaBayonet(const CPartObject& Prototype)
+CAugustaGriffon::CAugustaGriffon(const CPartObject& Prototype)
     : CWeapon(Prototype )
 {
 }
 
-HRESULT CAugustaBayonet::Initialize_Prototype()
+HRESULT CAugustaGriffon::Initialize_Prototype()
 {
     if (FAILED(CWeapon::Initialize_Prototype()))
         return E_FAIL;
@@ -19,7 +19,7 @@ HRESULT CAugustaBayonet::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
+HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
 {
     WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
@@ -34,12 +34,12 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CAugustaBayonet::Priority_Update(_float fTimeDelta)
+void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
     CWeapon::Priority_Update(fTimeDelta);
 }
 
-void CAugustaBayonet::Update(_float fTimeDelta)
+void CAugustaGriffon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
@@ -51,16 +51,11 @@ void CAugustaBayonet::Update(_float fTimeDelta)
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
 
-    /*XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());*/
-
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
     //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
 }
 
-void CAugustaBayonet::Late_Update(_float fTimeDelta)
+void CAugustaGriffon::Late_Update(_float fTimeDelta)
 {
 
 
@@ -73,7 +68,7 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
         return;
 }
 
-void CAugustaBayonet::Render()
+void CAugustaGriffon::Render()
 {
     Bind_Resources();
 
@@ -96,11 +91,11 @@ void CAugustaBayonet::Render()
     }
 
 #ifdef _DEBUG
-    //m_pRigidbodyCom->Render();
+    m_pRigidbodyCom->Render();
 #endif // _DEBUG
 }
 
-void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -128,7 +123,7 @@ void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
         CRASH("Rigidbody");*/
 }
 
-void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Variables(const WEAPON_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -138,14 +133,14 @@ void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CAugustaBayonet::Ready_Positions(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Positions(const WEAPON_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 }
 
-void CAugustaBayonet::Bind_Resources()
+void CAugustaGriffon::Bind_Resources()
 {
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
         CRASH("Failed Bind Matrix");
@@ -157,29 +152,29 @@ void CAugustaBayonet::Bind_Resources()
         CRASH("Failed Proj Matrix");
 }
 
-CAugustaBayonet* CAugustaBayonet::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAugustaGriffon* CAugustaGriffon::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CAugustaBayonet* pInstance = new CAugustaBayonet(pDevice, pContext);
+    CAugustaGriffon* pInstance = new CAugustaGriffon(pDevice, pContext);
     if (FAILED(pInstance->Initialize_Prototype()))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Create Failed CAugustaBayonet");
+        MSG_BOX("Create Failed CAugustaGriffon");
     }
     return pInstance;
 }
 
-CGameObject* CAugustaBayonet::Clone(void* pArg)
+CGameObject* CAugustaGriffon::Clone(void* pArg)
 {
-    CAugustaBayonet* pInstance = new CAugustaBayonet(*this);
+    CAugustaGriffon* pInstance = new CAugustaGriffon(*this);
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Clone Failed CAugustaBayonet");
+        MSG_BOX("Clone Failed CAugustaGriffon");
     }
     return pInstance;
 }
 
-void CAugustaBayonet::Free()
+void CAugustaGriffon::Free()
 {
     CWeapon::Free();
 }

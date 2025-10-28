@@ -61,7 +61,7 @@ public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
-	void Ensemble_Skill(CHARACTERTYPE eCharacter);
+	void Switch_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
 	void Notify_EnsembleEnd();
 
@@ -84,6 +84,7 @@ private:
 
 
 private:
+	class CGameSystem* m_pGameSystem = { nullptr };
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };

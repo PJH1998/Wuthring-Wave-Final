@@ -17,9 +17,11 @@
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
 
+
 // Air 카테고리 State들
 #include "AugustaAirJump.h"
 #include "AugustaAirFall.h"
+#include "AugustaAirAttack.h"
 
 // Climb State들
 #include "AugustaClimbMove.h"
@@ -43,6 +45,7 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     // Air 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL), CAugustaAirFall::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK), CAugustaAirAttack::Create(pPlayer));
 
     // Climb 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE), CAugustaClimbMove::Create(pPlayer));
