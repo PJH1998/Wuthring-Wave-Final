@@ -51,7 +51,6 @@ private:
     virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);
     void Check_Physics();
-    void LockOnCheck_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void Setup_Animations();

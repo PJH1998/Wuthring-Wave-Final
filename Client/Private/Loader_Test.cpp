@@ -148,7 +148,7 @@ HRESULT CLoader_Test::Load_Augusta()
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.01f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -176,7 +176,7 @@ HRESULT CLoader_Test::Load_Augusta()
     wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
     fSize = 0.01f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,

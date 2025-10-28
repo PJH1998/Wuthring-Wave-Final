@@ -100,7 +100,8 @@ void CAugusta::Update(_float fTimeDelta)
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 5. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 0.5f);
+    //_float fOffsetY = m_fColliderHeight + m_fColliderRadius * 2.f;
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 3.f);
 
     
 
@@ -124,6 +125,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
     // Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
+        
 
 
     
@@ -208,6 +210,11 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
         m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
         break;
     }
+}
+
+void CAugusta::Sync_Position()
+{
+    m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
 

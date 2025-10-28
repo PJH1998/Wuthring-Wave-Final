@@ -108,6 +108,8 @@ public:
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) override;
 
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
+
+	void Sync_Position();
 #pragma endregion
 
 

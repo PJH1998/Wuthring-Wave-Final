@@ -13,6 +13,7 @@ private:
         AIR_ATTACK_JUMP,
         MOVE,
         JUMP,
+        LAND,
         END
     };
 

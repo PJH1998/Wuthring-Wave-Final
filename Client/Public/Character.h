@@ -18,7 +18,6 @@ public:
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
@@ -57,28 +56,46 @@ public:
 
 #pragma endregion
 
-#pragma region STATE 조건에 사용
+#pragma region 객체 공유
 public:
-	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
-	_vector Get_LookVector();
-	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
-	_bool Is_LockOn();
-	_bool Is_Land(_float3* pNormal = nullptr);
-
-	// LockOn 시 대상 타겟 바라보기?
-
-	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
-	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
-
+	// Object 
 	void Set_InputController(class CInputController* pInputControllerCom);
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
+#pragma endregion
+
+
+
+#pragma region STATE 조건에 사용
+public:
+	/* Parts */
+	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // 뼈 세팅
+
+	// LockOn
+	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
+	_bool Is_LockOn();
+
+	// Land Check
+	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_bool Is_Land(_float3* pNormal = nullptr);
 	
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	// Wall
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
+	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+
+	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
-	
-	void Change_State(_uint iCategory, _uint iSubState);
 
+	// Animation
+	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	
+	// Change State
+	void Change_State(_uint iCategory, _uint iSubState);
+	
+
+	// Move
 	ACTORDIR Calculate_Direction();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
@@ -87,17 +104,17 @@ public:
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
 	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);
 
+	// Rotate
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	
-	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
-	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 	void Rotate_Target();
 
+	// Gravity
 	void Set_Gravity(_bool IsGravity);
 
-	// 뼈 세팅?..
-	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {};
+	// Collider
+	void Sync_Collider();
+	
 	
 #pragma endregion
 
@@ -139,6 +156,8 @@ protected:
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+
+	_bool m_IsSyncCollider = { false };
 
 	CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };

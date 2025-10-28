@@ -52,10 +52,6 @@ void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
     Check_Physics();
 
     // 3. 전환 제어
-   /* if (m_pAugusta->Is_LockOn())
-        LockOnCheck_StateTransition(fTimeDelta);
-    else
-        Check_StateTransition(fTimeDelta);*/
     Check_StateTransition(fTimeDelta);
 
     // 4. 현재  상태 초기화
@@ -101,7 +97,7 @@ void CAugustaGroundRun::Handle_Input()
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
-    m_fSpeed = m_States[SPRINT_F] ? 1.f : 0.5f;
+    m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
 }
 
 
@@ -137,113 +133,6 @@ void CAugustaGroundRun::Check_Physics()
     m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
 }
 
-void CAugustaGroundRun::LockOnCheck_StateTransition(_float fTimeDelta)
-{
-    ERunType eRunType = static_cast<ERunType>(m_iCurrentAnimIdx);
-
-    _float fOffsetY = 0.1f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
-
-    //if (!m_States[LAND] && fDistanceToGround > 1.f)
-    //{
-    //    m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
-    //    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-    //    return;
-    //}
-    if (!m_States[LAND] && fDistanceToGround > 0.2f) 
-    {
-        m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-        return;
-    }
-
-    // SPACE 누르면 바로 점프로 전환.
-    if (m_States[JUMP])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_WALK_LF;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
-        return;
-    }
-
-    // Run => Attack
-    if (m_States[ATTACK])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eAttackType = EAttackType::ATTACK01;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK)); // 상위, 하위 상태
-        return;
-    }
-
-    // Run => Sprint
-    if (m_States[SPRINT_F])
-    {
-        m_iCurrentAnimIdx = ENUM_CLASS(ERunType::SPRINT_F);
-        return;
-    }
-
-    // 뛰다가 DASH
-    if (m_States[DASH])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eDashType = EDashType::MOVE_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
-
-    if (m_States[MOVE])
-    {
-
-        if (m_States[RUN_U])
-        {
-            if (m_States[RUN_L])
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_LF);
-            else if (m_States[RUN_R])
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_RF);
-            else
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_F);
-        }
-        else if (m_States[RUN_D])
-        {
-            if (m_States[RUN_L])
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_LB);
-            else if (m_States[RUN_R])
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_RB);
-            else
-                m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_B);
-        }
-        else if (m_States[RUN_L])
-            m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_LF);
-        else if (m_States[RUN_R])
-            m_iCurrentAnimIdx = ENUM_CLASS(ERunType::RUN_RF);
-
-        return;
-    }
-
-    // 이동 상태를 아래에 몰아둔다. => 우선 순위 낮음
-    // 이동 입력 값이 안들어왔다면?
-    if (!m_States[MOVE])
-    {
-        // 현재 상태가 Sprint 였다면?
-        if (eRunType == ERunType::SPRINT_F)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(ERunType::STOP_SPRINT_L);
-            return;
-        }
-
-        // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
-        if (eRunType != ERunType::STOP_RUN_L)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(ERunType::STOP_RUN_L);
-            return;
-        }
-        // Stop Run 이면서 애니메이션 재생이 끝났다면?.
-        if ((eRunType == ERunType::STOP_RUN_L || eRunType == ERunType::STOP_SPRINT_L) && m_IsAnimationEnd)
-        {
-            m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
-            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-            return;
-        }
-    }
-
-}
 
 void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 {
@@ -251,7 +140,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     ERunType eRunType = static_cast<ERunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 0.1f;
+    _float fOffsetY = 0.2f;
     _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
     //// 전방 벽감지.
@@ -262,7 +151,12 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     //    return;
     //}
     
-    if (!m_States[LAND] && fDistanceToGround > 1.f)
+    // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
+    //if (!m_States[LAND] && fDistanceToGround > 0.3f)
+    if (eRunType == ERunType::SPRINT_F)
+        cout << "SPRINT fDistance : " << fDistanceToGround << endl;
+
+    if (fDistanceToGround > 1.f)
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태

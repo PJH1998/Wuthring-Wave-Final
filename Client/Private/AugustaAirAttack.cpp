@@ -43,6 +43,7 @@ void CAugustaAirAttack::OnEnter()
 
     // 점공이니까 한번만? => 카메라 락온상태일때 뭔가 문제가 있다.
     m_pAugusta->Rotate_Target(); 
+    m_pAugusta->Set_Gravity(false);
 }
 
 void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
@@ -70,6 +71,7 @@ void CAugustaAirAttack::OnExit()
 
     // 콤보 카운트 초기화
     m_pAugusta->PartAcitvate(m_iPartType, false); 
+    m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaAirAttack::Handle_Input()
@@ -86,7 +88,6 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
     // Target이 존재한다면? => Auto Target
     
-
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pAugusta->Play_PartAnimation(
         m_iPartType,
@@ -97,7 +98,8 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
 {
-
+    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+    m_pAugusta->Sync_Collider();
 }
 
 void CAugustaAirAttack::LockOn_StateTransition(_float fTimeDelta)
@@ -112,9 +114,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     
     EAirAttackType eAirAttackType = static_cast<EAirAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
-
-    
-
     _float fOffsetY = 0.1f;
     _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
@@ -122,7 +121,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_SP_END)
         {
-            if (m_States[MOVE] && m_pAugusta->Is_Land(&m_vLandNormal))
+            if (m_States[MOVE] && m_States[LAND])
             {
                 m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
@@ -158,19 +157,17 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
         }
     }
 
-
-    
 }
 
 void CAugustaAirAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.f, 20.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.f, 20.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 0.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.f, 0.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.3f, 20.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.3f, 20.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.f, 0.f, 1.f);
 }
 
 void CAugustaAirAttack::State_Reset()

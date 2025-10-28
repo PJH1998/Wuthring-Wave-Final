@@ -140,7 +140,7 @@ void CSpringCamera::Compute_CamPos()
 	m_fLockOnDistanceOffset = 0.f;
 	if(CAMERA_STATE::LOCKON ==  m_eCameraState)
 		Adjust_LockOn_Distance();
-	cout << "LDO : " << m_fLockOnDistanceOffset << endl;
+	//cout << "LDO : " << m_fLockOnDistanceOffset << endl;
 	_vector vCamPos = XMVectorSetW(vTargetPos - vLook * (m_fDistance + m_fLockOnDistanceOffset), 1.f);
 
 	m_pTransformCom->Set_State(STATE::POSITION, vCamPos);
