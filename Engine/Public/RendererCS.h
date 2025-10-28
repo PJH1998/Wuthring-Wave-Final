@@ -48,7 +48,6 @@ public:
 	HRESULT							Debug_Render(const _wstring& strRCS_Name);
 #endif
 
-
 private:
 	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*			m_pContext = { nullptr };

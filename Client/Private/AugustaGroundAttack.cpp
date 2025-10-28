@@ -114,6 +114,9 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
+    // Target이 존재한다면? => Auto Target
+    m_pAugusta->Rotate_Target();
+
     // 1타 모션일때 누르고 있다면?
     if (m_States[HEAVY_ATTACK_PENDING])
         m_fAttackPressTime += fTimeDelta;

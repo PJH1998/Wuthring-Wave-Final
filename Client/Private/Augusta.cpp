@@ -41,7 +41,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
-    CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
+    //CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
 
 
     // 초기 State 설정.
@@ -67,11 +67,11 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
     // 3. 키입력 갱신은 Player 객체에서 관리 중
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::UP))
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
     {
         m_IsLockOn = !m_IsLockOn;
         m_pSpringCamera->Lock_On();
-    }
+    }*/
         
     // 4. Parts 갱신
     for (auto& pPart : m_PartObjects)

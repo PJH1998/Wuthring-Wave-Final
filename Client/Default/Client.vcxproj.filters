@@ -118,6 +118,9 @@
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Level\Loader\VIBuffer">
+      <UniqueIdentifier>{212f9fd5-3f73-4c1d-a296-1208dfe69bde}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Augusta">
       <UniqueIdentifier>{1ddcb2b8-3bfd-4a31-90e1-cf1db119a67f}</UniqueIdentifier>
     </Filter>
@@ -349,6 +352,9 @@
     <ClInclude Include="..\Public\Weapon.h">
       <Filter>03. GameObject\Weapon</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -521,6 +527,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Weapon.cpp">
       <Filter>03. GameObject\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

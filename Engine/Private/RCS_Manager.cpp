@@ -11,6 +11,15 @@ CRCS_Manager::CRCS_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     Safe_AddRef(m_pContext);
 }
 
+ID3D11ShaderResourceView* CRCS_Manager::Get_RCS_SRV(const _wstring& strRCSTag)
+{
+    CRendererCS* pRCS = Find_RCS(strRCSTag);
+    if (nullptr == pRCS)
+        return nullptr;
+
+    return pRCS->Get_SRV();
+}
+
 HRESULT CRCS_Manager::Add_RCS(const _wstring& strRCSTag, void* pDesc)
 {
     if (nullptr != Find_RCS(strRCSTag))
@@ -68,7 +77,6 @@ HRESULT CRCS_Manager::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShade
 
 HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag)
 {
-
     CRendererCS* pRCS = Find_RCS(strRCSTag);
     if (nullptr == pRCS)
         return E_FAIL;

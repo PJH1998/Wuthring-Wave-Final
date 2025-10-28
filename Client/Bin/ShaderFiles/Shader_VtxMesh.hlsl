@@ -5,7 +5,7 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D   g_DiffuseTexture[2];
 texture2D   g_NormalTexture;
 texture2D   g_MaskDiffuseTexture;
-
+texture2D   g_MetallicTexture;
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector      g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
 
@@ -16,6 +16,8 @@ matrix g_ShadowProjMatrix[4];
 
 bool g_HasNormal = false;
 bool g_HasNormalMask = false;
+bool g_HasMetallic = false;
+bool g_IsDynamicObject = false;
 int g_iIndex = 0;
 
 struct VS_IN
@@ -72,7 +74,7 @@ struct PS_OUT_LIGHT
     float4 vDepth : SV_TARGET2;
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
-    float4 vMetallic : SV_TARGET5;
+    float4 vPBR : SV_TARGET5;
 };
 
 
@@ -89,27 +91,38 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     Out.vDiffuse.w = 1.f;
     
-    float3 vNormal;
+    Out.vPBR.y = vDiffuse.w; // Roughness
     
+    if(g_IsDynamicObject)
+        Out.vPBR.z = 1.f;
+    Out.vPBR.a = 1.f;
+    
+    if (g_HasMetallic)
+    {
+        vector vMetallicDesc = g_MetallicTexture.Sample(DefaultSampler, In.vTexcoord);
+        if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
+            Out.vPBR.x = 1.f;
+    }
+    
+    float3 vNormal;
     if(g_HasNormal)
     {
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
-        vNormal = vNormalDesc.xyz * 2.f - 1.f;
-
+        vNormal = normalize(float4(vNormalDesc.xyz * 2.f - 1.f, 0.f));
         float3x3 WorldMatrix;
         
-        WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz *-1.f);
-        
+        WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
         vNormal = normalize(mul(vNormal, WorldMatrix));
         vNormal = vNormal * 0.5f + 0.5f;
     }
     else
     {
-        vNormal = In.vNormal.xyz;
-        vNormal = vNormal * 0.5f + 0.5f;    
+        vNormal = In.vNormal.xyz; 
+        vNormal = vNormal * 0.5f + 0.5f;
         Out.vDepth.z = 1.f;
     }
+    
     
     Out.vNormal = float4(vNormal, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
@@ -143,7 +156,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
-    
     
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);

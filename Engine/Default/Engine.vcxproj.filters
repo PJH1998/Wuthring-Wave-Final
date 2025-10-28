@@ -205,9 +205,6 @@
     <Filter Include="01. Utility\04. Component\Model\Animation\Notify">
       <UniqueIdentifier>{a576fd20-ddb9-45da-9c42-34f0959c8e7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="99. Define">
-      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\Behavior_Tree">
       <UniqueIdentifier>{cd02884e-a999-444f-82f6-47109afae285}</UniqueIdentifier>
     </Filter>
@@ -274,6 +271,12 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\State">
       <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="99. Define">
+      <UniqueIdentifier>{75c4b6e1-929a-412f-9202-9ef5bc0c88eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\03. GameObject\UI\Manager">
+      <UniqueIdentifier>{d7b0bd10-3ee3-4d42-b8b7-84303dab6dc6}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\99. Renderer\RCS">
       <UniqueIdentifier>{268ef3af-b64c-46f4-a94d-fb395fa5ca5b}</UniqueIdentifier>
@@ -572,6 +575,9 @@
     <ClInclude Include="..\Public\StateMachine.h">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Manager.h">
+      <Filter>01. Utility\03. GameObject\UI\Manager</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\RendererCS.h">
       <Filter>01. Utility\99. Renderer\RCS</Filter>
     </ClInclude>
@@ -841,6 +847,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\StateMachine.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Manager.cpp">
+      <Filter>01. Utility\03. GameObject\UI\Manager</Filter>
     </ClCompile>
     <ClCompile Include="..\private\RendererCS.cpp">
       <Filter>01. Utility\99. Renderer\RCS</Filter>

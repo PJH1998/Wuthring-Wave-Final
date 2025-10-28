@@ -81,12 +81,11 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if (CAMERA_STATE::LOCKON == m_eCameraState)
 	{
 		//m_fFovy = XMConvertToRadians(90.f);
-		Sorting_Target();
+		//Sorting_Target();
 		Dual_Targeting(fTimeDelta);
 	}
 
-	// Target Transform Rest
-	m_TargetTransforms.clear();
+	// Target Transform Reset
 	m_pTargetTransform = nullptr;
 
 	Mouse_Scroll(fTimeDelta);
@@ -100,7 +99,7 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if(CAMERA_STATE::LOCKON != m_eCameraState)
 		Check_Ray();
 
-	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	//m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 }
 
@@ -194,10 +193,10 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
 	// 회전 보간
 	_float fLerp = {};
-	if (fDot < cos(XMConvertToRadians(40.f)))
+	if (fDot < cos(XMConvertToRadians(25.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);
 	else
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f * (cos(XMConvertToRadians(40.f) - fDot)));
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 5.f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
 }
 
@@ -243,7 +242,7 @@ void CSpringCamera::Dynamic_Distance()
 void CSpringCamera::Ready_Component()
 {
 	// Com_Rigidbody
-	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	/*CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
@@ -257,7 +256,7 @@ void CSpringCamera::Ready_Component()
 
 	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
-		});
+		});*/
 }
 
 CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -290,7 +289,7 @@ void CSpringCamera::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pRigidbodyCom);
-	m_TargetTransforms.clear();
+	//Safe_Release(m_pRigidbodyCom);
+	//m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
 }

@@ -1,5 +1,7 @@
 #include "Engine_Shader_State.hlsli"
 
+static float PI = 3.1415926535f;
+
 // Emissive효과를 넣을지 판단할 때 사용하는 RGB 계수
 float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
 
@@ -14,6 +16,94 @@ float g_fHeight = 1080.f;
 
 float g_iShadowMapSizeX = 8192;
 float g_iShadowMapSizeY = 4608;
+
+float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , 미세면 표면의 거칠기 분포
+{
+    float RoughnessSqr = pow(Roughness, 2.f);                       
+    float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // 내적(노말, 반사) * 내적(노말, 반사) * ( 거칠기 - 1.f ) + 1.f 
+    
+    float NDF = RoughnessSqr / (PI * Distribution * Distribution); 
+    
+    return NDF;
+}
+
+float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , 미세면끼리의 자기 그림자
+{
+    float k = Roughness / 2.f;
+    
+    float SmithL = (NdotL) / (NdotL * (1.f - k) + k);
+    float SmithV = (NdotV) / (NdotV * (1.f - k) + k);
+    
+    float GS = (SmithL * SmithV);
+    
+    return GS;
+}
+
+float SchlickFresnel(float i)
+{
+    float x = clamp(1.f - i, 0.f, 1.f);
+    
+    return pow(x, 5.f);
+}
+
+float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , 입사각에 따른 반사되는 비율
+{
+    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH);
+}
+
+float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness) // vViewDir = Look (WorldPos - CamPos)
+{
+    float3 vHalf = normalize(vViewDir + vLightDir);
+    float NdotL = saturate(dot(vNormal, vLightDir));
+    float NdotV = saturate(dot(vNormal, vViewDir));
+    float NdotH = saturate(dot(vNormal, vHalf));
+    float LdotH = saturate(dot(vLightDir, vHalf));
+    
+    float3 vF0 = 0.04f;
+    vF0 = lerp(vF0, vAlbedo, fMetallic);
+    
+    float3 Fresnel = Compute_Fresnel(vF0, LdotH);
+        
+    float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
+    
+    float NDF = Compute_NDF(NdotH, fRoughness);
+    
+    float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
+    
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    
+    float3 vDiffuse = kd * vAlbedo / PI;
+    
+    return (vDiffuse + Specular) * NdotL;
+}
+
+float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness, float4 vToonRim)
+{
+    float3 vHalf = normalize(vViewDir + vLightDir);
+    float NdotL = saturate(dot(vNormal, vLightDir));
+    float NdotV = saturate(dot(vNormal, vViewDir));
+    float NdotH = saturate(dot(vNormal, vHalf));
+    float LdotH = saturate(dot(vLightDir, vHalf));
+    
+    float3 vF0 = 0.04f;
+    vF0 = lerp(vF0, vAlbedo, fMetallic);
+    
+    float3 Fresnel = Compute_Fresnel(vF0, LdotH);
+        
+    float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
+    
+    float NDF = Compute_NDF(NdotH, fRoughness);
+    
+    float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
+    
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    
+    float3 vDiffuse = kd * vAlbedo / PI;
+    
+    vDiffuse *= vToonRim.x;
+    
+    return (vDiffuse + Specular) * NdotL;
+}
 
 float2 Compute_Texcoord(float2 vProjXY)
 {

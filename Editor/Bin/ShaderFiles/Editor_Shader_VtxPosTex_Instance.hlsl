@@ -49,6 +49,9 @@ BlendState BS_AlphaBlend
 // * Global Variables
 // ==============================
 
+
+#define PI      3.14159265359f
+
 // Basic Variables
 matrix      g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 texture2D   g_Texture;
@@ -71,6 +74,13 @@ float2      g_ImageSize = { 0.f, 0.f };
 float2      g_SectorBorder = { 0.f, 0.f };                                  // based on local texcoord.     for 9sector
 float       g_UIScale = 1.f;                                                // UI Scaler
 
+
+// Variant UI Variables
+#define UIFLAG_ERROR                0           // 플래그를 주지 않았을 때의 초기값
+#define UIFLAG_COOLDOWN_CIRCLE      1           // 반시계방향으로 나타나는 쿨타임 구현용
+#define UIFLAG_COOLDOWN_RECT        2           // 단순 사각형에서 내려오는 쿨타임 구현용
+#define UIFLAG_END                  3
+uint g_iVariantFlag = UIFLAG_ERROR;
 
 
 
@@ -206,8 +216,14 @@ struct VS_IN_INSTANCE
     
     float2 vSInstCoordX     : TEXCOORD5;
     float2 vSInstCoordY     : TEXCOORD6;
-    float2 vClipTexcoordX   : TEXCOORD7;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
-    float2 vClipTexcoordY   : TEXCOORD8;    // 나중에 HP바 같은데다 쓸 생각으로 둔, 인스턴스 별 로컬 좌표 기반 클리핑용 값
+    float2 vClipTexcoordX   : TEXCOORD7;
+    float2 vClipTexcoordY   : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
+
 };
 
 struct VS_OUT
@@ -224,28 +240,12 @@ struct VS_OUT
     
     float2 vSInstPos        : TEXCOORD7;
     float2 vSInstSca        : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
 };
-
-
-
-//VS_OUT VS_MAIN(VS_IN In)
-//{
-//    VS_OUT Out = (VS_OUT) 0;
-//    
-//    /* 정점의 로컬위치 * 월드 * 뷰 * 투영 */ 
-//        
-//    float4x4 matWV, matWVP;
-//    
-//    matWV = mul(g_WorldMatrix, g_ViewMatrix);
-//    matWVP = mul(matWV, g_ProjMatrix);
-//    
-//    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
-//    Out.vTexcoord = In.vTexcoord;
-//    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-//    Out.vProjPos = Out.vPosition;
-//    
-//    return Out;
-//}
 
 
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
@@ -258,16 +258,12 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
     
+    
     float4x4 matAdditionalTransform = float4x4(
-        In.vSInstRight, 
-        In.vSInstUp,    
-        In.vSInstLook,  
-        In.vSInstTrans  
-        
-        //1, 0, 0, 0,
-        //0, 1, 0, 0,
-        //0, 0, 1, 0,
-        //0, 0, 0, 1
+        In.vSInstRight,
+        In.vSInstUp,
+        In.vSInstLook,
+        In.vSInstTrans
     );
     
     float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
@@ -275,18 +271,22 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     
     Out.vPosition = vWorldPos;
     Out.vTexcoord = In.vTexcoord;
-    Out.vWorldPos = vWorldPos;
-    Out.vProjPos = Out.vPosition;   
+    Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
+    Out.vProjPos = Out.vPosition;
     
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
     // 이후 픽셀에서 사용
     
     // Pixel에서 사용 위해 바로 Output
-    Out.vSInstCoordX   = In.vSInstCoordX;
-    Out.vSInstCoordY   = In.vSInstCoordY;
+    Out.vSInstCoordX = In.vSInstCoordX;
+    Out.vSInstCoordY = In.vSInstCoordY;
     Out.vClipTexcoordX = In.vClipTexcoordX;
     Out.vClipTexcoordY = In.vClipTexcoordY;
+    Out.mExtra0 = In.mExtra0;
+    Out.mExtra1 = In.mExtra1;
+    Out.mExtra2 = In.mExtra2;
+    Out.mExtra3 = In.mExtra3;
     
     return Out;
 }
@@ -313,6 +313,11 @@ struct PS_IN
     
     float2 vSInstPos        : TEXCOORD7;
     float2 vSInstSca        : TEXCOORD8;
+    
+    float4 mExtra0          : TEXCOORD9;
+    float4 mExtra1          : TEXCOORD10;
+    float4 mExtra2          : TEXCOORD11;
+    float4 mExtra3          : TEXCOORD12;
 };
 
 struct PS_OUT
@@ -340,13 +345,28 @@ float2 vClipTexcoordY   : TEXCOORD6;
 
 PS_OUT PS_MAIN(PS_IN In)
 {
+    // Apply InstCoord for atlas / sprite style
     PS_OUT Out = (PS_OUT) 0;
-    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x), // 이걸로 In.vSInstCoord 범위에 따라.. 이용?
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
-    // ksta : 위에 확인하고 해결되면 원래대로 되돌리고 여기도 확인할 것
+    // Apply ClipTexcoord for clipped ui. like as HP Bar
+    // Calc Clip Space
+    float2 clipX = float2 ( lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),    // 예시로 텍스쳐를 0.2 ~ 0.8 범위만 쓰는데, 클립 범위는 0.5 ~ 1.0 이라면
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y) );  // 0.2 ~ 0.8 범위 내에서의 0.5 및 1.0을 클립 범위로 삼음. ( result : 0.5 ~ 0.8 )
+    float2 clipY = float2 ( lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y) );
+    // discard
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
+    
+    
+        
+    // In.vSInstCoordX.x 와 In.vSInstCoordX.y 사이의 값을 0~1로 생각하여
+    // In.vClipTexcoordX.x, y 가 그 기준으로 밖에 있다면 discard.
+    
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
-    //Out.vColor = g_Texture.Sample(DefaultSampler, In.vTexcoord);
     
     return Out;
 }
@@ -356,7 +376,13 @@ PS_OUT PS_CUTOUT_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
-    
+    float2 clipX = float2 ( lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),  
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y) );
+    float2 clipY = float2 ( lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y) );
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
         
@@ -372,6 +398,13 @@ PS_OUT PS_ALPHAENABLED_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
     
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
@@ -389,6 +422,13 @@ PS_OUT PS_GRADIENT_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
 
     
     // gradient 목적지 좌표 구함.
@@ -468,6 +508,13 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
     PS_OUT Out = (PS_OUT) 0;
     float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
 
     
     // gradient 목적지 좌표 구함.
@@ -565,6 +612,92 @@ PS_OUT PS_NINESECTOR_UI(PS_IN In)
 }
 
 
+PS_OUT PS_VARIENT_UI(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
+    float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));
+    float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
+                            lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
+    if (fixedUV.x < clipX.x || fixedUV.x > clipX.y ||
+        fixedUV.y < clipY.x || fixedUV.y > clipY.y)
+        discard;
+    
+    Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+    Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
+    
+    
+    // bind variables
+    float fCooldown = In.mExtra0.x; // 0 ~ 1. instance 0 은 e, 1 은 r 에 대응
+    
+    
+    switch (g_iVariantFlag)
+    {
+        case UIFLAG_COOLDOWN_CIRCLE: // 1
+        {
+            // circle cd
+            // g_fLeftCDRate 가 1 일때는 밝은 색으로
+            // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
+            
+            float2 center = float2(0.5f, 0.5f);
+            float2 dir = normalize(fixedUV - center); // 중앙에서 목표 UV좌표로의 방향.
+            float angle = atan2(dir.y, dir.x); // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
+            angle += PI / 2; // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
+            if (angle < 0)
+                angle += 2 * PI; // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
+    
+            float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
+    
+            if (angle <= fCooldownAngle)
+            {
+            // 이미 지난 부분은 원래의 색으로
+                return Out;
+            }
+            else
+            {
+            // 지나지 않은 부분은 좀 더 하얀 색으로
+                Out.vColor.rgb *= 1.2f;
+                return Out;
+            }
+            
+        }
+        break;
+        
+        case UIFLAG_COOLDOWN_RECT: // 2
+        {
+        // rect cd. 
+        // g_fLeftCDRate 가 1 일때는 어두운 색으로
+        // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
+            if (fixedUV.y > fCooldown)
+            {
+            // 밝게 표시될 부분
+                return Out;
+            }
+            else
+            {
+            // 어둡게 표시될 부분
+                Out.vColor *= 0.8f;
+                return Out;
+            }
+            
+            
+        }
+        break;
+        
+        default:
+        {
+            //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+            //return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+            Out.vColor = lerp(Out.vColor, float4(1.f, 0.f, 1.f, 1.f), 0.5f);
+            return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+        }
+    }
+    
+    return Out;
+}
+
 
 // ==============================
 // * Technique (Pass)
@@ -622,5 +755,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_INSTANCE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_NINESECTOR_UI();
+    }
+
+    pass VariantUIPass // AlphaPass + a. for cooldown, etc. not designed for animation.
+    { // 쿨타임 등의 용도로 사용할 특수한 경우용 짬통 pass.. flag로 내부에서 사용할 것 나눔      
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+
+        VertexShader = compile vs_5_0 VS_INSTANCE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_VARIENT_UI();
     }
 }

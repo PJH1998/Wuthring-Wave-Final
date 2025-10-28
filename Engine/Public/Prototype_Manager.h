@@ -15,6 +15,7 @@
 #include "Rigidbody.h"
 #include "Collider.h"
 #include "Model_Instance.h"
+#include "UIObject.h"
 
 #include "InputController.h"
 #include "StateMachine.h"
