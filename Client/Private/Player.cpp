@@ -383,11 +383,11 @@ void CPlayer::Toggle_LockOn()
         m_IsLockOn = !m_IsLockOn;
     }
 
-    if (m_IsLockOn)
-    {
+   // if (m_IsLockOn)
+   // {
         m_pSpringCamera->Lock_On(m_pTargetTransform, m_IsLockOn);
-        return;
-    }
+      //  return;
+    //}
 
     m_pTargetTransform = nullptr;
 }

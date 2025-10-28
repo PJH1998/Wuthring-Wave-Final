@@ -34,23 +34,9 @@ public:
 		m_eCameraState = CAMERA_STATE::SPRING;
 	}
 	// Lock-On
-	void							Lock_On()
-	{
-		if (CAMERA_STATE::LOCKON == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::TARGET;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-		}
-		else if (CAMERA_STATE::TARGET == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::LOCKON;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
-		}
-	}
-
 	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
 	{
-		if (nullptr == pTargetTransform)
+		if (nullptr == pTargetTransform || false == IsLockOn)
 		{
 			m_eCameraState = CAMERA_STATE::TARGET;
 			return;
@@ -63,7 +49,6 @@ public:
 	}
 
 public:
-	_float3 Get_TargetPos() { return m_vTargetPos; }
 	_vector Get_LookVector_NoPitch();
 	_vector Get_RightVector_NoPitch();
 
@@ -76,13 +61,9 @@ public:
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 
-	void							OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
-
 private:
 	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
 	_float4						m_vLookPosition = {};
-	// Detect Collider
-	CRigidbody*				m_pRigidbodyCom = { nullptr };
 
 	_float4						m_vTargetPosition = {};		// Target Pos
 	_float							m_fOffsetY = {};				// Target Pos Y + OffsetY <= Look
@@ -99,11 +80,9 @@ private:
 	_float							m_fSpringDuration = {};
 
 	// Lock-On
-	vector<CTransform*>		m_TargetTransforms;
 	CTransform*				m_pTargetTransform = { nullptr };
-	_float					m_fLockOnOffsetY = {};
-
-	_float3					m_vTargetPos = {};
+	_float							m_fLockOnOffsetY = {};
+	_float							m_fLockOnDistanceOffset = {};
 
 private:
 	// Default
@@ -119,13 +98,9 @@ private:
 
 	// LockOn
 	void							Lerp_Move(_float fTimeDelta);				// Quat Lerp
-	void							Sorting_Target();								// Target Transforms Sort (Distance Less)
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
-
-	
-private:
-	void							Ready_Component();
+	void							Adjust_LockOn_Distance();
 
 public:
 	static		CSpringCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

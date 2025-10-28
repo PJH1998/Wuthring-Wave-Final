@@ -14,7 +14,6 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 {
 	m_fOffsetY = fOffsetY;
-
 	// Lerp
 	//_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
 	XMStoreFloat4(&m_vTargetPosition, TargetPos);
@@ -44,8 +43,6 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		CRASH("Camera");
-
-	Ready_Component();
 
 	m_fDistance = 10.f;
 	m_fFixedDistance = 10.f;
@@ -77,14 +74,9 @@ void CSpringCamera::Update(_float fTimeDelta)
 		Lerp_Distance(fTimeDelta);
 
 	// Lock-On
-	//m_fFovy = XMConvertToRadians(60.f);
 	if (CAMERA_STATE::LOCKON == m_eCameraState)
-	{
-		//m_fFovy = XMConvertToRadians(90.f);
-		//Sorting_Target();
 		Dual_Targeting(fTimeDelta);
-	}
-
+	
 	// Target Transform Reset
 	m_pTargetTransform = nullptr;
 
@@ -96,11 +88,8 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 1. 거리 제한으로 인한 간격 보정
 	Compute_CamPos();
 	// 2. Ray Cast 이용하여 지형, 오브젝트와 충돌
-	if(CAMERA_STATE::LOCKON != m_eCameraState)
+	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
-
-	//m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-
 }
 
 void CSpringCamera::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
@@ -109,20 +98,12 @@ void CSpringCamera::Update_Action(const _fvector& vQuaternion, _float fDistance,
 
 void CSpringCamera::Late_Update(_float fTimeDelta)
 {
-	if (CAMERA_STATE::LOCKON == m_eCameraState && 0 == m_TargetTransforms.size())
-		m_eCameraState = CAMERA_STATE::TARGET;
+	//if (CAMERA_STATE::LOCKON == m_eCameraState && 0 == m_TargetTransforms.size())
+	//	m_eCameraState = CAMERA_STATE::TARGET;
 }
 
 void CSpringCamera::Render()
 {
-}
-
-void CSpringCamera::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
-{
-	CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
-	if (nullptr == pTargetTransform)
-		return;
-	m_TargetTransforms.push_back(pTargetTransform);
 }
 
 void CSpringCamera::Lerp_Distance(_float fTimeDelta)
@@ -159,7 +140,11 @@ void CSpringCamera::Compute_CamPos()
 	_vector vTargetPos;
 	vTargetPos = XMLoadFloat4(&m_vLookPosition);
 
-	_vector vCamPos = XMVectorSetW(vTargetPos - vLook * m_fDistance, 1.f);
+	m_fLockOnDistanceOffset = 0.f;
+	if(CAMERA_STATE::LOCKON ==  m_eCameraState)
+		Adjust_LockOn_Distance();
+	cout << "LDO : " << m_fLockOnDistanceOffset << endl;
+	_vector vCamPos = XMVectorSetW(vTargetPos - vLook * (m_fDistance + m_fLockOnDistanceOffset), 1.f);
 
 	m_pTransformCom->Set_State(STATE::POSITION, vCamPos);
 }
@@ -194,26 +179,10 @@ void CSpringCamera::Lerp_Move(_float fTimeDelta)
 	// 회전 보간
 	_float fLerp = {};
 	if (fDot < cos(XMConvertToRadians(25.f)))
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 2.5f);
 	else
-		fLerp = 1.f - exp(-1.f * fTimeDelta * 5.f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
+		fLerp = 1.f - exp(-1.f * fTimeDelta * 1.25f * min(1.f, (cos(XMConvertToRadians(25.f) - fDot))));
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionSlerp(vPreQuat, vCurrentQuat, fLerp));
-}
-
-void CSpringCamera::Sorting_Target()
-{
-	sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
-		_float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrcTransform->Get_State(STATE::POSITION)));
-		_float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDstTransform->Get_State(STATE::POSITION)));
-		return fSrcDistance < fDstDistance;
-		});
-
-	if (0 < m_TargetTransforms.size())
-	{
-		m_pTargetTransform = m_TargetTransforms[0];
-		XMStoreFloat3(&m_vTargetPos, m_pTargetTransform->Get_State(STATE::POSITION));
-	}
-		
 }
 
 void CSpringCamera::Dual_Targeting(_float fTimeDelta)
@@ -239,24 +208,16 @@ void CSpringCamera::Dynamic_Distance()
 	m_fFixedDistance = max(m_fMinDistance, sqrt(fDistance * fDistance + m_fLockOnOffsetY * m_fLockOnOffsetY));
 }
 
-void CSpringCamera::Ready_Component()
+void CSpringCamera::Adjust_LockOn_Distance()
 {
-	// Com_Rigidbody
-	/*CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::BOX;
-	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
-	RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+	_vector vLookRemoveY = vLook;
+	vLookRemoveY.m128_f32[1] = 0.f;
 
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-		CRASH("Rigidbody");
+	_float fRadian = XMVectorGetX(XMVector3Dot(XMVector3Normalize(vLook), XMVector3Normalize(vLookRemoveY)));
 
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollide_During(iLayer, pDesc, Manifold);
-		});*/
+	_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&m_vLookPosition)));
+	m_fLockOnDistanceOffset = fLength / fRadian;
 }
 
 CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -289,7 +250,6 @@ void CSpringCamera::Free()
 {
 	__super::Free();
 
-	//Safe_Release(m_pRigidbodyCom);
 	//m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
 }
