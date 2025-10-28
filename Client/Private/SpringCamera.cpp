@@ -76,9 +76,6 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// Lock-On
 	if (CAMERA_STATE::LOCKON == m_eCameraState)
 		Dual_Targeting(fTimeDelta);
-	
-	// Target Transform Reset
-	m_pTargetTransform = nullptr;
 
 	Mouse_Scroll(fTimeDelta);
 	// 0. Cam Rotate

@@ -4,12 +4,14 @@
 #include "AnimMachine.h"
 #include "AnimTransition.h"
 
-//CAnimState::CAnimState(const CAnimState& Prototype)
-//	: m_Transitions { Prototype.m_Transitions }
-//{
-//	for(auto& Transition : m_Transitions)
-//		Safe_AddRef(Transition);
-//}
+CAnimState::CAnimState(const CAnimState& Prototype)
+	: m_Transitions { Prototype.m_Transitions },
+	m_strAnimationTag { Prototype.m_strAnimationTag },
+	m_StateData{ Prototype.m_StateData }
+{
+	//for(auto& Transition : m_Transitions)
+	//	Safe_AddRef(Transition);
+}
 
 #ifdef _DEBUG
 

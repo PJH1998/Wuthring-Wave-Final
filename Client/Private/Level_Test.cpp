@@ -22,7 +22,7 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
 	Ready_Dummy();
-    Ready_MonsterTest();
+    //Ready_MonsterTest();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
