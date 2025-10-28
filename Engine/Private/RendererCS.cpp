@@ -52,6 +52,14 @@ void CRendererCS::Add_SRVData(const _char* pConstantName, ID3D11ShaderResourceVi
 	m_SRVs.push_back(Data);
 }
 
+ID3D11ShaderResourceView* CRendererCS::Get_SRV(_uint iMipLevel)
+{
+	if (iMipLevel >= m_iMipLevels)
+		return nullptr;
+
+	return m_ComputeSRVs[iMipLevel];
+}
+
 HRESULT CRendererCS::Initialize(void* pDesc)
 {
 	ASSERT_CRASH(pDesc);
@@ -66,6 +74,11 @@ HRESULT CRendererCS::Initialize(void* pDesc)
 	m_fDefinitionX = pRCS_Desc->fDefinitionX;
 	m_fDefinitionY = pRCS_Desc->fDefinitionY;
 	m_vClearColor = pRCS_Desc->vClearColor;
+	m_iMipLevels = pRCS_Desc->iMipLevels;
+
+	m_Texture2Ds.resize(m_iMipLevels, nullptr);
+	m_UAV.second.resize(m_iMipLevels, nullptr);
+	m_ComputeSRVs.resize(m_iMipLevels, nullptr);
 
 	if (FAILED(Ready_BindTexture(pRCS_Desc->iWidth, pRCS_Desc->iHeight, pRCS_Desc->eFormat)))
 		CRASH("Failed Ready Textures");
@@ -73,7 +86,7 @@ HRESULT CRendererCS::Initialize(void* pDesc)
 	return S_OK;
 }
 
-void CRendererCS::Bind_Resources()
+void CRendererCS::Bind_Resources(_uint iMipLevel)
 {
 	for (auto& Pair : m_Buffers)
 		m_pComputeShader->Set_ConstantBuffer(Pair.first, Pair.second.second);
@@ -81,19 +94,22 @@ void CRendererCS::Bind_Resources()
 	for (auto& SRV : m_SRVs)
 		m_pComputeShader->Set_SRV(SRV.first, SRV.second);
 
-	m_pComputeShader->Set_UAV(m_UAV.first, m_UAV.second);
+	m_pComputeShader->Set_UAV(m_UAV.first, m_UAV.second[iMipLevel]);
 }
 
-void CRendererCS::Dispatch()
+void CRendererCS::Dispatch(_uint iMipLevel)
 {
-	m_pComputeShader->Dispatch(static_cast<_uint>((m_fWidht + m_fDefinitionX -1.f) / m_fDefinitionX) , static_cast<_uint>(( m_fHeight + m_fDefinitionY - 1.f ) / m_fDefinitionY), 1);
+	_uint iWidth = static_cast<_uint>(m_fWidht) >> iMipLevel;
+	_uint iHeight = static_cast<_uint>( m_fHeight ) >> iMipLevel;
+
+	m_pComputeShader->Dispatch(static_cast<_uint>(( iWidth + m_fDefinitionX -1.f) / m_fDefinitionX) , static_cast<_uint>(( iHeight + m_fDefinitionY - 1.f ) / m_fDefinitionY), 1);
 
 	Clear_Resource();
 }
 
-void CRendererCS::Clear()
+void CRendererCS::Clear(_uint iMipLevel)
 {
-	m_pContext->ClearUnorderedAccessViewFloat(m_UAV.second, reinterpret_cast<_float*>( &m_vClearColor ));
+	m_pContext->ClearUnorderedAccessViewFloat(m_UAV.second[iMipLevel], reinterpret_cast<_float*>( &m_vClearColor ));
 }
 
 void CRendererCS::Clear_Resource()
@@ -107,13 +123,18 @@ void CRendererCS::Clear_Resource()
 
 #ifdef _DEBUG
 HRESULT CRendererCS::Debug_Render(const _wstring& strRCS_Name)
-{
-	ImGui::Begin(WStringToString(strRCS_Name).c_str());
+{	
+	for(_uint i=0; i<m_iMipLevels; ++i)
+	{
+		string strName = m_iMipLevels == 1 ? WStringToString(strRCS_Name).c_str() : WStringToString(strRCS_Name).c_str() + to_string(i + 1);
+		ImGui::Begin(strName.c_str());
 
-	ImGui::Image(reinterpret_cast<ImTextureID>( m_pComputeSRV ), ImVec2(500.f, 500.f));
+		ImGui::Image(reinterpret_cast<ImTextureID>( m_ComputeSRVs[i] ), ImVec2(500.f, 500.f));
+		
+		ImGui::End();
+	}
 
-	ImGui::End();
-
+	
 	return S_OK;
 }
 #endif
@@ -134,41 +155,45 @@ HRESULT CRendererCS::Ready_Buffer(ID3D11Buffer** ppOut, _uint iLength)
 
 HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT eFormat)
 {
-	D3D11_TEXTURE2D_DESC TextureDesc = {};
-	TextureDesc.Width = iWidth;
-	TextureDesc.Height = iHeight;
-	TextureDesc.MipLevels = 1;
-	TextureDesc.ArraySize = 1;
-	TextureDesc.Format = eFormat;
+	for (_uint i = 0; i < m_iMipLevels; i++)
+	{
+		D3D11_TEXTURE2D_DESC TextureDesc = {};
+		TextureDesc.Width = iWidth >> i;
+		TextureDesc.Height = iHeight >> i;
+		TextureDesc.MipLevels = 1;
+		TextureDesc.ArraySize = 1;
+		TextureDesc.Format = eFormat;
 
-	TextureDesc.SampleDesc.Quality = 0;
-	TextureDesc.SampleDesc.Count = 1;
+		TextureDesc.SampleDesc.Quality = 0;
+		TextureDesc.SampleDesc.Count = 1;
 
-	TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-	TextureDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	TextureDesc.CPUAccessFlags = 0;
-	TextureDesc.MiscFlags = 0;
+		TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+		TextureDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+		TextureDesc.CPUAccessFlags = 0;
+		TextureDesc.MiscFlags = 0;
+		
+		if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_Texture2Ds[i])))
+			return E_FAIL;
 
-	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_pTexture2D)))
-		return E_FAIL;
+		D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
 
-	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc{};
+		UAVDesc.Format = TextureDesc.Format;
+		UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+		UAVDesc.Texture2D.MipSlice = 0;
 
-	UAVDesc.Format = TextureDesc.Format;
-	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
-	UAVDesc.Texture2D.MipSlice = 0;
-	
-	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pTexture2D, &UAVDesc, &m_UAV.second)))
-		return E_FAIL;
+		if (FAILED(m_pDevice->CreateUnorderedAccessView(m_Texture2Ds[i], &UAVDesc, &m_UAV.second[i])))
+			return E_FAIL;
 
-	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-	SRVDesc.Format = TextureDesc.Format;
-	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	SRVDesc.Texture2D.MostDetailedMip = 0;
-	SRVDesc.Texture2D.MipLevels = 1;
+		D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+		SRVDesc.Format = TextureDesc.Format;
+		SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		SRVDesc.Texture2D.MostDetailedMip = 0;
+		SRVDesc.Texture2D.MipLevels = 1;
 
-	if (FAILED(m_pDevice->CreateShaderResourceView(m_pTexture2D, &SRVDesc, &m_pComputeSRV)))
-		return E_FAIL;
+		if (FAILED(m_pDevice->CreateShaderResourceView(m_Texture2Ds[i], &SRVDesc, &m_ComputeSRVs[i])))
+			return E_FAIL;
+
+	}
 
 	return S_OK;
 }
@@ -210,7 +235,17 @@ void CRendererCS::Free()
 	m_SRVs.clear();
 
 	Safe_Release(m_pComputeShader);
-	Safe_Release(m_pTexture2D);
-	Safe_Release(m_pComputeSRV);
-	Safe_Release(m_UAV.second);
+
+	for(auto& pTexture : m_Texture2Ds)
+		Safe_Release(pTexture);
+	m_Texture2Ds.clear();
+
+	for (auto& pSRV : m_ComputeSRVs)
+		Safe_Release(pSRV);
+	m_ComputeSRVs.clear();
+
+	for(auto& pUAV : m_UAV.second)
+		Safe_Release(pUAV);
+	m_UAV.second.clear();
+
 }
