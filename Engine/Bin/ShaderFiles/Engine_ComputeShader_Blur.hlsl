@@ -11,17 +11,22 @@
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
+cbuffer SIZE_DATA : register(b0)
+{
+    float2 fOutSize;
+    float2 Paddingblur;
+}
+
 static float g_fGaussianWeights[13] =
 {
     0.020597f, 0.037981f, 0.062950f, 0.093995f, 0.117324f, 0.153170f, 0.163967f, 0.153170f, 0.117324f, 0.093995f, 0.062950f, 0.037981f, 0.020597f
 };
 
-cbuffer BLUR_DATA : register(b0)
-{
-    float fWidth;
-    float fHeight;
-    float2 Paddingblur;
-}
+//static const float g_fGaussianWeights[21] =
+//{
+//    0.000012f, 0.000067f, 0.000314f, 0.001188f, 0.003661f, 0.009310f, 0.020597f, 0.037981f, 0.057783f, 0.073649f, 0.080657f, 
+//    0.073649f, 0.057783f, 0.037981f, 0.020597f, 0.009310f, 0.003661f, 0.001188f, 0.000314f, 0.000067f, 0.000012f
+//};
 
 groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * BLUR_RADIUS)];
 
@@ -40,8 +45,8 @@ void GaussianBlur_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
         if (LeftID.x < 0)
             LeftID.x = 0;
         
-        if (RightID.x >= (int) fWidth)
-            RightID.x = (int) fWidth - 1;
+        if (RightID.x >= (int) fOutSize.x)
+            RightID.x = (int) fOutSize.x - 1;
             
         vSharedColorX[GTID.y][GTID.x] = InputTexture.Load(LeftID);
         vSharedColorX[GTID.y][GTID.x + THREAD_X + BLUR_RADIUS] = InputTexture.Load(RightID);
@@ -80,8 +85,8 @@ void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
         if (LeftID.y < 0)
             LeftID.y = 0;
         
-        if (RightID.y >= (int) fHeight)
-            RightID.y = (int) fHeight - 1;
+        if (RightID.y >= (int) fOutSize.y)
+            RightID.y = (int) fOutSize.y - 1;
             
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
         vSharedColorY[GTID.y + THREAD_Y + BLUR_RADIUS][GTID.x] = InputTexture.Load(RightID);
