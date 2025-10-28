@@ -46,12 +46,12 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
-	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
 	void Render_Gizmo(_fmatrix TransformMatrix);

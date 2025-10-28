@@ -128,6 +128,10 @@ const vector<_uint>& CModel::Get_Indices(_uint iIndex)
 		CRASH("Mesh Index Error");
 	return m_Meshes[iIndex]->Get_Indices();
 }
+void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
+{
+	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
+}
 
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
@@ -139,10 +143,7 @@ _float CModel::Get_Duration(const _string& strAnimName)
 {
 	return m_Animations[strAnimName]->Get_Duration();
 }
-void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
-{
-	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
-}
+
 HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;

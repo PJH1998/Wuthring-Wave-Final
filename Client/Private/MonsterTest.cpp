@@ -120,6 +120,7 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
+	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::DETECT)){}
 	else
 		m_isDetecting = false;
 }
@@ -195,8 +196,8 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
-	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 30.f); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 3.f); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(1, 3.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(0, 5.f); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -234,7 +235,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	{
 		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
 		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		_vector vDir = vPosition - vTargetPos;
+		_vector vDir = vTargetPos - vPosition;
 		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
 		vDir = XMVector3Normalize(vDir);
 		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
@@ -251,7 +252,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 		if(m_fAttackAcc[i] > 0.f)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
-	if(m_fDodgeCoolTime < 0.f)
+	if(m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
 }
 

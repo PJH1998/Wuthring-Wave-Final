@@ -92,7 +92,7 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 
 		if(Transition->Is_Transit(pOwnerState, strNextAnimTag, fNextTargetTrackPos))
 		{
-			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag/*, fNextTargetTrackPos*/);
+			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag, fNextTargetTrackPos);
 			if(pTemp && false == m_StateData.isLoop)
 				m_Transitions.push_back(pTemp);
 			return;

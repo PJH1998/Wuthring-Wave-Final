@@ -93,7 +93,8 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 		m_fRootMotionRate = Desc.fRootMotionRate;
 		m_fTransitTrackPos = Desc.fTransitTrackPos;
 		m_fAnimationSpeed = Desc.fAnimationSpeed;
-		//pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
+
+		pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
 	}
 }
 
