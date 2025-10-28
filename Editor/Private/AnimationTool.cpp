@@ -66,8 +66,9 @@ void CAnimationTool::Export_AnimationData(CEffect_Controller* pEffectController)
     EFFECTACTOR_DESC Desc{};
     // 현재 선택된 객체의 포인터와 필요한 값. 전달.
     Desc.pAnimActor = m_AnimationActors[m_wSelected_AnimActorTag];
+#ifdef _DEBUG
     Desc.fDuration = Desc.pAnimActor->Get_Duration(m_Selected_AnimationTag);
-    
+#endif
     m_pEffectController->Import_AnimationData(Desc);
 }
 
@@ -384,18 +385,18 @@ void CAnimationTool::RenderUI_OptionState()
                 if (fTrackPosition > m_fDuration)
                     MSG_BOX("Duration Over");
 
-                stringstream ss;
-                ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
-                    << "," << to_string(fTrackPosition);
-                strTransition = ss.str();
-                m_StateTransitions.emplace_back(strTransition);
+                //stringstream ss;
+                //ss << m_SelectedFromStateTag << "," << m_SelectedFromStateTag 
+                //    << "," << to_string(fTrackPosition);
+                //strTransition = ss.str();
+                //m_StateTransitions.emplace_back(strTransition);
 
 
                 TRANSITION_DATA T_Data{
                 m_SelectedFromStateTag,
                 m_SelectedToStateTag,
                 m_iTransitionPriority,
-                m_iTransitionTargetState,
+                m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)),
                 fTrackPosition,
                 m_iTransitionEnablePos
                 };
@@ -404,16 +405,16 @@ void CAnimationTool::RenderUI_OptionState()
             }
 
             ImGui::SameLine();
-            if (ImGui::Button("Delete Back"))
-            {
-                m_StateTransitions.pop_back();
-            }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Delete Front"))
-            {
-                m_StateTransitions.pop_front();
-            }
+            //if (ImGui::Button("Delete Back"))
+            //{
+            //    m_StateTransitions.pop_back();
+            //}
+            //
+            //ImGui::SameLine();
+            //if (ImGui::Button("Delete Front"))
+            //{
+            //    m_StateTransitions.pop_front();
+            //}
             if(ImGui::Button("Delete Selection"))
             {
                 m_TransitionDatas.erase(m_TransitionDatas.begin() + m_iTransitionInfoSelectedIndex);
@@ -482,8 +483,42 @@ void CAnimationTool::RenderUI_TransitionInfo()
         ImGui::Text("To: %s", SelectData.strTo.c_str());
         ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
         ImGui::Text("TargetState: %u", SelectData.iTargetState);
+        _uint iTemp = SelectData.iTargetState;
+        _int iCount = {};
+        vector<_int> Check;
+        while(iTemp > 0)
+        {            
+            Check.insert(Check.begin(), iTemp % 2);
+            iTemp /= 2;
+        }
+
+        for(size_t i = 0; i < Check.size(); i++)
+        {
+            if(Check[i])
+            {
+                ImGui::SameLine();
+                ImGui::Text("%u", (1 << Check.size() - i - 1));
+            }
+        }
         ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
         ImGui::InputFloat("Transit Enable Position",&SelectData.fTransitEnablePos);
+        _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
+        ImGui::Text("%u", iStateFlag);
+        ImGui::InputScalar("Additional State", ImGuiDataType_U32, &m_iTransitionTargetState);
+        if(ImGui::Button("Add_State"))
+        {
+            SelectData.iTargetState |= (m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Remove_State"))
+        {
+            SelectData.iTargetState &= ~(m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Clear_State"))
+        {
+            SelectData.iTargetState = 0;
+        }
     }
     //ImGui::EndChild();
     //if(ImGui::CollapsingHeader("Conditions"))
