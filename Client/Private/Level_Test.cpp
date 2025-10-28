@@ -22,6 +22,7 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
 	Ready_Dummy();
+    Ready_MonsterTest();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
@@ -103,6 +104,23 @@ void CLevel_Test::Ready_Layer_Player()
 void CLevel_Test::Ready_Dummy()
 {
 	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 5.f, 50.f), XMMatrixScaling(0.0001f, 0.0001f, 0.0001f));
+}
+
+void CLevel_Test::Ready_MonsterTest()
+{
+    CMonsterTest::MONSTERTEST_DESC MobDesc{};
+    MobDesc.eCurLevel = m_eCurLevel;
+    MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
+    MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+    MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    MobDesc.fSpeedPerSec = 10.f;
+    MobDesc.vInitPosition = _float3(0.f, -8.f, 0.f);
+    MobDesc.pAnimationTag = "Born1";
+    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+        CRASH("Failed Ready MonsterTest");
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)

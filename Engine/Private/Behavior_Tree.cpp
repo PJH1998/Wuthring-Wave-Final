@@ -12,18 +12,28 @@ CBehavior_Tree::CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 CBehavior_Tree::CBehavior_Tree(const CBehavior_Tree& Prototype)
 	:CComponent { Prototype }
 	,m_pRoot { Prototype.m_pRoot }
+	,m_RequireKey { Prototype.m_RequireKey }
 {
 	Safe_AddRef(m_pRoot);
 }
 
+#ifdef _DEBUG
 HRESULT CBehavior_Tree::Initialize_Prototype(CBT_Node* pRoot)
 {
     m_pRoot = pRoot;
-    //Load_Tree_Graph(file);
-	//m_pRoot = Create_Node(0);
-	//if(nullptr == m_pRoot)
-	//	return E_FAIL;
-	//m_NodesDatas.clear();
+    
+	return S_OK;
+}
+#endif // _DEBUG
+
+HRESULT CBehavior_Tree::Initialize_Prototype(const _char* BehaviorTreeDataPath)
+{
+
+	Load_Tree_Graph(BehaviorTreeDataPath);
+	m_pRoot = Create_Node(0);
+	if(nullptr == m_pRoot)
+		return E_FAIL;
+	m_NodesDatas.clear();
 	return S_OK;
 }
 
@@ -36,7 +46,13 @@ HRESULT CBehavior_Tree::Initialize_Clone(void* pArg)
 	m_pBlackBoard = pDesc->pBlackBoard;
 	if(m_pBlackBoard == nullptr)
 		return E_FAIL;
-    
+
+	if(false == m_pBlackBoard->Necessary_Key_Check(m_RequireKey))
+	{
+		CRASH(m_RequireKey.data())
+		return E_FAIL;
+	}
+	m_RequireKey.clear();
 	return S_OK;
 }
 
@@ -66,6 +82,7 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 	{
 		BT_TYPE eType = NodeData["eType"];
 		size_t iNumTransition = NodeData["NumTransition"];
+		_uint iTargetState =  NodeData["TargetState"];
 		vector<Link> Transition;
 		for(auto& Transit : NodeData["Transitions"])
 		{
@@ -76,15 +93,34 @@ void CBehavior_Tree::Load_Tree_Graph(const _char* BehaviorTreeDataPath)
 			Transition.push_back(tLink);
 		}
 
-		size_t iNumCondition = NodeData["NumCondition"];
+		//size_t iNumCondition = NodeData["NumCondition"];
 		CONDITION_TAG Condition {NodeData["ValueName"], NodeData["ConditionName"], NodeData["ConstName"]};
 
 		NodeDat tNode;
 		tNode.eType = eType;
 		tNode.Transition = Transition;
 		tNode.Conditions = Condition;
+		tNode.iTargetState = iTargetState == 0 ? 0 : (1 << (iTargetState - 1));
 		m_NodesDatas.push_back(tNode);
 	}
+
+	for(auto& strKey : BT_Data["A_ValueKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+	m_RequireKey.push_back("iState");
+
+	for(auto& strKey : BT_Data["A_ConditionKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+	m_RequireKey.push_back("isAnimationRunning");
+
+	for(auto& strKey : BT_Data["A_ConstKey"])
+	{
+		m_RequireKey.push_back(strKey);
+	}
+
 	File.close();
 }
 
@@ -96,7 +132,29 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 	case ACTION:
 	{
 		const NodeDat tData = m_NodesDatas[iIndex];
-		BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+		
+		if(0 == tData.Conditions.ConditionName.length())
+			//Idle
+			if(0 == tData.iTargetState)
+			{
+				BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+					return CBT_Node::BT_STATE::SUCCESS;
+					});
+			}
+			//dead
+			else
+			{
+				BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
+					if(pBlackBoard->Get_Condition("isAnimationRunning"))
+						return CBT_Node::BT_STATE::RUNNING;
+					_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
+					if(*pState & tData.iTargetState)
+						return CBT_Node::BT_STATE::SUCCESS;
+					return CBT_Node::BT_STATE::FAILURE;
+				});
+			}
+		else
+			BT_Node = CBT_Action::Create([tData](CGameObject* pGameObject, CBlackBoard* pBlackBoard) ->CBT_Node::BT_STATE{
 			
 			if(pBlackBoard->Get_Condition("isAnimationRunning"))
 				return CBT_Node::BT_STATE::RUNNING;
@@ -139,6 +197,7 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 	return BT_Node;
 }
 
+#ifdef _DEBUG
 CBehavior_Tree* CBehavior_Tree::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CBT_Node* pRoot)
 {
     CBehavior_Tree* pInstance = new CBehavior_Tree(pDevice, pContext);
@@ -148,6 +207,18 @@ CBehavior_Tree* CBehavior_Tree::Create(ID3D11Device* pDevice, ID3D11DeviceContex
         Safe_Release(pInstance);
     }
     return pInstance;
+}
+#endif // _DEBUG
+
+CBehavior_Tree* CBehavior_Tree::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* BehaviorTreeDataPath)
+{
+	CBehavior_Tree* pInstance = new CBehavior_Tree(pDevice, pContext);
+	if(FAILED(pInstance->Initialize_Prototype(BehaviorTreeDataPath)))
+	{
+		MSG_BOX("Failed to Created : CBehavior_Tree");
+		Safe_Release(pInstance);
+	}
+	return pInstance;
 }
 
 CComponent* CBehavior_Tree::Clone(void* pArg)

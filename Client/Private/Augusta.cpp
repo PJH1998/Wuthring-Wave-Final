@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Augusta.h"
 #include "Player.h"
 #include "SpringCamera.h"
@@ -39,12 +39,12 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
-    Ready_PartObjects(pDesc); // Parts Ãß°¡.
+    Ready_PartObjects(pDesc); // Parts ì¶”ê°€.
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
     //CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
 
 
-    // ÃÊ±â State ¼³Á¤.
+    // ì´ˆê¸° State ì„¤ì •.
     m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
@@ -52,7 +52,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     
     m_pColliderCom->Set_Gravity(true);
 
-    // ±âº»ÀûÀ¸·Î ¹«±â Activate ²ô±â?
+    // ê¸°ë³¸ì ìœ¼ë¡œ ë¬´ê¸° Activate ë„ê¸°?
     m_pAugustaBayonet->SetActivate(false);
 
     return S_OK;
@@ -63,17 +63,17 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    // 2. ÀÌÀü À§Ä¡ ÀúÀå
+    // 2. ì´ì „ ìœ„ì¹˜ ì €ìž¥
     m_pTransformCom->Save_PreviousPosition();
 
-    // 3. Å°ÀÔ·Â °»½ÅÀº Player °´Ã¼¿¡¼­ °ü¸® Áß
-   /* if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
-    {
-        m_IsLockOn = !m_IsLockOn;
-        m_pSpringCamera->Lock_On();
-    }*/
+    // 3. í‚¤ìž…ë ¥ ê°±ì‹ ì€ Player ê°ì²´ì—ì„œ ê´€ë¦¬ ì¤‘
+    //if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
+    //{
+    //    m_IsLockOn = !m_IsLockOn;
+    //    m_pSpringCamera->Lock_On();
+    //}
         
-    // 4. Parts °»½Å
+    // 4. Parts ê°±ì‹ 
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
@@ -86,25 +86,25 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 
 void CAugusta::Update(_float fTimeDelta)
 {
-    // 1. À§¿¡¼­ Activate°¡ falseÀÎ°æ¿ì ¾÷µ¥ÀÌÆ®ÇÏÁö ¾ÊÀ½.
+    // 1. ìœ„ì—ì„œ Activateê°€ falseì¸ê²½ìš° ì—…ë°ì´íŠ¸í•˜ì§€ ì•ŠìŒ.
     if (!m_isActivate)
         return;
 
-    // 2. »óÅÂ ¸Ó½Å °»½Å
-    m_pStateMachineCom->Update(fTimeDelta); // ¿©±â¼­ WeaponÀÌ³ª PartsÀÇ °»½ÅÀ» ÇØ¾ßÇÔ..
+    // 2. ìƒíƒœ ë¨¸ì‹  ê°±ì‹ 
+    m_pStateMachineCom->Update(fTimeDelta); // ì—¬ê¸°ì„œ Weaponì´ë‚˜ Partsì˜ ê°±ì‹ ì„ í•´ì•¼í•¨..
 
-    // 3. ÇöÀç À§Ä¡ - 1Frame ÀÌÀü À§Ä¡ °ª °è»ê
+    // 3. í˜„ìž¬ ìœ„ì¹˜ - 1Frame ì´ì „ ìœ„ì¹˜ ê°’ ê³„ì‚°
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-    // 4. Collider °»½Å => Jolt ÀÚÃ¼¿¡¼­µµ fTimeDelta °ªÀ» Àû¿ëÇÏ°í ÀÖ±â ¶§¹®¿¡ 
+    // 4. Collider ê°±ì‹  => Jolt ìžì²´ì—ì„œë„ fTimeDelta ê°’ì„ ì ìš©í•˜ê³  ìžˆê¸° ë•Œë¬¸ì— 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Camera °»½Å => À§Ä¡ µû¶ó¿À°Ô
+    // 5. Camera ê°±ì‹  => ìœ„ì¹˜ ë”°ë¼ì˜¤ê²Œ
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 0.5f);
 
     
 
-    // 7. ÆÄÃ÷ °»½Å.?
+    // 7. íŒŒì¸  ê°±ì‹ .?
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
@@ -114,7 +114,7 @@ void CAugusta::Update(_float fTimeDelta)
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    // ÆÄÃ÷ °»½Å
+    // íŒŒì¸  ê°±ì‹ 
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
@@ -122,13 +122,13 @@ void CAugusta::Late_Update(_float fTimeDelta)
     }
 
 
-    // Collider Ãæµ¹ Ã³¸®ÈÄ À§Ä¡¿¡ ¸ÂÃá´Ù.
+    // Collider ì¶©ëŒ ì²˜ë¦¬í›„ ìœ„ì¹˜ì— ë§žì¶˜ë‹¤.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
 
     
 
-    // »ç¿ëÀÌ ³¡³µÀ¸¸é ¹ÝÈ¯.
+    // ì‚¬ìš©ì´ ëë‚¬ìœ¼ë©´ ë°˜í™˜.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
 
@@ -167,7 +167,7 @@ void CAugusta::Render_Shadow()
 {
 }
 
-// AnimNameÀÌ °°Àº°É·Î ¸ÅÇÎµÇ¾îÀÖÀ½.
+// AnimNameì´ ê°™ì€ê±¸ë¡œ ë§¤í•‘ë˜ì–´ìžˆìŒ.
 void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     switch (iPartType)
@@ -220,7 +220,7 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
     
-    // °è»ê¿¡ »ç¿ëÇÒ °ª ÁöÁ¤.
+    // ê³„ì‚°ì— ì‚¬ìš©í•  ê°’ ì§€ì •.
     m_fColliderRadius = 0.4f;
     m_fColliderHeight = 0.5f;
     m_vColliderOffSet = { 0.f, 0.67f, 0.f };
@@ -236,6 +236,9 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
+
+    //ëª¬ìŠ¤í„° íƒì§€ìš© ì½œë°±ìœ¼ë¡œ ë°›ì„ Desc - LJH
+    m_pColliderCom->Set_Desc(m_pTransformCom);
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)

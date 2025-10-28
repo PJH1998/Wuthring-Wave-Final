@@ -287,6 +287,9 @@
     <Filter Include="01. Utility\99. Renderer\RendererSubResource">
       <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
+      <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -581,6 +584,9 @@
     <ClInclude Include="..\public\RCS_Manager.h">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\AnimTransition.h">
+      <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -850,6 +856,9 @@
     </ClCompile>
     <ClCompile Include="..\private\RCS_Manager.cpp">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\AnimTransition.cpp">
+      <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
