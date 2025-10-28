@@ -34,9 +34,10 @@ HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT eForm
 
 	if (FAILED(m_pDevice->CreateRenderTargetView(m_pTexture2D, nullptr, &m_pRTV)))
 		return E_FAIL;
-
+	 
 	if (FAILED(m_pDevice->CreateShaderResourceView(m_pTexture2D, nullptr, &m_pSRV)))
 		return E_FAIL;
+
 
 	m_vClearColor = vClearColor;
 

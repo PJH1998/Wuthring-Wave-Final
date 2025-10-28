@@ -82,7 +82,8 @@ void CRenderer::Render()
 	Render_Combined();
 	Render_NonLight();
 	Render_Emissive();
-	Render_Bloom();
+	//Render_Bloom();
+	Render_DistortionObject();
 	Render_Blend();
 	Render_Distortion();
 	Render_LUT();
@@ -424,11 +425,6 @@ void CRenderer::Render_Bloom()
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"))))
 		CRASH("Failed RCS_GAUSSIAN_BLUR_Y");
 #pragma endregion
-
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-		CRASH("Failed Begin MRT_BackBuffer");
-
-	m_pGameInstance->End_MRT();
 }
 
 void CRenderer::Render_DistortionObject()
@@ -751,7 +747,6 @@ HRESULT CRenderer::Ready_RCS()
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO_BLUR_Y"), &BlurDesc)))
 		CRASH("Failed Add RCS_SSAO");
-
 
 #pragma endregion
 
