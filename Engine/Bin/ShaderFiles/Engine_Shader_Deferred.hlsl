@@ -31,10 +31,9 @@ Texture2D g_DistortionTexture;
 Texture2D g_SsaoTexture;        
 Texture2D g_BackBufferTexture;
 
-//BLUR
-Texture2D g_BlurBeginTexture;
-Texture2D g_BlurTexture;
-Texture2D g_BlurEndTexture;
+//BLOOM
+Texture2D g_BloomTexture;
+
 
 //RAMP
 Texture2D g_RampTexture;            // Shade Color
@@ -297,6 +296,20 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    vector vColor = g_BloomTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (false == all(vColor.xyz))
+        vColor.a = 0.f;
+        
+    Out.vColor = vColor;
+    
+    return Out;
+}
+
 PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
@@ -315,7 +328,7 @@ PS_OUT_BACKBUFFER PS_DISTORTION(PS_IN In)
 
     vTexcoord = In.vTexcoord + vWeight;
     
-    vector vFinalColor = g_BlurEndTexture.Sample(ClampSampler, vTexcoord);
+    vector vFinalColor = g_BackBufferTexture.Sample(ClampSampler, vTexcoord);
     
     Out.vColor = vFinalColor;
     
@@ -472,7 +485,19 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_LIGHT_POINT();
     }
-    pass Distortion // 5
+    
+    pass Bloom // 5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BLOOM();
+    }
+    
+    pass Distortion // 6
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -483,7 +508,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DISTORTION();
     }
     
-    pass LUT // 6
+    pass LUT // 7
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -494,7 +519,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_LUT();
     }
     
-    pass Fog // 7
+    pass Fog // 8
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
