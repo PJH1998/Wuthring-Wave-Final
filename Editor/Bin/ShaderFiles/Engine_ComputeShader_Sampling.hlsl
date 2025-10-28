@@ -21,4 +21,3 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     
     OutputTexture[DTID.xy] = vColor;
 }
-
