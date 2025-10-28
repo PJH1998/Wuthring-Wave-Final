@@ -43,6 +43,7 @@ public:
 	void							Bind_Resources();
 	void							Dispatch();
 	void							Clear();
+	void							Clear_Resource();
 
 #ifdef _DEBUG
 	HRESULT							Debug_Render(const _wstring& strRCS_Name);

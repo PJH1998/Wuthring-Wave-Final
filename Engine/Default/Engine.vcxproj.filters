@@ -873,5 +873,8 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Sampling.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -104,7 +104,7 @@ float4 Compute_Normal_DTID(Texture2D NormalTexture, int3 DTID)
     return normalize(vNormal);
 }
 
-float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOriginNormal, float4 vSampleColor, float fSampleDepth, float4 vSampleNormal, float fMinDepthDistance)
+float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOriginNormal, float4 vSampleColor, float fSampleDepth, float4 vSampleNormal, float fMinDepthDistance, inout float fWeight)
 {
     float4 vColor = 1.f;
     
@@ -121,6 +121,8 @@ float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOrigin
     {
         vColor = vSampleColor;// * ((1.f - fNormalWeight));
     }
+    
+    fWeight += (1.f - fNormalWeight);
     
     return vColor;
 }

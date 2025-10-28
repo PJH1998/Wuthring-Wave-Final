@@ -139,6 +139,18 @@ HRESULT CRendererSubResource::Add_SSAO_Blur_BufferData(const _wstring& strRCSTag
     return S_OK;
 }
 
+HRESULT CRendererSubResource::Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+{
+    BLUR_DATA Data = {};
+    Data.fWidth = fWidth;
+    Data.fHeight = fHeight;
+
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLUR_DATA))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
 HRESULT CRendererSubResource::Add_SSAO_NoiseTexture(const _wstring& strRCSTag, const _char* pConstantName)
 {
     if (FAILED(m_pGameInstance->Add_SRVData(strRCSTag, pConstantName, m_pNoiseTexture->Get_SRV(0))))

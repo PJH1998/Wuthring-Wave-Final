@@ -77,8 +77,7 @@ void CRendererCS::Bind_Resources()
 {
 	for (auto& Pair : m_Buffers)
 		m_pComputeShader->Set_ConstantBuffer(Pair.first, Pair.second.second);
-	//m_Buffers.clear();
-
+	
 	for (auto& SRV : m_SRVs)
 		m_pComputeShader->Set_SRV(SRV.first, SRV.second);
 
@@ -88,11 +87,22 @@ void CRendererCS::Bind_Resources()
 void CRendererCS::Dispatch()
 {
 	m_pComputeShader->Dispatch(static_cast<_uint>((m_fWidht + m_fDefinitionX -1.f) / m_fDefinitionX) , static_cast<_uint>(( m_fHeight + m_fDefinitionY - 1.f ) / m_fDefinitionY), 1);
+
+	Clear_Resource();
 }
 
 void CRendererCS::Clear()
 {
 	m_pContext->ClearUnorderedAccessViewFloat(m_UAV.second, reinterpret_cast<_float*>( &m_vClearColor ));
+}
+
+void CRendererCS::Clear_Resource()
+{
+	m_Buffers.clear();
+
+	for (auto& pSRV : m_SRVs)
+		Safe_Release(pSRV.second);
+	m_SRVs.clear();
 }
 
 #ifdef _DEBUG
@@ -147,7 +157,7 @@ HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT 
 	UAVDesc.Format = TextureDesc.Format;
 	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
 	UAVDesc.Texture2D.MipSlice = 0;
-
+	
 	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pTexture2D, &UAVDesc, &m_UAV.second)))
 		return E_FAIL;
 

@@ -2,8 +2,8 @@
 
 #pragma pack_matrix(row_major)
 
-#define THREAD_X 8
-#define THREAD_Y 8
+#define THREAD_X 16
+#define THREAD_Y 16
 #define THREAD_Z 1
 
 Texture2D<float4> InputTexture : register(t0);
@@ -55,9 +55,6 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
     vNoiseTexcoord.x = (float) DTID.x * fNoiseTexelSize * 16.f;
     vNoiseTexcoord.y = (float) DTID.y * fNoiseTexelSize * 16.f;
 
-    //float4 vNoiseNormal = g_NoiseTexture.SampleLevel(NoiseSampler, vNoiseTexcoord, 0);
-    //float2 vNoiseXY = vNoiseNormal.xy * 2.f - 1.f;
-    //vNoiseNormal = normalize(float4(vNoiseXY, 0.f, 0.f));
     vector vNoiseNormal = Compute_Normal(g_NoiseTexture, NoiseSampler, vNoiseTexcoord);
     vNoiseNormal = normalize(mul(vNoiseNormal, CamViewMatrix));
     
@@ -73,10 +70,10 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         
         float3 vRandomVector = mul(vSampleVector[i].xyz, TBN);
         
-        float4 vSampeDir = float4(vRandomVector, 0.f); // 샘플 벡터를 vNormal 기준 반구 형태로 변형
+        float4 vSampeDir = float4(vRandomVector, 0.f);                              // 샘플 벡터를 vNormal 기준 반구 형태로 변형
        
-        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);      // Radius 만큼 이동
-        vSamplePos.w = 1.f;                                                         // 이상한 값이 드가는거 같음,,
+        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);                  // Radius 만큼 이동
+        vSamplePos.w = 1.f;                                                         
         float fRandomZ = vSamplePos.z;
         
         float4 vProjPos = mul(vSamplePos, CamProjMatrix);
@@ -113,11 +110,10 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
     }
     
     float AO = (TotalOcclusion / (float) iSampleSize);
-//    AO = pow(AO, 2.f);
+    AO = pow(AO, 2.f);
     
     OutputTexture[DTID.xy] = float4(AO, AO, AO, 1.f);
 }
-
 
 cbuffer SSAO_BLUR_DATA : register(b1)
 {
@@ -133,12 +129,8 @@ groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * SSAO_BLUR_RADIUS)];
 groupshared float vSharedDepthX[THREAD_Y][THREAD_X + (2 * SSAO_BLUR_RADIUS)];
 groupshared float4 vSharedNormalX[THREAD_Y][THREAD_X + (2 * SSAO_BLUR_RADIUS)];
     
-groupshared float4 vSharedColorY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
-groupshared float vSharedDepthY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
-groupshared float4 vSharedNormalY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
-
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void SSAO_BLUR_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
     float fBlurRadius = (float) SSAO_BLUR_RADIUS;
     
@@ -169,6 +161,7 @@ void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
     GroupMemoryBarrierWithGroupSync();
     
     float4 vColorX = 0.f;
+    float fWeightX = 0.f;
     
     float4 vOriginColorX = vSharedColorX[GTID.y][GTID.x + SSAO_BLUR_RADIUS];
     float fOriginDepthX = vSharedDepthX[GTID.y][GTID.x + SSAO_BLUR_RADIUS];
@@ -182,14 +175,26 @@ void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
         float fSampleDepth = vSharedDepthX[GTID.y][iIndexX];
         float4 vSampleNormal = vSharedNormalX[GTID.y][iIndexX];
         
-        vColorX += Compute_SSAO_Blur(vOriginColorX, fOriginDepthX, vOriginNormalX, vSampleColor, fSampleDepth, vSampleNormal, fSSAO_MinDepthDistance);
+        vColorX += Compute_SSAO_Blur(vOriginColorX, fOriginDepthX, vOriginNormalX, vSampleColor, fSampleDepth, vSampleNormal, fSSAO_MinDepthDistance, fWeightX);
     }
     
     vColorX /= (fBlurRadius * 2.f + 1.f);
     
-    vSharedColorY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = vColorX;
-    vSharedDepthY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = fOriginDepthX;
-    vSharedNormalY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = vOriginNormalX;
+    OutputTexture[DTID.xy] = vColorX;
+  
+}
+groupshared float4 vSharedColorY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
+groupshared float vSharedDepthY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
+groupshared float4 vSharedNormalY[THREAD_Y + (2 * SSAO_BLUR_RADIUS)][THREAD_X];
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void SSAO_BLUR_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+{
+    float fBlurRadius = (float) SSAO_BLUR_RADIUS;
+    
+    vSharedColorY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
+    vSharedDepthY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = g_DepthTexture.Load(int3(DTID.xy, 0)).y;
+    vSharedNormalY[GTID.y + SSAO_BLUR_RADIUS][GTID.x] = Compute_Normal_DTID(g_NormalTexture, int3(DTID.xy, 0));
     
     if (GTID.y < SSAO_BLUR_RADIUS)
     {
@@ -200,15 +205,17 @@ void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
             LeftID.y = 0;
         
         if (RightID.y >= fHeight_Blur)
-            RightID.y = fHeight_Blur -1.f;
+            RightID.y = fHeight_Blur - 1.f;
         
         
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
-        vSharedDepthY[GTID.y][GTID.x] = g_DepthTexture.Load(LeftID).y;
+        vSharedDepthY[GTID.y][GTID.x] = g_DepthTexture.Load(LeftID).
+y;
         vSharedNormalY[GTID.y][GTID.x] = Compute_Normal_DTID(g_NormalTexture, LeftID);
         
         vSharedColorY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = InputTexture.Load(RightID);
-        vSharedDepthY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = g_DepthTexture.Load(RightID).y;
+        vSharedDepthY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = g_DepthTexture.Load(RightID).
+y;
         vSharedNormalY[GTID.y + THREAD_Y + SSAO_BLUR_RADIUS][GTID.x] = Compute_Normal_DTID(g_NormalTexture, RightID);
     }
     
@@ -219,6 +226,7 @@ void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
     float4 vOriginNormalY = vSharedNormalY[GTID.y + SSAO_BLUR_RADIUS][GTID.x];
     
     float4 vColorY = 0.f;
+    float fWeightY = 0.f;
     
     for (int j = -SSAO_BLUR_RADIUS; j <= SSAO_BLUR_RADIUS; ++j)
     {
@@ -228,10 +236,11 @@ void SSAO_BLUR(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uin
         float fSampleDepth = vSharedDepthY[iIndexY][GTID.x];
         float4 vSampleNormal = vSharedNormalY[iIndexY][GTID.x];
         
-        vColorY += Compute_SSAO_Blur(vOriginColorY, fOriginDepthY, vOriginNormalY, vSampleColor, fSampleDepth, vSampleNormal, fSSAO_MinDepthDistance);
+        vColorY += Compute_SSAO_Blur(vOriginColorY, fOriginDepthY, vOriginNormalY, vSampleColor, fSampleDepth, vSampleNormal, fSSAO_MinDepthDistance, fWeightY);
     }
-    
     vColorY /= (fBlurRadius * 2.f + 1.f);
     
     OutputTexture[DTID.xy] = vColorY;
 }
+
+

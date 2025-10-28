@@ -81,7 +81,8 @@ void CRenderer::Render()
 	Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
-	//Render_Emissive();
+	Render_Emissive();
+	Render_Bloom();
 	Render_Blend();
 	Render_Distortion();
 	Render_LUT();
@@ -252,6 +253,15 @@ void CRenderer::Render_SSAO()
 	if (FAILED(m_pSubResource->Add_SSAO_BufferData(TEXT("RCS_SSAO"), m_fWinSizeX, m_fWinSizeY)))
 		CRASH("Failed Add_SSAO_BufferData");
 
+	if (FAILED(m_pSubResource->Add_SSAO_NoiseTexture(TEXT("RCS_SSAO"), "g_NoiseTexture")))
+		CRASH("Failed Add_SSAO_NoiseTexture");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+		CRASH("Failed Add_SRVData");
+
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO"))))
 		CRASH("Failed RCS_SSAO");
 #pragma endregion
@@ -264,12 +274,38 @@ void CRenderer::Render_SSAO()
 	}
 #endif
 
-#pragma region BLUR
-	if (FAILED(m_pSubResource->Add_SSAO_Blur_BufferData(TEXT("RCS_SSAO_BLUR"), m_fWinSizeX, m_fWinSizeY)))
+#pragma region BLUR_X
+	if (FAILED(m_pSubResource->Add_SSAO_Blur_BufferData(TEXT("RCS_SSAO_BLUR_X"), m_fWinSizeX, m_fWinSizeY)))
 		CRASH("Failed Add_SSAO_BufferData");
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO_BLUR"))))
-		CRASH("Failed RCS_SSAO");
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSAO")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO_BLUR_X"))))
+		CRASH("Failed RCS_SSAO_BLUR_X");
+#pragma endregion
+
+#pragma region BLUR_Y
+	if (FAILED(m_pSubResource->Add_SSAO_Blur_BufferData(TEXT("RCS_SSAO_BLUR_Y"), m_fWinSizeX, m_fWinSizeY)))
+		CRASH("Failed Add_SSAO_BufferData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSAO_BLUR_X")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_Y"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_Y"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO_BLUR_Y"))))
+		CRASH("Failed RCS_SSAO_BLUR_Y");
 #pragma endregion
 }
 
@@ -284,11 +320,8 @@ void CRenderer::Render_Combined()
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_ToonRim"), m_pShader, "g_ToonRimTexture")))
 		CRASH("Render Fail")
 
-	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR"), m_pShader, "g_SsaoTexture")))
+	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR_Y"), m_pShader, "g_SsaoTexture")))
 		CRASH("Failed Bind_SsaoTexture");
-
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_SsaoTexture")))
-//		CRASH("Failed Bind_SsaoTexture");
 
 	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_ShadowMap")))
 		CRASH("Failed Bind_CSM_SRV");
@@ -346,6 +379,42 @@ void CRenderer::Render_Emissive()
 	}
 
 	m_RenderObjects[ENUM_CLASS(RENDERGROUP::EMISSIVE)].clear();
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_Bloom()
+{
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Emissive")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"))))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
+#pragma region GAUSSIAN_BLUR_X
+	if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), m_fWinSizeX, m_fWinSizeY)))
+		CRASH("Failed Add_BufferData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"))))
+		CRASH("Failed RCS_GAUSSIAN_BLUR_X");
+#pragma endregion
+
+#pragma region GAUSSIAN_BLUR_Y
+	if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_Y"), m_fWinSizeX, m_fWinSizeY)))
+		CRASH("Failed Add_BufferData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_X")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"))))
+		CRASH("Failed RCS_GAUSSIAN_BLUR_Y");
+#pragma endregion
+
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+		CRASH("Failed Begin MRT_BackBuffer");
 
 	m_pGameInstance->End_MRT();
 }
@@ -462,117 +531,6 @@ void CRenderer::Render_Fade()
 
 	m_RenderObjects[ENUM_CLASS(RENDERGROUP::FADE)].clear();
 }
-//
-//void CRenderer::GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType)
-//{
-//	_uint iShaderPass = eType == BLUR_TYPE::GAUSSIAN ? ENUM_CLASS(SHADER_DEFFERED::GAUSSIAN_BLUR_X) : 0;// ENUM_CLASS(SHADER_DEFFERED::BILATERAL_BLUR_X);
-//
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
-//		CRASH("Render Fail")
-//
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(pBlurRenderTarget, m_pShader, "g_BlurBeginTexture")))
-//		CRASH("Render Fail")
-//
-//	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_iWinSizeX, sizeof(_float))))
-//		CRASH("Render Fail")
-//
-//	if (FAILED(m_pShader->Begin(iShaderPass++)))
-//		CRASH("Render Fail")
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_iWinSizeY, sizeof(_float))))
-//		CRASH("Render Fail")
-//
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Begin(iShaderPass)))
-//		CRASH("Render Fail")
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//
-//	if (FAILED(m_pGameInstance->Begin_MRT(pCombinedBlurMRT, nullptr, false)))
-//		CRASH("Render Fail");
-//
-//	if(FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_ADD))))
-//		CRASH("Render Fail");
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//}
-//
-//void CRenderer::SSAO_Blur()
-//{
-//#pragma region BLUR_X
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Blur"))))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_SSAO"), m_pShader, "g_BlurBeginTexture")))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Bind_Value("g_fWidth", &m_fWinSizeX, sizeof(_float))))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_X))))
-//		CRASH("Render Fail");
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//#pragma endregion
-//
-//#pragma region BLUR_Y
-//
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BlurEnd"))))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Blur"), m_pShader, "g_BlurTexture")))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Bind_Value("g_fHeight", &m_fWinSizeY, sizeof(_float))))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO_BLUR_Y))))
-//		CRASH("Render Fail");
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//#pragma endregion
-//
-//#pragma region BLUR_RETURN
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"), nullptr, false)))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
-//		CRASH("Render Fail");
-//
-//	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR_RETURN))))
-//		CRASH("Render Fail");
-//
-//	m_pVIBuffer->Bind_Resources();
-//	m_pVIBuffer->Render();
-//
-//	m_pGameInstance->End_MRT();
-//#pragma region BLUR_END
-//}
 
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
@@ -657,7 +615,7 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Emissive*/
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Emissive"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Lut */
@@ -758,76 +716,80 @@ HRESULT CRenderer::Ready_RCS()
 #pragma region SSAO_RCS
 	CRendererCS::RCS_DESC RCSDesc = {};
 	RCSDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
-	RCSDesc.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	RCSDesc.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
 	RCSDesc.strEntryPoint = "SSAO";
 	RCSDesc.iWidth = m_iWinSizeX;
 	RCSDesc.iHeight = m_iWinSizeY;
-	RCSDesc.fDefinitionX = 8.f;
-	RCSDesc.fDefinitionY = 8.f;
+	RCSDesc.fDefinitionX = 16.f;
+	RCSDesc.fDefinitionY = 16.f;
 	RCSDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
 	RCSDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO"), &RCSDesc)))
 		CRASH("Failed Add RCS_SSAO");
-
-	if(FAILED(m_pGameInstance->Setting_UAV_Data(TEXT("RCS_SSAO"), "OutputTexture")))
-		CRASH("Failed Setting_UAV_Data");
-
-	if(FAILED(m_pSubResource->Add_SSAO_NoiseTexture(TEXT("RCS_SSAO"), "g_NoiseTexture")))
-		CRASH("Failed Add_SSAO_NoiseTexture");
-
-	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
-	   CRASH("Failed Add_SRVData");
-
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
-		CRASH("Failed Add_SRVData");
 #pragma endregion
 	
 #pragma region SSAO_BLUR_RCS
 	CRendererCS::RCS_DESC BlurDesc = {};
 	BlurDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
-	BlurDesc.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
-	BlurDesc.strEntryPoint = "SSAO_BLUR";
+	BlurDesc.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	BlurDesc.strEntryPoint = "SSAO_BLUR_X";
 	BlurDesc.iWidth = m_iWinSizeX;
 	BlurDesc.iHeight = m_iWinSizeY;
-	BlurDesc.fDefinitionX = 8.f;
-	BlurDesc.fDefinitionY = 8.f;
+	BlurDesc.fDefinitionX = 16.f;
+	BlurDesc.fDefinitionY = 16.f;
 	BlurDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
 	BlurDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
 
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO_BLUR"), &BlurDesc)))
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO_BLUR_X"), &BlurDesc)))
 		CRASH("Failed Add RCS_SSAO");
 
-	if (FAILED(m_pGameInstance->Setting_UAV_Data(TEXT("RCS_SSAO_BLUR"), "OutputTexture")))
-		CRASH("Failed Setting_UAV_Data");
+	BlurDesc.strEntryPoint = "SSAO_BLUR_Y";
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSAO")))))
-		CRASH("Failed Add_SRVData");
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO_BLUR_Y"), &BlurDesc)))
+		CRASH("Failed Add RCS_SSAO");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
-		CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
-		CRASH("Failed Add_SRVData");
 #pragma endregion
 
 #pragma region GAUSSIAN BLUR
 	CRendererCS::RCS_DESC GaussianRCS = {};
 	GaussianRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Blur.hlsl");
-	GaussianRCS.eShaderMacro = { {"THREAD_X", "8" } ,{"THREAD_Y", "8" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
-	GaussianRCS.strEntryPoint = "GaussianBlur";
+	GaussianRCS.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	GaussianRCS.strEntryPoint = "GaussianBlur_X";
 	GaussianRCS.iWidth = m_iWinSizeX;
 	GaussianRCS.iHeight = m_iWinSizeY;
-	GaussianRCS.fDefinitionX = 8.f;
-	GaussianRCS.fDefinitionY = 8.f;
+	GaussianRCS.fDefinitionX = 16.f;
+	GaussianRCS.fDefinitionY = 16.f;
 	GaussianRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
 	GaussianRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR"), &GaussianRCS)))
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &GaussianRCS)))
 		CRASH("Failed Add RCS_SSAO");
 
-	if (FAILED(m_pGameInstance->Setting_UAV_Data(TEXT("RCS_GAUSSIAN_BLUR"), "OutputTexture")))
-		CRASH("Failed Setting_UAV_Data");
+	GaussianRCS.strEntryPoint = "GaussianBlur_Y";
+
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), &GaussianRCS)))
+		CRASH("Failed Add RCS_SSAO");
+
+
+#pragma endregion
+
+#pragma region DOWNSAMPLE
+	CRendererCS::RCS_DESC DownSampleRCS = {};
+	DownSampleRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Sampling.hlsl");
+	DownSampleRCS.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	DownSampleRCS.strEntryPoint = "DownSample";
+	DownSampleRCS.iWidth = m_iWinSizeX >> 1;
+	DownSampleRCS.iHeight = m_iWinSizeY >> 1;
+	DownSampleRCS.fDefinitionX = 16.f;
+	DownSampleRCS.fDefinitionY = 16.f;
+	DownSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	DownSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
+
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOWNSAMPLE"), &DownSampleRCS)))
+		CRASH("Failed Add RCS_SSAO");
+
 #pragma endregion
 
 	return S_OK;
