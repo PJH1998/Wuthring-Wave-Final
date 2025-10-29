@@ -87,6 +87,10 @@ HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
     pRCS->Bind_Resources(iMipLevel);
     pRCS->Dispatch(iMipLevel);
 
+    ID3D11SamplerState* pNullSampler[D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT] = { nullptr };
+    m_pContext->PSSetSamplers(0, D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT, pNullSampler);
+    m_pContext->CSSetSamplers(0, D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT, pNullSampler);
+
     return S_OK;
 }
 
