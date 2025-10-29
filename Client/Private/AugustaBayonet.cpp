@@ -45,6 +45,9 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
     // Augusta의 StateMachine에서 애니메이션실행?
 
+
+
+
     // Last :  Combined 행렬 초기화
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *

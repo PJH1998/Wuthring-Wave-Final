@@ -38,6 +38,8 @@ public:
 		Vec3 vPos = m_pCharacterVirtual->GetPosition();
 		return XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f);
 	}
+
+	void								Set_Offset(const _float3 vOffset);
 public:
 	virtual		HRESULT				Initialize_Prototype() override;
 	virtual		HRESULT				Initialize_Clone(void* pArg) override;

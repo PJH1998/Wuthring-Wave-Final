@@ -102,6 +102,15 @@ void CAnimationActor::Update(_float fTimeDelta)
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
+#ifdef _DEBUG
+    // Jump Second F
+    //const _float4x4* RootMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+    //const _float4x4* HairMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Hair001_M");
+    //OutPutDebugMatrix(TEXT("Root"), *RootMatrix);
+    //OutPutDebugMatrix(TEXT("Bone_Hair001_M"), *HairMatrix);
+#endif // _DEBUG
+
+
     if (IsAnimationEnd)
         m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
   

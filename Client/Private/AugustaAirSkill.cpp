@@ -1,9 +1,9 @@
 #include "ClientPch.h"
-#include "AugustaAirAttack.h"
+#include "AugustaAirSkill.h"
 #include "Augusta.h"
 #include "StateMachine.h"
 
-HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
+HRESULT CAugustaAirSkill::Initialize(class CGameObject* pOwner)
 {
     if (FAILED(CAirState::Initialize(pOwner)))
         return E_FAIL;
@@ -18,7 +18,7 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirAttack::OnEnter()
+void CAugustaAirSkill::OnEnter()
 {
     CAirState::OnEnter();
 
@@ -66,7 +66,7 @@ void CAugustaAirAttack::OnEnter()
 
 }
 
-void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
+void CAugustaAirSkill::OnUpdate(_float fTimeDelta)
 {
     CAirState::OnUpdate(fTimeDelta);
 
@@ -85,7 +85,7 @@ void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
     State_Reset();
 }
 
-void CAugustaAirAttack::OnExit()
+void CAugustaAirSkill::OnExit()
 {
     CAirState::OnExit();
 
@@ -97,14 +97,14 @@ void CAugustaAirAttack::OnExit()
     //m_pAugusta->Set_ColliderReferenceBone("");
 }
 
-void CAugustaAirAttack::Handle_Input()
+void CAugustaAirSkill::Handle_Input()
 {
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
         
 }
 
-void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
+void CAugustaAirSkill::Update_AttackAnimations(_float fTimeDelta)
 {
     // 1. 애니메이션 실행.
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
@@ -126,17 +126,17 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     );
 }
 
-void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
+void CAugustaAirSkill::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+    m_States[LAND] = m_pAugusta->Get_DistanceToGround(&m_vLandNormal, 0.1f) < 0.2f;
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 
-void CAugustaAirAttack::LockOn_StateTransition(_float fTimeDelta)
+void CAugustaAirSkill::LockOn_StateTransition(_float fTimeDelta)
 {
 }
 
-void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
+void CAugustaAirSkill::Check_StateTransition(_float fTimeDelta)
 {
     // 1. 스킬 입력 (E, R 등) 들어오면 Skill로 => 우선순위 별.
     // ... 추후 구현
@@ -198,7 +198,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
 }
 
-void CAugustaAirAttack::SetUp_Animations()
+void CAugustaAirSkill::SetUp_Animations()
 {
     
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.3f, 20.f);
@@ -209,26 +209,26 @@ void CAugustaAirAttack::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.f, 0.f, 1.f);
 }
 
-void CAugustaAirAttack::State_Reset()
+void CAugustaAirSkill::State_Reset()
 {
-    for (_uint i = 0; i < AIRATTACKSTATE::END; ++i)
+    for (_uint i = 0; i < AIRSKILLSTATE::END; ++i)
         m_States[i] = false;
 }
 
-CAugustaAirAttack* CAugustaAirAttack::Create(class CGameObject* pOwner)
+CAugustaAirSkill* CAugustaAirSkill::Create(class CGameObject* pOwner)
 {
-    CAugustaAirAttack* pInstance = new CAugustaAirAttack();
+    CAugustaAirSkill* pInstance = new CAugustaAirSkill();
 
     if (FAILED(pInstance->Initialize(pOwner)))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Failed to Create : CAugustaAirAttack");
+        MSG_BOX("Failed to Create : CAugustaAirSkill");
     }
 
     return pInstance;
 }
 
-void CAugustaAirAttack::Free()
+void CAugustaAirSkill::Free()
 {
     CAirState::Free();
 }

@@ -38,6 +38,17 @@ _bool CCollider::IsLand(_float3* pNormalOut)
 	return m_pCharacterVirtual->IsSupported();
 }
 
+void CCollider::Set_Offset(const _float3 vOffset)
+{
+	m_vOffset = vOffset;
+
+	if (m_pCharacterVirtual)
+	{
+		// Jolt CharacterVirtual의 ShapeOffset을 실시간 업데이트
+		m_pCharacterVirtual->SetShapeOffset(LoadVec3(m_vOffset));
+	}
+}
+
 HRESULT CCollider::Initialize_Prototype()
 {
     return S_OK;

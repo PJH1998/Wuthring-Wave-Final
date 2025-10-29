@@ -4,22 +4,21 @@
 NS_BEGIN(Client)
 
 // Augusta Attack State - Attack01~04, Attack_*, SpAttack* 처리
-class CAugustaAirAttack final : public CAirState
+class CAugustaAirSkill final : public CAirState
 {
 private:
-    enum AIRATTACKSTATE // 내부에서 전환 가능한 상태.
+    enum AIRSKILLSTATE // 내부에서 전환 가능한 상태.
     {
-        AIR_ATTACK_START,
-        AIR_ATTACK_JUMP,
         MOVE,
         JUMP,
+        FALL,
         LAND,
         END
     };
 
 private:
-    explicit CAugustaAirAttack() = default;
-    virtual ~CAugustaAirAttack() = default;
+    explicit CAugustaAirSkill() = default;
+    virtual ~CAugustaAirSkill() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -29,7 +28,7 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _bool m_States[AIRATTACKSTATE::END] = {};
+    _bool m_States[AIRSKILLSTATE::END] = {};
     _float m_fSpeed = {};
     
 
@@ -44,7 +43,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaAirAttack* Create(class CGameObject* pOwner);
+    static CAugustaAirSkill* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

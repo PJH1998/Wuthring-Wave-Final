@@ -1,5 +1,6 @@
 #include "ClientPch.h"
 #include "AugustaGriffon.h"
+#include "Client_Debug.h"
 
 CAugustaGriffon::CAugustaGriffon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CWeapon{ pDevice, pContext }
@@ -30,13 +31,16 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
-
     return S_OK;
 }
 
 void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
     CWeapon::Priority_Update(fTimeDelta);
+
+#ifdef _DEBUG
+    ClientDebug::Edit_TransformRotate(m_pTransformCom);
+#endif // _DEBUG
 }
 
 void CAugustaGriffon::Update(_float fTimeDelta)
@@ -50,9 +54,6 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
-
-    _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-    //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)

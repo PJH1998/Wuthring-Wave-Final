@@ -7,7 +7,7 @@
 #include "PlayerFactory.h"
 #include "GameSystem.h"
 
-#pragma region �⺻ �Լ�
+#pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
     , m_pGameSystem { CGameSystem::GetInstance()}
@@ -36,23 +36,18 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
-    // 0. GameObject Clone
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-    // 1. ���� Components �ʱ�ȭ
     if (FAILED(Ready_Components(pDesc)))
         return E_FAIL;
 
-    // 2. Players �ʱ�ȭ.
     if (FAILED(Ready_Players(pDesc)))
         return E_FAIL;
 
-    // 3. Camera ��� �� InputController Key ���.
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
-    // 4. �ʿ��� ���� ����
     for (auto& pCharacter : m_Characters)
     {
         if (nullptr != pCharacter)
@@ -62,12 +57,11 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
         }
     }
 
-    // 5. Transform �ʱ�ȭ
+    // 5. Transform
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    // �⺻ NONE => �׽�Ʈ�뵵 => ������ AUGUSTA��
     m_iCurrentCharacterIdx = AUGUSTA;
 
 
@@ -78,18 +72,24 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
     
-    // 1. InputController ������Ʈ.
     m_pInputControllerCom->Update();
     
-    // 2. Ȱ�� ĳ���� ������Ʈ
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
-    // 3. Ensemble ĳ���͵� ������Ʈ
     if (m_iEnsembleCharacterIdx != NONE && 
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
+
+    // 임시.
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
+        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+    }
+        
+
 
 
 }
@@ -97,11 +97,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 void CPlayer::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
-    // 1. ���� ĳ���� Update
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
         
-    // 2. Ensemble ĳ���͵� ������Ʈ
+    // 2. Ensemble 
     if (m_iEnsembleCharacterIdx != NONE &&
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);

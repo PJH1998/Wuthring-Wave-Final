@@ -16,12 +16,15 @@
 #include "AugustaGroundDash.h"
 #include "AugustaGroundAttack.h"
 #include "AugustaGroundSkill.h"
+#include "AugustaGroundBurst.h"
+#include "AugustaGroundSpecial.h"
 
 
 // Air 카테고리 State들
 #include "AugustaAirJump.h"
 #include "AugustaAirFall.h"
 #include "AugustaAirAttack.h"
+#include "AugustaAirSkill.h"
 
 // Climb State들
 #include "AugustaClimbMove.h"
@@ -41,11 +44,14 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH), CAugustaGroundDash::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL), CAugustaGroundSkill::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST), CAugustaGroundBurst::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL), CAugustaGroundSpecial::Create(pPlayer));
 
     // Air 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL), CAugustaAirFall::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK), CAugustaAirAttack::Create(pPlayer));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_SKILL), CAugustaAirSkill::Create(pPlayer));
 
     // Climb 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE), CAugustaClimbMove::Create(pPlayer));

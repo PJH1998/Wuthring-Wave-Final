@@ -20,11 +20,13 @@ private:
 		ESkillType m_eSkillType = ESkillType::END;
 		EUniqueType m_eUniqueType = EUniqueType::END;
 		EBurstType m_eBurstType = EBurstType::END;
+		ESpecialType m_eSpecialType = ESpecialType::END;
 
 		// Air
 		EJumpType m_eJumpType = EJumpType::END;
 		EFallType m_eFallType = EFallType::END;
 		EAirAttackType m_eAirAttackType = EAirAttackType::END;
+		EAirSkillType m_eAirSkillType = EAirSkillType::END;
 
 		// Climb
 		EClimbIdleType m_eClimbIdleType = EClimbIdleType::END;
@@ -45,10 +47,12 @@ private:
 			m_eSkillType = ESkillType::END;
 			m_eUniqueType = EUniqueType::END;
 			m_eBurstType = EBurstType::END;
+			m_eSpecialType = ESpecialType::END;
 			
 			m_eJumpType = EJumpType::END;
 			m_eFallType = EFallType::END;
 			m_eAirAttackType = EAirAttackType::END;
+			m_eAirSkillType = EAirSkillType::END;
 
 			m_eClimbIdleType = EClimbIdleType::END;
 			m_eClimbMoveType = EClimbMoveType::END;
@@ -106,16 +110,21 @@ public:
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartAcitvate(_uint iPartType, _bool IsActive) override;
-
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
-
 	void Sync_Position();
+
+#ifdef _DEBUG
+public:
+	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
+#endif // _DEBUG
+
 #pragma endregion
 
 
 private:
 	class CAugustaBayonet* m_pBayonet = { nullptr };
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
+	class CAugustaGriffon* m_pGriffon = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

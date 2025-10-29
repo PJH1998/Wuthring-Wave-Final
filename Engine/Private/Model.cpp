@@ -95,11 +95,18 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 	_matrix matWorld = pOwnerTransform->Get_WorldMatrix();
 	_matrix ResultMatrix = m_RootMatrix * pOwnerTransform->Get_WorldMatrix();
 
-	_vector vScale, vRotation, vPosition;
-	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);
+	
+
+	/*_vector vScale, vRotation, vPosition;
+	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);*/
 
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
 }
+
+
+
+
+
 
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 {
@@ -660,12 +667,15 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 행렬은 이제 '엔진 좌표계' 기준.
 	m_RootMatrix = XMMatrixAffineTransformation(
+		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
 		vRotationDelta,                  // 회전 델타
 		vLocalTranslate * fRootMotionRate // 이동 델타
-	);
 
+	
+	);
+	
 	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.
 	XMStoreFloat4(&m_vPreRootPosition, vConvertedTranslation);
 	XMStoreFloat4(&m_vPreRootRotation, vConvertedRotation);
