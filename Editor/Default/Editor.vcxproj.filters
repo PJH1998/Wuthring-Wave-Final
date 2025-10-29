@@ -298,6 +298,12 @@
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Event_Scene_Edit.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Editor_Struct.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">

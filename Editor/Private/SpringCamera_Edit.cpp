@@ -1,5 +1,6 @@
 #include "EditorPch.h"
 #include "SpringCamera_Edit.h"
+#include "Event_Scene_Edit.h"
 
 CSpringCamera_Edit::CSpringCamera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCamera { pDevice, pContext }
@@ -22,6 +23,7 @@ HRESULT CSpringCamera_Edit::Initialize_Clone(void* pArg)
 		CRASH("Camera");
 
 	Ready_Component();
+	Ready_Event();
 
 	m_fDistance = 100.f;
 	m_fFixedDistance = 100.f;
@@ -49,6 +51,11 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	_vector vCamPos = m_pTransformCom->Get_State(STATE::POSITION);
 	sprintf_s(szPos, MAX_PATH, "%.2f, %.2f, %.2f", vCamPos.m128_f32[0], vCamPos.m128_f32[1], vCamPos.m128_f32[2]);
 	ImGui::Text(szPos);
+	_char szQuat[MAX_PATH] = {};
+	_float4 vQuat = {};
+	XMStoreFloat4(&vQuat, m_pTransformCom->Get_Quaternion());
+	sprintf_s(szQuat, MAX_PATH, "%.4f, %.4f, %.4f, %.4f", vQuat.x, vQuat.y, vQuat.z, vQuat.w);
+	ImGui::Text(szQuat);
 	_char szDistance[MAX_PATH] = {};
 	sprintf_s(szDistance, MAX_PATH, "Distance : %.2f / Fixed Distance : %.2f", m_fDistance, m_fFixedDistance);
 	ImGui::Text(szDistance);
@@ -60,6 +67,22 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	// Look Position Init
 	m_vLookPosition = m_vTargetPosition;
 	m_vLookPosition.y += m_fOffsetY;
+
+	// Action
+	if (CAMERA_STATE::ACTION == m_eCameraState)
+	{
+		if (true == m_isRecovery)
+			Recovery(fTimeDelta);
+		else
+			Action(fTimeDelta);
+	}
+	else
+	{
+		Mouse_Scroll(fTimeDelta);
+		// 0. Cam Rotate
+		if (CAMERA_STATE::TARGET == m_eCameraState && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
+			__super::Mouse_Move_Up();
+	}
 
 	// Spring
 	if (CAMERA_STATE::SPRING == m_eCameraState)
@@ -79,26 +102,17 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	// Target Transform Rest
 	m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
-
-	Mouse_Scroll(fTimeDelta);
-	// 0. Cam Rotate
-	if (CAMERA_STATE::TARGET == m_eCameraState)
-		__super::Mouse_Move_Up();
 	
 	// 1. 거리 제한으로 인한 간격 보정
 	Compute_CamPos();
 	// 2. Ray Cast 이용하여 지형, 오브젝트와 충돌
-	Check_Ray();
+	//Check_Ray();
 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	// Test
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::DOWN)
 		Lock_On();
-}
-
-void CSpringCamera_Edit::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
-{
 }
 
 void CSpringCamera_Edit::Late_Update(_float fTimeDelta)
@@ -226,6 +240,55 @@ void CSpringCamera_Edit::Dynamic_Distance()
 	m_fFixedDistance = max(m_fMinDistance, sqrt(fDistance * fDistance + m_fLockOnOffsetY * m_fLockOnOffsetY));
 }
 
+void CSpringCamera_Edit::Action(_float fTimeDelta)
+{
+	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
+		return;
+
+	_float fStartFrame{}, fEndFrame{};
+	fStartFrame = -1 == m_iFrameIndex ? m_fFirstFrame : m_Frames[m_iFrameIndex].fStartFrame;
+	fEndFrame = m_Frames[m_iFrameIndex + 1].fStartFrame;
+
+	_float fRatio = (m_fTrackPosition - fStartFrame) / (fEndFrame - fStartFrame);
+	m_fTrackPosition += fTimeDelta * m_fTrackPerSec;
+
+	// Rotation
+	_vector vPreQuaternion = {};
+	if (-1 == m_iFrameIndex)
+		vPreQuaternion = XMLoadFloat4(&m_vPreQuaternion);
+	else
+		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
+		//vPreQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_Frames[m_iFrameIndex].vRotation));
+
+	//_vector vDestQuat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vRotation));
+	_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+
+	_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
+
+	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+
+	// Distance
+	m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+
+	if (m_Frames[m_iFrameIndex + 1].fStartFrame < m_fTrackPosition)
+		++m_iFrameIndex;
+}
+
+void CSpringCamera_Edit::Recovery(_float fTimeDelta)
+{
+	m_fTrackPosition += fTimeDelta;
+
+	if (m_fTrackPosition >= 1.5f)
+	{
+		m_isRecovery = false;
+		m_eCameraState = CAMERA_STATE::TARGET;
+		return;
+	}
+
+	_vector vLerpQuat = XMQuaternionSlerp(XMLoadFloat4(&m_vEndQuaternion), XMLoadFloat4(&m_vPreQuaternion), m_fTrackPosition / 1.5f);
+	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+}
+
 void CSpringCamera_Edit::Ready_Component()
 {
 	// Com_Rigidbody
@@ -243,6 +306,30 @@ void CSpringCamera_Edit::Ready_Component()
 
 	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 			OnCollide_During(iLayer, pDesc, Manifold);
+		});
+}
+
+void CSpringCamera_Edit::Ready_Event()
+{
+	m_pGameInstance->Subscribe<CAMERA_ACTION_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), [this](const CAMERA_ACTION_EVENT& event) {
+			if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction)
+			{
+				m_iFrameIndex = -1;
+				m_fTrackPosition = static_cast<_float>(event.iStart);
+				m_fFirstFrame = m_fTrackPosition;
+				m_eCameraState = CAMERA_STATE::ACTION;
+				m_Frames = event.pFrame;
+				XMStoreFloat4(&m_vPreQuaternion, m_pTransformCom->Get_Quaternion());
+				m_fPreFixedDistance = m_fFixedDistance;
+				m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
+			}
+			else
+			{
+				m_fTrackPosition = 0.f;
+				m_isRecovery = true;
+				m_fFixedDistance = m_fPreFixedDistance;
+				XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+			}
 		});
 }
 
