@@ -56,10 +56,6 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pParentTransform->Get_WorldMatrix());
 
 
-//#ifdef _DEBUG
-//    OutPutDebugMatrix(TEXT("Griffon"), m_CombinedMatrix);
-//#endif // _DEBUG
-
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -106,22 +102,6 @@ void CAugustaGriffon::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
     
-    if (IsActive)
-    {
-#ifdef _DEBUG
-        if (nullptr != m_pTransformCom)
-        {
-            _float4x4 matDebug = {}; 
-            XMStoreFloat4x4(&matDebug, m_pTransformCom->Get_WorldMatrix());
-            OutPutDebugMatrix(TEXT("Griffon World"), matDebug);
-        }
-            
-#endif // _DEBUG
-
-        
-        if (nullptr != m_pTransformCom)
-            m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());
-    }
     // TrackPosition 도 초기화
     // Griffon의 경우에는 위치를 초기화해준다?
     
