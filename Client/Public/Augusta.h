@@ -118,6 +118,14 @@ public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
 #endif // _DEBUG
 
+#pragma region 2. NOTIFY
+	public:
+		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
+		virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+
+#pragma endregion
+
+
 #pragma endregion
 
 

@@ -31,6 +31,7 @@ namespace PlayerData
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
         //Desc.controllerData = make_pair(eLevel, TEXT("Prototype_Component_Controller_Augusta"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
@@ -61,6 +62,7 @@ namespace PlayerData
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Bayonet"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Notify/";
         Desc.strBoneName = "WeaponProp02";
         //Desc.strBoneName = "WeaponProp05";
         Desc.eWeaponType = WEAPONTYPE::ANIM;

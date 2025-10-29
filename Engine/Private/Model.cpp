@@ -209,7 +209,7 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
-void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback)
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
 {
 	for (auto& pair : m_Animations)
 	{

@@ -42,6 +42,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
+    Register_AllNotifies(pDesc->strFolderPath);
+
     CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
 
 
@@ -50,16 +52,12 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
     
-    
     m_pColliderCom->Set_Gravity(true);
-
     m_pBayonet->SetActivate(true);
     m_pSkillWeapon->SetActivate(false);
     m_pGriffon->SetActivate(false);
     
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-
-
     return S_OK;
 }
 
@@ -237,6 +235,33 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 
 }
 #endif // _DEBUG
+
+#pragma region NOTIFY
+void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
+{
+    if (wStrColliderTag == TEXT("Player"))
+    {
+        
+    }
+    else if (wStrColliderTag == TEXT("Bayonet"))
+    {
+        
+    }
+    else if (wStrColliderTag == TEXT("SkillWeapon"))
+    {
+
+    }
+}
+void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
+{
+    if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+        return;
+
+    _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+    m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+#pragma endregion
+
 
 
 

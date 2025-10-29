@@ -51,6 +51,20 @@ void CActor::Render()
 }
 #pragma endregion
 
+void CActor::Register_AllNotifies(const _string& strFolderPath)
+{
+    ASSERT_CRASH(m_pModelCom);
+    auto colliderCallback = [this](const _wstring& tag, bool active) {
+        this->Collider_Active(tag, active); // 'this->'는 생략 가능
+        };
+
+    auto effectCallBack = [this](const _wstring& tag) {
+        this->Effect_Active(tag);
+        };
+
+    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+}
+
 void CActor::Free()
 {
     CContainerObject::Free();

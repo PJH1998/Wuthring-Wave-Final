@@ -587,6 +587,9 @@
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\EffectNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -859,6 +862,9 @@
     </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EffectNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
