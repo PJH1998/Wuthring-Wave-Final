@@ -5,7 +5,26 @@
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
 //#define KSTA_UI_HPBARBOSSTEST
-#define KSTA_UI_ENERGYBARTEST
+//#define KSTA_UI_ENERGYBARTEST
+
+
+/**
+*   테스트 방법
+*   
+*   U : 캐릭터 모드 전환 (방랑자는 서지모드 여부, 아우구스타는 궁모드 여부 등)
+*   I : 공명 게이지 랜덤하게 UP
+*   O : 보스 체력/아머 랜덤하게 DOWN
+* 
+*   (아우구스타)
+*   J : 하단 검 자원 갯수 변경 (0 - 1 - 2개)
+*   K : 하단 원형 자원 랜덤하게 UP
+*   L : 궁극기 사용 후 칼로 바뀐 자원 랜덤하게 UP
+* 
+*   (갈브레나) (WIP)
+*   Y : 에코 전용 공명게이지 10씩 UP (50이 최대치. 5번 쓰면 최대치로 찬다던데..)
+* 
+*   * 각 수치는 최상단의 매크로를 주석 해제하면 cout으로 보임
+*/
 
 
 // 얘는 오브젝트 매니저의 통제를 받음.
@@ -37,7 +56,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
         //L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
-        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD.json";
+        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251029_1433.json";
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
@@ -63,7 +82,12 @@ void CUI_HUD::Update(_float fTimeDelta)
     Update_UI_SkillSection(fTimeDelta);
     Update_UI_PlayerHPBar(fTimeDelta);
     Update_UI_BossHPBar(fTimeDelta);
+
+    Update_UI_PlayerEnergyFrame(fTimeDelta);
     Update_UI_PlayerEnergyBar(fTimeDelta);
+
+    Update_UI_PlayerEnergyBar_Augusta(fTimeDelta);
+    Update_UI_PlayerEnergyBar_Galbrena(fTimeDelta);
 
     Update_CombinedMatrix();
 
@@ -252,7 +276,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         pSkillUI[2]->Set_Active(false);
     }
 
-    for (auto& chCD : fSkillCD)                             // update cooldown
+    for (auto& chCD : fSkillCD)                         // update cooldown
     {
         for (auto& cd : chCD)
         {
@@ -289,7 +313,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
     if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::DOWN)           // trigger cooldowns
     {
-        if (fChangeCD[0] == 0)
+        if (fChangeCD[0] == 0 && m_iSelectedCHIndex != 0)
         {
             m_iSelectedCHIndex = 0;
             fChangeCD[0] = fMaxChangeCD[0];
@@ -297,7 +321,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::DOWN)
     {
-        if (fChangeCD[1] == 0)
+        if (fChangeCD[1] == 0 && m_iSelectedCHIndex != 1)
         {
             m_iSelectedCHIndex = 1;
             fChangeCD[1] = fMaxChangeCD[1];
@@ -305,7 +329,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_3) == KEYSTATE::DOWN)
     {
-        if (fChangeCD[2] == 0)
+        if (fChangeCD[2] == 0 && m_iSelectedCHIndex != 2)
         {
             m_iSelectedCHIndex = 2;
             fChangeCD[2] = fMaxChangeCD[2];
@@ -337,8 +361,13 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         auto targetUI = pSkillUI[i];
 
         vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+
         vecVariantMat[0].m[0][0] = fCooldown_E / fMaxSkillCD[i][SK_E];
         vecVariantMat[1].m[0][0] = fCooldown_R / fMaxSkillCD[i][SK_R];
+        vecVariantMat[0].m[0][1] = 0.5f;
+        vecVariantMat[1].m[0][1] = 0.5f;
+        vecVariantMat[0].m[0][2] = 0.95f;
+        vecVariantMat[1].m[0][2] = 0.95f;
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
@@ -357,6 +386,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
         vector<_float4x4> vecVariantMat = { _float4x4() };
         vecVariantMat[0].m[0][0] = 1.f - (fCooldown / fMaxChangeCD[i]);
+        vecVariantMat[0].m[0][1] = 1.0f;
+        vecVariantMat[0].m[0][2] = 0.8f;
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
@@ -450,12 +481,12 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
     // change
     vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11) = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11)    = vHPBackColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21) = vHPColor;
-    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21)    = vHPBackColor;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31)       = fPlayerHPRatio;
-    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31)     = fPlayerHPBackRatio;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._11)    = vHPColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._11)      = vHPBackColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_NORMAL]._21)    = vHPColor;
+    *reinterpret_cast<_float4*>(&vecVariantMat[PLHP_BACK]._21)      = vHPBackColor;
+    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_NORMAL]._31)     = fPlayerHPRatio;
+    *reinterpret_cast<_float*>(&vecVariantMat[PLHP_BACK]._31)       = fPlayerHPBackRatio;
 
     CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
         vecVariantMat,
@@ -624,15 +655,81 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 }
 
+void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
+{
+    switch (m_iSelectedCHIndex)
+    {
+    case Client::CUI_HUD::CH_ROVER:
+        Find_ChildObject(L"Group_Rover")    ->Set_Active(true);     // CH change visible
+        Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
+        Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
+
+        if      (m_iEnergyBarMode == 0)     
+        {
+            Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(false);
+            // Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
+        } 
+        else if (m_iEnergyBarMode == 1)
+        {
+            Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(true);
+            // Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
+        }
+                                    
+        break;
+    case Client::CUI_HUD::CH_AUGUSTA:
+        Find_ChildObject(L"Group_Rover")    ->Set_Active(false);
+        Find_ChildObject(L"Group_Augusta")  ->Set_Active(true);
+        Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
+
+        if      (m_iEnergyBarMode == 0)
+        {
+            Find_ChildObject(L"Frame_Augusta")->Set_Active(true);
+            Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
+            Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
+        }
+        else if (m_iEnergyBarMode == 1)
+        {
+            Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
+            Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
+            Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(true);
+        }
+
+        break;
+    case Client::CUI_HUD::CH_GALBRENA:
+        Find_ChildObject(L"Group_Rover")    ->Set_Active(false);
+        Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
+        Find_ChildObject(L"Group_Galbrena") ->Set_Active(true);
+
+        if      (m_iEnergyBarMode == 0)
+        {
+            Find_ChildObject(L"Frame_Galbrena")->Set_Active(true);
+            Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(true);
+            Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(false);
+        }
+        else if (m_iEnergyBarMode == 1)
+        {
+            Find_ChildObject(L"Frame_Galbrena")->Set_Active(false);
+            Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(false);
+            Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(true);
+        }
+
+        break;
+    }
+
+}
+
 void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
 
     // ksta : 현재 공명회로 수치 나중에 받아올 것
-    static  _float fPlayerEnergy[CH_END]        = { 0.f, 0.f, 0.f };
-    const   _float fPlayerMaxEnergy[CH_END]     = { 100.f, 100.f, 100.f };
+    m_fPlayerEnergy;
+    m_fPlayerMaxEnergy;
 
-    _float fCurPlayerEnergy         = fPlayerEnergy[m_iSelectedCHIndex];
-    _float fCurPlayerMaxEnergy      = fPlayerMaxEnergy[m_iSelectedCHIndex];
+    _float fCurPlayerEnergy         = m_fPlayerEnergy[m_iSelectedCHIndex];
+    _float fCurPlayerMaxEnergy      = m_fPlayerMaxEnergy[m_iSelectedCHIndex];
+    
+    static _float fGalbEchoEnergy   = 0.f;
+    const _float fGalbMaxEchoEnergy = 50.f;
 
     _float fCurPlayerEnergyRatio    = fCurPlayerEnergy / fCurPlayerMaxEnergy;
     
@@ -655,13 +752,13 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     {
         _float fRandEnergy = m_pGameInstance->Rand(10.f, 40.f);
         
-        if (fPlayerEnergy[m_iSelectedCHIndex] < fPlayerMaxEnergy[m_iSelectedCHIndex])
-            fPlayerEnergy[m_iSelectedCHIndex] += fRandEnergy;
-        else if (fPlayerEnergy[m_iSelectedCHIndex] >= fPlayerMaxEnergy[m_iSelectedCHIndex])
-            fPlayerEnergy[m_iSelectedCHIndex] = 0;
+        if (m_fPlayerEnergy[m_iSelectedCHIndex] == m_fPlayerMaxEnergy[m_iSelectedCHIndex])
+            m_fPlayerEnergy[m_iSelectedCHIndex] = 0;
+        else if (m_fPlayerEnergy[m_iSelectedCHIndex] < m_fPlayerMaxEnergy[m_iSelectedCHIndex])
+            m_fPlayerEnergy[m_iSelectedCHIndex] += fRandEnergy;
         
-        if (fPlayerEnergy[m_iSelectedCHIndex] > fPlayerMaxEnergy[m_iSelectedCHIndex])
-            fPlayerEnergy[m_iSelectedCHIndex] = fPlayerMaxEnergy[m_iSelectedCHIndex];
+        if (m_fPlayerEnergy[m_iSelectedCHIndex] > m_fPlayerMaxEnergy[m_iSelectedCHIndex])
+            m_fPlayerEnergy[m_iSelectedCHIndex] = m_fPlayerMaxEnergy[m_iSelectedCHIndex];
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
     {
@@ -669,6 +766,15 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         if (m_iEnergyBarMode >= 2)
             m_iEnergyBarMode = 0;
     }
+
+    // [Galbrena]
+    if (m_pGameInstance->Get_DIKeyState(DIK_Y) == KEYSTATE::DOWN)
+    {
+        if (fGalbEchoEnergy == fGalbMaxEchoEnergy) fGalbEchoEnergy = 0;
+        fGalbEchoEnergy += 10;
+        if (fGalbEchoEnergy >= fGalbMaxEchoEnergy) fGalbEchoEnergy = fGalbMaxEchoEnergy;
+    }
+
 
 
     enum HUD_PLAYER_ENERGYBAR { VALUE, TARGET, END };
@@ -679,6 +785,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         ENCL_GALBRENA_NORMAL_L,
         ENCL_GALBRENA_NORMAL_R,
         ENCL_GALBRENA_ULT,
+
+        ENCL_STATIC,
         ENCL_END
     };
     const _uint iNumSpectrums = 41;     // 스펙트럼의 각 요소 점 갯수는 최대 41개로 고정
@@ -688,12 +796,14 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vector<array<_float4, 2>> vecColorPreset;       // { start color (bottom), end color (top) }
     vecColorPreset.resize(ENCL_END);
 
-    vecColorPreset[ENCL_ROVER_NORMAL]       = { _float4{0.961f, 0.192f, 0.502f, 1.f}, _float4{0.961f, 0.192f, 0.502f, .6f} };
-    vecColorPreset[ENCL_AUGUSTA_NORMAL]     = { _float4{0.769f, 0.631f, 0.933f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .6f} };
-    vecColorPreset[ENCL_AUGUSTA_ULT]        = { _float4{1.000f, 0.953f, 0.722f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .6f} };
-    vecColorPreset[ENCL_GALBRENA_NORMAL_L]  = { _float4{0.894f, 0.573f, 0.525f, 1.f}, _float4{0.922f, 0.490f, 0.486f, .6f} };
-    vecColorPreset[ENCL_GALBRENA_NORMAL_R]  = { _float4{0.682f, 0.769f, 0.980f, 1.f}, _float4{0.553f, 0.557f, 0.878f, .6f} };
-    vecColorPreset[ENCL_GALBRENA_ULT]       = { _float4{0.482f, 0.412f, 0.878f, 1.f}, _float4{0.867f, 0.824f, 0.957f, .6f} };
+    vecColorPreset[ENCL_ROVER_NORMAL]       = { _float4{0.961f, 0.192f, 0.502f, 1.f}, _float4{0.961f, 0.192f, 0.502f, .8f} };
+    vecColorPreset[ENCL_AUGUSTA_NORMAL]     = { _float4{0.769f, 0.631f, 0.933f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .8f} };
+    vecColorPreset[ENCL_AUGUSTA_ULT]        = { _float4{1.000f, 0.953f, 0.722f, 1.f}, _float4{0.769f, 0.631f, 0.933f, .8f} };
+    vecColorPreset[ENCL_GALBRENA_NORMAL_L]  = { _float4{0.894f, 0.573f, 0.525f, 1.f}, _float4{0.922f, 0.490f, 0.486f, .8f} };
+    vecColorPreset[ENCL_GALBRENA_NORMAL_R]  = { _float4{0.682f, 0.769f, 0.980f, 1.f}, _float4{0.553f, 0.557f, 0.878f, .8f} };
+    vecColorPreset[ENCL_GALBRENA_ULT]       = { _float4{0.482f, 0.412f, 0.878f, 1.f}, _float4{0.867f, 0.824f, 0.957f, .8f} };
+
+    vecColorPreset[ENCL_STATIC]             = { _float4(1.f, .8f, .8f, .35f), _float4(1.f, .8f, .8f, .35f) }; // 안찼을 때 색상
 
 
 
@@ -758,7 +868,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         }break;
     case CH_AUGUSTA:   
         {
-            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            if      (m_iEnergyBarMode == 0 && fCurPlayerEnergyRatio != 1.f)     /* Normal */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_NORMAL][0];       // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_NORMAL][1]; 
@@ -777,7 +887,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
-            else if (m_iEnergyBarMode == 1)     /* Ult?   */  
+            else if (m_iEnergyBarMode == 0 && fCurPlayerEnergyRatio == 1.f)     /* Ult?   */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_ULT][0];          // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_ULT][1]; 
@@ -785,7 +895,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
                 fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // applying player energy
                 fill(vIsVisible.begin(),
                     (iVisibleBarRange > 16) ? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
                 fill(vIsVisible.end() - 16,
@@ -795,6 +905,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 for (_uint i = 0; i < vIsVisible.size(); i++)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
+            }
+            else if (m_iEnergyBarMode == 1)
+            {
+                fill(vIsVisibleStatic.begin(), vIsVisibleStatic.end(), false);
             }
         }break;
     case CH_GALBRENA:  
@@ -808,8 +922,13 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
                 fill(vIsVisible.begin() + 11, vIsVisible.end() - 26, false);    // isvisible
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 26.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 26.f);      // applying player energy
                 fill(vIsVisible.end() - 26, vIsVisible.end() - 26 + iVisibleBarRange, true);
+
+                // [Galbrena] applying echo energy
+                _uint iVisibleBarRange_Echo = static_cast<_uint>(fGalbEchoEnergy / fGalbMaxEchoEnergy * 11.f);
+                fill(vIsVisible.begin() + 11 - iVisibleBarRange_Echo, vIsVisible.begin() + 11, true);
+
 
                 // applying player energy - not filled
                 for (_uint i = 0; i < vIsVisible.size(); i++)
@@ -825,7 +944,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
                 //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // applying player energy
                 fill(vIsVisible.begin(), vIsVisible.begin() + iVisibleBarRange, true);
 
                 // applying player energy - not filled
@@ -885,8 +1004,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     }
     for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. 앞에서 공명게이지 덜 찼을 떄 움직이지 않는 그것.
     {
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = _float4(1.f, .5f, .5f, .2f);   // 기본값 색상 사용.
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = _float4(1.f, .5f, .5f, .2f);   // 기본값 색상 사용.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];   // 기본값 색상 사용.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];   // 기본값 색상 사용.
         vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);                  // 게이지가 차지 않아 그려지지 않는 부분만 그림.
         //vecVariantStaticMat[i]._31 = false;                                                     // 게이지가 차지 않아 그려지지 않는 부분만 그림.
         vecVariantStaticMat[i]._32 = 1.f;                                                       // 크기 1로 고정
@@ -931,27 +1050,171 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_PLAYER_TRANSMIT),
         true
     };
-
+    
     targetUI->Set_VariantUIDesc(tVariantDesc);  // 인스턴스 123개용 정보 한번에 그리게끔 보냄
 
 #ifdef KSTA_UI_ENERGYBARTEST
     std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] fPlayerEnergy : " << fPlayerEnergy[m_iSelectedCHIndex] << std::endl;
+    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] fPlayerEnergy : " << m_fPlayerEnergy[m_iSelectedCHIndex] << std::endl;
 #endif // KSTA_UI_ENERGYBARTEST
 
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 {
+    if (m_iSelectedCHIndex != CH_AUGUSTA)
+        return;
+
+
     // 중앙 게이지, 칼날 두 개 존재
+    // ksta : 나중에 받아와야 함
+
+    static _uint iSwordEnergy = 0;            // mAX = 2
+
+    static _float fPointEnergy = 0.f;
+    const _float fMaxPointEnergy = 100.f;
+
+    static _float fUltBladeEnergy = 0.f;
+    const _float fMaxUltBladeEnergy = 100.;
 
 
+    CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");          // 인스턴스 0번이 왼쪽, 1번이 오른쪽 칼 자원.
+    CCustom_UI* pPointUI    = Find_ChildObject(L"Frame_Augusta_Inst_CenterPointEnergy");    // 하단부 원형 자원
+
+    CCustom_UI* pUltBladeUI = Find_ChildObject(L"Frame_Augusta_Inst_UltModeEnergy");        // 궁극기 중 사용하는 자원. 단일. 
+
+
+
+    // 칼 자원
+    if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+    {
+        iSwordEnergy++;
+        if (iSwordEnergy > 2) iSwordEnergy = 0;
+    }
+
+    // 원형 자원
+    if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+    {
+        if (fPointEnergy == 100) fPointEnergy = 0;
+        else
+        {
+            fPointEnergy += m_pGameInstance->Rand(10.f, 40.f);
+            if (fPointEnergy >= 100) fPointEnergy = 100;
+        }
+    }
+
+    // 궁극기 자원
+    if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
+    {
+        if (fUltBladeEnergy == 100) fUltBladeEnergy = 0;
+        else
+        {
+            fUltBladeEnergy += m_pGameInstance->Rand(10.f, 40.f);
+            if (fUltBladeEnergy >= 100) fUltBladeEnergy = 100;
+        }
+    }
+
+
+    if (m_iEnergyBarMode == 0)
+    {
+        // 일반 UI
+        pBladeUI    ->Set_Active(true);
+        pPointUI    ->Set_Active(true);
+        pUltBladeUI ->Set_Active(false);
+    }
+
+    else if (m_iEnergyBarMode == 1)
+    {
+        // 궁 UI
+        pBladeUI    ->Set_Active(false);
+        pPointUI    ->Set_Active(false);
+        pUltBladeUI ->Set_Active(true);
+    }
+
+
+
+    // 셰이더에 반영하는 코드 만들어야 함
+
+
+
+    auto bladeDesc = pBladeUI->Get_UIDesc();
+
+    auto ultBladeDesc = pUltBladeUI->Get_UIDesc();
+    
+    // 칼 자원
+    // 그냥 갯수에 따라 보일지 말지 정해주기. alpha pass 이용.
+    switch (iSwordEnergy)
+    {
+    case 0:     
+        bladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 0.0f };
+        bladeDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 0.0f };
+    break;
+    case 1 :    
+        bladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 1.0f };
+        bladeDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 0.0f };
+    break;
+    case 2 :    
+        bladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 1.0f };
+        bladeDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 1.0f };
+    break;
+    }
+
+    pBladeUI->Set_UIDesc(bladeDesc);
+    
+
+
+
+    // 원형 자원
+    // 기존의 쿨타임용 셰이더 활용. vatiant pass 이용.
+
+    // ! 반드시 pass 변경 필요
+    vector<_float4x4> vecPointVariantMat = { _float4x4() };
+
+    vecPointVariantMat[0].m[0][0] = 1 - fPointEnergy / fMaxPointEnergy;
+    vecPointVariantMat[0].m[0][1] = 0.f;
+    vecPointVariantMat[0].m[0][2] = 1.f;
+    vecPointVariantMat[0].m[0][3] = static_cast<_float>(true);
+    *reinterpret_cast<_float4*>(&vecPointVariantMat[0].m[1][0]) = _float4(1.0f, 0.941f, 0.729f, 1.f);
+
+    CCustom_UI::VARIANTREADY_UI_DESC tPointVariantDesc = {
+        vecPointVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
+        true
+    };
+    pPointUI->Set_VariantUIDesc(tPointVariantDesc);
+
+
+
+
+    // 궁극기 자원
+    // 기존 셰이더에 만들어둔 것 활용. alpha pass 이용.
+    _float ultRatio = fUltBladeEnergy / fMaxUltBladeEnergy;
+    ultBladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, ultRatio };
+
+    pUltBladeUI->Set_UIDesc(ultBladeDesc);
 
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 {
-    // 왼쪽 에코바 존재
+    // 왼쪽 에코바는 Update_UI_PlayerEnergyBar 에서 처리
+    // 
+    // 강화상태일 시 하단 게이지 바 존재
+
+
+    // 강화 상태 대응
+    if (m_iSelectedCHIndex != CH_GALBRENA)
+        return;
+
+    if (m_iEnergyBarMode != 1)
+        return;
+
+
+
+
+
+
+
 
 
 

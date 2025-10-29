@@ -665,9 +665,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [1] Circle Cooldown
             // ==============================
             // * matrix info [size : 2] (skillbtn_e, skillbtn_r)
-            // [CDRATE] -
+            // [CDRATE] [COLORMUL_1] [COLORMUL_2] [IS_USECUSTOMCOLOR]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
             // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            float fColorMul1 = In.mExtra0.y;
+            float fColorMul2 = In.mExtra0.z;
+            bool isUseCustomColor = _BOOL(In.mExtra0.w);
+            float4 vCustomColor = In.mExtra1.rgba;
             
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
@@ -682,20 +687,23 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             angle += PI / 2;                            // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
             if (angle < 0) angle += 2 * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
     
-            float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
+            float fCooldownAngle = 2 * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
     
             if (angle <= fCooldownAngle)
             {
                 // 이미 지난 부분은 원래의 색으로
-                Out.vColor.rgb *= 0.5f;
+                Out.vColor.rgb *= fColorMul1;
+                if (isUseCustomColor)
+                    Out.vColor *= vCustomColor;
                 return Out;
             }
             else
             {
                 // 지나지 않은 부분은 좀 더 하얀 색으로
                 if (fCooldown != 0.f)
-                    Out.vColor.rgb *= 0.95f;
-                
+                    Out.vColor.rgb *= fColorMul2;
+                if (isUseCustomColor)
+                    Out.vColor *= vCustomColor;
                 return Out;
             }
             
@@ -707,21 +715,25 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [2] Rect Cooldown (for PartyFrame)
             // ==============================
             // * matrix info [size : 3] (frame_rover, frame_augusta, frame_galbrena)
-            // [CDRATE] -
+            // [CDRATE] [COLORMUL_1] [COLORMUL_2] -
             // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            float fColorMul1 = In.mExtra0.y;
+            float fColorMul2 = In.mExtra0.z;
+            
             
             // g_fLeftCDRate 가 1 일때는 어두운 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
             if (fixedUV.y < fCooldown)
             {
             // 밝게 표시될 부분
+                Out.vColor *= fColorMul1;
                 return Out;
             }
             else
             {
             // 어둡게 표시될 부분
-                Out.vColor *= 0.8f;
+                Out.vColor *= fColorMul2;
                 return Out;
             }
         }
@@ -791,8 +803,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             // 9sector.. 123
             float2 vSize = {
-                length(g_WorldMatrix[0].xyz) * g_UIScale /* fHeight 이거 맞나 */,
-                length(g_WorldMatrix[1].xyz) * g_UIScale /* fHeight 이거 맞나 */,
+                length(g_WorldMatrix[0].xyz) * g_UIScale,
+                length(g_WorldMatrix[1].xyz) * g_UIScale,
             };
             
             float2 border = g_SectorBorder * g_UIScale;

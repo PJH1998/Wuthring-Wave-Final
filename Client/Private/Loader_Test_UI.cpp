@@ -30,6 +30,7 @@ HRESULT CLoader_Test_UI::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Prototype(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     m_pGameInstance->Wait_Thread_End();
 
     return S_OK;
@@ -47,7 +48,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
     // * Json Parse                 // for pre-loading textures
     // UI_HUD
     //_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
-    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD.json"; // ksta
+    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251029_1433.json"; // ksta
     vecDescs.push_back(Load_Tree(strFilePath_UI_HUD));
 
     for (auto& treeDesc : vecDescs)
@@ -58,10 +59,13 @@ HRESULT CLoader_Test_UI::Load_Texture()
             const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
             const   _uint       iNumFiles   = infoDesc.tUIDesc.iNumFiles;
 
+            if (strFileName == L"T_JiabeilinaEnergyBgCombined")
+                int i = 10;
+
             infoDesc.tUIDesc.strFilePath;
             if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
                 CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-                OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+                OutputDebugString(L"[CLoader_Test_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
         }
     }
 
@@ -153,6 +157,14 @@ HRESULT CLoader_Test_UI::Load_Prototype()
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
         CUI_HUD::Create(m_pDevice, m_pContext))))
         OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test_UI::Load_Font()
+{
+    //if (FAILED(m_pGameInstance->Add_Font()))
+    //    OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
     return S_OK;
 }
