@@ -95,6 +95,21 @@ void CAugustaSkillWeapon::Render()
 #endif // _DEBUG
 }
 
+void CAugustaSkillWeapon::Activate(_bool IsActive)
+{
+    SetActivate(IsActive);
+
+    // Griffon의 경우에는 위치를 초기화해준다?
+    /*m_fTrackPosition = 0.f;
+    _matrix mat = XMMatrixIdentity();
+    m_pTransformCom->Set_WorldMatrix(mat);*/
+
+    if (IsActive)
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+    else
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+}
+
 void CAugustaSkillWeapon::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
@@ -110,17 +125,18 @@ void CAugustaSkillWeapon::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
+    CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    RigidbodyDesc.fRadius = 0.2f;
+    RigidbodyDesc.fHeight = 0.6f;
     RigidbodyDesc.eShape = SHAPE::CAPSULE;
     RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
     RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
         , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+        CRASH("Rigidbody");
 }
 
 void CAugustaSkillWeapon::Ready_Variables(const WEAPON_DESC* pDesc)

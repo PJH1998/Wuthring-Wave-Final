@@ -9,8 +9,7 @@ class CAugustaAirAttack final : public CAirState
 private:
     enum AIRATTACKSTATE // 내부에서 전환 가능한 상태.
     {
-        AIR_ATTACK_START,
-        AIR_ATTACK_JUMP,
+        ATTACK,
         MOVE,
         JUMP,
         LAND,

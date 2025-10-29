@@ -13,6 +13,7 @@ private:
         LAND,
         MOVE,
         DOUBLE_JUMP,
+        AIR_ATTACK,
         END
     };
 

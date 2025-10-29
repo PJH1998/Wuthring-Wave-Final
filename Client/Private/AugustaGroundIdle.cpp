@@ -41,7 +41,7 @@ void CAugustaGroundIdle::OnEnter()
         || eIdleType == EIdleType::STAND2)
     {
         _string strBoneName = "Root";
-        m_pAugusta->PartAcitvate(m_iPartType, true);
+        m_pAugusta->PartActivate(m_iPartType, true);
         m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
     }
 
@@ -74,7 +74,7 @@ void CAugustaGroundIdle::OnExit()
 {
     CGroundState::OnExit();
 
-    m_pAugusta->PartAcitvate(m_iPartType, false);
+    m_pAugusta->PartActivate(m_iPartType, false);
 }
 
 void CAugustaGroundIdle::Handle_Input()
@@ -166,12 +166,12 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    /*   if (m_States[UNIQUE_E])
+    if (m_States[UNIQUE_E])
     {
         m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_STRIKE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
         return;
-    }*/
+    }
 
     
 
@@ -256,10 +256,13 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 자동 변환.
     if (m_IsAnimationEnd)
     {
-        EIdleType nextIdle = EIdleType::STAND1_ACTION01;
+        EIdleType nextIdle = EIdleType::STAND1;
 
         switch (static_cast<EIdleType>(m_iCurrentAnimIdx))
         {
+        case EIdleType::STAND1:
+            nextIdle = EIdleType::STAND1_ACTION01;
+            break;
         case EIdleType::STAND1_ACTION01:
             nextIdle = EIdleType::STAND1_ACTION02;
             break;
@@ -292,6 +295,7 @@ void CAugustaGroundIdle::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION01), "Stand1_Action01", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION02), "Stand1_Action02", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION03), "Stand1_Action03", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1), "Stand1", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EIdleType::STAND2), "Stand2", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EIdleType::STANDCHANGE), "StandChange", 1.f, 0.f);

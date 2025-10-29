@@ -54,6 +54,19 @@ void CWeapon::Late_Update(_float fTimeDelta)
     CPartObject::Late_Update(fTimeDelta);
 }
 
+void CWeapon::Activate(_bool IsActive)
+{
+    SetActivate(IsActive);
+    
+    if (nullptr == m_pRigidbodyCom)
+        return;
+    if (IsActive)
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+    else
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+        
+}
+
 
 void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
@@ -61,6 +74,13 @@ void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _flo
     m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
         m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+}
+
+void CWeapon::Clear_Animation(const _string& strAnimName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    m_pModelCom->Clear_Animation(strAnimName);
+    m_fTrackPosition = 0.f;
 }
 
 #pragma region NOTIFY

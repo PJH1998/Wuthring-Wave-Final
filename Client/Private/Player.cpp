@@ -10,7 +10,7 @@
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
-    , m_pGameSystem { CGameSystem::GetInstance()}
+    , m_pGameSystem{ CGameSystem::GetInstance() }
 {
     Safe_AddRef(m_pGameSystem);
 }
@@ -18,7 +18,9 @@ CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CPlayer::CPlayer(const CPlayer& Prototype)
     : CGameObject(Prototype)
+    , m_pGameSystem { CGameSystem::GetInstance()}
 {
+    Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CPlayer::Initialize_Prototype()
@@ -82,12 +84,21 @@ void CPlayer::Priority_Update(_float fTimeDelta)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
 
+#ifdef _DEBUG
     // 임시.
     if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
     {
         m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
         m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
     }
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
+        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
+    }
+#endif // _DEBUG
+
+
         
 
 
@@ -116,19 +127,15 @@ void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
-    // 1. ĳ���� ������Ʈ
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
-    // 2. Ensemble ĳ���� ������Ʈ
     if (m_iEnsembleCharacterIdx != NONE &&
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
 
-    // 3. Sync Transform;
     Sync_Transform();
 
-    // 4. Ű�Է¿��� �ٲٴ� �Է��� Ȯ�� �Ǿ�����?
     Change_CharacterCheck();
 }
 void CPlayer::Render()
@@ -155,10 +162,8 @@ void CPlayer::Change_CharacterCheck()
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
-    // ���� ĳ������ Ensemble Skill State�� ��ȯ
     CCharacter* pCharacter = m_Characters[eCharacter];
 
-    // Ensemble ���� ���� Character�� CallBack ����ϱ�.
     pCharacter->Set_EnsembleEndCallback([this, eCharacter]() {
         this->On_EnsembleEnd(eCharacter);
     });
@@ -167,7 +172,6 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
     switch (eCharacter)
     {
     case CHARACTERTYPE::AUGUSTA:
-        // Augusta�� Ensemble Skill State�� ��ȯ
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
             ENUM_CLASS(ESkillType::SKILLQTE));

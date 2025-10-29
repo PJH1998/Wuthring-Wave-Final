@@ -75,7 +75,7 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // 조금 더 가속 주기?
-    m_pAugusta->Move_Fall(fTimeDelta, 0.5f);
+    m_pAugusta->Move_Fall(fTimeDelta, 1.f);
 
     // 1. 조작키에 따른 이동?
     /*if (m_States[MOVE])

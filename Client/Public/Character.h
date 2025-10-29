@@ -68,7 +68,7 @@ public:
 #pragma region STATE 조건에 사용
 public:
 	/* Parts */
-	virtual void PartAcitvate(_uint iPartType, _bool IsActive) {};
+	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // 뼈 세팅
 
@@ -96,8 +96,10 @@ public:
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 
 	// Animation
+	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	
+
 	// Change State
 	void Change_State(_uint iCategory, _uint iSubState);
 	

@@ -14,7 +14,18 @@ private:
        MOVE,
        DASH,
        STOP,
+       LAND,
        END
+    };
+
+    enum COMBO
+    {
+        NONE = 0,
+        ATTACK01,
+        ATTACK02,
+        ATTACK03,
+        ATTACKOMNI,
+        COMBO_END
     };
 
 private:
@@ -32,6 +43,7 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[SPEICALSTATE::END] = {};
     map<_string, _string> m_PartsAnimations = {};
+    _uint m_iComboCount = { };
 
 private:
     virtual void Handle_Input() override;

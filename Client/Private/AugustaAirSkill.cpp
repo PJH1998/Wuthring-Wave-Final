@@ -39,7 +39,7 @@ void CAugustaAirSkill::OnEnter()
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "WeaponProp05";
-    m_pAugusta->PartAcitvate(m_iPartType, true);
+    m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
     // 7. 다른 애니메이션당 필요한 상태 재정의
@@ -90,7 +90,7 @@ void CAugustaAirSkill::OnExit()
     CAirState::OnExit();
 
     // 콤보 카운트 초기화
-    m_pAugusta->PartAcitvate(m_iPartType, false); 
+    m_pAugusta->PartActivate(m_iPartType, false); 
     m_pAugusta->Set_Gravity(true);
 
     // Sync Bone 초기화

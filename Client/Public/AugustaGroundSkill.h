@@ -17,6 +17,7 @@ private:
        MOVE,
        JUMP, 
        LAND,
+       SKILL_E,
        AIR_ATTACK,
        FALL,
        END

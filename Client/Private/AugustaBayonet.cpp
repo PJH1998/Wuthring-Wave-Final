@@ -45,20 +45,19 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
     // Augusta의 StateMachine에서 애니메이션실행?
 
-
-
-
     // Last :  Combined 행렬 초기화
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
 
-    //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
+    _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
+    m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
 }
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
+
     CWeapon::Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
@@ -90,7 +89,7 @@ void CAugustaBayonet::Render()
     }
 
 #ifdef _DEBUG
-    //m_pRigidbodyCom->Render();
+    m_pRigidbodyCom->Render();
 #endif // _DEBUG
 }
 
@@ -109,17 +108,18 @@ void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
+    CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    RigidbodyDesc.fRadius = 0.3f;
+    RigidbodyDesc.fHeight = 0.5f;
     RigidbodyDesc.eShape = SHAPE::CAPSULE;
     RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
     RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
         , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+        CRASH("Rigidbody");
 }
 
 void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)

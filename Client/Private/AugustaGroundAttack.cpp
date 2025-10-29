@@ -41,7 +41,8 @@ void CAugustaGroundAttack::OnEnter()
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
     _string strBoneName = "WeaponProp02";
-    m_pAugusta->PartAcitvate(m_iPartType, true);
+    m_pAugusta->PartActivate(m_iPartType, true);
+    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 }
 
@@ -75,7 +76,7 @@ void CAugustaGroundAttack::OnExit()
     // 콤보 카운트 초기화
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
-    m_pAugusta->PartAcitvate(m_iPartType, false); 
+    m_pAugusta->PartActivate(m_iPartType, false); 
 }
 
 void CAugustaGroundAttack::Handle_Input()

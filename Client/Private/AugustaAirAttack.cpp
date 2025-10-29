@@ -38,28 +38,43 @@ void CAugustaAirAttack::OnEnter()
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
     // 6. 무기에 Bone 붙이기. + Offset 추가.
-    _string strBoneName = "WeaponProp05";
-    m_pAugusta->PartAcitvate(m_iPartType, true);
-    m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+    _string strBoneName = "";
+
 
     // 7. 다른 애니메이션당 필요한 상태 재정의
     switch (eAirAttackType)
     {
-    case EAirAttackType::AIRATTACK_HACKDOWN_START:
-    {
-        //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f });
-        m_fSpeed = 0.5f;
-        m_pAugusta->Set_Gravity(true);
+        case EAirAttackType::AIRATTACK_HACKDOWN_START:
+        {
+            strBoneName = "WeaponProp05";
+            m_fSpeed = 0.5f;
+            m_pAugusta->Set_Gravity(true);
+            break;
+        }
+
+        case EAirAttackType::AIRATTACK_HACKDOWN_SP_END:
+        {
+            strBoneName = "WeaponProp05";
+            m_fSpeed = 0.f;
+            m_pAugusta->Set_Gravity(true);
+            break;
+        }
+        case EAirAttackType::AIRATTACK_START:
+        {
+            strBoneName = "WeaponProp02";
+            m_pAugusta->Set_Gravity(false);
+            break;
+        }
+        case EAirAttackType::AIRATTACK_END:
+        {
+            strBoneName = "WeaponProp02";
+            m_pAugusta->Set_Gravity(false);
+            break;
+        }
     }
-        break;
-    case EAirAttackType::AIRATTACK_HACKDOWN_SP_END:
-    {
-        //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f });
-        m_fSpeed = 0.f;
-        m_pAugusta->Set_Gravity(true);
-    }
-        break;
-    }
+
+    m_pAugusta->PartActivate(m_iPartType, true);
+    m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
     // 8. Enter에 들어오면 한번 회전.
     m_pAugusta->Rotate_Target(); 
@@ -89,16 +104,14 @@ void CAugustaAirAttack::OnExit()
 {
     CAirState::OnExit();
 
-    // 콤보 카운트 초기화
-    m_pAugusta->PartAcitvate(m_iPartType, false); 
+    m_pAugusta->PartActivate(m_iPartType, false); 
     m_pAugusta->Set_Gravity(true);
-
-    // Sync Bone 초기화
-    //m_pAugusta->Set_ColliderReferenceBone("");
+    m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 }
 
 void CAugustaAirAttack::Handle_Input()
 {
+    m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
         
@@ -119,11 +132,15 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     }
 
     // Attack State에 해당하는 경우 모두 Animation이 존재.
-    m_pAugusta->Play_PartAnimation(
-        m_iPartType,
-        m_Animations[m_iCurrentAnimIdx].strAnimName,
-        fTimeDelta, nullptr
-    );
+    if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+    {
+        m_pAugusta->Play_PartAnimation(
+            m_iPartType,
+            m_Animations[m_iCurrentAnimIdx].strAnimName,
+            fTimeDelta, nullptr
+        );
+    }
+    
 }
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
@@ -149,17 +166,26 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-        if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+        if (eAirAttackType == EAirAttackType::AIRATTACK_START)
+        {
+            if (m_States[ATTACK])
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAirAttackType::AIRATTACK_END);
+                return;
+            }
+        }
+
+        if (!(eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_START))
         {
             if (m_States[MOVE])
             {
-                if (fDistanceToGround <= 0.2f)
+                if (m_States[LAND])
                 {
                     m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
                     return;
                 }
-                if (fDistanceToGround > 0.2f)
+                if (!m_States[LAND])
                 {
                     m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -167,9 +193,10 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 }
             }
         }
+
+
     }
 
-    // 우선순위 순서대로
     if (m_IsAnimationEnd)
     {
         if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_START)
@@ -177,22 +204,17 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END);
             return;
         }
-
-        if (eAirAttackType == EAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+        if (m_States[LAND])
         {
-            if (fDistanceToGround <= 0.2f)
-            {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-                return;
-            }
-            if (fDistanceToGround > 0.2f)
-            {
-                m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-                return;
-            }
-            
+            m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+            return;
+        }
+        if (!m_States[LAND])
+        {
+            m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
+            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+            return;
         }
     }
 
@@ -204,9 +226,9 @@ void CAugustaAirAttack::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.3f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.3f, 30.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.f, 0.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);
 }
 
 void CAugustaAirAttack::State_Reset()

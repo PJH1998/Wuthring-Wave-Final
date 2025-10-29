@@ -54,6 +54,12 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
+
+
+//#ifdef _DEBUG
+//    OutPutDebugMatrix(TEXT("Griffon"), m_CombinedMatrix);
+//#endif // _DEBUG
+
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -96,6 +102,35 @@ void CAugustaGriffon::Render()
 #endif // _DEBUG
 }
 
+void CAugustaGriffon::Activate(_bool IsActive)
+{
+    SetActivate(IsActive);
+    
+    if (IsActive)
+    {
+#ifdef _DEBUG
+        if (nullptr != m_pTransformCom)
+        {
+            _float4x4 matDebug = {}; 
+            XMStoreFloat4x4(&matDebug, m_pTransformCom->Get_WorldMatrix());
+            OutPutDebugMatrix(TEXT("Griffon World"), matDebug);
+        }
+            
+#endif // _DEBUG
+
+        
+        if (nullptr != m_pTransformCom)
+            m_pTransformCom->Set_WorldMatrix(XMMatrixIdentity());
+    }
+    // TrackPosition 도 초기화
+    // Griffon의 경우에는 위치를 초기화해준다?
+    
+   /* if (isactive)
+        m_prigidbodycom->change_layer(enum_class(collisionlayer::none));
+    else
+        m_prigidbodycom->change_layer(enum_class(collisionlayer::attack));*/
+}
+
 void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
@@ -111,17 +146,18 @@ void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
-    RigidbodyDesc.eShape = SHAPE::CAPSULE;
-    RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-    RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
-    RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
+    //CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    //RigidbodyDesc.fRadius = 0.3f;
+    //RigidbodyDesc.fHeight = 0.5f;
+    //RigidbodyDesc.eShape = SHAPE::CAPSULE;
+    //RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
+    //RigidbodyDesc.eType = EMotionType::Kinematic;
+    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
+    //RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-        , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+    //if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
+    //    , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+    //    CRASH("Rigidbody");
 }
 
 void CAugustaGriffon::Ready_Variables(const WEAPON_DESC* pDesc)

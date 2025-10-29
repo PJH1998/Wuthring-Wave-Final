@@ -32,11 +32,13 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 
+public:
+	virtual void Activate(_bool IsActive);
 
 public:
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true); // Part Animation이 있을 경우,
 	void Set_SocketMatrix(const _float4x4* pSocketMatrix) { m_pSocketMatrix = pSocketMatrix; }
-
+	void Clear_Animation(const _string& strAnimName);
 #pragma region NOTIFY
 public:
 	void Collider_Active(_bool isActive);
@@ -56,6 +58,7 @@ protected:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	_float m_fTrackPosition = {};
 	_bool m_IsAnimationEnd = { false };
+	_string m_strCurrentAnimName = {};
 private:
 	void Bind_Resources();
 

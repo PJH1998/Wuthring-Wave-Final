@@ -197,7 +197,7 @@ HRESULT CLoader_Test::Load_Augusta()
 
     wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
-
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
@@ -210,8 +210,7 @@ HRESULT CLoader_Test::Load_Augusta()
 
     wStrModelTag = L"Prototype_Component_Model_Augusta_Griffon";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Griffon/Griffon.dat";
-
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.f), XMConvertToRadians(-90.f), 0.f);
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
     //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))

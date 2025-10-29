@@ -135,7 +135,6 @@ _bool CCharacter::Is_LockOn()
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
     ASSERT_CRASH(m_pTransformCom);
-
     
     //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vCurrentPos = m_pColliderCom->Get_Position();
@@ -179,8 +178,6 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
     }
     return bAnyHit ? fMinDistance : 3.f;
 }
-
-
 
 
 
@@ -319,6 +316,8 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
     
     return IsPlayAnimationEnd;
 }
+
+
 
 
 

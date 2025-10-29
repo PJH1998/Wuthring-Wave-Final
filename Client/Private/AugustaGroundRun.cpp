@@ -179,12 +179,12 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    /*if (m_States[UNIQUE_E])
+    if (m_States[UNIQUE_E])
     {
         m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_STRIKE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
         return;
-    }*/
+    }
 
     // SKILL_E 누르면 
     if (m_States[SKILL_E])

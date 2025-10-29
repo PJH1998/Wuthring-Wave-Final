@@ -184,6 +184,7 @@ void CModel::Render_Gizmo(_fmatrix TransformMatrix)
 	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
+
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
@@ -477,10 +478,15 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 		return;
 
 	m_isChangeAnimation = true;
-	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_RootMatrix = XMMatrixIdentity();
+
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return;
+
+	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 }
 
 BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)

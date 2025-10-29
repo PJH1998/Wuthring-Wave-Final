@@ -23,6 +23,9 @@ public:
 	virtual	void Render() override;
 
 
+public:
+	virtual void Activate(_bool IsActive) override;
+
 private:
 	vector<_uint> m_ShaderPaths = {};
 

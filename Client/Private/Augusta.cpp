@@ -69,13 +69,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-    // 3. 키입력 갱신은 Player 객체에서 관리 중
-    //if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
-    //{
-    //    m_IsLockOn = !m_IsLockOn;
-    //    m_pSpringCamera->Lock_On();
-    //}
-        
     // 4. Parts 갱신
     for (auto& pPart : m_PartObjects)
     {
@@ -189,18 +182,36 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     }
 }
 
-void CAugusta::PartAcitvate(_uint iPartType, _bool IsActive)
+void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
 {
     switch (iPartType)
     {
     case PART_BAYONET:
-        m_pBayonet->SetActivate(IsActive);
+        m_pBayonet->Activate(IsActive);
         break;
     case PART_SKILLWEAPON:
-        m_pSkillWeapon->SetActivate(IsActive);
+        m_pSkillWeapon->Activate(IsActive);
         break;
     case PART_GRIFFON:
-        m_pGriffon->SetActivate(IsActive);
+        m_pGriffon->Activate(IsActive);
+        
+        break;
+    }
+}
+
+void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Clear_Animation(strAnimName);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Clear_Animation(strAnimName);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Clear_Animation(strAnimName);
+
         break;
     }
 }
@@ -220,6 +231,9 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Set_SocketMatrix(pSocketMatrix);
         break;
     }
 }
@@ -381,7 +395,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         case PARTTYPE::PART_SKILLWEAPON:
             vScale = { 1.f, 1.f, 1.f };
             vPosition = { 0.f, 0.f, 0.f };
-            Desc = PlayerData::GetAugustaGriffonCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc = PlayerData::GetAugustaSkillWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
             Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
             Desc.pParentTransform = m_pTransformCom;
             ASSERT_CRASH(Desc.pSocketMatrix);
