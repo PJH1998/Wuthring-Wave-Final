@@ -327,6 +327,10 @@ void CAnimation::Free()
 {
 	__super::Free();
 
+	for (auto& pAnimNotfiy : m_AnimNotifies)
+		Safe_Release(pAnimNotfiy);
+	m_AnimNotifies.clear();
+
 	m_Notifies.clear();
 
 	for (auto& pChannel : m_Channels)
