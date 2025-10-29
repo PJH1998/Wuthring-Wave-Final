@@ -706,6 +706,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
     vector<_bool> vIsVisible = {};
     vIsVisible.resize(iNumSpectrums);
+    vector<_bool> vIsVisibleStatic = {};
+    vIsVisibleStatic.resize(iNumSpectrums);
+
     //vIsVisible.assign(vIsVisible.size(), true);
 
     // 추가로 뒤에서 가만히 있을 스펙트럼도 존재, 이는 현재 공명 게이지에 따라 단순히 마스킹만 될 것. 그러므로 값은 1.f 고정.
@@ -728,8 +731,12 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
                 //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // applying player energy
                 fill(vIsVisible.begin(), vIsVisible.end() - (41 - iVisibleBarRange), true);
+
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
             }
             else if (m_iEnergyBarMode == 1)     /* Ult    */  
             { 
@@ -739,9 +746,14 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
                 fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 16.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 16.f);      // applying player energy
                 fill(vIsVisible.begin() + (16 - iVisibleBarRange), vIsVisible.end() - 25, true);
                 fill(vIsVisible.end() - 16, vIsVisible.end() - (16 - iVisibleBarRange), true);
+
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
+                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
         }break;
     case CH_AUGUSTA:   
@@ -754,12 +766,16 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
                 fill(vIsVisible.begin() + 16, vIsVisible.end() - 16, false);
 
-                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // appling player energy
+                _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 32.f);      // applying player energy
                 fill(vIsVisible.begin(), 
                     (iVisibleBarRange > 16)? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
                 fill(vIsVisible.end() - 16,
                     vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
 
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
+                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
             else if (m_iEnergyBarMode == 1)     /* Ult?   */  
             { 
@@ -774,6 +790,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     (iVisibleBarRange > 16) ? vIsVisible.begin() + 16 : vIsVisible.begin() + iVisibleBarRange, true);
                 fill(vIsVisible.end() - 16,
                     vIsVisible.end() - 16 + ((iVisibleBarRange > 16) ? (iVisibleBarRange - 16) : 0), true);
+
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
+                fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
         }break;
     case CH_GALBRENA:  
@@ -789,6 +810,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 26.f);      // appling player energy
                 fill(vIsVisible.end() - 26, vIsVisible.end() - 26 + iVisibleBarRange, true);
+
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
+                fill(vIsVisibleStatic.begin() + 11, vIsVisibleStatic.end() - 26, false);
             }
             else if (m_iEnergyBarMode == 1)     /* Ult    */  
             { 
@@ -801,6 +827,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // appling player energy
                 fill(vIsVisible.begin(), vIsVisible.begin() + iVisibleBarRange, true);
+
+                // applying player energy - not filled
+                for (_uint i = 0; i < vIsVisible.size(); i++)
+                    vIsVisibleStatic[i] = !vIsVisible[i];
             }
         }break;
     }
@@ -855,10 +885,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     }
     for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. 앞에서 공명게이지 덜 찼을 떄 움직이지 않는 그것.
     {
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = _float4(1.f, 1.f, 1.f, .5f);   // 기본값 색상 사용.
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = _float4(1.f, 1.f, 1.f, .5f);   // 기본값 색상 사용.
-        //vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisible[i]);                        // 게이지가 차지 않아 그려지지 않는 부분만 그림.
-        vecVariantStaticMat[i]._31 = false;                                                     // 게이지가 차지 않아 그려지지 않는 부분만 그림.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = _float4(1.f, .5f, .5f, .2f);   // 기본값 색상 사용.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = _float4(1.f, .5f, .5f, .2f);   // 기본값 색상 사용.
+        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);                  // 게이지가 차지 않아 그려지지 않는 부분만 그림.
+        //vecVariantStaticMat[i]._31 = false;                                                     // 게이지가 차지 않아 그려지지 않는 부분만 그림.
         vecVariantStaticMat[i]._32 = 1.f;                                                       // 크기 1로 고정
     }
 
@@ -884,7 +914,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vExtraBackColor[1] = vExtraColor[1];   vExtraBackColor[1].w = 0.5f;
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraBackColor[0];
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraBackColor[1];
-                }
+                }   
             }
         }
     }
