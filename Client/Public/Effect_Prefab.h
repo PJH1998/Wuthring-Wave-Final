@@ -19,6 +19,7 @@ public:
 		vector<FRAME_DESC> FrameDesc;
 
 		_float2	vLifeTime = { 0.f, 0.f };
+		_string strBoneTag;
 	}PREFAB_DESC;
 
 private:
@@ -35,25 +36,20 @@ public:
 	virtual void Render() override;
 
 public:
-	void Add_Children(void* pArg, EFFECT_TYPE eType);
-	void Remove_Children(_wstring& ChildrenTag);
+	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
-public:
-	void Root_Test();
-
-public:
-	//툴에서 쓰던것들, 없어도 될거 같으면 지워주자
-	_int Get_Children_Count();
-	_wstring Get_Children_Tag(_int iIndex);
-
+private:
 	CGameObject* Get_Children(_wstring ChildrenTag);
+	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType);
 
+public:
 	_wstring	Get_MyTag() {
 		return m_strMyTag;
 	};
 
 public:
-	void Set_FrameDesc(FRAME_DESC* pFrameDesc);
+	void Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix);
+	void Reset_SpawnMatrix();
 
 public:
 	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
@@ -61,15 +57,18 @@ public:
 private:
 
 	_wstring							 m_strMyTag;	 
+	_string								 m_strBoneTag;
 	
-
-	const _float4x4*					 m_pRootMatirx = {};
+	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해주기. 
+	_float4x4							 m_SpawnMatrix = {};
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
 
-
+	//자식들 주소
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
+
+	//자식들정보
 	vector<FRAME_DESC>					 m_vFrames;
 
 public:

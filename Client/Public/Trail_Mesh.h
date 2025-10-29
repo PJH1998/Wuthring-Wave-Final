@@ -1,4 +1,5 @@
 #pragma once
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -38,7 +39,7 @@ private:
 	virtual ~CTrail_Mesh() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype();
+	virtual HRESULT Initialize_Prototype(const TRAILMESH_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Priority_Update(_float fTimeDelta);
 	virtual void Update(_float fTimeDelta);
@@ -49,13 +50,16 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform();
+	void Root_Transform(_fmatrix WorldMatrix);
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CTexture*					m_pColorTextureCom = { nullptr };
 	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
+
+	//원형이 들고있을 정보
+	TRAILMESH_DESC				m_tDesc = {};
 
 	_int						m_iShaderPass = 0;
 		
@@ -74,8 +78,9 @@ private:
 	_float3						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
+	_float						m_fTime = 0.f;
+
 	_bool						m_IsRoot = false;
-	const _float4x4*			m_ParentMatrix = { nullptr };
 	_float4x4					m_ComBindMatrix = {  };
 
 private:
@@ -83,7 +88,7 @@ private:
 	HRESULT Bind_ShaderResources();
 
 public:
-	static CTrail_Mesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CTrail_Mesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const TRAILMESH_DESC* pDesc);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };

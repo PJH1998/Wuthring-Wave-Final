@@ -170,6 +170,7 @@ void CAnimNotifyTool::RenderUI_EditSound()
 
 void CAnimNotifyTool::RenderUI_EditEffect()
 {
+
 }
 
 void CAnimNotifyTool::RenderUI_EditCollider()

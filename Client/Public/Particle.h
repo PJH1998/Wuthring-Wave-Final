@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -9,6 +10,7 @@ class CComputeShader;
 NS_END
 
 NS_BEGIN(Client)
+
 class CParticle final : public CGameObject
 {
 public:
@@ -17,7 +19,7 @@ public:
 		_wstring strTextureTag;
 		_wstring strVIBufferTag;
 
-		_int	fShaderPass = 0.f;
+		_int	iShaderPass = 0.f;
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
@@ -34,7 +36,7 @@ private:
 	virtual ~CParticle() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype();
+	virtual HRESULT Initialize_Prototype(const PARTICLE_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Priority_Update(_float fTimeDelta);
 	virtual void Update(_float fTimeDelta);
@@ -45,7 +47,7 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform();
+	void Root_Transform(_fmatrix WorldMatrix);
 	void Bind_CS_SpriteInfo();
 	
 
@@ -54,6 +56,9 @@ private:
 	CTexture*					m_pTextureCom = { nullptr };
 	CVIBuffer_Point_Instance*	m_pVIBufferCom = { nullptr };
 	CComputeShader*				m_pComputeShader = { nullptr };
+
+	//원형이 가지고 있을 정보
+	PARTICLE_DESC				m_tDesc = {};
 
 	_int						m_iShaderPass = 0;
 	_float3						m_vPos = {};
@@ -64,15 +69,12 @@ private:
 	_int						m_iRow = {};
 	_int						m_iCol = {};
 
-	_bool						m_IsRoot = false;
-	const _float4x4*			m_ParentMatrix = { nullptr };
-
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);
 	HRESULT Bind_ShaderResources();
 
 public:
-	static CParticle* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CParticle* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const PARTICLE_DESC* pDesc);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };

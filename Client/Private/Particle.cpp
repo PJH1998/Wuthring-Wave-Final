@@ -1,4 +1,4 @@
-﻿#include"ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Particle.h"
 
 CParticle::CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -8,44 +8,43 @@ CParticle::CParticle(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CParticle::CParticle(const CParticle& Prototype)
     : CGameObject{ Prototype }
+    , m_tDesc {Prototype.m_tDesc}
 {
 }
 
-HRESULT CParticle::Initialize_Prototype()
+HRESULT CParticle::Initialize_Prototype(const PARTICLE_DESC* pDesc)
 {
+    m_tDesc = *pDesc;
+
     return S_OK;
 }
 
 HRESULT CParticle::Initialize_Clone(void* pArg)
 {
-    PARTICLE_DESC* pDesc = static_cast<PARTICLE_DESC*>(pArg);
+   // PARTICLE_DESC* pDesc = static_cast<PARTICLE_DESC*>(pArg);
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
 
-    if (FAILED(Ready_Components(*pDesc)))
+    if (FAILED(Ready_Components(m_tDesc)))
         return E_FAIL;
 
-    m_iShaderPass = pDesc->fShaderPass;
-    m_vColor = pDesc->vColor;
-    m_vLifeTime = pDesc->vLifeTime;
+    m_iShaderPass = m_tDesc.iShaderPass;
+    m_vColor = m_tDesc.vColor;
+    m_vLifeTime = m_tDesc.vLifeTime;
 
-    _vector Pos = XMVectorSet(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z, 1.f);
+    _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
-    m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
+    m_pTransformCom->Scale(_float3(m_tDesc.vSize.x, m_tDesc.vSize.y, m_tDesc.vSize.z));
 
-
-    m_IsRoot = pDesc->IsRootOn;
-
-    if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-
-    if (m_IsSprite = pDesc->IsSprite)
+    if (m_IsSprite = m_tDesc.IsSprite)
     {
-        m_iRow = pDesc->iRows;
-        m_iCol = pDesc->iCols;
+        m_iRow = m_tDesc.iRows;
+        m_iCol = m_tDesc.iCols;
     }
+
+    m_isActivate = false;
 
     return S_OK;
 }
@@ -67,6 +66,7 @@ void CParticle::Update(_float fTimeDelta)
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
        m_isActivate = false;
+       m_vLifeTime.x = 0.f;
    }
 }
 
@@ -92,13 +92,19 @@ void CParticle::Render()
 
 void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    m_isActivate = true;
-    m_vLifeTime.x = 0.f;
-    m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+    if(_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
+
+     m_vLifeTime.x = 0.f;
+     Root_Transform(WorldMatrix);
+     m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 }
 
-void CParticle::Root_Transform()
+void CParticle::Root_Transform(_fmatrix WorldMatrix)
 {
+    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+    m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
 void CParticle::Bind_CS_SpriteInfo()
@@ -107,8 +113,6 @@ void CParticle::Bind_CS_SpriteInfo()
 
 HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 {
-    //일단 임시 스태틱
-
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
@@ -130,7 +134,8 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 
 HRESULT CParticle::Bind_ShaderResources()
 {
-    if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+
+    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
@@ -160,11 +165,11 @@ HRESULT CParticle::Bind_ShaderResources()
     return S_OK;
 }
 
-CParticle* CParticle::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CParticle* CParticle::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext ,const PARTICLE_DESC* pDesc)
 {
     CParticle* pInstance = new CParticle(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype()))
+    if (FAILED(pInstance->Initialize_Prototype(pDesc)))
     {
         MSG_BOX("Failed to Created : CParticle");
         Safe_Release(pInstance);

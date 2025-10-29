@@ -45,9 +45,6 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     //처음 만들어질 땐 무조건 활성화 ?
     m_isActivate = true;
 
-    XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
-    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
-
     return S_OK;
 }
 
@@ -94,7 +91,9 @@ void CParticle::Render()
 
 void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-     m_isActivate = false;
+    if(_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
+
      m_vLifeTime.x = 0.f;
      Root_Transform(WorldMatrix);
      m_pVIBufferCom->Reset_UAV(m_pComputeShader);
@@ -102,9 +101,9 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CParticle::Root_Transform(_fmatrix WorldMatrix)
 {
-    XMStoreFloat4x4(&m_ComBindMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        WorldMatrix);
+    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+    m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
 void CParticle::Bind_CS_SpriteInfo()
@@ -134,7 +133,8 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 
 HRESULT CParticle::Bind_ShaderResources()
 {
-    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+
+    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))

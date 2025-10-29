@@ -208,7 +208,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillTest();
     }
 
-    pass PS_TraillTest
+    pass PS_TraillTest //2
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -219,7 +219,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillDesh();
     }
 
-    pass PS_TraillTestB
+    pass PS_TraillTestB //3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -228,6 +228,17 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_TraillDeshB();
+    }
+
+    pass PS_Debug //4
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN();
     }
 
 }

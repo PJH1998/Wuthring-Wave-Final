@@ -1,8 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Effect_Prefab.h"
 #include "Particle.h"
-#include "Effect_Mesh.h"
-
+//#include "Effect_Mesh.h"
 #include "Trail_Mesh.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -28,14 +27,25 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_strMyTag = pDesc->strPrefabTag;
+    m_strBoneTag = pDesc->strBoneTag;
+
+    for (size_t i = 0; i < pDesc->ChildrenCount; i++)
+    {
+       _wstring strChildrenTag = pDesc->FrameDesc[i].strChildrenTag;
+       EFFECT_TYPE eType = pDesc->FrameDesc[i].eChildrenType;
+
+       Add_Children(strChildrenTag, eType);
+
+       m_vFrames.push_back(pDesc->FrameDesc[i]);
+    }
     //m_vLifeTime = pDesc->vLifeTime;
-
-    //일단 프리팹 라이프타임 15초로
+    //프리팹 라이프 타임 필요할까 ?
     m_vLifeTime.y = 10.f;
-
-   // Root_Test();
+    m_vLifeTime.x = 0.f;
 
     m_isActivate = false;
+  
+    XMStoreFloat4x4(&m_SpawnMatrix, XMMatrixIdentity());
 
     return S_OK;
 }
@@ -51,8 +61,9 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
     {
         if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
         {
+            _bool IsActivated = true;
             //자식 활성화
-            Get_Children(Frame.strChildrenTag)->SetActivate(true);
+            Get_Children(Frame.strChildrenTag)->Reset(XMLoadFloat4x4(&m_SpawnMatrix), &IsActivated);
 
             Frame.bActivated = true;
         }
@@ -73,6 +84,7 @@ void CEffect_Prefab::Update(_float fTimeDelta)
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
         m_isActivate = false;
+        Reset_Prefab_Info();
     }
     else
         m_vLifeTime.x += fTimeDelta;
@@ -101,56 +113,62 @@ void CEffect_Prefab::Render()
 
 }
 
-void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
+void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+    //여기서 플레이어 월드매트릭스랑, 모델 주소 넘겨받아야함.
+    if (CModel* pModel = static_cast<CModel*>(pArg))
+    {
+        //혹시모를 이전 프리팹 값 있으면 리셋 진행.
+        Reset_SpawnMatrix();
+        Reset_Prefab_Info();
+
+        _float4x4 PlayerMatrix = {};
+        XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+        //프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
+        _float4x4 BoneMatrix = *pModel->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+
+        //위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
+        Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+       
+
+        m_isActivate = true;
+    }
+}
+
+void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType)
 {
     CGameObject* pChildren = {};
-    _wstring strChildrenTag = {};
-    
-    //설정할 자식들 Desc 미리 선언
-    CParticle::PARTICLE_DESC* pParticleDesc = {};
-    CEffect_Mesh::EFFECTMESH_DESC* pMeshDesc = {};
-    CTrail_Mesh::TRAILMESH_DESC* pTrailDesc = {};
-
-    //프리팹 프레임에 미리 추가.
-    FRAME_DESC FrameDesc = {};
+    _wstring strChildrenProtoTag = TEXT("Prototype_GameObject_");
+    _wstring strChildrenNameTag = ChildrenTag;
 
     switch (eType)
     {
     case EFFECT_TYPE::PARTICLE:
-        pParticleDesc = static_cast<CParticle::PARTICLE_DESC*>(pArg);
-        strChildrenTag = pParticleDesc->strMyTag;
 
-        FrameDesc.strChildrenTag = pParticleDesc->strMyTag;
-        FrameDesc.eChildrenType = eType;
+        strChildrenProtoTag += TEXT("Particle_");
+        strChildrenProtoTag += strChildrenNameTag;
 
-        if (pParticleDesc->IsRootOn)
-            pParticleDesc->RootMatrix = m_pRootMatirx;
-
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, pArg));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
-    case EFFECT_TYPE::MESH:
+   /* case EFFECT_TYPE::MESH:
         pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
         strChildrenTag = pMeshDesc->strMyTag;
 
         FrameDesc.strChildrenTag = pMeshDesc->strMyTag;
         FrameDesc.eChildrenType = eType;
 
-        if (pMeshDesc->IsRootOn)
-            pMeshDesc->RootMatrix = m_pRootMatirx;
+         strDefaultTag += TEXT("FXMesh_");
+        strDefaultTag += strChildrenTag;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
-        break;
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
+        break;*/
     case EFFECT_TYPE::TRAIL:
-        pTrailDesc = static_cast<CTrail_Mesh::TRAILMESH_DESC*>(pArg);
-        strChildrenTag = pTrailDesc->strMyTag;
+        strChildrenProtoTag += TEXT("TrailMesh_");
+        strChildrenProtoTag += strChildrenNameTag;
 
-        FrameDesc.strChildrenTag = pTrailDesc->strMyTag;
-        FrameDesc.eChildrenType = eType;
-
-        if (pTrailDesc->IsRootOn)
-            pTrailDesc->RootMatrix = m_pRootMatirx;
-
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_TrailMesh"), PROTOTYPE::GAMEOBJECT, pArg));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
@@ -160,66 +178,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
     if (pChildren == nullptr)
         return;
 
-    //활성화 한번
-    Reset_Prefab_Info();
-    _matrix DefaultMat = {};
-    pChildren->Reset(DefaultMat, nullptr);
-
-    m_EffectChildren.emplace(strChildrenTag, pChildren);
-    m_vFrames.push_back(FrameDesc);
-
-}
-
-void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
-{
-    auto iter = m_EffectChildren.find(ChildrenTag);
-
-    if (iter == m_EffectChildren.end())
-        return;
-
-    Safe_Release(iter->second);
-    m_EffectChildren.erase(iter);
-
-    for (auto iterFrame = m_vFrames.begin(); iterFrame != m_vFrames.end(); )
-    {
-        if (iterFrame->strChildrenTag == ChildrenTag)
-            iterFrame = m_vFrames.erase(iterFrame);
-        else
-            ++iterFrame;
-    }
-}
-
-void CEffect_Prefab::Root_Test()
-{
-   CModel* pModel = static_cast<CModel*>(m_pGameInstance->Get_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Layer_Actor"), 0, TEXT("Com_Model")));
-
-   m_pRootMatirx = pModel->Get_BoneMatrixPtr("Bone_Skirt051_M");
-}
-
-_int CEffect_Prefab::Get_Children_Count()
-{
-    if (m_EffectChildren.empty())
-        return 0;
-
-    return m_EffectChildren.size();
-}
-
-_wstring CEffect_Prefab::Get_Children_Tag(_int iIndex)
-{
-    _int iCheckIndex = 0;
-
-    for (auto iter = m_EffectChildren.begin(); iter != m_EffectChildren.end();)
-    {
-        if (iCheckIndex == iIndex)
-        {
-            return iter->first;
-        } 
-        else
-        {
-            ++iter;
-            ++iCheckIndex;
-        }
-    }
+    m_EffectChildren.emplace(strChildrenNameTag, pChildren);
 }
 
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
@@ -232,16 +191,20 @@ CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
     return iter->second;
 }
 
-void CEffect_Prefab::Set_FrameDesc(FRAME_DESC* pFrameDesc)
+void CEffect_Prefab::Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix)
 {
-    for (auto& Frame : m_vFrames)
-    {
-        if (pFrameDesc->strChildrenTag == Frame.strChildrenTag)
-        {
-            Frame.fActivateTime = pFrameDesc->fActivateTime;
-            return;
-        }
-    }
+    //플레이어 매트릭스는 위치에만 영향받게 설정
+    _vector vPos = XMVectorSet(PlayerMatrix._41, PlayerMatrix._42, PlayerMatrix._43, 1.f);
+
+    _matrix PlayerPosMatrix = XMMatrixTranslationFromVector(vPos);
+
+    XMStoreFloat4x4(&m_SpawnMatrix,
+      XMLoadFloat4x4(&BoneMatrix) * PlayerPosMatrix);
+}
+
+void CEffect_Prefab::Reset_SpawnMatrix()
+{
+    XMStoreFloat4x4(&m_SpawnMatrix, XMMatrixIdentity());
 }
 
 void CEffect_Prefab::Reset_Prefab_Info()
@@ -252,14 +215,14 @@ void CEffect_Prefab::Reset_Prefab_Info()
     }
     m_fCurrentTime = 0.f;
 
-    //일단처리
     m_vLifeTime.x = 0.f;
-    m_isActivate = true;
 
-    _matrix DefaultMat = {};
+    _matrix DefaultMat = XMLoadFloat4x4(&m_SpawnMatrix);
 
+    //초기설정으로 되돌리기 처리만
+    _bool Activate = false;
     for (auto& Children : m_EffectChildren)
-        Children.second->Reset(DefaultMat, nullptr);
+        Children.second->Reset(DefaultMat, &Activate);
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

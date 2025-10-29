@@ -29,6 +29,26 @@ void CGameSystem::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
 	return m_pParser->Create_Map_Model(pFilePath, eLevel);
 }
 
+void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Effect(strFolderPath, eLevel);
+}
+
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectTexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
 void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)
 {
 	m_pFactory->Create_MonsterDummy(eLayerLevel, vPos, PreTransformationMatrix);

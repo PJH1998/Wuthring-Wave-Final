@@ -124,6 +124,16 @@ HRESULT CLoader_Test::Load_MonsterTest()
     return S_OK;
 }
 
+HRESULT CLoader_Test::Load_Effect()
+{
+    m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+    m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+    m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+    m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+
+    return E_NOTIMPL;
+}
+
 HRESULT CLoader_Test::Load_Player()
 {
 

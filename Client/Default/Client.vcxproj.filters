@@ -163,6 +163,15 @@
     <Filter Include="03. GameObject\Effect">
       <UniqueIdentifier>{0bd0ad0c-ce59-4ec2-bbee-d7fe62618a49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab">
+      <UniqueIdentifier>{4d8babfa-3c25-448e-8b30-d7fda6e85546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Particle">
+      <UniqueIdentifier>{5bdbb908-4119-4d78-a40e-4a501a3c2497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\TrailMesh">
+      <UniqueIdentifier>{9c4ff355-bd13-4b3e-94a1-15e0b1f6cb7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -246,7 +255,6 @@
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\MonsterBody.h" />
     <ClInclude Include="..\Public\MonsterTest.h">
       <Filter>03. GameObject\Actor\MonsterTest</Filter>
     </ClInclude>
@@ -374,6 +382,15 @@
     <ClInclude Include="..\Public\AugustaAirAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -441,7 +458,6 @@
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\MonsterBody.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp">
       <Filter>03. GameObject\Actor\MonsterTest</Filter>
     </ClCompile>
@@ -562,6 +578,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaAirAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Prefab.cpp">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

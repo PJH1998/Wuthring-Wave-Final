@@ -19,6 +19,7 @@ public:
 		vector<FRAME_DESC> FrameDesc;
 
 		_float2	vLifeTime = { 0.f, 0.f };
+		_string strBoneTag;
 	}PREFAB_DESC;
 
 private:
@@ -64,6 +65,7 @@ private:
 	
 	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해주기. Reset
 	_float4x4							 m_SpawnMatrix = {};
+
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};

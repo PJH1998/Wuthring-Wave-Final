@@ -25,7 +25,6 @@ namespace Editor
 	const unsigned int		g_iWinSizeY = 1080;
 	const unsigned int		g_iFrame = 250;
 
-
 	typedef struct tagEffectActorDesc
 	{
 		class CAnimationActor* pAnimActor = { nullptr }; // Animation 객체 주소

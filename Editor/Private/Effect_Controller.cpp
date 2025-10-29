@@ -560,6 +560,7 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
 
     PrefabJson["Prefab_Name"] = WStringToString(Prefab->second.strPrefabTag);
     PrefabJson["Children_Number"] = Prefab->second.ChildrenCount;
+    PrefabJson["Bone_Name"] = Prefab->second.strBoneTag;
     
     //배열 저장할려면 array() 사용해야됨.
     json LifeTimeJson = json::array();
@@ -1383,7 +1384,7 @@ void CEffect_Controller::PrefabBinding_Tab()
             if (ImGui::Button("Binding"))
             {;
                 _string BoneName = m_BoneName;
-
+                m_pSelectedPrefabDesc->strBoneTag = m_BoneName;
                 m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
 
                 m_bBoneFlag = false;
@@ -1417,12 +1418,23 @@ void CEffect_Controller::PrefabBinding_Tab()
             {
                 _float fCurrentTrackPos = *m_AnimActorDesc.pAnimActor->Get_TrackPositionPtr(m_AnimActorDesc.strAnimName);
 
-                if (m_fTrackPosition >= fCurrentTrackPos)
+                if (m_fTrackPosition <= fCurrentTrackPos)
                 {
-                    _float4x4 BoneMatrix = *m_AnimActorDesc.pBoneMatrix;
+                    _float4x4 SpawnMatrix = {};
 
-                    m_pSelectedPrefab->Set_SpawnMatrix(BoneMatrix);
+                     if (m_AnimActorDesc.pBoneMatrix == nullptr)
+                        XMStoreFloat4x4(&SpawnMatrix, XMMatrixIdentity());
+                     else
+                     {
+                         _matrix BoneMatrix = XMLoadFloat4x4(m_AnimActorDesc.pBoneMatrix);
+                         _matrix PlayerMatrix = XMLoadFloat4x4(m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr());
+
+                         XMStoreFloat4x4(&SpawnMatrix,  BoneMatrix * PlayerMatrix);
+                     }
+
+                    m_pSelectedPrefab->Set_SpawnMatrix(SpawnMatrix);
                     m_pSelectedPrefab->Reset_Prefab_Info();
+                    m_pSelectedPrefab->SetActivate(true);
                     m_bTest = false;
                 }
             }

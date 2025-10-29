@@ -17,7 +17,14 @@ public:
 
 #pragma region Parser
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	
+	//============================Effect
 	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	void							Create_Effect(const string& strFolderPath, LEVEL eLevel); 
+	void							Create_Prefab(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	//============================Effect
 #pragma endregion
 
 #pragma region Factory

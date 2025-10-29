@@ -154,6 +154,9 @@
     <Filter Include="01. Level\Camera\Sequencer">
       <UniqueIdentifier>{11fc27fe-040e-443a-b82b-7ad88739045e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Flare_Controller">
+      <UniqueIdentifier>{8b171076-f75d-4db9-9502-07e527d0f6cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">

@@ -27,6 +27,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     m_strMyTag = pDesc->strPrefabTag;
+
     //m_vLifeTime = pDesc->vLifeTime;
     //일단 프리팹 라이프타임 15초로
     m_vLifeTime.y = 10.f;
@@ -50,8 +51,9 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
     {
         if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
         {
+            _bool IsActivated = true;
             //자식 활성화
-            Get_Children(Frame.strChildrenTag)->Reset(XMLoadFloat4x4(&m_SpawnMatrix), nullptr);
+            Get_Children(Frame.strChildrenTag)->Reset(XMLoadFloat4x4(&m_SpawnMatrix), &IsActivated);
 
             Frame.bActivated = true;
         }
@@ -251,11 +253,18 @@ void CEffect_Prefab::Reset_Prefab_Info()
     m_fCurrentTime = 0.f;
 
     m_vLifeTime.x = 0.f;
+
+
+#ifdef _DEBUG
+    OutPutDebugMatrix(TEXT("Spawn Matrix : "), m_SpawnMatrix);
+#endif // DEBUG
+
     _matrix DefaultMat = XMLoadFloat4x4(&m_SpawnMatrix);
 
     //초기설정으로 되돌리기 처리만
+    _bool Activate = false;
     for (auto& Children : m_EffectChildren)
-        Children.second->Reset(DefaultMat, this);
+        Children.second->Reset(DefaultMat, &Activate);
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

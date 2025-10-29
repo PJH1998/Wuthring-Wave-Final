@@ -65,6 +65,15 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
+    m_vLifeTime.x += fTimeDelta;
+
+    if (m_vLifeTime.x >= m_vLifeTime.y)
+    {
+        m_fSweep = 0.f;
+        m_isActivate = false;
+        m_fColorSweep = 0.f;
+        m_vLifeTime.x = 0.f;
+    }
 
     if (m_fSweep >= 1.f + m_fSweepWitdh)
     {
@@ -96,16 +105,43 @@ void CTrail_Mesh::Render()
 
 void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+    if (_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
+
     m_fSweep = 0.f;
-    m_isActivate = false;
     m_fColorSweep = 0.f;
+    m_vLifeTime.x = 0.f;
+    Root_Transform(WorldMatrix);
 }
 
 void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
 {
-    XMStoreFloat4x4(&m_ComBindMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        WorldMatrix);
+     if (m_IsRoot)
+     {
+         _matrix SpawnMatrix = WorldMatrix;
+         _float4x4 SpawnW = {};
+         XMStoreFloat4x4(&SpawnW, SpawnMatrix);
+
+         _float fYaw = atan2f(SpawnW._31, SpawnW._33);
+         XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //나중에 설정값 줄수 있게?
+
+         XMVECTOR vPos = XMVectorSet(SpawnW._41, SpawnW._42, SpawnW._43, 1.f);
+         XMMATRIX PosMatrix = XMMatrixTranslationFromVector(vPos);
+
+         SpawnMatrix = RotationMatrix * PosMatrix;
+
+         XMStoreFloat4x4(&m_ComBindMatrix,
+             m_pTransformCom->Get_WorldMatrix() *
+             SpawnMatrix);
+     }
+     else
+     {
+         _vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+         m_pTransformCom->Set_State(STATE::POSITION, vPos);
+
+         XMStoreFloat4x4(&m_ComBindMatrix,
+             m_pTransformCom->Get_WorldMatrix());
+     }
 }
 
 HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)

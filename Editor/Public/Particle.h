@@ -17,10 +17,9 @@ public:
 	typedef struct tagParticleDesc : Engine::EFFECT_DESC
 	{
 		_wstring strTextureTag;
-		//_wstring strShaderTag;
 		_wstring strVIBufferTag;
 
-		_int	fShaderPass = 0.f;
+		_int	fShaderPass = 0;
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
@@ -29,8 +28,6 @@ public:
 		_bool	IsSprite = false;
 		_int    iRows = 0;
 		_int	iCols = 0;
-		//_bool	bSpread = false;
-		//_bool	bDrop = false;
 	}PARTICLE_DESC;
 
 private:
@@ -60,6 +57,8 @@ private:
 	CVIBuffer_Point_Instance*	m_pVIBufferCom = { nullptr };
 	CComputeShader*				m_pComputeShader = { nullptr };
 
+	PARTICLE_DESC				m_tDesc = {};
+
 	_int						m_iShaderPass = 0;
 	_float3						m_vPos = {};
 	_float4						m_vColor = {};
@@ -68,8 +67,6 @@ private:
 	_bool						m_IsSprite = false;
 	_int						m_iRow = {};
 	_int						m_iCol = {};
-
-	_float4x4					m_ComBindMatrix = {  };
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);

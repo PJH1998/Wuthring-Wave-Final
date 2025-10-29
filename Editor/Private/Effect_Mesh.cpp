@@ -90,7 +90,9 @@ void CEffect_Mesh::Render()
 
 void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-   m_isActivate = false;
+    if (_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
+
    m_vLifeTime.x = 0.f;
    Root_Transform(WorldMatrix);
    m_pVIBufferCom->Reset_UAV();
@@ -98,9 +100,13 @@ void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CEffect_Mesh::Root_Transform(_fmatrix WorldMatrix)
 {
+    _matrix SpawnMatrix = WorldMatrix;
+
+    SpawnMatrix.r[3] = XMVectorSetW(SpawnMatrix.r[3], 1.f);
+
     XMStoreFloat4x4(&m_ComBindMatrix,
         m_pTransformCom->Get_WorldMatrix() *
-        WorldMatrix);
+        SpawnMatrix);
 }
 
 HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)

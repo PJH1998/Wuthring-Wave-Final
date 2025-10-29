@@ -152,6 +152,9 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
     if(PrefabJson.contains("Children_Number"))
         PrefabDesc.ChildrenCount = PrefabJson["Children_Number"].get<_int>();
 
+    if(PrefabJson.contains("Bone_Name"))
+        PrefabDesc.strBoneTag = PrefabJson["Bone_Name"].get<string>();
+
     if (PrefabJson.contains("Prefab_LifeTime") && PrefabJson["Prefab_LifeTime"].is_array())
     {
         json LifeTime = PrefabJson["Prefab_LifeTime"];
