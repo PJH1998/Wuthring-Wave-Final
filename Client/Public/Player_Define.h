@@ -31,11 +31,12 @@ namespace PlayerData
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
         //Desc.controllerData = make_pair(eLevel, TEXT("Prototype_Component_Controller_Augusta"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
         Desc.vPosition = vPosition;
-        Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f };
+        Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f};
         
 
         // Desc.pController, pController는 런타임에 주입
@@ -61,6 +62,7 @@ namespace PlayerData
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Bayonet"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Notify/";
         Desc.strBoneName = "WeaponProp02";
         //Desc.strBoneName = "WeaponProp05";
         Desc.eWeaponType = WEAPONTYPE::ANIM;
@@ -80,6 +82,25 @@ namespace PlayerData
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_SkillWeapon"));
+        Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+        Desc.strBoneName = "WeaponProp02";
+        Desc.eWeaponType = WEAPONTYPE::ANIM;
+        Desc.vScale = vScale;
+        Desc.vRotation = vRotation;
+        Desc.vPosition = vPosition;
+        return Desc;
+    }
+
+    static CWeapon::WEAPON_DESC GetAugustaGriffonCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+    {
+        CWeapon::WEAPON_DESC Desc{};
+        Desc.fRotationPerSec = XMConvertToRadians(90.f);
+        Desc.fSpeedPerSec = 10.f;
+        Desc.pSocketMatrix = { nullptr }; // Augusta에서 채워줘야하는 데이터.
+        Desc.pParentTransform = { nullptr }; // Augusta에서 채워줘야하는 데이터.
+        Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+        Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+        Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Griffon"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
         Desc.strBoneName = "WeaponProp02";
         Desc.eWeaponType = WEAPONTYPE::ANIM;

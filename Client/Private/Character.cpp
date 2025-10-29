@@ -92,6 +92,24 @@ void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
 #pragma region STATE
 
 
+_vector CCharacter::Get_LookVector()
+{
+    _vector vLook = XMVectorZero();
+
+    if (nullptr == m_pTransformCom)
+        return vLook;
+
+    vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+ 
+    return vLook;
+}
+
+_vector CCharacter::Get_LookVector_NoPitch()
+{
+    _vector vLook = XMVector3Normalize(XMVectorSetY(Get_LookVector(), 0.f));
+    return vLook;
+}
+
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
     if (nullptr == pTargetTransform)
@@ -164,10 +182,73 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 
 
 
+
+
+_float CCharacter::Get_DistanceToGround(_float3* pNormal, _float fStartYOffset)
+{
+    ASSERT_CRASH(m_pTransformCom);
+
+
+    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vCurrentPos = m_pColliderCom->Get_Position();
+    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+    _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+
+    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
+
+    // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
+    _vector vPositions[5] = {
+        vFootPos + vLook * m_fColliderRadius,  // 앞
+        vFootPos + vRight * m_fColliderRadius, // 왼쪽
+        vFootPos,                              // 중앙
+        vFootPos - vRight * m_fColliderRadius, // 오른쪽
+        vFootPos - vLook * m_fColliderRadius   // 뒤
+    };
+
+
+    _float fMinDistance = 3.f;  // 가장 가까운 거리 저장
+    _bool bAnyHit = false;
+
+    // 5개 지점에서 각각 레이 발사
+    for (_uint i = 0; i < 5; ++i)
+    {
+        _vector vStartPos = vPositions[i];
+        _vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
+
+        _float4 vHitPoint = {};
+        _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
+
+        if (bHit)
+        {
+            bAnyHit = true;
+            _vector vHitPos = XMLoadFloat4(&vHitPoint);
+            _vector vDistance = vPositions[i] - vHitPos;
+            _float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+            // 가장 가까운 거리 저장
+            if (fDistance < fMinDistance)
+                fMinDistance = fDistance;
+
+            XMStoreFloat3(pNormal, XMVector3Normalize(vDistance));
+        }
+    }
+    return bAnyHit ? fMinDistance : 3.f;
+}
+
 _bool CCharacter::Is_Land(_float3* pNormal)
 {
     ASSERT_CRASH(m_pColliderCom);
     return m_pColliderCom->IsLand(pNormal);
+}
+
+_bool CCharacter::Is_Land(_float fLandOffsetY)
+{
+    _float fDistanceToGround = Get_DistanceToGround(0.1f);
+
+    if (fDistanceToGround > fLandOffsetY)
+        return false;
+
+    return true;
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -182,7 +263,7 @@ _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 
     _float fOffsetY = m_fColliderHeight * 2.f + m_fColliderRadius;
     _vector vStart = vPos + XMVectorSet(0.f, fOffsetY, 0.f, 0.f); // 캡슐이니까.
-    _vector vEnd = vStart + vLook * -(m_fColliderRadius + 0.1f); // Collider Radius 고려.
+    _vector vEnd = vStart + vLook * (m_fColliderRadius + 0.1f); // Collider Radius 고려.
 
     _float4 vHitPoint = {};
     _bool bHit = m_pGameInstance->Ray_Cast(vStart, vEnd, &vHitPoint);
@@ -206,8 +287,9 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
     _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 
     // 머리위쪽에서 정면으로 Ray 발사.
-    _vector vStart = vPos + XMVectorSet(0.f, m_fColliderHeight * 1.7f, 0.f, 0.f);
-    _vector vEnd = vStart + vLook * -(m_fColliderRadius + fEndRayOffset);
+    _float fYOffset = m_fColliderHeight + m_fColliderRadius * 1.5f;
+    _vector vStart = vPos + XMVectorSet(0.f, fYOffset, 0.f, 0.f);
+    _vector vEnd = vStart + vLook * (m_fColliderRadius + fEndRayOffset);
 
     _float4 vHitPoint = {};
 
@@ -232,10 +314,13 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
 {
     ASSERT_CRASH(m_pModelCom);
     _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     
     return IsPlayAnimationEnd;
 }
+
+
 
 
 
@@ -403,9 +488,36 @@ void CCharacter::Set_Gravity(_bool IsGravity)
     m_pColliderCom->Set_Gravity(IsGravity);
 }
 
-void CCharacter::Sync_Collider()
+
+
+void CCharacter::Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset)
 {
-    m_IsSyncCollider = true;
+    m_strColliderReferenceBone = strBoneName;
+
+    if (strBoneName.empty())
+    {
+        m_pColliderCom->Sync_Position(m_pTransformCom);
+        m_pColliderCom->Set_Offset(m_vColliderOffSet);    // 원본 오프셋으로 변경.
+        return;
+    }
+        
+    // 1. RootBone의 위치 가져오기.
+    _matrix RootMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr("Root"));
+    _matrix TargetMatrix = XMLoadFloat4x4(m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str()));
+
+    // 2. Root 본의 로컬 위치
+    _vector vRootPos = RootMatrix.r[3];
+    // 3. Target 본의 로컬 위치
+    _vector vTargetPos = TargetMatrix.r[3];
+    _vector vBoneOffset = (vTargetPos - vRootPos) * 0.01f - XMLoadFloat3(&vOffset);
+    
+    _float3 vNewOffset = {};
+    XMStoreFloat3(&vNewOffset, XMLoadFloat3(&m_vColliderOffSet) + vBoneOffset); // 차이만큼 더한다.
+
+    m_pColliderCom->Set_Offset(vNewOffset);
+
+    m_vAnimColliderOffset = vOffset;
+    
 }
 
 

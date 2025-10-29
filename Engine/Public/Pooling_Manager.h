@@ -20,7 +20,7 @@ public:
 
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
-	_bool									IsWorkFinish() { return 0 == m_iLiveWork; }
+	_bool									IsWorkFinish() { return 0 == m_iLiveWork && 0 == m_Works.size(); }
 	void									Wait_Thread_End();
 
 private:

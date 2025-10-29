@@ -72,19 +72,26 @@ public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // 뼈 세팅
 
+	// Look Vector
+	_vector Get_LookVector();
+	_vector Get_LookVector_NoPitch();
+
 	// LockOn
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 
 	// Land Check
 	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_float Get_DistanceToGround(_float3* pNormal, _float fStartYOffset = 0.f);
 	_bool Is_Land(_float3* pNormal = nullptr);
+	_bool Is_Land(_float fLandOffsetY = 0.2f);
 	
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // 벽전환이 가능한가?
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 
 	// KeyInput
+
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 
@@ -109,11 +116,12 @@ public:
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
 
+
 	// Gravity
 	void Set_Gravity(_bool IsGravity);
 
 	// Collider
-	void Sync_Collider();
+	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = {0.f, 0.f, 0.f});
 	
 	
 #pragma endregion
@@ -157,7 +165,8 @@ protected:
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
 
-	_bool m_IsSyncCollider = { false };
+	_string m_strColliderReferenceBone = {}; // strColliderRefBone
+	_float3 m_vAnimColliderOffset = {};
 
 	CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };

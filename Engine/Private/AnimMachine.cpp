@@ -25,12 +25,12 @@ CAnimMachine::CAnimMachine(const CAnimMachine& Prototype)
 	for(auto& pTransition : m_AnyState)
 		Safe_AddRef(pTransition);
 }
-
+#ifdef _DEBUG
 HRESULT CAnimMachine::Initialize_Prototype()
 {
-    return S_OK;
+	return S_OK;
 }
-
+#endif // _DEBUG
 HRESULT CAnimMachine::Initialize_Prototype(const _char* AnimMachineDataPath)
 {
 	ifstream file(AnimMachineDataPath);

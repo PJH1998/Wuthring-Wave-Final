@@ -73,7 +73,7 @@ void CLevel_Test::Ready_Layer_Player()
     //vScale = { 1.f, 1.f, 1.f };
     vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
-    vPosition = { 0.f, 0.f, 0.f };
+    vPosition = { 0.f, -10.f, 50.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;

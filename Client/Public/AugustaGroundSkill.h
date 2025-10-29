@@ -14,10 +14,11 @@ private:
        RISE_ZERO,
        QTE,
        IDLE,
-       RUN,
+       MOVE,
        JUMP, 
        LAND,
        AIR_ATTACK,
+       FALL,
        END
     };
 
@@ -35,13 +36,13 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[SKILLSTATE::END] = {};
+    map<_string, _string> m_PartsAnimations = {};
 
 private:
     virtual void Handle_Input() override;
     void Update_SkillAnimations(_float fTimeDelta);
     void Check_Physcis(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta) ;
-    
     void SetUp_Animations();
     void State_Reset();
 

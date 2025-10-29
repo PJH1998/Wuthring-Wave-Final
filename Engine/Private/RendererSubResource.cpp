@@ -142,13 +142,12 @@ HRESULT CRendererSubResource::Add_SSAO_Blur_BufferData(const _wstring& strRCSTag
     return S_OK;
 }
 
-HRESULT CRendererSubResource::Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+HRESULT CRendererSubResource::Add_SizeData_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
 {
-    BLUR_DATA Data = {};
-    Data.fWidth = fWidth;
-    Data.fHeight = fHeight;
-
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLUR_DATA))))
+    SIZE_DATA Data = {};
+    Data.vSize = _float2(fWidth, fHeight);
+    
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SIZE_DATA", reinterpret_cast<void*>( &Data ), sizeof(SIZE_DATA))))
         return E_FAIL;
 
     return S_OK;

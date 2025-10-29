@@ -1,6 +1,8 @@
 #include "EditorPch.h"
 #include "Sequencer.h"
 
+#include "Event_Scene_Edit.h"
+
 CSequencer::CSequencer()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -25,10 +27,27 @@ void CSequencer::Get(_int index, _int** start, _int** end, _int* type, _uint* co
 
 void CSequencer::Add(_int iType)
 {
-	if(ENUM_CLASS(ITEM_TYPE::CAMERA) == iType)
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Item" });
-	else
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Item" });
+	switch (iType)
+	{
+	case ENUM_CLASS(ITEM_TYPE::ACTION):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Action" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SCENE):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Scene" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SOUND):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Sound" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SCREEN):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Screen" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::ACTOR):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Actor" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::EFFECT):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Effect" });
+		break;
+	}
 
 }
 
@@ -36,14 +55,18 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 {
 	switch (iIndex)
 	{
-	case ENUM_CLASS(ITEM_TYPE::CAMERA):
-		return "Camera";
+	case ENUM_CLASS(ITEM_TYPE::ACTION):
+		return "Action";
+	case ENUM_CLASS(ITEM_TYPE::SCENE):
+		return "Scene";
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		return "Sound";
 	case ENUM_CLASS(ITEM_TYPE::SCREEN):
 		return "Screen";
-	case ENUM_CLASS(ITEM_TYPE::OBJECT):
-		return "Object";
+	case ENUM_CLASS(ITEM_TYPE::ACTOR):
+		return "Actor";
+	case ENUM_CLASS(ITEM_TYPE::EFFECT):
+		return "Effect";
 	}
 }
 
@@ -100,8 +123,7 @@ void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& custo
 	// Add Point
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::DOWN)
 	{
-		if (delegate.miSelectCurve > -1)
-			delegate.AddPoint(delegate.miSelectCurve, ImVec2(fMouseX, fMouseY));
+		delegate.AddPoint(ENUM_CLASS(m_Items[m_iSelectedEntry].eType), ImVec2(fMouseX, fMouseY));
 	}
 }
 
@@ -115,9 +137,9 @@ void CSequencer::CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect
 	m_pDrawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
 	for (_int i = 0; i < 3; ++i)
 	{
-		for (_uint j = 0; j < delegate.mPointCount[i]; ++j)
+		for (_uint j = 0; j < delegate.mPoints.size(); ++j)
 		{
-			_float fFrame = delegate.mPoints[i][j].x;
+			_float fFrame = delegate.mPoints[j].x;
 			cout << fFrame << endl;
 			if (fFrame < m_Items[iIndex].iFrameStart || fFrame > m_Items[iIndex].iFrameEnd)
 				continue;
@@ -189,10 +211,12 @@ void CSequencer::Selectable_Item()
 		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
 			SetUp_Point(item);
 
-		if(ITEM_TYPE::CAMERA == item.eType)
+		if(ITEM_TYPE::ACTION == item.eType)
 			SetUp_Camera(item);
 
 		ImGui::End();
+
+		item.mRampEdit.Update_Frame();
 	}
 }
 
@@ -202,16 +226,36 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 
 	// Translation
 	_int iSelectIndex = item.mRampEdit.miSelectPoint;
-	if (item.mRampEdit.miSelectCurve == 0)
+	iSelectIndex = min(iSelectIndex, static_cast<_int>(item.mRampEdit.GetPointCount(0)));
+
+	CAMERA_FRAME& CameraFrame = item.mRampEdit.mTargetCameraFrames[iSelectIndex];
+
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "[Frame] : %.2f", CameraFrame.fStartFrame);
+	ImGui::Text(szFrame);
+
+	ImGui::Text("[Distance]");
+	ImGui::PushID(100);
+	ImGui::InputFloat("##", &CameraFrame.fDistance);
+	ImGui::PopID();
+
+	ImGui::Text("[Rotation]");
+	ImGui::PushID(101);
+	ImGui::InputFloat4("##", reinterpret_cast<_float*>(&CameraFrame.vRotation));
+	ImGui::PopID();
+
+	ImGui::Text("[Translation]");
+	ImGui::PushID(102);
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&CameraFrame.vTranslation));
+	ImGui::PopID();
+
+	ImGui::SameLine();
+	if (ImGui::Button("Delete"))
 	{
-		ImGui::Text("[Translation]");
-		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mPositions[iSelectIndex]));
-	}
-	// Rotation
-	else if (item.mRampEdit.miSelectCurve == 1)
-	{
-		ImGui::Text("[Rotation]");
-		ImGui::InputFloat3("##", reinterpret_cast<_float*>(&item.mRampEdit.mRotations[iSelectIndex]));
+		item.mRampEdit.mPoints.erase(item.mRampEdit.mPoints.begin() + iSelectIndex);
+		item.mRampEdit.mTargetCameraFrames.erase(item.mRampEdit.mTargetCameraFrames.begin() + iSelectIndex);
+		if (item.mRampEdit.miSelectPoint >= item.mRampEdit.GetPointCount(0))
+			item.mRampEdit.miSelectPoint = -1;
 	}
 
 	ImGui::End();
@@ -219,9 +263,32 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 
 void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 {
-	ImGui::Text("[Camera Setting]");
+	ImGui::Text("[Camera Action Setting]");
+
+	if (ImGui::Button("Action", ImVec2(100.f, 20.f)))
+	{
+		CAMERA_ACTION_EVENT event { item.mRampEdit.mTargetCameraFrames, true, item.iFrameStart, item.iFrameEnd };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
+	}
+	if (ImGui::Button("Reset", ImVec2(100.f, 20.f)))
+	{
+		CAMERA_ACTION_EVENT event{ item.mRampEdit.mTargetCameraFrames, false, item.iFrameStart, item.iFrameEnd };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
+	}
+
+	ImGui::Text("======================");
+
+	if (ImGui::Button("Save"))
+		m_isSave = !m_isSave;
+	if (m_isSave)
+		Save_CameraAction();
+	
+	ImGui::SameLine();
+	if (ImGui::Button("Load"))
+	{
 
 
+	}
 }
 
 void CSequencer::Sorting_Item()
@@ -232,6 +299,59 @@ void CSequencer::Sorting_Item()
 	sort(m_Items.begin(), m_Items.end(), [this](const SEQUENCE_ITEM& srcItem, const SEQUENCE_ITEM& dstItem)->_bool {
 		return srcItem.iFrameStart < dstItem.iFrameStart;
 		});
+}
+
+void CSequencer::Save_CameraAction()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Action/";
+	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+	ImGuiFileDialog::Instance()->OpenDialog("CameraActionSave", "Save File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("CameraActionSave")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ofstream OutputFile(strFilePath);
+
+			json ActionJson;
+
+			SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+
+			ActionJson["Duration"] = item.iFrameEnd - item.iFrameStart;
+
+			ActionJson["Frame"] = json::array();
+
+			vector<CAMERA_FRAME>& Frames = item.mRampEdit.mTargetCameraFrames;
+			for (size_t i = 0; i < Frames.size(); ++i)
+			{
+				json FrameJson;
+				FrameJson["Start"] = Frames[i].fStartFrame;
+				FrameJson["Distance"] = Frames[i].fDistance;
+
+				FrameJson["Rotation"] = json::array();
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.x);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.y);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.z);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.w);
+
+				FrameJson["Translation"] = json::array();
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.x);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
+
+				ActionJson["Frame"].push_back(FrameJson);
+			}
+
+			OutputFile << ActionJson.dump(4);
+
+			OutputFile.close();
+		}
+		m_isSave = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
 }
 
 void CSequencer::Drawing()

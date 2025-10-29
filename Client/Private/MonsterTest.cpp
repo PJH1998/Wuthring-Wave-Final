@@ -108,7 +108,7 @@ void CMonsterTest::Render()
 	//m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
 	_float4 temp{};
-	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + m_pTransformCom->Get_State(STATE::LOOK) * 100.f,&temp);
+	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif
 }
 

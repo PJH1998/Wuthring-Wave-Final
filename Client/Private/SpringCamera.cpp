@@ -89,10 +89,6 @@ void CSpringCamera::Update(_float fTimeDelta)
 		Check_Ray();
 }
 
-void CSpringCamera::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
-{
-}
-
 void CSpringCamera::Late_Update(_float fTimeDelta)
 {
 	//if (CAMERA_STATE::LOCKON == m_eCameraState && 0 == m_TargetTransforms.size())

@@ -290,6 +290,15 @@
     <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
       <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\15. Sequence">
+      <UniqueIdentifier>{f833f2c3-0b09-4497-b45c-7aba0e14b763}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\15. Sequence\Manager">
+      <UniqueIdentifier>{b4286599-8506-4061-a2e1-6b81c2966d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\InputController">
+      <UniqueIdentifier>{e589aac7-526d-4da3-82c4-7b06f2660761}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Factory">
       <UniqueIdentifier>{cc380aed-f6ac-4cc7-a43a-13cf8d3d8a86}</UniqueIdentifier>
     </Filter>
@@ -571,7 +580,6 @@
     <ClInclude Include="..\Public\CollideComponent.h">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\State.h">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClInclude>
@@ -589,6 +597,18 @@
     </ClInclude>
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Sequence_Manager.h">
+      <Filter>01. Utility\15. Sequence\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Sequence.h">
+      <Filter>01. Utility\15. Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\EffectNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\InputController.h">
+      <Filter>01. Utility\04. Component\InputController</Filter>
     </ClInclude>
     <ClInclude Include="..\public\AnimStateFactory.h">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
@@ -847,7 +867,6 @@
     <ClCompile Include="..\Private\CollideComponent.cpp">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\State.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClCompile>
@@ -865,6 +884,18 @@
     </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Sequence_Manager.cpp">
+      <Filter>01. Utility\15. Sequence\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Sequence.cpp">
+      <Filter>01. Utility\15. Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EffectNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\InputController.cpp">
+      <Filter>01. Utility\04. Component\InputController</Filter>
     </ClCompile>
     <ClCompile Include="..\private\AnimStateFactory.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>

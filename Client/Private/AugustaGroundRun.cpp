@@ -92,7 +92,9 @@ void CAugustaGroundRun::Handle_Input()
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
+    
 
+    
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
@@ -153,8 +155,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
-    if (eRunType == ERunType::SPRINT_F)
-        cout << "SPRINT fDistance : " << fDistanceToGround << endl;
 
     if (fDistanceToGround > 1.f)
     {
@@ -170,6 +170,21 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
+    if (m_States[BURST_R])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eBurstType = EBurstType::BURST01;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
+        return;
+    }
+
+    /*if (m_States[UNIQUE_E])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_STRIKE;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+        return;
+    }*/
 
     // SKILL_E 누르면 
     if (m_States[SKILL_E])

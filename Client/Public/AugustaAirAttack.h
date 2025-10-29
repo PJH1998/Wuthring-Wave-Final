@@ -30,7 +30,7 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[AIRATTACKSTATE::END] = {};
-    
+    _float m_fSpeed = {};
     
 
 private:

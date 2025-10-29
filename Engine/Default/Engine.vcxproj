@@ -51,6 +51,7 @@
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
     <ClInclude Include="..\Public\DebugRender.h" />
+    <ClInclude Include="..\Public\EffectNotify.h" />
     <ClInclude Include="..\Public\EnginePch.h" />
     <ClInclude Include="..\Public\Engine_Define.h" />
     <ClInclude Include="..\Public\Engine_Enum.h" />
@@ -83,6 +84,8 @@
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
+    <ClInclude Include="..\Public\Sequence.h" />
+    <ClInclude Include="..\Public\Sequence_Manager.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\Public\State.h" />
     <ClInclude Include="..\Public\StateMachine.h" />
@@ -151,6 +154,7 @@
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />
     <ClCompile Include="..\Private\DebugRender.cpp" />
+    <ClCompile Include="..\Private\EffectNotify.cpp" />
     <ClCompile Include="..\Private\EnginePch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -179,6 +183,8 @@
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
+    <ClCompile Include="..\Private\Sequence.cpp" />
+    <ClCompile Include="..\Private\Sequence_Manager.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
     <ClCompile Include="..\Private\StateMachine.cpp" />

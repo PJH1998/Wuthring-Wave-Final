@@ -16,6 +16,7 @@ enum class EAugustaGroundState : _uint
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
 	SKILL,			// 스킬 (Skill)
 	BURST,			// Burst 상태
+	SPECIAL,		// Burst Special 상태.
 	UNIQUE,			// 캐릭터 고유 상태. (Griffon 등등)
 	LAND,			// 착지 (Land)
 	GROUND_END
@@ -28,6 +29,7 @@ enum class EAugustaAirState : _uint
 	FALL,			// 낙하 (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
 	AIR_ATTACK,		// 공중 공격 (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
 	HOOK,			// 갈고리 (Hook_Up)
+	AIR_SKILL,		// 공중 스킬 (Air
 	AIR_END
 };
 
@@ -141,8 +143,25 @@ enum class EAttackType : _uint
 enum class ESkillType : _uint
 {
 	SKILL_HACK = 0,
+	SKILL_RISE,
 	SKILL_RISE_ZERO,
+	SKILL_STRIKE,
 	SKILLQTE,
+	END
+};
+
+enum class ESpecialType : _uint
+{
+	SPATTACK01 = 0,
+	SPATTACK02,
+	SPATTACK03,
+	SPATTACKOMNI,
+	SPWALK_DASH,
+	SPWALK_DASH_ROOT,
+	SPWALK_F,
+	SPWALK_STAND,
+	SPWALK_STOP_L,
+	SPWALK_STOP_R,
 	END
 };
 
@@ -192,6 +211,12 @@ enum class EAirAttackType : _uint
 	AIRATTACK_HACKDOWN_START,
 	AIRATTACK_LOOP,
 	AIRATTACK_START,
+	END
+};
+
+enum class EAirSkillType : _uint
+{
+
 	END
 };
 #pragma endregion
