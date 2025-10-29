@@ -59,15 +59,15 @@ public:
 
 
 private:
-	CBT_Node* m_pRoot = { nullptr };
+	class CBT_Node*		m_pRoot = { nullptr };
 	CBlackBoard* m_pBlackBoard = {nullptr};
 
 	vector<NodeDat> m_NodesDatas;
 	vector<_string> m_RequireKey;
 
 private:
-	void Load_Tree_Graph(const _char* BehaviorTreeDataPath);
-	CBT_Node* Create_Node(_uint iIndex);
+	void						Load_Tree_Graph(const _char* BehaviorTreeDataPath);
+	class CBT_Node*		Create_Node(_uint iIndex);
 
 public:
 #ifdef _DEBUG
