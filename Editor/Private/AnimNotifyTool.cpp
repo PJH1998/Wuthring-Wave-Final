@@ -71,8 +71,13 @@ void CAnimNotifyTool::Clear()
 
     for (auto& notify : m_ColliderNotifies)
         Safe_Release(notify);
-    
+
     m_ColliderNotifies.clear();
+
+    for (auto& notify : m_EffectNotifies)
+        Safe_Release(notify);
+
+    m_EffectNotifies.clear();
 
 
     
@@ -432,8 +437,6 @@ void CAnimNotifyTool::Render_CurrentNotify()
             _uint iIndex = { 0 };
             for (auto& ColliderNotify : m_ColliderNotifies)
             {
-                // ?꾩옱 猷⑦봽???몃뜳?ㅻ? ?ъ슜?섏뿬 怨좎쑀??ID ?ㅽ깮??留뚮벊?덈떎.
-                // -> ImGui??String ID媛 ?숈씪??媛앹껜媛 媛숈? ?붾㈃???덉쑝硫??ㅻ쪟媛 ?덉쓬.
                 ImGui::PushID(iIndex);
 
                 ColliderNotify->ImGui_Print();
@@ -444,10 +447,8 @@ void CAnimNotifyTool::Render_CurrentNotify()
                     iDeleteIndex = iIndex;
                 }
 
-                // ID ?ㅽ깮???먮옒?濡??섎룎由쎈땲??
                 ImGui::PopID();
 
-                // 留덉?留???ぉ???꾨땺 ?뚮쭔 援щ텇??異붽?
                 if (iIndex < m_ColliderNotifies.size() - 1)
                     ImGui::Separator();
 
@@ -466,11 +467,6 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Light List"))
         {
-            // ?꾩옱 ?좊땲硫붿씠???대쫫怨?珥?Duration 媛믪쓣 留??꾩뿉??異쒕젰
-            /*ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);*/
-
-            // ?꾩옱 ?깅줉??list 援ъ“泥??뺣낫瑜??꾩껜 ?뚮뜑留곹븳??
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -662,7 +658,7 @@ void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
 
 void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
 {
-    // 1. ?꾩옱 濡쒕뱶???곗씠??紐⑤몢 ??젣.
+    // 1. 
     Clear();
 
     ifstream jsonStream(strFilePath.c_str());
@@ -676,10 +672,8 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
     jsonStream >> notifyJson;
     jsonStream.close();
 
-    // 3. ?뚯떛???곗씠?곕줈 硫ㅻ쾭 蹂??梨꾩슦湲?
     m_strCurrentAnimName = notifyJson["AnimName"].get<_string>();
     
-    // 4. "Notifies" 諛곗뿴 ?쒗쉶 諛???낆뿉 留욊쾶 蹂듭썝
     if (notifyJson.contains("Notifies") && notifyJson["Notifies"].is_array())
     {
         for (const auto& notifyObject : notifyJson["Notifies"])
@@ -691,22 +685,16 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
                 // CSoundNotify ?대옒?ㅼ뿉??From_Json ?⑥닔媛 ?덈떎怨?媛??
                 CSoundNotify* pSoundNotify = CSoundNotify::From_Json(notifyObject);
                 m_SoundNotifies.emplace_back(pSoundNotify);
-                
-
-                Safe_AddRef(pSoundNotify);
-
-                // 紐⑤뜽???꾨떖??List 而⑦뀒?대꼫
-                m_AnimNotifies.emplace_back(pSoundNotify);
             }
             else if (type == "Collider")
             {
                 CColliderNotify* pColliderNotify = CColliderNotify::From_Json(notifyObject);
                 m_ColliderNotifies.emplace_back(pColliderNotify);
-
-                Safe_AddRef(pColliderNotify);
-
-                // 紐⑤뜽???꾨떖??List 而⑦뀒?대꼫
-                m_AnimNotifies.emplace_back(pColliderNotify);
+            }
+            else if (type == "Effect")
+            {
+                CEffectNotify* pEffectNofiy = CEffectNotify::From_Json(notifyObject);
+                m_EffectNotifies.emplace_back(pEffectNofiy);
             }
             
             // else if (type == "Effect") { ... }
