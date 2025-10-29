@@ -31,7 +31,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_pTransformCom->Scale(_float3(0.01f, 0.01f, 0.01f));
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
-	m_fAttackCoolTime[0] = 1.f;
+	m_fAttackCoolTime[0] = 3.f;
 	m_fAttackCoolTime[1] = 7.f;
 	m_fAttackCoolTime[2] = 7.f;
 	m_fAttackCoolTime[3] = 5.f;
@@ -64,6 +64,9 @@ void CMonsterTest::Update(_float fTimeDelta)
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
 	//m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+
+	// 2025 10 29	루트모션 앞뒤는 재대로 적용되는데 좌우가 반전됨.
+	//				모델 preMatrix 0,00001로 바로 설정하면 루트모션 값이 크게 튀어나감
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -104,12 +107,13 @@ void CMonsterTest::Render()
 
 	//m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
+	_float4 temp{};
+	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + m_pTransformCom->Get_State(STATE::LOOK) * 100.f,&temp);
 #endif
 }
 
 void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-	//2025.10.27 플레이어 레이어 2번 호출됨
 	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 
@@ -194,10 +198,13 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CBlackBoard* pBlackBoard = CBlackBoard::Create();
 	pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
 	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
+	pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
-	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(1, 3.f); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(0, 5.f); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 3.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 10.f); });
+	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 8.f); });
+	pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(9, 5.f); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -243,8 +250,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 #ifdef _DEBUG
-		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
-		cout << "distance: " << m_fDistance << endl;
+		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		//cout << "distance: " << m_fDistance << endl;
 #endif
 	}
 	for(_uint i = 0; i < 10; ++i)
@@ -256,18 +263,28 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 		m_fDodgeCoolTime -= fTimeDelta;
 }
 
+_bool CMonsterTest::isKnockDown()
+{
+	return m_isParalysis;
+}
+
 _bool CMonsterTest::isAttackEnable()
 {
-	_bool Result = m_isDetecting;
-	for(_uint i = 0; i < 2; ++i)
-	{
-		if(m_fAttackAcc[i] < 0.f)
-		{
-			Result = true;
-			break;
-		}
-	}
-	//Result = m_isDetecting;
+	if(!m_isDetecting)
+		return false;
+	_bool Result{};
+	//for(_uint i = 0; i < 2; ++i)
+	//{
+	//	if(m_fAttackAcc[i] <= 0.f)
+	//	{
+	//		Result = true;
+	//		break;
+	//	}
+	//}
+	if(m_fAttackAcc[0] <= 0.f) Result = true;
+	if(m_fAttackAcc[1] <= 0.f) Result = true;
+	if(m_fAttackAcc[2] <= 0.f) Result = true;
+	if(m_fAttackAcc[9] <= 0.f) Result = true;
 	if(Result)
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
@@ -287,7 +304,9 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
 	_bool Result = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
 	if(Result)
+	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
+	}
 	return Result;
 }
 

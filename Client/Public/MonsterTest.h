@@ -60,6 +60,8 @@ private:
 
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isBlocked{};
+	_bool					m_isParalysis{};
 
 private:
 	HRESULT						Bind_Resources();
@@ -69,6 +71,7 @@ private:
 	void						Reset_Condition(_float fTimeDelta);
 
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
+	_bool						isKnockDown();
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
 	_bool						Attack(_uint iIndex, _float fInterval);

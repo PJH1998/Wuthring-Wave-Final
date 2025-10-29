@@ -24,6 +24,7 @@
     <ClInclude Include="..\Public\AnimNotify.h" />
     <ClInclude Include="..\Public\AnimState.h" />
     <ClInclude Include="..\public\AnimTransition.h" />
+    <ClInclude Include="..\public\AnimStateFactory.h" />
     <ClInclude Include="..\Public\Base.h" />
     <ClInclude Include="..\Public\Behavior_Tree.h" />
     <ClInclude Include="..\Public\BlackBoard.h" />
@@ -122,6 +123,7 @@
     <ClCompile Include="..\Private\AnimMachine.cpp" />
     <ClCompile Include="..\Private\AnimState.cpp" />
     <ClCompile Include="..\private\AnimTransition.cpp" />
+    <ClCompile Include="..\private\AnimStateFactory.cpp" />
     <ClCompile Include="..\Private\Base.cpp" />
     <ClCompile Include="..\Private\Behavior_Tree.cpp" />
     <ClCompile Include="..\Private\BlackBoard.cpp" />

@@ -3,7 +3,7 @@
 #include "BlackBoard.h"
 
 NS_BEGIN(Engine)
-
+class CBT_Node;
 class ENGINE_DLL CBehavior_Tree final : public CComponent
 {
 public:
@@ -46,7 +46,7 @@ private:
 
 public:
 #ifdef _DEBUG
-	HRESULT Initialize_Prototype(class CBT_Node* pRoot);
+	HRESULT Initialize_Prototype(CBT_Node* pRoot);
 #endif // _DEBUG
 	HRESULT Initialize_Prototype(const _char* BehaviorTreeDataPath);
 	virtual HRESULT Initialize_Clone(void* pArg) override;
