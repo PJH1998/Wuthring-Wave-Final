@@ -13,9 +13,9 @@ Texture2D<float4> g_NormalTexture : register(t1);
 Texture2D<float4> g_DepthTexture : register(t2);
 Texture2D<float4> g_NoiseTexture : register(t3);
 
-SamplerState DefaultSampler : register(s1);
-SamplerState PointClampSampler : register(s2);
-SamplerState NoiseSampler : register(s3);
+SamplerState CS_DefaultSampler : register(s1);
+SamplerState CS_PointClampSampler : register(s2);
+SamplerState CS_NoiseSampler : register(s3);
 
 cbuffer SSAO_DATA : register(b0)
 {
@@ -46,7 +46,7 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         return;
     }
     
-    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, vTexcoord);
+    vector vNormal = Compute_Normal(g_NormalTexture, CS_DefaultSampler, vTexcoord);
     vNormal = normalize(mul(vNormal, CamViewMatrix));
     
     float fNoiseTexelSize = 1.f / 512.f;
@@ -55,7 +55,7 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
     vNoiseTexcoord.x = (float) DTID.x * fNoiseTexelSize * 16.f;
     vNoiseTexcoord.y = (float) DTID.y * fNoiseTexelSize * 16.f;
 
-    vector vNoiseNormal = Compute_Normal(g_NoiseTexture, NoiseSampler, vNoiseTexcoord);
+    vector vNoiseNormal = Compute_Normal(g_NoiseTexture, CS_NoiseSampler, vNoiseTexcoord);
     vNoiseNormal = normalize(mul(vNoiseNormal, CamViewMatrix));
     
     float TotalOcclusion = 0.f;
@@ -82,7 +82,7 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         
         float2 vSampleTexcoord = Compute_Texcoord_Proj(vProjPosXY);
             
-        float SampleDepth = g_DepthTexture.SampleLevel(PointClampSampler, vSampleTexcoord, 0).y;
+        float SampleDepth = g_DepthTexture.SampleLevel(CS_PointClampSampler, vSampleTexcoord, 0).y;
         
         if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
         {
@@ -92,7 +92,7 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         {
             float fDistance = abs(SampleDepth - fViewPosZ);
             
-            float4 vSampleViewPos = Compute_ViewPosTexcoord(vSampleTexcoord, g_DepthTexture, DefaultSampler, ProjMatrixInv);
+            float4 vSampleViewPos = Compute_ViewPosTexcoord(vSampleTexcoord, g_DepthTexture, CS_DefaultSampler, ProjMatrixInv);
 
             float fNormalWeight = saturate(dot(vNormal.xyz, normalize(vSampleViewPos.xyz - vViewPos.xyz))); // 현재 노말과 Sample 위치까지의 방향 벡터
             

@@ -24,10 +24,15 @@ public:
 	void							Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix);
 #pragma endregion
 
+#pragma region CHARACTER INFO
+	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
+#pragma endregion
+
+
 private:
 	class		CParser*		m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
-
+	CHARACTER_STAT m_Stats = {};
 public:
 	virtual		void	Free() override;
 

@@ -13,6 +13,7 @@ public:
 		pair<LEVEL, _wstring> modelData = {};
 		pair<LEVEL, _wstring> rigidBodyData = {};
 		_string strBoneName = {};
+		_string strFolderPath = {};
 		WEAPONTYPE eWeaponType = { WEAPONTYPE::END };
 		_float3 vPosition = {};
 		_float3 vScale = {};
@@ -34,6 +35,13 @@ public:
 
 public:
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true); // Part Animation이 있을 경우,
+	void Set_SocketMatrix(const _float4x4* pSocketMatrix) { m_pSocketMatrix = pSocketMatrix; }
+
+#pragma region NOTIFY
+public:
+	void Collider_Active(_bool isActive);
+#pragma endregion
+
 
 protected:
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
@@ -42,9 +50,11 @@ protected:
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CTransform* m_pParentTransform = { nullptr };
 	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
+	
+	_float3 m_vRotationOffset = {};
 
 	const _float4x4* m_pSocketMatrix = { nullptr };
-
+	_float m_fTrackPosition = {};
 	_bool m_IsAnimationEnd = { false };
 private:
 	void Bind_Resources();

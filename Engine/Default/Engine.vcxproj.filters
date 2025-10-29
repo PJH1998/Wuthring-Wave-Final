@@ -296,6 +296,9 @@
     <Filter Include="01. Utility\15. Sequence\Manager">
       <UniqueIdentifier>{b4286599-8506-4061-a2e1-6b81c2966d25}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\InputController">
+      <UniqueIdentifier>{e589aac7-526d-4da3-82c4-7b06f2660761}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -574,7 +577,6 @@
     <ClInclude Include="..\Public\CollideComponent.h">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\State.h">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClInclude>
@@ -598,6 +600,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Sequence.h">
       <Filter>01. Utility\15. Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\EffectNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\InputController.h">
+      <Filter>01. Utility\04. Component\InputController</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -853,7 +861,6 @@
     <ClCompile Include="..\Private\CollideComponent.cpp">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\State.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClCompile>
@@ -877,6 +884,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sequence.cpp">
       <Filter>01. Utility\15. Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EffectNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\InputController.cpp">
+      <Filter>01. Utility\04. Component\InputController</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

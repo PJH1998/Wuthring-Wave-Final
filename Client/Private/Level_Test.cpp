@@ -73,7 +73,7 @@ void CLevel_Test::Ready_Layer_Player()
     //vScale = { 1.f, 1.f, 1.f };
     vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
-    vPosition = { 0.f, 0.f, 0.f };
+    vPosition = { 0.f, -10.f, 50.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
@@ -88,7 +88,9 @@ void CLevel_Test::Ready_Layer_Player()
 
     // 1. Augusta 정의.
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    //Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    
 
     // 2. Galbrena 정의
 

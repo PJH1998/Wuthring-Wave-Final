@@ -46,7 +46,7 @@ void CRendererCS::Add_SRVData(const _char* pConstantName, ID3D11ShaderResourceVi
 		CRASH("Failed Set SRV_DATA");
 
 	SRV_DATA Data = make_pair(pConstantName, pSRV);
-
+	
 	Safe_AddRef(pSRV);
 
 	m_SRVs.push_back(Data);
@@ -56,7 +56,7 @@ ID3D11ShaderResourceView* CRendererCS::Get_SRV(_uint iMipLevel)
 {
 	if (iMipLevel >= m_iMipLevels)
 		return nullptr;
-
+	
 	return m_ComputeSRVs[iMipLevel];
 }
 
@@ -114,11 +114,10 @@ void CRendererCS::Clear(_uint iMipLevel)
 
 void CRendererCS::Clear_Resource()
 {
-	m_Buffers.clear();
-
 	for (auto& pSRV : m_SRVs)
 		Safe_Release(pSRV.second);
 	m_SRVs.clear();
+	m_SRVs.resize(0);
 }
 
 #ifdef _DEBUG
@@ -192,7 +191,6 @@ HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT 
 
 		if (FAILED(m_pDevice->CreateShaderResourceView(m_Texture2Ds[i], &SRVDesc, &m_ComputeSRVs[i])))
 			return E_FAIL;
-
 	}
 
 	return S_OK;

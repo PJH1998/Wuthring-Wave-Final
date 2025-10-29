@@ -23,7 +23,7 @@ public:
 public:
 	void				Register_Notify(const NOTIFY& AnimNotify); 
 
-	void				Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback);
+	void				Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback);
 	
 
 	void				Sort_Notify();

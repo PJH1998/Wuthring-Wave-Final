@@ -19,7 +19,7 @@ HRESULT CAugustaGroundIdle::Initialize(class CGameObject* pOwner)
     m_iCurrentAnimIdx = 0;
 
     // 바꿀 파트타입?
-    m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
+    
     return S_OK;
 }
 
@@ -35,11 +35,14 @@ void CAugustaGroundIdle::OnEnter()
 
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
+    m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
 
     if (eIdleType == EIdleType::STAND1_ACTION01 || eIdleType == EIdleType::STAND1_ACTION02
         || eIdleType == EIdleType::STAND2)
     {
+        _string strBoneName = "Root";
         m_pAugusta->PartAcitvate(m_iPartType, true);
+        m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
     }
 
     // 3. Idle 상태 초기화
@@ -94,15 +97,25 @@ void CAugustaGroundIdle::Handle_Input()
         m_States[MOVE_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
         m_States[MOVE_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
     }
+    
+    // 기본 Skill E
+    m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+    m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
+    m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+    
+    m_States[AIR_ATTACK_E] = m_States[SKILL_E];
+
+    // 그리폰
+    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pAugusta->Is_UniqueGaugeFull();
+
+    // BurstR
+    m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
 }
 
 
 // Idle 간의 전환 지정.
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
-    if (m_pAugusta->Is_LockOn()) // 오히려  안돌리는게 자연스러움?
-    {
-    }
 
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
@@ -136,6 +149,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     _uint iKeyInput = {};
 
+    // 우선순위 순으로 전환조건 진행.
     // 점프
     if (m_States[JUMP])
     {
@@ -143,6 +157,39 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
+    if (m_States[BURST_R])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eBurstType = EBurstType::BURST01;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
+        return;
+    }
+
+    /*   if (m_States[UNIQUE_E])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_STRIKE;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+        return;
+    }*/
+
+    
+
+    if (m_States[SKILL_E])
+    {
+        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAirAttackType::AIRATTACK_HACKDOWN_START;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+        return;
+    }
+
+    // 에코 => 소환 
+    if (m_States[SKILL_Q])
+    {
+       /* m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_RISE;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));*/
+        return;
+    }
+
 
     // 기본 공격
     if (m_States[ATTACK])
@@ -173,8 +220,6 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     if (m_States[MOVE])
     {
         // 더 우선순위 높은 것. => Sprint
-        
-
         // LockOn일때 전환 로직 변경.
         if (m_pAugusta->Is_LockOn())
         {

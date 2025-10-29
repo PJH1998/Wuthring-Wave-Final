@@ -15,6 +15,9 @@ enum class EAugustaGroundState : _uint
 	DASH,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
 	SKILL,			// 스킬 (Skill)
+	BURST,			// Burst 상태
+	SPECIAL,		// Burst Special 상태.
+	UNIQUE,			// 캐릭터 고유 상태. (Griffon 등등)
 	LAND,			// 착지 (Land)
 	GROUND_END
 };
@@ -26,6 +29,7 @@ enum class EAugustaAirState : _uint
 	FALL,			// 낙하 (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
 	AIR_ATTACK,		// 공중 공격 (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
 	HOOK,			// 갈고리 (Hook_Up)
+	AIR_SKILL,		// 공중 스킬 (Air
 	AIR_END
 };
 
@@ -146,6 +150,35 @@ enum class ESkillType : _uint
 	END
 };
 
+enum class ESpecialType : _uint
+{
+	SPATTACK01 = 0,
+	SPATTACK02,
+	SPATTACK03,
+	SPATTACKOMNI,
+	SPWALK_DASH,
+	SPWALK_DASH_ROOT,
+	SPWALK_F,
+	SPWALK_STAND,
+	SPWALK_STOP_L,
+	SPWALK_STOP_R,
+	END
+};
+
+enum class EBurstType : _uint
+{
+	BURST01 = 0,
+	BURST_STAND,
+	END
+};
+
+enum class EUniqueType : _uint // 그리폰 등등..
+{
+	SKILL_STRIKE = 0,
+	SKILL_RISE,
+	END
+};
+
 
 #pragma endregion
 
@@ -178,6 +211,12 @@ enum class EAirAttackType : _uint
 	AIRATTACK_HACKDOWN_START,
 	AIRATTACK_LOOP,
 	AIRATTACK_START,
+	END
+};
+
+enum class EAirSkillType : _uint
+{
+
 	END
 };
 #pragma endregion
