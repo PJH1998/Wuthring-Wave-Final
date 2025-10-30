@@ -11,7 +11,6 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     int iIndexX = DTID.x * 2;
     int iIndexY = DTID.y * 2;
     
-
     float4 vColor = 0.f;
 
     vColor += InputTexture.Load(int3(iIndexX, iIndexY, 0));
