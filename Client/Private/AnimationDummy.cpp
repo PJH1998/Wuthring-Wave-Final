@@ -206,7 +206,7 @@ void CAnimationDummy::Register_AllNotifies(const _string& strFolderPath)
         this->Collider_Active(tag, active); // 'this->'?? ???? ????
     };
 
-    auto effectCallBack = [this](const _wstring& str) {
+    auto effectCallBack = [this](const _wstring& tag) {
         this->Effect_Active();
     };
 

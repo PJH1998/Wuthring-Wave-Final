@@ -27,7 +27,11 @@ public:
 	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 	void		IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
 	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
-
+	void		SetBloomWeight(_int iWeight) { m_iBloomWeight = iWeight; }
+	void		SetBloomIntensity(_float fIntensity);
+	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
+	void		SetDof(_float fDepth, _float fRange, _float fScale);
+	void		SetBlur(_bool IsBlur, BLUR_TYPE eType) { m_IsBlur = IsBlur, m_eBlurType = eType; }
 #endif
 
 private:
@@ -43,9 +47,13 @@ private:
 	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
 	_float							m_fWinSizeX{}, m_fWinSizeY{};
-	//TEST
+	
 	CRendererSubResource*			m_pSubResource = { nullptr };
 	_uint							m_iLUT_Index = {};
+	_int							m_iBloomWeight = { 1 };
+
+	_bool							m_IsBlur = {};
+	BLUR_TYPE						m_eBlurType = { BLUR_TYPE::END };
 
 	recursive_mutex					m_RecursiveMutex;
 
@@ -58,41 +66,45 @@ private:
 
 private:
 	// Viewport Size 
-	void				Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
+	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:
-	void				Render_Priority();
-	void				Render_Shadow();
-	void				Render_Outline();
-	void				Render_NonBlend();
-	void				Render_SSAO();
-	void				Render_Light();
-	void				Render_Combined();
-	void				Render_NonLight();
-	void				Render_Emissive();
-	void				Render_Bloom();
-	void				Render_BloomCombined();
-	void				Render_DistortionObject();
-	void				Render_Blend();
-	void				Render_Distortion();
-	void				Render_LUT();
-	void				Render_Fog();
-	void				Render_UI();
-	void				Render_Fade();
+	void						Render_Priority();
+	void						Render_Shadow();
+	void						Render_Outline();
+	void						Render_NonBlend();
+	void						Render_SSAO();
+	void						Render_Dynamic();
+	void						Render_Light();
+	void						Render_Combined();
+	void						Render_NonLight();
+	void						Render_Emissive();
+	void						Render_Bloom();
+	void						Render_BloomCombined();
+	void						Render_DistortionObject();
+	void						Render_Blend();
+	void						Render_Distortion();
+	void						Render_LUT();
+	void						Render_Fog();
+	void						Render_Blur();
+	void						Render_UI();
+	void						Render_Fade();
 
-	//void				GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType);
-	//void				SSAO_Blur();
+
+	//BLUR
+	void						Render_DOF();
+
 #ifdef _DEBUG
-	void				Render_Debug();
+	void						Render_Debug();
 #endif
 
 private:
-	HRESULT				Ready_RT();
-	HRESULT				Ready_MRT();
-	HRESULT				Ready_SubResource();
-	HRESULT				Ready_RCS();
-
-	HRESULT				Ready_Shadow_DSV();
+	ID3D11ShaderResourceView*	Get_BlurSRV();
+	HRESULT						Ready_RT();
+	HRESULT						Ready_MRT();
+	HRESULT						Ready_SubResource();
+	HRESULT						Ready_RCS();
+	HRESULT						Ready_Shadow_DSV();
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

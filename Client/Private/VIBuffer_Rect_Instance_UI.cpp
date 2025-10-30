@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 
 #include "VIBuffer_Rect_Instance_UI.h"
 #include "GameInstance.h"
@@ -97,7 +97,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
 
-	// ºó °ªÀÌ¶óµµ ÇÒ´çÇØ¾ß ÅÍÁöÁö ¾ÊÀ½..? ksta
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¶ï¿½ ï¿½Ò´ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½..? ksta
 	m_pVBInstanceVertices = new SINGLE_INST_DESC[m_iNumInstance];
 	for (size_t i = 0; i < m_iNumInstance; i++)
 	{
@@ -142,7 +142,7 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 
 	for (size_t i = 0; i < m_iNumAvailableInstance; i++)
 	{
-		// ¿©±â¼­ °¢ InstanceÀÇ À§Ä¡ µî Á¤º¸ Àü´Þ
+		// ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ Instanceï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		pVertices[i].vSInstRight	= vecDescs[i].vSInstRight;
 		pVertices[i].vSInstUp		= vecDescs[i].vSInstUp   ;
 		pVertices[i].vSInstLook		= vecDescs[i].vSInstLook ;

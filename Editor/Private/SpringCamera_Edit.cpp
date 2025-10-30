@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "SpringCamera_Edit.h"
 #include "Event_Scene_Edit.h"
 
@@ -103,9 +103,9 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
 	
-	// 1. °Å¸® Á¦ÇÑÀ¸·Î ÀÎÇÑ °£°Ý º¸Á¤
+	// 1. ï¿½Å¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	Compute_CamPos();
-	// 2. Ray Cast ÀÌ¿ëÇÏ¿© ÁöÇü, ¿ÀºêÁ§Æ®¿Í Ãæµ¹
+	// 2. Ray Cast ï¿½Ì¿ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½æµ¹
 	//Check_Ray();
 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -182,21 +182,21 @@ void CSpringCamera_Edit::Check_Ray()
 
 void CSpringCamera_Edit::Lerp_Move(_float fTimeDelta)
 {
-	// ÇöÀç È¸Àü·®
+	// ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½
 	_vector vPreQuat = m_pTransformCom->Get_Quaternion();
 
-	// ÇöÀç Dir
+	// ï¿½ï¿½ï¿½ï¿½ Dir
 	_vector vDestinationDir = XMVector3Normalize(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition));
 
 	_vector vCamPos = XMLoadFloat4(&m_vLookPosition) - vDestinationDir * m_fDistance;
 	vCamPos.m128_f32[1] += m_fLockOnOffsetY;
 	_vector vLookDir = XMLoadFloat4(&m_vLookPosition) - vCamPos;
-	// ¸ñÇ¥ Dir
+	// ï¿½ï¿½Ç¥ Dir
 	m_pTransformCom->LookDir(vLookDir);
 	_vector vCurrentQuat = m_pTransformCom->Get_Quaternion();
 
 	_float fDot = XMVectorGetX(XMQuaternionDot(vPreQuat, vCurrentQuat));
-	// È¸Àü º¸°£
+	// È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	_float fLerp = {};
 	if (fDot < cos(XMConvertToRadians(25.f)))
 		fLerp = 1.f - exp(-1.f * fTimeDelta * 10.f);

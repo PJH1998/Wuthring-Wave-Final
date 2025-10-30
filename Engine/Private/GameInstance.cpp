@@ -413,6 +413,26 @@ void CGameInstance::Setting_SSAO(_float fRadius, _float fMaxDistance)
 {
 	m_pRenderer->Setting_SSAO(fRadius, fMaxDistance);
 }
+void CGameInstance::SetBloomIntensity(_float fIntensity)
+{
+	m_pRenderer->SetBloomIntensity(fIntensity);
+}
+void CGameInstance::SetBloomWeight(_int iWeight)
+{
+	m_pRenderer->SetBloomWeight(iWeight);
+}
+void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
+{
+	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
+}
+void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
+{
+	m_pRenderer->SetDof(fDepth, fRange, fScale);
+}
+void CGameInstance::Set_Blur(_bool IsBlur, BLUR_TYPE eType)
+{
+	m_pRenderer->SetBlur(IsBlur, eType);
+}
 #endif
 #pragma endregion
 

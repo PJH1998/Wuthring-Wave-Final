@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_Mesh.h"
 #include "GameInstance.h"
 
@@ -22,7 +22,7 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 {
     const MESH_FXINSTANCE_DESC* pMeshDesc = static_cast<const MESH_FXINSTANCE_DESC*>(pDesc);
 
-    m_iInstanceVertexStride = sizeof(VTXINSTACNE_FXMESH);     //ÀÏ´Ü ±¸»óÁßÀÎ°ÍÀÌ °¡´ÉÇÏ´Ù¸é, ÀÌ°ª ½áµµ µÊ. ¾ÈµÇ¸é ±¸Á¶Ã¼ Ãß°¡ÇØÁÖÀÚ.
+    m_iInstanceVertexStride = sizeof(VTXINSTACNE_FXMESH);     //ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´Ù¸ï¿½, ï¿½Ì°ï¿½ ï¿½áµµ ï¿½ï¿½. ï¿½ÈµÇ¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ß°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     m_iNumInstance = pMeshDesc->iNumInstance;
 
     ifstream EMeshFile(pFilePath, ios::binary);
@@ -32,8 +32,8 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
         return E_FAIL;
     }
 
-    //Ã³À½¿¡ ÀÐ´Â Á¤º¸´Â ¸Å½¬°³¼ö, ·ÎµåÆÄÀÏ¿¡¼­ ¸Å½¬°³¼ö ¸ÕÀú ÀÐÀ½.
-    //ÀÌÆåÆ® ¸Å½¬´Â ´ÜÀÏ ¸Å½¬¶ó ÀÌ Á¤º¸°¡ ÇÊ¿ä¾ø¾î¼­ read·Î ³Ñ°ÜÁà¾ßÇÔ.
+    //Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½Ð´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Îµï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    //ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½î¼­ readï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     _uint MeshIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MeshIndex), sizeof(_uint));
 
@@ -47,8 +47,8 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
     m_iNumIndexPerInstance = m_iNumIndices;
     pIndices = new _uint[m_iNumIndices];
 
-    //¸Å½¬ ¹öÆÛ°¡ ÅØ½ºÃ³ °³¼ö ¾Ë°íÀÖ¾î¾ßÇÏ³ª?
-    //¸Å½¬ ÀÌÆåÆ®¿¡ ³Ö¾îÁÙ°Å °°Àºµ¥ ÀÏ´Ü µ¥ÀÌÅÍ ³»ºÎ¿¡¼­ ÀÐÀ»·Á¸é ³Ñ°ÜÁà¾ßÇÔ ³ªÁß¿¡ °í¹ÎÇØº¸°í ¼öÁ¤ÇÏÀÚ
+    //ï¿½Å½ï¿½ ï¿½ï¿½ï¿½Û°ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë°ï¿½ï¿½Ö¾ï¿½ï¿½ï¿½Ï³ï¿½?
+    //ï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½Ù°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     _uint MaterialIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MaterialIndex), sizeof(_uint));
 
@@ -66,7 +66,7 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
     m_iNumVertexBuffers = 2;
     m_iVertexStride = sizeof(VTXMESH);
 
-    // ¹öÅØ½º ¹öÆÛ »ý¼º
+    // ï¿½ï¿½ï¿½Ø½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     D3D11_BUFFER_DESC VBDesc = {};
 
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -85,7 +85,7 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
     Safe_Delete_Array(pVertices);
 
 
-    //ÀÎµ¦½º ¹öÆÛ »ý¼º
+    //ï¿½Îµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
     m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     m_iIndexStride = sizeof(_uint);
@@ -107,14 +107,14 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
     Safe_Delete_Array(pIndices);
 
-    //¸Å½¬ ÀÎ½ºÅÏ½ÌÇØ¼­ »ç¿ëÇØº¸°íÀÚ ÇÏ´ÂÁß.
-    //Å¬·ÐÀÌ °¢°¢ °¡Á®¾ßÇÒ Desc µ¥ÀÌÅÍ ¹öÆÛ (±×¸®±â¿ë)
+    //ï¿½Å½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ï¿½ï¿½.
+    //Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Desc ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½×¸ï¿½ï¿½ï¿½ï¿½)
     m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
     m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
     m_VBInstanceDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     m_VBInstanceDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
     m_VBInstanceDesc.MiscFlags = 0;
-    m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride; //±¸Á¶Ã¼ »çÀÌÁî
+    m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride; //ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     m_pVBInstanceVertices = new VTXINSTACNE_FXMESH[m_iNumInstance];
     FXMESH_SRV* pSRV = new FXMESH_SRV[m_iNumInstance];
@@ -127,14 +127,14 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
             _float fScale = m_pGameInstance->Rand(pMeshDesc->vSize.x, pMeshDesc->vSize.y);
 
-            //°¢ÀÚ ¼Óµµ ´Ù¸£°ÔÇÒ°ÇÁö
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ ï¿½Ù¸ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ï¿½ï¿½
             pSRV[i].fSpeed = m_pGameInstance->Rand(pMeshDesc->vSpeed.x, pMeshDesc->vSpeed.y);
 
-            //¸Å½¬ ¼³Á¤ ´Ù¾çÇÏ°Ô ÇÊ¿äÇÒµí.
-            //ÆÄÆ¼Å¬Ã³·³ ·£´ýÀûÀ¸·Î Èð»Ñ·ÁÁö´Â °Íµµ ÇÊ¿äÇÏ°í , Æ¯Á¤ ¼³Á¤°ª Àâ¾ÆÁÖ¸é ±× ¸Å½¬´Â °£°Ý À¯ÁöµÇ´Â ¸µ »óÅÂ·Î »ý¼º µÇ¸é¼­ Æ¯Á¤ ¹æÇâÀ» º¼ ¼ö ÀÖ°Ô ÇØÁà¾ßÇÒ°Å °°Àºµ¥ ?
-            //ÀÏ´Ü ¿òÁ÷ÀÓÀº ³ªÁß¿¡ ¼³Á¤°ªÀ¸·Î Ãß°¡ÇØÁÖ°í, ÆÄÆ¼Å¬Ã³·³¸¸ ¸¸µå´Â°Å Å×½ºÆ® ¸ÕÀú ÁøÇàÇÏÀÚ.
+            //ï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¾ï¿½ï¿½Ï°ï¿½ ï¿½Ê¿ï¿½ï¿½Òµï¿½.
+            //ï¿½ï¿½Æ¼Å¬Ã³ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Íµï¿½ ï¿½Ê¿ï¿½ï¿½Ï°ï¿½ , Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ç¸é¼­ Æ¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ?
+            //ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ï¿½Ö°ï¿½, ï¿½ï¿½Æ¼Å¬Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½×½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
 
-            //»çÀÌÁî ´ã±â
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
             pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
             pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
             pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
@@ -158,17 +158,17 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
             _float fScale = m_pGameInstance->Rand(pMeshDesc->vSize.x, pMeshDesc->vSize.y);
 
-            //°¢ÀÚ ¼Óµµ ´Ù¸£°ÔÇÒ°ÇÁö
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ ï¿½Ù¸ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ï¿½ï¿½
             pSRV[i].fSpeed = m_pGameInstance->Rand(pMeshDesc->vSpeed.x, pMeshDesc->vSpeed.y);
 
-            //¸µÀÇ ¹ÝÁö¸§ ¹üÀ§ ÃÖ¼Ò, ÃÖ´ë
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½, ï¿½Ö´ï¿½
             _float fMin = pMeshDesc->fRmin;
             _float fMax = pMeshDesc->fRmax;
 
             _float fAngle = {};
             if (!pMeshDesc->IsRingAngle)
             {
-                //¼¾ÅÍ ±âÁØ X,Z¸¦ ¿øÇüÀ¸·Î ÆÛÁö°Ô ÇØÁÖ±â À§ÇØ ¾Þ±ÛÀ» 0 ~ 360µµ°¡ ³ª¿À°Ô ¼³Á¤.
+                //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ X,Zï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ö±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ±ï¿½ï¿½ï¿½ 0 ~ 360ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
                 fAngle = m_pGameInstance->Rand(0.f, XM_2PI);
             }
             else
@@ -179,24 +179,24 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
                 fAngle = fStartRadian + ((_float)Index  / (m_iNumInstance - 1)) * fSweepRadian;
             }
-            //¹ÝÁö¸§ ÃÖ¼Ò,ÃÖ´ë¿¡ °öÇØ MIN~MAXÀÇ ·£´ý°ªÀÌ ³ª¿Ã ¼ö ÀÖ°Ô ÇØÁÖ±â À§ÇÑ °ª.
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½,ï¿½Ö´ë¿¡ ï¿½ï¿½ï¿½ï¿½ MIN~MAXï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½Ö±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
             _float fRatio = m_pGameInstance->Rand(0.f, 1.f);
 
-            //sqrt´Â Á¦°ö±ÙÀ» °è»êÇØÁÖ´Â ÇÔ¼ö, sqrt(4) -> 2 / ¿©±â¼­ ³ª¿Â Radius°¡ ½ÇÁúÀû ¹ÝÁö¸§ÀÇ ·£´ý °ªÀÓ.
+            //sqrtï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½Ô¼ï¿½, sqrt(4) -> 2 / ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ Radiusï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
             _float fRadius = sqrt(fRatio * ((fMax * fMax) - (fMin * fMin)) + (fMin * fMin));
 
-            //AngleÀÇ °ªÀº 0 ~ 360µµ, / 0ÀÌ¸é cos°ª 1, sin 0 / 180ÀÌ¸é -1 , 0 / Áï, ÀÌ°ªÀ¸·Î ¿ÞÂÊ ¿À¸¥ÂÊ À§ ¾Æ·¡ ¹æÇâÀÌ Á¤ÇØÁö´Â °Í.
+            //Angleï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 0 ~ 360ï¿½ï¿½, / 0ï¿½Ì¸ï¿½ cosï¿½ï¿½ 1, sin 0 / 180ï¿½Ì¸ï¿½ -1 , 0 / ï¿½ï¿½, ï¿½Ì°ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
             _float fPosX = fRadius * cosf(fAngle);
             _float fPosZ = fRadius * sinf(fAngle);
 
             pInstanceVertices[i].vTranslation = _float4(
                 pMeshDesc->vCenter.x + fPosX,
-                pMeshDesc->vCenter.y,                   //¼¾ÅÍ°ªÀÏ´Ü ÆòÆòÇÏ°Ô ¼³Á¤, ·£´ý°ª ÁÖ°í½ÍÀ¸¸é °ª ÇÏ³ª ´õ ¹Þ¾Æ¿Í¾ßÇÔ.
+                pMeshDesc->vCenter.y,                   //ï¿½ï¿½ï¿½Í°ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ï³ï¿½ ï¿½ï¿½ ï¿½Þ¾Æ¿Í¾ï¿½ï¿½ï¿½.
                 pMeshDesc->vCenter.z + fPosZ,
                 1.f
             );
 
-            //»çÀÌÁî , È¸Àü ´ã±â.
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ , È¸ï¿½ï¿½ ï¿½ï¿½ï¿½.
             if (pMeshDesc->IsInWard)
             {
                 _vector vPos = XMVectorSet(pInstanceVertices[i].vTranslation.x, pInstanceVertices[i].vTranslation.y, pInstanceVertices[i].vTranslation.z, 0.f);
@@ -244,12 +244,12 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
         }
     }
 
-    //SRV¿ë ¹öÆÛ »ý¼º, ÀÎ½ºÅÏ½Ì °´Ã¼°¡ °¢°¢ °¡Á®¾ßÇÒ °ª, ºÒº¯ÇÒ °ª
+    //SRVï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½Òºï¿½ï¿½ï¿½ ï¿½ï¿½
     D3D11_BUFFER_DESC SRV_BufferDesc = {};
     SRV_BufferDesc.StructureByteStride = sizeof(FXMESH_SRV);
     SRV_BufferDesc.ByteWidth = SRV_BufferDesc.StructureByteStride * m_iNumInstance;
-    SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//ºÒº¯
-    SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//¸®¼Ò½º
+    SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//ï¿½Òºï¿½
+    SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//ï¿½ï¿½ï¿½Ò½ï¿½
     SRV_BufferDesc.CPUAccessFlags = 0;
     SRV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
@@ -261,7 +261,7 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
     Safe_Delete_Array(pSRV);
 
-    //SRV ¹öÆÛ¸¦ ÅëÇØ ¸®¼Ò½ººä »ý¼º
+    //SRV ï¿½ï¿½ï¿½Û¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
     SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
     SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -271,7 +271,7 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
     if (FAILED(m_pDevice->CreateShaderResourceView(m_pSRVBuffer, &SRVDesc, &m_pSRV)))
         return E_FAIL;
 
-    //CB ¹öÆÛ »ý¼º, °ø¿ëÀ¸·Î °¡Áú °ªµé ¼öÁ¤°¡´É°ª
+    //CB ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É°ï¿½
     FXMESH_CB* pCB = new FXMESH_CB;
     pCB->vPivot = pMeshDesc->vPivot;
     pCB->fTimeDelta = 0.1f;
@@ -282,9 +282,9 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
     D3D11_BUFFER_DESC CB_BufferDesc = {};
     CB_BufferDesc.StructureByteStride = 0;
-    CB_BufferDesc.ByteWidth = sizeof(FXMESH_CB);				 //16¹ÙÀÌÆ® ¹è¼ö·Î ¸ÂÃá ±¸Á¶Ã¼ ÇÊ¿ä
-    CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC;					//ÀÚÁÖº¯ÇÔ
-    CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//ºä ¾øÀ½
+    CB_BufferDesc.ByteWidth = sizeof(FXMESH_CB);				 //16ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã¼ ï¿½Ê¿ï¿½
+    CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC;					//ï¿½ï¿½ï¿½Öºï¿½ï¿½ï¿½
+    CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     CB_BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     CB_BufferDesc.MiscFlags = 0;
 
@@ -336,7 +336,7 @@ void CVIBuffer_Mesh::Bind_CSResources(CComputeShader* pCShader, _float fTimeDelt
 {
     D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-    //»ó¼ö¹öÆÛ ¼öÁ¤ÇÒ °ª ÀÖÀ¸¸é ¿©±â¼­ ¼öÁ¤ÇØÁà¾ßÇÔ
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     m_pContext->Map(m_pCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
 
     FXMESH_CB* pCB = static_cast<FXMESH_CB*>(SubResource.pData);
@@ -354,7 +354,7 @@ void CVIBuffer_Mesh::Bind_CSResources(CComputeShader* pCShader, _float fTimeDelt
 
     pCShader->Dispatch(128, 1, 1);
 
-    //GPU¿¡¼­ º¹»ç ÁøÇàÇÔ. ³»ºÎ¿¡¼­ ¿¬»êÀÛ¾÷ÀÌ ³¡³µ´ÂÁö È®ÀÎÇÏ°í º¹»ç ÁøÇàÇØÁØ´Ù°í ÇÔ.
+    //GPUï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø´Ù°ï¿½ ï¿½ï¿½.
     m_pContext->CopyResource(m_pVBInstance, m_pUAVBuffer);
 }
 

@@ -6,40 +6,34 @@
 #define THREAD_Y 16
 #define THREAD_Z 1
 
+#define MAX_RADIUS 15
 #define BLUR_RADIUS 6
 
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
-cbuffer SIZE_DATA : register(b0)
+cbuffer BLUR_DATA : register(b0)
 {
     float2 fOutSize;
-    float2 Paddingblur;
+    int iRadius;
+    float Paddingblur;
 }
 
-static float g_fGaussianWeights[13] =
-{
-    0.020597f, 0.037981f, 0.062950f, 0.093995f, 0.117324f, 0.153170f, 0.163967f, 0.153170f, 0.117324f, 0.093995f, 0.062950f, 0.037981f, 0.020597f
-};
+StructuredBuffer<float> g_Weights : register(t1);
 
-//static const float g_fGaussianWeights[21] =
-//{
-//    0.000012f, 0.000067f, 0.000314f, 0.001188f, 0.003661f, 0.009310f, 0.020597f, 0.037981f, 0.057783f, 0.073649f, 0.080657f, 
-//    0.073649f, 0.057783f, 0.037981f, 0.020597f, 0.009310f, 0.003661f, 0.001188f, 0.000314f, 0.000067f, 0.000012f
-//};
-
-groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * BLUR_RADIUS)];
+groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * MAX_RADIUS)];
+groupshared float4 vSharedColorY[THREAD_Y + (2 * MAX_RADIUS)][THREAD_X];
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void GaussianBlur_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
-    float fBlurRadius = (float) BLUR_RADIUS;
+    float fBlurRadius = iRadius;
     
-    vSharedColorX[GTID.y][GTID.x + BLUR_RADIUS] = InputTexture.Load(int3(DTID.xy, 0));
+    vSharedColorX[GTID.y][GTID.x + iRadius] = InputTexture.Load(int3(DTID.xy, 0));
     
-    if (GTID.x < BLUR_RADIUS)
+    if (GTID.x < iRadius)
     {
-        int3 LeftID = int3(DTID.x - BLUR_RADIUS, DTID.y, 0);
+        int3 LeftID = int3(DTID.x - iRadius, DTID.y, 0);
         int3 RightID = int3(DTID.x + THREAD_X, DTID.y, 0);
         
         if (LeftID.x < 0)
@@ -49,37 +43,35 @@ void GaussianBlur_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
             RightID.x = (int) fOutSize.x - 1;
             
         vSharedColorX[GTID.y][GTID.x] = InputTexture.Load(LeftID);
-        vSharedColorX[GTID.y][GTID.x + THREAD_X + BLUR_RADIUS] = InputTexture.Load(RightID);
+        vSharedColorX[GTID.y][GTID.x + THREAD_X + iRadius] = InputTexture.Load(RightID);
     }
     
     GroupMemoryBarrierWithGroupSync();
 
     float4 vColorX = 0.f;
     
-    for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; ++i)
+    for (int i = -iRadius; i <= iRadius; ++i)
     {
-        int iIndexX = GTID.x + BLUR_RADIUS + i;
+        int iIndexX = GTID.x + iRadius + i;
         
         float4 vSampleColor = vSharedColorX[GTID.y][iIndexX];
         
-        vColorX += vSampleColor * g_fGaussianWeights[i + BLUR_RADIUS];
+        vColorX += vSampleColor * g_Weights[i + iRadius];
     }
     
     OutputTexture[DTID.xy] = vColorX;
 }
 
-groupshared float4 vSharedColorY[THREAD_Y + (2 * BLUR_RADIUS)][THREAD_X];
-
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
-    float fBlurRadius = (float) BLUR_RADIUS;
+    float fBlurRadius = (float) iRadius;
     
-    vSharedColorY[GTID.y + BLUR_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
+    vSharedColorY[GTID.y + iRadius][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
     
-    if (GTID.y < BLUR_RADIUS)
+    if (GTID.y < iRadius)
     {
-        int3 LeftID = int3(DTID.x, DTID.y - BLUR_RADIUS, 0);
+        int3 LeftID = int3(DTID.x, DTID.y - iRadius, 0);
         int3 RightID = int3(DTID.x, DTID.y + THREAD_Y, 0);
         
         if (LeftID.y < 0)
@@ -89,21 +81,135 @@ void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
             RightID.y = (int) fOutSize.y - 1;
             
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
-        vSharedColorY[GTID.y + THREAD_Y + BLUR_RADIUS][GTID.x] = InputTexture.Load(RightID);
+        vSharedColorY[GTID.y + THREAD_Y + iRadius][GTID.x] = InputTexture.Load(RightID);
     }
     
     GroupMemoryBarrierWithGroupSync();
     
     float4 vColorY = 0.f;
     
-    for (int j = -BLUR_RADIUS; j <= BLUR_RADIUS; ++j)
+    for (int j = -iRadius; j <= iRadius; ++j)
     {
-        int iIndexY = GTID.y + BLUR_RADIUS + j;
+        int iIndexY = GTID.y + iRadius + j;
         
         float4 vSampleColor = vSharedColorY[iIndexY][GTID.x];
         
-        vColorY += vSampleColor * g_fGaussianWeights[j + BLUR_RADIUS];
+        vColorY += vSampleColor * g_Weights[j + iRadius];
     }
     
     OutputTexture[DTID.xy] = vColorY;
+}
+
+cbuffer DOF_DATA : register(b1)
+{
+    float2 fOutSizeDof;
+    float2 PaddingDOF;
+}
+
+Texture2D<float4> DepthTexture : register(t1);
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void DOF_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+{
+    float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
+    
+    vSharedColorX[GTID.y][GTID.x + MAX_RADIUS] = InputTexture.Load(int3(DTID.xy, 0));
+    
+    if (GTID.x < MAX_RADIUS)
+    {
+        int3 LeftID = int3(DTID.x - MAX_RADIUS, DTID.y, 0);
+        int3 RightID = int3(DTID.x + THREAD_X, DTID.y, 0);
+        
+        if (LeftID.x < 0)
+            LeftID.x = 0;
+        
+        if (RightID.x >= (int) fOutSizeDof.x)
+            RightID.x = (int) fOutSizeDof.x - 1;
+            
+        vSharedColorX[GTID.y][GTID.x] = InputTexture.Load(LeftID);
+        vSharedColorX[GTID.y][GTID.x + THREAD_X + MAX_RADIUS] = InputTexture.Load(RightID);
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+
+    float fCoc = vDofData.x;
+    
+    int iDofRadius = fCoc * (float) MAX_RADIUS;
+    
+    if(fCoc <= vDofData.z)
+    {
+        OutputTexture[DTID.xy] = vSharedColorX[GTID.y][GTID.x + MAX_RADIUS];
+        return;
+    }
+    
+    float fGaussianSigma = (float) iDofRadius / 3.f;
+    
+    float4 vColorX = 0.f;
+    float fTotalWeight = 0.f;
+    for (int i = -iDofRadius; i <= iDofRadius; ++i)
+    {
+        int iIndexX = GTID.x + MAX_RADIUS + i;
+        
+        float4 vSampleColor = vSharedColorX[GTID.y][iIndexX];
+        
+        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
+        
+        vColorX += vSampleColor * fGaussianWeight;
+        fTotalWeight += fGaussianWeight;
+    }
+    
+    OutputTexture[DTID.xy] = vColorX / fTotalWeight;
+}
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void DOF_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+{
+    float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
+    
+    vSharedColorY[GTID.y + MAX_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
+
+    if (GTID.y < MAX_RADIUS)
+    {
+        int3 LeftID = int3(DTID.x, DTID.y - MAX_RADIUS, 0);
+        int3 RightID = int3(DTID.x, DTID.y + THREAD_Y, 0);
+        
+        if (LeftID.y < 0)
+            LeftID.y = 0;
+        
+        if (RightID.y >= (int) fOutSizeDof.y)
+            RightID.y = (int) fOutSizeDof.y - 1;
+            
+        vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
+        vSharedColorY[GTID.y + THREAD_Y + MAX_RADIUS][GTID.x] = InputTexture.Load(RightID);
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+
+    float fCoc = vDofData.x;
+    
+    int iDofRadius = fCoc * (float) MAX_RADIUS;
+    
+    if (fCoc <= vDofData.z)
+    {
+        OutputTexture[DTID.xy] = vSharedColorY[GTID.y + MAX_RADIUS][GTID.x];
+        return;
+    }
+    
+    float fGaussianSigma = (float) iDofRadius / 3.f;
+    
+    float4 vColorY = 0.f;
+    float fTotalWeight = 0.f;
+    for (int i = -iDofRadius; i <= iDofRadius; ++i)
+    {
+        int iIndexY = GTID.y + MAX_RADIUS + i;
+        
+        float4 vSampleColor = vSharedColorY[iIndexY][GTID.x];
+
+        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
+
+        vColorY += vSampleColor * fGaussianWeight;
+        fTotalWeight += fGaussianWeight;
+    }
+    
+    OutputTexture[DTID.xy] = vColorY / fTotalWeight;
 }

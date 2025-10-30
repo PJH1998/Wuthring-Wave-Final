@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Define.h"
 #include "StateCategory_Enum.h"
 
@@ -46,12 +46,7 @@ enum class EAugustaClimbState : _uint
 // Augusta Hit 하위 상태
 enum class EAugustaHitState : _uint
 {
-	HIT_SMALL = 0,		// 약한 피격 (Behit_S_L/R, Behit_B_L/R)
-	HIT_FLY,			// 날아가는 피격 (Behit_Fly_Start/Loop/Fall)
-	HIT_PUSH,			// 밀리는 피격 (Behit_Push_Start/Loop/Fall)
-	HIT_HOVER,			// 공중 피격 (Behit_Hover, Behit_Press)
-	HIT_CAPTURED,		// 포획 (Captured)
-	HIT_DEATH,			// 사망 (Death, StandUp)
+	HIT = 0,
 	HIT_END
 };
 
@@ -61,13 +56,14 @@ enum class EAugustaHitState : _uint
 #pragma region DEPTH2
 
 #pragma region GROUND
-enum class EIdleType : _uint
+enum class EAugustaIdleType : _uint
 {
 	STAND1_ACTION01 = 0,
 	STAND1_ACTION02,
 	STAND1_ACTION03,
 	STAND1_TURN_L90D,
 	STAND1_TURN_R90D,
+	STAND1,
 	STAND2,
 	STAND_CONTROL,
 	STANDCHANGE,
@@ -75,7 +71,7 @@ enum class EIdleType : _uint
 	END
 };
 
-enum class ERunType : _uint
+enum class EAugustaRunType : _uint
 {
 	RUN_B = 0,
 	RUN_F,
@@ -96,7 +92,7 @@ enum class ERunType : _uint
 	END
 };
 
-enum class ELandType : _uint
+enum class EAugustaLandType : _uint
 {
 	LAND_LIGHT = 0,     // 약한 착지
 	LAND_HEAVY, // 강한 착지
@@ -111,7 +107,7 @@ enum class ELandType : _uint
 };
 
 
-enum class EDashType : _uint
+enum class EAugustaDashType : _uint
 {
 	MOVE_B = 0, 
 	MOVE_F,
@@ -122,7 +118,7 @@ enum class EDashType : _uint
 
 };
 
-enum class EAttackType : _uint
+enum class EAugustaAttackType : _uint
 {
 	ATTACK01 = 0,
 	ATTACK02,
@@ -140,7 +136,7 @@ enum class EAttackType : _uint
 	END
 };
 
-enum class ESkillType : _uint
+enum class EAugustaSkillType : _uint
 {
 	SKILL_HACK = 0,
 	SKILL_RISE,
@@ -150,7 +146,7 @@ enum class ESkillType : _uint
 	END
 };
 
-enum class ESpecialType : _uint
+enum class EAugustaSpecialType : _uint
 {
 	SPATTACK01 = 0,
 	SPATTACK02,
@@ -165,14 +161,14 @@ enum class ESpecialType : _uint
 	END
 };
 
-enum class EBurstType : _uint
+enum class EAugustaBurstType : _uint
 {
 	BURST01 = 0,
 	BURST_STAND,
 	END
 };
 
-enum class EUniqueType : _uint // 그리폰 등등..
+enum class EAugustaUniqueType : _uint // 그리폰 등등..
 {
 	SKILL_STRIKE = 0,
 	SKILL_RISE,
@@ -183,7 +179,7 @@ enum class EUniqueType : _uint // 그리폰 등등..
 #pragma endregion
 
 #pragma region AIR
-enum class EJumpType : _uint
+enum class EAugustaJumpType : _uint
 {
 	JUMP_LOOP = 0,
 	JUMP_RUN_LF, // 앞으로
@@ -195,7 +191,7 @@ enum class EJumpType : _uint
 	END
 };
 
-enum class EFallType : _uint
+enum class EAugustaFallType : _uint
 {
 	FALL_LOOP = 0,
 	FALL_LOOP_FAST,
@@ -203,7 +199,7 @@ enum class EFallType : _uint
 
 };
 
-enum class EAirAttackType : _uint
+enum class EAugustaAirAttackType : _uint
 {
 	AIRATTACK_END = 0,
 	AIRATTACK_HACKDOWN_LOOP,
@@ -223,13 +219,13 @@ enum class EAirSkillType : _uint
 
 #pragma region CLIMB
 
-enum class EClimbIdleType : _uint
+enum class EAugustaClimbIdleType : _uint
 {
 	
 	END
 };
 
-enum class EClimbMoveType : _uint
+enum class EAugustaClimbMoveType : _uint
 {
 	CLIMB_D_1 = 0,
 	CLIMB_D_2,
@@ -250,7 +246,7 @@ enum class EClimbMoveType : _uint
 	END
 };
 
-enum class EClimbBoostType : _uint
+enum class EAugustaClimbBoostType : _uint
 {
 	CLIMB_BOOST_L = 0,
 	CLIMB_BOOST_L_START,
@@ -276,7 +272,7 @@ enum class EClimbBoostType : _uint
 	END
 };
 
-enum class EClimbExitType : _uint
+enum class EAugustaClimbExitType : _uint
 {
 	CLIMB_D1_STOP = 0,
 	CLIMB_D2_STOP,
@@ -303,6 +299,35 @@ enum class EClimbExitType : _uint
 #pragma endregion
 
 
+
+#pragma region HIT
+
+/*
+*   HIT_SMALL = 0,		// 약한 피격 (Behit_S_L/R, Behit_B_L/R)
+	HIT_FLY,			// 날아가는 피격 (Behit_Fly_Start/Loop/Fall)
+	HIT_PUSH,			// 밀리는 피격 (Behit_Push_Start/Loop/Fall)
+	HIT_HOVER,			// 공중 피격 (Behit_Hover, Behit_Press)
+	HIT_CAPTURED,		// 포획 (Captured)
+	HIT_DEATH,			// 사망 (Death, StandUp)
+*/
+enum class EAugustaHitType : _uint
+{
+	BEHIT_B_L = 0,
+	BEHIT_B_R,
+	BEHIT_FLY_FALL,
+	BEHIT_FLY_LOOP,
+	BEHIT_FLY_START,
+	BEHIT_HOVER,
+	BEHIT_PRESS,
+	BEHIT_PUSH_FALL,
+	BEHIT_PUSH_LOOP,
+	BEHIT_PUSH_START,
+	BEHIT_S_L,
+	BEHIT_S_R,
+	END
+};
+
+#pragma endregion
 
 
 #pragma endregion

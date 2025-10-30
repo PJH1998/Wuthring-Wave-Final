@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
@@ -11,8 +11,10 @@ private:
     enum BURSTSTATE
     {
        BURST01 = 0,
+       SP_DASH,
        SP_MOVE,
        SP_ATTACK,
+
        END
     };
 

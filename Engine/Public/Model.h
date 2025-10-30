@@ -108,11 +108,12 @@ private:
 	_uint									m_iNumAnimations = {};
 	_string								m_strPreAnimation;
 	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader???꾨떖?좊븣??_uint ?꾨떖?댁빞??
+	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
 
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
+	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
 
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;

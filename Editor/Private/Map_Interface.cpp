@@ -1,4 +1,4 @@
-#include"EditorPch.h"
+ï»¿#include"EditorPch.h"
 #include "Map_Interface.h"
 #include"Edit_PreViewModel.h"
 #include"Edit_MapObject.h"
@@ -91,9 +91,9 @@ void CMap_Interface::Set_Transform(CTransform* pTransform)
 
     ImGui::Text("Turn_Quaternion");
     {
-        //ë¡œí…Œ?´ì…˜??ê³„ì† ?…ë°?´íŠ¸ ?˜ì–´??ê°’ì´ ì´ˆê¸°?”ë¨.
+        //ë¡œí…Œ?ï¿½ì…˜??ê³„ì† ?ï¿½ë°?ï¿½íŠ¸ ?ï¿½ì–´??ê°’ì´ ì´ˆê¸°?ï¿½ë¨.
         ImGui::PushItemWidth(300.0f);
-        //?”ê·¸ë¦?ê°ë„ë¡?0?„ì—??360?„ê¹Œì§€.
+        //?ï¿½ê·¸ï¿½?ê°ë„ï¿½?0?ï¿½ì—??360?ï¿½ê¹Œì§€.
         ImGui::InputFloat3("Rotation", vRotation);
     }
 
@@ -235,7 +235,7 @@ _bool CMap_Interface::Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMa
 
                         _wstring baseName = StringToWString(FileName);
 
-                        // LOD ¸¶Áö¸·¿¡ ºÙÀº ¼ıÀÚ ÃßÃâ
+                        // LOD ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                         size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
                         _wstring namePart = baseName.substr(0, pos + 1);
                         _wstring numberPart = baseName.substr(pos + 1);
@@ -304,7 +304,7 @@ void CMap_Interface::Add_MapObject(_fvector vPos)
 
             //_wstring baseName = StringToWString(FileName);
 
-            // LOD ¸¶Áö¸·¿¡ ºÙÀº ¼ıÀÚ ÃßÃâ
+            // LOD ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             //size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
             //_wstring namePart = baseName.substr(0, pos + 1);
             //_wstring numberPart = baseName.substr(pos + 1);
@@ -313,12 +313,12 @@ void CMap_Interface::Add_MapObject(_fvector vPos)
 
             _string ModelPath = FileDir;
             ModelPath += FileName;
-            //¿©±â¼­ ¼ıÀÚ ÃßÃâ
+            //ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             ModelPath.pop_back();
             ModelPath += to_string(0);
             ModelPath += ".dat";
 
-            //Á¦ÀÏ ³ôÀº ¼ıÀÚ°¡ µé¾î°¨. 
+            //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú°ï¿½ ï¿½ï¿½î°¨. 
 
             _wstring PrototypeName = TEXT("Prototype_Component_Model_");
             _wstring ModelName = StringToWString(FileName);

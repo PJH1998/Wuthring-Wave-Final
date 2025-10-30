@@ -185,6 +185,7 @@ void CModel::Render_Gizmo(_fmatrix TransformMatrix)
 	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
+
 #endif // _DEBUG
 
 void CModel::Register_Notify(const _string& strFilePath, const vector<function<void()>>& Functions)
@@ -364,7 +365,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	}
 
 
-
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
@@ -478,10 +478,15 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 		return;
 
 	m_isChangeAnimation = true;
-	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 	m_vPreRootRotation = _float4(0.f, 0.f, 0.f, 1.f);
 	m_vPreRootPosition = _float4(0.f, 0.f, 0.f, 1.f);
 	m_RootMatrix = XMMatrixIdentity();
+
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return;
+
+	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 }
 
 BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
@@ -569,7 +574,6 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	pAnimCBInfo->IsRibAnimUsed = false;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
-
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
 	_string strRibAnimationName = "Rib_" + strAnimationName;
 	auto iter = m_Animations.find(strRibAnimationName);
@@ -628,6 +632,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRotation, _bool isRootMotionTranslate)
 {
+	// PreTransform의 스케일 추출
 	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
@@ -638,6 +643,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
@@ -667,14 +673,19 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	}
 
 	// 행렬은 이제 '엔진 좌표계' 기준.
+	//m_RootMatrix = XMMatrixAffineTransformation(
+	//	//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+	//	XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+	//	XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
+	//	vRotationDelta,                  // 회전 델타
+	//	vLocalTranslate * fRootMotionRate // 이동 델타
+	//);
 	m_RootMatrix = XMMatrixAffineTransformation(
 		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
 		vRotationDelta,                  // 회전 델타
-		vLocalTranslate * fRootMotionRate // 이동 델타
-
-	
+		vLocalTranslate * m_fPreScale * fRootMotionRate // 이동 델타
 	);
 	
 	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.

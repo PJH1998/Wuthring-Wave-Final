@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 
 #include "UI_Manager.h"
 #include "UIObject.h"
@@ -20,9 +20,9 @@ void CUI_Manager::Update(_float fTimeDelta)
 		//rootUI.second->Update();
 	}
 
-	// ±Ùµ¥ ±×·¡¼­ ¿©±â¼­ ¹» µ¹¸±°ÅÀÓ?
+	// ï¿½Ùµï¿½ ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 
-	// Update´Â ¿ÀºêÁ§Æ®¸Å´ÏÀú¿¡¼­µ¹¸®´Âµ¥
+	// Updateï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âµï¿½
 }
 
 HRESULT CUI_Manager::SetActive_UI(const _wstring& strName_UI, _bool isActive)
@@ -37,26 +37,26 @@ HRESULT CUI_Manager::SetActive_UI(const _wstring& strName_UI, _bool isActive)
 
 //_bool CUI_Manager::Check_UIEvent_Triggered(const _wstring& strName_UI, _uint iCheckEventType)
 //{
-//	// ÀÌ°Ç ¿£Áø´Ü°è¿¡¼­ ¾ÈµÉ µí.
+//	// ï¿½Ì°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ü°è¿¡ï¿½ï¿½ ï¿½Èµï¿½ ï¿½ï¿½.
 //	// 
-//	// Â÷¶ó¸® Find_UIObject ·Î °¡Á®¿Â µÚ, CCustom_UI* ·Î Ä³½ºÆÃÇØ¼­,
-//	// Check_OnInteract ÇÔ¼ö ºÒ·¯¿À°Ô ÇÏ´Â ÆíÀÌ?
+//	// ï¿½ï¿½ï¿½ï¿½ Find_UIObject ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, CCustom_UI* ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½,
+//	// Check_OnInteract ï¿½Ô¼ï¿½ ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½?
 //
-//	// ±×·³ ¾Æ·¡¿Í °°Àº ²Ã..
+//	// ï¿½×·ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½..
 //	// 
 //	// 
 //	// 
-//	// - ¿ÜºÎ¿¡¼­ UIÀÇ »óÅÂ¸¦ È®ÀÎÇÏ±â (¸· Å¬¸¯µÆ´ÂÁö, È£¹ö °¨ÁöÁßÀÎÁö µî)
+//	// - ï¿½ÜºÎ¿ï¿½ï¿½ï¿½ UIï¿½ï¿½ ï¿½ï¿½ï¿½Â¸ï¿½ È®ï¿½ï¿½ï¿½Ï±ï¿½ (ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½Æ´ï¿½ï¿½ï¿½, È£ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 //	// 
-//	// UI_UHD : rootUIÀÇ ÅÂ±× (·¹º§ ½ÃÀÛ ½Ã »ðÀÔ)
-//	// SectorB_Status : ÀÚ½ÄÁß ÇØ´ç ¹®ÀÚ¿­À» m_tUIDesc.strUIName À¸·Î °¡Áö´Â °ÍÀÌ ÀÖ´ÂÁö¸¦ Ã£À½
-//	// Check_OnInteract(A, B) : A ´Â ÀÌº¥Æ® Å¸ÀÔ, B(¼±ÅÃ) Àº ÀÎ½ºÅÏ½º UI¶ó¸é ¸î¹øÂ° ÀÎµ¦½ºÀÇ ÀÎ½ºÅÏ½º¸¦ °¡¸®Å°´ÂÁö.
+//	// UI_UHD : rootUIï¿½ï¿½ ï¿½Â±ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+//	// SectorB_Status : ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ m_tUIDesc.strUIName ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
+//	// Check_OnInteract(A, B) : A ï¿½ï¿½ ï¿½Ìºï¿½Æ® Å¸ï¿½ï¿½, B(ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ UIï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Â° ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ï¿½ï¿½.
 //	// 
 //	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
 //	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Check_OnInteract(L"SectorB_Status", ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
 //	//
 //	//
-//	// - ¿ÜºÎ¿¡¼­ UI¿¡°Ô »óÅÂ º¸³»±â
+//	// - ï¿½ÜºÎ¿ï¿½ï¿½ï¿½ UIï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->OnEvent(UI_EVENT_TYPE::CLICK_ENTER);
 //	// 
 //

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "VIBuffer_Instance.h"
 
 NS_BEGIN(Engine)
@@ -7,13 +7,13 @@ class ENGINE_DLL CVIBuffer_Mesh final : public CVIBuffer_Instance
 {
 public:
 	enum FacingMod { OutWard, InWard, TangentCW, TangentCCW, Offset, LookAt };
-	// ¼³Á¤ÇØÁà¾ßÇÏ´Â °ªÀÌ ³Ê¹« ¸¹Àºµ¥ ÀÌ·¸°Ô ÇØ¾ßÇÒ°Å °°Àºµ¥ ?, ¹æÇâ ¼³Á¤ °í¹Î ¸¹ÀÌ ÇØºÁ¾ßÇÒ°Å °°À½  bool·Î ÇÏ±â¿¡´Â ¼³Á¤ÇØÁà¾ßÇÏ´Â ¹æÇâ°ú °ªÀÌ ²Ï ¸¹À»°Å°°À½.
-	// ÀÌ°É ¹Ş¾Æ¼­, Ã¼Å©ÇØÁà¾ßÇÒ°Å °°Àºµ¥ Èì..
+	// ì„¤ì •í•´ì¤˜ì•¼í•˜ëŠ” ê°’ì´ ë„ˆë¬´ ë§ì€ë° ì´ë ‡ê²Œ í•´ì•¼í• ê±° ê°™ì€ë° ?, ë°©í–¥ ì„¤ì • ê³ ë¯¼ ë§ì´ í•´ë´ì•¼í• ê±° ê°™ìŒ  boolë¡œ í•˜ê¸°ì—ëŠ” ì„¤ì •í•´ì¤˜ì•¼í•˜ëŠ” ë°©í–¥ê³¼ ê°’ì´ ê½¤ ë§ì„ê±°ê°™ìŒ.
+	// ì´ê±¸ ë°›ì•„ì„œ, ì²´í¬í•´ì¤˜ì•¼í• ê±° ê°™ì€ë° í ..
 
 	typedef struct tagtMeshFXInstanceDesc : public CVIBuffer_Instance::INSTANCE_DESC
 	{
-		_char DatFilePath[MAX_PATH] = {};				//DatÀ§Ä¡ ¾Ë·Á¸é ÀÌ·¸°Ô ÇØ¾ßµÇ´Âµ¥ ¿©±â Ãß°¡?
-		//ÇÁ·ÎÅäÅ¸ÀÔ ÀÌ¸§µµ Ãß°¡ÇØµÑ±î? ¾Æ´Ï¸é Á¶ÇÕÀ» ÇÒ±î °í¹ÎÇØºÁ¾ßÇÒ°Å °°À½.
+		_char DatFilePath[MAX_PATH] = {};				//Datìœ„ì¹˜ ì•Œë ¤ë©´ ì´ë ‡ê²Œ í•´ì•¼ë˜ëŠ”ë° ì—¬ê¸° ì¶”ê°€?
+		//í”„ë¡œí† íƒ€ì… ì´ë¦„ë„ ì¶”ê°€í•´ë‘˜ê¹Œ? ì•„ë‹ˆë©´ ì¡°í•©ì„ í• ê¹Œ ê³ ë¯¼í•´ë´ì•¼í• ê±° ê°™ìŒ.
 
 		_float3	vPivot;
 		_float2 vSpeed;
@@ -37,7 +37,7 @@ public:
 		_float fSpreadWeight = 0.f;
 		_float fDropWeight = 0.f;
 		_float fRotationWeight = 0.f;
-		//Ãß°¡ ?
+		//ì¶”ê°€ ?
 	}MESH_FXINSTANCE_DESC;
 private:
 	explicit CVIBuffer_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -48,7 +48,7 @@ public:
 	virtual HRESULT Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath, const INSTANCE_DESC* pDesc);
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 
-	//ÄÄ¼Î·Î °è»êÃ³¸® ÇØ¾ßÇÒµí
+	//ì»´ì…°ë¡œ ê³„ì‚°ì²˜ë¦¬ í•´ì•¼í• ë“¯
 	void Bind_CSResources(class CComputeShader* pCShader, _float fTimeDelta);
 
 private:

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "AugustaGriffon.h"
 #include "Client_Debug.h"
 
@@ -47,13 +47,15 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // AugustaÀÇ StateMachine¿¡¼­ ¾Ö´Ï¸ÞÀÌ¼Ç½ÇÇà?
+    // Augustaï¿½ï¿½ StateMachineï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼Ç½ï¿½ï¿½ï¿½?
 
-    // Last :  Combined Çà·Ä ÃÊ±âÈ­
+    // Last :  Combined ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
+
+
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -96,6 +98,19 @@ void CAugustaGriffon::Render()
 #endif // _DEBUG
 }
 
+void CAugustaGriffon::Activate(_bool IsActive)
+{
+    SetActivate(IsActive);
+    
+    // TrackPosition ï¿½ï¿½ ï¿½Ê±ï¿½È­
+    // Griffonï¿½ï¿½ ï¿½ï¿½ì¿¡ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½Ø´ï¿½?
+    
+   /* if (isactive)
+        m_prigidbodycom->change_layer(enum_class(collisionlayer::none));
+    else
+        m_prigidbodycom->change_layer(enum_class(collisionlayer::attack));*/
+}
+
 void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
@@ -111,17 +126,18 @@ void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
-    RigidbodyDesc.eShape = SHAPE::CAPSULE;
-    RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-    RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
-    RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
+    //CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    //RigidbodyDesc.fRadius = 0.3f;
+    //RigidbodyDesc.fHeight = 0.5f;
+    //RigidbodyDesc.eShape = SHAPE::CAPSULE;
+    //RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
+    //RigidbodyDesc.eType = EMotionType::Kinematic;
+    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
+    //RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-        , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+    //if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
+    //    , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+    //    CRASH("Rigidbody");
 }
 
 void CAugustaGriffon::Ready_Variables(const WEAPON_DESC* pDesc)

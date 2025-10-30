@@ -28,6 +28,8 @@ public:
 	HRESULT		Ready_Debug(const _wstring& strTargetTag, _float fX, _float fY, _float fSizeX, _float fSizeY);
 	HRESULT		Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	HRESULT     Render();
+
+	void		AddRemoveRT(const _wstring& strTargetTag, class CRenderTarget* pRT);
 #endif
 
 private:
@@ -39,6 +41,10 @@ private:
 
 	map<const _wstring, class CRenderTarget*> m_RenderTargets;
 	map<const _wstring, list<class CRenderTarget*>> m_MRTs;
+
+#ifdef _DEBUG
+	map<const _wstring, class CRenderTarget*> m_DebugRenderRT;
+#endif
 
 private:
 	class CRenderTarget*				Find_RenderTarget(const _wstring& strTargetTag);

@@ -174,7 +174,7 @@ void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 	Clear_States();
 	for(auto& strAnimationName : AnimationNames)
 	{
-		CAnimState::ANIMSTATE_DESC Temp{ false, true, 0.1f, 0.f, 1.f };
+		CAnimState::ANIMSTATE_DESC Temp{};
 		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
 	}
 }

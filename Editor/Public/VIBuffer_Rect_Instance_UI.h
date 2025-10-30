@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "VIBuffer_Instance.h"
 
 NS_BEGIN(Editor)
@@ -9,8 +9,8 @@ class CVIBuffer_Rect_Instance_UI final : public CVIBuffer_Instance
 public:
 	typedef struct tagRectSingleInstanceDesc
 	{
-		// ´ÜÀÏ ÀÎ½ºÅÏ½º¿¡°Ô ºÎ¿©ÇÒ Á¤º¸
-		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };					// ÇöÀç °´Ã¼ÀÇ Pivot ¿¡ µû¸¥ »ó´ëÁÂÇ¥
+		// ï¿½ï¿½ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		_float4 vSInstRight		= { 1.f, 0.f, 0.f ,0.f };					// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ Pivot ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¥
 		_float4 vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
 		_float4 vSInstLook		= { 0.f, 0.f, 1.f ,0.f };
 		_float4 vSInstTrans		= { 0.f, 0.f, 0.f ,1.f };

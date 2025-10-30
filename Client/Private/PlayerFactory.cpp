@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "PlayerFactory.h"
 #include "Player.h"
 #include "InputController.h"
@@ -20,9 +20,12 @@ void CPlayerFactory::Register_KeyInputs(CInputController* pInputControllerCom, C
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D1), DIK_1);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D2), DIK_2);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D3), DIK_3);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D4), DIK_4);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D5), DIK_5);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D6), DIK_6);
 
 
-    // ¸¶¿ì½º Å°ÀÔ·Â µî·Ï
+    // ï¿½ï¿½ï¿½ì½º Å°ï¿½Ô·ï¿½ ï¿½ï¿½ï¿½
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB);
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::WB), MOUSEKEYSTATE::WB);
     pInputControllerCom->Register_MouseKeyInput(ENUM_CLASS(KEYINPUT::RB), MOUSEKEYSTATE::RB);
@@ -47,7 +50,7 @@ void CPlayerFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, CPlaye
     ASSERT_CRASH(pSpringCamera);
     *ppCamera = pSpringCamera;
 
-    // Camera µî·Ï.
+    // Camera ï¿½ï¿½ï¿½.
     pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), pSpringCamera);
     Safe_AddRef(pSpringCamera);
 

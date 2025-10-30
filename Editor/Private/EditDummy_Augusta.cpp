@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "EditDummy_Augusta.h"
 
 CEditDummy_Augusta::CEditDummy_Augusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -45,7 +45,7 @@ void CEditDummy_Augusta::Update(_float fTimeDelta)
 
 void CEditDummy_Augusta::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this);
 }
