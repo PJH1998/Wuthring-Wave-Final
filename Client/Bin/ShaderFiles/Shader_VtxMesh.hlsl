@@ -111,7 +111,10 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
 
         vNormal = normalize(vNormalDesc * 2.f - 1.f);
         if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        {
             vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+            vNormal = normalize(vNormal);
+        }
         
         float3 vTangent = In.vTangent.xyz;
         float3 vBinormal = In.vBinormal.xyz * -1.f;
