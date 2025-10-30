@@ -187,6 +187,9 @@
     <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
       <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. GameSystem\Director">
+      <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -423,6 +426,12 @@
     <ClInclude Include="CAttackVolume.h">
       <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Event_Camera.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Director.h">
+      <Filter>01. GameSystem\Director</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -630,6 +639,9 @@
     </ClCompile>
     <ClCompile Include="CAttackVolume.cpp">
       <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Director.cpp">
+      <Filter>01. GameSystem\Director</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

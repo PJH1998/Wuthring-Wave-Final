@@ -63,6 +63,7 @@ namespace Engine
 		XMFLOAT4		vRotation;		// Rotation
 		float				fDistance = {};		// Distance
 		float				fStartFrame = {};
+		float				fFovy = {};
 	}CAMERA_FRAME;
 
 	typedef struct tagMapObject

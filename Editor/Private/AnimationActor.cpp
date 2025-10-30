@@ -346,7 +346,7 @@ HRESULT CAnimationActor::Ready_Camera()
 	CSpringCamera_Edit::CAMERA_DESC CameraDesc = {};
 	CameraDesc.fSpeedPerSec = 100.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	CameraDesc.fFovy = XMConvertToRadians(40.f);
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
 	CameraDesc.fFar = 5000.f;
 	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);

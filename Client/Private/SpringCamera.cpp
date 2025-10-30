@@ -1,6 +1,8 @@
 ﻿#include "ClientPch.h"
 #include "SpringCamera.h"
 
+#include "Event_Camera.h"
+
 CSpringCamera::CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCamera { pDevice, pContext }
 {
@@ -14,8 +16,6 @@ CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
 void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 {
 	m_fOffsetY = fOffsetY;
-	// Lerp
-	//_vector vPos = XMVectorLerp(XMLoadFloat4(&m_vTargetPosition), TargetPos, 1.f - exp(-1.f * 0.0016f * 30.f));
 	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
@@ -77,14 +77,25 @@ void CSpringCamera::Update(_float fTimeDelta)
 	if (CAMERA_STATE::LOCKON == m_eCameraState)
 		Dual_Targeting(fTimeDelta);
 
-	Mouse_Scroll(fTimeDelta);
-	// 0. Cam Rotate
-	if (CAMERA_STATE::TARGET == m_eCameraState)
-		__super::Mouse_Move_Up();
+	// Action
+	if (CAMERA_STATE::ACTION == m_eCameraState)
+	{
+		if (true == m_isRecovery)
+			Recovery(fTimeDelta);
+		else
+			Action(fTimeDelta);
+	}
+	else
+	{
+		Mouse_Scroll(fTimeDelta);
+		// 0. Cam Rotate
+		if (CAMERA_STATE::TARGET == m_eCameraState)
+			__super::Mouse_Move_Up();
+	}
 
-	// 1. �Ÿ� �������� ���� ���� ����
+	// 1. Camera Position 계산
 	Compute_CamPos();
-	// 2. Ray Cast �̿��Ͽ� ����, ������Ʈ�� �浹
+	// 2. Ray Cast => 벽 충돌
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
 }
@@ -211,6 +222,108 @@ void CSpringCamera::Adjust_LockOn_Distance()
 
 	_float fLength = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vTargetPosition) - XMLoadFloat4(&m_vLookPosition)));
 	m_fLockOnDistanceOffset = fLength / fRadian;
+}
+
+void CSpringCamera::Action(_float fTimeDelta)
+{
+	// Action End
+	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
+	{
+		if (false == m_isMaintain)
+			SetUp_Recovery();
+		return;
+	}
+
+	_float fStartFrame{}, fEndFrame{};
+	fStartFrame = -1 == m_iFrameIndex ? m_fFirstFrame : m_Frames[m_iFrameIndex].fStartFrame;
+	fEndFrame = m_Frames[m_iFrameIndex + 1].fStartFrame;
+
+	_float fRatio = (m_fTrackPosition - fStartFrame) / (fEndFrame - fStartFrame);
+	m_fTrackPosition += fTimeDelta * m_fTrackPerSec;
+
+	// Rotation
+	_vector vPreQuaternion = {};
+	_vector vPreTranslation = {};
+	if (-1 == m_iFrameIndex)
+	{
+		vPreQuaternion = XMLoadFloat4(&m_vPreQuaternion);
+		vPreTranslation = XMLoadFloat3(&m_vPreTranslation);
+	}
+	else
+	{
+		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
+		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		// Fov
+		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
+	}
+
+	_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+	_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
+	vLerpQuat = XMVector4Transform(vLerpQuat, XMLoadFloat4x4(&m_OwnerMatrix));
+	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+
+	// Translation Offset
+	_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+	_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
+	vLerpTranslation = XMVector4Transform(vLerpTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+
+	// Distance
+	m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+
+	if (m_Frames[m_iFrameIndex + 1].fStartFrame < m_fTrackPosition)
+		++m_iFrameIndex;
+}
+
+void CSpringCamera::Recovery(_float fTimeDelta)
+{
+	m_fTrackPosition += fTimeDelta;
+
+	if (m_fTrackPosition >= 1.5f)
+	{
+		m_isRecovery = false;
+		m_eCameraState = CAMERA_STATE::TARGET;
+		return;
+	}
+
+	_vector vLerpQuat = XMQuaternionSlerp(XMLoadFloat4(&m_vEndQuaternion), XMLoadFloat4(&m_vPreQuaternion), m_fTrackPosition / 1.5f);
+	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+	_vector vLerpTranslation = XMVectorLerp(XMLoadFloat3(&m_vEndTranslation), XMLoadFloat3(&m_vPreTranslation), m_fTrackPosition / 1.5f);
+	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+}
+
+void CSpringCamera::SetUp_Recovery()
+{
+	m_fTrackPosition = 0.f;
+	if (false == m_isRecovery)
+		m_isRecovery = true;
+	m_fFixedDistance = m_fPreFixedDistance;
+	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+	m_vEndTranslation = _float3(0.f, 0.f, 0.f);
+}
+
+void CSpringCamera::Ready_Event()
+{
+	m_pGameInstance->Subscribe<CAMERA_ACTION_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), [this](const CAMERA_ACTION_EVENT& event) {
+		if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction)
+		{
+			m_OwnerMatrix = event.WorldMatrix;
+			m_iFrameIndex = -1;
+			m_fTrackPosition = static_cast<_float>(event.iStart);
+			m_fFirstFrame = m_fTrackPosition;
+			m_eCameraState = CAMERA_STATE::ACTION;
+			m_Frames = event.pFrame;
+			XMStoreFloat4(&m_vPreQuaternion, m_pTransformCom->Get_Quaternion());
+			m_vPreTranslation = _float3(0.f, 0.f, 0.f);
+			m_fPreFixedDistance = m_fFixedDistance;
+			m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
+			m_isMaintain = event.isMaintain;
+		}
+		else
+		{
+			SetUp_Recovery();
+		}
+		});
 }
 
 CSpringCamera* CSpringCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
