@@ -97,7 +97,7 @@ void CAugusta::Update(_float fTimeDelta)
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 5. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 2.5f);
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
 
 
