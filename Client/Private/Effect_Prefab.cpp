@@ -65,7 +65,7 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
             //활성화 전 오프셋 적용
             _matrix OffsetMatrix = {};
-            Children_Offset(Frame, OffsetMatrix);
+             Children_Offset(Frame, OffsetMatrix);
 
             //자식 활성화
             Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
@@ -197,7 +197,17 @@ void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
 
     _matrix OffsetMatrix = ScaleMat * RotMat * PositionMat;
 
-    OutMatrix = OffsetMatrix * XMLoadFloat4x4(&m_SpawnMatrix);
+	//m_SpawnMatrix 크기 영향 죽이기
+	_vector vScale = {};
+	_vector vPos = {};
+	_vector vRot = {};
+	XMMatrixDecompose(&vScale, &vRot, &vPos, XMLoadFloat4x4(&m_SpawnMatrix));
+
+	_matrix SpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+	OutMatrix = OffsetMatrix * SpawnMatrix;
+
+    /*OutMatrix = OffsetMatrix * XMLoadFloat4x4(&m_SpawnMatrix);*/
 }
 
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
