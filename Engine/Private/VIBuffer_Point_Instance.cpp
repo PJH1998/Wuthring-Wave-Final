@@ -67,7 +67,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
 	m_pVBInstanceVertices = new VTXINSTANCE_PARTICLE[m_iNumInstance];
-	m_pSpeeds = new _float[m_iNumInstance];
+	//m_pSpeeds = new _float[m_iNumInstance];
 
 	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
@@ -77,9 +77,8 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
 		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
-		m_pSpeeds[i] = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
 
-		pSRV[i].fSpeed = m_pSpeeds[i];
+		pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
 		pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
 
 		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
@@ -393,10 +392,10 @@ void CVIBuffer_Point_Instance::Free()
 {
 	__super::Free();
 
-	if (false == m_isClone)
-	{
-		Safe_Delete_Array(m_pSpeeds);
-	}
+	//if (false == m_isClone)
+	//{
+	//	Safe_Delete_Array(m_pSpeeds);
+	//}
 
 	Safe_Release(m_pSRV);
 	Safe_Release(m_pOptionCBBuffer);

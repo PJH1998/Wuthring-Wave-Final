@@ -191,9 +191,9 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
 
             if (extension == ".json")
             {
-                _string strParticleVBTag = entry.path().stem().string();
+                _string strPrefabTag = entry.path().stem().string();
 
-                Load_Particle_VB_FromJson(filePath, strParticleVBTag, eLevel);
+                Load_Prefab_FromJson(filePath, strPrefabTag, eLevel);
             }
         }
     }

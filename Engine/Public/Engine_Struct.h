@@ -82,6 +82,7 @@ namespace Engine
 		_bool		IsRootOn = false;
 		const _float4x4**  RootMatrix = {};
 		const _float4x4** ParentMatrix = {};
+		_uint	CurrentLevel;
 	}EFFECT_DESC;
 
 	typedef struct ParticleSRV	

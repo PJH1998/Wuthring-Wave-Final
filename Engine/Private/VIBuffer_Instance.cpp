@@ -73,6 +73,7 @@ void CVIBuffer_Instance::Free()
 {
 	__super::Free();
 
+	//여기서 파티클 똥 발생함, 원형에서 만드는데 클론만 지워서 원형꺼 안지워짐.
 	if (m_isClone)
 		Safe_Delete_Array(m_pVBInstanceVertices);
 
