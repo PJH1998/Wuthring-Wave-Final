@@ -90,13 +90,9 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     //Out.vDiffuse = vDiffuse * (1.f - vMask) + (vMaskDiffiuse * float4(0.1f, 0.f, 1.f, 1.f)) * vMask;
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     Out.vDiffuse.w = 1.f;
+   
     
-    Out.vEmissive = Out.vDiffuse;
-    
-    //Out.vEmissive = Out.vDiffuse;
-    
-    Out.vPBR.y = max(0.01f, 1.f - vDiffuse.w); // Roughness
-    Out.vPBR.x = 1.f;
+    Out.vPBR.y = 0.2f;
     
     if(g_IsDynamicObject)
         Out.vPBR.z = 1.f;
@@ -105,15 +101,14 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (g_HasMetallic)
     {
         vector vMetallicDesc = g_MetallicTexture.Sample(DefaultSampler, In.vTexcoord);
-        //if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
-        //    Out.vPBR.x = 1.f;
+      //  Out.vPBR.x = 1.f - vMetallicDesc.g;
     }
     
     float4 vNormal;
     if(g_HasNormal)
     {
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        
+
         vNormal = normalize(vNormalDesc * 2.f - 1.f);
         if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
             vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
