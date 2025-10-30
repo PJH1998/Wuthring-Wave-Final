@@ -249,6 +249,7 @@ private:
 
 private:
 	_bool								m_isSave = { false };
+	_bool								m_isLoad = { false };
 
 	_bool								m_isPlay = { false };
 	_float								m_fTrackPerSec = {};

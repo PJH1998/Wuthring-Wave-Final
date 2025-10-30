@@ -8,6 +8,7 @@
 
 #include	"Map_Interface.h"
 #include	"Camera_Interface.h"
+#include "AnimationTool.h"
 
 #include "Sequencer.h"
 
@@ -24,6 +25,7 @@ HRESULT CLevel_Camera::Initialize()
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
+	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::CAMERA);
 	
 	m_pSequencer = CSequencer::Create();
 
@@ -50,29 +52,6 @@ void CLevel_Camera::Update(_float fTimeDelta)
 
 void CLevel_Camera::Render()
 {
-}
-
-void CLevel_Camera::Ready_Camera()
-{
-	m_pSpringCamera = CSpringCamera_Edit::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(m_pSpringCamera);
-
-	CSpringCamera_Edit::CAMERA_DESC CameraDesc = {};
-	CameraDesc.fSpeedPerSec = 100.f;
-	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	CameraDesc.fFovy = XMConvertToRadians(60.f);
-	CameraDesc.fNear = 0.1f;
-	CameraDesc.fFar = 5000.f;
-	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
-	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
-	CameraDesc.fMouseSensor = 0.004f;
-
-	m_pSpringCamera->Initialize_Clone(&CameraDesc);
-
-	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), m_pSpringCamera);
-	Safe_AddRef(m_pSpringCamera);
-
-	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
 }
 
 void CLevel_Camera::Ready_Dummy()
@@ -136,9 +115,9 @@ void CLevel_Camera::Free()
 
 	Safe_Release(m_pGround);
 
-	Safe_Release(m_pSpringCamera);
 	Safe_Release(m_pMapInterface);
 	Safe_Release(m_pCameraInterface);
+	Safe_Release(m_pAnimationTool);
 
 	Safe_Release(m_pSequencer);
 }

@@ -848,8 +848,6 @@ void CAnimationTool::RenderUI_AnimationList()
     
     
 #endif // _DEBUG
-
-
 }
 
 

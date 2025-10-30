@@ -309,10 +309,9 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 	
 	ImGui::SameLine();
 	if (ImGui::Button("Load"))
-	{
-
-
-	}
+		m_isLoad = !m_isLoad;
+	if(m_isLoad)
+		Load_CameraAction();
 }
 
 void CSequencer::Sorting_Item()
@@ -389,6 +388,8 @@ void CSequencer::Load_CameraAction()
 
 	if (ImGuiFileDialog::Instance()->Display("CameraActionLoad")) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
+			// Action Camera 1°³ »ý¼º
+			//Add(ENUM_CLASS(ITEM_TYPE::ACTION));
 			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
 
 			ifstream InputFile(strFilePath);
@@ -397,36 +398,27 @@ void CSequencer::Load_CameraAction()
 
 			InputFile >> ActionJson;
 
-			SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
-
-			ActionJson["Duration"] = item.iFrameEnd - item.iFrameStart;
-
-			ActionJson["Frame"] = json::array();
-
-			vector<CAMERA_FRAME>& Frames = item.mRampEdit.mTargetCameraFrames;
-			for (size_t i = 0; i < Frames.size(); ++i)
+			if (ITEM_TYPE::ACTION == m_Items[m_iSelectedEntry].eType)
 			{
-				json FrameJson;
-				FrameJson["Start"] = Frames[i].fStartFrame;
-				FrameJson["Distance"] = Frames[i].fDistance;
+				SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+				item.iFrameStart = 0;
+				item.iFrameEnd = static_cast<_int>(ActionJson["Duration"]);
 
-				FrameJson["Rotation"] = json::array();
-				FrameJson["Rotation"].push_back(Frames[i].vRotation.x);
-				FrameJson["Rotation"].push_back(Frames[i].vRotation.y);
-				FrameJson["Rotation"].push_back(Frames[i].vRotation.z);
-				FrameJson["Rotation"].push_back(Frames[i].vRotation.w);
+				for (auto& Frame : ActionJson["Frame"])
+				{
+					CAMERA_FRAME CameraFrame = {};
+					CameraFrame.fStartFrame = Frame["Start"];
+					CameraFrame.vRotation = _float4(Frame["Rotation"][0], Frame["Rotation"][1], Frame["Rotation"][2], Frame["Rotation"][3]);
+					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
+					CameraFrame.fDistance = Frame["Distance"];
 
-				FrameJson["Translation"] = json::array();
-				FrameJson["Translation"].push_back(Frames[i].vTranslation.x);
-				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
-				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
-
-				ActionJson["Frame"].push_back(FrameJson);
+					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
+					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);
+				}
 			}
-
 			InputFile.close();
 		}
-		m_isSave = false;
+		m_isLoad = false;
 		ImGuiFileDialog::Instance()->Close();
 	}
 }
