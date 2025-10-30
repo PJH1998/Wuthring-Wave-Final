@@ -30,6 +30,9 @@
 #include "AugustaClimbMove.h"
 #include "AugustaClimbExit.h"
 
+// Hit State
+#include "AugustaHit.h"
+
 
 void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
 {
@@ -56,6 +59,9 @@ void CAugustaStateFactory::Register_States(CStateMachine* pStateMachineCom, CAug
     // Climb 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE), CAugustaClimbMove::Create(pPlayer));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_EXIT), CAugustaClimbExit::Create(pPlayer));
+
+    // Hit 하위 State
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT), CAugustaHit::Create(pPlayer));
 }
 
 void CAugustaStateFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, class CAugusta* pPlayer, class CGameInstance* pGameInstance, class CSpringCamera** ppCamera)

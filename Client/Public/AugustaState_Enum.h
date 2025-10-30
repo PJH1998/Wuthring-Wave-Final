@@ -46,12 +46,7 @@ enum class EAugustaClimbState : _uint
 // Augusta Hit 하위 상태
 enum class EAugustaHitState : _uint
 {
-	HIT_SMALL = 0,		// 약한 피격 (Behit_S_L/R, Behit_B_L/R)
-	HIT_FLY,			// 날아가는 피격 (Behit_Fly_Start/Loop/Fall)
-	HIT_PUSH,			// 밀리는 피격 (Behit_Push_Start/Loop/Fall)
-	HIT_HOVER,			// 공중 피격 (Behit_Hover, Behit_Press)
-	HIT_CAPTURED,		// 포획 (Captured)
-	HIT_DEATH,			// 사망 (Death, StandUp)
+	HIT = 0,
 	HIT_END
 };
 
@@ -304,6 +299,35 @@ enum class EClimbExitType : _uint
 #pragma endregion
 
 
+
+#pragma region HIT
+
+/*
+*   HIT_SMALL = 0,		// 약한 피격 (Behit_S_L/R, Behit_B_L/R)
+	HIT_FLY,			// 날아가는 피격 (Behit_Fly_Start/Loop/Fall)
+	HIT_PUSH,			// 밀리는 피격 (Behit_Push_Start/Loop/Fall)
+	HIT_HOVER,			// 공중 피격 (Behit_Hover, Behit_Press)
+	HIT_CAPTURED,		// 포획 (Captured)
+	HIT_DEATH,			// 사망 (Death, StandUp)
+*/
+enum class EHitType : _uint
+{
+	BEHIT_B_L = 0,
+	BEHIT_B_R,
+	BEHIT_FLY_FALL,
+	BEHIT_FLY_LOOP,
+	BEHIT_FLY_START,
+	BEHIT_HOVER,
+	BEHIT_PRESS,
+	BEHIT_PUSH_FALL,
+	BEHIT_PUSH_LOOP,
+	BEHIT_PUSH_START,
+	BEHIT_S_L,
+	BEHIT_S_R,
+	END
+};
+
+#pragma endregion
 
 
 #pragma endregion

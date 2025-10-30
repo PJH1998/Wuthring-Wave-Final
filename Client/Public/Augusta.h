@@ -31,33 +31,41 @@ private:
 		// Climb
 		EClimbIdleType m_eClimbIdleType = EClimbIdleType::END;
 		EClimbMoveType m_eClimbMoveType = EClimbMoveType::END;
+		EClimbExitType m_eClimbExitType = EClimbExitType::END;
 		_bool m_IsClimbSecondStep = { false };
 
-		EClimbExitType m_eClimbExitType = EClimbExitType::END;
+		// Hit
+		EHitType m_eHitType = EHitType::END;
 		
 		// 컨텍스트 사용 뒤 초기화
 		void Clear()
 		{
+			// Land
 			m_eIdleType = EIdleType::END;
 			m_eRunType = ERunType::END;
 			m_eDashType = EDashType::END;
 			m_eLandType = ELandType::END;
 
+			// Attack
 			m_eAttackType = EAttackType::END;
 			m_eSkillType = ESkillType::END;
 			m_eUniqueType = EUniqueType::END;
 			m_eBurstType = EBurstType::END;
 			m_eSpecialType = ESpecialType::END;
 			
+			// Air
 			m_eJumpType = EJumpType::END;
 			m_eFallType = EFallType::END;
 			m_eAirAttackType = EAirAttackType::END;
 			m_eAirSkillType = EAirSkillType::END;
 
+			// Climb
 			m_eClimbIdleType = EClimbIdleType::END;
 			m_eClimbMoveType = EClimbMoveType::END;
 			m_eClimbExitType = EClimbExitType::END;
 			m_IsClimbSecondStep = false;
+
+			m_eHitType = EHitType::END;
 		};
 	};
 
@@ -112,6 +120,7 @@ public:
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
+	virtual void Hit_Judge() override;
 	void Sync_Position();
 
 #ifdef _DEBUG
@@ -128,8 +137,6 @@ public:
 
 
 #pragma endregion
-
-
 private:
 	class CAugustaBayonet* m_pBayonet = { nullptr };
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };

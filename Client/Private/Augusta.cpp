@@ -194,7 +194,6 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
         break;
     case PART_GRIFFON:
         m_pGriffon->Activate(IsActive);
-        
         break;
     }
 }
@@ -236,6 +235,12 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
         m_pGriffon->Set_SocketMatrix(pSocketMatrix);
         break;
     }
+}
+
+// Hit 판정
+void CAugusta::Hit_Judge()
+{
+
 }
 
 void CAugusta::Sync_Position()
