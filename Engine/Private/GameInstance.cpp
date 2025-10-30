@@ -126,7 +126,6 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Update(fTimeDelta);
 	
 	m_pCamera_Manager->Update(fTimeDelta);
-	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
@@ -164,9 +163,6 @@ void CGameInstance::Render_Begin(const _float4* pClearColor)
 
 HRESULT CGameInstance::Draw()
 {
-	ASSERT_CRASH(m_pPooling_Manager);
-	m_pPooling_Manager->Wait_Thread_End();
-
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 

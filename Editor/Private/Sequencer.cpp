@@ -264,9 +264,16 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::PopID();
 
 	ImGui::Text("[Rotation]");
-	ImGui::PushID(101);
-	ImGui::InputFloat4("##", reinterpret_cast<_float*>(&CameraFrame.vRotation));
-	ImGui::PopID();
+	_char szQuat[MAX_PATH] = {};
+	sprintf_s(szQuat, MAX_PATH, "X : %.4f\nY : %.4f\nZ : %.4f\bW : %.4f", CameraFrame.vRotation.x, CameraFrame.vRotation.y, CameraFrame.vRotation.z, CameraFrame.vRotation.w);
+	ImGui::Text(szQuat);
+	if (ImGui::Button("Rotation Sync"))
+	{
+		_matrix CameraWoldMatrx = m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW);
+		_vector vScale{}, vQuat{}, vTrans{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, CameraWoldMatrx);
+		XMStoreFloat4(&CameraFrame.vRotation, vQuat);
+	}
 
 	ImGui::Text("[Translation]");
 	ImGui::PushID(102);

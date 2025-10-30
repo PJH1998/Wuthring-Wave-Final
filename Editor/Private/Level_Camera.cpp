@@ -20,7 +20,9 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 HRESULT CLevel_Camera::Initialize()
 {
 	//Ready_Camera();
-	Ready_Dummy();
+	Ready_Prototype();
+	Ready_Light();
+	//Ready_Dummy();
 	//Ready_Ground();
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
@@ -52,6 +54,46 @@ void CLevel_Camera::Update(_float fTimeDelta)
 
 void CLevel_Camera::Render()
 {
+	m_pAnimationTool->Render();
+}
+
+void CLevel_Camera::Ready_Prototype()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+	}
+
+	SHADER_MACRO eShaderMacro = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+
+	string strEntryPoint = "CSMain";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+	}
+}
+
+void CLevel_Camera::Ready_Light()
+{
+	LIGHT_DESC LightDesc{};
+	LightDesc.eType = LIGHT_DESC::DIRECTION;
+	LightDesc.vAmbient = _float4(0.7f, 0.7f, 0.7f, 1.f);
+	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	m_pGameInstance->SetUp_ShadowNF();
 }
 
 void CLevel_Camera::Ready_Dummy()

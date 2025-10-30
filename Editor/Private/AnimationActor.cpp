@@ -2,6 +2,8 @@
 #include "AnimationActor.h"
 #include "Model.h"
 
+#include "SpringCamera_Edit.h"
+
 CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
 {
@@ -63,6 +65,9 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
     //m_pTransformCom->Scale(pDesc->vScale);
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
+	if (FAILED(Ready_Camera()))
+		CRASH("Camera");
+	m_fOffsetY = 1.f;
 
     return S_OK;
 }
@@ -120,7 +125,13 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     m_pModelCom->Render_Gizmo(m_pTransformCom->Get_WorldMatrix());
 #endif // _DEBUG
+	ImGui::Begin("Offset");
+	ImGui::Text("OffsetY : ");
+	ImGui::SameLine();
+	ImGui::InputFloat("##", &m_fOffsetY);
+	ImGui::End();
 
+	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fOffsetY);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
@@ -327,6 +338,31 @@ HRESULT CAnimationActor::Ready_Components(const ANIMATION_ACTOR_DESC* pDesc)
     return S_OK;
 }
 
+HRESULT CAnimationActor::Ready_Camera()
+{
+	m_pSpringCamera = CSpringCamera_Edit::Create(m_pDevice, m_pContext);
+	ASSERT_CRASH(m_pSpringCamera);
+
+	CSpringCamera_Edit::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fSpeedPerSec = 100.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fFovy = XMConvertToRadians(40.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 5000.f;
+	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
+	CameraDesc.fMouseSensor = 0.004f;
+
+	m_pSpringCamera->Initialize_Clone(&CameraDesc);
+	
+	m_pGameInstance->Add_Camera(ENUM_CLASS(m_eCurLevel), TEXT("Camera_Spring"), m_pSpringCamera);
+	Safe_AddRef(m_pSpringCamera);
+
+	m_pGameInstance->Change_MainCamera(ENUM_CLASS(m_eCurLevel), TEXT("Camera_Spring"));
+
+	return S_OK;
+}
+
 CGameObject* CAnimationActor::Clone(void* pArg)
 {
     CAnimationActor* pInstance = new CAnimationActor(*this);
@@ -359,5 +395,7 @@ void CAnimationActor::Free()
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pComputeShaderCom);
+
+	Safe_Release(m_pSpringCamera);
 
 }

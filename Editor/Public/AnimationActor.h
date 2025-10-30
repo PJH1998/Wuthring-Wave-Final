@@ -82,9 +82,14 @@ private:
 
 	_string m_strModelDatPath = {}; // 
 
+	// Camera
+	class CSpringCamera_Edit* m_pSpringCamera = { nullptr };
+	_float	m_fOffsetY = {};
+
 private:
 	void Bind_Resources();
 	HRESULT Ready_Components(const ANIMATION_ACTOR_DESC* pDesc);
+	HRESULT Ready_Camera();
 
 public:
 	virtual	CGameObject* Clone(void* pArg) override;

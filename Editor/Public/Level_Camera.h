@@ -34,6 +34,8 @@ private:
 	CRigidbody*			m_pGround = { nullptr };
 
 private:
+	void						Ready_Prototype();
+	void						Ready_Light();
 	void						Ready_Dummy();
 	void						Ready_Ground();
 	//void						Ready_Sequencer();
