@@ -91,7 +91,10 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     Out.vDiffuse.w = 1.f;
     
-    Out.vPBR.y = vDiffuse.w; // Roughness
+    //Out.vEmissive = Out.vDiffuse;
+    
+    Out.vPBR.y = max(0.01f, 1.f - vDiffuse.w); // Roughness
+    Out.vPBR.x = 1.f;
     
     if(g_IsDynamicObject)
         Out.vPBR.z = 1.f;
@@ -100,8 +103,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (g_HasMetallic)
     {
         vector vMetallicDesc = g_MetallicTexture.Sample(DefaultSampler, In.vTexcoord);
-        if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
-            Out.vPBR.x = 1.f;
+        //if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
+        //    Out.vPBR.x = 1.f;
     }
     
     float4 vNormal;
@@ -110,7 +113,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
         vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        if (vNormalDesc.x > vNormalDesc.z || vNormalDesc.y > vNormalDesc.z)
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
             vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
         
         float3 vTangent = In.vTangent.xyz;
@@ -301,7 +304,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.2f), 0.f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.12f), 0.f);
    
     vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
     
