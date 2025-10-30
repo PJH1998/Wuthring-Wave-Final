@@ -228,20 +228,20 @@ void CEdit_MapObject::Render()
                 HasMask = false;
 
 
-            //if (HasMask)
-            //{
+            if (HasMask)
+            {
                 m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
                 if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
                     HasNormal = false;
-            //}
-            //else
-            //{
-            //    m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+            }
+            else
+            {
+                m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
 
-            //    if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
-            //        HasNormal = false;
-            //}
+                if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+                    HasNormal = false;
+            }
             //m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
             //if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
@@ -251,7 +251,7 @@ void CEdit_MapObject::Render()
             //    m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK);
         }
         m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-        //m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+        m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 

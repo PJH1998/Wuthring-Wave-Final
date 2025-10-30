@@ -87,12 +87,14 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
 
-    if (vMask.r == 0.f && vMask.g == 0.f)
-        Out.vDiffuse = vDiffuse;
-    else
+    if (g_HasMask)
     {
         Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
         Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+    }
+    else
+    {
+        Out.vDiffuse = vDiffuse;
     }
     
     //Out.vDiffuse = vDiffuse * (1.f - vMask.r) + vMaskDiffiuse * vMask.g;
@@ -102,26 +104,36 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     if (g_HasNormal)
     {
-        vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        
-        float3 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
-        if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
-            vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
-
-        vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
-        
-        float3 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
-        if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
-            vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
-
-        if (vMask.r == 0.f && vMask.g == 0.f)
-            vNormal = vNormal1;
-        else
+        if (g_HasMask)
         {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        
+            float3 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+
+            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+        
+            float3 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+            if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+                vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+
+            //if (vMask.r == 0.f && vMask.g == 0.f)
+            //    vNormal = vNormal1;
+            //else
+            //{
             vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
             vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+            //}
         }
-        
+        else
+        {
+            vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+
+            vNormal = normalize(vDefaultNormal * 2.f - 1.f);
+            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+                vNormal.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+        }
         //vector vNormalDesc = vDefaultNormal * (1.f - vMask.r) + vMaskNormal * vMask.g;
         
         //vNormal = normalize(vNormalDesc * 2.f - 1.f);

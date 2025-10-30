@@ -298,6 +298,7 @@
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Map_Object_Destruction.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -436,6 +437,7 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Map_Object_Destruction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
