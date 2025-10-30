@@ -172,6 +172,11 @@ void CAnimMachine::Reset()
 void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 {
 	Clear_States();
+	for(auto& strAnimationName : AnimationNames)
+	{
+		CAnimState::ANIMSTATE_DESC Temp{};
+		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
+	}
 }
 
 void CAnimMachine::Clear_States()

@@ -184,6 +184,9 @@
     <Filter Include="03. GameObject\Weapon\Rover">
       <UniqueIdentifier>{469434cf-11b1-4aa1-aee2-d91080f9ced2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
+      <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -417,6 +420,9 @@
     <ClInclude Include="..\Public\RoverState_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
+    <ClInclude Include="CAttackVolume.h">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -621,6 +627,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverWeapon.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="CAttackVolume.cpp">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

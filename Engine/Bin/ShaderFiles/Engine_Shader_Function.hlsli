@@ -1,8 +1,8 @@
-#include "Engine_Shader_State.hlsli"
+ï»¿#include "Engine_Shader_State.hlsli"
 
 static float PI = 3.1415926535f;
 
-// EmissiveÈ¿°ú¸¦ ³ÖÀ»Áö ÆÇ´ÜÇÒ ¶§ »ç¿ëÇÏ´Â RGB °è¼ö
+// Emissiveíš¨ê³¼ë¥¼ ë„£ì„ì§€ íŒë‹¨í•  ë•Œ ì‚¬ìš©í•˜ëŠ” RGB ê³„ìˆ˜
 float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
@@ -21,17 +21,17 @@ float g_fFocusDepth;
 float g_fFocusMinCoc;
 float g_fFocusRange;
 
-float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , ¹Ì¼¼¸é Ç¥¸éÀÇ °ÅÄ¥±â ºĞÆ÷
+float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , ë¯¸ì„¸ë©´ í‘œë©´ì˜ ê±°ì¹ ê¸° ë¶„í¬
 {
     float RoughnessSqr = pow(Roughness, 2.f);                       
-    float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // ³»Àû(³ë¸», ¹İ»ç) * ³»Àû(³ë¸», ¹İ»ç) * ( °ÅÄ¥±â - 1.f ) + 1.f 
+    float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // ë‚´ì (ë…¸ë§, ë°˜ì‚¬) * ë‚´ì (ë…¸ë§, ë°˜ì‚¬) * ( ê±°ì¹ ê¸° - 1.f ) + 1.f 
     
     float NDF = RoughnessSqr / (PI * Distribution * Distribution); 
     
     return NDF;
 }
 
-float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , ¹Ì¼¼¸é³¢¸®ÀÇ ÀÚ±â ±×¸²ÀÚ
+float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , ë¯¸ì„¸ë©´ë¼ë¦¬ì˜ ìê¸° ê·¸ë¦¼ì
 {
     float k = Roughness / 2.f;
     
@@ -45,14 +45,14 @@ float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeomet
 
 float SchlickFresnel(float i)
 {
-    float x = clamp(1.f - i, 0.f, 1.f);         // ÇÏÇÁ º¤ÅÍ¿Í Light°¡ °ãÄ¥¼ö·Ï ³·Àº ¼öÄ¡
+    float x = clamp(1.f - i, 0.f, 1.f);         // í•˜í”„ ë²¡í„°ì™€ Lightê°€ ê²¹ì¹ ìˆ˜ë¡ ë‚®ì€ ìˆ˜ì¹˜
     
     return pow(x, 5.f);
 }
 
-float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , ÀÔ»ç°¢¿¡ µû¸¥ ¹İ»çµÇ´Â ºñÀ²
+float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , ì…ì‚¬ê°ì— ë”°ë¥¸ ë°˜ì‚¬ë˜ëŠ” ë¹„ìœ¨
 {
-    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH); // ÀÔ»ç°¢¿¡ µû¸¥ Specular ¼öÄ¡ ( ÇÏÇÁº¤ÅÍ¿Í Light°¡ ºñ½ÁÇÒ¼ö·Ï Specular Down )
+    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH); // ì…ì‚¬ê°ì— ë”°ë¥¸ Specular ìˆ˜ì¹˜ ( í•˜í”„ë²¡í„°ì™€ Lightê°€ ë¹„ìŠ·í• ìˆ˜ë¡ Specular Down )
 }
 
 float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness) // vViewDir = Look (WorldPos - CamPos)
@@ -66,7 +66,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     float3 vF0 = 0.04f;
     vF0 = lerp(vF0, vAlbedo, fMetallic);
     
-    float3 Fresnel = Compute_Fresnel(vF0, LdotH);                               // LdotH°¡ Å©¸é ¼öÄ¡°¡ ³·À½ ( ¼öÄ¡´Â F0, Specular Color )
+    float3 Fresnel = Compute_Fresnel(vF0, LdotH);                               // LdotHê°€ í¬ë©´ ìˆ˜ì¹˜ê°€ ë‚®ìŒ ( ìˆ˜ì¹˜ëŠ” F0, Specular Color )
         
     float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
     
@@ -74,7 +74,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse »ö»ó¿¡ ±â¿©ÇÏ´Â ºñÀ² ( Á¤¸é ÀÏ¼ö·Ï Diffuse »ö)
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse ìƒ‰ìƒì— ê¸°ì—¬í•˜ëŠ” ë¹„ìœ¨ ( ì •ë©´ ì¼ìˆ˜ë¡ Diffuse ìƒ‰)
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
@@ -308,7 +308,7 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
     
     float SampleDepth = vSampleViewPos.z; //DepthTexture.Sample(PointClampSampler, vSampleUV).y;
     
-    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ¾È±×·ÁÁ®ÀÖ°Å³ª, ·£´ı À§Ä¡º¸´Ù µÚ¿¡ ÀÖ´Ù¸é
+    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ì•ˆê·¸ë ¤ì ¸ìˆê±°ë‚˜, ëœë¤ ìœ„ì¹˜ë³´ë‹¤ ë’¤ì— ìˆë‹¤ë©´
         return 1.f;
     
     float fDistance = abs(SampleDepth - vViewPos.z);
