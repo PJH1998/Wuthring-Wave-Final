@@ -166,14 +166,14 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
-    Out.vColor.xyz = 1.f * Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-    
-    Out.vColor.xyz += vDiffuse.xyz * 0.15f; // Ambient
+    //Out.vColor.xyz = 1.f * Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+    //
+    //Out.vColor.xyz += vDiffuse.xyz * 0.15f; // Ambient
     
     
     //Out.vColor.xyz = 1.f * Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y, vToonRim);
     
-    //Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
+    Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
     Out.vColor.a = 1.f;
     
     float IsShadow = vPBRDesc.z;
@@ -319,9 +319,11 @@ PS_OUT_BACKBUFFER PS_BLOOM(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
+    vector vOriginColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    
     vector vColor = g_BloomTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vColor = (vColor * 0.4f);
+    Out.vColor = vOriginColor + (vColor * 0.4f);
     
     return Out;
 }

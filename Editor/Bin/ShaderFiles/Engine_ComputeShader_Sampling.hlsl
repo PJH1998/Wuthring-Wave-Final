@@ -4,7 +4,6 @@ typedef row_major matrix matrix_rm;
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
-const static float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
 
 [numthreads(16, 16, 1)]
 void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
@@ -12,7 +11,6 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     int iIndexX = DTID.x * 2;
     int iIndexY = DTID.y * 2;
     
-
     float4 vColor = 0.f;
 
     vColor += InputTexture.Load(int3(iIndexX, iIndexY, 0));
@@ -21,7 +19,7 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     vColor += InputTexture.Load(int3(iIndexX + 1, iIndexY + 1, 0));
     
     vColor *= 0.25f;
-    
+   
     OutputTexture[DTID.xy] = vColor;
 }
 

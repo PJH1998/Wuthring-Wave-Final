@@ -46,7 +46,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 
 	m_iHP = 1;
-
+	m_fParalysisAcc = 5.f;
 	return S_OK;
 }
 
@@ -66,6 +66,20 @@ void CMonsterTest::Update(_float fTimeDelta)
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
+	//그로기 특수상황
+	if(m_isParalysis)
+	{
+		if(m_isKnockDownTrig)
+			m_iState = ENUM_CLASS(TEST_STATE::PARALYSIS);
+		else
+		{
+			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_isKnockDownTrig = true;
+		}
+	}
+	else
+		m_isKnockDownTrig = m_isParalysis;
+
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
 	//m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
@@ -76,7 +90,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
-	
+
 	// y축 수직 회전 lerp 사용할 함수 : CTransform->LookLerp
 	// y축 수직으로  look fix할 함수 : CTransform->LookDir
 
@@ -87,6 +101,10 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
 	//for(auto& Pair : m_PartObjects)
 	//	Pair.second->Late_Update(fTimeDelta);
+#ifdef _DEBUG
+	if(KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE))
+		m_isParalysis = true;
+#endif // _DEBUG
 	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
@@ -207,9 +225,11 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("DodgeCooldown", [this]() ->_bool { return DodgeCooldown();});
 	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 3.f); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 10.f); });
+	pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(9, 4.f); });
+	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(3, 5.f); });
+	pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(6, 6.f); });
 	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 8.f); });
-	pBlackBoard->Add_Condition("Attack10", [this]() ->_bool { return Attack(9, 5.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 10.f); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -242,7 +262,10 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
 	if(m_isAnimationFinished)
+	{
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+		
+	}
 	if(m_isDetecting)
 	{
 		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
@@ -255,8 +278,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 #ifdef _DEBUG
-		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
-		//cout << "distance: " << m_fDistance << endl;
+		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		cout << "distance: " << m_fDistance << endl;
 #endif
 	}
 	for(_uint i = 0; i < 10; ++i)
@@ -269,6 +292,13 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 	if(m_isParalysis)
 	{
+		//if(m_isKnockDownTrig)
+		//	m_iState |= ENUM_CLASS(TEST_STATE::PARALYSIS);
+		//else
+		//{
+		//	m_iState |= (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+		//	m_isKnockDownTrig = true;
+		//}
 		m_fParalysisAcc -= fTimeDelta;
 		if(m_fParalysisAcc <= 0.f)
 		{
@@ -277,11 +307,20 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 			m_isParalysis = false;
 		}
 	}
+	else
+		m_isKnockDownTrig = m_isParalysis;
 }
 
 _bool CMonsterTest::isKnockDown()
 {
 	//현재 그로기 상태 여부 판단. 행동트리에서 상태 제어 X
+	//if(false == m_isParalysis)
+	//	return false;
+	//else
+	//{
+	//	m_iState |= ENUM_CLASS(TEST_STATE::PARALYSIS);
+	//}
+
 	return m_isParalysis;
 }
 
@@ -301,6 +340,8 @@ _bool CMonsterTest::isAttackEnable()
 	if(m_fAttackAcc[0] <= 0.f) Result = true;
 	if(m_fAttackAcc[1] <= 0.f) Result = true;
 	if(m_fAttackAcc[2] <= 0.f) Result = true;
+	if(m_fAttackAcc[3] <= 0.f) Result = true;
+	if(m_fAttackAcc[6] <= 0.f) Result = true;
 	if(m_fAttackAcc[9] <= 0.f) Result = true;
 	if(Result)
 	{
@@ -311,7 +352,7 @@ _bool CMonsterTest::isAttackEnable()
 
 _bool CMonsterTest::DodgeCooldown()
 {
-	_bool Result = m_fDodgeCoolTime <= 0.f;
+	_bool Result = m_isDetecting && m_fDodgeCoolTime <= 0.f;
 	if(Result)
 		m_fDodgeCoolTime = 7.f;
 	return Result;
