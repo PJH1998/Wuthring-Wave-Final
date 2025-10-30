@@ -247,7 +247,13 @@ private:
 private:
 	_bool								m_isSave = { false };
 
+	_bool								m_isPlay = { false };
+	_float								m_fTrackPerSec = {};
+
 private:
+	// Play
+	void								Play(_float fTimeDelta);
+
 	// Selectable Item
 	void								Selectable_Item();
 	void								SetUp_Point(SEQUENCE_ITEM& item);
