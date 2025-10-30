@@ -37,7 +37,8 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_COOLDOWN_RECT        2           // 단순 사각형에서 내려오는 쿨타임 구현용
 #define UIFLAG_PLAYER_HP            3           // 플레이어 HP용
 #define UIFLAG_PLAYER_TRANSMIT      4  
-#define UIFLAG_END                  5
+#define UIFLAG_SIMPLEMASK           5
+#define UIFLAG_END                  6
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -789,8 +790,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
             // [VISIBLE] [HEIGHT]] -
             // ==============================
-            vector vColor1 = In.mExtra0.wyzw;
-            vector vColor2 = In.mExtra1.wyzw;
+            vector vColor1 = In.mExtra0.rgba;
+            vector vColor2 = In.mExtra1.rgba;
             bool isVisible = _BOOL(In.mExtra2.x);
             float fHeight = In.mExtra2.y;
             // border는 다 같은 이미지 여러 개 쓸 테니 여기 말고 전역으로 받는게 좋을 듯
@@ -825,6 +826,31 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             return Out;
         } break;
+        case UIFLAG_SIMPLEMASK :        // 5. T_MaskCircle.png
+        {
+            // ==============================
+            // * [5] SimpleMask (for SkillIcon BG)
+            // ==============================
+            // * matrix info [size : ~5]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // [IS_ACTIVE]                                  // 필요 시 조건 추가
+            // ==============================
+            
+            // rgb 의 평균값만큼 색을 준다.
+            // rgb 의 평균값이 255에 가까우면 alpha가 1에 가까워진다.
+            float4 vColor = In.mExtra0.rgba;
+            bool isActive = _BOOL(In.mExtra1.x);
+            
+            if (!isActive)
+                discard;
+            
+            float fAverageColor = (Out.vColor.x + Out.vColor.y + Out.vColor.z) / 3.f;
+            float4 vAppliedColor = vColor * fAverageColor;
+            vAppliedColor.a = fAverageColor * vColor.a;
+            
+            Out.vColor = vAppliedColor;
+            return Out;
+        }
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

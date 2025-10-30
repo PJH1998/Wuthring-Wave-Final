@@ -103,8 +103,6 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
 
 void CCustom_UI::Render()
 {
-    if (m_tUIDesc.strUIName == L"Frame_Augusta_Inst_SwordEnergy")
-        int i = 10;
     if (!m_isActivate)
         return;
 

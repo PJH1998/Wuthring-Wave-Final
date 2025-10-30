@@ -245,7 +245,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
     enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
-    enum HUD_SKILL_INDEX    { SK_E, SK_R, SK_END };
+
 
     // ksta : 나중에 플레이어 정보 통합되면 거기로부터 받아올 정보
                     m_iSelectedCHIndex;
@@ -259,6 +259,8 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         Find_ChildObject(L"Skill_Rover"),
         Find_ChildObject(L"Skill_Auguata"),
         Find_ChildObject(L"Skill_Galbrena")
+
+        // echo..
     };
 
     CCustom_UI* pChangeUI[CH_END] = {                 // PartyFrame UI per Character.
@@ -397,6 +399,48 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
         targetUI->Set_VariantUIDesc(tVariantDesc);
     }
+
+
+
+
+
+
+
+
+
+
+
+    // ==============================
+    // * Skill_BackgroundImage
+    // =============================='
+
+
+    // custom var
+    static _uint iNumActiveBG = 4;
+    _float4 vBGColor = _float4{.5f, .5f, .5f, .3f};
+
+    CCustom_UI* pSkillBGUI = Find_ChildObject(L"Skill_BackgroundImage");    // 인스턴스 4개임
+
+    vector<_float4x4> vecBGVariantMat = {};
+    vecBGVariantMat.resize(5);
+
+    for (_uint i = 0; i < iNumActiveBG; i++)
+    {
+        *reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
+        *reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
+    }
+
+    CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
+        vecBGVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLEMASK),
+        true
+    };
+
+    pSkillBGUI->Set_VariantUIDesc(tBGVariantDesc);
+
+
+
+
 
 
 #ifdef KSTA_UI_COOLDOWNTEST
@@ -1133,9 +1177,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 
 
-    // 셰이더에 반영하는 코드 만들어야 함
-
-
 
     auto bladeDesc = pBladeUI->Get_UIDesc();
 
@@ -1189,7 +1230,12 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     // 궁극기 자원
     // 기존 셰이더에 만들어둔 것 활용. alpha pass 이용.
     _float ultRatio = fUltBladeEnergy / fMaxUltBladeEnergy;
-    ultBladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, ultRatio };
+    static _float fPreUltRatio = 0.f;
+
+    if (ultRatio > fPreUltRatio) fPreUltRatio += fTimeDelta * 1.5f;
+    if (ultRatio <= fPreUltRatio) fPreUltRatio = ultRatio;
+
+    ultBladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, fPreUltRatio };
 
     pUltBladeUI->Set_UIDesc(ultBladeDesc);
 

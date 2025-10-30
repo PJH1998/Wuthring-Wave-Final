@@ -53,6 +53,7 @@ namespace Client
 		UIFLAG_COOLDOWN_RECT,		// 사각형 쿨타임 (partyframe)
 		UIFLAG_PLAYER_HP,
 		UIFLAG_PLAYER_TRANSMIT,
+		UIFLAG_SIMPLEMASK,
 		UIFLAG_END
 	};
 	
