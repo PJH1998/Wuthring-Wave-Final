@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -26,21 +26,11 @@ private:
 		_float   Padding;
 	}BLUR_DATA;
 
-	typedef struct tagUPSampleData {
-		_float2  vSize;
-		_float2	 Padding;
-	}UPSAMPLE_DATA;
-
 	typedef struct tagBloomUpData {
 		_float2  vSize;
 		_float	fIntensity;
 		_float   Padding;
 	}BLOOM_UP_DATA;
-
-	typedef struct tagDofData {
-		_float2 vSize;
-		_float2 PaddingDOF;
-	}DOF_DATA;
 
 private:
 	CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -65,9 +55,7 @@ public:
 
 	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight = 1);
-	HRESULT						Add_UPSample_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex);
-	HRESULT						Add_DOF_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 
 private:
 	CGameInstance*				m_pGameInstance = { nullptr };

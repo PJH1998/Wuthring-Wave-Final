@@ -388,6 +388,16 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
+
+void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
+{
+	m_pRenderer->Begin_ScreenEffect(eType);
+}
+void CGameInstance::End_ScreenEffect()
+{
+	m_pRenderer->End_ScreenEffect();
+}
+
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
@@ -429,9 +439,9 @@ void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pRenderer->SetDof(fDepth, fRange, fScale);
 }
-void CGameInstance::Set_Blur(_bool IsBlur, BLUR_TYPE eType)
+void CGameInstance::SetMaxEffectIntensity(_float fMaxIntensity)
 {
-	m_pRenderer->SetBlur(IsBlur, eType);
+	m_pRenderer->SetMaxEffectIntensity(fMaxIntensity);
 }
 #endif
 #pragma endregion

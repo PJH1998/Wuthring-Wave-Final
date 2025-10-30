@@ -91,6 +91,8 @@ float g_DebugSlopeScale = 2.f;
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
 
+float g_fEffectIntensity;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -471,9 +473,11 @@ PS_OUT_BACKBUFFER PS_DOF(PS_IN In)
     
     float4 vDofData = g_DofTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    
     float fMask = smoothstep(0.3f, 1.f, vDofData.x);
-    Out.vColor = lerp(vOriginColor, vDofColor, fMask);
+    
+    float4 vFinalColor = lerp(vOriginColor, vDofColor, fMask);
+    
+    Out.vColor = lerp(vOriginColor, vFinalColor, g_fEffectIntensity);
     
     return Out;
 }
@@ -493,6 +497,18 @@ PS_OUT_BACKBUFFER PS_DOF_DEPTH(PS_IN In)
     vDepth.z = g_fFocusMinCoc;
     
     Out.vColor = float4(vDepth.xyz, 1.f);
+    
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_BLUR(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);
     
     return Out;
 }
@@ -655,7 +671,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF();
     }
     
-    pass DOF_DEPTH
+    pass DOF_DEPTH // 11
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -664,5 +680,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_DOF_DEPTH();
+    }
+    
+    pass Blur
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BLUR();
     }
 }
