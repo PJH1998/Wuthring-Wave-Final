@@ -106,13 +106,39 @@ void CRCS_Manager::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 #ifdef _DEBUG
 HRESULT CRCS_Manager::Debug_Render()
 {
-    for (auto& Pair : m_RCSs)
+    ImGui::Begin("RendererCS");
+
+    if (ImGui::BeginCombo("RCS", "List"))
     {
-        if (nullptr != Pair.second)
-            Pair.second->Debug_Render(Pair.first);
+        for (auto& Pair : m_RCSs)
+        {
+            if (ImGui::Selectable(WStringToString(Pair.first).c_str()))
+            {
+                AddRemoveRCS(Pair.first, Pair.second);
+            }
+        }
+
+        ImGui::EndCombo();
     }
+    ImGui::End();
+
+    for (auto& Pair : m_RenderRCSs)
+        Pair.second->Debug_Render(Pair.first);
 
     return S_OK;
+}
+void CRCS_Manager::AddRemoveRCS(const _wstring& strRCSTag, CRendererCS* pRCS)
+{
+    auto iter = m_RenderRCSs.find(strRCSTag);
+    if (iter != m_RenderRCSs.end())
+    {
+        m_RenderRCSs.erase(iter);
+        Safe_Release(pRCS);
+        return;
+    }
+
+    m_RenderRCSs.emplace(strRCSTag, pRCS);
+    Safe_AddRef(pRCS);
 }
 #endif
 
@@ -123,6 +149,8 @@ CRendererCS* CRCS_Manager::Find_RCS(const _wstring& strRCSTag)
         return nullptr;
     return iter->second;
 }
+
+
 
 CRCS_Manager* CRCS_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
@@ -139,4 +167,10 @@ void CRCS_Manager::Free()
     for (auto& Pair : m_RCSs)
         Safe_Release(Pair.second);
     m_RCSs.clear();
+
+#ifdef _DEBUG
+    for (auto& Pair : m_RenderRCSs)
+        Safe_Release(Pair.second);
+    m_RenderRCSs.clear();
+#endif
 }

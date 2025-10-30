@@ -48,10 +48,6 @@ void CCamera::Update(_float fTimeDelta)
 {
 }
 
-void CCamera::Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta)
-{
-}
-
 void CCamera::Late_Update(_float fTimeDelta)
 {
 }

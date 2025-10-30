@@ -138,7 +138,6 @@ void CCSM::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 		pVIBuffer->Bind_Resources();
 		pVIBuffer->Render();
 	}
-
 }
 #endif
 

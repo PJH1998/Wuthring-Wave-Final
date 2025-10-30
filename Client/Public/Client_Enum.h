@@ -75,7 +75,7 @@ namespace Client
 
 		TURN				= 1 << 12,
 		BLOCK				= 1 << 14,
-		PARALYISIS			= 1 << 15,
+		PARALYSIS			= 1 << 15,
 
 		ATTACK_1			= 1 << 16,
 		ATTACK_2			= 1 << 17,

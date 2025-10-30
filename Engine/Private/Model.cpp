@@ -135,6 +135,10 @@ const vector<_uint>& CModel::Get_Indices(_uint iIndex)
 		CRASH("Mesh Index Error");
 	return m_Meshes[iIndex]->Get_Indices();
 }
+void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
+{
+	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
+}
 
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
@@ -146,10 +150,7 @@ _float CModel::Get_Duration(const _string& strAnimName)
 {
 	return m_Animations[strAnimName]->Get_Duration();
 }
-void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
-{
-	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
-}
+
 HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;
@@ -572,7 +573,6 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	pAnimCBInfo->iAnimindex = m_AnimationNameToIndex[strAnimationName]; /* 애니메이션 이름(strAnimationName)에 해당하는 인덱스 */;
 	pAnimCBInfo->IsRibAnimUsed = false;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
-
 
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
 	_string strRibAnimationName = "Rib_" + strAnimationName;

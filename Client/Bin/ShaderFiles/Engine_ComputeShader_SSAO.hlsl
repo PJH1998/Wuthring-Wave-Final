@@ -17,103 +17,104 @@ SamplerState CS_DefaultSampler : register(s1);
 SamplerState CS_PointClampSampler : register(s2);
 SamplerState CS_NoiseSampler : register(s3);
 
-cbuffer SSAO_DATA : register(b0)
-{
-    vector vSampleVector[16];
-    float4x4 CamViewMatrix;
-    float4x4 CamProjMatrix;
-    float4x4 ProjMatrixInv;
-    float fWidth;
-    float fHeight;
-    int iSampleSize;
-    float fSSAO_Radius;
-    float fSSAO_MaxDistance;
-    float3 Padding;
-}
+// PS로 옮김
+//cbuffer SSAO_DATA : register(b0)
+//{
+//    vector vSampleVector[16];
+//    float4x4 CamViewMatrix;
+//    float4x4 CamProjMatrix;
+//    float4x4 ProjMatrixInv;
+//    float fWidth;
+//    float fHeight;
+//    int iSampleSize;
+//    float fSSAO_Radius;
+//    float fSSAO_MaxDistance;
+//    float3 Padding;
+//}
 
-[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
-{
-    float2 vTexcoord = Compute_Texcoord(DTID, fWidth, fHeight);
+//[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+//void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+//{
+//    float2 vTexcoord = Compute_Texcoord(DTID, fWidth, fHeight);
     
-    float4 vViewPos = Compute_ViewPos(vTexcoord, g_DepthTexture, DTID, ProjMatrixInv);
+//    float4 vViewPos = Compute_ViewPos(vTexcoord, g_DepthTexture, DTID, ProjMatrixInv);
 
-    float fViewPosZ = vViewPos.z;
+//    float fViewPosZ = vViewPos.z;
     
-    if (fViewPosZ == 0.f || fViewPosZ >= 2000.f)
-    {
-        OutputTexture[DTID.xy] = 1.f;
-        return;
-    }
+//    if (fViewPosZ == 0.f || fViewPosZ >= 2000.f)
+//    {
+//        OutputTexture[DTID.xy] = 1.f;
+//        return;
+//    }
     
-    vector vNormal = Compute_Normal(g_NormalTexture, CS_DefaultSampler, vTexcoord);
-    vNormal = normalize(mul(vNormal, CamViewMatrix));
+//    vector vNormal = Compute_Normal(g_NormalTexture, CS_DefaultSampler, vTexcoord);
+//    vNormal = normalize(mul(vNormal, CamViewMatrix));
     
-    float fNoiseTexelSize = 1.f / 512.f;
+//    float fNoiseTexelSize = 1.f / 512.f;
     
-    float2 vNoiseTexcoord = 0.f;
-    vNoiseTexcoord.x = (float) DTID.x * fNoiseTexelSize * 16.f;
-    vNoiseTexcoord.y = (float) DTID.y * fNoiseTexelSize * 16.f;
+//    float2 vNoiseTexcoord = 0.f;
+//    vNoiseTexcoord.x = (float) DTID.x * fNoiseTexelSize * 16.f;
+//    vNoiseTexcoord.y = (float) DTID.y * fNoiseTexelSize * 16.f;
 
-    vector vNoiseNormal = Compute_Normal(g_NoiseTexture, CS_NoiseSampler, vNoiseTexcoord);
-    vNoiseNormal = normalize(mul(vNoiseNormal, CamViewMatrix));
+//    vector vNoiseNormal = Compute_Normal(g_NoiseTexture, CS_NoiseSampler, vNoiseTexcoord);
+//    vNoiseNormal = normalize(mul(vNoiseNormal, CamViewMatrix));
     
-    float TotalOcclusion = 0.f;
+//    float TotalOcclusion = 0.f;
     
-    for (int i = 0; i < iSampleSize; ++i)
-    {
-        float Occlusion = 0.f;
+//    for (int i = 0; i < iSampleSize; ++i)
+//    {
+//        float Occlusion = 0.f;
     
-        float3 vTangent = normalize(vNoiseNormal.xyz - (vNormal.xyz * dot(vNoiseNormal, vNormal)));
-        float3 vBinormal = normalize(cross(vNormal.xyz, vTangent));
-        float3x3 TBN = float3x3(vTangent.xyz, vBinormal.xyz, vNormal.xyz);
+//        float3 vTangent = normalize(vNoiseNormal.xyz - (vNormal.xyz * dot(vNoiseNormal, vNormal)));
+//        float3 vBinormal = normalize(cross(vNormal.xyz, vTangent));
+//        float3x3 TBN = float3x3(vTangent.xyz, vBinormal.xyz, vNormal.xyz);
         
-        float3 vRandomVector = mul(vSampleVector[i].xyz, TBN);
+//        float3 vRandomVector = mul(vSampleVector[i].xyz, TBN);
         
-        float4 vSampeDir = float4(vRandomVector, 0.f);                              // 샘플 벡터를 vNormal 기준 반구 형태로 변형
+//        float4 vSampeDir = float4(vRandomVector, 0.f);                              // 샘플 벡터를 vNormal 기준 반구 형태로 변형
        
-        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);                  // Radius 만큼 이동
-        vSamplePos.w = 1.f;                                                         
-        float fRandomZ = vSamplePos.z;
+//        float4 vSamplePos = vViewPos + (vSampeDir * fSSAO_Radius);                  // Radius 만큼 이동
+//        vSamplePos.w = 1.f;                                                         
+//        float fRandomZ = vSamplePos.z;
         
-        float4 vProjPos = mul(vSamplePos, CamProjMatrix);
+//        float4 vProjPos = mul(vSamplePos, CamProjMatrix);
     
-        float2 vProjPosXY = vProjPos.xy / vProjPos.w;
+//        float2 vProjPosXY = vProjPos.xy / vProjPos.w;
         
-        float2 vSampleTexcoord = Compute_Texcoord_Proj(vProjPosXY);
+//        float2 vSampleTexcoord = Compute_Texcoord_Proj(vProjPosXY);
             
-        float SampleDepth = g_DepthTexture.SampleLevel(CS_PointClampSampler, vSampleTexcoord, 0).y;
+//        float SampleDepth = g_DepthTexture.SampleLevel(CS_PointClampSampler, vSampleTexcoord, 0).y;
         
-        if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
-        {
-            Occlusion = 1.f;
-        }
-        else
-        {
-            float fDistance = abs(SampleDepth - fViewPosZ);
+//        if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
+//        {
+//            Occlusion = 1.f;
+//        }
+//        else
+//        {
+//            float fDistance = abs(SampleDepth - fViewPosZ);
             
-            float4 vSampleViewPos = Compute_ViewPosTexcoord(vSampleTexcoord, g_DepthTexture, CS_DefaultSampler, ProjMatrixInv);
+//            float4 vSampleViewPos = Compute_ViewPosTexcoord(vSampleTexcoord, g_DepthTexture, CS_DefaultSampler, ProjMatrixInv);
 
-            float fNormalWeight = saturate(dot(vNormal.xyz, normalize(vSampleViewPos.xyz - vViewPos.xyz))); // 현재 노말과 Sample 위치까지의 방향 벡터
+//            float fNormalWeight = saturate(dot(vNormal.xyz, normalize(vSampleViewPos.xyz - vViewPos.xyz))); // 현재 노말과 Sample 위치까지의 방향 벡터
             
-            float fDistWeight = smoothstep(fSSAO_MaxDistance, 0.f, fDistance); // 깊이 차이가 클수록 강하게, 낮을수록 약하게    
+//            float fDistWeight = smoothstep(fSSAO_MaxDistance, 0.f, fDistance); // 깊이 차이가 클수록 강하게, 낮을수록 약하게    
 
-            //if(fNormalWeight <= 0.1f)                                    // 만약 노말방향 뒤에 있다면
-            //    Occlusion = 1.f;
-            //else
-            {
-                Occlusion = (fDistWeight * (1.f - fNormalWeight));
-            }
-        }
+//            //if(fNormalWeight <= 0.1f)                                    // 만약 노말방향 뒤에 있다면
+//            //    Occlusion = 1.f;
+//            //else
+//            {
+//                Occlusion = (fDistWeight * (1.f - fNormalWeight));
+//            }
+//        }
         
-        TotalOcclusion += Occlusion;
-    }
+//        TotalOcclusion += Occlusion;
+//    }
     
-    float AO = (TotalOcclusion / (float) iSampleSize);
-    AO = pow(AO, 2.f);
+//    float AO = (TotalOcclusion / (float) iSampleSize);
+//    AO = pow(AO, 2.f);
     
-    OutputTexture[DTID.xy] = float4(AO, AO, AO, 1.f);
-}
+//    OutputTexture[DTID.xy] = float4(AO, AO, AO, 1.f);
+//}
 
 cbuffer SSAO_BLUR_DATA : register(b1)
 {

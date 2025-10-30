@@ -28,7 +28,6 @@ public:
 	virtual		HRESULT			Initialize_Clone(void* pArg);
 	virtual		void				Priority_Update(_float fTimeDelta);
 	virtual		void				Update(_float fTimeDelta);
-	virtual		void				Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta);
 	virtual		void				Late_Update(_float fTimeDelta);
 	virtual		void				Render();
 

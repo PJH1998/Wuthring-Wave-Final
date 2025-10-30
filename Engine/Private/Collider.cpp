@@ -83,7 +83,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	
 	VirtualSetting.mInnerBodyShape = m_pShape;
 	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
-	
+
 	// Create CharacterVirtual
 	m_tCollisionData.pComponent = this;
 	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);

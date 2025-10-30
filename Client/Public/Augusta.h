@@ -6,7 +6,7 @@
 NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
-#pragma region STATE ���� ���濡 ���.
+#pragma region STATE
 private:
 	struct StateTransitionContext
 	{
@@ -37,7 +37,7 @@ private:
 		// Hit
 		EAugustaHitType m_eHitType = EAugustaHitType::END;
 		
-		// ���ؽ�Ʈ ��� �� �ʱ�ȭ
+		//
 		void Clear()
 		{
 			// Land

@@ -14,6 +14,7 @@
 #include "Timer_Manager.h"
 #include "PhysicsManager.h"
 #include "Camera_Manager.h"
+#include "Sequence_Manager.h"
 #include "EventBus.h"
 #include "PipeLine.h"
 #include "Light_Manager.h"
@@ -71,6 +72,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pCamera_Manager = CCamera_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pCamera_Manager);
+
+	m_pSequence_Manager = CSequence_Manager::Create();
+	ASSERT_CRASH(m_pSequence_Manager);
 
 	m_pTimer_Manager = CTimer_Manager::Create();
 	ASSERT_CRASH(m_pTimer_Manager);
@@ -413,6 +417,26 @@ void CGameInstance::Setting_SSAO(_float fRadius, _float fMaxDistance)
 {
 	m_pRenderer->Setting_SSAO(fRadius, fMaxDistance);
 }
+void CGameInstance::SetBloomIntensity(_float fIntensity)
+{
+	m_pRenderer->SetBloomIntensity(fIntensity);
+}
+void CGameInstance::SetBloomWeight(_int iWeight)
+{
+	m_pRenderer->SetBloomWeight(iWeight);
+}
+void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
+{
+	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
+}
+void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
+{
+	m_pRenderer->SetDof(fDepth, fRange, fScale);
+}
+void CGameInstance::Set_Blur(_bool IsBlur, BLUR_TYPE eType)
+{
+	m_pRenderer->SetBlur(IsBlur, eType);
+}
 #endif
 #pragma endregion
 
@@ -446,18 +470,6 @@ HRESULT CGameInstance::Add_Camera(_uint iLevelID, const _wstring& strCameraTag, 
 {
 	return m_pCamera_Manager->Add_Camera(iLevelID, strCameraTag, iPrototypeLevelID, strPrototypeTag, pArg);
 }
-HRESULT CGameInstance::Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames)
-{
-	return m_pCamera_Manager->Add_Camera_Action(strActionTag, ActionFrames);
-}
-HRESULT CGameInstance::Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath)
-{
-	return m_pCamera_Manager->Add_Camera_Action(strActionTag, pFilePath);
-}
-void CGameInstance::Play_Action(const _wstring& strActionTag)
-{
-	m_pCamera_Manager->Play_Action(strActionTag);
-}
 HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag)
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
@@ -469,6 +481,17 @@ _float CGameInstance::Get_CurrentCamera_Near()
 _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
+}
+#pragma endregion
+
+#pragma region SEQUENCE_MANAGER
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+{
+	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
+}
+void CGameInstance::Play_Sequence(const _wstring& strSequenceTag)
+{
+	m_pSequence_Manager->Play_Sequence(strSequenceTag);
 }
 #pragma endregion
 
@@ -795,6 +818,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pCamera_Manager);
+	Safe_Release(m_pSequence_Manager);
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);

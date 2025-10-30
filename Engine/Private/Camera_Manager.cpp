@@ -38,64 +38,6 @@ HRESULT CCamera_Manager::Add_Camera(_uint iLevelID, const _wstring& strCameraTag
     return S_OK;
 }
 
-HRESULT CCamera_Manager::Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames)
-{
-    auto iter = m_CameraActions.find(strActionTag);
-    if (iter != m_CameraActions.end())
-        m_CameraActions.erase(iter);
-
-    vector<ACTIONFRAME> Actions;
-
-    for (size_t i = 0; i < ActionFrames.size(); ++i)
-    {
-        ACTIONFRAME ActionFrame = {};
-        memcpy(&ActionFrame, &ActionFrames[i], sizeof(ACTIONFRAME));
-        Actions.push_back(ActionFrame);
-    }
-
-    m_CameraActions.emplace(strActionTag, Actions);
-
-    return S_OK;
-}
-
-HRESULT CCamera_Manager::Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath)
-{
-    ifstream InputFile(pFilePath, ios::binary);
-    if (false == InputFile.is_open())
-        return E_FAIL;
-
-    _uint iNumActions = {};
-    InputFile.read(reinterpret_cast<_char*>(&iNumActions), sizeof(_uint));
-
-    vector<ACTIONFRAME> Actions;
-
-    for (_uint i = 0; i < iNumActions; ++i)
-    {
-        ACTIONFRAME ActionFrame = {};
-        InputFile.read(reinterpret_cast<_char*>(&ActionFrame), sizeof(ACTIONFRAME));
-        Actions.push_back(ActionFrame);
-    }
-
-    m_CameraActions.emplace(strActionTag, Actions);
-
-    InputFile.close();
-
-    return S_OK;
-}
-
-void CCamera_Manager::Play_Action(const _wstring& strActionTag)
-{
-    auto iter = m_CameraActions.find(strActionTag);
-    if (iter == m_CameraActions.end())
-        return;
-
-    m_strActionTag = strActionTag;
-    m_isPlayAction = true;
-    m_iActionIndex = 0;
-    m_fCurrentTrackPosition = 0.f;
-    Compute_Pre();
-}
-
 HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag)
 {
     CCamera* pCamera = Find_Camera(iLevelID, strCameraTag);
@@ -146,10 +88,7 @@ void CCamera_Manager::Update(_float fTimeDelta)
 	}
 	else
 	{
-		if (false == m_isPlayAction)
-			m_pMainCamera->Update(fTimeDelta);
-		else
-			Compute_Action(fTimeDelta);
+		m_pMainCamera->Update(fTimeDelta);
 	}
 }
 
@@ -162,9 +101,7 @@ void CCamera_Manager::Late_Update(_float fTimeDelta)
 	}
 	else
 	{
-		if (false == m_isPlayAction)
-			m_pMainCamera->Late_Update(fTimeDelta);
-
+		m_pMainCamera->Late_Update(fTimeDelta);
 		m_pMainCamera->Update_Matrix();
 	}
 }
@@ -191,49 +128,6 @@ CCamera* CCamera_Manager::Find_Camera(_uint iLevelID, const _wstring& strCameraT
         return nullptr;
 
     return iter->second;
-}
-
-void CCamera_Manager::Compute_Action(_float fTimeDelta)
-{
-    _float fDuration = m_CameraActions[m_strActionTag][m_iActionIndex].fDuration;
-    m_fCurrentTrackPosition += fTimeDelta;
-    // 1媛쒖쓽 Action ?꾨즺
-    if (m_fCurrentTrackPosition > fDuration)
-    {
-        m_fCurrentTrackPosition = 0.f;
-        m_vPreQuaternion = m_CameraActions[m_strActionTag][m_iActionIndex].vRotation;
-        m_fPreDistance = m_CameraActions[m_strActionTag][m_iActionIndex].fDistance;
-        ++m_iActionIndex;
-        // Action End
-        if (m_iActionIndex >= m_CameraActions[m_strActionTag].size())
-        {
-            m_isPlayAction = false;
-            return;
-        }
-    }
-
-    _float4 vRightQuaternion = m_CameraActions[m_strActionTag][m_iActionIndex].vRotation;
-    _float fRightDistance = m_CameraActions[m_strActionTag][m_iActionIndex].fDistance;
-
-    _float fRatio = m_fCurrentTrackPosition / fDuration;
-
-    _vector vLerpQuaternion = XMQuaternionSlerp(XMLoadFloat4(&m_vPreQuaternion), XMLoadFloat4(&vRightQuaternion), fRatio);
-    _float fLerpDistance = m_fPreDistance + (fRightDistance - m_fPreDistance) * fRatio;
-
-    m_pMainCamera->Update_Action(vLerpQuaternion, fLerpDistance, fTimeDelta);
-}
-
-void CCamera_Manager::Compute_Pre()
-{
-    CTransform* pTransform = static_cast<CTransform*>(m_pMainCamera->Get_Component(TEXT("Com_Transform")));
-
-    _vector vScale = {};
-    _vector vRotation = {};
-    _vector vTranslation = {};
-    XMMatrixDecompose(&vScale, &vRotation, &vTranslation, pTransform->Get_WorldMatrix());
-
-    XMStoreFloat4(&m_vPreQuaternion, vRotation);
-    m_fPreDistance = m_pMainCamera->Get_Distance();
 }
 
 void CCamera_Manager::Ready_FreeCamera()

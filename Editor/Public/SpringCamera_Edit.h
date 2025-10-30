@@ -11,7 +11,7 @@ NS_BEGIN(Editor)
 class CSpringCamera_Edit final : public CCamera
 {
 public:
-	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, CUTSCENE };
+	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, ACTION, CUTSCENE };
 private:
 	explicit CSpringCamera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CSpringCamera_Edit(const CSpringCamera_Edit& Prototype);
@@ -54,7 +54,6 @@ public:
 	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
-	virtual		void				Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta) override;
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 
@@ -84,6 +83,18 @@ private:
 	CTransform*				m_pTargetTransform = { nullptr };
 	_float							m_fLockOnOffsetY = {};
 
+	// Action
+	vector<CAMERA_FRAME>	m_Frames;// = { nullptr };
+	_float								m_fFirstFrame = {};
+	_int								m_iFrameIndex = { -1 };
+	_float								m_fTrackPerSec = { 10.f };
+	_bool								m_isRecovery = { false };
+	_float4							m_vPreQuaternion = {};
+	_float4							m_vEndQuaternion = {};
+	_float								m_fPreFixedDistance = {};
+	_float								m_fTrackPosition = {};
+	_float								m_fDuration = {};
+
 private:
 	// Default
 	void							Lerp_Distance(_float fTimeDelta);
@@ -102,8 +113,13 @@ private:
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
 
+	// Action
+	void							Action(_float fTimeDelta);
+	void							Recovery(_float fTimeDelta);
+
 private:
 	void							Ready_Component();
+	void							Ready_Event();
 
 public:
 	static		CSpringCamera_Edit*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

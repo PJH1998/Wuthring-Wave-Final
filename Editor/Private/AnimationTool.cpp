@@ -262,6 +262,9 @@ void CAnimationTool::RenderUI_FromState()
                     iSelectedIndex = id;
                     m_SelectedFromStateTag = stateName;
                     //m_iTransitionInfoSelectedIndex = -1;
+                    if(false == m_pAnimMachineCom->isEmpty())
+                        m_pAnimMachineCom->Get_StateData(m_SelectedFromStateTag, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_isLoopCheck,
+                                                        m_fRootMotionRate, m_fTransitTrackPos, m_fAnimationSpeed);
                 }
                 id++;
             }
@@ -311,8 +314,9 @@ void CAnimationTool::RenderUI_Transitions()
     ImGui::BeginGroup();
     {
         ImGui::Text("Transitions");
-
-        ImGui::BeginChild("Transition", ImVec2(400, 0), true);
+        ImVec2 vParentSize = ImGui::GetContentRegionAvail();
+        _float fChildHeight = (vParentSize.y - ImGui::GetStyle().ItemSpacing.y) * 0.6f;
+        ImGui::BeginChild("Transition", ImVec2(400, fChildHeight), true);
         {
             static int iSelectedIndex = -1;
             _uint id = 0;
@@ -339,11 +343,26 @@ void CAnimationTool::RenderUI_Transitions()
                 }
                 id++;
             }
-            
-            
         }
         ImGui::EndChild();
 
+        ImGui::BeginChild("AnyState", ImVec2(400, 0), true);
+        {
+            ImGui::Text("AnyState");
+            ImGui::Separator();
+            _int iSelectedIndex = m_iAnyStateTransitionSelectedIndex;
+            _uint id = 0;
+            for(auto& tTransition : m_AnyStateTransitions)
+            {
+                if(ImGui::Selectable(tTransition.strTo.c_str(), id == iSelectedIndex))
+                {
+                    m_iAnyStateTransitionSelectedIndex = id;
+                }
+                
+                id++;
+            }
+        }
+        ImGui::EndChild();
         //if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
         //    RenderUI_TransitionInfo();
     }
@@ -376,10 +395,14 @@ void CAnimationTool::RenderUI_OptionState()
             ImGui::InputScalar("Priority", ImGuiDataType_U32, &m_iTransitionPriority);
             //4. 조건이 되어질 상태
             _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
-            ImGui::Text("%u", iStateFlag);
-            ImGui::InputScalar("Target State", ImGuiDataType_U32, &m_iTransitionTargetState);
-
-            _string strTransition = {};
+            ImGui::Text("Target State: %u", iStateFlag);
+            ImGui::InputScalar("State Index", ImGuiDataType_U32, &m_iTransitionTargetState);
+            ImGui::RadioButton("_Single", reinterpret_cast<_int*>(&m_eTransitConditionType), 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("_Multi", reinterpret_cast<_int*>(&m_eTransitConditionType), 1);
+            ImGui::SameLine();
+            ImGui::RadioButton("_Not", reinterpret_cast<_int*>(&m_eTransitConditionType), 2);
+            //_string strTransition = {};
             if (ImGui::Button("Add Transition"))
             {
                 if (fTrackPosition > m_fDuration)
@@ -427,9 +450,28 @@ void CAnimationTool::RenderUI_OptionState()
                 m_TransitionDatas.clear();
             }
 
+            if(ImGui::Button("Add to AnyState"))
+            {
+                TRANSITION_DATA T_Data{
+                "",
+                m_SelectedToStateTag,
+                m_iTransitionPriority,
+                m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)),
+                fTrackPosition,
+                m_iTransitionEnablePos
+                };
+                m_AnyStateTransitions.push_back(T_Data);
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Delete from AnyState"))
+            {
+                m_AnyStateTransitions.erase(m_AnyStateTransitions.begin() + m_iAnyStateTransitionSelectedIndex);
+                m_iAnyStateTransitionSelectedIndex = -1;
+            }
+
             
 #ifdef _DEBUG
-            if(ImGui::Button("AnimState Set"))
+            if(m_pAnimMachineCom->isEmpty() && ImGui::Button("AnimState Set"))
             {
                 m_pAnimMachineCom->Create_AnimStates(m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames());
             }
@@ -460,8 +502,6 @@ void CAnimationTool::RenderUI_OptionState()
                 Import_StateTransition_From_Json();
 #endif
 
-            
-            
         }
         ImGui::EndChild();
     }
@@ -472,55 +512,122 @@ void CAnimationTool::RenderUI_OptionState()
 void CAnimationTool::RenderUI_TransitionInfo()
 {
     ImGui::Begin("Transition Info");
-    //ImGui::Text("Transition Info");
-    //ImGui::BeginChild("Transition Info", ImVec2(400, 0), true);
+    ImVec2 vParentSize = ImGui::GetContentRegionAvail();
+    _float fChildWidth = (vParentSize.x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+    if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
     {
-        ImGui::Text("Transition Count : %u", m_TransitionDatas.size());
-        ImGui::Separator();
-        auto& SelectData = m_TransitionDatas[m_iTransitionInfoSelectedIndex];
-
-        ImGui::Text("From: %s", SelectData.strFrom.c_str());
-        ImGui::Text("To: %s", SelectData.strTo.c_str());
-        ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
-        ImGui::Text("TargetState: %u", SelectData.iTargetState);
-        _uint iTemp = SelectData.iTargetState;
-        _int iCount = {};
-        vector<_int> Check;
-        while(iTemp > 0)
-        {            
-            Check.insert(Check.begin(), iTemp % 2);
-            iTemp /= 2;
-        }
-
-        for(size_t i = 0; i < Check.size(); i++)
+        ImGui::BeginChild("Current Transition", ImVec2(fChildWidth, 0), true);
         {
-            if(Check[i])
+            ImGui::Text("Transition Count : %u", m_TransitionDatas.size());
+            ImGui::Separator();
+            auto& SelectData = m_TransitionDatas[m_iTransitionInfoSelectedIndex];
+
+            ImGui::Text("From: %s", SelectData.strFrom.c_str());
+            ImGui::Text("To: %s", SelectData.strTo.c_str());
+            ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
+            ImGui::Text("TargetState: %u", SelectData.iTargetState);
+            _uint iTemp = SelectData.iTargetState;
+            _int iCount = {};
+            vector<_int> Check;
+            while(iTemp > 0)
             {
-                ImGui::SameLine();
-                ImGui::Text("%u", (1 << Check.size() - i - 1));
+                Check.insert(Check.begin(), iTemp % 2);
+                iTemp /= 2;
+            }
+
+            for(size_t i = 0; i < Check.size(); i++)
+            {
+                if(Check[i])
+                {
+                    ImGui::SameLine();
+                    ImGui::Text("%u", (1 << Check.size() - i - 1));
+                }
+            }
+            ImGui::RadioButton("Single", reinterpret_cast<_int*>(&SelectData.eType), 0);
+            ImGui::SameLine();
+            ImGui::RadioButton("Multi", reinterpret_cast<_int*>(&SelectData.eType), 1);
+            ImGui::SameLine();
+            ImGui::RadioButton("Not", reinterpret_cast<_int*>(&SelectData.eType), 2);
+
+            ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
+            ImGui::InputFloat("Transit Enable Position", &SelectData.fTransitEnablePos);
+            _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
+            ImGui::Text("%u", iStateFlag);
+            ImGui::InputScalar("Additional State", ImGuiDataType_U32, &m_iTransitionTargetState);
+            if(ImGui::Button("Add_State"))
+            {
+                SelectData.iTargetState |= (m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Remove_State"))
+            {
+                SelectData.iTargetState &= ~(m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Clear_State"))
+            {
+                SelectData.iTargetState = 0;
             }
         }
-        ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
-        ImGui::InputFloat("Transit Enable Position",&SelectData.fTransitEnablePos);
-        _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
-        ImGui::Text("%u", iStateFlag);
-        ImGui::InputScalar("Additional State", ImGuiDataType_U32, &m_iTransitionTargetState);
-        if(ImGui::Button("Add_State"))
-        {
-            SelectData.iTargetState |= (m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Remove_State"))
-        {
-            SelectData.iTargetState &= ~(m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
-        }
-        ImGui::SameLine();
-        if(ImGui::Button("Clear_State"))
-        {
-            SelectData.iTargetState = 0;
-        }
+        ImGui::EndChild();
     }
-    //ImGui::EndChild();
+    ImGui::SameLine();
+    if(false == m_AnyStateTransitions.empty() && -1 != m_iAnyStateTransitionSelectedIndex)
+    {
+        ImGui::BeginChild("AnyState Transition", ImVec2(0, 0), true);
+        {
+            ImGui::Text("AnyState Transition Count : %u", m_AnyStateTransitions.size());
+            ImGui::Separator();
+            auto& SelectData = m_AnyStateTransitions[m_iAnyStateTransitionSelectedIndex];
+
+            ImGui::Text("From: %s", SelectData.strFrom.c_str());
+            ImGui::Text("To: %s", SelectData.strTo.c_str());
+            ImGui::InputScalar("Priority", ImGuiDataType_U32, &SelectData.iPriority);
+            ImGui::Text("TargetState: %u", SelectData.iTargetState);
+            _uint iTemp = SelectData.iTargetState;
+            _int iCount = {};
+            vector<_int> Check;
+            while(iTemp > 0)
+            {
+                Check.insert(Check.begin(), iTemp % 2);
+                iTemp /= 2;
+            }
+
+            for(size_t i = 0; i < Check.size(); i++)
+            {
+                if(Check[i])
+                {
+                    ImGui::SameLine();
+                    ImGui::Text("%u", (1 << Check.size() - i - 1));
+                }
+            }
+            ImGui::RadioButton(".Single", reinterpret_cast<_int*>(&SelectData.eType), 0);
+            ImGui::SameLine();
+            ImGui::RadioButton(".Multi", reinterpret_cast<_int*>(&SelectData.eType), 1);
+            ImGui::SameLine();
+            ImGui::RadioButton(".Not", reinterpret_cast<_int*>(&SelectData.eType), 2);
+            ImGui::InputFloat("Transit Target Position", &SelectData.fTargetTrackPos);
+            ImGui::InputFloat("Transit Enable Position", &SelectData.fTransitEnablePos);
+            _uint iStateFlag = m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1));
+            ImGui::Text("%u", iStateFlag);
+            ImGui::InputScalar("Additional State", ImGuiDataType_U32, &m_iTransitionTargetState);
+            if(ImGui::Button("Add_State"))
+            {
+                SelectData.iTargetState |= (m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Remove_State"))
+            {
+                SelectData.iTargetState &= ~(m_iTransitionTargetState == 0 ? 0 : (1 << (m_iTransitionTargetState - 1)));
+            }
+            ImGui::SameLine();
+            if(ImGui::Button("Clear_State"))
+            {
+                SelectData.iTargetState = 0;
+            }
+        }
+        ImGui::EndChild();
+    }
     //if(ImGui::CollapsingHeader("Conditions"))
     //{
     //    for(auto& ConditionName : SelectData.ConditionConst)
@@ -570,8 +677,8 @@ void CAnimationTool::RenderUI_EditState()
     RenderUI_OptionState();
 
 
-    if(false == m_TransitionDatas.empty() && -1 != m_iTransitionInfoSelectedIndex)
-        RenderUI_TransitionInfo();
+  
+    RenderUI_TransitionInfo();
 
     ImGui::End();
 }
@@ -1020,10 +1127,24 @@ void CAnimationTool::Export_StateTransition_To_CSV()
                 //다음 애니메이션의 해당 트랙 위치로 변환
                 Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
                 Transition["Transit Enable Pos"] = tTransitionData.fTransitEnablePos;
+                Transition["Condition Type"] = tTransitionData.eType;
 
                 Output["Transitions"].push_back(Transition);
             }
 
+            Output["AnyState"] = json::array();
+            for(auto& tTransitionData : m_AnyStateTransitions)
+            {
+                json Transition;
+                Transition["To"] = tTransitionData.strTo;
+                Transition["Priority"] = tTransitionData.iPriority;
+                Transition["Target State"] = (tTransitionData.iTargetState);
+                //다음 애니메이션의 해당 트랙 위치로 변환
+                Transition["Transit Target Pos"] = tTransitionData.fTargetTrackPos;
+                Transition["Transit Enable Pos"] = tTransitionData.fTransitEnablePos;
+                Transition["Condition Type"] = tTransitionData.eType;
+                Output["AnyState"].push_back(Transition);
+            }
             outFile << Output.dump(4);
 
             outFile.close();
@@ -1059,16 +1180,30 @@ void CAnimationTool::Import_StateTransition_From_Json()
 
         for(auto& jsonTransition : ASM_Data["Transitions"])
         {
-            _uint iState = jsonTransition["Target State"];
             TRANSITION_DATA tTransition{
                 jsonTransition["From"],
                 jsonTransition["To"],
                 jsonTransition["Priority"],
-                (1 << iState),
+                jsonTransition["Target State"],
                 jsonTransition["Transit Target Pos"],
-                jsonTransition["Transit Enable Pos"]
+                jsonTransition["Transit Enable Pos"],
+                jsonTransition["Condition Type"]
             };
             m_TransitionDatas.push_back(tTransition);
+        }
+
+        for(auto& jsonTransition : ASM_Data["AnyState"])
+        {
+            TRANSITION_DATA tTransition{
+                "",
+                jsonTransition["To"],
+                jsonTransition["Priority"],
+                jsonTransition["Target State"],
+                jsonTransition["Transit Target Pos"],
+                jsonTransition["Transit Enable Pos"],
+                jsonTransition["Condition Type"]
+            };
+            m_AnyStateTransitions.push_back(tTransition);
         }
 
         file.close();
