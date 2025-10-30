@@ -730,7 +730,7 @@ void CAnimationTool::LoadDat()
 
             _matrix		PreTransformMatrix = XMMatrixIdentity();
             //_float fSize = 1.f;
-            _float fSize = 0.01f;
+            _float fSize = 0.0001f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
             wStrModelName = StringToWString(strModelName);
@@ -794,11 +794,35 @@ void CAnimationTool::RenderUI_AnimationList()
     _uint id = 0;
 
 
-    
+    // 1. 검색 버퍼 추가.
+	static char szSearchBuffer[256] = "";
+	ImGui::InputText("Search", szSearchBuffer, sizeof(szSearchBuffer));
+	ImGui::Separator();
+
+	// 2. 검색 필터링.
+	_string strSearch = szSearchBuffer;
+
+	// 대소문자 구분없이 검색.
+	transform(strSearch.begin(), strSearch.end(), strSearch.begin(), ::tolower);
+
+
 #ifdef _DEBUG
     for (auto& animName : m_AnimationActors[m_wSelected_AnimActorTag]->Get_AnimationNames())
     {
-        // 1. 애니메이션을 선택했을 경우에는 애니메이션 각각에 대한 Detail한 설정.
+		// 1. 검색어가 있으면 필터링
+		if (szSearchBuffer[0] != '\0')
+		{
+			_string strAnimName = animName;
+			transform(strAnimName.begin(), strAnimName.end(), strAnimName.begin(), ::tolower);
+
+			if (strAnimName.find(strSearch) == string::npos)
+			{
+				id++;
+				continue; // 매치 안되면 스킵
+			}
+		}
+
+        // 2. 애니메이션을 선택했을 경우에는 애니메이션 각각에 대한 Detail한 설정.
         if (ImGui::Selectable(animName.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
@@ -865,7 +889,7 @@ void CAnimationTool::Render_Model_Detail()
     static float fRotation[3] = { 0.f, 0.f, 0.f };
     ImGui::InputFloat3("Rotation", fRotation);
 
-    static float fScale[3] = { 0.01f, 0.01f, 0.01f };
+    static float fScale[3] = { 1.f, 1.f, 1.f };
     ImGui::InputFloat3("Scale", fScale);
 
     static float fSpeedPerSec = { 10.f };
@@ -878,6 +902,9 @@ void CAnimationTool::Render_Model_Detail()
     static const unsigned int min_val = static_cast<_uint>(SHADER_ANIMPATH::DEFAULT_NORMAL);
     static const unsigned int max_val = static_cast<_uint>(SHADER_ANIMPATH::NORMAL_TEXTURE);
     ImGui::SliderScalar("Shader Path", ImGuiDataType_U32, &iShaderPath, &min_val, &max_val);
+
+	
+
 
     if (ImGui::Button("Create Instance"))
     {
@@ -931,11 +958,11 @@ void CAnimationTool::Render_Model_Detail()
         m_ActorNames.emplace_back(WStringToString(wstrObjTag));
 
         Safe_AddRef(pActor);
-        m_AnimationActors.emplace(wstrObjTag, pActor);
-        
-
-        
+        m_AnimationActors.emplace(wstrObjTag, pActor);        
     }
+
+	ImGui::Separator();
+
 
     ImGui::EndChild();
 }
@@ -1074,6 +1101,8 @@ void CAnimationTool::Export_StateAnimationMap_ToCSV()
 
 
 }
+
+
 void CAnimationTool::Export_StateTransition_To_CSV()
 {
     if (ImGui::Button("Save Transition"))
@@ -1211,7 +1240,7 @@ void CAnimationTool::Import_StateTransition_From_Json()
         m_isShowImport_ST_Dialog = false;
     }
 }
-#endif // _DEBUG
+#endif
 
 
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
