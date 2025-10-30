@@ -96,6 +96,7 @@ void CPooling_Manager::Add_Work(function<void()> Work)
 		lock_guard<mutex> lock(m_Mutex);
 		m_Works.push(Work);
 	}
+	m_iRemainWork.fetch_add(1);
 	m_CV.notify_one();
 }
 
@@ -105,7 +106,6 @@ void CPooling_Manager::Wait_Thread_End()
 	{
 
 	}
-	//cout << "Work End" << endl;
 }
 
 void CPooling_Manager::Work_Thread()
@@ -121,11 +121,12 @@ void CPooling_Manager::Work_Thread()
 		function<void()> Work = move(m_Works.front());
 		m_Works.pop();
 		lock.unlock();
+		m_iRemainWork.fetch_sub(1);
 
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
-		if(0 == m_Works.size())
+		if(0 == m_iRemainWork)
 			m_CV.notify_all();
 	}
 }

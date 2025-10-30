@@ -90,7 +90,9 @@ private:
 	_float								m_fTrackPerSec = { 10.f };
 	_bool								m_isRecovery = { false };
 	_float4							m_vPreQuaternion = {};
+	_float3							m_vPreTranslation = {};
 	_float4							m_vEndQuaternion = {};
+	_float3							m_vEndTranslation = {};
 	_float								m_fPreFixedDistance = {};
 	_float								m_fTrackPosition = {};
 	_float								m_fDuration = {};

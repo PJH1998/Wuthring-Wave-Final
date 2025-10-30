@@ -20,7 +20,7 @@ public:
 
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
-	_bool									IsWorkFinish() { return 0 == m_iLiveWork && 0 == m_Works.size(); }
+	_bool									IsWorkFinish() { return 0 == m_iLiveWork && 0 == m_iRemainWork; }
 	void									Wait_Thread_End();
 
 private:
@@ -42,8 +42,10 @@ private:
 	condition_variable				m_CV;
 	// Thread All Stop
 	_bool								m_isAllStop = { false };
-	// 吏꾪뻾以묒씤 Work Count
+	// 진행중인 Work Count
 	atomic<_int>					m_iLiveWork = {};
+	// 남아있는 Work Count
+	atomic<_int>					m_iRemainWork = {};
 
 private:
 	void									Work_Thread();
