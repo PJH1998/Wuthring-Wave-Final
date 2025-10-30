@@ -165,10 +165,11 @@ void CSequencer::Update(_float fTimeDelta)
 {
 	ImGui::Begin("Sequence");
 
-	ImGui::PushItemWidth(200);
+	ImGui::PushItemWidth(300);
 	ImGui::Text("Frame : "); ImGui::SameLine(); ImGui::InputInt("##1", &m_iCurrentFrame); ImGui::SameLine();
 	ImGui::Text("/ Frame Min : ");  ImGui::SameLine(); ImGui::InputInt("##2", &m_iFrameMin); ImGui::SameLine();
 	ImGui::Text("/ Frame Max : ");  ImGui::SameLine(); ImGui::InputInt("##3", &m_iFrameMax);
+	ImGui::InputFloat("/ TPS : ", &m_fTrackPerSec);
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
@@ -182,6 +183,20 @@ void CSequencer::Update(_float fTimeDelta)
 
 	if(m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		Sorting_Item();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN)
+		m_isPlay = !m_isPlay;
+
+	if (true == m_isPlay)
+		Play(fTimeDelta);
+}
+
+void CSequencer::Play(_float fTimeDelta)
+{
+	if (m_iCurrentFrame >= m_iFrameMax)
+		return;
+
+
 }
 
 void CSequencer::Selectable_Item()
