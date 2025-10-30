@@ -40,7 +40,8 @@ private:
 private:					// 자식 UI에 관한 모든 동작은 해당 컨테이너 UI가 전담.
 	void					Update_UI_SkillSection(_float fTimeDelta);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
-	void					Update_UI_BossHPBar(_float fTimeDelta);				
+	void					Update_UI_BossHPBar(_float fTimeDelta);
+	void					Update_UI_KeyGuide(_float fTimeDelta);
 
 	void					Update_UI_PlayerEnergyFrame(_float fTimeDelta);				// [Energy] Only Frame
 	void					Update_UI_PlayerEnergyBar(_float fTimeDelta);				// [Energy] Normal Energy. shared.

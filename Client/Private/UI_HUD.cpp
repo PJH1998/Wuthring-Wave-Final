@@ -56,7 +56,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
         //L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
-        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251029_1433.json";
+        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_1522.json";
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
@@ -82,6 +82,7 @@ void CUI_HUD::Update(_float fTimeDelta)
     Update_UI_SkillSection(fTimeDelta);
     Update_UI_PlayerHPBar(fTimeDelta);
     Update_UI_BossHPBar(fTimeDelta);
+    Update_UI_KeyGuide(fTimeDelta);
 
     Update_UI_PlayerEnergyFrame(fTimeDelta);
     Update_UI_PlayerEnergyBar(fTimeDelta);
@@ -358,14 +359,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     // skill
     for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
     {
-        _float fCooldown_E = fSkillCD[i][SK_E];
-        _float fCooldown_R = fSkillCD[i][SK_R];
         auto targetUI = pSkillUI[i];
 
         vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
 
-        vecVariantMat[0].m[0][0] = fCooldown_E / fMaxSkillCD[i][SK_E];
-        vecVariantMat[1].m[0][0] = fCooldown_R / fMaxSkillCD[i][SK_R];
+        vecVariantMat[0].m[0][0] = fSkillCD[i][SK_E] / fMaxSkillCD[i][SK_E];
+        vecVariantMat[1].m[0][0] = fSkillCD[i][SK_R] / fMaxSkillCD[i][SK_R];
         vecVariantMat[0].m[0][1] = 0.5f;
         vecVariantMat[1].m[0][1] = 0.5f;
         vecVariantMat[0].m[0][2] = 0.95f;
@@ -378,6 +377,53 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         };
 
         targetUI->Set_VariantUIDesc(tVariantDesc);
+
+
+
+        if      (   i == CH_ROVER &&
+                    m_iSelectedCHIndex == CH_ROVER)
+        {
+            auto roverUIDesc = pSkillUI[CH_ROVER]->Get_UIDesc();
+
+            if (m_iEnergyBarMode == 1)
+            {
+                roverUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.07142857142f, 0.14285714285f };
+            }
+            else
+            {
+                roverUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.0f, 0.07142857142f };
+            }
+            pSkillUI[CH_ROVER]->Set_UIDesc(roverUIDesc);
+        }
+
+        else if (   i == CH_AUGUSTA &&
+                    m_iSelectedCHIndex == CH_AUGUSTA)
+        {
+            auto augustaUIDesc = pSkillUI[CH_AUGUSTA]->Get_UIDesc();
+
+            if (m_iEnergyBarMode == 1)
+            {
+                augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.0f, 0.14285714285f };
+                augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = { 0.0f, 0.5f };
+                augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+
+                augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = { 0.0f, 0.1428571492433548f };
+                augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = { 0.5f, 1.0f };
+             }
+            else
+            {
+                augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.7142857313156128f, 0.8571428656578064f };
+                augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = { 0.0f, 0.5f };
+                augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+
+                augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = { 0.1428571492433548f, 0.28571428571f };
+                augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = { 0.5f, 1.0f };
+            }
+
+            pSkillUI[CH_AUGUSTA]->Set_UIDesc(augustaUIDesc);
+        }
+
+        
     }
 
     // change
@@ -699,6 +745,33 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 }
 
+void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
+{
+    // 캐릭터에 따른 키 가이드 보이기 여부 분기
+    CCustom_UI* pKeyButtonUI = Find_ChildObject(L"Inst_KeyButton");
+    auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
+
+    switch (m_iSelectedCHIndex)
+    {
+    case Client::CUI_HUD::CH_ROVER:
+        keyButtonDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 0.0f };
+        keyButtonDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 1.0f };
+        keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 1.0f };
+        break;
+    case Client::CUI_HUD::CH_AUGUSTA:
+        keyButtonDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 1.0f };
+        keyButtonDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 0.0f };
+        keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 1.0f };        
+        break;
+    case Client::CUI_HUD::CH_GALBRENA:
+        keyButtonDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 1.0f };
+        keyButtonDesc.vecInstanceDescs[1].vClipTexcoordX = { 0.0f, 1.0f };
+        keyButtonDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.0f, 0.0f }; 
+        break;
+    }
+    pKeyButtonUI->Set_UIDesc(keyButtonDesc);
+}
+
 void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 {
     switch (m_iSelectedCHIndex)
@@ -759,6 +832,75 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
         break;
     }
+
+
+    
+
+
+
+    // 속성 아이콘 색상 적용
+    vector<CCustom_UI*> pElementIcons = {
+        Find_ChildObject(L"Icon_ElementDark"),
+        Find_ChildObject(L"Icon_ElementThunder"),
+        Find_ChildObject(L"Icon_ElementFire")
+    };
+    CCustom_UI* pElementTargetUI = pElementIcons[m_iSelectedCHIndex];
+    const vector<_float4> vecElemColors = {
+        {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
+        {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
+        {1.0f, 0.416f, 0.416f, 1.0f}          // Fire
+    };
+
+    vector<_float4x4> vecElementVariantMat = { _float4x4() };
+    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = vecElemColors[m_iSelectedCHIndex];
+    *reinterpret_cast<_float*>(&vecElementVariantMat[0]._21) = static_cast<_float>(true);
+
+    CCustom_UI::VARIANTREADY_UI_DESC tElementVariantDesc = {
+        vecElementVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLEMASK),
+        true
+    };
+
+    pElementTargetUI->Set_VariantUIDesc(tElementVariantDesc);
+
+    
+    
+    // 속성 아이콘 주변 공명 값 적용
+    const vector<_float4> vecElemCircleColors = {
+        {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
+        {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
+        {1.0f, 0.416f, 0.416f, 1.0f}          // Fire
+    };
+    static _float fElementAmounts[CH_END] = { 0.f, 0.f ,0.f };
+    static _float fMaxElementAmounts[CH_END] = {100.f, 100.f, 100.f};
+
+    // ksta : test 
+    fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
+    fElementAmounts[1] = (fElementAmounts[1] >= 100)? 0 : fElementAmounts[1] + 1.5f * 30.f * fTimeDelta;
+    fElementAmounts[2] = (fElementAmounts[2] >= 100)? 0 : fElementAmounts[2] + 1.f  * 30.f * fTimeDelta;
+
+    
+
+    CCustom_UI* pElementGuageUI = Find_ChildObject(L"Icon_ElementGuage");
+    //auto elementGuageDesc = pElementGuageUI->Get_UIDesc();
+
+    vector<_float4x4> vecElementGuageVariantMat = { _float4x4() };
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._12) = 0.0f;
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._13) = 1.0f;
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_bool>(true);
+    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[m_iSelectedCHIndex];
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
+
+
+
+    CCustom_UI::VARIANTREADY_UI_DESC tElementAmountVariantDesc = {
+        vecElementGuageVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
+        true
+    };
+
+    pElementGuageUI->Set_VariantUIDesc(tElementAmountVariantDesc);
 
 }
 

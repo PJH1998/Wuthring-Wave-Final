@@ -39,7 +39,7 @@ HRESULT CLoader_Test_UI::Initialize()
 HRESULT CLoader_Test_UI::Load_Texture()
 {
     // ==============================
-    cout << "Texture" << endl;
+    cout << "[CLoader_Test_UI] Texture" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -48,7 +48,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
     // * Json Parse                 // for pre-loading textures
     // UI_HUD
     //_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
-    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251029_1433.json"; // ksta
+    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_1522.json"; // ksta
     vecDescs.push_back(Load_Tree(strFilePath_UI_HUD));
 
     for (auto& treeDesc : vecDescs)
@@ -75,7 +75,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
 HRESULT CLoader_Test_UI::Load_Model()
 {
     // ==============================
-    cout << "Model" << endl;
+    cout << "[CLoader_Test_UI] Model" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -97,7 +97,7 @@ HRESULT CLoader_Test_UI::Load_Model()
 HRESULT CLoader_Test_UI::Load_Shader()
 {
     // ==============================
-    cout << "Shader" << endl;
+    cout << "[CLoader_Test_UI] Shader" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -117,7 +117,7 @@ HRESULT CLoader_Test_UI::Load_Shader()
 HRESULT CLoader_Test_UI::Load_Object()
 {
     // ==============================
-    cout << "Object" << endl;
+    cout << "[CLoader_Test_UI] Object" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -150,7 +150,7 @@ HRESULT CLoader_Test_UI::Load_Object()
 HRESULT CLoader_Test_UI::Load_Prototype()
 {
     // ==============================
-    cout << "[UI Custom] Prototype" << endl;
+    cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -163,6 +163,8 @@ HRESULT CLoader_Test_UI::Load_Prototype()
 
 HRESULT CLoader_Test_UI::Load_Font()
 {
+    cout << "[CLoader_Test_UI] .. " << endl;
+
     //if (FAILED(m_pGameInstance->Add_Font()))
     //    OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
