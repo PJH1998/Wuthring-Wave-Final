@@ -113,7 +113,7 @@ HRESULT CLoader_Test::Load_MonsterTest()
         CRASH("Monster AnimMachine Create Failed");
 
     // Prototype_Component_Model_FalseSovereign
-    _fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(XM_PI));
+    _fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FalseSovereign"),
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereignTest.dat"))))
         CRASH("Prototype Create Failed");

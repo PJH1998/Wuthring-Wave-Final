@@ -49,7 +49,9 @@ private:
 
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
+	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
+	_float3					m_vTargetDir{};
 	_float					m_fAttackCoolTime[10]{};
 	_float					m_fAttackAcc[10]{};
 	_float					m_fDistance{};
@@ -59,6 +61,9 @@ private:
 
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isBlocked{};
+	_bool					m_isParalysis{};
+	_float					m_fParalysisAcc{};
 
 private:
 	HRESULT						Bind_Resources();
@@ -67,11 +72,11 @@ private:
 
 	void						Reset_Condition(_float fTimeDelta);
 
-	_bool						isAnimationRunning() { return m_isAnimationFinished; }
+	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
+	_bool						isKnockDown();
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
-	_bool						Attadk1();
-	_bool						Attack2();
+	_bool						Attack(_uint iIndex, _float fInterval);
 	_bool						Back();
 	_bool						Front();
 	_bool						Left();
