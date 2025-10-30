@@ -24,8 +24,6 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
-	CoInitializeEx(nullptr, 0);
-
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -35,9 +33,7 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
-    
-
-    m_pGameInstance->Wait_Thread_End();
+    //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 
