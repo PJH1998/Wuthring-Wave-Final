@@ -253,7 +253,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
     }
 
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
-        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 30, &PrefabDesc)))
+        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 3, &PrefabDesc)))
     {
         MSG_BOX("Prefab Load Fail");
         return;
@@ -275,7 +275,6 @@ void CParser::Load_Particle_VB_FromJson(const _string& strFilePath, const _strin
 
     json ParticleVBJson;
     JsonStream >> ParticleVBJson;
-    JsonStream.close();
 
     CVIBuffer_Point_Instance::POINT_INSTANCE_DESC Desc = {};
 
@@ -374,6 +373,8 @@ void CParser::Load_Particle_VB_FromJson(const _string& strFilePath, const _strin
     if (ParticleVBJson.contains("Gravity"))
         Desc.fGravity = ParticleVBJson["Gravity"].get<_float>();
 
+    JsonStream.close();
+
     //읽은 정보로 원형 생성
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
         CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, &Desc))))
@@ -460,6 +461,8 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
     if (ParticleJson.contains("Col"))
         Desc.iCols = ParticleJson["Col"].get<_int>();
 
+    Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
         CParticle::Create(m_pDevice, m_pContext, &Desc))))
     {
@@ -539,6 +542,8 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
         Desc.vLifeTime.x = LifeTimeJson[0].get<_float>();
         Desc.vLifeTime.y = LifeTimeJson[1].get<_float>();
     }
+
+    Desc.CurrentLevel = ENUM_CLASS(eLevel);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
         CTrail_Mesh::Create(m_pDevice, m_pContext, &Desc))))

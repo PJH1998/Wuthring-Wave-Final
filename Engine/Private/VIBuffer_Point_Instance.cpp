@@ -350,16 +350,16 @@ void CVIBuffer_Point_Instance::Reset_UAV(class CComputeShader* pCShader)
 	m_pContext->CopyResource(m_pDebugBuffer, m_pUABuffer);
 
 
-	D3D11_MAPPED_SUBRESOURCE mapped{};
+	//D3D11_MAPPED_SUBRESOURCE mapped{};
 
-	m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+	//m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
 
-	VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
+	//VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
 
-	for (size_t i = 0; i < m_iNumInstance; i++)
-	{
-		pData[i];
-	}
+	//for (size_t i = 0; i < m_iNumInstance; i++)
+	//{
+	//	pData[i];
+	//}
 
 }
 
@@ -405,4 +405,5 @@ void CVIBuffer_Point_Instance::Free()
 	Safe_Release(m_pUABuffer);
 	Safe_Release(m_pUAV);
 	Safe_Release(m_pDefaultUAVBufer);
+	Safe_Release(m_pDebugBuffer);
 }

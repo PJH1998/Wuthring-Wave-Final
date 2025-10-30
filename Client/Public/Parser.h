@@ -28,6 +28,9 @@ public:
 	//폴더째로 읽고, 폴더로 나눠두면 좋을거 같은데 ex) 보스, 아우구스타, 공용, 등등.
 	void						Create_Prefab(const string& strFolderPath, LEVEL eLevel); 
 
+	//텍스처랑 Dat 먼저 읽어놔야 위에 이펙트 문제없이 클론가능.
+	void						Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void						Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 private:
 	//원형 있어야 클론가능.
 	void						Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel);
@@ -36,10 +39,6 @@ private:
 	void						Load_Particle_VB_FromJson(const _string& strFilePath, const _string& VBTag, LEVEL eLevel);
 	void						Load_Particle_OB_FromJson(const _string& strFilePath, const _string& ParticleTag, LEVEL eLevel);
 	void						Load_TrailMesh_FromJson(const _string& strFilePath, const _string& TrailMeshTag, LEVEL eLevel);
-
-	//텍스처랑 Dat 먼저 읽어놔야 위에 이펙트 문제없이 클론가능.
-	void						Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
-	void						Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 #pragma endregion
 
 public:

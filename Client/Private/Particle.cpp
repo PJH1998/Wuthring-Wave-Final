@@ -117,11 +117,11 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), Desc.strVIBufferTag,
+    if (FAILED(CGameObject::Add_Component(Desc.CurrentLevel, Desc.strVIBufferTag,
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC), Desc.strTextureTag,
+    if (FAILED(CGameObject::Add_Component(Desc.CurrentLevel, Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
 

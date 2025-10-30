@@ -17,8 +17,10 @@ CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 
 CPlayer::CPlayer(const CPlayer& Prototype)
-    : CGameObject(Prototype)
+    : CGameObject(Prototype),
+    m_pGameSystem { CGameSystem::GetInstance()}
 {
+    Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CPlayer::Initialize_Prototype()
