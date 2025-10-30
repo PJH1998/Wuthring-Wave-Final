@@ -1,7 +1,6 @@
 #include "Engine_Shader_State.hlsli"
 
 // Emissive ÃÖ¼ÒÄ¡
-float g_fEmissiveThreshold = 0.6f;
 // Blur Weight
 float g_fWeights[13] =
 {
@@ -10,7 +9,16 @@ float g_fWeights[13] =
 
 float g_fLUT_Size = 16.f;
 
-int g_iSampleSize = 8;
 
-float g_fSSAO_Radius = 15.f;
-float g_fSSAO_MaxDistance = 50.f;
+float g_fEmissiveThreshold = 0.6f;
+
+float g_fLuminence[3] = { 0.2126f, 0.7152f, 0.0722f };
+
+float Luminance(float3 vColor)
+{
+    float fWeight;
+    
+    fWeight = (vColor.r * g_fLuminence[0]) + (vColor.g * g_fLuminence[1]) + (vColor.b * g_fLuminence[2]);
+    
+    return fWeight;
+}

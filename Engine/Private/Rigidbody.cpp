@@ -32,7 +32,7 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
 	m_eShape = pDesc->eShape;
-	RefConst<Shape> BodyShape;
+	RefConst<Shape> BodyShape = { nullptr };
 
 	using namespace JPH;
 	switch (m_eShape)
@@ -83,10 +83,8 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 HRESULT CRigidbody::Render()
 {
 #ifdef _DEBUG
-	//if(nullptr != m_pBody)
-	//	m_pGameInstance->DrawShape(m_pBody->GetShape());
-	//if (nullptr != m_pCharacter)
-	//	m_pGameInstance->DrawShape(m_pCharacter->GetShape());
+	/*if(nullptr != m_pBody)
+		m_pGameInstance->DrawShape(m_pBody->GetShape());*/
 #endif
 	return S_OK;
 }
@@ -150,14 +148,18 @@ const JPH::Array<Vec3> CRigidbody::ConvertToArrayVec3(CModel* pModel)
 	return Vertices;
 }
 
-const JPH::Array<Float3> CRigidbody::ConvertToArrayFloat3(CModel* pModel, _uint iIndex)
+const JPH::Array<Float3> CRigidbody::ConvertToArrayFloat3(CModel* pModel, const _float3& vScale, _uint iIndex)
 {
 	JPH::Array<Float3> Vertices;
 
 	vector<_float3> ModelVertices = pModel->Get_VerticesPos(iIndex);
 
 	for (size_t i = 0; i < ModelVertices.size(); ++i)
-		Vertices.push_back(Float3(ModelVertices[i].x, ModelVertices[i].y, ModelVertices[i].z));
+	{
+		_vector Vertex = XMVector3TransformCoord(XMLoadFloat3(&ModelVertices[i]), XMMatrixScaling(vScale.x, vScale.y, vScale.z));
+		Vertices.push_back(Float3(Vertex.m128_f32[0], Vertex.m128_f32[1], Vertex.m128_f32[2]));
+		//Vertices.push_back(Float3(ModelVertices[i].x, ModelVertices[i].y, ModelVertices[i].z));
+	}
 
 	return Vertices;
 }
@@ -188,7 +190,7 @@ void CRigidbody::Make_MeshShape(void* pArg)
 		RefConst<Shape> BodyShape;
 
 		Ref<MeshShapeSettings> MeshSetting;
-		MeshSetting = new MeshShapeSettings(ConvertToArrayFloat3(pDesc->pModel, i), ConvertToArrayTri(pDesc->pModel, i));
+		MeshSetting = new MeshShapeSettings(ConvertToArrayFloat3(pDesc->pModel, pDesc->vScale, i), ConvertToArrayTri(pDesc->pModel, i));
 		BodyShape = MeshSetting->Create().Get();
 
 		BodyCreationSettings bodySetting(

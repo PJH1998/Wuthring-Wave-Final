@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Component.h"
 #include "GameObject.h"
@@ -21,17 +21,17 @@ public:
 
 	typedef struct tagUIAnimKeyFrameDesc
 	{
-		_uint			iKeyframeIndex = {};			// Á¤º¸°¡ ´ã±æ Å°ÇÁ·¹ÀÓ Á¤º¸
+		_uint			iKeyframeIndex = {};
 		_uint			iLerpType = {};
 
 		_uint			iTexIndex = {};
-		_float			fAlpha = {};			// 0 ~ 1
+		_float			fAlpha = {};
 		_float3			vPos = {};
-		_float3			vRot = {};			// Euler
+		_float3			vRot = {};
 		_float3			vSca = {};
 
 
-		_float2			vScreenLT = {};			// Ç¥½ÃµÉ È­¸é»óÀÇ ÁÂÇ¥ Á¦ÇÑ. (¿ì»ó 0, 0 / ÁÂÇÏ È­¸éÅ©±â)
+		_float2			vScreenLT = {};
 		_float2			vScreenRB = { g_iWinSizeX, g_iWinSizeY };
 
 		_float4			vBlendToOuterWidth = {};
@@ -77,12 +77,12 @@ public:
 	UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
 
 private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ¿¡¼­ »ç¿ëÇÒ, LerpType¿¡ µû¸¥ ºñÀ² fIn°ªÀÇ º¸Á¤°ª ¹ÝÈ¯ (0 -> 1 ·Î °¡´Â ±×·¡ÇÁÀÇ °î¼±È­)
-	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// Á¤¸» ´Ü¼øÈ÷ Ratio ¿¡ µû¸¥ Start¿Í End »çÀÌÀÇ °ªÀ» ¹ÝÈ¯
+	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½, LerpTypeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ fInï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (0 -> 1 ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½î¼±È­)
+	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ü¼ï¿½ï¿½ï¿½ Ratio ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Startï¿½ï¿½ End ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 
-	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Å°ÇÁ·¹ÀÓÀ» ³ÖÀ¸¸é ÇöÀç ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÇöÀç position¿¡ ¸Â´Â °ªÀ» ¹ÝÈ¯ (catmull-rom Àû¿ë)
+	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ positionï¿½ï¿½ ï¿½Â´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (catmull-rom ï¿½ï¿½ï¿½ï¿½)
 
-	void		Update_Animation(_float fTimeDelta);
+	void		Update_Animation();
 
 private:
 	vector<UI_ANIM_DESC>		m_vecAnimationDescs = {};
@@ -100,7 +100,14 @@ public:
 
 NS_END
 
-inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC & d)
+
+#pragma region json
+
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC& d);
+inline void from_json(const json& j, vector<CAnimator_UI::UI_ANIM_KEYFRAME_DESC>& vec);
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_DESC& d);
+
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_KEYFRAME_DESC& d)
 {
 	d.iKeyframeIndex = j["iKeyframeIndex"];
 
@@ -134,4 +141,15 @@ inline void from_json(const json& j, vector<CAnimator_UI::UI_ANIM_KEYFRAME_DESC>
 	}
 }
 
+inline void from_json(const json& j, CAnimator_UI::UI_ANIM_DESC& d)
+{
+	from_json(j["vecKeyFrames"], d.vecKeyFrames);
+	from_json(j["tUIDesc"], d.tUIDesc);
 
+	//d.iLerpType		= j["iLerpType"];
+	d.isLoop = j["isLoop"];
+	_string strAnimName = j["strAnimName"].get<_string>();
+	d.strAnimName = StringToWString(strAnimName);
+}
+
+#pragma endregion

@@ -92,7 +92,7 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_pObjectVsBPFilter = new ObjectVsBroadPhaseLayerFilterImpl(iNumObjectLayer);
 	ASSERT_CRASH(m_pObjectVsBPFilter);
 
-	// Virtual Container ?숈쟻 ?좊떦
+	// Virtual Container Create
 	m_Virtuals = new vector<CharacterVirtual*>[m_iNumObjectLayer];
 	// CharacterVirtual VS CharacterVirtual Collision
 	m_pCVCCollision = new CharacterVsCharacterCollisionSimple();
@@ -108,9 +108,13 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_DrawSetting.mDrawShapeWireframe = false;
 #endif
 
-	//m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -2.f, 0.f);
-	m_ExtendedUpdateSetting.mStickToFloorStepDown = Vec3(0.f, -0.2f, 0.f);
-
+	m_ExtendedUpdateSetting.mStickToFloorStepDown = { 0.f, -0.25f, 0.f };				// 바닥에 붙이기 (아래로 Ray 쏴서)
+	m_ExtendedUpdateSetting.mWalkStairsStepUp = Vec3{ 0.f, 0.3f, 0.f };				// 계단 허용 높이
+	m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3{ 0.f, 0.15f, 0.f };		// 아래로 내려갈 때 여유 (붕 뜨는 느낌 방지)
+	m_ExtendedUpdateSetting.mWalkStairsMinStepForward = 0.01f;					// 단차 이동 시, 최소 필요 이동 거리
+	m_ExtendedUpdateSetting.mWalkStairsStepForwardTest = 0.12f;						// 단차 이동 시, 앞으로 Ray 쏴서 올라갈 수 있는가 Test
+	m_ExtendedUpdateSetting.mWalkStairsCosAngleForwardContact = XMConvertToRadians(8.f);			// 각도 허용치
+	
 	return S_OK;
 }
 

@@ -41,7 +41,8 @@ public:
 #pragma endregion
 
 #pragma region SOUND_MANAGER
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath);
+	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath);
+	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath);
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
 	void			Play_BGM(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop = false);
 	void			Play_Other(const _wstring& strSoundTag, _float fVolume);
@@ -51,7 +52,7 @@ public:
 #pragma endregion
 
 #pragma region FONT_MANAGER
-	HRESULT		Add_Font(const _wstring& strFontTag, const _tchar* pFilePath);
+	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath);
 	HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 #pragma endregion
 
@@ -120,6 +121,12 @@ public:
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
 	void		IsSSAO_Blur(_bool IsBlur);
+	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
+	void		SetBloomIntensity(_float fIntensity);
+	void		SetBloomWeight(_int iWeight);
+	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
+	void		SetDof(_float fDepth, _float fRange, _float fScale);
+	void		Set_Blur(_bool IsBlur, BLUR_TYPE eType);
 #endif
 #pragma endregion
 
@@ -135,13 +142,16 @@ public:
 #pragma region CAMERA_MANAGER
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, class CCamera* pCamera);
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
-	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames);
-	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
-	void			Play_Action(const _wstring& strActionTag);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
-	_float			Get_CurrentCamera_Near();
-	_float			Get_CurrentCamera_Far();
+	_float				Get_CurrentCamera_Near();
+	_float				Get_CurrentCamera_Far();
 #pragma endregion
+
+#pragma region SEQUENCE_MANAGER
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Play_Sequence(const _wstring& strSequenceTag);
+#pragma endregion
+
 
 #pragma region TIMER_MANAGER
 public:
@@ -235,14 +245,22 @@ public:
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+public:
+	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);
+	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
+	void				Clear_RootUI();
+#pragma endregion
+
 #pragma region RCS_MANAGER
-	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
-	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
-	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
-	HRESULT					Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
-	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
-	HRESULT					Begin_RCS(const _wstring& strRCSTag);
-	void					Clear_RCS(const _wstring& strRCSTag);
+	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
+	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
+	HRESULT						Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	HRESULT						Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
+	HRESULT						Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel = 0);
+	HRESULT						Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
+	void						Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
+	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel = 0);
 #ifdef _DEBUG
 	HRESULT					Debug_Render_RCS();
 #endif
@@ -255,27 +273,29 @@ public:
 
 private:
 	class CGraphic_Device*		m_pGraphic_Device = { nullptr };
-	class CInput_Device*		m_pInput_Device = { nullptr };
+	class CInput_Device*			m_pInput_Device = { nullptr };
 	class CSound_Manager*		m_pSound_Manager = { nullptr };
 	class CFont_Manager*		m_pFont_Manager = { nullptr };
 	class CLevel_Manager*		m_pLevel_Manager = { nullptr };
 	class CPrototype_Manager*	m_pPrototype_Manager = { nullptr };
 	class CObject_Manager*		m_pObject_Manager = { nullptr };
-	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
-	class COctoTree*			m_pOctoTree = { nullptr };
+	class CPooling_Manager*	m_pPooling_Manager = { nullptr };
+	class COctoTree*				m_pOctoTree = { nullptr };
 	class CTarget_Manager*		m_pTargetManager = { nullptr };
-	class CRenderer*			m_pRenderer = { nullptr };
+	class CRenderer*				m_pRenderer = { nullptr };
 	class CLight_Manager*		m_pLight_Manager = { nullptr };
-	class CCamera_Manager*		m_pCamera_Manager = { nullptr };
+	class CCamera_Manager*	m_pCamera_Manager = { nullptr };
+	class CSequence_Manager* m_pSequence_Manager = { nullptr };
 	class CTimer_Manager*		m_pTimer_Manager = { nullptr };
 	class CPhysicsManager*		m_pPhysicsManager = { nullptr };
-	class CEventBus*			m_pEventBus = { nullptr };
-	class CPipeLine*			m_pPipeLine = { nullptr };
-	class CPicking*				m_pPicking = { nullptr };
+	class CEventBus*				m_pEventBus = { nullptr };
+	class CPipeLine*				m_pPipeLine = { nullptr };
+	class CPicking*					m_pPicking = { nullptr };
 	class CShadow*				m_pShadow = { nullptr };
 	class CGUIManager*			m_pGUIManager = { nullptr };
-	class CFrustrum*			m_pFrustrum = { nullptr };
-	class CCSM*					m_pCSM = { nullptr };
+	class CFrustrum*				m_pFrustrum = { nullptr };
+	class CCSM*						m_pCSM = { nullptr };
+	class CUI_Manager*			m_pUI_Manager = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 
 	_uint									m_iNumLevel = {};

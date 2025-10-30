@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 #include "Loader.h"
 
+#include "Custom_UI.h"
 NS_BEGIN(Client)
 
 class CLoader_Test_UI final : public CLoader
@@ -17,6 +18,11 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
+
+	HRESULT				Load_Prototype();
+
+private:
+	CCustom_UI::CUSTOM_UITREE_DESC Load_Tree(_string strFilePath);
 
 public:
 	static		CLoader_Test_UI* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

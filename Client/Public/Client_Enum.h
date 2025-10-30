@@ -11,6 +11,8 @@ namespace Client
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
 
+	enum class WEAPONTYPE { ANIM, NONANIM, END};
+
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
 		END
@@ -34,7 +36,9 @@ namespace Client
 		D1 = 1 << 14,
 		D2 = 1 << 15,
 		D3 = 1 << 16,
-		
+		D4 = 1 << 17,
+		D5 = 1 << 18,
+		D6 = 1 << 19
 	};
 
 	enum class DIRECTION {
@@ -42,10 +46,20 @@ namespace Client
 	};
 
 	enum class UI_EVENT_TYPE {
-		CLICK, HOVER, SCROLL, END
+		NONE, CLICK_ENTER, CLICKING, CLICK_EXIT, HOVER_ENTER, HOVERING, HOVER_EXIT, SCROLL, END
+	};
+
+	enum class UI_VARIANT_FLAG {			// * UI용 짬통셰이더 플래그 지정용
+		UIFLAG_ERROR,				// default. outputs magenta
+		UIFLAG_COOLDOWN_CIRCLE,		// 원형 쿨타임 (skill)
+		UIFLAG_COOLDOWN_RECT,		// 사각형 쿨타임 (partyframe)
+		UIFLAG_PLAYER_HP,
+		UIFLAG_PLAYER_TRANSMIT,
+		UIFLAG_END
 	};
 	
-	enum class TEST_STATE{
+	enum class  TEST_STATE : unsigned int
+	{
 		NONE				= 0,
 		MOVE_FORWARD		= 1 << 0,
 		MOVE_BACKWARD		= 1 << 1,
@@ -59,6 +73,10 @@ namespace Client
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
+		TURN				= 1 << 12,
+		BLOCK				= 1 << 14,
+		PARALYSIS			= 1 << 15,
+
 		ATTACK_1			= 1 << 16,
 		ATTACK_2			= 1 << 17,
 		ATTACK_3			= 1 << 18,
@@ -67,13 +85,12 @@ namespace Client
 		ATTACK_6			= 1 << 21,
 		ATTACK_7			= 1 << 22,
 		ATTACK_8			= 1 << 23,
-
-		BLOCK				= 1 << 24,
-		PARALYISIS			= 1 << 25,
-
-		SPAWN = 1 << 29,
-		ANIMATION_PLAYING = 1 << 30,
-		DEAD = 1 << 31
+		ATTACK_9			= 1 << 24,
+		ATTACK_10			= 1 << 25,
+		ATTACK_11			= 1 << 26,
+		SPAWN				= 1 << 27,
+		ANIMATION_PLAYING	= 1 << 28,
+		DEAD				= 1 << 29
 	};
 
 	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, SHADOW, END };

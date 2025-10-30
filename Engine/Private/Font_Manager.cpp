@@ -8,14 +8,22 @@ CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 	Safe_AddRef(m_pContext);
 }
 
-HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _tchar* pFilePath)
+HRESULT CFont_Manager::Initialize()
+{
+	if (FT_Init_FreeType(&m_pFTLibrary))
+		CRASH("FT Library");
+
+	return S_OK;
+}
+
+HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _char* pFilePath)
 {
 	if (nullptr != Find_Font(strFontTag))
 		return E_FAIL;
 
-	CCustomFont* pFont = CCustomFont::Create(m_pDevice, m_pContext, pFilePath);
-	if (nullptr == pFont)
-		return E_FAIL;
+	FT_Face pFont = { nullptr };
+	if (FT_New_Face(m_pFTLibrary, pFilePath, 0, &pFont))
+		CRASH("Add Font");
 
 	m_Fonts.emplace(strFontTag, pFont);
 
@@ -24,14 +32,15 @@ HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _tchar* pFileP
 
 HRESULT CFont_Manager::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
 {
-	CCustomFont* pFont = Find_Font(strFontTag);
-	if (nullptr == pFont)
-		return E_FAIL;
-
-	return pFont->Render(pText, vPosition, vColor, fRadian, vOrigin, vScale);
+	//FT_Face pFont = Find_Font(strFontTag);
+	//if (nullptr == pFont)
+	//	return E_FAIL;
+	//
+	//return pFont->Render(pText, vPosition, vColor, fRadian, vOrigin, vScale);
+	return S_OK;
 }
 
-CCustomFont* CFont_Manager::Find_Font(const _wstring& strFontTag)
+FT_Face CFont_Manager::Find_Font(const _wstring& strFontTag)
 {
 	auto iter = m_Fonts.find(strFontTag);
 
@@ -43,16 +52,23 @@ CCustomFont* CFont_Manager::Find_Font(const _wstring& strFontTag)
 
 CFont_Manager* CFont_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	return new CFont_Manager(pDevice, pContext);
+	CFont_Manager* pInstance = new CFont_Manager(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize()))
+		CRASH("FontManager");
+
+	return pInstance;
 }
 
 void CFont_Manager::Free()
 {
 	__super::Free();
 
-	for (auto& Pair : m_Fonts)
-		Safe_Release(Pair.second);
+	//for (auto& Pair : m_Fonts)
+	//	Pair.second = nullptr;
 	m_Fonts.clear();
+
+	//m_pFTLibrary = nullptr;
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);

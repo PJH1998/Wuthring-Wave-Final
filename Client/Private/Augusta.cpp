@@ -1,10 +1,13 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Augusta.h"
 #include "Player.h"
 #include "SpringCamera.h"
 
-#include "AugustaStateFactory.h"
+#include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
+#include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
+#include "AugustaGriffon.h"
 
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -38,76 +41,96 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+    Ready_PartObjects(pDesc); // Parts ì¶”ê°€.
+    Register_AllNotifies(pDesc->strFolderPath);
 
-    // Ready_PartObjects(pDesc); // Parts Ãß°¡.
-    CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
-    CAugustaStateFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
+    CAugustaFactory::Register_States(m_pStateMachineCom, this);
 
 
-    // ÃÊ±â State ¼³Á¤.
-    m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
+    // ì´ˆê¸° State ì„¤ì •.
+    m_StateContext.m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
-
-    
-    
     
     m_pColliderCom->Set_Gravity(true);
+    m_pBayonet->SetActivate(true);
+    m_pSkillWeapon->SetActivate(false);
+    m_pGriffon->SetActivate(false);
+    
+    XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
 
 void CAugusta::Priority_Update(_float fTimeDelta)
 {
-    // 1. Activate°¡ FalseÀÎ °æ¿ì ¾÷µ¥ÀÌÆ® ÇÏÁö ¾ÊÀ½.
-    CCharacter::Priority_Update(fTimeDelta);
+    if (!m_isActivate)
+        return;
 
-    // 2. ÀÌÀü À§Ä¡ ÀúÀå
+    // 2. ì´ì „ ìœ„ì¹˜ ì €ìž¥
     m_pTransformCom->Save_PreviousPosition();
 
-    // 3. Å°ÀÔ·Â °»½ÅÀº Player °´Ã¼¿¡¼­ °ü¸® Áß
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::UP))
+    // 4. Parts ê°±ì‹ 
+    for (auto& pPart : m_PartObjects)
     {
-        m_IsLockOn = !m_IsLockOn;
-        m_pSpringCamera->Lock_On();
+        if (pPart.second->IsActivate())
+            pPart.second->Priority_Update(fTimeDelta);
     }
-        
-        
 
-    
 }
 
 void CAugusta::Update(_float fTimeDelta)
 {
-    // 1. À§¿¡¼­ Activate°¡ falseÀÎ°æ¿ì ¾÷µ¥ÀÌÆ®ÇÏÁö ¾ÊÀ½.
-    CCharacter::Update(fTimeDelta);
+    // 1. ìœ„ì—ì„œ Activateê°€ falseì¸ê²½ìš° ì—…ë°ì´íŠ¸í•˜ì§€ ì•ŠìŒ.
+    if (!m_isActivate)
+        return;
 
-    // 2. »óÅÂ ¸Ó½Å °»½Å
-    m_pStateMachineCom->Update(fTimeDelta);
+    // 2. ìƒíƒœ ë¨¸ì‹  ê°±ì‹ 
+    m_pStateMachineCom->Update(fTimeDelta); // ì—¬ê¸°ì„œ Weaponì´ë‚˜ Partsì˜ ê°±ì‹ ì„ í•´ì•¼í•¨..
 
-    // 3. ÇöÀç À§Ä¡ - 1Frame ÀÌÀü À§Ä¡ °ª °è»ê
+
+
+    // 3. í˜„ìž¬ ìœ„ì¹˜ - 1Frame ì´ì „ ìœ„ì¹˜ ê°’ ê³„ì‚°
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-    // 4. Collider °»½Å => Jolt ÀÚÃ¼¿¡¼­µµ fTimeDelta °ªÀ» Àû¿ëÇÏ°í ÀÖ±â ¶§¹®¿¡ 
+
+    // 4. Collider ê°±ì‹  => Jolt ìžì²´ì—ì„œë„ fTimeDelta ê°’ì„ ì ìš©í•˜ê³  ìžˆê¸° ë•Œë¬¸ì— 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    //if (m_strPreAnimation != m_strCurrentAnimation)
-    //    m_fTrackPosition = 0.f;
+    // 5. Camera ê°±ì‹  => ìœ„ì¹˜ ë”°ë¼ì˜¤ê²Œ
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-    // 5. Camera °»½Å => À§Ä¡ µû¶ó¿À°Ô
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 5.f);
+
+
+
+
+    // 6. íŒŒì¸  ê°±ì‹ .?
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Update(fTimeDelta);
+    }
+
 }
-
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    CCharacter::Late_Update(fTimeDelta);
+    // íŒŒì¸  ê°±ì‹ 
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Late_Update(fTimeDelta);
+    }
 
-    // Collider Ãæµ¹ Ã³¸®ÈÄ À§Ä¡¿¡ ¸ÂÃá´Ù.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
+    // Collider ì¶©ëŒ ì²˜ë¦¬í›„ ìœ„ì¹˜ì— ë§žì¶˜ë‹¤.
+    
+    
 
-    // »ç¿ëÀÌ ³¡³µÀ¸¸é ¹ÝÈ¯.
+    // ì‚¬ìš©ì´ ëë‚¬ìœ¼ë©´ ë°˜í™˜.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
+
+    
 }
 
 void CAugusta::Render()
@@ -142,6 +165,172 @@ void CAugusta::Render_Shadow()
 {
 }
 
+// AnimNameì´ ê°™ì€ê±¸ë¡œ ë§¤í•‘ë˜ì–´ìžˆìŒ.
+void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
+    }
+}
+
+void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Activate(IsActive);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Activate(IsActive);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Activate(IsActive);
+        break;
+    }
+}
+
+void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Clear_Animation(strAnimName);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Clear_Animation(strAnimName);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Clear_Animation(strAnimName);
+
+        break;
+    }
+}
+
+void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName)
+{
+    ASSERT_CRASH(m_pModelCom);
+    
+    const _float4x4* pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(strBoneName.c_str());
+    if (nullptr == pSocketMatrix)
+        pSocketMatrix = &m_MatrixIdentity;
+    
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Set_SocketMatrix(pSocketMatrix);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Set_SocketMatrix(pSocketMatrix);
+        break;
+    }
+}
+
+// Hit íŒì •.
+void CAugusta::Hit_Judge(void* pArg)
+{
+    // ìž„ì‹œ
+    _bool IsLand = Is_Land(0.2f);
+    
+    // ê°•ê³µ?
+    
+
+    // ëª¬ìŠ¤í„° ê³µê²© Dir
+    ACTORDIR eAttackDir = ACTORDIR::RU;
+    // Behit S = SMALL(ê¸°ë³¸ ê³µ Big), B = Big (Skillë¡œ ë§žìœ¼ë©´ Big)
+    if (IsLand)
+    {
+        // íŠ¹ìˆ˜ ì¡°ê±´ ìš°ì„ ìˆœìœ„ì— ë”°ë¼ Change_State
+        
+        switch (eAttackDir)
+        {
+        case ACTORDIR::LU:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::RU:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            break;
+        case ACTORDIR::U: 
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::LD:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            break;
+        case ACTORDIR::RD:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_R;
+            break;
+        case ACTORDIR::D:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            break;
+        case ACTORDIR::L: // L, Rì€ ì •ë©´ íŒë‹¨.
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::R:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            break;
+        }
+
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+    }
+    else
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START));
+
+}
+
+
+void CAugusta::Sync_Position()
+{
+    m_pColliderCom->Sync_Position(m_pTransformCom);
+}
+
+#ifdef _DEBUG
+void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
+{
+
+}
+#endif // _DEBUG
+
+#pragma region NOTIFY
+void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
+{
+    if (wStrColliderTag == TEXT("Player"))
+    {
+        
+    }
+    else if (wStrColliderTag == TEXT("Bayonet"))
+    {
+        
+    }
+    else if (wStrColliderTag == TEXT("SkillWeapon"))
+    {
+
+    }
+}
+void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
+{
+    if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+        return;
+
+    _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+    m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+#pragma endregion
+
+
+
+
+
 void CAugusta::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
@@ -173,20 +362,16 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
-
-  /*  if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->controllerData.first)
-        , pDesc->controllerData.second, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
-        CRASH("Controller");*/
-
     
-    // °è»ê¿¡ »ç¿ëÇÒ °ª ÁöÁ¤.
-    m_fColliderRadius = 4.f;
-    m_fColliderHeight = 5.f;
-    m_vColliderOffSet = { 0.f, 6.7f, 0.f };
+    // ê³„ì‚°ì— ì‚¬ìš©í•  ê°’ ì§€ì •.
+    m_fColliderRadius = 0.4f;
+    m_fColliderHeight = 0.5f;
+    m_vColliderOffSet = { 0.f, 0.67f, 0.f };
+    //m_vColliderOffSet = { 0.f, 0.f, 0.f };
 
 
     CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = { 0.f, 0.f, 0.f };
+    ColliderDesc.vPos = pDesc->vPosition;
     ColliderDesc.vOffset = m_vColliderOffSet;
     ColliderDesc.eType = EMotionType::Kinematic;
     ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
@@ -195,6 +380,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
         , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
         CRASH("Collider");
+
+    //ëª¬ìŠ¤í„° íƒì§€ìš© ì½œë°±ìœ¼ë¡œ ë°›ì„ Desc - LJH
+    m_pColliderCom->Set_Desc(m_pTransformCom);
+
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
@@ -223,26 +412,77 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
 
+    _float3 vScale = {};
+    _float3 vRotation = {};
+    _float3 vPosition = {};
+
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
     {
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
+        CWeapon::WEAPON_DESC Desc{};
         switch (i)
         {
-        case PARTTYPE::PART_WEAPON:
+        case PARTTYPE::PART_BAYONET:
+            
+            vScale = { 1.f, 1.f, 1.f };
+            vPosition = { 0.f, 0.f, 0.f };
+            Desc = PlayerData::GetAugustaBayonetCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+            Desc.pParentTransform = m_pTransformCom;
+            ASSERT_CRASH(Desc.pSocketMatrix);
+            
+
             // WeaponDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
-                , strPrototypeName, nullptr)))
+                , strPrototypeName, &Desc)))
                 CRASH("Weapon");
+
+            m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pBayonet);
+            Safe_AddRef(m_pBayonet);
             break;
 
-        case PARTTYPE::PART_SHIELD:
+        case PARTTYPE::PART_SKILLWEAPON:
+            vScale = { 1.f, 1.f, 1.f };
+            vPosition = { 0.f, 0.f, 0.f };
+            Desc = PlayerData::GetAugustaSkillWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+            Desc.pParentTransform = m_pTransformCom;
+            ASSERT_CRASH(Desc.pSocketMatrix);
+
+
+            // WeaponDesc
+            if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+                , strPrototypeName, &Desc)))
+                CRASH("Weapon");
+
+            m_pSkillWeapon = dynamic_cast<CAugustaSkillWeapon*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pSkillWeapon);
+            Safe_AddRef(m_pSkillWeapon);
+            break;
+        case PARTTYPE::PART_GRIFFON:
+            vScale = { 1.f, 1.f, 1.f };
+            vPosition = { 0.f, 0.f, 0.f };
+            Desc = PlayerData::GetAugustaGriffonCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+            Desc.pParentTransform = m_pTransformCom;
+            ASSERT_CRASH(Desc.pSocketMatrix);
+
+
+            // WeaponDesc
+            if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+                , strPrototypeName, &Desc)))
+                CRASH("Weapon");
+
+            m_pGriffon = dynamic_cast<CAugustaGriffon*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pGriffon);
+            Safe_AddRef(m_pGriffon);
             break;
         }
-
+       
     }
-    
 }
 
 CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -274,4 +514,7 @@ CGameObject* CAugusta::Clone(void* pArg)
 void CAugusta::Free()
 {
     CCharacter::Free();
+    Safe_Release(m_pBayonet);
+    Safe_Release(m_pSkillWeapon);
+    Safe_Release(m_pGriffon);
 }

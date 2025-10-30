@@ -14,6 +14,7 @@
 #include "Timer_Manager.h"
 #include "PhysicsManager.h"
 #include "Camera_Manager.h"
+#include "Sequence_Manager.h"
 #include "EventBus.h"
 #include "PipeLine.h"
 #include "Light_Manager.h"
@@ -23,6 +24,7 @@
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
+#include "UI_Manager.h"
 #include "RCS_Manager.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
@@ -71,6 +73,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pCamera_Manager = CCamera_Manager::Create(*ppDevice, *ppContext, EngineDesc.iNumLevel);
 	ASSERT_CRASH(m_pCamera_Manager);
 
+	m_pSequence_Manager = CSequence_Manager::Create();
+	ASSERT_CRASH(m_pSequence_Manager);
+
 	m_pTimer_Manager = CTimer_Manager::Create();
 	ASSERT_CRASH(m_pTimer_Manager);
 
@@ -98,6 +103,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pCSM);
 
+	m_pUI_Manager = CUI_Manager::Create();
+	ASSERT_CRASH(m_pUI_Manager);
+
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
 
@@ -118,7 +126,6 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pObject_Manager->Update(fTimeDelta);
 	
 	m_pCamera_Manager->Update(fTimeDelta);
-	//m_pPooling_Manager->Add_Work([this]() {m_pOctoTree->Update(); });
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
@@ -156,9 +163,6 @@ void CGameInstance::Render_Begin(const _float4* pClearColor)
 
 HRESULT CGameInstance::Draw()
 {
-	ASSERT_CRASH(m_pPooling_Manager);
-	m_pPooling_Manager->Wait_Thread_End();
-
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
@@ -228,7 +232,7 @@ void CGameInstance::Set_ChannelVolume(_uint iChannelID, _float fVolume)
 #pragma endregion
 
 #pragma region FONT_MANAGER
-HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _tchar* pFilePath)
+HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePath)
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath);
 }
@@ -379,6 +383,9 @@ ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& s
 #pragma region RENDERER
 HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObject)
 {
+	if (pObject->IsActivate() == false)
+		int i = 10;
+
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
 #ifdef _DEBUG
@@ -401,6 +408,30 @@ void CGameInstance::IsSSAO(_bool IsSSAO)
 void CGameInstance::IsSSAO_Blur(_bool IsBlur)
 {
 	m_pRenderer->IsSSAO_Blur(IsBlur);
+}
+void CGameInstance::Setting_SSAO(_float fRadius, _float fMaxDistance)
+{
+	m_pRenderer->Setting_SSAO(fRadius, fMaxDistance);
+}
+void CGameInstance::SetBloomIntensity(_float fIntensity)
+{
+	m_pRenderer->SetBloomIntensity(fIntensity);
+}
+void CGameInstance::SetBloomWeight(_int iWeight)
+{
+	m_pRenderer->SetBloomWeight(iWeight);
+}
+void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
+{
+	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
+}
+void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
+{
+	m_pRenderer->SetDof(fDepth, fRange, fScale);
+}
+void CGameInstance::Set_Blur(_bool IsBlur, BLUR_TYPE eType)
+{
+	m_pRenderer->SetBlur(IsBlur, eType);
 }
 #endif
 #pragma endregion
@@ -435,18 +466,6 @@ HRESULT CGameInstance::Add_Camera(_uint iLevelID, const _wstring& strCameraTag, 
 {
 	return m_pCamera_Manager->Add_Camera(iLevelID, strCameraTag, iPrototypeLevelID, strPrototypeTag, pArg);
 }
-HRESULT CGameInstance::Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames)
-{
-	return m_pCamera_Manager->Add_Camera_Action(strActionTag, ActionFrames);
-}
-HRESULT CGameInstance::Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath)
-{
-	return m_pCamera_Manager->Add_Camera_Action(strActionTag, pFilePath);
-}
-void CGameInstance::Play_Action(const _wstring& strActionTag)
-{
-	m_pCamera_Manager->Play_Action(strActionTag);
-}
 HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag)
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
@@ -458,6 +477,17 @@ _float CGameInstance::Get_CurrentCamera_Near()
 _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
+}
+#pragma endregion
+
+#pragma region SEQUENCE_MANAGER
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+{
+	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
+}
+void CGameInstance::Play_Sequence(const _wstring& strSequenceTag)
+{
+	m_pSequence_Manager->Play_Sequence(strSequenceTag);
 }
 #pragma endregion
 
@@ -677,6 +707,24 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 #endif
 #pragma endregion
 
+#pragma region UI_MANAGER
+HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI)
+{
+	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
+}
+
+CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Find_UIObject(strName_UI);
+}
+
+void	CGameInstance::Clear_RootUI()
+{
+	m_pUI_Manager->Clear_RootUI();
+}
+#pragma endregion
+
+
 #pragma region RCS_MANAGER
 HRESULT CGameInstance::Add_RCS(const _wstring& strRCSTag, void* pDesc)
 {
@@ -694,17 +742,21 @@ HRESULT CGameInstance::Setting_UAV_Data(const _wstring& strRCSTag, const _char* 
 {
 	return m_pRCS_Manager->Setting_UAV_Data(strRCSTag, pConstantName);
 }
-HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName)
+HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName);
+	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName, iMipLevel);
 }
-HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag)
+HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Begin_RCS(strRCSTag);
+	return m_pRCS_Manager->Begin_RCS(strRCSTag, iMipLevel);
 }
-void CGameInstance::Clear_RCS(const _wstring& strRCSTag)
+void CGameInstance::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {
-	m_pRCS_Manager->Clear_RCS(strRCSTag);
+	m_pRCS_Manager->Clear_RCS(strRCSTag, iMipLevel);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel)
+{
+	return m_pRCS_Manager->Get_RCS_SRV(strRCSTag, iMipLevel);
 }
 #ifdef _DEBUG
 HRESULT CGameInstance::Debug_Render_RCS()
@@ -748,29 +800,33 @@ HRESULT CGameInstance::Clear_Memory()
 
 void CGameInstance::Release_Engine()
 {
+	Wait_Thread_End();
+
+	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
 	Safe_Release(m_pFont_Manager);
-	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
-	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pTargetManager);
 	Safe_Release(m_pRenderer);
 	Safe_Release(m_pLight_Manager);
 	Safe_Release(m_pTimer_Manager);
 	Safe_Release(m_pCamera_Manager);
+	Safe_Release(m_pSequence_Manager);
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadow);
-	Safe_Release(m_pGUIManager);
 	Safe_Release(m_pInput_Device);
-	Safe_Release(m_pGraphic_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pRCS_Manager);
-	Safe_Release(m_pPhysicsManager);
+	Safe_Release(m_pUI_Manager);
+	Safe_Release(m_pPhysicsManager);																									
+	Safe_Release(m_pPrototype_Manager);
+	Safe_Release(m_pGraphic_Device);
 
 	Release();
 }

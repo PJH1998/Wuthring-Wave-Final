@@ -16,25 +16,25 @@ public:
 	const _float4x4*			Get_TransformState_Float4x4_Inv(D3DTS eState) const;
 	_matrix						Get_TransformState_Matrix_Inv(D3DTS eState) const;
 
-	void						Set_TransformState(D3DTS eState, _fmatrix Matrix);
-	void						Set_TransformState(D3DTS eState, const _float4x4& Matrix);
+	void							Set_TransformState(D3DTS eState, _fmatrix Matrix);
+	void							Set_TransformState(D3DTS eState, const _float4x4& Matrix);
 
 	const _float4*				Get_CamPos() const { return &m_vCamPos; }
 
-	_float						Compute_Distance(class CGameObject* pObject);
+	_float							Compute_Distance(class CGameObject* pObject);
 
 public:
 	HRESULT						Initialize();
-	void						Update();
+	void							Update();
 
 private:
-	_float4x4					m_TransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
-	_float4x4					m_TransformMatrixes_Inv[ENUM_CLASS(D3DTS::END)] = {};
-	_float4					m_vCamPos = {};
+	_float4x4						m_TransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
+	_float4x4						m_TransformMatrixes_Inv[ENUM_CLASS(D3DTS::END)] = {};
+	_float4						m_vCamPos = {};
 
 public:
-	static		CPipeLine*	Create();
-	virtual		void			Free() override;
+	static		CPipeLine*		Create();
+	virtual		void				Free() override;
 };
 
 NS_END

@@ -17,10 +17,11 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
-	HRESULT				Load_Component();
+	HRESULT				Load_MonsterTest();
 
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();	
+	HRESULT				Load_Rover();
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };

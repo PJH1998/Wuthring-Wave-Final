@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "ClimbState.h"
 
 NS_BEGIN(Client)
@@ -17,6 +17,7 @@ private:
         L,
         WALL,
         ONTOP,
+        VAULT,
         BACKJUMP,
         LAND,
         END
@@ -43,6 +44,8 @@ private:
     void Update_ClimbAnimation(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
+
+    void Adjust_To_Wall(_float fTimeDelta);
 
     void Setup_Animations();
     void State_Reset();

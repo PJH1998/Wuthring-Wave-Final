@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
@@ -10,8 +10,21 @@ private:
     enum IDLESTATE
     {
         JUMP = 0,
+        DASH,
         SPRINT,
         MOVE,
+        ATTACK,
+        MOVE_U,
+        MOVE_D,
+        MOVE_L,
+        MOVE_R,
+        AIR_ATTACK_E,
+        SKILL_E,
+        SKILL_Q,
+        SKILL_R,
+        UNIQUE_E, // Unique E상태. => 그리폰 타서 공격.
+        UNIQUE_R,
+        BURST_R, // Burst R 상태 => Skill 검으로 바뀜.
         END
     };
 
@@ -33,8 +46,9 @@ private:
 
 private:
     virtual void Handle_Input() override;
-    void Update_PhysicsCheck(_float fTimeDelta);
+    
     void Update_IdleAnimations(_float fTimeDelta);
+    void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void LockOn_StateTransition(_float fTimeDelta);
 

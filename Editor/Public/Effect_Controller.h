@@ -4,12 +4,19 @@
 
 NS_BEGIN(Editor)
 
-//?꾨━??愿由??댁＜怨좎옄 ??
-//?꾨━??Desc 異붿텧
-//(?꾨━???대쫫, ?먯떇 ?뺣낫, ?먯떇?ㅼ쓽 ?ъ깮????뺣낫)
+
 
 class CEffect_Controller :public CBase
 {
+private:
+	typedef struct tagAnimationActorDesc
+	{
+		class CModel* pModelCom = { nullptr };
+		class CAnimationActor* pAnimActor = { nullptr };
+		_string strAnimName = {};
+		float fDuration = {};
+	}ANIMACTOR_DSEC;
+
 private:
 	explicit CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CEffect_Controller() = default;
@@ -28,6 +35,9 @@ public:
 	void UpdateSelected_ChildrenFromIndex();
 
 	void Reset_TabInfo();
+
+
+	void Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc);
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -57,6 +67,9 @@ private:
 	_bool														m_IsParticle = false;
 	_bool														m_IsMeshEffect = false;
 	_bool														m_IsTrailMesh = false;
+
+	ANIMACTOR_DSEC												m_AnimActorDesc = {};
+	
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};

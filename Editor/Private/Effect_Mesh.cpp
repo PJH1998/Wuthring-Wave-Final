@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+ï»¿#include "Editorpch.h"
 #include "Effect_Mesh.h"
 
 CEffect_Mesh::CEffect_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -39,7 +39,7 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
     
     if (m_IsRoot)
         m_ParentMatrix = pDesc->RootMatrix;
-    //ÀÓ½ÃÃ³¸®
+    //ï¿½Ó½ï¿½Ã³ï¿½ï¿½
     m_isActivate = true;
 
     return S_OK;
@@ -59,7 +59,7 @@ void CEffect_Mesh::Update(_float fTimeDelta)
 
 
     m_pVIBufferCom->Bind_CSResources(m_pComputeShaderCom, fTimeDelta);
-    //¿òÁ÷ÀÓ Ã³¸® ¾î¶»°Ô ?
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½ ï¿½î¶»ï¿½ï¿½ ?
    /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
    // m_vLifeTime.x += fTimeDelta;
@@ -67,7 +67,7 @@ void CEffect_Mesh::Update(_float fTimeDelta)
    // if (m_vLifeTime.x >= m_vLifeTime.y)
    //     m_isActivate = false;
    //
-    //¶óÀÌÇÁÅ¸ÀÓ ³¡³ª¸é ºñÈ°¼ºÈ­
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
 }
 
 void CEffect_Mesh::Late_Update(_float fTimeDelta)
@@ -112,7 +112,7 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //ÅØ½ºÃ³ ¿©·¯°³ ½á¾ßÇÏ´Âµ¥ ¾î¶»°Ô ÇÒÁö °í¹ÎÇØº¸ÀÚ
+    //ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´Âµï¿½ ï¿½î¶»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;

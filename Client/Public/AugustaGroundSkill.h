@@ -1,15 +1,26 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
 
 // Augusta Skill State - Skill_Hack, Skill_Rise, Skill_Strike, SkillQTE, Burst01 처리
+// Default Skill State
 class CAugustaGroundSkill final : public CGroundState
 {
 private:
     enum SKILLSTATE
     {
-
+       HACK = 0,
+       RISE_ZERO,
+       QTE,
+       IDLE,
+       MOVE,
+       JUMP, 
+       LAND,
+       SKILL_E,
+       AIR_ATTACK,
+       FALL,
+       END
     };
 
 private:
@@ -22,15 +33,22 @@ public:
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
+
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _string m_strSkillType = {};  // "Hack", "Rise", "Strike", "QTE", "Burst"
+    _bool m_States[SKILLSTATE::END] = {};
+    map<_string, _string> m_PartsAnimations = {};
 
 private:
-    void Check_StateTransition();
+    virtual void Handle_Input() override;
+    void Update_SkillAnimations(_float fTimeDelta);
+    void Check_Physcis(_float fTimeDelta);
+    void Check_StateTransition(_float fTimeDelta) ;
+    void SetUp_Animations();
+    void State_Reset();
 
 public:
-    static CAugustaGroundSkill* Create(class CGameObject* pOwner, const _string& skillType);
+    static CAugustaGroundSkill* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

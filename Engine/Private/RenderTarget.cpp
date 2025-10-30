@@ -34,9 +34,10 @@ HRESULT CRenderTarget::Initialize(_uint iWidth, _uint iHeight, DXGI_FORMAT eForm
 
 	if (FAILED(m_pDevice->CreateRenderTargetView(m_pTexture2D, nullptr, &m_pRTV)))
 		return E_FAIL;
-
+	 
 	if (FAILED(m_pDevice->CreateShaderResourceView(m_pTexture2D, nullptr, &m_pSRV)))
 		return E_FAIL;
+
 
 	m_vClearColor = vClearColor;
 
@@ -85,7 +86,7 @@ HRESULT CRenderTarget::Render(const _wstring& strRT_Name)
 {
 	ImGui::Begin(WStringToString(strRT_Name).c_str());
 
-	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(300.f, 300.f));
+	ImGui::Image(reinterpret_cast<ImTextureID>( m_pSRV ), ImVec2(500.f, 500.f));
 
 	ImGui::End();
 

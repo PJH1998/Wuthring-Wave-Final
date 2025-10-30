@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
@@ -10,14 +10,22 @@ private:
     enum RUNSTATE // Transition에 사용하는 상태들을 정의 해두기.
     {
         JUMP = 0,
-        SPRINT = 1,
-        RUN_U = 2,
-        RUN_D = 3,
-        RUN_L = 4,
-        RUN_R = 5,
-        MOVE = 6,
-        WALL = 7,
-        LAND = 8,
+        DASH,
+        ATTACK,
+        WALL,
+        LAND,
+        RUN_U,
+        RUN_D,
+        RUN_L,
+        RUN_R,
+        SPRINT_F,
+        SKILL_E,
+        SKILL_Q,
+        SKILL_R,
+        UNIQUE_E, 
+        UNIQUE_R,
+        BURST_R,
+        MOVE,
         END
     };
 
@@ -36,15 +44,13 @@ private:
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
-    
-
     _bool m_States[RUNSTATE::END] = {};
+    _float m_fSpeed = {};
 
 private:
     virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);
     void Check_Physics();
-    void LockOnCheck_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void Setup_Animations();

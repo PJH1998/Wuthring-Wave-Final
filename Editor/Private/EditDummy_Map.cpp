@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "EditDummy_Map.h"
 
 CEditDummy_Map::CEditDummy_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -57,7 +57,7 @@ void CEditDummy_Map::Render()
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
 		_bool HasNormal = { false };
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
 			HasNormal = true;
 
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));

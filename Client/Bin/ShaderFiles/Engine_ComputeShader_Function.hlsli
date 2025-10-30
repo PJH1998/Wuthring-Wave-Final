@@ -1,3 +1,8 @@
+#pragma pack_matrix(row_major)
+
+// Emissive ÃÖ¼ÒÄ¡
+
+
 float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
 {
     float2 vTexcoord = 0.f;
@@ -52,6 +57,9 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture, int3 Location, 
     float4 vViewPos = 0.f;
     
     vector vDepthDesc = DepthTexture.Load(Location);
+    if(vDepthDesc.y == 0.f)
+        return vViewPos;
+    
     
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
@@ -88,7 +96,38 @@ float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord
     float4 vNormal = NormalTexture.SampleLevel(Sampler, vTexcoord, 0);
     vNormal = vector((vNormal.xyz * 2.f - 1.f), 0.f);
     
-    return vNormal;
+    return normalize(vNormal);
+}
+
+float4 Compute_Normal_DTID(Texture2D NormalTexture, int3 DTID)
+{
+    float4 vNormal = NormalTexture.Load(DTID);
+    vNormal = vector((vNormal.xyz * 2.f - 1.f), 0.f);
+    
+    return normalize(vNormal);
+}
+
+float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOriginNormal, float4 vSampleColor, float fSampleDepth, float4 vSampleNormal, float fMinDepthDistance, inout float fWeight)
+{
+    float4 vColor = 1.f;
+    
+    if(fSampleDepth == 0.f || vSampleColor.r == 1.f)
+    {
+        vColor = vOriginColor;
+    }
+    
+    float fDepthDist = abs(fOriginDepth - fSampleDepth);
+    
+    float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal));
+    
+    if (fDepthDist <= fMinDepthDistance)
+    {
+        vColor = vSampleColor;// * ((1.f - fNormalWeight));
+    }
+    
+    fWeight += (1.f - fNormalWeight);
+    
+    return vColor;
 }
 
 float Random(float2 St)

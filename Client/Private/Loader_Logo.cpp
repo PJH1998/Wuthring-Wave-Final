@@ -17,7 +17,7 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
-	m_pGameInstance->Wait_Thread_End();
+	//m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 

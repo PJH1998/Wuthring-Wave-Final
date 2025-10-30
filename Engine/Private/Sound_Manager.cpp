@@ -1,11 +1,12 @@
 ﻿#include "EnginePch.h"
 #include "Sound_Manager.h"
+#include "GameInstance.h"
 
 CSound_Manager::CSound_Manager()
 {
 }
 
-HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath)
+HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath)
 {
     FMOD_SOUND* pSound = Find_Sound(strSoundTag);
 
@@ -26,6 +27,35 @@ HRESULT CSound_Manager::Load_Sound(const _wstring& strSoundTag, const char* pSou
     FMOD_System_Update(m_pSystem);
 
     return S_OK;
+}
+
+HRESULT CGameInstance::Load_Sound_FromFolder(const _char* pFolderPath)
+{
+	return m_pSound_Manager->Load_Sound_FromFolder(pFolderPath);
+}
+
+HRESULT CSound_Manager::Load_Sound_FromFolder(const _char* pFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			// .wav
+			if (extension == ".wav" || extension == ".WAV")
+			{
+				_string soundTag = entry.path().stem().string();
+				_wstring wSoundTag = StringToWString(soundTag);
+
+				if(FAILED(Load_Sound(wSoundTag, filePath.c_str())))
+					CRASH("Sound");
+			}
+		}
+	}
+	return S_OK;
 }
 
 void CSound_Manager::Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop)

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "MonsterDummy.h"
 
 CMonsterDummy::CMonsterDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -113,17 +113,16 @@ void CMonsterDummy::Ready_Component(const _fmatrix& PreTransformMatrix)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 9.f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 0.9f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 5.f;
-	ColliderDesc.fRadius = 5.f;
+	ColliderDesc.fHeight = 0.5f;
+	ColliderDesc.fRadius = 0.5f;
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Collider"),
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
 
 	m_pColliderCom->Set_Desc(m_pTransformCom);
-
 }
 
 CMonsterDummy* CMonsterDummy::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

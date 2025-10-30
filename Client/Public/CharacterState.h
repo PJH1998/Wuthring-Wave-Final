@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "State.h"
 
 NS_BEGIN(Client)
@@ -25,6 +25,9 @@ protected:
 
     _float3 m_vWallNormal = {}; // 정면 방향 WallNormal
     _float3 m_vLandNormal = {};
+    _uint m_iPartType = {}; // 현재 State에서 실행해야할 PartType;
+
+    class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
 
 public:
     virtual void Free() override;

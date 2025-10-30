@@ -55,10 +55,14 @@ public:
 
 	void Register_AllNotifies(const _string& strFolderPath);
 
-
 	
-	void Collider_Active(const _wstring&, _bool IsActive);
-	void Effect_Active();
+	void Collider_Active(const _wstring& tag, _bool IsActive);
+	void Effect_Active(const _wstring& tag);
+
+	class CModel* Get_ModelCom() { return m_pModelCom; }
+	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
+
+	_float4 m_vInitPosition = {};
 #endif // _DEBUG
 
 
@@ -78,9 +82,14 @@ private:
 
 	_string m_strModelDatPath = {}; // 
 
+	// Camera
+	class CSpringCamera_Edit* m_pSpringCamera = { nullptr };
+	_float	m_fOffsetY = {};
+
 private:
 	void Bind_Resources();
 	HRESULT Ready_Components(const ANIMATION_ACTOR_DESC* pDesc);
+	HRESULT Ready_Camera();
 
 public:
 	virtual	CGameObject* Clone(void* pArg) override;

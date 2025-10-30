@@ -20,7 +20,7 @@ public:
 
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
-	_bool									IsWorkFinish() { return  m_iLiveWork == 0 && 0 == m_Works.size(); }
+	_bool									IsWorkFinish() { return 0 == m_iLiveWork && 0 == m_iRemainWork; }
 	void									Wait_Thread_End();
 
 private:
@@ -32,18 +32,20 @@ private:
 
 	// Thread
 	vector<thread>					m_Threads;
-	// Hardware?먯꽌 ?쒓났?섎뒗 CPU Core 媛쒖닔
+	// Hardware Supported CPU Core
 	_uint								m_iNumThread = {};
 	// Thread???좊떦???묒뾽??
 	queue<function<void()>>	m_Works;
-	// Mutex (Data 李몄“ ?? ?쒖꽌?濡?1媛쒖쓽 Thread留??묎렐 媛?ν븯寃??섎룄濡?
+	// Mutex (Data)
 	mutex								m_Mutex;
 	// Thread Wait ?곹깭 留뚮뱾湲??꾪븳 媛앹껜
 	condition_variable				m_CV;
 	// Thread All Stop
 	_bool								m_isAllStop = { false };
-	// 吏꾪뻾以묒씤 Work Count
+	// 진행중인 Work Count
 	atomic<_int>					m_iLiveWork = {};
+	// 남아있는 Work Count
+	atomic<_int>					m_iRemainWork = {};
 
 private:
 	void									Work_Thread();

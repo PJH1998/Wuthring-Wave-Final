@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 
 #include "VIBuffer_Rect_Instance_UI.h"
 #include "GameInstance.h"
@@ -21,7 +21,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	//m_vPivot = pInstDesc->vPivot;
 
 	m_iNumIndexPerInstance = 6;
-	m_iInstanceVertexStride = sizeof(SINGLE_INST_DESC);
+	m_iInstanceVertexStride = sizeof(SINGLE_INST_DESC); // ksta : DO NOT USE EMEMENT INCLUDED STRUCT !! IT EXCEEDS AND USE WRONG BUFFER SPACE
 	m_iNumInstance = pInstDesc->iNumInstance;
 	m_iNumVertices = 4;
 	m_iVertexStride = sizeof(VTXPOSTEX);
@@ -32,7 +32,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	m_ePrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	D3D11_BUFFER_DESC		VBDesc{};
-	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
+	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride; // VBDesc.ByteWidth = m_iNumVertices * m_iInstanceVertexStride;
 	VBDesc.Usage = D3D11_USAGE_DEFAULT;
 	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	VBDesc.CPUAccessFlags = 0;
@@ -97,14 +97,11 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
 
-	// ºó °ªÀÌ¶óµµ ÇÒ´çÇØ¾ß ÅÍÁöÁö ¾ÊÀ½..? ksta
-	m_pVBInstanceVertices = new VTXUIINSTANCE[m_iNumInstance];
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¶ï¿½ ï¿½Ò´ï¿½ï¿½Ø¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½..? ksta
+	m_pVBInstanceVertices = new SINGLE_INST_DESC[m_iNumInstance];
 	for (size_t i = 0; i < m_iNumInstance; i++)
 	{
-		VTXUIINSTANCE* pInstanceVertices = static_cast<VTXUIINSTANCE*>(m_pVBInstanceVertices);
-
-		pInstanceVertices[i].vPosition = {};
-		pInstanceVertices[i].vTexcoord = {};
+		SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
 
 		pInstanceVertices[i].vSInstRight	= { 1.f, 0.f, 0.f ,0.f };
 		pInstanceVertices[i].vSInstUp		= { 0.f, 1.f, 0.f ,0.f };
@@ -115,11 +112,8 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Prototype(const INSTANCE_DESC* pD
 		pInstanceVertices[i].vSInstCoordY	= { 0.f, 1.f} ;
 
 		pInstanceVertices[i].vClipTexcoordX = { 0.f, 1.f };			
-		pInstanceVertices[i].vClipTexcoordY = { 0.f, 1.f };			
-		
-		
+		pInstanceVertices[i].vClipTexcoordY = { 0.f, 1.f };
 	}
-
 
 	return S_OK;
 }
@@ -136,31 +130,46 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 {
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-	VTXUIINSTANCE* pInstanceVertices = static_cast<VTXUIINSTANCE*>(m_pVBInstanceVertices);	
+	SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
 
-	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-	VTXUIINSTANCE* pVertices = static_cast<VTXUIINSTANCE*>(SubResource.pData);
+	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource); // ksta : "D3D11_MAP_WRITE_DISCARD", "D3D11_MAP_WRITE_NO_OVERWRITE"
+	SINGLE_INST_DESC* pVertices = static_cast<SINGLE_INST_DESC*>(SubResource.pData);
 
-	_uint iNumAvailableInstance = min(m_iNumInstance, static_cast<_uint>(vecDescs.size()));
+	m_iNumAvailableInstance = min(m_iNumInstance, static_cast<_uint>(vecDescs.size()));
 
-	for (size_t i = 0; i < iNumAvailableInstance; i++)
+
+	for (size_t i = 0; i < m_iNumAvailableInstance; i++)
 	{
-		// ¿©±â¼­ °¢ InstanceÀÇ À§Ä¡ µî Á¤º¸ Àü´Þ`
+
+
+		// ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ Instanceï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½`
 		pVertices[i].vSInstRight	= vecDescs[i].vSInstRight;
 		pVertices[i].vSInstUp		= vecDescs[i].vSInstUp   ;
 		pVertices[i].vSInstLook		= vecDescs[i].vSInstLook ;
 		pVertices[i].vSInstTrans	= vecDescs[i].vSInstTrans;
 
-		pVertices[i].vSInstCoordX	= vecDescs[i].vTexcoordX;
-		pVertices[i].vSInstCoordY	= vecDescs[i].vTexcoordY;
+		pVertices[i].vSInstCoordX	= vecDescs[i].vSInstCoordX;
+		pVertices[i].vSInstCoordY	= vecDescs[i].vSInstCoordY;
 
-		pVertices[i].vClipTexcoordX = vecDescs[i].vClipTexcoordX;	// ¾ÆÁ÷ ¹Ì»ç¿ë
-		pVertices[i].vClipTexcoordY = vecDescs[i].vClipTexcoordY;	// ¾ÆÁ÷ ¹Ì»ç¿ë
+		pVertices[i].vClipTexcoordX = vecDescs[i].vClipTexcoordX;	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½
+		pVertices[i].vClipTexcoordY = vecDescs[i].vClipTexcoordY;	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½
+
+		pVertices[i].matExtraData	= vecDescs[i].matExtraData;
 	}
 
 	m_pContext->Unmap(m_pVBInstance, 0);
 
 }
+
+
+HRESULT CVIBuffer_Rect_Instance_UI::Render()
+{
+	m_pContext->DrawIndexedInstanced(m_iNumIndexPerInstance, m_iNumAvailableInstance, 0, 0, 0);
+
+	return S_OK;
+
+}
+
 
 CVIBuffer_Rect_Instance_UI* CVIBuffer_Rect_Instance_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const CVIBuffer_Rect_Instance_UI::INSTANCE_DESC* pDesc)
 {
@@ -189,5 +198,11 @@ CComponent* CVIBuffer_Rect_Instance_UI::Clone(void* pArg)
 
 void CVIBuffer_Rect_Instance_UI::Free()
 {
-	__super::Free();
+	//__super::Free();
+
+	CVIBuffer::Free();
+
+	if (!m_isClone)
+		Safe_Delete_Array(m_pVBInstanceVertices);
+	Safe_Release(m_pVBInstance);
 }

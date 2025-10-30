@@ -11,4 +11,7 @@ namespace Editor
 	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, END };
 
 	enum class EFFECT_TYPE { PARTICLE, MESH, END };
+
+	// Sequence
+	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SCREEN, ACTOR, EFFECT, END };
 }

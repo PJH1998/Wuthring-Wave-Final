@@ -1043,6 +1043,4 @@ void CEdit_MapObject::Free()
 
     for (auto& pChild : m_ChildObjects)
         pChild = nullptr;
-
-    m_pGameInstance->Unscribe();
 }

@@ -85,6 +85,9 @@
     <Filter Include="03. GameObject\Camera\Spring">
       <UniqueIdentifier>{ede301d8-870a-4741-b3fc-ef4ad81d9087}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\MonsterTest">
+      <UniqueIdentifier>{2c3f6197-3925-414b-870c-256facfb484c}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\UI">
       <UniqueIdentifier>{e3e754ff-d915-4aa3-b5f5-0d09b20d656d}</UniqueIdentifier>
     </Filter>
@@ -114,6 +117,9 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\State">
       <UniqueIdentifier>{bd546683-7b66-418d-9277-900e4e5357c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Level\Loader\VIBuffer">
+      <UniqueIdentifier>{212f9fd5-3f73-4c1d-a296-1208dfe69bde}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\Augusta">
       <UniqueIdentifier>{1ddcb2b8-3bfd-4a31-90e1-cf1db119a67f}</UniqueIdentifier>
@@ -147,6 +153,39 @@
     </Filter>
     <Filter Include="94. Factory">
       <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon">
+      <UniqueIdentifier>{f1e21b97-7a13-4226-b93f-ddaa894e0419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Augusta">
+      <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Common">
+      <UniqueIdentifier>{d56cb8b9-0472-4119-9694-c75f26e7e168}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Rover">
+      <UniqueIdentifier>{45115b7c-87c0-4266-acac-0b543d7f66bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit\Augusta">
+      <UniqueIdentifier>{5ace380b-b2e8-4d8a-b46a-496c01d647f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air\Rover">
+      <UniqueIdentifier>{46c6cdd0-f4af-4ecd-8b44-694a70960755}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Climb\Rover">
+      <UniqueIdentifier>{ac612425-aa8e-47f8-908c-2a27d2bfbaea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground\Rover">
+      <UniqueIdentifier>{829deb35-c008-4077-b12b-9b1c45105902}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit\Rover">
+      <UniqueIdentifier>{3a289f67-d563-4748-868a-598a591d44aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Rover">
+      <UniqueIdentifier>{469434cf-11b1-4aa1-aee2-d91080f9ced2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
+      <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -216,21 +255,17 @@
     <ClInclude Include="..\Public\GameSystem.h">
       <Filter>01. GameSystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\AnimationDummy.h">
       <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h">
       <Filter>03. GameObject\Actor</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Player_Define.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Player.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\SpringCamera.h">
       <Filter>03. GameObject\Camera\Spring</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MonsterTest.h">
+      <Filter>03. GameObject\Actor\MonsterTest</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Animator_UI.h">
       <Filter>03. GameObject\UI\_Component</Filter>
@@ -259,15 +294,11 @@
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\MonsterBody.h" />
     <ClInclude Include="..\Public\Augusta.h">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaStateFactory.h">
+    <ClInclude Include="..\Public\AugustaFactory.h">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Character.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GroundState.h">
       <Filter>03. GameObject\Actor\Player\State\Ground</Filter>
@@ -287,13 +318,10 @@
     <ClInclude Include="..\Public\StateCategory_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaState_Enum.h">
-      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\AugustaGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\AugustaGroundSprint.h">
+    <ClInclude Include="..\Public\AugustaGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaGroundAttack.h">
@@ -307,9 +335,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\AugustaGroundWalk.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\PlayerFactory.h">
-      <Filter>03. GameObject\Actor\Player</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
@@ -332,7 +357,72 @@
     <ClInclude Include="..\Public\Factory.h">
       <Filter>94. Factory</Filter>
     </ClInclude>
-    
+    <ClInclude Include="..\Public\AugustaBayonet.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Weapon.h">
+      <Filter>03. GameObject\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Client_Struct.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaSkillWeapon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGriffon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Client_Debug.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSpecial.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Character.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Player.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Player_Define.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerFactory.h">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaHit.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Rover.h">
+      <Filter>03. GameObject\Actor\Player\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverFactory.h">
+      <Filter>03. GameObject\Actor\Player\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverWeapon.h">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaState_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverState_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="CAttackVolume.h">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -388,18 +478,17 @@
     <ClCompile Include="..\Private\GameSystem.cpp">
       <Filter>01. GameSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp">
       <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp">
       <Filter>03. GameObject\Actor</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Player.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\SpringCamera.cpp">
       <Filter>03. GameObject\Camera\Spring</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MonsterTest.cpp">
+      <Filter>03. GameObject\Actor\MonsterTest</Filter>
     </ClCompile>
     <ClCompile Include="..\private\Animator_UI.cpp">
       <Filter>03. GameObject\UI\_Component</Filter>
@@ -431,15 +520,11 @@
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\MonsterBody.cpp" />
     <ClCompile Include="..\Private\Augusta.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaStateFactory.cpp">
+    <ClCompile Include="..\Private\AugustaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Character.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AirState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air</Filter>
@@ -459,7 +544,7 @@
     <ClCompile Include="..\Private\AugustaGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
+    <ClCompile Include="..\Private\AugustaGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp">
@@ -473,9 +558,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\PlayerFactory.cpp">
-      <Filter>03. GameObject\Actor\Player</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaAirJump.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
@@ -497,6 +579,57 @@
     </ClCompile>
     <ClCompile Include="..\Private\Factory.cpp">
       <Filter>94. Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaBayonet.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Weapon.cpp">
+      <Filter>03. GameObject\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
+      <Filter>02. Level\Loader\VIBuffer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaSkillWeapon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGriffon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSpecial.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Character.cpp">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Player.cpp">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaHit.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Rover.cpp">
+      <Filter>03. GameObject\Actor\Player\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverWeapon.cpp">
+      <Filter>03. GameObject\Weapon\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="CAttackVolume.cpp">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

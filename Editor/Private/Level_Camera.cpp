@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "Level_Camera.h"
 
 #include "SpringCamera_Edit.h"
@@ -8,6 +8,7 @@
 
 #include	"Map_Interface.h"
 #include	"Camera_Interface.h"
+#include "AnimationTool.h"
 
 #include "Sequencer.h"
 
@@ -19,11 +20,14 @@ CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 HRESULT CLevel_Camera::Initialize()
 {
 	//Ready_Camera();
-	Ready_Dummy();
-	Ready_Ground();
+	Ready_Prototype();
+	Ready_Light();
+	//Ready_Dummy();
+	//Ready_Ground();
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
+	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::CAMERA);
 	
 	m_pSequencer = CSequencer::Create();
 
@@ -50,29 +54,46 @@ void CLevel_Camera::Update(_float fTimeDelta)
 
 void CLevel_Camera::Render()
 {
+	m_pAnimationTool->Render();
 }
 
-void CLevel_Camera::Ready_Camera()
+void CLevel_Camera::Ready_Prototype()
 {
-	m_pSpringCamera = CSpringCamera_Edit::Create(m_pDevice, m_pContext);
-	ASSERT_CRASH(m_pSpringCamera);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+			, VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+	}
 
-	CSpringCamera_Edit::CAMERA_DESC CameraDesc = {};
-	CameraDesc.fSpeedPerSec = 100.f;
-	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	CameraDesc.fFovy = XMConvertToRadians(60.f);
-	CameraDesc.fNear = 0.1f;
-	CameraDesc.fFar = 5000.f;
-	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
-	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
-	CameraDesc.fMouseSensor = 0.004f;
+	SHADER_MACRO eShaderMacro = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
 
-	m_pSpringCamera->Initialize_Clone(&CameraDesc);
+	string strEntryPoint = "CSMain";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+	}
+}
 
-	m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), m_pSpringCamera);
-	Safe_AddRef(m_pSpringCamera);
+void CLevel_Camera::Ready_Light()
+{
+	LIGHT_DESC LightDesc{};
+	LightDesc.eType = LIGHT_DESC::DIRECTION;
+	LightDesc.vAmbient = _float4(0.7f, 0.7f, 0.7f, 1.f);
+	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"));
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	m_pGameInstance->SetUp_ShadowNF();
 }
 
 void CLevel_Camera::Ready_Dummy()
@@ -87,12 +108,12 @@ void CLevel_Camera::Ready_Dummy()
 		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &WolfDesc)))
 		CRASH("Failed Clone Dummy Wolf");
 
-	CEditDummy_Target::DUMMY_TARGET_DESC TargetDesc = {};
-	TargetDesc.PreTransformMatrix = PreTransformationMatrix;
-	TargetDesc.vPosition = XMVectorSet(40.f, 0.f, 0.f, 1.f);
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Target"),
-		ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &TargetDesc)))
-		CRASH("Failed Clone Dummy Target");
+	//CEditDummy_Target::DUMMY_TARGET_DESC TargetDesc = {};
+	//TargetDesc.PreTransformMatrix = PreTransformationMatrix;
+	//TargetDesc.vPosition = XMVectorSet(40.f, 0.f, 0.f, 1.f);
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Target"),
+	//	ENUM_CLASS(LEVEL::CAMERA), TEXT("Layer_Dummy"), &TargetDesc)))
+	//	CRASH("Failed Clone Dummy Target");
 
 	// Dummy Map
 	//PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.05f, 0.05f, 0.05f, 1.f));
@@ -136,9 +157,9 @@ void CLevel_Camera::Free()
 
 	Safe_Release(m_pGround);
 
-	Safe_Release(m_pSpringCamera);
 	Safe_Release(m_pMapInterface);
 	Safe_Release(m_pCameraInterface);
+	Safe_Release(m_pAnimationTool);
 
 	Safe_Release(m_pSequencer);
 }

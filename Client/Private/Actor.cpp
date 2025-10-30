@@ -1,7 +1,7 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Actor.h"
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region ï¿½âº» ï¿½Ô¼ï¿½
 CActor::CActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
 {
@@ -50,6 +50,20 @@ void CActor::Render()
 
 }
 #pragma endregion
+
+void CActor::Register_AllNotifies(const _string& strFolderPath)
+{
+    ASSERT_CRASH(m_pModelCom);
+    auto colliderCallback = [this](const _wstring& tag, bool active) {
+        this->Collider_Active(tag, active); // 'this->'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        };
+
+    auto effectCallBack = [this](const _wstring& tag) {
+        this->Effect_Active(tag);
+        };
+
+    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+}
 
 void CActor::Free()
 {

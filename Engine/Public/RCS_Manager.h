@@ -16,15 +16,18 @@ private:
 	virtual ~CRCS_Manager() = default;
 
 public:
+	ID3D11ShaderResourceView* Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel);
+
+public:
 	HRESULT					Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT					Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
 	HRESULT					Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
 	HRESULT					Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
 
-	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName);
+	HRESULT					Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel);
 
-	HRESULT					Begin_RCS(const _wstring& strRCSTag);
-	void					Clear_RCS(const _wstring& strRCSTag);
+	HRESULT					Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel);
+	void					Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel);
 
 #ifdef _DEBUG
 	HRESULT                 Debug_Render();
@@ -35,8 +38,16 @@ private:
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 	RCS						m_RCSs;
 
+#ifdef _DEBUG
+	RCS						m_RenderRCSs;
+#endif
 private:
 	CRendererCS*			Find_RCS(const _wstring& strRCSTag);
+
+
+#ifdef _DEBUG
+	void					AddRemoveRCS(const _wstring& strRCSTag, CRendererCS* pRCS);
+#endif
 
 public:
 	static CRCS_Manager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

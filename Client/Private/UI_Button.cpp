@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "UI_Button.h"
 
 CUI_Button::CUI_Button(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -21,7 +21,7 @@ HRESULT CUI_Button::Initialize_Clone(void* pArg)
     __super::Initialize_Clone(pArg);
 
     Ready_Components(pArg);
-
+    
 	return S_OK;
 }
 
@@ -42,7 +42,7 @@ void CUI_Button::Late_Update(_float fTimeDelta)
 
 void CUI_Button::Render()
 {
-    __super::Render();                      // Nothing.
+    __super::Render();                      // Binding Shader Variables Continuously.
 }
 
 HRESULT CUI_Button::Ready_Components(void* pArg)

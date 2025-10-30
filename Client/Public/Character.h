@@ -1,8 +1,8 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Actor.h"
 NS_BEGIN(Client)
-// ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍÀÇ ºÎ¸ð °´Ã¼.
+// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Î¸ï¿½ ï¿½ï¿½Ã¼.
 class CCharacter abstract : public CActor
 {
 public:
@@ -18,16 +18,10 @@ public:
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
-	typedef struct tagPlayerStat
-	{
-		_float fHp = {};
-		_float fEnsembleEnergy = {};
-		_float fAttack = {};
-	}CHARACTER_STAT;
+
 
 
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -44,7 +38,7 @@ public:
 	}CHARACTER_DESC;
 	
 
-#pragma region ±âº» ÇÔ¼ö
+#pragma region ï¿½âº» ï¿½Ô¼ï¿½
 protected:
 	explicit CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CCharacter(const CCharacter& Prototype);
@@ -62,27 +56,75 @@ public:
 
 #pragma endregion
 
-#pragma region STATE Á¶°Ç¿¡ »ç¿ë
+#pragma region ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½
 public:
-	void Process_Input(class CInputController* pInputControllerCom);
-	
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
-	_bool Check_AnyInput(_uint iKeyFlag);
-	_bool Check_AllInput(_uint iKeyFlag);
+	// Object 
+	void Set_InputController(class CInputController* pInputControllerCom);
+	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
+#pragma endregion
+
+
+
+#pragma region STATE ï¿½ï¿½ï¿½Ç¿ï¿½ ï¿½ï¿½ï¿½
+public:
+	/* Parts */
+	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+	// Look Vector
+	_vector Get_LookVector();
+	_vector Get_LookVector_NoPitch();
+
+	// LockOn
+	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
+
+	// Land Check
+	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
+	_float Get_DistanceToGround(_float3* pNormal, _float fStartYOffset = 0.f);
 	_bool Is_Land(_float3* pNormal = nullptr);
+	_bool Is_Land(_float fLandOffsetY = 0.2f);
+	
+	// Wall
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ°ï¿½?
+	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+
+	// KeyInput
+
+	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
+	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
+
+	// Animation
+	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
+	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	
+
+	// Change State
 	void Change_State(_uint iCategory, _uint iSubState);
+	
 
-
+	// Move
 	ACTORDIR Calculate_Direction();
+
+	_vector Calculate_Move_Direction(ACTORDIR eDir);
+	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
 	void Move_Direction(_fvector vDir, _float fTimeDelta, _float fSpeed);
-	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
-	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // º®ÀüÈ¯ÀÌ °¡´ÉÇÑ°¡?
-	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+
+	// Rotate
+	void Rotate_Direction(_fvector vDir);
+	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
+	void Rotate_Target();
+	void Rotate_HitTarget();
+
+
+	// Gravity
 	void Set_Gravity(_bool IsGravity);
 
+	// Collider
+	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = {0.f, 0.f, 0.f});
 	
 	
 #pragma endregion
@@ -90,23 +132,44 @@ public:
 
 public:
 	class CPlayer* Get_Owenr() { return m_pOwner; }
+
+#pragma region UI Interface
+public:
 	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-    void Add_EnsembleEnergy(_float fEnergy)  { m_Stats.fEnsembleEnergy = min(m_Stats.fEnsembleEnergy + fEnergy, m_fMaxEnsembleEnergy); }
-    _bool Is_EnsembleFull() const { return  m_Stats.fEnsembleEnergy >= m_fMaxEnsembleEnergy; }
-    void Reset_EnsembleEnergy() { m_Stats.fEnsembleEnergy = 0.f; }
+	void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
+	_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
+	void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
+
+	void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
+	_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
+	void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
+
+	void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
+	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
+	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
+
+	void Sync_UI(); // UIï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ Playerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
+#pragma endregion
+
+
 	
 
 protected:
+	class CGameSystem* m_pGameSystem = { nullptr };
 	class CPlayer* m_pOwner = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
+	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target ï¿½ëµµ
+	class CTransform* m_pHitTargetTransform = { nullptr };
 
-
-	_float m_fMaxEnsembleEnergy = { 100.f };
+	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+
+	_string m_strColliderReferenceBone = {}; // strColliderRefBone
+	_float3 m_vAnimColliderOffset = {};
 
 	CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };

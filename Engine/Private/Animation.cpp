@@ -5,6 +5,7 @@
 
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
+#include "EffectNotify.h"
 
 CAnimation::CAnimation()
 {
@@ -31,14 +32,14 @@ void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
 	m_Notifies.push_back(AnimNotify);
 }
 
-void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void()> EffectCallback)
+void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
 {
 	for (const auto& notifyObject : notifyJson)
 	{
 		string type = notifyObject["NotifyType"].get<string>();
 		CAnimNotify* pAnimNotify = { nullptr };
 
-		// 1. 媛앹껜 ?앹꽦
+		// 1. 
 		if (type == "Sound")
 			pAnimNotify = CSoundNotify::From_Json(notifyObject);
 		else if (type == "Collider")
@@ -49,6 +50,7 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 		else if (type == "Effect")
 		{
 			// EffectNotify
+			pAnimNotify = CEffectNotify::From_Json(notifyObject);
 			pAnimNotify->Set_EffectCallback(EffectCallback);
 		}
 		ASSERT_CRASH(pAnimNotify);
@@ -324,6 +326,10 @@ CAnimation* CAnimation::Clone()
 void CAnimation::Free()
 {
 	__super::Free();
+
+	for (auto& pAnimNotfiy : m_AnimNotifies)
+		Safe_Release(pAnimNotfiy);
+	m_AnimNotifies.clear();
 
 	m_Notifies.clear();
 

@@ -7,6 +7,7 @@ NS_BEGIN(Engine)
 class CAnimNotify;
 class CSoundNotify;
 class CColliderNotify;
+class CEffectNotify;
 NS_END
 
 NS_BEGIN(Editor)
@@ -111,6 +112,7 @@ private:
 	list<CAnimNotify*>     m_AnimNotifies;
 	list<CSoundNotify*>    m_SoundNotifies;
 	list<CColliderNotify*> m_ColliderNotifies;
+	list<CEffectNotify*> m_EffectNotifies;
 
 private:
 	HRESULT Ready_Sound();
