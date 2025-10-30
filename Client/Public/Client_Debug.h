@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "ClientPch.h"
 
 #ifdef _DEBUG
@@ -8,7 +8,7 @@ namespace ClientDebug
     {
         ImGuiIO& io = ImGui::GetIO();
 
-        // ±âÁ¸ Player Debug Window
+        // ï¿½ï¿½ï¿½ï¿½ Player Debug Window
 
         ImVec2 windowSize = ImVec2(300.f, 300.f);
         ImVec2 windowPos = ImVec2(io.DisplaySize.x - windowSize.x, 0.f);

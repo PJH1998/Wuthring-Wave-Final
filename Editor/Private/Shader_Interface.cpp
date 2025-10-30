@@ -1,4 +1,4 @@
-
+﻿
 #include "EditorPch.h"
 #include "Shader_Interface.h"
 
@@ -17,6 +17,150 @@ void CShader_Interface::Update_Shadow()
 	Set_ShadowBias();
 	Setting_LUT();
 	Set_SSAO();
+}
+
+void CShader_Interface::Setting_Shader()
+{
+	ImGui::Begin("SHADER SETTING");
+
+#pragma region CASCADE
+	if (ImGui::CollapsingHeader("CASCADE"))
+	{
+		if (ImGui::CollapsingHeader("Base Bias"))
+		{
+			Setting_Bias("BIAS_CASCADE[0]", &m_fBias[0]);
+			Setting_Bias("BIAS_CASCADE[1]", &m_fBias[1]);
+			Setting_Bias("BIAS_CASCADE[2]", &m_fBias[2]);
+			Setting_Bias("BIAS_CASCADE[3]", &m_fBias[3]);
+		}
+
+		if (ImGui::CollapsingHeader("Min Bias"))
+		{
+			Setting_Bias("MIN_BIAS_CASCADE[0]", &m_fMinBias[0]);
+			Setting_Bias("MIN_BIAS_CASCADE[1]", &m_fMinBias[1]);
+			Setting_Bias("MIN_BIAS_CASCADE[2]", &m_fMinBias[2]);
+			Setting_Bias("MIN_BIAS_CASCADE[3]", &m_fMinBias[3]);
+		}
+
+		if (ImGui::CollapsingHeader("SLOPE_SCALE"))
+		{
+			//Setting_Bias("SLOPE_SCALE", &m_fSlopeScale);
+			ImGui::InputFloat("SCALE", &m_fSlopeScale);
+		}
+
+#ifdef _DEBUG
+		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowBais", &m_fBias, sizeof(_float4));
+		m_pGameInstance->Bind_RawValue_Renderer("g_fMinShadowBias", &m_fMinBias, sizeof(_float4));
+		m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
+#endif // _DEBUG
+	}
+#pragma endregion
+
+#pragma region SSAO
+	if (ImGui::CollapsingHeader("SSAO"))
+	{
+
+#ifdef _DEBUG
+		if (ImGui::Button("SSAO_ON"))
+			m_pGameInstance->IsSSAO(true);
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("SSAO_OFF"))
+			m_pGameInstance->IsSSAO(false);
+#endif // _DEBUG
+
+		ImGui::InputFloat("RADIUS", &m_fRadius);
+
+		ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+
+#ifdef _DEBUG
+		m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
+#endif // _DEBUG
+	}
+#pragma endregion
+
+#pragma region LUT
+	if (ImGui::CollapsingHeader("LUT"))
+	{
+		ImGui::InputInt("INDEX", &m_iLUT_Index, 1, 1);
+		if (m_iLUT_Index < 0)
+			m_iLUT_Index = 0;
+		if (m_iLUT_Index >= 5)
+			m_iLUT_Index = 4;
+
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.01f, 1.f);
+#ifdef _DEBUG
+		m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
+		m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
+#endif // _DEBUG
+	}
+#pragma endregion
+
+#pragma region BLOOM
+	if (ImGui::CollapsingHeader("BLOOM"))
+	{
+
+		ImGui::InputInt("WEIGHT", &m_iBloomWeight, 1, 1);
+		if (m_iBloomWeight < 0)
+			m_iBloomWeight = 0;
+		if (m_iBloomWeight >= 5)
+			m_iBloomWeight = 4;
+
+		ImGui::DragFloat("BLOOM_INTENSITY", &m_fBloomIntensity, 0.1f, 0.1f, 5.f);
+		
+#ifdef _DEBUG
+		m_pGameInstance->SetBloomWeight(m_iBloomWeight);
+		m_pGameInstance->SetBloomIntensity(m_fBloomIntensity);
+#endif // _DEBUG
+	}
+#pragma endregion
+
+#pragma region FOG
+	if (ImGui::CollapsingHeader("FOG"))
+	{
+		ImGui::InputFloat2("DEPTH", reinterpret_cast<_float*>( &m_vFogDepthDistance ));
+		ImGui::InputFloat2("HEIGHT", reinterpret_cast<_float*>( &m_vFogHeightDistance ));
+		ImGui::InputFloat4("COLOR", reinterpret_cast<_float*>( &m_vFogColor ));
+	}
+
+#ifdef _DEBUG
+	m_pGameInstance->Setting_Fog(m_vFogDepthDistance, m_vFogHeightDistance, m_vFogColor);
+
+#endif
+
+#pragma endregion
+	
+#pragma region BLUR
+
+	if (ImGui::CollapsingHeader("DOF"))
+	{
+		if (ImGui::Button("DOF ON"))
+#ifdef _DEBUG
+			m_pGameInstance->Set_Blur(true, BLUR_TYPE::DOF);
+#endif
+		ImGui::SameLine();
+
+		if(ImGui::Button("DOF OFF"))
+#ifdef _DEBUG
+			m_pGameInstance->Set_Blur(false, BLUR_TYPE::END);
+#endif
+
+		ImGui::InputFloat("FOCUS", &m_fFocusDepth);
+
+		ImGui::InputFloat("RANGE", &m_fFocusRange);
+		
+		ImGui::InputFloat("DEPTH_SCALE", &m_fDofDepthScale);
+
+#ifdef _DEBUG
+
+		m_pGameInstance->SetDof(m_fFocusDepth, m_fFocusRange, m_fDofDepthScale);
+#endif
+	}
+
+
+#pragma endregion
+	ImGui::End();
 }
 
 void CShader_Interface::Set_ShadowBias()
@@ -81,16 +225,9 @@ void CShader_Interface::Set_SSAO()
 	ImGui::InputFloat("RADIUS", &m_fRadius);
 	
 	ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
-
-
-	//ImGui::DragFloat("DEPTH_SIGMA", &m_fSigmaWeight, 0.0001f, 0.0001f, 50.f, "%.5f");
-
-	//ImGui::InputFloat("MIN_DEPTH", &m_fMinDepthWeight);
 	
 	m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
 
-	//m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_Radius", &m_fRadius, sizeof(_float));
-	//m_pGameInstance->Bind_RawValue_Renderer("g_fSSAO_MaxDistance", &m_fMaxDistance, sizeof(_float));
 	ImGui::End();
 }
 
@@ -98,16 +235,7 @@ void CShader_Interface::Setting_Bias(const _char* pName, _float* pFloat)
 {
 	ImGui::PushItemWidth(250.f);
 	ImGui::DragFloat(pName, pFloat, 0.001f, 0.001f, 0.5f);
-
-//	ImGui::SliderFloat(pName, pFloat, 0.001f, 0.5f);
 	ImGui::PopItemWidth();
-
-	//ImGui::SameLine();
-
-	//ImGui::PushItemWidth(120.f);
-
-	//ImGui::InputFloat("", pFloat, 0.001f, 0.01f);
-	//ImGui::PopItemWidth();
 }
 
 void CShader_Interface::Setting_LUT()
@@ -126,8 +254,6 @@ void CShader_Interface::Setting_LUT()
 				m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
 			}
 #endif // _DEBUG
-
-			
 		}
 
 		ImGui::EndCombo();

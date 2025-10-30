@@ -36,7 +36,9 @@ namespace Client
 		D1 = 1 << 14,
 		D2 = 1 << 15,
 		D3 = 1 << 16,
-		
+		D4 = 1 << 17,
+		D5 = 1 << 18,
+		D6 = 1 << 19
 	};
 
 	enum class DIRECTION {
@@ -86,12 +88,9 @@ namespace Client
 		ATTACK_9			= 1 << 24,
 		ATTACK_10			= 1 << 25,
 		ATTACK_11			= 1 << 26,
-
-
-
-		SPAWN = 1 << 27,
-		ANIMATION_PLAYING = 1 << 28,
-		DEAD = 1 << 29
+		SPAWN				= 1 << 27,
+		ANIMATION_PLAYING	= 1 << 28,
+		DEAD				= 1 << 29
 	};
 
 	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, SHADOW, END };

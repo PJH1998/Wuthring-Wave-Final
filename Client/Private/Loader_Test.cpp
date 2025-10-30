@@ -13,6 +13,9 @@
 #include "AugustaGriffon.h"
 #include "Augusta.h"
 
+#include "RoverWeapon.h"
+#include "Rover.h"
+
 #include "Player.h"
 
 #include"GameSystem.h"
@@ -30,6 +33,7 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
+    //m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
@@ -193,7 +197,7 @@ HRESULT CLoader_Test::Load_Augusta()
 
     wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
-
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
@@ -206,8 +210,7 @@ HRESULT CLoader_Test::Load_Augusta()
 
     wStrModelTag = L"Prototype_Component_Model_Augusta_Griffon";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Griffon/Griffon.dat";
-
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.f), XMConvertToRadians(-90.f), 0.f);
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
     //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
@@ -221,6 +224,61 @@ HRESULT CLoader_Test::Load_Augusta()
 #pragma endregion
 
   
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Rover()
+{
+    _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
+    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/R.dat";
+    _matrix	PreTransformMatrix = XMMatrixIdentity();
+    _float fSize = 0.01f;
+    //_float fSize = 0.0001f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+    // 1. 모델 초기화.
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+
+    // 2. StateMachine 초기화
+    _wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Rover";
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+        CStateMachine::Create(m_pDevice, m_pContext))))
+        CRASH("PlayerState Machine");
+
+
+    // 3. 객체 초기화
+    _wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Rover");
+
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrActorTag
+        , CRover::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+
+
+#pragma region Parts
+    wStrModelTag = L"Prototype_Component_Model_Rover_Weapon";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Weapon.dat";
+    fSize = 0.01f;
+    //fSize = 0.0001f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+    // 1. 모델 초기화.
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    // 2. 객체 초기화.
+    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Bayonet");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wstrBayonetTag
+        , CRoverWeapon::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+
+#pragma endregion
 
     return S_OK;
 }

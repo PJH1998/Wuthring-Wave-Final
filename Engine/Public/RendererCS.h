@@ -76,6 +76,7 @@ private:
 	HRESULT							Ready_Buffer(ID3D11Buffer** ppOut, _uint iLength);
 	BUFFER_DATA*					Find_Buffer(const _char* pConstantName);
 
+
 public:
 	static CRendererCS*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, void* pDesc);
 	virtual void					Free() override;

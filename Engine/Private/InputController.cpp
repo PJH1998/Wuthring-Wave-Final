@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "InputController.h"
 #include "GameInstance.h"
 
@@ -32,11 +32,11 @@ void CInputController::Update_KeyInput()
 {
     m_PrevKeyInput = m_KeyInput;
 
-    // 1. ÀÌÀü ÇÁ·¹ÀÓ Å° »óÅÂ ÃÊ±âÈ­
+    // 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å° ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     m_KeyInput = 0;
     KEYSTATE eState = { KEYSTATE::END };
 
-    // 2. Å°º¸µå ÀÔ·Â È®ÀÎ.
+    // 2. Å°ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·ï¿½ È®ï¿½ï¿½.
     for (_uint i = 0; i < m_KeyboardMappings.size(); ++i)
     {
         const auto& keyMapping = m_KeyboardMappings[i];
@@ -46,7 +46,7 @@ void CInputController::Update_KeyInput()
             m_KeyInput |= keyMapping.first;
     }
 
-    // 3. ¸¶¿ì½º ÀÔ·Â È®ÀÎ.
+    // 3. ï¿½ï¿½ï¿½ì½º ï¿½Ô·ï¿½ È®ï¿½ï¿½.
     for (_uint i = 0; i < m_MouseMappings.size(); ++i)
     {
         const auto& keyMapping = m_MouseMappings[i];
@@ -61,13 +61,13 @@ _bool CInputController::Check_AnyInput(_uint eKeyInput, KEYSTATE eState)
 {
     _uint iFlag = static_cast<_uint>(eKeyInput);
     if (eState == KEYSTATE::PRESS)
-        return (m_KeyInput & iFlag) != 0;  // ÇöÀç ´­¸²
+        return (m_KeyInput & iFlag) != 0;  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     if (eState == KEYSTATE::DOWN)
-        return !(m_PrevKeyInput & iFlag) && (m_KeyInput & iFlag);  // ÀÌÀüX, ÇöÀçO
+        return !(m_PrevKeyInput & iFlag) && (m_KeyInput & iFlag);  // ï¿½ï¿½ï¿½ï¿½X, ï¿½ï¿½ï¿½ï¿½O
 
     if (eState == KEYSTATE::UP)
-        return (m_PrevKeyInput & iFlag) && !(m_KeyInput & iFlag);  // ÀÌÀüO, ÇöÀçX
+        return (m_PrevKeyInput & iFlag) && !(m_KeyInput & iFlag);  // ï¿½ï¿½ï¿½ï¿½O, ï¿½ï¿½ï¿½ï¿½X
 
     return false;
 }
@@ -77,20 +77,20 @@ _bool CInputController::Check_AllInput(_uint eKeyInput, KEYSTATE eState)
     _uint iFlag = static_cast<_uint>(eKeyInput);
 
     if (eState == KEYSTATE::PRESS)
-        return (m_KeyInput & iFlag) == iFlag;  // ÇöÀç ´­¸²
+        return (m_KeyInput & iFlag) == iFlag;  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     if (eState == KEYSTATE::DOWN)
-        return !((m_PrevKeyInput & iFlag) == iFlag) && ((m_KeyInput & iFlag) == iFlag);  // ÀÌÀüX, ÇöÀçO
+        return !((m_PrevKeyInput & iFlag) == iFlag) && ((m_KeyInput & iFlag) == iFlag);  // ï¿½ï¿½ï¿½ï¿½X, ï¿½ï¿½ï¿½ï¿½O
 
     if (eState == KEYSTATE::UP)
-        return ((m_PrevKeyInput & iFlag) == iFlag) && !((m_KeyInput & iFlag) == iFlag);  // ÀÌÀüO, ÇöÀçX
+        return ((m_PrevKeyInput & iFlag) == iFlag) && !((m_KeyInput & iFlag) == iFlag);  // ï¿½ï¿½ï¿½ï¿½O, ï¿½ï¿½ï¿½ï¿½X
 
     return false;
 }
 
 
 /*
-* ¿¹½Ã
+* ï¿½ï¿½ï¿½ï¿½
 * Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W));
 */
 void CInputController::Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValue)
@@ -99,7 +99,7 @@ void CInputController::Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValu
 }
 
 /*
-* ¿¹½Ã
+* ï¿½ï¿½ï¿½ï¿½
 * Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB));
 */
 void CInputController::Register_MouseKeyInput(_uint iKey, MOUSEKEYSTATE mouseValue)

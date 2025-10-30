@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Weapon.h"
 
 NS_BEGIN(Client)
@@ -22,6 +22,9 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+
+public:
+	virtual void Activate(_bool IsActive) override;
 
 private:
 	vector<_uint> m_ShaderPaths = {};

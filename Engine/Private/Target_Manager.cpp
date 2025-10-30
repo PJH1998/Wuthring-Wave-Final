@@ -154,13 +154,40 @@ HRESULT CTarget_Manager::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 }
 HRESULT CTarget_Manager::Render()
 {
-	for (auto& Pair : m_RenderTargets)
+	ImGui::Begin("RenderTarget");
+
+	if (ImGui::BeginCombo("RT", "List"))
 	{
-		if (nullptr != Pair.second)
-			Pair.second->Render(Pair.first);
+		for (auto& Pair : m_RenderTargets)
+		{
+			if (ImGui::Selectable(WStringToString(Pair.first).c_str()))
+			{
+				AddRemoveRT(Pair.first, Pair.second);
+			}
+		}
+
+		ImGui::EndCombo();
 	}
+	ImGui::End();
+
+	for (auto& Pair : m_DebugRenderRT)
+		Pair.second->Render(Pair.first);
 
 	return S_OK;
+}
+
+void CTarget_Manager::AddRemoveRT(const _wstring& strTargetTag, CRenderTarget* pRT)
+{
+	auto iter = m_DebugRenderRT.find(strTargetTag);
+	if (iter != m_DebugRenderRT.end())
+	{
+		m_DebugRenderRT.erase(iter);
+		Safe_Release(pRT);
+		return;
+	}
+
+	m_DebugRenderRT.emplace(strTargetTag, pRT);
+	Safe_AddRef(pRT);
 }
 #endif
 
@@ -205,4 +232,10 @@ void CTarget_Manager::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
+
+#ifdef _DEBUG
+	for (auto& Pair : m_DebugRenderRT)
+		Safe_Release(Pair.second);
+	m_DebugRenderRT.clear();
+#endif
 }

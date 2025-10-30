@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Player_Define.h"
 #include "GameObject.h"
 
@@ -12,7 +12,7 @@ public:
 		NONE = -1,
 		AUGUSTA = 0,
 		GALBRENA = 1,
-		PLAYER = 2,
+		ROVER = 2,
 		TYPE_END
 	};
 

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "AugustaSkillWeapon.h"
 
 CAugustaSkillWeapon::CAugustaSkillWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -43,9 +43,9 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // AugustaÀÇ StateMachine¿¡¼­ ¾Ö´Ï¸ÞÀÌ¼Ç½ÇÇà?
+    // Augustaï¿½ï¿½ StateMachineï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼Ç½ï¿½ï¿½ï¿½?
 
-    // Last :  Combined Çà·Ä ÃÊ±âÈ­
+    // Last :  Combined ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
@@ -95,6 +95,21 @@ void CAugustaSkillWeapon::Render()
 #endif // _DEBUG
 }
 
+void CAugustaSkillWeapon::Activate(_bool IsActive)
+{
+    SetActivate(IsActive);
+
+    // Griffonï¿½ï¿½ ï¿½ï¿½ì¿¡ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½Ø´ï¿½?
+    /*m_fTrackPosition = 0.f;
+    _matrix mat = XMMatrixIdentity();
+    m_pTransformCom->Set_WorldMatrix(mat);*/
+
+    if (IsActive)
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+    else
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+}
+
 void CAugustaSkillWeapon::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
@@ -110,17 +125,18 @@ void CAugustaSkillWeapon::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
+    CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    RigidbodyDesc.fRadius = 0.2f;
+    RigidbodyDesc.fHeight = 0.6f;
     RigidbodyDesc.eShape = SHAPE::CAPSULE;
     RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
     RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
         , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+        CRASH("Rigidbody");
 }
 
 void CAugustaSkillWeapon::Ready_Variables(const WEAPON_DESC* pDesc)

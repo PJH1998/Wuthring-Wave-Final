@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "Character.h"
 #include "InputController.h"
 #include "SpringCamera.h"
@@ -135,7 +135,6 @@ _bool CCharacter::Is_LockOn()
 _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 {
     ASSERT_CRASH(m_pTransformCom);
-
     
     //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vCurrentPos = m_pColliderCom->Get_Position();
@@ -179,8 +178,6 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
     }
     return bAnyHit ? fMinDistance : 3.f;
 }
-
-
 
 
 
@@ -319,6 +316,8 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
     
     return IsPlayAnimationEnd;
 }
+
+
 
 
 
@@ -475,9 +474,28 @@ void CCharacter::Rotate_Target()
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
-    //m_pTransformCom->LookDir(vToTarget * -1.f); // 이동은 바로 회전. => Idle 되면 Lerp로
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
-    //m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
+
+    return;
+}
+
+void CCharacter::Rotate_HitTarget()
+{
+    // 1. 타겟이 없는 경우 Return
+    if (nullptr == m_pTargetTransform)
+        return;
+
+    //if (nullptr == m_pHitTargetTransform)
+    //    return;
+
+    // 2. 타겟이 있으면 즉시 회전.
+    _vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+    _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+
+
+    vToTarget = XMVectorSetY(vToTarget, 0.f);
+    m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
 }

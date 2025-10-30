@@ -1,8 +1,8 @@
-#include "Engine_Shader_State.hlsli"
+ï»¿#include "Engine_Shader_State.hlsli"
 
 static float PI = 3.1415926535f;
 
-// EmissiveÈ¿°ú¸¦ ³ÖÀ»Áö ÆÇ´ÜÇÒ ¶§ »ç¿ëÇÏ´Â RGB °è¼ö
+// Emissiveíš¨ê³¼ë¥¼ ë„£ì„ì§€ íŒë‹¨í•  ë•Œ ì‚¬ìš©í•˜ëŠ” RGB ê³„ìˆ˜
 float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
@@ -17,17 +17,21 @@ float g_fHeight = 1080.f;
 float g_iShadowMapSizeX = 8192;
 float g_iShadowMapSizeY = 4608;
 
-float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , ¹Ì¼¼¸é Ç¥¸éÀÇ °ÅÄ¥±â ºÐÆ÷
+float g_fFocusDepth;
+float g_fFocusMinCoc;
+float g_fFocusRange;
+
+float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , ë¯¸ì„¸ë©´ í‘œë©´ì˜ ê±°ì¹ ê¸° ë¶„í¬
 {
     float RoughnessSqr = pow(Roughness, 2.f);                       
-    float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // ³»Àû(³ë¸», ¹Ý»ç) * ³»Àû(³ë¸», ¹Ý»ç) * ( °ÅÄ¥±â - 1.f ) + 1.f 
+    float Distribution = NdotH * NdotH * (RoughnessSqr - 1.f) + 1.f; // ë‚´ì (ë…¸ë§, ë°˜ì‚¬) * ë‚´ì (ë…¸ë§, ë°˜ì‚¬) * ( ê±°ì¹ ê¸° - 1.f ) + 1.f 
     
     float NDF = RoughnessSqr / (PI * Distribution * Distribution); 
     
     return NDF;
 }
 
-float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , ¹Ì¼¼¸é³¢¸®ÀÇ ÀÚ±â ±×¸²ÀÚ
+float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeometricShadowingFunction    , ë¯¸ì„¸ë©´ë¼ë¦¬ì˜ ìžê¸° ê·¸ë¦¼ìž
 {
     float k = Roughness / 2.f;
     
@@ -41,14 +45,14 @@ float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeomet
 
 float SchlickFresnel(float i)
 {
-    float x = clamp(1.f - i, 0.f, 1.f);
+    float x = clamp(1.f - i, 0.f, 1.f);         // í•˜í”„ ë²¡í„°ì™€ Lightê°€ ê²¹ì¹ ìˆ˜ë¡ ë‚®ì€ ìˆ˜ì¹˜
     
     return pow(x, 5.f);
 }
 
-float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , ÀÔ»ç°¢¿¡ µû¸¥ ¹Ý»çµÇ´Â ºñÀ²
+float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , ìž…ì‚¬ê°ì— ë”°ë¥¸ ë°˜ì‚¬ë˜ëŠ” ë¹„ìœ¨
 {
-    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH);
+    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH); // ìž…ì‚¬ê°ì— ë”°ë¥¸ Specular ìˆ˜ì¹˜ ( í•˜í”„ë²¡í„°ì™€ Lightê°€ ë¹„ìŠ·í• ìˆ˜ë¡ Specular Down )
 }
 
 float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness) // vViewDir = Look (WorldPos - CamPos)
@@ -62,7 +66,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     float3 vF0 = 0.04f;
     vF0 = lerp(vF0, vAlbedo, fMetallic);
     
-    float3 Fresnel = Compute_Fresnel(vF0, LdotH);
+    float3 Fresnel = Compute_Fresnel(vF0, LdotH);                               // LdotHê°€ í¬ë©´ ìˆ˜ì¹˜ê°€ ë‚®ìŒ ( ìˆ˜ì¹˜ëŠ” F0, Specular Color )
         
     float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
     
@@ -70,7 +74,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse ìƒ‰ìƒì— ê¸°ì—¬í•˜ëŠ” ë¹„ìœ¨ ( ì •ë©´ ì¼ìˆ˜ë¡ Diffuse ìƒ‰)
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
@@ -96,13 +100,13 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    float3 kd = clamp(0.3f, 1.f, (1.f - Fresnel)) * (1.f - fMetallic);
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
-    vDiffuse *= vToonRim.x;
+    //vDiffuse *= vToonRim.x;
     
-    return (vDiffuse + Specular) * NdotL;
+    return (vDiffuse + Specular);// * NdotL;
 }
 
 float2 Compute_Texcoord(float2 vProjXY)
@@ -140,6 +144,23 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
     float4 vViewPos = 0.f;
     
     vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
+    
+    vViewPos.x = vTexcoord.x * 2.f - 1.f;
+    vViewPos.y = vTexcoord.y * -2.f + 1.f;
+    vViewPos.z = vDepthDesc.x;
+    vViewPos.w = 1.f;
+    
+    vViewPos = vViewPos * vDepthDesc.y;
+    vViewPos = mul(vViewPos, g_ProjMatrixInv);
+    
+    return vViewPos;
+}
+
+float4 Compute_ViewPos_Sampler(float2 vTexcoord, Texture2D DepthTexture, sampler Sampler)
+{
+    float4 vViewPos = 0.f;
+    
+    vector vDepthDesc = DepthTexture.Sample(Sampler, vTexcoord);
     
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
@@ -274,27 +295,54 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
     
     float3x3 TBN = float3x3(vTangent, vBinormal, vNormal);
     
-    vector vSamplePos = vViewPos + vector((mul(vSampleNormal.xyz, TBN) * fRadius), 0.f);
+    float3 vRandomVector = (mul(vSampleNormal.xyz, TBN) * fRadius);
     
-    vector vProjPos = mul(vSamplePos, g_CamProjMatrix);
-    float fRandomZ = vProjPos.w;
+    float4 vSamplePos = vViewPos + float4((vRandomVector * fRadius), 0.f);
+    float fRandomZ = vSamplePos.z;
+    
+    float4 vProjPos = mul(vSamplePos, g_CamProjMatrix);
     
     float2 vSampleUV = Compute_Texcoord((vProjPos.xy / vProjPos.w));
     
-    float SampleDepth = DepthTexture.Sample(PointClampSampler, vSampleUV).y;
+    float4 vSampleViewPos = Compute_ViewPos_Sampler(vSampleUV, DepthTexture, PointClampSampler);
     
-    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ¾È±×·ÁÁ®ÀÖ°Å³ª, ·£´ý À§Ä¡º¸´Ù µÚ¿¡ ÀÖ´Ù¸é
+    float SampleDepth = vSampleViewPos.z; //DepthTexture.Sample(PointClampSampler, vSampleUV).y;
+    
+    if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // ì•ˆê·¸ë ¤ì ¸ìžˆê±°ë‚˜, ëžœë¤ ìœ„ì¹˜ë³´ë‹¤ ë’¤ì— ìžˆë‹¤ë©´
         return 1.f;
     
-    float Distance = abs(SampleDepth - vViewPos.z);
+    float fDistance = abs(SampleDepth - vViewPos.z);
     
-    Occlusion = smoothstep(fMaxDistance, 0.f, Distance);
+    if (fDistance > fMaxDistance)
+        return 1.f;
+        
+    float fDistWeight = smoothstep(fMaxDistance, 0.f, fDistance);
+
+    float fNormalWeight = saturate(dot(vViewNormal, normalize(vSampleViewPos - vViewPos)));
     
-    float fNormalWeight = saturate(dot(vViewNormal, normalize(vSamplePos - vViewPos)));
-    
-    Occlusion *= fNormalWeight;
+    Occlusion = fDistWeight * (1.f - fNormalWeight);
     
     return Occlusion;
+}
+
+float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
+{
+    //float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+    
+    float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
+    
+    float3 vViewDir = normalize(vViewPos.xyz);
+    
+    float3 vCamDir = float3(0.f, 0.f, 1.f);
+    
+    float fDot = dot(vViewDir, vCamDir);
+    float fDepth = fDot * vViewPos.z;
+    
+    float fCoc = 0.f;
+    
+    fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (fDepth * g_fFocusRange));
+    
+    return fCoc;
 }
 
 float Random(float2 St)
