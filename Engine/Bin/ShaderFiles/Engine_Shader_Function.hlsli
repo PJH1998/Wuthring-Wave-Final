@@ -2,9 +2,6 @@
 
 static float PI = 3.1415926535f;
 
-// Emissive효과를 넣을지 판단할 때 사용하는 RGB 계수
-float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
-
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_CamViewMatrix, g_CamProjMatrix;
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
@@ -179,15 +176,6 @@ float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
     return vNormal;
-}
-
-float Luminame(float3 vColor)
-{
-    float fWeight;
-    
-    fWeight = (vColor.r * g_fLuminence[0]) + (vColor.g * g_fLuminence[1]) + (vColor.b * g_fLuminence[2]);
-    
-    return fWeight;
 }
 
 float ShadowPCF(float3 UVDepth, int iCascadeIndex, int iNumWeight, Texture2DArray<float> ShadowMap)
