@@ -64,22 +64,23 @@ struct PS_IN
 
 struct PS_OUT
 {
-    float4 vColor : SV_TARGET0;             //지금은 그냥 그리기
-    //float4 vDiffuse : SV_TARGET0;
-    //float4 vNormal : SV_TARGET1;
-    //float4 vDepth : SV_TARGET2;
-    //float4 vEmissive : SV_TARGET3;
-    //float4 vDistortion : SV_TARGET4;
+    float4 vDiffuse : SV_TARGET0;
+    float4 vEmissive : SV_TARGET1;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    Out.vColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
    
-    if(Out.vColor.a < 0.3f)
+    if(Out.vDiffuse.a < 0.3f)
         discard;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }
@@ -113,7 +114,12 @@ PS_OUT PS_TrailDefault(PS_IN In)
    
     float alpha = fVisible * vMask.a;
     
-    Out.vColor = float4(vColor.rgb * alpha, alpha);
+    Out.vDiffuse = float4(vColor.rgb * alpha, alpha);
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }
@@ -138,7 +144,12 @@ PS_OUT PS_TraillTest(PS_IN In)
     
     float fAlpha = fVisible * vMask.a;
     
-    Out.vColor = float4(vColor.rgb * fAlpha, fAlpha);
+    Out.vDiffuse = float4(vColor.rgb * fAlpha, fAlpha);
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }
@@ -158,7 +169,12 @@ PS_OUT PS_TraillDesh(PS_IN In)
     if(mask.r < 0.35f)
         discard;
     
-    Out.vColor = mask * 0.6f;
+    Out.vDiffuse = mask * 0.6f;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }
@@ -179,7 +195,12 @@ PS_OUT PS_TraillDeshB(PS_IN In)
     if (mask.r < 0.35f)
         discard;
     
-    Out.vColor = mask * 0.6f;
+    Out.vDiffuse = mask * 0.6f;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }

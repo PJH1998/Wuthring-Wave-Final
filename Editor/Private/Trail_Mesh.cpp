@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+ï»¿#include "Editorpch.h"
 #include "Trail_Mesh.h"
 
 CTrail_Mesh::CTrail_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -32,7 +32,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
 
-    //Æ®·¹ÀÏ Àü¿ë °ª
+    //íŠ¸ë ˆì¼ ì „ìš© ê°’
     m_fSweepSpeed = pDesc->fSweep;
     m_fSweepWitdh = pDesc->fSweepWitdh;
 
@@ -43,7 +43,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 
     m_IsRoot = pDesc->IsRootOn;
     
-    //ÀÓ½ÃÃ³¸®
+    //ì„ì‹œì²˜ë¦¬
     m_isActivate = false;
     m_fColorSpeed = 1.f;
 
@@ -62,7 +62,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //¿©±â¼­ Sweep °è»ê ÈÄ ¼ÎÀÌ´õ¿¡ ¹ÙÀÎµù ÇØÁà¾ß ÇÔ.
+    //ì—¬ê¸°ì„œ Sweep ê³„ì‚° í›„ ì…°ì´ë”ì— ë°”ì¸ë”© í•´ì¤˜ì•¼ í•¨.
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
     m_vLifeTime.x += fTimeDelta;
@@ -88,7 +88,7 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
 }
 
 void CTrail_Mesh::Render()
@@ -123,7 +123,7 @@ void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
      //    XMStoreFloat4x4(&SpawnW, SpawnMatrix);
 
      //    _float fYaw = atan2f(SpawnW._31, SpawnW._33);
-     //    XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //³ªÁß¿¡ ¼³Á¤°ª ÁÙ¼ö ÀÖ°Ô?
+     //    XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //ë‚˜ì¤‘ì— ì„¤ì •ê°’ ì¤„ìˆ˜ ìˆê²Œ?
 
      //    XMVECTOR vPos = XMVectorSet(SpawnW._41, SpawnW._42, SpawnW._43, 1.f);
      //    XMMATRIX PosMatrix = XMMatrixTranslationFromVector(vPos);
@@ -158,7 +158,7 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //ÅØ½ºÃ³ ¿©·¯°³ ½á¾ßÇÏ´Âµ¥ ¾î¶»°Ô ÇÒÁö °í¹ÎÇØº¸ÀÚ
+    //í…ìŠ¤ì²˜ ì—¬ëŸ¬ê°œ ì¨ì•¼í•˜ëŠ”ë° ì–´ë–»ê²Œ í• ì§€ ê³ ë¯¼í•´ë³´ì
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -195,7 +195,7 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0)))
         return E_FAIL;
 
-    //¼ÎÀÌ´õ¿¡ ¹ÙÀÎµù ÇØÁÖÀÚ.
+    //ì…°ì´ë”ì— ë°”ì¸ë”© í•´ì£¼ì.
     if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
         return E_FAIL;
 

@@ -192,18 +192,24 @@ struct PS_IN
 
 struct PS_OUT
 {
-    float4 vColor : SV_TARGET0;
+    float4 vDiffuse : SV_TARGET0;
+    float4 vEmissive : SV_TARGET1;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;    
     
-    Out.vColor = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vColor.a < 0.3f)
+    if (Out.vDiffuse.a < 0.3f)
         discard;
     //Out.vColor = 1.f;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }
@@ -229,14 +235,19 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     float2 Texcoord = In.vTexcoord * CellSize + OffSet;
     
-    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
-    Out.vColor = g_vColor * vColor;
+    Out.vDiffuse = g_vColor * Out.vDiffuse;
     
-    Out.vColor.a = vColor.r;
+    Out.vDiffuse.a = Out.vDiffuse.r;
     
-    if(Out.vColor.a <= 0.3)
+    if (Out.vDiffuse.a <= 0.3)
         discard;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
     return Out;
 }

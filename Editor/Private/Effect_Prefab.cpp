@@ -290,7 +290,15 @@ void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
 
     _matrix OffsetMatrix = ScaleMat * RotMat * PositionMat;
 
-    OutMatrix = OffsetMatrix * XMLoadFloat4x4(&m_SpawnMatrix);
+	//m_SpawnMatrix 크기 영향 죽이기
+	_vector vScale = {};
+	_vector vPos = {};
+	_vector vRot = {};
+	XMMatrixDecompose(&vScale, &vRot, &vPos, XMLoadFloat4x4(&m_SpawnMatrix));
+
+	_matrix SpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+
+	OutMatrix = OffsetMatrix * SpawnMatrix;
 }
 
 void CEffect_Prefab::FrameDesc_Check(_wstring& ChildrenTag, _bool* bCheck)
