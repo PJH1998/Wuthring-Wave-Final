@@ -115,7 +115,6 @@ void CPooling_Manager::Work_Thread()
 		unique_lock<mutex> lock(m_Mutex);
 		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
 
-		// Client 醫낅즺 ?? Thread 紐⑤몢 醫낅즺
 		if (true == m_isAllStop)
 			return;
 
@@ -126,6 +125,8 @@ void CPooling_Manager::Work_Thread()
 		m_iLiveWork.fetch_add(1);
 		Work();
 		m_iLiveWork.fetch_sub(1);
+		if(0 == m_Works.size())
+			m_CV.notify_all();
 	}
 }
 
