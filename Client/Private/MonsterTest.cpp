@@ -53,6 +53,11 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 void CMonsterTest::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
+	if(m_isTrigger == true)
+		m_isDetecting = true;
+	else
+		m_isDetecting = false;
+	m_isTrigger = false;
 }
 
 void CMonsterTest::Update(_float fTimeDelta)
@@ -117,7 +122,7 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	if(iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 
-		m_isDetecting = true;
+		m_isTrigger = true;
 		CTransform* pTransform = static_cast<CTransform*>(pOther);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 
@@ -126,7 +131,7 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::DETECT)){}
 	else
-		m_isDetecting = false;
+		m_isTrigger = false;
 }
 
 HRESULT CMonsterTest::Bind_Resources()
@@ -261,10 +266,22 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	if(m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
+
+	if(m_isParalysis)
+	{
+		m_fParalysisAcc -= fTimeDelta;
+		if(m_fParalysisAcc <= 0.f)
+		{
+			//그로기 유지시간 정의하기
+			m_fParalysisAcc = 5.f;
+			m_isParalysis = false;
+		}
+	}
 }
 
 _bool CMonsterTest::isKnockDown()
 {
+	//현재 그로기 상태 여부 판단. 행동트리에서 상태 제어 X
 	return m_isParalysis;
 }
 

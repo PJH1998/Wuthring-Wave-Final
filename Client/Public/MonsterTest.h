@@ -49,6 +49,7 @@ private:
 
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
+	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
 	_float					m_fAttackCoolTime[10]{};
@@ -62,6 +63,7 @@ private:
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
 	_bool					m_isParalysis{};
+	_float					m_fParalysisAcc{};
 
 private:
 	HRESULT						Bind_Resources();
