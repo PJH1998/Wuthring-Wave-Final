@@ -115,6 +115,8 @@ public:
 #pragma region RENDERER
 public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
+	void		Begin_ScreenEffect(SFX_TYPE eType);
+	void		End_ScreenEffect();
 #ifdef _DEBUG
 	void		Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -126,7 +128,7 @@ public:
 	void		SetBloomWeight(_int iWeight);
 	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
-	void		Set_Blur(_bool IsBlur, BLUR_TYPE eType);
+	void		SetMaxEffectIntensity(_float fMaxIntensity);
 #endif
 #pragma endregion
 

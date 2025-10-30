@@ -13,42 +13,56 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     
     float4 vColor = 0.f;
 
-    vColor += InputTexture.Load(int3(iIndexX, iIndexY, 0));
-    vColor += InputTexture.Load(int3(iIndexX + 1, iIndexY, 0));
-    vColor += InputTexture.Load(int3(iIndexX, iIndexY + 1, 0));
-    vColor += InputTexture.Load(int3(iIndexX + 1, iIndexY + 1, 0));
+    int2 InSize = 0;
+    InputTexture.GetDimensions(InSize.x, InSize.y);
+    
+    int iSampleX0 = min(iIndexX, InSize.x - 1);
+    int iSampleX1 = min(iIndexX + 1, InSize.x - 1);
+    
+    int iSampleY0 = min(iIndexY, InSize.y - 1);
+    int iSampleY1 = min(iIndexY + 1, InSize.y - 1);
+    
+    vColor += InputTexture.Load(int3(iSampleX0, iSampleY0, 0));
+    vColor += InputTexture.Load(int3(iSampleX1, iSampleY0, 0));
+    vColor += InputTexture.Load(int3(iSampleX0, iSampleY1, 0));
+    vColor += InputTexture.Load(int3(iSampleX1, iSampleY1, 0));
     
     vColor *= 0.25f;
    
     OutputTexture[DTID.xy] = vColor;
 }
 
-cbuffer UPSAMPLE_DATA : register(b0)
-{
-    float2 vOutSize;
-    float2 Paddingblur;
-}
-
 [numthreads(16, 16, 1)]
-void UpSampleDOF(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void UpSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
+    int2 vInSize;
+    InputTexture.GetDimensions(vInSize.x, vInSize.y);
     
-    float2 fTexcoord = float2(DTID.xy) / vOutSize;
-    float2 fFrac = fmod(fTexcoord * 0.5f * vOutSize, 1.f);
+    int2 vOutSize;
+    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
     
-    int2 iLowID = int2(fTexcoord * 0.5f * vOutSize);
+    float2 vTexcoord = float2(DTID.xy);
     
+    float2 vLowPos = (vTexcoord + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
+    
+    int2 iLowID = (int2) floor(vLowPos);
+    float2 fFrac = vLowPos - (float2) iLowID;
     float4 vColor = 0.f;
        
-    float4 vLT = InputTexture.Load(int3(iLowID.x, iLowID.y, 0));
-    float4 vRT = InputTexture.Load(int3(iLowID.x + 1, iLowID.y, 0));
-    float4 vLB = InputTexture.Load(int3(iLowID.x, iLowID.y + 1, 0));
-    float4 vRB = InputTexture.Load(int3(iLowID.x + 1, iLowID.y + 1, 0));
+    int iSampleX0 = min(iLowID.x, vInSize.x - 1);
+    int iSampleX1 = min(iLowID.x + 1, vInSize.x - 1);
+    
+    int iSampleY0 = min(iLowID.y, vInSize.y - 1);
+    int iSampleY1 = min(iLowID.y + 1, vInSize.y - 1);
+       
+    float4 vLT = InputTexture.Load(int3(iSampleX0, iSampleY0, 0));
+    float4 vRT = InputTexture.Load(int3(iSampleX1, iSampleY0, 0));
+    float4 vLB = InputTexture.Load(int3(iSampleX0, iSampleY1, 0));
+    float4 vRB = InputTexture.Load(int3(iSampleX1, iSampleY1, 0));
     
     vColor = lerp(lerp(vLT, vRT, fFrac.x), lerp(vLB, vRB, fFrac.x), fFrac.y);
     
     OutputTexture[DTID.xy] = vColor;
-
 }
 
 Texture2D<float4> BaseTexture : register(t1);
@@ -68,7 +82,6 @@ void UpSample_Bloom(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
     float2 fFrac = fmod(fTexcoord * 0.5f * vOutSizeBloom, 1.f);
     
     int2 iLowID = int2(fTexcoord * 0.5f * vOutSizeBloom);
-    
     
     float4 vColor = 0.f;
        

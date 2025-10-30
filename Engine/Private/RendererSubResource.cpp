@@ -154,31 +154,20 @@ HRESULT CRendererSubResource::Add_SSAO_Blur_BufferData(const _wstring& strRCSTag
 
 HRESULT CRendererSubResource::Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight)
 {
-    if (iBlurWeight >= m_iNumWeights)
-        return E_FAIL;
-    
-    BLUR_DATA Data = {};
-    Data.vSize = _float2(fWidth, fHeight);
-    Data.iRadius = m_Weights[iBlurWeight].first;
+	if (iBlurWeight >= m_iNumWeights)
+		return E_FAIL;
 
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLUR_DATA))))
-        return E_FAIL;
+	BLUR_DATA Data = {};
+	Data.vSize = _float2(fWidth, fHeight);
+	Data.iRadius = m_Weights[iBlurWeight].first;
 
-    if (FAILED(m_pGameInstance->Add_SRVData(strRCSTag, "g_Weights", m_WeightSRVs[iBlurWeight])))
-        return E_FAIL;
+	if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>(&Data), sizeof(BLUR_DATA))))
+		return E_FAIL;
 
-    return S_OK;
-}
+	if (FAILED(m_pGameInstance->Add_SRVData(strRCSTag, "g_Weights", m_WeightSRVs[iBlurWeight])))
+		return E_FAIL;
 
-HRESULT CRendererSubResource::Add_UPSample_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
-{
-    UPSAMPLE_DATA Data = {};
-    Data.vSize = _float2(fWidth, fHeight);
-    
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "UPSAMPLE_DATA", reinterpret_cast<void*>( &Data ), sizeof(UPSAMPLE_DATA))))
-        return E_FAIL;
-
-    return S_OK;
+	return S_OK;
 }
 
 HRESULT CRendererSubResource::Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex)
@@ -188,17 +177,6 @@ HRESULT CRendererSubResource::Add_Bloom_BufferData(const _wstring& strRCSTag, _f
     Data.fIntensity = ( 1.f - static_cast<_float>( ( iUpIndex + 1 ) ) * m_fIntensity );
 
     if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLOOM_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLOOM_UP_DATA))))
-        return E_FAIL;
-
-    return S_OK;
-}
-
-HRESULT CRendererSubResource::Add_DOF_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
-{
-    DOF_DATA Data = {};
-    Data.vSize = _float2(fWidth, fHeight);
-
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "DOF_DATA", reinterpret_cast<void*>( &Data ), sizeof(DOF_DATA))))
         return E_FAIL;
 
     return S_OK;
