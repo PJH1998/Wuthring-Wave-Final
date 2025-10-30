@@ -3,6 +3,7 @@
 #include "Model.h"
 #include "AnimMachine.h"
 #include "AnimTransition.h"
+#include "AnimStateFactory.h"
 
 CAnimState::CAnimState(const CAnimState& Prototype)
 	: m_Transitions { Prototype.m_Transitions },
@@ -56,7 +57,7 @@ HRESULT CAnimState::Initialize(json& jsonParser, json& jsonTransitions)
 	for(auto& jsonTransition : jsonTransitions)
 	{
 		if(0 == m_strAnimationTag.compare(jsonTransition["From"]))
-			m_Transitions.push_back(CAnimTransition::Create(jsonTransition));
+			m_Transitions.push_back(CAnimTransition::Create(jsonTransition, CAnimStateFactory::Register_Transition(jsonTransition)));
 	}
 
 	//오름차순 정렬
@@ -94,10 +95,11 @@ void CAnimState::Update(class CAnimMachine* pAnimMachine, CModel* pModelCom, _ui
 
 		if(Transition->Is_Transit(pOwnerState, strNextAnimTag, fNextTargetTrackPos))
 		{
-			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag/*, fNextTargetTrackPos*/);
-			if(pTemp && false == m_StateData.isLoop)
-				m_Transitions.push_back(pTemp);
-			return;
+			pAnimMachine->Handle_Input(pModelCom, pOwnerState, strNextAnimTag, fNextTargetTrackPos);
+			//if(pTemp && false == m_StateData.isLoop)
+			//	m_Transitions.push_back(pTemp);
+			//return;
+			break;
 		}
 	}
 	if(pTemp && false == m_StateData.isLoop)

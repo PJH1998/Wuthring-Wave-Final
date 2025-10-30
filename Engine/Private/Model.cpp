@@ -135,6 +135,10 @@ const vector<_uint>& CModel::Get_Indices(_uint iIndex)
 		CRASH("Mesh Index Error");
 	return m_Meshes[iIndex]->Get_Indices();
 }
+void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
+{
+	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
+}
 
 #ifdef _DEBUG
 _float* CModel::Get_TrackPositionPtr(const _string& strAnimName)
@@ -146,10 +150,7 @@ _float CModel::Get_Duration(const _string& strAnimName)
 {
 	return m_Animations[strAnimName]->Get_Duration();
 }
-void CModel::Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition)
-{
-	m_Animations[strAnimName]->Set_CurrentTrackPosition(fTrackPosition);
-}
+
 HRESULT CModel::Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix)
 {
 	_int iNextBoneIndex = iBoneIndex + 1;
@@ -637,7 +638,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환
