@@ -569,7 +569,6 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	pAnimCBInfo->IsRibAnimUsed = false;
 	pAnimCBInfo->iRibbonAnimIndex = 0;
 
-
 	// 2. Ribbon 애니메이션이 존재한다면 정보 바인딩
 	_string strRibAnimationName = "Rib_" + strAnimationName;
 	auto iter = m_Animations.find(strRibAnimationName);
