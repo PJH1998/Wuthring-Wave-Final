@@ -89,9 +89,9 @@ namespace Client
 
 
 
-		SPAWN = 1 << 29,
-		ANIMATION_PLAYING = 1 << 30,
-		DEAD = 1 << 31
+		SPAWN = 1 << 27,
+		ANIMATION_PLAYING = 1 << 28,
+		DEAD = 1 << 29
 	};
 
 	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, SHADOW, END };

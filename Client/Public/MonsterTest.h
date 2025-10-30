@@ -63,6 +63,7 @@ private:
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
 	_bool					m_isParalysis{};
+	_bool					m_isKnockDownTrig{};
 	_float					m_fParalysisAcc{};
 
 private:

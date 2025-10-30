@@ -160,6 +160,9 @@
     <Filter Include="03. GameObject\Weapon\Augusta">
       <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
+      <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -378,6 +381,9 @@
     <ClInclude Include="..\Public\AugustaGroundSpecial.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="CAttackVolume.h">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -570,6 +576,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundSpecial.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="CAttackVolume.cpp">
+      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
