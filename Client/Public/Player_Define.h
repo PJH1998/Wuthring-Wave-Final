@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Client_Define.h"
 #include "Character.h"
 #include "Weapon.h"
@@ -38,9 +38,9 @@ namespace PlayerData
         Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
 
-        // Desc.pController, pController´Â ·±Å¸ÀÓ¿¡ ÁÖÀÔ
+        // Desc.pController, pControllerï¿½ï¿½ ï¿½ï¿½Å¸ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-        // Parts Á¤º¸
+        // Parts ï¿½ï¿½ï¿½ï¿½
         Desc.PartPrototypes = {
             make_pair(L"Bayonet", L"Prototype_GameObject_Augusta_Bayonet"),
             make_pair(L"SkillWeapon", L"Prototype_GameObject_Augusta_SkillWeapon"),
@@ -55,8 +55,8 @@ namespace PlayerData
         CWeapon::WEAPON_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
-        Desc.pParentTransform = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
+        Desc.pSocketMatrix = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        Desc.pParentTransform = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Bayonet"));
@@ -76,8 +76,8 @@ namespace PlayerData
         CWeapon::WEAPON_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
-        Desc.pParentTransform = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
+        Desc.pSocketMatrix = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        Desc.pParentTransform = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_SkillWeapon"));
@@ -95,8 +95,8 @@ namespace PlayerData
         CWeapon::WEAPON_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
-        Desc.pParentTransform = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
+        Desc.pSocketMatrix = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        Desc.pParentTransform = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Griffon"));
@@ -128,8 +128,8 @@ namespace PlayerData
         Desc.vPosition = vPosition;
         Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
-        // Desc.pController, pController´Â ·±Å¸ÀÓ¿¡ ÁÖÀÔ
-        // Parts Á¤º¸
+        // Desc.pController, pControllerï¿½ï¿½ ï¿½ï¿½Å¸ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // Parts ï¿½ï¿½ï¿½ï¿½
         Desc.PartPrototypes = {
             make_pair(L"Weapon", L"Prototype_GameObject_Rover_Weapon")
         };
@@ -142,8 +142,8 @@ namespace PlayerData
         CWeapon::WEAPON_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
-        Desc.pParentTransform = { nullptr }; // Augusta¿¡¼­ Ã¤¿öÁà¾ßÇÏ´Â µ¥ÀÌÅÍ.
+        Desc.pSocketMatrix = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+        Desc.pParentTransform = { nullptr }; // Augustaï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_Weapon"));

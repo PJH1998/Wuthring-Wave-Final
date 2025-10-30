@@ -778,8 +778,8 @@ void CAnimationTool::Render_Model_Detail()
         Desc.fSpeedPerSec = fSpeedPerSec;
         Desc.fRotationPerSec = XMConvertToRadians(fRotationPerSec);
         Desc.strModelTag = m_wSelected_PrototypeModelTag;
-        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh"); // ?쇰떒 ?섎뱶肄붾뵫..
-        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"); // ?쇰떒 ?섎뱶肄붾뵫..
+        Desc.strShaderTag = TEXT("Prototype_Component_Shader_VtxAnimMesh");
+        Desc.strComputeShaderTag = TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh");
         Desc.iShaderPath = iShaderPath;
         memcpy(&Desc.vPostion, fPosition, sizeof(_float3));
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));

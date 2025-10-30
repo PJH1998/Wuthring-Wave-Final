@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Define.h"
 #include "StateCategory_Enum.h"
 

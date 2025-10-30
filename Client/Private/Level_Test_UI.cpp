@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Level_Test_UI.h"
 
 CLevel_Test_UI::CLevel_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -8,7 +8,7 @@ CLevel_Test_UI::CLevel_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pCont
 
 HRESULT CLevel_Test_UI::Initialize()
 {
-    // HUD °ÔÀÓ¿ÀºêÁ§Æ® Ãß°¡
+    // HUD ï¿½ï¿½ï¿½Ó¿ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ß°ï¿½
     const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
 
     const _wstring strLayertag_UI = L"Layer_Custom_UI";

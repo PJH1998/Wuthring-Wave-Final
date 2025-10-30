@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "RoverWeapon.h"
 
 CRoverWeapon::CRoverWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -43,9 +43,9 @@ void CRoverWeapon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // AugustaÀÇ StateMachine¿¡¼­ ¾Ö´Ï¸ÞÀÌ¼Ç½ÇÇà?
+    // Augustaï¿½ï¿½ StateMachineï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼Ç½ï¿½ï¿½ï¿½?
 
-    // Last :  Combined Çà·Ä ÃÊ±âÈ­
+    // Last :  Combined ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Client_Define.h"
 #include "StateCategory_Enum.h"
@@ -6,44 +6,44 @@
 NS_BEGIN(Client)
 
 #pragma region DEPTH 1
-// Rover Ground ÇÏÀ§ »óÅÂ
+// Rover Ground ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 enum class ERoverGroundState : _uint
 {
-	IDLE = 0,		// ´ë±â (Stand1, Stand2, Stand1_Action01~03, StandChange)
-	WALK,			// °È±â (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
-	RUN,			// ´Þ¸®±â (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	DASH,			// Àü·ÂÁúÁÖ (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
-	ATTACK,			// °ø°Ý (Attack01~04, Attack_*, SpAttack*)
-	SKILL,			// ½ºÅ³ (Skill)
-	BURST,			// Burst »óÅÂ
-	SPECIAL,		// Burst Special »óÅÂ.
-	UNIQUE,			// Ä³¸¯ÅÍ °íÀ¯ »óÅÂ. (Griffon µîµî)
-	LAND,			// ÂøÁö (Land)
+	IDLE = 0,		// ï¿½ï¿½ï¿½ (Stand1, Stand2, Stand1_Action01~03, StandChange)
+	WALK,			// ï¿½È±ï¿½ (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
+	RUN,			// ï¿½Þ¸ï¿½ï¿½ï¿½ (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
+	DASH,			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
+	ATTACK,			// ï¿½ï¿½ï¿½ï¿½ (Attack01~04, Attack_*, SpAttack*)
+	SKILL,			// ï¿½ï¿½Å³ (Skill)
+	BURST,			// Burst ï¿½ï¿½ï¿½ï¿½
+	SPECIAL,		// Burst Special ï¿½ï¿½ï¿½ï¿½.
+	UNIQUE,			// Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. (Griffon ï¿½ï¿½ï¿½)
+	LAND,			// ï¿½ï¿½ï¿½ï¿½ (Land)
 	GROUND_END
 };
 
-// Rover Air ÇÏÀ§ »óÅÂ
+// Rover Air ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 enum class ERoverAirState : _uint
 {
-	JUMP = 0,		// Á¡ÇÁ (Jump_Loop, Jump_Run_*, Jump_Walk_*, Jump_Second_*)
-	FALL,			// ³«ÇÏ (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
-	AIR_ATTACK,		// °øÁß °ø°Ý (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
-	HOOK,			// °¥°í¸® (Hook_Up)
-	AIR_SKILL,		// °øÁß ½ºÅ³ (Air
+	JUMP = 0,		// ï¿½ï¿½ï¿½ï¿½ (Jump_Loop, Jump_Run_*, Jump_Walk_*, Jump_Second_*)
+	FALL,			// ï¿½ï¿½ï¿½ï¿½ (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
+	AIR_ATTACK,		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
+	HOOK,			// ï¿½ï¿½ï¿½ï¿½ï¿½ (Hook_Up)
+	AIR_SKILL,		// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å³ (Air
 	AIR_END
 };
 
-// Rover Climb ÇÏÀ§ »óÅÂ
+// Rover Climb ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 enum class ERoverClimbState : _uint
 {
-	CLIMB_IDLE = 0,		// µî¹Ý ´ë±â (Climb_Stand, Climb_Move)
-	CLIMB_MOVE,			// µî¹Ý ÀÌµ¿ (Climb_U/D/L/R_1/2, Climb_UL/UR/DL/DR_1/2, Climb_*_Stop)
-	CLIMB_BOOST,		// µî¹Ý °¡¼Ó (Climb_Boost_*, Climb_Dash_*)
-	CLIMB_EXIT,			// µî¹Ý Å»Ãâ (Climb_OnTop, Climb_Vault, Climb_Start_Up/Down)
+	CLIMB_IDLE = 0,		// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ (Climb_Stand, Climb_Move)
+	CLIMB_MOVE,			// ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ (Climb_U/D/L/R_1/2, Climb_UL/UR/DL/DR_1/2, Climb_*_Stop)
+	CLIMB_BOOST,		// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (Climb_Boost_*, Climb_Dash_*)
+	CLIMB_EXIT,			// ï¿½ï¿½ï¿½ Å»ï¿½ï¿½ (Climb_OnTop, Climb_Vault, Climb_Start_Up/Down)
 	CLIMB_END
 };
 
-// Rover Hit ÇÏÀ§ »óÅÂ
+// Rover Hit ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 enum class ERoverHitState : _uint
 {
 	HIT = 0,
@@ -93,10 +93,10 @@ enum class ERoverRunType : _uint
 
 enum class ERoverLandType : _uint
 {
-	LAND_LIGHT = 0,     // ¾àÇÑ ÂøÁö
-	LAND_HEAVY, // °­ÇÑ ÂøÁö
-	LAND_ROLL,      // ÂøÁöÈÄ ±¸¸£±â.
-	LANDSLIDE_F, // ¸Å´Þ¸° ¾Ö´Ï¸ÞÀÌ¼Ç.
+	LAND_LIGHT = 0,     // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	LAND_HEAVY, // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	LAND_ROLL,      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+	LANDSLIDE_F, // ï¿½Å´Þ¸ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½.
 	LAND_ROLL_ATTACK01_2,
 	LANDSLIDE_B,
 	LANDSLIDE_SPRINT_LOOP,
@@ -124,7 +124,7 @@ enum class ERoverAttackType : _uint
 	ATTACK03,
 	ATTACK04,
 	ATTACK_HEAVYHACK,
-	ATTACK_PENDING, // NormalAttack°ú HeavyAttack ±¸º°¿ëµµ.
+	ATTACK_PENDING, // NormalAttackï¿½ï¿½ HeavyAttack ï¿½ï¿½ï¿½ï¿½ï¿½ëµµ.
 	ATTACK_PULL,
 	ATTACK_SPEEDDRIVE,
 	ATTACK_SPSKILL,
@@ -167,7 +167,7 @@ enum class ERoverBurstType : _uint
 	END
 };
 
-enum class ERoverUniqueType : _uint // ±×¸®Æù µîµî..
+enum class ERoverUniqueType : _uint // ï¿½×¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½..
 {
 	SKILL_STRIKE = 0,
 	SKILL_RISE,
@@ -180,11 +180,11 @@ enum class ERoverUniqueType : _uint // ±×¸®Æù µîµî..
 enum class ERoverJumpType : _uint
 {
 	JUMP_LOOP = 0,
-	JUMP_RUN_LF, // ¾ÕÀ¸·Î
+	JUMP_RUN_LF, // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	JUMP_RUN_RF,
-	JUMP_SECOND_B, // ´õºí Á¡ÇÁ
+	JUMP_SECOND_B, // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	JUMP_SECOND_F,
-	JUMP_WALK_LF, // Á¦ÀÚ¸®
+	JUMP_WALK_LF, // ï¿½ï¿½ï¿½Ú¸ï¿½
 	JUMP_WALK_RF,
 	END
 };
@@ -284,8 +284,8 @@ enum class ERoverClimbExitType : _uint
 	CLIMB_UL2_STOP,
 	CLIMB_UR1_STOP,
 	CLIMB_UR2_STOP,
-	CLIMB_ONTOP, // º® ³Ñ´Â Å»Ãâ.(À§¿¡¼­)
-	CLIMB_MOVE, // µÞ Á¡ÇÁ Å»Ãâ
+	CLIMB_ONTOP, // ï¿½ï¿½ ï¿½Ñ´ï¿½ Å»ï¿½ï¿½.(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+	CLIMB_MOVE, // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å»ï¿½ï¿½
 	CLIMB_VAULT,
 	END
 };
@@ -296,12 +296,12 @@ enum class ERoverClimbExitType : _uint
 #pragma region HIT
 
 /*
-*   HIT_SMALL = 0,		// ¾àÇÑ ÇÇ°Ý (Behit_S_L/R, Behit_B_L/R)
-	HIT_FLY,			// ³¯¾Æ°¡´Â ÇÇ°Ý (Behit_Fly_Start/Loop/Fall)
-	HIT_PUSH,			// ¹Ð¸®´Â ÇÇ°Ý (Behit_Push_Start/Loop/Fall)
-	HIT_HOVER,			// °øÁß ÇÇ°Ý (Behit_Hover, Behit_Press)
-	HIT_CAPTURED,		// Æ÷È¹ (Captured)
-	HIT_DEATH,			// »ç¸Á (Death, StandUp)
+*   HIT_SMALL = 0,		// ï¿½ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ (Behit_S_L/R, Behit_B_L/R)
+	HIT_FLY,			// ï¿½ï¿½ï¿½Æ°ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ (Behit_Fly_Start/Loop/Fall)
+	HIT_PUSH,			// ï¿½Ð¸ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ (Behit_Push_Start/Loop/Fall)
+	HIT_HOVER,			// ï¿½ï¿½ï¿½ï¿½ ï¿½Ç°ï¿½ (Behit_Hover, Behit_Press)
+	HIT_CAPTURED,		// ï¿½ï¿½È¹ (Captured)
+	HIT_DEATH,			// ï¿½ï¿½ï¿½ (Death, StandUp)
 */
 enum class ERoverHitType : _uint
 {

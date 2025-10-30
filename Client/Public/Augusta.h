@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Player_Define.h"
 #include "AugustaState_Enum.h"
 
@@ -6,7 +6,7 @@
 NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
-#pragma region STATE »óÅÂ º¯°æ¿¡ »ç¿ë.
+#pragma region STATE ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½æ¿¡ ï¿½ï¿½ï¿½.
 private:
 	struct StateTransitionContext
 	{
@@ -37,7 +37,7 @@ private:
 		// Hit
 		EAugustaHitType m_eHitType = EAugustaHitType::END;
 		
-		// ÄÁÅØ½ºÆ® »ç¿ë µÚ ÃÊ±âÈ­
+		// ï¿½ï¿½ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ê±ï¿½È­
 		void Clear()
 		{
 			// Land
@@ -73,18 +73,18 @@ private:
 
 
 public:
-	// ÇöÀç State¿¡¼­ È£Ãâ
+	// ï¿½ï¿½ï¿½ï¿½ Stateï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½
 	StateTransitionContext& GetStateContextForWrite()
 	{
 		return m_StateContext;
 	};
 
-	// È£Ãâ ¹Þ´Â State
+	// È£ï¿½ï¿½ ï¿½Þ´ï¿½ State
 	StateTransitionContext TakeStateContext()
 	{
-		StateTransitionContext tempCopy = m_StateContext; // ÇöÀç ÄÁÅØ½ºÆ®¸¦ º¹»ç
-		m_StateContext = {}; // ¿øº» ÄÁÅØ½ºÆ®¸¦ Áï½Ã ºñ¿ò ±âº»°ª ÃÊ±âÈ­)
-		return tempCopy; // º¹»çº»À» ¹ÝÈ¯
+		StateTransitionContext tempCopy = m_StateContext; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+		m_StateContext = {}; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ø½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½âº»ï¿½ï¿½ ï¿½Ê±ï¿½È­)
+		return tempCopy; // ï¿½ï¿½ï¿½çº»ï¿½ï¿½ ï¿½ï¿½È¯
 	}
 
 #pragma endregion
@@ -97,7 +97,7 @@ public:
 		TYPE_END
 	};
 
-#pragma region 0. ±âº» ÇÔ¼ö
+#pragma region 0. ï¿½âº» ï¿½Ô¼ï¿½
 protected:
 	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugusta(const CAugusta& Prototype);
@@ -114,7 +114,7 @@ public:
 #pragma endregion
 
 
-#pragma region 1. STATE °ü¸®.
+#pragma region 1. STATE ï¿½ï¿½ï¿½ï¿½.
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
@@ -144,21 +144,21 @@ private:
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
-	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State¸¶´Ù È°¼ºÈ­?
+	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // Stateï¿½ï¿½ï¿½ï¿½ È°ï¿½ï¿½È­?
 
 	
 #ifdef _DEBUG
-	// RayCast ÀúÀå
+	// RayCast ï¿½ï¿½ï¿½ï¿½
 	vector<pair<_float, _float>> m_RayCasts = {};
 #endif // _DEBUG
 
 
 
 private:
-	// Runtime µµÁß ÇÊ¿äÇÑ °ª¿¡ ´ëÇÑ ÁØºñ.
+	// Runtime ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Øºï¿½.
 	void Bind_Resources();
 
-	// ÃÊ±â °ª¿¡ ´ëÇÑ ÁØºñ.
+	// ï¿½Ê±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Øºï¿½.
 	void Ready_Components(const CHARACTER_DESC* pDesc);
 	void Ready_Variables(const CHARACTER_DESC* pDesc);
 	void Ready_Positions(const CHARACTER_DESC* pDesc);

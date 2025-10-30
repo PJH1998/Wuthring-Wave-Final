@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "AugustaGriffon.h"
 #include "Client_Debug.h"
 
@@ -47,9 +47,9 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // AugustaÀÇ StateMachine¿¡¼­ ¾Ö´Ï¸ÞÀÌ¼Ç½ÇÇà?
+    // Augustaï¿½ï¿½ StateMachineï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼Ç½ï¿½ï¿½ï¿½?
 
-    // Last :  Combined Çà·Ä ÃÊ±âÈ­
+    // Last :  Combined ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
@@ -102,8 +102,8 @@ void CAugustaGriffon::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
     
-    // TrackPosition µµ ÃÊ±âÈ­
-    // GriffonÀÇ °æ¿ì¿¡´Â À§Ä¡¸¦ ÃÊ±âÈ­ÇØÁØ´Ù?
+    // TrackPosition ï¿½ï¿½ ï¿½Ê±ï¿½È­
+    // Griffonï¿½ï¿½ ï¿½ï¿½ì¿¡ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ê±ï¿½È­ï¿½ï¿½ï¿½Ø´ï¿½?
     
    /* if (isactive)
         m_prigidbodycom->change_layer(enum_class(collisionlayer::none));

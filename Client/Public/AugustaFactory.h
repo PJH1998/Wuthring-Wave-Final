@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Define.h"
 NS_BEGIN(Client)
 class CAugustaFactory final : public CBase

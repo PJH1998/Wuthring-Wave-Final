@@ -1,11 +1,11 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "RoverFactory.h"
 #include "Rover.h"
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
 {
-	// === HSM enum ±â¹Ý State µî·Ï ===
-	// enum °ªÀ» index·Î »ç¿ëÇÏ¿© Å¸ÀÔ ¾ÈÁ¤¼º È®º¸
+	// === HSM enum ï¿½ï¿½ï¿½ State ï¿½ï¿½ï¿½ ===
+	// enum ï¿½ï¿½ï¿½ï¿½ indexï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 
 }
 
