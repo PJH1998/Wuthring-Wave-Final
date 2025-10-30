@@ -26,12 +26,16 @@ void CAugustaHit::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EHitType eHitType = context.m_eHitType;
+    EAugustaHitType eHitType = context.m_eHitType;
 
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eHitType);
 
     State_Reset();
+
+    // 4. 현재 때린 객체를 바라보게.? 임시로 Target
+    m_pAugusta->Rotate_HitTarget();
+
 
     m_pAugusta->Set_Gravity(true);
 }
@@ -72,35 +76,124 @@ void CAugustaHit::Handle_Input()
 
 void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 {
-    // 0. 애니메이션 플레이.
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 }
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
 {
     m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
+    m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
+    m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }
 
 void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 {
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(0.2f);
+    EAugustaHitType eHitType = static_cast<EAugustaHitType>(m_iCurrentAnimIdx);
+
+    _bool IsEscapePossible = CState::Is_EscapePossible();
+    // 땅이 아닌 경우/
+    if (m_States[!LAND])
+    {
+        if (IsEscapePossible)
+        {
+            if (m_States[JUMP])
+            {
+                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+                    || eHitType == EAugustaHitType::BEHIT_S_R || eHitType == EAugustaHitType::BEHIT_FLY_START
+                    || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+                    return;
+                }
+            }
+        }
+
+        // 애니메이션이 끝났음에도 땅이 아니라면?
+        if (m_IsAnimationEnd)
+        {
+            if (eHitType == EAugustaHitType::BEHIT_FLY_START)
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP);
+                return;
+            }
+
+
+            if (eHitType == EAugustaHitType::BEHIT_PUSH_START)
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_LOOP);
+                return;
+            }
+        }
+    }
+
+    // 땅인 경우.
+    if (m_States[LAND])
+    {
+        // 탈출 가능할때 키입력 확인.
+        if (IsEscapePossible)
+        {
+            if (m_States[JUMP])
+            {
+                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+                    || eHitType == EAugustaHitType::BEHIT_S_R)
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+                    return;
+                }
+            }
+
+            if (m_States[MOVE])
+            {
+                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+                    || eHitType == EAugustaHitType::BEHIT_S_R)
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+                    return;
+                }
+            }
+           
+        }
+
+        if (m_IsAnimationEnd)
+        {
+            if (eHitType == EAugustaHitType::BEHIT_FLY_START || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+                return;
+            }
+            else 
+            {
+                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+                return;
+            }
+            
+        }
+    }
+    
 }
 
 
 void CAugustaHit::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_B_L), "BeHit_B_L", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_B_R), "BeHit_B_R", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_FLY_FALL), "BeHit_B_L", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_FLY_LOOP), "BeHit_Fly_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_FLY_START), "BeHit_Fly_Start", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_HOVER), "BeHit_Hover", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_PRESS), "BeHit_Hover", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_PUSH_FALL), "BeHit_Push_Fall", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_PUSH_LOOP), "BeHit_Push_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_PUSH_START), "BeHit_Push_Start", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_S_L), "BeHit_S_L", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EHitType::BEHIT_S_R), "BeHit_S_R", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PRESS), "Behit_Press", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_FALL), "Behit_Push_Fall", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_LOOP), "Behit_Push_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_START), "Behit_Push_Start", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_S_L), "Behit_S_L", 1.f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_S_R), "Behit_S_R", 1.f, 40.f);
 
 }
 

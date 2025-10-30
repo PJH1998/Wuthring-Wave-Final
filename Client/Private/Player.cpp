@@ -65,6 +65,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(pDesc->vScale);
 
     m_iCurrentCharacterIdx = AUGUSTA;
+    //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
 
     return S_OK;
@@ -86,22 +87,21 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 
 #ifdef _DEBUG
     // 임시.
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
     {
         m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
         m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
     }
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
     {
         m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
         m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
     }
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
+    }
 #endif // _DEBUG
-
-
-        
-
-
 
 }
 
@@ -119,7 +119,7 @@ void CPlayer::Update(_float fTimeDelta)
     Sorting_Target(); // Update => 
     Toggle_LockOn();
     
-    // 3. Rigidbody Update => Camera �浹 �ݹ� Ȯ��.
+    // 3. Rigidbody Update => Camera 
     m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
@@ -157,7 +157,7 @@ void CPlayer::Change_CharacterCheck()
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
         Change_Character(CHARACTERTYPE::GALBRENA);
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
-        Change_Character(CHARACTERTYPE::PLAYER);
+        Change_Character(CHARACTERTYPE::ROVER);
 }
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
@@ -174,25 +174,26 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(ESkillType::SKILLQTE));
+            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
         break;
 
     case CHARACTERTYPE::GALBRENA:
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::PLAYER:
+    case CHARACTERTYPE::ROVER:
         // Player Ensemble Skill
+        pCharacter->Change_State(
+            ENUM_CLASS(EStateCategory::GROUND),
+            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
         break;
     }
 }
 
 void CPlayer::Notify_EnsembleEnd()
 {
-    // Ensemble Skill �������� �ش� ĳ���� ��Ȱ��ȭ
     if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
     {
-        // �Ⱥ������� �մϴ�.
         m_Characters[m_iEnsembleCharacterIdx]->SetActivate(false);
         m_iEnsembleCharacterIdx = CHARACTERTYPE::NONE;
     }
@@ -200,13 +201,11 @@ void CPlayer::Notify_EnsembleEnd()
 
 void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 {
-    // ���� ĳ���� ��ȯ ���� (������ �ۼ��� ����)
     _matrix matPrevWorldMatrix = XMMatrixIdentity();
     _float4 vPrevPosition = {};
     _bool bHasPrevCharacter = false;
 
     
-    // 1. ���� ĳ���� ��Ȱ��ȭ
     if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
     {
         CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
@@ -215,32 +214,25 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 
         if (pPrevTransform)
         {
-            // ��ġ, ȸ��, ������ ����
             matPrevWorldMatrix = pPrevTransform->Get_WorldMatrix();
-            // ���� ��ġ ���� (���� ������ Velocity ����)
             XMStoreFloat4(&vPrevPosition, pPrevTransform->Get_State(STATE::POSITION));
 
             bHasPrevCharacter = true;
         }
 
-        // ���� ĳ���� ��Ȱ��ȭ
         pPrevCharacter->SetActivate(false);
     }
 
-    // 2. �� ĳ���� Ȱ��ȭ
     CCharacter* pNextCharacter = m_Characters[eNextCharacter];
     pNextCharacter->SetActivate(true);
 
-    // 3. Transform ����ȭ
     CTransform* pNextTransform = dynamic_cast<CTransform*>(
         pNextCharacter->Get_Component(L"Com_Transform"));
 
-    // 4. ��ġ ����ȭ
     if (pNextTransform)
     {
         if (m_iCurrentCharacterIdx == CHARACTERTYPE::NONE)
         {
-            // NONE���� ��ȯ: Player Transform ���
             if (m_pTransformCom)
                 pNextTransform->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix());
         }
@@ -269,7 +261,7 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 
 }
 
-// Callback���� ȣ��� �Լ�
+// Callback
 void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
 {
     if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
@@ -296,32 +288,27 @@ void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold&
 
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
 {
-    // 0. ��ȿ�� �˻�
     if (eNextCharacter < 0 || eNextCharacter >= TYPE_END)
         return;
 
-    if (m_Characters[eNextCharacter] == nullptr) // ����ִٸ�?
+    if (m_Characters[eNextCharacter] == nullptr)
         return;
 
-    if (m_iCurrentCharacterIdx == eNextCharacter) // ���� ĳ���͸�?
+    if (m_iCurrentCharacterIdx == eNextCharacter)
         return;
 
     CCharacter* pCurrentCharacter = nullptr;
     if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
         pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
 
-    // 1. ���� ĳ������ Switch Gauge üũ
     _bool bUseEnsemble = false;
     if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
         bUseEnsemble = true;
 
-    // 2. ���� ĳ���� ��ȯ ����
     Perform_CharacterSwitch(eNextCharacter);
 
-    // 3. ��ȯ �� ���� ĳ������ Switch Skill ���.
     if (bUseEnsemble && pCurrentCharacter)
     {
-        // ���� ĳ���͸� �ٽ� Ȱ��ȭ (��ų ��� ����)
         pCurrentCharacter->SetActivate(true);
         Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
         pCurrentCharacter->Reset_SwitchGauge();
@@ -371,7 +358,6 @@ void CPlayer::Sorting_Target()
 
 void CPlayer::Toggle_LockOn()
 {
-    // 1. TargetTransform�� ���°�� LockOn �ʱ�ȭ �ʿ�.
     if (nullptr == m_pTargetTransform)
     {
         if (m_IsLockOn)
@@ -382,18 +368,15 @@ void CPlayer::Toggle_LockOn()
                 m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
 
         }
-        // Transform ����.
         return;
     }
 
-    // 2. Auto Target �뵵�� ��ó�� �ִ� Target�� Transform�� ����.
     if (nullptr != m_Characters[m_iCurrentCharacterIdx])
     {
         m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(m_pTargetTransform, m_IsLockOn);
     }
 
 
-    // 3. Ű ����� ���� ���?
     if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
     {
         m_IsLockOn = !m_IsLockOn;
@@ -414,13 +397,13 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
 
-    // 1. Players ���� Ȯ��
+    // 1. Players
     m_Characters.resize(CHARACTERTYPE::TYPE_END);
     
     CCharacter::CHARACTER_DESC CharacterDesc;
     CCharacter* pPlayer = { nullptr };
 
-    // 2. ĳ���� �� ������ �ʱ�ȭ
+    // 2
     for (_uint i = 0; i < pDesc->iPlayerCount; ++i)
     {
         switch (i)
@@ -428,7 +411,7 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
         case CHARACTERTYPE::AUGUSTA:
         {
             CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this; // Controller Pointer�� ����?
+            CharacterDesc.pOwner = this;
             pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
                 ENUM_CLASS(m_eCurLevel),
                 pDesc->PlayerSpecs[i].strActorTag,
@@ -441,16 +424,24 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
             break;
         case CHARACTERTYPE::GALBRENA:
             break;
-        case CHARACTERTYPE::PLAYER:
+        case CHARACTERTYPE::ROVER:
+           /* CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+            CharacterDesc.pOwner = this;
+            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+                ENUM_CLASS(m_eCurLevel),
+                pDesc->PlayerSpecs[i].strActorTag,
+                PROTOTYPE::GAMEOBJECT,
+                &CharacterDesc));
+
+            ASSERT_CRASH(pPlayer);
+            m_Characters[i] = pPlayer;*/
             break;
         default:
             break;
         }
     }
 
-    // �⺻ 0�� Augusta
     //m_iCurrentCharacterIdx = CHARACTERTYPE::AUGUSTA;
-    // �׽�Ʈ�� None
     m_iCurrentCharacterIdx = CHARACTERTYPE::NONE;
 
     return S_OK;

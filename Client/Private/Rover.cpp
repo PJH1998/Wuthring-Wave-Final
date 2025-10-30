@@ -1,26 +1,20 @@
 ﻿#include "ClientPch.h"
-#include "Augusta.h"
+#include "Rover.h"
 #include "Player.h"
 #include "SpringCamera.h"
+#include "RoverWeapon.h"
 
-#include "AugustaFactory.h"
-#include "AugustaState_Enum.h"
-#include "AugustaBayonet.h"
-#include "AugustaSkillWeapon.h"
-#include "AugustaGriffon.h"
-
-
-CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {
 }
 
-CAugusta::CAugusta(const CAugusta& Prototype)
+CRover::CRover(const CRover& Prototype)
     : CCharacter(Prototype)
 {
 }
 
-HRESULT CAugusta::Initialize_Prototype()
+HRESULT CRover::Initialize_Prototype()
 {
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
@@ -28,7 +22,7 @@ HRESULT CAugusta::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CAugusta::Initialize_Clone(void* pArg)
+HRESULT CRover::Initialize_Clone(void* pArg)
 {
     CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
@@ -44,24 +38,20 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
-    CAugustaFactory::Register_States(m_pStateMachineCom, this);
 
 
     // 초기 State 설정.
-    m_StateContext.m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+    m_StateContext.m_eIdleType = ERoverIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(EAugustaGroundState::IDLE));
+        static_cast<_uint>(ERoverGroundState::IDLE));
     
     m_pColliderCom->Set_Gravity(true);
-    m_pBayonet->SetActivate(true);
-    m_pSkillWeapon->SetActivate(false);
-    m_pGriffon->SetActivate(false);
     
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
 
-void CAugusta::Priority_Update(_float fTimeDelta)
+void CRover::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -78,7 +68,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 
 }
 
-void CAugusta::Update(_float fTimeDelta)
+void CRover::Update(_float fTimeDelta)
 {
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
@@ -111,7 +101,7 @@ void CAugusta::Update(_float fTimeDelta)
     }
 
 }
-void CAugusta::Late_Update(_float fTimeDelta)
+void CRover::Late_Update(_float fTimeDelta)
 {
     // 파츠 갱신
     for (auto& pPart : m_PartObjects)
@@ -133,7 +123,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
     
 }
 
-void CAugusta::Render()
+void CRover::Render()
 {
     Bind_Resources();
 
@@ -161,61 +151,49 @@ void CAugusta::Render()
 
 }
 
-void CAugusta::Render_Shadow()
+void CRover::Render_Shadow()
 {
 }
 
 // AnimName이 같은걸로 매핑되어있음.
-void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     switch (iPartType)
     {
-    case PART_BAYONET:
-        m_pBayonet->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+    case PART_WEAPON:
+        m_pRoverWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
-    case PART_SKILLWEAPON:
-        m_pSkillWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
-        break;
-    case PART_GRIFFON:
-        m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+    default:
         break;
     }
 }
 
-void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
+void CRover::PartActivate(_uint iPartType, _bool IsActive)
 {
     switch (iPartType)
     {
-    case PART_BAYONET:
-        m_pBayonet->Activate(IsActive);
+    case PART_WEAPON:
+        m_pRoverWeapon->Activate(IsActive);
         break;
-    case PART_SKILLWEAPON:
-        m_pSkillWeapon->Activate(IsActive);
-        break;
-    case PART_GRIFFON:
-        m_pGriffon->Activate(IsActive);
+    default:
         break;
     }
 }
 
-void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
+void CRover::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 {
     switch (iPartType)
     {
-    case PART_BAYONET:
-        m_pBayonet->Clear_Animation(strAnimName);
+    case PART_WEAPON:
+        m_pRoverWeapon->Clear_Animation(strAnimName);
         break;
-    case PART_SKILLWEAPON:
-        m_pSkillWeapon->Clear_Animation(strAnimName);
-        break;
-    case PART_GRIFFON:
-        m_pGriffon->Clear_Animation(strAnimName);
-
+    default:
         break;
     }
+
 }
 
-void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName)
+void CRover::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName)
 {
     ASSERT_CRASH(m_pModelCom);
     
@@ -225,30 +203,23 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     
     switch (iPartType)
     {
-    case PART_BAYONET:
-        m_pBayonet->Set_SocketMatrix(pSocketMatrix);
-        break;
-    case PART_SKILLWEAPON:
-        m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
-        break;
-    case PART_GRIFFON:
-        m_pGriffon->Set_SocketMatrix(pSocketMatrix);
+    case PART_WEAPON:
+        m_pRoverWeapon->Set_SocketMatrix(pSocketMatrix);
         break;
     }
 }
 
 // Hit 판정.
-void CAugusta::Hit_Judge(void* pArg)
+void CRover::Hit_Judge(void* pArg)
 {
     // 임시
     _bool IsLand = Is_Land(0.2f);
-    
+
     // 강공?
-    
 
     // 몬스터 공격 Dir
     ACTORDIR eAttackDir = ACTORDIR::RU;
-    
+
     if (IsLand)
     {
         // 특수 조건 우선순위에 따라 Change_State
@@ -256,68 +227,65 @@ void CAugusta::Hit_Judge(void* pArg)
         switch (eAttackDir)
         {
         case ACTORDIR::LU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
             break;
         case ACTORDIR::RU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_R;
             break;
-        case ACTORDIR::U: 
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+        case ACTORDIR::U:
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
             break;
         case ACTORDIR::LD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_L;
             break;
         case ACTORDIR::RD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_R;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_R;
             break;
         case ACTORDIR::D:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_L;
             break;
         case ACTORDIR::L: // L, R은 정면 판단.
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
             break;
         case ACTORDIR::R:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_R;
             break;
         }
 
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
     }
     else
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START));
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitType::BEHIT_FLY_START));
 
 }
 
-
-void CAugusta::Sync_Position()
+void CRover::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
 #ifdef _DEBUG
-void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
+void CRover::PartRotation(_uint iPartType, _fvector vQuaternion)
 {
 
 }
 #endif // _DEBUG
 
 #pragma region NOTIFY
-void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
+void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
     if (wStrColliderTag == TEXT("Player"))
     {
         
     }
-    else if (wStrColliderTag == TEXT("Bayonet"))
+    else if (wStrColliderTag == TEXT("Weapon"))
     {
         
     }
-    else if (wStrColliderTag == TEXT("SkillWeapon"))
-    {
 
-    }
 }
-void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
+
+void CRover::Effect_Active(const _wstring& wStrEffectTag)
 {
     if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
         return;
@@ -328,10 +296,7 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 #pragma endregion
 
 
-
-
-
-void CAugusta::Bind_Resources()
+void CRover::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
@@ -344,7 +309,7 @@ void CAugusta::Bind_Resources()
 
 }
 
-void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
+void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
 {
     // 1. Components
     if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -386,7 +351,7 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 
 }
 
-void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
+void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
     m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
@@ -395,7 +360,7 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
+void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -409,7 +374,7 @@ void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
 }
 
 
-void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
+void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 {
 
     _float3 vScale = {};
@@ -424,30 +389,11 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         CWeapon::WEAPON_DESC Desc{};
         switch (i)
         {
-        case PARTTYPE::PART_BAYONET:
-            
+        case PARTTYPE::PART_WEAPON:
+
             vScale = { 1.f, 1.f, 1.f };
             vPosition = { 0.f, 0.f, 0.f };
-            Desc = PlayerData::GetAugustaBayonetCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
-            Desc.pParentTransform = m_pTransformCom;
-            ASSERT_CRASH(Desc.pSocketMatrix);
-            
-
-            // WeaponDesc
-            if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
-                , strPrototypeName, &Desc)))
-                CRASH("Weapon");
-
-            m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
-            ASSERT_CRASH(m_pBayonet);
-            Safe_AddRef(m_pBayonet);
-            break;
-
-        case PARTTYPE::PART_SKILLWEAPON:
-            vScale = { 1.f, 1.f, 1.f };
-            vPosition = { 0.f, 0.f, 0.f };
-            Desc = PlayerData::GetAugustaSkillWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc = PlayerData::GetRoverWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
             Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
             Desc.pParentTransform = m_pTransformCom;
             ASSERT_CRASH(Desc.pSocketMatrix);
@@ -458,63 +404,42 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
 
-            m_pSkillWeapon = dynamic_cast<CAugustaSkillWeapon*>(Find_PartObject(strPartName));
-            ASSERT_CRASH(m_pSkillWeapon);
-            Safe_AddRef(m_pSkillWeapon);
-            break;
-        case PARTTYPE::PART_GRIFFON:
-            vScale = { 1.f, 1.f, 1.f };
-            vPosition = { 0.f, 0.f, 0.f };
-            Desc = PlayerData::GetAugustaGriffonCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-            Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
-            Desc.pParentTransform = m_pTransformCom;
-            ASSERT_CRASH(Desc.pSocketMatrix);
-
-
-            // WeaponDesc
-            if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
-                , strPrototypeName, &Desc)))
-                CRASH("Weapon");
-
-            m_pGriffon = dynamic_cast<CAugustaGriffon*>(Find_PartObject(strPartName));
-            ASSERT_CRASH(m_pGriffon);
-            Safe_AddRef(m_pGriffon);
+            m_pRoverWeapon = dynamic_cast<CRoverWeapon*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pRoverWeapon);
+            Safe_AddRef(m_pRoverWeapon);
             break;
         }
-       
     }
 }
 
-CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CRover* CRover::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CAugusta* pInstance = new CAugusta(pDevice, pContext);
+    CRover* pInstance = new CRover(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CAugusta");
+        MSG_BOX("Failed to Create : CRover");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CAugusta::Clone(void* pArg)
+CGameObject* CRover::Clone(void* pArg)
 {
-    CAugusta* pInstance = new CAugusta(*this);
+    CRover* pInstance = new CRover(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Clone Failed : CAugusta");
+        MSG_BOX("Clone Failed : CRover");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CAugusta::Free()
+void CRover::Free()
 {
     CCharacter::Free();
-    Safe_Release(m_pBayonet);
-    Safe_Release(m_pSkillWeapon);
-    Safe_Release(m_pGriffon);
+    Safe_Release(m_pRoverWeapon);
 }

@@ -364,7 +364,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	}
 
 
-
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 
@@ -644,7 +643,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
+	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
 	// 현재 프레임의 T, R을 '엔진 좌표계'로 변환

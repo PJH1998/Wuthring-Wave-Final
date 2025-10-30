@@ -27,7 +27,7 @@ void CAugustaGroundSkill::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    ESkillType eSkillType = context.m_eSkillType;
+    EAugustaSkillType eSkillType = context.m_eSkillType;
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eSkillType);
@@ -40,7 +40,7 @@ void CAugustaGroundSkill::OnEnter()
      
     switch(eSkillType)
     {
-        case ESkillType::SKILL_STRIKE:
+        case EAugustaSkillType::SKILL_STRIKE:
         {
             //_string strBoneName = "WeaponProp06";
             _string strBoneName = "Root";
@@ -56,7 +56,7 @@ void CAugustaGroundSkill::OnEnter()
             
             break;
         }
-        case ESkillType::SKILL_RISE:
+        case EAugustaSkillType::SKILL_RISE:
         {
             m_pAugusta->Set_Gravity(false);
             break;
@@ -133,15 +133,15 @@ void CAugustaGroundSkill::Check_Physcis(_float fTimeDelta)
 
 void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 {
-    ESkillType eSkillType = static_cast<ESkillType>(m_iCurrentAnimIdx);
+    EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     if (IsEscapePossible)
     {
-        if (eSkillType == ESkillType::SKILL_STRIKE && m_States[SKILL_E])
+        if (eSkillType == EAugustaSkillType::SKILL_STRIKE && m_States[SKILL_E])
         {
-            m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_RISE;
+            m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
             return;
         }
@@ -149,7 +149,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
         // 더블 점프 형태로만 변경 가능.
         if (m_States[JUMP])
         {
-            m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_SECOND_F;
+            m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
             return;
         }
@@ -159,14 +159,14 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
         {
             if (m_States[MOVE])
             {
-                m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F;
+                m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                 return;
             }
 
             if (!m_States[MOVE])
             {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                 return;
             }
@@ -180,14 +180,14 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
         if (m_States[LAND])
         {
-            m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
             return;
         }
 
         if (!m_States[LAND])
         {
-            m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
+            m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
             return;
         }
@@ -197,11 +197,11 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundSkill::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ESkillType::SKILL_HACK), "Skill_Hack", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESkillType::SKILL_RISE), "Skill_Rise", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ESkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
-    CState::Add_Animations(ENUM_CLASS(ESkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
 
     m_PartsAnimations.emplace("Skill_Strike", "SA1Shouwangjiu_Skill_Strike");
     //SA1Shouwangjiu_AirAttack_End

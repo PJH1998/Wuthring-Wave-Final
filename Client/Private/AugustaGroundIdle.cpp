@@ -31,14 +31,14 @@ void CAugustaGroundIdle::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EIdleType eIdleType = context.m_eIdleType;
+    EAugustaIdleType eIdleType = context.m_eIdleType;
 
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
 
-    if (eIdleType == EIdleType::STAND1_ACTION01 || eIdleType == EIdleType::STAND1_ACTION02
-        || eIdleType == EIdleType::STAND2)
+    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
+        || eIdleType == EAugustaIdleType::STAND2)
     {
         _string strBoneName = "Root";
         m_pAugusta->PartActivate(m_iPartType, true);
@@ -121,11 +121,11 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
 
-    EIdleType eIdleType = static_cast<EIdleType>(m_iCurrentAnimIdx);
+    EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
     // 2. 파츠도 재생.
-    if (eIdleType == EIdleType::STAND1_ACTION01 || eIdleType == EIdleType::STAND1_ACTION02
-        || eIdleType == EIdleType::STAND2)
+    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
+        || eIdleType == EAugustaIdleType::STAND2)
     {
         m_pAugusta->Play_PartAnimation(
             m_iPartType,
@@ -145,7 +145,7 @@ void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 {
 
-    EIdleType eIdleType = static_cast<EIdleType>(m_iCurrentAnimIdx);
+    EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
 
@@ -153,7 +153,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 점프
     if (m_States[JUMP])
     {
-        m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_WALK_LF;
+        m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
         return;
     }
@@ -161,14 +161,14 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
     if (m_States[BURST_R])
     {
-        m_pAugusta->GetStateContextForWrite().m_eBurstType = EBurstType::BURST01;
+        m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
     }
 
     if (m_States[UNIQUE_E])
     {
-        m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_STRIKE;
+        m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
         return;
     }
@@ -177,7 +177,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     if (m_States[SKILL_E])
     {
-        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAirAttackType::AIRATTACK_HACKDOWN_START;
+        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
         return;
     }
@@ -185,7 +185,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 에코 => 소환 
     if (m_States[SKILL_Q])
     {
-       /* m_pAugusta->GetStateContextForWrite().m_eSkillType = ESkillType::SKILL_RISE;
+       /* m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));*/
         return;
     }
@@ -194,7 +194,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 기본 공격
     if (m_States[ATTACK])
     {
-        m_pAugusta->GetStateContextForWrite().m_eAttackType = EAttackType::ATTACK01;
+        m_pAugusta->GetStateContextForWrite().m_eAttackType = EAugustaAttackType::ATTACK01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK)); // 상위, 하위 상태
         return;
     }
@@ -202,7 +202,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // Sprint => 빠르게 달리기.
     if (m_States[SPRINT])
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::SPRINT_F;
+        m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::SPRINT_F;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
         return;
     }
@@ -210,7 +210,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // DASH
     if (m_States[DASH])
     {
-        m_pAugusta->GetStateContextForWrite().m_eDashType = EDashType::MOVE_F;
+        m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
         return;
     }
@@ -226,28 +226,28 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
             if (m_States[MOVE_U])
             {
                 if (m_States[MOVE_L])
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_LF; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_LF; // 애니메이션 상태 => 블랙보드에 기입.        
                 else if (m_States[MOVE_R])
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_RF; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_RF; // 애니메이션 상태 => 블랙보드에 기입.        
                 else
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
             }
             else if (m_States[MOVE_D])
             {
                 if (m_States[MOVE_L])
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_LB; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_LB; // 애니메이션 상태 => 블랙보드에 기입.        
                 else if (m_States[MOVE_R])
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_RB; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_RB; // 애니메이션 상태 => 블랙보드에 기입.        
                 else
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_B; // 애니메이션 상태 => 블랙보드에 기입.        
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_B; // 애니메이션 상태 => 블랙보드에 기입.        
             }
             else if (m_States[MOVE_L])
-                m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_LF; // 애니메이션 상태 => 블랙보드에 기입.        
+                m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_LF; // 애니메이션 상태 => 블랙보드에 기입.        
             else if (m_States[MOVE_R])
-                m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_RF; // 애니메이션 상태 => 블랙보드에 기입.        
+                m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_RF; // 애니메이션 상태 => 블랙보드에 기입.        
         }
         else
-            m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
+            m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
 
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
         return;
@@ -256,24 +256,24 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 자동 변환.
     if (m_IsAnimationEnd)
     {
-        EIdleType nextIdle = EIdleType::STAND1;
+        EAugustaIdleType nextIdle = EAugustaIdleType::STAND1;
 
-        switch (static_cast<EIdleType>(m_iCurrentAnimIdx))
+        switch (static_cast<EAugustaIdleType>(m_iCurrentAnimIdx))
         {
-        case EIdleType::STAND1:
-            nextIdle = EIdleType::STAND1_ACTION01;
+        case EAugustaIdleType::STAND1:
+            nextIdle = EAugustaIdleType::STAND1_ACTION01;
             break;
-        case EIdleType::STAND1_ACTION01:
-            nextIdle = EIdleType::STAND1_ACTION02;
+        case EAugustaIdleType::STAND1_ACTION01:
+            nextIdle = EAugustaIdleType::STAND1_ACTION02;
             break;
-        case EIdleType::STAND1_ACTION02:
-            nextIdle = EIdleType::STAND1_ACTION03;
+        case EAugustaIdleType::STAND1_ACTION02:
+            nextIdle = EAugustaIdleType::STAND1_ACTION03;
             break;
-        case EIdleType::STAND1_ACTION03:
-            nextIdle = EIdleType::STAND1_ACTION01;  // 다시 처음으로
+        case EAugustaIdleType::STAND1_ACTION03:
+            nextIdle = EAugustaIdleType::STAND1_ACTION01;  // 다시 처음으로
             break;
         default:
-            nextIdle = EIdleType::STAND1_ACTION01;
+            nextIdle = EAugustaIdleType::STAND1_ACTION01;
             break;
         }
 
@@ -292,14 +292,14 @@ void CAugustaGroundIdle::LockOn_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundIdle::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION01), "Stand1_Action01", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION02), "Stand1_Action02", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1_ACTION03), "Stand1_Action03", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND1), "Stand1", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND2), "Stand2", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STANDCHANGE), "StandChange", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EIdleType::STANDUP), "StandUp", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1_ACTION01), "Stand1_Action01", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1_ACTION02), "Stand1_Action02", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1_ACTION03), "Stand1_Action03", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1), "Stand1", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND2), "Stand2", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STANDCHANGE), "StandChange", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STANDUP), "StandUp", 1.f, 0.f);
 }
 
 

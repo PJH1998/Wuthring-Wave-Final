@@ -20,6 +20,9 @@ void CPlayerFactory::Register_KeyInputs(CInputController* pInputControllerCom, C
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D1), DIK_1);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D2), DIK_2);
     pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D3), DIK_3);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D4), DIK_4);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D5), DIK_5);
+    pInputControllerCom->Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::D6), DIK_6);
 
 
     // 마우스 키입력 등록

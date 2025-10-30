@@ -27,7 +27,7 @@ void CAugustaGroundDash::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EDashType EDashType = context.m_eDashType;
+    EAugustaDashType EDashType = context.m_eDashType;
 
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eDashType);
@@ -95,12 +95,12 @@ void CAugustaGroundDash::LockOnCheck_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 {
-    EDashType eDashType = static_cast<EDashType>(m_iCurrentAnimIdx);
+    EAugustaDashType eDashType = static_cast<EAugustaDashType>(m_iCurrentAnimIdx);
 
     // 애니메이션 끝나면?
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
         return;
     }
@@ -108,20 +108,20 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 
     switch (eDashType)
     {
-    case EDashType::MOVE_F:
+    case EAugustaDashType::MOVE_F:
     {
         if (CState::Is_EscapePossible())
         {
             if (m_States[JUMP])
             {
-                m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_WALK_LF;
+                m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
                 return;
             }
 
             if (m_States[MOVE])
             {
-                m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
+                m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
                 return;
             }
@@ -134,10 +134,10 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundDash::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EDashType::MOVE_F), "Move_F", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EDashType::MOVE_B), "Move_B", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EDashType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EDashType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_F), "Move_F", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_B), "Move_B", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_B), "Move_Limit_B", 30.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaDashType::MOVE_LIMIT_F), "Move_Limit_F", 30.f, 0.f);
 }
 
 void CAugustaGroundDash::State_Reset()

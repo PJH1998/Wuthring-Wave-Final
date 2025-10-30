@@ -28,7 +28,7 @@ void CAugustaGroundAttack::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EAttackType eAttackType = context.m_eAttackType;
+    EAugustaAttackType eAttackType = context.m_eAttackType;
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eAttackType);
@@ -82,11 +82,11 @@ void CAugustaGroundAttack::OnExit()
 void CAugustaGroundAttack::Handle_Input()
 {
     
-    EAttackType eAttackType = static_cast<EAttackType>(m_iCurrentAnimIdx);
+    EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
-    m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAttackType::ATTACK01 
+    m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAugustaAttackType::ATTACK01 
         && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
 
 
@@ -103,7 +103,7 @@ void CAugustaGroundAttack::Handle_Input()
     
 
 
-    if (eAttackType >= EAttackType::ATTACK01 && eAttackType < EAttackType::ATTACK04)
+    if (eAttackType >= EAugustaAttackType::ATTACK01 && eAttackType < EAugustaAttackType::ATTACK04)
     {
         if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS))
             m_IsNextAttackInput = true;
@@ -148,30 +148,30 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     // ... 추후 구현
     // 2. Normal Attack의 경우 콤보 공격이 가능하게.
     
-    EAttackType eAttackType = static_cast<EAttackType>(m_iCurrentAnimIdx);
+    EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {
-        m_iCurrentAnimIdx = ENUM_CLASS(EAttackType::ATTACK_HEAVYHACK);
+        m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
         m_fAttackPressTime = 0.f;
         return;
     }
 
     /*if (m_States[HEAVY_ATTACK_PENDING] && IsEscapePossible)
     {
-        m_iCurrentAnimIdx = ENUM_CLASS(EAttackType::ATTACK_HEAVYHACK);
+        m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
         m_fAttackPressTime = 0.f;
         return;
     }*/
     
     // 1. 기본 공상태에서 Heavy_Attack_Pending이 아닌 경우?
-    if (eAttackType >= EAttackType::ATTACK01 && eAttackType < EAttackType::ATTACK04)
+    if (eAttackType >= EAugustaAttackType::ATTACK01 && eAttackType < EAugustaAttackType::ATTACK04)
     {
         // 키 누르고 있다면 다른 상태전환하지 말고 계속 Attack01 실행.
-        if (eAttackType == EAttackType::ATTACK01 && m_States[HEAVY_ATTACK_PENDING])
+        if (eAttackType == EAugustaAttackType::ATTACK01 && m_States[HEAVY_ATTACK_PENDING])
         {
             return;
         }
@@ -179,7 +179,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         if (m_IsNextAttackInput && IsEscapePossible)
         {
             m_iComboCount++;
-            m_iCurrentAnimIdx = ENUM_CLASS(EAttackType::ATTACK01) + m_iComboCount;
+            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK01) + m_iComboCount;
             m_IsNextAttackInput = false;
             m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
             return;
@@ -196,7 +196,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         // 점프키 => 내부 우선순위 높음. (입력 보다) ex) w space 동시에 눌렀으면? => space 먼저 판별.
         if (m_States[JUMP])
         {
-            m_pAugusta->GetStateContextForWrite().m_eJumpType = EJumpType::JUMP_WALK_LF;
+            m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
             return;
         }
@@ -204,7 +204,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         // 입력키
         if (m_States[MOVE])
         {
-            m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F;
+            m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
             return;
         }
@@ -215,7 +215,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     //공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         m_IsNextAttackInput = false;
         return;
@@ -229,14 +229,14 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaGroundAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK01),"Attack01", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK02),"Attack02", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK03),"Attack03", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK04),"Attack04", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_PULL), "Attack_Pull", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAttackType::ATTACK_SPSKILL),"Attack_SpSkill", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK01),"Attack01", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK02),"Attack02", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK03),"Attack03", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK04),"Attack04", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_PULL), "Attack_Pull", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_SPSKILL),"Attack_SpSkill", 1.f, 0.f);
 }
 
 void CAugustaGroundAttack::State_Reset()

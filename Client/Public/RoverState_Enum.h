@@ -1,50 +1,50 @@
 #pragma once
+
 #include "Client_Define.h"
 #include "StateCategory_Enum.h"
-
 
 NS_BEGIN(Client)
 
 #pragma region DEPTH 1
-// Augusta Ground í•˜ìœ„ ìƒíƒœ
-enum class EAugustaGroundState : _uint
+// Rover Ground ÇÏÀ§ »óÅÂ
+enum class ERoverGroundState : _uint
 {
-	IDLE = 0,		// ëŒ€ê¸° (Stand1, Stand2, Stand1_Action01~03, StandChange)
-	WALK,			// ê±·ê¸° (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
-	RUN,			// ë‹¬ë¦¬ê¸° (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	DASH,			// ì „ë ¥ì§ˆì£¼ (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
-	ATTACK,			// ê³µê²© (Attack01~04, Attack_*, SpAttack*)
-	SKILL,			// ìŠ¤í‚¬ (Skill)
-	BURST,			// Burst ìƒíƒœ
-	SPECIAL,		// Burst Special ìƒíƒœ.
-	UNIQUE,			// ìºë¦­í„° ê³ ìœ  ìƒíƒœ. (Griffon ë“±ë“±)
-	LAND,			// ì°©ì§€ (Land)
+	IDLE = 0,		// ´ë±â (Stand1, Stand2, Stand1_Action01~03, StandChange)
+	WALK,			// °È±â (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
+	RUN,			// ´Ş¸®±â (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
+	DASH,			// Àü·ÂÁúÁÖ (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
+	ATTACK,			// °ø°İ (Attack01~04, Attack_*, SpAttack*)
+	SKILL,			// ½ºÅ³ (Skill)
+	BURST,			// Burst »óÅÂ
+	SPECIAL,		// Burst Special »óÅÂ.
+	UNIQUE,			// Ä³¸¯ÅÍ °íÀ¯ »óÅÂ. (Griffon µîµî)
+	LAND,			// ÂøÁö (Land)
 	GROUND_END
 };
 
-// Augusta Air í•˜ìœ„ ìƒíƒœ
-enum class EAugustaAirState : _uint
+// Rover Air ÇÏÀ§ »óÅÂ
+enum class ERoverAirState : _uint
 {
-	JUMP = 0,		// ì í”„ (Jump_Loop, Jump_Run_*, Jump_Walk_*, Jump_Second_*)
-	FALL,			// ë‚™í•˜ (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
-	AIR_ATTACK,		// ê³µì¤‘ ê³µê²© (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
-	HOOK,			// ê°ˆê³ ë¦¬ (Hook_Up)
-	AIR_SKILL,		// ê³µì¤‘ ìŠ¤í‚¬ (Air
+	JUMP = 0,		// Á¡ÇÁ (Jump_Loop, Jump_Run_*, Jump_Walk_*, Jump_Second_*)
+	FALL,			// ³«ÇÏ (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
+	AIR_ATTACK,		// °øÁß °ø°İ (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
+	HOOK,			// °¥°í¸® (Hook_Up)
+	AIR_SKILL,		// °øÁß ½ºÅ³ (Air
 	AIR_END
 };
 
-// Augusta Climb í•˜ìœ„ ìƒíƒœ
-enum class EAugustaClimbState : _uint
+// Rover Climb ÇÏÀ§ »óÅÂ
+enum class ERoverClimbState : _uint
 {
-	CLIMB_IDLE = 0,		// ë“±ë°˜ ëŒ€ê¸° (Climb_Stand, Climb_Move)
-	CLIMB_MOVE,			// ë“±ë°˜ ì´ë™ (Climb_U/D/L/R_1/2, Climb_UL/UR/DL/DR_1/2, Climb_*_Stop)
-	CLIMB_BOOST,		// ë“±ë°˜ ê°€ì† (Climb_Boost_*, Climb_Dash_*)
-	CLIMB_EXIT,			// ë“±ë°˜ íƒˆì¶œ (Climb_OnTop, Climb_Vault, Climb_Start_Up/Down)
+	CLIMB_IDLE = 0,		// µî¹İ ´ë±â (Climb_Stand, Climb_Move)
+	CLIMB_MOVE,			// µî¹İ ÀÌµ¿ (Climb_U/D/L/R_1/2, Climb_UL/UR/DL/DR_1/2, Climb_*_Stop)
+	CLIMB_BOOST,		// µî¹İ °¡¼Ó (Climb_Boost_*, Climb_Dash_*)
+	CLIMB_EXIT,			// µî¹İ Å»Ãâ (Climb_OnTop, Climb_Vault, Climb_Start_Up/Down)
 	CLIMB_END
 };
 
-// Augusta Hit í•˜ìœ„ ìƒíƒœ
-enum class EAugustaHitState : _uint
+// Rover Hit ÇÏÀ§ »óÅÂ
+enum class ERoverHitState : _uint
 {
 	HIT = 0,
 	HIT_END
@@ -52,11 +52,10 @@ enum class EAugustaHitState : _uint
 
 #pragma endregion
 
-
 #pragma region DEPTH2
 
 #pragma region GROUND
-enum class EAugustaIdleType : _uint
+enum class ERoverIdleType : _uint
 {
 	STAND1_ACTION01 = 0,
 	STAND1_ACTION02,
@@ -71,7 +70,7 @@ enum class EAugustaIdleType : _uint
 	END
 };
 
-enum class EAugustaRunType : _uint
+enum class ERoverRunType : _uint
 {
 	RUN_B = 0,
 	RUN_F,
@@ -92,12 +91,12 @@ enum class EAugustaRunType : _uint
 	END
 };
 
-enum class EAugustaLandType : _uint
+enum class ERoverLandType : _uint
 {
-	LAND_LIGHT = 0,     // ì•½í•œ ì°©ì§€
-	LAND_HEAVY, // ê°•í•œ ì°©ì§€
-	LAND_ROLL,      // ì°©ì§€í›„ êµ¬ë¥´ê¸°.
-	LANDSLIDE_F, // ë§¤ë‹¬ë¦° ì• ë‹ˆë©”ì´ì…˜.
+	LAND_LIGHT = 0,     // ¾àÇÑ ÂøÁö
+	LAND_HEAVY, // °­ÇÑ ÂøÁö
+	LAND_ROLL,      // ÂøÁöÈÄ ±¸¸£±â.
+	LANDSLIDE_F, // ¸Å´Ş¸° ¾Ö´Ï¸ŞÀÌ¼Ç.
 	LAND_ROLL_ATTACK01_2,
 	LANDSLIDE_B,
 	LANDSLIDE_SPRINT_LOOP,
@@ -107,9 +106,9 @@ enum class EAugustaLandType : _uint
 };
 
 
-enum class EAugustaDashType : _uint
+enum class ERoverDashType : _uint
 {
-	MOVE_B = 0, 
+	MOVE_B = 0,
 	MOVE_F,
 	MOVE_LIMIT_B,
 	MOVE_LIMIT_F,
@@ -118,14 +117,14 @@ enum class EAugustaDashType : _uint
 
 };
 
-enum class EAugustaAttackType : _uint
+enum class ERoverAttackType : _uint
 {
 	ATTACK01 = 0,
 	ATTACK02,
 	ATTACK03,
 	ATTACK04,
 	ATTACK_HEAVYHACK,
-	ATTACK_PENDING, // NormalAttackê³¼ HeavyAttack êµ¬ë³„ìš©ë„.
+	ATTACK_PENDING, // NormalAttack°ú HeavyAttack ±¸º°¿ëµµ.
 	ATTACK_PULL,
 	ATTACK_SPEEDDRIVE,
 	ATTACK_SPSKILL,
@@ -136,7 +135,7 @@ enum class EAugustaAttackType : _uint
 	END
 };
 
-enum class EAugustaSkillType : _uint
+enum class ERoverSkillType : _uint
 {
 	SKILL_HACK = 0,
 	SKILL_RISE,
@@ -146,7 +145,7 @@ enum class EAugustaSkillType : _uint
 	END
 };
 
-enum class EAugustaSpecialType : _uint
+enum class ERoverSpecialType : _uint
 {
 	SPATTACK01 = 0,
 	SPATTACK02,
@@ -161,37 +160,36 @@ enum class EAugustaSpecialType : _uint
 	END
 };
 
-enum class EAugustaBurstType : _uint
+enum class ERoverBurstType : _uint
 {
 	BURST01 = 0,
 	BURST_STAND,
 	END
 };
 
-enum class EAugustaUniqueType : _uint // ê·¸ë¦¬í° ë“±ë“±..
+enum class ERoverUniqueType : _uint // ±×¸®Æù µîµî..
 {
 	SKILL_STRIKE = 0,
 	SKILL_RISE,
 	END
 };
 
-
 #pragma endregion
 
 #pragma region AIR
-enum class EAugustaJumpType : _uint
+enum class ERoverJumpType : _uint
 {
 	JUMP_LOOP = 0,
-	JUMP_RUN_LF, // ì•ìœ¼ë¡œ
+	JUMP_RUN_LF, // ¾ÕÀ¸·Î
 	JUMP_RUN_RF,
-	JUMP_SECOND_B, // ë”ë¸” ì í”„
+	JUMP_SECOND_B, // ´õºí Á¡ÇÁ
 	JUMP_SECOND_F,
-	JUMP_WALK_LF, // ì œìë¦¬
+	JUMP_WALK_LF, // Á¦ÀÚ¸®
 	JUMP_WALK_RF,
 	END
 };
 
-enum class EAugustaFallType : _uint
+enum class ERoverFallType : _uint
 {
 	FALL_LOOP = 0,
 	FALL_LOOP_FAST,
@@ -199,7 +197,7 @@ enum class EAugustaFallType : _uint
 
 };
 
-enum class EAugustaAirAttackType : _uint
+enum class ERoverAirAttackType : _uint
 {
 	AIRATTACK_END = 0,
 	AIRATTACK_HACKDOWN_LOOP,
@@ -210,22 +208,18 @@ enum class EAugustaAirAttackType : _uint
 	END
 };
 
-enum class EAirSkillType : _uint
-{
-
-	END
-};
 #pragma endregion
+
 
 #pragma region CLIMB
 
-enum class EAugustaClimbIdleType : _uint
+enum class ERoverClimbIdleType : _uint
 {
-	
+
 	END
 };
 
-enum class EAugustaClimbMoveType : _uint
+enum class ERoverClimbMoveType : _uint
 {
 	CLIMB_D_1 = 0,
 	CLIMB_D_2,
@@ -246,7 +240,7 @@ enum class EAugustaClimbMoveType : _uint
 	END
 };
 
-enum class EAugustaClimbBoostType : _uint
+enum class ERoverClimbBoostType : _uint
 {
 	CLIMB_BOOST_L = 0,
 	CLIMB_BOOST_L_START,
@@ -272,7 +266,7 @@ enum class EAugustaClimbBoostType : _uint
 	END
 };
 
-enum class EAugustaClimbExitType : _uint
+enum class ERoverClimbExitType : _uint
 {
 	CLIMB_D1_STOP = 0,
 	CLIMB_D2_STOP,
@@ -290,8 +284,8 @@ enum class EAugustaClimbExitType : _uint
 	CLIMB_UL2_STOP,
 	CLIMB_UR1_STOP,
 	CLIMB_UR2_STOP,
-	CLIMB_ONTOP, // ë²½ ë„˜ëŠ” íƒˆì¶œ.(ìœ„ì—ì„œ)
-	CLIMB_MOVE, // ë’· ì í”„ íƒˆì¶œ
+	CLIMB_ONTOP, // º® ³Ñ´Â Å»Ãâ.(À§¿¡¼­)
+	CLIMB_MOVE, // µŞ Á¡ÇÁ Å»Ãâ
 	CLIMB_VAULT,
 	END
 };
@@ -299,18 +293,17 @@ enum class EAugustaClimbExitType : _uint
 #pragma endregion
 
 
-
 #pragma region HIT
 
 /*
-*   HIT_SMALL = 0,		// ì•½í•œ í”¼ê²© (Behit_S_L/R, Behit_B_L/R)
-	HIT_FLY,			// ë‚ ì•„ê°€ëŠ” í”¼ê²© (Behit_Fly_Start/Loop/Fall)
-	HIT_PUSH,			// ë°€ë¦¬ëŠ” í”¼ê²© (Behit_Push_Start/Loop/Fall)
-	HIT_HOVER,			// ê³µì¤‘ í”¼ê²© (Behit_Hover, Behit_Press)
-	HIT_CAPTURED,		// í¬íš (Captured)
-	HIT_DEATH,			// ì‚¬ë§ (Death, StandUp)
+*   HIT_SMALL = 0,		// ¾àÇÑ ÇÇ°İ (Behit_S_L/R, Behit_B_L/R)
+	HIT_FLY,			// ³¯¾Æ°¡´Â ÇÇ°İ (Behit_Fly_Start/Loop/Fall)
+	HIT_PUSH,			// ¹Ğ¸®´Â ÇÇ°İ (Behit_Push_Start/Loop/Fall)
+	HIT_HOVER,			// °øÁß ÇÇ°İ (Behit_Hover, Behit_Press)
+	HIT_CAPTURED,		// Æ÷È¹ (Captured)
+	HIT_DEATH,			// »ç¸Á (Death, StandUp)
 */
-enum class EAugustaHitType : _uint
+enum class ERoverHitType : _uint
 {
 	BEHIT_B_L = 0,
 	BEHIT_B_R,
@@ -331,8 +324,5 @@ enum class EAugustaHitType : _uint
 
 
 #pragma endregion
-
-
-
 
 NS_END

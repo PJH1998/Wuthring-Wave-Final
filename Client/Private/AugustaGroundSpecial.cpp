@@ -26,7 +26,7 @@ void CAugustaGroundSpecial::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    ESpecialType eSpecialType = context.m_eSpecialType;
+    EAugustaSpecialType eSpecialType = context.m_eSpecialType;
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eSpecialType);
@@ -84,14 +84,14 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target
-    ESpecialType eSpType = static_cast<ESpecialType>(m_iCurrentAnimIdx);
+    EAugustaSpecialType eSpType = static_cast<EAugustaSpecialType>(m_iCurrentAnimIdx);
     m_eDir = m_pAugusta->Calculate_Direction();
    
-    if (eSpType == ESpecialType::SPWALK_F)
+    if (eSpType == EAugustaSpecialType::SPWALK_F)
     {
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.2f);
     }
-    else if (eSpType == ESpecialType::SPWALK_DASH_ROOT)
+    else if (eSpType == EAugustaSpecialType::SPWALK_DASH_ROOT)
     {
 
     }
@@ -115,7 +115,7 @@ void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
 
 void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 {
-    ESpecialType eSpType = static_cast<ESpecialType>(m_iCurrentAnimIdx);
+    EAugustaSpecialType eSpType = static_cast<EAugustaSpecialType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
@@ -126,36 +126,36 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
             switch (m_iComboCount)
             {
             case COMBO::NONE:
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPATTACK01);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
                 m_iComboCount = COMBO::ATTACK01;
                 break;
             case COMBO::ATTACK01:
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPATTACK02);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
                 m_iComboCount = COMBO::ATTACK02;
                 break;
             case COMBO::ATTACK02:
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPATTACK03);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
                 m_iComboCount = COMBO::ATTACK03;
                 break;
             case COMBO::ATTACK03:
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPATTACKOMNI);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
                 m_iComboCount = COMBO::ATTACKOMNI;
                 break;
             }
             return;
         }
 
-        if (eSpType != ESpecialType::SPATTACKOMNI)
+        if (eSpType != EAugustaSpecialType::SPATTACKOMNI)
         {
             if (m_States[DASH])
             {
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPWALK_DASH_ROOT);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT);
                 return;
             }
 
             if (m_States[MOVE])
             {
-                m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPWALK_F);
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPWALK_F);
                 return;
             }
         }
@@ -164,24 +164,24 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
     if (m_IsAnimationEnd)
     {
-        if (eSpType == ESpecialType::SPWALK_F)
+        if (eSpType == EAugustaSpecialType::SPWALK_F)
         {
-            m_iCurrentAnimIdx = ENUM_CLASS(ESpecialType::SPWALK_STOP_L);
+            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_L);
             return;
         }
 
         // 상태 탈출
-        if (eSpType == ESpecialType::SPATTACKOMNI)
+        if (eSpType == EAugustaSpecialType::SPATTACKOMNI)
         {
             if (m_States[LAND])
             {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                 return;
             }
             else if (!m_States[LAND])
             {
-                m_pAugusta->GetStateContextForWrite().m_eFallType = EFallType::FALL_LOOP;
+                m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
                 return;
             }
@@ -192,16 +192,16 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundSpecial::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 50.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_STAND), "SpWalk_Stand", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_STOP_L), "SpWalk_Stop_L", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ESpecialType::SPWALK_STOP_R), "SpWalk_Stop_R", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 50.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STAND), "SpWalk_Stand", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_L), "SpWalk_Stop_L", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_R), "SpWalk_Stop_R", 1.f, 0.f);
 
 }
 

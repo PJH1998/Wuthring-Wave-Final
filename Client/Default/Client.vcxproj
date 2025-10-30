@@ -186,7 +186,7 @@
     <ClInclude Include="..\Public\AugustaHit.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
-    <ClInclude Include="..\Public\AugustaStateFactory.h" />
+    <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
     <ClInclude Include="..\Public\Client_Debug.h" />
@@ -228,6 +228,10 @@
     <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
+    <ClInclude Include="..\Public\Rover.h" />
+    <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverState_Enum.h" />
+    <ClInclude Include="..\Public\RoverWeapon.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -324,8 +328,11 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
-    <ClCompile Include="..\Private\AugustaStateFactory.cpp" />
+    <ClCompile Include="..\Private\AugustaFactory.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
+    <ClCompile Include="..\Private\Rover.cpp" />
+    <ClCompile Include="..\Private\RoverFactory.cpp" />
+    <ClCompile Include="..\Private\RoverWeapon.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

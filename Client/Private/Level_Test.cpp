@@ -94,8 +94,9 @@ void CLevel_Test::Ready_Layer_Player()
 
     // 2. Galbrena 정의
 
-    // 3.주인공 캐릭터 정의
-
+    // 3. Rover(주인공) 캐릭터 정의
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
     // 4. Player(Character 모음) 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),

@@ -1,71 +1,68 @@
 #pragma once
 #include "Player_Define.h"
-#include "AugustaState_Enum.h"
-
+#include "RoverState_Enum.h"
 
 NS_BEGIN(Client)
-class CAugusta final : public CCharacter
+class CRover final : public CCharacter
 {
 #pragma region STATE 상태 변경에 사용.
 private:
 	struct StateTransitionContext
 	{
 		// Ground
-		EAugustaDashType m_eDashType = EAugustaDashType::END;
-		EAugustaIdleType  m_eIdleType = EAugustaIdleType::END;
-		EAugustaRunType m_eRunType = EAugustaRunType::END;
-		EAugustaLandType m_eLandType = EAugustaLandType::END;
+		ERoverDashType m_eDashType = ERoverDashType::END;
+		ERoverIdleType  m_eIdleType = ERoverIdleType::END;
+		ERoverRunType m_eRunType = ERoverRunType::END;
+		ERoverLandType m_eLandType = ERoverLandType::END;
 
-		EAugustaAttackType m_eAttackType = EAugustaAttackType::END;
-		EAugustaSkillType m_eSkillType = EAugustaSkillType::END;
-		EAugustaUniqueType m_eUniqueType = EAugustaUniqueType::END;
-		EAugustaBurstType m_eBurstType = EAugustaBurstType::END;
-		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
+		ERoverAttackType m_eAttackType = ERoverAttackType::END;
+		ERoverSkillType m_eSkillType = ERoverSkillType::END;
+		ERoverUniqueType m_eUniqueType = ERoverUniqueType::END;
+		ERoverBurstType m_eBurstType = ERoverBurstType::END;
+		ERoverSpecialType m_eSpecialType = ERoverSpecialType::END;
 
 		// Air
-		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
-		EAugustaFallType m_eFallType = EAugustaFallType::END;
-		EAugustaAirAttackType m_eAirAttackType = EAugustaAirAttackType::END;
-		EAirSkillType m_eAirSkillType = EAirSkillType::END;
+		ERoverJumpType m_eJumpType = ERoverJumpType::END;
+		ERoverFallType m_eFallType = ERoverFallType::END;
+		ERoverAirAttackType m_eAirAttackType = ERoverAirAttackType::END;
 
 		// Climb
-		EAugustaClimbIdleType m_eClimbIdleType = EAugustaClimbIdleType::END;
-		EAugustaClimbMoveType m_eClimbMoveType = EAugustaClimbMoveType::END;
-		EAugustaClimbExitType m_eClimbExitType = EAugustaClimbExitType::END;
+		ERoverClimbIdleType m_eClimbIdleType = ERoverClimbIdleType::END;
+		ERoverClimbMoveType m_eClimbMoveType = ERoverClimbMoveType::END;
+		ERoverClimbExitType m_eClimbExitType = ERoverClimbExitType::END;
 		_bool m_IsClimbSecondStep = { false };
 
 		// Hit
-		EAugustaHitType m_eHitType = EAugustaHitType::END;
-		
+		ERoverHitType m_eHitType = ERoverHitType::END;
+
 		// 컨텍스트 사용 뒤 초기화
 		void Clear()
 		{
 			// Land
-			m_eIdleType = EAugustaIdleType::END;
-			m_eRunType = EAugustaRunType::END;
-			m_eDashType = EAugustaDashType::END;
-			m_eLandType = EAugustaLandType::END;
+			m_eIdleType = ERoverIdleType::END;
+			m_eRunType = ERoverRunType::END;
+			m_eDashType = ERoverDashType::END;
+			m_eLandType = ERoverLandType::END;
 
 			// Attack
-			m_eAttackType = EAugustaAttackType::END;
-			m_eSkillType = EAugustaSkillType::END;
-			m_eUniqueType = EAugustaUniqueType::END;
-			m_eBurstType = EAugustaBurstType::END;
-			m_eSpecialType = EAugustaSpecialType::END;
-			
+			m_eAttackType = ERoverAttackType::END;
+			m_eSkillType = ERoverSkillType::END;
+			m_eUniqueType = ERoverUniqueType::END;
+			m_eBurstType = ERoverBurstType::END;
+			m_eSpecialType = ERoverSpecialType::END;
+
 			// Air
-			m_eJumpType = EAugustaJumpType::END;
-			m_eFallType = EAugustaFallType::END;
-			m_eAirAttackType = EAugustaAirAttackType::END;
-			m_eAirSkillType = EAirSkillType::END;
+			m_eJumpType = ERoverJumpType::END;
+			m_eFallType = ERoverFallType::END;
+			m_eAirAttackType = ERoverAirAttackType::END;
 
 			// Climb
-			m_eClimbIdleType = EAugustaClimbIdleType::END;
-			m_eClimbMoveType = EAugustaClimbMoveType::END;
-			m_eClimbExitType = EAugustaClimbExitType::END;
+			m_eClimbIdleType = ERoverClimbIdleType::END;
+			m_eClimbMoveType = ERoverClimbMoveType::END;
+			m_eClimbExitType = ERoverClimbExitType::END;
 			m_IsClimbSecondStep = false;
 
-			m_eHitType = EAugustaHitType::END;
+			m_eHitType = ERoverHitType::END;
 		};
 	};
 
@@ -91,17 +88,15 @@ public:
 public:
 	enum PARTTYPE : _uint
 	{
-		PART_BAYONET = 0, // Bayonet
-		PART_SKILLWEAPON = 1, // SKill Weapon
-		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
+		PART_WEAPON = 0,
 		TYPE_END
 	};
 
 #pragma region 0. 기본 함수
 protected:
-	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CAugusta(const CAugusta& Prototype);
-	virtual ~CAugusta() = default;
+	explicit CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CRover(const CRover& Prototype);
+	virtual ~CRover() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -138,9 +133,7 @@ public:
 
 #pragma endregion
 private:
-	class CAugustaBayonet* m_pBayonet = { nullptr };
-	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
-	class CAugustaGriffon* m_pGriffon = { nullptr };
+	class CRoverWeapon* m_pRoverWeapon = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
@@ -165,7 +158,7 @@ private:
 	void Ready_PartObjects(const CHARACTER_DESC* pDesc);
 
 public:
-	static		CAugusta* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CRover* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void Free() override;
 };

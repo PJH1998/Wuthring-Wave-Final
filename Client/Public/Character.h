@@ -117,6 +117,7 @@ public:
 	void Rotate_Direction(_fvector vDir);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_HitTarget();
 
 
 	// Gravity
@@ -159,8 +160,8 @@ protected:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
-	class CTransform* m_pLockOnTargetTransform = { nullptr }; // LockOn Target 용도.
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
+	class CTransform* m_pHitTargetTransform = { nullptr };
 
 	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};

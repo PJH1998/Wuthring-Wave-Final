@@ -26,7 +26,7 @@ void CAugustaGroundBurst::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EBurstType eBurstType = context.m_eBurstType;
+    EAugustaBurstType eBurstType = context.m_eBurstType;
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eBurstType);
@@ -100,30 +100,30 @@ void CAugustaGroundBurst::Check_Physcis(_float fTimeDelta)
 
 void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
 {
-    EBurstType eBurstType = static_cast<EBurstType>(m_iCurrentAnimIdx);
+    EAugustaBurstType eBurstType = static_cast<EAugustaBurstType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     // Burst01 => Stand 고정
-    if (IsEscapePossible && eBurstType == EBurstType::BURST_STAND)
+    if (IsEscapePossible && eBurstType == EAugustaBurstType::BURST_STAND)
     {
         if (m_States[SP_ATTACK])
         {
-            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPATTACK01;
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = EAugustaSpecialType::SPATTACK01;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));
             return;
         }
 
         if (m_States[SP_DASH])
         {
-            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPWALK_DASH_ROOT;
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = EAugustaSpecialType::SPWALK_DASH_ROOT;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));
             return;
         }
 
         if (m_States[SP_MOVE])
         {
-            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPWALK_F;
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = EAugustaSpecialType::SPWALK_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));
             return;
         }
@@ -133,16 +133,16 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
     
     if (m_IsAnimationEnd)
     {
-        if (eBurstType == EBurstType::BURST01)
+        if (eBurstType == EAugustaBurstType::BURST01)
         {
-            m_iCurrentAnimIdx = ENUM_CLASS(EBurstType::BURST_STAND);
-            //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EBurstType::BURST_STAND));
+            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaBurstType::BURST_STAND);
+            //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaBurstType::BURST_STAND));
             return;
         }
 
-        if (eBurstType == EBurstType::BURST_STAND)
+        if (eBurstType == EAugustaBurstType::BURST_STAND)
         {
-            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPWALK_STAND;
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = EAugustaSpecialType::SPWALK_STAND;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));
             return;
         }
@@ -152,8 +152,8 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EBurstType::BURST01), "Burst01", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EBurstType::BURST_STAND), "Burst_Stand", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaBurstType::BURST01), "Burst01", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaBurstType::BURST_STAND), "Burst_Stand", 1.f, 0.f);
 }
 
 void CAugustaGroundBurst::State_Reset()
