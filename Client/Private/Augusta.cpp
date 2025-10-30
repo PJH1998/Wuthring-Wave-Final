@@ -248,11 +248,11 @@ void CAugusta::Hit_Judge(void* pArg)
 
     // 몬스터 공격 Dir
     ACTORDIR eAttackDir = ACTORDIR::RU;
-    
+    // Behit S = SMALL(기본 공 Big), B = Big (Skill로 맞으면 Big)
     if (IsLand)
     {
         // 특수 조건 우선순위에 따라 Change_State
-
+        
         switch (eAttackDir)
         {
         case ACTORDIR::LU:

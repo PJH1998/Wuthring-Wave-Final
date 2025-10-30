@@ -229,10 +229,10 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaGroundAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK01),"Attack01", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK02),"Attack02", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK03),"Attack03", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK04),"Attack04", 1.f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK01),"Attack01", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK02),"Attack02", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK03),"Attack03", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK04),"Attack04", 1.f, 10.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_PULL), "Attack_Pull", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 0.f);

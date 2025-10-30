@@ -106,6 +106,8 @@ void CAugustaAirAttack::OnExit()
 
     m_pAugusta->PartActivate(m_iPartType, false); 
     m_pAugusta->Set_Gravity(true);
+    m_fSpeed = 0.f;
+    
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 }
 
@@ -114,6 +116,7 @@ void CAugustaAirAttack::Handle_Input()
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
+    m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
         
 }
 
@@ -129,6 +132,11 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
     {
         m_pAugusta->Move_Direction(vLook, fTimeDelta, m_fSpeed); // 조금씩 앞으로 이동?
+    }
+
+    if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
+    {
+        m_pAugusta->Move_Fall(fTimeDelta, m_fSpeed);
     }
 
     // Attack State에 해당하는 경우 모두 Animation이 존재.
@@ -149,16 +157,8 @@ void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 
-void CAugustaAirAttack::LockOn_StateTransition(_float fTimeDelta)
-{
-}
-
 void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 {
-    // 1. 스킬 입력 (E, R 등) 들어오면 Skill로 => 우선순위 별.
-    // ... 추후 구현
-    // 2. Normal Attack의 경우 콤보 공격이 가능하게.
-    
     EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     _float fOffsetY = 0.1f;
@@ -168,33 +168,48 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
         {
-            if (m_States[ATTACK])
+            if (m_States[DOUBLE_JUMP])
             {
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
+                m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F; // 애니메이션 상태 => 블랙보드에 기입.        
+                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
                 return;
             }
         }
 
-        if (!(eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START))
+        if (m_States[LAND])
         {
-            if (m_States[MOVE])
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
             {
-                if (m_States[LAND])
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
+                return;
+            }
+
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+            {
+                if (m_States[MOVE])
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                     return;
                 }
-                if (!m_States[LAND])
+                else
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+                    return;
+                }
+            }
+
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_END)
+            {
+                if (m_States[MOVE])
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                     return;
                 }
             }
         }
-
-
     }
 
     if (m_IsAnimationEnd)
@@ -204,18 +219,83 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END);
             return;
         }
+
+        if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
+        {
+            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP); // 떨어지게.
+            m_fSpeed = 2.f;
+            return;
+        }
+          
+
+        // 땅에 안닿으면? => AirAttack Loop가 아닌 경우에는 Fall로 변경.
+        if (!m_States[LAND])
+        {
+            if (eAirAttackType != EAugustaAirAttackType::AIRATTACK_LOOP)
+            {
+                m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+                return;
+            }
+        }
+
+        // 땅에 닿으면.
         if (m_States[LAND])
         {
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP)
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END);
+                return;
+            }
+
+            // Loop 상태일때 땅에 닿으면 END 애니메이션 실행.
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
+            {
+                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
+                return;
+            }
+
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+            {
+                if (m_States[MOVE])
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+                    return;
+                }
+                else
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+                    return;
+                }
+            }
+
+            if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_END)
+            {
+                if (m_States[MOVE])
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+                    return;
+                }
+                else
+                {
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+                    return;
+                }
+                
+            }
+        }
+        else
+        {
+            // 모든 조건이 아닌 경우 Idle로
             m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
             return;
         }
-        if (!m_States[LAND])
-        {
-            m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-            return;
-        }
+        
     }
 
 }

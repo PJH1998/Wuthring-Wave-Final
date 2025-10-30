@@ -12,6 +12,7 @@ private:
         ATTACK,
         MOVE,
         JUMP,
+        DOUBLE_JUMP,
         LAND,
         END
     };
@@ -36,7 +37,6 @@ private:
     virtual void Handle_Input() override;
     void Update_AttackAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
-    void LockOn_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void SetUp_Animations();
