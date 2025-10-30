@@ -238,24 +238,19 @@ void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
         }
         else
         {
-            // ĳ���� �� ��ȯ: ���� ĳ���� ��ġ/ȸ�� ����
             pNextTransform->Set_WorldMatrix(matPrevWorldMatrix);
-            // PreviousPosition�� ����ȭ (Velocity 0���� ����)
             pNextTransform->Save_PreviousPosition();
         }
     }
 
-    // 4. Collider Position ����ȭ
     CCollider* pNextCollider = dynamic_cast<CCollider*>(
         pNextCharacter->Get_Component(L"Com_Collider"));
     if (pNextCollider && pNextTransform)
         pNextCollider->Sync_Position(pNextTransform);
 
-    // 5. �ε��� ����
     m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
     m_iCurrentCharacterIdx = eNextCharacter;
 
-    // 6. Player Transform ������Ʈ
     if (m_pTransformCom && pNextTransform)
         m_pTransformCom->Set_WorldMatrix(pNextTransform->Get_WorldMatrix());
 

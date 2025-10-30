@@ -632,6 +632,7 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 
 void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRotation, _bool isRootMotionTranslate)
 {
+	// PreTransform의 스케일 추출
 	// 1. GPU 계산 로컬본 전체 가져오기.
 	_vector vScale{}, vRotation{}, vTranslation{};
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, XMLoadFloat4x4(m_Bones[m_iRootBoneIndex]->Get_TransformationMatrix()));
@@ -672,14 +673,19 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 	}
 
 	// 행렬은 이제 '엔진 좌표계' 기준.
+	//m_RootMatrix = XMMatrixAffineTransformation(
+	//	//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+	//	XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
+	//	XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
+	//	vRotationDelta,                  // 회전 델타
+	//	vLocalTranslate * fRootMotionRate // 이동 델타
+	//);
 	m_RootMatrix = XMMatrixAffineTransformation(
 		//XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(1.f, 1.f, 1.f, 1.f), // 스케일 델타 (없음)
 		XMVectorSet(0.f, 0.f, 0.f, 1.f), // 원점
 		vRotationDelta,                  // 회전 델타
-		vLocalTranslate * fRootMotionRate // 이동 델타
-
-	
+		vLocalTranslate * m_fPreScale * fRootMotionRate // 이동 델타
 	);
 	
 	// 다음 프레임을 위해 '변환된' T, R 값을 저장합니다.

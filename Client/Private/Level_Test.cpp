@@ -70,8 +70,8 @@ void CLevel_Test::Render()
 void CLevel_Test::Ready_Layer_Player()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
-    //vScale = { 1.f, 1.f, 1.f };
-    vScale = { 0.01f, 0.01f, 0.01f };
+    vScale = { 1.f, 1.f, 1.f };
+    //vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { 0.f, -10.f, 50.f };
 

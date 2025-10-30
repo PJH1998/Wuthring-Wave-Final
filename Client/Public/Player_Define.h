@@ -38,8 +38,6 @@ namespace PlayerData
         Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
 
-        // Desc.pController, pController�� ��Ÿ�ӿ� ����
-
         // Parts ����
         Desc.PartPrototypes = {
             make_pair(L"Bayonet", L"Prototype_GameObject_Augusta_Bayonet"),

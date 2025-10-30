@@ -113,7 +113,8 @@ HRESULT CLoader_Test::Load_MonsterTest()
         CRASH("Monster AnimMachine Create Failed");
 
     // Prototype_Component_Model_FalseSovereign
-    _fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+    //_fmatrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+    _fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FalseSovereign"),
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereignTest.dat"))))
         CRASH("Prototype Create Failed");
@@ -149,8 +150,8 @@ HRESULT CLoader_Test::Load_Augusta()
     _wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
-    _float fSize = 0.01f;
-    //_float fSize = 0.0001f;
+    //_float fSize = 0.01f;
+    _float fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
@@ -233,8 +234,8 @@ HRESULT CLoader_Test::Load_Rover()
     _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
     _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/R.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
-    _float fSize = 0.01f;
-    //_float fSize = 0.0001f;
+    //_float fSize = 0.01f;
+    _float fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.

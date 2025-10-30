@@ -28,7 +28,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
 
-	m_pTransformCom->Scale(_float3(0.01f, 0.01f, 0.01f));
+	m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 3.f;
