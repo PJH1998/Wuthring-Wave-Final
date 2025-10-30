@@ -77,8 +77,9 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_Outline();
 	Render_NonBlend();
+	Render_SSAO();
+	Render_Dynamic();
 	Render_Light();
-	//Render_SSAO();
 	Render_Combined();
 	Render_NonLight();
 	Render_Emissive();
@@ -220,40 +221,6 @@ void CRenderer::Render_NonBlend()
 	m_pGameInstance->End_MRT();
 }
 
-void CRenderer::Render_Light()
-{
-	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
-		CRASH("Render Fail");
-
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Failed Bind WorldMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Failed Bind ViewMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Failed Bind ProjMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
-		CRASH("Failed Bind ViewMatrixInv");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
-		CRASH("Failed Bind ProjMatrixInv");
-	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Failed Bind CamPosition");
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
-		CRASH("Failed Bind RT_PBR");
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
-		CRASH("Failed Bind RT_Normal");
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
-		CRASH("Failed Bind RT_Depth");
-
-	//Toon Ramp Texture
-	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
-		return;
-
-	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
-
-	m_pGameInstance->End_MRT();
-}
-
-
 void CRenderer::Render_SSAO()
 {
 #ifdef _DEBUG
@@ -269,6 +236,19 @@ void CRenderer::Render_SSAO()
 #pragma region SSAO
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
 		CRASH("Render Fail");
+
+	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+		CRASH("Failed Bind WorldMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		CRASH("Failed Bind ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		CRASH("Failed Bind ProjMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
+		CRASH("Failed Bind ViewMatrixInv");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
+		CRASH("Failed Bind ProjMatrixInv");
+	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		CRASH("Failed Bind CamPosition");
 
 	if (FAILED(m_pSubResource->Bind_SSAO_Resources(m_pShader)))
 		CRASH("Failed Bind SSAO Resources");
@@ -317,6 +297,45 @@ void CRenderer::Render_SSAO()
 #pragma endregion
 }
 
+void CRenderer::Render_Dynamic()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
+		CRASH("Render Fail")
+
+		for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::DYNAMIC)])
+		{
+			if (nullptr != pRenderObject)
+				pRenderObject->Render();
+
+			Safe_Release(pRenderObject);
+		}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::DYNAMIC)].clear();
+
+	m_pGameInstance->End_MRT();
+}
+
+
+void CRenderer::Render_Light()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Light"))))
+		CRASH("Render Fail");
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_PBR"), m_pShader, "g_PBRTexture")))
+		CRASH("Failed Bind RT_PBR");
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Normal"), m_pShader, "g_NormalTexture")))
+		CRASH("Failed Bind RT_Normal");
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), m_pShader, "g_DepthTexture")))
+		CRASH("Failed Bind RT_Depth");
+
+	//Toon Ramp Texture
+	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
+		return;
+
+	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
+
+	m_pGameInstance->End_MRT();
+}
+
 void CRenderer::Render_Combined()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
@@ -340,7 +359,7 @@ void CRenderer::Render_Combined()
 	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
 		CRASH("Render Fail");
 	
-	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 1)))
+	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 2)))
 		return;
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))

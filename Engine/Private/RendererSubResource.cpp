@@ -119,7 +119,7 @@ HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
     if (FAILED(pShader->Bind_Value("g_vFogColor", &m_vFogColor, sizeof(_float4))))
         CRASH("Failed Bind Fog Color");
 
-    m_fFogTime = fmodf(m_fFogTime + 1.f, 1920.f); // ³ëÀÌÁî »çÀÌÁî 128 x 128
+    m_fFogTime = fmodf(m_fFogTime + 1.f, 1920.f); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 128 x 128
 
     if (FAILED(pShader->Bind_Value("g_fFogTime", &m_fFogTime, sizeof(_float))))
         CRASH("Failed Bind Fog Time");
@@ -206,7 +206,7 @@ HRESULT CRendererSubResource::Add_DOF_BufferData(const _wstring& strRCSTag, _flo
 
 HRESULT CRendererSubResource::Ready_Shader_Filters()
 {
-    m_pRampTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/Color_Ramp%d.png"), 2);
+    m_pRampTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/Color_Ramp%d.png"), 3);
     ASSERT_CRASH(m_pRampTexture);
 
     m_pLUT_Texture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/LUT_%d.png"), m_iNumLUT_Textures);
