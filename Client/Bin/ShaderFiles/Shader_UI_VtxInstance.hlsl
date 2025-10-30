@@ -38,7 +38,8 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_PLAYER_HP            3           // 플레이어 HP용
 #define UIFLAG_PLAYER_TRANSMIT      4  
 #define UIFLAG_SIMPLEMASK           5
-#define UIFLAG_END                  6
+#define UIFLAG_ACTIVEFEEDBACK       6
+#define UIFLAG_END                  7
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -279,6 +280,27 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
             matAdditionalTransform[1].xyz *= fHeight;                   // Y축
             matAdditionalTransform[3].y += (fHeight - 1) * 0.5f;        // 이따만큼 올림
             
+        } break;
+        case UIFLAG_ACTIVEFEEDBACK:
+        {
+            // ==============================
+            // * [6] Active Feedback (button touch feedback)
+            // ==============================
+            float2 vDestScale = In.mExtra0.xy;      // 목표 배율 (최초 1배)
+            float fStartAlpha = In.mExtra0.z;
+            float fTimeRatio = In.mExtra0.w;
+            
+            float fDeltaX = fTimeRatio;         // 보간 방법 바꾸고싶다면 이 fDeltaX를 수정하는 식으로?
+            
+            float2 vCurScale; // 현재 스케일이 0이 아님에 주의. 인스턴스별 크기가 이미 적용된 값이 들어옴.
+            vCurScale.x = length(matAdditionalTransform[0].xyz);
+            vCurScale.y = length(matAdditionalTransform[1].xyz);
+            
+            float2 vTargetScale = lerp(vCurScale, vCurScale * vDestScale, fDeltaX);
+
+            matAdditionalTransform[0].xyz *= (vTargetScale.x / vCurScale.x);
+            matAdditionalTransform[1].xyz *= (vTargetScale.y / vCurScale.y);
+
         } break;
     }
     
@@ -851,6 +873,30 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             vAppliedColor.a = fAverageColor * vColor.a * Out.vColor.a;
             
             Out.vColor = vAppliedColor;
+            return Out;
+        }
+        case UIFLAG_ACTIVEFEEDBACK :    // 6
+        {
+            // ==============================
+            // * [6] Active Feedback (button touch feedback)
+            // ==============================
+            // * matrix info [size : ~5? controls on hud]
+            // [DESTSCALE.x] [DESTSCALE.y] [STARTALPHA] [TIMERATIO]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // ==============================
+            float2 vDestScale = In.mExtra0.xy;
+            float fStartAlpha = In.mExtra0.z;
+            float fTimeRatio = In.mExtra0.w;
+            float4 vColor = In.mExtra1.rgba;
+            
+            float fDeltaX = fTimeRatio;         // 보간 방법 바꾸고싶다면 이 fDeltaX를 수정하는 식으로?
+            
+            float fAverageColor = (Out.vColor.x + Out.vColor.y + Out.vColor.z) / 3.f;
+            float4 vAppliedColor = vColor * fAverageColor;
+            vAppliedColor.a = fAverageColor * vColor.a * Out.vColor.a;
+            
+            Out.vColor.a = vAppliedColor.a * lerp(1.f - fStartAlpha, 0.f, fDeltaX);
+            
             return Out;
         }
         default:

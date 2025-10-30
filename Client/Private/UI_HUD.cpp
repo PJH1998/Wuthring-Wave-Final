@@ -56,7 +56,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
         //L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
-        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_1522.json";
+        L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
@@ -80,13 +80,13 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 void CUI_HUD::Update(_float fTimeDelta)
 {
     Update_UI_SkillSection(fTimeDelta);
+    Update_UI_SkillSection_OnFeedback(fTimeDelta);
     Update_UI_PlayerHPBar(fTimeDelta);
     Update_UI_BossHPBar(fTimeDelta);
     Update_UI_KeyGuide(fTimeDelta);
 
     Update_UI_PlayerEnergyFrame(fTimeDelta);
     Update_UI_PlayerEnergyBar(fTimeDelta);
-
     Update_UI_PlayerEnergyBar_Augusta(fTimeDelta);
     Update_UI_PlayerEnergyBar_Galbrena(fTimeDelta);
 
@@ -260,8 +260,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         Find_ChildObject(L"Skill_Rover"),
         Find_ChildObject(L"Skill_Auguata"),
         Find_ChildObject(L"Skill_Galbrena")
-
-        // echo..
     };
 
     CCustom_UI* pChangeUI[CH_END] = {                 // PartyFrame UI per Character.
@@ -342,12 +340,22 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
     {
         if (fSkillCD[m_iSelectedCHIndex][SK_E] == 0)
+        {
             fSkillCD[m_iSelectedCHIndex][SK_E] = fMaxSkillCD[m_iSelectedCHIndex][SK_E];
+            if (m_iSelectedCHIndex == CH_AUGUSTA &&
+                m_iEnergyBarMode == 1)
+                Add_UI_SkillSection_OnFeedback(1);
+            else
+                Add_UI_SkillSection_OnFeedback(2);
+        }
     }
     if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
     {
         if (fSkillCD[m_iSelectedCHIndex][SK_R] == 0)
+        {
             fSkillCD[m_iSelectedCHIndex][SK_R] = fMaxSkillCD[m_iSelectedCHIndex][SK_R];
+            Add_UI_SkillSection_OnFeedback(0);
+        }
     }
 
 
@@ -498,6 +506,115 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     std::cout << "[UI_HUD][Update_UI_Cooldown] R fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
 #endif // KSTA_UI_COOLDOWNTEST
 
+}
+
+void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
+{
+    // Feedback 객체를 시간에 따라 관리하는 함수.
+    // (시간에 따라 값 갱신하여 인스턴스별로 넘겨주며,
+    // 충분한 시간이 지나면 해당 벡터 요소를 삭제한다.)
+
+    // 변수는 여기서 정의함
+
+    CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");    
+    const _float2 fDestScale = { 1.2f, 1.2f };
+    const _float fStartAlpha = 0.f;     // 0이 보임, 1이 안보임으로 만듦.
+    const _float fLifeTime = .5f;
+    _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
+
+
+    auto uiDesc = pFeedbackUI->Get_UIDesc();
+    auto& uiInstDescs = uiDesc.vecInstanceDescs;
+
+
+
+    // 새로운 인스턴스가 추가되었으면 시간 관리용 저장벡터도 그만큼 늘림.
+    static vector<_float> vecLifeTimeElapsed = {};
+    
+    // 추가된 요소가 있다면 그만큼을 감지하고 빈 자리로 추가
+    if (uiInstDescs.size() > vecLifeTimeElapsed.size())
+    {
+        _uint iAddLoopTime = uiInstDescs.size() - vecLifeTimeElapsed.size();
+        for (_uint i = 0; i < iAddLoopTime; i++)
+            vecLifeTimeElapsed.push_back(0.f);
+    }
+
+    // 셰이더 측으로 관련 변수 전달
+    vector<_float4x4> vecVariantMat = {};
+    vecVariantMat.resize(uiInstDescs.size());
+
+    for (uint i = 0; i < vecVariantMat.size(); i++)
+    {
+        *reinterpret_cast<_float2*>(&vecVariantMat[i]._11) = fDestScale;
+        *reinterpret_cast<_float*>(&vecVariantMat[i]._13) = fStartAlpha;
+        *reinterpret_cast<_float*>(&vecVariantMat[i]._14) = vecLifeTimeElapsed[i] / fLifeTime;
+        *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vColor;
+    }
+
+    CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+        vecVariantMat,
+        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_ACTIVEFEEDBACK),
+        true
+    };
+
+    pFeedbackUI->Set_VariantUIDesc(tVariantDesc);
+
+    // 시간이 경과된 요소가 있다면 삭제
+    for (_uint i = 0; i < vecLifeTimeElapsed.size(); i++)
+    {
+        if (vecLifeTimeElapsed[i] >= fLifeTime)
+        {
+            vecLifeTimeElapsed.erase(vecLifeTimeElapsed.begin() + i);
+            uiInstDescs.erase(uiInstDescs.begin() + i);
+
+            uiDesc.vecInstanceDescs = uiInstDescs; // 적용
+            pFeedbackUI->Set_UIDesc(uiDesc);
+            i--;
+        }
+        else
+        {
+            vecLifeTimeElapsed[i] += fTimeDelta;
+        }
+    }
+}
+
+void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
+{
+    // Feedback 객체에 인스턴스 추가하는 함수.
+    // 버튼이 눌렸을 때에 원이 효과를 생성하기 위함.
+    // 위치는 아래의 vStartPos 와 fDeltaPosX 에 따라 정해짐.
+    // 
+    // 시간 경과에 따라 커지며, 시간이 다 지날 시 인스턴스를 삭제하는 것은 
+    // Update_UI_SkillSection_OnFeedback 에서 수행.
+
+    CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");
+
+    const _float4 vStartPos = { 850.f, -415.f, 0.f, 1.f };
+    const _float fDeltaPosX = -100.f;
+
+    vector<_float4> vecPosIndex = {};
+
+    for (_uint i = 0; i < 5; i++)
+    {
+        _float4 vPos = vStartPos;
+        vPos.x = vPos.x + fDeltaPosX * (i);
+        vecPosIndex.push_back(vPos);
+    }
+
+    auto uiDesc = pFeedbackUI->Get_UIDesc();
+    auto& uiInstDescs = uiDesc.vecInstanceDescs;
+
+
+
+    CVIBuffer_Rect_Instance_UI::SINGLE_INST_DESC tDesc = {};
+    tDesc.vSInstRight   = { 80.f, 0.f, 0.f, 0.f };
+    tDesc.vSInstUp      = { 0.f, 80.f, 0.f, 0.f };
+    tDesc.vSInstLook    = { 0.f, 0.f, 1.f, 0.f };
+    tDesc.vSInstTrans   = vecPosIndex[iSectionIndex];
+
+    uiInstDescs.push_back(tDesc);
+    uiDesc.vecInstanceDescs = uiInstDescs;
+    pFeedbackUI->Set_UIDesc(uiDesc);
 }
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)

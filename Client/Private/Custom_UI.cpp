@@ -91,9 +91,6 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if (m_tUIDesc.strUIName == L"Skill_Rover")
-        int i = 10;
-
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
 

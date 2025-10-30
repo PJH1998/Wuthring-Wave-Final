@@ -39,6 +39,8 @@ private:
 
 private:					// 자식 UI에 관한 모든 동작은 해당 컨테이너 UI가 전담.
 	void					Update_UI_SkillSection(_float fTimeDelta);
+	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);
+	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
 	void					Update_UI_BossHPBar(_float fTimeDelta);
 	void					Update_UI_KeyGuide(_float fTimeDelta);
