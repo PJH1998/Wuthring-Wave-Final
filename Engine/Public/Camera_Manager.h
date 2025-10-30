@@ -12,10 +12,6 @@ private:
 public:
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, class CCamera* pCamera);
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
-	
-	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const vector<ACTIONFRAME>& ActionFrames);
-	HRESULT			Add_Camera_Action(const _wstring& strActionTag, const _char* pFilePath);
-	void			Play_Action(const _wstring& strActionTag);
 
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 
@@ -31,32 +27,19 @@ public:
 
 private:
 	class CGameInstance*		m_pGameInstance = { nullptr };
-	ID3D11Device*				m_pDevice = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
 
-	_uint						m_iNumLevel = {};
+	_uint							m_iNumLevel = {};
 	typedef map<const _wstring, class CCamera*> CAMERA;
 	CAMERA*						m_Cameras = { nullptr };
 	class CCamera*				m_pMainCamera = { nullptr };
-
-	typedef map<const _wstring, vector<ACTIONFRAME>> CAMERA_ACTION;
-	CAMERA_ACTION			m_CameraActions;
-	_wstring						m_strActionTag;
-	_bool							m_isPlayAction = { false };
-	_uint							m_iActionIndex = {};						// Action Index
-	_float							m_fCurrentTrackPosition = {};			// Action Current Track Position
-
-	_float4						m_vPreQuaternion = {};
-	_float							m_fPreDistance = {};
 
 	class CCamera*				m_pFreeCamera = { nullptr };
 	_bool							m_isFree = { false };
 
 private:
 	class CCamera*		Find_Camera(_uint iLevelID, const _wstring& strCameraTag);
-
-	void					Compute_Action(_float fTimeDelta);
-	void					Compute_Pre();
 
 	void					Ready_FreeCamera();
 

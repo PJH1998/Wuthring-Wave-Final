@@ -4,6 +4,8 @@
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
 
+#include "EffectNotify.h"
+
 
 #pragma region 
 CAnimNotifyTool::CAnimNotifyTool(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -38,7 +40,6 @@ void CAnimNotifyTool::Render()
     RenderUI_EditNotify();
 }
 
-// Notify ?깅줉 ??臾댁“嫄댁쟻?쇰줈 ?꾩슂???뺣낫.
 void CAnimNotifyTool::Process_Notify(CAnimationActor* pActor, const _string& strAnimName, const _string& strModelDirPath, _float fDuration)
 {
     ASSERT_CRASH(pActor);
@@ -46,7 +47,6 @@ void CAnimNotifyTool::Process_Notify(CAnimationActor* pActor, const _string& str
     
     m_strCurrentAnimName = strAnimName;
 
-    // 鍮꾩뼱?덉? ?딆쓣 ?뚮쭔 ??ν븷 ?대뜑 寃쎈줈瑜?諛쏆뒿?덈떎.
     if (!strModelDirPath.empty())
     {
         m_strCurrentFolderPath = strModelDirPath;
@@ -72,8 +72,13 @@ void CAnimNotifyTool::Clear()
 
     for (auto& notify : m_ColliderNotifies)
         Safe_Release(notify);
-    
+
     m_ColliderNotifies.clear();
+
+    for (auto& notify : m_EffectNotifies)
+        Safe_Release(notify);
+
+    m_EffectNotifies.clear();
 
 
     
@@ -87,7 +92,6 @@ void CAnimNotifyTool::RenderUI_EditNotify()
 {
     ImGuiIO& io = ImGui::GetIO();
 
-    // ?ㅻⅨ履????꾩튂 怨꾩궛 (李??ш린 300x250 怨좊젮)
     ImVec2 vPos = ImVec2(g_iWinSizeX * 0.75f, 0.f); 
     ImGui::SetNextWindowPos(vPos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(ImVec2(g_iWinSizeX * 0.5f, g_iWinSizeY * 0.5f), ImGuiCond_Once);
@@ -119,14 +123,12 @@ void CAnimNotifyTool::RenderUI_EditNotify()
             ImGui::EndTabItem();
         }
 
-        // ?ㅼ젙??紐⑤뱺 ?뺣낫瑜?????섎㈃?? ?ㅼ젙???뺣낫???뺤씤 媛?ν븯寃?
         if (ImGui::BeginTabItem("Save"))
         {
             RenderUI_SaveNotify();
             ImGui::EndTabItem();
         }
 
-        // ?ㅼ젙???뺣낫瑜?遺덈윭???Notify瑜??뺤씤?섍린
         if (ImGui::BeginTabItem("Load"))
         {
             RenderUI_LoadNotify();
@@ -144,7 +146,6 @@ void CAnimNotifyTool::RenderUI_EditNotify()
 
 void CAnimNotifyTool::RenderUI_EditSound()
 {
-    // 1. ?ъ슫???뚯씪 紐⑸줉 FileDialog濡??좏깮?
     ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
     if (ImGui::BeginTabBar("TabBar", tab_bar_flags))
     {
@@ -170,7 +171,30 @@ void CAnimNotifyTool::RenderUI_EditSound()
 
 void CAnimNotifyTool::RenderUI_EditEffect()
 {
+    // 1. Collider Tag, TrackPosition, Active;
 
+    static float fTrackPosition = {};
+    ImGui::SetNextItemWidth(120.f);
+    ImGui::InputFloat("TrackPosition", &fTrackPosition);
+
+    static string strEffectTag;
+    static bool IsActive = { false };
+
+    if (strEffectTag.empty())
+        strEffectTag.resize(256);
+
+    ImGui::SetNextItemWidth(120.f);
+    ImGui::InputText("EffectTag", &strEffectTag[0], strEffectTag.capacity());
+
+    // 2. 
+    if (ImGui::Button("Apply Effect Notify"))
+    {
+        json EffectJson;
+        EffectJson["TrackPosition"] = fTrackPosition;
+        EffectJson["EffectTag"] = strEffectTag.c_str();
+        CEffectNotify* pEffectNotify = CEffectNotify::From_Json(EffectJson);
+        m_EffectNotifies.emplace_back(pEffectNotify);
+    }
 }
 
 void CAnimNotifyTool::RenderUI_EditCollider()
@@ -193,7 +217,6 @@ void CAnimNotifyTool::RenderUI_EditCollider()
     ImGui::Checkbox("Active", & IsActive);
 
 
-    // 2. ?ㅼ젙???뺣낫瑜?Notify?ㅼ젙.
     if (ImGui::Button("Apply Collider Notify"))
     {
         json ColliderJson;
@@ -209,26 +232,20 @@ void CAnimNotifyTool::RenderUI_EditCollider()
 
 void CAnimNotifyTool::RenderUI_SaveNotify()
 {
-    // 0. 怨듯넻 ?ы빆.
-    // ?꾩옱 ?좊땲硫붿씠???대쫫怨?珥?Duration 媛믪쓣 留??꾩뿉??異쒕젰
     ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
     ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
-    // 1. ?댁뿉??list???깅줉??Notify ?꾩껜瑜??뺤씤?????덉뼱?쇳븳??
 #ifdef _DEBUG
     Render_CurrentNotify();
 #endif
     ImGui::Separator();
 
-    // 2. Save瑜??꾨Ⅴ硫??꾩옱 ?깅줉??Notify ?뺣낫瑜??뺤씤?섍퀬? Json??湲곕줉?쒕떎.
     Save_Notify();
     
 }
 
 void CAnimNotifyTool::RenderUI_LoadNotify()
 {
-    // 0. 怨듯넻 ?ы빆.
-    // ?꾩옱 ?좊땲硫붿씠???대쫫怨?珥?Duration 媛믪쓣 留??꾩뿉??異쒕젰
     ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
     ImGui::Text("Duration : %.2f", m_fCurrentDuration);
 
@@ -237,17 +254,16 @@ void CAnimNotifyTool::RenderUI_LoadNotify()
 
 
 #ifdef _DEBUG
-    // 1. ?댁뿉??list???깅줉??Notify ?꾩껜瑜??뺤씤?????덉뼱?쇳븳??
-    if (m_IsLoadNotify) // Load?ㅻ? ?뚮???寃쎌슦?먮쭔 蹂댁뿬以띾땲??
+    if (m_IsLoadNotify)
         Render_CurrentNotify();
 #endif
 
     ImGui::Separator();
 
-    // 2. Load瑜??꾨Ⅴ硫?Json?쇰줈遺??Notfiy?뺣낫瑜??쎌뼱???List??梨꾩썙?먭퀬
+    // 2. Load
     Load_NotifyFromFile();
 
-    // 3. Load?????쒕쾲???대뜑瑜??ㅼ씫?댁???Load?섍퀬 ?뺤씤.
+    // 3. Load
 #ifdef _DEBUG
     if (ImGui::Button("Load All Animation Notifies"))
     {
@@ -281,8 +297,8 @@ void CAnimNotifyTool::Load_SoundFiles()
         ImGuiFileDialog::Instance()->OpenDialog("Load Sound Folder", "Import Sound Foloder", nullptr, config);
     }
 
-    ImVec2 vMinSize = ImVec2(600, 400);  // 理쒖냼 ?ш린
-    ImVec2 vMaxSize = ImVec2(800, 400); // 理쒕? ?ш린
+    ImVec2 vMinSize = ImVec2(600, 400);  
+    ImVec2 vMaxSize = ImVec2(800, 400); 
 
     if (ImGuiFileDialog::Instance()->Display(
         "Load Sound File", ImGuiWindowFlags_NoCollapse
@@ -320,24 +336,17 @@ void CAnimNotifyTool::Select_SoundNotify()
     static int iSelectedIndex = -1;
     _uint id = 0;
 
-    // 1. ?꾩옱 Sound Tag瑜????
     for (auto& pair : m_SoundTags)
     {
         if (ImGui::Selectable(pair.first.c_str(), id == iSelectedIndex))
         {
             iSelectedIndex = id;
-            // Sound Tag留???ν븯??
             m_CurrentSoundTag = pair.first;
         }
     }
     ImGui::EndChild();
 
     ImGui::SameLine();
-    // ?꾩슂???뺣낫
-    // 1. ?꾩옱 ?뚮젅??以묒씤 ?좊땲硫붿씠???뺣낫
-    // 2. ?꾩옱 ?좊땲硫붿씠?섏쓽 理쒕? ?꾨젅???뺣낫 (TrackPosition ?쇰줈 ?ㅼ젙?좊벏?)
-    // Process Notify濡??대? 諛쏆븘??
-    // ?대떦 ?뺣낫瑜?諛뷀깢?쇰줈 ?ㅼ젙 媛?議곌툑 異붽??댁꽌 list??struct濡?異붽?. 
 
     if (iSelectedIndex >= 0 && iSelectedIndex < m_SoundTags.size())
         Edit_SoundNotify();
@@ -354,14 +363,11 @@ void CAnimNotifyTool::Render_CurrentNotify()
     {
         if (ImGui::BeginTabItem("Sound List"))
         {
-            // ??젣??index
             _uint iDeleteIndex = {};
 
-            // ?꾩옱 ?깅줉??list 援ъ“泥??뺣낫瑜??꾩껜 ?뚮뜑留곹븳??
             _uint iIndex = { 0 };
             for (auto& SoundNotify : m_SoundNotifies)
             {
-                // ?꾩옱 猷⑦봽???몃뜳?ㅻ? ?ъ슜?섏뿬 怨좎쑀??ID ?ㅽ깮??留뚮벊?덈떎.
                 ImGui::PushID(iIndex);
 
                 SoundNotify->ImGui_Print();
@@ -372,10 +378,8 @@ void CAnimNotifyTool::Render_CurrentNotify()
                     iDeleteIndex = iIndex;
                 }
 
-                // ID ?ㅽ깮???먮옒?濡??섎룎由쎈땲??
                 ImGui::PopID();
 
-                // 留덉?留???ぉ???꾨땺 ?뚮쭔 援щ텇??異붽?
                 if (iIndex < m_SoundNotifies.size() - 1)
                     ImGui::Separator();
 
@@ -394,25 +398,46 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Effect List"))
         {
-            //// ?꾩옱 ?좊땲硫붿씠???대쫫怨?珥?Duration 媛믪쓣 留??꾩뿉??異쒕젰
-            //ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            //ImGui::Text("Duration : %.2f", m_fCurrentDuration);
+            _uint iDeleteIndex = {};
 
+            _uint iIndex = { 0 };
+            for (auto& EffectNotify : m_EffectNotifies)
+            {
+                ImGui::PushID(iIndex);
+
+                EffectNotify->ImGui_Print();
+
+                if (ImGui::Button("Delete"))
+                {
+                    IsDeleted = true;
+                    iDeleteIndex = iIndex;
+                }
+
+                ImGui::PopID();
+
+                if (iIndex < m_EffectNotifies.size() - 1)
+                    ImGui::Separator();
+
+                iIndex++;
+            }
+
+            if (IsDeleted)
+            {
+                auto iterDelete = next(m_EffectNotifies.begin(), iDeleteIndex);
+                Safe_Release(*iterDelete);
+                m_EffectNotifies.erase(iterDelete);
+            }
 
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Collider List"))
         {
-            // ??젣??index
             _uint iDeleteIndex = {};
 
-            // ?꾩옱 ?깅줉??list 援ъ“泥??뺣낫瑜??꾩껜 ?뚮뜑留곹븳??
             _uint iIndex = { 0 };
             for (auto& ColliderNotify : m_ColliderNotifies)
             {
-                // ?꾩옱 猷⑦봽???몃뜳?ㅻ? ?ъ슜?섏뿬 怨좎쑀??ID ?ㅽ깮??留뚮벊?덈떎.
-                // -> ImGui??String ID媛 ?숈씪??媛앹껜媛 媛숈? ?붾㈃???덉쑝硫??ㅻ쪟媛 ?덉쓬.
                 ImGui::PushID(iIndex);
 
                 ColliderNotify->ImGui_Print();
@@ -423,10 +448,8 @@ void CAnimNotifyTool::Render_CurrentNotify()
                     iDeleteIndex = iIndex;
                 }
 
-                // ID ?ㅽ깮???먮옒?濡??섎룎由쎈땲??
                 ImGui::PopID();
 
-                // 留덉?留???ぉ???꾨땺 ?뚮쭔 援щ텇??異붽?
                 if (iIndex < m_ColliderNotifies.size() - 1)
                     ImGui::Separator();
 
@@ -445,11 +468,6 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
         if (ImGui::BeginTabItem("Light List"))
         {
-            // ?꾩옱 ?좊땲硫붿씠???대쫫怨?珥?Duration 媛믪쓣 留??꾩뿉??異쒕젰
-            /*ImGui::Text("Animation Name : %s", m_strCurrentAnimName.c_str());
-            ImGui::Text("Duration : %.2f", m_fCurrentDuration);*/
-
-            // ?꾩옱 ?깅줉??list 援ъ“泥??뺣낫瑜??꾩껜 ?뚮뜑留곹븳??
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -461,16 +479,12 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
 
 
-// ?꾩옱 湲곕줉??Notify ?뺣낫瑜?Json ?뚯씪濡??뚯떛?댁꽌 ???
 void CAnimNotifyTool::Save_Notify()
 {
-    // 0. ???諛⑹떇??諛⑹떇?몃뜲 寃쎈줈???대뼸寃? => AnimationActor ?앹꽦????FilePath瑜?誘몃━ ??ν븷源?
-    // LoadDat?좊븣 ?대떦 紐⑤뜽??.dat ?대뜑 寃쎈줈瑜???ν빐?볦옄.
 
     if (ImGui::Button("Save All Notifyes"))
     {
         IGFD::FileDialogConfig config;
-        //config.path = "../../Client/Bin/Resource/"; // ?ш린???ㅼ뼱媛?쇳븿.
         config.path = m_strCurrentFolderPath;
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
@@ -496,7 +510,7 @@ void CAnimNotifyTool::Save_Notify()
 
 void CAnimNotifyTool::Load_NotifyFromFile()
 {
-    // 1. 踰꾪듉???뚮윭???뚯씪濡쒕???Json ?곗씠?곕? ?뚯떛?쒕떎.
+    // 1. 
     if (ImGui::Button("Load Notifyes"))
     {
         IGFD::FileDialogConfig config;
@@ -512,7 +526,6 @@ void CAnimNotifyTool::Load_NotifyFromFile()
     _string strFilePath = {};
     _string strFolderPath = {};
 
-    // 2. ?뚯떛???곗씠?곕? 諛뷀깢?쇰줈 list??媛믪쓣 梨꾩썙以띾땲??
     if (ImGuiFileDialog::Instance()->Display("Load Notify"
         , ImGuiWindowFlags_NoCollapse
         , vMinSize
@@ -523,7 +536,6 @@ void CAnimNotifyTool::Load_NotifyFromFile()
 
             size_t lastSlashPos = strFilePath.find_last_of("\\");
             if (lastSlashPos != string::npos) {
-                // 0踰덉㎏ ?꾩튂遺??'.' ?꾩튂源뚯? 臾몄옄?댁쓣 ?섎씪?낅땲??
                 strFolderPath += strFilePath.substr(0, lastSlashPos);
 
             }
@@ -536,10 +548,8 @@ void CAnimNotifyTool::Load_NotifyFromFile()
 
 void CAnimNotifyTool::Load_SoundsFromFile(const _string& strFilePath, const _string& strSoundPath)
 {
-    // .wav ?섎씪?닿린.
     size_t last_dot_pos = strSoundPath.find_last_of('.');
     if (last_dot_pos != std::string::npos) {
-        // 0踰덉㎏ ?꾩튂遺??'.' ?꾩튂源뚯? 臾몄옄?댁쓣 ?섎씪?낅땲??
         _string strSoundTag = strSoundPath.substr(0, last_dot_pos);
         _wstring wStrSoundTag = StringToWString(strSoundTag);
 
@@ -551,7 +561,7 @@ void CAnimNotifyTool::Load_SoundsFromFile(const _string& strFilePath, const _str
     }
     else
     {
-        MSG_BOX("寃쎈줈 ?섎せ??");
+        MSG_BOX("");
         return;
     }
 }
@@ -567,7 +577,7 @@ void CAnimNotifyTool::Load_AllSoundsFromFolder(const _string& strFolderPath)
             _string fileName = entry.path().filename().string();
             _string extension = entry.path().extension().string();
 
-            // .wav ?뚯씪留?泥섎━
+            // .wav
             if (extension == ".wav" || extension == ".WAV")
             {
                 _string soundTag = entry.path().stem().string(); // ?뺤옣???쒖쇅???뚯씪紐?
@@ -636,19 +646,20 @@ void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
         notifyJson["Notifies"].emplace_back(soundNotify->To_Json());
 
     // 2. Effect
+    for (auto& effectNotify : m_EffectNotifies)
+        notifyJson["Notifies"].emplace_back(effectNotify->To_Json());
 
     // 3. Collider
     for (auto& colliderNotify : m_ColliderNotifies)
         notifyJson["Notifies"].emplace_back(colliderNotify->To_Json());
 
-    // ????꾨즺.
     jsonStream << notifyJson.dump(4);
     jsonStream.close();
 }
 
 void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
 {
-    // 1. ?꾩옱 濡쒕뱶???곗씠??紐⑤몢 ??젣.
+    // 1. 
     Clear();
 
     ifstream jsonStream(strFilePath.c_str());
@@ -656,16 +667,14 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
     {
         return;
     }
-
+    
     // 2. ?뚯씪 ?댁슜??json 媛앹껜濡??뚯떛
     json notifyJson;
     jsonStream >> notifyJson;
     jsonStream.close();
 
-    // 3. ?뚯떛???곗씠?곕줈 硫ㅻ쾭 蹂??梨꾩슦湲?
     m_strCurrentAnimName = notifyJson["AnimName"].get<_string>();
     
-    // 4. "Notifies" 諛곗뿴 ?쒗쉶 諛???낆뿉 留욊쾶 蹂듭썝
     if (notifyJson.contains("Notifies") && notifyJson["Notifies"].is_array())
     {
         for (const auto& notifyObject : notifyJson["Notifies"])
@@ -677,22 +686,16 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
                 // CSoundNotify ?대옒?ㅼ뿉??From_Json ?⑥닔媛 ?덈떎怨?媛??
                 CSoundNotify* pSoundNotify = CSoundNotify::From_Json(notifyObject);
                 m_SoundNotifies.emplace_back(pSoundNotify);
-                
-
-                Safe_AddRef(pSoundNotify);
-
-                // 紐⑤뜽???꾨떖??List 而⑦뀒?대꼫
-                m_AnimNotifies.emplace_back(pSoundNotify);
             }
             else if (type == "Collider")
             {
                 CColliderNotify* pColliderNotify = CColliderNotify::From_Json(notifyObject);
                 m_ColliderNotifies.emplace_back(pColliderNotify);
-
-                Safe_AddRef(pColliderNotify);
-
-                // 紐⑤뜽???꾨떖??List 而⑦뀒?대꼫
-                m_AnimNotifies.emplace_back(pColliderNotify);
+            }
+            else if (type == "Effect")
+            {
+                CEffectNotify* pEffectNofiy = CEffectNotify::From_Json(notifyObject);
+                m_EffectNotifies.emplace_back(pEffectNofiy);
             }
             
             // else if (type == "Effect") { ... }

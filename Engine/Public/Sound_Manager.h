@@ -10,8 +10,10 @@ private:
 	virtual ~CSound_Manager() = default;
 
 public:
-	// ?ъ슫???뚯씪 Load (Sound File ??ν븷 Key, Sound File 寃쎈줈)
-	HRESULT		Load_Sound(const _wstring& strSoundTag, const char* pSoundFilePath);
+	// Sound Load (Sound File Key, Sound File Path)
+	HRESULT		Load_Sound(const _wstring& strSoundTag, const _char* pSoundFilePath);
+	// Sound Load From Folder
+	HRESULT		Load_Sound_FromFolder(const _char* pFolderPath);
 	// ?ъ슫???ъ깮 (Sound File ??ν븷 Key, ?ъ슜??ChannelID, ?ㅼ젙??蹂쇰ⅷ 媛?
 	void			Play_Sound(const _wstring& strSoundTag, _uint iChannelID, _float fVolume, _bool isStop);
 	// BGM ?ъ깮 (Sound File ??ν븷 Key, ?ъ슜??ChannelID, ?ㅼ젙??蹂쇰ⅷ 媛? = 怨꾩냽 ?ъ깮?쒕떎

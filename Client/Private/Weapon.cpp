@@ -63,6 +63,23 @@ void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _flo
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 
+#pragma region NOTIFY
+void CWeapon::Collider_Active(_bool isActive)
+{
+    if (!isActive)
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+    else 
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+}
+#pragma endregion
+
+
+
+
+
+
+
+
 void CWeapon::Free()
 {
     CPartObject::Free();

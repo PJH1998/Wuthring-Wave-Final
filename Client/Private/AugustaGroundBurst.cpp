@@ -13,7 +13,6 @@ HRESULT CAugustaGroundBurst::Initialize(class CGameObject* pOwner)
 
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
-
     
 
     return S_OK;
@@ -35,7 +34,8 @@ void CAugustaGroundBurst::OnEnter()
     // 4. 상태 초기화
     State_Reset();
 
-    m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
+    _string strBoneName = "WeaponProp02";
+    m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
     m_pAugusta->PartAcitvate(m_iPartType, true);
 }
 
@@ -68,8 +68,8 @@ void CAugustaGroundBurst::OnExit()
 
 void CAugustaGroundBurst::Handle_Input()
 {
-    m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
-
+    m_States[SP_MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+    m_States[SP_ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
@@ -95,12 +95,40 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
     EBurstType eBurstType = static_cast<EBurstType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
+
+
+    if (m_IsAnimationEnd)
+    {
+        if (m_States[SP_ATTACK])
+        {
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPATTACK01;
+            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL)); 
+            return;
+        }
+
+        if (m_States[SP_MOVE])
+        {
+            m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPWALK_F;
+            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));
+            return;
+        }
+
+        // 위에서 하나도 안걸린다면?
+        // 임시 테스트
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+
+        /*m_pAugusta->GetStateContextForWrite().m_eSpecialType = ESpecialType::SPWALK_STAND;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL));*/
+        return;
+    }
     
 }
 
 void CAugustaGroundBurst::SetUp_Animations()
 {
-
+    CState::Add_Animations(ENUM_CLASS(EBurstType::BURST01), "Burst01", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EBurstType::BURST_STAND), "Burst_Stand", 1.f, 0.f);
 }
 
 void CAugustaGroundBurst::State_Reset()

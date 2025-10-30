@@ -11,7 +11,8 @@ private:
     enum BURSTSTATE
     {
        BURST01 = 0,
-       JUMP,
+       SP_MOVE,
+       SP_ATTACK,
        END
     };
 

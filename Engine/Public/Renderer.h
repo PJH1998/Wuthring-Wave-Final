@@ -9,8 +9,7 @@ class CTexture;
 
 class CRenderer final : public CBase
 {
-public:
-	enum class BLUR_TYPE { GAUSSIAN, BILATERAL};
+private:
 
 private:
 	explicit CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -72,6 +71,7 @@ private:
 	void				Render_NonLight();
 	void				Render_Emissive();
 	void				Render_Bloom();
+	void				Render_BloomCombined();
 	void				Render_DistortionObject();
 	void				Render_Blend();
 	void				Render_Distortion();

@@ -10,7 +10,9 @@
 
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
+#include "AugustaGriffon.h"
 #include "Augusta.h"
+
 #include "Player.h"
 
 #include"GameSystem.h"
@@ -159,6 +161,7 @@ HRESULT CLoader_Test::Load_Augusta()
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     _float fSize = 0.01f;
+    //_float fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
     // 1. 모델 초기화.
@@ -187,7 +190,8 @@ HRESULT CLoader_Test::Load_Augusta()
     wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
     fSize = 0.01f;
-    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+    //fSize = 0.0001f;
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
 
     // 1. 모델 초기화.
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -202,7 +206,6 @@ HRESULT CLoader_Test::Load_Augusta()
         CRASH("Prototype Create Failed");
 
 
-    // 3. 모델 초기화
     wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
     strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
 
@@ -210,11 +213,25 @@ HRESULT CLoader_Test::Load_Augusta()
         CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
         CRASH("Prototype Create Failed");
 
-    // 4. 객체 초기화.
-    _wstring wstrSkillWeaponTag = TEXT("Prototype_GameObject_Augusta_SkillWeapon");
+    _wstring wStrSkillWeaponTag = TEXT("Prototype_GameObject_Augusta_SkillWeapon");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , wstrSkillWeaponTag
+        , wStrSkillWeaponTag
         , CAugustaSkillWeapon::Create(m_pDevice, m_pContext))))
+        CRASH("Prototype Create Failed");
+
+    wStrModelTag = L"Prototype_Component_Model_Augusta_Griffon";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Griffon/Griffon.dat";
+
+    PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationRollPitchYaw(XMConvertToRadians(90.f), XMConvertToRadians(-90.f), 0.f);
+    //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+        CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+        CRASH("Prototype Create Failed");
+
+    _wstring wStrGriffonTag = TEXT("Prototype_GameObject_Augusta_Griffon");
+    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+        , wStrGriffonTag
+        , CAugustaGriffon::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 #pragma endregion
 

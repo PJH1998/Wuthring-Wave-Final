@@ -285,7 +285,6 @@
     <ClInclude Include="..\public\Custom_UI.h">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\MonsterBody.h" />
     <ClInclude Include="..\Public\Augusta.h">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClInclude>
@@ -380,6 +379,15 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaAirAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Client_Debug.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSpecial.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Particle.h">
@@ -491,7 +499,6 @@
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\MonsterBody.cpp" />
     <ClCompile Include="..\Private\Augusta.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
@@ -577,6 +584,12 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaAirAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSpecial.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Particle.cpp">

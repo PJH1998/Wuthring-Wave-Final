@@ -53,7 +53,6 @@ public:
 	virtual		HRESULT			Initialize_Clone(void* pArg) override;
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
-	virtual		void				Update_Action(const _fvector& vQuaternion, _float fDistance, _float fTimeDelta) override;
 	virtual		void				Late_Update(_float fTimeDelta) override;
 	virtual		void				Render() override;
 

@@ -168,6 +168,7 @@
     <ClInclude Include="..\Public\AnimationDummy.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
+    <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
@@ -180,12 +181,14 @@
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
+    <ClInclude Include="..\Public\AugustaGroundSpecial.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaStateFactory.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_Debug.h" />
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
@@ -270,6 +273,7 @@
     <ClCompile Include="..\Private\AugustaAirAttack.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
+    <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
@@ -281,6 +285,7 @@
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />

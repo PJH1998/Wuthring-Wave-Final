@@ -55,9 +55,6 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     
 
     m_IsPlayAnimation = true;
-
-
-    
 	m_strCurrentAnimation = "Blend_BasePose";
     //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
@@ -101,6 +98,15 @@ void CAnimationActor::Update(_float fTimeDelta)
         IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 0.01f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
+
+#ifdef _DEBUG
+    // Jump Second F
+    //const _float4x4* RootMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+    //const _float4x4* HairMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Hair001_M");
+    //OutPutDebugMatrix(TEXT("Root"), *RootMatrix);
+    //OutPutDebugMatrix(TEXT("Bone_Hair001_M"), *HairMatrix);
+#endif // _DEBUG
+
 
     if (IsAnimationEnd)
         m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
@@ -242,8 +248,8 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
         this->Collider_Active(tag, active); // 'this->'는 생략 가능
     };
 
-    auto effectCallBack = [this]() {
-        this->Effect_Active();
+    auto effectCallBack = [this](const _wstring& tag) {
+        this->Effect_Active(tag);
     };
 
     m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
@@ -253,9 +259,12 @@ void CAnimationActor::Collider_Active(const _wstring&, _bool)
 {
 
 }
-void CAnimationActor::Effect_Active()
+void CAnimationActor::Effect_Active(const _wstring& tag)
 {
+    _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+    m_pGameInstance->Spawn_PoolingObject(tag, matWorld, m_pModelCom);
 }
+
 const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)
 {
     if (nullptr == m_pModelCom)
