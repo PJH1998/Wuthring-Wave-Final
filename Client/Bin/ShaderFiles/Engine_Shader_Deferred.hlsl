@@ -148,7 +148,8 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     vector vRimColor = g_ColorRampTexture.Sample(DefaultSampler, float2(0.5f, (1.f - vToonRim.z)));
     
-    Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
+    Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y));
+    //+(vRimColor * vToonRim.z);
 //    +(vRimColor * 0.4f);
     
 ///////// Shadow Begin /////////
@@ -191,7 +192,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
         vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
         
-        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ w ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X
+        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // Á÷±³¶ó w ³ª´©±â X
  
         float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
@@ -209,7 +210,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
         vShadowPos = mul(vWorldPos, matShadowLightVP);
     
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ w ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ X
+        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // Á÷±³¶ó w ³ª´©±â X
 
         float fBias = 0.f;
         
@@ -332,7 +333,7 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
     float fOriginDepth = g_DepthTexture.Sample(PointSampler, In.vTexcoord).y;
     vector vOriginNormal = Compute_Normal(g_NormalTexture, PointSampler, In.vTexcoord);
     
-    if (fOriginDepth == 0.f)            // ï¿½ï¿½ï¿½ ï¿½Èµï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ Pass
+    if (fOriginDepth == 0.f)            // ±â·Ï ¾ÈµÈ °÷ÀÌ¸é Pass
     {
         Out.vColor = vOriginColor;
         return Out;
@@ -349,22 +350,22 @@ PS_OUT_BACKBUFFER PS_SSAO_BLUR_X(PS_IN In)
         vector vSampleColor = g_BlurBeginTexture.Sample(ClampSampler, vTexcoord);
         float fSampleDepth = g_DepthTexture.Sample(ClampSampler, vTexcoord).y;
             
-        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ï¾Èµï¿½ or È¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½;
+        if (fSampleDepth == 0.f || vSampleColor.r == 1.f) // »ùÇÃÇÑ °÷ÀÌ ±â·Ï¾ÈµÊ or È¤Àº ³ëÀÌÁî ºó °ø°£;
         {
             vColor += vOriginColor;
             fCount += 1.f;
             continue;
         }
         
-        float fDepthDist = abs(fOriginDepth - fSampleDepth); // ï¿½ï¿½ï¿½ï¿½
+        float fDepthDist = abs(fOriginDepth - fSampleDepth); // ±íÀÌ
      
         vector vSampleNormal = Compute_Normal(g_NormalTexture, ClampSampler, vTexcoord);
         
-        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal)); // ï¿½ë¸» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ 0~1ï¿½ï¿½
+        float fNormalWeight = saturate(dot(vOriginNormal, vSampleNormal)); // ³ë¸» ³»Àû °ª 0~1·Î
      
-        if (fDepthDist <= g_fMinDepthDistance)                          // ï¿½Ö¼ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ( ï¿½ï¿½ï¿½ )
+        if (fDepthDist <= g_fMinDepthDistance)                          // ÃÖ¼Ò ºñ±³ ±íÀÌ ( »ó¼ö )
         {
-            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight)); // ï¿½âº»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ -> ï¿½ë¸» ï¿½ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            vector vFinalColor = vSampleColor * (1.f + (1.f - fNormalWeight)); // ±âº»ÀûÀ¸·Î ¼¯À» »öÀÌ ¾îµÎ¿î »ö -> ³ë¸» °¡ÁßÄ¡¿¡ µû¶ó ´õ ¹à°Ô Á¶Àý
             vColor += vFinalColor;
             fCount += 1.f;
         }

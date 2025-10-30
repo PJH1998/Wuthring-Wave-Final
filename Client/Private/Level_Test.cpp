@@ -244,7 +244,7 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
                     , PROTOTYPE::GAMEOBJECT, &pDesc);
                 });
         }
-        m_pGameInstance->Wait_Thread_End();
+        //m_pGameInstance->Wait_Thread_End();
     }
     m_pGameInstance->Wait_Thread_End();
     File.close();

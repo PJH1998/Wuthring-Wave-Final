@@ -53,10 +53,6 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
     vNoiseNormal = float4(normalize(float3(vNoiseXY, vNoiseNormal.z)), 0.f);
     vNoiseNormal = mul(vNoiseNormal, CamViewMatrix);
     
-    //vector vNoiseNormal = Compute_Normal(g_NoiseTexture, NoiseSampler, vNoiseTexcoord); //g_NoiseTexture.SampleLevel(NoiseSampler, vNoiseTexcoord, 0);
-    //vNoiseNormal = vector(normalize(vNoiseNormal.xyz), 0.f);
-    //vNoiseNormal = mul(vNoiseNormal, CamViewMatrix);
-    
     float TotalOcclusion = 0.f;
 
     [unroll]
@@ -65,7 +61,6 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
         float Occlusion = 0.f;
     
         float3 vTangent = normalize(vNoiseNormal.xyz - (vNormal.xyz * dot(vNoiseNormal, vNormal)));
-        //float3 vTBNNormal = vNormal.xyz;
         float3 vBinormal = normalize(cross(vTangent, vNormal.xyz));
   
         float3x3 TBN = float3x3(vTangent, vBinormal, vNormal.xyz);
@@ -113,7 +108,6 @@ void SSAO(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GT
     }
     
     TotalOcclusion = (TotalOcclusion / (float) iSampleSize);
-
         
     OutputTexture[DTID.xy] = float4(TotalOcclusion, TotalOcclusion, TotalOcclusion, 1.f);
 }

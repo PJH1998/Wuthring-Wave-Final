@@ -3,7 +3,7 @@
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 texture2D   g_DiffuseTexture[2];
-texture2D   g_NormalTexture;
+texture2D   g_NormalTexture[2];
 texture2D   g_MaskDiffuseTexture;
 
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
@@ -16,6 +16,7 @@ matrix g_ShadowProjMatrix[4];
 
 bool g_HasNormal = false;
 bool g_HasNormalMask = false;
+bool g_HasMask = false;
 int g_iIndex = 0;
 
 struct VS_IN
@@ -85,29 +86,78 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
-    //Out.vDiffuse = vDiffuse * (1.f - vMask) + (vMaskDiffiuse * float4(0.1f, 0.f, 1.f, 1.f)) * vMask;
-    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
-    Out.vDiffuse.w = 1.f;
+
+    if (vMask.r == 0.f && vMask.g == 0.f)
+        Out.vDiffuse = vDiffuse;
+    else
+    {
+        Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
+        Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+    }
     
+    //Out.vDiffuse = vDiffuse * (1.f - vMask.r) + vMaskDiffiuse * vMask.g;
+    
+    //Out.vDiffuse = vDiffuse;
     float3 vNormal;
     
-    if(g_HasNormal)
+    if (g_HasNormal)
     {
-        vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+        vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
         
-        vNormal = vNormalDesc.xyz * 2.f - 1.f;
+        float3 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
+        if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+            vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+
+        vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+        
+        float3 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+        if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+            vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+
+        if (vMask.r == 0.f && vMask.g == 0.f)
+            vNormal = vNormal1;
+        else
+        {
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+            vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+        }
+        
+        //vector vNormalDesc = vDefaultNormal * (1.f - vMask.r) + vMaskNormal * vMask.g;
+        
+        //vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        //if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+        //    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+
+        //vNormal = vNormal1;
+        
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
 
         float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
         
-        WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz *-1.f);
+        //vector vNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        //vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
         
-        vNormal = normalize(mul(vNormal, WorldMatrix));
-        vNormal = vNormal * 0.5f + 0.5f;
+        //vector vNormalDesc = vNormal * (1.f - vMask) + vMaskNormal * vMask;
+        
+        //vNormal = vNormalDesc.xyz * 2.f - 1.f;
+
+        //float3x3 WorldMatrix;
+        
+        //WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz *-1.f);
+        
+        //vNormal = normalize(mul(vNormal, WorldMatrix));
+        //vNormal = vNormal * 0.5f + 0.5f;
     }
     else
     {
         vNormal = In.vNormal.xyz;
-        vNormal = vNormal * 0.5f + 0.5f;    
+        vNormal = vNormal * 0.5f + 0.5f;
         Out.vDepth.z = 1.f;
     }
     
@@ -148,31 +198,46 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
+    Out.vDiffuse = vDiffuse * (1.f - vMask.r) + vMaskDiffiuse * vMask.g;
     Out.vDiffuse *= float4(0.7f, 1.f, 0.7f, 1.f);
     
     float3 vNormal;
     
     if(g_HasNormal)
     {
-        vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
-        vNormal = vNormalDesc.xyz * 2.f - 1.f;
-        float3x3 WorldMatrix = float3x3(In.vTangent.xyz, In.vBinormal.xyz * -1.f, In.vNormal.xyz);
-    
-        vNormal = mul(vNormal, WorldMatrix);
+        vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
+        vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+        
+        vector vNormalDesc = vDefaultNormal * (1.f - vMask.r) + vMaskNormal * vMask.g;
+        
+        vNormal = normalize(vNormalDesc * 2.f - 1.f);
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
+            vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+
+        float3 vTangent = In.vTangent.xyz;
+        float3 vBinormal = In.vBinormal.xyz * -1.f;
+        float3 vInNormal = In.vNormal.xyz;
+
+        float3x3 WorldMatrix;
+        WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+
+        vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+        vNormal.xyz = vNormal * 0.5f + 0.5f;
     }
     else
+    {
         vNormal = In.vNormal.xyz;
-        
-    Out.vNormal = vector(vNormal * 0.5f + 0.5f, 0.f);
+        vNormal = vNormal * 0.5f + 0.5f;
+        Out.vDepth.z = 1.f;
+    }
+    
+    Out.vNormal = float4(vNormal, 1.f);
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    
     Out.vDepth.w = 1.f;
     
-    Out.vDepth.z = 1.f;
-    
     return Out;
-    
 }
 
 struct PS_OUT_DEBUG
@@ -186,13 +251,11 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
     
     vector vMask = g_MaskTexture[0].Sample(DefaultSampler, In.vTexcoord);
     
-    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    vector vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    vector vDefaultDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
     vector vMaskDiffiuse = g_DiffuseTexture[1].Sample(DefaultSampler, In.vTexcoord);
     
-    Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
-    
+    Out.vDiffuse = vDefaultDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     return Out;
 }
 
