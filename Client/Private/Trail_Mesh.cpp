@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Trail_Mesh.h"
 
 CTrail_Mesh::CTrail_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -33,7 +33,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
     m_vColor = m_tDesc.vColor;
     m_vLifeTime = m_tDesc.vLifeTime;
 
-    //Æ®·¹ÀÏ Àü¿ë °ª
+    //íŠ¸ë ˆì¼ ì „ìš© ê°’
     m_fSweepSpeed = m_tDesc.fSweep;
     m_fSweepWitdh = m_tDesc.fSweepWitdh;
 
@@ -44,7 +44,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 
     m_IsRoot = m_tDesc.IsRootOn;
     
-    //ÀÓ½ÃÃ³¸®
+    //ì„ì‹œì²˜ë¦¬
     m_isActivate = false;
     m_fColorSpeed = 1.f;
 
@@ -63,7 +63,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //¿©±â¼­ Sweep °è»ê ÈÄ ¼ÎÀÌ´õ¿¡ ¹ÙÀÎµù ÇØÁà¾ß ÇÔ.
+    //ì—¬ê¸°ì„œ Sweep ê³„ì‚° í›„ ì…°ì´ë”ì— ë°”ì¸ë”© í•´ì¤˜ì•¼ í•¨.
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
     m_vLifeTime.x += fTimeDelta;
@@ -89,7 +89,7 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::BLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
 }
 
 void CTrail_Mesh::Render()
@@ -132,7 +132,7 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //ÅØ½ºÃ³ ¿©·¯°³ ½á¾ßÇÏ´Âµ¥ ¾î¶»°Ô ÇÒÁö °í¹ÎÇØº¸ÀÚ
+    //í…ìŠ¤ì²˜ ì—¬ëŸ¬ê°œ ì¨ì•¼í•˜ëŠ”ë° ì–´ë–»ê²Œ í• ì§€ ê³ ë¯¼í•´ë³´ì
     if (FAILED(CGameObject::Add_Component(Desc.CurrentLevel, Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -161,7 +161,7 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0)))
         return E_FAIL;
 
-    //¼ÎÀÌ´õ¿¡ ¹ÙÀÎµù ÇØÁÖÀÚ.
+    //ì…°ì´ë”ì— ë°”ì¸ë”© í•´ì£¼ì.
     if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
         return E_FAIL;
 

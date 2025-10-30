@@ -134,9 +134,10 @@ PS_OUT PS_TraillTest(PS_IN In)
     if (vMask.r < 0.3f)
         discard;
     
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
+    // 1 - x ¿Þ->¿À , ±×³É x ¿À->¿Þ
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
     
-    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, 1 - In.vTexcoord.x);
     
     float fVisible = fTailFad * fHeadFad;
     
