@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"StaticObject.h"
 #include"Editor_Enum.h"
 
@@ -38,7 +38,7 @@ private:
 	class CMap_Interface* m_pMapInterface = { nullptr };
 	_uint m_iShaderPassIndex = {};
 	_uint m_iLevel = {};
-	OBJECTTYPE m_eObjectType = { END };
+	OBJECTTYPE m_eObjectType = { OBJECTTYPE::END };
 	vector<CModel*> m_pModelComArray;
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 public:
