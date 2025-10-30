@@ -116,6 +116,9 @@ public:
 			case ENUM_CLASS(ITEM_TYPE::EFFECT):
 				eType = ITEM_TYPE::EFFECT;
 				break;
+			case ENUM_CLASS(ITEM_TYPE::SCENE):
+				eType = ITEM_TYPE::SCENE;
+				break;
 			case ENUM_CLASS(ITEM_TYPE::SCREEN):
 				eType = ITEM_TYPE::SCREEN;
 				break;
@@ -249,6 +252,7 @@ private:
 
 	_bool								m_isPlay = { false };
 	_float								m_fTrackPerSec = {};
+	_float								m_fTrackAcc = {};
 
 private:
 	// Play
@@ -262,6 +266,7 @@ private:
 
 	// Camera Action
 	void								Save_CameraAction();
+	void								Load_CameraAction();
 	
 	// GUI
 	void								Drawing();

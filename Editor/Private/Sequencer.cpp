@@ -169,7 +169,7 @@ void CSequencer::Update(_float fTimeDelta)
 	ImGui::Text("Frame : "); ImGui::SameLine(); ImGui::InputInt("##1", &m_iCurrentFrame); ImGui::SameLine();
 	ImGui::Text("/ Frame Min : ");  ImGui::SameLine(); ImGui::InputInt("##2", &m_iFrameMin); ImGui::SameLine();
 	ImGui::Text("/ Frame Max : ");  ImGui::SameLine(); ImGui::InputInt("##3", &m_iFrameMax);
-	ImGui::InputFloat("/ TPS : ", &m_fTrackPerSec);
+	ImGui::Text("TPS : ");  ImGui::SameLine(); ImGui::InputFloat("##4", &m_fTrackPerSec);
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
@@ -185,7 +185,11 @@ void CSequencer::Update(_float fTimeDelta)
 		Sorting_Item();
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN)
+	{
+		if(false == m_isPlay)
+			m_fTrackAcc = static_cast<_float>(m_iCurrentFrame);
 		m_isPlay = !m_isPlay;
+	}
 
 	if (true == m_isPlay)
 		Play(fTimeDelta);
@@ -193,10 +197,15 @@ void CSequencer::Update(_float fTimeDelta)
 
 void CSequencer::Play(_float fTimeDelta)
 {
-	if (m_iCurrentFrame >= m_iFrameMax)
+	if (m_fTrackAcc >= m_iFrameMax)
+	{
+		m_isPlay = false;
+		m_fTrackAcc = static_cast<_float>(m_iFrameMin);
 		return;
+	}
 
-
+	m_fTrackAcc += fTimeDelta * m_fTrackPerSec;
+	m_iCurrentFrame = m_fTrackAcc;
 }
 
 void CSequencer::Selectable_Item()
@@ -363,6 +372,59 @@ void CSequencer::Save_CameraAction()
 			OutputFile << ActionJson.dump(4);
 
 			OutputFile.close();
+		}
+		m_isSave = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+void CSequencer::Load_CameraAction()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Action/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("CameraActionLoad", "Load File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("CameraActionLoad")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ifstream InputFile(strFilePath);
+
+			json ActionJson;
+
+			InputFile >> ActionJson;
+
+			SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+
+			ActionJson["Duration"] = item.iFrameEnd - item.iFrameStart;
+
+			ActionJson["Frame"] = json::array();
+
+			vector<CAMERA_FRAME>& Frames = item.mRampEdit.mTargetCameraFrames;
+			for (size_t i = 0; i < Frames.size(); ++i)
+			{
+				json FrameJson;
+				FrameJson["Start"] = Frames[i].fStartFrame;
+				FrameJson["Distance"] = Frames[i].fDistance;
+
+				FrameJson["Rotation"] = json::array();
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.x);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.y);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.z);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.w);
+
+				FrameJson["Translation"] = json::array();
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.x);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
+
+				ActionJson["Frame"].push_back(FrameJson);
+			}
+
+			InputFile.close();
 		}
 		m_isSave = false;
 		ImGuiFileDialog::Instance()->Close();
