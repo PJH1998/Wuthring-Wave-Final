@@ -74,6 +74,7 @@ private:
 	void						Render_Outline();
 	void						Render_NonBlend();
 	void						Render_SSAO();
+	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_Combined();
 	void						Render_NonLight();

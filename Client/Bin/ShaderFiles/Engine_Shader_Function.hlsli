@@ -78,7 +78,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     return (vDiffuse + Specular) * NdotL;
 }
 
-float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness, float4 vToonRim)
+float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness)
 {
     float3 vHalf = normalize(vViewDir + vLightDir);
     float NdotL = saturate(dot(vNormal, vLightDir));
@@ -97,13 +97,11 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = clamp(0.3f, 1.f, (1.f - Fresnel)) * (1.f - fMetallic);
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
     
     float3 vDiffuse = kd * vAlbedo / PI;
-    
-    //vDiffuse *= vToonRim.x;
-    
-    return (vDiffuse + Specular);// * NdotL;
+        
+    return (vDiffuse + Specular);
 }
 
 float2 Compute_Texcoord(float2 vProjXY)
