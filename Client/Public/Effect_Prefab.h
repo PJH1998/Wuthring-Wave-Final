@@ -11,6 +11,10 @@ public:
 		EFFECT_TYPE eChildrenType;
 		_float	fActivateTime;
 		_bool   bActivated = false;
+
+		_float3 vOffsetSize = { 1.f, 1.f, 1.f };
+		_float3 vOffsetPos = { 0.f, 0.f, 0.f };
+		_float3 vOffsetRot = { 0.f, 0.f, 0.f };
 	}FRAME_DESC;
 
 	typedef struct PrefabDesc {
@@ -42,6 +46,7 @@ public:
 private:
 	CGameObject* Get_Children(_wstring ChildrenTag);
 	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType, _uint CurrentLevel);
+	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix);
 
 public:
 	_wstring	Get_MyTag() {

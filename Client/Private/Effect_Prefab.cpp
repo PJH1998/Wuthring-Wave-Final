@@ -40,7 +40,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
     }
     //m_vLifeTime = pDesc->vLifeTime;
     //프리팹 라이프 타임 필요할까 ?
-    m_vLifeTime.y = 10.f;
+    m_vLifeTime.y = 8.f;
     m_vLifeTime.x = 0.f;
 
     m_isActivate = false;
@@ -62,8 +62,13 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
         if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
         {
             _bool IsActivated = true;
+
+            //활성화 전 오프셋 적용
+            _matrix OffsetMatrix = {};
+            Children_Offset(Frame, OffsetMatrix);
+
             //자식 활성화
-            Get_Children(Frame.strChildrenTag)->Reset(XMLoadFloat4x4(&m_SpawnMatrix), &IsActivated);
+            Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
 
             Frame.bActivated = true;
         }
@@ -131,8 +136,6 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
         //위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
         Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
 
-       
-
         m_isActivate = true;
     }
 }
@@ -181,6 +184,22 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
     m_EffectChildren.emplace(strChildrenNameTag, pChildren);
 }
 
+void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
+{
+    _matrix PositionMat = XMMatrixTranslationFromVector(XMVectorSet(Desc.vOffsetPos.x, Desc.vOffsetPos.y, Desc.vOffsetPos.z, 1.f));
+
+    _matrix ScaleMat = XMMatrixScaling(Desc.vOffsetSize.x, Desc.vOffsetSize.y, Desc.vOffsetSize.z);
+
+    _matrix RotMat = XMMatrixRotationRollPitchYaw(
+        XMConvertToRadians(Desc.vOffsetRot.x),
+        XMConvertToRadians(Desc.vOffsetRot.y),
+        XMConvertToRadians(Desc.vOffsetRot.z));
+
+    _matrix OffsetMatrix = ScaleMat * RotMat * PositionMat;
+
+    OutMatrix = OffsetMatrix * XMLoadFloat4x4(&m_SpawnMatrix);
+}
+
 CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
 {
     auto iter = m_EffectChildren.find(ChildrenTag);
@@ -193,10 +212,6 @@ CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
 
 void CEffect_Prefab::Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix)
 {
-    // 
-    //_vector vPos = XMVectorSet(PlayerMatrix._41, PlayerMatrix._42, PlayerMatrix._43, 1.f);
-    //_matrix PlayerPosMatrix = XMMatrixTranslationFromVector(vPos);
-
     XMStoreFloat4x4(&m_SpawnMatrix,
       XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&PlayerMatrix));
 }

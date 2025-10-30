@@ -265,14 +265,14 @@ void CParticle_Controller::Particle_Tab()
                         {
                             bool IsSelected = (m_iSelectedTexture == i);
                             if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                            {
                                 m_iSelectedTexture = i;
-
+                                m_pSelectedParticleDesc->strTextureTag = m_Textures[i].strTextureTag;
+                            }
                             if (IsSelected)
                                 ImGui::SetItemDefaultFocus();
                         }
                         ImGui::EndCombo();
-
-                        m_pSelectedParticleDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                     }
 
                     ImGui::Separator();

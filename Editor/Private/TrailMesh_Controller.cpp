@@ -259,13 +259,12 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                     {
                         bool IsSelected = (m_iSelectedTexture == i);
                         if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
-                            m_iSelectedTexture = i;
-
-                        if (IsSelected)
                         {
-                            ImGui::SetItemDefaultFocus();
-                            m_pSelectedTrailMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
+                            m_iSelectedTexture = i;
+                            m_pSelectedTrailMeshDesc->strTextureTag = m_Textures[i].strTextureTag;
                         }
+                        if (IsSelected)
+                            ImGui::SetItemDefaultFocus();
                     }
               
       
@@ -277,17 +276,19 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                     ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
                 }
 
-                if (ImGui::BeginCombo("Color", "")) {
+                if (ImGui::BeginCombo("Base Color", "")) {
                     for (size_t i = 0; i < m_ColorTextures.size(); i++)
                     {
                         bool IsSelected = (m_iSelectedColor == i);
                         if (ImGui::Selectable(m_ColorTextures[i].szName, IsSelected))
+                        {
                             m_iSelectedColor = i;
+                            m_pSelectedTrailMeshDesc->strColorTextureTag = m_ColorTextures[i].strTextureTag;
+                        }
 
                         if (IsSelected)
                         {
                             ImGui::SetItemDefaultFocus();
-                            m_pSelectedTrailMeshDesc->strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
                         }
                     }
 

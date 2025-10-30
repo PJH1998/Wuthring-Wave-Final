@@ -52,8 +52,11 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
         if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
         {
             _bool IsActivated = true;
-            //자식 활성화
-            Get_Children(Frame.strChildrenTag)->Reset(XMLoadFloat4x4(&m_SpawnMatrix), &IsActivated);
+            //자식 활성화하기전에 오프셋 처리
+            _matrix OffsetMatrix = {};
+
+            Children_Offset(Frame, OffsetMatrix);
+            Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
 
             Frame.bActivated = true;
         }
@@ -159,7 +162,12 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
     pChildren->Reset(DefaultMat, nullptr);*/
 
     m_EffectChildren.emplace(strChildrenTag, pChildren);
-    m_vFrames.push_back(FrameDesc);
+
+    _bool bCheck = false;
+    FrameDesc_Check(strChildrenTag, &bCheck);
+
+    if (!bCheck)
+        m_vFrames.push_back(FrameDesc);
 
 }
 
@@ -172,14 +180,6 @@ void CEffect_Prefab::Remove_Children(_wstring& ChildrenTag)
 
     Safe_Release(iter->second);
     m_EffectChildren.erase(iter);
-
-    for (auto iterFrame = m_vFrames.begin(); iterFrame != m_vFrames.end(); )
-    {
-        if (iterFrame->strChildrenTag == ChildrenTag)
-            iterFrame = m_vFrames.erase(iterFrame);
-        else
-            ++iterFrame;
-    }
 }
 
 _int CEffect_Prefab::Get_Children_Count()
@@ -218,13 +218,23 @@ CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
     return iter->second;
 }
 
+void CEffect_Prefab::Bind_FrameDesc(PREFAB_DESC& PrefabDesc)
+{
+    for (size_t i = 0; i < PrefabDesc.ChildrenCount; i++)
+    {
+        FRAME_DESC FrameDesc = PrefabDesc.FrameDesc[i];
+
+        m_vFrames.push_back(FrameDesc);
+    }
+}
+
 void CEffect_Prefab::Set_FrameDesc(FRAME_DESC* pFrameDesc)
 {
     for (auto& Frame : m_vFrames)
     {
         if (pFrameDesc->strChildrenTag == Frame.strChildrenTag)
         {
-            Frame.fActivateTime = pFrameDesc->fActivateTime;
+            Frame = *pFrameDesc;
             return;
         }
     }
@@ -265,6 +275,52 @@ void CEffect_Prefab::Reset_Prefab_Info()
     _bool Activate = false;
     for (auto& Children : m_EffectChildren)
         Children.second->Reset(DefaultMat, &Activate);
+}
+
+void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
+{
+    _matrix PositionMat = XMMatrixTranslationFromVector(XMVectorSet(Desc.vOffsetPos.x, Desc.vOffsetPos.y, Desc.vOffsetPos.z, 1.f));
+
+    _matrix ScaleMat = XMMatrixScaling(Desc.vOffsetSize.x, Desc.vOffsetSize.y, Desc.vOffsetSize.z);
+
+    _matrix RotMat = XMMatrixRotationRollPitchYaw(
+        XMConvertToRadians(Desc.vOffsetRot.x),
+        XMConvertToRadians(Desc.vOffsetRot.y),
+        XMConvertToRadians(Desc.vOffsetRot.z));
+
+    _matrix OffsetMatrix = ScaleMat * RotMat * PositionMat;
+
+    OutMatrix = OffsetMatrix * XMLoadFloat4x4(&m_SpawnMatrix);
+}
+
+void CEffect_Prefab::FrameDesc_Check(_wstring& ChildrenTag, _bool* bCheck)
+{
+    //자식 추가했을 때, 이전에 있던 자식 태그와 같은 얘라면 FrameDesc 삭제x 급하게 대충 만듦
+    for (auto iterFrame = m_vFrames.begin(); iterFrame != m_vFrames.end();)
+    {
+        if (iterFrame->strChildrenTag == ChildrenTag)
+        {
+            *bCheck = true;
+            break;
+        }
+        else
+            ++iterFrame;
+    }
+
+    if (!bCheck)
+    {
+        for (auto iterFrameDesc = m_vFrames.begin(); iterFrameDesc != m_vFrames.end(); )
+        {
+            if (iterFrameDesc->strChildrenTag == ChildrenTag)
+            {
+                iterFrameDesc = m_vFrames.erase(iterFrameDesc);
+                break;
+            }
+            else
+                ++iterFrameDesc;
+        }
+    }
+
 }
 
 CEffect_Prefab* CEffect_Prefab::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

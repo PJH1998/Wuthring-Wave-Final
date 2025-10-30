@@ -180,6 +180,33 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
             if (Frame.contains("Activate_Time"))
                 FrameDesc.fActivateTime = Frame["Activate_Time"].get<double>();
 
+            if (Frame.contains("Offset_Size") && Frame["Offset_Size"].is_array())
+            {
+                json Size = Frame["Offset_Size"];
+
+                FrameDesc.vOffsetSize.x = Size[0].get<_float>();
+                FrameDesc.vOffsetSize.y = Size[1].get<_float>();
+                FrameDesc.vOffsetSize.y = Size[2].get<_float>();
+            }
+
+            if (Frame.contains("Offset_Position") && Frame["Offset_Position"].is_array())
+            {
+                json Pos = Frame["Offset_Position"];
+
+                FrameDesc.vOffsetPos.x = Pos[0].get<_float>();
+                FrameDesc.vOffsetPos.y = Pos[1].get<_float>();
+                FrameDesc.vOffsetPos.y = Pos[2].get<_float>();
+            }
+
+            if (Frame.contains("Offset_Rotation") && Frame["Offset_Rotation"].is_array())
+            {
+                json Rot = Frame["Offset_Rotation"];
+
+                FrameDesc.vOffsetRot.x = Rot[0].get<_float>();
+                FrameDesc.vOffsetRot.y = Rot[1].get<_float>();
+                FrameDesc.vOffsetRot.y = Rot[2].get<_float>();
+            }
+
             FrameDesc.bActivated = false;          //처음엔 기본적으로 비활성화
 
             PrefabDesc.FrameDesc.push_back(FrameDesc);

@@ -116,32 +116,36 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
 {
-     if (m_IsRoot)
-     {
-         _matrix SpawnMatrix = WorldMatrix;
-         _float4x4 SpawnW = {};
-         XMStoreFloat4x4(&SpawnW, SpawnMatrix);
+     //if (m_IsRoot)
+     //{
+     //    _matrix SpawnMatrix = WorldMatrix;
+     //    _float4x4 SpawnW = {};
+     //    XMStoreFloat4x4(&SpawnW, SpawnMatrix);
 
-         _float fYaw = atan2f(SpawnW._31, SpawnW._33);
-         XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //나중에 설정값 줄수 있게?
+     //    _float fYaw = atan2f(SpawnW._31, SpawnW._33);
+     //    XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //나중에 설정값 줄수 있게?
 
-         XMVECTOR vPos = XMVectorSet(SpawnW._41, SpawnW._42, SpawnW._43, 1.f);
-         XMMATRIX PosMatrix = XMMatrixTranslationFromVector(vPos);
+     //    XMVECTOR vPos = XMVectorSet(SpawnW._41, SpawnW._42, SpawnW._43, 1.f);
+     //    XMMATRIX PosMatrix = XMMatrixTranslationFromVector(vPos);
 
-         SpawnMatrix = RotationMatrix * PosMatrix;
+     //    SpawnMatrix = RotationMatrix * PosMatrix;
 
-         XMStoreFloat4x4(&m_ComBindMatrix,
-             m_pTransformCom->Get_WorldMatrix() *
-             SpawnMatrix);
-     }
-     else
-     {
-         _vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-         m_pTransformCom->Set_State(STATE::POSITION, vPos);
+     //    XMStoreFloat4x4(&m_ComBindMatrix,
+     //        m_pTransformCom->Get_WorldMatrix() *
+     //        SpawnMatrix);
+     //}
+     //else
+     //{
+     //    _vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+     //    m_pTransformCom->Set_State(STATE::POSITION, vPos);
 
-         XMStoreFloat4x4(&m_ComBindMatrix,
-             m_pTransformCom->Get_WorldMatrix());
-     }
+     //    XMStoreFloat4x4(&m_ComBindMatrix,
+     //        m_pTransformCom->Get_WorldMatrix());
+     //}
+
+    XMStoreFloat4x4(&m_ComBindMatrix,
+        m_pTransformCom->Get_WorldMatrix()
+        * WorldMatrix);
 }
 
 HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)

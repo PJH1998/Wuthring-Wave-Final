@@ -310,13 +310,14 @@ void CMesh_Controller::EffectMesh_Tab()
                     {
                         bool IsSelected = (m_iSelectedTexture == i);
                         if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                        {
                             m_iSelectedTexture = i;
-
+                            m_pSelectedEffectMeshDesc->strTextureTag = m_Textures[i].strTextureTag;
+                        }
                         if (IsSelected)
                             ImGui::SetItemDefaultFocus();
 
                     }
-                    m_pSelectedEffectMeshDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                     ImGui::EndCombo();
                 }
             }

@@ -438,59 +438,90 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 
 void CEffect_Controller::Selected_Prefab_Info()
 {
+    
     //선택 되어있는 프리팹에 자식들 설정값 넣어줘야하고, 저장하기 위한 Desc에도 넣어줘야할거 같음.
     //Desc 에 들어갈 정보, 자식의 태그 이름 -> 이건 자식들 생서할때, 프리팹과 Desc에 생성한 자식 이름 같이 넣어주자.
     //자식의 활성화 시점 -> 현재 선택한 프리팹의 자식이 있을 경우, 활성화 타임 지정할 수 있는 Info 띄우고 세팅해주면, 미리 넣어놓은 자식 태그로 Desc에저장, 프리팹애 던져주자.
-    if (m_pSelectedPrefabDesc != nullptr && m_pSelectedPrefabFrame != nullptr)
+    if (ImGui::CollapsingHeader("Children Offset", ImGuiTreeNodeFlags_DefaultOpen))
     {
-        ImGui::Text("ActivateTime");
-        ImGui::PushItemWidth(60);
-        ImGui::InputFloat("##ActivateTime", &(m_pSelectedPrefabFrame->fActivateTime));
-        ImGui::PopItemWidth();
-
-        if (ImGui::Button("Frame Apply"))
+        if (m_pSelectedPrefabDesc != nullptr && m_pSelectedPrefabFrame != nullptr)
         {
-            //여기서 현재 프리팹에 Frame 수정해줘야할거 같은데 
-            m_pSelectedPrefab->Set_FrameDesc(m_pSelectedPrefabFrame);
-        }
-        ImGui::SameLine(0.f, 30.f);
-        if (ImGui::Button("Reset Frame"))
-        {
-            m_pSelectedPrefab->Reset_Prefab_Info();
-            m_pSelectedPrefab->SetActivate(true);
-        }
-    }
+            ImGui::Text("ActivateTime");
+            ImGui::PushItemWidth(60);
+            ImGui::InputFloat("##ActivateTime", &(m_pSelectedPrefabFrame->fActivateTime));
+            ImGui::PopItemWidth();
 
-    if (m_pSelectedPrefabDesc != nullptr && m_pSelectedPrefab->Get_Children_Count() > 0)
-    {
-        if (ImGui::Button("Save Prefab"))
-        {
-            IGFD::FileDialogConfig config;
+            ImGui::Text("Offset Pos");
+            ImGui::PushItemWidth(60);
+            ImGui::InputFloat("##Offset Pos.x", &(m_pSelectedPrefabFrame->vOffsetPos.x));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Pos.y", &(m_pSelectedPrefabFrame->vOffsetPos.y));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Pos.z", &(m_pSelectedPrefabFrame->vOffsetPos.z));
+            ImGui::PopItemWidth();
 
-            config.path = "../../Client/Bin/Resource/Test/";
-            config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+            ImGui::Text("Offset Size");
+            ImGui::PushItemWidth(60);
+            ImGui::InputFloat("##Offset Size.x", &(m_pSelectedPrefabFrame->vOffsetSize.x));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Size.y", &(m_pSelectedPrefabFrame->vOffsetSize.y));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Size.z", &(m_pSelectedPrefabFrame->vOffsetSize.z));
+            ImGui::PopItemWidth();
 
-            ImGuiFileDialog::Instance()->OpenDialog("Save Prefab", "Export", ".json", config);
-        }
+            ImGui::Text("Offset Rot");
+            ImGui::PushItemWidth(60);
+            ImGui::InputFloat("##Offset Rot.x", &(m_pSelectedPrefabFrame->vOffsetRot.x));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Rot.y", &(m_pSelectedPrefabFrame->vOffsetRot.y));
+            ImGui::SameLine();
+            ImGui::InputFloat("##Offset Rot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
+            ImGui::PopItemWidth();
 
-        if (ImGuiFileDialog::Instance()->Display("Save Prefab", ImGuiWindowFlags_NoCollapse))
-        {
-            if (ImGuiFileDialog::Instance()->IsOk())
+            if (ImGui::Button("Frame Apply"))
             {
-                _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+                //여기서 현재 프리팹에 Frame 수정해줘야할거 같은데 
+                m_pSelectedPrefab->Set_FrameDesc(m_pSelectedPrefabFrame);
+            }
+            ImGui::SameLine(0.f, 30.f);
+            if (ImGui::Button("Reset Frame"))
+            {
+                m_pSelectedPrefab->Reset_Prefab_Info();
+                m_pSelectedPrefab->SetActivate(true);
+            }
+        }
 
-                Prefab_To_Json(strFilePath);
+        if (m_pSelectedPrefabDesc != nullptr && m_pSelectedPrefab->Get_Children_Count() > 0)
+        {
+            if (ImGui::Button("Save Prefab"))
+            {
+                IGFD::FileDialogConfig config;
+
+                config.path = "../../Client/Bin/Resource/Test/";
+                config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+                ImGuiFileDialog::Instance()->OpenDialog("Save Prefab", "Export", ".json", config);
             }
 
-            ImGuiFileDialog::Instance()->Close();
+            if (ImGuiFileDialog::Instance()->Display("Save Prefab", ImGuiWindowFlags_NoCollapse))
+            {
+                if (ImGuiFileDialog::Instance()->IsOk())
+                {
+                    _string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+                    Prefab_To_Json(strFilePath);
+                }
+
+                ImGuiFileDialog::Instance()->Close();
+            }
         }
-    }
 
-    ImGui::SameLine(0.f, 20.f);
+        ImGui::SameLine(0.f, 20.f);
 
-    if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
-    {
-        Save_SelectedChildren_To_Json();
+        if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
+        {
+            Save_SelectedChildren_To_Json();
+        }
     }
 }
 
@@ -582,6 +613,25 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
         Frame["Children_Type"] = FrameDesc.eChildrenType;
         Frame["Activate_Time"] = FrameDesc.fActivateTime;
         Frame["Activated"] = FrameDesc.bActivated;
+
+        //Offset저장
+        json SizeJson = json::array();
+        SizeJson.push_back(FrameDesc.vOffsetSize.x);
+        SizeJson.push_back(FrameDesc.vOffsetSize.y);
+        SizeJson.push_back(FrameDesc.vOffsetSize.z);
+        Frame["Offset_Size"] = SizeJson;
+
+        json PosJson = json::array();
+        PosJson.push_back(FrameDesc.vOffsetPos.x);
+        PosJson.push_back(FrameDesc.vOffsetPos.y);
+        PosJson.push_back(FrameDesc.vOffsetPos.z);
+        Frame["Offset_Position"] = PosJson;
+
+        json RotJson = json::array();
+        RotJson.push_back(FrameDesc.vOffsetRot.x);
+        RotJson.push_back(FrameDesc.vOffsetRot.y);
+        RotJson.push_back(FrameDesc.vOffsetRot.z);
+        Frame["Offset_Rotation"] = RotJson;
 
         FrameJson.push_back(Frame);
     }
@@ -990,6 +1040,7 @@ void CEffect_Controller::Load_Prefab()
    m_PrefabDesc.emplace(PrefabDesc.strPrefabTag, PrefabDesc);
 
    m_pSelectedPrefab = pPrefab;
+   m_pSelectedPrefab->Bind_FrameDesc(PrefabDesc);
 
    auto iter = m_PrefabDesc.find(PrefabDesc.strPrefabTag);
    if (iter != m_PrefabDesc.end())
