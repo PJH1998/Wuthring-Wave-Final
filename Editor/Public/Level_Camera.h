@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Level.h"
 
 NS_BEGIN(Engine)
@@ -32,7 +32,7 @@ private:
 private:
 	_bool						m_isMapInterface = { false };
 
-	// Test¿ë Ground
+	// Testï¿½ï¿½ Ground
 	CRigidbody*			m_pGround = { nullptr };
 
 private:

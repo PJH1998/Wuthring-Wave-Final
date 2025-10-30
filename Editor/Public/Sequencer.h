@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
@@ -207,8 +207,8 @@ private:
 	// Draw Frame
 	_float								m_fFramePixelWidth = { 10.f };
 	_float								m_fFramePixelWidthTarget = { 10.f };
-	_int								m_iItemHeight = { 20 };						// Item 1°³ ´ç Height
-	_int								m_iLegendWidth = { 200 };					// ¹ü·Ê(Ç¥½Ã ³»¿ë) Width
+	_int								m_iItemHeight = { 20 };						// Item 1ï¿½ï¿½ ï¿½ï¿½ Height
+	_int								m_iLegendWidth = { 200 };					// ï¿½ï¿½ï¿½ï¿½(Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) Width
 
 	ImVec2							m_vChildFramePos = {};
 	ImVec2							m_vChildFrameSize = {};
@@ -227,7 +227,7 @@ private:
 	_int								m_iPanningViewFrame = {};
 
 	// Entry
-	_int								m_iSelectedEntry = { -1 };						// Select Entry(Ç×¸ñ)
+	_int								m_iSelectedEntry = { -1 };						// Select Entry(ï¿½×¸ï¿½)
 	_int								m_iDelEntry = { -1 };
 	_int								m_iDupEntry = { -1 };
 
@@ -267,13 +267,13 @@ private:
 	
 	// GUI
 	void								Drawing();
-	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => È­¸é ÁÂ¿ì ÀÌµ¿)
+	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => È­ï¿½ï¿½ ï¿½Â¿ï¿½ ï¿½Ìµï¿½)
 	void								Expand(_int iControllHeight);	// Canvas Expand
-	void								DrawFrame();						// Sequence ÇÁ·¹ÀÓ
+	void								DrawFrame();						// Sequence ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	void								DrawLegend();						// List
 	void								DrawSlot();							// Slot (Item)
-	void								Moving();							// Item Duration Á¶Àý (Left, Right Àâ¾Æ´ç±â±â)		
-	void								Cursor();								// Cursor (Frame È­¸é ºÓÀº ¼±)
+	void								Moving();							// Item Duration ï¿½ï¿½ï¿½ï¿½ (Left, Right ï¿½ï¿½Æ´ï¿½ï¿½ï¿½)		
+	void								Cursor();								// Cursor (Frame È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 	void								CopyPaste();							// Copy / Paste
 	void								ScrollBar();							// ScrollBar
 

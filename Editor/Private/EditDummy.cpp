@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "EditDummy.h"
 
 CEditDummy::CEditDummy(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
