@@ -180,6 +180,7 @@ PS_OUT_LIGHTDEPTH PS_SHADOW(PS_IN_SHADOW In)
     return Out;
 }
 
+
 technique11 DefaultTechnique
 {
     pass DefaultNormal // 0
@@ -214,4 +215,5 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SHADOW();
     }
+    
 }

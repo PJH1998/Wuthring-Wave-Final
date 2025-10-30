@@ -422,7 +422,7 @@ void CRenderer::Render_Bloom()
 
 		ID3D11ShaderResourceView* pBlur = j == 3 ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), j) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE_BLOOM"), j + 1);
 
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", pBlur)))// m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), j))))
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", pBlur)))
 			CRASH("Failed Add_SRVData");
 
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), j)))
@@ -461,6 +461,9 @@ void CRenderer::Render_BloomCombined()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Emissive"), m_pShader, "g_BlurTexture")))
+		CRASH("Render Fail")
 
 	if (FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_UPSAMPLE_BLOOM"), m_pShader, "g_BloomTexture", 0)))
 		CRASH("Failed Bind_RendererCS");
@@ -824,7 +827,6 @@ HRESULT CRenderer::Ready_RT()
 	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Debug"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 0.f))))
 		ASSERT_CRASH(false);
 #endif
-
 	return S_OK;
 }
 
@@ -877,6 +879,8 @@ HRESULT CRenderer::Ready_MRT()
 
 	// RENDERGROUP::EMISSIVE
 #pragma region MRT_EMISSIVE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 #pragma endregion
@@ -970,7 +974,6 @@ HRESULT CRenderer::Ready_RCS()
 	DownSampleRCS.iMipLevels = 4;
 	DownSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
-	//Default
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOWNSAMPLE"), &DownSampleRCS)))
 		CRASH("Failed Add RCS_DOWNSAMPLE");
 
