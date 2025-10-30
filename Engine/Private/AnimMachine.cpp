@@ -2,6 +2,8 @@
 #include "AnimMachine.h"
 #include "Model.h"
 #include "AnimState.h"
+#include "AnimTransition.h"
+#include "AnimStateFactory.h"
 
 #pragma region ANIM_STATE
 
@@ -15,9 +17,13 @@ CAnimMachine::CAnimMachine(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 CAnimMachine::CAnimMachine(const CAnimMachine& Prototype)
 	: CComponent{ Prototype }
 	, m_AnimStates { Prototype.m_AnimStates }
+	, m_AnyState { Prototype.m_AnyState }
 {
 	for(auto& Pair : m_AnimStates)
 		Safe_AddRef(Pair.second);
+
+	for(auto& pTransition : m_AnyState)
+		Safe_AddRef(pTransition);
 }
 #ifdef _DEBUG
 HRESULT CAnimMachine::Initialize_Prototype()
@@ -39,15 +45,16 @@ HRESULT CAnimMachine::Initialize_Prototype(const _char* AnimMachineDataPath)
 		_string StateName = AnimState["Name"];
 		CAnimState::ANIMSTATE_DESC DataDesc{};
 
-		//DataDesc.isBlend = AnimState["isBlend"];
-		//DataDesc.isRootMotion = AnimState["isRootMotion"];
-		//DataDesc.isLoop = AnimState["isLoop"];
-		//DataDesc.fRootMotionRate = AnimState["fRootMotionRate"];
-		//DataDesc.fTransitTrackPos = AnimState["fTransitTrackPos"];
-		//DataDesc.fAnimationSpeed = AnimState["fAnimationSpeed"];
-
 		m_AnimStates.emplace(StateName, CAnimState::Create(AnimState, ASM_Data["Transitions"]));
 	}
+
+	for(auto& AnyTransition : ASM_Data["AnyState"])
+	{
+		m_AnyState.push_back(CAnimTransition::Create(AnyTransition, CAnimStateFactory::Register_Transition(AnyTransition)));
+	}
+	std::sort(m_AnyState.begin(), m_AnyState.end(), [](CAnimTransition* Src, CAnimTransition* Dst)->_bool{
+		return Src->Get_Priority() < Dst->Get_Priority();
+		});
 
 	return S_OK;
 }
@@ -71,13 +78,11 @@ HRESULT CAnimMachine::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-//void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex)
 void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAnimTag, _float fTargetTrackPos)
 {
-	//if(iIndex >= m_AnimStates.size())
 	if(m_AnimStates.end() == m_AnimStates.find(strAnimTag))
 		return;
-	//if(iIndex != m_iCurrentStateIndex)
+
 	if(0 != m_strCurrentAnimTag.compare(strAnimTag))
 	{
 		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
@@ -93,30 +98,64 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 		m_fRootMotionRate = Desc.fRootMotionRate;
 		m_fTransitTrackPos = Desc.fTransitTrackPos;
 		m_fAnimationSpeed = Desc.fAnimationSpeed;
-		//pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
+
+		pModelCom->Set_TrackPosition(m_strCurrentAnimTag, fTargetTrackPos);
 	}
 }
 
+//cpu
 void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
-	// 1. 현재 상태 업데이트
-	//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
-	m_AnimStates[m_strCurrentAnimTag]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
+	_bool AnyStateResult{};
+	_string strNextAnimation;
+	_float fTargetTrackPosition{};
+	// 0. Any State Transition
+	for(auto& pTransition : m_AnyState)
+	{
+		if(AnyStateResult = pTransition->Is_Transit(pState, strNextAnimation, fTargetTrackPosition))
+		{
+			Handle_Input(pModelCom, pState, strNextAnimation, fTargetTrackPosition);
+			break;
+		}
+	}
+
+	if(false == AnyStateResult)
+	{
+		// 1. 현재 상태 업데이트
+		//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
+		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
+	}
+	else
+		int a = 10;
 
 	// 2. 애니메이션 재생
 	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon);
-	//isAnimFinished = m_AnimStates[m_strCurrentAnimTag]->Play_Animation(pModelCom, fTimeDelata);
-	//Result : 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
+
+	// 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
+//gpu
 void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
-	m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
+	_bool AnyStateResult{};
+	_string strNextAnimation;
+	_float fTargetTrackPosition{};
+	// 0. Any State Transition
+	for(auto& pTransition : m_AnyState)
+	{
+		if(AnyStateResult = pTransition->Is_Transit(pState, strNextAnimation, fTargetTrackPosition))
+		{
+			Handle_Input(pModelCom, pState, strNextAnimation, fTargetTrackPosition);
+			break;
+		}
+	}
 
-	//isAnimFinished = m_AnimStates[m_strCurrentAnimTag]->Play_Animation_GPU(pModelCom, pComputeShaderCom, fTimeDelata);
+	if(false == AnyStateResult)
+		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
+
 	isAnimFinished = pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strCurrentAnimTag, fTimeDelata, 
 		&m_fCurrentTrackPositon, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
 	
@@ -135,7 +174,7 @@ void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 	Clear_States();
 	for(auto& strAnimationName : AnimationNames)
 	{
-		CAnimState::ANIMSTATE_DESC Temp{ false, true, 0.1f, 0.f, 1.f };
+		CAnimState::ANIMSTATE_DESC Temp{};
 		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
 	}
 }
@@ -160,10 +199,24 @@ void CAnimMachine::Reset_StateData(_string& strAnimName,_bool isRootMotion,  _bo
 	AnimStateDesc.fRootMotionRate = fRootMotionRate;
 	AnimStateDesc.fTransitTrackPos = fTransitTrackPos;
 	AnimStateDesc.fAnimationSpeed = fAnimationSpeed;
-	//AnimStateDesc.iConstAnimRunning = iConstAnimRunning;
 
 	m_AnimStates[strAnimName]->Set_Data(AnimStateDesc);
 
+}
+
+void CAnimMachine::Get_StateData(_string& strAnimName, _bool& isRootMotion, _bool& isRootMotionRotate, _bool& isRootMotionTranslate, _bool& isLoop, _float& fRootMotionRate, _float& fTransitTrackPos, _float& fAnimationSpeed)
+{
+	if(m_AnimStates.find(strAnimName) == m_AnimStates.end())
+		return;
+
+	CAnimState::ANIMSTATE_DESC AnimStateDesc = m_AnimStates[strAnimName]->Get_StateData();
+	isRootMotion = AnimStateDesc.isRootMotion;
+	isRootMotionRotate = AnimStateDesc.isRootMotionRotate;
+	isRootMotionTranslate = AnimStateDesc.isRootMotionTranslate;
+	isLoop = AnimStateDesc.isLoop;
+	fRootMotionRate = AnimStateDesc.fRootMotionRate;
+	fTransitTrackPos = AnimStateDesc.fTransitTrackPos;
+	fAnimationSpeed = AnimStateDesc.fAnimationSpeed;
 }
 
 _bool CAnimMachine::Render_CurrentStateGUI(_string& strCurrentAnim)
@@ -215,6 +268,9 @@ void CAnimMachine::Free()
 
 	for(auto& Pair : m_AnimStates)
 		Safe_Release(Pair.second);
+	for(auto& AnyTransit : m_AnyState)
+		Safe_Release(AnyTransit);
+
 	m_AnimStates.clear();
 }
 
@@ -236,7 +292,6 @@ void CAnimMachine::Save_AnimDatas(json& jsonOutput)
 		AnimState["fRootMotionRate"] = DataDesc.fRootMotionRate;
 		AnimState["fTransitTrackPos"] = DataDesc.fTransitTrackPos;
 		AnimState["fAnimationSpeed"] = DataDesc.fAnimationSpeed;
-		//AnimState["Transitions"] = json::array();
 
 		jsonOutput["AnimStates"].push_back(AnimState);
 	}
@@ -259,5 +314,13 @@ void CAnimMachine::Load_AnimDatas(json& jsonInput)
 		
 		m_AnimStates.emplace(StateName, CAnimState::Create(AnimState, jsonInput["Transitions"]));
 	}
+
+	for(auto& AnyTransition : jsonInput["AnyState"])
+	{
+		m_AnyState.push_back(CAnimTransition::Create(AnyTransition, CAnimStateFactory::Register_Transition(AnyTransition)));
+	}
+	std::sort(m_AnyState.begin(), m_AnyState.end(), [](CAnimTransition* Src, CAnimTransition* Dst)->_bool{
+		return Src->Get_Priority() < Dst->Get_Priority();
+		});
 }
 #endif

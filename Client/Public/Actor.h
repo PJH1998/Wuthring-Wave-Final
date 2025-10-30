@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Define.h"
 #include "ContainerObject.h"
 
@@ -36,8 +36,7 @@ public:
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) {};
 	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
-
-
+	virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
 
 
 #pragma endregion

@@ -2,9 +2,6 @@
 
 static float PI = 3.1415926535f;
 
-// Emissive효과를 넣을지 판단할 때 사용하는 RGB 계수
-float g_fLuminence[3] = { 0.2126, 0.7152, 0.0722 };
-
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_CamViewMatrix, g_CamProjMatrix;
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
@@ -16,6 +13,10 @@ float g_fHeight = 1080.f;
 
 float g_iShadowMapSizeX = 8192;
 float g_iShadowMapSizeY = 4608;
+
+float g_fFocusDepth;
+float g_fFocusMinCoc;
+float g_fFocusRange;
 
 float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , 미세면 표면의 거칠기 분포
 {
@@ -41,14 +42,14 @@ float Compute_GSF(float NdotL, float NdotV, float Roughness) // SchlickGGXGeomet
 
 float SchlickFresnel(float i)
 {
-    float x = clamp(1.f - i, 0.f, 1.f);
+    float x = clamp(1.f - i, 0.f, 1.f);         // 하프 벡터와 Light가 겹칠수록 낮은 수치
     
     return pow(x, 5.f);
 }
 
 float3 Compute_Fresnel(float3 vSpecularColor, float LdotH) // SchlickFresnelFunction    , 입사각에 따른 반사되는 비율
 {
-    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH);
+    return vSpecularColor + (float3(1.f, 1.f, 1.f) - vSpecularColor) * SchlickFresnel(LdotH); // 입사각에 따른 Specular 수치 ( 하프벡터와 Light가 비슷할수록 Specular Down )
 }
 
 float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float3 vAlbedo, float fMetallic, float fRoughness) // vViewDir = Look (WorldPos - CamPos)
@@ -62,7 +63,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     float3 vF0 = 0.04f;
     vF0 = lerp(vF0, vAlbedo, fMetallic);
     
-    float3 Fresnel = Compute_Fresnel(vF0, LdotH);
+    float3 Fresnel = Compute_Fresnel(vF0, LdotH);                               // LdotH가 크면 수치가 낮음 ( 수치는 F0, Specular Color )
         
     float GSF = Compute_GSF(NdotL, NdotV, fRoughness);
     
@@ -70,7 +71,7 @@ float3 Compute_BRDF_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, float
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);                            // Diffuse 색상에 기여하는 비율 ( 정면 일수록 Diffuse 색)
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
@@ -96,13 +97,13 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     
     float3 Specular = (NDF * GSF * Fresnel) / max(4.f * NdotL * NdotV, 0.001f);
     
-    float3 kd = (1.f - Fresnel) * (1.f - fMetallic);
+    float3 kd = clamp(0.3f, 1.f, (1.f - Fresnel)) * (1.f - fMetallic);
     
     float3 vDiffuse = kd * vAlbedo / PI;
     
-    vDiffuse *= vToonRim.x;
+    //vDiffuse *= vToonRim.x;
     
-    return (vDiffuse + Specular) * NdotL;
+    return (vDiffuse + Specular);// * NdotL;
 }
 
 float2 Compute_Texcoord(float2 vProjXY)
@@ -152,21 +153,29 @@ float4 Compute_ViewPos(float2 vTexcoord, Texture2D DepthTexture)
     return vViewPos;
 }
 
+float4 Compute_ViewPos_Sampler(float2 vTexcoord, Texture2D DepthTexture, sampler Sampler)
+{
+    float4 vViewPos = 0.f;
+    
+    vector vDepthDesc = DepthTexture.Sample(Sampler, vTexcoord);
+    
+    vViewPos.x = vTexcoord.x * 2.f - 1.f;
+    vViewPos.y = vTexcoord.y * -2.f + 1.f;
+    vViewPos.z = vDepthDesc.x;
+    vViewPos.w = 1.f;
+    
+    vViewPos = vViewPos * vDepthDesc.y;
+    vViewPos = mul(vViewPos, g_ProjMatrixInv);
+    
+    return vViewPos;
+}
+
 float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord)
 {
     float4 vNormal = NormalTexture.Sample(Sampler, vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
     return vNormal;
-}
-
-float Luminame(float3 vColor)
-{
-    float fWeight;
-    
-    fWeight = (vColor.r * g_fLuminence[0]) + (vColor.g * g_fLuminence[1]) + (vColor.b * g_fLuminence[2]);
-    
-    return fWeight;
 }
 
 float ShadowPCF(float3 UVDepth, int iCascadeIndex, int iNumWeight, Texture2DArray<float> ShadowMap)
@@ -274,27 +283,54 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
     
     float3x3 TBN = float3x3(vTangent, vBinormal, vNormal);
     
-    vector vSamplePos = vViewPos + vector((mul(vSampleNormal.xyz, TBN) * fRadius), 0.f);
+    float3 vRandomVector = (mul(vSampleNormal.xyz, TBN) * fRadius);
     
-    vector vProjPos = mul(vSamplePos, g_CamProjMatrix);
-    float fRandomZ = vProjPos.w;
+    float4 vSamplePos = vViewPos + float4((vRandomVector * fRadius), 0.f);
+    float fRandomZ = vSamplePos.z;
+    
+    float4 vProjPos = mul(vSamplePos, g_CamProjMatrix);
     
     float2 vSampleUV = Compute_Texcoord((vProjPos.xy / vProjPos.w));
     
-    float SampleDepth = DepthTexture.Sample(PointClampSampler, vSampleUV).y;
+    float4 vSampleViewPos = Compute_ViewPos_Sampler(vSampleUV, DepthTexture, PointClampSampler);
+    
+    float SampleDepth = vSampleViewPos.z; //DepthTexture.Sample(PointClampSampler, vSampleUV).y;
     
     if (SampleDepth == 0.f || SampleDepth >= fRandomZ) // 안그려져있거나, 랜덤 위치보다 뒤에 있다면
         return 1.f;
     
-    float Distance = abs(SampleDepth - vViewPos.z);
+    float fDistance = abs(SampleDepth - vViewPos.z);
     
-    Occlusion = smoothstep(fMaxDistance, 0.f, Distance);
+    if (fDistance > fMaxDistance)
+        return 1.f;
+        
+    float fDistWeight = smoothstep(fMaxDistance, 0.f, fDistance);
+
+    float fNormalWeight = saturate(dot(vViewNormal, normalize(vSampleViewPos - vViewPos)));
     
-    float fNormalWeight = saturate(dot(vViewNormal, normalize(vSamplePos - vViewPos)));
-    
-    Occlusion *= fNormalWeight;
+    Occlusion = fDistWeight * (1.f - fNormalWeight);
     
     return Occlusion;
+}
+
+float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
+{
+    //float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
+    
+    float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
+    
+    float3 vViewDir = normalize(vViewPos.xyz);
+    
+    float3 vCamDir = float3(0.f, 0.f, 1.f);
+    
+    float fDot = dot(vViewDir, vCamDir);
+    float fDepth = fDot * vViewPos.z;
+    
+    float fCoc = 0.f;
+    
+    fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (fDepth * g_fFocusRange));
+    
+    return fCoc;
 }
 
 float Random(float2 St)

@@ -3,7 +3,7 @@
 #include "Player.h"
 #include "SpringCamera.h"
 
-#include "AugustaStateFactory.h"
+#include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
@@ -44,11 +44,11 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
-    CAugustaStateFactory::Register_States(m_pStateMachineCom, this);
+    CAugustaFactory::Register_States(m_pStateMachineCom, this);
 
 
     // 초기 State 설정.
-    m_StateContext.m_eIdleType = EIdleType::STAND1_ACTION01;
+    m_StateContext.m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
         static_cast<_uint>(EAugustaGroundState::IDLE));
     
@@ -69,13 +69,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-    // 3. 키입력 갱신은 Player 객체에서 관리 중
-    //if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
-    //{
-    //    m_IsLockOn = !m_IsLockOn;
-    //    m_pSpringCamera->Lock_On();
-    //}
-        
     // 4. Parts 갱신
     for (auto& pPart : m_PartObjects)
     {
@@ -189,18 +182,35 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     }
 }
 
-void CAugusta::PartAcitvate(_uint iPartType, _bool IsActive)
+void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
 {
     switch (iPartType)
     {
     case PART_BAYONET:
-        m_pBayonet->SetActivate(IsActive);
+        m_pBayonet->Activate(IsActive);
         break;
     case PART_SKILLWEAPON:
-        m_pSkillWeapon->SetActivate(IsActive);
+        m_pSkillWeapon->Activate(IsActive);
         break;
     case PART_GRIFFON:
-        m_pGriffon->SetActivate(IsActive);
+        m_pGriffon->Activate(IsActive);
+        break;
+    }
+}
+
+void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
+{
+    switch (iPartType)
+    {
+    case PART_BAYONET:
+        m_pBayonet->Clear_Animation(strAnimName);
+        break;
+    case PART_SKILLWEAPON:
+        m_pSkillWeapon->Clear_Animation(strAnimName);
+        break;
+    case PART_GRIFFON:
+        m_pGriffon->Clear_Animation(strAnimName);
+
         break;
     }
 }
@@ -221,8 +231,63 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Set_SocketMatrix(pSocketMatrix);
         break;
+    case PART_GRIFFON:
+        m_pGriffon->Set_SocketMatrix(pSocketMatrix);
+        break;
     }
 }
+
+// Hit 판정.
+void CAugusta::Hit_Judge(void* pArg)
+{
+    // 임시
+    _bool IsLand = Is_Land(0.2f);
+    
+    // 강공?
+    
+
+    // 몬스터 공격 Dir
+    ACTORDIR eAttackDir = ACTORDIR::RU;
+    // Behit S = SMALL(기본 공 Big), B = Big (Skill로 맞으면 Big)
+    if (IsLand)
+    {
+        // 특수 조건 우선순위에 따라 Change_State
+        
+        switch (eAttackDir)
+        {
+        case ACTORDIR::LU:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::RU:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            break;
+        case ACTORDIR::U: 
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::LD:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            break;
+        case ACTORDIR::RD:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_R;
+            break;
+        case ACTORDIR::D:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
+            break;
+        case ACTORDIR::L: // L, R은 정면 판단.
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
+            break;
+        case ACTORDIR::R:
+            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
+            break;
+        }
+
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+    }
+    else
+        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START));
+
+}
+
 
 void CAugusta::Sync_Position()
 {
@@ -318,6 +383,7 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 
     //몬스터 탐지용 콜백으로 받을 Desc - LJH
     m_pColliderCom->Set_Desc(m_pTransformCom);
+
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
@@ -381,7 +447,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         case PARTTYPE::PART_SKILLWEAPON:
             vScale = { 1.f, 1.f, 1.f };
             vPosition = { 0.f, 0.f, 0.f };
-            Desc = PlayerData::GetAugustaGriffonCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+            Desc = PlayerData::GetAugustaSkillWeaponCloneData(vScale, vRotation, vPosition, m_eCurLevel);
             Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
             Desc.pParentTransform = m_pTransformCom;
             ASSERT_CRASH(Desc.pSocketMatrix);

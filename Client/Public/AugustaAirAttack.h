@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "AirState.h"
 
 NS_BEGIN(Client)
@@ -9,10 +9,10 @@ class CAugustaAirAttack final : public CAirState
 private:
     enum AIRATTACKSTATE // 내부에서 전환 가능한 상태.
     {
-        AIR_ATTACK_START,
-        AIR_ATTACK_JUMP,
+        ATTACK,
         MOVE,
         JUMP,
+        DOUBLE_JUMP,
         LAND,
         END
     };
@@ -37,7 +37,6 @@ private:
     virtual void Handle_Input() override;
     void Update_AttackAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
-    void LockOn_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void SetUp_Animations();

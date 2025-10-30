@@ -1,4 +1,4 @@
-#include "Editorpch.h"
+癤�#include "Editorpch.h"
 #include "Effect_Mesh.h"
 
 CEffect_Mesh::CEffect_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -65,7 +65,7 @@ void CEffect_Mesh::Update(_float fTimeDelta)
         m_vLifeTime.x = 0.f;
         m_pVIBufferCom->Reset_UAV();
     }
-    //라이프타임 끝나면 비활성화
+
 }
 
 void CEffect_Mesh::Late_Update(_float fTimeDelta)
@@ -119,7 +119,6 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;

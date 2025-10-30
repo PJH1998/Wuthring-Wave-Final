@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+﻿#include "EditorPch.h"
 #include "EditDummy_Augusta.h"
 
 CEditDummy_Augusta::CEditDummy_Augusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -75,7 +75,7 @@ void CEditDummy_Augusta::Render()
 		m_pShaderCom->Bind_Value("g_HasMetallic", &HasMetallic, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(7);
 		m_pModelCom->Render(i);
 	}
 }

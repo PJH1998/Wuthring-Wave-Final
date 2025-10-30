@@ -91,7 +91,12 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     Out.vDiffuse = vDiffuse * (1.f - vMask) + vMaskDiffiuse * vMask;
     Out.vDiffuse.w = 1.f;
     
-    Out.vPBR.y = vDiffuse.w; // Roughness
+    Out.vEmissive = Out.vDiffuse;
+    
+    //Out.vEmissive = Out.vDiffuse;
+    
+    Out.vPBR.y = max(0.01f, 1.f - vDiffuse.w); // Roughness
+    Out.vPBR.x = 1.f;
     
     if(g_IsDynamicObject)
         Out.vPBR.z = 1.f;
@@ -100,8 +105,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (g_HasMetallic)
     {
         vector vMetallicDesc = g_MetallicTexture.Sample(DefaultSampler, In.vTexcoord);
-        if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
-            Out.vPBR.x = 1.f;
+        //if (vMetallicDesc.r == 0.f && vMetallicDesc.b == 0.f)
+        //    Out.vPBR.x = 1.f;
     }
     
     float4 vNormal;
@@ -110,7 +115,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         vector vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
         vNormal = normalize(vNormalDesc * 2.f - 1.f);
-        if (vNormalDesc.x > vNormalDesc.z || vNormalDesc.y > vNormalDesc.z)
+        if (vNormalDesc.x > vNormalDesc.z && vNormalDesc.y > vNormalDesc.z)
             vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
         
         float3 vTangent = In.vTangent.xyz;
@@ -301,7 +306,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.2f), 0.f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.12f), 0.f);
    
     vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
     
@@ -330,6 +335,30 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 }
 
 /*======================================================OUTLINE_END======================================================*/
+
+struct PS_OUT_EMISSIVE
+{
+    float4 vDiffuse : SV_TARGET0;
+    float4 vEmissive : SV_TARGET1;
+};
+
+
+PS_OUT_EMISSIVE PS_EMISSIVE(PS_IN In)
+{
+    PS_OUT_EMISSIVE Out = (PS_OUT_EMISSIVE) 0;
+
+    float4 vColor = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+    
+    Out.vDiffuse = float4(vColor.xyz, 1.f);
+    
+    float fWeight = Luminance(vColor.xyz);
+    
+    if(fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(vColor.xyz, 1.f);
+        
+    return Out;
+}
+
 
 technique11 DefaultTechnique
 {
@@ -405,5 +434,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_OUTLINE();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_OUTLINE();
+    }
+    
+    pass Emissive
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_EMISSIVE();
     }
 }

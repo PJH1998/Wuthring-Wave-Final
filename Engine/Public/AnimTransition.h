@@ -6,6 +6,7 @@ NS_BEGIN(Engine)
 class CAnimTransition final : public CBase
 {
 public:
+	//enum CONDITOIN_TYPE {SINGLE, MULTI};
 	typedef struct tagTransitionData
 	{
 		_string strFrom;
@@ -17,9 +18,10 @@ public:
 		_float fTargetTrackPos;
 		// 현재 애니메이션에서 변환할 수 있는 트랙위치
 		_float fTransitEnablePos;
-		//_uint iNextStateIndex; strTo에서 직접 찾기
 
+		_uint eType;
 	}TRANSITION_DESC;
+	typedef function<_bool(const _uint*, const _uint)> CONDITION;
 
 private:
 	explicit CAnimTransition();
@@ -33,7 +35,7 @@ public:
 		fTargetTrackPos = m_fTargetTrackPos;
 	}
 public:
-	HRESULT Initialize_Prototype(json& jsonParser);
+	HRESULT Initialize_Prototype(json& jsonParser, CONDITION Func);
 
 	//_bool Is_Transit(const _uint* pOwnerState, _int& iAnimStateIndex);
 	_bool Is_Transit(const _uint* pOwnerState, _string& strNextState, _float& fTargetTrackPos);
@@ -58,9 +60,10 @@ private:
 	_float m_fTransitEnablePos{};
 	//typedef vector<function<_bool(const _uint*)>> CONDITION;
 	//CONDITION m_Conditions;
+	CONDITION m_Condition;
 
 public:
-	static CAnimTransition* Create(json& jsonParser);
+	static CAnimTransition* Create(json& jsonParser, CONDITION Func);
 #ifdef _DEBUG
 	static CAnimTransition* Create();
 #endif // _DEBUG

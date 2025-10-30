@@ -32,7 +32,7 @@ HRESULT CLevel_Shader::Initialize()
 void CLevel_Shader::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Shader"));
-    m_pShader_Interface->Update_Shadow();
+    m_pShader_Interface->Setting_Shader();
 }
 
 void CLevel_Shader::Render()

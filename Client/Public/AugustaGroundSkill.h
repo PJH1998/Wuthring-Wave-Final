@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
@@ -17,6 +17,7 @@ private:
        MOVE,
        JUMP, 
        LAND,
+       SKILL_E,
        AIR_ATTACK,
        FALL,
        END

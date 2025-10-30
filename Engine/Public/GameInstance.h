@@ -122,6 +122,11 @@ public:
 	void		IsSSAO(_bool IsSSAO);
 	void		IsSSAO_Blur(_bool IsBlur);
 	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
+	void		SetBloomIntensity(_float fIntensity);
+	void		SetBloomWeight(_int iWeight);
+	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
+	void		SetDof(_float fDepth, _float fRange, _float fScale);
+	void		Set_Blur(_bool IsBlur, BLUR_TYPE eType);
 #endif
 #pragma endregion
 

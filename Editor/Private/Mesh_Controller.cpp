@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Mesh_Controller.h"
 
 CMesh_Controller::CMesh_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -44,26 +44,26 @@ void CMesh_Controller::Load_AllTextureFromFolder(const _string& strFolderPath)
                 MESH_TEXTURE Desc{};
                 CTexture* pTexture = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¸ï¿½
                 _string strTextureTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÀÌ¸§ ÁöÁ¤
+                //ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
-                //ÆÄÀÏ°æ·Î wstring º¯È¯
+                //ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ wstring ï¿½ï¿½È¯
                 _wstring wstrFilePath = StringToWString(filePath);
     
-                //ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® »ý¼º
+                //ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
                     pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
 
-                //»ý¼ºÇÑ ÅØ½ºÃ³ ÁÖ¼Ò µî·Ï, ¹Ì¸®º¸±â ¶ç¿ï·Á¸é ÁÖ¼Ò·Î SRV°¡Á®¿Í¾ßÇØ¼­ ÀúÀåÇØÁà¾ßÇÔ.
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½, ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼Ò·ï¿½ SRVï¿½ï¿½ï¿½ï¿½ï¿½Í¾ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
                 Desc.pTexture = pTexture;
                 //Safe_AddRef(pTexture);
 
@@ -73,7 +73,7 @@ void CMesh_Controller::Load_AllTextureFromFolder(const _string& strFolderPath)
     }
 }
 
-//ÀÌ¸§¸¸ ÀÐ¾î¼­ ¸®½ºÆ®¹Ú½º¿¡ ÀÌ¸§ ¶ç¿ì´Â ¿ëµµ·Î¸¸ »ç¿ëÇÏÀÚ. 
+//ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½Ð¾î¼­ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ëµµï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. 
 void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
 {
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -89,13 +89,13 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
                 MESH_TAG Desc = {};
                 CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC FXMeshDesc = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï¸ï¿½
                 _string strMeshTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ¸Å½¬ ÀÌ¸§ ÁöÁ¤
+                //ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strMeshTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ¸Å½¬¹öÆÛ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_EffectMesh_");
                 strcat_s(szDefault, Desc.szName);
@@ -120,15 +120,15 @@ void CMesh_Controller::EffectMesh_Tab()
         if (ImGui::Begin("FXMesh Info"))
         {
 
-            //ÆÄÆ¼Å¬ ¼³Á¤°ª VIBuffer
+            //ï¿½ï¿½Æ¼Å¬ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ VIBuffer
             if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
             {
-                /////////////////////////////////////// Ã¼Å©¹Ú½º
+                /////////////////////////////////////// Ã¼Å©ï¿½Ú½ï¿½
                 ImGui::Checkbox("Loop", &(m_pSelectedVBFXDesc->IsLoop));
 
                 if (ImGui::Checkbox("SpawnRing", &(m_pSelectedVBFXDesc->IsSpawnRing)))
                 {
-                    //¼±ÅÃµÆÀ¸´Ï ´Ù¸¥ ¾êµé ²¨ÁÖÀÚ
+                    //ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     m_pSelectedVBFXDesc->IsSpawnBox = false;
                 }
 
@@ -148,7 +148,7 @@ void CMesh_Controller::EffectMesh_Tab()
 
                 ImGui::PushItemWidth(200);
 
-                /////////////////////////////////////// °¡ÁßÄ¡ ¼³Á¤
+                /////////////////////////////////////// ï¿½ï¿½ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½
                 ImGui::Separator();
                 ImGui::Text("SpreadWeight");
                 ImGui::SameLine();
@@ -168,7 +168,7 @@ void CMesh_Controller::EffectMesh_Tab()
          
                 if (m_pSelectedVBFXDesc->IsSpawnRing)
                 {
-                    /////////////////////////////////////// ¸µ ½ºÆù½Ã ¼³Á¤°ª
+                    /////////////////////////////////////// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     ImGui::Text("RMin/RMax");
                     ImGui::PushItemWidth(60);
                     ImGui::InputFloat("##RMin", &(m_pSelectedVBFXDesc->fRmin));
@@ -187,7 +187,7 @@ void CMesh_Controller::EffectMesh_Tab()
                 }
 
                 ImGui::Checkbox("InWard", &(m_pSelectedVBFXDesc->IsInWard));
-                /////////////////////////////////////// ¹æÇâ ¼³Á¤
+                /////////////////////////////////////// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
                 if (m_pSelectedVBFXDesc->IsInWard)
                 {
@@ -298,13 +298,13 @@ void CMesh_Controller::EffectMesh_Tab()
                     szMeshTag.push_back(iter->szName);
                 }
 
-                //¸Å½¬ ¸®½ºÆ®¹Ú½º ¶ç¿ì±â
+                //ï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 if (ImGui::ListBox("Effect Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
                 {
                     m_pSelectedEffectMeshDesc->strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
                 }
 
-                //¸Å½¬ ±âº» »ö»ó ÅØ½ºÃ³ ¼³Á¤
+                //ï¿½Å½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
                 if (ImGui::BeginCombo("Texture", "")) {
                     for (size_t i = 0; i < m_Textures.size(); i++)
                     {
@@ -329,12 +329,12 @@ void CMesh_Controller::EffectMesh_Tab()
 
 void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffectMeshDesc, _bool& IsCreate)
 {
-    //ÇÁ¸®ÆÕÀÌ Å¬·ÐÀ¸·Î ÀÚ½ÄÀ» »ý¼ºÇÒ Á¤º¸¸¦ ³Ñ°ÜÁà¾ßÇÔ.
-    //ÀÏ´Ü ±âº»º£ÀÌ½º·Î »ý¼ºÇÒ ¼ö ÀÖ°Ô ÇØÁÖÀÚ.
-    //ÀÌÆåÆ®¸Å½¬ (¿ÀºêÁ§Æ®)°¡ °¡Á®¾ßÇÒ Á¤º¸°¡ »ý°¢º¸´Ù ¸¹À» °Å °°À½. ex) ¸Å½¬ÀÇ ¿òÁ÷ÀÓ Á¤º¸, ÅØ½ºÃ³ Á¤º¸ (¿©·¯°³), ÆÐ½ºÁ¤º¸, ¶óÀÌÇÁÅ¸ÀÓ µîµî..
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //ï¿½Ï´ï¿½ ï¿½âº»ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Å½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ex) ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½), ï¿½Ð½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½..
 
-    //¸®½ºÆ®¹Ú½º·Î ¾î¶² ¸Å½¬ ÄÄÆ÷³ÍÆ®¸¦ °¡Áú°ÇÁö.
-    //ÅØ½ºÃ³ ¹Ì¸®º¸±â·Î ¾î¶² µðÇ»Áî ÅØ½ºÃ³(º¸Åë »ö»óÀÏµí?) °¡Áú°ÇÁö¸¸ ÀÏ´Ü ¼³Á¤ÇØ¼­ ±âº»º£ÀÌ½º·Î ¸¸µé ¼ö ÀÖ°Ô?
+    //ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ú½ï¿½ï¿½ï¿½ ï¿½î¶² ï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //ï¿½Ø½ï¿½Ã³ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½î¶² ï¿½ï¿½Ç»ï¿½ï¿½ ï¿½Ø½ï¿½Ã³(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½?) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½âº»ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½?
 
     if (ImGui::Begin("Mesh Base"))
     {
@@ -345,14 +345,14 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
             szMeshTag.push_back(iter->szName);
         }
 
-        //¸Å½¬ ¸®½ºÆ®¹Ú½º ¶ç¿ì±â
+        //ï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (ImGui::ListBox("Effect Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
         {
-            //¼±ÅÃµÈ ¸Å½¬ÅÂ±× ÀÓ½ÃÀúÀå? 
+            //ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Å½ï¿½ï¿½Â±ï¿½ ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½? 
             m_bMeshVBTag = true;
         }
 
-        //¸Å½¬ ±âº» »ö»ó ÅØ½ºÃ³ ¼³Á¤
+        //ï¿½Å½ï¿½ ï¿½âº» ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
         if (ImGui::BeginCombo("Texture", "")) {
             for (size_t i = 0; i < m_Textures.size(); i++)
             {
@@ -368,7 +368,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
             ImGui::EndCombo();
         }
 
-        //Root ¼³Á¤
+        //Root ï¿½ï¿½ï¿½ï¿½
         if(ImGui::Checkbox("Root", &m_IsRoot))
 
         ImGui::Separator();
@@ -376,11 +376,11 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
             ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
         }
 
-        if (m_bTagFlag && m_bMeshVBTag) //ÀÌÆåÆ® ÄÁÆ®·Ñ·¯°¡ ¼³Á¤ÇØÁØ ÀÌ¸§°ªÀÌ ÀÖ°í, ¼±ÅÃÇÑ ¸Å½¬¹öÆÛ°¡ ÀÖ¾î¾ßÁö¸¸ »ý¼ºÇÒ ¼ö ÀÖ°Ô.
+        if (m_bTagFlag && m_bMeshVBTag) //ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö°ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½Û°ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö°ï¿½.
         {
             if (ImGui::Button("Create"))
             {
-                //ÇÁ¸®ÆÕ¿¡°Ô Desc Àü´Þ -> ÇÁ¸®ÆÕÀÌ Desc·Î Å¬·Ð ÁøÇà
+                //ï¿½ï¿½ï¿½ï¿½ï¿½Õ¿ï¿½ï¿½ï¿½ Desc ï¿½ï¿½ï¿½ï¿½ -> ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Descï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
                 _tchar EffectMeshTag[MAX_PATH] = {};
                 CEffect_Mesh::EFFECTMESH_DESC EffectMeshDesc{};
@@ -390,19 +390,19 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 //EffectMeshDesc.strMyTag = EffectMeshTag;
 
-                //ÀÌÆåÆ® ¸Å½¬ ÀÌ¸§ ¹× Å¬·ÐÇÒ ÄÄÆ÷³ÍÆ® ÀÌ¸§µé
+                //ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å½ï¿½ ï¿½Ì¸ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ì¸ï¿½ï¿½ï¿½
                 EffectMeshDesc.strMyTag = EffectMeshTag;
                 EffectMeshDesc.eMyType = EFFECT_TYPE::MESH;
                 EffectMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 EffectMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
 
-                //ÀÌÆåÆ®¸Å½¬(¿ÀºêÁ§Æ®)°¡ °¡Áú µðÆúÆ® ¼³Á¤°ª.
+                //ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Å½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
                 EffectMeshDesc.vLifeTime.y = 10.f;
                 EffectMeshDesc.vPos = _float3(0.f, 0.f, 0.f);
                 EffectMeshDesc.vSize = _float3(0.5f, 0.5f, 0.5f);
                 EffectMeshDesc.fShaderPass = 0;
 
-                //ÀÎ½ºÅÏ½Ì¸Å½¬ µðÆúÆ® ¼³Á¤°ª. ¿©±â¼­ ¹Ì¸® ¿øÇü »ý¼ºÀ» ÇØÁà¾ßÇÔ.
+                //ï¿½Î½ï¿½ï¿½Ï½Ì¸Å½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½â¼­ ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
                 _fmatrix DefualtMatrix = XMMatrixIdentity();
                 VBFXMhesDesc.vSize = _float2(1.f, 1.f);
                 VBFXMhesDesc.iNumInstance = 1;
@@ -412,14 +412,14 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
                 strcpy_s(szDatPath, sizeof(szDatPath), "../../Client/Bin");
                 strcat_s(szDatPath, sizeof(szDatPath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
 
-                //¿øÇü »ý¼º
+                //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag,
                 CVIBuffer_FXMesh_Instance::Create(m_pDevice, m_pContext, szDatPath, DefualtMatrix, &VBFXMhesDesc));
                 
-                //¿øÇüÀÌ ÀÐÀº Dat °æ·Î VB¿¡ ÀúÀåÇØÁà¾ßÇÒ°Å °°À½.
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Dat ï¿½ï¿½ï¿½ VBï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ ï¿½ï¿½ï¿½ï¿½.
                 strcpy_s(VBFXMhesDesc.DatFilePath, sizeof(VBFXMhesDesc.DatFilePath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
 
-                ////Desc¿¡ VBMesh ÀÌ¸§ ÀúÀå?
+                ////Descï¿½ï¿½ VBMesh ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½?
                 //_tchar strFXMehsTag[MAX_PATH] = {};
                 //MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_MeshVBTag[m_iSelectedMeshVBTag].szName, strlen(m_MeshVBTag[m_iSelectedMeshVBTag].szName), strFXMehsTag, MAX_PATH);
                
@@ -431,16 +431,16 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
                     m_IsRoot = false;
                 }
 
-                //¸Å½¬ÀÌÆåÆ® ¿Í ¸Å½¬VBÅÂ±×¸¦ ¸ÂÃç¾ßÇÒÁö´Â °í¹ÎÇØº¸ÀÚ.
+  
                 m_tEffectMeshDesc.emplace(EffectMeshTag, EffectMeshDesc);
 
                 tEffectMeshDesc = EffectMeshDesc;
 
-                //»ý¼ºµÆÀ½À» ÀÌÆåÆ® ÄÁÆ®·Ñ·¯¿¡°Ô Àü´Þ
                 IsCreate = true;
 
-                //ÃÊ±âÈ­
                 m_TrailMeshTag[0] = _T('\0');
+     
+
                 m_bTagFlag = false;
             }
         }
@@ -520,7 +520,7 @@ void CMesh_Controller::Remove_Desc(const _wstring& DescTag)
 
     if (iterEffectMeshDesc != m_tEffectMeshDesc.end())
     {
-        //È¤½Ã °°Àº ÀÌ¸§À¸·Î ´Ù½Ã ¸¸µé¾îÁö´Â°Å ´ëºñÇØ¼­ Áö¿öÁà¾ßÇÒ°Å °°À½.
+        //È¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½ ï¿½ï¿½ï¿½ï¿½.
         m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterEffectMeshDesc->second.strVIBufferTag);
 
         m_tEffectMeshDesc.erase(iterEffectMeshDesc);
@@ -533,7 +533,7 @@ void CMesh_Controller::Remove_Desc(const _wstring& DescTag)
         m_tVBMeshDesc.erase(iterVBFXDesc);
     }
 
-    //ÃÊ±âÈ­
+    //ï¿½Ê±ï¿½È­
     m_bSelectedMesh = false;
     m_pSelectedEffectMeshDesc = nullptr;
     m_pSelectedVBFXDesc = nullptr;

@@ -46,12 +46,12 @@ public:
 	const _float4x4*					Get_BoneMatrixPtr(const _char* pBoneName);
 	const vector<_float3>&				Get_VerticesPos(_uint iIndex);
 	const vector<_uint>&				Get_Indices(_uint iIndex);
+	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
 	_float								Get_Duration(const _string& strAnimName);
-	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
 	void Render_Gizmo(_fmatrix TransformMatrix);
@@ -108,11 +108,12 @@ private:
 	_uint									m_iNumAnimations = {};
 	_string								m_strPreAnimation;
 	map<_string, class CAnimation*>		m_Animations;
-	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader???꾨떖?좊븣??_uint ?꾨떖?댁빞??
+	map<_string, _uint>					m_AnimationNameToIndex; // Compute Shader
 
 	_bool									m_isBlend = { false };
 	_bool									m_isChangeAnimation = { false };
 
+	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
 
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;

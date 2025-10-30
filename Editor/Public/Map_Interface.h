@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Interface_Edit.h"
 NS_BEGIN(Engine)
 class CShader;

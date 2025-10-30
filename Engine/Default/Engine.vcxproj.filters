@@ -314,6 +314,9 @@
     <Filter Include="01. Utility\04. Component\InputController">
       <UniqueIdentifier>{e589aac7-526d-4da3-82c4-7b06f2660761}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\AnimMachine\Factory">
+      <UniqueIdentifier>{cc380aed-f6ac-4cc7-a43a-13cf8d3d8a86}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -632,6 +635,9 @@
     <ClInclude Include="..\Public\InputController.h">
       <Filter>01. Utility\04. Component\InputController</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\AnimStateFactory.h">
+      <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -925,6 +931,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\InputController.cpp">
       <Filter>01. Utility\04. Component\InputController</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\AnimStateFactory.cpp">
+      <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "AugustaClimbExit.h"
 #include "Augusta.h"
 #include "StateMachine.h"
@@ -26,7 +26,7 @@ void CAugustaClimbExit::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EClimbExitType eClimbExitType = context.m_eClimbExitType;
+    EAugustaClimbExitType eClimbExitType = context.m_eClimbExitType;
 
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eClimbExitType);
@@ -36,7 +36,7 @@ void CAugustaClimbExit::OnEnter()
 
     // 예외 처리.
     _bool IsGravity = { false };
-    if (eClimbExitType == EClimbExitType::CLIMB_MOVE)
+    if (eClimbExitType == EAugustaClimbExitType::CLIMB_MOVE)
         IsGravity = true;
     
     m_pAugusta->Set_Gravity(IsGravity);
@@ -73,9 +73,9 @@ void CAugustaClimbExit::OnExit()
 
 void CAugustaClimbExit::Handle_Input()
 {
-    EClimbExitType eClimbExitType = static_cast<EClimbExitType>(m_iCurrentAnimIdx);
+    EAugustaClimbExitType eClimbExitType = static_cast<EAugustaClimbExitType>(m_iCurrentAnimIdx);
 
-    if ((eClimbExitType != EClimbExitType::CLIMB_ONTOP) && (eClimbExitType != EClimbExitType::CLIMB_MOVE))
+    if ((eClimbExitType != EAugustaClimbExitType::CLIMB_ONTOP) && (eClimbExitType != EAugustaClimbExitType::CLIMB_MOVE))
         m_States[BACKJUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
 
     m_States[U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
@@ -98,7 +98,7 @@ void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
     if (m_States[BACKJUMP])
     {
         m_States[IS_CLIMBEXIT] = true;
-        m_iCurrentAnimIdx = ENUM_CLASS(EClimbExitType::CLIMB_MOVE);
+        m_iCurrentAnimIdx = ENUM_CLASS(EAugustaClimbExitType::CLIMB_MOVE);
         return;
     }
 
@@ -113,7 +113,7 @@ void CAugustaClimbExit::Check_Physics(_float fTimeDelta)
 void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
 {
 
-    EClimbExitType eClimbExitType = static_cast<EClimbExitType>(m_iCurrentAnimIdx);
+    EAugustaClimbExitType eClimbExitType = static_cast<EAugustaClimbExitType>(m_iCurrentAnimIdx);
 
     // ONTOP 애니메이션 끝나면 벽 위에 착지
     
@@ -121,36 +121,36 @@ void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
     // 땅에 닿았다면?
     if (m_States[LAND])
     {
-        if (eClimbExitType == EClimbExitType::CLIMB_ONTOP && m_IsAnimationEnd)
+        if (eClimbExitType == EAugustaClimbExitType::CLIMB_ONTOP && m_IsAnimationEnd)
         {
-            m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
+            m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
             return;
         }
         // 위를 바라본다면?
         if (m_vLandNormal.y > 0.f)
         {
-            m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
+            m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
             return;
         }
     }
 
     // 입력 있을때만.
-    EClimbMoveType eClimbMoveType = { EClimbMoveType::CLIMB_U_1 };
+    EAugustaClimbMoveType eClimbMoveType = { EAugustaClimbMoveType::CLIMB_U_1 };
     if (m_States[MOVE])
     {
         if (m_IsSecondStep)
         {
             // 교체할 Move Type
             if (m_States[U])
-                eClimbMoveType = EClimbMoveType::CLIMB_U_2;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_U_2;
             else if (m_States[D])
-                eClimbMoveType = EClimbMoveType::CLIMB_D_2;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_D_2;
             else if (m_States[L])
-                eClimbMoveType = EClimbMoveType::CLIMB_L_2;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_L_2;
             else if (m_States[R])
-                eClimbMoveType = EClimbMoveType::CLIMB_R_2;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_R_2;
 
             m_pAugusta->GetStateContextForWrite().m_eClimbMoveType = eClimbMoveType;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE));
@@ -159,13 +159,13 @@ void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
         if (!m_IsSecondStep)
         {
             if (m_States[U])
-                eClimbMoveType = EClimbMoveType::CLIMB_U_1;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_U_1;
             else if (m_States[D])
-                eClimbMoveType = EClimbMoveType::CLIMB_D_1;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_D_1;
             else if (m_States[L])
-                eClimbMoveType = EClimbMoveType::CLIMB_L_1;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_L_1;
             else if (m_States[R])
-                eClimbMoveType = EClimbMoveType::CLIMB_R_1;
+                eClimbMoveType = EAugustaClimbMoveType::CLIMB_R_1;
 
             m_pAugusta->GetStateContextForWrite().m_eClimbMoveType = eClimbMoveType;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE));
@@ -179,25 +179,25 @@ void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)
 void CAugustaClimbExit::Setup_Animations()
 {
     // 올라가는 것부터?
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_D1_STOP), "Climb_D1_Stop", 1.f, 0.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_D2_STOP), "Climb_D2_Stop", 1.f, 0.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_DL1_STOP), "Climb_DL1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_DL2_STOP), "Climb_DL1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_DR1_STOP), "Climb_DR1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_DR2_STOP), "Climb_DR1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_L1_STOP), "Climb_L1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_L2_STOP), "Climb_L2_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_R1_STOP), "Climb_R1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_R2_STOP), "Climb_R2_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_U1_STOP), "Climb_U1_Stop", 1.f, 0.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_U2_STOP), "Climb_U2_Stop", 1.f, 0.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UL1_STOP), "Climb_UL1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UL2_STOP), "Climb_UL2_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR1_STOP), "Climb_UR1_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_UR2_STOP), "Climb_UR2_Stop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_ONTOP), "Climb_OnTop", 1.5f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 3.f, true, false); // 루트모션 회전 끄니까 됨.
-    CState::Add_Animations(ENUM_CLASS(EClimbExitType::CLIMB_VAULT), "Climb_Vault", 2.f, 0.f); // 어찌보면 이것도 달출인데?
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_D1_STOP), "Climb_D1_Stop", 1.f, 0.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_D2_STOP), "Climb_D2_Stop", 1.f, 0.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_DL1_STOP), "Climb_DL1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_DL2_STOP), "Climb_DL1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_DR1_STOP), "Climb_DR1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_DR2_STOP), "Climb_DR1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_L1_STOP), "Climb_L1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_L2_STOP), "Climb_L2_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_R1_STOP), "Climb_R1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_R2_STOP), "Climb_R2_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_U1_STOP), "Climb_U1_Stop", 1.f, 0.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_U2_STOP), "Climb_U2_Stop", 1.f, 0.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_UL1_STOP), "Climb_UL1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_UL2_STOP), "Climb_UL2_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_UR1_STOP), "Climb_UR1_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_UR2_STOP), "Climb_UR2_Stop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_ONTOP), "Climb_OnTop", 1.5f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_MOVE), "Climb_Move", 1.f, 0.f, 3.f, true, false); // 루트모션 회전 끄니까 됨.
+    CState::Add_Animations(ENUM_CLASS(EAugustaClimbExitType::CLIMB_VAULT), "Climb_Vault", 2.f, 0.f); // 어찌보면 이것도 달출인데?
 }
 
 void CAugustaClimbExit::State_Reset()

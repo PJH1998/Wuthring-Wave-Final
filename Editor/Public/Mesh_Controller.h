@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Effect_Mesh.h"
 
@@ -17,14 +17,14 @@ public:
 		_char szName[MAX_PATH] = {};
 		_tchar strMeshTag[MAX_PATH] = {};
 		_char szDatPath[MAX_PATH] = {};
-		//¸Å½¬´Â ¹Ì¸®º¸±â ¾î¶»°Ô ¸øÇÏ³ª ?
+		//ï¿½Å½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½î¶»ï¿½ï¿½ ï¿½ï¿½ï¿½Ï³ï¿½ ?
 	}MESH_TAG;
 
 private:
 	explicit CMesh_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CMesh_Controller() = default;
 
-#pragma region ±âº»
+#pragma region ï¿½âº»
 public:
 	HRESULT Initialize();
 	void Update();

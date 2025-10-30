@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "UI_HUD.h"
 #include "Animator_UI.h"
 
@@ -8,8 +8,8 @@
 #define KSTA_UI_ENERGYBARTEST
 
 
-// ¾ê´Â ¿ÀºêÁ§Æ® ¸Å´ÏÀúÀÇ ÅëÁ¦¸¦ ¹ÞÀ½.
-// ÀÚ½ÄµéÀº ¾êÀÇ ÅëÁ¦¸¦ ¹ÞÀ½. »èÁ¦ Æ÷ÇÔ.
+// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+// ï¿½Ú½Äµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
 {
@@ -41,7 +41,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
-    vector<_wstring> vecAnimFilePaths = {   // ·ÎµåÇÒ ¾Ö´Ï¸ÞÀÌ¼ÇÀº ¿©±â¿¡ Ãß°¡
+    vector<_wstring> vecAnimFilePaths = {   // ï¿½Îµï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ß°ï¿½
         //L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
 
     };
@@ -80,7 +80,7 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 
 void CUI_HUD::Render()
 {
-    //__super::Render();                      // Nothing. ·»´õ±×·ì Ãß°¡ÇÑ µÚ ºÎÅÍ ·»´õ·¯¿¡¼­ ¾Ë¾Æ¼­ ÀÚ½Äµé±îÁö Render µ¹¸²
+    //__super::Render();                      // Nothing. ï¿½ï¿½ï¿½ï¿½ï¿½×·ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¾Æ¼ï¿½ ï¿½Ú½Äµï¿½ï¿½ï¿½ï¿½ Render ï¿½ï¿½ï¿½ï¿½
 }
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
@@ -101,7 +101,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
     {
         UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
 
-        // Transform °ªÀ» °¡Á®¿Â µÚ, Çà·ÄÈ­ÇÏ¿© ¹Ý¿µÇÏ°í, (ÀÓ½Ã·Î) ÀÚ½Ä ¿ÀºêÁ§Æ®·Î½á Ãß°¡ÇÑ´Ù.
+        // Transform ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½È­ï¿½Ï¿ï¿½ ï¿½Ý¿ï¿½ï¿½Ï°ï¿½, (ï¿½Ó½Ã·ï¿½) ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Î½ï¿½ ï¿½ß°ï¿½ï¿½Ñ´ï¿½.
         _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
         _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
         _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
@@ -113,7 +113,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         case ENUM_CLASS(UI_TYPE::BUTTON): pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc)); break;
         default:            break;
         }
-        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // ·ÎÄÃ¿¡ ÀúÀå.. 
+        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // ï¿½ï¿½ï¿½Ã¿ï¿½ ï¿½ï¿½ï¿½ï¿½.. 
 
 
         HIERARCHY_OBJ_DESC tObjDesc = { };
@@ -179,7 +179,7 @@ HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
 
         pTargetAnimator->Insert_Animation(tLoadAnimDesc);
 
-        // ksta del : Å×½ºÆ®¿ë
+        // ksta del : ï¿½×½ï¿½Æ®ï¿½ï¿½
         pTargetAnimator->Change_Animation(L"TestHUDAnim3");
     }
 
@@ -193,37 +193,37 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
 
 void CUI_HUD::Update_UI_Cooldown(_float fTimeDelta)
 {
-    // Å°º¸µå¸¦ ´­·¯¼­ ÄðÅ¸ÀÓÀÌ µµ´Â °ÍÀ» Å×½ºÆ®ÇÔ.
+    // Å°ï¿½ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×½ï¿½Æ®ï¿½ï¿½.
 
-    // - Á¶°Ç
+    // - ï¿½ï¿½ï¿½ï¿½
     // 
-    // 1, pass°¡ Variant (index : 5) ·Î µÇ¾îÀÖ¾î¾ß ÀÛµ¿ÇÔ.
+    // 1, passï¿½ï¿½ Variant (index : 5) ï¿½ï¿½ ï¿½Ç¾ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ûµï¿½ï¿½ï¿½.
     // 
-    // 2. ¾Æ·¡ ÄÚµå¸¦ ÅëÇØ ÄðÅ¸ÀÓ Á¤º¸°¡, Custom_UI °´Ã¼¿¡¼­ ¼ÎÀÌ´õ·Î Àü´Þ µÉ ¿¹Á¤ÀÎ, descÀÇ Á¤º¸Àü´Þ¿ë Çà·Ä ³»ÀÇ [0][0]¿¡ ´ãÀ½.
-    //   ÀÌ´Â ÀÎ½ºÅÏ½ºº°·Î Àü´ÞµÇ¾î, ÀÎ½ºÅÏ½ºº°·Î °»½ÅÀÌ ÀÌ·ç¾îÁü..
+    // 2. ï¿½Æ·ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Custom_UI ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, descï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¿ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ [0][0]ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    //   ï¿½Ì´ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÞµÇ¾ï¿½, ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì·ï¿½ï¿½ï¿½ï¿½..
     // 
-    // 3. ÇØ´çÇÏ´Â Custom_UI ³»ÀÇ Render ÇÔ¼ö¿¡¼­, µå·Î¿ìÄÝ Àü¿¡ iShaderFlag ¸¦, ¼ÎÀÌ´õ Àü¿ªº¯¼ö·Î ÁöÁ¤ÇØ ÁÖ¾î¾ß ÇÔ.
-    //   ÀÌ´Â ÇÑ ÆÐ½º ³»¿¡¼­ ¿©·¯ °æ¿ì¿¡ ´ëÀÀ½ÃÅ°±â À§ÇØ ÁØ ÇÃ·¡±×ÀÌ¸ç, Custom_UI°¡ µé°íÀÖÀ½.
-    //   hlsl ³»ÀÇ ÃÖ»ó´Ü¿¡¼­ Á¾·ù È®ÀÎ °¡´É (¿øÇü ÄðÅ¸ÀÓ UIÀÎÁö, »ç°¢ÇüÀÎÁö µî)
+    // 3. ï¿½Ø´ï¿½ï¿½Ï´ï¿½ Custom_UI ï¿½ï¿½ï¿½ï¿½ Render ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ iShaderFlag ï¿½ï¿½, ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ ï¿½ï¿½.
+    //   ï¿½Ì´ï¿½ ï¿½ï¿½ ï¿½Ð½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ì¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½, Custom_UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //   hlsl ï¿½ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½Ü¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ UIï¿½ï¿½ï¿½ï¿½, ï¿½ç°¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 
-    // - Variant »ç¿ë¹ý
+    // - Variant ï¿½ï¿½ï¿½ï¿½
     // 
-    // 1. ¼ÎÀÌ´õ¿¡¼­ Variant Pass ³» switch-case ¹®¿¡ ¿øÇÏ´Â ¼ÎÀÌ´õ Á¦ÀÛ
+    // 1. ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ï¿½ï¿½ Variant Pass ï¿½ï¿½ switch-case ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½
     // 
-    // 2. ÇØ´ç È¿°ú¸¦ »ç¿ëÇÒ UI¿¡ CCustom_UI::VARIANTREADY_UI_DESC ¸¸µé¾î¼­
-    //   flag Á¤º¸¿Í »ç¿ëÇÒ Á¤º¸ matVariantValues ¿¡ Æ÷ÇÔÇÏ¿© ´øÁü (ÀÎ½ºÅÏ½ºº°·Î Á¤º¸¸¦ Àû¿ëÇØ¾ß ÇÏ±â¿¡ vector ÄÁÅ×ÀÌ³Ê »ç¿ë)
+    // 2. ï¿½Ø´ï¿½ È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ UIï¿½ï¿½ CCustom_UI::VARIANTREADY_UI_DESC ï¿½ï¿½ï¿½ï¿½î¼­
+    //   flag ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ matVariantValues ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½Ï±â¿¡ vector ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½)
     //
-    // 3. pass´Â ¹Ýµå½Ã Variant ·Î, flag ¹× ¿ä±¸ ÀÎ½ºÅÏ½º °¹¼ö Àß ÁöÁ¤ÇØÁÖ±â
+    // 3. passï¿½ï¿½ ï¿½Ýµï¿½ï¿½ Variant ï¿½ï¿½, flag ï¿½ï¿½ ï¿½ä±¸ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
 
 
-    // ³ªÁß¿¡ ¿À¸¥ÂÊ¿¡¼­ºÎÅÍ 2~5°³ ³»¿¡¼­ À¯µ¿ÀûÀ¸·Î º¯È­ ¹× Á¤·ÄµÇµµ·Ï ÇÏ±â
-    // ¾Æ¿ì±¸½ºÅ¸ °°Àº Ä³¸¯ÅÍ´Â ¾ÆÀÌÄÜÀÌ 2°³·Î ÁÙ°í ±×·±´Ù´Â µí
+    // ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2~5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½ÄµÇµï¿½ï¿½ï¿½ ï¿½Ï±ï¿½
+    // ï¿½Æ¿ì±¸ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½Í´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½Ù°ï¿½ ï¿½×·ï¿½ï¿½Ù´ï¿½ ï¿½ï¿½
 
 
     enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
     enum HUD_SKILL_INDEX    { SK_E, SK_R, SK_END };
 
-    // ksta : ³ªÁß¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
                     m_iSelectedCHIndex;
     static _float   fSkillCD[CH_END][SK_END] = {};                                                  // left cooldown
     static _float   fChangeCD[CH_END] = {};                                                         // left cooldown
@@ -324,10 +324,10 @@ void CUI_HUD::Update_UI_Cooldown(_float fTimeDelta)
     }
 
 
-    // UIº°·Î Ä³¸¯ÅÍ °¹¼ö¸¸Å­ Á¸Àç.
+    // UIï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ ï¿½ï¿½ï¿½ï¿½.
 
-    // 1. ½ºÅ³UI ¿¡ ¹æ¶ûÀÚ ER / ¾Æ¿ì ER / °¥ºê ER ÄðÅ¸ÀÓ ÇÒ´ç
-    // 2. ±³Ã¼UI ¿¡ ¹æ¶ûÀÚ / ¾Æ¿ì / °¥ºê ÄðÅ¸ÀÓ ÇÒ´ç
+    // 1. ï¿½ï¿½Å³UI ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ER / ï¿½Æ¿ï¿½ ER / ï¿½ï¿½ï¿½ï¿½ ER ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ò´ï¿½
+    // 2. ï¿½ï¿½Ã¼UI ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ / ï¿½Æ¿ï¿½ / ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ò´ï¿½
     
     // skill
     for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
@@ -381,15 +381,15 @@ void CUI_HUD::Update_UI_Cooldown(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 {
-    // ÇÃ·¹ÀÌ¾îÀÇ HP ¹Ù¸¦ °»½ÅÇÕ´Ï´Ù.
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ HP ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 
-    // 1. µÚµû¶ó¿À´Â Ã¼·Â¹Ù±îÁö »ý°¢ÇÏ¿© ÀÎ½ºÅÏ½º´Â 2Á¾À¸·Î »ç¿ëÇÔ.
-    // 2. »ö»óÀº ¼ÎÀÌ´õ¸¦ ÅëÇØ, ¿ø·¡ Ã¼·Â¹Ù¿Í µÚµû¶ó¿À´Â Ã¼·Â¹Ù 2Á¾À», °¢°¢ 2°¡Áö »ö¾¿ »ç¿ëÇÏ¿© ±×¶óµð¾ðÆ®µÇµµ·Ï ±¸¼º
+    // 1. ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹Ù±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
+    // 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹Ù¿ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹ï¿½ 2ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½×¶ï¿½ï¿½ï¿½Æ®ï¿½Çµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
     enum HUD_CHAR_INDEX { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
     enum HUD_PLAYER_HPBAR { PLHP_BACK, PLHP_NORMAL, PLHP_END };
 
-    // ksta : ³ªÁß¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
     const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
@@ -403,7 +403,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
     _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
 
-    const _float fHPReduceTime = 0.5f;          // ÁÙ¾îµå´Â ¼Ò¿ä½Ã°£Àº 0.5ÃÊÁ¤µµ?
+    const _float fHPReduceTime = 0.5f;          // ï¿½Ù¾ï¿½ï¿½ï¿½ ï¿½Ò¿ï¿½Ã°ï¿½ï¿½ï¿½ 0.5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 
     const auto targetUI = Find_ChildObject(L"Inst_HPBar");
 
@@ -411,11 +411,11 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     
     if (fHPReduceLeftTime > 0)
     {
-        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // Ã¼·Â ºñÀ² Â÷ÀÌ
+        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         if (diff > 0.f)
         {
-            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé Ã¼·Â ºñÀ²
+            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fPlayerHPBackRatio -= delta;                               
             if (fPlayerHPBackRatio < fPlayerHPRatio)
@@ -443,7 +443,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
         _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
 
-        // HP´Â Áï½Ã ±îÀÓ
+        // HPï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         fPlayerHP[m_iSelectedCHIndex] -= fRandDamage;
         if (fPlayerHP[m_iSelectedCHIndex] < 0) fPlayerHP[m_iSelectedCHIndex] = 0;
 
@@ -494,7 +494,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     enum HUD_BOSS_HPBAR{ BOHP_BACK, BOHP_NORMAL, BOHP_END };
     enum HUD_BOSS_SABAR{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
 
-    // ksta : ³ªÁß¿¡ º¸½º Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     static _float fBossHP = { 10000.f };            // boss hitpoint
     static _float fBossBackHP = fBossBackHP;
     const _float fBossMaxHP = { 10000.f };
@@ -524,7 +524,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     const _float4 vSABackColor      = { 1.f, 1.f, 1.f, .3f };   // after armor break
     //const _float4 vSABreakBackColor = { .2f, .2f, .2f, 1.f };
 
-    const _float fHPReduceTime = 0.5f;          // ÁÙ¾îµå´Â ¼Ò¿ä½Ã°£Àº 0.5ÃÊÁ¤µµ?
+    const _float fHPReduceTime = 0.5f;          // ï¿½Ù¾ï¿½ï¿½ï¿½ ï¿½Ò¿ï¿½Ã°ï¿½ï¿½ï¿½ 0.5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 
     const auto targetUI = Find_ChildObject(L"Inst_BossHPBar");
     const auto targetSAUI = Find_ChildObject(L"Inst_BossSABar");
@@ -532,12 +532,12 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
     if (fHPReduceLeftTime > 0)
     {
-        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // Ã¼·Â ºñÀ² Â÷ÀÌ
-        _float fSADiff = fBossSABackRatio - fBossSARatio;              // ¾Æ¸Ó ºñÀ² Â÷ÀÌ
+        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        _float fSADiff = fBossSABackRatio - fBossSARatio;              // ï¿½Æ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         if (fHPDiff > 0.f)
         {
-            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé Ã¼·Â ºñÀ²
+            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fBossHPBackRatio -= fHPDelta;
             if (fBossHPBackRatio < fBossHPRatio)
@@ -545,7 +545,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
         }
         if (fSADiff > 0.f)
         {
-            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé ¾Æ¸Ó ºñÀ²
+            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ ï¿½Æ¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fBossSABackRatio -= fSADelta;
             if (fBossSABackRatio < fBossSARatio)
@@ -575,7 +575,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
         _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
         _float fRandSADamage = fRandDamage * 0.8f;
 
-        // HP´Â Áï½Ã ±îÀÓ
+        // HPï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         fBossHP -= fRandDamage;
         fBossSA -= fRandSADamage;
 
@@ -638,8 +638,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
     static _bool isFirstUpdate = true;
     
-    // ¾Æ·¡°Íµé Á¤ÀÇÇØÁÖ°í ³Ñ°ÜÁà¾ß ÇÔ
-    // ¿¡µðÅÍ¿¡¼­ ¸¸µé ¶§ ±×¸¸Å­ÀÇ °¹¼ö ¸¸µé¾îÁÖ´Â °Í ÀØÁö¸»±â
+    // ï¿½Æ·ï¿½ï¿½Íµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö°ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½×¸ï¿½Å­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     _float4     vSingleColor = { };
     _bool       isSingleVisible = {};
     _float      fSingleHeight = {};
@@ -653,16 +653,16 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     {
         isFirstUpdate = false;
 
-        // 1. ¿¡³ÊÁö¹Ù Ä³¸¯ÅÍ¿¡ ¸Â´Â°É·Î ±³Ã¼, »ö»óµµ ±³Ã¼
+        // 1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½Â´Â°É·ï¿½ ï¿½ï¿½Ã¼, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼
 
 
-        // 2. ²Ü··ÀÌ´Â ·ÎÁ÷ »ý°¢ÇØ¼­ ÄÁÅ×ÀÌ³Ê·Î ¸¸µé´ø ¹¹´ø ¾îÄÉ ¸¸µé¾îº¸±â
+        // 2. ï¿½Ü·ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Ê·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½îº¸ï¿½ï¿½
 
         
-        // 3. ¹Ýµå½Ã!!!!! ÀÎ½ºÅÏ½º °¹¼ö, variant flag Á¦´ë·Î ÁØ °Í ¸Â´ÂÁö È®ÀÎÇÏ±â
+        // 3. ï¿½Ýµï¿½ï¿½!!!!! ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½, variant flag ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Â´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï±ï¿½
 
 
-        // 4. ³ôÀÌ Á¶ÀýÀ» À§ÇØ ¼ÎÀÌ´õ´Ü¿¡¼­ Á÷Á¢ ÇÈ¼¿ÀÇ Á¶Á¤ÀÌ ÇÊ¿ä = °£´ÜÇÑ pixel shader Á¦ÀÛ ÇÊ¿ä
+        // 4. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½È¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ pixel shader ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
     }
 
     vector<_float4x4> vecVariantMat = {};

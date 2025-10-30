@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Animator_UI.h"
 
 CAnimator_UI::CAnimator_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -190,7 +190,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     const _uint iLastKeyframeIndex = (_uint)(m_pCurAnimDesc->vecKeyFrames.size() - 1);
     _uint       iKeyframeIndex = 0;
 
-    // ÇöÀç Å°ÇÁ·¹ÀÓÀÇ vector ³» ÀÎµ¦½º¸¦ °Ë»ö
+    // ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ vector ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
         if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex > iKeyframe)
@@ -198,11 +198,11 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
         iKeyframeIndex = i;
     }
 
-    // lerp¿¡ »ç¿ëÇÒ °ªµé ÇÒ´ç
+    // lerpï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½
     for (_uint i = 0; i < 4; i++)
     {
-        // 1, 2 »çÀÕ°ªÀ» »ç¿ëÇÒ °Í.
-        // ´Ù¸¸ ÀÎµ¦½º¸¦ ¹þ¾î³ª´Â °æ¿ì¿¡ ´ëÇØ Á¤ÀÇ. ÀÌ´Â loop ¿©ºÎ¿¡ µû¶ó ´Ù¸§.
+        // 1, 2 ï¿½ï¿½ï¿½Õ°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½.
+        // ï¿½Ù¸ï¿½ ï¿½Îµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½ï¿½ì¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½Ì´ï¿½ loop ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½.
         _uint iIndex = iKeyframeIndex + i - 1;
         if (iIndex < 0)
             iIndex = (isLoop) ? iLastKeyframeIndex : 0;
@@ -233,8 +233,8 @@ void CAnimator_UI::Update_Animation()
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
     // 
-    // ÇöÀç ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ ¾ø´Ù¸é, ±âº»°ªÀ» ¼ÎÀÌ´õ¿¡ ÇÒ´ç.
-    // ¾ÈÇÏ¸é ±× ÀÌÀü¿¡ ´Ù¸¥ UI¿¡¼­ ÇÒ´çµÈ °ªÀ» ±×´ë·Î µû¶ó°¡±â¿¡, ÀÇµµÄ¡ ¾Ê°Ô ´Ù¸¥ ¿ÀºêÁ§Æ®µµ ¿µÇâÀ» ¹ÞÀ½.
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½, ï¿½âº»ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½.
+    // ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ UIï¿½ï¿½ï¿½ï¿½ ï¿½Ò´ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×´ï¿½ï¿½ ï¿½ï¿½ï¿½ó°¡±â¿¡, ï¿½Çµï¿½Ä¡ ï¿½Ê°ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
 
     if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
@@ -257,27 +257,27 @@ void CAnimator_UI::Update_Animation()
 
 
     // Calculate Frame..
-    const _uint     iKeyFrameRate = 60; // ±âÁØ ÃÊ´ç ÇÁ·¹ÀÓ
+    const _uint     iKeyFrameRate = 60; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     const _float    fSingleFrameTime = 1.f / iKeyFrameRate;
 
-    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ÇöÀç Å°ÇÁ·¹ÀÓ
+    _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
     {
         if (m_pCurAnimDesc->isLoop)
-            m_fElapsedTime = 0.f;                                           // ·çÇÁ ½Ã, ¹üÀ§ ³Ñ¾î°¡¸é 0À¸·Î
+            m_fElapsedTime = 0.f;                                           // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½
     }
 
-    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // ÃÖÁ¾ ÇöÀç Å°ÇÁ·¹ÀÓ
-    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // ÃÖÁ¾ ÇöÀç Å°ÇÁ·¹ÀÓ (int·Î ³»¸²)
+    fCurFrame = m_fElapsedTime / fSingleFrameTime;                          // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    _uint iCurFrame = static_cast<_uint>(fCurFrame);                        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (intï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 
 
     // ==============================
     // * Calculate Ratio..
     // ==============================
-    _uint iFrame_LerpStart = {};        // ÇÁ·¹ÀÓ °ª
-    _uint iFrame_LerpEnd = {};          // ÇÁ·¹ÀÓ °ª
-    _uint iFrame_StartIndex = {};       // ¼ø¼ö ÀÎµ¦½º
-    _uint iFrame_EndIndex = {};         // ¼ø¼ö ÀÎµ¦½º
+    _uint iFrame_LerpStart = {};        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+    _uint iFrame_LerpEnd = {};          // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
+    _uint iFrame_StartIndex = {};       // ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
+    _uint iFrame_EndIndex = {};         // ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
@@ -302,7 +302,7 @@ void CAnimator_UI::Update_Animation()
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
-    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // ÀÌÀü Å°ÇÁ·¹ÀÓ¿Í ÇöÀç Å°ÇÁ·¹ÀÓ °£ÀÇ ÃÖÁ¾ º¸°£ ºñÀ²
+    _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
     // ==============================

@@ -89,6 +89,7 @@ void CRenderer::Render()
 	Render_Distortion();
 	Render_LUT();
 	Render_Fog();
+	Render_Blur();
 	Render_UI();
 	Render_Fade();
 
@@ -115,6 +116,18 @@ HRESULT CRenderer::Bind_RawValue(const _char* pConstantName, void* pValue, _uint
 void CRenderer::Setting_SSAO(_float fRadius, _float fMaxDistance)
 {
 	m_pSubResource->Setting_SSAO(fRadius, fMaxDistance);
+}
+void CRenderer::SetBloomIntensity(_float fIntensity)
+{
+	m_pSubResource->SetBloomIntensity(fIntensity);
+}
+void CRenderer::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
+{
+	m_pSubResource->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
+}
+void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
+{
+	m_pSubResource->SetDof(fDepth, fRange, fScale);
 }
 #endif
 
@@ -246,41 +259,34 @@ void CRenderer::Render_SSAO()
 #ifdef _DEBUG
 	if (false == m_IsSSAO)
 	{
-		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO"));
+		m_pGameInstance->Clear_RT(TEXT("RT_SSAO"));
+		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO_BLUR_X"));
+		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO_BLUR_Y"));
 		return;
 	}
 #endif
 	
 #pragma region SSAO
-	if (FAILED(m_pSubResource->Add_SSAO_BufferData(TEXT("RCS_SSAO"), m_fWinSizeX, m_fWinSizeY)))
-		CRASH("Failed Add_SSAO_BufferData");
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
+		CRASH("Render Fail");
 
-	if (FAILED(m_pSubResource->Add_SSAO_NoiseTexture(TEXT("RCS_SSAO"), "g_NoiseTexture")))
-		CRASH("Failed Add_SSAO_NoiseTexture");
+	if (FAILED(m_pSubResource->Bind_SSAO_Resources(m_pShader)))
+		CRASH("Failed Bind SSAO Resources");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
-		CRASH("Failed Add_SRVData");
+	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::SSAO))))
+		CRASH("Render Fail");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO"), "g_DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
-		CRASH("Failed Add_SRVData");
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO"))))
-		CRASH("Failed RCS_SSAO");
+	m_pGameInstance->End_MRT();
 #pragma endregion
-
-#ifdef _DEBUG
-	if (false == m_IsSSAO_Blur)
-	{
-		m_pGameInstance->Clear_RCS(TEXT("RCS_SSAO_BLUR"));
-		return;
-	}
-#endif
 
 #pragma region BLUR_X
 	if (FAILED(m_pSubResource->Add_SSAO_Blur_BufferData(TEXT("RCS_SSAO_BLUR_X"), m_fWinSizeX, m_fWinSizeY)))
 		CRASH("Failed Add_SSAO_BufferData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_SSAO")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_SSAO")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_SSAO_BLUR_X"), "g_NormalTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Normal")))))
@@ -403,23 +409,27 @@ void CRenderer::Render_Bloom()
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), i + 1)))
 			CRASH("Failed RCS_DOWNSAMPLE");
 	}
-	
+
 	for (_int j = 3; j >= 0; --j)
 	{
 		// BLUR_X
 		_uint iDownWinSizeX = static_cast<_uint>( m_fWinSizeX ) >> (j + 1);
 		_uint iDownWinSizeY = static_cast<_uint>( m_fWinSizeY ) >> (j + 1);
-		if (FAILED(m_pSubResource->Add_SizeData_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), iDownWinSizeX, iDownWinSizeY)))
+
+		
+		if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), iDownWinSizeX, iDownWinSizeY, m_iBloomWeight)))
 			CRASH("Failed Add_SizeData_BufferData");
 
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), j))))
+		ID3D11ShaderResourceView* pBlur = j == 3 ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), j) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE_BLOOM"), j + 1);
+
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", pBlur)))
 			CRASH("Failed Add_SRVData");
 
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), j)))
 			CRASH("Failed RCS_GAUSSIAN_BLUR_X");
 
 		// BLUR_Y
-		if (FAILED(m_pSubResource->Add_SizeData_BufferData(TEXT("RCS_GAUSSIAN_BLUR_Y"), iDownWinSizeX, iDownWinSizeY)))
+		if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_Y"), iDownWinSizeX, iDownWinSizeY, m_iBloomWeight)))
 			CRASH("Failed Add_SizeData_BufferData");
 
 		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_X"), j))))
@@ -429,20 +439,20 @@ void CRenderer::Render_Bloom()
 			CRASH("Failed RCS_GAUSSIAN_BLUR_Y");
 
 		// UPSAMPLE
-		_uint iUpWinSizeX = static_cast<_uint>( m_fWinSizeX ) >> j;
-		_uint iUpWinSizeY = static_cast<_uint>( m_fWinSizeY ) >> j;
+		_uint iUpWinSizeX = ( m_iWinSizeX ) >> j;
+		_uint iUpWinSizeY = ( m_iWinSizeY ) >> j;
 
-		if (FAILED(m_pSubResource->Add_SizeData_BufferData(TEXT("RCS_UPSAMPLE"), iUpWinSizeX, iUpWinSizeY)))
+		if (FAILED(m_pSubResource->Add_Bloom_BufferData(TEXT("RCS_UPSAMPLE_BLOOM"), iUpWinSizeX, iUpWinSizeY, j)))
 			CRASH("Failed Add_UpSample_BufferData");
 
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_Y"), j))))
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE_BLOOM"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_Y"), j))))
 			CRASH("Failed Add_SRVData");
 
 		ID3D11ShaderResourceView* pBase = j == 0 ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Emissive")) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), j - 1);
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE"), "BaseTexture", pBase)))
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE_BLOOM"), "BaseTexture", pBase)))
 			CRASH("Failed Add_SRVData");
 
-		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_UPSAMPLE"), j)))
+		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_UPSAMPLE_BLOOM"), j)))
 			CRASH("Failed RCS_UPSAMPLE");
 	}
 }
@@ -452,7 +462,10 @@ void CRenderer::Render_BloomCombined()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 		CRASH("Render Fail");
 
-	if (FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_UPSAMPLE"), m_pShader, "g_BloomTexture", 0)))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Emissive"), m_pShader, "g_BlurTexture")))
+		CRASH("Render Fail")
+
+	if (FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_UPSAMPLE_BLOOM"), m_pShader, "g_BloomTexture", 0)))
 		CRASH("Failed Bind_RendererCS");
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLOOM));
@@ -538,6 +551,8 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Fog()
 {
+	m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false);
+
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))
 		CRASH("Failed Bind RT_Lut");
 
@@ -548,6 +563,31 @@ void CRenderer::Render_Fog()
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_Blur()
+{
+	if (m_IsBlur)
+	{
+		switch(m_eBlurType)
+		{
+			case BLUR_TYPE::DOF:
+				Render_DOF();
+				break;
+		}
+	}
+	else
+	{
+		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+			CRASH("Failed RT_BackBuffer");
+
+		m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DRAW));
+
+		m_pVIBuffer->Bind_Resources();
+		m_pVIBuffer->Render();
+	}
 }
 
 void CRenderer::Render_UI()
@@ -576,6 +616,88 @@ void CRenderer::Render_Fade()
 	m_RenderObjects[ENUM_CLASS(RENDERGROUP::FADE)].clear();
 }
 
+void CRenderer::Render_DOF()
+{
+	//COC 계산
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_DOF"))))
+		CRASH("Failed Begin MRT_DOF");
+
+	if (FAILED(m_pSubResource->Bind_Dof_Resource(m_pShader)))
+		CRASH("Failed Bind_Dof_Resource");
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DOF_DEPTH));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	//DOWNSAMPLE
+	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"))))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE_DEPTH"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Dof")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE_DEPTH"))))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
+	//BLUR_X
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOF_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE")))))
+		CRASH("Failed Add_SRVData");
+	
+	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOF_X"), "DepthTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE_DEPTH")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pSubResource->Add_DOF_BufferData(TEXT("RCS_DOF_X"), static_cast<_float>(m_iWinSizeX>> 1 ), static_cast<_float>( m_iWinSizeY >> 1 ))))
+		CRASH("Failed Add_BufferData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOF_X"))))
+		CRASH("Failed RCS_DOF_X");
+
+	//BLUR_Y
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOF_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOF_X")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOF_Y"), "DepthTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE_DEPTH")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pSubResource->Add_DOF_BufferData(TEXT("RCS_DOF_Y"), static_cast<_float>( m_iWinSizeX >> 1 ), static_cast<_float>( m_iWinSizeY >> 1 ))))
+		CRASH("Failed Add_BufferData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOF_Y"))))
+		CRASH("Failed RCS_DOF_Y");
+
+	//UPSAMPLE
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE_DOF"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOF_Y")))))
+		CRASH("Failed Add_SRVData");
+
+	if(FAILED(m_pSubResource->Add_UPSample_BufferData(TEXT("RCS_UPSAMPLE_DOF"), m_fWinSizeX, m_fWinSizeY)))
+		CRASH("Failed Add_BufferData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_UPSAMPLE_DOF"))))
+		CRASH("Failed RCS_UPSAMPLE_DOF");
+
+	//Combined
+	if (FAILED(m_pShader->Bind_Texture("g_BackBufferTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+		CRASH("Failed Bind Blur Texture");
+
+	if (FAILED(m_pShader->Bind_Texture("g_DofTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Dof")))))
+		CRASH("Failed Bind Blur Texture");
+
+	if (FAILED(m_pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE_DOF")))))
+		CRASH("Failed Bind Blur Texture");
+	
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DOF));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+}
+
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
 {
@@ -594,7 +716,6 @@ void CRenderer::Render_Debug()
 	m_DebugComponents.clear();
 
 	{   
-
 		if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Debug"))))
 			CRASH("MRT_Debug");
 
@@ -616,7 +737,7 @@ void CRenderer::Render_Debug()
 
 	if (FAILED(m_pGameInstance->Render_RT()))
 		CRASH("Render RT");
-
+	
 	if (FAILED(m_pGameInstance->Debug_Render_RCS()))
 		CRASH("Render RCS");
 
@@ -624,15 +745,39 @@ void CRenderer::Render_Debug()
 		CRASH("ViewMatrix");
 	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
 		CRASH("ProjMatrix");
+
 	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
 		
 }
 #endif
 
+ID3D11ShaderResourceView* CRenderer::Get_BlurSRV()
+{
+	if (m_eBlurType == BLUR_TYPE::END)
+		return nullptr;
+
+	_wstring strRCSTag = {};
+
+	switch (m_eBlurType)
+	{
+		case BLUR_TYPE::DOF:
+			strRCSTag = TEXT("RCS_UPSAMPLE_DOF");
+			break;
+
+		case BLUR_TYPE::RADIAL:
+			break;
+
+		case BLUR_TYPE::MOTION:
+			break;
+	}
+
+	return m_pGameInstance->Get_RCS_SRV(strRCSTag);
+}
+
 HRESULT CRenderer::Ready_RT()
 {
 	/* RenderTarget Diffuse */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 0.f, 1.f, 0.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Diffuse"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 0.f, 1.f, 1.f))))
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Normal */
@@ -666,18 +811,22 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Lut"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(0.f, 0.f, 0.f, 1.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget SSAO */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_SSAO"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
+		ASSERT_CRASH(false);
 
 	/* RenderTarget Distortion */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
-	
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Dof"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
 #ifdef _DEBUG
 	/* RenderTarget Debug */
 	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Debug"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 0.f))))
 		ASSERT_CRASH(false);
 #endif
-
 	return S_OK;
 }
 
@@ -707,6 +856,11 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
+#pragma region MRT_SSAO
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_SSAO"), TEXT("RT_SSAO"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
 #pragma region MRT_LUT
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Lut"), TEXT("RT_Lut"))))
 		ASSERT_CRASH(false);
@@ -725,12 +879,19 @@ HRESULT CRenderer::Ready_MRT()
 
 	// RENDERGROUP::EMISSIVE
 #pragma region MRT_EMISSIVE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Emissive"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 	// RENDERGROUP::DISTORTION
 #pragma region MRT_DISTORTION
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Distortion"), TEXT("RT_Distortion"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_DOF
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DOF"), TEXT("RT_Dof"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
@@ -746,23 +907,6 @@ HRESULT CRenderer::Ready_MRT()
 
 HRESULT CRenderer::Ready_RCS()
 {
-#pragma region SSAO_RCS
-	CRendererCS::RCS_DESC RCSDesc = {};
-	RCSDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
-	RCSDesc.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
-	RCSDesc.strEntryPoint = "SSAO";
-	RCSDesc.iWidth = m_iWinSizeX;
-	RCSDesc.iHeight = m_iWinSizeY;
-	RCSDesc.fDefinitionX = 16.f;
-	RCSDesc.fDefinitionY = 16.f;
-	RCSDesc.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
-	RCSDesc.iMipLevels = 1;
-	RCSDesc.vClearColor = _float4(1.f, 1.f, 1.f, 1.f);
-
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_SSAO"), &RCSDesc)))
-		CRASH("Failed Add RCS_SSAO");
-#pragma endregion
-	
 #pragma region SSAO_BLUR_RCS
 	CRendererCS::RCS_DESC BlurDesc = {};
 	BlurDesc.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_SSAO.hlsl");
@@ -786,26 +930,35 @@ HRESULT CRenderer::Ready_RCS()
 
 #pragma endregion
 
-#pragma region GAUSSIAN BLUR
-	CRendererCS::RCS_DESC GaussianRCS = {};
-	GaussianRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Blur.hlsl");
-	GaussianRCS.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
-	GaussianRCS.strEntryPoint = "GaussianBlur_X";
-	GaussianRCS.iWidth = m_iWinSizeX >> 1;
-	GaussianRCS.iHeight = m_iWinSizeY >> 1;
-	GaussianRCS.fDefinitionX = 16.f;
-	GaussianRCS.fDefinitionY = 16.f;
-	GaussianRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
-	GaussianRCS.iMipLevels = 4;
-	GaussianRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
+#pragma region BLUR
+	CRendererCS::RCS_DESC BlurRCS = {};
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Blur.hlsl");
+	BlurRCS.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
+	BlurRCS.strEntryPoint = "GaussianBlur_X";
+	BlurRCS.iWidth = m_iWinSizeX >> 1;
+	BlurRCS.iHeight = m_iWinSizeY >> 1;
+	BlurRCS.fDefinitionX = 16.f;
+	BlurRCS.fDefinitionY = 16.f;
+	BlurRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+	BlurRCS.iMipLevels = 4;
+	BlurRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
 
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &GaussianRCS)))
-		CRASH("Failed Add RCS_SSAO");
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &BlurRCS)))
+		CRASH("Failed Add G_BlurX");
 
-	GaussianRCS.strEntryPoint = "GaussianBlur_Y";
+	BlurRCS.strEntryPoint = "GaussianBlur_Y";
 
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), &GaussianRCS)))
-		CRASH("Failed Add RCS_SSAO");
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), &BlurRCS)))
+		CRASH("Failed Add G_BlurY");
+
+	BlurRCS.strEntryPoint = "DOF_X";
+	BlurRCS.iMipLevels = 2;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_X"), &BlurRCS)))
+		CRASH("Failed Add DOF_X");
+
+	BlurRCS.strEntryPoint = "DOF_Y";
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_Y"), &BlurRCS)))
+		CRASH("Failed Add DOF_Y");
 #pragma endregion
 
 #pragma region DOWNSAMPLE
@@ -823,13 +976,19 @@ HRESULT CRenderer::Ready_RCS()
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOWNSAMPLE"), &DownSampleRCS)))
 		CRASH("Failed Add RCS_DOWNSAMPLE");
+
+	//DOF Depth
+	DownSampleRCS.iMipLevels = 2;
+	DownSampleRCS.eFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOWNSAMPLE_DEPTH"), &DownSampleRCS)))
+		CRASH("Failed Add RCS_DOWNSAMPLE_DEPTH");
 #pragma endregion
 
 #pragma region UPSAMPLE
 	CRendererCS::RCS_DESC UpSampleRCS = {};
 	UpSampleRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_Sampling.hlsl");
 	UpSampleRCS.eShaderMacro = { {"THREAD_X", "16" } ,{"THREAD_Y", "16" } ,{"THREAD_Z", "1" } , { NULL, NULL } };
-	UpSampleRCS.strEntryPoint = "UpSample";
+	UpSampleRCS.strEntryPoint = "UpSample_Bloom";
 	UpSampleRCS.iWidth = m_iWinSizeX;
 	UpSampleRCS.iHeight = m_iWinSizeY;
 	UpSampleRCS.fDefinitionX = 16.f;
@@ -837,10 +996,17 @@ HRESULT CRenderer::Ready_RCS()
 	UpSampleRCS.eFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
 	UpSampleRCS.iMipLevels = 4;
 	UpSampleRCS.vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
-
-	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_UPSAMPLE"), &UpSampleRCS)))
+	
+	//UpSample Bloom
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_UPSAMPLE_BLOOM"), &UpSampleRCS)))
 		CRASH("Failed Add RCS_UPSAMPLE");
+
+	UpSampleRCS.iMipLevels = 2;
+	UpSampleRCS.strEntryPoint = "UpSampleDOF";
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_UPSAMPLE_DOF"), &UpSampleRCS)))
+		CRASH("Failed Add RCS_UPSAMPLE_DEPTH");
 #pragma endregion
+
 
 
 	return S_OK;

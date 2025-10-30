@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Sequencer.h"
 
 #include "Event_Scene_Edit.h"
@@ -93,7 +93,7 @@ void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& custo
 	ImGui::SetCursorScreenPos(customRect.Min);
 	ImCurveEdit::Edit(delegate, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
 
-	// Custom Rect ³»ºÎ MousePos Compute
+	// Custom Rect ï¿½ï¿½ï¿½ï¿½ MousePos Compute
 	_float fMouseX = (m_fFramePixelWidth * m_iFirstFrame + io.MousePos.x - customRect.Min.x) / m_fFramePixelWidth;
 	_float fMouseY = 1.f - (io.MousePos.y - customRect.Min.y) / (customRect.Max.y - customRect.Min.y);
 	// Point Click
@@ -165,10 +165,11 @@ void CSequencer::Update(_float fTimeDelta)
 {
 	ImGui::Begin("Sequence");
 
-	ImGui::PushItemWidth(200);
+	ImGui::PushItemWidth(300);
 	ImGui::Text("Frame : "); ImGui::SameLine(); ImGui::InputInt("##1", &m_iCurrentFrame); ImGui::SameLine();
 	ImGui::Text("/ Frame Min : ");  ImGui::SameLine(); ImGui::InputInt("##2", &m_iFrameMin); ImGui::SameLine();
 	ImGui::Text("/ Frame Max : ");  ImGui::SameLine(); ImGui::InputInt("##3", &m_iFrameMax);
+	ImGui::InputFloat("/ TPS : ", &m_fTrackPerSec);
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
@@ -182,6 +183,20 @@ void CSequencer::Update(_float fTimeDelta)
 
 	if(m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		Sorting_Item();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN)
+		m_isPlay = !m_isPlay;
+
+	if (true == m_isPlay)
+		Play(fTimeDelta);
+}
+
+void CSequencer::Play(_float fTimeDelta)
+{
+	if (m_iCurrentFrame >= m_iFrameMax)
+		return;
+
+
 }
 
 void CSequencer::Selectable_Item()
@@ -358,7 +373,7 @@ void CSequencer::Drawing()
 {
 	// Get DrawList
 	m_pDrawList = ImGui::GetWindowDrawList();
-	m_vCanvasPos = ImGui::GetCursorScreenPos();			// ImDrawList´Â Screen ÁÂÇ¥°è »ç¿ë
+	m_vCanvasPos = ImGui::GetCursorScreenPos();			// ImDrawListï¿½ï¿½ Screen ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_vCanvasSize = ImGui::GetContentRegionAvail();		// Canvas Size
 
 
@@ -387,7 +402,7 @@ void CSequencer::Drawing()
 
 void CSequencer::Panning(const _int iVisibleFrameCnt)
 {
-	// Panning (Alt + Wheel Click -> Drag => È­¸é ÁÂ¿ì ÀÌµ¿)
+	// Panning (Alt + Wheel Click -> Drag => È­ï¿½ï¿½ ï¿½Â¿ï¿½ ï¿½Ìµï¿½)
 	if (ImGui::IsWindowFocused() && m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::PRESS && m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::PRESS)
 	{
 		if (false == m_isPanningView)
@@ -407,7 +422,7 @@ void CSequencer::Panning(const _int iVisibleFrameCnt)
 	m_fFramePixelWidth = ImLerp(m_fFramePixelWidth, m_fFramePixelWidthTarget, 0.33f);
 	m_iFrameCnt = m_iFrameMax - m_iFrameMin;
 
-	// º¸¿©¾ß µÇ´Â Frame °³¼ö°¡ ÃÑ Frame °³¼öº¸´Ù ¸¹À¸¸é FirstFrame MinÀ¸·Î °íÁ¤
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ Frame ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Frame ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FirstFrame Minï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (iVisibleFrameCnt >= m_iFrameCnt)
 		m_iFirstFrame = m_iFrameMin;
 }

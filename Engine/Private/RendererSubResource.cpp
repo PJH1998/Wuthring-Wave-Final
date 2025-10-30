@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "RendererSubResource.h"
 #include "GameInstance.h"
 
@@ -16,17 +16,27 @@ CRendererSubResource::CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceCo
 HRESULT CRendererSubResource::Initialize()
 {
     m_iNumLUT_Textures = 4;
+
+    //SSAO
     m_iNumKernel = 16;
-
-    m_fRadius = 10.f;
-    m_fMaxDistance = 50.f;
-
-    m_fSSAO_MinDepthDistance = 10.f;
+    m_fRadius = 1.f;
+    m_fMaxDistance = 5.f;
+    m_fOutDistance = 500.f;
+    
+    // SSAO_Blur
+    m_fSSAO_MinDepthDistance = 5.f; 
 
     m_vFogDepthDistance = _float2(1000.f, 5000.f);
     m_vFogHeightDistance = _float2(0.f, 100.f);
 
     m_vFogColor = _float4(1.f, 1.f, 1.f, 1.f);
+
+    m_iNumWeights = 5;
+    m_fIntensity = 0.25f;
+
+    m_fDofDepth = 50.f;
+    m_fDofRange = 100.f;
+    m_fDofScale = 0.3f;
 
     if (FAILED(Ready_Shader_Filters()))
         CRASH("Failed Ready Shader Filters");
@@ -39,6 +49,10 @@ HRESULT CRendererSubResource::Initialize()
 
     if (FAILED(Ready_CS_Sampler()))
         CRASH("Failed Ready Sampler");
+
+    if (FAILED(Ready_BlurWeights()))
+        CRASH("Failed Ready BlurWeights");
+
     return S_OK;
 }
 
@@ -54,8 +68,6 @@ HRESULT CRendererSubResource::Bind_LUT_Texture(CShader* pShader, _uint iLUT_Inde
 {
     if(FAILED(pShader->Bind_Texture("g_LUT_Texture", m_pLUT_SRV)))
         CRASH("Failed Bind LUT_Texture");
-    //if (FAILED(m_pLUT_Texture->Bind_Shader_Resource(pShader, "g_LUT_Texture")))
-    //    CRASH("Failed Bind LUT_Texture");
 
     _uint iIndex = iLUT_Index >= m_iNumLUT_Textures ? 0 : iLUT_Index;
 
@@ -64,22 +76,34 @@ HRESULT CRendererSubResource::Bind_LUT_Texture(CShader* pShader, _uint iLUT_Inde
 
     return S_OK;
 }
-//
-//HRESULT CRendererSubResource::Bind_Noise_Texture(CShader* pShader, const _char* pConstantName)
-//{
-//    if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(pShader, pConstantName)))
-//        CRASH("Failed Bind RampTexture");
-//
-//    return S_OK;
-//}
-//
-//HRESULT CRendererSubResource::Bind_Sample_Vector(CShader* pShader, const _char* pConstantName)
-//{
-//    if (FAILED(pShader->Bind_Value(pConstantName, m_SSAO_SampleVector.data(), sizeof(_float4) * m_iNumKernel)))
-//        CRASH("Failed Bind Sample Vector");
-//
-//    return S_OK;
-//}
+HRESULT CRendererSubResource::Bind_SSAO_Resources(CShader* pShader)
+{
+    if (FAILED(pShader->Bind_Matrix("g_CamViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
+        CRASH("Render Fail");
+
+    if (FAILED(pShader->Bind_Matrix("g_CamProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
+        CRASH("Render Fail");
+
+    if (FAILED(m_pNoiseTexture->Bind_Shader_Resource(pShader, "g_NoiseTexture")))
+        CRASH("Failed Bind NoiseTexture");
+
+    if (FAILED(pShader->Bind_Value("g_vSampleVector", m_SSAO_SampleVector.data(), sizeof(_float4) * m_iNumKernel)))
+        CRASH("Failed Bind Sample Vector");
+
+    if (FAILED(pShader->Bind_Value("g_iSampleSize", &m_iNumKernel, sizeof(_uint))))
+        CRASH("Failed Bind g_iSampleSize");
+
+    if (FAILED(pShader->Bind_Value("g_fSSAO_Radius", &m_fRadius, sizeof(_float))))
+        CRASH("Failed Bind g_fSSAO_Radius");
+
+    if (FAILED(pShader->Bind_Value("g_fSSAO_MaxDistance", &m_fMaxDistance, sizeof(_float))))
+        CRASH("Failed Bind g_fSSAO_MaxDistance");
+
+    if (FAILED(pShader->Bind_Value("g_fSSAO_OutDistance", &m_fOutDistance, sizeof(_float))))
+        CRASH("Failed Bind g_fSSAO_OutDistance");
+    
+    return S_OK;
+}
 
 HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
 {
@@ -95,7 +119,7 @@ HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
     if (FAILED(pShader->Bind_Value("g_vFogColor", &m_vFogColor, sizeof(_float4))))
         CRASH("Failed Bind Fog Color");
 
-    m_fFogTime += 1.f;
+    m_fFogTime = fmodf(m_fFogTime + 1.f, 1920.f); // ³ëÀÌÁî »çÀÌÁî 128 x 128
 
     if (FAILED(pShader->Bind_Value("g_fFogTime", &m_fFogTime, sizeof(_float))))
         CRASH("Failed Bind Fog Time");
@@ -103,28 +127,14 @@ HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
     return S_OK;
 }
 
-HRESULT CRendererSubResource::Add_SSAO_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+HRESULT CRendererSubResource::Bind_Dof_Resource(CShader* pShader)
 {
-    SSAO_DATA Data = {};
-    memcpy(Data.vSampleVector, m_SSAO_SampleVector.data(), sizeof(_float4) * m_iNumKernel);
-    Data.CamViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
-    Data.CamProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
-    Data.ProjMatrixInv = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ);
-    Data.fWidth = fWidth;
-    Data.fHeight = fHeight;
-    Data.iSampleSize = m_iNumKernel;
-    Data.fSSAO_Radius = m_fRadius;
-    Data.fSSAO_MaxDistance = m_fMaxDistance;
-
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SSAO_DATA", reinterpret_cast<void*>(&Data), sizeof(SSAO_DATA))))
-        return E_FAIL;
-
-    m_pDefaultSampler->SetPrivateData(WKPDID_D3DDebugObjectName, 0, nullptr);
-
-    m_pContext->CSSetSamplers(1, 1, &m_pDefaultSampler);
-    m_pContext->CSSetSamplers(2, 1, &m_pPointClampSampler);
-    m_pContext->CSSetSamplers(3, 1, &m_pNoiseSampler);
-
+    if (FAILED(pShader->Bind_Value("g_fFocusDepth", &m_fDofDepth, sizeof(_float))))
+        CRASH("Failed Bind Fog Distance");
+    if (FAILED(pShader->Bind_Value("g_fFocusRange", &m_fDofRange, sizeof(_float))))
+        CRASH("Failed Bind Fog Distance");
+    if (FAILED(pShader->Bind_Value("g_fFocusMinCoc", &m_fDofScale, sizeof(_float))))
+        CRASH("Failed Bind Fog Distance");
 
     return S_OK;
 }
@@ -142,20 +152,53 @@ HRESULT CRendererSubResource::Add_SSAO_Blur_BufferData(const _wstring& strRCSTag
     return S_OK;
 }
 
-HRESULT CRendererSubResource::Add_SizeData_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+HRESULT CRendererSubResource::Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight)
 {
-    SIZE_DATA Data = {};
-    Data.vSize = _float2(fWidth, fHeight);
+    if (iBlurWeight >= m_iNumWeights)
+        return E_FAIL;
     
-    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "SIZE_DATA", reinterpret_cast<void*>( &Data ), sizeof(SIZE_DATA))))
+    BLUR_DATA Data = {};
+    Data.vSize = _float2(fWidth, fHeight);
+    Data.iRadius = m_Weights[iBlurWeight].first;
+
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLUR_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLUR_DATA))))
+        return E_FAIL;
+
+    if (FAILED(m_pGameInstance->Add_SRVData(strRCSTag, "g_Weights", m_WeightSRVs[iBlurWeight])))
         return E_FAIL;
 
     return S_OK;
 }
 
-HRESULT CRendererSubResource::Add_SSAO_NoiseTexture(const _wstring& strRCSTag, const _char* pConstantName)
+HRESULT CRendererSubResource::Add_UPSample_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
 {
-    if (FAILED(m_pGameInstance->Add_SRVData(strRCSTag, pConstantName, m_pNoiseTexture->Get_SRV(0))))
+    UPSAMPLE_DATA Data = {};
+    Data.vSize = _float2(fWidth, fHeight);
+    
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "UPSAMPLE_DATA", reinterpret_cast<void*>( &Data ), sizeof(UPSAMPLE_DATA))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CRendererSubResource::Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex)
+{
+    BLOOM_UP_DATA Data = {};
+    Data.vSize = _float2(fWidth, fHeight);
+    Data.fIntensity = ( 1.f - static_cast<_float>( ( iUpIndex + 1 ) ) * m_fIntensity );
+
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "BLOOM_DATA", reinterpret_cast<void*>( &Data ), sizeof(BLOOM_UP_DATA))))
+        return E_FAIL;
+
+    return S_OK;
+}
+
+HRESULT CRendererSubResource::Add_DOF_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight)
+{
+    DOF_DATA Data = {};
+    Data.vSize = _float2(fWidth, fHeight);
+
+    if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "DOF_DATA", reinterpret_cast<void*>( &Data ), sizeof(DOF_DATA))))
         return E_FAIL;
 
     return S_OK;
@@ -294,6 +337,65 @@ HRESULT CRendererSubResource::Ready_CS_Sampler()
     return S_OK;
 }
 
+HRESULT CRendererSubResource::Ready_BlurWeights()
+{
+    m_Weights.resize(m_iNumWeights);
+
+    for (_uint i = 1; i <= m_iNumWeights; ++i)
+    {
+        _int iRadius = i * 3;
+
+        _float fSum = 0.f;
+
+        for (_int j = -iRadius; j <= iRadius; ++j)
+        {
+            _float fWeight = expf(-( j * j ) / ( 2.f * i * i ));
+            m_Weights[i - 1].second.push_back(fWeight);
+            fSum += fWeight;
+        }
+
+        for (auto& Weight : m_Weights[i - 1].second)
+            Weight /= fSum;
+
+        m_Weights[i - 1].first = iRadius;
+        Create_BlurBuffer(m_Weights[i - 1].second, iRadius);
+    }
+
+    return S_OK;
+}
+
+HRESULT CRendererSubResource::Create_BlurBuffer(const vector<_float>& Weights, _uint iRadius)
+{
+    D3D11_BUFFER_DESC BufferDesc = {};
+    BufferDesc.ByteWidth = sizeof(_float) * (iRadius * 2 + 1);
+    BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    BufferDesc.StructureByteStride = sizeof(_float);
+    BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+    D3D11_SUBRESOURCE_DATA Data = {};
+    Data.pSysMem = Weights.data();
+
+    ID3D11Buffer* pBuffer = { nullptr };
+    m_pDevice->CreateBuffer(&BufferDesc, &Data, &pBuffer);
+    ASSERT_CRASH(pBuffer);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+    SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
+    SRVDesc.Buffer.FirstElement = 0;
+    SRVDesc.Buffer.NumElements = iRadius * 2 + 1;
+
+    ID3D11ShaderResourceView* pSRV = { nullptr };
+    m_pDevice->CreateShaderResourceView(pBuffer, &SRVDesc, &pSRV);
+    ASSERT_CRASH(pSRV);
+
+    m_WeightBuffers.push_back(pBuffer);
+    m_WeightSRVs.push_back(pSRV);
+
+    return S_OK;
+}
+
 CRendererSubResource* CRendererSubResource::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CRendererSubResource* pInstance = new CRendererSubResource(pDevice, pContext);
@@ -323,4 +425,12 @@ void CRendererSubResource::Free()
     Safe_Release(m_pDefaultSampler);
     Safe_Release(m_pPointClampSampler);
     Safe_Release(m_pNoiseSampler);
+
+    for (auto& pBuffer : m_WeightBuffers)
+        Safe_Release(pBuffer);
+    m_WeightBuffers.clear();
+
+    for (auto& pSRV : m_WeightSRVs)
+        Safe_Release(pSRV);
+    m_WeightSRVs.clear();
 }

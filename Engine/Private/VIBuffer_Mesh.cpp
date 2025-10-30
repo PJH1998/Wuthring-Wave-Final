@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_Mesh.h"
 #include "GameInstance.h"
 
@@ -15,6 +15,7 @@ CVIBuffer_Mesh::CVIBuffer_Mesh(const CVIBuffer_Mesh& Prototype)
 
 HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath)
 {
+
     ifstream EMeshFile(pFilePath, ios::binary);
     if (false == EMeshFile.is_open())
     {
@@ -22,8 +23,8 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
         return E_FAIL;
     }
 
-    //Ã³À½¿¡ ÀÐ´Â Á¤º¸´Â ¸Å½¬°³¼ö, ·ÎµåÆÄÀÏ¿¡¼­ ¸Å½¬°³¼ö ¸ÕÀú ÀÐÀ½.
-    //ÀÌÆåÆ® ¸Å½¬´Â ´ÜÀÏ ¸Å½¬¶ó ÀÌ Á¤º¸°¡ ÇÊ¿ä¾ø¾î¼­ read·Î ³Ñ°ÜÁà¾ßÇÔ.
+    //Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½Ð´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Îµï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    //ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½î¼­ readï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     _uint MeshIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MeshIndex), sizeof(_uint));
 
@@ -50,10 +51,10 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
         XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
     }
 
-    m_iNumVertexBuffers = 1;    //ÀÏ´Ü ÇÑ°³
+    m_iNumVertexBuffers = 1;    //ï¿½Ï´ï¿½ ï¿½Ñ°ï¿½
     m_iVertexStride = sizeof(VTXMESH);
 
-    // ¹öÅØ½º ¹öÆÛ »ý¼º
+    // ï¿½ï¿½ï¿½Ø½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     D3D11_BUFFER_DESC VBDesc = {};
 
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -71,7 +72,6 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
     Safe_Delete_Array(pVertices);
 
-    //ÀÎµ¦½º ¹öÆÛ »ý¼º
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
     m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     m_iIndexStride = sizeof(_uint);
@@ -93,6 +93,8 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
 
     Safe_Delete_Array(pIndices);
 
+   
+
 	return S_OK;
 }
 
@@ -103,18 +105,17 @@ HRESULT CVIBuffer_Mesh::Initialize_Clone(void* pArg)
 	return S_OK;
 }
 
-
 CVIBuffer_Mesh* CVIBuffer_Mesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, _fmatrix PreTransformMatrix)
 {
-    CVIBuffer_Mesh* pInstance = new CVIBuffer_Mesh(pDevice, pContext);
+	CVIBuffer_Mesh* pInstance = new CVIBuffer_Mesh(pDevice, pContext);
 
-    if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, pFilePath)))
-    {
-        MSG_BOX("Failed to Create : CVIBuffer_Mesh");
-        Safe_Release(pInstance);
-    }
+	if (FAILED(pInstance->Initialize_Prototype(PreTransformMatrix, pFilePath)))
+	{
+		MSG_BOX("Failed to Create : CVIBuffer_Mesh");
+		Safe_Release(pInstance);
+	}
 
-    return pInstance;
+	return pInstance;
 }
 
 CComponent* CVIBuffer_Mesh::Clone(void* pArg)

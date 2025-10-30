@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Engine_Define.h"
 
 namespace Client
@@ -7,13 +7,13 @@ namespace Client
 	{
 		_float fHp;
 		_float fAttack;
-		_float fSwitchGauge; // ÇùÁÖ °ÔÀÌÁö
+		_float fSwitchGauge; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		_float fMaxSwitchGauge;
 
-		_float fBurstGauge; // ³ë¶õ»ö Burst Gauge
+		_float fBurstGauge; // ï¿½ï¿½ï¿½ï¿½ï¿½ Burst Gauge
 		_float fMaxBurstGauge;
 
-		_float fUniqueGauge; // Ä³¸¯ÅÍ Æ¯¼ö Gauge
+		_float fUniqueGauge; // Ä³ï¿½ï¿½ï¿½ï¿½ Æ¯ï¿½ï¿½ Gauge
 		_float fMaxUniqueGauge; 
 	}CHARACTER_STAT;
 

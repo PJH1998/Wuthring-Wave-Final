@@ -72,8 +72,8 @@ void CLevel_Test::Render()
 void CLevel_Test::Ready_Layer_Player()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
-    //vScale = { 1.f, 1.f, 1.f };
-    vScale = { 0.01f, 0.01f, 0.01f };
+    vScale = { 1.f, 1.f, 1.f };
+    //vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { 0.f, -10.f, 50.f };
 
@@ -96,8 +96,9 @@ void CLevel_Test::Ready_Layer_Player()
 
     // 2. Galbrena 정의
 
-    // 3.주인공 캐릭터 정의
-
+    // 3. Rover(주인공) 캐릭터 정의
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
     // 4. Player(Character 모음) 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
@@ -120,7 +121,7 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
     MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
     MobDesc.fSpeedPerSec = 10.f;
-    MobDesc.vInitPosition = _float3(0.f, -8.f, 0.f);
+    MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "AugustaAirFall.h"
 #include "Augusta.h"
 #include "StateMachine.h"
@@ -26,7 +26,7 @@ void CAugustaAirFall::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EFallType eFallType = context.m_eFallType;
+    EAugustaFallType eFallType = context.m_eFallType;
 
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eFallType);
@@ -75,7 +75,7 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // 조금 더 가속 주기?
-    m_pAugusta->Move_Fall(fTimeDelta, 0.5f);
+    m_pAugusta->Move_Fall(fTimeDelta, 1.f);
 
     // 1. 조작키에 따른 이동?
     /*if (m_States[MOVE])
@@ -96,14 +96,14 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 
     if (fDistanceToGround < 0.2f)
     {
-        m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
+        m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
         return;
     }
 
     /*if (m_States[LAND])
     {
-        m_pAugusta->GetStateContextForWrite().m_eLandType = ELandType::LAND_LIGHT;
+        m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
         return;
     }*/
@@ -113,8 +113,8 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaAirFall::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP), "Fall_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EFallType::FALL_LOOP_FAST), "Fall_Loop_Fast", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaFallType::FALL_LOOP), "Fall_Loop", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaFallType::FALL_LOOP_FAST), "Fall_Loop_Fast", 1.f, 0.f);
 }
 
 void CAugustaAirFall::State_Reset()

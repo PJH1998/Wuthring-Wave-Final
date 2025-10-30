@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "AirState.h"
 
 NS_BEGIN(Client)
@@ -13,6 +13,7 @@ private:
         LAND,
         MOVE,
         DOUBLE_JUMP,
+        AIR_ATTACK,
         END
     };
 
