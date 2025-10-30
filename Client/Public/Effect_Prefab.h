@@ -20,6 +20,7 @@ public:
 
 		_float2	vLifeTime = { 0.f, 0.f };
 		_string strBoneTag;
+		_uint	CurrentLevel;
 	}PREFAB_DESC;
 
 private:
@@ -40,7 +41,7 @@ public:
 
 private:
 	CGameObject* Get_Children(_wstring ChildrenTag);
-	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType);
+	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType, _uint CurrentLevel);
 
 public:
 	_wstring	Get_MyTag() {

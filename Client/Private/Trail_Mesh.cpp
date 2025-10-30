@@ -89,7 +89,7 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::BLEND, this);
 }
 
 void CTrail_Mesh::Render()

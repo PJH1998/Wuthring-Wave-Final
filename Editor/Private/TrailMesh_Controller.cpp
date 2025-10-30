@@ -97,7 +97,7 @@ void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPa
 
                 //파일명으로 매쉬버퍼 컴포넌트 이름 지정
                 _char szDefault[MAX_PATH];
-                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_TrailMesh_");
+                strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Mesh_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strMeshTag, MAX_PATH);
 

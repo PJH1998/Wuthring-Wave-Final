@@ -34,7 +34,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
        _wstring strChildrenTag = pDesc->FrameDesc[i].strChildrenTag;
        EFFECT_TYPE eType = pDesc->FrameDesc[i].eChildrenType;
 
-       Add_Children(strChildrenTag, eType);
+       Add_Children(strChildrenTag, eType, pDesc->CurrentLevel);
 
        m_vFrames.push_back(pDesc->FrameDesc[i]);
     }
@@ -137,7 +137,7 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
     }
 }
 
-void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType)
+void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType, _uint CurrentLevel)
 {
     CGameObject* pChildren = {};
     _wstring strChildrenProtoTag = TEXT("Prototype_GameObject_");
@@ -150,7 +150,7 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
         strChildrenProtoTag += TEXT("Particle_");
         strChildrenProtoTag += strChildrenNameTag;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
    /* case EFFECT_TYPE::MESH:
         pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
@@ -168,7 +168,7 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
         strChildrenProtoTag += TEXT("TrailMesh_");
         strChildrenProtoTag += strChildrenNameTag;
 
-        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::STATIC), strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+        pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
@@ -193,13 +193,12 @@ CGameObject* CEffect_Prefab::Get_Children(_wstring ChildrenTag)
 
 void CEffect_Prefab::Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix)
 {
-    //플레이어 매트릭스는 위치에만 영향받게 설정
-    _vector vPos = XMVectorSet(PlayerMatrix._41, PlayerMatrix._42, PlayerMatrix._43, 1.f);
-
-    _matrix PlayerPosMatrix = XMMatrixTranslationFromVector(vPos);
+    // 
+    //_vector vPos = XMVectorSet(PlayerMatrix._41, PlayerMatrix._42, PlayerMatrix._43, 1.f);
+    //_matrix PlayerPosMatrix = XMMatrixTranslationFromVector(vPos);
 
     XMStoreFloat4x4(&m_SpawnMatrix,
-      XMLoadFloat4x4(&BoneMatrix) * PlayerPosMatrix);
+      XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&PlayerMatrix));
 }
 
 void CEffect_Prefab::Reset_SpawnMatrix()

@@ -252,6 +252,10 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
         }
     }
 
+    PrefabDesc.CurrentLevel = ENUM_CLASS(eLevel);
+    //프리팹 풀링 이름을 툴에서 설정한 프리팹 이름으로 할지 == Desc.PrefabName ex) test
+    //아니면 json으로 저장할 때 이름으로 할지 == strPrefabTag ex)Dash_Test
+
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
         ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 3, &PrefabDesc)))
     {
