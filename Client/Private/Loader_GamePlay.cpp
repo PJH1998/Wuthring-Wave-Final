@@ -73,6 +73,7 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 
 HRESULT CLoader_GamePlay::Load_Rover()
 {
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_MonsterTest()
