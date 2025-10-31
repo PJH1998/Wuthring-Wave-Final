@@ -30,6 +30,7 @@ HRESULT CLoader_Test_UI::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Prototype(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     m_pGameInstance->Wait_Thread_End();
 
     return S_OK;
@@ -38,7 +39,7 @@ HRESULT CLoader_Test_UI::Initialize()
 HRESULT CLoader_Test_UI::Load_Texture()
 {
     // ==============================
-    cout << "Texture" << endl;
+    cout << "[CLoader_Test_UI] Texture" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -47,7 +48,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
     // * Json Parse                 // for pre-loading textures
     // UI_HUD
     //_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
-    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD.json"; // ksta
+    _string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
     vecDescs.push_back(Load_Tree(strFilePath_UI_HUD));
 
     for (auto& treeDesc : vecDescs)
@@ -58,10 +59,13 @@ HRESULT CLoader_Test_UI::Load_Texture()
             const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
             const   _uint       iNumFiles   = infoDesc.tUIDesc.iNumFiles;
 
+            if (strFileName == L"T_JiabeilinaEnergyBgCombined")
+                int i = 10;
+
             infoDesc.tUIDesc.strFilePath;
             if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
                 CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-                OutputDebugString(L"[CCustom_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+                OutputDebugString(L"[CLoader_Test_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
         }
     }
 
@@ -71,7 +75,7 @@ HRESULT CLoader_Test_UI::Load_Texture()
 HRESULT CLoader_Test_UI::Load_Model()
 {
     // ==============================
-    cout << "Model" << endl;
+    cout << "[CLoader_Test_UI] Model" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -93,7 +97,7 @@ HRESULT CLoader_Test_UI::Load_Model()
 HRESULT CLoader_Test_UI::Load_Shader()
 {
     // ==============================
-    cout << "Shader" << endl;
+    cout << "[CLoader_Test_UI] Shader" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -113,7 +117,7 @@ HRESULT CLoader_Test_UI::Load_Shader()
 HRESULT CLoader_Test_UI::Load_Object()
 {
     // ==============================
-    cout << "Object" << endl;
+    cout << "[CLoader_Test_UI] Object" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
@@ -146,13 +150,23 @@ HRESULT CLoader_Test_UI::Load_Object()
 HRESULT CLoader_Test_UI::Load_Prototype()
 {
     // ==============================
-    cout << "[UI Custom] Prototype" << endl;
+    cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
     // ==============================
     const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
         CUI_HUD::Create(m_pDevice, m_pContext))))
         OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test_UI::Load_Font()
+{
+    cout << "[CLoader_Test_UI] .. " << endl;
+
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", 16)))
+        OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
     return S_OK;
 }

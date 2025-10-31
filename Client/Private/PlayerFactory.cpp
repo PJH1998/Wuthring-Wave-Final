@@ -50,7 +50,6 @@ void CPlayerFactory::Register_Camera(LEVEL ePrototypeLevel, LEVEL eLevel, CPlaye
     ASSERT_CRASH(pSpringCamera);
     *ppCamera = pSpringCamera;
 
-    // Camera ���.
     pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::STATIC), TEXT("Camera_Spring"), pSpringCamera);
     Safe_AddRef(pSpringCamera);
 

@@ -538,11 +538,21 @@ void CCharacter::Set_ColliderReferenceBone(const _string& strBoneName, _float3 v
     
 }
 
+void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_pTransformCom->Save_PreviousPosition(); // 급격한 콜라이더 이동 막기.
 
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	m_pColliderCom->Sync_Position(m_pTransformCom);
+}
 
-
-
-
+void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	pTransformCom->Set_WorldMatrix(mat);
+}
 
 #pragma endregion
 

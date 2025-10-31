@@ -5,7 +5,7 @@
 NS_BEGIN(Client)
 class CRover final : public CCharacter
 {
-#pragma region STATE ���� ���濡 ���.
+#pragma region STATE
 private:
 	struct StateTransitionContext
 	{
@@ -70,13 +70,11 @@ private:
 
 
 public:
-	// ���� State���� ȣ��
 	StateTransitionContext& GetStateContextForWrite()
 	{
 		return m_StateContext;
 	};
 
-	// ȣ�� �޴� State
 	StateTransitionContext TakeStateContext()
 	{
 		StateTransitionContext tempCopy = m_StateContext;
@@ -109,7 +107,7 @@ public:
 #pragma endregion
 
 
-#pragma region 1. STATE ����.
+#pragma region 1. STATE
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;

@@ -20,6 +20,8 @@ private:
 	void			Ready_Dummy();
 	void			Ready_MonsterTest();
 
+
+
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
 	class CGameSystem* m_pGameSystem = { nullptr };

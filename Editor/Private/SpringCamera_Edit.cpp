@@ -78,7 +78,8 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	}
 	else
 	{
-		Mouse_Scroll(fTimeDelta);
+		if(m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE) == KEYSTATE::PRESS)
+			Mouse_Scroll(fTimeDelta);
 		// 0. Cam Rotate
 		if (CAMERA_STATE::TARGET == m_eCameraState && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
 			__super::Mouse_Move_Up();

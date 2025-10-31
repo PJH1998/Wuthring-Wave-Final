@@ -66,6 +66,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
@@ -99,10 +100,6 @@ void CAugusta::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-
-
-
-
     // 6. 파츠 갱신.?
     for (auto& pPart : m_PartObjects)
     {
@@ -121,8 +118,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
     }
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
-
-    // Collider 충돌 처리후 위치에 맞춘다.
     
     
 

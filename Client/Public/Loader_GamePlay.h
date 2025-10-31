@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Loader.h"
 
+#include "Custom_UI.h"
+
 NS_BEGIN(Client)
 
 class CLoader_GamePlay final : public CLoader
@@ -23,9 +25,14 @@ private:
 	HRESULT				Load_Augusta();
 	HRESULT				Load_Rover();
 
+	HRESULT				Load_UI();
+
+
+private:
+	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);
+
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
-
 
 public:
 	static		CLoader_GamePlay*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

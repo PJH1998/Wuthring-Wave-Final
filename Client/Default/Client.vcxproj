@@ -234,6 +234,8 @@
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\Rover.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverGroundIdle.h" />
+    <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
@@ -342,6 +344,8 @@
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverFactory.cpp" />
+    <ClCompile Include="..\Private\RoverGroundIdle.cpp" />
+    <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

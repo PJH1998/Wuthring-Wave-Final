@@ -57,7 +57,7 @@ public:
 public:
 	void Change_CharacterCheck();
 	void Change_Character(CHARACTERTYPE eNextCharacter);
-	void Sync_Transform();
+	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
@@ -90,6 +90,9 @@ private:
 	class CTransform* m_pTargetTransform = { nullptr };
 	_bool m_IsLockOn = { false };
 
+	_bool m_IsChanage = { false };
+	CHARACTERTYPE m_eNextCharacter = {};
+	
 private:
 	void Sorting_Target();
 	void Toggle_LockOn();

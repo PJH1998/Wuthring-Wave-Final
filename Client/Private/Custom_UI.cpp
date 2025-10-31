@@ -91,9 +91,6 @@ void CCustom_UI::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if (m_tUIDesc.strUIName == L"Skill_Rover")
-        int i = 10;
-
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::UI, this)))
         return;
 
@@ -108,9 +105,6 @@ void CCustom_UI::Render()
 
     //if (m_tUIDesc.strUIName == L"Background_Dummy")
     //    return;
-
-    if (m_tUIDesc.strUIName == L"Skill_Rover")
-        int i = 10;
 
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
@@ -153,8 +147,8 @@ void CCustom_UI::Render()
         m_pVIBufferCom->Render();
     }
 
-   for (auto& child : m_vecChildObjects)
-       child->Render();
+   //for (auto& child : m_vecChildObjects)          // 얘 살려두니까 이중렌더됨.
+   //    child->Render();
 
 }
 
@@ -322,7 +316,8 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _uint         iNumFiles = pDesc->iNumFiles;
 
     //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
     const   _bool       isInstance = pDesc->isInstance;
 
 
