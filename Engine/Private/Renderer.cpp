@@ -161,17 +161,9 @@ void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
 void CRenderer::Render_Priority()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"))))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::PRIORITY)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::PRIORITY)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::PRIORITY));
 
 	m_pGameInstance->End_MRT();
 }
@@ -182,15 +174,7 @@ void CRenderer::Render_Shadow()
 
 	m_pGameInstance->Begin_CSM();
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::SHADOW)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render_Shadow(); // if(m_pGameInstance->IsIn_SplitFrustrum())
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::SHADOW)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::SHADOW));
 
 	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 
@@ -203,15 +187,7 @@ void CRenderer::Render_Outline()
 	if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 	   CRASH("Failed Begin MRT");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render_OutLine();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::OUTLINE));
 
 	m_pGameInstance->End_MRT();
 }
@@ -219,17 +195,9 @@ void CRenderer::Render_Outline()
 void CRenderer::Render_NonBlend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONBLEND));
 
 	m_pGameInstance->End_MRT();
 }
@@ -313,17 +281,9 @@ void CRenderer::Render_SSAO()
 void CRenderer::Render_Dynamic()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-		for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::DYNAMIC)])
-		{
-			if (nullptr != pRenderObject)
-				pRenderObject->Render();
-
-			Safe_Release(pRenderObject);
-		}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::DYNAMIC)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DYNAMIC));
 
 	m_pGameInstance->End_MRT();
 }
@@ -399,17 +359,9 @@ void CRenderer::Render_Combined()
 void CRenderer::Render_NonLight()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONLIGHT)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONLIGHT)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONLIGHT));
 
 	m_pGameInstance->End_MRT();
 }
@@ -417,17 +369,9 @@ void CRenderer::Render_NonLight()
 void CRenderer::Render_Emissive()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Emissive"), nullptr, false)))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::EMISSIVE)])
-	{
-		if(nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::EMISSIVE)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::EMISSIVE));
 
 	m_pGameInstance->End_MRT();
 }
@@ -515,17 +459,9 @@ void CRenderer::Render_BloomCombined()
 void CRenderer::Render_DistortionObject()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Distortion"), nullptr, false)))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-		for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::DISTORTION)])
-		{
-			if (nullptr != pRenderObject)
-				pRenderObject->Render();
-
-			Safe_Release(pRenderObject);
-		}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::DISTORTION)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::DISTORTION));
 
 	m_pGameInstance->End_MRT();
 }
@@ -533,17 +469,9 @@ void CRenderer::Render_DistortionObject()
 void CRenderer::Render_Blend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-		CRASH("Render Fail")
+		CRASH("Render Fail");
 
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::BLEND)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::BLEND)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::BLEND));
 
 	m_pGameInstance->End_MRT();
 }
@@ -632,28 +560,12 @@ void CRenderer::Render_ScreenEffect()
 
 void CRenderer::Render_UI()
 {
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::UI)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::UI)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::UI));
 }
 
 void CRenderer::Render_Fade()
 {
-	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::FADE)])
-	{
-		if (nullptr != pRenderObject)
-			pRenderObject->Render();
-
-		Safe_Release(pRenderObject);
-	}
-
-	m_RenderObjects[ENUM_CLASS(RENDERGROUP::FADE)].clear();
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::FADE));
 }
 
 void CRenderer::Update_EffectIntensity()
@@ -866,6 +778,19 @@ void CRenderer::Render_Debug()
 }
 #endif
 
+
+void CRenderer::Render_ObjectList(_uint iRG_Index)
+{
+	for (auto& pRenderObject : m_RenderObjects[iRG_Index])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(iRG_Index)].clear();
+}
 
 HRESULT CRenderer::Ready_RT()
 {

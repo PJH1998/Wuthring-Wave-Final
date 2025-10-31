@@ -111,6 +111,8 @@ private:
 #endif
 
 private:
+	void						Render_ObjectList(_uint iRG_Index);
+
 	HRESULT						Ready_RT();
 	HRESULT						Ready_MRT();
 	HRESULT						Ready_SubResource();
