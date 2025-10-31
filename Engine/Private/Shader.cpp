@@ -12,7 +12,7 @@ CShader::CShader(const CShader& Prototype)
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
-    Safe_AddRef(m_pEffect);
+    //Safe_AddRef(m_pEffect);
     for (auto& pInputLayOut : m_InputLayouts)
         Safe_AddRef(pInputLayOut);
 }
@@ -29,7 +29,7 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
 
     if (FAILED(D3DX11CompileEffectFromFile(pFilePath, nullptr,
         D3D_COMPILE_STANDARD_FILE_INCLUDE, iHlslFlag, 0,
-        m_pDevice, &m_pEffect, nullptr)))
+        m_pDevice, reinterpret_cast<ID3DX11Effect**>(&m_pEffect), nullptr)))
         return E_FAIL;
 
     ID3DX11EffectTechnique* pTechnique = m_pEffect->GetTechniqueByIndex(0);
@@ -188,5 +188,6 @@ void CShader::Free()
         Safe_Release(pInputLayout);
     m_InputLayouts.clear();
 
-    Safe_Release(m_pEffect);
+	m_pEffect = nullptr;
+    //Safe_Release(m_pEffect);
 }

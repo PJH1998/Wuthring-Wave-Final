@@ -104,11 +104,6 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
 }
 
-
-
-
-
-
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 {
 	auto iter = find_if(m_Bones.begin(), m_Bones.end(), [&](CBone* pBone)->_bool {

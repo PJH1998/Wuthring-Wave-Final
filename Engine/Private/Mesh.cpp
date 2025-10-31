@@ -75,7 +75,7 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 }
 #endif
 
-// ?닿쾬??怨꾩궛 ?곗씠?붽? ?곸슜?섏뼱???섎뒗 遺遺?
+// 
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)
