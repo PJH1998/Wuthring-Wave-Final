@@ -115,6 +115,7 @@ public:
 #pragma region RENDERER
 public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
+	HRESULT		Add_Render_StaticObject(class CGameObject* pObject);
 #ifdef _DEBUG
 	void		Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);

@@ -29,6 +29,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	Ready_Component(pArg);
 	m_iNumLOD = m_pModelComArray.size() - 1;
 	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
+
 	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
 
 	return S_OK;
@@ -40,12 +41,15 @@ void CMapObject::Priority_Update(_float fTimeDelta)
 
 void CMapObject::Update(_float fTimeDelta)
 {
-
+	//m_isDraw = false;
 }
 
 void CMapObject::Late_Update(_float fTimeDelta)
 {
-	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	//if (false == m_isDraw)
+	//	return;
+
+	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMapObject::Render()

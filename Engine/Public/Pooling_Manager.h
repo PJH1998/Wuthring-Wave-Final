@@ -20,7 +20,11 @@ public:
 
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
-	_bool									IsWorkFinish() { return 0 == m_iLiveWork && 0 == m_iRemainWork; }
+	_bool									IsWorkFinish() { 
+		_int iLiveWork = m_iLiveWork.load(memory_order_acquire);
+		_int iRemainWork = m_iRemainWork.load(memory_order_acquire);
+		return 0 == iLiveWork && 0 == iRemainWork; }
+
 	void									Wait_Thread_End();
 
 private:

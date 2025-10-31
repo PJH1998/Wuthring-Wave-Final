@@ -383,10 +383,11 @@ ID3D11ShaderResourceView* CGameInstance::Get_Debug_RT_Resource(const _wstring& s
 #pragma region RENDERER
 HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObject)
 {
-	if (pObject->IsActivate() == false)
-		int i = 10;
-
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
+}
+HRESULT CGameInstance::Add_Render_StaticObject(CGameObject* pObject)
+{
+	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
