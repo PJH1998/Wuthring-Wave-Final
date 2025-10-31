@@ -626,74 +626,85 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
         discard;
     
     Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+    
+    //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    //return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+    Out.vColor = lerp(Out.vColor, float4(1.f, 0.f, 1.f, 1.f), 0.5f);
     Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
+
+    return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+    
+    
+    
+    
     
     
     // bind variables
     float fCooldown = In.mExtra0.x; // 0 ~ 1. instance 0 은 e, 1 은 r 에 대응
     
     
-    switch (g_iVariantFlag)
-    {
-        case UIFLAG_COOLDOWN_CIRCLE: // 1
-        {
-            // circle cd
-            // g_fLeftCDRate 가 1 일때는 밝은 색으로
-            // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
-            
-            float2 center = float2(0.5f, 0.5f);
-            float2 dir = normalize(fixedUV - center); // 중앙에서 목표 UV좌표로의 방향.
-            float angle = atan2(dir.y, dir.x); // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
-            angle += PI / 2; // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
-            if (angle < 0)
-                angle += 2 * PI; // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
-    
-            float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
-    
-            if (angle <= fCooldownAngle)
-            {
-            // 이미 지난 부분은 원래의 색으로
-                return Out;
-            }
-            else
-            {
-            // 지나지 않은 부분은 좀 더 하얀 색으로
-                Out.vColor.rgb *= 1.2f;
-                return Out;
-            }
-            
-        }
-        break;
-        
-        case UIFLAG_COOLDOWN_RECT: // 2
-        {
-        // rect cd. 
-        // g_fLeftCDRate 가 1 일때는 어두운 색으로
-        // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
-            if (fixedUV.y > fCooldown)
-            {
-            // 밝게 표시될 부분
-                return Out;
-            }
-            else
-            {
-            // 어둡게 표시될 부분
-                Out.vColor *= 0.8f;
-                return Out;
-            }
-            
-            
-        }
-        break;
-        
-        default:
-        {
-            //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-            //return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
-            Out.vColor = lerp(Out.vColor, float4(1.f, 0.f, 1.f, 1.f), 0.5f);
-            return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
-        }
-    }
+    //switch (g_iVariantFlag)
+    //{
+    //    case UIFLAG_COOLDOWN_CIRCLE: // 1
+    //    {
+    //        // circle cd
+    //        // g_fLeftCDRate 가 1 일때는 밝은 색으로
+    //        // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
+    //        
+    //        float2 center = float2(0.5f, 0.5f);
+    //        float2 dir = normalize(fixedUV - center); // 중앙에서 목표 UV좌표로의 방향.
+    //        float angle = atan2(dir.y, dir.x); // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
+    //        angle += PI / 2; // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
+    //        if (angle < 0)
+    //            angle += 2 * PI; // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
+    //
+    //        float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
+    //
+    //        if (angle <= fCooldownAngle)
+    //        {
+    //        // 이미 지난 부분은 원래의 색으로
+    //            return Out;
+    //        }
+    //        else
+    //        {
+    //        // 지나지 않은 부분은 좀 더 하얀 색으로
+    //            Out.vColor.rgb *= 1.2f;
+    //            return Out;
+    //        }
+    //        
+    //    }
+    //    break;
+    //    
+    //    case UIFLAG_COOLDOWN_RECT: // 2
+    //    {
+    //    // rect cd. 
+    //    // g_fLeftCDRate 가 1 일때는 어두운 색으로
+    //    // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
+    //        if (fixedUV.y > fCooldown)
+    //        {
+    //        // 밝게 표시될 부분
+    //            return Out;
+    //        }
+    //        else
+    //        {
+    //        // 어둡게 표시될 부분
+    //            Out.vColor *= 0.8f;
+    //            return Out;
+    //        }
+    //        
+    //        
+    //    }
+    //    break;
+    //    
+    //    default:
+    //    {
+    //        //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    //        //return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+    //        Out.vColor = lerp(Out.vColor, float4(1.f, 0.f, 1.f, 1.f), 0.5f);
+    //        Out.vColor.a = l
+    //        return Out; // 플래그 지정 제대로 안했으면 마젠타 처리
+    //    }
+    //}
     
     return Out;
 }
