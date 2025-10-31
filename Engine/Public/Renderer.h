@@ -35,6 +35,8 @@ public:
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
 	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
+	void		Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
+	void		Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
 #endif
 
 private:
@@ -68,6 +70,8 @@ private:
 	_bool							m_IsSSAO = { true };
 	_bool							m_IsSSAO_Blur = { true };
 	_bool							m_IsStylized = { true };
+	_float							m_fDebugRoughness = {};
+	_float							m_fDebugMetallic = { false };
 #endif
 
 private:

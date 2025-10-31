@@ -41,11 +41,17 @@ void CEditDummy_Augusta::Priority_Update(_float fTimeDelta)
 
 void CEditDummy_Augusta::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_F10) == KEYSTATE::DOWN)
+		m_IsEmissive = !m_IsEmissive;
 }
 
 void CEditDummy_Augusta::Late_Update(_float fTimeDelta)
 {
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+	
+	RENDERGROUP eRGIndex = m_IsEmissive ? RENDERGROUP::EMISSIVE : RENDERGROUP::DYNAMIC;
+	m_pGameInstance->Add_Render_Object(eRGIndex, this);
+//	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
+
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this);
 }
@@ -75,7 +81,9 @@ void CEditDummy_Augusta::Render()
 		m_pShaderCom->Bind_Value("g_HasMetallic", &HasMetallic, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 
-		m_pShaderCom->Begin(0);
+		_uint iShaderIndex = m_IsEmissive ? 7 : 0;
+
+		m_pShaderCom->Begin(iShaderIndex);
 		m_pModelCom->Render(i);
 	}
 }

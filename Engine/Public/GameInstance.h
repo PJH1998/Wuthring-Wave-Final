@@ -130,6 +130,8 @@ public:
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity);
 	void		SetPBR(_bool IsStylized);
+	void		Set_Metallic(_float fMetallic);
+	void		Set_Roughness(_float fRoughness);
 #endif
 #pragma endregion
 

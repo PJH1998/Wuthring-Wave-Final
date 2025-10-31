@@ -378,6 +378,10 @@ void CRenderer::Render_Combined()
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
 		CRASH("Render Fail");
+	if (FAILED(m_pShader->Bind_Value("g_fGlobalRoughness", &m_fDebugRoughness, sizeof(_float))))
+		CRASH("Render Fail");
+	if (FAILED(m_pShader->Bind_Value("g_fGlobalMetallic", &m_fDebugMetallic, sizeof(_float))))
+		CRASH("Render Fail");
 #endif
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
@@ -448,7 +452,6 @@ void CRenderer::Render_Bloom()
 		// BLUR_X
 		_uint iDownWinSizeX = static_cast<_uint>( m_fWinSizeX ) >> (j + 1);
 		_uint iDownWinSizeY = static_cast<_uint>( m_fWinSizeY ) >> (j + 1);
-
 		
 		if (FAILED(m_pSubResource->Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), iDownWinSizeX, iDownWinSizeY, m_iBloomWeight)))
 			CRASH("Failed Add_SizeData_BufferData");

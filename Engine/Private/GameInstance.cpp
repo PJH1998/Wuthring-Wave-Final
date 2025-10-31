@@ -447,6 +447,14 @@ void CGameInstance::SetPBR(_bool IsStylized)
 {
 	m_pRenderer->SetPBR(IsStylized);
 }
+void CGameInstance::Set_Metallic(_float fMetallic)
+{
+	m_pRenderer->Set_Metallic(fMetallic);
+}
+void CGameInstance::Set_Roughness(_float fRoughness)
+{
+	m_pRenderer->Set_Roughness(fRoughness);
+}
 #endif
 #pragma endregion
 
