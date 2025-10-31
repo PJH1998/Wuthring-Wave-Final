@@ -26,7 +26,11 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
     
-    m_pAnimMachineCom = CAnimMachine::Create(m_pDevice, m_pContext);
+#ifdef _DEBUG
+	m_pAnimMachineCom = CAnimMachine::Create(m_pDevice, m_pContext);
+#endif // _DEBUG
+
+    
 
     return S_OK;
 }

@@ -132,7 +132,7 @@ void CAugustaGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+	m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
 }
 
 
@@ -156,7 +156,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (fDistanceToGround > 1.f)
+    if (!m_States[LAND])
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태

@@ -132,7 +132,7 @@ void CRoverGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pRover->Is_Land(&m_vLandNormal);
+    m_States[LAND] = m_pRover->Get_DistanceToGround(0.1f) <= 0.2f;
 }
 
 
@@ -156,52 +156,21 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (fDistanceToGround > 1.f)
-    {
-        m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
-        return;
-    }
+	//if (!m_States[LAND])
+	//{
+	//	m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverFallType::FALL_LOOP)); // 상위, 하위 상태
+	//	return;
+	//}
 
     // SPACE 누르면 바로 점프로 전환.
-    if (m_States[JUMP])
-    {
-        m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
-        return;
-    }
+    //if (m_States[JUMP])
+    //{
+    //    m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;
+    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
+    //    return;
+    //}
 
-    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
-    if (m_States[BURST_R])
-    {
-        m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST)); // 상위, 하위 상태
-        return;
-    }
-
-    if (m_States[UNIQUE_E])
-    {
-        m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL_STRIKE;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
-        return;
-    }
-
-    // SKILL_E 누르면 
-    if (m_States[SKILL_E])
-    {
-        m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_HACKDOWN_START;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK));
-        return;
-    }
-
-    // Run => Attack
-    if (m_States[ATTACK])
-    {
-        m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
-        return;
-    }
-  
     // Dash 보다 우선순위 높음.
     if (m_States[SPRINT_F])
     {
@@ -209,13 +178,13 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 뛰다가 Dash
-    if (m_States[DASH])
-    {
-        m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
+    //// 뛰다가 Dash
+    //if (m_States[DASH])
+    //{
+    //    m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+    //    return;
+    //}
 
     if (m_States[MOVE])
     {
@@ -268,13 +237,15 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
         if (eRunType != ERoverRunType::STOP_RUN_L)
         {
+			m_fTrackPosition = 0.f;
             m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::STOP_RUN_L);
             return;
         }
         // Stop Run 이면서 애니메이션 재생이 끝났다면?.
         if ((eRunType == ERoverRunType::STOP_RUN_L || eRunType == ERoverRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
         {
-            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+			
+            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
             m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
             return;
         }
