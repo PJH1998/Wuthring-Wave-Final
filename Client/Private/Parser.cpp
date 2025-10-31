@@ -171,8 +171,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 				pDesc.iShaderPassIndex = ShaderPass;
 				pDesc.eObjectType = eObjectType;
 				pDesc.WorldMatrix = &Matrix;
-
-				m_pGameInstance->Clone_Prototype(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject")
+				pDesc.iLevel = ENUM_CLASS(eLevel);
+				m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
 					, PROTOTYPE::GAMEOBJECT, &pDesc);
 				});
 		}

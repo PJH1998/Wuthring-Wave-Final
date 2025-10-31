@@ -17,6 +17,14 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
+	HRESULT				Load_MonsterTest();
+
+	HRESULT				Load_Player();
+	HRESULT				Load_Augusta();
+	HRESULT				Load_Rover();
+
+private:
+	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
 
 public:
 	static		CLoader_GamePlay*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

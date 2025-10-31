@@ -1,5 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Loader_GamePlay.h"
+#include"GameSystem.h"
+#include"MapObject.h"
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -13,6 +15,11 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
+	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
+	//m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
     return S_OK;
 }
 
@@ -25,6 +32,8 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
 	cout << "Model" << endl;
 
     return S_OK;
@@ -41,7 +50,30 @@ HRESULT CLoader_GamePlay::Load_Object()
 {
 	cout << "Object" << endl;
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
+		CMapObject::Create(m_pDevice, m_pContext));
+
     return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_MonsterTest()
+{
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Player()
+{
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Augusta()
+{
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Rover()
+{
+	return S_OK;
 }
 
 CLoader_GamePlay* CLoader_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
