@@ -81,8 +81,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	//m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 
 	// 2025 10 29	루트모션 앞뒤는 재대로 적용되는데 좌우가 반전됨.
 	//				모델 preMatrix 0,00001로 바로 설정하면 루트모션 값이 크게 튀어나감
@@ -107,7 +107,9 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 #endif // _DEBUG
 	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
 }
 
 void CMonsterTest::Render()
@@ -117,6 +119,11 @@ void CMonsterTest::Render()
 
 
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
 	for(_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
@@ -213,7 +220,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
 	//Com_AnimMachine
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Test"),
+	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
 		CRASH("MonsterTest/Com_AnimMachine");
 
@@ -238,7 +245,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
 	//Com_BehaviorTree
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
+	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
 		TEXT("MonsterTest/Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion

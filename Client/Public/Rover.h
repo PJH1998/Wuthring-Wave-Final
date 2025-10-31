@@ -79,20 +79,20 @@ public:
 	// ȣ�� �޴� State
 	StateTransitionContext TakeStateContext()
 	{
-		StateTransitionContext tempCopy = m_StateContext; // ���� ���ؽ�Ʈ�� ����
-		m_StateContext = {}; // ���� ���ؽ�Ʈ�� ��� ��� �⺻�� �ʱ�ȭ)
-		return tempCopy; // ���纻�� ��ȯ
+		StateTransitionContext tempCopy = m_StateContext;
+		m_StateContext = {}; 
+		return tempCopy; 
 	}
 
 #pragma endregion
 public:
 	enum PARTTYPE : _uint
 	{
-		PART_WEAPON = 0,
+		PART_SWORD = 0,
 		TYPE_END
 	};
 
-#pragma region 0. �⺻ �Լ�
+#pragma region 0. 
 protected:
 	explicit CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CRover(const CRover& Prototype);
@@ -133,7 +133,7 @@ public:
 
 #pragma endregion
 private:
-	class CRoverWeapon* m_pRoverWeapon = { nullptr };
+	class CRoverSword* m_pRoverSword = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
@@ -141,7 +141,7 @@ private:
 
 	
 #ifdef _DEBUG
-	// RayCast ����
+	// RayCast
 	vector<pair<_float, _float>> m_RayCasts = {};
 #endif // _DEBUG
 

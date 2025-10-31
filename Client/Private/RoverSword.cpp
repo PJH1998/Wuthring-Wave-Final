@@ -1,17 +1,17 @@
 ﻿#include "ClientPch.h"
-#include "RoverWeapon.h"
+#include "RoverSword.h"
 
-CRoverWeapon::CRoverWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CRoverSword::CRoverSword(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CWeapon{ pDevice, pContext }
 {
 }
 
-CRoverWeapon::CRoverWeapon(const CPartObject& Prototype)
+CRoverSword::CRoverSword(const CPartObject& Prototype)
     : CWeapon(Prototype )
 {
 }
 
-HRESULT CRoverWeapon::Initialize_Prototype()
+HRESULT CRoverSword::Initialize_Prototype()
 {
     if (FAILED(CWeapon::Initialize_Prototype()))
         return E_FAIL;
@@ -19,7 +19,7 @@ HRESULT CRoverWeapon::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CRoverWeapon::Initialize_Clone(void* pArg)
+HRESULT CRoverSword::Initialize_Clone(void* pArg)
 {
     WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
@@ -34,12 +34,12 @@ HRESULT CRoverWeapon::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CRoverWeapon::Priority_Update(_float fTimeDelta)
+void CRoverSword::Priority_Update(_float fTimeDelta)
 {
     CWeapon::Priority_Update(fTimeDelta);
 }
 
-void CRoverWeapon::Update(_float fTimeDelta)
+void CRoverSword::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
@@ -55,7 +55,7 @@ void CRoverWeapon::Update(_float fTimeDelta)
     m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
 }
 
-void CRoverWeapon::Late_Update(_float fTimeDelta)
+void CRoverSword::Late_Update(_float fTimeDelta)
 {
 
     CWeapon::Late_Update(fTimeDelta);
@@ -66,7 +66,7 @@ void CRoverWeapon::Late_Update(_float fTimeDelta)
         return;
 }
 
-void CRoverWeapon::Render()
+void CRoverSword::Render()
 {
     Bind_Resources();
 
@@ -93,7 +93,7 @@ void CRoverWeapon::Render()
 #endif // _DEBUG
 }
 
-void CRoverWeapon::Ready_Components(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Components(const WEAPON_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -122,7 +122,7 @@ void CRoverWeapon::Ready_Components(const WEAPON_DESC* pDesc)
         CRASH("Rigidbody");
 }
 
-void CRoverWeapon::Ready_Variables(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Variables(const WEAPON_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -132,14 +132,14 @@ void CRoverWeapon::Ready_Variables(const WEAPON_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CRoverWeapon::Ready_Positions(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Positions(const WEAPON_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 }
 
-void CRoverWeapon::Bind_Resources()
+void CRoverSword::Bind_Resources()
 {
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
         CRASH("Failed Bind Matrix");
@@ -151,29 +151,29 @@ void CRoverWeapon::Bind_Resources()
         CRASH("Failed Proj Matrix");
 }
 
-CRoverWeapon* CRoverWeapon::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CRoverSword* CRoverSword::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CRoverWeapon* pInstance = new CRoverWeapon(pDevice, pContext);
+    CRoverSword* pInstance = new CRoverSword(pDevice, pContext);
     if (FAILED(pInstance->Initialize_Prototype()))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Create Failed CRoverWeapon");
+        MSG_BOX("Create Failed CRoverSword");
     }
     return pInstance;
 }
 
-CGameObject* CRoverWeapon::Clone(void* pArg)
+CGameObject* CRoverSword::Clone(void* pArg)
 {
-    CRoverWeapon* pInstance = new CRoverWeapon(*this);
+    CRoverSword* pInstance = new CRoverSword(*this);
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Clone Failed CRoverWeapon");
+        MSG_BOX("Clone Failed CRoverSword");
     }
     return pInstance;
 }
 
-void CRoverWeapon::Free()
+void CRoverSword::Free()
 {
     CWeapon::Free();
 }

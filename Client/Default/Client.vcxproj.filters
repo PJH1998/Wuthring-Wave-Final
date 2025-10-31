@@ -414,7 +414,7 @@
     <ClInclude Include="..\Public\RoverFactory.h">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverWeapon.h">
+    <ClInclude Include="..\Public\RoverSword.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaState_Enum.h">
@@ -634,7 +634,7 @@
     <ClCompile Include="..\Private\RoverFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\RoverWeapon.cpp">
+    <ClCompile Include="..\Private\RoverSword.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="CAttackVolume.cpp">

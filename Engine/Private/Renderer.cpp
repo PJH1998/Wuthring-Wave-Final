@@ -231,16 +231,19 @@ void CRenderer::Render_NonBlend()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
 		CRASH("Render Fail")
 
-	// Buffer Index Swap
-	m_iDoubleBufferIndex.exchange((m_iDoubleBufferIndex + 1) % 2, memory_order_release);
-	_uint iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+	// Buffer Index
+	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 	// Static Object Render
 	for (auto& pStaticObject : m_StaticObjects[iReadIndex])
 	{
 		if (nullptr != pStaticObject)
 			pStaticObject->Render();
 	}
-	m_StaticObjects[iReadIndex].clear();
+	if (m_pGameInstance->IsWorkFinish())
+	{
+		m_StaticObjects[iReadIndex].clear();
+		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+	}
 
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)])
 	{

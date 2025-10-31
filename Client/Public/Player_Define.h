@@ -126,10 +126,8 @@ namespace PlayerData
         Desc.vPosition = vPosition;
         Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
-        // Desc.pController, pController�� ��Ÿ�ӿ� ����
-        // Parts ����
         Desc.PartPrototypes = {
-            make_pair(L"Weapon", L"Prototype_GameObject_Rover_Weapon")
+            make_pair(L"Sword", L"Prototype_GameObject_Rover_Sword")
         };
 
         return Desc;
@@ -140,13 +138,13 @@ namespace PlayerData
         CWeapon::WEAPON_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta���� ä������ϴ� ������.
-        Desc.pParentTransform = { nullptr }; // Augusta���� ä������ϴ� ������.
+        Desc.pSocketMatrix = { nullptr }; 
+        Desc.pParentTransform = { nullptr };
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-        Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_Weapon"));
+        Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover_Sword"));
         Desc.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
-        Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Weapon/Notify/";
+        Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Weapon/Sword/Notify/";
         Desc.strBoneName = "WeaponProp02";
         Desc.eWeaponType = WEAPONTYPE::ANIM;
         Desc.vScale = vScale;

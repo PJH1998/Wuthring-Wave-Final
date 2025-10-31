@@ -125,8 +125,6 @@ void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinishe
 		//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
 	}
-	else
-		int a = 10;
 
 	// 2. 애니메이션 재생
 	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon);
@@ -156,8 +154,10 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	if(false == AnyStateResult)
 		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
 
-	isAnimFinished = pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strCurrentAnimTag, fTimeDelata, 
-		&m_fCurrentTrackPositon, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+	//isAnimFinished = pModelCom->Play_Animation_GPU(pComputeShaderCom, m_strCurrentAnimTag, fTimeDelata, 
+	//	&m_fCurrentTrackPositon, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, 
+		&m_fCurrentTrackPositon, false, m_isRootMotion, m_fRootMotionRate);
 	
 	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
 

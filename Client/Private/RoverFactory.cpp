@@ -4,8 +4,7 @@
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pPlayer)
 {
-	// === HSM enum ��� State ��� ===
-	// enum ���� index�� ����Ͽ� Ÿ�� ������ Ȯ��
+	// === HSM enum State ===
 
 }
 

@@ -26,6 +26,8 @@ private:
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
 
+	HRESULT				Load_MonsterTest();
+
 public:
 	static		CLoader_GamePlay*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void					Free() override;

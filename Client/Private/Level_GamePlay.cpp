@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Level_GamePlay.h"
 #include"GameSystem.h"
+#include "MonsterTest.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -49,6 +50,19 @@ void CLevel_GamePlay::Ready_Dummy()
 
 void CLevel_GamePlay::Ready_MonsterTest()
 {
+	CMonsterTest::MONSTERTEST_DESC MobDesc{};
+	MobDesc.eCurLevel = LEVEL::GAMEPLAY;
+	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	MobDesc.modelData = make_pair(LEVEL::GAMEPLAY, TEXT("Prototype_Component_Model_FalseSovereign"));
+	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	MobDesc.fSpeedPerSec = 10.f;
+	MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	MobDesc.pAnimationTag = "Born1";
+	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
+		CRASH("Failed Ready MonsterTest");
 }
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
