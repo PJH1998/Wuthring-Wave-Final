@@ -77,7 +77,6 @@ void CCubeCell::Update(const _fvector& vCamPos)
 			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 			pObject->Set_LOD(iLODIndex);
 			m_pGameInstance->Add_Render_StaticObject(pObject);
-			//pObject->IsDraw(true);
 		}
 
 		// Child Update
