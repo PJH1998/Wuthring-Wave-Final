@@ -32,7 +32,7 @@ public:
 	//void Handle_Input(CModel* pModelCom, _uint* pState, _uint iIndex);
 	void Handle_Input(CModel* pModelCom, _uint* pState,_string& strAnimTag, _float fTargetTrackPos = 0.f);
 	// cpu
-	void Update(CModel* pModelCom, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
+	void Update(CModel* pModelCom, CTransform* pTransform, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	// gpu
 	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	

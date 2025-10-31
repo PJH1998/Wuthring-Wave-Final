@@ -104,7 +104,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 }
 
 //cpu
-void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
+void CAnimMachine::Update(CModel* pModelCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
 	_bool AnyStateResult{};
 	_string strNextAnimation;
@@ -128,6 +128,7 @@ void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinishe
 
 	// 2. 애니메이션 재생
 	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon, false, m_isRootMotion, m_fRootMotionRate);
+	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
 
 	// 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 

@@ -82,7 +82,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -153,8 +153,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::DETECT)){}
-	else
-		m_isTrigger = false;
+	//else
+	//	m_isTrigger = false;
 }
 
 HRESULT CMonsterTest::Bind_Resources()
