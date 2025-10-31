@@ -503,6 +503,7 @@ void CLevel_Map::Menu_Save_Load()
                             {
                                 memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
                                 File.read(Desc.ModelName, NameLength);
+								_string Name = Desc.ModelName;
 
                                 File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
                                 File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CEdit_MapObject::OBJECTTYPE));
@@ -538,8 +539,8 @@ void CLevel_Map::Load_Objects()
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     //string FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-    string FolderPath = "../../Client/Bin/Resource/Map/Test/";
-    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/Test/";
+    string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
     //string FolderPath = "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
@@ -574,6 +575,7 @@ void CLevel_Map::Load_Objects()
                 // LOD 마지막에 붙은 숫자 추출
                 size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
                 _wstring namePart = baseName.substr(0, pos + 1);
+
                 _wstring numberPart = baseName.substr(pos + 1);
                 version = stoi(numberPart);
 
