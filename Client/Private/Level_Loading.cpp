@@ -39,7 +39,14 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
-    if (true == m_pGameInstance->IsWorkFinish())
+	//this_thread::sleep_for(chrono::milliseconds(1));
+	if (false == m_isFinished && true == m_pGameInstance->IsWorkFinish())
+	{
+		cout << "Finish" << endl;
+		m_isFinished =  true;
+	}
+
+    if (	true == m_isFinished)
     {
 		cout << "Loading End" << endl;
         CHANGE_LEVEL_EVENT event{ m_eNextLevel, false };

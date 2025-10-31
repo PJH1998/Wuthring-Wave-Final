@@ -32,7 +32,7 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 
 	RIGIDBODY_DESC* pDesc = static_cast<RIGIDBODY_DESC*>(pArg);
 	m_eShape = pDesc->eShape;
-	RefConst<Shape> BodyShape;
+	RefConst<Shape> BodyShape = { nullptr };
 
 	using namespace JPH;
 	switch (m_eShape)
@@ -83,10 +83,8 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 HRESULT CRigidbody::Render()
 {
 #ifdef _DEBUG
-	//if(nullptr != m_pBody)
-	//	m_pGameInstance->DrawShape(m_pBody->GetShape());
-	//if (nullptr != m_pCharacter)
-	//	m_pGameInstance->DrawShape(m_pCharacter->GetShape());
+	/*if(nullptr != m_pBody)
+		m_pGameInstance->DrawShape(m_pBody->GetShape());*/
 #endif
 	return S_OK;
 }

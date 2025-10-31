@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Client_Define.h"
 #include "ContainerObject.h"
 
@@ -14,6 +14,7 @@ public:
 		pair<LEVEL, _wstring> colliderData = {};
 		pair<LEVEL, _wstring> rigidBodyData = {};
 		pair<LEVEL, _wstring> modelData = {};
+		_string strFolderPath = {};
 	}ACTOR_DESC;
 
 
@@ -32,6 +33,12 @@ public:
 	virtual	void	Render() override;
 
 
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) {};
+	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
+	virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
+
+
 #pragma endregion
 
 protected:
@@ -40,11 +47,12 @@ protected:
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
 	class CRigidbody* m_pRigidBodyCom = { nullptr };
-	vector<_uint> m_ShaderPaths = {}; // �������� ���ؾ��� => ��ü �𵨸��� Mesh �������ٸ�
+	vector<_uint> m_ShaderPaths = {}; 
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_float m_fTrackPosition = {};
 
-private:
+protected:
+	void Register_AllNotifies(const _string& strFolderPath);
 	// void Ready_Components(const ACTOR_DESC* pDesc);
 
 

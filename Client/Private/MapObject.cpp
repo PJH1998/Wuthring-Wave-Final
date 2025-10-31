@@ -28,8 +28,8 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
 	m_iNumLOD = m_pModelComArray.size() - 1;
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(0), m_pTransformCom->Get_WorldMatrix());
-	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
+	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 
 	return S_OK;
 }
@@ -73,33 +73,54 @@ void CMapObject::Render()
 		//	m_pModelComArray[m_iLODIndex]->Render(i);
 		//}
 	}
+
+	if (m_iNumLOD <= m_iLODIndex)
+		m_iLODIndex = m_iNumLOD;
+
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[m_iNumLOD]->Get_NumMesh();
+	_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		_bool HasNormal = { true };
-		m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
 
-		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-			HasNormal = false;
+		_bool HasNormal = { true };
+		_bool HasMask = { true };
+
+		if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			HasMask = false;
+		if (HasMask)
+		{
+			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+				HasNormal = false;
+		}
+		else
+		{
+			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+
+			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+				HasNormal = false;
+		}
 
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-		if (FAILED(m_pModelComArray[m_iNumLOD]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-			m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 
-		m_pModelComArray[m_iNumLOD]->Render(i);
+		m_pModelComArray[m_iLODIndex]->Render(i);
 	}
 }
 
 void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-	
+
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
 	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
@@ -116,7 +137,7 @@ void CMapObject::Ready_Component(void* pArg)
 
 		_char ModelName[MAX_PATH] = {};
 		sprintf_s(ModelName, "Com_Model%d", i);
-		if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), ModelCom,
+		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
 			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
 			CRASH("FAILED");
 
@@ -133,6 +154,7 @@ void CMapObject::Ready_Component(void* pArg)
 	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 	//RigidbodyDesc.pModel = m_pModelCom;
 	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
 	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
 	RigidbodyDesc.eShape = SHAPE::MESH;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));

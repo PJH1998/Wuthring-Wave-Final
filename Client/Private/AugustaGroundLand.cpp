@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+﻿#include "ClientPch.h"
 #include "AugustaGroundLand.h"
 #include "Augusta.h"
 #include "StateMachine.h"
@@ -26,7 +26,7 @@ void CAugustaGroundLand::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    ELandType eLandType = context.m_eLandType;
+    EAugustaLandType eLandType = context.m_eLandType;
 
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eLandType);
@@ -77,14 +77,14 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     if (IsEscapePossible && m_States[RUN])
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = ERunType::RUN_F;
+        m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
         return;
     }
 
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EIdleType::STAND1_ACTION01;
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         return;
     }
@@ -93,10 +93,10 @@ void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundLand::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
-    CState::Add_Animations(ENUM_CLASS(ELandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_LIGHT), "Land_Light", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_HEAVY), "Land_Heavy", 1.f, 32.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_ROLL), "Land_Roll", 1.f, 22.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LANDSLIDE_F), "Landslide_F", 1.f, 0.f);
 }
 
 void CAugustaGroundLand::State_Reset()

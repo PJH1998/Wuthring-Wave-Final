@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Editor)
@@ -7,36 +7,14 @@ struct RampEdit : public ImCurveEdit::Delegate
 {
 	RampEdit()
 	{
-		mPoints[0].push_back(ImVec2(20.f, 0.5f));
-		mPoints[0].push_back(ImVec2(30.f, 0.3f));
-		//mPts[0][0] = ImVec2(20.f, 0.5f);
-		//mPts[0][1] = ImVec2(20.f, 0.6f);
-		//mPts[0][2] = ImVec2(25.f, 0.2f);
-		//mPts[0][3] = ImVec2(70.f, 0.4f);
-		//mPts[0][4] = ImVec2(120.f, 1.f);
-		mPointCount[0] = 2;
-		
-		//mPts[1][0] = ImVec2(-50.f, 0.2f);
-		//mPts[1][1] = ImVec2(33.f, 0.7f);
-		//mPts[1][2] = ImVec2(80.f, 0.2f);
-		//mPts[1][3] = ImVec2(82.f, 0.8f);
-		mPointCount[1] = 0;
-		//
-		//
-		//mPts[2][0] = ImVec2(40.f, 0);
-		//mPts[2][1] = ImVec2(60.f, 0.1f);
-		//mPts[2][2] = ImVec2(90.f, 0.82f);
-		//mPts[2][3] = ImVec2(150.f, 0.24f);
-		//mPts[2][4] = ImVec2(200.f, 0.34f);
-		//mPts[2][5] = ImVec2(250.f, 0.12f);
-		mPointCount[2] = 0;
-		mbVisible[0] = mbVisible[1] = mbVisible[2] = true;
+		mbVisible[0] = true;
+		mbVisible[1] = mbVisible[2] = false;
 		mMax = ImVec2(1.f, 1.f);
 		mMin = ImVec2(0.f, 0.f);
 	}
 	size_t GetCurveCount()
 	{
-		return 3;
+		return 1;
 	}
 
 	bool IsVisible(size_t curveIndex)
@@ -45,7 +23,7 @@ struct RampEdit : public ImCurveEdit::Delegate
 	}
 	size_t GetPointCount(size_t curveIndex)
 	{
-		return mPoints[curveIndex].size();
+		return mPoints.size();
 	}
 
 	uint32_t GetCurveColor(size_t curveIndex)
@@ -55,32 +33,49 @@ struct RampEdit : public ImCurveEdit::Delegate
 	}
 	ImVec2* GetPoints(size_t curveIndex)
 	{
-		return mPoints[curveIndex].data();
+		return mPoints.data();
 	}
 	virtual ImCurveEdit::CurveType GetCurveType(size_t curveIndex) const { return ImCurveEdit::CurveSmooth; }
 	virtual int EditPoint(size_t curveIndex, int pointIndex, ImVec2 value)
 	{
-		mPoints[curveIndex][pointIndex] = ImVec2(value.x, value.y);
-		SortValues(curveIndex);
-		for (size_t i = 0; i < GetPointCount(curveIndex); i++)
+		mPoints[pointIndex] = ImVec2(value.x, value.y);
+		SortValues();
+		for (size_t i = 0; i < GetPointCount(0); i++)
 		{
-			if (mPoints[curveIndex][i].x == value.x)
+			if (mPoints[i].x == value.x)
 				return (int)i;
 		}
 		return pointIndex;
 	}
-	virtual void AddPoint(size_t curveIndex, ImVec2 value)
+	virtual void AddPoint(size_t iType, ImVec2 value)
 	{
-		mPoints[curveIndex].push_back(value);
-		SortValues(curveIndex);
+		mPoints.push_back(value);
+		if (ENUM_CLASS(ITEM_TYPE::ACTION) == iType)
+		{
+			CAMERA_FRAME frame = {};
+			frame.vTranslation = _float3(0.f, 0.f, 0.f);
+			frame.vRotation = _float4(0.f, 0.f, 0.f, 0.f);
+			frame.fDistance = 10.f;
+			frame.fStartFrame = 0.f;
+			mTargetCameraFrames.push_back(frame);
+		}
+
+		SortValues();
 	}
 	virtual ImVec2& GetMax() { return mMax; }
 	virtual ImVec2& GetMin() { return mMin; }
 	virtual unsigned int GetBackgroundColor() { return 0; }
 
-	//ImVec2		mPts[3][8];
-	vector<ImVec2>	mPoints[3];
-	size_t			mPointCount[3];
+	void Update_Frame() {
+		for (size_t i = 0; i < mPoints.size(); ++i)
+			mTargetCameraFrames[i].fStartFrame = mPoints[i].x;
+	}
+
+	vector<ImVec2>		mPoints;
+	vector<CAMERA_FRAME> mTargetCameraFrames;
+	vector<_float3>		mPositions;
+	vector<_float3>		mRotations;
+	size_t			mPointCount = {};
 	_bool			mbVisible[3];
 	ImVec2		mMin;
 	ImVec2		mMax;
@@ -89,12 +84,10 @@ struct RampEdit : public ImCurveEdit::Delegate
 	_int			miSelectPoint = { -1 };
 
 private:
-	void SortValues(size_t curveIndex)
+	void SortValues()
 	{
-		//auto b = std::begin(mPts[curveIndex]);
-		//auto e = std::begin(mPts[curveIndex]) + GetPointCount(curveIndex);
-		auto b = std::begin(mPoints[curveIndex]);
-		auto e = std::begin(mPoints[curveIndex]) + GetPointCount(curveIndex);
+		auto b = std::begin(mPoints);
+		auto e = std::begin(mPoints) + GetPointCount(0);
 		std::sort(b, e, [](ImVec2 a, ImVec2 b) { return a.x < b.x; });
 	}
 };
@@ -102,8 +95,6 @@ private:
 class CSequencer : public CBase, ImSequencer::SequenceInterface
 {
 public:
-	enum class ITEM_TYPE { CAMERA, SOUND, SCREEN, OBJECT, END };
-
 	typedef struct tagSequenceItem {
 		ITEM_TYPE		eType;								// Sequence Item Type
 		_int				iFrameStart{}, iFrameEnd{};		// Frame Start / End
@@ -116,17 +107,23 @@ public:
 			strcpy_s(szItemLabel, MAX_PATH, pLabel);
 			switch (iType)
 			{
-			case ENUM_CLASS(ITEM_TYPE::CAMERA):
-				eType = ITEM_TYPE::CAMERA;
+			case ENUM_CLASS(ITEM_TYPE::ACTOR):
+				eType = ITEM_TYPE::ACTOR;
 				break;
-			case ENUM_CLASS(ITEM_TYPE::SOUND):
-				eType = ITEM_TYPE::SOUND;
+			case ENUM_CLASS(ITEM_TYPE::ACTION):
+				eType = ITEM_TYPE::ACTION;
+				break;
+			case ENUM_CLASS(ITEM_TYPE::EFFECT):
+				eType = ITEM_TYPE::EFFECT;
+				break;
+			case ENUM_CLASS(ITEM_TYPE::SCENE):
+				eType = ITEM_TYPE::SCENE;
 				break;
 			case ENUM_CLASS(ITEM_TYPE::SCREEN):
 				eType = ITEM_TYPE::SCREEN;
 				break;
-			case ENUM_CLASS(ITEM_TYPE::OBJECT):
-				eType = ITEM_TYPE::OBJECT;
+			case ENUM_CLASS(ITEM_TYPE::SOUND):
+				eType = ITEM_TYPE::SOUND;
 				break;
 			}
 		}
@@ -167,7 +164,7 @@ public:
 
 #pragma region Private Varation
 private:
-	class CGameInstance* m_pGameInstance = { nullptr };
+	class CGameInstance*		m_pGameInstance = { nullptr };
 	ImGuiIO							io;
 
 	// Custom Draw Label
@@ -200,8 +197,8 @@ private:
 	// Draw Frame
 	_float								m_fFramePixelWidth = { 10.f };
 	_float								m_fFramePixelWidthTarget = { 10.f };
-	_int								m_iItemHeight = { 20 };						// Item 1°³ ´ç Height
-	_int								m_iLegendWidth = { 200 };					// ¹ü·Ê(Ç¥½Ã ³»¿ë) Width
+	_int								m_iItemHeight = { 20 };						// Item 1ï¿½ï¿½ ï¿½ï¿½ Height
+	_int								m_iLegendWidth = { 200 };					// ï¿½ï¿½ï¿½ï¿½(Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½) Width
 
 	ImVec2							m_vChildFramePos = {};
 	ImVec2							m_vChildFrameSize = {};
@@ -220,7 +217,7 @@ private:
 	_int								m_iPanningViewFrame = {};
 
 	// Entry
-	_int								m_iSelectedEntry = { -1 };						// Select Entry(Ç×¸ñ)
+	_int								m_iSelectedEntry = { -1 };						// Select Entry(ï¿½×¸ï¿½)
 	_int								m_iDelEntry = { -1 };
 	_int								m_iDupEntry = { -1 };
 
@@ -251,22 +248,37 @@ private:
 #pragma endregion
 
 private:
+	_bool								m_isSave = { false };
+	_bool								m_isLoad = { false };
+
+	_bool								m_isPlay = { false };
+	_float								m_fTrackPerSec = {};
+	_float								m_fTrackAcc = {};
+
+private:
+	// Play
+	void								Play(_float fTimeDelta);
+
 	// Selectable Item
 	void								Selectable_Item();
 	void								SetUp_Point(SEQUENCE_ITEM& item);
 	void								SetUp_Camera(SEQUENCE_ITEM& item);
-
 	void								Sorting_Item();
+
+	// Camera Action
+	void								Save_CameraAction();
+	void								Load_CameraAction();
 	
 	// GUI
 	void								Drawing();
-	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => È­¸é ÁÂ¿ì ÀÌµ¿)
+	void								Panning(const _int iVisibleFrameCnt);	//  (Alt + Wheel Click -> Drag => È­ï¿½ï¿½ ï¿½Â¿ï¿½ ï¿½Ìµï¿½)
 	void								Expand(_int iControllHeight);	// Canvas Expand
-	void								DrawFrame();						// Sequence ÇÁ·¹ÀÓ
+	void								DrawFrame();						// Sequence ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	void								DrawLegend();						// List
+	void								ItemDupDel();
 	void								DrawSlot();							// Slot (Item)
-	void								Moving();							// Item Duration Á¶Àý (Left, Right Àâ¾Æ´ç±â±â)		
-	void								Cursor();								// Cursor (Frame È­¸é ºÓÀº ¼±)
+	void								Moving();							// Item Duration ï¿½ï¿½ï¿½ï¿½ (Left, Right ï¿½ï¿½Æ´ï¿½ï¿½ï¿½)		
+	void								Cursor();								// Cursor (Frame È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 	void								CopyPaste();							// Copy / Paste
 	void								ScrollBar();							// ScrollBar
 

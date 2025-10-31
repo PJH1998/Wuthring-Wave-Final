@@ -76,7 +76,7 @@ void CCubeCell::Update(const _fvector& vCamPos)
 			_float fDistance = pObject->Compute_Distance(vCamPos);
 			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 			pObject->Set_LOD(iLODIndex);
-			m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, pObject);
+			m_pGameInstance->Add_Render_StaticObject(pObject);
 		}
 
 		// Child Update

@@ -12,7 +12,7 @@ CPooling_Manager::CPooling_Manager()
 
 HRESULT CPooling_Manager::Initialize()
 {
-	m_iNumThread = thread::hardware_concurrency();
+	m_iNumThread = max(6, thread::hardware_concurrency());
 	m_Threads.reserve(m_iNumThread);
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
@@ -92,10 +92,12 @@ void CPooling_Manager::Update_Pooling()
 
 void CPooling_Manager::Add_Work(function<void()> Work)
 {
+
 	{
 		lock_guard<mutex> lock(m_Mutex);
 		m_Works.push(Work);
 	}
+	m_iRemainWork.fetch_add(1, memory_order_release);
 	m_CV.notify_one();
 }
 
@@ -105,7 +107,6 @@ void CPooling_Manager::Wait_Thread_End()
 	{
 
 	}
-	//cout << "Work End" << endl;
 }
 
 void CPooling_Manager::Work_Thread()
@@ -115,17 +116,17 @@ void CPooling_Manager::Work_Thread()
 		unique_lock<mutex> lock(m_Mutex);
 		m_CV.wait(lock, [this]() { return 0 < m_Works.size() || true == m_isAllStop; });
 
-		// Client 醫낅즺 ?? Thread 紐⑤몢 醫낅즺
 		if (true == m_isAllStop)
 			return;
 
 		function<void()> Work = move(m_Works.front());
 		m_Works.pop();
 		lock.unlock();
+		m_iRemainWork.fetch_sub(1, memory_order_release);
 
-		m_iLiveWork.fetch_add(1);
+		m_iLiveWork.fetch_add(1, memory_order_release);
 		Work();
-		m_iLiveWork.fetch_sub(1);
+		m_iLiveWork.fetch_sub(1, memory_order_release);
 	}
 }
 

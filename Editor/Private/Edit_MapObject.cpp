@@ -42,10 +42,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iNumLOD = m_pModelComArray.size()-1;
 
 
-    for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
-    {
-        Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
-    }
+	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+
     //박스 모델에서 종합해서 최종 크기.
     //m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;
@@ -87,7 +85,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
         _uint Length = strlen(m_ModelName);
         event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
         event.File.write(m_ModelName, Length);
-        if (m_iShaderPassIndex == 3)
+        
+        if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
             m_iShaderPassIndex = 0;
         event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
         event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
@@ -101,11 +100,13 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_pNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pMaskTextureCom.resize(m_pModelCom->Get_NumMesh());
     m_pMaskDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
+    m_pMaskNormalTextureCom.resize(m_pModelCom->Get_NumMesh());
 
     m_SelectedDiffuseName.resize(m_pModelCom->Get_NumMesh());
     m_SelectedNormalName.resize(m_pModelCom->Get_NumMesh());
     m_SelectedMaskTextureName.resize(m_pModelCom->Get_NumMesh());
     m_SelectedMaskDiffuseName.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskNormalName.resize(m_pModelCom->Get_NumMesh());
 
 
     m_SelectedDiffuseTexturePath.resize(m_pModelCom->Get_NumMesh());
@@ -113,12 +114,14 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_SelectedMaskTexturePath.resize(m_pModelCom->Get_NumMesh());
     m_SelectedMaskTexturePath.resize(m_pModelCom->Get_NumMesh());
     m_SelectedMaskDiffusePath.resize(m_pModelCom->Get_NumMesh());
+    m_SelectedMaskNormalPath.resize(m_pModelCom->Get_NumMesh());
 
 
     m_iSelectedDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedNormalIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedMaskIndex = new _uint[m_pModelCom->Get_NumMesh()];
     m_iSelectedMaskDiffuseIndex = new _uint[m_pModelCom->Get_NumMesh()];
+    m_iSelectedMaskNormalIndex = new _uint[m_pModelCom->Get_NumMesh()];
 
 
     m_iSelectedMesh = 0;
@@ -126,6 +129,13 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 
     m_iNumObject = CEdit_MapObject::g_iNumObjects++;
+    
+    /*for(_uint i=0; i<3;++i)
+    {
+        if (vScale.m128_f32[i] <= 0.98f || vScale.m128_f32[i] > 1.1f)
+            m_iShaderPassIndex = 3;
+    }*/
+
     return S_OK;
 }
 
@@ -180,7 +190,7 @@ void CEdit_MapObject::Render()
 {
     _uint DrawModel = m_iLODIndex;
     //_uint DrawModel = 0;
-    
+
     if (DrawModel > m_iNumLOD)
         DrawModel = m_iNumLOD;
 
@@ -188,7 +198,11 @@ void CEdit_MapObject::Render()
 
     for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
     {
+        m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+        m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
+        m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         _bool HasNormal = { true };
+        _bool HasMask = { true };
         if (m_TexMode)
         {
 
@@ -208,15 +222,34 @@ void CEdit_MapObject::Render()
         }
         else
         {
-            m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
-
-            if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-                HasNormal = false;
-
             if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-                m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+                HasMask = false;
+
+
+            if (HasMask)
+            {
+                m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+                if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+                    HasNormal = false;
+            }
+            else
+            {
+                m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+
+                if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+                    HasNormal = false;
+            }
+            //m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+
+            //if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+            //    HasNormal = false;
+
+            //if (m_iLODIndex < 2)
+            //    m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK);
         }
         m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+        m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 
         m_pShaderCom->Begin(m_iShaderPassIndex);
 
@@ -440,6 +473,7 @@ void CEdit_MapObject::Export_MaterialData()
                 _char NormalFileName[MAX_PATH] = {};
                 _char MaskFileName[MAX_PATH] = {};
                 _char MaskDiffuseFileName[MAX_PATH] = {};
+                _char MaskNormalFileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
 
                 _splitpath_s(m_SelectedDiffuseTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, DiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
@@ -448,6 +482,7 @@ void CEdit_MapObject::Export_MaterialData()
                 {
                     _splitpath_s(m_SelectedMaskTexturePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskFileName, MAX_PATH, FileExt, MAX_PATH);
                     _splitpath_s(m_SelectedMaskDiffusePath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskDiffuseFileName, MAX_PATH, FileExt, MAX_PATH);
+                    _splitpath_s(m_SelectedMaskNormalPath[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, MaskNormalFileName, MAX_PATH, FileExt, MAX_PATH);
                 }
 
                 json MaterialData;
@@ -479,7 +514,7 @@ void CEdit_MapObject::Export_MaterialData()
 
                 json NormalData;
 
-                NormalData["TextureCnt"] = 1;
+
                 NormalData["FileName"] = json::array();
 
                 _char NormalName[MAX_PATH] = {};
@@ -487,6 +522,18 @@ void CEdit_MapObject::Export_MaterialData()
                 strcat_s(NormalName, FileExt);
 
                 NormalData["FileName"].push_back(NormalName);
+
+                if (!m_SelectedMaskTexturePath[i].empty())
+                {
+                    _char MaskNormalName[MAX_PATH] = {};
+                    strcat_s(MaskNormalName, MaskNormalFileName);
+                    strcat_s(MaskNormalName, FileExt);
+
+                    NormalData["FileName"].push_back(MaskNormalName);
+                    NormalData["TextureCnt"] = 2;
+                }
+                else
+                    NormalData["TextureCnt"] = 1;
 
                 MaterialData["Normal"] = NormalData;
 
@@ -508,16 +555,17 @@ void CEdit_MapObject::Export_MaterialData()
 
                 Totaljson["Materials"].push_back(MaterialData);
 
-
+            //텍스쳐 정상화중
                 filesystem::copy_file(m_SelectedDiffuseTexturePath[i], strTexturePath + DiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
                 filesystem::copy_file(m_SelectedNormalTexturePath[i], strTexturePath + NormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
                 if (!m_SelectedMaskTexturePath[i].empty())
                 {
-
                     filesystem::copy_file(m_SelectedMaskTexturePath[i], strTexturePath + MaskFileName + FileExt, filesystem::copy_options::overwrite_existing);
                     filesystem::copy_file(m_SelectedMaskDiffusePath[i], strTexturePath + MaskDiffuseFileName + FileExt, filesystem::copy_options::overwrite_existing);
+                    filesystem::copy_file(m_SelectedMaskNormalPath[i], strTexturePath + MaskNormalFileName + FileExt, filesystem::copy_options::overwrite_existing);
                 }
             }
+
             File << Totaljson.dump(4);
             File.close();
 
@@ -619,15 +667,19 @@ void CEdit_MapObject::About_Texture()
     {
         IGFD::FileDialogConfig config;
 
-        
+        //원래 ㅅ쓰던거
         //config.path = filesystem::current_path().parent_path().parent_path().parent_path().string();
 
         //When Many Model Need Same texture, use this
-        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/";
-        
+        config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/QiQiu/Common/Obj/Tex";
+        //config.path = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/";
+
         for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
         {
-            //m_SelectedDiffuseTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Tex/T_Tab_Roc_25A_D.png";
+
+            //m_SelectedDiffuseTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Json_Texture/T4_Com2_Roc_05A_D.png";
+            //m_SelectedMaskDiffusePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Json_Texture/T4_Sev_Roc_01A_D.png";
+        //m_SelectedDiffuseTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Tex/T_Tab_Roc_25A_D.png";
             //m_SelectedNormalTexturePath[i] = "C:/Users/dnheu/Downloads/FModel/Output/Exports/Client/Content/Aki/Scene/Assets/Levels/LiNaXiTa/DiSiTaiDi/Rock/Tex/T_Tab_Roc_25A_N.png";
         }
         config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
@@ -642,37 +694,39 @@ void CEdit_MapObject::About_Texture()
                 for (const auto& entry : filesystem::recursive_directory_iterator(strFolderPath)) {
                     if (entry.is_regular_file()) {
                         filesystem::path Filepath = entry.path();
+                        filesystem::path fileName = Filepath.filename();
+                        if (fileName.extension() != ".png")
+                            continue;
 
-                        if ((Filepath.string().find("_D_") != std::string::npos) || (Filepath.string().find("_D") != std::string::npos))
+                        if ((fileName.string().find("_D_") != std::string::npos) || (fileName.string().find("_D") != std::string::npos))
                         {
-                            if (Filepath.extension() == ".png") {
+                            if ((fileName.string().find("_Doo") != std::string::npos) || (fileName.string().find("_Des") != std::string::npos))
+                            {
+                                if (fileName.string().find("_N_") != std::string::npos || (fileName.string().find("_N") != std::string::npos))
                                 {
-                                    string fileName = Filepath.filename().string();
-                                    
-                                    m_EntireDiffuseTextureName.push_back(Filepath.string());
-                                }
-                            }
-                        }
-                        else if (Filepath.string().find("_N_") != std::string::npos || (Filepath.string().find("_N") != std::string::npos))
-                        {
-                            if (Filepath.extension() == ".png") {
-                                {
-                                    string fileName = Filepath.filename().string();
                                     m_EntireNormalTextureName.push_back(Filepath.string());
                                 }
-                            }
-                        }
-                        else if (Filepath.string().find("_MA_") != std::string::npos || (Filepath.string().find("_MA") != std::string::npos))
-                        {
-                            if (Filepath.extension() == ".png") {
+                                else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_MA") != std::string::npos))
                                 {
-                                    string fileName = Filepath.filename().string();
                                     m_EntireMaskTextureName.push_back(Filepath.string());
                                 }
+                                else
+                                    m_EntireDiffuseTextureName.push_back(Filepath.string());
                             }
+                            else
+                                m_EntireDiffuseTextureName.push_back(Filepath.string());
+                        }
+                        else if (fileName.string().find("_N_") != std::string::npos || (fileName.string().find("_N") != std::string::npos))
+                        {
+                            m_EntireNormalTextureName.push_back(Filepath.string());
+                        }
+                        else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_MA") != std::string::npos))
+                        {
+                            m_EntireMaskTextureName.push_back(Filepath.string());
                         }
                     }
                 }
+
                 m_IsLoaded = true;
                 m_IsCustomTexture = !m_IsCustomTexture;
                 ImGuiFileDialog::Instance()->Close();
@@ -684,6 +738,7 @@ void CEdit_MapObject::About_Texture()
             }
         }
     }
+
 
     if (m_IsLoaded)
     {
@@ -808,7 +863,7 @@ void CEdit_MapObject::About_Texture()
             m_SelectedMaskTextureName[m_iSelectedMesh] = "";
         }
 
-        if (ImGui::BeginCombo("X###MaskDiffuse", m_SelectedMaskDiffuseName[m_iSelectedMesh].c_str()))
+        if (ImGui::BeginCombo("MaskDiffuse", m_SelectedMaskDiffuseName[m_iSelectedMesh].c_str()))
         {
 
             for (_uint i = 0; i < m_EntireDiffuseTextureName.size(); ++i)
@@ -837,14 +892,55 @@ void CEdit_MapObject::About_Texture()
             }
             ImGui::EndCombo();
         }
+
         ImGui::SameLine();
-        if (ImGui::Button("MaskDiffuse###X"))
+        if (ImGui::Button("X###MaskDiffuse"))
         {
             if (m_pMaskDiffuseTextureCom[m_iSelectedMesh])
                 Safe_Release(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
 
             m_SelectedMaskDiffusePath[m_iSelectedMesh] = "";
             m_SelectedMaskDiffuseName[m_iSelectedMesh] = "";
+        }
+
+        if (ImGui::BeginCombo("MaskNormal", m_SelectedMaskNormalName[m_iSelectedMesh].c_str()))
+        {
+
+            for (_uint i = 0; i < m_EntireNormalTextureName.size(); ++i)
+            {
+                _char FileDrive[MAX_PATH] = {};
+                _char FileDir[MAX_PATH] = {};
+                _char FileName[MAX_PATH] = {};
+                _char FileExt[MAX_PATH] = {};
+                _splitpath_s(m_EntireNormalTextureName[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+                if (ImGui::Selectable(FileName) || ImGui::IsItemHovered())
+                {
+                    ImGui::SetItemDefaultFocus();
+                    m_SelectedMaskNormal = m_EntireNormalTextureName[i].c_str();
+
+                    //W��Ʈ������ �ٲ�.
+                    if (m_pMaskNormalTextureCom[m_iSelectedMesh])
+                        Safe_Release(m_pMaskNormalTextureCom[m_iSelectedMesh]);
+
+                    m_pMaskNormalTextureCom[m_iSelectedMesh] = CTexture::Create(m_pDevice, m_pContext, StringToWString(m_SelectedMaskNormal).c_str(), 1);
+                    m_SelectedMaskNormalPath[m_iSelectedMesh] = m_EntireNormalTextureName[i].c_str();
+
+                    m_SelectedMaskNormalName[m_iSelectedMesh] = FileName;
+                    m_iSelectedMaskIndex[m_iSelectedMesh] = i;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("X###MaskNormal"))
+        {
+            if (m_pMaskNormalTextureCom[m_iSelectedMesh])
+                Safe_Release(m_pMaskNormalTextureCom[m_iSelectedMesh]);
+
+            m_SelectedMaskNormalPath[m_iSelectedMesh] = "";
+            m_SelectedMaskNormalName[m_iSelectedMesh] = "";
         }
 
         if (ImGui::Button("Make_Json"))
@@ -862,10 +958,12 @@ void CEdit_MapObject::About_Texture()
         m_pMapInterface->Display_Textures(m_pDiffuseTextureCom[m_iSelectedMesh]);
         ImGui::SameLine();
         m_pMapInterface->Display_Textures(m_pNormalTextureCom[m_iSelectedMesh]);
-        ImGui::SameLine();
+
         m_pMapInterface->Display_Textures(m_pMaskTextureCom[m_iSelectedMesh]);
         ImGui::SameLine();
         m_pMapInterface->Display_Textures(m_pMaskDiffuseTextureCom[m_iSelectedMesh]);
+        ImGui::SameLine();
+        m_pMapInterface->Display_Textures(m_pMaskNormalTextureCom[m_iSelectedMesh]);
 
         ImGui::End();
 
@@ -911,6 +1009,7 @@ void CEdit_MapObject::Free()
     Safe_Delete(m_iSelectedNormalIndex);
     Safe_Delete(m_iSelectedMaskIndex);
     Safe_Delete(m_iSelectedMaskDiffuseIndex);
+    Safe_Delete(m_iSelectedMaskNormalIndex);
 
     m_pParent = nullptr;
     m_pPickedChild = nullptr;
@@ -935,9 +1034,11 @@ void CEdit_MapObject::Free()
         if (pTexture)
             Safe_Release(pTexture);
 
+    for (auto& pTexture : m_pMaskNormalTextureCom)
+        if (pTexture)
+            Safe_Release(pTexture);
+
 
     for (auto& pChild : m_ChildObjects)
         pChild = nullptr;
-
-    m_pGameInstance->Unscribe();
 }

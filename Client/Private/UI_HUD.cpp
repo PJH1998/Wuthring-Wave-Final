@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "UI_HUD.h"
 #include "Animator_UI.h"
 
@@ -9,26 +9,26 @@
 
 
 /**
-*   Å×½ºÆ® ¹æ¹ý
+*   ï¿½×½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 *   
-*   U : Ä³¸¯ÅÍ ¸ðµå ÀüÈ¯ (¹æ¶ûÀÚ´Â ¼­Áö¸ðµå ¿©ºÎ, ¾Æ¿ì±¸½ºÅ¸´Â ±Ã¸ðµå ¿©ºÎ µî)
-*   I : °ø¸í °ÔÀÌÁö ·£´ýÇÏ°Ô UP
-*   O : º¸½º Ã¼·Â/¾Æ¸Ó ·£´ýÇÏ°Ô DOWN
+*   U : Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Æ¿ì±¸ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ã¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
+*   I : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ UP
+*   O : ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½ï¿½/ï¿½Æ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ DOWN
 * 
-*   (¾Æ¿ì±¸½ºÅ¸)
-*   J : ÇÏ´Ü °Ë ÀÚ¿ø °¹¼ö º¯°æ (0 - 1 - 2°³)
-*   K : ÇÏ´Ü ¿øÇü ÀÚ¿ø ·£´ýÇÏ°Ô UP
-*   L : ±Ã±Ø±â »ç¿ë ÈÄ Ä®·Î ¹Ù²ï ÀÚ¿ø ·£´ýÇÏ°Ô UP
+*   (ï¿½Æ¿ì±¸ï¿½ï¿½Å¸)
+*   J : ï¿½Ï´ï¿½ ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (0 - 1 - 2ï¿½ï¿½)
+*   K : ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ UP
+*   L : ï¿½Ã±Ø±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ä®ï¿½ï¿½ ï¿½Ù²ï¿½ ï¿½Ú¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ UP
 * 
-*   (°¥ºê·¹³ª)
-*   Y : ¿¡ÄÚ Àü¿ë °ø¸í°ÔÀÌÁö 10¾¿ UP (50ÀÌ ÃÖ´ëÄ¡. 5¹ø ¾²¸é ÃÖ´ëÄ¡·Î Âù´Ù´øµ¥..)
+*   (ï¿½ï¿½ï¿½ê·¹ï¿½ï¿½)
+*   Y : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 10ï¿½ï¿½ UP (50ï¿½ï¿½ ï¿½Ö´ï¿½Ä¡. 5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½ï¿½Ù´ï¿½ï¿½ï¿½..)
 * 
-*   * °¢ ¼öÄ¡´Â ÃÖ»ó´ÜÀÇ ¸ÅÅ©·Î¸¦ ÁÖ¼® ÇØÁ¦ÇÏ¸é coutÀ¸·Î º¸ÀÓ
+*   * ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å©ï¿½Î¸ï¿½ ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ coutï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 */
 
 
-// ¾ê´Â ¿ÀºêÁ§Æ® ¸Å´ÏÀúÀÇ ÅëÁ¦¸¦ ¹ÞÀ½.
-// ÀÚ½ÄµéÀº ¾êÀÇ ÅëÁ¦¸¦ ¹ÞÀ½. »èÁ¦ Æ÷ÇÔ.
+// ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+// ï¿½Ú½Äµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
 {
@@ -60,7 +60,7 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
-    vector<_wstring> vecAnimFilePaths = {   // ·ÎµåÇÒ ¾Ö´Ï¸ÞÀÌ¼ÇÀº ¿©±â¿¡ Ãß°¡
+    vector<_wstring> vecAnimFilePaths = {   // ï¿½Îµï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¿¡ ï¿½ß°ï¿½
         //L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
 
     };
@@ -105,7 +105,7 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 
 void CUI_HUD::Render()
 {
-    //__super::Render();                      // Nothing. ·»´õ±×·ì Ãß°¡ÇÑ µÚ ºÎÅÍ ·»´õ·¯¿¡¼­ ¾Ë¾Æ¼­ ÀÚ½Äµé±îÁö Render µ¹¸²
+    //__super::Render();                      // Nothing. ï¿½ï¿½ï¿½ï¿½ï¿½×·ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¾Æ¼ï¿½ ï¿½Ú½Äµï¿½ï¿½ï¿½ï¿½ Render ï¿½ï¿½ï¿½ï¿½
 }
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
@@ -126,7 +126,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
     {
         UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
 
-        // Transform °ªÀ» °¡Á®¿Â µÚ, Çà·ÄÈ­ÇÏ¿© ¹Ý¿µÇÏ°í, (ÀÓ½Ã·Î) ÀÚ½Ä ¿ÀºêÁ§Æ®·Î½á Ãß°¡ÇÑ´Ù.
+        // Transform ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½È­ï¿½Ï¿ï¿½ ï¿½Ý¿ï¿½ï¿½Ï°ï¿½, (ï¿½Ó½Ã·ï¿½) ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½Î½ï¿½ ï¿½ß°ï¿½ï¿½Ñ´ï¿½.
         _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
         _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
         _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
@@ -138,7 +138,7 @@ HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
         case ENUM_CLASS(UI_TYPE::BUTTON): pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc)); break;
         default:            break;
         }
-        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // ·ÎÄÃ¿¡ ÀúÀå.. 
+        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // ï¿½ï¿½ï¿½Ã¿ï¿½ ï¿½ï¿½ï¿½ï¿½.. 
 
 
         HIERARCHY_OBJ_DESC tObjDesc = { };
@@ -204,7 +204,7 @@ HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
 
         pTargetAnimator->Insert_Animation(tLoadAnimDesc);
 
-        // ksta del : Å×½ºÆ®¿ë
+        // ksta del : ï¿½×½ï¿½Æ®ï¿½ï¿½
         pTargetAnimator->Change_Animation(L"TestHUDAnim3");
     }
 
@@ -218,37 +218,37 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
 
 void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
-    // Å°º¸µå¸¦ ´­·¯¼­ ÄðÅ¸ÀÓÀÌ µµ´Â °ÍÀ» Å×½ºÆ®ÇÔ.
+    // Å°ï¿½ï¿½ï¿½å¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×½ï¿½Æ®ï¿½ï¿½.
 
-    // - Á¶°Ç
+    // - ï¿½ï¿½ï¿½ï¿½
     // 
-    // 1, pass°¡ Variant (index : 5) ·Î µÇ¾îÀÖ¾î¾ß ÀÛµ¿ÇÔ.
+    // 1, passï¿½ï¿½ Variant (index : 5) ï¿½ï¿½ ï¿½Ç¾ï¿½ï¿½Ö¾ï¿½ï¿½ ï¿½Ûµï¿½ï¿½ï¿½.
     // 
-    // 2. ¾Æ·¡ ÄÚµå¸¦ ÅëÇØ ÄðÅ¸ÀÓ Á¤º¸°¡, Custom_UI °´Ã¼¿¡¼­ ¼ÎÀÌ´õ·Î Àü´Þ µÉ ¿¹Á¤ÀÎ, descÀÇ Á¤º¸Àü´Þ¿ë Çà·Ä ³»ÀÇ [0][0]¿¡ ´ãÀ½.
-    //   ÀÌ´Â ÀÎ½ºÅÏ½ºº°·Î Àü´ÞµÇ¾î, ÀÎ½ºÅÏ½ºº°·Î °»½ÅÀÌ ÀÌ·ç¾îÁü..
+    // 2. ï¿½Æ·ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Custom_UI ï¿½ï¿½Ã¼ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, descï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¿ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ [0][0]ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    //   ï¿½Ì´ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÞµÇ¾ï¿½, ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì·ï¿½ï¿½ï¿½ï¿½..
     // 
-    // 3. ÇØ´çÇÏ´Â Custom_UI ³»ÀÇ Render ÇÔ¼ö¿¡¼­, µå·Î¿ìÄÝ Àü¿¡ iShaderFlag ¸¦, ¼ÎÀÌ´õ Àü¿ªº¯¼ö·Î ÁöÁ¤ÇØ ÁÖ¾î¾ß ÇÔ.
-    //   ÀÌ´Â ÇÑ ÆÐ½º ³»¿¡¼­ ¿©·¯ °æ¿ì¿¡ ´ëÀÀ½ÃÅ°±â À§ÇØ ÁØ ÇÃ·¡±×ÀÌ¸ç, Custom_UI°¡ µé°íÀÖÀ½.
-    //   hlsl ³»ÀÇ ÃÖ»ó´Ü¿¡¼­ Á¾·ù È®ÀÎ °¡´É (¿øÇü ÄðÅ¸ÀÓ UIÀÎÁö, »ç°¢ÇüÀÎÁö µî)
+    // 3. ï¿½Ø´ï¿½ï¿½Ï´ï¿½ Custom_UI ï¿½ï¿½ï¿½ï¿½ Render ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½Î¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ iShaderFlag ï¿½ï¿½, ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ ï¿½ï¿½.
+    //   ï¿½Ì´ï¿½ ï¿½ï¿½ ï¿½Ð½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ì¿¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½, Custom_UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
+    //   hlsl ï¿½ï¿½ï¿½ï¿½ ï¿½Ö»ï¿½Ü¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ UIï¿½ï¿½ï¿½ï¿½, ï¿½ç°¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½)
 
-    // - Variant »ç¿ë¹ý
+    // - Variant ï¿½ï¿½ï¿½ï¿½
     // 
-    // 1. ¼ÎÀÌ´õ¿¡¼­ Variant Pass ³» switch-case ¹®¿¡ ¿øÇÏ´Â ¼ÎÀÌ´õ Á¦ÀÛ
+    // 1. ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ï¿½ï¿½ Variant Pass ï¿½ï¿½ switch-case ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½
     // 
-    // 2. ÇØ´ç È¿°ú¸¦ »ç¿ëÇÒ UI¿¡ CCustom_UI::VARIANTREADY_UI_DESC ¸¸µé¾î¼­
-    //   flag Á¤º¸¿Í »ç¿ëÇÒ Á¤º¸ matVariantValues ¿¡ Æ÷ÇÔÇÏ¿© ´øÁü (ÀÎ½ºÅÏ½ºº°·Î Á¤º¸¸¦ Àû¿ëÇØ¾ß ÇÏ±â¿¡ vector ÄÁÅ×ÀÌ³Ê »ç¿ë)
+    // 2. ï¿½Ø´ï¿½ È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ UIï¿½ï¿½ CCustom_UI::VARIANTREADY_UI_DESC ï¿½ï¿½ï¿½ï¿½î¼­
+    //   flag ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ matVariantValues ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ ï¿½Ï±â¿¡ vector ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½)
     //
-    // 3. pass´Â ¹Ýµå½Ã Variant ·Î, flag ¹× ¿ä±¸ ÀÎ½ºÅÏ½º °¹¼ö Àß ÁöÁ¤ÇØÁÖ±â
+    // 3. passï¿½ï¿½ ï¿½Ýµï¿½ï¿½ Variant ï¿½ï¿½, flag ï¿½ï¿½ ï¿½ä±¸ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½
 
 
-    // ³ªÁß¿¡ ¿À¸¥ÂÊ¿¡¼­ºÎÅÍ 2~5°³ ³»¿¡¼­ À¯µ¿ÀûÀ¸·Î º¯È­ ¹× Á¤·ÄµÇµµ·Ï ÇÏ±â
-    // ¾Æ¿ì±¸½ºÅ¸ °°Àº Ä³¸¯ÅÍ´Â ¾ÆÀÌÄÜÀÌ 2°³·Î ÁÙ°í ±×·±´Ù´Â µí
+    // ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2~5ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È­ ï¿½ï¿½ ï¿½ï¿½ï¿½ÄµÇµï¿½ï¿½ï¿½ ï¿½Ï±ï¿½
+    // ï¿½Æ¿ì±¸ï¿½ï¿½Å¸ ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½Í´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½Ù°ï¿½ ï¿½×·ï¿½ï¿½Ù´ï¿½ ï¿½ï¿½
 
 
     enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
 
 
-    // ksta : ³ªÁß¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
                     m_iSelectedCHIndex;
     static _float   fSkillCD[CH_END][SK_END] = {};                                                  // left cooldown
     static _float   fChangeCD[CH_END] = {};                                                         // left cooldown
@@ -359,10 +359,10 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     }
 
 
-    // UIº°·Î Ä³¸¯ÅÍ °¹¼ö¸¸Å­ Á¸Àç.
+    // UIï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å­ ï¿½ï¿½ï¿½ï¿½.
 
-    // 1. ½ºÅ³UI ¿¡ ¹æ¶ûÀÚ ER / ¾Æ¿ì ER / °¥ºê ER ÄðÅ¸ÀÓ ÇÒ´ç
-    // 2. ±³Ã¼UI ¿¡ ¹æ¶ûÀÚ / ¾Æ¿ì / °¥ºê ÄðÅ¸ÀÓ ÇÒ´ç
+    // 1. ï¿½ï¿½Å³UI ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ER / ï¿½Æ¿ï¿½ ER / ï¿½ï¿½ï¿½ï¿½ ER ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ò´ï¿½
+    // 2. ï¿½ï¿½Ã¼UI ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ / ï¿½Æ¿ï¿½ / ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½Ò´ï¿½
     
     // skill
     for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
@@ -473,7 +473,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     static _uint iNumActiveBG = 4;
     _float4 vBGColor = _float4{.5f, .5f, .5f, .3f};
 
-    CCustom_UI* pSkillBGUI = Find_ChildObject(L"Skill_BackgroundImage");    // ÀÎ½ºÅÏ½º 4°³ÀÓ
+    CCustom_UI* pSkillBGUI = Find_ChildObject(L"Skill_BackgroundImage");    // ï¿½Î½ï¿½ï¿½Ï½ï¿½ 4ï¿½ï¿½ï¿½ï¿½
 
     vector<_float4x4> vecBGVariantMat = {};
     vecBGVariantMat.resize(5);
@@ -510,15 +510,15 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 {
-    // Feedback °´Ã¼¸¦ ½Ã°£¿¡ µû¶ó °ü¸®ÇÏ´Â ÇÔ¼ö.
-    // (½Ã°£¿¡ µû¶ó °ª °»½ÅÇÏ¿© ÀÎ½ºÅÏ½ºº°·Î ³Ñ°ÜÁÖ¸ç,
-    // ÃæºÐÇÑ ½Ã°£ÀÌ Áö³ª¸é ÇØ´ç º¤ÅÍ ¿ä¼Ò¸¦ »èÁ¦ÇÑ´Ù.)
+    // Feedback ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
+    // (ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ°ï¿½ï¿½Ö¸ï¿½,
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.)
 
-    // º¯¼ö´Â ¿©±â¼­ Á¤ÀÇÇÔ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½â¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");    
     const _float2 fDestScale = { 1.2f, 1.2f };
-    const _float fStartAlpha = 0.f;     // 0ÀÌ º¸ÀÓ, 1ÀÌ ¾Èº¸ÀÓÀ¸·Î ¸¸µê.
+    const _float fStartAlpha = 0.f;     // 0ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, 1ï¿½ï¿½ ï¿½Èºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
     const _float fLifeTime = .5f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
 
@@ -528,10 +528,10 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 
 
 
-    // »õ·Î¿î ÀÎ½ºÅÏ½º°¡ Ãß°¡µÇ¾úÀ¸¸é ½Ã°£ °ü¸®¿ë ÀúÀåº¤ÅÍµµ ±×¸¸Å­ ´Ã¸².
+    // ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½åº¤ï¿½Íµï¿½ ï¿½×¸ï¿½Å­ ï¿½Ã¸ï¿½.
     static vector<_float> vecLifeTimeElapsed = {};
     
-    // Ãß°¡µÈ ¿ä¼Ò°¡ ÀÖ´Ù¸é ±×¸¸Å­À» °¨ÁöÇÏ°í ºó ÀÚ¸®·Î Ãß°¡
+    // ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò°ï¿½ ï¿½Ö´Ù¸ï¿½ ï¿½×¸ï¿½Å­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
     if (uiInstDescs.size() > vecLifeTimeElapsed.size())
     {
         _uint iAddLoopTime = uiInstDescs.size() - vecLifeTimeElapsed.size();
@@ -539,7 +539,7 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
             vecLifeTimeElapsed.push_back(0.f);
     }
 
-    // ¼ÎÀÌ´õ ÃøÀ¸·Î °ü·Ã º¯¼ö Àü´Þ
+    // ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     vector<_float4x4> vecVariantMat = {};
     vecVariantMat.resize(uiInstDescs.size());
 
@@ -559,7 +559,7 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 
     pFeedbackUI->Set_VariantUIDesc(tVariantDesc);
 
-    // ½Ã°£ÀÌ °æ°úµÈ ¿ä¼Ò°¡ ÀÖ´Ù¸é »èÁ¦
+    // ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ò°ï¿½ ï¿½Ö´Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½
     for (_uint i = 0; i < vecLifeTimeElapsed.size(); i++)
     {
         if (vecLifeTimeElapsed[i] >= fLifeTime)
@@ -567,7 +567,7 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
             vecLifeTimeElapsed.erase(vecLifeTimeElapsed.begin() + i);
             uiInstDescs.erase(uiInstDescs.begin() + i);
 
-            uiDesc.vecInstanceDescs = uiInstDescs; // Àû¿ë
+            uiDesc.vecInstanceDescs = uiInstDescs; // ï¿½ï¿½ï¿½ï¿½
             pFeedbackUI->Set_UIDesc(uiDesc);
             i--;
         }
@@ -580,12 +580,12 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 
 void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 {
-    // Feedback °´Ã¼¿¡ ÀÎ½ºÅÏ½º Ãß°¡ÇÏ´Â ÇÔ¼ö.
-    // ¹öÆ°ÀÌ ´­·ÈÀ» ¶§¿¡ ¿øÀÌ È¿°ú¸¦ »ý¼ºÇÏ±â À§ÇÔ.
-    // À§Ä¡´Â ¾Æ·¡ÀÇ vStartPos ¿Í fDeltaPosX ¿¡ µû¶ó Á¤ÇØÁü.
+    // Feedback ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ß°ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½.
+    // ï¿½ï¿½Æ°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    // ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Æ·ï¿½ï¿½ï¿½ vStartPos ï¿½ï¿½ fDeltaPosX ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.
     // 
-    // ½Ã°£ °æ°ú¿¡ µû¶ó Ä¿Áö¸ç, ½Ã°£ÀÌ ´Ù Áö³¯ ½Ã ÀÎ½ºÅÏ½º¸¦ »èÁ¦ÇÏ´Â °ÍÀº 
-    // Update_UI_SkillSection_OnFeedback ¿¡¼­ ¼öÇà.
+    // ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ï¿½ï¿½, ï¿½Ã°ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ 
+    // Update_UI_SkillSection_OnFeedback ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 
     CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");
 
@@ -619,12 +619,12 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 {
-    // ÇÃ·¹ÀÌ¾îÀÇ HP ¹Ù¸¦ °»½ÅÇÕ´Ï´Ù.
+    // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ HP ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 
-    // 1. µÚµû¶ó¿À´Â Ã¼·Â¹Ù±îÁö »ý°¢ÇÏ¿© ÀÎ½ºÅÏ½º´Â 2Á¾À¸·Î »ç¿ëÇÔ.
-    // 2. »ö»óÀº ¼ÎÀÌ´õ¸¦ ÅëÇØ, ¿ø·¡ Ã¼·Â¹Ù¿Í µÚµû¶ó¿À´Â Ã¼·Â¹Ù 2Á¾À», °¢°¢ 2°¡Áö »ö¾¿ »ç¿ëÇÏ¿© ±×¶óµð¾ðÆ®µÇµµ·Ï ±¸¼º
+    // 1. ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹Ù±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
+    // 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹Ù¿ï¿½ ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¼ï¿½Â¹ï¿½ 2ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½×¶ï¿½ï¿½ï¿½Æ®ï¿½Çµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-    // ksta : ³ªÁß¿¡ ÇÃ·¹ÀÌ¾î Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
     const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
@@ -638,7 +638,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
     _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
 
-    const _float fHPReduceTime = 0.5f;          // ÁÙ¾îµå´Â ¼Ò¿ä½Ã°£Àº 0.5ÃÊÁ¤µµ?
+    const _float fHPReduceTime = 0.5f;          // ï¿½Ù¾ï¿½ï¿½ï¿½ ï¿½Ò¿ï¿½Ã°ï¿½ï¿½ï¿½ 0.5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 
     const auto targetUI = Find_ChildObject(L"Inst_HPBar");
 
@@ -646,11 +646,11 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     
     if (fHPReduceLeftTime > 0)
     {
-        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // Ã¼·Â ºñÀ² Â÷ÀÌ
+        _float diff = fPlayerHPBackRatio - fPlayerHPRatio;              // Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         if (diff > 0.f)
         {
-            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé Ã¼·Â ºñÀ²
+            _float delta = diff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fPlayerHPBackRatio -= delta;                               
             if (fPlayerHPBackRatio < fPlayerHPRatio)
@@ -678,7 +678,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
         _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
 
-        // HP´Â Áï½Ã ±îÀÓ
+        // HPï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         fPlayerHP[m_iSelectedCHIndex] -= fRandDamage;
         if (fPlayerHP[m_iSelectedCHIndex] < 0) fPlayerHP[m_iSelectedCHIndex] = 0;
 
@@ -722,7 +722,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     
 
 
-    // ksta : ³ªÁß¿¡ º¸½º Á¤º¸ ÅëÇÕµÇ¸é °Å±â·ÎºÎÅÍ ¹Þ¾Æ¿Ã Á¤º¸
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÕµÇ¸ï¿½ ï¿½Å±ï¿½ï¿½Îºï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½
     static _float fBossHP = { 10000.f };            // boss hitpoint
     static _float fBossBackHP = fBossBackHP;
     const _float fBossMaxHP = { 10000.f };
@@ -752,7 +752,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     const _float4 vSABackColor      = { 1.f, 1.f, 1.f, .3f };   // after armor break
     //const _float4 vSABreakBackColor = { .2f, .2f, .2f, 1.f };
 
-    const _float fHPReduceTime = 0.5f;          // ÁÙ¾îµå´Â ¼Ò¿ä½Ã°£Àº 0.5ÃÊÁ¤µµ?
+    const _float fHPReduceTime = 0.5f;          // ï¿½Ù¾ï¿½ï¿½ï¿½ ï¿½Ò¿ï¿½Ã°ï¿½ï¿½ï¿½ 0.5ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 
     const auto targetUI = Find_ChildObject(L"Inst_BossHPBar");
     const auto targetSAUI = Find_ChildObject(L"Inst_BossSABar");
@@ -760,12 +760,12 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
     if (fHPReduceLeftTime > 0)
     {
-        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // Ã¼·Â ºñÀ² Â÷ÀÌ
-        _float fSADiff = fBossSABackRatio - fBossSARatio;              // ¾Æ¸Ó ºñÀ² Â÷ÀÌ
+        _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        _float fSADiff = fBossSABackRatio - fBossSARatio;              // ï¿½Æ¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         if (fHPDiff > 0.f)
         {
-            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé Ã¼·Â ºñÀ²
+            _float fHPDelta = fHPDiff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fBossHPBackRatio -= fHPDelta;
             if (fBossHPBackRatio < fBossHPRatio)
@@ -773,7 +773,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
         }
         if (fSADiff > 0.f)
         {
-            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // ÁÙ¾îµé ¾Æ¸Ó ºñÀ²
+            _float fSADelta = fSADiff * (fTimeDelta / fHPReduceLeftTime);     // ï¿½Ù¾ï¿½ï¿½ ï¿½Æ¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 
             fBossSABackRatio -= fSADelta;
             if (fBossSABackRatio < fBossSARatio)
@@ -803,7 +803,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
         _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
         _float fRandSADamage = fRandDamage * 0.8f;
 
-        // HP´Â Áï½Ã ±îÀÓ
+        // HPï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         fBossHP -= fRandDamage;
         fBossSA -= fRandSADamage;
 
@@ -864,7 +864,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 {
-    // Ä³¸¯ÅÍ¿¡ µû¸¥ Å° °¡ÀÌµå º¸ÀÌ±â ¿©ºÎ ºÐ±â
+    // Ä³ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ Å° ï¿½ï¿½ï¿½Ìµï¿½ ï¿½ï¿½ï¿½Ì±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð±ï¿½
     CCustom_UI* pKeyButtonUI = Find_ChildObject(L"Inst_KeyButton");
     auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
@@ -955,7 +955,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 
 
-    // ¼Ó¼º ¾ÆÀÌÄÜ »ö»ó Àû¿ë
+    // ï¿½Ó¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     vector<CCustom_UI*> pElementIcons = {
         Find_ChildObject(L"Icon_ElementDark"),
         Find_ChildObject(L"Icon_ElementThunder"),
@@ -982,7 +982,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
     
     
-    // ¼Ó¼º ¾ÆÀÌÄÜ ÁÖº¯ °ø¸í °ª Àû¿ë
+    // ï¿½Ó¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Öºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     const vector<_float4> vecElemCircleColors = {
         {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
         {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
@@ -1024,7 +1024,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
 
-    // ksta : ÇöÀç °ø¸íÈ¸·Î ¼öÄ¡ ³ªÁß¿¡ ¹Þ¾Æ¿Ã °Í
+    // ksta : ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È¸ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Þ¾Æ¿ï¿½ ï¿½ï¿½
     m_fPlayerEnergy;
     m_fPlayerMaxEnergy;
 
@@ -1038,7 +1038,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     
 
     _float4     vSingleColor[2] = {};   // for Gradiant
-    _float4     vExtraColor[2] = {};    // for Galbrena. ÀÓ¸¶´Â È¥ÀÚ °ø¸íÈ¸·Î¿¡ ÄÃ·¯ ÁÂ¿ì·Î µÎ°³¾¸
+    _float4     vExtraColor[2] = {};    // for Galbrena. ï¿½Ó¸ï¿½ï¿½ï¿½ È¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È¸ï¿½Î¿ï¿½ ï¿½Ã·ï¿½ ï¿½Â¿ï¿½ï¿½ï¿½ ï¿½Î°ï¿½ï¿½ï¿½
     _bool       isSingleVisible = {};   //
     //_float      fSingleHeight = {};   // vSpectrumHeights, vBackSpectrumHeights
 
@@ -1050,7 +1050,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
 
 
-    // Å×½ºÆ®¿ë ÀÔ·ÂÀ» ÅëÇÑ °ª º¯°æ
+    // ï¿½×½ï¿½Æ®ï¿½ï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
     {
         _float fRandEnergy = m_pGameInstance->Rand(10.f, 40.f);
@@ -1081,7 +1081,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
 
     enum HUD_PLAYER_ENERGYBAR { VALUE, TARGET, END };
-    enum HUD_PLAYER_ENCOLOR {           // °ø¸í°ÔÀÌÁö »ö»ó ±¸ºÐ¿ë ÇÁ¸®¼Â
+    enum HUD_PLAYER_ENCOLOR {           // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ð¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         ENCL_ROVER_NORMAL, 
         ENCL_AUGUSTA_NORMAL,
         ENCL_AUGUSTA_ULT,
@@ -1092,10 +1092,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         ENCL_STATIC,
         ENCL_END
     };
-    const _uint iNumSpectrums = 41;     // ½ºÆåÆ®·³ÀÇ °¢ ¿ä¼Ò Á¡ °¹¼ö´Â ÃÖ´ë 41°³·Î °íÁ¤
+    const _uint iNumSpectrums = 41;     // ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ 41ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
-    // ÄÃ·¯ ÇÁ¸®¼Â ¸ñ·Ï
+    // ï¿½Ã·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     vector<array<_float4, 2>> vecColorPreset;       // { start color (bottom), end color (top) }
     vecColorPreset.resize(ENCL_END);
 
@@ -1106,7 +1106,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vecColorPreset[ENCL_GALBRENA_NORMAL_R]  = { _float4{0.682f, 0.769f, 0.980f, 1.f}, _float4{0.553f, 0.557f, 0.878f, .8f} };
     vecColorPreset[ENCL_GALBRENA_ULT]       = { _float4{0.482f, 0.412f, 0.878f, 1.f}, _float4{0.867f, 0.824f, 0.957f, .8f} };
 
-    vecColorPreset[ENCL_STATIC]             = { _float4(1.f, .8f, .8f, .35f), _float4(1.f, .8f, .8f, .35f) }; // ¾ÈÃ¡À» ¶§ »ö»ó
+    vecColorPreset[ENCL_STATIC]             = { _float4(1.f, .8f, .8f, .35f), _float4(1.f, .8f, .8f, .35f) }; // ï¿½ï¿½Ã¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
 
@@ -1124,14 +1124,14 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
     //vIsVisible.assign(vIsVisible.size(), true);
 
-    // Ãß°¡·Î µÚ¿¡¼­ °¡¸¸È÷ ÀÖÀ» ½ºÆåÆ®·³µµ Á¸Àç, ÀÌ´Â ÇöÀç °ø¸í °ÔÀÌÁö¿¡ µû¶ó ´Ü¼øÈ÷ ¸¶½ºÅ·¸¸ µÉ °Í. ±×·¯¹Ç·Î °ªÀº 1.f °íÁ¤.
-    // Áï, ÀÎ½ºÅÏ½º 41°³¸¦ °¡Áø °´Ã¼ 3°³¸¦ ±×¸®°Å³ª, Á¤º¸¸¦ ÇÕÃÄ¼­ ÇÑ¹ø¿¡ 41*3°³¸¦ ±×¸®°Å³ª ÇÒ µí
+    // ï¿½ß°ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ü¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Å·ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½. ï¿½×·ï¿½ï¿½Ç·ï¿½ ï¿½ï¿½ï¿½ï¿½ 1.f ï¿½ï¿½ï¿½ï¿½.
+    // ï¿½ï¿½, ï¿½Î½ï¿½ï¿½Ï½ï¿½ 41ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ 3ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½Å³ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ä¼ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ 41*3ï¿½ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½Å³ï¿½ ï¿½ï¿½ ï¿½ï¿½
 
-    // »ö»ó, º¸ÀÏ ºÎºÐ ÁöÁ¤Àº ÇöÀç ¼±ÅÃÁßÀÎ Ä³¸¯ÅÍ Á¾·ù¿¡ µû¶ó
-    // ksta : 1) °¥ºê·¹³ª »ö»ó ³ª´©´Â°Ç ¾Æ·¡ Çà·Ä ÀúÀå½Ã¿¡ ºÐ±â·Î ³ª´­ °Í (¿Ï)
-    // ksta : 2) °ÔÀÌÁö°¡ ¿À¸£´Â ¹æÇâ ¶ÇÇÑ ÇÃ·¹ÀÌ¾î¸¶´Ù ´Ù¸§. ÀÌ´Â ÇØ´ç ºÐ±â¿¡¼­ °è»ê.
-    // ksta : 3) Ä³¸¯ÅÍ¿¡ µû¶ó Ãß°¡ÀÚ¿øÀÌ ÀÖ´Â °æ¿ìµµ ÀÖÀ½.(¾Æ¿ì±¸½ºÅ¸ Áß°£¿ø, Ä®. °¥ºê ¿Þ°ÔÀÌÁö)
-    //          ÀÌ´Â Àü¿ë ÇÔ¼ö µû·Î ÆÄ¼­ °Å±â¼­ °è»ê.
+    // ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Îºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ksta : 1) ï¿½ï¿½ï¿½ê·¹ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Â°ï¿½ ï¿½Æ·ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ ï¿½Ð±ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ (ï¿½ï¿½)
+    // ksta : 2) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¶ï¿½ï¿½ ï¿½Ù¸ï¿½. ï¿½Ì´ï¿½ ï¿½Ø´ï¿½ ï¿½Ð±â¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+    // ksta : 3) Ä³ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ìµµ ï¿½ï¿½ï¿½ï¿½.(ï¿½Æ¿ì±¸ï¿½ï¿½Å¸ ï¿½ß°ï¿½ï¿½ï¿½, Ä®. ï¿½ï¿½ï¿½ï¿½ ï¿½Þ°ï¿½ï¿½ï¿½ï¿½ï¿½)
+    //          ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ä¼ï¿½ ï¿½Å±â¼­ ï¿½ï¿½ï¿½ï¿½.
 
     switch (m_iSelectedCHIndex)
     {
@@ -1266,14 +1266,14 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vBackColor[0].w *= 0.4f;
     vBackColor[1].w *= 0.4f;
 
-    // ·£´ý ¼öÄ¡ ÇÒ´ç
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½Ò´ï¿½
     for (_uint i = 0; i < iNumSpectrums; ++i)
     {
-        // ¸ñÇ¥Ä¡¿¡ ÃµÃµÈ÷ Á¢±Ù (ºÎµå·´°Ô º¯ÇÔ)
+        // ï¿½ï¿½Ç¥Ä¡ï¿½ï¿½ ÃµÃµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Îµå·´ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
         vSpectrumHeights[VALUE][i] += (vSpectrumHeights[TARGET][i] - vSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
         vBackSpectrumHeights[VALUE][i] += (vBackSpectrumHeights[TARGET][i] - vBackSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
 
-        // ÀÏÁ¤ È®·ü·Î »õ·Î¿î ¸ñÇ¥·Î º¯°æ
+        // ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
             vSpectrumHeights[TARGET][i] = m_pGameInstance->Rand(1.f, 2.f);
         if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
@@ -1289,15 +1289,15 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vecVariantStaticMat.resize(41);
 
 
-    // ¼ÎÀÌ´õ Àü´Þ¿ë Çà·Ä¿¡ °ª Àü´Þ
-    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum. ¾Õ¿¡¼­ »ö ÀÔÇôÁö°í ¿òÁ÷ÀÌ´Â ±×°Í.
+    // ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Þ¿ï¿½ ï¿½ï¿½ï¿½Ä¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum. ï¿½Õ¿ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½×°ï¿½.
     {
         *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor[0];
         *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSingleColor[1];
         vecVariantMat[i]._31 = static_cast<_float>(vIsVisible[i]);
         vecVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum.  µÚ¿¡¼­ ¾ËÆÄ Àû¿ëµÈ Ã¤·Î ¿òÁ÷ÀÌ´Â ±×°Í.
+    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum.  ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½×°ï¿½.
     {
         *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor[0];
         *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._21) = vBackColor[1];
@@ -1305,16 +1305,16 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         //vecVariantBackMat[i]._31 = false;5
         vecVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. ¾Õ¿¡¼­ °ø¸í°ÔÀÌÁö ´ú Ã¡À» ‹š ¿òÁ÷ÀÌÁö ¾Ê´Â ±×°Í.
+    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. ï¿½Õ¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ã¡ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´ï¿½ ï¿½×°ï¿½.
     {
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];   // ±âº»°ª »ö»ó »ç¿ë.
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];   // ±âº»°ª »ö»ó »ç¿ë.
-        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);                  // °ÔÀÌÁö°¡ Â÷Áö ¾Ê¾Æ ±×·ÁÁöÁö ¾Ê´Â ºÎºÐ¸¸ ±×¸².
-        //vecVariantStaticMat[i]._31 = false;                                                     // °ÔÀÌÁö°¡ Â÷Áö ¾Ê¾Æ ±×·ÁÁöÁö ¾Ê´Â ºÎºÐ¸¸ ±×¸².
-        vecVariantStaticMat[i]._32 = 1.f;                                                       // Å©±â 1·Î °íÁ¤
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];   // ï¿½âº»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];   // ï¿½âº»ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);                  // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ ï¿½×·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´ï¿½ ï¿½ÎºÐ¸ï¿½ ï¿½×¸ï¿½.
+        //vecVariantStaticMat[i]._31 = false;                                                     // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¾ï¿½ ï¿½×·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê´ï¿½ ï¿½ÎºÐ¸ï¿½ ï¿½×¸ï¿½.
+        vecVariantStaticMat[i]._32 = 1.f;                                                       // Å©ï¿½ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 
-    // °¥ºê·¹³ª ¿¹¿ÜÃ³¸® - ÁÂ¿ì »ö»ó º¯°æ
+    // ï¿½ï¿½ï¿½ê·¹ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ã³ï¿½ï¿½ - ï¿½Â¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (m_iSelectedCHIndex == CH_GALBRENA)
     {
         if (m_iEnergyBarMode == 0)
@@ -1354,7 +1354,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         true
     };
     
-    targetUI->Set_VariantUIDesc(tVariantDesc);  // ÀÎ½ºÅÏ½º 123°³¿ë Á¤º¸ ÇÑ¹ø¿¡ ±×¸®°Ô²û º¸³¿
+    targetUI->Set_VariantUIDesc(tVariantDesc);  // ï¿½Î½ï¿½ï¿½Ï½ï¿½ 123ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¹ï¿½ï¿½ï¿½ ï¿½×¸ï¿½ï¿½Ô²ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 #ifdef KSTA_UI_ENERGYBARTEST
     std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] ============================== : " << std::endl;
@@ -1369,8 +1369,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
         return;
 
 
-    // Áß¾Ó °ÔÀÌÁö, Ä®³¯ µÎ °³ Á¸Àç
-    // ksta : ³ªÁß¿¡ ¹Þ¾Æ¿Í¾ß ÇÔ
+    // ï¿½ß¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, Ä®ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ksta : ï¿½ï¿½ï¿½ß¿ï¿½ ï¿½Þ¾Æ¿Í¾ï¿½ ï¿½ï¿½
 
     static _uint iSwordEnergy = 0;            // mAX = 2
 
@@ -1381,21 +1381,21 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     const _float fMaxUltBladeEnergy = 100.;
 
 
-    CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");          // ÀÎ½ºÅÏ½º 0¹øÀÌ ¿ÞÂÊ, 1¹øÀÌ ¿À¸¥ÂÊ Ä® ÀÚ¿ø.
-    CCustom_UI* pPointUI    = Find_ChildObject(L"Frame_Augusta_Inst_CenterPointEnergy");    // ÇÏ´ÜºÎ ¿øÇü ÀÚ¿ø
+    CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");          // ï¿½Î½ï¿½ï¿½Ï½ï¿½ 0ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½, 1ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä® ï¿½Ú¿ï¿½.
+    CCustom_UI* pPointUI    = Find_ChildObject(L"Frame_Augusta_Inst_CenterPointEnergy");    // ï¿½Ï´Üºï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½
 
-    CCustom_UI* pUltBladeUI = Find_ChildObject(L"Frame_Augusta_Inst_UltModeEnergy");        // ±Ã±Ø±â Áß »ç¿ëÇÏ´Â ÀÚ¿ø. ´ÜÀÏ. 
+    CCustom_UI* pUltBladeUI = Find_ChildObject(L"Frame_Augusta_Inst_UltModeEnergy");        // ï¿½Ã±Ø±ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ú¿ï¿½. ï¿½ï¿½ï¿½ï¿½. 
 
 
 
-    // Ä® ÀÚ¿ø
+    // Ä® ï¿½Ú¿ï¿½
     if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
     {
         iSwordEnergy++;
         if (iSwordEnergy > 2) iSwordEnergy = 0;
     }
 
-    // ¿øÇü ÀÚ¿ø
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½
     if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
     {
         if (fPointEnergy == 100) fPointEnergy = 0;
@@ -1406,7 +1406,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
         }
     }
 
-    // ±Ã±Ø±â ÀÚ¿ø
+    // ï¿½Ã±Ø±ï¿½ ï¿½Ú¿ï¿½
     if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
     {
         if (fUltBladeEnergy == 100) fUltBladeEnergy = 0;
@@ -1421,7 +1421,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
     if (m_iEnergyBarMode == 0)
     {
-        // ÀÏ¹Ý UI
+        // ï¿½Ï¹ï¿½ UI
         pBladeUI    ->Set_Active(true);
         pPointUI    ->Set_Active(true);
         pUltBladeUI ->Set_Active(false);
@@ -1429,7 +1429,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
     else if (m_iEnergyBarMode == 1)
     {
-        // ±Ã UI
+        // ï¿½ï¿½ UI
         pBladeUI    ->Set_Active(false);
         pPointUI    ->Set_Active(false);
         pUltBladeUI ->Set_Active(true);
@@ -1442,8 +1442,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
     auto ultBladeDesc = pUltBladeUI->Get_UIDesc();
     
-    // Ä® ÀÚ¿ø
-    // ±×³É °¹¼ö¿¡ µû¶ó º¸ÀÏÁö ¸»Áö Á¤ÇØÁÖ±â. alpha pass ÀÌ¿ë.
+    // Ä® ï¿½Ú¿ï¿½
+    // ï¿½×³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½. alpha pass ï¿½Ì¿ï¿½.
     switch (iSwordEnergy)
     {
     case 0:     
@@ -1465,10 +1465,10 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 
 
-    // ¿øÇü ÀÚ¿ø
-    // ±âÁ¸ÀÇ ÄðÅ¸ÀÓ¿ë ¼ÎÀÌ´õ È°¿ë. vatiant pass ÀÌ¿ë.
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¿ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½Ó¿ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ È°ï¿½ï¿½. vatiant pass ï¿½Ì¿ï¿½.
 
-    // ! ¹Ýµå½Ã pass º¯°æ ÇÊ¿ä
+    // ! ï¿½Ýµï¿½ï¿½ï¿½ pass ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
     vector<_float4x4> vecPointVariantMat = { _float4x4() };
 
     vecPointVariantMat[0].m[0][0] = 1 - fPointEnergy / fMaxPointEnergy;
@@ -1487,8 +1487,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 
 
-    // ±Ã±Ø±â ÀÚ¿ø
-    // ±âÁ¸ ¼ÎÀÌ´õ¿¡ ¸¸µé¾îµÐ °Í È°¿ë. alpha pass ÀÌ¿ë.
+    // ï¿½Ã±Ø±ï¿½ ï¿½Ú¿ï¿½
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È°ï¿½ï¿½. alpha pass ï¿½Ì¿ï¿½.
     _float ultRatio = fUltBladeEnergy / fMaxUltBladeEnergy;
     static _float fPreUltRatio = 0.f;
 
@@ -1503,12 +1503,12 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 {
-    // ¿ÞÂÊ ¿¡ÄÚ¹Ù´Â Update_UI_PlayerEnergyBar ¿¡¼­ Ã³¸®
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¹Ù´ï¿½ Update_UI_PlayerEnergyBar ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
     // 
-    // °­È­»óÅÂÀÏ ½Ã ÇÏ´Ü °ÔÀÌÁö ¹Ù Á¸Àç
+    // ï¿½ï¿½È­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
-    // °­È­ »óÅÂ ´ëÀÀ
+    // ï¿½ï¿½È­ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if (m_iSelectedCHIndex != CH_GALBRENA)
         return;
 

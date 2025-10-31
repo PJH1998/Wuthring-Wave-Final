@@ -298,6 +298,15 @@
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Map_Object_Destruction.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Event_Scene_Edit.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Editor_Struct.h">
+      <Filter>99. Define</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -435,6 +444,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Map_Object_Destruction.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

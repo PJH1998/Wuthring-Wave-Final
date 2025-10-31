@@ -168,21 +168,32 @@
     <ClInclude Include="..\Public\AnimationDummy.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
+    <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
     <ClInclude Include="..\Public\AugustaClimbExit.h" />
     <ClInclude Include="..\Public\AugustaClimbMove.h" />
+    <ClInclude Include="..\Public\AugustaGriffon.h" />
+    <ClInclude Include="..\Public\AugustaAirAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
+    <ClInclude Include="..\Public\AugustaGroundBurst.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
+    <ClInclude Include="..\Public\AugustaGroundSpecial.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
+    <ClInclude Include="..\Public\AugustaHit.h" />
+    <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
-    <ClInclude Include="..\Public\AugustaStateFactory.h" />
+    <ClInclude Include="..\Public\AugustaFactory.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_Debug.h" />
+    <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
+    <ClInclude Include="..\Public\Director.h" />
+    <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -217,9 +228,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\MapObject.h" />
-    <ClInclude Include="..\public\MonsterBody.h" />
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
+    <ClInclude Include="..\Public\Rover.h" />
+    <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverState_Enum.h" />
+    <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -247,6 +261,7 @@
     <ClInclude Include="..\Public\SpringCamera.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Weapon.h" />
+    <ClInclude Include="CAttackVolume.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -260,18 +275,25 @@
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
+    <ClCompile Include="..\Private\AugustaAirAttack.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
+    <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
+    <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSpecial.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
+    <ClCompile Include="..\Private\AugustaHit.cpp" />
+    <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
@@ -283,6 +305,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Director.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
@@ -306,12 +329,14 @@
     </ClCompile>
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
-    <ClCompile Include="..\private\MonsterBody.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
-    <ClCompile Include="..\Private\AugustaStateFactory.cpp" />
+    <ClCompile Include="..\Private\AugustaFactory.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
+    <ClCompile Include="..\Private\Rover.cpp" />
+    <ClCompile Include="..\Private\RoverFactory.cpp" />
+    <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -338,6 +363,7 @@
     <ClCompile Include="..\Private\SpringCamera.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Weapon.cpp" />
+    <ClCompile Include="CAttackVolume.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>

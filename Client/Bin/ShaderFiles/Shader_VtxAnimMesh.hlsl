@@ -16,7 +16,7 @@ matrix g_BoneMatrices[512];
 
 cbuffer GlobalConstants
 {
-    // <-- ¹Ù·Î ÀÌ »ó¼öÀÔ´Ï´Ù. C++¿¡¼­ 2·Î ¼³Á¤.
+    // <-- ï¿½Ù·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ô´Ï´ï¿½. C++ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
     int g_iNumBlendWeightsToUse = 2; 
 }
 
@@ -125,6 +125,7 @@ struct PS_OUT
     float4 vDepth : SV_TARGET2;
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
+    float4 vPBR : SV_TARGET5;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -136,6 +137,8 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vPBR.y = 0.2f;
     
     return Out;
 }
@@ -155,6 +158,9 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vPBR.y = 0.2f;
+    
+    Out.vPBR.y = 0.2f;
     
     return Out;
 }
@@ -179,6 +185,7 @@ PS_OUT_LIGHTDEPTH PS_SHADOW(PS_IN_SHADOW In)
     
     return Out;
 }
+
 
 technique11 DefaultTechnique
 {
@@ -214,4 +221,5 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SHADOW();
     }
+    
 }

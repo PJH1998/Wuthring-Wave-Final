@@ -17,11 +17,13 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_First/");
-    Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
+
+	//로더에서 부른 것과 같은 거 부르기.
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
     Ready_Layer_Player();
-	Ready_Dummy();
+	//Ready_Dummy();
+    Ready_MonsterTest();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
@@ -69,10 +71,11 @@ void CLevel_Test::Render()
 void CLevel_Test::Ready_Layer_Player()
 {
     _float3 vScale{}, vRotation{}, vPosition{};
-    //vScale = { 1.f, 1.f, 1.f };
-    vScale = { 0.01f, 0.01f, 0.01f };
+    vScale = { 1.f, 1.f, 1.f };
+    //vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
-    vPosition = { 0.f, 0.f, 0.f };
+    vPosition = { 0.f, -10.f, 50.f };
+    //vPosition = { 3455.f, 160.f, 2951.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
@@ -87,12 +90,15 @@ void CLevel_Test::Ready_Layer_Player()
 
     // 1. Augusta 정의.
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+    //Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+    
 
     // 2. Galbrena 정의
 
-    // 3.주인공 캐릭터 정의
-
+    // 3. Rover(주인공) 캐릭터 정의
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
     // 4. Player(Character 모음) 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
@@ -103,6 +109,23 @@ void CLevel_Test::Ready_Layer_Player()
 void CLevel_Test::Ready_Dummy()
 {
 	m_pGameSystem->Create_MonsterDummy(LEVEL::TEST, _float3(0.f, 5.f, 50.f), XMMatrixScaling(0.0001f, 0.0001f, 0.0001f));
+}
+
+void CLevel_Test::Ready_MonsterTest()
+{
+    CMonsterTest::MONSTERTEST_DESC MobDesc{};
+    MobDesc.eCurLevel = m_eCurLevel;
+    MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
+    MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+    MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    MobDesc.fSpeedPerSec = 10.f;
+    MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+    MobDesc.pAnimationTag = "Born1";
+    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+        CRASH("Failed Ready MonsterTest");
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
@@ -218,32 +241,39 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 
         _wstring PrototypeName = TEXT("Prototype_Component_Model_");
 
-        while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-        {
-            memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-            File.read(Desc.ModelName, NameLength);
+		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+		{
+			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+			File.read(Desc.ModelName, NameLength);
 
-            File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-            File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
-            _float4x4 Matrix = {};
-            File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-            Desc.WorldMatrix = &Matrix;
+			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
+			_float4x4 Matrix = {};
+			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+			Desc.WorldMatrix = &Matrix;
 
-            //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
-            _wstring ModelName = StringToWString(Desc.ModelName);
+			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
+			_wstring ModelName = StringToWString(Desc.ModelName);
 
-            m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
-                CMapObject::MAP_LOAD pDesc{};
-                strcpy_s(pDesc.ModelName, ModelName.c_str());
-                pDesc.iShaderPassIndex= ShaderPass;
-                pDesc.eObjectType = eObjectType;
-                pDesc.WorldMatrix = &Matrix;
+			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+				CMapObject::MAP_LOAD pDesc{};
+				strcpy_s(pDesc.ModelName, ModelName.c_str());
+				pDesc.iShaderPassIndex = ShaderPass;
+				pDesc.eObjectType = eObjectType;
+				pDesc.WorldMatrix = &Matrix;
 
-                m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
-                    , PROTOTYPE::GAMEOBJECT, &pDesc);
-                });
+				CMapObject* pMapObject = static_cast<CMapObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
+					, PROTOTYPE::GAMEOBJECT, &pDesc));
+
+				//m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Layer_Map"), pMapObject);
+				//Safe_AddRef(pMapObject);
+				//m_pGameInstance->Add_To_OctoTree(pMapObject)
+
+				//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"), ENUM_CLASS(m_eCurLevel), TEXT("Layer_Map"), &pDesc)))
+				//	CRASH("Map Object");
+				//});
+				});
         }
-        m_pGameInstance->Wait_Thread_End();
     }
     m_pGameInstance->Wait_Thread_End();
     File.close();

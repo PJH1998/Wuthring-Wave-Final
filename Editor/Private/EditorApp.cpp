@@ -59,7 +59,6 @@ HRESULT CEditorApp::Initialize()
 
 void CEditorApp::Post_Update()
 {
-	// Level ?꾪솚
 	if (true == m_isChangeLevel)
 	{
 		// Wait Thread End
@@ -67,7 +66,6 @@ void CEditorApp::Post_Update()
 
 		m_isChangeLevel = false;
 
-		// Memory Clear (Sound, Camera, Light, ETC)
 		if (FAILED(m_pGameInstance->Clear_Memory()))
 			return;
 

@@ -33,7 +33,20 @@ _bool CCollider::IsLand(_float3* pNormalOut)
 	if (nullptr != pNormalOut)
 		*pNormalOut = StoreFloat3(m_pCharacterVirtual->GetGroundNormal());
 
+	
+
 	return m_pCharacterVirtual->IsSupported();
+}
+
+void CCollider::Set_Offset(const _float3 vOffset)
+{
+	m_vOffset = vOffset;
+
+	if (m_pCharacterVirtual)
+	{
+		// Jolt CharacterVirtual의 ShapeOffset을 실시간 업데이트
+		m_pCharacterVirtual->SetShapeOffset(LoadVec3(m_vOffset));
+	}
 }
 
 HRESULT CCollider::Initialize_Prototype()
@@ -57,7 +70,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
-	CharacterVirtualSettings VirtualSetting;
+	CharacterVirtualSettings VirtualSetting = {};
 	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
 	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(120.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
@@ -70,7 +83,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	
 	VirtualSetting.mInnerBodyShape = m_pShape;
 	VirtualSetting.mInnerBodyLayer = ObjectLayer(pDesc->iLayer);
-	
+
 	// Create CharacterVirtual
 	m_tCollisionData.pComponent = this;
 	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);

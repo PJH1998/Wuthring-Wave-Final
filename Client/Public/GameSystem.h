@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Client)
@@ -17,17 +17,23 @@ public:
 
 #pragma region Parser
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
-	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
 #pragma endregion
 
 #pragma region Factory
 	void							Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix);
 #pragma endregion
 
+#pragma region CHARACTER INFO
+	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
+#pragma endregion
+
+
 private:
 	class		CParser*		m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
-
+	CHARACTER_STAT m_Stats = {};
 public:
 	virtual		void	Free() override;
 

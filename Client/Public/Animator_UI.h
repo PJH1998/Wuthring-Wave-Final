@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "Component.h"
 #include "GameObject.h"
@@ -77,10 +77,10 @@ public:
 	UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
 
 private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ¿¡¼­ »ç¿ëÇÒ, LerpType¿¡ µû¸¥ ºñÀ² fIn°ªÀÇ º¸Á¤°ª ¹ÝÈ¯ (0 -> 1 ·Î °¡´Â ±×·¡ÇÁÀÇ °î¼±È­)
-	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// Á¤¸» ´Ü¼øÈ÷ Ratio ¿¡ µû¸¥ Start¿Í End »çÀÌÀÇ °ªÀ» ¹ÝÈ¯
+	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½, LerpTypeï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ fInï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (0 -> 1 ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½×·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½î¼±È­)
+	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ü¼ï¿½ï¿½ï¿½ Ratio ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Startï¿½ï¿½ End ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 
-	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Å°ÇÁ·¹ÀÓÀ» ³ÖÀ¸¸é ÇöÀç ¾Ö´Ï¸ÞÀÌ¼ÇÀÇ ÇöÀç position¿¡ ¸Â´Â °ªÀ» ¹ÝÈ¯ (catmull-rom Àû¿ë)
+	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Å°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ positionï¿½ï¿½ ï¿½Â´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯ (catmull-rom ï¿½ï¿½ï¿½ï¿½)
 
 	void		Update_Animation();
 

@@ -55,12 +55,16 @@ namespace Engine
 		_float fTrackPosition;
 	}KEYFRAME;
 
-	typedef struct tagActionFrame
+	typedef struct tagCameraFrame
 	{
-		_float		fDuration;
-		_float4		vRotation;
-		_float		fDistance;
-	}ACTIONFRAME;
+		// [Target] LookPos = TargetPos + vTranslation
+		// [Scene] Position
+		XMFLOAT3		vTranslation;
+		XMFLOAT4		vRotation;		// Rotation
+		float				fDistance = {};		// Distance
+		float				fStartFrame = {};
+		float				fFovy = {};
+	}CAMERA_FRAME;
 
 	typedef struct tagMapObject
 	{
@@ -191,6 +195,22 @@ namespace Engine
 		class CCollideComponent* pComponent = { nullptr };
 		void* pDesc = { nullptr };
 	}COLLISION_DATA;
+
+#pragma region SEQUENCE
+	// Sequence Item Frame, Tag => Sequence가 갖고 있음
+	typedef struct tagSequenceItem
+	{
+		_float		fStartFrame = {};
+		_float		fEndFrame = {};
+		_wstring	strItemTag;
+	}SEQUENCE_ITEM;
+
+	// Sequence Item Data => Item Reset시 던질 Data
+	typedef struct tagSequenceItemData
+	{
+
+	}SEQUENCE_ITEM_DATA;
+#pragma endregion
 }
 
 

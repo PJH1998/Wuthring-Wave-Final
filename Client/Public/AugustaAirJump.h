@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "AirState.h"
 
 NS_BEGIN(Client)
@@ -10,8 +10,10 @@ private:
     enum JUMPSTATE
     {
         JUMP = 0,
-        LAND = 1,
-        MOVE = 2,
+        LAND,
+        MOVE,
+        DOUBLE_JUMP,
+        AIR_ATTACK,
         END
     };
 

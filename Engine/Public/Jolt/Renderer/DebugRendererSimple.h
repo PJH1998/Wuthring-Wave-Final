@@ -75,7 +75,7 @@ private:
 		virtual void			Release() override			{ if (--mRefCount == 0) delete this; }
 
 		Array<Triangle>			mTriangles;
-
+		
 	private:
 		atomic<uint32>			mRefCount = 0;
 	};

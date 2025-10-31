@@ -52,7 +52,7 @@ private:
 	void RenderUI_ToState();
 	void RenderUI_Transitions();
 	void RenderUI_OptionState();
-	
+	void RenderUI_TransitionInfo();
 	
 
 private:
@@ -90,6 +90,49 @@ private:
 	typedef map<const _wstring, const _string> MODELPATHS;
 	MODELPATHS	m_ModelDirPaths;
 
+#pragma region ANIM_MACHINE_PROPERTY
+	typedef struct tagTransitionData
+	{
+		_string strFrom;
+		_string strTo;
+		//조건에 사용할 const flag변수
+		_int iPriority;
+		//0을 추가하기 위해 마스킹 값을 n - 1로 입력 받음(ex.입력: 4 = > 2 ^ (4 - 1) = 8이 출력 됨)
+		_uint iTargetState;
+		_float fTargetTrackPos;
+		// 현재 애니메이션에서 변환할 수 있는 트랙위치
+		_float fTransitEnablePos;
+		_uint eType;
+		//vector<_string> ConditionConst;
+	}TRANSITION_DATA;
+
+	class CAnimMachine* m_pAnimMachineCom = { nullptr };
+	_uint m_iTransitionPriority{};
+	// 0을 추가하기 위해 마스킹 값을 n-1로 입력 받음(ex. 입력: 4 => 2^(4 - 1) = 8이 출력 됨)
+	_uint m_iTransitionTargetState{};
+	_float m_iTransitionEnablePos{};
+	_uint m_eTransitConditionType{};
+
+	//AnimState Data
+	_bool m_isRootMotion;
+	_bool	m_isRootMotionRotate{};
+	_bool	m_isRootMotionTranslate{};
+	_bool m_isLoopCheck;
+	_float m_fRootMotionRate;
+	_float m_fTransitTrackPos;
+	_float m_fAnimationSpeed;
+
+	TRANSITION_DATA m_tTransitionInfo{};
+
+	vector<TRANSITION_DATA> m_TransitionDatas;
+	vector<TRANSITION_DATA> m_AnyStateTransitions;
+	_int m_iTransitionInfoSelectedIndex = {-1};
+	_int m_iAnyStateTransitionSelectedIndex = {-1};
+	_char m_szConditionName[MAX_PATH] = {};
+
+	_bool m_isShowImport_ST_Dialog = {};
+#pragma endregion
+
 	_wstring m_wSelected_PrototypeModelTag = {};
 	_string m_Selected_PrototypeModelTag = {};
 
@@ -107,7 +150,7 @@ private:
 	_bool m_IsVisibleNotify = { false };
 	_bool m_IsPlayAnimation = { true };
 	_bool m_IsStateTransition = { false };
-	
+
 private:
 	_float m_fEditorAlpha = { 1.f };
 
@@ -115,6 +158,7 @@ private:
 #ifdef _DEBUG
 	void Export_StateAnimationMap_ToCSV();
 	void Export_StateTransition_To_CSV();
+	void Import_StateTransition_From_Json();
 #endif
 
 private:

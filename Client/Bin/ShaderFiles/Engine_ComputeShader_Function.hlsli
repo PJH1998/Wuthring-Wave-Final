@@ -1,5 +1,8 @@
 #pragma pack_matrix(row_major)
 
+// Emissive ÃÖ¼ÒÄ¡
+
+
 float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
 {
     float2 vTexcoord = 0.f;
@@ -104,7 +107,7 @@ float4 Compute_Normal_DTID(Texture2D NormalTexture, int3 DTID)
     return normalize(vNormal);
 }
 
-float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOriginNormal, float4 vSampleColor, float fSampleDepth, float4 vSampleNormal, float fMinDepthDistance)
+float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOriginNormal, float4 vSampleColor, float fSampleDepth, float4 vSampleNormal, float fMinDepthDistance, inout float fWeight)
 {
     float4 vColor = 1.f;
     
@@ -121,6 +124,8 @@ float4 Compute_SSAO_Blur(float4 vOriginColor, float fOriginDepth, float4 vOrigin
     {
         vColor = vSampleColor;// * ((1.f - fNormalWeight));
     }
+    
+    fWeight += (1.f - fNormalWeight);
     
     return vColor;
 }

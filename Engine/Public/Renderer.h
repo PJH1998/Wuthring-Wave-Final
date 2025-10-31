@@ -9,8 +9,7 @@ class CTexture;
 
 class CRenderer final : public CBase
 {
-public:
-	enum class BLUR_TYPE { GAUSSIAN, BILATERAL};
+private:
 
 private:
 	explicit CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -19,7 +18,10 @@ private:
 public:
 	HRESULT		Initialize();
 	HRESULT		Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
+	HRESULT		Add_Render_StaticObject(class CGameObject* pRenderObject);
 	void		Render();
+	void		Begin_ScreenEffect(SFX_TYPE eType);
+	void		End_ScreenEffect();
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -28,15 +30,22 @@ public:
 	void		IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 	void		IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
 	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
-
+	void		SetBloomWeight(_int iWeight) { m_iBloomWeight = iWeight; }
+	void		SetBloomIntensity(_float fIntensity);
+	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
+	void		SetDof(_float fDepth, _float fRange, _float fScale);
+	void		SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
+	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 #endif
 
 private:
-	ID3D11Device*					m_pDevice = { nullptr };
+	ID3D11Device*						m_pDevice = { nullptr };
 	ID3D11DeviceContext*			m_pContext = { nullptr };
 	class CGameInstance*			m_pGameInstance = { nullptr };
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	list<class CGameObject*>		m_StaticObjects[2];
+	atomic<_uint>						m_iDoubleBufferIndex = {};
 
 	class CShader*					m_pShader = { nullptr };
 	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };
@@ -44,9 +53,15 @@ private:
 	_float4x4						m_WorldMatrix{}, m_ViewMatrix{}, m_ProjMatrix{};
 	_uint							m_iWinSizeX{}, m_iWinSizeY{};
 	_float							m_fWinSizeX{}, m_fWinSizeY{};
-	//TEST
+	
 	CRendererSubResource*			m_pSubResource = { nullptr };
 	_uint							m_iLUT_Index = {};
+	_int							m_iBloomWeight = { 1 };
+
+	SFX_TYPE						m_eEffectType = { SFX_TYPE::END };
+	_bool							m_IsEffectEnd = {};
+	_float							m_fEffectIntensity = {};
+	_float							m_fMaxEffectIntensity = {};
 
 	recursive_mutex					m_RecursiveMutex;
 
@@ -55,43 +70,51 @@ private:
 	_bool							m_isRenderDebug = { true };
 	_bool							m_IsSSAO = { true };
 	_bool							m_IsSSAO_Blur = { true };
+	_bool							m_IsStylized = { true };
 #endif
 
 private:
 	// Viewport Size 
-	void				Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
+	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:
-	void				Render_Priority();
-	void				Render_Shadow();
-	void				Render_Outline();
-	void				Render_NonBlend();
-	void				Render_SSAO();
-	void				Render_Light();
-	void				Render_Combined();
-	void				Render_NonLight();
-	void				Render_Emissive();
-	void				Render_DistortionObject();
-	void				Render_Blend();
-	void				Render_Distortion();
-	void				Render_LUT();
-	void				Render_Fog();
-	void				Render_UI();
-	void				Render_Fade();
+	void						Render_Priority();
+	void						Render_Shadow();
+	void						Render_Outline();
+	void						Render_NonBlend();
+	void						Render_SSAO();
+	void						Render_Dynamic();
+	void						Render_Light();
+	void						Render_Combined();
+	void						Render_NonLight();
+	void						Render_Emissive();
+	void						Render_Bloom();
+	void						Render_BloomCombined();
+	void						Render_DistortionObject();
+	void						Render_Blend();
+	void						Render_Distortion();
+	void						Render_LUT();
+	void						Render_Fog();
+	void						Render_ScreenEffect();
+	void						Render_UI();
+	void						Render_Fade();
 
-	//void				GaussianBlur_RenderTager(const _tchar* pBlurRenderTarget, const _tchar* pCombinedBlurMRT, BLUR_TYPE eType);
-	//void				SSAO_Blur();
+
+	//EFFECT
+	void						Update_EffectIntensity();
+	void						Render_Blur();
+	void						Render_DOF();
+
 #ifdef _DEBUG
-	void				Render_Debug();
+	void						Render_Debug();
 #endif
 
 private:
-	HRESULT				Ready_RT();
-	HRESULT				Ready_MRT();
-	HRESULT				Ready_SubResource();
-	HRESULT				Ready_RCS();
-
-	HRESULT				Ready_Shadow_DSV();
+	HRESULT						Ready_RT();
+	HRESULT						Ready_MRT();
+	HRESULT						Ready_SubResource();
+	HRESULT						Ready_RCS();
+	HRESULT						Ready_Shadow_DSV();
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

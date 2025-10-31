@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "Channel.h"
 
 #include "Bone.h"
@@ -117,9 +117,9 @@ void CChannel::Update_RibTransformationMatrix(_float fCurrentTrackPosition, cons
 		_matrix LerpMatrix = {};
 		LerpMatrix = XMMatrixAffineTransformation(vLerpScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vLerpRotation, vLerpPosition);
 
-		// 1. ÀÌÀü »ÀÀÇ Á¤º¸¸¦ °¡Á®¿É´Ï´Ù.
+		// 1. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½É´Ï´ï¿½.
 		_matrix PrevMatrix = XMLoadFloat4x4(Bones[m_iBoneIndex]->Get_TransformationMatrix());
-		// 2. °íÀ¯ÀÇ ¿òÁ÷ÀÓÀ» Ãß°¡·Î Àû¿ëÇÏ´Â °Í.
+		// 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½.
 		_matrix FinalMatrix = PrevMatrix * LerpMatrix;
 		Bones[m_iBoneIndex]->Set_TransformationMatrix(FinalMatrix);
 	}
@@ -137,7 +137,7 @@ void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, con
 	}
 	else
 	{
-#ifdef _DEBUG //=> ¾Ö´Ï¸ÞÀÌ¼Ç Æ®·¢Æ÷Áö¼Ç Á¶Àý¿ë => ºí·»´õ±â´É
+#ifdef _DEBUG //=> ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ => ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
 			--*pCurrentFrameIndex;
 #endif // _DEBUG

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Custom_UI.h"
 
 NS_BEGIN(Client)
@@ -21,7 +21,7 @@ public:
 private:
 	HRESULT					Ready_Components(void* pArg);
 
-private: // ÆùÆ®?
+private: // ï¿½ï¿½Æ®?
 
 public:
 	static CUI_Text*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "AugustaBayonet.h"
 
 CAugustaBayonet::CAugustaBayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -43,22 +43,20 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // AugustaÀÇ StateMachine¿¡¼­ ¾Ö´Ï¸ÞÀÌ¼Ç½ÇÇà?
+    // Augustaï¿½ï¿½ StateMachineï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼Ç½ï¿½ï¿½ï¿½?
 
-    // Last :  Combined Çà·Ä ÃÊ±âÈ­
+    // Last :  Combined ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
 
-    _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-    //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
+    _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
+    m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
 }
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
-
-
 
     CWeapon::Late_Update(fTimeDelta);
 
@@ -110,17 +108,18 @@ void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    /*CRigidbody::RIGIDBODY_DESC RigidbodyDesc{};
+    CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
+    RigidbodyDesc.fRadius = 0.3f;
+    RigidbodyDesc.fHeight = 0.5f;
     RigidbodyDesc.eShape = SHAPE::CAPSULE;
     RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
     RigidbodyDesc.eType = EMotionType::Kinematic;
-    RigidbodyDesc.iLayer = 1;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
     RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-    
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
         , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-        CRASH("Rigidbody");*/
+        CRASH("Rigidbody");
 }
 
 void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)

@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Level_Effect.h"
 #include "Event_Level.h"
 #include "Effect_Controller.h"
@@ -23,15 +23,15 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"),
         CEffect_Mesh::Create(m_pDevice, m_pContext));
 
-    //ÆÄÆ¼Å¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
+    //ï¿½ï¿½Æ¼Å¬ ï¿½×¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
-    //¸Å½¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
+    //ï¿½Å½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXMesh_Instance.hlsl"), VTXFXMESHINSTANCE::Elements, VTXFXMESHINSTANCE::iNumElements));
 
-    //ÆÄÆ¼Å¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
+    //ï¿½ï¿½Æ¼Å¬ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -45,7 +45,7 @@ HRESULT CLevel_Effect::Initialize()
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
 
 
-    //FX¸Å½¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
+    //FXï¿½Å½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
 
     SHADER_MACRO eShaderMacroMesh = {
       {"THREAD_X", "64" }
@@ -59,11 +59,11 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_ComputeShader_FXMesh"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_FXMeshUpdate_CS.hlsl"), eShaderMacroMesh, strEntryPointMesh));
 
-    //ÀÌÆåÆ® Åø
+    //ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½
     m_pEffect_Controller = CEffect_Controller::Create(m_pDevice, m_pContext);
 
 
-    //ÆÄÆ¼Å¬ ¿òÁ÷ÀÓ ¹× À§Ä¡°°Àº ¼³Á¤µé º¸±â À§ÇØ ÇÃ·¹ÀÌ¾î ¶ç¿ï·Á°í Ãß°¡ÇÔ. ¿µÈÆ¿Àºü°¡ ¸¸µç ¾Ö´Ï¸ÞÀÌ¼Ç Åø
+    //ï¿½ï¿½Æ¼Å¬ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ï¿½ï¿½. ï¿½ï¿½ï¿½Æ¿ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½
     m_pAnimation_Tool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
     m_pAnimation_Tool->Set_EffectContorller(m_pEffect_Controller);
 
@@ -75,7 +75,7 @@ HRESULT CLevel_Effect::Initialize()
         return E_FAIL;
     }
 
-    //¾Ö´Ï¸ÞÀÌ¼Ç ¿¬»ê¿ë ¼ÎÀÌ´õ
+    //ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
     SHADER_MACRO eShaderMacroB = {
     {"THREAD_X", "64" }
     ,{"THREAD_Y", "1" }

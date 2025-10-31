@@ -12,6 +12,7 @@ protected:
 
 public:
 	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
+	void						IsDraw(_bool isDraw) { m_isDraw = isDraw; }
 	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:
@@ -28,6 +29,8 @@ protected:
 	_uint		m_iNumLOD = {};
 	// LOD Index
 	_uint		m_iLODIndex = {};
+	// Render true/false
+	_bool		m_isDraw = { false };
 
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;

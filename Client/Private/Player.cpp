@@ -1,19 +1,26 @@
-#include "ClientPch.h"
+Ôªø#include "ClientPch.h"
 #include "Player.h"
 #include "Character.h"
 #include "Augusta.h"
 #include "AugustaState_Enum.h"
+#include "SpringCamera.h"
 #include "PlayerFactory.h"
+#include "GameSystem.h"
 
-#pragma region ±‚∫ª «‘ºˆ
+#pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
+    , m_pGameSystem{ CGameSystem::GetInstance() }
 {
+    Safe_AddRef(m_pGameSystem);
 }
+
 
 CPlayer::CPlayer(const CPlayer& Prototype)
     : CGameObject(Prototype)
+    , m_pGameSystem { CGameSystem::GetInstance()}
 {
+    Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CPlayer::Initialize_Prototype()
@@ -31,36 +38,34 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
-    // 0. GameObject Clone
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-    // 1. ∞¯¿Ø Components √ ±‚»≠
     if (FAILED(Ready_Components(pDesc)))
         return E_FAIL;
 
-    // 2. Players √ ±‚»≠.
     if (FAILED(Ready_Players(pDesc)))
         return E_FAIL;
 
-    // 3. Controller ∞¯¿Ø
+    CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
+    CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
+
     for (auto& pCharacter : m_Characters)
     {
         if (nullptr != pCharacter)
-            pCharacter->Process_Input(m_pInputControllerCom);
+        {
+            pCharacter->Set_InputController(m_pInputControllerCom);
+            pCharacter->Set_SpringCamera(m_pSpringCamera);
+        }
     }
 
-
-    // 4. Factory √ ±‚»≠
-    CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
-
-    // 5. Transform √ ±‚»≠
+    // 5. Transform
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    // ±‚∫ª NONE => ≈◊Ω∫∆ÆøÎµµ => ø¯∑°¥¬ AUGUSTA∑Œ
-    m_iCurrentPlayerIdx = AUGUSTA;
+    //m_iCurrentCharacterIdx = AUGUSTA;
+    m_iCurrentCharacterIdx = ROVER; // Î∞©ÎûëÏûêÎ°ú ÌÖåÏä§Ìä∏
 
 
     return S_OK;
@@ -70,49 +75,68 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
     
-    // 1. InputController æ˜µ•¿Ã∆Æ.
     m_pInputControllerCom->Update();
     
-    // 2. »∞º∫ ƒ≥∏Ø≈Õ æ˜µ•¿Ã∆Æ
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Priority_Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
-    // 3. Ensemble ƒ≥∏Ø≈Õµµ æ˜µ•¿Ã∆Æ
     if (m_iEnsembleCharacterIdx != NONE && 
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
+	// Ï∫êÎ¶≠ÌÑ∞ Ï≤¥Ïù∏ÏßÄ => Ï∂îÌõÑ Íµ¨ÌòÑ
+	//Change_CharacterCheck();
+
+    // ÏûÑÏãú.
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
+        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+    }
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
+        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
+    }
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
+    }
 
 }
 
 void CPlayer::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
-    // 1. «ˆ¿Á ƒ≥∏Ø≈Õ Update
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
         
-    // 2. Ensemble ƒ≥∏Ø≈Õµµ æ˜µ•¿Ã∆Æ
+    // 2. Ensemble 
     if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
+
+    Sorting_Target(); // Update => 
+    Toggle_LockOn();
+    
+    // 3. Rigidbody Update => Camera 
+    m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
 {
     CGameObject::Late_Update(fTimeDelta);
 
-    // 1. ƒ≥∏Ø≈Õ æ˜µ•¿Ã∆Æ
-    if (m_iCurrentPlayerIdx != NONE)
-        m_Characters[m_iCurrentPlayerIdx]->Late_Update(fTimeDelta);
+    if (m_iCurrentCharacterIdx != NONE)
+        m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
-    // 2. Ensemble ƒ≥∏Ø≈Õ æ˜µ•¿Ã∆Æ
     if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentPlayerIdx)
+        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
 
-    // 3. ≈∞¿‘∑¬ø°º≠ πŸ≤Ÿ¥¬ ¿‘∑¬¿Ã »Æ¿Œ µ«æ˙¿∏∏È?
-    Change_CharacterCheck();
+    Sync_Transform();
+
+    
 }
 void CPlayer::Render()
 {
@@ -133,15 +157,13 @@ void CPlayer::Change_CharacterCheck()
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
         Change_Character(CHARACTERTYPE::GALBRENA);
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
-        Change_Character(CHARACTERTYPE::PLAYER);
+        Change_Character(CHARACTERTYPE::ROVER);
 }
 
-void CPlayer::Ensemble_Skill(CHARACTERTYPE eCharacter)
+void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
-    // «ˆ¿Á ƒ≥∏Ø≈Õ¿« Ensemble Skill State∑Œ ¿¸»Ø
     CCharacter* pCharacter = m_Characters[eCharacter];
 
-    // Ensemble ¡æ∑· ¡∂∞« Characterø° CallBack µÓ∑œ«œ±‚.
     pCharacter->Set_EnsembleEndCallback([this, eCharacter]() {
         this->On_EnsembleEnd(eCharacter);
     });
@@ -150,28 +172,28 @@ void CPlayer::Ensemble_Skill(CHARACTERTYPE eCharacter)
     switch (eCharacter)
     {
     case CHARACTERTYPE::AUGUSTA:
-        // Augusta¿« Ensemble Skill State∑Œ ¿¸»Ø
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(ESkillType::SKILLQTE));
+            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
         break;
 
     case CHARACTERTYPE::GALBRENA:
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::PLAYER:
+    case CHARACTERTYPE::ROVER:
         // Player Ensemble Skill
+        pCharacter->Change_State(
+            ENUM_CLASS(EStateCategory::GROUND),
+            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
         break;
     }
 }
 
 void CPlayer::Notify_EnsembleEnd()
 {
-    // Ensemble Skill ≥°≥µ¿∏∏È «ÿ¥Á ƒ≥∏Ø≈Õ ∫Ò»∞º∫»≠
     if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
     {
-        // æ»∫∏ø©¡ˆ∞‘ «’¥œ¥Ÿ.
         m_Characters[m_iEnsembleCharacterIdx]->SetActivate(false);
         m_iEnsembleCharacterIdx = CHARACTERTYPE::NONE;
     }
@@ -179,76 +201,62 @@ void CPlayer::Notify_EnsembleEnd()
 
 void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 {
-    // Ω«¡¶ ƒ≥∏Ø≈Õ ¿¸»Ø ∑Œ¡˜ (¿Ã¿¸ø° ¿€º∫«— ≥ªøÎ)
     _matrix matPrevWorldMatrix = XMMatrixIdentity();
     _float4 vPrevPosition = {};
     _bool bHasPrevCharacter = false;
 
     
-    // 1. ¿Ã¿¸ ƒ≥∏Ø≈Õ ∫Ò»∞º∫»≠
-    if (m_iCurrentPlayerIdx != CHARACTERTYPE::NONE)
+    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
     {
-        CCharacter* pPrevCharacter = m_Characters[m_iCurrentPlayerIdx];
+        CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
         CTransform* pPrevTransform = dynamic_cast<CTransform*>(
             pPrevCharacter->Get_Component(L"Com_Transform"));
 
         if (pPrevTransform)
         {
-            // ¿ßƒ°, »∏¿¸, Ω∫ƒ…¿œ ¿˙¿Â
             matPrevWorldMatrix = pPrevTransform->Get_WorldMatrix();
-            // «ˆ¿Á ¿ßƒ° ¿˙¿Â (¥Ÿ¿Ω «¡∑π¿” Velocity ∞ËªÍøÎ)
             XMStoreFloat4(&vPrevPosition, pPrevTransform->Get_State(STATE::POSITION));
 
             bHasPrevCharacter = true;
         }
 
-        // ¿Ã¿¸ ƒ≥∏Ø≈Õ ∫Ò»∞º∫»≠
         pPrevCharacter->SetActivate(false);
     }
 
-    // 2. ªı ƒ≥∏Ø≈Õ »∞º∫»≠
     CCharacter* pNextCharacter = m_Characters[eNextCharacter];
     pNextCharacter->SetActivate(true);
 
-    // 3. Transform µø±‚»≠
     CTransform* pNextTransform = dynamic_cast<CTransform*>(
         pNextCharacter->Get_Component(L"Com_Transform"));
 
-    // 4. ¿ßƒ° µø±‚»≠
     if (pNextTransform)
     {
-        if (m_iCurrentPlayerIdx == CHARACTERTYPE::NONE)
+        if (m_iCurrentCharacterIdx == CHARACTERTYPE::NONE)
         {
-            // NONEø°º≠ ¿¸»Ø: Player Transform ªÁøÎ
             if (m_pTransformCom)
                 pNextTransform->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix());
         }
         else
         {
-            // ƒ≥∏Ø≈Õ ∞£ ¿¸»Ø: ¿Ã¿¸ ƒ≥∏Ø≈Õ ¿ßƒ°/»∏¿¸ ∫πªÁ
             pNextTransform->Set_WorldMatrix(matPrevWorldMatrix);
-            // PreviousPositionµµ µø±‚»≠ (Velocity 0¿∏∑Œ Ω√¿€)
             pNextTransform->Save_PreviousPosition();
         }
     }
 
-    // 4. Collider Position µø±‚»≠
     CCollider* pNextCollider = dynamic_cast<CCollider*>(
         pNextCharacter->Get_Component(L"Com_Collider"));
     if (pNextCollider && pNextTransform)
         pNextCollider->Sync_Position(pNextTransform);
 
-    // 5. ¿Œµ¶Ω∫ ∫Ø∞Ê
-    m_iPrevPlayerIdx = m_iCurrentPlayerIdx;
-    m_iCurrentPlayerIdx = eNextCharacter;
+    m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
+    m_iCurrentCharacterIdx = eNextCharacter;
 
-    // 6. Player Transform æ˜µ•¿Ã∆Æ
     if (m_pTransformCom && pNextTransform)
         m_pTransformCom->Set_WorldMatrix(pNextTransform->Get_WorldMatrix());
 
 }
 
-// Callbackø°º≠ »£√‚µ… «‘ºˆ
+// Callback
 void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
 {
     if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
@@ -259,47 +267,56 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
     }
 }
 
+void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
+		return;
+
+    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+    if (nullptr == pTargetTransform)
+    {
+        return;
+    }
+        
+    m_TargetTransforms.push_back(pTargetTransform);
+}
+
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
 {
-    // 0. ¿Ø»øº∫ ∞ÀªÁ
     if (eNextCharacter < 0 || eNextCharacter >= TYPE_END)
         return;
 
-    if (m_Characters[eNextCharacter] == nullptr) // ∫ÒæÓ¿÷¥Ÿ∏È?
+    if (m_Characters[eNextCharacter] == nullptr)
         return;
 
-    if (m_iCurrentPlayerIdx == eNextCharacter) // ∞∞¿∫ ƒ≥∏Ø≈Õ∏È?
+    if (m_iCurrentCharacterIdx == eNextCharacter)
         return;
 
     CCharacter* pCurrentCharacter = nullptr;
-    if (m_iCurrentPlayerIdx != CHARACTERTYPE::NONE)
-        pCurrentCharacter = m_Characters[m_iCurrentPlayerIdx];
+    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
+        pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
 
-    // 1. «ˆ¿Á ƒ≥∏Ø≈Õ¿« Ensemble Energy √º≈©
     _bool bUseEnsemble = false;
-    if (pCurrentCharacter && pCurrentCharacter->Is_EnsembleFull())
+    if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
         bUseEnsemble = true;
 
-    // 2. ∏’¿˙ ƒ≥∏Ø≈Õ ¿¸»Ø Ω««‡
     Perform_CharacterSwitch(eNextCharacter);
 
-    // 3. ¿¸»Ø »ƒ ¿Ã¿¸ ƒ≥∏Ø≈Õ¿« Ensemble Skill ªÁøÎ.
     if (bUseEnsemble && pCurrentCharacter)
     {
-        // ¿Ã¿¸ ƒ≥∏Ø≈Õ∏¶ ¥ŸΩ√ »∞º∫»≠ (Ω∫≈≥ ªÁøÎ ¿ß«ÿ)
         pCurrentCharacter->SetActivate(true);
-        Ensemble_Skill(static_cast<CHARACTERTYPE>(m_iPrevPlayerIdx));
-        pCurrentCharacter->Reset_EnsembleEnergy();
+        Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
+        pCurrentCharacter->Reset_SwitchGauge();
     }
 
 }
 
 void CPlayer::Sync_Transform()
 {
-    if (m_iCurrentPlayerIdx != TYPE_END)
+    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
     {
         CTransform* pTransform = dynamic_cast<CTransform*>(
-            m_Characters[m_iCurrentPlayerIdx]->Get_Component(L"Com_Transform"));
+            m_Characters[m_iCurrentCharacterIdx]->Get_Component(L"Com_Transform"));
         ASSERT_CRASH(pTransform);
         m_pTransformCom->Set_WorldMatrix(pTransform->Get_WorldMatrix());
     }
@@ -307,17 +324,81 @@ void CPlayer::Sync_Transform()
         
 }
 
+void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+		return;
+
+    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+    if (nullptr == pTargetTransform)
+        return;
+    m_TargetTransforms.push_back(pTargetTransform);
+}
+
+void CPlayer::Sorting_Target()
+{
+    sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
+        _float fSrcDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pSrcTransform->Get_State(STATE::POSITION)));
+        _float fDstDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(m_pGameInstance->Get_CamPos()) - pDstTransform->Get_State(STATE::POSITION)));
+        return fSrcDistance < fDstDistance;
+        });
+
+    if (0 < m_TargetTransforms.size())
+    {
+        m_pTargetTransform = m_TargetTransforms[0];
+    }
+
+    m_TargetTransforms.clear();
+}
+
+void CPlayer::Toggle_LockOn()
+{
+    if (nullptr == m_pTargetTransform)
+    {
+        if (m_IsLockOn)
+        {
+            m_IsLockOn = false;
+            m_pSpringCamera->Lock_On(nullptr, false);
+            if (m_iCurrentCharacterIdx !=NONE)
+                m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+
+        }
+        return;
+    }
+
+    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+    {
+        m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(m_pTargetTransform, m_IsLockOn);
+    }
+
+
+    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
+    {
+        m_IsLockOn = !m_IsLockOn;
+    }
+
+   // if (m_IsLockOn)
+   // {
+        m_pSpringCamera->Lock_On(m_pTargetTransform, m_IsLockOn);
+      //  return;
+    //}
+
+    m_pTargetTransform = nullptr;
+    
+}
+
+
 HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
 
-    // 1. Players ∞¯∞£ »Æ∫∏
+    // 1. Players
     m_Characters.resize(CHARACTERTYPE::TYPE_END);
     
     CCharacter::CHARACTER_DESC CharacterDesc;
     CCharacter* pPlayer = { nullptr };
 
-    // 2. ƒ≥∏Ø≈Õ ∫∞ µ•¿Ã≈Õ √ ±‚»≠
+    // 2
     for (_uint i = 0; i < pDesc->iPlayerCount; ++i)
     {
         switch (i)
@@ -325,7 +406,7 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
         case CHARACTERTYPE::AUGUSTA:
         {
             CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this; // Controller Pointer∏∏ ¿¸¥ﬁ?
+            CharacterDesc.pOwner = this;
             pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
                 ENUM_CLASS(m_eCurLevel),
                 pDesc->PlayerSpecs[i].strActorTag,
@@ -338,17 +419,25 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
             break;
         case CHARACTERTYPE::GALBRENA:
             break;
-        case CHARACTERTYPE::PLAYER:
+        case CHARACTERTYPE::ROVER:
+            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+            CharacterDesc.pOwner = this;
+            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+                ENUM_CLASS(m_eCurLevel),
+                pDesc->PlayerSpecs[i].strActorTag,
+                PROTOTYPE::GAMEOBJECT,
+                &CharacterDesc));
+
+            ASSERT_CRASH(pPlayer);
+            m_Characters[i] = pPlayer;
             break;
         default:
             break;
         }
     }
 
-    // ±‚∫ª 0π¯ Augusta
-    //m_iCurrentPlayerIdx = CHARACTERTYPE::AUGUSTA;
-    // ≈◊Ω∫∆Æ∑Œ None
-    m_iCurrentPlayerIdx = CHARACTERTYPE::NONE;
+    //m_iCurrentCharacterIdx = CHARACTERTYPE::AUGUSTA;
+    m_iCurrentCharacterIdx = CHARACTERTYPE::NONE;
 
     return S_OK;
 }
@@ -358,6 +447,24 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->eCurLevel)
         , pDesc->wStrInputControllerTag, TEXT("Com_InputController"), reinterpret_cast<CComponent**>(&m_pInputControllerCom), nullptr)))
         CRASH("Input Controller");
+
+
+    CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+    RigidbodyDesc.eBodyType = CRigidbody::BODY;
+    RigidbodyDesc.eShape = SHAPE::BOX;
+    RigidbodyDesc.eType = EMotionType::Kinematic;
+    RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+    RigidbodyDesc.vExtent = _float3(1000.f, 400.f, 1000.f);
+    XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+    if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
+        CRASH("Rigidbody");
+
+    m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+        OnCollide_During(iLayer, pDesc, Manifold);
+    });
+
 
     return S_OK;
 }
@@ -391,9 +498,12 @@ CGameObject* CPlayer::Clone(void* pArg)
 void CPlayer::Free()
 {
     CGameObject::Free();
+    Safe_Release(m_pGameSystem);
 
     for (auto& pPlayer : m_Characters)
         Safe_Release(pPlayer);
 
+    Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);
+    Safe_Release(m_pRigidbodyCom);
 }

@@ -180,7 +180,20 @@ HRESULT CComputeShader::Ready_Reflection(ID3DBlob* pCSBlob)
 
 void CComputeShader::Clear_Resources()
 {
-    for (auto& Pair : m_UAVs_To_Bind)
+    for(auto& Pair : m_SRVs_To_Bind)
+    {
+        ID3D11ShaderResourceView* pNullSRV = nullptr;
+        m_pContext->CSSetShaderResources(Pair.first, 1, &pNullSRV);
+    }
+
+    // CB 슬롯도 해제  
+    for(auto& Pair : m_CBs_To_Bind)
+    {
+        ID3D11Buffer* pNullCB = nullptr;
+        m_pContext->CSSetConstantBuffers(Pair.first, 1, &pNullCB);
+    }
+
+    for(auto& Pair : m_UAVs_To_Bind)
     {
         ID3D11UnorderedAccessView* pNullUAV = nullptr;
         m_pContext->CSSetUnorderedAccessViews(Pair.first, 1, &pNullUAV, nullptr);

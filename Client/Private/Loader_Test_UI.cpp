@@ -1,4 +1,4 @@
-#include "ClientPch.h"
+ï»¿#include "ClientPch.h"
 #include "Loader_Test_UI.h"
 
 
@@ -13,8 +13,8 @@
 
 #include "UI_HUD.h"
 
-// ¾îÂ÷ÇÇ ¿ÀºêÁ§Æ® ¸Å´ÏÀú¿¡´Â ÄÁÅ×ÀÌ³Ê °³³äÀÌ µÇ´Â UI_HUD, UI_EscMenu, UI_TabMenu µîµî¸¸ ³ÖÀ» °Å°í,
-// ÇÏÀ§ Update´Â ºÎ¸ð¿¡ ÀÇÇØ Á¦¾îµÉ°Çµ¥ ±»ÀÌ UI¸Å´ÏÀú¸¦? 
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ UI_HUD, UI_EscMenu, UI_TabMenu ï¿½ï¿½î¸¸ ï¿½ï¿½ï¿½ï¿½ ï¿½Å°ï¿½,
+// ï¿½ï¿½ï¿½ï¿½ Updateï¿½ï¿½ ï¿½Î¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½É°Çµï¿½ ï¿½ï¿½ï¿½ï¿½ UIï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½? 
 
 CLoader_Test_UI::CLoader_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader{ pDevice, pContext }

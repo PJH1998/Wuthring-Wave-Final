@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GroundState.h"
 
 NS_BEGIN(Client)
@@ -19,6 +19,12 @@ private:
         RUN_L,
         RUN_R,
         SPRINT_F,
+        SKILL_E,
+        SKILL_Q,
+        SKILL_R,
+        UNIQUE_E, 
+        UNIQUE_R,
+        BURST_R,
         MOVE,
         END
     };
@@ -45,7 +51,6 @@ private:
     virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);
     void Check_Physics();
-    void LockOnCheck_StateTransition(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void Setup_Animations();

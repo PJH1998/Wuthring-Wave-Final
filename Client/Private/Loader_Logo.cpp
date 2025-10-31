@@ -17,7 +17,7 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
-	m_pGameInstance->Wait_Thread_End();
+	//m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 
@@ -30,7 +30,7 @@ HRESULT CLoader_Logo::Load_Texture()
 
 HRESULT CLoader_Logo::Load_Model()
 {
-	//m_pParser->Create_Map_Model(m_pDevice, m_pContext, "../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", LEVEL::LOGO);
+	//m_pParser->Ready_Prototype_Map(m_pDevice, m_pContext, "../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", LEVEL::LOGO);
 	_fmatrix PreMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_Component_Model_Augusta"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreMatrix, "../Bin/Resource/Model/Player/Augusta/Augusta.dat"))))

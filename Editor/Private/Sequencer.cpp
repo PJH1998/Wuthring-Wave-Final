@@ -1,5 +1,7 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Sequencer.h"
+
+#include "Event_Scene_Edit.h"
 
 CSequencer::CSequencer()
 	: m_pGameInstance { CGameInstance::GetInstance() }
@@ -25,10 +27,27 @@ void CSequencer::Get(_int index, _int** start, _int** end, _int* type, _uint* co
 
 void CSequencer::Add(_int iType)
 {
-	if(ENUM_CLASS(ITEM_TYPE::CAMERA) == iType)
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Item" });
-	else
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Item" });
+	switch (iType)
+	{
+	case ENUM_CLASS(ITEM_TYPE::ACTION):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Action" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SCENE):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Scene" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SOUND):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Sound" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::SCREEN):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Screen" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::ACTOR):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Actor" });
+		break;
+	case ENUM_CLASS(ITEM_TYPE::EFFECT):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Effect" });
+		break;
+	}
 
 }
 
@@ -36,14 +55,18 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 {
 	switch (iIndex)
 	{
-	case ENUM_CLASS(ITEM_TYPE::CAMERA):
-		return "Camera";
+	case ENUM_CLASS(ITEM_TYPE::ACTION):
+		return "Action";
+	case ENUM_CLASS(ITEM_TYPE::SCENE):
+		return "Scene";
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		return "Sound";
 	case ENUM_CLASS(ITEM_TYPE::SCREEN):
 		return "Screen";
-	case ENUM_CLASS(ITEM_TYPE::OBJECT):
-		return "Object";
+	case ENUM_CLASS(ITEM_TYPE::ACTOR):
+		return "Actor";
+	case ENUM_CLASS(ITEM_TYPE::EFFECT):
+		return "Effect";
 	}
 }
 
@@ -70,7 +93,7 @@ void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& custo
 	ImGui::SetCursorScreenPos(customRect.Min);
 	ImCurveEdit::Edit(delegate, customRect.Max - customRect.Min, 137 + iIndex, &clippingRect);
 
-	// Custom Rect ³»ºÎ MousePos Compute
+	// Custom Rect ï¿½ï¿½ï¿½ï¿½ MousePos Compute
 	_float fMouseX = (m_fFramePixelWidth * m_iFirstFrame + io.MousePos.x - customRect.Min.x) / m_fFramePixelWidth;
 	_float fMouseY = 1.f - (io.MousePos.y - customRect.Min.y) / (customRect.Max.y - customRect.Min.y);
 	// Point Click
@@ -100,8 +123,7 @@ void CSequencer::CustomDraw(RampEdit& delegate, _int iIndex, const ImRect& custo
 	// Add Point
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::DOWN)
 	{
-		if (delegate.miSelectCurve > -1)
-			delegate.AddPoint(delegate.miSelectCurve, ImVec2(fMouseX, fMouseY));
+		delegate.AddPoint(ENUM_CLASS(m_Items[m_iSelectedEntry].eType), ImVec2(fMouseX, fMouseY));
 	}
 }
 
@@ -115,9 +137,9 @@ void CSequencer::CustomDrawCompact(RampEdit& delegate, _int iIndex, const ImRect
 	m_pDrawList->PushClipRect(clippingRect.Min, clippingRect.Max, true);
 	for (_int i = 0; i < 3; ++i)
 	{
-		for (_uint j = 0; j < delegate.mPointCount[i]; ++j)
+		for (_uint j = 0; j < delegate.mPoints.size(); ++j)
 		{
-			_float fFrame = delegate.mPoints[i][j].x;
+			_float fFrame = delegate.mPoints[j].x;
 			cout << fFrame << endl;
 			if (fFrame < m_Items[iIndex].iFrameStart || fFrame > m_Items[iIndex].iFrameEnd)
 				continue;
@@ -143,10 +165,11 @@ void CSequencer::Update(_float fTimeDelta)
 {
 	ImGui::Begin("Sequence");
 
-	ImGui::PushItemWidth(200);
+	ImGui::PushItemWidth(300);
 	ImGui::Text("Frame : "); ImGui::SameLine(); ImGui::InputInt("##1", &m_iCurrentFrame); ImGui::SameLine();
 	ImGui::Text("/ Frame Min : ");  ImGui::SameLine(); ImGui::InputInt("##2", &m_iFrameMin); ImGui::SameLine();
 	ImGui::Text("/ Frame Max : ");  ImGui::SameLine(); ImGui::InputInt("##3", &m_iFrameMax);
+	ImGui::Text("TPS : ");  ImGui::SameLine(); ImGui::InputFloat("##4", &m_fTrackPerSec);
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
@@ -160,6 +183,29 @@ void CSequencer::Update(_float fTimeDelta)
 
 	if(m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
 		Sorting_Item();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN)
+	{
+		if(false == m_isPlay)
+			m_fTrackAcc = static_cast<_float>(m_iCurrentFrame);
+		m_isPlay = !m_isPlay;
+	}
+
+	if (true == m_isPlay)
+		Play(fTimeDelta);
+}
+
+void CSequencer::Play(_float fTimeDelta)
+{
+	if (m_fTrackAcc >= m_iFrameMax)
+	{
+		m_isPlay = false;
+		m_fTrackAcc = static_cast<_float>(m_iFrameMin);
+		return;
+	}
+
+	m_fTrackAcc += fTimeDelta * m_fTrackPerSec;
+	m_iCurrentFrame = m_fTrackAcc;
 }
 
 void CSequencer::Selectable_Item()
@@ -189,10 +235,12 @@ void CSequencer::Selectable_Item()
 		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
 			SetUp_Point(item);
 
-		if(ITEM_TYPE::CAMERA == item.eType)
+		if(ITEM_TYPE::ACTION == item.eType)
 			SetUp_Camera(item);
 
 		ImGui::End();
+
+		item.mRampEdit.Update_Frame();
 	}
 }
 
@@ -200,16 +248,82 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 {
 	ImGui::Begin("Point Setting");
 
-	ImGui::Text("[Point Setting]");
+	// Translation
+	_int iSelectIndex = item.mRampEdit.miSelectPoint;
+	iSelectIndex = min(iSelectIndex, static_cast<_int>(item.mRampEdit.GetPointCount(0)));
+
+	CAMERA_FRAME& CameraFrame = item.mRampEdit.mTargetCameraFrames[iSelectIndex];
+
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "[Frame] : %.2f", CameraFrame.fStartFrame);
+	ImGui::Text(szFrame);
+
+	ImGui::Text("[Distance]");
+	ImGui::PushID(100);
+	ImGui::InputFloat("##", &CameraFrame.fDistance);
+	ImGui::PopID();
+
+	ImGui::Text("[Rotation]");
+	_char szQuat[MAX_PATH] = {};
+	sprintf_s(szQuat, MAX_PATH, "X : %.4f\nY : %.4f\nZ : %.4f\bW : %.4f", CameraFrame.vRotation.x, CameraFrame.vRotation.y, CameraFrame.vRotation.z, CameraFrame.vRotation.w);
+	ImGui::Text(szQuat);
+	if (ImGui::Button("Rotation Sync"))
+	{
+		_matrix CameraWoldMatrx = m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW);
+		_vector vScale{}, vQuat{}, vTrans{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, CameraWoldMatrx);
+		XMStoreFloat4(&CameraFrame.vRotation, vQuat);
+	}
+
+	ImGui::Text("[Translation]");
+	ImGui::PushID(102);
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&CameraFrame.vTranslation));
+	ImGui::PopID();
+
+	ImGui::Text("[Fov]");
+	ImGui::PushID(103);
+	ImGui::InputFloat("##", &CameraFrame.fFovy);
+	ImGui::PopID();
+
+	ImGui::SameLine();
+	if (ImGui::Button("Delete"))
+	{
+		item.mRampEdit.mPoints.erase(item.mRampEdit.mPoints.begin() + iSelectIndex);
+		item.mRampEdit.mTargetCameraFrames.erase(item.mRampEdit.mTargetCameraFrames.begin() + iSelectIndex);
+		if (item.mRampEdit.miSelectPoint >= item.mRampEdit.GetPointCount(0))
+			item.mRampEdit.miSelectPoint = -1;
+	}
 
 	ImGui::End();
 }
 
 void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 {
-	ImGui::Text("[Camera Setting]");
+	ImGui::Text("[Camera Action Setting]");
 
+	if (ImGui::Button("Action", ImVec2(100.f, 20.f)))
+	{
+		CAMERA_ACTION_EVENT event { item.mRampEdit.mTargetCameraFrames, true, item.iFrameStart, item.iFrameEnd };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
+	}
+	if (ImGui::Button("Reset", ImVec2(100.f, 20.f)))
+	{
+		CAMERA_ACTION_EVENT event{ item.mRampEdit.mTargetCameraFrames, false, item.iFrameStart, item.iFrameEnd };
+		m_pGameInstance->Publish(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), event);
+	}
 
+	ImGui::Text("======================");
+
+	if (ImGui::Button("Save"))
+		m_isSave = !m_isSave;
+	if (m_isSave)
+		Save_CameraAction();
+	
+	ImGui::SameLine();
+	if (ImGui::Button("Load"))
+		m_isLoad = !m_isLoad;
+	if(m_isLoad)
+		Load_CameraAction();
 }
 
 void CSequencer::Sorting_Item()
@@ -222,11 +336,111 @@ void CSequencer::Sorting_Item()
 		});
 }
 
+void CSequencer::Save_CameraAction()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Action/";
+	config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
+
+	ImGuiFileDialog::Instance()->OpenDialog("CameraActionSave", "Save File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("CameraActionSave")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ofstream OutputFile(strFilePath);
+
+			json ActionJson;
+
+			SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+
+			ActionJson["Duration"] = item.iFrameEnd - item.iFrameStart;
+
+			ActionJson["Frame"] = json::array();
+
+			vector<CAMERA_FRAME>& Frames = item.mRampEdit.mTargetCameraFrames;
+			for (size_t i = 0; i < Frames.size(); ++i)
+			{
+				json FrameJson;
+				FrameJson["Start"] = Frames[i].fStartFrame;
+				FrameJson["Distance"] = Frames[i].fDistance;
+
+				FrameJson["Rotation"] = json::array();
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.x);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.y);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.z);
+				FrameJson["Rotation"].push_back(Frames[i].vRotation.w);
+
+				FrameJson["Translation"] = json::array();
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.x);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
+				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
+
+				FrameJson["FOV"] = Frames[i].fFovy;
+
+				ActionJson["Frame"].push_back(FrameJson);
+			}
+
+			OutputFile << ActionJson.dump(4);
+
+			OutputFile.close();
+		}
+		m_isSave = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+void CSequencer::Load_CameraAction()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Action/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("CameraActionLoad", "Load File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("CameraActionLoad")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ifstream InputFile(strFilePath);
+
+			json ActionJson;
+
+			InputFile >> ActionJson;
+
+			if (ITEM_TYPE::ACTION == m_Items[m_iSelectedEntry].eType)
+			{
+				SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+				item.iFrameStart = 0;
+				item.iFrameEnd = static_cast<_int>(ActionJson["Duration"]);
+
+				for (auto& Frame : ActionJson["Frame"])
+				{
+					CAMERA_FRAME CameraFrame = {};
+					CameraFrame.fStartFrame = Frame["Start"];
+					CameraFrame.vRotation = _float4(Frame["Rotation"][0], Frame["Rotation"][1], Frame["Rotation"][2], Frame["Rotation"][3]);
+					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
+					CameraFrame.fDistance = Frame["Distance"];
+					CameraFrame.fFovy = Frame["FOV"];
+
+					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
+					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);
+				}
+			}
+			InputFile.close();
+		}
+		m_isLoad = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
 void CSequencer::Drawing()
 {
 	// Get DrawList
 	m_pDrawList = ImGui::GetWindowDrawList();
-	m_vCanvasPos = ImGui::GetCursorScreenPos();			// ImDrawList´Â Screen ÁÂÇ¥°è »ç¿ë
+	m_vCanvasPos = ImGui::GetCursorScreenPos();			// ImDrawListï¿½ï¿½ Screen ï¿½ï¿½Ç¥ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_vCanvasSize = ImGui::GetContentRegionAvail();		// Canvas Size
 
 
@@ -255,7 +469,7 @@ void CSequencer::Drawing()
 
 void CSequencer::Panning(const _int iVisibleFrameCnt)
 {
-	// Panning (Alt + Wheel Click -> Drag => È­¸é ÁÂ¿ì ÀÌµ¿)
+	// Panning (Alt + Wheel Click -> Drag => È­ï¿½ï¿½ ï¿½Â¿ï¿½ ï¿½Ìµï¿½)
 	if (ImGui::IsWindowFocused() && m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::PRESS && m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::WB) == KEYSTATE::PRESS)
 	{
 		if (false == m_isPanningView)
@@ -275,7 +489,7 @@ void CSequencer::Panning(const _int iVisibleFrameCnt)
 	m_fFramePixelWidth = ImLerp(m_fFramePixelWidth, m_fFramePixelWidthTarget, 0.33f);
 	m_iFrameCnt = m_iFrameMax - m_iFrameMin;
 
-	// º¸¿©¾ß µÇ´Â Frame °³¼ö°¡ ÃÑ Frame °³¼öº¸´Ù ¸¹À¸¸é FirstFrame MinÀ¸·Î °íÁ¤
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ Frame ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Frame ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FirstFrame Minï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (iVisibleFrameCnt >= m_iFrameCnt)
 		m_iFirstFrame = m_iFrameMin;
 }
@@ -429,6 +643,8 @@ void CSequencer::DrawLegend()
 		iCustomHeight += GetCustomHeight(i);
 	}
 
+	ItemDupDel();
+
 	//ImGuiIO& io = ImGui::GetIO();
 	// Slot BackGround
 	for (size_t i = 0; i < m_Items.size(); ++i)
@@ -460,6 +676,25 @@ void CSequencer::DrawLegend()
 	Cursor();
 
 	m_pDrawList->PopClipRect();
+}
+
+void CSequencer::ItemDupDel()
+{
+	// Item Duplicate
+	if (m_iDupEntry > -1)
+	{
+		// TODO
+
+	}
+
+	// Item Delete
+	if (m_iDelEntry > -1)
+	{
+		m_Items.erase(m_Items.begin() + m_iDelEntry);
+		if (m_iSelectedEntry >= m_Items.size())
+			m_iSelectedEntry = m_Items.size() - 1;
+		m_iDelEntry = -1;
+	}
 }
 
 void CSequencer::DrawSlot()
