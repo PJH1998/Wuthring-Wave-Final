@@ -17,8 +17,9 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_Final/");
-    Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
+
+	//로더에서 부른 것과 같은 거 부르기.
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
     Ready_Layer_Player();
 	//Ready_Dummy();
@@ -74,6 +75,7 @@ void CLevel_Test::Ready_Layer_Player()
     //vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { 0.f, -10.f, 50.f };
+    //vPosition = { 3455.f, 160.f, 2951.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
