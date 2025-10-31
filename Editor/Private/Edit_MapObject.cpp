@@ -42,10 +42,8 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iNumLOD = m_pModelComArray.size()-1;
 
 
-    for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
-    {
-        Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
-    }
+	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+
     //박스 모델에서 종합해서 최종 크기.
     //m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
     _vector vScale, vRotation, vTranslation;

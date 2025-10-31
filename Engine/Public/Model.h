@@ -87,7 +87,9 @@ public:
 	void								Clear_Animation(const _string& strAnimationName, _float fTrackPosition = 0.f);
 	
 
-	BoundingBox*							Get_BoundingBox(_uint iNumMesh);
+
+	void								Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
+	BoundingBox*							Get_BoundingBox();
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
@@ -115,6 +117,7 @@ private:
 
 	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
 
+	BoundingBox*						m_pBoundingBox = { nullptr };
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };

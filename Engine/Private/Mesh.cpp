@@ -15,11 +15,10 @@ CMesh::CMesh(const CMesh& Prototype)
     : CVIBuffer { Prototype }
     , m_VertexPositions { Prototype.m_VertexPositions }
     , m_Indices { Prototype.m_Indices }
-    , m_pBoundingBox{Prototype.m_pBoundingBox }
 {
 }
 
-HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile)
+HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
     if (MODELTYPE::NONANIM == eType)
     {
@@ -33,7 +32,7 @@ HRESULT CMesh::Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>&
     }
 	else if (MODELTYPE::MAP == eType)
 	{
-		if (FAILED(Ready_Mesh_Map(PreTransformMatrix, InputFile)))
+		if (FAILED(Ready_Mesh_Map(PreTransformMatrix, InputFile, MinPos, MaxPos)))
 			return E_FAIL;
 	}
 
@@ -246,7 +245,7 @@ HRESULT CMesh::Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTr
     return S_OK;
 }
 
-HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
+HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
 	VTXMESH* pVertices = { nullptr };
 	_uint* pIndices = { nullptr };
@@ -261,9 +260,6 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 	InputFile.read(reinterpret_cast<_char*>(pVertices), sizeof(VTXMESH) * m_iNumVertices);
 	InputFile.read(reinterpret_cast<_char*>(pIndices), sizeof(_uint) * m_iNumIndices);
 
-    _float3 MinPos = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
-    _float3 MaxPos = _float3(FLT_MIN, FLT_MIN, FLT_MIN);
-
 	for (size_t i = 0; i < m_iNumVertices; ++i)
 	{
 		XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
@@ -274,37 +270,14 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 
 		// Mesh Shape??Container
 		m_VertexPositions.push_back(pVertices[i].vPosition);
-        MaxPos.x = max(pVertices[i].vPosition.x, MaxPos.x);
-        MaxPos.y = max(pVertices[i].vPosition.y, MaxPos.y);
-        MaxPos.z = max(pVertices[i].vPosition.z, MaxPos.z);
+        MaxPos[0] = max(pVertices[i].vPosition.x, MaxPos[0]);
+		MaxPos[1] = max(pVertices[i].vPosition.y, MaxPos[1]);
+		MaxPos[2] = max(pVertices[i].vPosition.z, MaxPos[2]);
 
-        MinPos.x = min(pVertices[i].vPosition.x, MinPos.x);
-        MinPos.y = min(pVertices[i].vPosition.y, MinPos.y);
-        MinPos.z = min(pVertices[i].vPosition.z, MinPos.z);
+        MinPos[0] = min(pVertices[i].vPosition.x, MinPos[0]);
+		MinPos[1] = min(pVertices[i].vPosition.y, MinPos[1]);
+		MinPos[2] = min(pVertices[i].vPosition.z, MinPos[2]);
 	}
-
-    _float3 vCorner[CORNER::END];
-
-    vCorner[LTN] = _float3(MinPos.x, MaxPos.y, MinPos.z);
-    
-    vCorner[RTN] = _float3(MaxPos.x, MaxPos.y, MinPos.z);
-    
-    vCorner[RBN] = _float3(MaxPos.x, MinPos.y, MinPos.z);
-    
-    vCorner[LBN] = _float3(MinPos.x, MinPos.y, MinPos.z);
-    
-    vCorner[LTF] = _float3(MinPos.x, MaxPos.y, MaxPos.z);
-    
-    vCorner[RTF] = _float3(MaxPos.x, MaxPos.y, MaxPos.z);
-    
-    vCorner[RBF] = _float3(MaxPos.x, MinPos.y, MaxPos.z);
-    
-    vCorner[LBF] = _float3(MinPos.x, MinPos.y, MaxPos.z);
-
-    _float3 vCenter = _float3((MinPos.x + MaxPos.x)/2.f, (MinPos.y + MaxPos.y) / 2.f, (MinPos.z + MaxPos.z) / 2.f);
-    _float3  vExtents = _float3((MaxPos.x - vCenter.x), (MaxPos.y - vCenter.y) , (MaxPos.z - vCenter.z));
-    
-    m_pBoundingBox = new BoundingBox(vCenter, vExtents);
 
 	m_iVertexStride = sizeof(VTXMESH);
 	m_iNumVertexBuffers = 1;
@@ -354,11 +327,11 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile)
 	return S_OK;
 }
 
-CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile)
+CMesh* CMesh::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos)
 {
 	CMesh* pInstance = new CMesh(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize_Prototype(eType, Bones, PreTransformMatrix, InputFile)))
+	if (FAILED(pInstance->Initialize_Prototype(eType, Bones, PreTransformMatrix, InputFile,MinPos,MaxPos)))
 	{
 		MSG_BOX("Failed to Create : Mesh");
 		Safe_Release(pInstance);
@@ -383,7 +356,4 @@ CComponent* CMesh::Clone(void* pArg)
 void CMesh::Free()
 {
 	__super::Free();
-
-    if (!m_isClone)
-        Safe_Delete(m_pBoundingBox);
 }
