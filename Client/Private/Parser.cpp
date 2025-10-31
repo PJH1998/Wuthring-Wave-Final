@@ -252,7 +252,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
 
                 FrameDesc.vOffsetSize.x = Size[0].get<_float>();
                 FrameDesc.vOffsetSize.y = Size[1].get<_float>();
-                FrameDesc.vOffsetSize.y = Size[2].get<_float>();
+                FrameDesc.vOffsetSize.z = Size[2].get<_float>();
             }
 
             if (Frame.contains("Offset_Position") && Frame["Offset_Position"].is_array())
@@ -261,7 +261,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
 
                 FrameDesc.vOffsetPos.x = Pos[0].get<_float>();
                 FrameDesc.vOffsetPos.y = Pos[1].get<_float>();
-                FrameDesc.vOffsetPos.y = Pos[2].get<_float>();
+                FrameDesc.vOffsetPos.z = Pos[2].get<_float>();
             }
 
             if (Frame.contains("Offset_Rotation") && Frame["Offset_Rotation"].is_array())
@@ -270,7 +270,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
 
                 FrameDesc.vOffsetRot.x = Rot[0].get<_float>();
                 FrameDesc.vOffsetRot.y = Rot[1].get<_float>();
-                FrameDesc.vOffsetRot.y = Rot[2].get<_float>();
+                FrameDesc.vOffsetRot.z = Rot[2].get<_float>();
             }
 
             FrameDesc.bActivated = false;          //처음엔 기본적으로 비활성화

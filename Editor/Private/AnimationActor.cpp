@@ -65,8 +65,8 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
     //m_pTransformCom->Scale(pDesc->vScale);
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
-	//if (FAILED(Ready_Camera()))
-	//	CRASH("Camera");
+	if (FAILED(Ready_Camera()))
+		CRASH("Camera");
 	m_fOffsetY = 1.f;
 
     return S_OK;
@@ -131,7 +131,7 @@ void CAnimationActor::Update(_float fTimeDelta)
 	ImGui::InputFloat("##", &m_fOffsetY);
 	ImGui::End();
 
-	//m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fOffsetY);
+	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fOffsetY);
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)

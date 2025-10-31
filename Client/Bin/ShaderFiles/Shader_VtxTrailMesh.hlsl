@@ -134,7 +134,7 @@ PS_OUT PS_TraillTest(PS_IN In)
     if (vMask.r < 0.3f)
         discard;
     
-    // 1 - x 왼->오 , 그냥 x 오->왼
+    // 1 - x 
     float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
     
     float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, 1 - In.vTexcoord.x);
@@ -146,6 +146,43 @@ PS_OUT PS_TraillTest(PS_IN In)
     float fAlpha = fVisible * vMask.a;
     
     Out.vDiffuse = float4(vColor.rgb * fAlpha, fAlpha);
+    
+    if (Out.vDiffuse.r < 0.2f)      //테스트
+        discard;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    return Out;
+}
+
+PS_OUT PS_TraillTestA(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    //마스크 알파 값으로 잘라내기 처리, 만약 검정색이면 r로 해도 될듯함.
+    if (vMask.r < 0.3f)
+        discard;
+    
+    // 1x 
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
+    
+    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    
+    float fVisible = fTailFad * fHeadFad;
+    
+    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    float fAlpha = fVisible * vMask.a;
+    
+    Out.vDiffuse = float4(vColor.rgb * fAlpha, fAlpha);
+    
+    if (Out.vDiffuse.r < 0.2f)      //테스트
+        discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -172,6 +209,9 @@ PS_OUT PS_TraillDesh(PS_IN In)
     
     Out.vDiffuse = mask * 0.6f;
     
+    if (Out.vDiffuse.r < 0.2f)      //테스트
+        discard;
+    
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
@@ -197,6 +237,9 @@ PS_OUT PS_TraillDeshB(PS_IN In)
         discard;
     
     Out.vDiffuse = mask * 0.6f;
+    
+    if (Out.vDiffuse.r < 0.2f)      //테스트
+        discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -230,7 +273,18 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillTest();
     }
 
-    pass PS_TraillTest //2
+    pass TestPassA // 2
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_TraillTestA();
+    }
+
+    pass PS_TraillTest //3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -241,7 +295,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillDesh();
     }
 
-    pass PS_TraillTestB //3
+    pass PS_TraillTestB //4
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -252,7 +306,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillDeshB();
     }
 
-    pass PS_Debug //4
+    pass PS_Debug //5
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);

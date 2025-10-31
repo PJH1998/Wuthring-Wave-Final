@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "Load_Controller.h"
 
 CLoad_Controller::CLoad_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -18,7 +18,7 @@ HRESULT CLoad_Controller::Initialize(LEVEL eCurrentLevel)
     if (eCurrentLevel == LEVEL::EFFECT)
         return S_OK;
 
-    //´Ù¸¥ ·¹º§¿¡¼­ ÄÁÆ®·Ñ·¯ ºÒ·¯¿À¸é ÀÌÆåÆ®¿¡ ÇÊ¿äÇÑ ÆÄÀÏµé ¹Ì¸® ÀĞ¾îµÖ¾ßÇÔ.
+    //ë‹¤ë¥¸ ë ˆë²¨ì—ì„œ ì»¨íŠ¸ë¡¤ëŸ¬ ë¶ˆëŸ¬ì˜¤ë©´ ì´í™íŠ¸ì— í•„ìš”í•œ íŒŒì¼ë“¤ ë¯¸ë¦¬ ì½ì–´ë‘¬ì•¼í•¨.
 
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_GameObject_Prefab"),
         CEffect_Prefab::Create(m_pDevice, m_pContext));
@@ -32,19 +32,19 @@ HRESULT CLoad_Controller::Initialize(LEVEL eCurrentLevel)
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_GameObject_TrailMesh"),
         CTrail_Mesh::Create(m_pDevice, m_pContext));
 
-    //ÆÄÆ¼Å¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
+    //íŒŒí‹°í´ ê·¸ë¦¬ê¸°ìš© ì…°ì´ë”
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
-    //¸Å½¬ ±×¸®±â¿ë ¼ÎÀÌ´õ
+    //ë§¤ì‰¬ ê·¸ë¦¬ê¸°ìš© ì…°ì´ë”
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXMesh_Instance.hlsl"), VTXFXMESHINSTANCE::Elements, VTXFXMESHINSTANCE::iNumElements));
 
-    //ÀÏ¹İ ¸Å½¬ ±×¸®±â¿ë ¼ÎÀÌ´õ Ãß°¡ÇØÁà¾ßÇÔ.
+    //ì¼ë°˜ ë§¤ì‰¬ ê·¸ë¦¬ê¸°ìš© ì…°ì´ë” ì¶”ê°€í•´ì¤˜ì•¼í•¨.
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_Shader_VtxTrailMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
-    //ÆÄÆ¼Å¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
+    //íŒŒí‹°í´ ì—°ì‚°ìš© ì…°ì´ë”
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -57,7 +57,7 @@ HRESULT CLoad_Controller::Initialize(LEVEL eCurrentLevel)
     m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurrentLevel), TEXT("Prototype_Shader_ComputeShader_Particle"),
         CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacro, strEntryPoint));
 
-    //FX¸Å½¬ ¿¬»ê¿ë ¼ÎÀÌ´õ
+    //FXë§¤ì‰¬ ì—°ì‚°ìš© ì…°ì´ë”
     SHADER_MACRO eShaderMacroMesh = {
       {"THREAD_X", "64" }
       ,{"THREAD_Y", "1" }
@@ -117,7 +117,7 @@ void CLoad_Controller::Prefab_Load_Tab(_bool* IsLoad)
 
             size_t lastSlashPos = strFilePath.find_last_of("\\");
 
-            //¸¶Áö¸· ¹®ÀÚ¿­ »©°í Æú´õ °æ·Î¸¸ °¡Á®¿À±â. 
+            //ë§ˆì§€ë§‰ ë¬¸ìì—´ ë¹¼ê³  í´ë” ê²½ë¡œë§Œ ê°€ì ¸ì˜¤ê¸°. 
             if (lastSlashPos != string::npos) {
                 strFolderPath += strFilePath.substr(0, lastSlashPos);
             }
@@ -186,7 +186,7 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
                 FrameDesc.vOffsetSize.x = Size[0].get<_float>();
                 FrameDesc.vOffsetSize.y = Size[1].get<_float>();
-                FrameDesc.vOffsetSize.y = Size[2].get<_float>();
+                FrameDesc.vOffsetSize.z = Size[2].get<_float>();
             }
 
             if (Frame.contains("Offset_Position") && Frame["Offset_Position"].is_array())
@@ -195,7 +195,7 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
                 FrameDesc.vOffsetPos.x = Pos[0].get<_float>();
                 FrameDesc.vOffsetPos.y = Pos[1].get<_float>();
-                FrameDesc.vOffsetPos.y = Pos[2].get<_float>();
+                FrameDesc.vOffsetPos.z = Pos[2].get<_float>();
             }
 
             if (Frame.contains("Offset_Rotation") && Frame["Offset_Rotation"].is_array())
@@ -204,21 +204,21 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
                 FrameDesc.vOffsetRot.x = Rot[0].get<_float>();
                 FrameDesc.vOffsetRot.y = Rot[1].get<_float>();
-                FrameDesc.vOffsetRot.y = Rot[2].get<_float>();
+                FrameDesc.vOffsetRot.z = Rot[2].get<_float>();
             }
 
-            FrameDesc.bActivated = false;          //Ã³À½¿£ ±âº»ÀûÀ¸·Î ºñÈ°¼ºÈ­
+            FrameDesc.bActivated = false;          //ì²˜ìŒì—” ê¸°ë³¸ì ìœ¼ë¡œ ë¹„í™œì„±í™”
 
             PrefabDesc.FrameDesc.push_back(FrameDesc);
 
-            //ÀÌÆåÆ® ·¹º§¿¡¼± Desc ÇÊ¿äÇØ¼­ ÀúÀå µû·Î Ã³¸®
+            //ì´í™íŠ¸ ë ˆë²¨ì—ì„  Desc í•„ìš”í•´ì„œ ì €ì¥ ë”°ë¡œ ì²˜ë¦¬
             if (m_eCurrentLevel == LEVEL::EFFECT)
                 m_tPrefabDesc = PrefabDesc;
 
-            //ÇÁ¸®ÆÕ Á¤º¸ ´Ù ÀĞ¾ú°í, ÀĞÀº Á¤º¸ Åä´ë·Î ÀÚ½Ä SaveÆÄÀÏ ÀĞ±â.
+            //í”„ë¦¬íŒ¹ ì •ë³´ ë‹¤ ì½ì—ˆê³ , ì½ì€ ì •ë³´ í† ëŒ€ë¡œ ìì‹ SaveíŒŒì¼ ì½ê¸°.
             if (FrameDesc.eChildrenType == EFFECT_TYPE::PARTICLE)
             {
-                //VBÀúÀå
+                //VBì €ì¥
                 _string ParticleVBPath = strFolderPath;
                 ParticleVBPath += "/ParticleVB/";
                 ParticleVBPath += WStringToString(FrameDesc.strChildrenTag);
@@ -226,7 +226,7 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
                 Load_Particle_VB_FromJson(ParticleVBPath, FrameDesc.strChildrenTag);
 
-                //OBÀúÀå
+                //OBì €ì¥
                 _string ParticlePath = strFolderPath;
                 ParticlePath += "/Particle/";
                 ParticlePath += WStringToString(FrameDesc.strChildrenTag);
@@ -237,7 +237,7 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
             if (FrameDesc.eChildrenType == EFFECT_TYPE::MESH)
             {
-                //VBÀúÀå
+                //VBì €ì¥
                 _string FXMeshVBPath = strFolderPath;
                 FXMeshVBPath += "/MeshVB/";
                 FXMeshVBPath += WStringToString(FrameDesc.strChildrenTag);
@@ -245,7 +245,7 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
                 
                 Load_FXMesh_VB_FromJson(FXMeshVBPath, FrameDesc.strChildrenTag);
 
-                //OBÀúÀå
+                //OBì €ì¥
                 _string FXMehsPath = strFolderPath;
                 FXMehsPath += "/Mesh/";
                 FXMehsPath += WStringToString(FrameDesc.strChildrenTag);
@@ -268,11 +268,11 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
     }
 
 
-    //ÇÁ¸®ÆÕ Á¤º¸ ´Ù ÀĞ¾úÀ½. ÀÚ½Äµé ´Ù Ã£¾Æ¼­ Desc °¢°¢ »ı¼º ¿Ï·á ÇÑ ÈÄ
-    // ÇöÀç ÀÌÆåÆ® ·¹º§ÀÏ¶§ -> ÀÌÆåÆ® ÄÁÆ®·Ñ·¯ ÅëÇØ¼­ ÀÚ½Äµé ¼¼ÆÃ ÇØÁÖ°í, ÇÁ¸®ÆÕ Desc ÀúÀåÇØÁà¾ßÇÔ
-    // ¶ÇÇÑ ÀÚ½Äµéµµ °¢°¢ ¸Â´Â ÄÁÆ®·Ñ·¯¿¡ Desc ÀúÀåÇØÁà¾ß. ÃßÈÄ ¼öÁ¤ÇßÀ» ¶§ ÀúÀå°¡´É.
+    //í”„ë¦¬íŒ¹ ì •ë³´ ë‹¤ ì½ì—ˆìŒ. ìì‹ë“¤ ë‹¤ ì°¾ì•„ì„œ Desc ê°ê° ìƒì„± ì™„ë£Œ í•œ í›„
+    // í˜„ì¬ ì´í™íŠ¸ ë ˆë²¨ì¼ë•Œ -> ì´í™íŠ¸ ì»¨íŠ¸ë¡¤ëŸ¬ í†µí•´ì„œ ìì‹ë“¤ ì„¸íŒ… í•´ì£¼ê³ , í”„ë¦¬íŒ¹ Desc ì €ì¥í•´ì¤˜ì•¼í•¨
+    // ë˜í•œ ìì‹ë“¤ë„ ê°ê° ë§ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬ì— Desc ì €ì¥í•´ì¤˜ì•¼. ì¶”í›„ ìˆ˜ì •í–ˆì„ ë•Œ ì €ì¥ê°€ëŠ¥.
 
-    // ÇöÀç ´Ù¸¥ ·¹º§ ÀÏ¶§ -> ±×³É ·¹ÀÌ¾î¿¡ Ãß°¡ÇØ¼­ Àç»ı¸¸ µÇ°Ô ÇÏ¸é µÊ.
+    // í˜„ì¬ ë‹¤ë¥¸ ë ˆë²¨ ì¼ë•Œ -> ê·¸ëƒ¥ ë ˆì´ì–´ì— ì¶”ê°€í•´ì„œ ì¬ìƒë§Œ ë˜ê²Œ í•˜ë©´ ë¨.
 
 }
 
