@@ -157,6 +157,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {
         m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
+		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
         m_fAttackPressTime = 0.f;
         return;
     }
@@ -180,6 +181,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         if (m_IsNextAttackInput && IsEscapePossible)
         {
             m_iComboCount++;
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName); // 애니메이션 초기화
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK01) + m_iComboCount;
             m_IsNextAttackInput = false;
             m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
