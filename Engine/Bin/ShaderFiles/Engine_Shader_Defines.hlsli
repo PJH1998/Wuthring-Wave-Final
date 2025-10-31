@@ -9,7 +9,7 @@ float g_fWeights[13] =
 
 float g_fLUT_Size = 16.f;
 
-
+//낮아질수록 번져지는 색이 더 많아진다 ?
 float g_fEmissiveThreshold = 0.6f;
 
 float g_fLuminence[3] = { 0.2126f, 0.7152f, 0.0722f };
