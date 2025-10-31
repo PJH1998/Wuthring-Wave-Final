@@ -432,6 +432,12 @@
     <ClInclude Include="..\Public\Director.h">
       <Filter>01. GameSystem\Director</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundIdle.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundRun.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -642,6 +648,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Director.cpp">
       <Filter>01. GameSystem\Director</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundRun.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

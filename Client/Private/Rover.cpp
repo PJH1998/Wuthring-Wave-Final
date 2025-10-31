@@ -82,7 +82,6 @@ void CRover::Update(_float fTimeDelta)
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-
     // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
