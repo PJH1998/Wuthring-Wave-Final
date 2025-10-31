@@ -275,6 +275,7 @@ private:
 	void								Expand(_int iControllHeight);	// Canvas Expand
 	void								DrawFrame();						// Sequence ������
 	void								DrawLegend();						// List
+	void								ItemDupDel();
 	void								DrawSlot();							// Slot (Item)
 	void								Moving();							// Item Duration ���� (Left, Right ��ƴ���)		
 	void								Cursor();								// Cursor (Frame ȭ�� ���� ��)

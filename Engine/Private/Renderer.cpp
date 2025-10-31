@@ -63,11 +63,19 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 {
 	if (nullptr == pRenderObject)
 		return E_FAIL;
-	
+
+	m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
+	Safe_AddRef(pRenderObject);
+
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(CGameObject* pRenderObject)
+{
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-		m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
-		Safe_AddRef(pRenderObject);
+		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
 	}
 
 	return S_OK;
@@ -75,6 +83,8 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 
 void CRenderer::Render()
 {
+	//m_pGameInstance->Wait_Thread_End();
+
 	Render_Priority();
 	Render_Shadow();
 	Render_Outline();
@@ -220,6 +230,17 @@ void CRenderer::Render_NonBlend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
 		CRASH("Render Fail")
+
+	// Buffer Index Swap
+	m_iDoubleBufferIndex.exchange((m_iDoubleBufferIndex + 1) % 2, memory_order_release);
+	_uint iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+	// Static Object Render
+	for (auto& pStaticObject : m_StaticObjects[iReadIndex])
+	{
+		if (nullptr != pStaticObject)
+			pStaticObject->Render();
+	}
+	m_StaticObjects[iReadIndex].clear();
 
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)])
 	{

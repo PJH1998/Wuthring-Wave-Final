@@ -280,6 +280,11 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&CameraFrame.vTranslation));
 	ImGui::PopID();
 
+	ImGui::Text("[Fov]");
+	ImGui::PushID(103);
+	ImGui::InputFloat("##", &CameraFrame.fFovy);
+	ImGui::PopID();
+
 	ImGui::SameLine();
 	if (ImGui::Button("Delete"))
 	{
@@ -372,6 +377,8 @@ void CSequencer::Save_CameraAction()
 				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
 				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
 
+				FrameJson["FOV"] = Frames[i].fFovy;
+
 				ActionJson["Frame"].push_back(FrameJson);
 			}
 
@@ -395,8 +402,6 @@ void CSequencer::Load_CameraAction()
 
 	if (ImGuiFileDialog::Instance()->Display("CameraActionLoad")) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
-			// Action Camera 1°³ »ý¼º
-			//Add(ENUM_CLASS(ITEM_TYPE::ACTION));
 			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
 
 			ifstream InputFile(strFilePath);
@@ -418,6 +423,7 @@ void CSequencer::Load_CameraAction()
 					CameraFrame.vRotation = _float4(Frame["Rotation"][0], Frame["Rotation"][1], Frame["Rotation"][2], Frame["Rotation"][3]);
 					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
 					CameraFrame.fDistance = Frame["Distance"];
+					CameraFrame.fFovy = Frame["FOV"];
 
 					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
 					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);
@@ -637,6 +643,8 @@ void CSequencer::DrawLegend()
 		iCustomHeight += GetCustomHeight(i);
 	}
 
+	ItemDupDel();
+
 	//ImGuiIO& io = ImGui::GetIO();
 	// Slot BackGround
 	for (size_t i = 0; i < m_Items.size(); ++i)
@@ -668,6 +676,25 @@ void CSequencer::DrawLegend()
 	Cursor();
 
 	m_pDrawList->PopClipRect();
+}
+
+void CSequencer::ItemDupDel()
+{
+	// Item Duplicate
+	if (m_iDupEntry > -1)
+	{
+		// TODO
+
+	}
+
+	// Item Delete
+	if (m_iDelEntry > -1)
+	{
+		m_Items.erase(m_Items.begin() + m_iDelEntry);
+		if (m_iSelectedEntry >= m_Items.size())
+			m_iSelectedEntry = m_Items.size() - 1;
+		m_iDelEntry = -1;
+	}
 }
 
 void CSequencer::DrawSlot()
