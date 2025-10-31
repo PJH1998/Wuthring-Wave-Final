@@ -2,7 +2,6 @@
 
 #include "Actor.h"
 NS_BEGIN(Client)
-// �÷��̾� ĳ������ �θ� ��ü.
 class CCharacter abstract : public CActor
 {
 public:
@@ -38,7 +37,7 @@ public:
 	}CHARACTER_DESC;
 	
 
-#pragma region �⺻ �Լ�
+#pragma region 
 protected:
 	explicit CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CCharacter(const CCharacter& Prototype);
@@ -56,7 +55,7 @@ public:
 
 #pragma endregion
 
-#pragma region ��ü ����
+#pragma region 
 public:
 	// Object 
 	void Set_InputController(class CInputController* pInputControllerCom);
@@ -65,12 +64,12 @@ public:
 
 
 
-#pragma region STATE ���ǿ� ���
+#pragma region STATE
 public:
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
-	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; // �� ����
+	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
 
 	// Look Vector
 	_vector Get_LookVector();
@@ -87,7 +86,7 @@ public:
 	_bool Is_Land(_float fLandOffsetY = 0.2f);
 	
 	// Wall
-	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr); // ����ȯ�� �����Ѱ�?
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
 
 	// KeyInput
@@ -126,6 +125,9 @@ public:
 	// Collider
 	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = {0.f, 0.f, 0.f});
 	
+	// Transform
+	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix);
+	void Sync_Transform_ToPlayer(class CTransform* pTransformCom);
 	
 #pragma endregion
 

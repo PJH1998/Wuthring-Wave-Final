@@ -57,6 +57,7 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
@@ -78,8 +79,6 @@ void CRover::Update(_float fTimeDelta)
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
 
-
-
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
@@ -88,7 +87,7 @@ void CRover::Update(_float fTimeDelta)
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 5. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 2.5f);
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
 
 

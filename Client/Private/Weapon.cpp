@@ -86,6 +86,21 @@ void CWeapon::Clear_Animation(const _string& strAnimName)
 }
 
 #pragma region NOTIFY
+void CWeapon::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
+{
+	if (!IsActive)
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+	else
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+}
+void CWeapon::Effect_Active(const _wstring& wStrEffectTag)
+{
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+
+	_matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
 void CWeapon::Collider_Active(_bool isActive)
 {
     if (!isActive)
@@ -98,9 +113,19 @@ void CWeapon::Collider_Active(_bool isActive)
 
 
 
+void CWeapon::Register_AllNotifies(const _string& strFolderPath)
+{
+	ASSERT_CRASH(m_pModelCom);
+	auto colliderCallback = [this](const _wstring& tag, bool active) {
+		this->Collider_Active(tag, active); // 
+		};
 
+	auto effectCallBack = [this](const _wstring& tag) {
+		this->Effect_Active(tag);
+		};
 
-
+	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+}
 
 void CWeapon::Free()
 {
