@@ -125,8 +125,6 @@ void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinishe
 		//m_AnimStates[m_iCurrentStateIndex]->Update( this, pModelCom, pState, &m_strCurrentAnimTag, fTimeDelata);
 		m_AnimStates[m_strCurrentAnimTag]->Update(this, pModelCom, pState, &m_strCurrentAnimTag, m_fCurrentTrackPositon);
 	}
-	else
-		int a = 10;
 
 	// 2. 애니메이션 재생
 	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon);

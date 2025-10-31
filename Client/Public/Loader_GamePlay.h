@@ -18,6 +18,8 @@ private:
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
 
+	HRESULT				Load_MonsterTest();
+
 public:
 	static		CLoader_GamePlay*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void					Free() override;
