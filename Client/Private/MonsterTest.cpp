@@ -107,7 +107,9 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 #endif // _DEBUG
 	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
 }
 
 void CMonsterTest::Render()
@@ -117,6 +119,11 @@ void CMonsterTest::Render()
 
 
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
 	for(_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);

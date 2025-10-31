@@ -125,6 +125,7 @@ struct PS_OUT
     float4 vDepth : SV_TARGET2;
     float4 vEmissive : SV_TARGET3;
     float4 vDistortion : SV_TARGET4;
+    float4 vPBR : SV_TARGET5;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -136,7 +137,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    
+    Out.vPBR.y = 0.2f;
     return Out;
 }
 
@@ -155,6 +156,7 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vPBR.y = 0.2f;
     
     return Out;
 }

@@ -85,7 +85,6 @@ void CPlayer::Priority_Update(_float fTimeDelta)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
 
-#ifdef _DEBUG
     // 임시.
     if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
     {
@@ -101,7 +100,6 @@ void CPlayer::Priority_Update(_float fTimeDelta)
     {
         m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
     }
-#endif // _DEBUG
 
 }
 

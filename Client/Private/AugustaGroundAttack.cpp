@@ -102,6 +102,7 @@ void CAugustaGroundAttack::Handle_Input()
 
     
 
+	m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     if (eAttackType >= EAugustaAttackType::ATTACK01 && eAttackType < EAugustaAttackType::ATTACK04)
     {
@@ -170,7 +171,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     // 1. 기본 공상태에서 Heavy_Attack_Pending이 아닌 경우?
     if (eAttackType >= EAugustaAttackType::ATTACK01 && eAttackType < EAugustaAttackType::ATTACK04)
     {
-        // 키 누르고 있다면 다른 상태전환하지 말고 계속 Attack01 실행.
+        // 키 누르고 있다면 다른 상태전환하지 말고 계속 Attack01 실행. => 강공을 위해.
         if (eAttackType == EAugustaAttackType::ATTACK01 && m_States[HEAVY_ATTACK_PENDING])
         {
             return;
@@ -202,8 +203,15 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         }
 
         // 입력키
+		
         if (m_States[MOVE])
         {
+			// Escape가 너무 빠르게 동작함. => 공격 전환 TrackPoistion과 이동 전환 TrackPosition이 달라야할듯?
+			if ((eAttackType == EAugustaAttackType::ATTACK01) && m_fTrackPosition < 30.f)
+			{
+				return;
+			}
+
             m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
             return;
@@ -233,7 +241,7 @@ void CAugustaGroundAttack::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK02),"Attack02", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK03),"Attack03", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK04),"Attack04", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK),"Attack_HeavyHack", 1.f, 80.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_PULL), "Attack_Pull", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_SPEEDDRIVE),"Attack_SpeedDrive", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAttackType::ATTACK_SPSKILL),"Attack_SpSkill", 1.f, 0.f);

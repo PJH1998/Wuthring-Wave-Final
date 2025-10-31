@@ -63,7 +63,8 @@ void CAugustaGroundSkill::OnEnter()
         }
         
     }
-    
+    // 진입할때 한번만.
+	m_pAugusta->Rotate_Target();
 }
 
 void CAugustaGroundSkill::OnUpdate(_float fTimeDelta)
@@ -108,10 +109,14 @@ void CAugustaGroundSkill::Handle_Input()
 
 void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 {
+	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
+
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target
-    m_pAugusta->Rotate_Target();
+	
+	
+    //m_pAugusta->Rotate_Target();
 
     //m_pAugusta->Move_Direction(XMVectorSet(0.f, 1.f, 0.f, 0.f), fTimeDelta, 0.1f);
 
@@ -120,7 +125,7 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
         m_pAugusta->Play_PartAnimation(
             m_iPartType,
             m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-            fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, false
+            fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
         );
     }
      

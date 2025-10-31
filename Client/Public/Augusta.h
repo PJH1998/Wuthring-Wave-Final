@@ -114,7 +114,7 @@ public:
 #pragma endregion
 
 
-#pragma region 1. STATE ����.
+#pragma region 1. STATE.
 public:
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
