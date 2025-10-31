@@ -20,6 +20,7 @@ public:
 		_uint iShaderPassIndex = {};
 		_float4x4* WorldMatrix = { nullptr };
 		OBJECTTYPE eObjectType;
+		_uint iLevel = {};
 	}MAP_LOAD;
 
 private:

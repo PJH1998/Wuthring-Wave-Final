@@ -64,6 +64,10 @@ Texture2DArray<float4> g_LUT_Texture : register(t1);
 const int  g_iLutIndex = 0;
 float g_fLutLerpIntensity = 0.f;
 
+//PBR
+float g_fGlobalRoughness = 0.2f;
+float g_fGlobalMetallic = 0.f;
+
 cbuffer CSMDatas : register(b1)
 {
     float4  g_vClipDistances;
@@ -174,15 +178,29 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
+    /////////TEST
     if (g_IsStylized)
     {
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+       // float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
         Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * fRim); //vToonRim.z);
     }
     else
     {
-        Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+        //Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        Out.vColor.xyz = vPBR * fSSao;
     }
+    
+    //if (g_IsStylized)
+    //{
+    //    float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+    //    Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * fRim); //vToonRim.z);
+    //}
+    //else
+    //{
+    //    Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+    //}
     
     Out.vColor.xyz += vDiffuse.xyz * 0.4f; // Ambient
     

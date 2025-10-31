@@ -52,7 +52,7 @@ public:
 #pragma endregion
 
 #pragma region FONT_MANAGER
-	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath);
+	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
 	HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 #pragma endregion
 
@@ -122,15 +122,17 @@ public:
 	void			Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
-	void			IsSSAO(_bool IsSSAO);
-	void			IsSSAO_Blur(_bool IsBlur);
-	void			Setting_SSAO(_float fRadius, _float fMaxDistance);
-	void			SetBloomIntensity(_float fIntensity);
-	void			SetBloomWeight(_int iWeight);
-	void			Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
-	void			SetDof(_float fDepth, _float fRange, _float fScale);
-	void			SetMaxEffectIntensity(_float fMaxIntensity);
-	void			SetPBR(_bool IsStylized);
+	void		IsSSAO(_bool IsSSAO);
+	void		IsSSAO_Blur(_bool IsBlur);
+	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
+	void		SetBloomIntensity(_float fIntensity);
+	void		SetBloomWeight(_int iWeight);
+	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
+	void		SetDof(_float fDepth, _float fRange, _float fScale);
+	void		SetMaxEffectIntensity(_float fMaxIntensity);
+	void		SetPBR(_bool IsStylized);
+	void		Set_Metallic(_float fMetallic);
+	void		Set_Roughness(_float fRoughness);
 #endif
 #pragma endregion
 

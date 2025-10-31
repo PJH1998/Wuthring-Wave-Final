@@ -155,7 +155,6 @@ void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SING
 		pVertices[i].vClipTexcoordY = vecDescs[i].vClipTexcoordY;
 
 		pVertices[i].matExtraData	= vecDescs[i].matExtraData;
-
 	}
 
 	m_pContext->Unmap(m_pVBInstance, 0);

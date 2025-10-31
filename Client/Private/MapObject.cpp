@@ -120,7 +120,7 @@ void CMapObject::Render()
 void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-	
+
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
 	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
@@ -137,7 +137,7 @@ void CMapObject::Ready_Component(void* pArg)
 
 		_char ModelName[MAX_PATH] = {};
 		sprintf_s(ModelName, "Com_Model%d", i);
-		if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), ModelCom,
+		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ModelCom,
 			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
 			CRASH("FAILED");
 
