@@ -75,6 +75,8 @@ public:
 	UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
 	UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
+	UI_ANIM_KEYFRAME_DESC* Get_CurAnimKeyframeDesc() { return m_pCurKeyFrameDesc; }
+	UI_ANIM_KEYFRAME_DESC* Get_CurCombinedAnimKeyframeDesc() { return &m_tCombinedKeyFrameDesc; }
 
 private:
 	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ���� �����, LerpType�� ���� ���� fIn���� ������ ��ȯ (0 -> 1 �� ���� �׷����� �ȭ)
@@ -85,8 +87,12 @@ private:
 	void		Update_Animation();
 
 private:
+	const _uint					m_iKeyFrameRate = 60;
 	vector<UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	UI_ANIM_DESC*				m_pCurAnimDesc = { nullptr };
+
+	UI_ANIM_KEYFRAME_DESC*		m_pCurKeyFrameDesc = { nullptr };
+	UI_ANIM_KEYFRAME_DESC		m_tCombinedKeyFrameDesc = {};
 
 	CCustom_UI*					m_pOwner = { nullptr };
 

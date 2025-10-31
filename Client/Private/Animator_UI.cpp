@@ -197,6 +197,7 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
             break;
         iKeyframeIndex = i;
     }
+	m_pCurKeyFrameDesc = &m_pCurAnimDesc->vecKeyFrames[iKeyframeIndex];
 
     // lerp�� ����� ���� �Ҵ�
     for (_uint i = 0; i < 4; i++)
@@ -232,27 +233,45 @@ void CAnimator_UI::Update_Animation()
 {
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
-    // 
-    // ���� �ִϸ��̼��� ���ٸ�, �⺻���� ���̴��� �Ҵ�.
-    // ���ϸ� �� ������ �ٸ� UI���� �Ҵ�� ���� �״�� ���󰡱⿡, �ǵ�ġ �ʰ� �ٸ� ������Ʈ�� ������ ����.
 
-
-    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
+    if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
         return;
+
+	// Get Parent Animator, Get Combined KeyframeDesc.
+
+	// 부모 오브젝트 찾아서 해당 오브젝트로부터 combineddesc 가져와서 계산에 사용.
+	// 만약 부모 오브젝트에게 애니메이터가 없거나 부모오브젝트가 없으면 그 경우는 예외처리
+
+	UI_ANIM_KEYFRAME_DESC tDesc = {};
+
+	CAnimator_UI* pParentAnimator = nullptr;
+	UI_ANIM_KEYFRAME_DESC* pParentCombinedDesc = nullptr;
+	CCustom_UI* pParentUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(m_pOwner->Get_UIDesc().strParentName));
+	if (pParentUI)
+		pParentAnimator = dynamic_cast<CAnimator_UI*>(pParentUI->Get_Component(L"Com_Animator_UI"));
+	if (pParentAnimator)
+		pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
+
 
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
 
     if (m_pCurAnimDesc == nullptr)
     {
-        UI_ANIM_KEYFRAME_DESC tDesc = {};
-
-        pTargetShader->Bind_Value("g_AlphaStrength", &tDesc.fAlpha, sizeof(tDesc.fAlpha));
+		_float fCombinedAlpha = (pParentAnimator)? pParentCombinedDesc->fAlpha * tDesc.fAlpha : tDesc.fAlpha;
+        pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
         pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
         pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
         pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+
+		if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
+		{
+			cout << fCombinedAlpha << endl;
+		}
+
+
+		m_tCombinedKeyFrameDesc.fAlpha = fCombinedAlpha;
         return;
     }
-
 
 
 
@@ -356,12 +375,7 @@ void CAnimator_UI::Update_Animation()
     // ==============================
     // * Apply Results..
     // ==============================
-    m_pOwner->Set_CurTexIndex(iResultTexIndex);
 
-    pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
-    pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
-    pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
-    pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
     CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
 
@@ -371,7 +385,28 @@ void CAnimator_UI::Update_Animation()
 
     _matrix matTransform = matSca * matRot * matPos;
 
-    pOwnerTransformCom->Set_WorldMatrix(matTransform);
+    m_pOwner->Set_CurTexIndex(iResultTexIndex);
+
+
+	// 복사
+	m_tCombinedKeyFrameDesc = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex];
+	m_tCombinedKeyFrameDesc.vPos = vResultPos;
+	m_tCombinedKeyFrameDesc.vRot = vResultRotRad;
+	m_tCombinedKeyFrameDesc.vSca = vResultSca;
+	m_tCombinedKeyFrameDesc.vScreenLT = vResultScreenLT;
+	m_tCombinedKeyFrameDesc.vScreenRB = vResultScreenRB;
+	m_tCombinedKeyFrameDesc.vBlendToOuterWidth = vResultOuterWidth;
+	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha;
+
+	if (pParentCombinedDesc)
+		m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
+
+	pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
+	pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+	pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+	pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
+
+	pOwnerTransformCom->Set_WorldMatrix(matTransform);
 }
 
 CAnimator_UI* CAnimator_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

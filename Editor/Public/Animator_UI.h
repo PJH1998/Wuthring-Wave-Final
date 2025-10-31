@@ -49,6 +49,8 @@ public:
 	CLevel_UI::UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
 
 	CLevel_UI::UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC* Get_CurAnimKeyframeDesc() { return m_pCurKeyFrameDesc; }
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC* Get_CurCombinedAnimKeyframeDesc() { return &m_tCombinedKeyFrameDesc; }
 
 private:
 	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ?癒?퐣 ????? LerpType???怨뺚뀲 ??쑴??fIn揶쏅???癰귣똻?쇿첎?獄쏆꼹??(0 -> 1 嚥?揶쎛??域밸챶??袁⑹벥 ?ⓥ돦苑??
@@ -61,6 +63,9 @@ private:
 private:
 	vector<CLevel_UI::UI_ANIM_DESC>		m_vecAnimationDescs = {};
 	CLevel_UI::UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
+
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC*	m_pCurKeyFrameDesc = { nullptr };
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC	m_tCombinedKeyFrameDesc = {};
 
 	CCustom_UI*							m_pOwner = { nullptr };
 

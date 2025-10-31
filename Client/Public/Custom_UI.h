@@ -123,6 +123,7 @@ public:
 	
 public:
 	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
+	void					Update_CombinedDesc(CUSTOM_UI_DESC* pParentDesc = nullptr);
 private:
 	void					Update_CacheTransform(_float fTimeDelta);
 	void					Update_InputState()						override;
@@ -153,6 +154,7 @@ protected:
 
 
 	CUSTOM_UI_DESC			m_tUIDesc = {};
+	CUSTOM_UI_DESC			m_tCombinedDesc = {};
 	_uint					m_iCurTexIndex = {};
 
 	_float4x4				m_CombinedWorldMatrix = {};

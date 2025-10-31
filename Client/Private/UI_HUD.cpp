@@ -61,11 +61,14 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {   // �ε��� �ִϸ��̼��� ���⿡ �߰�
-        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/HUD_HPBar_Effect.json"
+        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/statustest.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeOut.json"
 
     };
     Load_Animations(vecAnimFilePaths);
 
+	//static_cast<CAnimator_UI*>(Find_ChildObject(L"EnergyBar")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
 
     //Find_ChildObject(L"UI_ParentTest")->Set_Active(false);
 

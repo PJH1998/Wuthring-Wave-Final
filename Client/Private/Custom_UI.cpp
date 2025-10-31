@@ -456,9 +456,6 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
 
 void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 {
-    if (this->m_tUIDesc.strUIName == L"Icon_Augusta")
-        int i = 10;
-
     if (pParentMatrix)
         XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix() * *pParentMatrix);
     else
@@ -469,6 +466,23 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
         _matrix LoadCombinedMatrix = XMLoadFloat4x4(&m_CombinedWorldMatrix);
         child->Update_CombinedMatrix(&LoadCombinedMatrix);
     }
+}
+
+void CCustom_UI::Update_CombinedDesc(CUSTOM_UI_DESC* pParentDesc)
+{
+	//if (pParentDesc)
+	//{
+	//	; .alp = ;
+	//	
+
+	//}
+	//else
+	//{
+
+
+
+	//}
+
 }
 
 void CCustom_UI::Update_InputState()
@@ -551,7 +565,7 @@ void CCustom_UI::Update_InputState()
 
 void CCustom_UI::Free()
 {
-    m_pGameInstance->Unscribe();
+    //m_pGameInstance->Unscribe();
     __super::Free(); 
 
     Safe_Release(m_pShaderCom);
