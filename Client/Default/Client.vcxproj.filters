@@ -199,6 +199,9 @@
     <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
       <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. GameSystem\Director">
+      <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -432,7 +435,7 @@
     <ClInclude Include="..\Public\RoverFactory.h">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverWeapon.h">
+    <ClInclude Include="..\Public\RoverSword.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\AugustaState_Enum.h">
@@ -443,6 +446,12 @@
     </ClInclude>
     <ClInclude Include="CAttackVolume.h">
       <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Event_Camera.h">
+      <Filter>97. Event</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Director.h">
+      <Filter>01. GameSystem\Director</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -652,7 +661,7 @@
     <ClCompile Include="..\Private\RoverFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\RoverWeapon.cpp">
+    <ClCompile Include="..\Private\RoverSword.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="CAttackVolume.cpp">
@@ -660,6 +669,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Director.cpp">
+      <Filter>01. GameSystem\Director</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

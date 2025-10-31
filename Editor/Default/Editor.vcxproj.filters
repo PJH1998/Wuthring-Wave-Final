@@ -328,6 +328,9 @@
     <ClInclude Include="..\Public\Level_Effect.h">
       <Filter>01. Level\Effect</Filter>
 	</ClInclude>
+    <ClInclude Include="..\Public\Map_Object_Destruction.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Event_Scene_Edit.h">
       <Filter>97. Event</Filter>
     </ClInclude>
@@ -483,6 +486,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Map_Object_Destruction.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

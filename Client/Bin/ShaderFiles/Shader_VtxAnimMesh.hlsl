@@ -16,7 +16,7 @@ matrix g_BoneMatrices[512];
 
 cbuffer GlobalConstants
 {
-    // <-- ¹Ù·Î ÀÌ »ó¼öÀÔ´Ï´Ù. C++¿¡¼­ 2·Î ¼³Á¤.
+    // <-- ï¿½Ù·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ô´Ï´ï¿½. C++ï¿½ï¿½ï¿½ï¿½ 2ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
     int g_iNumBlendWeightsToUse = 2; 
 }
 
@@ -158,6 +158,9 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vPBR.y = 0.2f;
+    
+    Out.vPBR.y = 0.2f;
     
     return Out;
 }

@@ -18,7 +18,10 @@ private:
 public:
 	HRESULT		Initialize();
 	HRESULT		Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
+	HRESULT		Add_Render_StaticObject(class CGameObject* pRenderObject);
 	void		Render();
+	void		Begin_ScreenEffect(SFX_TYPE eType);
+	void		End_ScreenEffect();
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -31,15 +34,18 @@ public:
 	void		SetBloomIntensity(_float fIntensity);
 	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
-	void		SetBlur(_bool IsBlur, BLUR_TYPE eType) { m_IsBlur = IsBlur, m_eBlurType = eType; }
+	void		SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
+	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 #endif
 
 private:
-	ID3D11Device*					m_pDevice = { nullptr };
+	ID3D11Device*						m_pDevice = { nullptr };
 	ID3D11DeviceContext*			m_pContext = { nullptr };
 	class CGameInstance*			m_pGameInstance = { nullptr };
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	list<class CGameObject*>		m_StaticObjects[2];
+	atomic<_uint>						m_iDoubleBufferIndex = {};
 
 	class CShader*					m_pShader = { nullptr };
 	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };
@@ -52,8 +58,10 @@ private:
 	_uint							m_iLUT_Index = {};
 	_int							m_iBloomWeight = { 1 };
 
-	_bool							m_IsBlur = {};
-	BLUR_TYPE						m_eBlurType = { BLUR_TYPE::END };
+	SFX_TYPE						m_eEffectType = { SFX_TYPE::END };
+	_bool							m_IsEffectEnd = {};
+	_float							m_fEffectIntensity = {};
+	_float							m_fMaxEffectIntensity = {};
 
 	recursive_mutex					m_RecursiveMutex;
 
@@ -62,6 +70,7 @@ private:
 	_bool							m_isRenderDebug = { true };
 	_bool							m_IsSSAO = { true };
 	_bool							m_IsSSAO_Blur = { true };
+	_bool							m_IsStylized = { true };
 #endif
 
 private:
@@ -86,12 +95,14 @@ private:
 	void						Render_Distortion();
 	void						Render_LUT();
 	void						Render_Fog();
-	void						Render_Blur();
+	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
 
 
-	//BLUR
+	//EFFECT
+	void						Update_EffectIntensity();
+	void						Render_Blur();
 	void						Render_DOF();
 
 #ifdef _DEBUG
@@ -99,7 +110,6 @@ private:
 #endif
 
 private:
-	ID3D11ShaderResourceView*	Get_BlurSRV();
 	HRESULT						Ready_RT();
 	HRESULT						Ready_MRT();
 	HRESULT						Ready_SubResource();

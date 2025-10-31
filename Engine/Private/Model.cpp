@@ -29,7 +29,8 @@ CModel::CModel(const CModel& Prototype)
 	m_AnimationNameToIndex { Prototype.m_AnimationNameToIndex},
 	m_Buffers {Prototype.m_Buffers},
 	m_SRVs { Prototype.m_SRVs },
-	m_isRibAnimation { Prototype.m_isRibAnimation }
+	m_isRibAnimation { Prototype.m_isRibAnimation },
+	m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
 		Safe_AddRef(pMesh);
@@ -489,15 +490,27 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 	m_Animations[strAnimationName]->Set_CurrentTrackPosition(fTrackPosition);
 }
 
-BoundingBox* CModel::Get_BoundingBox(_uint iNumMesh)
+void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
+{
+	_float3 vCenter = {};
+	_float3 vExtends = {};
+	vCenter.x = (pMaxPos[0] + pMinPos[0]) / 2.f;
+	vCenter.y = (pMaxPos[1] + pMinPos[1]) / 2.f;
+	vCenter.z = (pMaxPos[2] + pMinPos[2]) / 2.f;
+
+	vExtends.x = (pMaxPos[0] - pMinPos[0]) / 2.f;
+	vExtends.y = (pMaxPos[1] - pMinPos[1]) / 2.f;
+	vExtends.z = (pMaxPos[2] - pMinPos[2]) / 2.f;
+	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
+
+}
+
+BoundingBox* CModel::Get_BoundingBox()
 {
 	if (m_eType != MODELTYPE::MAP)
 		ASSERT_CRASH("Is Not Map Object");
 
-	if (iNumMesh >= m_iNumMeshes)
-		return nullptr;
-
-	return m_Meshes[iNumMesh]->Get_BoundingBox();
+	return m_pBoundingBox;
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)
@@ -761,13 +774,37 @@ HRESULT CModel::Ready_Bone(ifstream& InputFile, _int iParentIndex)
 HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
+
+	_float* pMin = nullptr;
+	_float* pMax = nullptr;
+
+	if (MODELTYPE::MAP == m_eType)
+	{
+		pMin = new _float[3];
+		pMax = new _float[3];
+
+		for (_uint i = 0; i < 3; ++i)
+		{
+			pMin[i] = FLT_MAX;
+			pMax[i] = FLT_MIN;
+		}
+	}
+
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile);
+		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
 		ASSERT_CRASH(pMesh);
 		m_Meshes.push_back(pMesh);
 	}
-	
+
+	if (MODELTYPE::MAP == m_eType)
+	{
+		Ready_BoundingBox(pMin, pMax);
+
+		Safe_Delete_Array(pMin);
+		Safe_Delete_Array(pMax);
+	}
+
 	return S_OK;
 }
 
@@ -1049,8 +1086,7 @@ void CModel::Free()
 		Safe_Release(pUAV);
 	m_UAVs.clear();
 
-	
-
-	
+	if (!m_isClone)
+		Safe_Delete(m_pBoundingBox);
 
 }

@@ -193,6 +193,8 @@
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
+    <ClInclude Include="..\Public\Director.h" />
+    <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\Particle.h" />
@@ -233,7 +235,7 @@
     <ClInclude Include="..\Public\Rover.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
-    <ClInclude Include="..\Public\RoverWeapon.h" />
+    <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\public\UI_Button.h">
@@ -307,6 +309,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\Director.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
@@ -339,7 +342,7 @@
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverFactory.cpp" />
-    <ClCompile Include="..\Private\RoverWeapon.cpp" />
+    <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

@@ -317,16 +317,27 @@ float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
     
     float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
     
-    float3 vViewDir = normalize(vViewPos.xyz);
+//    float3 vViewDir = normalize(vViewPos.xyz);
     
-    float3 vCamDir = float3(0.f, 0.f, 1.f);
     
-    float fDot = dot(vViewDir, vCamDir);
-    float fDepth = fDot * vViewPos.z;
+//    float3 vCamDir = float3(0.f, 0.f, 1.f);
+    
+    //float fDot = dot(vViewDir, vCamDir);
+    //float fDepth = fDot * vViewPos.z;
+    
+    //float fCoc = 0.f;
+    
+    //fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (fDepth * g_fFocusRange));
+    
+    float3 vCamDir = float3(0.f, 0.f, g_fFocusDepth);
+    float3 vViewDir = vViewPos.xyz - vCamDir;
+    
+    float fDepth = length(vViewDir);
     
     float fCoc = 0.f;
     
-    fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (fDepth * g_fFocusRange));
+    fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
+    
     
     return fCoc;
 }

@@ -25,6 +25,9 @@ public:
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	//============================Effect
+
+	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
 #pragma endregion
 
 #pragma region Factory

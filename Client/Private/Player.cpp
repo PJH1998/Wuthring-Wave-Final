@@ -64,8 +64,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    m_iCurrentCharacterIdx = AUGUSTA;
-    //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
+    //m_iCurrentCharacterIdx = AUGUSTA;
+    m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
 
     return S_OK;
@@ -84,8 +84,9 @@ void CPlayer::Priority_Update(_float fTimeDelta)
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
+	// 캐릭터 체인지 => 추후 구현
+	//Change_CharacterCheck();
 
-#ifdef _DEBUG
     // 임시.
     if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
     {
@@ -101,7 +102,6 @@ void CPlayer::Priority_Update(_float fTimeDelta)
     {
         m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
     }
-#endif // _DEBUG
 
 }
 
@@ -136,7 +136,7 @@ void CPlayer::Late_Update(_float fTimeDelta)
 
     Sync_Transform();
 
-    Change_CharacterCheck();
+    
 }
 void CPlayer::Render()
 {
@@ -420,7 +420,7 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
         case CHARACTERTYPE::GALBRENA:
             break;
         case CHARACTERTYPE::ROVER:
-           /* CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
             CharacterDesc.pOwner = this;
             pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
                 ENUM_CLASS(m_eCurLevel),
@@ -429,7 +429,7 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
                 &CharacterDesc));
 
             ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;*/
+            m_Characters[i] = pPlayer;
             break;
         default:
             break;

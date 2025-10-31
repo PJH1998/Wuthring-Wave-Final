@@ -11,12 +11,14 @@ private:
 
 public:
 	// File Model
-	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
+	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
 private:
 	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
+	void							Read_Map_Dat(LEVEL eLevel, const _string pFilePath);
 
 #pragma region EffectLoad
 public:
@@ -40,7 +42,6 @@ private:
 	void						Load_Particle_OB_FromJson(const _string& strFilePath, const _string& ParticleTag, LEVEL eLevel);
 	void						Load_TrailMesh_FromJson(const _string& strFilePath, const _string& TrailMeshTag, LEVEL eLevel);
 #pragma endregion
-
 public:
 	HRESULT						Initialize();
 
@@ -50,6 +51,7 @@ private:
 	ID3D11DeviceContext*	m_pContext = { nullptr };
 
 	vector<vector<_string>> m_Data;
+	unordered_map<LEVEL, vector<const _char*>> m_LoadingMap;
 
 public:
 	static		CParser*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

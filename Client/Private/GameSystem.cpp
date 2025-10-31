@@ -24,9 +24,14 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
-void CGameSystem::Create_Map_Model(const _char* pFilePath, LEVEL eLevel)
+void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 {
-	return m_pParser->Create_Map_Model(pFilePath, eLevel);
+	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
+}
+
+void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+{
+	m_pParser->Clone_MapObjects(eLevel, iIndex);
 }
 
 void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
