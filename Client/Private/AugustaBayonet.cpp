@@ -30,6 +30,7 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+	Register_AllNotifies(pDesc->strFolderPath);
 
     return S_OK;
 }

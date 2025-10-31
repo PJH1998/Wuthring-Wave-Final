@@ -160,8 +160,6 @@ void CShader_Interface::Setting_Shader()
 		}
 
 #ifdef _DEBUG
-
-
 		m_pGameInstance->SetMaxEffectIntensity(m_fEffectIntensity);
 		m_pGameInstance->SetDof(m_fFocusDepth, m_fFocusRange, m_fDofDepthScale);
 #endif
@@ -176,6 +174,16 @@ void CShader_Interface::Setting_Shader()
 
 		if (ImGui::Button("DEFAULT"))
 			m_pGameInstance->SetPBR(false);
+
+
+		ImGui::DragFloat("ROUGHNESS", &m_fRoughness, 0.01f, 0.1f, 1.f);
+
+		ImGui::DragFloat("METALLIC", &m_fMetallic, 0.01f, 0.f, 1.f);
+
+#ifdef _DEBUG
+		m_pGameInstance->Set_Metallic(m_fMetallic);
+		m_pGameInstance->Set_Roughness(m_fRoughness);
+#endif
 	}
 	
 #pragma endregion

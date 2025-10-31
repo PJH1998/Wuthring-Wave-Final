@@ -1,11 +1,15 @@
 #include "Engine_ComputeShader_Function.hlsli"
 typedef row_major matrix matrix_rm;
 
+#define THREAD_X 16
+#define THREAD_Y 16
+#define THREAD_Z 1
+
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
 
-[numthreads(16, 16, 1)]
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
     int iIndexX = DTID.x * 2;
@@ -32,7 +36,7 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     OutputTexture[DTID.xy] = vColor;
 }
 
-[numthreads(16, 16, 1)]
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void UpSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
     int2 vInSize;
@@ -74,7 +78,7 @@ cbuffer BLOOM_DATA : register(b1)
     float Padding;
 }
 
-[numthreads(16, 16, 1)]
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void UpSample_Bloom(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
     
@@ -96,7 +100,7 @@ void UpSample_Bloom(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
     
     float4 vBaseColor = BaseTexture.Load(int3(DTID.xy, 0));
     
-    //float4 vFinalColor = vBaseColor + (vColor);
+//    float4 vFinalColor = vBaseColor + (vColor);
     float4 vFinalColor = 1.f - exp(-(vBaseColor + vColor * 2.f));
     vFinalColor.a = vColor.a;
     

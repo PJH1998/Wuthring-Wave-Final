@@ -3,6 +3,8 @@
 #include"GameSystem.h"
 #include "MonsterTest.h"
 
+#include "Player.h"
+
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
 {
@@ -43,6 +45,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	}
 	// _UI
 
+	Ready_Layer_Player();
+	
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 	return S_OK;
@@ -59,6 +63,41 @@ void CLevel_GamePlay::Render()
 
 void CLevel_GamePlay::Ready_Layer_Player()
 {
+	_float3 vScale{}, vRotation{}, vPosition{};
+	vScale = { 1.f, 1.f, 1.f };
+	vRotation = { 0.f, 0.f, 0.f };
+	//vPosition = { 0.f, -10.f, 50.f };
+	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
+	vPosition = { 2787.4f, 320.f, 1647.f };
+	
+
+	CPlayer::PLAYER_DESC Desc{};
+	Desc.eCurLevel = m_eCurLevel;
+	Desc.vScale = vScale;
+	Desc.vRotation = vRotation;
+	Desc.vPosition = vPosition;
+	Desc.iPlayerCount = CPlayer::CHARACTERTYPE::TYPE_END;
+	Desc.wStrInputControllerTag = TEXT("Prototype_Component_PlayerController");
+
+	// 0. vector 크기 정의
+	Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
+
+	// 1. Augusta 정의.
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+	//Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+
+
+	// 2. Galbrena 정의
+
+	// 3. Rover(주인공) 캐릭터 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
+
+	// 4. Player(Character 모음) 생성.
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
+		CRASH("Failed Ready Player");
 }
 
 void CLevel_GamePlay::Ready_Dummy()

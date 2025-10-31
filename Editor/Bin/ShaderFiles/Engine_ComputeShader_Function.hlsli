@@ -2,7 +2,6 @@
 
 // Emissive ÃÖ¼ÒÄ¡
 
-
 float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
 {
     float2 vTexcoord = 0.f;

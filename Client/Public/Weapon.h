@@ -39,8 +39,11 @@ public:
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true); // Part Animation�� ���� ���,
 	void Set_SocketMatrix(const _float4x4* pSocketMatrix) { m_pSocketMatrix = pSocketMatrix; }
 	void Clear_Animation(const _string& strAnimName);
+
 #pragma region NOTIFY
 public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) ;
+	virtual void Effect_Active(const _wstring& wStrEffectTag);
 	void Collider_Active(_bool isActive);
 #pragma endregion
 
@@ -59,8 +62,10 @@ protected:
 	_float m_fTrackPosition = {};
 	_bool m_IsAnimationEnd = { false };
 	_string m_strCurrentAnimName = {};
-private:
+
+protected:
 	void Bind_Resources();
+	void Register_AllNotifies(const _string& strFolderPath);
 
 public:
 	static CWeapon* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
