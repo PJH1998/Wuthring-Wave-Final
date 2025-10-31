@@ -142,8 +142,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         {
             vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
 			
-	        Out.vPBR.y = vNormalDesc.a;
-	        Out.vPBR.x = vNormalDesc.b;
+            Out.vPBR.y = vDefaultNormal.a;
+            Out.vPBR.x = vDefaultNormal.b;
 	        
             vNormal = normalize(vDefaultNormal * 2.f - 1.f);
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
