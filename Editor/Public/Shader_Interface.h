@@ -44,7 +44,7 @@ private:
 	_float				m_fFocusDepth = {50.f};
 	_float				m_fFocusRange = { 100.f };
 	_float				m_fDofDepthScale = { 0.3f };
-
+	_float				m_fEffectIntensity = { 10.f };
 private:
 	void				Setting_Bias(const _char* pName, _float* pFloat);
 

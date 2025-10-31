@@ -67,7 +67,7 @@ private:
 	_bool m_LoadMenu = { false };
 
 	_string m_CurrentObjectMode;
-	_uint m_eObjectType = { 1 };
+	_uint m_eObjectType = {};
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

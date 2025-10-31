@@ -25,10 +25,10 @@ HRESULT CSpringCamera_Edit::Initialize_Clone(void* pArg)
 	Ready_Component();
 	Ready_Event();
 
-	m_fDistance = 100.f;
-	m_fFixedDistance = 100.f;
+	m_fDistance = 5.f;
+	m_fFixedDistance = 5.f;
 	m_fLerpSpeed = 1.5f;
-	m_fMinDistance = 100.f;
+	m_fMinDistance = 1.f;
 
 	m_fStiffness = 3.f;
 
@@ -141,7 +141,7 @@ void CSpringCamera_Edit::Lerp_Distance(_float fTimeDelta)
 
 void CSpringCamera_Edit::Mouse_Scroll(_float fTimeDelta)
 {
-	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 20.f;
+	m_fFixedDistance -= m_pGameInstance->Get_DIMouseMove(MOUSEMOVESTATE::WHEEL) * fTimeDelta * 0.2f;
 }
 
 void CSpringCamera_Edit::Spring(_float fTimeDelta)
@@ -242,8 +242,13 @@ void CSpringCamera_Edit::Dynamic_Distance()
 
 void CSpringCamera_Edit::Action(_float fTimeDelta)
 {
+	// Action End
 	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
+	{
+		if (false == m_isMaintain)
+			SetUp_Recovery();
 		return;
+	}
 
 	_float fStartFrame{}, fEndFrame{};
 	fStartFrame = -1 == m_iFrameIndex ? m_fFirstFrame : m_Frames[m_iFrameIndex].fStartFrame;
@@ -254,18 +259,28 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 
 	// Rotation
 	_vector vPreQuaternion = {};
+	_vector vPreTranslation = {};
 	if (-1 == m_iFrameIndex)
+	{
 		vPreQuaternion = XMLoadFloat4(&m_vPreQuaternion);
+		vPreTranslation = XMLoadFloat3(&m_vPreTranslation);
+	}
 	else
+	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
-		//vPreQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_Frames[m_iFrameIndex].vRotation));
+		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		// Fov
+		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
+	}
 
-	//_vector vDestQuat = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vRotation));
 	_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
-
 	_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
-
 	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+
+	// Translation Offset
+	_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+	_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
+	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
 
 	// Distance
 	m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
@@ -287,6 +302,18 @@ void CSpringCamera_Edit::Recovery(_float fTimeDelta)
 
 	_vector vLerpQuat = XMQuaternionSlerp(XMLoadFloat4(&m_vEndQuaternion), XMLoadFloat4(&m_vPreQuaternion), m_fTrackPosition / 1.5f);
 	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+	_vector vLerpTranslation = XMVectorLerp(XMLoadFloat3(&m_vEndTranslation), XMLoadFloat3(&m_vPreTranslation), m_fTrackPosition / 1.5f);
+	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+}
+
+void CSpringCamera_Edit::SetUp_Recovery()
+{
+	m_fTrackPosition = 0.f;
+	if (false == m_isRecovery)
+		m_isRecovery = true;
+	m_fFixedDistance = m_fPreFixedDistance;
+	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+	m_vEndTranslation = _float3(0.f, 0.f, 0.f);
 }
 
 void CSpringCamera_Edit::Ready_Component()
@@ -320,15 +347,13 @@ void CSpringCamera_Edit::Ready_Event()
 				m_eCameraState = CAMERA_STATE::ACTION;
 				m_Frames = event.pFrame;
 				XMStoreFloat4(&m_vPreQuaternion, m_pTransformCom->Get_Quaternion());
+				m_vPreTranslation = _float3(0.f, 0.f, 0.f);
 				m_fPreFixedDistance = m_fFixedDistance;
 				m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
 			}
 			else
 			{
-				m_fTrackPosition = 0.f;
-				m_isRecovery = true;
-				m_fFixedDistance = m_fPreFixedDistance;
-				XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+				SetUp_Recovery();
 			}
 		});
 }

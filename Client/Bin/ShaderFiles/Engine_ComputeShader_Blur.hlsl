@@ -100,18 +100,15 @@ void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
     OutputTexture[DTID.xy] = vColorY;
 }
 
-cbuffer DOF_DATA : register(b1)
-{
-    float2 fOutSizeDof;
-    float2 PaddingDOF;
-}
-
 Texture2D<float4> DepthTexture : register(t1);
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void DOF_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {
     float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
+    
+    int2 vOutSize = 0;
+    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
     
     vSharedColorX[GTID.y][GTID.x + MAX_RADIUS] = InputTexture.Load(int3(DTID.xy, 0));
     
@@ -123,8 +120,8 @@ void DOF_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
         if (LeftID.x < 0)
             LeftID.x = 0;
         
-        if (RightID.x >= (int) fOutSizeDof.x)
-            RightID.x = (int) fOutSizeDof.x - 1;
+        if (RightID.x >= (int) vOutSize.x)
+            RightID.x = (int) vOutSize.x - 1;
             
         vSharedColorX[GTID.y][GTID.x] = InputTexture.Load(LeftID);
         vSharedColorX[GTID.y][GTID.x + THREAD_X + MAX_RADIUS] = InputTexture.Load(RightID);
@@ -166,6 +163,9 @@ void DOF_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
 {
     float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
     
+    int2 vOutSize = 0;
+    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    
     vSharedColorY[GTID.y + MAX_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
 
     if (GTID.y < MAX_RADIUS)
@@ -176,8 +176,8 @@ void DOF_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
         if (LeftID.y < 0)
             LeftID.y = 0;
         
-        if (RightID.y >= (int) fOutSizeDof.y)
-            RightID.y = (int) fOutSizeDof.y - 1;
+        if (RightID.y >= (int) vOutSize.y)
+            RightID.y = (int) vOutSize.y - 1;
             
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
         vSharedColorY[GTID.y + THREAD_Y + MAX_RADIUS][GTID.x] = InputTexture.Load(RightID);

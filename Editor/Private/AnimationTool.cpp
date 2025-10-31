@@ -872,8 +872,6 @@ void CAnimationTool::RenderUI_AnimationList()
     
     
 #endif // _DEBUG
-
-
 }
 
 
@@ -1241,7 +1239,6 @@ void CAnimationTool::Import_StateTransition_From_Json()
     }
 }
 #endif
-
 
 HRESULT CAnimationTool::Add_Prototype_AnimModel(_wstring strPrototypeName, MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
 {

@@ -116,6 +116,9 @@ public:
 			case ENUM_CLASS(ITEM_TYPE::EFFECT):
 				eType = ITEM_TYPE::EFFECT;
 				break;
+			case ENUM_CLASS(ITEM_TYPE::SCENE):
+				eType = ITEM_TYPE::SCENE;
+				break;
 			case ENUM_CLASS(ITEM_TYPE::SCREEN):
 				eType = ITEM_TYPE::SCREEN;
 				break;
@@ -246,9 +249,11 @@ private:
 
 private:
 	_bool								m_isSave = { false };
+	_bool								m_isLoad = { false };
 
 	_bool								m_isPlay = { false };
 	_float								m_fTrackPerSec = {};
+	_float								m_fTrackAcc = {};
 
 private:
 	// Play
@@ -262,6 +267,7 @@ private:
 
 	// Camera Action
 	void								Save_CameraAction();
+	void								Load_CameraAction();
 	
 	// GUI
 	void								Drawing();
@@ -269,6 +275,7 @@ private:
 	void								Expand(_int iControllHeight);	// Canvas Expand
 	void								DrawFrame();						// Sequence ������
 	void								DrawLegend();						// List
+	void								ItemDupDel();
 	void								DrawSlot();							// Slot (Item)
 	void								Moving();							// Item Duration ���� (Left, Right ��ƴ���)		
 	void								Cursor();								// Cursor (Frame ȭ�� ���� ��)

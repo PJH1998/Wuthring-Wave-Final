@@ -90,6 +90,8 @@ HRESULT CLevel_Map::Initialize()
         return E_FAIL;
     }
 
+    m_eObjectType = CEdit_MapObject::OBJECTTYPE::DEFAULT;
+
     return S_OK;
 }
 
@@ -377,26 +379,36 @@ void CLevel_Map::Menu_Save_Load()
                 else
                     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 
+                File.flush();
                 File.close();
 
-                string PrototypeSave = config.path;
+                _string PrototypeSave = config.path;
                 PrototypeSave += exportText;
                 PrototypeSave += "/";
                 if (!filesystem::exists(PrototypeSave))
                     filesystem::create_directories(PrototypeSave);
                 PrototypeSave += exportText;
                 PrototypeSave += "_";
+                _string PrototypeSaveNames = PrototypeSave;
+                PrototypeSaveNames += ".txt";
                 PrototypeSave += "_Prototype.dat";
                 ofstream File2(PrototypeSave, ios::binary);
+                ofstream File3(PrototypeSaveNames, ios::trunc);
 
+                _uint i = 0;
                 for (const auto& Data : Test)
                 {
                     //_uint i = strlen(Data.c_str());
                     _uint StrSize = strlen(Data.c_str());
                     File2.write(reinterpret_cast<const _char*>(&StrSize), sizeof(_uint));
                     File2.write(reinterpret_cast<const _char*>(Data.c_str()), StrSize);
+                    File3 << Data.c_str() << endl;
+                    i++;
                 }
+                File2.flush();
                 File2.close();
+                File3.write(reinterpret_cast<const _char*>(&i), sizeof(_uint));
+                File3.close();
             }
         }
         ImGui::EndMenu();
@@ -438,7 +450,8 @@ void CLevel_Map::Menu_Save_Load()
                         _string strFilePath = entry.path().string();
                         if (strFilePath.find("Prototype") != std::string::npos)
                             continue;
-
+                        if (strFilePath.find(".txt") != std::string::npos)
+                            continue;
                         ifstream File(strFilePath, ios::binary);
 
                         if (!File.is_open())
@@ -493,7 +506,6 @@ void CLevel_Map::Menu_Save_Load()
 
                                 File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
                                 File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CEdit_MapObject::OBJECTTYPE));
-
                                 _float4x4 Matrix = {};
                                 File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
                                 Desc.WorldMatrix = &Matrix;
@@ -525,9 +537,11 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Rock/Common/1025/";
-    string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+    string FolderPath = "../../Client/Bin/Resource/Map/Test/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
     //string FolderPath = "../../Client/Bin/Resource/Map/";
+
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;
 
@@ -673,38 +687,26 @@ HRESULT CLevel_Map::Ready_Static_Component()
             CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
         });
 
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
 
-    m_pGameInstance->Add_Work([&]() {
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements));
 
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
-            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
 
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements));
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
 
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
-            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements));
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
+        CVIBuffer_Point::Create(m_pDevice, m_pContext));
 
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Shader_Brush"),
-            CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxPoint.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
-
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_VIBuffer_Point"),
-            CVIBuffer_Point::Create(m_pDevice, m_pContext));
-        });
-
-    m_pGameInstance->Wait_Thread_End();
-
-    m_pGameInstance->Add_Work([&]() {
-
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
-            CEdit_MapObject::Create(m_pDevice, m_pContext));
-        });
-
-    m_pGameInstance->Wait_Thread_End();
+    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"),
+        CEdit_MapObject::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
         CEdit_LightObject::Create(m_pDevice, m_pContext));
-
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));

@@ -33,6 +33,7 @@ private:
 	class		CParser*		m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
 	CHARACTER_STAT m_Stats = {};
+	//unordered_map<LEVEL,const _char*> m_
 public:
 	virtual		void	Free() override;
 

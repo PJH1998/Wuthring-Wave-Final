@@ -84,16 +84,19 @@ private:
 	_float							m_fLockOnOffsetY = {};
 
 	// Action
-	vector<CAMERA_FRAME>	m_Frames;// = { nullptr };
+	vector<CAMERA_FRAME>	m_Frames;
 	_float								m_fFirstFrame = {};
 	_int								m_iFrameIndex = { -1 };
 	_float								m_fTrackPerSec = { 10.f };
 	_bool								m_isRecovery = { false };
 	_float4							m_vPreQuaternion = {};
+	_float3							m_vPreTranslation = {};
 	_float4							m_vEndQuaternion = {};
+	_float3							m_vEndTranslation = {};
 	_float								m_fPreFixedDistance = {};
 	_float								m_fTrackPosition = {};
 	_float								m_fDuration = {};
+	_bool								m_isMaintain = { false };
 
 private:
 	// Default
@@ -116,6 +119,7 @@ private:
 	// Action
 	void							Action(_float fTimeDelta);
 	void							Recovery(_float fTimeDelta);
+	void							SetUp_Recovery();
 
 private:
 	void							Ready_Component();

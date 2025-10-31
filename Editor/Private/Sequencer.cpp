@@ -169,7 +169,7 @@ void CSequencer::Update(_float fTimeDelta)
 	ImGui::Text("Frame : "); ImGui::SameLine(); ImGui::InputInt("##1", &m_iCurrentFrame); ImGui::SameLine();
 	ImGui::Text("/ Frame Min : ");  ImGui::SameLine(); ImGui::InputInt("##2", &m_iFrameMin); ImGui::SameLine();
 	ImGui::Text("/ Frame Max : ");  ImGui::SameLine(); ImGui::InputInt("##3", &m_iFrameMax);
-	ImGui::InputFloat("/ TPS : ", &m_fTrackPerSec);
+	ImGui::Text("TPS : ");  ImGui::SameLine(); ImGui::InputFloat("##4", &m_fTrackPerSec);
 	ImGui::PopItemWidth();
 
 	io = ImGui::GetIO();
@@ -185,7 +185,11 @@ void CSequencer::Update(_float fTimeDelta)
 		Sorting_Item();
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_SPACE) == KEYSTATE::DOWN)
+	{
+		if(false == m_isPlay)
+			m_fTrackAcc = static_cast<_float>(m_iCurrentFrame);
 		m_isPlay = !m_isPlay;
+	}
 
 	if (true == m_isPlay)
 		Play(fTimeDelta);
@@ -193,10 +197,15 @@ void CSequencer::Update(_float fTimeDelta)
 
 void CSequencer::Play(_float fTimeDelta)
 {
-	if (m_iCurrentFrame >= m_iFrameMax)
+	if (m_fTrackAcc >= m_iFrameMax)
+	{
+		m_isPlay = false;
+		m_fTrackAcc = static_cast<_float>(m_iFrameMin);
 		return;
+	}
 
-
+	m_fTrackAcc += fTimeDelta * m_fTrackPerSec;
+	m_iCurrentFrame = m_fTrackAcc;
 }
 
 void CSequencer::Selectable_Item()
@@ -255,13 +264,25 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::PopID();
 
 	ImGui::Text("[Rotation]");
-	ImGui::PushID(101);
-	ImGui::InputFloat4("##", reinterpret_cast<_float*>(&CameraFrame.vRotation));
-	ImGui::PopID();
+	_char szQuat[MAX_PATH] = {};
+	sprintf_s(szQuat, MAX_PATH, "X : %.4f\nY : %.4f\nZ : %.4f\bW : %.4f", CameraFrame.vRotation.x, CameraFrame.vRotation.y, CameraFrame.vRotation.z, CameraFrame.vRotation.w);
+	ImGui::Text(szQuat);
+	if (ImGui::Button("Rotation Sync"))
+	{
+		_matrix CameraWoldMatrx = m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW);
+		_vector vScale{}, vQuat{}, vTrans{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, CameraWoldMatrx);
+		XMStoreFloat4(&CameraFrame.vRotation, vQuat);
+	}
 
 	ImGui::Text("[Translation]");
 	ImGui::PushID(102);
 	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&CameraFrame.vTranslation));
+	ImGui::PopID();
+
+	ImGui::Text("[Fov]");
+	ImGui::PushID(103);
+	ImGui::InputFloat("##", &CameraFrame.fFovy);
 	ImGui::PopID();
 
 	ImGui::SameLine();
@@ -300,10 +321,9 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 	
 	ImGui::SameLine();
 	if (ImGui::Button("Load"))
-	{
-
-
-	}
+		m_isLoad = !m_isLoad;
+	if(m_isLoad)
+		Load_CameraAction();
 }
 
 void CSequencer::Sorting_Item()
@@ -357,6 +377,8 @@ void CSequencer::Save_CameraAction()
 				FrameJson["Translation"].push_back(Frames[i].vTranslation.y);
 				FrameJson["Translation"].push_back(Frames[i].vTranslation.z);
 
+				FrameJson["FOV"] = Frames[i].fFovy;
+
 				ActionJson["Frame"].push_back(FrameJson);
 			}
 
@@ -365,6 +387,51 @@ void CSequencer::Save_CameraAction()
 			OutputFile.close();
 		}
 		m_isSave = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+void CSequencer::Load_CameraAction()
+{
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Action/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("CameraActionLoad", "Load File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("CameraActionLoad")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ifstream InputFile(strFilePath);
+
+			json ActionJson;
+
+			InputFile >> ActionJson;
+
+			if (ITEM_TYPE::ACTION == m_Items[m_iSelectedEntry].eType)
+			{
+				SEQUENCE_ITEM& item = m_Items[m_iSelectedEntry];
+				item.iFrameStart = 0;
+				item.iFrameEnd = static_cast<_int>(ActionJson["Duration"]);
+
+				for (auto& Frame : ActionJson["Frame"])
+				{
+					CAMERA_FRAME CameraFrame = {};
+					CameraFrame.fStartFrame = Frame["Start"];
+					CameraFrame.vRotation = _float4(Frame["Rotation"][0], Frame["Rotation"][1], Frame["Rotation"][2], Frame["Rotation"][3]);
+					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
+					CameraFrame.fDistance = Frame["Distance"];
+					CameraFrame.fFovy = Frame["FOV"];
+
+					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
+					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);
+				}
+			}
+			InputFile.close();
+		}
+		m_isLoad = false;
 		ImGuiFileDialog::Instance()->Close();
 	}
 }
@@ -576,6 +643,8 @@ void CSequencer::DrawLegend()
 		iCustomHeight += GetCustomHeight(i);
 	}
 
+	ItemDupDel();
+
 	//ImGuiIO& io = ImGui::GetIO();
 	// Slot BackGround
 	for (size_t i = 0; i < m_Items.size(); ++i)
@@ -607,6 +676,25 @@ void CSequencer::DrawLegend()
 	Cursor();
 
 	m_pDrawList->PopClipRect();
+}
+
+void CSequencer::ItemDupDel()
+{
+	// Item Duplicate
+	if (m_iDupEntry > -1)
+	{
+		// TODO
+
+	}
+
+	// Item Delete
+	if (m_iDelEntry > -1)
+	{
+		m_Items.erase(m_Items.begin() + m_iDelEntry);
+		if (m_iSelectedEntry >= m_Items.size())
+			m_iSelectedEntry = m_Items.size() - 1;
+		m_iDelEntry = -1;
+	}
 }
 
 void CSequencer::DrawSlot()
