@@ -50,8 +50,8 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-    //m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
-    m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/Kings_Load_1026_Final/", m_eCurLevel);
+    m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
+    //m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/Kings_Load_1026_Final/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
     //_fmatrix PreMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
