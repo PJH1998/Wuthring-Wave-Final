@@ -71,8 +71,10 @@ void CWeapon::Activate(_bool IsActive)
 void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     ASSERT_CRASH(m_pModelCom);
-    m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
-        m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+    //m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
+    //    m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+    m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(
+        strAnimName, fTimeDelta, &m_fTrackPosition, false, IsRootMotion, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 

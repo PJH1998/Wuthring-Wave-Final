@@ -83,6 +83,7 @@ protected:
 	vector<CTexture*> m_pNormalTextureCom;
 	vector<CTexture*> m_pMaskTextureCom;
 	vector<CTexture*> m_pMaskDiffuseTextureCom;
+	vector<CTexture*> m_pMaskNormalTextureCom;
 
 
 	class CMap_Interface* m_pMapInterface = {nullptr};
@@ -117,17 +118,20 @@ protected:
 	vector<_string> m_SelectedNormalTexturePath;
 	vector<_string> m_SelectedMaskTexturePath;
 	vector<_string> m_SelectedMaskDiffusePath;
+	vector<_string> m_SelectedMaskNormalPath;
 
 	_string m_SelectedDiffuse;
 	_string m_SelectedNormal;
 	_string m_SelectedMask;
 	_string m_SelectedMaskDiffuse;
+	_string m_SelectedMaskNormal;
 
 	
 	vector<_string >m_SelectedDiffuseName;
 	vector<_string >m_SelectedNormalName;
 	vector<_string> m_SelectedMaskTextureName;
 	vector<_string> m_SelectedMaskDiffuseName;
+	vector<_string> m_SelectedMaskNormalName;
 
 	
 	_string m_iSelectedMeshName;
@@ -137,6 +141,7 @@ protected:
 	_uint* m_iSelectedNormalIndex;
 	_uint* m_iSelectedMaskIndex;
 	_uint* m_iSelectedMaskDiffuseIndex;
+	_uint* m_iSelectedMaskNormalIndex;
 	
 	_uint m_iNumObject = {};
 

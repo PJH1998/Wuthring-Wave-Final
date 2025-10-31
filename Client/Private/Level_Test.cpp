@@ -17,8 +17,9 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_First/");
-    Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
+
+	//로더에서 부른 것과 같은 거 부르기.
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
     Ready_Layer_Player();
 	//Ready_Dummy();
@@ -74,6 +75,7 @@ void CLevel_Test::Ready_Layer_Player()
     //vScale = { 0.01f, 0.01f, 0.01f };
     vRotation = { 0.f, 0.f, 0.f };
     vPosition = { 0.f, -10.f, 50.f };
+    //vPosition = { 3455.f, 160.f, 2951.f };
 
     CPlayer::PLAYER_DESC Desc{};
     Desc.eCurLevel = m_eCurLevel;
@@ -239,32 +241,39 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 
         _wstring PrototypeName = TEXT("Prototype_Component_Model_");
 
-        while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-        {
-            memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-            File.read(Desc.ModelName, NameLength);
+		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+		{
+			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+			File.read(Desc.ModelName, NameLength);
 
-            File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-            File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
-            _float4x4 Matrix = {};
-            File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-            Desc.WorldMatrix = &Matrix;
+			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
+			_float4x4 Matrix = {};
+			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+			Desc.WorldMatrix = &Matrix;
 
-            //프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
-            _wstring ModelName = StringToWString(Desc.ModelName);
+			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
+			_wstring ModelName = StringToWString(Desc.ModelName);
 
-            m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
-                CMapObject::MAP_LOAD pDesc{};
-                strcpy_s(pDesc.ModelName, ModelName.c_str());
-                pDesc.iShaderPassIndex= ShaderPass;
-                pDesc.eObjectType = eObjectType;
-                pDesc.WorldMatrix = &Matrix;
+			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+				CMapObject::MAP_LOAD pDesc{};
+				strcpy_s(pDesc.ModelName, ModelName.c_str());
+				pDesc.iShaderPassIndex = ShaderPass;
+				pDesc.eObjectType = eObjectType;
+				pDesc.WorldMatrix = &Matrix;
 
-                m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
-                    , PROTOTYPE::GAMEOBJECT, &pDesc);
-                });
+				CMapObject* pMapObject = static_cast<CMapObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject")
+					, PROTOTYPE::GAMEOBJECT, &pDesc));
+
+				//m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Layer_Map"), pMapObject);
+				//Safe_AddRef(pMapObject);
+				//m_pGameInstance->Add_To_OctoTree(pMapObject)
+
+				//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"), ENUM_CLASS(m_eCurLevel), TEXT("Layer_Map"), &pDesc)))
+				//	CRASH("Map Object");
+				//});
+				});
         }
-        m_pGameInstance->Wait_Thread_End();
     }
     m_pGameInstance->Wait_Thread_End();
     File.close();

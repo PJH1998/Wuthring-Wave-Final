@@ -2,7 +2,7 @@
 #include "Rover.h"
 #include "Player.h"
 #include "SpringCamera.h"
-#include "RoverWeapon.h"
+#include "RoverSword.h"
 
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -38,12 +38,13 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
-
+	// 임시.
+	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Stand1", 0.f, &m_fTrackPosition);
 
     // 초기 State 설정.
-    m_StateContext.m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+  /*  m_StateContext.m_eIdleType = ERoverIdleType::STAND1_ACTION01;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(ERoverGroundState::IDLE));
+        static_cast<_uint>(ERoverGroundState::IDLE));*/
     
     m_pColliderCom->Set_Gravity(true);
     
@@ -160,8 +161,8 @@ void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _fl
 {
     switch (iPartType)
     {
-    case PART_WEAPON:
-        m_pRoverWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+    case PART_SWORD:
+		m_pRoverSword->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
     default:
         break;
@@ -172,8 +173,8 @@ void CRover::PartActivate(_uint iPartType, _bool IsActive)
 {
     switch (iPartType)
     {
-    case PART_WEAPON:
-        m_pRoverWeapon->Activate(IsActive);
+    case PART_SWORD:
+		m_pRoverSword->Activate(IsActive);
         break;
     default:
         break;
@@ -184,8 +185,8 @@ void CRover::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 {
     switch (iPartType)
     {
-    case PART_WEAPON:
-        m_pRoverWeapon->Clear_Animation(strAnimName);
+    case PART_SWORD:
+		m_pRoverSword->Clear_Animation(strAnimName);
         break;
     default:
         break;
@@ -203,8 +204,8 @@ void CRover::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName
     
     switch (iPartType)
     {
-    case PART_WEAPON:
-        m_pRoverWeapon->Set_SocketMatrix(pSocketMatrix);
+    case PART_SWORD:
+		m_pRoverSword->Set_SocketMatrix(pSocketMatrix);
         break;
     }
 }
@@ -389,7 +390,7 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         CWeapon::WEAPON_DESC Desc{};
         switch (i)
         {
-        case PARTTYPE::PART_WEAPON:
+        case PARTTYPE::PART_SWORD:
 
             vScale = { 1.f, 1.f, 1.f };
             vPosition = { 0.f, 0.f, 0.f };
@@ -404,9 +405,9 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
 
-            m_pRoverWeapon = dynamic_cast<CRoverWeapon*>(Find_PartObject(strPartName));
-            ASSERT_CRASH(m_pRoverWeapon);
-            Safe_AddRef(m_pRoverWeapon);
+			m_pRoverSword = dynamic_cast<CRoverSword*>(Find_PartObject(strPartName));
+            ASSERT_CRASH(m_pRoverSword);
+            Safe_AddRef(m_pRoverSword);
             break;
         }
     }
@@ -441,5 +442,5 @@ CGameObject* CRover::Clone(void* pArg)
 void CRover::Free()
 {
     CCharacter::Free();
-    Safe_Release(m_pRoverWeapon);
+    Safe_Release(m_pRoverSword);
 }

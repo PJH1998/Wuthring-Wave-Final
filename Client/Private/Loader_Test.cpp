@@ -13,7 +13,7 @@
 #include "AugustaGriffon.h"
 #include "Augusta.h"
 
-#include "RoverWeapon.h"
+#include "RoverSword.h"
 #include "Rover.h"
 
 #include "Player.h"
@@ -33,7 +33,7 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-    //m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
@@ -50,8 +50,8 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-    m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
-    //m_pGameSystem->Create_Map_Model("../Bin/Resource/Map/MapData/Kings_Load_1026_First/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
+    m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
     //_fmatrix PreMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
@@ -102,8 +102,8 @@ HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
 
-    // Prototype_Component_BehaviorTree_Test
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
+    // Prototype_Component_BehaviorTree_TestLoad_MonsterTest
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
         CRASH("BehaviorTree Create Failed");
 
@@ -232,7 +232,7 @@ HRESULT CLoader_Test::Load_Augusta()
 HRESULT CLoader_Test::Load_Rover()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/R.dat";
+    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/DarkRover.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     //_float fSize = 0.01f;
     _float fSize = 0.0001f;
@@ -261,8 +261,8 @@ HRESULT CLoader_Test::Load_Rover()
 
 
 #pragma region Parts
-    wStrModelTag = L"Prototype_Component_Model_Rover_Weapon";
-    strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Weapon.dat";
+    wStrModelTag = L"Prototype_Component_Model_Rover_Sword";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Sword/Sword.dat";
     fSize = 0.01f;
     //fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -273,10 +273,10 @@ HRESULT CLoader_Test::Load_Rover()
         CRASH("Prototype Create Failed");
 
     // 2. 객체 초기화.
-    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Bayonet");
+    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Sword");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wstrBayonetTag
-        , CRoverWeapon::Create(m_pDevice, m_pContext))))
+        , CRoverSword::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
 #pragma endregion

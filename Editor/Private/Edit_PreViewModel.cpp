@@ -60,15 +60,14 @@ void CEdit_PreViewModel::Render()
 
     CModel* pModel = Pair->second;
 
-    for (_uint i = 0; i < pModel->Get_NumMesh(); ++i)
-        Sync_BoundingBox(pModel->Get_BoundingBox(i), m_pTransformCom->Get_WorldMatrix());
+        Sync_BoundingBox(pModel->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
     _float3 vMinExt = _float3(FLT_MAX, FLT_MAX, FLT_MAX);
     _float3 vMaxExt = _float3(FLT_MIN, FLT_MIN, FLT_MIN);
 
     for (_uint i = 0; i < pModel->Get_NumMesh(); ++i)
     {
-        BoundingBox* Box = pModel->Get_BoundingBox(i);
+        BoundingBox* Box = pModel->Get_BoundingBox();
         vMinExt.x = min(vMinExt.x, Box->Center.x - Box->Extents.x);
         vMinExt.y = min(vMinExt.y, Box->Center.y - Box->Extents.y);
         vMinExt.z = min(vMinExt.z, Box->Center.z - Box->Extents.z);

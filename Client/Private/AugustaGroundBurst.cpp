@@ -85,11 +85,11 @@ void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
 
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {
-        m_pAugusta->Play_PartAnimation(
+       /* m_pAugusta->Play_PartAnimation(
             m_iPartType,
             m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr, 1.f
-        );
+            fTimeDelta, nullptr, 1.f // 파츠 애니메이션 적용하는게 아님. => 적용해서 떴던거.
+        );*/
     }
     
 }
@@ -136,6 +136,7 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
         if (eBurstType == EAugustaBurstType::BURST01)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaBurstType::BURST_STAND);
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
             //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaBurstType::BURST_STAND));
             return;
         }

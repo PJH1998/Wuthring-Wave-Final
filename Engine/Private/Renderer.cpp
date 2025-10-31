@@ -63,11 +63,19 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 {
 	if (nullptr == pRenderObject)
 		return E_FAIL;
-	
+
+	m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
+	Safe_AddRef(pRenderObject);
+
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(CGameObject* pRenderObject)
+{
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
-		m_RenderObjects[ENUM_CLASS(eRenderGroup)].push_back(pRenderObject);
-		Safe_AddRef(pRenderObject);
+		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
 	}
 
 	return S_OK;
@@ -75,6 +83,8 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 
 void CRenderer::Render()
 {
+	//m_pGameInstance->Wait_Thread_End();
+
 	Render_Priority();
 	Render_Shadow();
 	Render_Outline();
@@ -221,6 +231,20 @@ void CRenderer::Render_NonBlend()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
 		CRASH("Render Fail")
 
+	// Buffer Index
+	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+	// Static Object Render
+	for (auto& pStaticObject : m_StaticObjects[iReadIndex])
+	{
+		if (nullptr != pStaticObject)
+			pStaticObject->Render();
+	}
+	if (m_pGameInstance->IsWorkFinish())
+	{
+		m_StaticObjects[iReadIndex].clear();
+		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+	}
+
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)])
 	{
 		if (nullptr != pRenderObject)
@@ -236,6 +260,19 @@ void CRenderer::Render_NonBlend()
 
 void CRenderer::Render_SSAO()
 {
+	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
+		CRASH("Failed Bind WorldMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
+		CRASH("Failed Bind ViewMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
+		CRASH("Failed Bind ProjMatrix");
+	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
+		CRASH("Failed Bind ViewMatrixInv");
+	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
+		CRASH("Failed Bind ProjMatrixInv");
+	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		CRASH("Failed Bind CamPosition");
+
 #ifdef _DEBUG
 	if (false == m_IsSSAO)
 	{
@@ -249,19 +286,6 @@ void CRenderer::Render_SSAO()
 #pragma region SSAO
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
 		CRASH("Render Fail");
-
-	if (FAILED(m_pShader->Bind_Matrix("g_WorldMatrix", &m_WorldMatrix)))
-		CRASH("Failed Bind WorldMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrix", &m_ViewMatrix)))
-		CRASH("Failed Bind ViewMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrix", &m_ProjMatrix)))
-		CRASH("Failed Bind ProjMatrix");
-	if (FAILED(m_pShader->Bind_Matrix("g_ViewMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW))))
-		CRASH("Failed Bind ViewMatrixInv");
-	if (FAILED(m_pShader->Bind_Matrix("g_ProjMatrixInv", m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ))))
-		CRASH("Failed Bind ProjMatrixInv");
-	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Failed Bind CamPosition");
 
 	if (FAILED(m_pSubResource->Bind_SSAO_Resources(m_pShader)))
 		CRASH("Failed Bind SSAO Resources");
@@ -374,6 +398,11 @@ void CRenderer::Render_Combined()
 	
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 2)))
 		return;
+
+#ifdef _DEBUG
+	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
+		CRASH("Render Fail");
+#endif
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
 		CRASH("Render Fail")
