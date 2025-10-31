@@ -21,9 +21,15 @@
 #include "DirectXTK/Effects.h"
 using namespace DirectX;
 
+// Comptr
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+
 // Fmod
 #include "Fmod/fmod.hpp"
 #define FMOD_CHANNEL_MAX 32
+
+
 
 // Json
 #include "Json/json.hpp"

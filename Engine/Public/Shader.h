@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Component.h"
 
 NS_BEGIN(Engine)
@@ -28,8 +29,7 @@ public:
 #endif
 
 private:
-	shared_ptr<ID3DX11Effect>			m_pEffect = { nullptr };
-	//ID3DX11Effect*							m_pEffect = { nullptr };
+	ComPtr<ID3DX11Effect>			m_pEffect = { nullptr };
 	vector<ID3D11InputLayout*>				m_InputLayouts;
 	_uint									m_iNumPasses = {};
 
