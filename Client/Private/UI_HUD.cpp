@@ -20,7 +20,7 @@
 *   K : 하단 원형 자원 랜덤하게 UP
 *   L : 궁극기 사용 후 칼로 바뀐 자원 랜덤하게 UP
 * 
-*   (갈브레나) (WIP)
+*   (갈브레나)
 *   Y : 에코 전용 공명게이지 10씩 UP (50이 최대치. 5번 쓰면 최대치로 찬다던데..)
 * 
 *   * 각 수치는 최상단의 매크로를 주석 해제하면 cout으로 보임
@@ -1412,8 +1412,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
         if (fUltBladeEnergy == 100) fUltBladeEnergy = 0;
         else
         {
-            fUltBladeEnergy += m_pGameInstance->Rand(10.f, 40.f);
-            if (fUltBladeEnergy >= 100) fUltBladeEnergy = 100;
+            //fUltBladeEnergy += m_pGameInstance->Rand(10.f, 40.f);
+            fUltBladeEnergy += 100.f / 7.f;
+            if (fUltBladeEnergy >= 99.9f) fUltBladeEnergy = 100;
         }
     }
 
