@@ -9,6 +9,7 @@ class CAugustaGroundAttack final : public CGroundState
 private:
     enum ATTACKSTATE // 내부에서 전환 가능한 상태.
     {
+		ATTACK,
         FIRST_ATTACK = 0,
         SECOND_ATTACK,
         THIRED_ATTACK,

@@ -78,7 +78,8 @@ void CSpringCamera_Edit::Update(_float fTimeDelta)
 	}
 	else
 	{
-		Mouse_Scroll(fTimeDelta);
+		if(m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE) == KEYSTATE::PRESS)
+			Mouse_Scroll(fTimeDelta);
 		// 0. Cam Rotate
 		if (CAMERA_STATE::TARGET == m_eCameraState && m_pGameInstance->Get_DIKeyState(DIK_LCONTROL) == KEYSTATE::PRESS)
 			__super::Mouse_Move_Up();
@@ -242,8 +243,13 @@ void CSpringCamera_Edit::Dynamic_Distance()
 
 void CSpringCamera_Edit::Action(_float fTimeDelta)
 {
+	// Action End
 	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
+	{
+		if (false == m_isMaintain)
+			SetUp_Recovery();
 		return;
+	}
 
 	_float fStartFrame{}, fEndFrame{};
 	fStartFrame = -1 == m_iFrameIndex ? m_fFirstFrame : m_Frames[m_iFrameIndex].fStartFrame;
@@ -264,6 +270,8 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		// Fov
+		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
 
 	_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
@@ -297,6 +305,16 @@ void CSpringCamera_Edit::Recovery(_float fTimeDelta)
 	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
 	_vector vLerpTranslation = XMVectorLerp(XMLoadFloat3(&m_vEndTranslation), XMLoadFloat3(&m_vPreTranslation), m_fTrackPosition / 1.5f);
 	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+}
+
+void CSpringCamera_Edit::SetUp_Recovery()
+{
+	m_fTrackPosition = 0.f;
+	if (false == m_isRecovery)
+		m_isRecovery = true;
+	m_fFixedDistance = m_fPreFixedDistance;
+	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+	m_vEndTranslation = _float3(0.f, 0.f, 0.f);
 }
 
 void CSpringCamera_Edit::Ready_Component()
@@ -336,11 +354,7 @@ void CSpringCamera_Edit::Ready_Event()
 			}
 			else
 			{
-				m_fTrackPosition = 0.f;
-				if(false == m_isRecovery)
-					m_isRecovery = true;
-				m_fFixedDistance = m_fPreFixedDistance;
-				XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
+				SetUp_Recovery();
 			}
 		});
 }

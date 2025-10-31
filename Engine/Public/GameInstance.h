@@ -115,10 +115,11 @@ public:
 #pragma region RENDERER
 public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	void		Begin_ScreenEffect(SFX_TYPE eType);
-	void		End_ScreenEffect();
+	HRESULT		Add_Render_StaticObject(class CGameObject* pObject);
+	void			Begin_ScreenEffect(SFX_TYPE eType);
+	void			End_ScreenEffect();
 #ifdef _DEBUG
-	void		Set_LUT_Index(_uint iIndex);
+	void			Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);

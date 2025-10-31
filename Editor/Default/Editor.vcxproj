@@ -199,6 +199,7 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
+    <ClInclude Include="..\Public\Map_Object_Destruction.h" />
     <ClInclude Include="..\Public\Mesh_Controller.h" />
     <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
@@ -252,6 +253,7 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
+    <ClCompile Include="..\Private\Map_Object_Destruction.cpp" />
     <ClCompile Include="..\Private\Mesh_Controller.cpp" />
     <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />

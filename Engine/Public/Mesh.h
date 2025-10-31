@@ -20,7 +20,7 @@ public:
 	const vector<_float4x4>& Get_OffsetMatrices() const { return m_OffsetMatrices; }
 
 public:
-	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	virtual		HRESULT			Initialize_Prototype(MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos = nullptr, _float* MaxPos = nullptr);
 	virtual		HRESULT			Initialize_Clone(void* pArg);
 
 #ifdef _DEBUG
@@ -29,7 +29,7 @@ public:
 
 public:
 	HRESULT						Bind_BoneMatrices(class CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones);
-	BoundingBox*				Get_BoundingBox() { return m_pBoundingBox; }
+
 private:
 	_uint							m_iMaterialIndex = {};
 	_uint							m_iNumBones = {};
@@ -42,15 +42,14 @@ private:
 	// Mesh Shape??Container
 	vector<_float3>				m_VertexPositions;
 	vector<_uint>				m_Indices;
-	BoundingBox*				m_pBoundingBox = { nullptr };
 
 private:
 	HRESULT						Ready_Mesh_NonAnim(_fmatrix PreTransformMatrix, ifstream& InputFile);
 	HRESULT						Ready_Mesh_Anim(const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
-	HRESULT						Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile);
+	HRESULT						Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
 
 public:
-	static		CMesh*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile);
+	static		CMesh*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, MODELTYPE eType, const vector<class CBone*>& Bones, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos=nullptr, _float* MaxPos=nullptr);
 	virtual		CComponent*	Clone(void* pArg);
 	virtual		void				Free() override;
 };

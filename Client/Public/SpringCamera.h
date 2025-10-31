@@ -10,7 +10,7 @@ NS_BEGIN(Client)
 class CSpringCamera final : public CCamera
 {
 public:
-	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, CUTSCENE };
+	enum class CAMERA_STATE { TARGET, SPRING, LOCKON, ACTION };
 private:
 	explicit CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CSpringCamera(const CSpringCamera& Prototype);
@@ -79,6 +79,22 @@ private:
 	_float							m_fLockOnOffsetY = {};
 	_float							m_fLockOnDistanceOffset = {};
 
+	// Action
+	vector<CAMERA_FRAME>	m_Frames;
+	_float								m_fFirstFrame = {};
+	_int								m_iFrameIndex = { -1 };
+	_float								m_fTrackPerSec = { 10.f };
+	_bool								m_isRecovery = { false };
+	_float4							m_vPreQuaternion = {};
+	_float3							m_vPreTranslation = {};
+	_float4							m_vEndQuaternion = {};
+	_float3							m_vEndTranslation = {};
+	_float								m_fPreFixedDistance = {};
+	_float								m_fTrackPosition = {};
+	_float								m_fDuration = {};
+	_float4x4							m_OwnerMatrix = {};
+	_bool								m_isMaintain = { false };
+
 private:
 	// Default
 	void							Lerp_Distance(_float fTimeDelta);
@@ -96,6 +112,14 @@ private:
 	void							Dual_Targeting(_float fTimeDelta);			// Dual Target Compute
 	void							Dynamic_Distance();
 	void							Adjust_LockOn_Distance();
+
+	// Action
+	void							Action(_float fTimeDelta);
+	void							Recovery(_float fTimeDelta);
+	void							SetUp_Recovery();
+
+private:
+	void							Ready_Event();
 
 public:
 	static		CSpringCamera*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

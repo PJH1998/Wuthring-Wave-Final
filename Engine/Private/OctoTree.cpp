@@ -21,7 +21,6 @@ void COctoTree::Add_To_OctoTree(CStaticObject* pObject, const BoundingBox* pBox)
 {
 	ASSERT_CRASH(m_pRootCell);
 
-	// Object??BoundingBox Min, Max X/Y/Z ?앹꽦
 	_float fMinMax[ENUM_CLASS(CCubeCell::MINMAX::END)] = {};
 
 	fMinMax[ENUM_CLASS(CCubeCell::MINMAX::MIN_X)] = pBox->Center.x - pBox->Extents.x * 0.5f;
