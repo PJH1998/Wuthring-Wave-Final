@@ -159,6 +159,8 @@ PS_OUT PS_NORMALTEX(PS_IN In)
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
     
+    Out.vPBR.y = 0.2f;
+    
     return Out;
 }
 

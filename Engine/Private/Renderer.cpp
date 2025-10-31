@@ -83,6 +83,8 @@ HRESULT CRenderer::Add_Render_StaticObject(CGameObject* pRenderObject)
 
 void CRenderer::Render()
 {
+	//m_pGameInstance->Wait_Thread_End();
+
 	Render_Priority();
 	Render_Shadow();
 	Render_Outline();
@@ -229,14 +231,16 @@ void CRenderer::Render_NonBlend()
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
 		CRASH("Render Fail")
 
-	_uint iReadIndex = m_iDoubleBufferIndex.exchange((m_iDoubleBufferIndex + 1) % 2, memory_order_acq_rel);
+	// Buffer Index Swap
+	m_iDoubleBufferIndex.exchange((m_iDoubleBufferIndex + 1) % 2, memory_order_release);
+	_uint iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+	// Static Object Render
 	for (auto& pStaticObject : m_StaticObjects[iReadIndex])
 	{
 		if (nullptr != pStaticObject)
 			pStaticObject->Render();
 	}
 	m_StaticObjects[iReadIndex].clear();
-	m_iDoubleBufferIndex = m_iDoubleBufferIndex.exchange((m_iDoubleBufferIndex + 1) % 2, memory_order_release);
 
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::NONBLEND)])
 	{

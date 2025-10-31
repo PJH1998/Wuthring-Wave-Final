@@ -17,7 +17,7 @@ HRESULT CLevel_Test::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_First/");
+    //Ready_Layer_Map("../Bin/Resource/Map/MapData/Kings_Load_1026_Final/");
     Ready_Layer_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/");
 
     Ready_Layer_Player();

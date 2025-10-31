@@ -21,6 +21,7 @@ public:
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
 	_bool									IsWorkFinish() { 
+		this_thread::sleep_for(chrono::milliseconds(1));
 		_int iLiveWork = m_iLiveWork.load(memory_order_acquire);
 		_int iRemainWork = m_iRemainWork.load(memory_order_acquire);
 		return 0 == iLiveWork && 0 == iRemainWork; }

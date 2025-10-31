@@ -78,7 +78,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
                     m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
                         if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
                             CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
-                            CRASH("Prototype Create Failed");
+                            CRASH(Prototype.data);
                         });
                 }
                 else if (entry2.path().string().find("Instance") != std::string::npos)
