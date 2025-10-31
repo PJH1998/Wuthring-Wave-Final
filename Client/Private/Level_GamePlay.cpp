@@ -26,6 +26,23 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_ShadowNF();
 
+
+	// UI
+	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	const _wstring strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+	// _UI
+
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 	return S_OK;

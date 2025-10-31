@@ -10,12 +10,10 @@ HRESULT CLevel_Test_UI::Initialize()
 {
     // HUD ���ӿ�����Ʈ �߰�
     const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
-
     const _wstring strLayertag_UI = L"Layer_Custom_UI";
     const _wstring strPrototypeTag_UI[] = {
          L"Prototype_GameObject_Custom_UI_Container_HUD"
     };
-
 
     for (auto& strPrototypeTag : strPrototypeTag_UI)
     {

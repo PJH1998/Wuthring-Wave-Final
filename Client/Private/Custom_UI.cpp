@@ -316,7 +316,8 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
     const _uint         iNumFiles = pDesc->iNumFiles;
 
     //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
-    const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
+	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
     const   _bool       isInstance = pDesc->isInstance;
 
 
