@@ -489,15 +489,14 @@ void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
 	_float3 vCenter = {};
 	_float3 vExtends = {};
-	vCenter.x = (pMaxPos[0] + pMinPos[0]) / 2.f;
-	vCenter.y = (pMaxPos[1] + pMinPos[1]) / 2.f;
-	vCenter.z = (pMaxPos[2] + pMinPos[2]) / 2.f;
+	vCenter.x = (pMaxPos[0] + pMinPos[0]) * 0.5f;
+	vCenter.y = (pMaxPos[1] + pMinPos[1]) * 0.5f;
+	vCenter.z = (pMaxPos[2] + pMinPos[2]) * 0.5f;
 
-	vExtends.x = (pMaxPos[0] - pMinPos[0]) / 2.f;
-	vExtends.y = (pMaxPos[1] - pMinPos[1]) / 2.f;
-	vExtends.z = (pMaxPos[2] - pMinPos[2]) / 2.f;
+	vExtends.x = (pMaxPos[0] - pMinPos[0]) * 0.5f;
+	vExtends.y = (pMaxPos[1] - pMinPos[1]) * 0.5f;
+	vExtends.z = (pMaxPos[2] - pMinPos[2]) * 0.5f;
 	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
-
 }
 
 BoundingBox* CModel::Get_BoundingBox()
