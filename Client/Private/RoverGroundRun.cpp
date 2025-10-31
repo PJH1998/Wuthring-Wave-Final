@@ -100,9 +100,6 @@ void CRoverGroundRun::Handle_Input()
 }
 
 
-
-
-
 void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
 {
     // 0. 애니메이션 실행부터
@@ -130,7 +127,8 @@ void CRoverGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pRover->Get_DistanceToGround(0.1f) <= 0.4f;
+	m_States[LAND] = m_pRover->Is_Land();
+	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.4f);
 }
 
 
@@ -143,9 +141,17 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 
 	if (!m_States[LAND])
 	{
-		m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
-		return;
+		m_iNotLandFrames++;
+		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		{
+			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+			return;
+		}
+	}
+	else
+	{
+		m_iNotLandFrames = 0;  // 리셋
 	}
 
     // SPACE 누르면 바로 점프로 전환.

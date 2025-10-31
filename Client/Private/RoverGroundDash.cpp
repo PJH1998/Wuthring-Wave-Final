@@ -62,6 +62,8 @@ void CRoverGroundDash::Handle_Input()
 {
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
+	m_States[LAND] = m_pRover->Is_Land();
+	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);;
 }
 
 
@@ -80,19 +82,20 @@ void CRoverGroundDash::Update_SprintAnimation(_float fTimeDelta)
         m_pRover->Rotate_Direction(vMoveDir);
     }
     CCharacterState::Play_Animation(m_pRover, fTimeDelta);
-    
-
-    
-}
-
-void CRoverGroundDash::LockOnCheck_StateTransition(_float fTimeDelta)
-{
 }
 
 void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 {
     ERoverDashType eDashType = static_cast<ERoverDashType>(m_iCurrentAnimIdx);
 	_bool IsEscapePossible = CState::Is_EscapePossible();
+
+	if (!m_States[LAND])
+	{
+		m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
+
     // 애니메이션 끝나면?
     if (m_IsAnimationEnd)
     {

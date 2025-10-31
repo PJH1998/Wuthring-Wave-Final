@@ -77,7 +77,8 @@ void CRoverAirJump::Handle_Input()
 
 void CRoverAirJump::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pRover->Get_DistanceToGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pRover->Is_Land();
+	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);
 }
 
 // 점프에 관련된 Update

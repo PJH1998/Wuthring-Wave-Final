@@ -11,6 +11,7 @@ private:
     {
         JUMP = 0,
         DASH,
+		LAND,
         SPRINT,
         MOVE,
         ATTACK,

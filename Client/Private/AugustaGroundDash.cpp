@@ -67,6 +67,7 @@ void CAugustaGroundDash::Handle_Input()
 {
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 
@@ -85,19 +86,19 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
         m_pAugusta->Rotate_Direction(vMoveDir);
     }
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
-
     
-
-    
-}
-
-void CAugustaGroundDash::LockOnCheck_StateTransition(_float fTimeDelta)
-{
 }
 
 void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 {
     EAugustaDashType eDashType = static_cast<EAugustaDashType>(m_iCurrentAnimIdx);
+
+	if (!m_States[LAND])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
 
     // 애니메이션 끝나면?
     if (m_IsAnimationEnd)

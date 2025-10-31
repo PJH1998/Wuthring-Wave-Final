@@ -80,7 +80,8 @@ void CRoverAirFall::Update_FallAnimation(_float fTimeDelta)
 
 void CRoverAirFall::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pRover->Get_DistanceToGround(0.1f) <= 0.2f;
+    m_States[LAND] = m_pRover->Is_Land();
+	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);
 }
 
 void CRoverAirFall::Check_StateTransition(_float fTimeDelta)

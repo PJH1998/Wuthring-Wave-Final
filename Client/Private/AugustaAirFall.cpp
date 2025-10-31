@@ -87,7 +87,7 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
 
 void CAugustaAirFall::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.4f;
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)

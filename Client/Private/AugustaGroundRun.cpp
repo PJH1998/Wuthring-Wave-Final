@@ -130,7 +130,7 @@ void CAugustaGroundRun::Check_Physics()
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
 
-	m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.4f;
+	m_States[LAND] = m_pAugusta->Is_Land();
 
 }
 
@@ -141,8 +141,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 0.2f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
     //// 전방 벽감지.
     //if (m_States[RUN_U] && m_States[WALL])

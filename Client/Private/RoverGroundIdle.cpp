@@ -106,7 +106,7 @@ void CRoverGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 
 void CRoverGroundIdle::Check_Physics(_float fTimeDelta)
 {
-
+	m_States[LAND] = m_pRover->Is_Land();
 }
 
 // Idles 조건이 아닌 것들.
