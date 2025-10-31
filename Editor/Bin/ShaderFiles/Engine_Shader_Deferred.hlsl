@@ -93,6 +93,9 @@ float4 g_fRimIntensity = 0.8f;
 
 float g_fEffectIntensity;
 
+//DEBUG
+bool g_IsStylized;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -160,7 +163,10 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     vector vToonRim = g_ToonRimTexture.Sample(DefaultSampler, In.vTexcoord);
     float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
     
-    vector vRimColor = g_ColorRampTexture.Sample(DefaultSampler, float2(0.5f, (1.f - vToonRim.z)));
+    vector vRimColor = vDiffuse;
+    //g_ColorRampTexture.Sample(DefaultSampler, float2(0.5f, (1.f - vToonRim.z)));
+    
+    float fRim = clamp(vToonRim.z, 0.1f, 1.f);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
     
@@ -168,12 +174,16 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
-    //Out.vColor.xyz = 1.f * Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-    //
+    if (g_IsStylized)
+    {
+        float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+        Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * fRim); //vToonRim.z);
+    }
+    else
+    {
+        Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+    }
     
-    
-    float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-    Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * vToonRim.z);
     Out.vColor.xyz += vDiffuse.xyz * 0.4f; // Ambient
     
     //Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
@@ -284,37 +294,20 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
 
     Out.vToonRim.x = fToonShade;
-    
-    
-    //float fY = saturate(dot(normalize(g_vLightDirection.xyz * -1.f), vNormal.xyz));
-    
-    //Out.vToonRim.y = fY;
-    
-    //fY = clamp(0.4f, 1.f, fY);
-    
-    //float fShade = g_RampTexture.Sample(PointSampler, float2(0.5f, fY)).r;
-    
-    
-    //Out.vToonRim.x = fShade;
-
-    
+  
     vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
-    
+   
     vector vRimLight = 0.f;
     
-    vRimLight = pow(1.f - (saturate(dot(vNormal, vLook))),3.f);
+    vRimLight = 1.f - abs(dot(vNormal, vLook));
+    
+    vRimLight *= smoothstep(0.2f, 1.f, NdotL);
+    
+    vRimLight = pow(vRimLight, 3.f);
     
     Out.vToonRim.z = vRimLight;
-    
-    //Out.vToonRim.w = 1.f;
-    
-    //vector vReflect = reflect(normalize(g_vLightDirection), vNormal);
-    
-    //float fSpecular = pow(max(dot(normalize(vReflect) * -1.f, normalize(vLook)), 0.f), 50.f);
-    
-    //Out.vSpecular = (g_vLightSpecular) * fSpecular;
     
     return Out;
 }

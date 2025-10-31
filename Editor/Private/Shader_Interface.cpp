@@ -167,7 +167,17 @@ void CShader_Interface::Setting_Shader()
 #endif
 	}
 
+	if (ImGui::CollapsingHeader("PBR"))
+	{
+		if (ImGui::Button("STYLIZED"))
+			m_pGameInstance->SetPBR(true);
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("DEFAULT"))
+			m_pGameInstance->SetPBR(false);
+	}
+	
 #pragma endregion
 	ImGui::End();
 }

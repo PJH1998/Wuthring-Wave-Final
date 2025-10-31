@@ -129,6 +129,7 @@ public:
 	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity);
+	void		SetPBR(_bool IsStylized);
 #endif
 #pragma endregion
 

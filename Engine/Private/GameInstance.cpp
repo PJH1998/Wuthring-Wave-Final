@@ -443,6 +443,10 @@ void CGameInstance::SetMaxEffectIntensity(_float fMaxIntensity)
 {
 	m_pRenderer->SetMaxEffectIntensity(fMaxIntensity);
 }
+void CGameInstance::SetPBR(_bool IsStylized)
+{
+	m_pRenderer->SetPBR(IsStylized);
+}
 #endif
 #pragma endregion
 

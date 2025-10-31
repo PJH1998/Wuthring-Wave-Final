@@ -34,6 +34,7 @@ public:
 	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
+	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 #endif
 
 private:
@@ -66,6 +67,7 @@ private:
 	_bool							m_isRenderDebug = { true };
 	_bool							m_IsSSAO = { true };
 	_bool							m_IsSSAO_Blur = { true };
+	_bool							m_IsStylized = { true };
 #endif
 
 private:
