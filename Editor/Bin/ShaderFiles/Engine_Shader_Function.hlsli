@@ -5,6 +5,7 @@ static float PI = 3.1415926535f;
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 matrix g_CamViewMatrix, g_CamProjMatrix;
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
+matrix g_PrevCamViewMatrix, g_PrevCamProjMatrix;
 float g_fFar;
 vector g_vCamPosition;
 
@@ -156,6 +157,26 @@ float4 Compute_ViewPos_Sampler(float2 vTexcoord, Texture2D DepthTexture, sampler
     float4 vViewPos = 0.f;
     
     vector vDepthDesc = DepthTexture.Sample(Sampler, vTexcoord);
+    
+    vViewPos.x = vTexcoord.x * 2.f - 1.f;
+    vViewPos.y = vTexcoord.y * -2.f + 1.f;
+    vViewPos.z = vDepthDesc.x;
+    vViewPos.w = 1.f;
+    
+    vViewPos = vViewPos * vDepthDesc.y;
+    vViewPos = mul(vViewPos, g_ProjMatrixInv);
+    
+    return vViewPos;
+}
+
+float4 Compute_ViewPos_SSAO(float2 vTexcoord, Texture2D DepthTexture)
+{
+    float4 vViewPos = 0.f;
+    
+    vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
+    
+    if(vDepthDesc.z == 1.f)
+        return vViewPos;
     
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;

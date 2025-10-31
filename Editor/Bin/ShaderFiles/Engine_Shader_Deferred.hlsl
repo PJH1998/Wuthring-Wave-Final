@@ -1,17 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
 #include "Engine_Shader_Function.hlsli"
-//matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-//matrix g_CamViewMatrix, g_CamProjMatrix;
-//matrix g_ViewMatrixInv, g_ProjMatrixInv;
-//float g_fFar;
-//vector g_vCamPosition;
-//Texture2DArray<float> g_ShadowMap : register(t0);
-
-//float g_fWidth = 1920.f;
-//float g_fHeight = 1080.f;
-//Texture2D g_NormalTexture;
-//Texture2D g_DepthTexture;
-
 float g_fLightFar;
 
 Texture2D g_Texture;
@@ -20,7 +8,7 @@ Texture2D g_Texture;
 Texture2D g_DiffuseTexture; // Color
 Texture2D g_NormalTexture;  // Normal
 Texture2D g_DepthTexture;   // (Depth.x = Proj.z / Proj.w) , (Depth.y = Proj.w)
-Texture2D g_PBRTexture;     // (PBR.x = IsMetallic), (PBR.y = Roughness ), (PBR.z = IsShadow) 
+Texture2D g_PBRTexture;     // (PBR.x = Metallic), (PBR.y = Roughness ), (PBR.z = IsDynamic) 
 
 Texture2DArray<float> g_ShadowMap : register(t2);
 
@@ -63,10 +51,6 @@ Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
 float g_fLutLerpIntensity = 0.f;
-
-//PBR
-float g_fGlobalRoughness = 0.2f;
-float g_fGlobalMetallic = 0.f;
 
 cbuffer CSMDatas : register(b1)
 {
@@ -179,39 +163,23 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
     /////////TEST
-    if (g_IsStylized)
+    if (vPBRDesc.z)
     {
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-       // float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
-        Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * fRim); //vToonRim.z);
+        Out.vColor.xyz = vPBR * (vToonRim.x) + (vRimColor.xyz * fRim);
     }
     else
     {
-        //Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
         float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
         Out.vColor.xyz = vPBR * fSSao;
     }
     
-    //if (g_IsStylized)
-    //{
-    //    float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-    //    Out.vColor.xyz = vPBR * (vToonRim.x * fSSao) + (vRimColor.xyz * fRim); //vToonRim.z);
-    //}
-    //else
-    //{
-    //    Out.vColor.xyz = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-    //}
-    
     Out.vColor.xyz += vDiffuse.xyz * 0.4f; // Ambient
     
-    //Out.vColor = vDiffuse * (vToonRim.x * lerp(vSSao, 1.f, vToonRim.y)) + (vRimColor * vToonRim.z);
     Out.vColor.a = 1.f;
     
-    float IsShadow = vPBRDesc.z;
-    
-    if(IsShadow == 1.f)
+    if (any(vPBRDesc.z))
         return Out;
-    
 ///////// Shadow Begin /////////
 
     int iCascadeIndex = 0;
@@ -441,7 +409,7 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    vector vViewPos = Compute_ViewPos_SSAO(In.vTexcoord, g_DepthTexture);
    
     if (vViewPos.z == 0.f || vViewPos.z >= g_fSSAO_OutDistance)
     {
@@ -520,6 +488,25 @@ PS_OUT_BACKBUFFER PS_BLUR(PS_IN In)
     float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
     
     Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);
+    
+    return Out;
+}
+
+PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
+    
+    float4 vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    float4 vPrevProjPos = mul(vWorldPos, PrevVP);
+    
+    float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy / vPrevProjPos.w);
+    
+    float2 vMotionVector = In.vTexcoord - vPrevTexcoord;
+    
+    Out.vColor.xy = vMotionVector;
+    Out.vColor.a = 1.f;
     
     return Out;
 }
@@ -693,7 +680,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOF_DEPTH();
     }
     
-    pass Blur
+    pass Blur   // 12
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -702,5 +689,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_BLUR();
+    }
+    
+    pass MotionBlur // 13
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_VELOCITY_MAP();
     }
 }
