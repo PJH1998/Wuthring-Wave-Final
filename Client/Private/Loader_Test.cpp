@@ -13,7 +13,7 @@
 #include "AugustaGriffon.h"
 #include "Augusta.h"
 
-#include "RoverWeapon.h"
+#include "RoverSword.h"
 #include "Rover.h"
 
 #include "Player.h"
@@ -33,7 +33,7 @@ HRESULT CLoader_Test::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-    //m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+    m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
@@ -261,8 +261,8 @@ HRESULT CLoader_Test::Load_Rover()
 
 
 #pragma region Parts
-    wStrModelTag = L"Prototype_Component_Model_Rover_Weapon";
-    strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Weapon.dat";
+    wStrModelTag = L"Prototype_Component_Model_Rover_Sword";
+    strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Sword/Sword.dat";
     fSize = 0.01f;
     //fSize = 0.0001f;
     PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
@@ -273,10 +273,10 @@ HRESULT CLoader_Test::Load_Rover()
         CRASH("Prototype Create Failed");
 
     // 2. 객체 초기화.
-    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Bayonet");
+    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Sword");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
         , wstrBayonetTag
-        , CRoverWeapon::Create(m_pDevice, m_pContext))))
+        , CRoverSword::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
 
 #pragma endregion

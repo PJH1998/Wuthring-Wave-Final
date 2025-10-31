@@ -2,7 +2,7 @@
 #include "Weapon.h"
 
 NS_BEGIN(Client)
-class CRoverWeapon final : public CWeapon
+class CRoverSword final : public CWeapon
 {
 public:
 	typedef struct tagRoverWeaponDesc : public CWeapon::WEAPON_DESC {
@@ -10,9 +10,9 @@ public:
 	} ROVER_WEAPON_DESC;
 
 protected:
-	explicit CRoverWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CRoverWeapon(const CPartObject& Prototype);
-	virtual ~CRoverWeapon() = default;
+	explicit CRoverSword(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CRoverSword(const CPartObject& Prototype);
+	virtual ~CRoverSword() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -35,7 +35,7 @@ private:
 	void Bind_Resources();
 
 public:
-	static CRoverWeapon* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CRoverSword* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 

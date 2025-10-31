@@ -233,7 +233,7 @@
     <ClInclude Include="..\Public\Rover.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
-    <ClInclude Include="..\Public\RoverWeapon.h" />
+    <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -336,7 +336,7 @@
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverFactory.cpp" />
-    <ClCompile Include="..\Private\RoverWeapon.cpp" />
+    <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
