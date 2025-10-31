@@ -61,6 +61,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
             for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
                 if (entry2.path().string().find("MapData") != std::string::npos)
                     continue;
+				if (entry2.path().string().find("Test") != std::string::npos)
+					continue;
 
                 if (entry2.path().string().find(ModelName) == std::string::npos)
                     continue;

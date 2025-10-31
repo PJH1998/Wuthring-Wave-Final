@@ -92,6 +92,7 @@ void CPooling_Manager::Update_Pooling()
 
 void CPooling_Manager::Add_Work(function<void()> Work)
 {
+
 	{
 		lock_guard<mutex> lock(m_Mutex);
 		m_Works.push(Work);

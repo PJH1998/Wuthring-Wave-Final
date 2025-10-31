@@ -133,32 +133,51 @@ void CShader_Interface::Setting_Shader()
 	
 #pragma region BLUR
 
-	if (ImGui::CollapsingHeader("DOF"))
+	if (ImGui::CollapsingHeader("SCREEN_EFFECT"))
 	{
 		if (ImGui::Button("DOF ON"))
 #ifdef _DEBUG
-			m_pGameInstance->Set_Blur(true, BLUR_TYPE::DOF);
+			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::DOF);
 #endif
-		ImGui::SameLine();
-
-		if(ImGui::Button("DOF OFF"))
+		if(ImGui::Button("BLUR ON"))
 #ifdef _DEBUG
-			m_pGameInstance->Set_Blur(false, BLUR_TYPE::END);
+			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::BLUR);
+#endif
+		if(ImGui::Button("OFF"))
+#ifdef _DEBUG
+			m_pGameInstance->End_ScreenEffect();
 #endif
 
-		ImGui::InputFloat("FOCUS", &m_fFocusDepth);
+		ImGui::InputFloat("EFFECT_SPEED", &m_fEffectIntensity);
 
-		ImGui::InputFloat("RANGE", &m_fFocusRange);
-		
-		ImGui::InputFloat("DEPTH_SCALE", &m_fDofDepthScale);
+		if(ImGui::CollapsingHeader("SET_DOF"))
+		{
+			ImGui::InputFloat("FOCUS", &m_fFocusDepth);
+
+			ImGui::InputFloat("RANGE", &m_fFocusRange);
+
+			ImGui::InputFloat("DEPTH_SCALE", &m_fDofDepthScale);
+		}
 
 #ifdef _DEBUG
 
+
+		m_pGameInstance->SetMaxEffectIntensity(m_fEffectIntensity);
 		m_pGameInstance->SetDof(m_fFocusDepth, m_fFocusRange, m_fDofDepthScale);
 #endif
 	}
 
+	if (ImGui::CollapsingHeader("PBR"))
+	{
+		if (ImGui::Button("STYLIZED"))
+			m_pGameInstance->SetPBR(true);
 
+		ImGui::SameLine();
+
+		if (ImGui::Button("DEFAULT"))
+			m_pGameInstance->SetPBR(false);
+	}
+	
 #pragma endregion
 	ImGui::End();
 }

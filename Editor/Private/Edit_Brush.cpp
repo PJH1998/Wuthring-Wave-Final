@@ -51,9 +51,9 @@ void CEdit_Brush::Update(_float fTimeDelta)
         Foliage();
     }
 
-#ifdef _DEBUG
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
-#endif
+//#ifdef _DEBUG
+//    m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this);
+//#endif
 }
 
 void CEdit_Brush::Late_Update(_float fTimeDelta)
@@ -62,6 +62,8 @@ void CEdit_Brush::Late_Update(_float fTimeDelta)
 
 void CEdit_Brush::Render()
 {
+    return;
+
     Bind_Resources();
     m_pShaderCom->Begin(0);
     m_pVIBufferCom->Bind_Resources();
@@ -88,8 +90,8 @@ void CEdit_Brush::Bind_Resources()
 
 void CEdit_Brush::Ready_Components()
 {
-    __super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_Brush"),
-        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
+    //__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_Brush"),
+    //    TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr);
 
     __super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_VIBuffer_Point"),
         TEXT("Com_VIBufferCom"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr);
