@@ -33,6 +33,8 @@ void CAugustaGroundDash::OnEnter()
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eDashType);
 
     State_Reset();
+
+	m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
