@@ -208,6 +208,12 @@
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\Public\Editor_Define_UI.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
+    <ClInclude Include="..\Public\SQ_Actor_Edit.h" />
+    <ClInclude Include="..\Public\SQ_Audio_Edit.h" />
+    <ClInclude Include="..\Public\SQ_Camera_Edit.h" />
+    <ClInclude Include="..\Public\SQ_Effect_Edit.h" />
+    <ClInclude Include="..\Public\SQ_Item_Edit.h" />
+    <ClInclude Include="..\Public\SQ_SFX_Edit.h" />
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
@@ -262,6 +268,12 @@
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />
+    <ClCompile Include="..\Private\SQ_Actor_Edit.cpp" />
+    <ClCompile Include="..\Private\SQ_Audio_Edit.cpp" />
+    <ClCompile Include="..\Private\SQ_Camera_Edit.cpp" />
+    <ClCompile Include="..\Private\SQ_Effect_Edit.cpp" />
+    <ClCompile Include="..\Private\SQ_Item_Edit.cpp" />
+    <ClCompile Include="..\Private\SQ_SFX_Edit.cpp" />
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />

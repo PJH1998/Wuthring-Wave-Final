@@ -209,7 +209,8 @@ namespace Engine
 	// Sequence Item Data => Item Reset시 던질 Data
 	typedef struct tagSequenceItemData
 	{
-
+		_float		fStartFrame = {};
+		_float		fEndFrame = {};
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
 }

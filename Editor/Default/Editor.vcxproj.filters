@@ -142,6 +142,24 @@
     <Filter Include="03. GameObject\MapObject\Destruction">
       <UniqueIdentifier>{1e367e59-8695-45e4-8839-a31fb74b2d93}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Sequence">
+      <UniqueIdentifier>{3226be9e-5451-4b8f-b216-4b07b5a01ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Actor">
+      <UniqueIdentifier>{6509f61d-c948-4490-930a-9a3acb78e0b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Camera">
+      <UniqueIdentifier>{0348049c-4ba5-4984-a77d-03ef1f4b9e1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Audio">
+      <UniqueIdentifier>{ed778718-71c4-4e24-98a3-b46352eb56c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\SFX">
+      <UniqueIdentifier>{c97249cc-c410-4aa1-866e-1c7d8a0f8093}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Effect">
+      <UniqueIdentifier>{c46f0d49-ab5a-47fb-b030-3debd47973e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -313,6 +331,24 @@
     <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\SQ_Item_Edit.h">
+      <Filter>03. GameObject\Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Actor_Edit.h">
+      <Filter>03. GameObject\Sequence\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Camera_Edit.h">
+      <Filter>03. GameObject\Sequence\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Audio_Edit.h">
+      <Filter>03. GameObject\Sequence\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Effect_Edit.h">
+      <Filter>03. GameObject\Sequence\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_SFX_Edit.h">
+      <Filter>03. GameObject\Sequence\SFX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -456,6 +492,24 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Item_Edit.cpp">
+      <Filter>03. GameObject\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Actor_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Camera_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Audio_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Effect_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_SFX_Edit.cpp">
+      <Filter>03. GameObject\Sequence\SFX</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

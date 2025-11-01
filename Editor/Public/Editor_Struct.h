@@ -2,44 +2,6 @@
 
 namespace Editor
 {
-//#pragma region UI
-//
-//	typedef struct tagUIAnimKeyFrameDesc
-//	{
-//		unsigned int			iKeyframeIndex = {};	// ?뺣낫媛 ?닿만 ?ㅽ봽?덉엫 ?뺣낫
-//
-//		unsigned int			iTexIndex = {};
-//		float			fAlpha = {};			// 0 ~ 1
-//		XMFLOAT3		vPos = {};
-//		XMFLOAT3		vRot = {};				// Euler
-//		XMFLOAT3		vSca = {};
-//
-//	} UI_ANIM_KEYFRAME_DESC;
-//
-//	typedef struct tagUIAnimDesc
-//	{
-//		class CUSTOM_UI_DESC*	pUIDesc = {};// FilePath, FileName, NumTex (?대뼡 ?띿뒪爾먯슜?몄?瑜??꾪븿)
-//
-//		// ?ㅽ봽?덉엫, ?ㅽ봽?덉엫蹂??됰젹?뺣낫, 蹂닿컙諛⑸쾿, 湲몄씠 ??.
-//		wstring				strAnimName = {};
-//		//_uint					iNumKeyFrame = {};
-//
-//		vector<UI_ANIM_KEYFRAME_DESC*> vecKeyFrames = {};
-//
-//		unsigned int					iLerpType = {};
-//		bool					isLoop = false;
-//	} UI_ANIM_DESC;
-//
-//	typedef struct tagUIInfoDesc
-//	{
-//		class CUSTOM_UI_DESC*		pUIDesc = {};	// FilePath, FileName, NumTex
-//
-//		XMFLOAT3					vPos = {};
-//		XMFLOAT3					vRot = {};	// Euler
-//		XMFLOAT3					vSca = {};
-//	} UI_INFO_DESC;
-//#pragma endregion
-
 #pragma region EFFECT
 	typedef struct tagEffectActorDesc
 	{
@@ -47,4 +9,40 @@ namespace Editor
 		float fDuration = {}; // 현재선택한 Animation Duration
 	}EFFECTACTOR_DESC;
 #pragma endregion
+
+#pragma region SEQUENCE
+	typedef struct tagAnimData {
+		_float3			vScale{};
+		_float4			vQuat{};
+		_float3			vTranslation{};
+		_string			strAnimation;
+	}ANIM_DATA;
+	typedef struct tagSQActorData : public SEQUENCE_ITEM_DATA {
+		_wstring						strActorTag;
+		vector<ANIM_DATA>		strAnimDatas;
+	}SQ_ACTOR_DATA;
+
+	typedef struct tagSQCameraData : public SEQUENCE_ITEM_DATA {
+		vector<CAMERA_FRAME> Frames;
+	}SQ_CAMERA_DATA;
+
+	typedef struct tagSQAudioData : public SEQUENCE_ITEM_DATA {
+		_wstring				strSoundTag;
+		_float					fVolume;
+		_bool					isBGM;
+	}SQ_AUDIO_DATA;
+
+	typedef struct tagSQEffectData : public SEQUENCE_ITEM_DATA {
+		_wstring				strEffectTag;
+		_float3				vScale{};
+		_float4				vQuat{};
+		_float3				vTranslation{};
+		// TODO
+	}SQ_EFFECT_DATA;
+
+	typedef struct tagSQSFXData : public SEQUENCE_ITEM_DATA {
+		SFX_TYPE			eSFXType;
+	}SQ_SFX_DATA;
+#pragma endregion
+
 }
