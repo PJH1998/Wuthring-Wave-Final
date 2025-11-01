@@ -74,4 +74,5 @@ void CGameSystem::Free()
 
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
+	Safe_Release(m_pDirector);
 }
