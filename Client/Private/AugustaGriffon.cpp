@@ -47,15 +47,10 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // Augusta�� StateMachine���� �ִϸ��̼ǽ���?
-
-    // Last :  Combined ��� �ʱ�ȭ
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
-
-
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -101,15 +96,10 @@ void CAugustaGriffon::Render()
 
 void CAugustaGriffon::Activate(_bool IsActive)
 {
-    SetActivate(IsActive);
-    
-    // TrackPosition �� �ʱ�ȭ
-    // Griffon�� ��쿡�� ��ġ�� �ʱ�ȭ���ش�?
-    
-   /* if (isactive)
-        m_prigidbodycom->change_layer(enum_class(collisionlayer::none));
-    else
-        m_prigidbodycom->change_layer(enum_class(collisionlayer::attack));*/
+	CWeapon::Activate(IsActive);
+	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
+	CWeapon::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+  
 }
 
 void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)

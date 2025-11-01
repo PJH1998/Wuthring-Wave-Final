@@ -127,11 +127,11 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
     if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
         || eIdleType == EAugustaIdleType::STAND2)
     {
-        m_pAugusta->Play_PartAnimation(
-            m_iPartType,
-            m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr
-        );
+		m_pAugusta->Play_PartAnimation(
+			m_iPartType,
+			m_Animations[m_iCurrentAnimIdx].strAnimName,
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+		);
     }
     
 }

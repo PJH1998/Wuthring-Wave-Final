@@ -61,6 +61,7 @@ public:
 	// Object 
 	void Set_InputController(class CInputController* pInputControllerCom);
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
+	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
 #pragma endregion
 
 
@@ -93,7 +94,7 @@ public:
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
-	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
 
 	// Look Vector

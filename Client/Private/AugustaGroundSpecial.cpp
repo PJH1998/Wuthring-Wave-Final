@@ -101,11 +101,11 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     }
 
     
-    m_pAugusta->Play_PartAnimation(
-        m_iPartType,
-        m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-        fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr
-    );
+	m_pAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_Animations[m_iCurrentAnimIdx].strAnimName,
+		m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+	);
 }
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)

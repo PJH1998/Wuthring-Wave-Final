@@ -58,6 +58,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
         {
             pCharacter->Set_InputController(m_pInputControllerCom);
             pCharacter->Set_SpringCamera(m_pSpringCamera);
+			pCharacter->Set_Collider(m_pColliderCom, m_vColliderOffSet, m_fColliderHeight, m_fColliderRadius);
+			pCharacter->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
         }
     }
 
@@ -77,12 +79,8 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
 	
-
     m_pInputControllerCom->Update();
     
-	// 임시.
-    
-        
 	// 2. 현재 활성화 캐릭터 이후에 키 입력 확인하기
 	Player_KeyInput();
 
@@ -153,21 +151,31 @@ void CPlayer::Player_KeyInput()
 	// Character Change
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 	{
-		m_IsChanage = true;
-		m_eNextCharacter = CHARACTERTYPE::ROVER;
-		return;
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+		{
+			m_IsChanage = true;
+			m_eNextCharacter = CHARACTERTYPE::ROVER;
+			return;
+		}
+		
 	}
 	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
 	{
-		m_IsChanage = true;
-		m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
-		return;
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA)
+		{
+			m_IsChanage = true;
+			m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+			return;
+		}
 	}
 	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
 	{
-		m_IsChanage = true;
-		m_eNextCharacter = CHARACTERTYPE::GALBRENA;
-		return;
+		if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA)
+		{
+			m_IsChanage = true;
+			m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+			return;
+		}
 	}
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
@@ -256,92 +264,16 @@ void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold&
     m_TargetTransforms.push_back(pTargetTransform);
 }
 
-//void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
-//{
-//    if (eNextCharacter < 0 || eNextCharacter >= TYPE_END)
-//        return;
-//
-//    if (m_Characters[eNextCharacter] == nullptr)
-//        return;
-//
-//    if (m_iCurrentCharacterIdx == eNextCharacter)
-//        return;
-//
-//
-//    CCharacter* pCurrentCharacter = nullptr;
-//    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
-//        pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
-//
-//    _bool bUseEnsemble = false;
-//    if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
-//        bUseEnsemble = true;
-//
-//
-//	_matrix matPrevWorldMatrix = XMMatrixIdentity();
-//	_float4 vPrevPosition = {};
-//	_bool bHasPrevCharacter = false;
-//
-//	// 이전 캐릭터 비활성화
-//	CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
-//	
-//
-//	// 다음캐릭 활성화
-//	CCharacter* pNextCharacter = m_Characters[eNextCharacter];
-//	pNextCharacter->SetActivate(true);
-//
-//	_matrix mat = m_pTransformCom->Get_WorldMatrix();
-//	m_Characters[eNextCharacter]->Sync_Transform_FromPlayer(mat, fTimeDelta);
-//
-//	// 현재 선택된 캐릭터로 CurrentCharacter Idx 변경.
-//	m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
-//	m_iCurrentCharacterIdx = eNextCharacter;
-//
-//	pPrevCharacter->SetActivate(false);
-//
-//	// 최근 캐릭터가 존재하고, Ensemble 게이지가 가득찼다면?
-//	if (bUseEnsemble && pPrevCharacter)
-//	{
-//		pPrevCharacter->SetActivate(true);
-//		//pCurrentCharacter->SetActivate(true);
-//		Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
-//		pPrevCharacter->Reset_SwitchGauge(); // 이전 캐릭터 SwitchGauge 지우기.
-//	}
-//	else
-//	{
-//		// 현재 Animation 초기화 상태를 Idle로 변경?
-//		switch (m_iPrevCharacterIdx)
-//		{
-//		case CHARACTERTYPE::ROVER:
-//		{
-//			CRover* pRover = dynamic_cast<CRover*>(pPrevCharacter);
-//			if (nullptr == pRover) return;
-//			pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
-//			pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-//			break;
-//		}
-//		
-//		case CHARACTERTYPE::AUGUSTA:
-//		{
-//			CAugusta* pAugusta = dynamic_cast<CAugusta*>(pPrevCharacter);
-//			if (nullptr == pAugusta) return;
-//			pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-//			pPrevCharacter->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-//			break;
-//		}
-//			
-//		case CHARACTERTYPE::GALBRENA:
-//			break;
-//
-//		}
-//
-//	}
-//}
-
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 {
+	// 0. 예외 조건 return;
+	if (nullptr == m_Characters[eNextCharacter])
+		return;
+
+	// 1. 현재 Idx가 None이 아니라면.
 	if (m_iCurrentCharacterIdx != NONE)
 	{
-		// 1. 이전 캐릭터 비활성화
+		// 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
 		m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
@@ -475,6 +407,7 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 
             ASSERT_CRASH(pPlayer);
             m_Characters[i] = pPlayer;
+
         }
             break;
         case CHARACTERTYPE::GALBRENA:
@@ -525,6 +458,26 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
         OnCollide_During(iLayer, pDesc, Manifold);
     });
 
+	// Collider 추가했고.
+	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
+	m_fColliderRadius = 0.4f;
+	m_fColliderHeight = 0.5f;
+	
+	// Collider를 Player가 소유하고 Character들은 AddRef로 참조
+	CCollider::COLLIDER_DESC ColliderDesc{};
+	ColliderDesc.vPos = pDesc->vPosition;
+	ColliderDesc.vOffset = m_vColliderOffSet;
+	ColliderDesc.eType = EMotionType::Kinematic;
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	ColliderDesc.fHeight = m_fColliderHeight;
+	ColliderDesc.fRadius = m_fColliderRadius;
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Collider"), TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
+		CRASH("Collider");
+
+
+	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
+	m_pColliderCom->Set_Desc(m_pTransformCom);
 
     return S_OK;
 }
@@ -566,4 +519,5 @@ void CPlayer::Free()
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pColliderCom);
 }

@@ -27,9 +27,12 @@ protected:
     _float3 m_vLandNormal = {};
     _uint m_iPartType = {};	   // 현재 State에서 실행해야할 PartType;
 	_uint m_iSubPartType = {}; // 현재 State에서 실행해야 할 SubPartType;
-
+	_bool m_IsPartAnimationEnd = {}; //
+	_bool m_IsSubPartAnimationEnd = {}; //
 	_string m_strPrevInfo = {};
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
+
+
 
 public:
     virtual void Free() override;

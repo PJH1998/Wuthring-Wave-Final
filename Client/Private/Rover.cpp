@@ -41,14 +41,7 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
-
-    // 초기 State 설정.
-    m_StateContext.m_eIdleType = ERoverIdleType::STAND1;
-    m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(ERoverGroundState::IDLE));
-    
-    m_pColliderCom->Set_Gravity(true);
-    
+	
 	// 비활성화. 
 	m_pRoverSword->SetActivate(false);
 
@@ -345,28 +338,6 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
-    
-    // 계산에 사용할 값 지정.
-    m_fColliderRadius = 0.4f;
-    m_fColliderHeight = 0.5f;
-    m_vColliderOffSet = { 0.f, 0.67f, 0.f };
-    //m_vColliderOffSet = { 0.f, 0.f, 0.f };
-
-
-    CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = pDesc->vPosition;
-    ColliderDesc.vOffset = m_vColliderOffSet;
-    ColliderDesc.eType = EMotionType::Kinematic;
-    ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-    ColliderDesc.fHeight = m_fColliderHeight;
-    ColliderDesc.fRadius = m_fColliderRadius;
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
-        , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
-        CRASH("Collider");
-
-    //몬스터 탐지용 콜백으로 받을 Desc - LJH
-    m_pColliderCom->Set_Desc(m_pTransformCom);
-
 }
 
 void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)

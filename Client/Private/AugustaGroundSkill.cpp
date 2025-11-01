@@ -46,11 +46,7 @@ void CAugustaGroundSkill::OnEnter()
             m_pAugusta->PartActivate(m_iPartType, true);
             m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
             m_pAugusta->Set_Gravity(false);
-
-            const _string& strAnimName = m_Animations[m_iCurrentAnimIdx].strAnimName;
-            auto iter = m_PartsAnimations.find(strAnimName);
-            if (iter != m_PartsAnimations.end())
-                m_pAugusta->Clear_PartAnimation(m_iPartType, iter->second);
+            m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
             
 			// 진입할때 한번만. => Griffon
 			m_pAugusta->Rotate_Target();
@@ -70,12 +66,35 @@ void CAugustaGroundSkill::OnEnter()
 			m_pAugusta->PartActivate(m_iPartType, true);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+			m_pAugusta->Set_Gravity(false);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
 			break;
 		}
         
     }
+
+
+	// 한번 실행.
+	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		// 애니메이션 속도 서로 Sync 맞추기.
+		m_pAugusta->Play_PartAnimation(
+			m_iPartType,
+			m_Animations[m_iCurrentAnimIdx].strAnimName,
+			0.f, nullptr
+		);
+	}
+
+	// Griffon
+	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->Play_PartAnimation(
+			m_iSubPartType,
+			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
+			0.f, nullptr, 1.f, true, true, true, false
+		);
+	}
 
 }
 
@@ -102,9 +121,19 @@ void CAugustaGroundSkill::OnUpdate(_float fTimeDelta)
 
 void CAugustaGroundSkill::OnExit()
 {
-    CGroundState::OnExit();
+	CGroundState::OnExit();
+
+
+	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iPartType, false);
+	}
+	
+	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iSubPartType, false);
+	}
     
-    m_pAugusta->PartActivate(m_iPartType, false);
     m_pAugusta->Set_Gravity(true);
     
 

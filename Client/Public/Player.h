@@ -84,11 +84,18 @@ private:
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };
+	class CCollider* m_pColliderCom = { nullptr };
+
 	_bool m_IsLockOn = { false };
 
 	_bool m_IsChanage = { false };
 	CHARACTERTYPE m_eNextCharacter = {};
 	
+
+	_float3 m_vColliderOffSet = {};
+	_float m_fColliderHeight = {};
+	_float m_fColliderRadius = {};
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
