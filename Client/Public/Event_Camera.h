@@ -9,8 +9,8 @@ typedef struct tagCameraAction : public CEvent
 	_int									iEnd = {};
 	_float4x4								WorldMatrix = {};
 	_bool									isMaintain = { false };
-	tagCameraAction(vector<CAMERA_FRAME>& _pFrame, _bool _isAction, _int _iStart, _int _iEnd, const _float4x4& _WorldMatrix, _bool _isMaintain)
-		: pFrame{ _pFrame }, isAction{ _isAction }, iStart{ _iStart }, iEnd{ _iEnd },
+	tagCameraAction(vector<CAMERA_FRAME>& _Frame, _bool _isAction, _int _iStart, _int _iEnd, const _float4x4& _WorldMatrix, _bool _isMaintain)
+		: pFrame{ _Frame }, isAction{ _isAction }, iStart{ _iStart }, iEnd{ _iEnd },
 		WorldMatrix { _WorldMatrix }, isMaintain { _isMaintain }
 	{
 	};

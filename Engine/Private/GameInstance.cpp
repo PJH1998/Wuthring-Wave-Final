@@ -552,9 +552,9 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
-Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut)
 {
-    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData, pOut);
 }
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {

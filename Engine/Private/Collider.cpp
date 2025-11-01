@@ -49,6 +49,11 @@ void CCollider::Set_Offset(const _float3 vOffset)
 	}
 }
 
+void CCollider::IsActivate(_bool isActive)
+{
+	true == isActive ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID);
+}
+
 HRESULT CCollider::Initialize_Prototype()
 {
     return S_OK;
@@ -86,9 +91,10 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	// Create CharacterVirtual
 	m_tCollisionData.pComponent = this;
-	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData);
+	m_pCharacterVirtual = m_pGameInstance->Register_Virtual(VirtualSetting, LoadVec3(pDesc->vPos), LoadQuat(pDesc->vQuat), &m_tCollisionData, &m_pBodyInterface);
 	ASSERT_CRASH(m_pCharacterVirtual);
 
+	m_BodyID = m_pCharacterVirtual->GetInnerBodyID();
 
     return S_OK;
 }

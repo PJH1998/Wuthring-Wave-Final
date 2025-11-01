@@ -37,6 +37,7 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
+	Load_Action();
     //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
@@ -283,6 +284,13 @@ HRESULT CLoader_Test::Load_Rover()
 #pragma endregion
 
     return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Action()
+{
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	return S_OK;
 }
 
 CLoader_Test* CLoader_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
