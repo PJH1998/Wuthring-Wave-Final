@@ -400,7 +400,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         switch (i)
         {
         case PARTTYPE::PART_BAYONET:

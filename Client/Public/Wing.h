@@ -2,17 +2,17 @@
 #include "Prop.h"
 
 NS_BEGIN(Client)
-class CAugustaBayonet final : public CProp
+class CWing final : public CProp
 {
 public:
-	typedef struct tagAugustaBayonetDesc : public CProp::PROP_DESC {
-		
-	} AUGUSTA_BAYONET_DESC;
+	typedef struct tagWingDesc : public CProp::PROP_DESC {
+
+	} WING_DESC;
 
 protected:
-	explicit CAugustaBayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CAugustaBayonet(const CPartObject& Prototype);
-	virtual ~CAugustaBayonet() = default;
+	explicit CWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CWing(const CPartObject& Prototype);
+	virtual ~CWing() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -36,10 +36,9 @@ private:
 	void Bind_Resources();
 
 public:
-	static CAugustaBayonet* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject* Clone(void* pArg) override;
-	virtual		void					Free() override;
-
+	static CWing* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual	CGameObject* Clone(void* pArg) override;
+	virtual	void Free() override;
 };
 NS_END
 

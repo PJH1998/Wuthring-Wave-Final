@@ -2,10 +2,10 @@
 #include "PartObject.h"
 
 NS_BEGIN(Client)
-class CWeapon abstract : public CPartObject
+class CProp abstract : public CPartObject
 {
 public:
-	typedef struct tagWeaponDesc : public CPartObject::PART_DESC 
+	typedef struct tagPropDesc : public CPartObject::PART_DESC 
 	{
 		const _float4x4* pSocketMatrix = { nullptr };
 		pair<LEVEL, _wstring> shaderData = {};
@@ -18,12 +18,12 @@ public:
 		_float3 vPosition = {};
 		_float3 vScale = {};
 		_float3 vRotation = {};
-	} WEAPON_DESC;
+	} PROP_DESC;
 
 protected:
-	explicit CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CWeapon(const CPartObject& Prototype);
-	virtual ~CWeapon() = default;
+	explicit CProp(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CProp(const CPartObject& Prototype);
+	virtual ~CProp() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -69,7 +69,7 @@ protected:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 public:
-	static CWeapon* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CProp* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	CGameObject* Clone(void* pArg) = 0;
 	virtual	void Free() override;
 };

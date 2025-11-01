@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Client_Define.h"
 #include "Character.h"
-#include "Weapon.h"
+#include "Prop.h"
 
 typedef struct tagPlayerSpec
 {
@@ -48,9 +48,9 @@ namespace PlayerData
         return Desc;
     }
 
-    static CWeapon::WEAPON_DESC GetAugustaBayonetCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+    static CProp::PROP_DESC GetAugustaBayonetCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
     {
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; // Augusta���� ä������ϴ� ������.
@@ -69,9 +69,9 @@ namespace PlayerData
         return Desc;
     }
 
-    static CWeapon::WEAPON_DESC GetAugustaSkillWeaponCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+    static CProp::PROP_DESC GetAugustaSkillWeaponCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
     {
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; // Augusta���� ä������ϴ� ������.
@@ -88,9 +88,9 @@ namespace PlayerData
         return Desc;
     }
 
-    static CWeapon::WEAPON_DESC GetAugustaGriffonCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+    static CProp::PROP_DESC GetAugustaGriffonCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
     {
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; // Augusta���� ä������ϴ� ������.
@@ -133,9 +133,9 @@ namespace PlayerData
         return Desc;
     }
 
-    static CWeapon::WEAPON_DESC GetRoverWeaponCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+    static CProp::PROP_DESC GetRoverWeaponCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
     {
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
         Desc.pSocketMatrix = { nullptr }; 

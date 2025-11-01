@@ -1,27 +1,27 @@
 ﻿#include "ClientPch.h"
-#include "Weapon.h"
+#include "Prop.h"
 #include "Character.h"
 
-CWeapon::CWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CProp::CProp(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject{ pDevice, pContext }
 {
 }
 
-CWeapon::CWeapon(const CPartObject& Prototype)
+CProp::CProp(const CPartObject& Prototype)
     : CPartObject(Prototype)
 {
 }
 
-HRESULT CWeapon::Initialize_Prototype()
+HRESULT CProp::Initialize_Prototype()
 {
     if (FAILED(CPartObject::Initialize_Prototype()))
         return E_FAIL;
     return S_OK;
 }
 
-HRESULT CWeapon::Initialize_Clone(void* pArg)
+HRESULT CProp::Initialize_Clone(void* pArg)
 {
-    WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
+    PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
 
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
@@ -31,14 +31,14 @@ HRESULT CWeapon::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CWeapon::Priority_Update(_float fTimeDelta)
+void CProp::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
     CPartObject::Priority_Update(fTimeDelta);
 }
 
-void CWeapon::Update(_float fTimeDelta)
+void CProp::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -46,7 +46,7 @@ void CWeapon::Update(_float fTimeDelta)
     CPartObject::Update(fTimeDelta);
 }
 
-void CWeapon::Late_Update(_float fTimeDelta)
+void CProp::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -54,7 +54,7 @@ void CWeapon::Late_Update(_float fTimeDelta)
     CPartObject::Late_Update(fTimeDelta);
 }
 
-void CWeapon::Activate(_bool IsActive)
+void CProp::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
 
@@ -74,7 +74,7 @@ void CWeapon::Activate(_bool IsActive)
 }
 
 
-void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
+void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
 {
     ASSERT_CRASH(m_pModelCom);
 
@@ -94,7 +94,7 @@ void CWeapon::Play_Animation(const _string& strAnimName, _float fTimeDelta, _flo
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 }
 
-void CWeapon::Clear_Animation(const _string& strAnimName)
+void CProp::Clear_Animation(const _string& strAnimName)
 {
     ASSERT_CRASH(m_pModelCom);
     m_pModelCom->Clear_Animation(strAnimName);
@@ -103,14 +103,14 @@ void CWeapon::Clear_Animation(const _string& strAnimName)
 }
 
 #pragma region NOTIFY
-void CWeapon::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
+void CProp::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
 	if (!IsActive)
 		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 	else
 		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
 }
-void CWeapon::Effect_Active(const _wstring& wStrEffectTag)
+void CProp::Effect_Active(const _wstring& wStrEffectTag)
 {
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
@@ -118,7 +118,7 @@ void CWeapon::Effect_Active(const _wstring& wStrEffectTag)
 	_matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
 	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
 }
-void CWeapon::Collider_Active(_bool isActive)
+void CProp::Collider_Active(_bool isActive)
 {
     if (!isActive)
         m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
@@ -130,7 +130,7 @@ void CWeapon::Collider_Active(_bool isActive)
 
 
 
-void CWeapon::Register_AllNotifies(const _string& strFolderPath)
+void CProp::Register_AllNotifies(const _string& strFolderPath)
 {
 	ASSERT_CRASH(m_pModelCom);
 	auto colliderCallback = [this](const _wstring& tag, bool active) {
@@ -144,7 +144,7 @@ void CWeapon::Register_AllNotifies(const _string& strFolderPath)
 	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
 }
 
-void CWeapon::Free()
+void CProp::Free()
 {
     CPartObject::Free();
     Safe_Release(m_pShaderCom);

@@ -266,7 +266,8 @@
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
-    <ClInclude Include="..\Public\Weapon.h" />
+    <ClInclude Include="..\Public\Prop.h" />
+    <ClInclude Include="..\Public\Wing.h" />
     <ClInclude Include="CAttackVolume.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
@@ -374,7 +375,8 @@
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
-    <ClCompile Include="..\Private\Weapon.cpp" />
+    <ClCompile Include="..\Private\Prop.cpp" />
+    <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="CAttackVolume.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
