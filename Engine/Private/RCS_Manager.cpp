@@ -57,6 +57,17 @@ HRESULT CRCS_Manager::Add_SRVData(const _wstring& strRCSTag, const _char* pConst
     return S_OK;
 }
 
+HRESULT CRCS_Manager::Add_SamplerState(const _wstring& strRCSTag, _uint iSlotIndex, ID3D11SamplerState* pSampler)
+{
+	CRendererCS* pRCS = Find_RCS(strRCSTag);
+	if (nullptr == pRCS)
+		return E_FAIL;
+
+	pRCS->Add_SamplerState(iSlotIndex, pSampler);
+
+	return S_OK;
+}
+
 HRESULT CRCS_Manager::Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName)
 {
     CRendererCS* pRCS = Find_RCS(strRCSTag);
@@ -77,7 +88,7 @@ HRESULT CRCS_Manager::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShade
     return pShader->Bind_Texture(pConstantName, pRCS->Get_SRV(iMipLevel));
 }
 
-HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
+HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel)
 {
     CRendererCS* pRCS = Find_RCS(strRCSTag);
     if (nullptr == pRCS)
@@ -85,7 +96,7 @@ HRESULT CRCS_Manager::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 
     pRCS->Clear(iMipLevel);
     pRCS->Bind_Resources(iMipLevel);
-    pRCS->Dispatch(iMipLevel);
+    pRCS->Dispatch(iWidth, iHeight);
 
     ID3D11SamplerState* pNullSampler[D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT] = { nullptr };
     m_pContext->PSSetSamplers(0, D3D11_COMMONSHADER_SAMPLER_REGISTER_COUNT, pNullSampler);
