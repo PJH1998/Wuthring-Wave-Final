@@ -469,11 +469,6 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 
 void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 {
-	if (m_tUIDesc.strUIName == L"Icon_Rover")
-		int i = 10;
-	if (m_tUIDesc.strUIName == L"SectorR_PartyFrame")
-		int i = 10;
-
 	if (m_pAnimator_UICom)
 	{
 		if (!pParentAnimatorCom)
@@ -487,13 +482,13 @@ void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 			auto pParentKFDesc = pParentAnimatorCom->Get_CurCombinedAnimKeyframeDesc();
 			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
 
-			if (thisCalcedKFDesc)
+			if (pParentKFDesc)
 			{
 				CAnimator_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
 				tDesc = *thisCalcedKFDesc;
 
-				// 일단은 Alpha만 연결되도록..
-				tDesc.fAlpha = (1.f - tDesc.fAlpha) * (1.f - pParentKFDesc->fAlpha);
+				// 일단은 Alpha만 연결되도록.. 
+				tDesc.fAlpha = 1.f - ((1.f - thisCalcedKFDesc->fAlpha) * (1.f - pParentKFDesc->fAlpha)); // 다시 사라짐 값으로 되돌림
 				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
 			}
 

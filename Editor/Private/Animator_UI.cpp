@@ -289,7 +289,7 @@ void CAnimator_UI::Update_Animation()
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
-        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex < iCurFrame)
+        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex < iCurFrame) // ksta
         {
             iFrame_LerpStart = m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex;
             iFrame_StartIndex = i;

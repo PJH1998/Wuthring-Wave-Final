@@ -62,13 +62,13 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {   // �ε��� �ִϸ��̼��� ���⿡ �߰�
         //L"../../Client/Bin/Resource/UI/FJson/UIAnim/statustest.json"
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeOut.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_Disappear_Test.json"
 
     };
     Load_Animations(vecAnimFilePaths);
 
 	//static_cast<CAnimator_UI*>(Find_ChildObject(L"EnergyBar")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
 
     //Find_ChildObject(L"UI_ParentTest")->Set_Active(false);
 
@@ -379,6 +379,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         vecVariantMat[1].m[0][0] = fSkillCD[i][SK_R] / fMaxSkillCD[i][SK_R];
         vecVariantMat[0].m[0][1] = 0.5f;
         vecVariantMat[1].m[0][1] = 0.5f;
+
         vecVariantMat[0].m[0][2] = 0.95f;
         vecVariantMat[1].m[0][2] = 0.95f;
 

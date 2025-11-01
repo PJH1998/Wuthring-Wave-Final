@@ -713,13 +713,19 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (angle < 0) angle += 2.f * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
     
             float fCooldownAngle = 2.f * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
-    
+            
+            
+            Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+            
             if (angle <= fCooldownAngle)
             {
                 // 이미 지난 부분은 원래의 색으로
                 Out.vColor.rgba *= fColorMul1;
                 if (isUseCustomColor)
+                {
                     Out.vColor *= vCustomColor;
+                    Out.vColor.a *= (1 - g_AlphaStrength);
+                }
                 return Out;
             }
             else
@@ -728,7 +734,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 if (fCooldown != 0.f)
                     Out.vColor.rgba *= fColorMul2;
                 if (isUseCustomColor)
+                {
                     Out.vColor *= vCustomColor;
+                    Out.vColor.a *= (1 - g_AlphaStrength);
+                }
                 return Out;
             }
             
@@ -800,7 +809,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
-            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
+            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
             
             return Out;
         } break;
@@ -846,7 +855,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
             Out.vColor.rgb  = Out.vColor.rgb * lerp(vColor1, vColor2, fixedUV.y).rgb; // 색상 추가
             Out.vColor.a    = saturate(Out.vColor.a * 1.5f);
-            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
+            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
             
             return Out;
         } break;

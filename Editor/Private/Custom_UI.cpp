@@ -277,6 +277,11 @@ void CCustom_UI::Update_CombinedMatrix()
 
 void CCustom_UI::Update_CombinedDesc()
 {
+
+	if (m_tUIDesc.strUIName == L"Frame_Rover_Dark")
+		int i = 10;
+
+
 	CAnimator_UI* pParentAnimatorCom = nullptr;
 
 	if (m_tUIDesc.pParentObject)
@@ -301,7 +306,7 @@ void CCustom_UI::Update_CombinedDesc()
 				tDesc = *thisCalcedKFDesc;
 
 				// 일단은 Alpha만 연결되도록..
-				tDesc.fAlpha = (1.f - tDesc.fAlpha) * (1.f - pParentKFDesc->fAlpha);
+				tDesc.fAlpha = 1.f - ((1.f - thisCalcedKFDesc->fAlpha) * (1.f - pParentKFDesc->fAlpha)); // 다시 사라짐 값으로 되돌림
 				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
 			}
 
