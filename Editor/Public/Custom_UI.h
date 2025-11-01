@@ -91,6 +91,7 @@ private:
 	HRESULT					Bind_Description(void* pArg);
 
 	void					Update_CombinedMatrix();
+	void					Update_CombinedDesc();
 
 private:
 	CShader*				m_pShaderCom				= { nullptr };

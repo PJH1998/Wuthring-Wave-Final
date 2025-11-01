@@ -123,7 +123,7 @@ public:
 	
 public:
 	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
-	void					Update_CombinedDesc(CUSTOM_UI_DESC* pParentDesc = nullptr);
+	void					Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom = nullptr);
 private:
 	void					Update_CacheTransform(_float fTimeDelta);
 	void					Update_InputState()						override;

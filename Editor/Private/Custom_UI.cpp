@@ -73,6 +73,7 @@ void CCustom_UI::Update(_float fTimeDelta)
     m_pAnimator_UICom->Update(fTimeDelta);
 
     Update_CombinedMatrix();
+	Update_CombinedDesc();
 }
 
 void CCustom_UI::Late_Update(_float fTimeDelta)
@@ -272,6 +273,40 @@ void CCustom_UI::Update_CombinedMatrix()
     }
     else
         XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix());
+}
+
+void CCustom_UI::Update_CombinedDesc()
+{
+	CAnimator_UI* pParentAnimatorCom = nullptr;
+
+	if (m_tUIDesc.pParentObject)
+		pParentAnimatorCom = dynamic_cast<CAnimator_UI*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Animator_UI"));
+
+	if (m_pAnimator_UICom)
+	{
+		if (!pParentAnimatorCom)
+		{
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+			if (thisCalcedKFDesc)
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(*thisCalcedKFDesc);
+		}
+		else
+		{
+			auto pParentKFDesc = pParentAnimatorCom->Get_CurCombinedAnimKeyframeDesc();
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+
+			if (thisCalcedKFDesc)
+			{
+				CLevel_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
+				tDesc = *thisCalcedKFDesc;
+
+				// 일단은 Alpha만 연결되도록..
+				tDesc.fAlpha = (1.f - tDesc.fAlpha) * (1.f - pParentKFDesc->fAlpha);
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
+			}
+
+		}
+	}
 }
 
 CCustom_UI* CCustom_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

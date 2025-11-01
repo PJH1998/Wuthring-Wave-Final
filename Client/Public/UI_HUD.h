@@ -37,7 +37,7 @@ private:
 private:
 	HRESULT					Ready_Components(void* pArg);
 
-private:					// ÀÚ½Ä UI¿¡ °üÇÑ ¸ðµç µ¿ÀÛÀº ÇØ´ç ÄÁÅ×ÀÌ³Ê UI°¡ Àü´ã.
+private:					// ï¿½Ú½ï¿½ UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³ï¿½ UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 	void					Update_UI_SkillSection(_float fTimeDelta);
 	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);

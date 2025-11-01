@@ -244,32 +244,28 @@ void CAnimator_UI::Update_Animation()
 
 	UI_ANIM_KEYFRAME_DESC tDesc = {};
 
-	CAnimator_UI* pParentAnimator = nullptr;
-	UI_ANIM_KEYFRAME_DESC* pParentCombinedDesc = nullptr;
-	CCustom_UI* pParentUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(m_pOwner->Get_UIDesc().strParentName));
-	if (pParentUI)
-		pParentAnimator = dynamic_cast<CAnimator_UI*>(pParentUI->Get_Component(L"Com_Animator_UI"));
-	if (pParentAnimator)
-		pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
+	//CAnimator_UI* pParentAnimator = nullptr;
+	//UI_ANIM_KEYFRAME_DESC* pParentCombinedDesc = nullptr;
+	//CCustom_UI* pParentUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(m_pOwner->Get_UIDesc().strParentName));
+	//if (pParentUI)
+	//	pParentAnimator = dynamic_cast<CAnimator_UI*>(pParentUI->Get_Component(L"Com_Animator_UI"));
+	//if (pParentAnimator)
+	//	pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
 
+	if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
+		int i = 10;
 
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
 
     if (m_pCurAnimDesc == nullptr)
     {
-		_float fCombinedAlpha = (pParentAnimator)? pParentCombinedDesc->fAlpha * tDesc.fAlpha : tDesc.fAlpha;
+		//_float fCombinedAlpha = (pParentAnimator)? pParentCombinedDesc->fAlpha * tDesc.fAlpha : tDesc.fAlpha;
+		_float fCombinedAlpha = m_tCombinedKeyFrameDesc.fAlpha;
         pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
         pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
         pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
         pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
 
-		if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
-		{
-			cout << fCombinedAlpha << endl;
-		}
-
-
-		m_tCombinedKeyFrameDesc.fAlpha = fCombinedAlpha;
         return;
     }
 
@@ -388,18 +384,21 @@ void CAnimator_UI::Update_Animation()
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
 
 
-	// 복사
-	m_tCombinedKeyFrameDesc = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex];
-	m_tCombinedKeyFrameDesc.vPos = vResultPos;
-	m_tCombinedKeyFrameDesc.vRot = vResultRotRad;
-	m_tCombinedKeyFrameDesc.vSca = vResultSca;
-	m_tCombinedKeyFrameDesc.vScreenLT = vResultScreenLT;
-	m_tCombinedKeyFrameDesc.vScreenRB = vResultScreenRB;
-	m_tCombinedKeyFrameDesc.vBlendToOuterWidth = vResultOuterWidth;
-	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha;
+	// 계산된 결과를 복사. 실시간 desc 정보를 저장하여 자식 계산에 사용하기 위함
+	m_tCalcedKeyFrameDesc = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex];
+	m_tCalcedKeyFrameDesc.vPos = vResultPos;
+	m_tCalcedKeyFrameDesc.vRot = vResultRotRad;
+	m_tCalcedKeyFrameDesc.vSca = vResultSca;
+	m_tCalcedKeyFrameDesc.vScreenLT = vResultScreenLT;
+	m_tCalcedKeyFrameDesc.vScreenRB = vResultScreenRB;
+	m_tCalcedKeyFrameDesc.vBlendToOuterWidth = vResultOuterWidth;
+	m_tCalcedKeyFrameDesc.fAlpha = fResultAlpha;
+	
+	//if (pParentCombinedDesc)
+	//	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
 
-	if (pParentCombinedDesc)
-		m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
+	if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
+		int i = 10;
 
 	pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
 	pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));

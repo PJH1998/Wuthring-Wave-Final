@@ -61,7 +61,6 @@ void CCustom_UI::Update(_float fTimeDelta)
     Update_InputState();
     Update_CacheTransform(fTimeDelta);
 
-
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
 
@@ -468,20 +467,44 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
     }
 }
 
-void CCustom_UI::Update_CombinedDesc(CUSTOM_UI_DESC* pParentDesc)
+void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 {
-	//if (pParentDesc)
-	//{
-	//	; .alp = ;
-	//	
+	if (m_tUIDesc.strUIName == L"Icon_Rover")
+		int i = 10;
+	if (m_tUIDesc.strUIName == L"SectorR_PartyFrame")
+		int i = 10;
 
-	//}
-	//else
-	//{
+	if (m_pAnimator_UICom)
+	{
+		if (!pParentAnimatorCom)
+		{
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+			if (thisCalcedKFDesc)
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(*thisCalcedKFDesc);
+		}
+		else
+		{
+			auto pParentKFDesc = pParentAnimatorCom->Get_CurCombinedAnimKeyframeDesc();
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+
+			if (thisCalcedKFDesc)
+			{
+				CAnimator_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
+				tDesc = *thisCalcedKFDesc;
+
+				// 일단은 Alpha만 연결되도록..
+				tDesc.fAlpha = (1.f - tDesc.fAlpha) * (1.f - pParentKFDesc->fAlpha);
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
+			}
+
+		}
+	}
 
 
 
-	//}
+	// transfer to child..
+	for (auto& child : m_vecChildObjects)
+		child->Update_CombinedDesc(m_pAnimator_UICom);
 
 }
 
