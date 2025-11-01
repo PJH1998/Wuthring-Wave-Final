@@ -722,10 +722,9 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 // 이미 지난 부분은 원래의 색으로
                 Out.vColor.rgba *= fColorMul1;
                 if (isUseCustomColor)
-                {
                     Out.vColor *= vCustomColor;
-                    Out.vColor.a *= (1 - g_AlphaStrength);
-                }
+                
+                Out.vColor.a *= (1 - g_AlphaStrength);
                 return Out;
             }
             else
@@ -734,10 +733,9 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                 if (fCooldown != 0.f)
                     Out.vColor.rgba *= fColorMul2;
                 if (isUseCustomColor)
-                {
                     Out.vColor *= vCustomColor;
-                    Out.vColor.a *= (1 - g_AlphaStrength);
-                }
+                
+                Out.vColor.a *= (1 - g_AlphaStrength);
                 return Out;
             }
             
@@ -759,17 +757,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // g_fLeftCDRate 가 1 일때는 어두운 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
             if (fixedUV.y < fCooldown)
-            {
             // 밝게 표시될 부분
-                Out.vColor *= fColorMul1;
                 return Out;
-            }
             else
-            {
             // 어둡게 표시될 부분
                 Out.vColor *= fColorMul2;
-                return Out;
-            }
+            
+            Out.vColor.a *= (1 - g_AlphaStrength);
+            return Out;
         }
         case UIFLAG_PLAYER_HP:           // 3
         {

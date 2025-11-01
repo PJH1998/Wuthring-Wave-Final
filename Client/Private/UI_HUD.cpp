@@ -62,13 +62,25 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     // Load Animations from json.
     vector<_wstring> vecAnimFilePaths = {   // �ε��� �ִϸ��̼��� ���⿡ �߰�
         //L"../../Client/Bin/Resource/UI/FJson/UIAnim/statustest.json"
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_Disappear_Test.json"
-
+        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_Disappear_Test.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeOut.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeIn.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_FadeOut.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_FadeIn.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/A_FadeOut.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/A_FadeIn.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeOut.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeIn.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeOut.json",
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeIn.json"
     };
     Load_Animations(vecAnimFilePaths);
 
 	//static_cast<CAnimator_UI*>(Find_ChildObject(L"EnergyBar")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
 
     //Find_ChildObject(L"UI_ParentTest")->Set_Active(false);
 
@@ -95,6 +107,38 @@ void CUI_HUD::Update(_float fTimeDelta)
 
     Update_CombinedMatrix();
 	Update_CombinedDesc();
+
+
+	// test
+	static _bool isToggled = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+	{
+		isToggled = !isToggled;
+
+
+		if (isToggled)
+		{
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+		}
+		else
+		{
+
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+		}
+	}
+
+	
+
+
 
     __super::Update(fTimeDelta);            // Update Animator_UI Component
 }
@@ -207,9 +251,6 @@ HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
         CAnimator_UI* pTargetAnimator = dynamic_cast<CAnimator_UI*>(pTargetObject->Get_Component(L"Com_Animator_UI"));
 
         pTargetAnimator->Insert_Animation(tLoadAnimDesc);
-
-        // ksta del : �׽�Ʈ��
-        pTargetAnimator->Change_Animation(L"TestHUDAnim3");
     }
 
     return S_OK;
