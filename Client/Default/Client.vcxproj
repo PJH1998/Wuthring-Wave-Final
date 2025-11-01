@@ -233,8 +233,12 @@
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\Rover.h" />
+    <ClInclude Include="..\Public\RoverAirFall.h" />
+    <ClInclude Include="..\Public\RoverAirJump.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverGroundDash.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
+    <ClInclude Include="..\Public\RoverGroundLand.h" />
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
@@ -341,8 +345,12 @@
     <ClCompile Include="..\Private\AugustaFactory.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
+    <ClCompile Include="..\Private\RoverAirFall.cpp" />
+    <ClCompile Include="..\Private\RoverAirJump.cpp" />
     <ClCompile Include="..\Private\RoverFactory.cpp" />
+    <ClCompile Include="..\Private\RoverGroundDash.cpp" />
     <ClCompile Include="..\Private\RoverGroundIdle.cpp" />
+    <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">

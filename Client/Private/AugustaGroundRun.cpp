@@ -73,7 +73,7 @@ void CAugustaGroundRun::Handle_Input()
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
-    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
+    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
     m_States[RUN_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
     m_States[RUN_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
@@ -91,9 +91,6 @@ void CAugustaGroundRun::Handle_Input()
 
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
-
-    
-
     
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
@@ -132,7 +129,9 @@ void CAugustaGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+
+	m_States[LAND] = m_pAugusta->Is_Land();
+
 }
 
 
@@ -142,8 +141,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 0.2f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
     //// 전방 벽감지.
     //if (m_States[RUN_U] && m_States[WALL])
@@ -156,7 +153,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (fDistanceToGround > 1.f)
+    if (!m_States[LAND])
     {
         m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -202,6 +199,23 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
   
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
     // Dash 보다 우선순위 높음.
     if (m_States[SPRINT_F])
     {
@@ -209,13 +223,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 뛰다가 Dash
-    if (m_States[DASH])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
+  
 
     if (m_States[MOVE])
     {

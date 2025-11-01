@@ -87,14 +87,14 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
 
 void CAugustaAirFall::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 {
     _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(0.2f);
 
-    if (fDistanceToGround < 0.2f)
+    if (m_States[LAND])
     {
         m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));

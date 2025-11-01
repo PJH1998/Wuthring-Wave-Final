@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "RoverSword.h"
+#include "RoverFactory.h"
 
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -38,16 +39,18 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
-	// 임시.
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Stand1", 0.f, &m_fTrackPosition);
+	CRoverFactory::Register_States(m_pStateMachineCom, this);
 
     // 초기 State 설정.
-  /*  m_StateContext.m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+    m_StateContext.m_eIdleType = ERoverIdleType::STAND1;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(ERoverGroundState::IDLE));*/
+        static_cast<_uint>(ERoverGroundState::IDLE));
     
     m_pColliderCom->Set_Gravity(true);
     
+	// 비활성화. 
+	m_pRoverSword->SetActivate(false);
+
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
@@ -88,10 +91,6 @@ void CRover::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-
-
-
-
     // 6. 파츠 갱신.?
     for (auto& pPart : m_PartObjects)
     {
@@ -112,11 +111,9 @@ void CRover::Late_Update(_float fTimeDelta)
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
     // Collider 충돌 처리후 위치에 맞춘다.
-    
-    
 
     // 사용이 끝났으면 반환.
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
     
@@ -153,6 +150,8 @@ void CRover::Render()
 void CRover::Render_Shadow()
 {
 }
+
+
 
 // AnimName이 같은걸로 매핑되어있음.
 void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)

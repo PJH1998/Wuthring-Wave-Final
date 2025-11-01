@@ -81,9 +81,8 @@ public:
 
 	// Land Check
 	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
-	_float Get_DistanceToGround(_float3* pNormal, _float fStartYOffset = 0.f);
-	_bool Is_Land(_float3* pNormal = nullptr);
-	_bool Is_Land(_float fLandOffsetY = 0.2f);
+	//_bool Is_LandCollider(_float3* pNormal = nullptr, _float fLandDistnace = 0.2f);
+	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
 	
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
@@ -96,7 +95,8 @@ public:
 
 	// Animation
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
-	_bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+	
 	
 
 	// Change State

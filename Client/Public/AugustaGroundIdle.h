@@ -10,6 +10,7 @@ private:
     enum IDLESTATE
     {
         JUMP = 0,
+		LAND,
         DASH,
         SPRINT,
         MOVE,
