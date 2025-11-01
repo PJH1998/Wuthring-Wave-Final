@@ -21,7 +21,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
+	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
 
 	m_pTransformCom->Scale({ 1.f, 1.f, 1.f });
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
@@ -33,18 +33,19 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	m_iHP = 1;
+
+	m_fIdleDuration = 30.f;
+	m_fIdleAcc = 10.f;
+
+	//임시 patrol 위치 데이터
+	m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
+	m_PatrolPoints.push(pDesc->vInitPosition);
 	return S_OK;
 }
 
 void CElectroPredator::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
-	if (m_isTrigger == true)
-		m_isDetecting = true;
-	else
-		m_isDetecting = false;
-	m_isTrigger = false;
-
 }
 
 void CElectroPredator::Update(_float fTimeDelta)
@@ -54,9 +55,14 @@ void CElectroPredator::Update(_float fTimeDelta)
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
 
+	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
+
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-
+	//_float temp;
+	//m_pModelCom->Play_Animation_CPU("Stand2", fTimeDelta, &temp, false, true, false, true, 1.f);
+	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	// 3. Collider Update
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -110,7 +116,7 @@ HRESULT CElectroPredator::Bind_Resources()
 	return S_OK;
 }
 
-void CElectroPredator::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
+void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 {
 	// Com_Rigidbody
 	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
@@ -118,7 +124,7 @@ void CElectroPredator::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(10.f, 8.f, 10.f);
+	RigidbodyDesc.vExtent = _float3(25.f, 13.f, 25.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -151,27 +157,52 @@ void CElectroPredator::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-		CRASH("MonsterTest/Com_Shader");
+		CRASH("ElectroPredator/Com_Shader");
 
 	// Com_ComputeShader
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
 		, pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
-		CRASH("MonsterTest/Com_ComputeShader");
+		CRASH("ElectroPredator/Com_ComputeShader");
 
 	// Com_Model
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-		CRASH("MonsterTest/Com_Model");
+		CRASH("ElectroPredator/Com_Model");
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
 	//Com_AnimMachine
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_ElectroPredator"),
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_AnimMachine_ElectroPredator"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
-		CRASH("MonsterTest/Com_AnimMachine");
+		CRASH("ElectroPredator/Com_AnimMachine");
+
+#pragma region BlackBoard_Value_&_Condition
+	CBlackBoard* pBlackBoard = CBlackBoard::Create();
+	pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
+	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
+	pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
+	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 13.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 13.f); });
+	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 14.f); });
+	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
+	pBlackBoard->Add_Condition("isPatrol", [this]() ->_bool { return isPatrol(); });
+	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
+	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
+	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
+	pBlackBoard->Add_Condition("Right", [this]() ->_bool { return Right(); });
+
+	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
+	BTDesc.pBlackBoard = pBlackBoard;
+	//Com_BehaviorTree
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
+		TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
+		CRASH(m_pBehaviorTreeCom);
+#pragma endregion
+
 }
 
-void CElectroPredator::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
+void CElectroPredator::Ready_PartObjects(ELECTROPREDATOR_DESC* pDesc)
 {
 }
 
@@ -182,17 +213,27 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 
 	}
+	if (m_isTrigger == true)
+	{
+		if (m_isAggro != m_isDetecting)
+			m_iState |= ENUM_CLASS(TEST_STATE::SPAWN);
+		m_isDetecting = true;
+	}
+	else
+		m_isDetecting = false;
+	m_isTrigger = false;
 	if (m_isDetecting)
 	{
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		_vector vDir = vTargetPos - vPosition;
-		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
-		vDir = XMVector3Normalize(vDir);
-		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
-		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
-
-		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+		//_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+		//_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		//_vector vDir = vTargetPos - vPosition;
+		//m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+		//vDir = XMVector3Normalize(vDir);
+		//m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+		//m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+		//
+		//XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+		Calculate_PosAndDir();
 #ifdef _DEBUG
 		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
 		//cout << "distance: " << m_fDistance << endl;
@@ -203,6 +244,26 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 		if (m_fAttackAcc[i] > 0.f)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
+	if (m_fIdleAcc > 0.f)
+		m_fIdleAcc -= fTimeDelta;
+	else
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
+		m_fIdleAcc = m_fIdleDuration;
+	}
+}
+
+void CElectroPredator::Calculate_PosAndDir()
+{
+	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	_vector vDir = vTargetPos - vPosition;
+	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	vDir = XMVector3Normalize(vDir);
+	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 }
 
 void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -212,6 +273,8 @@ void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const Contac
 		m_isTrigger = true;
 		CTransform* pTransform = static_cast<CTransform*>(pOther);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+		if (!m_isAggro)
+			m_isAggro = true;
 	}
 }
 
@@ -228,15 +291,16 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 void CElectroPredator::Patrol()
 {
 	m_vTargetPosition = m_PatrolPoints.front();
-	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-	_vector vDir = vTargetPos - vPosition;
-	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
-	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
-	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	//_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	//_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	//_vector vDir = vTargetPos - vPosition;
+	//m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	//XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+	//m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	Calculate_PosAndDir();
 	m_fFrontDot = 1.f;
 
-	if (m_fDistance < 0.2f)
+	if (m_fDistance < 0.1f)
 	{
 		m_PatrolPoints.pop();
 		m_PatrolPoints.push(m_vTargetPosition);
@@ -252,38 +316,59 @@ _bool CElectroPredator::isAttackEnable()
 {
 	if (!m_isDetecting)
 		return false;
-	_bool Result{};
-	return Result;
+	_bool bResult{};
+	for (_uint i = 0; i < 3; ++i)
+	{
+		if (m_fAttackAcc[i] <= 0.f)
+		{
+			bResult = true;
+			break;
+		}
+	}
+	return bResult;
 }
 
 _bool CElectroPredator::Attack(_uint iIndex, _float fInterval)
 {
-	_bool Result = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
-	if (Result)
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	if (bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
 	}
-	return Result;
+	return bResult;
 }
 
 _bool CElectroPredator::isChase()
 {
-	_bool Result = m_isDetecting;
-	if (Result)
-	{
+	if (m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+		return false;
 
+	_bool bResult{};
+	if (m_isDetecting)
+	{
+		bResult = true;
 	}
-	return Result;
+	else
+	{
+		if (m_fDistance < 0.1f)
+		{
+			m_isAggro = false;
+		}
+	}
+	return bResult;
 }
 
 _bool CElectroPredator::isPatrol()
 {
-	_bool Result = !m_isAggro;
-	if (Result)
+	if (m_PatrolPoints.empty())
+		return false;
+
+	_bool bResult = !m_isAggro;
+	if (bResult)
 	{
-		m_fFrontDot = 1.f;
+		Patrol();
 	}
-	return Result;
+	return bResult;
 }
 
 _bool CElectroPredator::Back()

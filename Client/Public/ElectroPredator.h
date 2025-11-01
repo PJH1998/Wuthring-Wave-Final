@@ -17,7 +17,7 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
-	}HAVOCWARRIOR_DESC;
+	}ELECTROPREDATOR_DESC;
 
 private:
 	explicit CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -55,13 +55,16 @@ private:
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
+	_float					m_fIdleDuration{};
+	_float					m_fIdleAcc{};
 
 private:
 	HRESULT						Bind_Resources();
-	void						Ready_Component(HAVOCWARRIOR_DESC* pDesc);
-	void						Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc);
+	void						Ready_Component(ELECTROPREDATOR_DESC* pDesc);
+	void						Ready_PartObjects(ELECTROPREDATOR_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);

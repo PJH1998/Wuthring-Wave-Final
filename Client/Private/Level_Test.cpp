@@ -3,6 +3,8 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
 
 #include "GameSystem.h"
 #include "Player.h"
@@ -112,6 +114,7 @@ void CLevel_Test::Ready_Dummy()
 
 void CLevel_Test::Ready_MonsterTest()
 {
+	// False Sovereign
     CMonsterTest::MONSTERTEST_DESC MobDesc{};
     MobDesc.eCurLevel = m_eCurLevel;
     MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
@@ -125,6 +128,36 @@ void CLevel_Test::Ready_MonsterTest()
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
+
+	// Havoc Warrior
+	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+		CRASH("Failed Ready Monster");
+
+	// Electro Predator
+	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
+	ADesc.eCurLevel = m_eCurLevel;
+	ADesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
+	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	ADesc.fRotationPerSec = XMConvertToRadians(90.f);
+	ADesc.fSpeedPerSec = 10.f;
+	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
+	ADesc.pAnimationTag = "Stand2";
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
+		CRASH("Failed Ready Monster");
 }
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)

@@ -13,7 +13,7 @@ class ENGINE_DLL CAnimMachine final : public CComponent
 public:
 	typedef struct tagAnimMacnineDesc
 	{
-		const _char* pAnimationTag;
+		_string pAnimationTag;
 	}ANIMMACNINE_DESC;
 
 private:

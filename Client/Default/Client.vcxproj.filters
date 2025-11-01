@@ -462,7 +462,7 @@
     <ClInclude Include="..\public\HavocWarrior.h">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\ElectroPredator.h">
+    <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
   </ItemGroup>
@@ -697,7 +697,7 @@
     <ClCompile Include="..\private\HavocWarrior.cpp">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\ElectroPredator.cpp">
+    <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
   </ItemGroup>

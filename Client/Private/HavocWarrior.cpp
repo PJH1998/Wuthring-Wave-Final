@@ -33,6 +33,8 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	m_iHP = 1;
+	m_fIdleDuration = 30.f;
+	m_fIdleAcc = 10.f;
 	return S_OK;
 }
 
@@ -53,10 +55,13 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
-
+	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-
+	//_float temp;
+	//m_pModelCom->Play_Animation_CPU("Walk_B", fTimeDelta, &temp, false, true, false, true, 1.f);
+	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	// 3. Collider Update
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -67,6 +72,10 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 {
 	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
+#ifdef _DEBUG
+	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_O))
+		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
+#endif // _DEBUG
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
@@ -149,24 +158,24 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-		CRASH("MonsterTest/Com_Shader");
+		CRASH("HavocWarrior/Com_Shader");
 
 	// Com_ComputeShader
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
 		, pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
-		CRASH("MonsterTest/Com_ComputeShader");
+		CRASH("HavocWarrior/Com_ComputeShader");
 
 	// Com_Model
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
-		CRASH("MonsterTest/Com_Model");
+		CRASH("HavocWarrior/Com_Model");
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
 	//Com_AnimMachine
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_HavocWarrior"),
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_AnimMachine_HavocWarrior"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
-		CRASH("MonsterTest/Com_AnimMachine");
+		CRASH("HavocWarrior/Com_AnimMachine");
 
 #pragma region BlackBoard_Value_&_Condition
 	CBlackBoard* pBlackBoard = CBlackBoard::Create();
@@ -176,18 +185,18 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 3.f); });
 	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 4.f); });
-	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 10.f); });
-	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return Front(); });
-	pBlackBoard->Add_Condition("isPatrol", [this]() ->_bool { return Front(); });
+	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 15.f); });
+	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
+	pBlackBoard->Add_Condition("isPatrol", [this]() ->_bool { return isPatrol(); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
 	pBlackBoard->Add_Condition("Right", [this]() ->_bool { return Right(); });
-
+	
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
 	//Com_BehaviorTree
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
 		TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
@@ -206,15 +215,7 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 	}
 	if (m_isDetecting)
 	{
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		_vector vDir = vTargetPos - vPosition;
-		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
-		vDir = XMVector3Normalize(vDir);
-		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
-		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
-
-		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+		Calculate_PosAndDir();
 #ifdef _DEBUG
 		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
 		//cout << "distance: " << m_fDistance << endl;
@@ -225,6 +226,26 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 		if (m_fAttackAcc[i] > 0.f)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
+	if (m_fIdleAcc > 0.f)
+		m_fIdleAcc -= fTimeDelta;
+	else
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
+		m_fIdleAcc = m_fIdleDuration;
+	}
+}
+
+void CHavocWarrior::Calculate_PosAndDir()
+{
+	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	_vector vDir = vTargetPos - vPosition;
+	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	vDir = XMVector3Normalize(vDir);
+	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 }
 
 void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -234,6 +255,8 @@ void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactMa
 		m_isTrigger = true;
 		CTransform* pTransform = static_cast<CTransform*>(pOther);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+		if (!m_isAggro)
+			m_isAggro = true;
 	}
 }
 
@@ -248,6 +271,19 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	}
 }
 
+void CHavocWarrior::Patrol()
+{
+	m_vTargetPosition = m_PatrolPoints.front();
+	Calculate_PosAndDir();
+	m_fFrontDot = 1.f;
+
+	if (m_fDistance < 0.1f)
+	{
+		m_PatrolPoints.pop();
+		m_PatrolPoints.push(m_vTargetPosition);
+	}
+}
+
 _bool CHavocWarrior::isKnockDown()
 {
 	return m_iState & (ENUM_CLASS(TEST_STATE::BEHIT) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::AIR));
@@ -257,8 +293,16 @@ _bool CHavocWarrior::isAttackEnable()
 {
 	if (!m_isDetecting)
 		return false;
-	_bool Result{};
-	return Result;
+	_bool bResult{};
+	for (_uint i = 0; i < 3; ++i)
+	{
+		if (m_fAttackAcc[i] <= 0.f)
+		{
+			bResult = true;
+			break;
+		}
+	}
+	return bResult;
 }
 
 _bool CHavocWarrior::Attack(_uint iIndex, _float fInterval)
@@ -273,20 +317,33 @@ _bool CHavocWarrior::Attack(_uint iIndex, _float fInterval)
 
 _bool CHavocWarrior::isChase()
 {
-	_bool Result = m_isDetecting;
-	if (Result)
-	{
+	if (m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+		return false;
 
+	_bool bResult{};
+	if (m_isDetecting)
+	{
+		bResult = true;
 	}
-	return Result;
+	else
+	{
+		if (m_fDistance < 0.1f)
+		{
+			m_isAggro = false;
+		}
+	}
+	return bResult;
 }
 
 _bool CHavocWarrior::isPatrol()
 {
+	if (m_PatrolPoints.empty())
+		return false;
+
 	_bool Result = !m_isAggro;
 	if (Result)
 	{
-		m_fFrontDot = 1.f;
+		Patrol();
 	}
 	return Result;
 }

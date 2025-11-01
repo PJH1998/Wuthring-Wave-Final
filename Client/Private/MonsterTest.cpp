@@ -218,7 +218,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 		CRASH("MonsterTest/Com_Model");
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
-	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
+	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
 	//Com_AnimMachine
 	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))

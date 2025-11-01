@@ -38,7 +38,7 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 
-	vector<_float3>			m_PatrolPoints;
+	queue<_float3>			m_PatrolPoints;
 
 	_uint					m_iState{};
 	_bool					m_isAggro{};
@@ -55,6 +55,8 @@ private:
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
+	_float					m_fIdleDuration{};
+	_float					m_fIdleAcc{};
 
 private:
 	HRESULT						Bind_Resources();
@@ -62,9 +64,11 @@ private:
 	void						Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						Patrol();
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
