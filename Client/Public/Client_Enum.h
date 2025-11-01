@@ -69,13 +69,14 @@ namespace Client
 		MOVE_RIGHT			= 1 << 3,
 		SPLINT				= 1 << 4,
 		DODGE				= 1 << 5,
-
+		TURN				= 1 << 6,
 		JUMP				= 1 << 8,
 		AIR					= 1 << 9,
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
-		TURN				= 1 << 12,
+		STRIKE				= 1 << 12,
+		BEHIT				= 1 << 13,
 		BLOCK				= 1 << 14,
 		PARALYSIS			= 1 << 15,
 

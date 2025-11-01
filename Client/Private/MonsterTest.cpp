@@ -1,6 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "MonsterTest.h"
-#include  "GameInstance.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -196,7 +195,10 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
-	
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		BeHit(iLayer, pDesc, Manifold);
+		});
+
 	m_pColliderCom->Set_Desc(m_pTransformCom);
 
 
@@ -283,8 +285,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 #ifdef _DEBUG
-		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
-		cout << "distance: " << m_fDistance << endl;
+		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		//cout << "distance: " << m_fDistance << endl;
 #endif
 	}
 	for(_uint i = 0; i < 10; ++i)
@@ -314,6 +316,16 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+}
+
+void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	{
+#ifdef _DEBUG
+		cout << "On Hit! (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 }
 
 _bool CMonsterTest::isKnockDown()
