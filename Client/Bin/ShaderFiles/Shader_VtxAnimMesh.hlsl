@@ -139,6 +139,7 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     
     Out.vPBR.y = 0.2f;
+    Out.vPBR.z = 1.f;
     
     return Out;
 }

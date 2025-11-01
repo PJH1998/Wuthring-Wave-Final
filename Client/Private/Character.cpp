@@ -87,6 +87,17 @@ void CCharacter::Set_SpringCamera(CSpringCamera* pSpringCamera)
     Safe_AddRef(pSpringCamera);
 }
 
+// Collider 설정 완료.
+void CCharacter::Set_Collider(CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius)
+{
+	m_pColliderCom = pColliderCom;
+	Safe_AddRef(m_pColliderCom);
+
+	m_vColliderOffSet = vColliderOffset;
+	m_fColliderHeight = fColliderHeight;
+	m_fColliderRadius = fColliderRadius;
+}
+
 _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 {
 	ASSERT_CRASH(m_pTransformCom);
@@ -517,31 +528,6 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 
 	// 0. World Matrix
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);  // 위치 설정
-
-	// 1. 위치 보정.
-	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) 
-		+ XMVectorSet(0.f, m_fColliderHeight, 0.f, 0.f);
-	m_pTransformCom->Set_State(STATE::POSITION, vPos);
-
-	// 2. 이전 위치 저장.
-	// m_pTransformCom->Save_PreviousPosition();  // 이전 위치 저장 (속도 계산용)
-	
-
-	// 2. 위치 보정한 곳에서 RayCast로 땅까지 거리 측정 (Get_DistanceToGround() 사용)
-	//_float fRayOffset = 0.2f;
-	//_float fGroundDist = Get_DistanceFromGround(fRayOffset);  // 현재 위치에서 땅까지 거리
-
-	//if (fGroundDist > 0.3f) {  // 떠 있으면 땅으로 낮춤 (0.1f: 여유값)
-	//	vPos -= XMVectorSet(0.f, fGroundDist - fRayOffset, 0.f, 0.f);  // 콜라이더 반경만큼 위에 놓음
-	//}
-	//else if (fGroundDist < 0.f) {  // 땅 아래면 위로 올림 (꽂힘 방지)
-	//	vPos -= XMVectorSet(0.f, fGroundDist + fRayOffset, 0.f, 0.f);  // 거리만큼 위로
-	//}
-
-	// 3. 땅처리 했으니까 콜라이더 이동하고
-	m_pColliderCom->Set_Position(vPos);  // 콜라이더 즉시 이동
-
-	m_pColliderCom->Set_Gravity(true);
 }
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)

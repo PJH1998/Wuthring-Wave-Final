@@ -182,6 +182,14 @@ HRESULT CRendererSubResource::Add_Bloom_BufferData(const _wstring& strRCSTag, _f
     return S_OK;
 }
 
+HRESULT CRendererSubResource::Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot)
+{
+	if (FAILED(m_pGameInstance->Add_SamplerState(strRCSTag, iSlot, m_pDefaultSampler)))
+		return E_FAIL;
+
+	return S_OK;
+}
+
 HRESULT CRendererSubResource::Ready_Shader_Filters()
 {
     m_pRampTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/Color_Ramp%d.png"), 3);

@@ -128,8 +128,15 @@ void CAugustaAirAttack::OnExit()
 {
     CAirState::OnExit();
 
-    m_pAugusta->PartActivate(m_iPartType, false); 
-	m_pAugusta->PartActivate(m_iSubPartType, false);
+	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iPartType, false);
+	}
+
+	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iSubPartType, false);
+	}
 
     m_pAugusta->Set_Gravity(true);
     m_fSpeed = 0.f;
@@ -170,20 +177,22 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {
+		// 애니메이션 속도 서로 Sync 맞추기.
         m_pAugusta->Play_PartAnimation(
             m_iPartType,
             m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
         );
     }
 
 	// Griffon
 	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
 	{
+		
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
 			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-			fTimeDelta, nullptr
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true, false
 		);
 	}
     
