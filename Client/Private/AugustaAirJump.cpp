@@ -77,7 +77,7 @@ void CAugustaAirJump::Handle_Input()
 
 void CAugustaAirJump::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 // 점프에 관련된 Update

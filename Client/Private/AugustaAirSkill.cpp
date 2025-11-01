@@ -128,7 +128,7 @@ void CAugustaAirSkill::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirSkill::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(&m_vLandNormal, 0.1f) < 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land();
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 

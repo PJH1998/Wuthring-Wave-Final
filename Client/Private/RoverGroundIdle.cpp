@@ -35,15 +35,6 @@ void CRoverGroundIdle::OnEnter()
 
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
-    m_iPartType = CRover::PARTTYPE::PART_SWORD;
-
-    if (eIdleType == ERoverIdleType::STAND1_ACTION01 || eIdleType == ERoverIdleType::STAND1_ACTION02
-        || eIdleType == ERoverIdleType::STAND2)
-    {
-        _string strBoneName = "Root";
-        m_pRover->PartActivate(m_iPartType, true);
-        m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-    }
 
     // 3. Idle 상태 초기화
     State_Reset();
@@ -80,23 +71,18 @@ void CRoverGroundIdle::OnExit()
 void CRoverGroundIdle::Handle_Input()
 {
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
-    
-    m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
+    m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
-
     m_States[SPRINT] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
     // AttackState에서 판별.
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // LockOn인 경우에는 W, A, S, D 입력값을 모두 판별.
-    if (m_pRover->Is_LockOn())
-    {
-        m_States[MOVE_U] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
-        m_States[MOVE_D] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
-        m_States[MOVE_L] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
-        m_States[MOVE_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
-    }
+    m_States[MOVE_U] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+    m_States[MOVE_D] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+    m_States[MOVE_L] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
+    m_States[MOVE_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
     
     // 기본 Skill E
     m_States[SKILL_E] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
@@ -113,32 +99,14 @@ void CRoverGroundIdle::Handle_Input()
 }
 
 
-// Idle 간의 전환 지정.
 void CRoverGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
-
-    // 1. 현재 애니메이션 재생
-    CCharacterState::Play_Animation(m_pRover, fTimeDelta);
-
-
-    ERoverIdleType eIdleType = static_cast<ERoverIdleType>(m_iCurrentAnimIdx);
-
-    // 2. 파츠도 재생.
-    if (eIdleType == ERoverIdleType::STAND1_ACTION01 || eIdleType == ERoverIdleType::STAND1_ACTION02
-        || eIdleType == ERoverIdleType::STAND2)
-    {
-        m_pRover->Play_PartAnimation(
-            m_iPartType,
-            m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr
-        );
-    }
-    
+	CCharacterState::Play_Animation(m_pRover, fTimeDelta);
 }
 
 void CRoverGroundIdle::Check_Physics(_float fTimeDelta)
 {
-
+	m_States[LAND] = m_pRover->Is_Land();
 }
 
 // Idles 조건이 아닌 것들.
@@ -151,69 +119,39 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     // 우선순위 순으로 전환조건 진행.
     // 점프
-    //if (m_States[JUMP])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
-    //    return;
-    //}
+    if (m_States[JUMP])
+    {
+        m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;
+        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
+        return;
+    }
+	// DASH
+	if (m_States[DASH])
+	{
+		if (m_States[MOVE_D])
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
 
-    //// 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
-    //if (m_States[BURST_R])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST)); // 상위, 하위 상태
-    //    return;
-    //}
+    // Sprint => 빠르게 달리기.
+    if (m_States[SPRINT])
+    {
+        m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::SPRINT_F;
+        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN)); // 상위, 하위 상태
+        return;
+    }
 
-    //if (m_States[UNIQUE_E])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL_STRIKE;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
-    //    return;
-    //}
+   
 
-    //
-
-    //if (m_States[SKILL_E])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_HACKDOWN_START;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK));
-    //    return;
-    //}
-
-    //// 에코 => 소환 
-    //if (m_States[SKILL_Q])
-    //{
-    //   /* m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL_RISE;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));*/
-    //    return;
-    //}
-
-
-    //// 기본 공격
-    //if (m_States[ATTACK])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
-    //    return;
-    //}
-
-    //// Sprint => 빠르게 달리기.
-    //if (m_States[SPRINT])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::SPRINT_F;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN)); // 상위, 하위 상태
-    //    return;
-    //}
-
-    //// DASH
-    //if (m_States[DASH])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-    //    return;
-    //}
 
     
     // 이동은 Run State에서 조절.
@@ -252,43 +190,9 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN)); // 상위, 하위 상태
         return;
     }
-
-    // 자동 변환.
-    if (m_IsAnimationEnd)
-    {
-        ERoverIdleType nextIdle = ERoverIdleType::STAND1;
-
-        switch (static_cast<ERoverIdleType>(m_iCurrentAnimIdx))
-        {
-        case ERoverIdleType::STAND1:
-            nextIdle = ERoverIdleType::STAND1_ACTION01;
-            break;
-        case ERoverIdleType::STAND1_ACTION01:
-            nextIdle = ERoverIdleType::STAND1_ACTION02;
-            break;
-        case ERoverIdleType::STAND1_ACTION02:
-            nextIdle = ERoverIdleType::STAND1_ACTION03;
-            break;
-        case ERoverIdleType::STAND1_ACTION03:
-            nextIdle = ERoverIdleType::STAND1_ACTION01;  // 다시 처음으로
-            break;
-        default:
-            nextIdle = ERoverIdleType::STAND1_ACTION01;
-            break;
-        }
-
-        m_iCurrentAnimIdx = ENUM_CLASS(nextIdle);
-        return;
-    }
-
 }
 
 
-
-void CRoverGroundIdle::LockOn_StateTransition(_float fTimeDelta)
-{
-
-}
 
 void CRoverGroundIdle::Setup_Animations()
 {

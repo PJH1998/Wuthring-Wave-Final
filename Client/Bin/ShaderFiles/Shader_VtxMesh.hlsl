@@ -98,19 +98,16 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     }
     Out.vDiffuse.w = 1.f;
 
-    Out.vPBR.y = 0.25f;
+    Out.vPBR.y = 0.45f;
     Out.vPBR.x = 0.f;
     
     if (g_IsDynamicObject)
-        Out.vPBR.z = 1.f;
-    Out.vPBR.a = 1.f;
-    
-    if (g_HasMetallic)
     {
-        vector vMetallicDesc = g_MetallicTexture.Sample(DefaultSampler, In.vTexcoord);
-        //Out.vPBR.y = vMetallicDesc.r * 0.19f;
-        //Out.vPBR.x = (1.f - vMetallicDesc.g) * 0.4f;
+        Out.vDepth.z = 1.f;
+        Out.vPBR.z = 1.f;
     }
+     
+    Out.vPBR.a = 1.f;
     
     float4 vNormal;
     
@@ -142,8 +139,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         {
             vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
 			
-            Out.vPBR.y = vDefaultNormal.a;
             Out.vPBR.x = vDefaultNormal.b;
+            Out.vPBR.y = vDefaultNormal.a;
 	        
             vNormal = normalize(vDefaultNormal * 2.f - 1.f);
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
@@ -239,7 +236,6 @@ PS_OUT_LIGHT PS_MAIN_NORMAL_FOCUS(PS_IN In)
     {
         vNormal = In.vNormal.xyz;
         vNormal = vNormal * 0.5f + 0.5f;
-        Out.vDepth.z = 1.f;
     }
     
     Out.vNormal = float4(vNormal, 1.f);

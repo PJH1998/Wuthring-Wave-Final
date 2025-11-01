@@ -81,7 +81,7 @@ void CAugustaGroundIdle::Handle_Input()
 {
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     
-    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
+    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 
     m_States[SPRINT] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
@@ -90,13 +90,11 @@ void CAugustaGroundIdle::Handle_Input()
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // LockOn인 경우에는 W, A, S, D 입력값을 모두 판별.
-    if (m_pAugusta->Is_LockOn())
-    {
-        m_States[MOVE_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
-        m_States[MOVE_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
-        m_States[MOVE_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
-        m_States[MOVE_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
-    }
+    m_States[MOVE_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+    m_States[MOVE_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+    m_States[MOVE_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
+    m_States[MOVE_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+
     
     // 기본 Skill E
     m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
@@ -138,7 +136,7 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 
 void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 {
-
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 // Idles 조건이 아닌 것들.
@@ -199,6 +197,23 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[MOVE_D])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
     // Sprint => 빠르게 달리기.
     if (m_States[SPRINT])
     {
@@ -207,13 +222,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // DASH
-    if (m_States[DASH])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
+
 
     
     // 이동은 Run State에서 조절.

@@ -55,7 +55,7 @@ void CActor::Register_AllNotifies(const _string& strFolderPath)
 {
     ASSERT_CRASH(m_pModelCom);
     auto colliderCallback = [this](const _wstring& tag, bool active) {
-        this->Collider_Active(tag, active); // 'this->'�� ���� ����
+        this->Collider_Active(tag, active); 
         };
 
     auto effectCallBack = [this](const _wstring& tag) {
