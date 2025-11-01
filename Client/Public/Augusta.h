@@ -26,7 +26,8 @@ private:
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
 		EAugustaFallType m_eFallType = EAugustaFallType::END;
 		EAugustaAirAttackType m_eAirAttackType = EAugustaAirAttackType::END;
-		EAirSkillType m_eAirSkillType = EAirSkillType::END;
+		EAugustaAirSkillType m_eAirSkillType = EAugustaAirSkillType::END;
+		EAugustaAirFlyType m_eAirFlyType = EAugustaAirFlyType::END;
 
 		// Climb
 		EAugustaClimbIdleType m_eClimbIdleType = EAugustaClimbIdleType::END;
@@ -59,7 +60,8 @@ private:
 			m_eJumpType = EAugustaJumpType::END;
 			m_eFallType = EAugustaFallType::END;
 			m_eAirAttackType = EAugustaAirAttackType::END;
-			m_eAirSkillType = EAirSkillType::END;
+			m_eAirSkillType = EAugustaAirSkillType::END;
+			m_eAirFlyType = EAugustaAirFlyType::END;
 
 			// Climb
 			m_eClimbIdleType = EAugustaClimbIdleType::END;
@@ -69,7 +71,7 @@ private:
 
 			m_eHitType = EAugustaHitType::END;
 
-			m_strPrevInfo = "";
+			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
 
@@ -82,12 +84,11 @@ public:
 		return m_StateContext;
 	};
 
-	// ȣ�� �޴� State
 	StateTransitionContext TakeStateContext()
 	{
-		StateTransitionContext tempCopy = m_StateContext; // ���� ���ؽ�Ʈ�� ����
-		m_StateContext = {}; // ���� ���ؽ�Ʈ�� ��� ��� �⺻�� �ʱ�ȭ)
-		return tempCopy; // ���纻�� ��ȯ
+		StateTransitionContext tempCopy = m_StateContext; 
+		m_StateContext = {};
+		return tempCopy;
 	}
 
 #pragma endregion
@@ -97,6 +98,7 @@ public:
 		PART_BAYONET = 0, // Bayonet
 		PART_SKILLWEAPON = 1, // SKill Weapon
 		PART_GRIFFON = 2, // Griffon SKILL E UniqueGauge
+		PART_WING = 3,
 		TYPE_END
 	};
 
@@ -145,24 +147,16 @@ private:
 	class CAugustaBayonet* m_pBayonet = { nullptr };
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
+	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
-	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State���� Ȱ��ȭ?
-
-	
-#ifdef _DEBUG
-	// RayCast ����
-	vector<pair<_float, _float>> m_RayCasts = {};
-#endif // _DEBUG
-
+	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
 
 
 private:
-	// Runtime ���� �ʿ��� ���� ���� �غ�.
+	// Runtime 
 	void Bind_Resources();
-
-	// �ʱ� ���� ���� �غ�.
 	void Ready_Components(const CHARACTER_DESC* pDesc);
 	void Ready_Variables(const CHARACTER_DESC* pDesc);
 	void Ready_Positions(const CHARACTER_DESC* pDesc);

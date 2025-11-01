@@ -43,9 +43,9 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 {
     CProp::Update(fTimeDelta);
 
-    // Augusta�� StateMachine���� �ִϸ��̼ǽ���?
+    // Augusta StateMachine
 
-    // Last :  Combined ��� �ʱ�ȭ
+    // Last :  Combined 
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
@@ -57,14 +57,11 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 
 void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 {
-
-
-
     CProp::Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 

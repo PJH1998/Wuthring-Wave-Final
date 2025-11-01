@@ -42,9 +42,11 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 
 void CAugustaBayonet::Update(_float fTimeDelta)
 {
+	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
+	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
     CProp::Update(fTimeDelta);
 
-    // Last :  Combined ��� �ʱ�ȭ
+    // Combined Matrix 
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
@@ -61,7 +63,7 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 

@@ -4,23 +4,27 @@
 NS_BEGIN(Client)
 
 // Augusta Attack State - Attack01~04, Attack_*, SpAttack* 처리
-class CAugustaAirAttack final : public CAirState
+class CAugustaAirFly final : public CAirState
 {
 private:
-    enum AIRATTACKSTATE // 내부에서 전환 가능한 상태.
+    enum AIRFLYSTATE // 내부에서 전환 가능한 상태.
     {
-        ATTACK,
+		FLY_U,
+		FLY_D,
+		FLY_L,
+		FLY_R,
         MOVE,
+		ATTACK, // 낙하 공격
         JUMP,
         DOUBLE_JUMP,
         LAND,
-		UNIQUE_GRIFFON,
+		FALL,
         END
     };
 
 private:
-    explicit CAugustaAirAttack() = default;
-    virtual ~CAugustaAirAttack() = default;
+    explicit CAugustaAirFly() = default;
+    virtual ~CAugustaAirFly() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -30,15 +34,15 @@ public:
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
-    _bool m_States[AIRATTACKSTATE::END] = {};
+    _bool m_States[AIRFLYSTATE::END] = {};
     _float m_fSpeed = {};
 
-	map<_string, _string> m_PartsAnimations = {}; // Parts의 애니메이션이 서로 달라서?
+	_float3 m_vDirection = {};
     
 
 private:
     virtual void Handle_Input() override;
-    void Update_AttackAnimations(_float fTimeDelta);
+    void Update_FlyAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
@@ -46,7 +50,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaAirAttack* Create(class CGameObject* pOwner);
+    static CAugustaAirFly* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

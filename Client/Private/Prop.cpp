@@ -78,15 +78,6 @@ void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float
 {
     ASSERT_CRASH(m_pModelCom);
 
-
-	// 같은 애니메이션 재시작 방지 + 트랙 초기화
-	//if (m_strCurrentAnimName != strAnimName)
-	//{
-	//	m_fTrackPosition = 0.f;
-	//	m_strCurrentAnimName = strAnimName;
-	//	m_IsAnimationEnd = false;
-	//}
-
     //m_IsAnimationEnd = m_pModelCom->Play_Animation_GPU(
     //    m_pComputeShaderCom, strAnimName, fTimeDelta, &m_fTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(

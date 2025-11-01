@@ -456,6 +456,9 @@
     <ClInclude Include="..\Public\Wing.h">
       <Filter>03. GameObject\Weapon\Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -687,6 +690,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Wing.cpp">
       <Filter>03. GameObject\Weapon\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -264,6 +264,14 @@ _fvector CCharacter::Get_Velocity()
 	return m_pTransformCom->Get_Velocity();
 }
 
+void CCharacter::Add_Force(_fvector vForce, _float fTimeDelta)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pTransformCom->Go_Force(vForce, fTimeDelta);
+}
+
+
+
 #pragma endregion
 
 
