@@ -2,6 +2,7 @@
 #include "Augusta.h"
 #include "Player.h"
 #include "SpringCamera.h"
+#include "Collider.h"
 
 #include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
@@ -66,7 +67,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
@@ -87,7 +87,6 @@ void CAugusta::Update(_float fTimeDelta)
 
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
-
 
 
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
@@ -119,7 +118,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
     
-    // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
@@ -156,6 +154,24 @@ void CAugusta::Render()
 
 void CAugusta::Render_Shadow()
 {
+}
+
+void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+{
+	// 애니메이션 변경할 값.
+	switch (eTransitionType)
+	{
+	case CHARACTER_TRANSITIONTYPE::IDLE:
+		GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+		break;
+	case CHARACTER_TRANSITIONTYPE::RUN:
+		break;
+	}
+	
+
+	// 상태 변수 초기화
+	m_StateContext.Clear();
 }
 
 // AnimName이 같은걸로 매핑되어있음.

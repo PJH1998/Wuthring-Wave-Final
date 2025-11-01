@@ -4,6 +4,7 @@
 #include "SpringCamera.h"
 #include "RoverSword.h"
 #include "RoverFactory.h"
+#include "Collider.h"
 
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -153,7 +154,26 @@ void CRover::Render_Shadow()
 
 
 
-// AnimName이 같은걸로 매핑되어있음.
+void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+{
+	switch (eTransitionType)
+	{
+		case CHARACTER_TRANSITIONTYPE::IDLE:
+		{
+			// 애니메이션 변경할 값.
+			GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+			m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+			break;
+		}
+	}
+
+	// 상태 변수 초기화
+	m_StateContext.Clear();
+}
+
+
+
+	// AnimName이 같은걸로 매핑되어있음.
 void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     switch (iPartType)

@@ -37,7 +37,9 @@ private:
 		// Hit
 		EAugustaHitType m_eHitType = EAugustaHitType::END;
 		
-		//
+
+		// Prev Info
+		_string m_strPrevInfo = {};
 		void Clear()
 		{
 			// Land
@@ -66,6 +68,8 @@ private:
 			m_IsClimbSecondStep = false;
 
 			m_eHitType = EAugustaHitType::END;
+
+			m_strPrevInfo = "";
 		};
 	};
 
@@ -115,6 +119,7 @@ public:
 
 #pragma region 1. STATE.
 public:
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;

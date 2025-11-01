@@ -4,6 +4,7 @@
 NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
+
 public:
 	using EnsembleEndCallback = function<void()>;
 
@@ -63,9 +64,33 @@ public:
 #pragma endregion
 
 
+#pragma region PHYSICS
+public:
+	// Wall
+	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
+	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
+
+	// Land Check
+	_float Get_DistanceFromGround(_float fStartYOffset = 0.f);
+	_bool Is_LandCollider(_float3* pNormal = nullptr);
+	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
+
+	// Gravity
+	void Set_Gravity(_bool IsGravity);
+
+	// Collider
+	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = { 0.f, 0.f, 0.f });
+	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
+
+	_fvector Get_Velocity();
+#pragma endregion
+
 
 #pragma region STATE
 public:
+	// Transition Character From Player
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
+
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) {};
@@ -78,18 +103,8 @@ public:
 	// LockOn
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
-
-	// Land Check
-	_float Get_DistanceToGround(_float fStartYOffset = 0.f);
-	//_bool Is_LandCollider(_float3* pNormal = nullptr, _float fLandDistnace = 0.2f);
-	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
 	
-	// Wall
-	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
-	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
-
 	// KeyInput
-
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 
@@ -97,8 +112,6 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	
-	
-
 	// Change State
 	void Change_State(_uint iCategory, _uint iSubState);
 	
@@ -118,17 +131,10 @@ public:
 	void Rotate_Target();
 	void Rotate_HitTarget();
 
-
-	// Gravity
-	void Set_Gravity(_bool IsGravity);
-
-	// Collider
-	void Set_ColliderReferenceBone(const _string& strBoneName, _float3 vOffset = {0.f, 0.f, 0.f});
 	
 	// Transform
-	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix);
-	void Sync_Transform_ToPlayer(class CTransform* pTransformCom);
-	
+	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevVeloctiy, _float fTimeDelta);
+	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
 #pragma endregion
 
 
@@ -150,7 +156,7 @@ public:
 	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
 	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
 
-	void Sync_UI(); // UI�� �ʿ��� ���� �ʱ�ȭ�� Player�� ����Ѵ�.
+	void Sync_UI(); // UI
 #pragma endregion
 
 

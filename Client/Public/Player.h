@@ -55,16 +55,12 @@ public:
 #pragma endregion
 
 public:
-	void Change_CharacterCheck();
-	void Change_Character(CHARACTERTYPE eNextCharacter);
-	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
-	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	
 
 public:
 	void Switch_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
 	void Notify_EnsembleEnd();
-
 	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
@@ -94,6 +90,10 @@ private:
 	CHARACTERTYPE m_eNextCharacter = {};
 	
 private:
+	void Player_KeyInput();
+	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
+	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void Sorting_Target();
 	void Toggle_LockOn();
 

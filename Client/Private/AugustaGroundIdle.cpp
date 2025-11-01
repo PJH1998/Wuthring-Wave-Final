@@ -47,6 +47,8 @@ void CAugustaGroundIdle::OnEnter()
 
     // 3. Idle 상태 초기화
     State_Reset();
+
+	m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaGroundIdle::OnUpdate(_float fTimeDelta)
@@ -148,6 +150,11 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     _uint iKeyInput = {};
 
     // 우선순위 순으로 전환조건 진행.
+	if (!m_States[LAND])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+	}
     // 점프
     if (m_States[JUMP])
     {
@@ -172,13 +179,13 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     }
 
     
-
-    if (m_States[SKILL_E])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
-        return;
-    }
+	// SKILL_E 누르면 => 
+	if (m_States[SKILL_E])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_HACK;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+		return;
+	}
 
     // 에코 => 소환 
     if (m_States[SKILL_Q])

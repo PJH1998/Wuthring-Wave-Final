@@ -7,7 +7,7 @@ class CWeapon abstract : public CPartObject
 public:
 	typedef struct tagWeaponDesc : public CPartObject::PART_DESC 
 	{
-		const _float4x4* pSocketMatrix = { nullptr }; // ������ ��
+		const _float4x4* pSocketMatrix = { nullptr };
 		pair<LEVEL, _wstring> shaderData = {};
 		pair<LEVEL, _wstring> computeShaderData = {};
 		pair<LEVEL, _wstring> modelData = {};

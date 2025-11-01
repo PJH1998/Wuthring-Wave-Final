@@ -63,6 +63,8 @@ void CAugustaGroundRun::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->Set_Gravity(true);
+
+	m_iNotLandFrames = 0;
 }
 
 void CAugustaGroundRun::Handle_Input()
@@ -130,7 +132,9 @@ void CAugustaGroundRun::Check_Physics()
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
 
-	m_States[LAND] = m_pAugusta->Is_Land();
+	//m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.4f);
+	//m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
 }
 
@@ -155,9 +159,14 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 
     if (!m_States[LAND])
     {
-        m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-        return;
+		m_iNotLandFrames++;
+		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		{
+			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+			return;
+		}
+        
     }
 
     // SPACE 누르면 바로 점프로 전환.
@@ -183,11 +192,11 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // SKILL_E 누르면 
+    // SKILL_E 누르면 => 
     if (m_States[SKILL_E])
     {
-        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+        m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_HACK;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
         return;
     }
 

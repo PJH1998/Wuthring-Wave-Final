@@ -76,41 +76,29 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
-    
-	// 1. Change 된게 있다면 1프레임 뒤에 체인지.
-	if (m_IsChanage)
-	{
-		m_IsChanage = false;
-		Change_Character(m_eNextCharacter);
-	}
+	
 
     m_pInputControllerCom->Update();
     
-    if (m_iCurrentCharacterIdx != NONE)
-        m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
-
-    if (m_iEnsembleCharacterIdx != NONE && 
-        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
+	// 임시.
+    
         
-	// 2. 캐릭터 체인지
-	Change_CharacterCheck();
+	// 2. 현재 활성화 캐릭터 이후에 키 입력 확인하기
+	Player_KeyInput();
 
-    // 임시.
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
-    {
-        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
-        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
-    }
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
-    {
-        m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
-        m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
-    }
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
-    {
-        m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
-    }
+	// 3. 변경이 있다면, 이 프레임 끝에서 처리
+	if (m_IsChanage)
+	{
+		m_IsChanage = false;
+		Change_Character(m_eNextCharacter, fTimeDelta);
+	}
+   
+	if (m_iCurrentCharacterIdx != NONE)
+		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
+
+	if (m_iEnsembleCharacterIdx != NONE &&
+		m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
+		m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
 
 }
 
@@ -119,21 +107,20 @@ void CPlayer::Update(_float fTimeDelta)
     CGameObject::Update(fTimeDelta);
 	if (m_iCurrentCharacterIdx != NONE)
 	{
-		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
-        
-        
+
     // 2. Ensemble 
     if (m_iEnsembleCharacterIdx != NONE &&
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
 
+	// 3. Rigidbody Update => Camera 
+	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+
     Sorting_Target(); // Update => 
     Toggle_LockOn();
-    
-    // 3. Rigidbody Update => Camera 
-    m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
@@ -161,25 +148,44 @@ void CPlayer::Render_Shadow()
 
 #pragma endregion
 
-void CPlayer::Change_CharacterCheck()
+void CPlayer::Player_KeyInput()
 {
-	
+	// Character Change
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 	{
 		m_IsChanage = true;
 		m_eNextCharacter = CHARACTERTYPE::ROVER;
+		return;
 	}
-    else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
+	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
 	{
 		m_IsChanage = true;
 		m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+		return;
 	}
-    else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
+	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
 	{
 		m_IsChanage = true;
 		m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+		return;
+	}
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
+		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+	}
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
+		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
+	}
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
 	}
 }
+
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
@@ -250,91 +256,129 @@ void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold&
     m_TargetTransforms.push_back(pTargetTransform);
 }
 
-void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
+//void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
+//{
+//    if (eNextCharacter < 0 || eNextCharacter >= TYPE_END)
+//        return;
+//
+//    if (m_Characters[eNextCharacter] == nullptr)
+//        return;
+//
+//    if (m_iCurrentCharacterIdx == eNextCharacter)
+//        return;
+//
+//
+//    CCharacter* pCurrentCharacter = nullptr;
+//    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
+//        pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
+//
+//    _bool bUseEnsemble = false;
+//    if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
+//        bUseEnsemble = true;
+//
+//
+//	_matrix matPrevWorldMatrix = XMMatrixIdentity();
+//	_float4 vPrevPosition = {};
+//	_bool bHasPrevCharacter = false;
+//
+//	// 이전 캐릭터 비활성화
+//	CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
+//	
+//
+//	// 다음캐릭 활성화
+//	CCharacter* pNextCharacter = m_Characters[eNextCharacter];
+//	pNextCharacter->SetActivate(true);
+//
+//	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+//	m_Characters[eNextCharacter]->Sync_Transform_FromPlayer(mat, fTimeDelta);
+//
+//	// 현재 선택된 캐릭터로 CurrentCharacter Idx 변경.
+//	m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
+//	m_iCurrentCharacterIdx = eNextCharacter;
+//
+//	pPrevCharacter->SetActivate(false);
+//
+//	// 최근 캐릭터가 존재하고, Ensemble 게이지가 가득찼다면?
+//	if (bUseEnsemble && pPrevCharacter)
+//	{
+//		pPrevCharacter->SetActivate(true);
+//		//pCurrentCharacter->SetActivate(true);
+//		Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
+//		pPrevCharacter->Reset_SwitchGauge(); // 이전 캐릭터 SwitchGauge 지우기.
+//	}
+//	else
+//	{
+//		// 현재 Animation 초기화 상태를 Idle로 변경?
+//		switch (m_iPrevCharacterIdx)
+//		{
+//		case CHARACTERTYPE::ROVER:
+//		{
+//			CRover* pRover = dynamic_cast<CRover*>(pPrevCharacter);
+//			if (nullptr == pRover) return;
+//			pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+//			pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+//			break;
+//		}
+//		
+//		case CHARACTERTYPE::AUGUSTA:
+//		{
+//			CAugusta* pAugusta = dynamic_cast<CAugusta*>(pPrevCharacter);
+//			if (nullptr == pAugusta) return;
+//			pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+//			pPrevCharacter->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+//			break;
+//		}
+//			
+//		case CHARACTERTYPE::GALBRENA:
+//			break;
+//
+//		}
+//
+//	}
+//}
+
+void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 {
-    if (eNextCharacter < 0 || eNextCharacter >= TYPE_END)
-        return;
+	if (m_iCurrentCharacterIdx != NONE)
+	{
+		// 1. 이전 캐릭터 비활성화
+		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
+		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
+	}
 
-    if (m_Characters[eNextCharacter] == nullptr)
-        return;
+	// 2. 새 캐릭터 활성화
+	m_iCurrentCharacterIdx = eNextCharacter;
+	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
 
-    if (m_iCurrentCharacterIdx == eNextCharacter)
-        return;
+	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
+	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).
+	_fmatrix PlayerWorldMatrix = m_pTransformCom->Get_WorldMatrix();
+	m_Characters[m_iCurrentCharacterIdx]->Sync_Transform_FromPlayer(PlayerWorldMatrix, m_Characters[m_iPrevCharacterIdx]->Get_Velocity(), fTimeDelta);
 
-    CCharacter* pCurrentCharacter = nullptr;
-    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
-        pCurrentCharacter = m_Characters[m_iCurrentCharacterIdx];
+	// 4. 새 캐릭터의 콜라이더 초기화 (속도 0으로 리셋, 중력 등 상태 복원)
+	//    - CCharacter::m_pColliderCom->Update(XMVectorZero())로 속도 초기화.
+	//    - 필요 시 Set_Gravity(true) 등으로 물리 상태 재설정.
+	m_Characters[m_iCurrentCharacterIdx]->Sync_Collider(XMVectorZero(), fTimeDelta);  // 속도 0으로 초기화
 
-    _bool bUseEnsemble = false;
-    if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
-        bUseEnsemble = true;
-
-
-	_matrix matPrevWorldMatrix = XMMatrixIdentity();
-	_float4 vPrevPosition = {};
-	_bool bHasPrevCharacter = false;
-
-	// 이전 캐릭터 비활성화
-	CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
+	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작)
+	//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
+	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
+	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
-	// 다음캐릭 활성화
-	CCharacter* pNextCharacter = m_Characters[eNextCharacter];
-	pNextCharacter->SetActivate(true);
+	// 6. 카메라/입력 컨트롤러 재설정 (캐릭터 변경 후 카메라가 새 위치 따라가도록)
 
-	_matrix mat = m_pTransformCom->Get_WorldMatrix();
-	m_Characters[eNextCharacter]->Sync_Transform_FromPlayer(mat);
+	// 7. (옵션) 애니메이션 초기화: 등장 애니메이션 재생 
 
-	// 현재 선택된 캐릭터로 CurrentCharacter Idx 변경.
-	m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
-	m_iCurrentCharacterIdx = eNextCharacter;
+	// 8. UI/게이지 동기화 (캐릭터 스탯 유지)
 
-	pPrevCharacter->SetActivate(false);
-
-	// 최근 캐릭터가 존재하고, Ensemble 게이지가 가득찼다면?
-	if (bUseEnsemble && pPrevCharacter)
-	{
-		pPrevCharacter->SetActivate(true);
-		//pCurrentCharacter->SetActivate(true);
-		Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
-		pPrevCharacter->Reset_SwitchGauge(); // 이전 캐릭터 SwitchGauge 지우기.
-	}
-	else
-	{
-		// 현재 Animation 초기화 상태를 Idle로 변경?
-		switch (m_iPrevCharacterIdx)
-		{
-		case CHARACTERTYPE::ROVER:
-		{
-			CRover* pRover = dynamic_cast<CRover*>(pPrevCharacter);
-			if (nullptr == pRover) return;
-			pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
-			pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
-			break;
-		}
-		
-		case CHARACTERTYPE::AUGUSTA:
-		{
-			CAugusta* pAugusta = dynamic_cast<CAugusta*>(pPrevCharacter);
-			if (nullptr == pAugusta) return;
-			pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-			pPrevCharacter->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-			break;
-		}
-			
-		case CHARACTERTYPE::GALBRENA:
-			break;
-
-		}
-
-	}
 }
 
 void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 {
 	if (nullptr == pCharacter)
 		return;
-	pCharacter->Sync_Transform_ToPlayer(m_pTransformCom);
+	pCharacter->Sync_Transform_ToPlayer(m_pTransformCom); // 현재 캐릭터의 Transform을 Player와 동기화
 }
 
 

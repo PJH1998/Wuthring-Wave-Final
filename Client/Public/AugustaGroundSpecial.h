@@ -5,6 +5,8 @@ NS_BEGIN(Client)
 
 // Augusta Skill State - Skill_Hack, Skill_Rise, Skill_Strike, SkillQTE, Burst01 처리
 // Default Skill State
+
+// 1 -> 2 -> 3 -> 1 -> 2 -> 3
 class CAugustaGroundSpecial final : public CGroundState
 {
 private:
@@ -24,6 +26,9 @@ private:
         ATTACK01,
         ATTACK02,
         ATTACK03,
+        ATTACK04,
+        ATTACK05,
+        ATTACK06,
         ATTACKOMNI,
         COMBO_END
     };
