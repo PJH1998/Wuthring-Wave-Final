@@ -310,7 +310,6 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy);
 	}
 
-
 	if (m_Frames[m_iFrameIndex + 1].fStartFrame < m_fTrackPosition)
 		++m_iFrameIndex;
 }

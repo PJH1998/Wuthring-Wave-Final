@@ -24,7 +24,7 @@ public:
 	void							Update_Target(const _fvector& TargetPos, _float fOffsetY);
 
 	// Spring (Distance Adjust) - Lerp
-	// ��ǥ Distance, ���� �ð�
+	// 목표 Distance, 지속 시간
 	void							Use_Spring(_float fDestination, _float fDuration)
 	{
 		if (CAMERA_STATE::SPRING == m_eCameraState)
@@ -87,6 +87,7 @@ private:
 	_bool								m_isRecovery = { false };
 	_float4							m_vPreQuaternion = {};
 	_float3							m_vPreTranslation = {};
+	_float								m_fPreFovy = {};
 	_float4							m_vEndQuaternion = {};
 	_float3							m_vEndTranslation = {};
 	_float								m_fPreFixedDistance = {};
@@ -94,6 +95,7 @@ private:
 	_float								m_fDuration = {};
 	_float4x4							m_OwnerMatrix = {};
 	_bool								m_isMaintain = { false };
+	_bool								m_isLerp = { true };
 
 private:
 	// Default
