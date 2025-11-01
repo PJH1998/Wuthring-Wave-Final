@@ -139,6 +139,9 @@
     <Filter Include="01. Level\Camera\Sequencer">
       <UniqueIdentifier>{11fc27fe-040e-443a-b82b-7ad88739045e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\Destruction">
+      <UniqueIdentifier>{1e367e59-8695-45e4-8839-a31fb74b2d93}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -298,16 +301,18 @@
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Map_Object_Destruction.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Event_Scene_Edit.h">
       <Filter>97. Event</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Map_Object_Destruction_Piece.h" />
+    <ClInclude Include="..\Public\Edit_Map_Object_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -446,10 +451,12 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Map_Object_Destruction.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
+    <ClCompile Include="..\Private\Edit_Map_Object_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Map_Object_Destruction_Piece.cpp" />
+    <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -9,7 +9,7 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Editor)
-class CMap_Object_Destruction : public CStaticObject
+class CEdit_Map_Object_Destruction : public CStaticObject
 {
 public:
 	typedef struct tagMapLoad
@@ -22,9 +22,9 @@ public:
 	}MAP_LOAD;
 
 private:
-	CMap_Object_Destruction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CMap_Object_Destruction(const CMap_Object_Destruction& Prototype);
-	virtual ~CMap_Object_Destruction() = default;
+	CEdit_Map_Object_Destruction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CEdit_Map_Object_Destruction(const CEdit_Map_Object_Destruction& Prototype);
+	virtual ~CEdit_Map_Object_Destruction() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype();
@@ -64,9 +64,9 @@ private:
 	_float3 m_vNewTranslation = {};
 	_bool m_IsDestroy = { false };
 
-	vector<class CMap_Object_Destruction_Piece*> m_Pieces;
+	vector<class CEdit_Map_Object_Destruction_Piece*> m_Pieces;
 public:
-	static CMap_Object_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CEdit_Map_Object_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
 	virtual void Free()override;
 

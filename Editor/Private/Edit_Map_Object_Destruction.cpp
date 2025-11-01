@@ -1,6 +1,6 @@
 ﻿#include"EditorPch.h"
 #include "Edit_Map_Object_Destruction.h"
-#include "Map_Object_Destruction_Piece.h"
+#include "Edit_Map_Object_Destruction_Piece.h"
 
 CEdit_Map_Object_Destruction::CEdit_Map_Object_Destruction(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice,pContext)
@@ -88,7 +88,7 @@ void CEdit_Map_Object_Destruction::Update(_float fTimeDelta)
 			// 3. 스트림의 문자열을 Name에 추가
 			Name += ss.str(); // ss.str()이 "000", "001", ..., "010", ..., "100" 등을 반환
 			Name += "_LOD0";
-			CMap_Object_Destruction_Piece::MAP_LOAD Desc;
+			CEdit_Map_Object_Destruction_Piece::MAP_LOAD Desc;
 			Desc.eObjectType = OBJECTTYPE::INTERACTION;
 			Desc.iLevel = m_iLevel;
 			Desc.iShaderPassIndex = 0;
@@ -108,7 +108,7 @@ void CEdit_Map_Object_Destruction::Update(_float fTimeDelta)
 				//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
 				, m_iLevel, TEXT("Layer_Destruction_Peice"), &Desc);
 		}
-	}
+	}	
 }
 
 void CEdit_Map_Object_Destruction::Late_Update(_float fTimeDelta)
@@ -184,7 +184,7 @@ HRESULT CEdit_Map_Object_Destruction::Ready_Component(void* pArg)
 	lstrcat(Model, Name);
 	_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 
-	m_pModelComArray.resize(1);
+	m_pModelComArray.resize(V);
 
 	for (_uint i = 0; i < V; ++i)
 	{
@@ -259,6 +259,7 @@ void CEdit_Map_Object_Destruction::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pBoneModel);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);

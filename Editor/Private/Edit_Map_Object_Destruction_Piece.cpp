@@ -1,22 +1,22 @@
 ﻿#include"EditorPch.h"
-#include "Map_Object_Destruction_Piece.h"
+#include "Edit_Map_Object_Destruction_Piece.h"
 
-CMap_Object_Destruction_Piece::CMap_Object_Destruction_Piece(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_Map_Object_Destruction_Piece::CEdit_Map_Object_Destruction_Piece(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CStaticObject(pDevice, pContext)
 {
 }
 
-CMap_Object_Destruction_Piece::CMap_Object_Destruction_Piece(const CMap_Object_Destruction_Piece& Prototype)
+CEdit_Map_Object_Destruction_Piece::CEdit_Map_Object_Destruction_Piece(const CEdit_Map_Object_Destruction_Piece& Prototype)
 	:CStaticObject(Prototype)
 {
 }
 
-HRESULT CMap_Object_Destruction_Piece::Initialize_Prototype()
+HRESULT CEdit_Map_Object_Destruction_Piece::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CMap_Object_Destruction_Piece::Initialize_Clone(void* pArg)
+HRESULT CEdit_Map_Object_Destruction_Piece::Initialize_Clone(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
@@ -54,21 +54,25 @@ HRESULT CMap_Object_Destruction_Piece::Initialize_Clone(void* pArg)
 	return S_OK;
 }
 
-void CMap_Object_Destruction_Piece::Priority_Update(_float fTimeDelta)
+void CEdit_Map_Object_Destruction_Piece::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CMap_Object_Destruction_Piece::Update(_float fTimeDelta)
+void CEdit_Map_Object_Destruction_Piece::Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+	{
+		m_pRigidbodyCom->IsActivate(false);
+	}
 }
 
-void CMap_Object_Destruction_Piece::Late_Update(_float fTimeDelta)
+void CEdit_Map_Object_Destruction_Piece::Late_Update(_float fTimeDelta)
 {
 	m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMap_Object_Destruction_Piece::Render()
+void CEdit_Map_Object_Destruction_Piece::Render()
 {
 	_uint DrawModel = m_iLODIndex;
 	//_uint DrawModel = 0;
@@ -117,15 +121,15 @@ void CMap_Object_Destruction_Piece::Render()
 		}
 	}
 }
-void CMap_Object_Destruction_Piece::Render_Shadow()
+void CEdit_Map_Object_Destruction_Piece::Render_Shadow()
 {
 }
 
-void CMap_Object_Destruction_Piece::Set_ImGuiOption()
+void CEdit_Map_Object_Destruction_Piece::Set_ImGuiOption()
 {
 }
 
-HRESULT CMap_Object_Destruction_Piece::Ready_Component(void* pArg)
+HRESULT CEdit_Map_Object_Destruction_Piece::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 	m_iLevel = pDesc->iLevel;
@@ -159,13 +163,13 @@ HRESULT CMap_Object_Destruction_Piece::Ready_Component(void* pArg)
     return S_OK;
 }
 
-void CMap_Object_Destruction_Piece::Bind_Resources()
+void CEdit_Map_Object_Destruction_Piece::Bind_Resources()
 {
 }
 
-CMap_Object_Destruction_Piece* CMap_Object_Destruction_Piece::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEdit_Map_Object_Destruction_Piece* CEdit_Map_Object_Destruction_Piece::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-	CMap_Object_Destruction_Piece* pInstance = new CMap_Object_Destruction_Piece(pDevice, pContext);
+	CEdit_Map_Object_Destruction_Piece* pInstance = new CEdit_Map_Object_Destruction_Piece(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
 	{
@@ -176,9 +180,9 @@ CMap_Object_Destruction_Piece* CMap_Object_Destruction_Piece::Create(ID3D11Devic
 	return pInstance;
 }
 
-CGameObject* CMap_Object_Destruction_Piece::Clone(void* pArg)
+CGameObject* CEdit_Map_Object_Destruction_Piece::Clone(void* pArg)
 {
-	CMap_Object_Destruction_Piece* pClone = new CMap_Object_Destruction_Piece(*this);
+	CEdit_Map_Object_Destruction_Piece* pClone = new CEdit_Map_Object_Destruction_Piece(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
 	{
@@ -189,7 +193,7 @@ CGameObject* CMap_Object_Destruction_Piece::Clone(void* pArg)
 	return pClone;
 }
 
-void CMap_Object_Destruction_Piece::Free()
+void CEdit_Map_Object_Destruction_Piece::Free()
 {
 	__super::Free();
 

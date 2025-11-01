@@ -9,8 +9,8 @@
 #include"Edit_Brush.h"
 #include"Shader_Interface.h"
 #include"AnimationTool.h"
-#include"Map_Object_Destruction.h"
-#include"Map_Object_Destruction_Piece.h"
+#include"Edit_Map_Object_Destruction.h"
+#include"Edit_Map_Object_Destruction_Piece.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -95,7 +95,7 @@ HRESULT CLevel_Map::Initialize()
 
 	//m_eObjectType = ENUM_CLASS(OBJECTTYPE::DEFAULT);
 
-	//CMap_Object_Destruction::MAP_LOAD Desc{};
+	//CEdit_Map_Object_Destruction::MAP_LOAD Desc{};
 	//Desc.eObjectType = OBJECTTYPE::DEFAULT;
 	//Desc.iLevel = ENUM_CLASS(m_eCurLevel);
 	//Desc.iShaderPassIndex = 0;
@@ -745,7 +745,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
         CEdit_LightObject::Create(m_pDevice, m_pContext));
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice"),
-		CMap_Object_Destruction_Piece::Create(m_pDevice, m_pContext));
+		CEdit_Map_Object_Destruction_Piece::Create(m_pDevice, m_pContext));
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
@@ -757,7 +757,7 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Map_Object_Destruction"),
-		CMap_Object_Destruction::Create(m_pDevice, m_pContext));
+		CEdit_Map_Object_Destruction::Create(m_pDevice, m_pContext));
 
     return S_OK;
 }
