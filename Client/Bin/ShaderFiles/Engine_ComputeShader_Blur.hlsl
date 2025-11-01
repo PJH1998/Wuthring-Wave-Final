@@ -223,6 +223,15 @@ Texture2D<float4> VelocityMap : register(t2);
 
 SamplerState CS_DefaultSampler : register(s0);
 
+
+cbuffer MOTION_DATA : register(b1)
+{
+    float fLimitVelocity;
+    float fLimitDepth;
+    float fLengthScale;
+    float PaddingMotion;
+}
+
 float3 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
 {
     float3 vVelocity = 0.f;
@@ -265,46 +274,41 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     
     float3 vVelocity = Compute_Velocity(iIndex, vOutSize);
     
-    float2 vDir = normalize(vVelocity.xy);
+    float2 vDir = normalize(vVelocity.xy) * - 1.f;
     
-    float fVelocityLength = length(vVelocity.xy);
+    float fVelocityLength = length(vVelocity.xy) * fLengthScale;
+
+    fVelocityLength *= smoothstep(fLimitDepth, 0.f, vVelocity.z);
     
     float2 vTexcoord = (float2) DTID.xy / (float2) vInSize;
     
-    if (fVelocityLength <= 10.f)
-        return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
-    
-    //float fVelocityWeight = 16.f * smoothstep(0.2f, 1.f, fVelocityLength);
-    
-    ////Test
-    //fVelocityWeight *= smoothstep(200.f, 0.f, vVelocity.z);
-    
-    //int iMotionRadius = ceil(fVelocityWeight);
-    
-    //if(iMotionRadius <= 0)
+    //if (fVelocityLength <= fLimitVelocity)
     //    return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
     
-    float fGaussianSigma = (float) 16.f / 3.f;
+    float2 vTexelSize = 1.f / (float2) vInSize;
+    float2 vMotionScale = vDir * fVelocityLength * vTexelSize;
+    int iSampleCount = 15;
     
     float4 vColor = 0.f;
     float fTotalWeight = 0.f;
     
-    for (int i = 1; i <= 16; ++i)
+    for (int i = 1; i <= iSampleCount; ++i)
     {
+        float2 vDistance = (float) i * vTexelSize;
+        float2 vOffset = vMotionScale * vDistance;
         
-        float2 vOffset = vDir * fVelocityLength * (i / 16);
-        
-        //float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0).y;
-        
-        //if(fSampleDepth < vVelocity.z)
-        //    continue;
+        float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0).y;
+
+        if (fSampleDepth < vVelocity.z)
+            continue;
             
         float4 vSampleColor = InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0);
         
-        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
-       
-        vColor += vSampleColor * fGaussianWeight;
-        fTotalWeight += fGaussianWeight;
+        float fWeight = exp2(-(float) i / (float) iSampleCount * 3.f);
+        //float fWeight = 1.f - (float) i / 15.f;
+
+        vColor += vSampleColor * fWeight;
+        fTotalWeight += fWeight;
     }
     
     float4 vFinalColor = 0.f;

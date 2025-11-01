@@ -49,6 +49,7 @@ Texture2D g_BlurTexture;
 
 //Motion
 Texture2D g_VelocityMap;
+float g_fLimitVelocity;
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
@@ -537,7 +538,7 @@ PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
     float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
     float2 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord).xy;
     
-    bool IsBlur = length(vVelocity) > 10.f ? true : false;
+    bool IsBlur = length(vVelocity) > g_fLimitVelocity ? true : false;
     
     if(IsBlur)
         Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);

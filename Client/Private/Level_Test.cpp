@@ -62,6 +62,9 @@ void CLevel_Test::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Test"));
     
+#ifdef _DEBUG
+	Shader_Gui();
+#endif
 }
 
 void CLevel_Test::Render()
@@ -126,6 +129,24 @@ void CLevel_Test::Ready_MonsterTest()
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
 }
+
+#ifdef _DEBUG
+void CLevel_Test::Shader_Gui()
+{
+	ImGui::Begin("Test");
+
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+		ImGui::InputFloat("DISTANCE_SCALE", &m_fBlurDistanceScale);
+		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
+	}
+	ImGui::End();
+}
+#endif
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
