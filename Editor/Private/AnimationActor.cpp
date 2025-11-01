@@ -100,7 +100,7 @@ void CAnimationActor::Update(_float fTimeDelta)
     _bool IsAnimationEnd = { false };
     if (m_IsPlayAnimation)
     {
-        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, 0.01f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 

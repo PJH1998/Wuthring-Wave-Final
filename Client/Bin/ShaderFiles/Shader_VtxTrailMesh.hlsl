@@ -99,7 +99,7 @@ PS_OUT PS_TrailDefault(PS_IN In)
     MaskUV -= g_Sweep;
     float4 vMask = g_MaskTexture.Sample(DefaultSampler, MaskUV);
     
-    if(vMask.r < 0.3f)
+    if(vMask.r < 0.35f)
         discard;
     
     float2 ColorUV = In.vTexcoord;
@@ -116,6 +116,9 @@ PS_OUT PS_TrailDefault(PS_IN In)
     
     Out.vDiffuse = float4(vColor.rgb * alpha, alpha);
     
+    if (Out.vDiffuse.r < 0.35f)      //테스트
+        discard;
+    
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
@@ -131,7 +134,7 @@ PS_OUT PS_TraillTest(PS_IN In)
     float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord );
     
     //마스크 알파 값으로 잘라내기 처리, 만약 검정색이면 r로 해도 될듯함.
-    if (vMask.r < 0.3f)
+    if (vMask.r < 0.35f)
         discard;
     
     // 1 - x 
@@ -147,7 +150,7 @@ PS_OUT PS_TraillTest(PS_IN In)
     
     Out.vDiffuse = float4(vColor.rgb * fAlpha, fAlpha);
     
-    if (Out.vDiffuse.r < 0.2f)      //테스트
+    if (Out.vDiffuse.r < 0.35f)      //테스트
         discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -165,7 +168,7 @@ PS_OUT PS_TraillTestA(PS_IN In)
     float4 vMask = g_MaskTexture.Sample(DefaultSampler, In.vTexcoord);
     
     //마스크 알파 값으로 잘라내기 처리, 만약 검정색이면 r로 해도 될듯함.
-    if (vMask.r < 0.3f)
+    if (vMask.r < 0.35f)
         discard;
     
     // 1x 
@@ -181,7 +184,7 @@ PS_OUT PS_TraillTestA(PS_IN In)
     
     Out.vDiffuse = float4(vColor.rgb * fAlpha, fAlpha);
     
-    if (Out.vDiffuse.r < 0.2f)      //테스트
+    if (Out.vDiffuse.r < 0.35f)      //테스트
         discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -217,6 +220,8 @@ PS_OUT PS_TraillDesh(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
+    Out.vDiffuse.rgb *= Out.vDiffuse.a;
+    
     return Out;
 }
 
@@ -246,6 +251,8 @@ PS_OUT PS_TraillDeshB(PS_IN In)
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
+    Out.vDiffuse.rgb *= Out.vDiffuse.a;
+    
     return Out;
 }
 // ==Test==
@@ -255,7 +262,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -266,7 +273,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -277,7 +284,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -288,7 +295,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -299,7 +306,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
