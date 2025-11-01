@@ -10,8 +10,8 @@ namespace Client
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
-
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
+	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
@@ -96,6 +96,7 @@ namespace Client
 		DEAD				= 1 << 29
 	};
 
+	
 	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, AUGUSTA, SHADOW, END };
 
 }

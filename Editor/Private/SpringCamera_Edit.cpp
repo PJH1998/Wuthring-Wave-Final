@@ -265,26 +265,50 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 	{
 		vPreQuaternion = XMLoadFloat4(&m_vPreQuaternion);
 		vPreTranslation = XMLoadFloat3(&m_vPreTranslation);
+		m_fPreFovy = m_fFovy;
 	}
 	else
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
 		// Fov
-		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
+		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
 
-	_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
-	_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
-	m_pTransformCom->Rotation_Quaternion(vLerpQuat);
+	m_isLerp = m_Frames[m_iFrameIndex + 1].isLerp;
 
-	// Translation Offset
-	_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-	_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
-	XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+	if (true == m_isLerp)
+	{
+		// Lerp
+		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+		_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
+		m_pTransformCom->Rotation_Quaternion(vLerpQuat);
 
-	// Distance
-	m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		// Translation Offset
+		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
+		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+
+		// Distance
+		m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+
+		// Fov Lerp
+		m_fFovy = m_fPreFovy + (XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy) - m_fPreFovy) * fRatio;
+	}
+	// None Lerp (Teleport)
+	else
+	{
+		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+		m_pTransformCom->Rotation_Quaternion(vDestQuat);
+
+		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
+
+		m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
+		m_fDistance = m_fFixedDistance;
+
+		m_fFovy = XMConvertToRadians(m_Frames[m_iFrameIndex + 1].fFovy);
+	}
 
 	if (m_Frames[m_iFrameIndex + 1].fStartFrame < m_fTrackPosition)
 		++m_iFrameIndex;

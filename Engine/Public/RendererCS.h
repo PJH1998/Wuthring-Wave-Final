@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -34,6 +34,7 @@ private:
 public:
 	void							Add_BufferData(const _char* pConstantName, void* pData, _uint iLength);
 	void							Add_SRVData(const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	void							Add_SamplerState(_uint iSlotIndex, ID3D11SamplerState* pSampler);
 	void							Setting_UAV_Data(const _char* pConstantName) { m_UAV.first = pConstantName;}
 
 	ID3D11ShaderResourceView*		Get_SRV(_uint iMipLevel);
@@ -42,7 +43,7 @@ public:
 	HRESULT							Initialize(void* pDesc);
 
 	void							Bind_Resources(_uint iMipLevel);
-	void							Dispatch(_uint iMipLevel);
+	void							Dispatch(_uint iWidth, _uint iHeight);
 	void							Clear(_uint iMipLevel);
 	void							Clear_Resource();
 
@@ -57,6 +58,7 @@ private:
 	
 	BUFFERS								m_Buffers;
 	vector<SRV_DATA>					m_SRVs;
+	map<_uint, ID3D11SamplerState*>		m_Samplers;
 
 	_float								m_fWidht = {};
 	_float								m_fHeight = {};
@@ -72,7 +74,6 @@ private:
 
 private:
 	HRESULT							Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT eFormat);
-	
 	HRESULT							Ready_Buffer(ID3D11Buffer** ppOut, _uint iLength);
 	BUFFER_DATA*					Find_Buffer(const _char* pConstantName);
 

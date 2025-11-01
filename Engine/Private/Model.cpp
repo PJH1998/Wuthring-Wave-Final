@@ -257,6 +257,11 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 		if (FAILED(Ready_Animation(pFilePath)))
 			return E_FAIL;
 	}
+	else if (MODELTYPE::ECO == m_eType)
+	{
+		if (FAILED(Ready_Bone(InputFile, -1)))
+			return E_FAIL;
+	}
 
 	if (FAILED(Ready_Mesh(InputFile)))
 		return E_FAIL;
@@ -489,23 +494,34 @@ void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
 	_float3 vCenter = {};
 	_float3 vExtends = {};
-	vCenter.x = (pMaxPos[0] + pMinPos[0]) / 2.f;
-	vCenter.y = (pMaxPos[1] + pMinPos[1]) / 2.f;
-	vCenter.z = (pMaxPos[2] + pMinPos[2]) / 2.f;
+	vCenter.x = (pMaxPos[0] + pMinPos[0]) * 0.5f;
+	vCenter.y = (pMaxPos[1] + pMinPos[1]) * 0.5f;
+	vCenter.z = (pMaxPos[2] + pMinPos[2]) * 0.5f;
 
-	vExtends.x = (pMaxPos[0] - pMinPos[0]) / 2.f;
-	vExtends.y = (pMaxPos[1] - pMinPos[1]) / 2.f;
-	vExtends.z = (pMaxPos[2] - pMinPos[2]) / 2.f;
+	vExtends.x = (pMaxPos[0] - pMinPos[0]) * 0.5f;
+	vExtends.y = (pMaxPos[1] - pMinPos[1]) * 0.5f;
+	vExtends.z = (pMaxPos[2] - pMinPos[2]) * 0.5f;
 	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
-
 }
 
 BoundingBox* CModel::Get_BoundingBox()
 {
-	if (m_eType != MODELTYPE::MAP)
+	if (!(m_eType == MODELTYPE::MAP || m_eType == MODELTYPE::ECO))
+	//if (m_eType != MODELTYPE::MAP || MODELTYPE::ECO != m_eType)
 		ASSERT_CRASH("Is Not Map Object");
 
 	return m_pBoundingBox;
+}
+
+const _float4x4* CModel::Get_BoneMatrixPtr(_uint iBoneIndex)
+{
+	return m_Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
+}
+
+void CModel::Update_BoneMatrix_Map()
+{
+	for (auto& pBone : m_Bones)
+		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)
@@ -773,7 +789,7 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 	_float* pMin = nullptr;
 	_float* pMax = nullptr;
 
-	if (MODELTYPE::MAP == m_eType)
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO== m_eType)
 	{
 		pMin = new _float[3];
 		pMax = new _float[3];
@@ -792,7 +808,7 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 		m_Meshes.push_back(pMesh);
 	}
 
-	if (MODELTYPE::MAP == m_eType)
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
 	{
 		Ready_BoundingBox(pMin, pMax);
 

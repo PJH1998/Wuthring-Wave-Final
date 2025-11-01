@@ -89,7 +89,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
    
     if (eSpType == EAugustaSpecialType::SPWALK_F)
     {
-        m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.2f);
+        m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, 0.1f);
     }
     else if (eSpType == EAugustaSpecialType::SPWALK_DASH_ROOT)
     {
@@ -101,11 +101,11 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     }
 
     
-    m_pAugusta->Play_PartAnimation(
-        m_iPartType,
-        m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-        fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr
-    );
+	m_pAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_Animations[m_iCurrentAnimIdx].strAnimName,
+		m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+	);
 }
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
@@ -138,8 +138,20 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
                 m_iComboCount = COMBO::ATTACK03;
                 break;
             case COMBO::ATTACK03:
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
-                m_iComboCount = COMBO::ATTACKOMNI;
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
+				m_iComboCount = COMBO::ATTACK04;
+                break;
+            case COMBO::ATTACK04:
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
+				m_iComboCount = COMBO::ATTACK05;
+                break;
+            case COMBO::ATTACK05:
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
+				m_iComboCount = COMBO::ATTACK06;
+                break;
+            case COMBO::ATTACK06:
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
+				m_iComboCount = COMBO::ATTACKOMNI;
                 break;
             }
             return;

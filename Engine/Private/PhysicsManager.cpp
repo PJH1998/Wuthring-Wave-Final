@@ -32,7 +32,7 @@ Character* CPhysicsManager::Register_Character(const CharacterSettings& Characte
 	return new Character(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 }
 
-Ref<CharacterVirtual> CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CPhysicsManager::Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut)
 {
 	Ref<CharacterVirtual> pInstance = new CharacterVirtual(&CharacterSetting, vPos, vQuat, reinterpret_cast<JPH::uint64>(pUserData), m_pPhysicsSystem);
 	ASSERT_CRASH(pInstance);
@@ -43,6 +43,9 @@ Ref<CharacterVirtual> CPhysicsManager::Register_CharacterVirtual(const Character
 	m_pCVCCollision->Add(pInstance);
 	// CharacterContactListener SetUp
 	pInstance->SetListener(m_pCharacterContactListener);
+
+	if (nullptr != pOut)
+		*pOut = &m_pPhysicsSystem->GetBodyInterface();
 
 	return pInstance;
 }
@@ -57,11 +60,6 @@ void CPhysicsManager::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer
 void CPhysicsManager::Remove_Virtual(CharacterVirtual* pVirtual)
 {
 	m_pCVCCollision->Remove(pVirtual);
-}
-
-void CPhysicsManager::Clear_Resource()
-{
-	//m_pPhysicsSystem->GetBodyInterface().
 }
 
 HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)

@@ -63,6 +63,9 @@ public:
 
 	_bool							IsLand(_float3* pNormalOut = nullptr);
 
+	void							IsActivate(_bool isActive);
+	void							Change_MotionType(EMotionType eType);
+
 private:
 	SHAPE						m_eShape = {};
 	COLLISION_DATA			m_tCollisionData = {};

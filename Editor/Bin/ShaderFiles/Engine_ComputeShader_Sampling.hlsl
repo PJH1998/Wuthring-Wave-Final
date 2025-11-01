@@ -8,7 +8,6 @@ typedef row_major matrix matrix_rm;
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
-
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
 {

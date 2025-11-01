@@ -8,10 +8,13 @@ CShader::CShader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CShader::CShader(const CShader& Prototype)
     : CComponent { Prototype },
-    m_pEffect { Prototype.m_pEffect },
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_pEffect = Prototype.m_pEffect;
+	}
     //Safe_AddRef(m_pEffect);
     for (auto& pInputLayOut : m_InputLayouts)
         Safe_AddRef(pInputLayOut);

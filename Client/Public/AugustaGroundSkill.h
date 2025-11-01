@@ -18,6 +18,7 @@ private:
        JUMP, 
        LAND,
        SKILL_E,
+	   UNIQUE_E,
        AIR_ATTACK,
        FALL,
        END
