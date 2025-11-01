@@ -1,6 +1,10 @@
 ﻿#include "EnginePch.h"
 #include "Font_Manager.h"
 
+#include "Shader.h"
+
+#include "VIBuffer_Rect.h"
+
 CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext }
 {
@@ -8,10 +12,19 @@ CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 	Safe_AddRef(m_pContext);
 }
 
-HRESULT CFont_Manager::Initialize()
+HRESULT CFont_Manager::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 {
 	if (FT_Init_FreeType(&m_pFTLibrary))
 		CRASH("FT Library");
+	
+	m_pShaderCom = CShader::Create(m_pDevice, m_pContext,
+		TEXT("../Bin/ShaderFiles/Shader_UIText.hlsl"), VTXUITEXT::Elements, VTXUITEXT::iNumElements);
+
+	Ready_FontBuffer();
+
+	//m_pVIBufferCom->CVIBuffer_Rect::Create(m_pDevice, m_pContext);
+	m_iWinSizeX = iWinSizeX;
+	m_iWinSizeY = iWinSizeY;
 
 	return S_OK;
 }
@@ -32,6 +45,76 @@ HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 	Load_Font(pFontInfo, pFilePath, iPixelHeight);	// height : font height
 	m_Fonts.emplace(strFontTag, pFontInfo);
 
+
+
+	//wchar_t testChars[] = { L'A', L'B', L'C', 0 };
+	//_wstring strFontTagDebug = L"WW_Medium";
+	//TestGlyph(*Find_Font(strFontTagDebug), testChars[0]);
+	//TestGlyph(*Find_Font(strFontTagDebug), testChars[1]);
+	//TestGlyph(*Find_Font(strFontTagDebug), testChars[2]);
+
+
+	return S_OK;
+}
+
+void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
+{
+	FONT_SINGLEDESC tDesc = {};
+	tDesc.strFontTag = strFontTag;
+	tDesc.strText = strText;
+	tDesc.vScreenPos = vScreenPos;
+	tDesc.fScale = fScale;
+	tDesc.vLifeTime = _float2{0.f, fLifeTime};
+	tDesc.iPassIndex = iPassIndex;
+	tDesc.vColor = vColor;
+
+	m_vecActiveFonts.push_back(tDesc);
+}
+
+void CFont_Manager::Update(_float fTimeDelta)
+{
+	// 폰트들의 시간 경과를 업데이트하며, 시간이 이미 지나버린 폰트는 제거한다.
+	for (_uint i = 0; i < m_vecActiveFonts.size(); i++)
+	{
+		if (m_vecActiveFonts[i].vLifeTime.y <= m_vecActiveFonts[i].vLifeTime.x)
+		{
+			m_vecActiveFonts.erase(m_vecActiveFonts.begin() + i);
+			i--;
+			continue;
+		}
+
+		m_vecActiveFonts[i].vLifeTime.x += fTimeDelta;
+	}
+}
+
+void CFont_Manager::Render()
+{
+	// 폰트들을 그린다.
+	for (auto& activeFont : m_vecActiveFonts)
+	{
+		Draw_Font(
+			Find_Font(activeFont.strFontTag), 
+			activeFont.strText.c_str(), 
+			activeFont.vScreenPos, 
+			activeFont.fScale, 
+			activeFont.vColor,
+			activeFont.iPassIndex
+		);
+	}
+
+}
+
+HRESULT CFont_Manager::Ready_FontBuffer()
+{
+	D3D11_BUFFER_DESC desc = {};
+	desc.ByteWidth = sizeof(VTXUITEXT) * 3000;
+	desc.Usage = D3D11_USAGE_DYNAMIC;
+	desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	if (FAILED(m_pDevice->CreateBuffer(&desc, nullptr, &m_pFontVertexBuffer)))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -41,7 +124,7 @@ HRESULT CFont_Manager::Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePat
 	FT_Set_Pixel_Sizes(pFontInfo->pFace, 0, iPixelHeight);
 
 	pFontInfo->iPixelHeight = iPixelHeight;
-	pFontInfo->isHasKerning = FT_HAS_KERNING(pFontInfo->pFace) ? TRUE : FALSE;
+	pFontInfo->isHasKerning = FT_HAS_KERNING(pFontInfo->pFace) ? true : false;
 
 	Create_EmptyAtlas(pFontInfo);
 
@@ -65,7 +148,8 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	td.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
 	HRESULT hr = m_pDevice->CreateTexture2D(&td, nullptr, &pFontInfo->pAtlasTex);
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) 
+		return hr;
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC sd = {};
 	sd.Format = td.Format;
@@ -73,29 +157,145 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	sd.Texture2D.MipLevels = 1;
 
 	hr = m_pDevice->CreateShaderResourceView(pFontInfo->pAtlasTex, &sd, &pFontInfo->pAtlasSRV);
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) 
+		return hr;
 
 	D3D11_SAMPLER_DESC smp = {};
 	smp.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	smp.AddressU = smp.AddressV = smp.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 
 	hr = m_pDevice->CreateSamplerState(&smp, &pFontInfo->pSampler);
-	if (FAILED(hr)) return hr;
+	if (FAILED(hr)) 
+		return hr;
 
 	return S_OK;
 }
 
-HRESULT CFont_Manager::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//HRESULT CFont_Manager::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//{
+//	//FT_Face pFont = Find_Font(strFontTag);
+//	//if (nullptr == pFont)
+//	//	return E_FAIL;
+//	//
+//	//return pFont->Render(pText, vPosition, vColor, fRadian, vOrigin, vScale);
+//	return S_OK;
+//}
+
+_bool CFont_Manager::Draw_Font(FTCUSTOM_FONT* pFontInfo, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
 {
-	//FT_Face pFont = Find_Font(strFontTag);
-	//if (nullptr == pFont)
-	//	return E_FAIL;
-	//
-	//return pFont->Render(pText, vPosition, vColor, fRadian, vOrigin, vScale);
-	return S_OK;
+	if (!pFontInfo || !pText)
+		return false;
+
+	vector<VTXUITEXT> vecVertices;
+	vecVertices.reserve(512); // 대략 문자 80~100개 정도 버퍼 확보
+
+	_float penX = fPos.x;
+	_float penY = fPos.y;
+	_uint prevCode = 0;
+
+	for (_uint i = 0; pText[i] != 0; )
+	{
+		_uint cp = (_uint)pText[i++]; // 단순 ASCII 또는 한글 BMP 영역까지는 OK
+
+		if (cp == L'\n')
+		{
+			penX = fPos.x;
+			penY += pFontInfo->iPixelHeight * fScale;
+			prevCode = 0;
+			continue;
+		}
+
+		// 글리프가 atlas에 없으면 Bake
+		if (!BakeOneGlyph(pFontInfo, cp))
+			continue;
+
+		FTCUSTOM_FONT_GLYPH glyph = pFontInfo->mapGlyphs[cp];
+
+		// 커닝 적용 시
+		if (pFontInfo->isHasKerning && prevCode != 0)
+		{
+			FT_Vector kern = {};
+			FT_Get_Kerning(pFontInfo->pFace,
+				FT_Get_Char_Index(pFontInfo->pFace, prevCode),
+				FT_Get_Char_Index(pFontInfo->pFace, cp),
+				FT_KERNING_DEFAULT, &kern);
+
+			penX += (kern.x >> 6) * fScale;
+		}
+
+		// 실제 그려질 사각형 위치 계산 (bearing 적용)
+		_float x0 = penX + glyph.sOffsetX * fScale;
+		_float y0 = penY - glyph.sOffsetY * fScale;
+		_float x1 = x0 + glyph.sWidth * fScale;
+		_float y1 = y0 + glyph.sHeight * fScale;
+
+		// UV
+		_float u0 = glyph.fU0;
+		_float v0 = glyph.fV0;
+		_float u1 = glyph.fU1;
+		_float v1 = glyph.fV1;
+
+		VTXUITEXT vtx[6] =				// 정점 6개
+		{
+			{{x0, y0}, {u0, v0}},
+			{{x1, y0}, {u1, v0}},
+			{{x1, y1}, {u1, v1}},
+
+			{{x0, y0}, {u0, v0}},
+			{{x1, y1}, {u1, v1}},
+			{{x0, y1}, {u0, v1}},
+		};
+
+		vecVertices.insert(vecVertices.end(), vtx, vtx + 6);
+
+		// 펜 이동
+		penX += glyph.sAdvance * fScale;
+		prevCode = cp;
+	}
+
+	if (vecVertices.empty())
+		return true;
+
+	// ====== GPU에 업로드 후 Draw ======
+	// (1) Dynamic VB에 업로드
+	D3D11_MAPPED_SUBRESOURCE mapped;
+	if (FAILED(m_pContext->Map(m_pFontVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+		return false;
+
+	memcpy(mapped.pData, vecVertices.data(), sizeof(VTXUITEXT) * static_cast<_uint>(vecVertices.size()));
+	m_pContext->Unmap(m_pFontVertexBuffer, 0);
+
+	// (2) 셰이더 상수 설정 (색상 등)
+	_float2 screen = { static_cast<_float>(m_iWinSizeX), static_cast<_float>(m_iWinSizeY) };
+	m_pShaderCom->Bind_Value("g_ScreenSize", &screen, sizeof(screen));
+	m_pShaderCom->Bind_Value("g_FontColor", &vColor, sizeof(_float4));
+	m_pShaderCom->Bind_Textures("g_FontAtlas", &pFontInfo->pAtlasSRV, 1);
+
+	// (3) 렌더 상태 적용 (FX pass or 직접 BlendState 설정)
+	//m_pShaderPass->Apply(0, m_pContext);
+	m_pShaderCom->Begin(0);
+
+	// (4) Bind Resource, Draw
+	UINT stride = sizeof(VTXUITEXT);
+	UINT offset = 0;
+	m_pContext->IASetVertexBuffers(0, 1, &m_pFontVertexBuffer, &stride, &offset);
+	m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pContext->Draw(vecVertices.size(), 0);
+
+	return true;
 }
 
-_bool CFont_Manager::Atlas_AllocRect(FTCUSTOM_FONT* pFont, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY)
+static _bool FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)
+{
+	// FreeType이 글자를 그레이스케일 비트맵으로 변환.
+	if (FT_Load_Char(face, iCodePoint, FT_LOAD_RENDER))
+		return false;
+
+	outSlot = face->glyph;
+	return true;
+}
+
+_bool CFont_Manager::Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY)
 {
 	// 생성했던 아틀라스에 빈 영역을 할당하여, 글리프를 담을 공간을 인자로 내보냅니다.
 	// 
@@ -118,28 +318,116 @@ _bool CFont_Manager::Atlas_AllocRect(FTCUSTOM_FONT* pFont, _int iGlyphWidth, _in
     }
 
     // 아틀라스의 현재 행에 공간이 없으면 줄바꿈을 시도합니다.
-    if (pFont->iPenX + iGlyphWidth > pFont->iAtlasW)
+    if (pFontInfo->iPenX + iGlyphWidth > pFontInfo->iAtlasW)
     {
-        pFont->iPenX = 0;
-        pFont->iPenY += pFont->iRowH + 1;
-        pFont->iRowH = 0;
+		pFontInfo->iPenX = 0;
+		pFontInfo->iPenY += pFontInfo->iRowH + 1;
+		pFontInfo->iRowH = 0;
     }
 
     // 아틀라스 공간이 부족한 경우
-    if (pFont->iPenY + iGlyphHeight > pFont->iAtlasH)
+    if (pFontInfo->iPenY + iGlyphHeight > pFontInfo->iAtlasH)
         return false; // 나중에 리빌드 (더 큰 아틀라스 이미지 사용)
 
-    outX = pFont->iPenX;
-    outY = pFont->iPenY;
+    outX = pFontInfo->iPenX;
+    outY = pFontInfo->iPenY;
 
-    pFont->iPenX += iGlyphWidth + 1;
-    if (iGlyphHeight > pFont->iRowH)
-        pFont->iRowH = iGlyphHeight;
+	pFontInfo->iPenX += iGlyphWidth + 1;
+    if (iGlyphHeight > pFontInfo->iRowH)
+		pFontInfo->iRowH = iGlyphHeight;
 
     return true;
 }
 
-CFont_Manager::FTCUSTOM_FONT* CFont_Manager::Find_Font(const _wstring& strFontTag)
+_bool CFont_Manager::Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h, const uint8_t* pSrc, _int srcPitch)
+{
+	// 얻은 비트맵 데이터를 실제 GPU 텍스쳐로 복사합니다.
+	if (w <= 0 || h <= 0)
+		return true;
+
+	for (int row = 0; row < h; ++row)
+	{
+		D3D11_BOX box = { (UINT)x, (UINT)(y + row), 0, (UINT)(x + w), (UINT)(y + row + 1), 1 };
+		const void* pRow = pSrc + row * srcPitch;
+		m_pContext->UpdateSubresource(Font.pAtlasTex, 0, &box, pRow, w, 0);
+	}
+	return true;
+}
+
+_bool CFont_Manager::FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)
+{
+	if (FT_Load_Char(face, iCodePoint, FT_LOAD_RENDER)) return FALSE;
+	outSlot = face->glyph;
+	return true;
+}
+
+_bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint)
+{
+	unordered_map<_uint, FTCUSTOM_FONT_GLYPH>& vecGlyphMap = pFontInfo->mapGlyphs;
+
+	// 이미 존재하면 스킵
+	if (vecGlyphMap.find(iCodePoint) != vecGlyphMap.end())
+		return true;
+
+	FT_GlyphSlot slot = nullptr;
+	if (!FT_RenderGlyph(pFontInfo->pFace, iCodePoint, slot))
+		return false;
+
+	FT_Bitmap& bmp = slot->bitmap;
+	int gw = (int)bmp.width;
+	int gh = (int)bmp.rows;
+
+	int x, y;
+	if (!Atlas_AllocRect(pFontInfo, gw, gh, x, y))
+		return false; // 공간 부족
+
+	if (gw > 0 && gh > 0)
+		Atlas_UploadBitmap(*pFontInfo, x, y, gw, gh, bmp.buffer, bmp.pitch);
+
+	FTCUSTOM_FONT_GLYPH tFontGlyph = {};
+	tFontGlyph.iCodepoint = iCodePoint;
+	tFontGlyph.sOffsetX = (SHORT)slot->bitmap_left;   // bearing X
+	tFontGlyph.sOffsetY = (SHORT)slot->bitmap_top;    // bearing Y
+	tFontGlyph.sWidth = (SHORT)gw;
+	tFontGlyph.sHeight = (SHORT)gh;
+	tFontGlyph.sAdvance = (SHORT)(slot->advance.x >> 6); // 픽셀 단위 advance
+
+	tFontGlyph.fU0 = (float)x / pFontInfo->iAtlasW;
+	tFontGlyph.fV0 = (float)y / pFontInfo->iAtlasH;
+	tFontGlyph.fU1 = (float)(x + gw) / pFontInfo->iAtlasW;
+	tFontGlyph.fV1 = (float)(y + gh) / pFontInfo->iAtlasH;
+
+	vecGlyphMap[iCodePoint] = tFontGlyph;
+	return true;
+}
+
+//_bool CFont_Manager::TestGlyph(FTCUSTOM_FONT& font, wchar_t ch)
+//{
+//	if (FT_Load_Char(font.pFace, ch, FT_LOAD_RENDER))
+//	{
+//		std::cout << "Failed to render char: " << (char)ch << "\n";
+//		return false;
+//	}
+//
+//	FT_GlyphSlot g = font.pFace->glyph;
+//	int w = g->bitmap.width;
+//	int h = g->bitmap.rows;
+//	int x, y;
+//
+//	if (!Atlas_AllocRect(&font, w, h, x, y))
+//	{
+//		std::cout << "No space in atlas for char " << (char)ch << "\n";
+//		return false;
+//	}
+//
+//	std::cout << "Char '" << (char)ch << "' → "
+//		<< "Size(" << w << "x" << h << "), "
+//		<< "AtlasPos(" << x << ", " << y << ")\n";
+//
+//	return true;
+//}
+
+FTCUSTOM_FONT* CFont_Manager::Find_Font(const _wstring& strFontTag)
 {
 	auto iter = m_Fonts.find(strFontTag);
 
@@ -149,11 +437,11 @@ CFont_Manager::FTCUSTOM_FONT* CFont_Manager::Find_Font(const _wstring& strFontTa
 	return iter->second;
 }
 
-CFont_Manager* CFont_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CFont_Manager* CFont_Manager::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
 {
 	CFont_Manager* pInstance = new CFont_Manager(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize()))
+	if (FAILED(pInstance->Initialize(iWinSizeX, iWinSizeY)))
 		CRASH("FontManager");
 
 	return pInstance;
@@ -180,6 +468,7 @@ void CFont_Manager::Free()
 
 	//m_pFTLibrary = nullptr;
 
+	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 }

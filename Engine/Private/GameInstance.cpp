@@ -45,7 +45,7 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext);
+	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
 
 	m_pLevel_Manager = CLevel_Manager::Create();
@@ -133,6 +133,9 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
+
+	m_pFont_Manager->Update(fTimeDelta);
+
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
 	m_pOctoTree->Update();
@@ -165,6 +168,9 @@ HRESULT CGameInstance::Draw()
 {
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
+
+	ASSERT_CRASH(m_pRenderer);
+	m_pFont_Manager->Render();
 
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
@@ -236,10 +242,15 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath, iPixelHeight);
 }
-HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//{
+//	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+//}
+void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
 {
-	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iPassIndex, vColor);
 }
+
 #pragma endregion
 
 #pragma region LEVEL_MANAGER

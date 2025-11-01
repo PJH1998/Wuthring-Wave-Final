@@ -33,6 +33,26 @@ HRESULT CLevel_Test_UI::Initialize()
 void CLevel_Test_UI::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Test_UI"));
+
+
+	static _float fTimeElapsed = 0.f;
+	const _float fTimeCheckCycle = 1.f;
+
+	fTimeElapsed += fTimeDelta;
+	if (fTimeElapsed >= fTimeCheckCycle)
+	{
+		fTimeElapsed = 0.f;
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { 0.f, 0.f }	, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { 0.5f, 0.5f }	, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { -0.5f, -0.5f }, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		_float4 vRandColor = _float4{
+			m_pGameInstance->Rand_Normal(),
+			m_pGameInstance->Rand_Normal(),
+			m_pGameInstance->Rand_Normal(),
+			m_pGameInstance->Rand_Normal()
+		};
+		m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { 920.f, 1045.f }, 1.f, 1.f, 0, vRandColor);
+	}
 }
 
 void CLevel_Test_UI::Render()

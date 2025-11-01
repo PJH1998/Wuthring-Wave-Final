@@ -168,6 +168,8 @@ HRESULT CLoader_Test_UI::Load_Font()
     if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", 16)))
         OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
+	
+
     return S_OK;
 }
 

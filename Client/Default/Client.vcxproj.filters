@@ -689,6 +689,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">

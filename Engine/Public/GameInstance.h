@@ -53,7 +53,9 @@ public:
 
 #pragma region FONT_MANAGER
 	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
-	HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
+	//HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
+	//void		Add_FloatingText(const _wstring& strFontTag, const _tchar* pText, FONT_SINGLEDESC tSingleFontDesc);
+	void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
 #pragma endregion
 
 
