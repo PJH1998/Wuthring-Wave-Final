@@ -35,7 +35,7 @@ private:
 		// Hit
 		ERoverHitType m_eHitType = ERoverHitType::END;
 
-		// ���ؽ�Ʈ ��� �� �ʱ�ȭ
+		// �
 		void Clear()
 		{
 			// Land
@@ -115,7 +115,7 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
-
+	
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);

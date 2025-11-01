@@ -71,9 +71,8 @@ private:
 
 	StateTransitionContext m_StateContext;
 
-
+	
 public:
-	// ���� State���� ȣ��
 	StateTransitionContext& GetStateContextForWrite()
 	{
 		return m_StateContext;

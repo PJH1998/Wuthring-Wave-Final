@@ -341,11 +341,15 @@ void CEffect_Controller::Import_AnimationData(const EFFECTACTOR_DESC& effectActo
         return;
     }
 
-    // 있으면 정보를 채워준다.
-    m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
-    m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
-    m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
-    m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+#ifdef _DEBUG
+	// 있으면 정보를 채워준다.
+	m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
+	m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
+	m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
+	m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+#endif // _DEBUG
+
+
 
 }
 

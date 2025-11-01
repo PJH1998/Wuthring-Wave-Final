@@ -153,7 +153,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
