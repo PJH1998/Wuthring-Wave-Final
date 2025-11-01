@@ -157,6 +157,10 @@ void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pSubResource->SetDof(fDepth, fRange, fScale);
 }
+void CRenderer::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
+{
+	m_pSubResource->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
+}
 #endif
 
 void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
@@ -849,21 +853,33 @@ void CRenderer::Render_MotionBlur()
 	_uint iDownSizeX = m_iWinSizeX >> 1;
 	_uint iDownSizeY = m_iWinSizeY >> 1;
 
+	//BackBuffer DownScale
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
 		CRASH("Failed RCS_DOWNSAMPLE");
 
+	// DEPTH DownScale
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE_DEPTH"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+		CRASH("Failed Add_SRVData");
+
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE_DEPTH"), iDownSizeX, iDownSizeY)))
+		CRASH("Failed RCS_DOWNSAMPLE");
+
+	// Motion Blur + UpScale
 	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE")))))
 		CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "DepthTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "DepthTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE_DEPTH")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "VelocityMap", m_pGameInstance->Get_RT_SRV(TEXT("RT_VelocityMap")))))
 		CRASH("Failed Add_SRVData");
 
+	if(FAILED(m_pSubResource->Add_MotionBlur_BufferData(TEXT("RCS_MotionBlur"))))
+		CRASH("Failed Add_BufferData");
+	
 	if(FAILED(m_pSubResource->Set_DefalutSampler(TEXT("RCS_MotionBlur"), 0)))
 		CRASH("Failed Set_DefalutSampler");
 
@@ -879,6 +895,9 @@ void CRenderer::Render_MotionBlur()
 
 	if (FAILED(m_pShader->Bind_Texture("g_VelocityMap", m_pGameInstance->Get_RT_SRV(TEXT("RT_VelocityMap")))))
 		CRASH("Failed Bind VelocityMap");
+
+	if(FAILED(m_pSubResource->Bind_LimitVelocity(m_pShader)))
+		CRASH("Failed Bind LimitVelocity");
 
 	Update_EffectIntensity();
 

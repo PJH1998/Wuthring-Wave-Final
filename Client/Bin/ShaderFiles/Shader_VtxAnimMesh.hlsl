@@ -170,6 +170,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    // 
     float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
     float4 vNormal = normalize(vNormalDesc * 2.f - 1.f);

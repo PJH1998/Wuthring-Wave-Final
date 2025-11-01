@@ -32,6 +32,13 @@ private:
 		_float   Padding;
 	}BLOOM_UP_DATA;
 
+	typedef struct tagMotionBlurData {
+		_float fLimitVelocity;
+		_float fLimitDepth;
+		_float fLengthScale;
+		_float PaddingMotion;
+	}MOTION_BLUR_DATA;
+
 private:
 	CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRendererSubResource() = default;
@@ -42,6 +49,7 @@ public:
 	void Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor) { m_vFogDepthDistance = vDepthDistance, m_vFogHeightDistance = vHeightDistance, m_vFogColor = vColor; }
 	void SetBloomIntensity(_float fIntensity) { m_fIntensity = fIntensity; }
 	void SetDof(_float fDepth, _float fRange, _float fScale) { m_fDofDepth = fDepth, m_fDofRange = fRange, m_fDofScale = fScale; }
+	void SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance) { m_fLimitVelocity = fLimitVelocity, m_fLimitDepth = fLimitDepth, m_fLengthScale = fDistance; }
 #endif
 
 public:
@@ -49,6 +57,7 @@ public:
 	HRESULT						Bind_Ramp_Texture(CShader* pShader, const _char* pConstantName, _uint iTextureIndex);
 	HRESULT						Bind_LUT_Texture(CShader* pShader, _uint iLUT_Index);
 	HRESULT						Bind_SSAO_Resources(CShader* pShader);
+	HRESULT						Bind_LimitVelocity(CShader* pShader);
 
 	HRESULT						Bind_Fog_Resources(CShader* pShader);
 	HRESULT						Bind_Dof_Resource(CShader* pShader);
@@ -56,6 +65,7 @@ public:
 	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight = 1);
 	HRESULT						Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex);
+	HRESULT						Add_MotionBlur_BufferData(const _wstring& strRCSTag);
 	HRESULT						Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot);
 private:
 	CGameInstance*				m_pGameInstance = { nullptr };
@@ -110,6 +120,12 @@ private:
 	_float						m_fDofDepth = {};
 	_float						m_fDofRange = {};
 	_float						m_fDofScale = {};
+#pragma endregion
+
+#pragma region MOTION_BLUR		
+	_float						m_fLimitVelocity = {};
+	_float						m_fLimitDepth = {};
+	_float						m_fLengthScale = {};
 #pragma endregion
 
 private:
