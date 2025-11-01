@@ -315,7 +315,7 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
     if (wStrColliderTag == TEXT("Player"))
     {
-        
+		m_pColliderCom->IsActivate(IsActive);
     }
     else if (wStrColliderTag == TEXT("Bayonet"))
     {

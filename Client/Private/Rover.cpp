@@ -292,9 +292,9 @@ void CRover::PartRotation(_uint iPartType, _fvector vQuaternion)
 #pragma region NOTIFY
 void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Player"))
+    if (wStrColliderTag == TEXT("Body"))
     {
-        
+		m_pColliderCom->IsActivate(IsActive);
     }
     else if (wStrColliderTag == TEXT("Weapon"))
     {

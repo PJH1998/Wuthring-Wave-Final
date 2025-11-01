@@ -343,12 +343,14 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	{
 		// 1. 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
+		m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
 	}
 
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
 	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
+	m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), true); // 콜라이더 활성화
 
 	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
 	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).

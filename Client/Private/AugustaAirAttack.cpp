@@ -239,12 +239,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                     return;
                 }
-                else
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-                    return;
-                }
             }
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_END)
