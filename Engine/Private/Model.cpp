@@ -314,7 +314,7 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
 	// 다른 Animation 들어올 시, 이전 Animation 저장
 	//if (m_strPreAnimation != strAnimationName)
@@ -357,7 +357,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 
 		// Root Node Translation 조정
 		if (true == isRootMotion)
-			Compute_RootAnimation(fRootMotionRate);
+			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
 	}
 
 
