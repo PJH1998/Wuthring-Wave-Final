@@ -47,6 +47,9 @@ float   g_fSSAO_OutDistance;
 Texture2D g_DofTexture;
 Texture2D g_BlurTexture;
 
+//Motion
+Texture2D g_VelocityMap;
+
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
@@ -496,20 +499,54 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
+    bool IsDyanmic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;       // Dynamic Discard;
+    
+    if(IsDyanmic)
+        return Out;
+    
+    float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    
+    Out.vColor.z = vViewPos.z;          // Depth 기록
+    
+    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+    
     float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
     
-    float4 vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     float4 vPrevProjPos = mul(vWorldPos, PrevVP);
+    vPrevProjPos /= vPrevProjPos.w;
     
-    float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy / vPrevProjPos.w);
+    float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
     
-    float2 vMotionVector = In.vTexcoord - vPrevTexcoord;
+    float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);    // 픽셀 거리로 보정
+    vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
+    
+    float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
     
     Out.vColor.xy = vMotionVector;
     Out.vColor.a = 1.f;
     
     return Out;
 }
+
+
+PS_OUT_BACKBUFFER PS_MOTION_BLUR(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float4 vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    float4 vBlurColor = g_BlurTexture.Sample(DefaultSampler, In.vTexcoord);
+    float2 vVelocity = g_VelocityMap.Sample(DefaultSampler, In.vTexcoord).xy;
+    
+    bool IsBlur = length(vVelocity) > 10.f ? true : false;
+    
+    if(IsBlur)
+        Out.vColor = lerp(vOriginColor, vBlurColor, g_fEffectIntensity);
+    else
+        Out.vColor = vOriginColor;
+    
+    return Out;
+}
+
 
 PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
 {
@@ -691,7 +728,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_BLUR();
     }
     
-    pass MotionBlur // 13
+    pass VelocityMap // 13
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
@@ -700,5 +737,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_VELOCITY_MAP();
+    }
+    
+    pass MotionBlur // 14
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MOTION_BLUR();
     }
 }

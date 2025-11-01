@@ -145,7 +145,7 @@ void CAugustaAirSkill::Check_StateTransition(_float fTimeDelta)
     EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     _float fOffsetY = 0.1f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
+    _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(fOffsetY);
 
     if (IsEscapePossible)
     {

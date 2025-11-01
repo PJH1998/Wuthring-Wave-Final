@@ -5,6 +5,8 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
 
 #include "StateMachine.h"
 
@@ -37,6 +39,7 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
     
+	Load_Action();
     //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
@@ -103,12 +106,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
 
-    // Prototype_Component_BehaviorTree_TestLoad_MonsterTest
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
+    // Prototype_Component_BehaviorTree_Test
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
         CRASH("BehaviorTree Create Failed");
 
-    // Prototype_Component_AnimMachine_Test
+    // Prototype_Component_AnimMachine_FalseSovereign
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
         CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/Animation/FalseSovereign_StateMachine.json"))))
         CRASH("Monster AnimMachine Create Failed");
@@ -124,6 +127,47 @@ HRESULT CLoader_Test::Load_MonsterTest()
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         CMonsterTest::Create(m_pDevice, m_pContext))))
         CRASH("MonsterTest Prototype Create Failed");
+
+	// Prototype_Component_BehaviorTree_Ordinary
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/MonsterOrdinary_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+	
+#pragma region HAVOC_WARRIOR
+	// Prototype_Component_AnimMachine_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_HavocWarrior"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/Animation/HavocWarrior_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_HavocWarrior
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_HavocWarrior"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/HavocWarrior/HavocWarrior.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		CHavocWarrior::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region ELECTRO_PREDATOR
+	// Prototype_Component_AnimMachine_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_ElectroPredator"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/ElectroPredator/Animation/ElectroPredator_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_ElectroPredator
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_ElectroPredator"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/ElectroPredator/ElectroPredator.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		CElectroPredator::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
 
     return S_OK;
 }
@@ -283,6 +327,13 @@ HRESULT CLoader_Test::Load_Rover()
 #pragma endregion
 
     return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Action()
+{
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	return S_OK;
 }
 
 CLoader_Test* CLoader_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

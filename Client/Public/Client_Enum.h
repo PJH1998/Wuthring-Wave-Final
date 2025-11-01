@@ -11,8 +11,8 @@ namespace Client
 	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, DESTRUCTION, NONRIGID, END };
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
-
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
+	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
@@ -70,13 +70,14 @@ namespace Client
 		MOVE_RIGHT			= 1 << 3,
 		SPLINT				= 1 << 4,
 		DODGE				= 1 << 5,
-
+		TURN				= 1 << 6,
 		JUMP				= 1 << 8,
 		AIR					= 1 << 9,
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
-		TURN				= 1 << 12,
+		STRIKE				= 1 << 12,
+		BEHIT				= 1 << 13,
 		BLOCK				= 1 << 14,
 		PARALYSIS			= 1 << 15,
 
@@ -96,6 +97,7 @@ namespace Client
 		DEAD				= 1 << 29
 	};
 
+	
 	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, AUGUSTA, SHADOW, END };
 
 }

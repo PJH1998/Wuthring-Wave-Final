@@ -2,6 +2,7 @@
 #include "Augusta.h"
 #include "Player.h"
 #include "SpringCamera.h"
+#include "Collider.h"
 
 #include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
@@ -45,15 +46,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Register_AllNotifies(pDesc->strFolderPath);
 
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
-
-
-    // 초기 State 설정.
-    m_StateContext.m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-    m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(EAugustaGroundState::IDLE));
-    
-    m_pColliderCom->Set_Gravity(true);
-    m_pBayonet->SetActivate(true);
+	m_pBayonet->SetActivate(false);
     m_pSkillWeapon->SetActivate(false);
     m_pGriffon->SetActivate(false);
     
@@ -65,7 +58,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
-
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -87,7 +79,6 @@ void CAugusta::Update(_float fTimeDelta)
 
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
-
 
 
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
@@ -119,7 +110,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
     
-    // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
@@ -158,19 +148,37 @@ void CAugusta::Render_Shadow()
 {
 }
 
+void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
+{
+	// 애니메이션 변경할 값.
+	switch (eTransitionType)
+	{
+	case CHARACTER_TRANSITIONTYPE::IDLE:
+		GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+		break;
+	case CHARACTER_TRANSITIONTYPE::RUN:
+		break;
+	}
+	
+
+	// 상태 변수 초기화
+	m_StateContext.Clear();
+}
+
 // AnimName이 같은걸로 매핑되어있음.
-void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
 {
     switch (iPartType)
     {
     case PART_BAYONET:
-        m_pBayonet->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		m_pBayonet->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
     case PART_SKILLWEAPON:
-        m_pSkillWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		m_pSkillWeapon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
     case PART_GRIFFON:
-        m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
     }
 }
@@ -299,7 +307,7 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
     if (wStrColliderTag == TEXT("Player"))
     {
-        
+		m_pColliderCom->IsActivate(IsActive);
     }
     else if (wStrColliderTag == TEXT("Bayonet"))
     {
@@ -355,28 +363,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
-    
-    // 계산에 사용할 값 지정.
-    m_fColliderRadius = 0.4f;
-    m_fColliderHeight = 0.5f;
-    m_vColliderOffSet = { 0.f, 0.67f, 0.f };
-    //m_vColliderOffSet = { 0.f, 0.f, 0.f };
-
-
-    CCollider::COLLIDER_DESC ColliderDesc{};
-    ColliderDesc.vPos = pDesc->vPosition;
-    ColliderDesc.vOffset = m_vColliderOffSet;
-    ColliderDesc.eType = EMotionType::Kinematic;
-    ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
-    ColliderDesc.fHeight = m_fColliderHeight;
-    ColliderDesc.fRadius = m_fColliderRadius;
-    if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->colliderData.first)
-        , pDesc->colliderData.second, TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
-        CRASH("Collider");
-
-    //몬스터 탐지용 콜백으로 받을 Desc - LJH
-    m_pColliderCom->Set_Desc(m_pTransformCom);
-
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)

@@ -92,7 +92,7 @@ void CAugustaAirFall::Check_Physics(_float fTimeDelta)
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 {
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(0.2f);
+    _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(0.2f);
 
     if (m_States[LAND])
     {

@@ -44,8 +44,6 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 {
     CWeapon::Update(fTimeDelta);
 
-    // Augusta�� StateMachine���� �ִϸ��̼ǽ���?
-
     // Last :  Combined ��� �ʱ�ȭ
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
@@ -92,6 +90,11 @@ void CAugustaBayonet::Render()
 #ifdef _DEBUG
     m_pRigidbodyCom->Render();
 #endif // _DEBUG
+}
+
+void CAugustaBayonet::Activate(_bool IsActivate)
+{
+	CWeapon::Activate(IsActivate);
 }
 
 void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)

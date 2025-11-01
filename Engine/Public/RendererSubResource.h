@@ -56,7 +56,7 @@ public:
 	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
 	HRESULT						Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight = 1);
 	HRESULT						Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex);
-
+	HRESULT						Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot);
 private:
 	CGameInstance*				m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };
