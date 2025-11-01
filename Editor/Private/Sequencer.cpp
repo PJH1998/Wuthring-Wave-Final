@@ -285,6 +285,9 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::InputFloat("##", &CameraFrame.fFovy);
 	ImGui::PopID();
 
+	if (ImGui::RadioButton("[Lerp]", CameraFrame.isLerp))
+		CameraFrame.isLerp = !CameraFrame.isLerp;
+
 	ImGui::SameLine();
 	if (ImGui::Button("Delete"))
 	{
@@ -379,6 +382,8 @@ void CSequencer::Save_CameraAction()
 
 				FrameJson["FOV"] = Frames[i].fFovy;
 
+				FrameJson["Lerp"] = Frames[i].isLerp;
+
 				ActionJson["Frame"].push_back(FrameJson);
 			}
 
@@ -424,6 +429,8 @@ void CSequencer::Load_CameraAction()
 					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
 					CameraFrame.fDistance = Frame["Distance"];
 					CameraFrame.fFovy = Frame["FOV"];
+					if (Frame.contains("Lerp"))
+						CameraFrame.isLerp = Frame["Lerp"];
 
 					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
 					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);

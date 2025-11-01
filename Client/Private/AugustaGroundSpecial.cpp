@@ -110,7 +110,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
+    m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)

@@ -6,19 +6,19 @@
 NS_BEGIN(Client)
 
 #pragma region DEPTH 1
-// Rover Ground ���� ����
+// Rover Ground 
 enum class ERoverGroundState : _uint
 {
-	IDLE = 0,		// ��� (Stand1, Stand2, Stand1_Action01~03, StandChange)
-	WALK,			// �ȱ� (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
-	RUN,			// �޸��� (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	DASH,			// �������� (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
-	ATTACK,			// ���� (Attack01~04, Attack_*, SpAttack*)
-	SKILL,			// ��ų (Skill)
-	BURST,			// Burst ����
-	SPECIAL,		// Burst Special ����.
-	UNIQUE,			// ĳ���� ���� ����. (Griffon ���)
-	LAND,			// ���� (Land)
+	IDLE = 0,		//  (Stand1, Stand2, Stand1_Action01~03, StandChange)
+	WALK,			//  (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
+	RUN,			// (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
+	DASH,			// (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
+	ATTACK,			// ack01~04, Attack_*, SpAttack*)
+	SKILL,			// l)
+	BURST,			// 
+	SPECIAL,		// 
+	UNIQUE,			// 
+	LAND,			// 
 	GROUND_END
 };
 
@@ -180,11 +180,11 @@ enum class ERoverUniqueType : _uint // �׸��� ���..
 enum class ERoverJumpType : _uint
 {
 	JUMP_LOOP = 0,
-	JUMP_RUN_LF, // ������
+	JUMP_RUN_LF,
 	JUMP_RUN_RF,
-	JUMP_SECOND_B, // ���� ����
+	JUMP_SECOND_B,
 	JUMP_SECOND_F,
-	JUMP_WALK_LF, // ���ڸ�
+	JUMP_WALK_LF, 
 	JUMP_WALK_RF,
 	END
 };

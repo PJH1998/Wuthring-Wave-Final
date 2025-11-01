@@ -37,7 +37,9 @@ float g_UIScale = 1.f; // UI Scaler
 #define UIFLAG_COOLDOWN_RECT        2           // 단순 사각형에서 내려오는 쿨타임 구현용
 #define UIFLAG_PLAYER_HP            3           // 플레이어 HP용
 #define UIFLAG_PLAYER_TRANSMIT      4  
-#define UIFLAG_END                  5
+#define UIFLAG_SIMPLEMASK           5
+#define UIFLAG_ACTIVEFEEDBACK       6
+#define UIFLAG_END                  7
 
 uint g_iVariantFlag = UIFLAG_ERROR;
 
@@ -261,8 +263,60 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
         In.vSInstTrans
     );
     
+    
+    
+    // Variant : 계산 전에 계산용 행렬에 값 반영하여 원하는 transform 을 적용
+    switch (g_iVariantFlag)
+    {
+        case UIFLAG_PLAYER_TRANSMIT:
+        {
+            // ==============================
+            // * [4] PlayerEnergy
+            // ==============================
+            
+            // fHeight 만큼 scale 늘리고 fHeight / 2 만큼 y 올려서 보정?
+            float fHeight = -In.mExtra2.y;
+            
+            matAdditionalTransform[1].xyz *= fHeight;                   // Y축
+            matAdditionalTransform[3].y += (fHeight - 1) * 0.5f;        // 이따만큼 올림
+            
+        } break;
+        case UIFLAG_ACTIVEFEEDBACK:
+        {
+            // ==============================
+            // * [6] Active Feedback (button touch feedback)
+            // ==============================
+            float2 vDestScale = In.mExtra0.xy;      // 목표 배율 (최초 1배)
+            float fStartAlpha = In.mExtra0.z;
+            float fTimeRatio = In.mExtra0.w;
+            
+            float fDeltaX = fTimeRatio;         // 보간 방법 바꾸고싶다면 이 fDeltaX를 수정하는 식으로?
+            
+            float2 vCurScale; // 현재 스케일이 0이 아님에 주의. 인스턴스별 크기가 이미 적용된 값이 들어옴.
+            vCurScale.x = length(matAdditionalTransform[0].xyz);
+            vCurScale.y = length(matAdditionalTransform[1].xyz);
+            
+            float2 vTargetScale = lerp(vCurScale, vCurScale * vDestScale, fDeltaX);
+
+            matAdditionalTransform[0].xyz *= (vTargetScale.x / vCurScale.x);
+            matAdditionalTransform[1].xyz *= (vTargetScale.y / vCurScale.y);
+
+        } break;
+    }
+    
+    
+    
+    
     float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
     vWorldPos = mul(vWorldPos, matWVP);
+    
+    
+    
+    
+    
+    
+    
+    
     
     Out.vPosition = vWorldPos;
     Out.vTexcoord = In.vTexcoord;
@@ -272,7 +326,7 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
     // 이후 픽셀에서 사용
-    
+    \
     // Pixel에서 사용 위해 바로 Output
     Out.vSInstCoordX = In.vSInstCoordX;
     Out.vSInstCoordY = In.vSInstCoordY;
@@ -634,9 +688,16 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [1] Circle Cooldown
             // ==============================
             // * matrix info [size : 2] (skillbtn_e, skillbtn_r)
-            // [CDRATE] -
+            // [CDRATE] [COLORMUL_1] [COLORMUL_2] [IS_USECUSTOMCOLOR]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // [STARTRATIO(DEG)] -
             // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            float fColorMul1 = In.mExtra0.y;
+            float fColorMul2 = In.mExtra0.z;
+            bool isUseCustomColor = _BOOL(In.mExtra0.w);
+            float4 vCustomColor = In.mExtra1.rgba;
+            float fStartRatio = In.mExtra2.x;       // 각도(degree) 및 시계방향 기준. 0 기준 12시부터 시작.
             
             // g_fLeftCDRate 가 1 일때는 밝은 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 반시계방향으로 돌며 점차 원래대로의 색으로 바뀌도록
@@ -648,23 +709,26 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             float2 center = float2(0.5f, 0.5f);
             float2 dir = normalize(localUV - center);   // 중앙에서 목표 UV좌표로의 방향.
             float angle = atan2(dir.y, dir.x);          // +x(3시) 방향 = 0, 반시계방향이 + 기준의 라디안 상대각도를 구함
-            angle += PI / 2;                            // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
-            if (angle < 0) angle += 2 * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
+            angle += ((PI / 2.f) * (1 - fStartRatio / 90.f)); // +90도를 줘서, 기존 3시 방향이었던 각도 기준을 12시로 전환
+            if (angle < 0) angle += 2.f * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
     
-            float fCooldownAngle = 2 * PI * fCooldown; // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
+            float fCooldownAngle = 2.f * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
     
             if (angle <= fCooldownAngle)
             {
                 // 이미 지난 부분은 원래의 색으로
-                Out.vColor.rgb *= 0.5f;
+                Out.vColor.rgba *= fColorMul1;
+                if (isUseCustomColor)
+                    Out.vColor *= vCustomColor;
                 return Out;
             }
             else
             {
                 // 지나지 않은 부분은 좀 더 하얀 색으로
                 if (fCooldown != 0.f)
-                    Out.vColor.rgb *= 0.95f;
-                
+                    Out.vColor.rgba *= fColorMul2;
+                if (isUseCustomColor)
+                    Out.vColor *= vCustomColor;
                 return Out;
             }
             
@@ -676,21 +740,25 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [2] Rect Cooldown (for PartyFrame)
             // ==============================
             // * matrix info [size : 3] (frame_rover, frame_augusta, frame_galbrena)
-            // [CDRATE] -
+            // [CDRATE] [COLORMUL_1] [COLORMUL_2] -
             // ==============================
             float fCooldown = In.mExtra0.x; // 0 ~ 1.
+            float fColorMul1 = In.mExtra0.y;
+            float fColorMul2 = In.mExtra0.z;
+            
             
             // g_fLeftCDRate 가 1 일때는 어두운 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
             if (fixedUV.y < fCooldown)
             {
             // 밝게 표시될 부분
+                Out.vColor *= fColorMul1;
                 return Out;
             }
             else
             {
             // 어둡게 표시될 부분
-                Out.vColor *= 0.8f;
+                Out.vColor *= fColorMul2;
                 return Out;
             }
         }
@@ -742,12 +810,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // * [4] PlayerEnergy
             // ==============================
             // * matrix info [size : 41 * 2] (energy * 41, background * 41)
-            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w] 
-            // [VISIBLE] [HEIGHT] -
+            // [COLORGRAD1.x] [COLORGRAD1.y] [COLORGRAD1.z] [COLORGRAD1.w]
+            // [COLORGRAD2.x] [COLORGRAD2.y] [COLORGRAD2.z] [COLORGRAD2.w]
+            // [VISIBLE] [HEIGHT]] -
             // ==============================
-            vector vColor = In.mExtra0.wyzw;
-            bool isVisible = _BOOL(In.mExtra1.x);
-            float fHeight = In.mExtra1.y;
+            vector vColor1 = In.mExtra0.rgba;
+            vector vColor2 = In.mExtra1.rgba;
+            bool isVisible = _BOOL(In.mExtra2.x);
+            float fHeight = In.mExtra2.y;
             // border는 다 같은 이미지 여러 개 쓸 테니 여기 말고 전역으로 받는게 좋을 듯
             
             // 픽셀 자체의 크기는 픽셀 셰이더에서 제어해야 할 듯
@@ -756,10 +826,10 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (!isVisible)
                 discard;
             
-            // 9sector.. 
+            // 9sector.. 123
             float2 vSize = {
-                length(g_WorldMatrix[0].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
-                length(g_WorldMatrix[1].xyz) * g_UIScale * fHeight /* fHeight 이거 맞나 */,
+                length(g_WorldMatrix[0].xyz) * g_UIScale,
+                length(g_WorldMatrix[1].xyz) * g_UIScale,
             };
             
             float2 border = g_SectorBorder * g_UIScale;
@@ -772,10 +842,63 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             Out.vColor = g_Texture.Sample(DefaultSampler, finalUV);
             // =====
             
-            Out.vColor.rgba *= vColor.rgba;  // 색상 추가
+            
+            //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+            Out.vColor.rgb  = Out.vColor.rgb * lerp(vColor1, vColor2, fixedUV.y).rgb; // 색상 추가
+            Out.vColor.a    = saturate(Out.vColor.a * 1.5f);
+            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
             
             return Out;
         } break;
+        case UIFLAG_SIMPLEMASK :        // 5. T_MaskCircle.png
+        {
+            // ==============================
+            // * [5] SimpleMask (for SkillIcon BG)
+            // ==============================
+            // * matrix info [size : ~5]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // [IS_ACTIVE]                                  // 필요 시 조건 추가
+            // ==============================
+            
+            // rgb 의 평균값만큼 색을 준다.
+            // rgb 의 평균값이 255에 가까우면 alpha가 1에 가까워진다.
+            float4 vColor = In.mExtra0.rgba;
+            bool isActive = _BOOL(In.mExtra1.x);
+            
+            if (!isActive)
+                discard;
+            
+            float fAverageColor = (Out.vColor.x + Out.vColor.y + Out.vColor.z) / 3.f;
+            float4 vAppliedColor = vColor * fAverageColor;
+            vAppliedColor.a = fAverageColor * vColor.a * Out.vColor.a;
+            
+            Out.vColor = vAppliedColor;
+            return Out;
+        }
+        case UIFLAG_ACTIVEFEEDBACK :    // 6
+        {
+            // ==============================
+            // * [6] Active Feedback (button touch feedback)
+            // ==============================
+            // * matrix info [size : ~5? controls on hud]
+            // [DESTSCALE.x] [DESTSCALE.y] [STARTALPHA] [TIMERATIO]
+            // [COLOR.x] [COLOR.y] [COLOR.z] [COLOR.w]
+            // ==============================
+            float2 vDestScale = In.mExtra0.xy;
+            float fStartAlpha = In.mExtra0.z;
+            float fTimeRatio = In.mExtra0.w;
+            float4 vColor = In.mExtra1.rgba;
+            
+            float fDeltaX = fTimeRatio;         // 보간 방법 바꾸고싶다면 이 fDeltaX를 수정하는 식으로?
+            
+            float fAverageColor = (Out.vColor.x + Out.vColor.y + Out.vColor.z) / 3.f;
+            float4 vAppliedColor = vColor * fAverageColor;
+            vAppliedColor.a = fAverageColor * vColor.a * Out.vColor.a;
+            
+            Out.vColor.a = vAppliedColor.a * lerp(1.f - fStartAlpha, 0.f, fDeltaX);
+            
+            return Out;
+        }
         default:
         {
             Out.vColor = float4(1.f, 0.f, 1.f, 1.f);

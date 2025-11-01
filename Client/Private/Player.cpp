@@ -3,6 +3,8 @@
 #include "Character.h"
 #include "Augusta.h"
 #include "AugustaState_Enum.h"
+#include "Rover.h"
+#include "RoverState_Enum.h"
 #include "SpringCamera.h"
 #include "PlayerFactory.h"
 #include "GameSystem.h"
@@ -75,6 +77,13 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 {
     CGameObject::Priority_Update(fTimeDelta);
     
+	// 1. Change 된게 있다면 1프레임 뒤에 체인지.
+	if (m_IsChanage)
+	{
+		m_IsChanage = false;
+		Change_Character(m_eNextCharacter);
+	}
+
     m_pInputControllerCom->Update();
     
     if (m_iCurrentCharacterIdx != NONE)
@@ -84,8 +93,8 @@ void CPlayer::Priority_Update(_float fTimeDelta)
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
         
-	// 캐릭터 체인지 => 추후 구현
-	//Change_CharacterCheck();
+	// 2. 캐릭터 체인지
+	Change_CharacterCheck();
 
     // 임시.
     if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
@@ -108,8 +117,12 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 void CPlayer::Update(_float fTimeDelta)
 {
     CGameObject::Update(fTimeDelta);
-    if (m_iCurrentCharacterIdx != NONE)
-        m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
+	if (m_iCurrentCharacterIdx != NONE)
+	{
+		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]);
+		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
+	}
+        
         
     // 2. Ensemble 
     if (m_iEnsembleCharacterIdx != NONE &&
@@ -132,11 +145,9 @@ void CPlayer::Late_Update(_float fTimeDelta)
 
     if (m_iEnsembleCharacterIdx != NONE &&
         m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
+        m_Characters[m_iEnsembleCharacterIdx]->Late_Update(fTimeDelta);
 
-    Sync_Transform();
-
-    
+	
 }
 void CPlayer::Render()
 {
@@ -152,12 +163,22 @@ void CPlayer::Render_Shadow()
 
 void CPlayer::Change_CharacterCheck()
 {
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
-        Change_Character(CHARACTERTYPE::AUGUSTA);
+	
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
+	{
+		m_IsChanage = true;
+		m_eNextCharacter = CHARACTERTYPE::ROVER;
+	}
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
-        Change_Character(CHARACTERTYPE::GALBRENA);
+	{
+		m_IsChanage = true;
+		m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+	}
     else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
-        Change_Character(CHARACTERTYPE::ROVER);
+	{
+		m_IsChanage = true;
+		m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+	}
 }
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
@@ -201,58 +222,6 @@ void CPlayer::Notify_EnsembleEnd()
 
 void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
 {
-    _matrix matPrevWorldMatrix = XMMatrixIdentity();
-    _float4 vPrevPosition = {};
-    _bool bHasPrevCharacter = false;
-
-    
-    if (m_iCurrentCharacterIdx != CHARACTERTYPE::NONE)
-    {
-        CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
-        CTransform* pPrevTransform = dynamic_cast<CTransform*>(
-            pPrevCharacter->Get_Component(L"Com_Transform"));
-
-        if (pPrevTransform)
-        {
-            matPrevWorldMatrix = pPrevTransform->Get_WorldMatrix();
-            XMStoreFloat4(&vPrevPosition, pPrevTransform->Get_State(STATE::POSITION));
-
-            bHasPrevCharacter = true;
-        }
-
-        pPrevCharacter->SetActivate(false);
-    }
-
-    CCharacter* pNextCharacter = m_Characters[eNextCharacter];
-    pNextCharacter->SetActivate(true);
-
-    CTransform* pNextTransform = dynamic_cast<CTransform*>(
-        pNextCharacter->Get_Component(L"Com_Transform"));
-
-    if (pNextTransform)
-    {
-        if (m_iCurrentCharacterIdx == CHARACTERTYPE::NONE)
-        {
-            if (m_pTransformCom)
-                pNextTransform->Set_WorldMatrix(m_pTransformCom->Get_WorldMatrix());
-        }
-        else
-        {
-            pNextTransform->Set_WorldMatrix(matPrevWorldMatrix);
-            pNextTransform->Save_PreviousPosition();
-        }
-    }
-
-    CCollider* pNextCollider = dynamic_cast<CCollider*>(
-        pNextCharacter->Get_Component(L"Com_Collider"));
-    if (pNextCollider && pNextTransform)
-        pNextCollider->Sync_Position(pNextTransform);
-
-    m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
-    m_iCurrentCharacterIdx = eNextCharacter;
-
-    if (m_pTransformCom && pNextTransform)
-        m_pTransformCom->Set_WorldMatrix(pNextTransform->Get_WorldMatrix());
 
 }
 
@@ -300,29 +269,74 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter)
     if (pCurrentCharacter && pCurrentCharacter->Is_SwitchGaugeFull())
         bUseEnsemble = true;
 
-    Perform_CharacterSwitch(eNextCharacter);
 
-    if (bUseEnsemble && pCurrentCharacter)
-    {
-        pCurrentCharacter->SetActivate(true);
-        Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
-        pCurrentCharacter->Reset_SwitchGauge();
-    }
+	_matrix matPrevWorldMatrix = XMMatrixIdentity();
+	_float4 vPrevPosition = {};
+	_bool bHasPrevCharacter = false;
 
+	// 이전 캐릭터 비활성화
+	CCharacter* pPrevCharacter = m_Characters[m_iCurrentCharacterIdx];
+	
+
+	// 다음캐릭 활성화
+	CCharacter* pNextCharacter = m_Characters[eNextCharacter];
+	pNextCharacter->SetActivate(true);
+
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_Characters[eNextCharacter]->Sync_Transform_FromPlayer(mat);
+
+	// 현재 선택된 캐릭터로 CurrentCharacter Idx 변경.
+	m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
+	m_iCurrentCharacterIdx = eNextCharacter;
+
+	pPrevCharacter->SetActivate(false);
+
+	// 최근 캐릭터가 존재하고, Ensemble 게이지가 가득찼다면?
+	if (bUseEnsemble && pPrevCharacter)
+	{
+		pPrevCharacter->SetActivate(true);
+		//pCurrentCharacter->SetActivate(true);
+		Switch_Skill(static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx));
+		pPrevCharacter->Reset_SwitchGauge(); // 이전 캐릭터 SwitchGauge 지우기.
+	}
+	else
+	{
+		// 현재 Animation 초기화 상태를 Idle로 변경?
+		switch (m_iPrevCharacterIdx)
+		{
+		case CHARACTERTYPE::ROVER:
+		{
+			CRover* pRover = dynamic_cast<CRover*>(pPrevCharacter);
+			if (nullptr == pRover) return;
+			pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
+			pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+			break;
+		}
+		
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CAugusta* pAugusta = dynamic_cast<CAugusta*>(pPrevCharacter);
+			if (nullptr == pAugusta) return;
+			pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+			pPrevCharacter->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+			break;
+		}
+			
+		case CHARACTERTYPE::GALBRENA:
+			break;
+
+		}
+
+	}
 }
 
-void CPlayer::Sync_Transform()
+void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 {
-    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
-    {
-        CTransform* pTransform = dynamic_cast<CTransform*>(
-            m_Characters[m_iCurrentCharacterIdx]->Get_Component(L"Com_Transform"));
-        ASSERT_CRASH(pTransform);
-        m_pTransformCom->Set_WorldMatrix(pTransform->Get_WorldMatrix());
-    }
-
-        
+	if (nullptr == pCharacter)
+		return;
+	pCharacter->Sync_Transform_ToPlayer(m_pTransformCom);
 }
+
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {

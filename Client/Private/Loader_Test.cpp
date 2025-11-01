@@ -51,8 +51,8 @@ HRESULT CLoader_Test::Load_Texture()
 HRESULT CLoader_Test::Load_Model()
 {
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
-    //m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
+    m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
     //_fmatrix PreMatrix = XMMatrixScaling(0.1f, 0.1f, 0.1f) * XMMatrixRotationAxis(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
@@ -104,7 +104,7 @@ HRESULT CLoader_Test::Load_MonsterTest()
     cout << "MonsterTest" << endl;
 
     // Prototype_Component_BehaviorTree_TestLoad_MonsterTest
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
         CRASH("BehaviorTree Create Failed");
 
@@ -233,7 +233,7 @@ HRESULT CLoader_Test::Load_Augusta()
 HRESULT CLoader_Test::Load_Rover()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/DarkRover.dat";
+    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     //_float fSize = 0.01f;
     _float fSize = 0.0001f;

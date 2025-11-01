@@ -154,6 +154,7 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
+	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::DETECT)){}
 	else
 		m_isTrigger = false;

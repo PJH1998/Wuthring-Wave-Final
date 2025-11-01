@@ -136,6 +136,16 @@ _bool CRigidbody::IsLand(_float3* pNormalOut)
 	return m_pCharacter->IsSupported();
 }
 
+void CRigidbody::IsActivate(_bool isActive)
+{
+	true == isActive ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID);
+}
+
+void CRigidbody::Change_MotionType(EMotionType eType)
+{
+	m_pBodyInterface->SetMotionType(m_BodyID, eType, EActivation::Activate);
+}
+
 const JPH::Array<Vec3> CRigidbody::ConvertToArrayVec3(CModel* pModel)
 {
 	JPH::Array<Vec3> Vertices;

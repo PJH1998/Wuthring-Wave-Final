@@ -35,6 +35,8 @@ private:
 	CModel*				m_pModelCom = { nullptr };
 	CShader*			m_pShaderCom = { nullptr };
 
+	_bool				m_IsEmissive = { false };
+
 private:
 	HRESULT				Ready_Components(_fmatrix PreTransformMatrix);
 

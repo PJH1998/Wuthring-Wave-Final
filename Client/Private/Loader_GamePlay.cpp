@@ -7,6 +7,35 @@
 #include "MonsterTest.h"
 #pragma endregion
 
+#pragma region UI
+#include "Custom_UI.h"
+#include "UI_Button.h"
+#include "UI_Image.h"
+#include "UI_Text.h"
+#include "Animator_UI.h"
+#include "UI_HUD.h"
+#pragma endregion
+
+
+#pragma region PLAYER
+
+#include "StateMachine.h"
+
+// Augusta
+#include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
+#include "AugustaGriffon.h"
+#include "Augusta.h"
+
+// Rover
+#include "RoverSword.h"
+#include "Rover.h"
+
+// Player
+#include "Player.h"
+#pragma endregion
+
+
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
 {
@@ -21,9 +50,11 @@ HRESULT CLoader_GamePlay::Initialize()
 	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
+	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
 
     return S_OK;
 }
@@ -63,16 +94,257 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 HRESULT CLoader_GamePlay::Load_Player()
 {
+	// Controller 초기화
+	_wstring wstrControllerTag = L"Prototype_Component_PlayerController";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wstrControllerTag,
+		CInputController::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerInput Controller");
+
+	_wstring wStrControllerTag = TEXT("Prototype_GameObject_Player");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrControllerTag
+		, CPlayer::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
 	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Augusta()
 {
+	_wstring wStrModelTag = L"Prototype_Component_Model_Augusta";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Augusta.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Augusta";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CAugusta::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+#pragma region Parts
+	wStrModelTag = L"Prototype_Component_Model_Augusta_Bayonet";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Bayonet/Bayonet.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Augusta_Bayonet");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CAugustaBayonet::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_SkillWeapon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/SkillWeapon/SkillWeapon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrSkillWeaponTag = TEXT("Prototype_GameObject_Augusta_SkillWeapon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrSkillWeaponTag
+		, CAugustaSkillWeapon::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Augusta_Griffon";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Augusta/Weapon/Griffon/Griffon.dat";
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	_wstring wStrGriffonTag = TEXT("Prototype_GameObject_Augusta_Griffon");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrGriffonTag
+		, CAugustaGriffon::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+#pragma endregion
+
 	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Rover()
 {
+	_wstring wStrModelTag = L"Prototype_Component_Model_Rover";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Rover";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Rover");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CRover::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+#pragma region Parts
+	wStrModelTag = L"Prototype_Component_Model_Rover_Sword";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Sword/Sword.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Sword");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CRoverSword::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+#pragma endregion
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_UI()
+{
+	const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
+
+
+	// ==============================
+	cout << "[CLoader_Test_UI] Texture" << endl;
+	// ==============================
+
+	vector<CCustom_UI::CUSTOM_UITREE_DESC> vecDescs = {};       // parsed data from json
+
+	// * Json Parse                 // for pre-loading textures
+	// UI_HUD
+	//_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
+	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
+
+	for (auto& treeDesc : vecDescs)
+	{
+		for (auto& infoDesc : treeDesc.vecUIInfoDescs)
+		{
+			const   _wstring    strFilePath = infoDesc.tUIDesc.strFilePath;
+			const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
+			const   _uint       iNumFiles = infoDesc.tUIDesc.iNumFiles;
+
+			if (strFileName == L"T_JiabeilinaEnergyBgCombined")
+				int i = 10;
+
+			infoDesc.tUIDesc.strFilePath;
+			if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
+				CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
+				OutputDebugString(L"[CLoader_Test_UI::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+		}
+	}
+
+	// ==============================
+	cout << "[CLoader_Test_UI] Model" << endl;
+	// ==============================
+	// 
+	// VIBuffer_Rect
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+
+	// VIBuffer_Rect_Instance_UI
+	CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
+	tRectInstDesc.iNumInstance = 500U;
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
+		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
+
+
+	// ==============================
+	cout << "[CLoader_Test_UI] Shader" << endl;
+	// ==============================
+
+	// Shader
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader Load Failed. The Shader may have already been loaded.\n");
+
+	// Shader_Instance
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
+
+	// ==============================
+	cout << "[CLoader_Test_UI] Object" << endl;
+	// ==============================
+
+	// * Components Load
+	// Animator_UI
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
+		CAnimator_UI::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
+
+
+
+	// * Objects Load
+	// Custom UI
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button",
+		CUI_Button::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test_UI:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image",
+		CUI_Image::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
+		CUI_Text::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
+
+
+	// ==============================
+	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
+	// ==============================
+
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
+		CUI_HUD::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_MonsterTest()
@@ -102,6 +374,30 @@ HRESULT CLoader_GamePlay::Load_MonsterTest()
 		CRASH("MonsterTest Prototype Create Failed");
 	return S_OK;
 }
+
+
+
+
+
+
+
+CCustom_UI::CUSTOM_UITREE_DESC CLoader_GamePlay::Load_UITree(_string strFilePath)
+{
+	ifstream file(strFilePath);
+	json jUIInfoData = {};
+	if (file.is_open()) {
+		file >> jUIInfoData;
+	}
+	else
+		CRASH("File Open Failed.");
+
+	CCustom_UI::CUSTOM_UITREE_DESC tDesc = {};
+	from_json(jUIInfoData, tDesc);
+
+	return tDesc;
+}
+
+
 
 CLoader_GamePlay* CLoader_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

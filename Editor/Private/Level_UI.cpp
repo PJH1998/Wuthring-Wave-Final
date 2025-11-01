@@ -961,6 +961,10 @@ void CLevel_UI::Update_Inspector()
         isInverseScreenDiscard = tDesc.isInverseScreenDiscard;
         fCutout = tDesc.fCutout;
 
+        vSectorBorder = tDesc.vSectorBorder;
+        fUIScale = tDesc.fUIScale;
+
+
         ImGui::Text("UI Name");
         ImGui::InputText("##UI Name", szUIName, 256);
 

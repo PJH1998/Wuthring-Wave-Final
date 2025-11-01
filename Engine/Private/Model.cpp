@@ -96,18 +96,13 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 	_matrix matWorld = pOwnerTransform->Get_WorldMatrix();
 	_matrix ResultMatrix = m_RootMatrix * pOwnerTransform->Get_WorldMatrix();
 
-	
-
 	/*_vector vScale, vRotation, vPosition;
 	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);*/
 
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
+
+
 }
-
-
-
-
-
 
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 {
@@ -324,7 +319,7 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
 	// 다른 Animation 들어올 시, 이전 Animation 저장
 	//if (m_strPreAnimation != strAnimationName)
@@ -367,7 +362,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 
 		// Root Node Translation 조정
 		if (true == isRootMotion)
-			Compute_RootAnimation(fRootMotionRate);
+			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
 	}
 
 
@@ -499,15 +494,14 @@ void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
 	_float3 vCenter = {};
 	_float3 vExtends = {};
-	vCenter.x = (pMaxPos[0] + pMinPos[0]) / 2.f;
-	vCenter.y = (pMaxPos[1] + pMinPos[1]) / 2.f;
-	vCenter.z = (pMaxPos[2] + pMinPos[2]) / 2.f;
+	vCenter.x = (pMaxPos[0] + pMinPos[0]) * 0.5f;
+	vCenter.y = (pMaxPos[1] + pMinPos[1]) * 0.5f;
+	vCenter.z = (pMaxPos[2] + pMinPos[2]) * 0.5f;
 
-	vExtends.x = (pMaxPos[0] - pMinPos[0]) / 2.f;
-	vExtends.y = (pMaxPos[1] - pMinPos[1]) / 2.f;
-	vExtends.z = (pMaxPos[2] - pMinPos[2]) / 2.f;
+	vExtends.x = (pMaxPos[0] - pMinPos[0]) * 0.5f;
+	vExtends.y = (pMaxPos[1] - pMinPos[1]) * 0.5f;
+	vExtends.z = (pMaxPos[2] - pMinPos[2]) * 0.5f;
 	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
-
 }
 
 BoundingBox* CModel::Get_BoundingBox()

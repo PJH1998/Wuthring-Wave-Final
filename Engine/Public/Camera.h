@@ -41,6 +41,8 @@ protected:
 
 	_float							m_fDistance = {};
 
+	_float4x4						m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
+
 protected:
 	void							Lerp_Distance(_float fTimeDelta);
 	void							Key_Move(_float fTimeDelta);

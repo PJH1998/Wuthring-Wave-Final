@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "RoverSword.h"
+#include "RoverFactory.h"
 
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -38,16 +39,18 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
-	// 임시.
-	m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Stand1", 0.f, &m_fTrackPosition);
+	CRoverFactory::Register_States(m_pStateMachineCom, this);
 
     // 초기 State 설정.
-  /*  m_StateContext.m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+    m_StateContext.m_eIdleType = ERoverIdleType::STAND1;
     m_pStateMachineCom->Change_State(static_cast<_uint>(EStateCategory::GROUND),
-        static_cast<_uint>(ERoverGroundState::IDLE));*/
+        static_cast<_uint>(ERoverGroundState::IDLE));
     
     m_pColliderCom->Set_Gravity(true);
     
+	// 비활성화. 
+	m_pRoverSword->SetActivate(false);
+
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
@@ -56,6 +59,7 @@ void CRover::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -78,21 +82,14 @@ void CRover::Update(_float fTimeDelta)
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
 
-
-
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
-
 
     // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 5. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 2.5f);
-
-
-
-
+    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
     // 6. 파츠 갱신.?
     for (auto& pPart : m_PartObjects)
@@ -114,11 +111,9 @@ void CRover::Late_Update(_float fTimeDelta)
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
     // Collider 충돌 처리후 위치에 맞춘다.
-    
-    
 
     // 사용이 끝났으면 반환.
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
     
@@ -155,6 +150,8 @@ void CRover::Render()
 void CRover::Render_Shadow()
 {
 }
+
+
 
 // AnimName이 같은걸로 매핑되어있음.
 void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)

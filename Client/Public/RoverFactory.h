@@ -5,7 +5,7 @@ NS_BEGIN(Client)
 class CRoverFactory final : public CBase
 {
 public:
-	static void Register_States(class CStateMachine* pStateMachineCom, class CAugusta* pPlayer);
+	static void Register_States(class CStateMachine* pStateMachineCom, class CRover* pCharacter);
 };
 NS_END
 

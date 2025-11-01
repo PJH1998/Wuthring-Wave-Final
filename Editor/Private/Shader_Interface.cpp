@@ -16,7 +16,11 @@ void CShader_Interface::Update_Shadow()
 {
 	Set_ShadowBias();
 	Setting_LUT();
+#ifdef _DEBUG
 	Set_SSAO();
+#endif // _DEBUG
+
+
 }
 
 void CShader_Interface::Setting_Shader()
@@ -160,15 +164,15 @@ void CShader_Interface::Setting_Shader()
 		}
 
 #ifdef _DEBUG
-
-
 		m_pGameInstance->SetMaxEffectIntensity(m_fEffectIntensity);
 		m_pGameInstance->SetDof(m_fFocusDepth, m_fFocusRange, m_fDofDepthScale);
 #endif
 	}
 
+
 	if (ImGui::CollapsingHeader("PBR"))
 	{
+#ifdef _DEBUG
 		if (ImGui::Button("STYLIZED"))
 			m_pGameInstance->SetPBR(true);
 
@@ -176,6 +180,18 @@ void CShader_Interface::Setting_Shader()
 
 		if (ImGui::Button("DEFAULT"))
 			m_pGameInstance->SetPBR(false);
+#endif // _DEBUG
+		
+
+
+		ImGui::DragFloat("ROUGHNESS", &m_fRoughness, 0.01f, 0.1f, 1.f);
+
+		ImGui::DragFloat("METALLIC", &m_fMetallic, 0.01f, 0.f, 1.f);
+
+#ifdef _DEBUG
+		m_pGameInstance->Set_Metallic(m_fMetallic);
+		m_pGameInstance->Set_Roughness(m_fRoughness);
+#endif
 	}
 	
 #pragma endregion
@@ -220,13 +236,15 @@ void CShader_Interface::Set_ShadowBias()
 	ImGui::End();
 }
 
+#ifdef _DEBUG
+
 void CShader_Interface::Set_SSAO()
 {
 	ImGui::Begin("SSAO");
 
-	if(ImGui::Button("SSAO_ON"))
+	if (ImGui::Button("SSAO_ON"))
 		m_pGameInstance->IsSSAO(true);
-	
+
 	ImGui::SameLine();
 
 	if (ImGui::Button("SSAO_OFF"))
@@ -242,13 +260,15 @@ void CShader_Interface::Set_SSAO()
 
 
 	ImGui::InputFloat("RADIUS", &m_fRadius);
-	
+
 	ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
-	
+
 	m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
 
 	ImGui::End();
 }
+
+#endif // _DEBUG
 
 void CShader_Interface::Setting_Bias(const _char* pName, _float* pFloat)
 {
