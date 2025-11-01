@@ -33,13 +33,16 @@ public:
 	// Set Pos
 	void								Set_Position(const _fvector& vPos) { m_pCharacterVirtual->SetPosition(LoadVec3(vPos)); }
 
-	_vector								Get_Position() const
+	_vector							Get_Position() const
 	{
 		Vec3 vPos = m_pCharacterVirtual->GetPosition();
 		return XMVectorSet(vPos.GetX(), vPos.GetY(), vPos.GetZ(), 1.f);
 	}
 
 	void								Set_Offset(const _float3 vOffset);
+
+	void								IsActivate(_bool isActive);
+
 public:
 	virtual		HRESULT				Initialize_Prototype() override;
 	virtual		HRESULT				Initialize_Clone(void* pArg) override;
@@ -49,6 +52,8 @@ public:
 private:
 	Ref<CharacterVirtual>		m_pCharacterVirtual = { nullptr };
 	COLLISION_DATA				m_tCollisionData = {};
+	BodyInterface*					m_pBodyInterface = { nullptr };
+	BodyID							m_BodyID = {};
 
 	_uint								m_iCollisionLayer = {};
 

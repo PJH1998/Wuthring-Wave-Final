@@ -271,13 +271,13 @@ void CEdit_MapObject::Set_ImGuiOption()
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
     const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
-    if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
+	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
-        for (_uint i = 0; i < CEdit_MapObject::OBJECTTYPE::END; ++i)
+		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
         {
             if (ImGui::Selectable(pObejceTType[i]))
             {
-                m_eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(i);
+                m_eObjectType = static_cast<OBJECTTYPE>(i);
             }
         }
         ImGui::EndCombo();
@@ -316,7 +316,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
 HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
-    m_pGameInstance->Wait_Thread_End();
+    //m_pGameInstance->Wait_Thread_End();
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
     m_iLevel = pDesc->iLevel;
@@ -343,24 +343,26 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
             CRASH("FAILED");
 
     }
-    m_pGameInstance->Wait_Thread_End();
+    //m_pGameInstance->Wait_Thread_End();
 
     if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
     
-    //CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-    //RigidbodyDesc.eShape = SHAPE::MESH;
-    //XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-    //RigidbodyDesc.eType = EMotionType::Static;
-    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-    //RigidbodyDesc.pModel = m_pModelComArray[0];
+	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+	RigidbodyDesc.eShape = SHAPE::MESH;
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	RigidbodyDesc.eType = EMotionType::Static;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	RigidbodyDesc.pModel = m_pModelComArray[0];
 
-    //Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-    //    TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
     m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
-    m_pGameInstance->Wait_Thread_End();
+    //m_pGameInstance->Wait_Thread_End();
     m_pModelCom = m_pModelComArray[0];
     return S_OK;
 }

@@ -173,7 +173,7 @@ public:
 	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
@@ -200,9 +200,15 @@ public:
 	const _float4x4*		Get_TransformState_Float4x4_Inv(D3DTS eState) const;
 	_matrix					Get_TransformState_Matrix_Inv(D3DTS eState) const;
 
+	const _float4x4*		Get_PrevTransformState_Float4x4(D3DTS eState) const;
+	_matrix					Get_PrevTransformState_Matrix(D3DTS eState) const;
+
 	void					Set_TransformState(D3DTS eState, _fmatrix Matrix);
 	void					Set_TransformState(D3DTS eState, const _float4x4& Matrix);
 
+	void					Set_PrevTransformState(D3DTS eState, _fmatrix Matrix);
+	void					Set_PrevTransformState(D3DTS eState, const _float4x4& Matrix);
+	
 	const _float4*			Get_CamPos() const;
 	_float					Compute_Distance_ToCam(class CGameObject* pObject);
 #pragma endregion

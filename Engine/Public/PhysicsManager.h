@@ -44,13 +44,10 @@ public:
 	// Character 생성
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	// CharacterVirtual 생성
-	Ref<CharacterVirtual>	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Ref<CharacterVirtual>	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
-
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
-
-	void					Clear_Resource();
 
 public:
 	HRESULT			Initialize(_uint iNumObjectLayer);

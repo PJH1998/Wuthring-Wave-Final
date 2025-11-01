@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include"StaticObject.h"
 
-
 NS_BEGIN(Engine)
 class CModel;
 class CShader;
@@ -14,8 +13,6 @@ NS_BEGIN(Editor)
 class CEdit_MapObject : public CStaticObject
 {
 public:
-	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, END };
-		
 	typedef struct tagMapLoad
 	{
 		_char ModelName[MAX_PATH] = {};
@@ -147,7 +144,7 @@ protected:
 
 
 	_uint m_iLevel = {};
-	OBJECTTYPE m_eObjectType = { END };
+	OBJECTTYPE m_eObjectType = { OBJECTTYPE::END };
 protected:
 	static _uint g_iNumObjects;
 

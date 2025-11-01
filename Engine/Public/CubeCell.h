@@ -7,14 +7,14 @@ class CCubeCell final : public CBase
 {
 public:
 	enum class CORNER {
-		LFD,	// Left Forward Down
-		RFD,	// Right Forward Down
-		RFU,	// Right Forward Up
+		LBU,	// Left Backward Up
+		RBU,	// Right Backward Up
 		LFU,	// Left Forward Up
+		RFU,	// Right Forward Up
 		LBD,	// Left Backward Down
 		RBD,	// Right Backward Down
-		RBU,	// Right Backward Up
-		LBU,	// Left Backward Up
+		LFD,	// Left Forward Down
+		RFD,	// Right Forward Down
 		END
 	};
 

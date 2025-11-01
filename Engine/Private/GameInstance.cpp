@@ -552,9 +552,9 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
-Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut)
 {
-    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData, pOut);
 }
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
@@ -601,6 +601,16 @@ _matrix CGameInstance::Get_TransformState_Matrix_Inv(D3DTS eState) const
 	return m_pPipeLine->Get_TransformState_Matrix_Inv(eState);
 }
 
+const _float4x4* CGameInstance::Get_PrevTransformState_Float4x4(D3DTS eState) const
+{
+	return m_pPipeLine->Get_PrevTransformState_Float4x4(eState);
+}
+
+_matrix CGameInstance::Get_PrevTransformState_Matrix(D3DTS eState) const
+{
+	return m_pPipeLine->Get_PrevTransformState_Matrix(eState);
+}
+
 void CGameInstance::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 {
 	m_pPipeLine->Set_TransformState(eState, Matrix);
@@ -609,6 +619,16 @@ void CGameInstance::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 void CGameInstance::Set_TransformState(D3DTS eState, const _float4x4& Matrix)
 {
 	m_pPipeLine->Set_TransformState(eState, Matrix);
+}
+
+void CGameInstance::Set_PrevTransformState(D3DTS eState, _fmatrix Matrix)
+{
+	m_pPipeLine->Set_PrevTransformState(eState, Matrix);
+}
+
+void CGameInstance::Set_PrevTransformState(D3DTS eState, const _float4x4& Matrix)
+{
+	m_pPipeLine->Set_PrevTransformState(eState, Matrix);
 }
 
 const _float4* CGameInstance::Get_CamPos() const

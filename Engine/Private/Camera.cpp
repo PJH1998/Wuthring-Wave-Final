@@ -58,8 +58,20 @@ void CCamera::Render()
 
 void CCamera::Update_Matrix()
 {
-	m_pGameInstance->Set_TransformState(D3DTS::VIEW, m_pTransformCom->Get_WorldMatrix_Inv());
-	m_pGameInstance->Set_TransformState(D3DTS::PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar));
+	m_pGameInstance->Set_PrevTransformState(D3DTS::VIEW, m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::VIEW)]);
+	m_pGameInstance->Set_PrevTransformState(D3DTS::PROJ, m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::PROJ)]);
+
+	_matrix CurViewMatrix = m_pTransformCom->Get_WorldMatrix_Inv();
+	_matrix CurProjMatrix = XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar);
+
+	m_pGameInstance->Set_TransformState(D3DTS::VIEW, CurViewMatrix);
+	m_pGameInstance->Set_TransformState(D3DTS::PROJ, CurProjMatrix);
+
+	XMStoreFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::VIEW)], CurViewMatrix);
+	XMStoreFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::PROJ)], CurProjMatrix);
+
+	//m_pGameInstance->Set_TransformState(D3DTS::VIEW, m_pTransformCom->Get_WorldMatrix_Inv());
+	//m_pGameInstance->Set_TransformState(D3DTS::PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar));
 }
 
 void CCamera::Key_Move(_float fTimeDelta)
