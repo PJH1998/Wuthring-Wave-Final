@@ -307,6 +307,7 @@
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Map_Object_Destruction_Piece.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -448,6 +449,7 @@
     <ClCompile Include="..\Private\Map_Object_Destruction.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Map_Object_Destruction_Piece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

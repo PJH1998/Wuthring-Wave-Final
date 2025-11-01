@@ -68,6 +68,7 @@ private:
 
 	_string m_CurrentObjectMode;
 	_uint m_eObjectType = {};
+	mutex m_Mutex;
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

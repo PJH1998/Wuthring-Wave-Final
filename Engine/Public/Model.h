@@ -90,6 +90,10 @@ public:
 
 	void								Ready_BoundingBox(_float* pMinPos, _float* pMaxPos);
 	BoundingBox*							Get_BoundingBox();
+
+	_uint								Get_BoneSize() { return  m_Bones.size(); }
+	const _float4x4*					Get_BoneMatrixPtr(_uint iBoneIndex);
+	void								Update_BoneMatrix_Map();
 private:
 	MODELTYPE							m_eType = { MODELTYPE::NONANIM };
 
