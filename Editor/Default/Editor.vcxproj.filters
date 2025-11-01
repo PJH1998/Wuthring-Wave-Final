@@ -307,12 +307,13 @@
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction.h">
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_TriggerBox.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -451,12 +452,13 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction.cpp">
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

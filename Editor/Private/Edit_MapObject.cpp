@@ -270,7 +270,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-    const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" };
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -316,55 +316,59 @@ void CEdit_MapObject::Set_ImGuiOption()
 
 HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
-    //m_pGameInstance->Wait_Thread_End();
-    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	//m_pGameInstance->Wait_Thread_End();
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-    m_iLevel = pDesc->iLevel;
-    
-    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-    _tchar Name[MAX_PATH] = {};
+	m_iLevel = pDesc->iLevel;
 
-    MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
-    lstrcat(Model, Name);
-    _uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
-    
-    m_pModelComArray.resize(V);
+	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+	_tchar Name[MAX_PATH] = {};
 
-    for (_uint i = 0; i < V; ++i)
-    {
-        _wstring ModelCom = Model;
-        ModelCom.pop_back();
-        ModelCom += to_wstring(i);
-        
-        _char ModelName[MAX_PATH] = {};
-        sprintf_s(ModelName, "Com_Model%d", i);
-        if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
-            StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-            CRASH("FAILED");
+	MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
+	lstrcat(Model, Name);
+	_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 
-    }
-    //m_pGameInstance->Wait_Thread_End();
+	m_pModelComArray.resize(V);
 
-    if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
-        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-        return E_FAIL;
-    
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.pModel = m_pModelComArray[0];
+	for (_uint i = 0; i < V; ++i)
+	{
+		_wstring ModelCom = Model;
+		ModelCom.pop_back();
+		ModelCom += to_wstring(i);
 
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+		_char ModelName[MAX_PATH] = {};
+		sprintf_s(ModelName, "Com_Model%d", i);
+		if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
+			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+			CRASH("FAILED");
 
-    m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
-    //m_pGameInstance->Wait_Thread_End();
-    m_pModelCom = m_pModelComArray[0];
-    return S_OK;
+	}
+	//m_pGameInstance->Wait_Thread_End();
+
+	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		return E_FAIL;
+
+
+	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	{
+		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::MESH;
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		RigidbodyDesc.eType = EMotionType::Static;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.pModel = m_pModelComArray[0];
+
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	}
+
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
+	//m_pGameInstance->Wait_Thread_End();
+	m_pModelCom = m_pModelComArray[0];
+	return S_OK;
 }
 
 void CEdit_MapObject::Bind_Resources()

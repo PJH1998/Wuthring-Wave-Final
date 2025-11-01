@@ -62,6 +62,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 			for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 				if (entry2.path().string().find("MapData") != std::string::npos)
 					continue;
+
 				if (entry2.path().string().find("Test") != std::string::npos)
 					continue;
 
@@ -74,11 +75,11 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				_string Path = entry2.path().string();
 				_string Prototype = entry2.path().stem().string();
 				//파서 수정중
-				if (entry2.path().string().find("Instance") == std::string::npos)
+				if (entry2.path().string().find("Bone") != std::string::npos)
 				{
 					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
+							CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, ModelPath.c_str()))))
 							CRASH("Prototype Create Failed");
 						});
 				}
@@ -87,6 +88,15 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					m_pGameInstance->Add_Work([=, Model = InstancePrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), Model,
 							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, ModelPath.c_str()))))
+							CRASH("Prototype Create Failed");
+						});
+				}
+				else
+					//if (entry2.path().string().find("Instance") == std::string::npos)
+				{
+					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
+							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 							CRASH("Prototype Create Failed");
 						});
 				}
@@ -145,6 +155,49 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	{
 		return;
 	}
+	//else if (pFilePath.find("Destruction") != std::string::npos)
+	//{
+	//	//continue;
+	//	_uint NameLength;
+
+	//	_matrix PreTransformMatrix = XMMatrixIdentity();
+	//	_float fSize = 0.01f;
+	//	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+	//	CMapObject_Destruction::MAP_LOAD Desc{};
+
+	//	while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+	//	{
+	//		memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+	//		File.read(Desc.ModelName, NameLength);
+	//		_string Name = Desc.ModelName;
+
+	//		File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+	//		File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+	//		_float4x4 Matrix = {};
+	//		File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+	//		Desc.WorldMatrix = &Matrix;
+	//		Desc.iLevel = m_iLevel;
+
+	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
+	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
+
+	//		m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
+	//			eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix,
+	//			vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower]() mutable {
+	//			CMapObject_Destruction::MAP_LOAD pDesc{};
+	//			strcpy_s(pDesc.ModelName, ModelName.c_str());
+	//			pDesc.iShaderPassIndex = ShaderPass;
+	//			pDesc.eObjectType = eObjectType;
+	//			pDesc.WorldMatrix = &Matrix;
+	//			pDesc.iLevel = ENUM_CLASS(eLevel);
+	//			pDesc.m_vImpulsePos = vImpulsePos;
+	//			pDesc.m_vImpulsePower = vImpulsePower;
+	//			m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+	//				, PROTOTYPE::GAMEOBJECT, &pDesc);
+	//			});
+	//	}
+	//}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};
@@ -157,7 +210,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(Desc.ModelName, NameLength);
 
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
 			_float4x4 Matrix = {};
 			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 			Desc.WorldMatrix = &Matrix;

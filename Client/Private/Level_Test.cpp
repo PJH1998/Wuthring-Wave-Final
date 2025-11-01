@@ -246,7 +246,7 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 			File.read(Desc.ModelName, NameLength);
 
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
 			_float4x4 Matrix = {};
 			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 			Desc.WorldMatrix = &Matrix;
