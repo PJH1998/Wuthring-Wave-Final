@@ -143,6 +143,10 @@ void CShader_Interface::Setting_Shader()
 #ifdef _DEBUG
 			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::BLUR);
 #endif
+		if (ImGui::Button("MOTION ON"))
+#ifdef _DEBUG
+			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::MOTION);
+#endif
 		if(ImGui::Button("OFF"))
 #ifdef _DEBUG
 			m_pGameInstance->End_ScreenEffect();

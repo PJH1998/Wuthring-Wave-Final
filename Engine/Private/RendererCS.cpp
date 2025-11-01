@@ -52,6 +52,14 @@ void CRendererCS::Add_SRVData(const _char* pConstantName, ID3D11ShaderResourceVi
 	m_SRVs.push_back(Data);
 }
 
+void CRendererCS::Add_SamplerState(_uint iSlotIndex, ID3D11SamplerState* pSampler)
+{
+	if (nullptr == pSampler)
+		CRASH("Failed Set Sampler");
+
+	m_Samplers.emplace(iSlotIndex, pSampler);
+}
+
 ID3D11ShaderResourceView* CRendererCS::Get_SRV(_uint iMipLevel)
 {
 	if (iMipLevel >= m_iMipLevels)
@@ -70,7 +78,7 @@ HRESULT CRendererCS::Initialize(void* pDesc)
 	ASSERT_CRASH(m_pComputeShader);
 
 	m_fWidht = static_cast<_float>( pRCS_Desc->iWidth);
-	m_fHeight = static_cast<_float>( pRCS_Desc->iHeight );
+	m_fHeight = static_cast<_float>( pRCS_Desc->iHeight);
 	m_fDefinitionX = pRCS_Desc->fDefinitionX;
 	m_fDefinitionY = pRCS_Desc->fDefinitionY;
 	m_vClearColor = pRCS_Desc->vClearColor;
@@ -94,14 +102,14 @@ void CRendererCS::Bind_Resources(_uint iMipLevel)
 	for (auto& SRV : m_SRVs)
 		m_pComputeShader->Set_SRV(SRV.first, SRV.second);
 
+	for (auto& Pair : m_Samplers)
+		m_pComputeShader->Set_Sampler(Pair.first, Pair.second);
+
 	m_pComputeShader->Set_UAV(m_UAV.first, m_UAV.second[iMipLevel]);
 }
 
-void CRendererCS::Dispatch(_uint iMipLevel)
+void CRendererCS::Dispatch(_uint iWidth, _uint iHeight)
 {
-	_uint iWidth = static_cast<_uint>(m_fWidht) >> iMipLevel;
-	_uint iHeight = static_cast<_uint>( m_fHeight ) >> iMipLevel;
-
 	m_pComputeShader->Dispatch(static_cast<_uint>(( iWidth + m_fDefinitionX -1.f) / m_fDefinitionX) , static_cast<_uint>(( iHeight + m_fDefinitionY - 1.f ) / m_fDefinitionY), 1);
 
 	Clear_Resource();

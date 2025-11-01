@@ -26,7 +26,7 @@ public:
     void Set_SRV(const string& strName, ID3D11ShaderResourceView* pSRV);
     void Set_UAV(const string& strName, ID3D11UnorderedAccessView* pUAV);
     void Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB);
-
+	void Set_Sampler(_uint iSlotIndex, ID3D11SamplerState* pSampler);
     // 
     void Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ);
 
@@ -47,10 +47,10 @@ private:
     map<string, _uint>          m_CB_BindPoints;
 
     // 
-    map<_uint, ID3D11ShaderResourceView*>    m_SRVs_To_Bind;
-    map<_uint, ID3D11UnorderedAccessView*>   m_UAVs_To_Bind;
-    map<_uint, ID3D11Buffer*>                m_CBs_To_Bind; 
-
+    map<_uint, ID3D11ShaderResourceView*>   m_SRVs_To_Bind;
+    map<_uint, ID3D11UnorderedAccessView*>  m_UAVs_To_Bind;
+    map<_uint, ID3D11Buffer*>               m_CBs_To_Bind; 
+	map<_uint, ID3D11SamplerState*>			m_SAMPLERs_To_Bind;
 public:
     static CComputeShader* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath, const SHADER_MACRO& eShaderMacro, _string strEntryPoint);
     virtual		CComponent* Clone(void* pArg) override;

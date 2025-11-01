@@ -100,6 +100,9 @@ void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
     OutputTexture[DTID.xy] = vColorY;
 }
 
+
+/* ------------------------------------DOF------------------------------------ */
+
 Texture2D<float4> DepthTexture : register(t1);
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
@@ -212,4 +215,189 @@ void DOF_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
     }
     
     OutputTexture[DTID.xy] = vColorY / fTotalWeight;
+}
+
+/* ------------------------------------MOTION-BLUR------------------------------------ */
+
+Texture2D<float4> VelocityMap : register(t2);
+
+SamplerState CS_DefaultSampler : register(s0);
+
+float3 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
+{
+    float3 vVelocity = 0.f;
+    
+    int iSampleX0 = min(vIndex.x, vVelocitySize.x - 1);
+    int iSampleX1 = min(vIndex.x + 1, vVelocitySize.x - 1);
+    
+    int iSampleY0 = min(vIndex.y, vVelocitySize.y - 1);
+    int iSampleY1 = min(vIndex.y + 1, vVelocitySize.y - 1);
+    
+    float3 Vector[4];
+    
+    Vector[0] = VelocityMap.Load(int3(iSampleX0, iSampleY0, 0)).xyz;
+    Vector[1] = VelocityMap.Load(int3(iSampleX1, iSampleY0, 0)).xyz;
+    Vector[2] = VelocityMap.Load(int3(iSampleX0, iSampleY1, 0)).xyz;
+    Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0)).xyz;
+   
+    float fMaxLength = 0.f;
+    
+    for (int i = 0; i < 4; ++i)
+    {
+        float fLength = length(Vector[i].xy);
+        
+        if(fLength == 0.f)
+            return 0.f;
+            
+        if(fLength > fMaxLength)
+        {
+            fMaxLength = fLength;
+            vVelocity = Vector[i];
+        }
+    }
+   
+    return vVelocity;
+}
+
+float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
+{
+    int2 iIndex = DTID.xy * 2;
+    
+    float3 vVelocity = Compute_Velocity(iIndex, vOutSize);
+    
+    float2 vDir = normalize(vVelocity.xy);
+    
+    float fVelocityLength = length(vVelocity.xy);
+    
+    float2 vTexcoord = (float2) DTID.xy / (float2) vInSize;
+    
+    if (fVelocityLength <= 10.f)
+        return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+    
+    //float fVelocityWeight = 16.f * smoothstep(0.2f, 1.f, fVelocityLength);
+    
+    ////Test
+    //fVelocityWeight *= smoothstep(200.f, 0.f, vVelocity.z);
+    
+    //int iMotionRadius = ceil(fVelocityWeight);
+    
+    //if(iMotionRadius <= 0)
+    //    return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+    
+    float fGaussianSigma = (float) 16.f / 3.f;
+    
+    float4 vColor = 0.f;
+    float fTotalWeight = 0.f;
+    
+    for (int i = 1; i <= 16; ++i)
+    {
+        
+        float2 vOffset = vDir * fVelocityLength * (i / 16);
+        
+        //float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0).y;
+        
+        //if(fSampleDepth < vVelocity.z)
+        //    continue;
+            
+        float4 vSampleColor = InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0);
+        
+        float fGaussianWeight = exp(-(i * i) / (2.f * fGaussianSigma * fGaussianSigma));
+       
+        vColor += vSampleColor * fGaussianWeight;
+        fTotalWeight += fGaussianWeight;
+    }
+    
+    float4 vFinalColor = 0.f;
+    
+    if(fTotalWeight > 0.f)
+        vFinalColor = vColor / fTotalWeight; 
+    else
+        vFinalColor = InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+   
+   vFinalColor.a = 1.f;
+    
+    return vFinalColor;
+}
+
+
+groupshared float4 vSharedMotionColor[THREAD_Y + 1][THREAD_X + 1];
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void Motion_Blur(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+{
+    int2 vInSize;
+    InputTexture.GetDimensions(vInSize.x, vInSize.y);
+    
+    int2 vOutSize;
+    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    
+    vSharedMotionColor[GTID.y][GTID.x] = ComputeMotionBlur(DTID, vInSize, vOutSize);
+
+    if (GTID.y  == THREAD_Y - 1)
+    {
+        int3 OffsetID = int3(DTID.x, DTID.y + 1, 0);
+        if (OffsetID.y >= (int) vInSize.y)
+            OffsetID.y = (int) vInSize.y - 1;
+            
+        vSharedMotionColor[GTID.y + 1][GTID.x] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    }
+    
+    if (GTID.x >= THREAD_X - 1)
+    {
+        int3 OffsetID = int3(DTID.x + 1, DTID.y, 0);
+        if (OffsetID.x >= (int) vInSize.x)
+            OffsetID.x = (int) vInSize.x - 1;
+            
+        vSharedMotionColor[GTID.y][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    }
+    
+    if (GTID.x >= THREAD_X - 1 && GTID.y >= THREAD_Y -1 )
+    {
+        int3 OffsetID = int3(DTID.x + 1, DTID.y + 1, 0);
+        
+        if (OffsetID.x >= (int) vInSize.x)
+            OffsetID.x = (int) vInSize.x - 1;
+            
+        if (OffsetID.y >= (int) vInSize.y)
+            OffsetID.y = (int) vInSize.y - 1;
+            
+        vSharedMotionColor[GTID.y + 1][GTID.x + 1] = ComputeMotionBlur(OffsetID, vInSize, vOutSize);
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+    
+    
+    for (int i = 0; i < 4; i++)
+    {   
+        int2 OutIndex = DTID.xy * 2;
+        float2 vTexcoord = float2(GTID.xy);
+        
+        int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
+        
+        OutIndex += Offset;
+        
+        vTexcoord += Offset;
+    
+        float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
+    
+        int2 iLowID = (int2) floor(vLowPos);
+        float2 fFrac = vLowPos - (float2) iLowID;
+        
+        float4 vColor = 0.f;
+       
+        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X); //min(iLowID.x, THREAD_X + 1);
+        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X); //min(iLowID.x + 1, THREAD_X + 1);
+    
+        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y); //min(iLowID.y, THREAD_Y + 1);
+        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y); //min(iLowID.y + 1, THREAD_Y + 1);
+       
+        float4 vLT = vSharedMotionColor[iSampleY0][iSampleX0];
+        float4 vRT = vSharedMotionColor[iSampleY0][iSampleX1];
+        float4 vLB = vSharedMotionColor[iSampleY1][iSampleX0];
+        float4 vRB = vSharedMotionColor[iSampleY1][iSampleX1];
+    
+        vColor = lerp(lerp(vLT, vRT, fFrac.x), lerp(vLB, vRB, fFrac.x), fFrac.y);
+        
+        OutputTexture[OutIndex] = vColor;
+    }
 }
