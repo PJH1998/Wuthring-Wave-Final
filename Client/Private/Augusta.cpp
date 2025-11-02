@@ -52,6 +52,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pGriffon->SetActivate(false);
 	m_pWing->SetActivate(false);
     
+	
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
@@ -143,7 +144,7 @@ void CAugusta::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-		if (FAILED(m_pShaderCom->Begin(2)))
+		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
 			CRASH("Ready Shader Begin Failed");
         //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
         //    CRASH("Ready Shader Begin Failed");
@@ -394,7 +395,7 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA);
 }
 
 void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)

@@ -261,7 +261,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_NORMALTEX();
     }
 
-    pass Augusta
+    pass Augusta // 2
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
@@ -272,7 +272,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_AUGUSTA();
     }
 
-    pass Shadow // 2
+    pass Shadow // 3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
