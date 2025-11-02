@@ -313,6 +313,12 @@
     <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\EditorProp.h">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\EditorPropWeapon.h">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -456,6 +462,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EditorProp.cpp">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EditorPropWeapon.cpp">
+      <Filter>03. GameObject\Actor\Anim</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

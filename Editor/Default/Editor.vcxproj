@@ -176,6 +176,7 @@
     <ClInclude Include="..\public\EditDummy_Wolf.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
+    <ClInclude Include="..\Public\EditorPropWeapon.h" />
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
     <ClInclude Include="..\Public\Editor_Struct.h" />
@@ -207,6 +208,7 @@
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\Public\Editor_Define_UI.h" />
+    <ClInclude Include="..\Public\EditorProp.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
@@ -236,6 +238,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Private\EditorPropWeapon.cpp" />
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
@@ -261,6 +264,7 @@
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\Private\EditorProp.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
