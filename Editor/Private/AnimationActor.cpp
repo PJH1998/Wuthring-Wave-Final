@@ -50,7 +50,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 		m_pParentActor = pDesc->pParentActor;
 		m_pSocketMatrix = m_pParentActor->Get_BoneMatrix(pDesc->strBoneName);
 
-		m_pParentAct  or->Set_ChildActor(this);
+		m_pParentActor->Set_ChildActor(this);
 	}
 
     if (FAILED(Ready_Components(pDesc)))
@@ -228,7 +228,7 @@ void CAnimationActor::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
+        if (FAILED(m_pShaderCom->Begin(1)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
