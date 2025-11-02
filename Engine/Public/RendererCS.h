@@ -28,7 +28,7 @@ private:
 	typedef pair<_string, vector<ID3D11UnorderedAccessView*>> UAV_DATA;
 
 private:
-	CRendererCS(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CRendererCS(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRendererCS() = default;
 
 public:

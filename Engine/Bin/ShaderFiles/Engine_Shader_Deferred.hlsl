@@ -1,5 +1,11 @@
 #include "Engine_Shader_Defines.hlsli"
 #include "Engine_Shader_Function.hlsli"
+
+Texture2DArray<float4> g_LUT_Texture : register(t1);
+
+const int  g_iLutIndex = 0;
+float g_fLutLerpIntensity = 0.f;
+
 float g_fLightFar;
 
 Texture2D g_Texture;
@@ -10,18 +16,21 @@ Texture2D g_NormalTexture;  // Normal
 Texture2D g_DepthTexture;   // (Depth.x = Proj.z / Proj.w) , (Depth.y = Proj.w)
 Texture2D g_PBRTexture;     // (PBR.x = Metallic), (PBR.y = Roughness ), (PBR.z = IsDynamic) 
 
-Texture2DArray<float> g_ShadowMap : register(t2);
+//BackBuffer
+Texture2D g_BackBufferTexture;
 
 //COMBINED
-Texture2D g_ToonRimTexture;     // (ToonRim.x = Shade Color ), (ToonRim.y = Shade Value), (ToonRim.z = Rim Value )
-Texture2D g_EmissiveTexture;
-Texture2D g_DistortionTexture;
+Texture2D g_LightAccTexture;
 Texture2D g_SsaoTexture;        
-Texture2D g_BackBufferTexture;
+
+//Emissive
+Texture2D g_EmissiveTexture;
+
+//Distoriton
+Texture2D g_DistortionTexture;
 
 //BLOOM
 Texture2D g_BloomTexture;
-
 
 //RAMP
 Texture2D g_RampTexture;            // Shade Color
@@ -51,38 +60,37 @@ Texture2D g_BlurTexture;
 Texture2D g_VelocityMap;
 float g_fLimitVelocity;
 
-Texture2DArray<float4> g_LUT_Texture : register(t1);
+//Light
+vector  g_vLightDirection = 0.f;
+vector  g_vLightDiffuse = 1.f;
+vector  g_vLightAmbient = 1.f;
+vector  g_vMtrlAmbient = 0.4f;
+vector  g_vLightPosition;
+float   g_fLightRange; 
+vector  g_vLightSpecular = 1.f;
+vector  g_vMtrlSpecular = 1.f;
 
-const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.f;
-
+//CASCADE
+Texture2DArray<float> g_ShadowMap : register(t2);
 cbuffer CSMDatas : register(b1)
 {
     float4  g_vClipDistances;
     float   g_fLastDistance;
     float3  padding;
 };
-
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
-
-vector g_vLightDirection = 0.f;
-vector g_vLightDiffuse = 1.f;
-vector g_vLightAmbient = 1.f;
-vector g_vMtrlAmbient = { 0.2f, 0.2f, 0.2f, 0.2f };
-vector g_vLightSpecular = 1.f;
-vector g_vMtrlSpecular = 1.f;
-
-
-int g_DebugCSMIndex;
-
 float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
 float4 g_fMinShadowBias = 0.f;
 float g_DebugSlopeScale = 2.f;
 
+int g_DebugCSMIndex;
+
+
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
 
+//SFX
 float g_fEffectIntensity;
 
 //DEBUG
@@ -138,53 +146,26 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 {
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
 
-    // Default Combine
-    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
-        discard;
+    vector vLightResult = g_LightAccTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    Out.vColor = vLightResult;
+    
+    if (any(vPBRDesc.z))
+        return Out;
+        
+    float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
+    Out.vColor *= fSSao;
+        
+///////// Shadow Begin /////////
+
     vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
     vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     float fViewZ = vViewPos.z;
     
     vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-    //vector vRimLight = g_RimLightTexture.Sample(DefaultSampler, In.vTexcoord);
-    vector vToonRim = g_ToonRimTexture.Sample(DefaultSampler, In.vTexcoord);
-    float fSSao = g_SsaoTexture.Sample(DefaultSampler, In.vTexcoord).r;
-    
-    vector vRimColor = vDiffuse;
-    //g_ColorRampTexture.Sample(DefaultSampler, float2(0.5f, (1.f - vToonRim.z)));
-    
-    float fRim = clamp(vToonRim.z, 0.1f, 1.f);
-    
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
-    
-    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
-    
-    float3 vLightDir = g_vLightDirection.xyz * -1.f;
-    
-    if (vPBRDesc.z)
-    {
-        float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-        Out.vColor.xyz = vPBR * (vToonRim.x) + (vRimColor.xyz * fRim);
-    }
-    else
-    {
-        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
-        Out.vColor.xyz = vPBR * fSSao;
-    }
-    
-    Out.vColor.xyz += vDiffuse.xyz * 0.4f; // Ambient
-    
-    Out.vColor.a = 1.f;
-    
-    if (any(vPBRDesc.z))
-        return Out;
-        
-///////// Shadow Begin /////////
 
     int iCascadeIndex = 0;
     
@@ -193,6 +174,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         if (fViewZ > g_vClipDistances[i])
             iCascadeIndex = i;
     }
+   
+    if(fViewZ >= g_fLastDistance)
+        return Out;
    
     float Gradiant = RPB_Gradiant(fViewZ);
     float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
@@ -224,14 +208,17 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
         vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
         
-        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // 직교라 w 나누기 X
- 
-        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
+        if(IsInNDC(vShadowBlendPos))
+        {
+            float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy); // 직교라 w 나누기 X
+        
+            float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
-        fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
-        float fBlendDepth = vShadowBlendPos.z - fBlendBias;
+            fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
+            float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
-        fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_ShadowMap); // 2 == Kernel size
+            fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_ShadowMap); // 2 == Kernel size
+        }
     }
     
     // Current Cascade
@@ -241,24 +228,26 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 
         matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
         vShadowPos = mul(vWorldPos, matShadowLightVP);
-    
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // 직교라 w 나누기 X
+        if (IsInNDC(vShadowPos))
+        {
+            float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // 직교라 w 나누기 X
 
-        float fBias = 0.f;
+            float fBias = 0.f;
         
-        fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
+            fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
 
-        fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
+            fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
     
-        float fDepth = vShadowPos.z - fBias;
-    
-        float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_ShadowMap);
+            float fDepth = vShadowPos.z - fBias;
+        
+            float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_ShadowMap);
 
-        float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
+            float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
 
-        fFinalShadow = saturate(fFinalShadow + 0.3f);
+            fFinalShadow = saturate(fFinalShadow + 0.3f);
     
-        Out.vColor.xyz *= fFinalShadow;
+            Out.vColor.xyz *= fFinalShadow;
+        }
     }
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
@@ -268,36 +257,50 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 
 struct PS_OUT_LIGHT
 {
-    float4 vToonRim : SV_TARGET0;
-    float4 vSpecular : SV_TARGET1;
+    float4 vLightAcc : SV_TARGET0;
 };
 
 PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
     
+    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
+        discard;
+        
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
-
-    float NdotL = dot(normalize(g_vLightDirection.xyz * -1.f), vNormal.xyz);
     
-    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
-
-    Out.vToonRim.x = fToonShade;
-  
     vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
     
     vector vLook = normalize(g_vCamPosition - vWorldPos);
+    
+    float3 vLightDir = g_vLightDirection.xyz * -1.f;
+    
+    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
    
-    vector vRimLight = 0.f;
+    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     
-    vRimLight = 1.f - abs(dot(vNormal, vLook));
+    if (vPBRDesc.z)
+    {
+        float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
+        
+        float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fToonShade + fRimPower);
+    }
+    else
+    {
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
+    }
     
-    vRimLight *= smoothstep(0.2f, 1.f, NdotL);
+    float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+   
+    Out.vLightAcc.xyz += (vAmbientColor * g_vMtrlAmbient).xyz;
     
-    vRimLight = pow(vRimLight, 3.f);
-    
-    Out.vToonRim.z = vRimLight;
+    Out.vLightAcc.a = 1.f;
     
     return Out;
 }
@@ -306,9 +309,49 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
 {
     PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
-
     
+    vector vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    if (vDiffuse.r == 1.f && vDiffuse.g == 0.f && vDiffuse.b == 1.f)
+        discard;
+        
+    vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
+    vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
+    
+    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    
+    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    
+    float3 vLightDir = g_vLightPosition.xyz - vWorldPos.xyz;
+    float fDistance = length(vLightDir);
+    
+    float fAtt = saturate((g_fLightRange - fDistance) / g_fLightRange);
+    
+    vector vPBRDesc = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord);
+   
+    float NdotL = dot(normalize(vLightDir), vNormal.xyz);
+    float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
+    float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
+ 
+    if (vPBRDesc.z)
+    {
+        float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, normalize(vLightDir), vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fToonShade + fRimPower);
+        Out.vLightAcc.xyz *= fAtt;
+    }
+    else
+    {
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
+        Out.vLightAcc.xyz *= fAtt;
+    }
 
+    float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
+   
+    Out.vLightAcc.xyz += (vAmbientColor * g_vLightAmbient).xyz * fAtt;
+    
+    Out.vLightAcc.a = 1.f;
+    
     return Out;
 }
 
