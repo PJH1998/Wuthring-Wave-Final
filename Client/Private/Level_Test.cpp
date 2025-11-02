@@ -83,7 +83,7 @@ HRESULT CLevel_Test::Initialize()
 	ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
 	ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
 
-	CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
+	//CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
 
     return S_OK;
 }
@@ -383,4 +383,5 @@ void CLevel_Test::Free()
 {
     __super::Free();
     Safe_Release(m_pGameSystem);
+	
 }
