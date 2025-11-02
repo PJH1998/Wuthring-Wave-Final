@@ -4,6 +4,7 @@
 #include "MonsterTest.h"
 
 #include "Player.h"
+#include "SkyBox.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -51,7 +52,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
 	Ready_Effect();
-
+	Ready_Skybox();
 
 	return S_OK;
 }
@@ -128,6 +129,20 @@ void CLevel_GamePlay::Ready_MonsterTest()
 void CLevel_GamePlay::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+}
+
+void CLevel_GamePlay::Ready_Skybox()
+{
+	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
+	SkyboxDesc.iNumModel = 3;
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Moon"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Cloud"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"), &SkyboxDesc)))
+		CRASH("Skybox");
 }
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

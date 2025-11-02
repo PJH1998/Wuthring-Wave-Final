@@ -1,6 +1,7 @@
 #include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+float g_fCloudSpeed;
 
 texture2D   g_DiffuseTexture[2];
 texture2D   g_NormalTexture[2];
@@ -52,6 +53,25 @@ VS_OUT VS_MAIN(VS_IN In)
     return Out;
 }
 
+VS_OUT VS_EFFECT(VS_IN In)
+{
+    VS_OUT Out = (VS_OUT) 0;
+    
+    matrix matWV, matWVP;
+    
+    In.vPosition *= 20.f;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+    matWVP = mul(matWV, g_ProjMatrix);
+    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), g_WorldMatrix));
+    Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), g_WorldMatrix));
+    Out.vBinormal = normalize(mul(float4(In.vBinormal, 0.f), g_WorldMatrix));
+    Out.vTexcoord = In.vTexcoord;
+
+    return Out;
+}
+
 struct PS_IN
 {
     float4 vPosition : SV_POSITION;
@@ -66,19 +86,43 @@ struct PS_OUT_SKYBOX
     float4 vDiffuse : SV_TARGET0;
 };
 
-PS_OUT_SKYBOX PS_SKYBOX(PS_IN In)
+PS_OUT_SKYBOX PS_DOME(PS_IN In)
+{
+    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
+    
+    Out.vDiffuse = g_DiffuseTexture[0].Sample(PointClampSampler, In.vTexcoord);
+    
+    //float4 vSkyColor = float4(0.6f, 0.6f, 0.8f, 1.f);
+    //Out.vDiffuse = Out.vDiffuse * Out.vDiffuse.a + vSkyColor * (1.f - Out.vDiffuse.a);
+    
+    return Out;
+}
+
+PS_OUT_SKYBOX PS_EFFECT(PS_IN In)
 {
     PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
     
     Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+
+    Out.vDiffuse.a = Out.vDiffuse.b;
     
+    return Out;
+}
+
+PS_OUT_SKYBOX PS_CLOUD(PS_IN In)
+{
+    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
+    
+    float2 vTexcoord = In.vTexcoord + float2(g_fCloudSpeed, 0.f);
+    Out.vDiffuse.rgba = g_DiffuseTexture[0].Sample(DefaultSampler, vTexcoord).b;
+
     return Out;
 }
 
 
 technique11 DefaultTechnique
 {
-    pass SkyBox         //0
+    pass Dome         //0
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_None, 0);
@@ -86,6 +130,30 @@ technique11 DefaultTechnique
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
-        PixelShader = compile ps_5_0 PS_SKYBOX();
+        PixelShader = compile ps_5_0 PS_DOME();
     }
+
+    pass Effect            //1
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_EFFECT();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_EFFECT();
+    }
+
+    pass Cloud          //2
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_CLOUD();
+    }
+
+
 }

@@ -79,7 +79,7 @@ void CCubeCell::Update(const _fvector& vCamPos)
 			{
 				//if (m_iDepth <= 3)
 				//	m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
-				pObject->Set_LOD(m_iLODIndex);
+				pObject->Set_LOD(0);
 				m_pGameInstance->Add_Render_StaticObject(pObject);
 			}
 		}

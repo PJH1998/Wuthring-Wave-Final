@@ -11,10 +11,11 @@ NS_BEGIN(Client)
 class CSkyBox final : public CGameObject
 {
 public:
-	enum class SKYTYPE { DOME, CLOUD, FX, END };
+	enum class SKYTYPE { DOME, FX1, CLOUD, END };
 public:
 	typedef struct tagSkyBoxDesc {
-		_wstring		strModelTag;
+		vector<_wstring>	strModelTags;
+		_uint					iNumModel;
 	}SKYBOX_DESC;
 
 private:
@@ -40,9 +41,12 @@ private:
 	CModel*					m_pModelCom[ENUM_CLASS(SKYTYPE::END)] = {nullptr};
 
 	_uint						m_iCurrentLevel = {};
+	_uint						m_iNumModels = {};
+
+	_float						m_fTimeAcc = {};
 
 private:
-	void						Ready_Component(const _wstring& strModelTag);
+	void						Ready_Component(const vector<_wstring>& strModelTags);
 
 public:
 	static		CSkyBox*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
