@@ -66,6 +66,33 @@ void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 {
 	m_Stats = eCharacterStat;
 }
+
+#pragma endregion
+
+#pragma region TRIGGER
+
+void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
+{
+	m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+}
+
+void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)
+{
+	auto iter = m_TriggerEvents.find(iNumTriggerMapIndex);
+	if (iter == m_TriggerEvents.end())
+		return;
+
+	for (auto& pTriggerFunc : m_TriggerEvents[iNumTriggerMapIndex])
+	{
+		pTriggerFunc(pArg);
+	}
+}
+void CGameSystem::Clear_TriggerCallBack()
+{
+	for (auto& TriggerVector : m_TriggerEvents)
+		TriggerVector.second.clear();
+	m_TriggerEvents.clear();
+}
 #pragma endregion
 
 void CGameSystem::Free()

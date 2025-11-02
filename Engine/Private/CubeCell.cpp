@@ -73,6 +73,9 @@ void CCubeCell::Update(const _fvector& vCamPos)
 		{
 			if (nullptr == pObject)
 				continue;
+			//if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
+			//{
+			//}
 			_float fDistance = pObject->Compute_Distance(vCamPos);
 			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 			pObject->Set_LOD(iLODIndex);

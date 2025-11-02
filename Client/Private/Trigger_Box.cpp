@@ -1,0 +1,125 @@
+﻿#include"ClientPch.h"
+#include "Trigger_Box.h"
+#include"GameSystem.h"
+CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	:CGameObject(pDevice, pContext),m_pGameSystem(CGameSystem::GetInstance())
+{
+	Safe_AddRef(m_pGameSystem);
+}
+
+CTrigger_Box::CTrigger_Box(const CTrigger_Box& Prototype)
+	:CGameObject(Prototype), m_pGameSystem(CGameSystem::GetInstance())
+{
+	Safe_AddRef(m_pGameSystem);
+}
+
+HRESULT CTrigger_Box::Initialize_Prototype()
+{
+	return S_OK;
+}
+
+HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
+{
+	TRIGGER* pDesc = static_cast<TRIGGER*>(pArg);
+
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+
+
+
+	Ready_Components(pArg);
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [&](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		m_pGameSystem->OnTriggerActivate(0);
+		});
+
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [&](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		iLayer = ENUM_CLASS(LEVEL::TEST);
+		int a = 0;
+		});
+
+	m_pGameSystem->TriggerRegister(0, [this](void* pArg) {
+		Collision();
+		});
+
+	return S_OK;
+}
+
+void CTrigger_Box::Priority_Update(_float fTimeDelta)
+{
+}
+
+void CTrigger_Box::Update(_float fTimeDelta)
+{
+	const ContactManifold Manifold{};
+	//m_pRigidbodyCom->OnCollide_Enter(ENUM_CLASS(LEVEL::MAP), nullptr, Manifold);
+	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+}
+
+void CTrigger_Box::Late_Update(_float fTimeDelta)
+{
+
+}
+
+void CTrigger_Box::Ready_Components(void* pArg)
+{
+	TRIGGER* pDesc = static_cast<TRIGGER*>(pArg);
+
+	CRigidbody::BOXBODY_DESC RigidbodyDesc{};
+	//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+	RigidbodyDesc.vExtent = pDesc->vExtends;
+
+	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+}
+
+void CTrigger_Box::Collision()
+{
+	int a = 9;
+}
+
+void CTrigger_Box::CallBack(_uint iFuncIndex, void* pArg)
+{
+	if (iFuncIndex >= m_Functions.size())
+		CRASH("Failed");
+
+	m_Functions[iFuncIndex](pArg);
+}
+
+CTrigger_Box* CTrigger_Box::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+{
+	CTrigger_Box* pInstance = new CTrigger_Box(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize_Prototype()))
+	{
+		MSG_BOX("Failed to Create : Edit_TriggerBox");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
+CGameObject* CTrigger_Box::Clone(void* pArg)
+{
+	CTrigger_Box* pInstance = new CTrigger_Box(*this);
+
+	if (FAILED(pInstance->Initialize_Clone(pArg)))
+	{
+		MSG_BOX("Failed to Create : Edit_TriggerBox (Clone)");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
+void CTrigger_Box::Free()
+{
+	__super::Free();
+	Safe_Release(m_pGameSystem);
+	Safe_Release(m_pRigidbodyCom);
+}

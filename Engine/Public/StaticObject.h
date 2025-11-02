@@ -23,6 +23,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) {};
 	virtual		void			Render() {};
 	virtual		void			Render_Shadow() {};
+	virtual		BoundingBox* Get_BoundingBox() { return nullptr; }
 
 protected:
 	// LOD 개수

@@ -96,7 +96,7 @@ void CRigidbody::Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta)
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, Matrix);
 
 	m_pBodyInterface->MoveKinematic(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), fTimeDelta);
-
+	
 	//m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vTranslation), EActivation::Activate);
 }
 

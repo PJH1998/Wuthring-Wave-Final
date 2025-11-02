@@ -1,5 +1,5 @@
 ﻿#include "ClientPch.h"
-#include "CAttackVolume.h"
+#include "AttackVolume.h"
 
 CAttackVolume::CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject { pDevice, pContext }

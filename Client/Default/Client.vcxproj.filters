@@ -184,9 +184,9 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
-	 <Filter Include="03. GameObject\SkyBox">
-	  <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
-	 </Filter>
+    <Filter Include="03. GameObject\SkyBox">
+      <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Monster">
       <UniqueIdentifier>{5e9c0d4e-a9fe-420d-af13-5a6fe9e85554}</UniqueIdentifier>
     </Filter>
@@ -435,9 +435,6 @@
     <ClInclude Include="..\Public\RoverState_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
-    <ClInclude Include="CAttackVolume.h">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Event_Camera.h">
       <Filter>97. Event</Filter>
     </ClInclude>
@@ -464,12 +461,16 @@
     </ClInclude>
     <ClInclude Include="..\Public\SkyBox.h">
       <Filter>03. GameObject\SkyBox</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\HavocWarrior.h">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h" />
+    <ClInclude Include="..\Public\AttackVolume.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -676,9 +677,6 @@
     <ClCompile Include="..\Private\RoverSword.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="CAttackVolume.cpp">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Director.cpp">
       <Filter>01. GameSystem\Director</Filter>
     </ClCompile>
@@ -700,14 +698,18 @@
     <ClCompile Include="..\Private\RoverGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
-	 <ClCompile Include="..\Private\SkyBox.cpp">
-	  <Filter>03. GameObject\SkyBox</Filter>
-	 </ClCompile>
+    <ClCompile Include="..\Private\SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\HavocWarrior.cpp">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    <ClCompile Include="..\Private\AttackVolume.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

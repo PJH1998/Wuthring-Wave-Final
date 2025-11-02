@@ -68,6 +68,7 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map/", m_eCurLevel);
 	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map/", m_eCurLevel);
