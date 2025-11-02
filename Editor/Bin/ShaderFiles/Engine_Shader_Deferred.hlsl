@@ -208,14 +208,17 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
         vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
         
-        float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);        // 직교라 w 나누기 X
- 
-        float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
+        if(IsInNDC(vShadowBlendPos))
+        {
+            float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy); // 직교라 w 나누기 X
+        
+            float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
-        fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
-        float fBlendDepth = vShadowBlendPos.z - fBlendBias;
+            fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
+            float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
-        fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_ShadowMap); // 2 == Kernel size
+            fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_ShadowMap); // 2 == Kernel size
+        }
     }
     
     // Current Cascade
@@ -225,24 +228,26 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 
         matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
         vShadowPos = mul(vWorldPos, matShadowLightVP);
-    
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // 직교라 w 나누기 X
+        if (IsInNDC(vShadowPos))
+        {
+            float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // 직교라 w 나누기 X
 
-        float fBias = 0.f;
+            float fBias = 0.f;
         
-        fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
+            fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
 
-        fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
+            fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
     
-        float fDepth = vShadowPos.z - fBias;
+            float fDepth = vShadowPos.z - fBias;
         
-        float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_ShadowMap);
+            float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_ShadowMap);
 
-        float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
+            float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
 
-        fFinalShadow = saturate(fFinalShadow + 0.3f);
+            fFinalShadow = saturate(fFinalShadow + 0.3f);
     
-        Out.vColor.xyz *= fFinalShadow;
+            Out.vColor.xyz *= fFinalShadow;
+        }
     }
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
@@ -288,7 +293,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     else
     {
         float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR);
     }
     
     float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);

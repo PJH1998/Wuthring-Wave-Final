@@ -293,7 +293,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     else
     {
         float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR);
     }
     
     float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);

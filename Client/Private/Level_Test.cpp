@@ -8,6 +8,7 @@
 #include "GameSystem.h"
 #include "Player.h"
 #include"Trigger_Box.h"
+#include "ShadowMap.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -47,9 +48,9 @@ HRESULT CLevel_Test::Initialize()
 
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
-    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+    LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
     LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
     LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
@@ -58,8 +59,6 @@ HRESULT CLevel_Test::Initialize()
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
-
-
 
 	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_TriggerBox"),
 		CTrigger_Box::Create(m_pDevice, m_pContext));
@@ -72,6 +71,19 @@ HRESULT CLevel_Test::Initialize()
 	XMStoreFloat4x4(&TT, Mat);
 	Tri.WorldMatrix = &TT;
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
+
+
+	//TEST
+	CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
+	ShadowMapDesc.iNumSectorX = 2;
+	ShadowMapDesc.iNumSectorY = 2;
+	ShadowMapDesc.iSectorSizeX = 2048;
+	ShadowMapDesc.iSectorSizeY = 2048;
+	ShadowMapDesc.vCenterPos = _float3(3000.f, 0.f, 2000.f);
+	ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
+	ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
+
+	CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
 
     return S_OK;
 }
