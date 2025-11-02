@@ -166,7 +166,6 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
-    /////////TEST
     if (vPBRDesc.z)
     {
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
@@ -184,6 +183,7 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     if (any(vPBRDesc.z))
         return Out;
+        
 ///////// Shadow Begin /////////
 
     int iCascadeIndex = 0;
@@ -624,7 +624,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_None, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_Blend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
