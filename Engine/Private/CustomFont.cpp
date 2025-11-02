@@ -24,15 +24,9 @@ HRESULT CCustomFont::Initialize_Clone(void* pArg)
 {
 	__super::Initialize_Clone(pArg);
 
-	CUSTOMFONT_DESC* pDesc = static_cast<CUSTOMFONT_DESC*>(pArg);
+	FONT_SINGLEDESC* pDesc = static_cast<FONT_SINGLEDESC*>(pArg);
 
-	m_strFontTag	= pDesc->strFontTag;
-	m_strText		= pDesc->strText;
-	m_vScreenPos	= pDesc->vScreenPos;
-	m_fScale		= pDesc->fScale;
-	m_vLifeTime		= pDesc->vLifeTime;
-	m_vColor		= pDesc->vColor;
-	m_iPassIndex	= pDesc->iPassIndex;
+	m_tSingleDesc	= *pDesc;
 
 	return S_OK;
 }
@@ -45,10 +39,10 @@ void CCustomFont::Update(_float fTimeDelta)
 {
 	// Update Lifetime. If Lifetimes end, disable activate.
 
-	if (m_vLifeTime.y <= m_vLifeTime.x)
+	if (m_tSingleDesc.vLifeTime.y <= m_tSingleDesc.vLifeTime.x)
 		m_isActivate = false;
 
-	m_vLifeTime.x += fTimeDelta;
+	m_tSingleDesc.vLifeTime.x += fTimeDelta;
 }
 
 void CCustomFont::Late_Update(_float fTimeDelta)
@@ -59,14 +53,7 @@ void CCustomFont::Late_Update(_float fTimeDelta)
 
 void CCustomFont::Render()
 {
-	m_pGameInstance->Draw_Font(
-		m_strFontTag,
-		m_strText.c_str(),
-		m_vScreenPos,
-		m_fScale,
-		m_vColor,
-		m_iPassIndex
-	);
+	m_pGameInstance->Draw_Font(&m_tSingleDesc);
 }
 
 CCustomFont* CCustomFont::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

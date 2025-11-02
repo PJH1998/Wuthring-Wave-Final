@@ -266,13 +266,21 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 //{
 //	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
 //}
-_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar * pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
+_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
 {
-	return m_pFont_Manager->Draw_Font(strFontTag, pText, fPos, fScale, vColor, iPass);
+	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
 }
-void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
+_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
 {
-	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iPassIndex, vColor);
+	return m_pFont_Manager->Draw_Font(pSingleDesc);
+}
+void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
+{
+	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
+}
+void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
+{
+	m_pFont_Manager->Add_FloatingText(tDesc);
 }
 
 #pragma endregion

@@ -1,6 +1,8 @@
 ﻿#include "ClientPch.h"
 #include "Level_Test_UI.h"
 
+#define KSTA_FONTTEXTTEST
+
 CLevel_Test_UI::CLevel_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice, pContext)
 {
@@ -35,6 +37,10 @@ void CLevel_Test_UI::Update(_float fTimeDelta)
     SetWindowText(g_hWnd, TEXT("Test_UI"));
 
 
+
+
+
+#ifdef KSTA_FONTTEXTTEST
 	static _float fTimeElapsed = 0.f;
 	const _float fTimeCheckCycle = 1.f;
 
@@ -51,8 +57,30 @@ void CLevel_Test_UI::Update(_float fTimeDelta)
 			m_pGameInstance->Rand_Normal(),
 			1.f //m_pGameInstance->Rand_Normal()
 		};
-		m_pGameInstance->Add_FloatingText(L"WW_Medium", L"Test 테스트입니다.", { 920.f, 1045.f }, 1.f, 1.f, 0, vRandColor);
+		_float2 vRandPos = _float2{
+			m_pGameInstance->Rand(-100.f, +100.f),
+			m_pGameInstance->Rand(-100.f, +100.f)
+		};
+		FONT_SINGLEDESC tDesc = {};
+		tDesc.strFontTag = L"WW_Bold";
+		tDesc.strText = L"Test 테스트입니다.";
+		tDesc.vScreenPos = { 920.f + vRandPos.x, 1045.f + vRandPos.y };
+		tDesc.fScale = 1.f;
+		tDesc.vLifeTime = { 0.f, 10.f };
+		tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
+		tDesc.vColor = vRandColor;
+
+		tDesc.vOutlineColor = { 0.f, 0.f, 0.f, .1f };
+		//tDesc.vFontTexPerPixel = ;// ?
+		tDesc.fFontOutlineWidth = .5f;
+
+		//m_pGameInstance->Add_FloatingText(L"WW_Bold", L"Test 테스트입니다.", { 920.f + vRandPos.x, 1045.f + vRandPos.y }, 1.f, 10.f, 0, vRandColor);
+		m_pGameInstance->Add_FloatingText(tDesc);
 	}
+#endif // KSTA_FONTTEXTTEST
+
+
+
 }
 
 void CLevel_Test_UI::Render()

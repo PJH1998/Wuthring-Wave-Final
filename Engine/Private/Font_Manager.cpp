@@ -38,7 +38,7 @@ HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 	// load for freetype
 
 	//FT_Face pFont = { nullptr };
-	FTCUSTOM_FONT* pFontInfo = new FTCUSTOM_FONT();
+	FTCUSTOM_FONT* pFontInfo = new FTCUSTOM_FONT(); 
 	
 	if (FT_New_Face(m_pFTLibrary, pFilePath, 0, &pFontInfo->pFace))
 		CRASH("Add Font");
@@ -58,16 +58,16 @@ HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 	return S_OK;
 }
 
-void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
+void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
 {
-	CCustomFont::CUSTOMFONT_DESC fontDesc = {};
+	FONT_SINGLEDESC fontDesc = {};
 	
 	fontDesc.strFontTag = strFontTag;
 	fontDesc.strText = strText;
 	fontDesc.vScreenPos = vScreenPos;
 	fontDesc.fScale = fScale;
 	fontDesc.vLifeTime = _float2{0.f, fLifeTime};
-	fontDesc.iPassIndex = iPassIndex;
+	fontDesc.iShaderFlag = iShaderFlag;
 	fontDesc.vColor = vColor;
 
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
@@ -86,6 +86,13 @@ void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring&
 	//tDesc.vColor = vColor;
 	//
 	//m_vecActiveFonts.push_back(tDesc);
+}
+
+void CFont_Manager::Add_FloatingText(FONT_SINGLEDESC tDesc)
+{
+	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	CCustomFont* pCustomFont = dynamic_cast<CCustomFont*>(m_pGameInstance->Clone_Prototype(0, L"Prototype_GameObject_Font", PROTOTYPE::GAMEOBJECT, &tDesc));
+	m_vecActiveFonts.push_back(pCustomFont);
 }
 
 
@@ -262,39 +269,62 @@ _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uin
 	return true;
 }
 
-
-//HRESULT CFont_Manager::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
-//{
-//	//FT_Face pFont = Find_Font(strFontTag);
-//	//if (nullptr == pFont)
-//	//	return E_FAIL;
-//	//
-//	//return pFont->Render(pText, vPosition, vColor, fRadian, vOrigin, vScale);
-//	return S_OK;
-//}
-
-_bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
+_bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
 {
+	FONT_SINGLEDESC tDesc = {};
+
+	tDesc.strFontTag = strFontTag;
+	tDesc.strText = pText;
+	tDesc.vScreenPos = vPos;
+	tDesc.fScale = fScale;
+	tDesc.vColor = vColor;
+	tDesc.iShaderFlag = iShaderFlag;
+
+	return Draw_Font(&tDesc);
+}
+
+_bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
+{
+	_wstring strFontTag			= pDesc->strFontTag;
+	_wstring strText			= pDesc->strText;
+	const _tchar* pText			= pDesc->strText.c_str();
+
+	_float2 vScreenPos			= pDesc->vScreenPos;
+	_float  fScale				= pDesc->fScale;
+
+	_float2 vLifeTime			= pDesc->vLifeTime;
+	_int	iShaderFlag			= pDesc->iShaderFlag;
+
+	// for shader
+	_float4 vColor				= pDesc->vColor;				// Font Color
+
+	// for shader : additional info for extra pass 
+	// - outline
+	_float4 vOutlineColor		= pDesc->vOutlineColor;
+	//_float2 vFontTexPerPixel	= pDesc->vFontTexPerPixel;		//??
+	_float fFontOutlineWidth	= pDesc->fFontOutlineWidth;
+	// - grad
+	_float4 vFontGradColor		= pDesc->vFontGradColor;		// Right Dir
+
+
+
+
 	FTCUSTOM_FONT* pFontInfo = Find_Font(strFontTag);
-
-
 	if (!pFontInfo || !pText)
 		return false;
 
 	vector<VTXUITEXT> vecVertices;
 	vecVertices.reserve(512); // 대략 문자 80~100개 정도 버퍼 확보
-
-	_float penX = fPos.x;
-	_float penY = fPos.y;
+	_float penX = vScreenPos.x;
+	_float penY = vScreenPos.y;
 	_uint prevCode = 0;
 
 	for (_uint i = 0; pText[i] != 0; )
 	{
 		_uint cp = (_uint)pText[i++]; // 단순 ASCII 또는 한글 BMP 영역까지는 OK
-
 		if (cp == L'\n')
 		{
-			penX = fPos.x;
+			penX = vScreenPos.x;
 			penY += pFontInfo->iPixelHeight * fScale;
 			prevCode = 0;
 			continue;
@@ -303,7 +333,6 @@ _bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2
 		// 글리프가 atlas에 없으면 Bake
 		if (!BakeOneGlyph(pFontInfo, cp))
 			continue;
-
 		FTCUSTOM_FONT_GLYPH glyph = pFontInfo->mapGlyphs[cp];
 
 		// 커닝 적용 시
@@ -331,11 +360,8 @@ _bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2
 		_float v1 = glyph.fV1;
 
 		VTXUITEXT vtx[6] =				// 정점 6개
-		{
-			{{x0, y0}, {u0, v0}},	{{x1, y0}, {u1, v0}},	{{x1, y1}, {u1, v1}},
-			{{x0, y0}, {u0, v0}},	{{x1, y1}, {u1, v1}},	{{x0, y1}, {u0, v1}},
-		};
-
+		{	{{x0, y0}, {u0, v0}},	{{x1, y0}, {u1, v0}},	{{x1, y1}, {u1, v1}},
+			{{x0, y0}, {u0, v0}},	{{x1, y1}, {u1, v1}},	{{x0, y1}, {u0, v1}} };
 		vecVertices.insert(vecVertices.end(), vtx, vtx + 6);
 
 		// 펜 이동
@@ -346,8 +372,7 @@ _bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2
 	if (vecVertices.empty())
 		return true;
 
-	// ====== GPU에 업로드 후 Draw ======
-	// (1) Dynamic VB에 업로드
+	// Dynamic VB에 업로드
 	D3D11_MAPPED_SUBRESOURCE mapped;
 	if (FAILED(m_pContext->Map(m_pFontVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
 		return false;
@@ -355,24 +380,52 @@ _bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2
 	memcpy(mapped.pData, vecVertices.data(), sizeof(VTXUITEXT) * static_cast<_uint>(vecVertices.size()));
 	m_pContext->Unmap(m_pFontVertexBuffer, 0);
 
-	// (2) 셰이더 상수 설정 (색상 등)
+
+	// 셰이더 상수 설정
 	_float2 screen = { static_cast<_float>(m_iWinSizeX), static_cast<_float>(m_iWinSizeY) };
-	m_pShaderCom->Bind_Value("g_ScreenSize", &screen, sizeof(screen));
-	m_pShaderCom->Bind_Value("g_FontColor", &vColor, sizeof(_float4));
 	m_pShaderCom->Bind_Textures("g_FontAtlas", &pFontInfo->pAtlasSRV, 1);
 
-	// (3) 렌더 상태 적용 (FX pass or 직접 BlendState 설정)
-	//m_pShaderPass->Apply(0, m_pContext);
+	m_pShaderCom->Bind_Value("g_ScreenSize", &screen, sizeof(screen));
+	m_pShaderCom->Bind_Value("g_FontColor", &vColor, sizeof(vColor));
+
+	m_pShaderCom->Bind_Value("g_FontFlag", &iShaderFlag, sizeof(iShaderFlag));
+	m_pShaderCom->Bind_Value("g_FontOutlineColor", &vOutlineColor, sizeof(vOutlineColor));
+	//m_pShaderCom->Bind_Value("g_FontTexPerPixel", &vFontTexPerPixel, sizeof(vFontTexPerPixel)); // 이건 아래에서
+	m_pShaderCom->Bind_Value("g_FontOutlineWidth", &fFontOutlineWidth, sizeof(fFontOutlineWidth));
+	m_pShaderCom->Bind_Value("g_FontGradColor", &vFontGradColor, sizeof(vFontGradColor));
+
+	// 상수.. Atlas Texel
+	ID3D11Resource* pRes = nullptr;
+	pFontInfo->pAtlasSRV->GetResource(&pRes);
+	ID3D11Texture2D* pTex2D = nullptr;
+	pRes->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTex2D);
+	D3D11_TEXTURE2D_DESC desc = {};
+	pTex2D->GetDesc(&desc);
+	_float2 vTexPerPixel = { 1.0f / desc.Width,	1.0f / desc.Height };
+
+	m_pShaderCom->Bind_Value("g_FontTexPerPixel", &vTexPerPixel, sizeof(_float2));
+	Safe_Release(pTex2D);
+	Safe_Release(pRes);
+
+	
+	// 렌더 상태 적용
 	m_pShaderCom->Begin(0);
 
-	// (4) Bind Resource, Draw
+	// Bind Resource, Draw
 	UINT stride = sizeof(VTXUITEXT);
 	UINT offset = 0;
 	m_pContext->IASetVertexBuffers(0, 1, &m_pFontVertexBuffer, &stride, &offset);
 	m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_pContext->Draw(vecVertices.size(), 0);
 
+
+
+	ImGui::Image(pFontInfo->pAtlasSRV, ImVec2(512, 512));
+
+
+
 	return true;
+
 }
 
 static _bool FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot)

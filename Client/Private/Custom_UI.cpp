@@ -6,7 +6,7 @@
 #include "Event_Level.h"
 
 //#define KSTA_UICLICKTEST
-#define KSTA_UIEVENTTEST
+//#define KSTA_UIEVENTTEST
 
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)

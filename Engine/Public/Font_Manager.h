@@ -24,7 +24,8 @@ public:
 
 	//HRESULT								Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float2 vScale);
 	//void								Add_FloatingText(/*const _wstring& strFontTag, const _tchar* pText, */FONT_SINGLEDESC tSingleFontDesc);
-	void								Add_FloatingText(const _wstring& strFontTag, const _wstring& pText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
+	void								Add_FloatingText(const _wstring& strFontTag, const _wstring& pText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor);
+	void								Add_FloatingText(FONT_SINGLEDESC tDesc);	// for transfer additional infos
 
 	void								Priority_Update(_float fTimeDelta);
 	void								Update(_float fTimeDelta);
@@ -32,8 +33,9 @@ public:
 	//void								Render();
 
 public:
-	_bool								Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass);
-    
+	_bool								Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
+	_bool								Draw_Font(FONT_SINGLEDESC* pSingleDesc);
+	
 private:
 	HRESULT								Ready_FontBuffer();
 	HRESULT                             Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePath, _uint iPixelHeight);

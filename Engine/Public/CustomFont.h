@@ -26,18 +26,20 @@ public:
 
 
 private:
-	_wstring				m_strFontTag			= {};
-	_wstring				m_strText				= {};
-	_float2					m_vScreenPos			= {};
-	_float					m_fScale				= {};
-	_float2					m_vLifeTime				= {};
-	_float4					m_vColor				= {};
-	_int					m_iPassIndex			= {};
+	FONT_SINGLEDESC			m_tSingleDesc = {};
+
+	//_wstring				m_strFontTag			= {};
+	//_wstring				m_strText				= {};
+	//_float2					m_vScreenPos			= {};
+	//_float					m_fScale				= {};
+	//_float2					m_vLifeTime				= {};
+	//_float4					m_vColor				= {};
+	//_uint					m_iShaderFlag			= {};
 
 				
 public:
-	static CCustomFont* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual	CGameObject* Clone(void* pArg);
+	static CCustomFont*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual	CGameObject*	Clone(void* pArg);
 	virtual	void			Free()									override;
 };
 

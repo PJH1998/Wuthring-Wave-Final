@@ -59,6 +59,15 @@ namespace Client
 		UIFLAG_ACTIVEFEEDBACK,
 		UIFLAG_END
 	};
+
+	enum class FONT_FLAG
+	{
+		FL_NONE				= 0,
+		FL_OUTLINE			= 1 << 0,
+		FL_GRAD				= 1 << 1,
+
+		FL_END				= 1 << 2
+	};
 	
 	enum class  TEST_STATE : unsigned int
 	{

@@ -2,7 +2,7 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D g_DiffuseTexture;
+Texture2D g_DiffuseTexture;
 
 struct VS_IN
 {

@@ -241,6 +241,7 @@ namespace Engine
 		_bool                                       isHasKerning;
 	}FTCUSTOM_FONT;
 
+
 	typedef struct tFontSingleDesc
 	{
 		_wstring strFontTag;
@@ -250,10 +251,21 @@ namespace Engine
 		_float  fScale;
 
 		_float2 vLifeTime;
-		_int	iPassIndex;
+		_int	iShaderFlag;
 
 		// for shader
-		_float4 vColor;
+		_float4 vColor;				// Font Color
+
+		// for shader : additional info for extra pass 
+		// - [Flag 1] outline
+		_float4 vOutlineColor;
+		_float2 vFontTexPerPixel;
+		_float fFontOutlineWidth;
+		// - [Flag 2] grad
+		_float4 vFontGradColor;		// Right Dir
+
+
+		//..
 	}FONT_SINGLEDESC;
 
 #pragma endregion

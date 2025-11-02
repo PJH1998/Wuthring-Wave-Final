@@ -106,9 +106,6 @@
     <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
       <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
-      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
     </Filter>
@@ -192,6 +189,9 @@
     </Filter>
     <Filter Include="03. GameObject\UI_Font">
       <UniqueIdentifier>{2360616c-913e-4bd3-b736-e70576703212}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
+      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
