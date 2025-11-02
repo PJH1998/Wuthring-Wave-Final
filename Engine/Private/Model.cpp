@@ -374,7 +374,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 }
 
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
@@ -401,7 +401,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	*pTrackPosition = fTrackPosition;
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
+	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName, gpuBlendInfo);
 	// Root Node Translation 조정
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
@@ -428,6 +428,8 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	return false;
 }
+
+
 
 _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
 {
@@ -581,7 +583,7 @@ void CModel::ApplyComputeResults_ToBones()
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
-void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
+void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 
@@ -612,6 +614,26 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	}
 
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
+
+	// Blend Enabled가 True 라면? 정보 바인딩.
+	if (gpuBlendInfo.IsBlendEnabled)
+	{
+		pAnimCBInfo->IsBlendEnabled = gpuBlendInfo.IsBlendEnabled;
+		pAnimCBInfo->fBlendParamLR = gpuBlendInfo.fBlendParamLR;
+		pAnimCBInfo->fBlendParamDU = gpuBlendInfo.fBlendParamDU;
+
+		// RL
+		pAnimCBInfo->iClipIndexL = gpuBlendInfo.iClipIndexL;
+		pAnimCBInfo->iClipIndexMidLR = gpuBlendInfo.iClipIndexMidLR;
+		pAnimCBInfo->iClipIndexR = gpuBlendInfo.iClipIndexR;
+		pAnimCBInfo->iWeightClipLR = gpuBlendInfo.iWeightClipLR;
+
+		// UD
+		pAnimCBInfo->iClipIndexD = gpuBlendInfo.iClipIndexD;
+		pAnimCBInfo->iClipIndexMidDU = gpuBlendInfo.iClipIndexMidDU;
+		pAnimCBInfo->iClipIndexR = gpuBlendInfo.iClipIndexR;
+		pAnimCBInfo->iWeightClipDU = gpuBlendInfo.iWeightClipDU;
+	}
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 	// 3. Compute Shader에 리소스 바인딩

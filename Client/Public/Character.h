@@ -119,8 +119,11 @@ public:
 
 	// Animation
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
-	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
-	
+	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
+		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true,
+		const GPU_BLEND_INFO& blendInfo = G_DefaultBlendInfo);
+	void Start_FlyBlending(_float fDuration);
+
 	// Change State
 	void Change_State(_uint iCategory, _uint iSubState);
 	

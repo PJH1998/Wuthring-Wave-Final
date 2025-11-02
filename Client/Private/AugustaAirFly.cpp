@@ -83,6 +83,7 @@ void CAugustaAirFly::OnUpdate(_float fTimeDelta)
     Check_StateTransition(fTimeDelta);
 
     State_Reset();
+
 }
 
 void CAugustaAirFly::OnExit()
@@ -102,6 +103,9 @@ void CAugustaAirFly::OnExit()
     
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
+
+	// Blending 정보 초기화
+	ZeroMemory(&m_GpuBlendInfo, sizeof(GPU_BLEND_INFO));
 }
 
 void CAugustaAirFly::Handle_Input()
@@ -129,10 +133,51 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	// 0. 애니메이션 체크.
 	EAugustaAirFlyType eAirFlyType = static_cast<EAugustaAirFlyType>(m_iCurrentAnimIdx);
 
-    // 1. 애니메이션 실행. (기본 실행.
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	// 1-1. 기본 애니메이션 이름 결정
+	_string strBaseAnimName = m_Animations[m_iCurrentAnimIdx].strAnimName;
+	
+	// 1-2. XA_START가 재생 중이 아니면, 기본(Base) 애니메이션은 항상 "XA_Loop_Stand"입니다.
+	if (eAirFlyType != EAugustaAirFlyType::XA_START)
+	{
+		strBaseAnimName = "XA_Loop_Stand";
+	}
 
-	// 2. 조향 (Steering) - 캐릭터를 직접 회전시킵니다.
+	// 1-2. XA_START 중에는 블렌딩을 비활성화하고, 그 외에는 활성화합니다.
+	if (eAirFlyType == EAugustaAirFlyType::XA_START)
+	{
+		m_GpuBlendInfo.IsBlendEnabled = false;
+	}
+	else
+	{
+		m_GpuBlendInfo.IsBlendEnabled = true;
+
+		// 1-3. 좌/우(LR) 파라미터 계산
+		if (m_States[INPUT_L])
+			m_GpuBlendInfo.fBlendParamLR = -1.f;
+		else if (m_States[INPUT_R])
+			m_GpuBlendInfo.fBlendParamLR = 1.f;
+		else
+			m_GpuBlendInfo.fBlendParamLR = 0.f;
+
+		// 1-4. 상/하(DU) 파라미터 계산
+		if (m_States[INPUT_U]) // W
+			m_GpuBlendInfo.fBlendParamDU = 1.f;
+		else if (m_States[INPUT_D]) // S
+			m_GpuBlendInfo.fBlendParamDU = -1.f;
+		else
+			m_GpuBlendInfo.fBlendParamDU = 0.f;
+	}
+
+	// 2. (수정) 애니메이션 실행
+	// CCharacterState::Play_Animation 함수에 m_GpuBlendInfo를 전달합니다.
+	// (이전 단계에서 CharacterState::Play_Animation이 GPU_BLEND_INFO를 받도록 수정했다고 가정)
+	m_IsAnimationEnd = CCharacterState::Play_Animation(
+		m_pAugusta,
+		fTimeDelta,
+		m_GpuBlendInfo // <--- 핵심: 계산된 블렌드 정보 전달
+	);
+
+	// 3. 조향 (Steering) - 캐릭터를 직접 회전시킵니다.
 	_vector vLook = m_pAugusta->Get_LookVector();
 	_vector vRight = m_pAugusta->Get_RightVector();
 	_vector vTargetDir = vLook; // 기본값: 현재 방향
@@ -240,42 +285,7 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
 			return;
 		}
-
-		// 3. 피드백 기반 애니메이션 전환 로직
-		if (m_States[INPUT_L])
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L);
-			return;
-		}
-		if (m_States[INPUT_R])
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R);
-			return;
-		}
-
-		// 우선순위 4: U (Point 1, 2. 상승 조건)
-		if ((m_States[INPUT_U] && m_States[INPUT_ACCEL]) ||             // Point 2: W + LShift (가속)
-			(m_States[INPUT_U] && eAirFlyType == EAugustaAirFlyType::XA_LOOP_D)) // Point 1: W + 하강 중 (급상승)
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U);
-			return;
-		}
-
-		// 우선순위 5: D (Point 4. S키)
-		if (m_States[INPUT_D])
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D);
-			return;
-		}
-		
-		// 우선순위 6: STAND (Point 3. W만 누르거나, 아무것도 안 누름)
-		// 위 조건(L/R/U/D)에 하나도 해당하지 않으면 STAND
-		// (XA_START는 IsEscapePossible이 false이므로 이 로직을 타지 않음)
-		if (eAirFlyType != EAugustaAirFlyType::XA_START)
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND);
-			return;
-		}
+	
     }
 
 	if (m_IsAnimationEnd)
@@ -304,10 +314,11 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirFly::SetUp_Animations()
 {
     
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 0.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 0.f);
+	// 이동 용도는 Root모션 모두 제거.
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 20.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 20.f, 1.f, false);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 20.f, 1.f, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 20.f, 1.f, false);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_SHAKE_LOOP), "XA_Shake_Loop", 1.f, 0.f);

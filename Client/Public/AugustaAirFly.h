@@ -52,6 +52,9 @@ private:
 	_float3 m_vGravity = {};  // 감속을 위한 Gravity (감속)
 	
 	_vector m_vForce = {}; // 현재 작용하는 힘.
+
+
+	GPU_BLEND_INFO m_GpuBlendInfo = {};
     
 
 private:

@@ -58,6 +58,23 @@ cbuffer AnimationInfoCB : register(b0)
     uint g_AnimIndex;
     bool g_IsRibAnimUsed;
     uint g_RibbonAnimIndex;
+    
+    bool  g_IsBlendEnabled;  // Blending Usable.
+    float g_BlendParamLR;    // 4 (LR -1(L) to 1(R))
+    float g_fBlendParamDU;   // 4 (DU -1(D) to 1(U))
+    float g_Padding;         // 4 (16바이트 정렬)
+
+	// LR Blend Clip
+    uint g_ClipIndexL;     
+    uint g_ClipIndexMidLR; 
+    uint g_ClipIndexR; 
+    uint g_WeightClipLR;
+
+	// DU Blend Clip
+    uint g_ClipIndexD; 
+    uint g_ClipIndexMidDU;
+    uint g_ClipIndexU; 
+    uint g_WeightClipDU;
 }
 
 float4 mul_quaternion(float4 q1, float4 q2)
@@ -405,10 +422,8 @@ void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID
         result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
     }
     
-        
-    
     // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
     g_OutLocalMatrices[boneIndex] = result_matrix;
-    
+   
 }
 
