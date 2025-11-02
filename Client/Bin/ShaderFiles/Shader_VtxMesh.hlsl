@@ -97,14 +97,14 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         Out.vDiffuse = vDiffuse;
     }
     Out.vDiffuse.w = 1.f;
-
-    Out.vPBR.y = 0.45f;
-    Out.vPBR.x = 0.2f;
+    
+    Out.vPBR.y = g_fGlobalRoughness;
+    Out.vPBR.x = g_fGlobalMetallic;
     
     if (g_IsDynamicObject)
     {
         Out.vDepth.z = 1.f;
-   //     Out.vPBR.z = 1.f;
+        Out.vPBR.z = 1.f;
     }
      
     Out.vPBR.a = 1.f;

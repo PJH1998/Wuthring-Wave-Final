@@ -3,18 +3,18 @@
 #include "Client_Debug.h"
 
 CAugustaGriffon::CAugustaGriffon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CWeapon{ pDevice, pContext }
+    : CProp{ pDevice, pContext }
 {
 }
 
 CAugustaGriffon::CAugustaGriffon(const CPartObject& Prototype)
-    : CWeapon(Prototype )
+    : CProp(Prototype )
 {
 }
 
 HRESULT CAugustaGriffon::Initialize_Prototype()
 {
-    if (FAILED(CWeapon::Initialize_Prototype()))
+    if (FAILED(CProp::Initialize_Prototype()))
         return E_FAIL;
 
     return S_OK;
@@ -22,7 +22,7 @@ HRESULT CAugustaGriffon::Initialize_Prototype()
 
 HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
 {
-    WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
+    PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
 
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
@@ -36,7 +36,7 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
 
 void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
-    CWeapon::Priority_Update(fTimeDelta);
+    CProp::Priority_Update(fTimeDelta);
 
 #ifdef _DEBUG
     ClientDebug::Edit_TransformRotate(m_pTransformCom);
@@ -45,7 +45,7 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 
 void CAugustaGriffon::Update(_float fTimeDelta)
 {
-    CWeapon::Update(fTimeDelta);
+    CProp::Update(fTimeDelta);
 
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
@@ -55,7 +55,7 @@ void CAugustaGriffon::Update(_float fTimeDelta)
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
 {
-    CWeapon::Late_Update(fTimeDelta);
+    CProp::Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
@@ -96,13 +96,13 @@ void CAugustaGriffon::Render()
 
 void CAugustaGriffon::Activate(_bool IsActive)
 {
-	CWeapon::Activate(IsActive);
+	CProp::Activate(IsActive);
 	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
-	CWeapon::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+	CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
   
 }
 
-void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -131,7 +131,7 @@ void CAugustaGriffon::Ready_Components(const WEAPON_DESC* pDesc)
     //    CRASH("Rigidbody");
 }
 
-void CAugustaGriffon::Ready_Variables(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -141,7 +141,7 @@ void CAugustaGriffon::Ready_Variables(const WEAPON_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CAugustaGriffon::Ready_Positions(const WEAPON_DESC* pDesc)
+void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -184,5 +184,5 @@ CGameObject* CAugustaGriffon::Clone(void* pArg)
 
 void CAugustaGriffon::Free()
 {
-    CWeapon::Free();
+    CProp::Free();
 }

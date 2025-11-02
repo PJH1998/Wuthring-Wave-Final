@@ -211,6 +211,9 @@
     <Filter Include="03. GameObject\Actor\Monster\ElectroPredator">
       <UniqueIdentifier>{da785c09-916c-4fe0-a759-16e111b51508}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Weapon\Common">
+      <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -384,7 +387,7 @@
     <ClInclude Include="..\Public\AugustaBayonet.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Weapon.h">
+    <ClInclude Include="..\Public\Prop.h">
       <Filter>03. GameObject\Weapon</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
@@ -479,6 +482,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\RoverGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Wing.h">
+      <Filter>03. GameObject\Weapon\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
     </ClInclude>
     <ClInclude Include="..\public\HavocWarrior.h">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
@@ -644,7 +653,7 @@
     <ClCompile Include="..\Private\AugustaBayonet.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Weapon.cpp">
+    <ClCompile Include="..\Private\Prop.cpp">
       <Filter>03. GameObject\Weapon</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
@@ -724,6 +733,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Wing.cpp">
+      <Filter>03. GameObject\Weapon\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\private\HavocWarrior.cpp">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>

@@ -84,6 +84,12 @@ public:
 	void Sync_Collider(_fvector vVelocity, _float fTimeDetla);
 
 	_fvector Get_Velocity();
+	void Add_Force(_fvector vForce, _float fTimeDelta);
+
+#ifdef _DEBUG
+	void RayDir(_vector vRayDir, _float3 vEndPos);
+#endif // _DEBUG
+
 #pragma endregion
 
 
@@ -100,6 +106,8 @@ public:
 	// Look Vector
 	_vector Get_LookVector();
 	_vector Get_LookVector_NoPitch();
+	_vector Get_RightVector();
+	_vector Get_RightVector_NoPitch();
 
 	// LockOn
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
@@ -119,6 +127,7 @@ public:
 
 	// Move
 	ACTORDIR Calculate_Direction();
+	_vector Get_CameraRightVector();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
 	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
@@ -128,9 +137,13 @@ public:
 
 	// Rotate
 	void Rotate_Direction(_fvector vDir);
+	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
 	void Rotate_HitTarget();
+
+	// Turn
+	
 
 	
 	// Transform
@@ -169,8 +182,8 @@ protected:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
-	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target �뵵
-	class CTransform* m_pHitTargetTransform = { nullptr };
+	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
+	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
 
 	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};

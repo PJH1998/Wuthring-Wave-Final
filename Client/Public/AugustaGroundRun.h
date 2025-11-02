@@ -10,6 +10,7 @@ private:
     enum RUNSTATE // Transition에 사용하는 상태들을 정의 해두기.
     {
         JUMP = 0,
+		FLY,
         DASH,
         ATTACK,
         WALL,

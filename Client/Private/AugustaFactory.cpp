@@ -25,6 +25,7 @@
 #include "AugustaAirFall.h"
 #include "AugustaAirAttack.h"
 #include "AugustaAirSkill.h"
+#include "AugustaAirFly.h"
 
 // Climb State들
 #include "AugustaClimbMove.h"
@@ -55,6 +56,7 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL), CAugustaAirFall::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK), CAugustaAirAttack::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_SKILL), CAugustaAirSkill::Create(pCharacter));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY), CAugustaAirFly::Create(pCharacter));
 
     // Climb 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(EAugustaClimbState::CLIMB_MOVE), CAugustaClimbMove::Create(pCharacter));

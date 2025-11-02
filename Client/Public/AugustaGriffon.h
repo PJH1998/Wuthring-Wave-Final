@@ -1,11 +1,11 @@
 ﻿#pragma once
-#include "Weapon.h"
+#include "Prop.h"
 
 NS_BEGIN(Client)
-class CAugustaGriffon final : public CWeapon
+class CAugustaGriffon final : public CProp
 {
 public:
-	typedef struct tagAugustaGriffonDesc : public CWeapon::WEAPON_DESC {
+	typedef struct tagAugustaGriffonDesc : public CProp::PROP_DESC {
 		
 	} AUGUSTA_GRIFFON_DESC;
 
@@ -32,9 +32,9 @@ private:
 
 
 private:
-	void Ready_Components(const WEAPON_DESC* pDesc);
-	void Ready_Variables(const WEAPON_DESC* pDesc);
-	void Ready_Positions(const WEAPON_DESC* pDesc);
+	void Ready_Components(const PROP_DESC* pDesc);
+	void Ready_Variables(const PROP_DESC* pDesc);
+	void Ready_Positions(const PROP_DESC* pDesc);
 	void Bind_Resources();
 
 public:

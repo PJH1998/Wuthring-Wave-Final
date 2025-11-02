@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "GameObject.h"
 #include"Editor_Enum.h"
+
 NS_BEGIN(Engine)
 class CRigidbody;
 NS_END

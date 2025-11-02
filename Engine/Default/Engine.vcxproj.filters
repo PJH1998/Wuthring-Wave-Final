@@ -314,6 +314,9 @@
     <Filter Include="01. Utility\04. Component\AnimMachine\Factory">
       <UniqueIdentifier>{cc380aed-f6ac-4cc7-a43a-13cf8d3d8a86}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\07. Shadow\ShadowMap">
+      <UniqueIdentifier>{7722a407-534c-4be0-99ae-0976cb6c7923}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -635,6 +638,9 @@
     <ClInclude Include="..\public\AnimStateFactory.h">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ShadowMap.h">
+      <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -931,6 +937,9 @@
     </ClCompile>
     <ClCompile Include="..\private\AnimStateFactory.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ShadowMap.cpp">
+      <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

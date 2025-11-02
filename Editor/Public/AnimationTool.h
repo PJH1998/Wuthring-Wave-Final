@@ -66,6 +66,11 @@ private:
 	void Render_Model_Detail();
 	void Render_Animation_Detail();
 
+	
+
+private:
+	// 5Depth Menu
+	void Render_Animation_ChildDetail();
 
 	
 	
@@ -138,6 +143,9 @@ private:
 
 	_wstring m_wSelected_AnimActorTag = {};
 	_string m_Selected_AnimActorTag = {};
+
+	_wstring m_wPrevSelected_AnimActorTag = {};
+	_string m_PrevSelected_AnimActorTag = {};
 
 
 	_string m_SelectedFromStateTag = {};

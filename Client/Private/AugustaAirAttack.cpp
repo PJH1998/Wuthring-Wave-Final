@@ -29,7 +29,7 @@ void CAugustaAirAttack::OnEnter()
 
     // 2. 복사본에서 필요한 값 읽기
     EAugustaAirAttackType eAirAttackType = context.m_eAirAttackType;
-	m_strPrevInfo = context.m_strPrevInfo; // 복사본에서 이상한 정보
+	m_strPrevInfo = context.m_strPrevInfo; // 복사본에서 받은 정보.
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eAirAttackType);
@@ -60,11 +60,16 @@ void CAugustaAirAttack::OnEnter()
 				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
+
             break;
         }
 
         case EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END:
         {
+			
+
             strBoneName = "WeaponProp05";
             m_fSpeed = 0.f;
             m_pAugusta->Set_Gravity(true);
@@ -74,11 +79,14 @@ void CAugustaAirAttack::OnEnter()
 				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
+
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_START:
         {
-			// 8. Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
 
             strBoneName = "WeaponProp02";
@@ -87,7 +95,7 @@ void CAugustaAirAttack::OnEnter()
         }
         case EAugustaAirAttackType::AIRATTACK_END:
         {
-			// 8. Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
 
             strBoneName = "WeaponProp02";
