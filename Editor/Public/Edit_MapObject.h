@@ -20,6 +20,8 @@ public:
 		_float4x4* WorldMatrix = { nullptr };
 		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 		OBJECTTYPE eObjectType;
+		_float3 vBoundingPos;
+		_float3 vBoundingExtends;
 	}MAP_LOAD;
 
 	typedef struct tagMapSave

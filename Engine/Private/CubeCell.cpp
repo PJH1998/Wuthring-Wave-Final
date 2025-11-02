@@ -67,19 +67,16 @@ void CCubeCell::Update(const _fvector& vCamPos)
 	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
 	{
 		// LOD SetUp
-		_float3 vCenter = m_pBoundingBox->Center;
-		_uint iLODIndex = {};
+		Compute_LOD(vCamPos);
 		for (auto& pObject : m_Objects)
 		{
 			if (nullptr == pObject)
 				continue;
-			//if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
-			//{
-			//}
-			_float fDistance = pObject->Compute_Distance(vCamPos);
-			iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
-			pObject->Set_LOD(iLODIndex);
-			m_pGameInstance->Add_Render_StaticObject(pObject);
+			if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
+			{
+				pObject->Set_LOD(m_iLODIndex);
+				m_pGameInstance->Add_Render_StaticObject(pObject);
+			}
 		}
 
 		// Child Update
@@ -154,6 +151,12 @@ _bool CCubeCell::isIn(const _float* pMinMax)
 		return false;
 
 	return true;
+}
+
+void CCubeCell::Compute_LOD(const _fvector& vCamPos)
+{
+	_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat3(&m_pBoundingBox->Center) - vCamPos));
+	m_iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
 }
 
 CCubeCell* CCubeCell::Create(_float3 vCenter, _float3 vExtent, _uint iDepth)

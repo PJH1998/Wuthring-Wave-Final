@@ -28,8 +28,9 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
 	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
-	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
+	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
+	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 
 	return S_OK;
 }
@@ -73,15 +74,15 @@ void CMapObject::Render()
 		//	m_pModelComArray[m_iLODIndex]->Render(i);
 		//}
 	}
-
-	if (m_iNumLOD <= m_iLODIndex)
-		m_iLODIndex = m_iNumLOD;
+	_uint iLODIndex = m_iLODIndex;
+	if (m_iNumLOD <= iLODIndex)
+		iLODIndex = m_iNumLOD;
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+	_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -92,20 +93,20 @@ void CMapObject::Render()
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
-		if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 			HasMask = false;
 		if (HasMask)
 		{
-			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
 
-			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 				HasNormal = false;
 		}
 
@@ -113,13 +114,13 @@ void CMapObject::Render()
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 
-		m_pModelComArray[m_iLODIndex]->Render(i);
+		m_pModelComArray[iLODIndex]->Render(i);
 	}
 }
 
 BoundingBox* CMapObject::Get_BoundingBox()
 {
-	return m_pModelComArray[0]->Get_BoundingBox();
+	return m_pBoundingBox;
 }
 
 void CMapObject::Ready_Component(void* pArg)
@@ -151,24 +152,25 @@ void CMapObject::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 
-	// Com_Rigidbody
-	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::MESH;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Static;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	//RigidbodyDesc.pModel = m_pModelCom;
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.pModel = m_pModelComArray[0];
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	if (!m_pBoundingBox)
+		CRASH("Failed");
 
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	if(pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	{
+		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::MESH;
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		RigidbodyDesc.eType = EMotionType::Static;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.pModel = m_pModelComArray[0];
+
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	}
+
 }
 
 CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -203,6 +205,7 @@ void CMapObject::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Delete(m_pBoundingBox);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);

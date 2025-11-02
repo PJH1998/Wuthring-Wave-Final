@@ -181,12 +181,14 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	//		File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 	//		Desc.WorldMatrix = &Matrix;
 	//		Desc.iLevel = m_iLevel;
+	//		File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+	//		File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
 	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
 	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 
-	//		m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
-	//			eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix,
+	//		m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
+	//			Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
 	//			vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower]() mutable {
 	//			CMapObject_Destruction::MAP_LOAD pDesc{};
 	//			strcpy_s(pDesc.ModelName, ModelName.c_str());
@@ -196,6 +198,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	//			pDesc.iLevel = ENUM_CLASS(eLevel);
 	//			pDesc.m_vImpulsePos = vImpulsePos;
 	//			pDesc.m_vImpulsePower = vImpulsePower;
+	//			pDesc.vBoundingPos = BoundingPos;
+	//			pDesc.vBoundingExtends = BoundingExtends;
 	//			m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
 	//				, PROTOTYPE::GAMEOBJECT, &pDesc);
 	//			});
@@ -217,17 +221,22 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			_float4x4 Matrix = {};
 			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 			Desc.WorldMatrix = &Matrix;
+			File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
 			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
 			_wstring ModelName = StringToWString(Desc.ModelName);
 
-			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
+				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
 				CMapObject::MAP_LOAD pDesc{};
 				strcpy_s(pDesc.ModelName, ModelName.c_str());
 				pDesc.iShaderPassIndex = ShaderPass;
 				pDesc.eObjectType = eObjectType;
 				pDesc.WorldMatrix = &Matrix;
 				pDesc.iLevel = ENUM_CLASS(eLevel);
+				pDesc.vBoundingPos = BoundingPos;
+				pDesc.vBoundingExtends = BoundingExtends;
 				m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
 					, PROTOTYPE::GAMEOBJECT, &pDesc);
 				});

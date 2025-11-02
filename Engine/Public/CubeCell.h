@@ -43,6 +43,7 @@ private:
 	vector<CCubeCell*>				m_ChildCells;
 	vector<class CStaticObject*>	m_Objects;
 	_uint									m_iDepth = {};
+	_uint									m_iLODIndex = {};
 
 	_float3								m_Corners[ENUM_CLASS(CORNER::END)] = {};
 	_float									m_MinMax[ENUM_CLASS(MINMAX::END)] = {};
@@ -52,6 +53,7 @@ private:
 private:
 	void									Compute_MinMax();
 	_bool									isIn(const _float* pMinMax);
+	void									Compute_LOD(const _fvector& vCamPos);
 
 public:
 	static CCubeCell* Create(_float3 vCenter, _float3 vExtent, _uint iDepth);

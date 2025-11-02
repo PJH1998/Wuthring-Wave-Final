@@ -99,14 +99,14 @@ HRESULT CLevel_Map::Initialize()
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_TriggerBox"),
 		CEdit_TriggerBox::Create(m_pDevice, m_pContext));
 
-	CEdit_TriggerBox::TRIGGER Tri;
-	Tri.iLevel = m_iLevel;
-	Tri.vExtends = _float3(20.f, 20.f, 20.f);
-	_matrix Mat = XMMatrixIdentity();
-	_float4x4 TT;
-	XMStoreFloat4x4(&TT, Mat);
-	Tri.WorldMatrix = &TT;
-	m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+	//CEdit_TriggerBox::TRIGGER Tri;
+	//Tri.iLevel = m_iLevel;
+	//Tri.vExtends = _float3(20.f, 20.f, 20.f);
+	//_matrix Mat = XMMatrixIdentity();
+	//_float4x4 TT;
+	//XMStoreFloat4x4(&TT, Mat);
+	//Tri.WorldMatrix = &TT;
+	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
 	return S_OK;
 }
 
@@ -199,10 +199,15 @@ void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
 
-	if (m_pPickedObject)
-		m_pPickedObject->Set_ImGuiOption();
-	else if (m_pPickedDestructObject)
-		m_pPickedDestructObject->Set_ImGuiOption();
+	if (m_eObjectType != static_cast<_uint>(OBJECTTYPE::TRIGGERBOX))
+	{
+		if (m_pPickedObject)
+			m_pPickedObject->Set_ImGuiOption();
+		else if (m_pPickedDestructObject)
+			m_pPickedDestructObject->Set_ImGuiOption();
+	}
+	else
+		Create_TriggerBox();
 
     ImGui::End();
 }
@@ -339,7 +344,7 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" };
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
         for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -440,7 +445,7 @@ void CLevel_Map::Menu_Save_Load()
 			for (const auto& Data : UsingPrototypeNames)
 			{
 				//_uint i = strlen(Data.c_str());
-				_uint StrSize = strlen(Data.c_str());
+				_uint StrSize = static_cast<_uint>(strlen(Data.c_str()));
 				File2.write(reinterpret_cast<const _char*>(&StrSize), sizeof(_uint));
 				File2.write(reinterpret_cast<const _char*>(Data.c_str()), StrSize);
 				File3 << Data.c_str() << endl;
@@ -539,6 +544,9 @@ void CLevel_Map::Menu_Save_Load()
 								Desc.WorldMatrix = &Matrix;
 								Desc.iLevel = m_iLevel;
 
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
 								File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
 								File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 
@@ -563,8 +571,9 @@ void CLevel_Map::Menu_Save_Load()
 								_float4x4 Matrix = {};
 								File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 								Desc.WorldMatrix = &Matrix;
-								/*m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-									, m_iLevel, TEXT("Layer_Test"), &Desc);*/
+								/*File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));*/
+
 
 								m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
 									CEdit_MapObject::MAP_LOAD pDesc{};
@@ -605,8 +614,8 @@ void CLevel_Map::Load_Objects()
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     //string FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
     //string FolderPath = "../../Client/Bin/Resource/Map/Test/";
-    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
-    string FolderPath = "../../Client/Bin/Resource/Map/";
+    string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;
@@ -735,6 +744,25 @@ void CLevel_Map::Load_Objects()
     
     m_pGameInstance->Wait_Thread_End();
 
+}
+
+void CLevel_Map::Create_TriggerBox()
+{
+	ImGui::Text("TriggerBox Info");
+	ImGui::InputFloat3("TriggerBox Pos", reinterpret_cast<_float*>(&m_vPickedPos), "%.1f");
+
+	ImGui::InputFloat3("TriggerBox Extends", m_TriggerBoxExtends);
+	if (ImGui::Button("Create"))
+	{
+	CEdit_TriggerBox::TRIGGER Tri;
+		Tri.iLevel = m_iLevel;
+		Tri.vExtends = _float3(m_TriggerBoxExtends[0], m_TriggerBoxExtends[1], m_TriggerBoxExtends[2]);
+		_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(m_vPickedPos.x, m_vPickedPos.y, m_vPickedPos.z, 1.f));
+		_float4x4 TT;
+		XMStoreFloat4x4(&TT, Mat);
+		Tri.WorldMatrix = &TT;
+		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+	}
 }
 
 HRESULT CLevel_Map::Ready_Static_Component()

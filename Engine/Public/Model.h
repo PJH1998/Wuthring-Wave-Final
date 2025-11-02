@@ -122,6 +122,10 @@ private:
 	_float								m_fPreScale = { 0.01f }; // RootMotionRate에 곱해줄 값.
 
 	BoundingBox*						m_pBoundingBox = { nullptr };
+
+	_float* pMin = { nullptr };
+	_float* pMax = { nullptr };
+
 #ifdef _DEBUG
 	vector<_string>					m_AnimationNames;
 	_uint m_iSelectIndex = { 0 };

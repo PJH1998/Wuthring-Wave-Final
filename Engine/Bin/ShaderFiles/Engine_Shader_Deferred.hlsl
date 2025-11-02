@@ -193,6 +193,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         if (fViewZ > g_vClipDistances[i])
             iCascadeIndex = i;
     }
+    
+    if(fViewZ >= g_fLastDistance)
+        return Out;
    
     float Gradiant = RPB_Gradiant(fViewZ);
     float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
