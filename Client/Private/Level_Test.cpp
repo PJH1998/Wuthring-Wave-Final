@@ -26,6 +26,8 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
     Ready_MonsterTest();
+
+    Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
@@ -177,6 +179,11 @@ void CLevel_Test::Ready_MonsterTest()
 		CRASH("Failed Ready Monster");
 }
 
+void CLevel_Test::Ready_Effect()
+{
+    m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+}
+
 #ifdef _DEBUG
 void CLevel_Test::Shader_Gui()
 {
@@ -189,6 +196,7 @@ void CLevel_Test::Shader_Gui()
 		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
 
 		ImGui::InputFloat("DISTANCE_SCALE", &m_fBlurDistanceScale);
+
 		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
 	}
 	ImGui::End();

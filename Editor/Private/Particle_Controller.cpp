@@ -28,30 +28,6 @@ void CParticle_Controller::Render()
 
 }
 
-//void CParticle_Controller::Texture_Loading(const char* TextureName, const _tchar* pFilePath)
-//{
-//    PARTICLE_TEXTURE Desc{};
-//    CTexture* pTexture = {};
-//   
-//    Desc.szName = TextureName;
-//   
-//    _char szDefault[MAX_PATH];
-//   
-//    strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
-//   
-//    strcat_s(szDefault, Desc.szName);
-//   
-//    MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
-//   
-//    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
-//        pTexture = CTexture::Create(m_pDevice, m_pContext, pFilePath, 1));
-//   
-//    Desc.pTexture = pTexture;
-//    Safe_AddRef(pTexture);
-//   
-//    m_Textures.push_back(Desc);
-//}
-
 void CParticle_Controller::Load_AllTextureFromFolder(const _string& strFolderPath)
 {
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -96,7 +72,6 @@ void CParticle_Controller::Particle_Tab()
     {
         if (ImGui::Begin("Particle Info"))
         {
-       
                 if (ImGui::CollapsingHeader("VIBuffer", ImGuiTreeNodeFlags_DefaultOpen))
                 {
                     ImGui::Checkbox("Loop", &(m_pSelectedVBDesc->IsLoop));
@@ -105,7 +80,38 @@ void CParticle_Controller::Particle_Tab()
                     {
                         m_pSelectedParticleDesc->IsSprite = m_pSelectedVBDesc->IsSprite;
                     }
+                    ImGui::Checkbox("Delay", &(m_pSelectedVBDesc->IsDelay));
 
+					if (ImGui::Checkbox("SpawnRing", &(m_pSelectedVBDesc->IsSpawnRing)))
+					{
+						m_pSelectedVBDesc->IsSpawnBox = false;
+					}
+
+					ImGui::Checkbox("RingAngle", &(m_pSelectedVBDesc->IsRingAngle));
+
+					if (ImGui::Checkbox("SpawnBox", &(m_pSelectedVBDesc->IsSpawnBox)))
+					{
+						m_pSelectedVBDesc->IsSpawnRing = false;
+					}
+                    ImGui::Separator();
+
+					if (m_pSelectedVBDesc->IsSpawnRing)
+					{
+						ImGui::Text("RMin/RMax");
+						ImGui::PushItemWidth(60);
+						ImGui::InputFloat("##RMin", &(m_pSelectedVBDesc->fRmin));
+						ImGui::SameLine();
+						ImGui::InputFloat("##RMax", &(m_pSelectedVBDesc->fRmax));
+						ImGui::PopItemWidth();
+
+						ImGui::Text("Degree Start/End");
+						ImGui::PushItemWidth(60);
+						ImGui::InputFloat("##DegreeX", &(m_pSelectedVBDesc->fDegreeAngle.x));
+						ImGui::SameLine();
+						ImGui::InputFloat("##DegreeY", &(m_pSelectedVBDesc->fDegreeAngle.y));
+						ImGui::PopItemWidth();
+						ImGui::Separator();
+					}
 
                     ImGui::Text("NumInstance");
                     ImGui::PushItemWidth(100);
@@ -134,7 +140,7 @@ void CParticle_Controller::Particle_Tab()
 
                     ImGui::Separator();
 
-                    ////////////////////////////////// 
+                    ////////////////////////////////// 스트레치 빌보드 설정
                     if (m_pSelectedVBDesc->IsStretch)
                     {
                         ImGui::Text("StretchWeight");
@@ -152,7 +158,7 @@ void CParticle_Controller::Particle_Tab()
                     }
                     ////////////////////////////////// 
 
-                    ////////////////////////////////// 
+                    //////////////////////////////////  스프라이트 설정
                     if (m_pSelectedVBDesc->IsSprite)
                     {
                         ImGui::Text("SpriteWeight");
@@ -167,6 +173,18 @@ void CParticle_Controller::Particle_Tab()
 
                         ImGui::Separator();
                     }
+                    //////////////////////////////////
+
+                    ////////////////////////////////// 딜레이 설정
+                    if (m_pSelectedVBDesc->IsDelay)
+                    {
+                        ImGui::Text("Delay");
+                        ImGui::PushItemWidth(100);
+                        ImGui::DragFloat("##Delay", &(m_pSelectedVBDesc->fDelay.y), 0.1f, 0.f, 3.f);
+                        ImGui::PopItemWidth();
+                        ImGui::Separator();
+                    }
+                    //////////////////////////////////
 
                     ImGui::Text("Center");
                     ImGui::PushItemWidth(60);
@@ -223,7 +241,7 @@ void CParticle_Controller::Particle_Tab()
 
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
-                    ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass));
+                    ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
 
                     ImGui::Text("Size");
@@ -258,7 +276,6 @@ void CParticle_Controller::Particle_Tab()
 
                     ImGui::Separator();
                    
-              
                     if (m_pSelectedParticleDesc->IsSprite)
                     {
                         ImGui::Text("Row / Col");
@@ -270,47 +287,28 @@ void CParticle_Controller::Particle_Tab()
                     }
                 }
 
-                //if (ImGui::Button("Apply"))
-                //{
-                //    CParticle* pParticle = {};
-                //    _wstring ParticleTag = {};
+                if (ImGui::CollapsingHeader("Base", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    if (ImGui::BeginCombo("Texture", "")) {
+                        for (size_t i = 0; i < m_Textures.size(); i++)
+                        {
+                            bool IsSelected = (m_iSelectedTexture == i);
+                            if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                            {
+                                m_iSelectedTexture = i;
+                                m_pSelectedParticleDesc->strTextureTag = m_Textures[i].strTextureTag;
+                            }
+                            if (IsSelected)
+                                ImGui::SetItemDefaultFocus();
+                        }
+                        ImGui::EndCombo();
+                    }
 
-                //    _int iCheckIndex = 0;
-                //    for (auto iter = m_Particles.begin(); iter != m_Particles.end();)
-                //    {
-                //        if (iCheckIndex == m_iSelectedParticle)
-                //        {
-                //            ParticleTag = iter->first;
-
-                //            m_pSelectedParticleDesc->strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
-                //            m_pSelectedParticleDesc->strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
-                //            m_pSelectedParticleDesc->strVIBufferTag += ParticleTag;
-
-                //            m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag);
-
-                //            m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_pSelectedParticleDesc->strVIBufferTag,
-                //                CVIBuffer_Point_Instance::Create(m_pDevice, m_pContext, m_pSelectedVBDesc));
-
-                //            pParticle = static_cast<CParticle*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_Particle"), PROTOTYPE::GAMEOBJECT, m_pSelectedParticleDesc));
-                //            m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::EFFECT), TEXT("Particle"), pParticle);
-
-                //            m_pSelectedParticle->SetActivate(false);
-                //            Safe_Release(m_pSelectedParticle);
-
-                //            m_pSelectedParticle = pParticle;
-
-                //            iter->second = pParticle;
-                //            Safe_AddRef(pParticle);
-                //            break;
-                //        }
-                //        else
-                //        {
-                //            ++iCheckIndex;
-                //            ++iter;
-                //        }
-                //    }
-
-                //}
+                    ImGui::Separator();
+                    if (m_iSelectedTexture >= 0) {
+                        ImGui::Image((ImTextureID)m_Textures[m_iSelectedTexture].pTexture->Get_SRV(0), ImVec2(256, 256));
+                    }
+                }
 
             ImGui::End();
         }
@@ -352,6 +350,7 @@ void CParticle_Controller::Particle_Base_Tab(CParticle::PARTICLE_DESC& tParticle
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_ParticleTag, strlen(m_ParticleTag), ParticleTag, MAX_PATH);
 
                 ParticleDesc.strMyTag = ParticleTag;
+                ParticleDesc.eMyType = EFFECT_TYPE::PARTICLE;
                 ParticleDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 ParticleDesc.strVIBufferTag = TEXT("Prototype_Componenet_VIBuffer_Instance_Point_");
                 ParticleDesc.strVIBufferTag += ParticleTag;
@@ -432,6 +431,20 @@ CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* CParticle_Controller::Get_VBDesc(
 
     return &iter->second;
 }
+void CParticle_Controller::Set_ParticleDesc(_wstring& ParticleTag, CParticle::PARTICLE_DESC& ParticleDesc)
+{
+    CParticle::PARTICLE_DESC Desc = {};
+    Desc = ParticleDesc;
+
+    m_tParticleDesc.emplace(ParticleTag, Desc);
+}
+void CParticle_Controller::Set_VBDesc(_wstring& ParticleTag, CVIBuffer_Point_Instance::POINT_INSTANCE_DESC& ParticlVBeDesc)
+{
+    CVIBuffer_Point_Instance::POINT_INSTANCE_DESC Desc = {};
+    Desc = ParticlVBeDesc;
+
+    m_tVBDesc.emplace(ParticleTag, Desc);
+}
 void CParticle_Controller::Set_ParticleTag(const _char* szParticleTag)
 {
     strcat_s(m_ParticleTag, szParticleTag);
@@ -501,7 +514,5 @@ void CParticle_Controller::Free()
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 
-    //for (auto& pTexture : m_Textures)
-    //    Safe_Release(pTexture.pTexture);
     m_Textures.clear();
 }

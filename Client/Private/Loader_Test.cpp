@@ -38,8 +38,15 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
+
+    m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     
+
+    m_pGameInstance->Wait_Thread_End();
+
 	Load_Action();
+
     //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
@@ -107,6 +114,7 @@ HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
 
+
     // Prototype_Component_BehaviorTree_Test
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
@@ -169,6 +177,15 @@ HRESULT CLoader_Test::Load_MonsterTest()
 		CElectroPredator::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Effect()
+{
+    m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+    m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+    m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
     return S_OK;
 }

@@ -6,8 +6,10 @@
 #include "Effect_Mesh.h"
 #include "ComputeShader.h"
 #include "AnimationTool.h"
+#include "Trail_Mesh.h"
 
 #include"Edit_MapObject.h"
+#include "Effect_Rect.h"
 
 
 CLevel_Effect::CLevel_Effect(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -26,7 +28,15 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"),
         CEffect_Mesh::Create(m_pDevice, m_pContext));
 
-    //��ƼŬ �׸���� ���̴�
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_TrailMesh"),
+        CTrail_Mesh::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectRect"),
+		CEffect_Rect::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
+		CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements));
 
@@ -34,7 +44,13 @@ HRESULT CLevel_Effect::Initialize()
     m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxInstance_FXMesh"),
         CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXMesh_Instance.hlsl"), VTXFXMESHINSTANCE::Elements, VTXFXMESHINSTANCE::iNumElements));
 
-    //��ƼŬ ����� ���̴�
+    //�Ϲ� �Ž� �׸���� ���̴� �߰��������.
+    m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxTrailMesh"),
+        CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_Shader_VtxFXRect"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxFXRect.hlsl"), VTXPOS::Elements, VTXPOS::iNumElements));
+        
     SHADER_MACRO eShaderMacro = {
         {"THREAD_X", "64" }
         ,{"THREAD_Y", "1" }
@@ -96,6 +112,17 @@ HRESULT CLevel_Effect::Initialize()
     }
 	Ready_Map("../../Client/Bin/Resource/Map/MapData/Effect_Map/");
 
+	LIGHT_DESC LightDesc{};
+	LightDesc.eType = LIGHT_DESC::DIRECTION;
+	LightDesc.vAmbient = _float4(0.7f, 0.7f, 0.7f, 1.f);
+	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 1.f, 1.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+
+	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
+	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
+	m_pGameInstance->SetUp_ShadowNF();
+
     return S_OK;
 }
 
@@ -105,7 +132,6 @@ void CLevel_Effect::Update(_float fTimeDelta)
 
         m_pEffect_Controller->Update();
 
-   
 }
 
 void CLevel_Effect::Render()

@@ -672,7 +672,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
+
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 

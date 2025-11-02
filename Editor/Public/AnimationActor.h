@@ -35,8 +35,6 @@ public:
 	virtual	void Render() override;
 	virtual void Render_Shadow() override;
 
-
-
 #ifdef _DEBUG
 public:
 	const vector<_string>& Get_AnimationNames() const;
@@ -54,13 +52,13 @@ public:
 	void Set_PlayAnimation(_bool IsPlay);
 
 	void Register_AllNotifies(const _string& strFolderPath);
-
 	
 	void Collider_Active(const _wstring& tag, _bool IsActive);
 	void Effect_Active(const _wstring& tag);
 
 	class CModel* Get_ModelCom() { return m_pModelCom; }
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
+	const _float4x4* Get_WorldMatrixPtr();
 
 	_float4 m_vInitPosition = {};
 #endif // _DEBUG

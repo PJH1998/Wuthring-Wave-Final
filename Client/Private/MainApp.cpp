@@ -13,6 +13,8 @@
 
 #include "SpringCamera.h"
 
+#include "Effect_Prefab.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -228,6 +230,33 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SpringCamera"),
 		CSpringCamera::Create(m_pDevice, m_pContext))))
 		CRASH("SpringCamera");
+
+	// Prefab
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
+		CEffect_Prefab::Create(m_pDevice, m_pContext))))
+		CRASH("Prefab");
+
+	// Shader_VtxInstance_PointParticle
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements))))
+		CRASH("Shader_VtxInstance_PointParticle");
+
+	//Shader_VtxTrailMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxTrailMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxTrailMesh");
+
+	//Shader_ComputeShader_Particle
+	SHADER_MACRO eShaderMacroParticle = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+	string strEntryParticle = "main";
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+
 }
 
 void CMainApp::Start_Level()

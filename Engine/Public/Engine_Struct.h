@@ -85,7 +85,9 @@ namespace Engine
 		_wstring	strMyTag;
 		EFFECT_TYPE eMyType = EFFECT_TYPE::END;
 		_bool		IsRootOn = false;
-		const _float4x4*  RootMatrix = {};
+		const _float4x4**  RootMatrix = {};
+		const _float4x4** ParentMatrix = {};
+		_uint	CurrentLevel;
 	}EFFECT_DESC;
 
 	typedef struct ParticleSRV	
@@ -93,7 +95,8 @@ namespace Engine
 		_float4 DefaultPos; 
 
 		_float  fSpeed;
-		_float	_pad0[3];
+		_float  fDelay;
+		_float	_pad0[2];
 
 	}PARTICLE_SRV;
 
@@ -104,7 +107,8 @@ namespace Engine
 		
 		_uint	IsStretch;
 		_uint	IsSprite;
-		_float	_pad[2];
+		_uint   IsDelay;
+		_float	_pad;
 	}PARTICLE_DefaultCB;
 
 	typedef struct ParticleSpeedCB
@@ -129,7 +133,6 @@ namespace Engine
 
 		_float fSpeed;						
 		_float3 vColor;
-
 	}FXMESH_SRV;
 
 	typedef struct FXMeshCB
@@ -196,6 +199,14 @@ namespace Engine
 		class CCollideComponent* pComponent = { nullptr };
 		void* pDesc = { nullptr };
 	}COLLISION_DATA;
+
+
+	typedef struct tagSampleDesc
+	{
+		_float3 vPos = {};
+		_float fSpawnTime = {};
+
+	}SAMPLE_DESC;
 
 #pragma region SEQUENCE
 	// Sequence Item Frame, Tag => Sequence가 갖고 있음
