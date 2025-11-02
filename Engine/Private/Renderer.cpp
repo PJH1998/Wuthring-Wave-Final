@@ -994,7 +994,10 @@ HRESULT CRenderer::Ready_RT()
 		ASSERT_CRASH(false);
 
 	/* RenderTarget Shade */
-	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_ToonRim"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(1.f, 1.f, 1.f, 1.f))))
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_ToonRim"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Shade"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f ,0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Specular"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
