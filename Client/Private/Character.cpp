@@ -374,13 +374,18 @@ _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 }
 
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
     ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    
+	
     return IsPlayAnimationEnd;
+}
+
+void CCharacter::Start_FlyBlending(_float fDuration)
+{
+	
 }
 
 

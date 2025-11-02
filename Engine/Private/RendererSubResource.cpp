@@ -115,6 +115,8 @@ HRESULT CRendererSubResource::Bind_LimitVelocity(CShader* pShader)
 {
 	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_fLimitVelocity, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
+
+	return S_OK;
 }
 
 HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
