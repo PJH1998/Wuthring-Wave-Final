@@ -32,7 +32,7 @@ protected:
 	_uint		m_iLODIndex = {};
 	// Render true/false
 	_bool		m_isDraw = { false };
-
+	BoundingBox* m_pBoundingBox = { nullptr };
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;
 	virtual void					Free() override;

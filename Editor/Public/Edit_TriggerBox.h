@@ -31,21 +31,20 @@ public:
 	virtual		void			Update(_float fTimeDelta)override;
 	virtual		void			Late_Update(_float fTimeDelta)override;
 
+
 private:
 	void Ready_Components(void* pArg);
 
 private:
-	BoundingBox* m_pBoundingBox = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CMap_Interface* m_pMapInterface = { nullptr };
 
 	void Collision();
 
-	void CallBack(_uint iFuncIndex,void* pArg);
 private:
-	vector<CGameObject*> m_CurrentFrame;
-	vector<CGameObject*> m_LastFrame;
-
 	vector< TriggerCallback> m_Functions;
+	_uint m_iTriggerIndex = {};
+	_float3 m_vExtends = {};
 public:
 	static CEdit_TriggerBox* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

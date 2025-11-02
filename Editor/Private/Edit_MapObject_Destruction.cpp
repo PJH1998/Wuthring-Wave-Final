@@ -128,8 +128,14 @@ HRESULT CEdit_MapObject_Destruction::Initialize_Clone(void* pArg)
 		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
 		event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
 
+		_float3 vBoundingBoxPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
+		_float3 vBoundingBoxExtends = m_pModelComArray[0]->Get_BoundingBox()->Extents;
+		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxPos), sizeof(_float3));
+		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxExtends), sizeof(_float3));
+
 		event.File.write(reinterpret_cast<const _char*>(&m_vImpulsePos), sizeof(_float3));
 		event.File.write(reinterpret_cast<const _char*>(&m_vImpulsePower), sizeof(_float3));
+
 		});
 #endif
 

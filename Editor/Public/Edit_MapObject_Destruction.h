@@ -19,6 +19,8 @@ public:
 		_float4x4* WorldMatrix = { nullptr };
 		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 		OBJECTTYPE eObjectType;
+		_float3 vBoundingPos;
+		_float3 vBoundingExtends;
 		_float3 m_vImpulsePos = {};
 		_float3 m_vImpulsePower = _float3(1.f, 1.f, 1.f);
 	}MAP_LOAD;

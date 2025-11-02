@@ -27,6 +27,8 @@ public:
 	void Menu_Model_Load();
 	void Menu_Object_Type();
 	void Load_Objects();
+
+	void Create_TriggerBox();
 	//?대씪?댁뼵?몄뿉 由ъ냼?ㅼ뿉 Map ?대뜑???덈뒗 .dat???쎌뼱???ㅻ툕?앺듃?ㅻ쭔) ?꾨Ⅴ硫??앹꽦?????덇쾶 ?섍린. ?앹꽦 ?꾩튂??萸?. ?뚯븘??
 
 private:
@@ -72,6 +74,7 @@ private:
 	_string m_CurrentObjectMode;
 	_uint m_eObjectType = {};
 	mutex m_Mutex;
+	_float m_TriggerBoxExtends[3] = { 10.f,10.f,10.f };
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

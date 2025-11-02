@@ -38,7 +38,6 @@ private:
 	void CallBack(_uint iFuncIndex, void* pArg);
 
 private:
-	BoundingBox* m_pBoundingBox = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
 
