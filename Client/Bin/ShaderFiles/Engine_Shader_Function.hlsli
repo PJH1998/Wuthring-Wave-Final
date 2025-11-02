@@ -109,6 +109,19 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     return (vDiffuse + Specular);
 }
 
+float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
+{
+    float fRimPower = 0.f;
+    
+    fRimPower = 1.f - abs(dot(vNormal, vLook));
+    
+    fRimPower *= smoothstep(0.2f, 1.f, NdotL);
+    
+    fRimPower = pow(fRimPower, 3.f);
+    
+    return fRimPower;
+}
+
 float2 Compute_Texcoord(float2 vProjXY)
 {
     float2 vTexcoord = 0.f;

@@ -28,7 +28,6 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_ShadowNF();
 
-
 	// UI
 	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
