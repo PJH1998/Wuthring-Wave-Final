@@ -198,7 +198,46 @@ void CASM_Interface::Node_Info()
 			}
 			if(ImGui::Button("Delete Condition"))
 			{
+				CONDITION_TAG Temp = m_Nodes[m_iCurrentNodeIndex].Conditions;
 				m_Nodes[m_iCurrentNodeIndex].Conditions = CONDITION_TAG{};
+
+				if (Temp.strValue.length() != 0)
+				{
+					_bool isDuplicate{};
+					for (const auto tNode : m_Nodes)
+						if (0 == tNode.Conditions.strValue.compare(Temp.strValue))
+						{
+							isDuplicate = true;
+							break;
+						}
+					if(false == isDuplicate)
+						m_RequireValueKey.erase(Temp.strValue);
+				}
+				if (Temp.strCondition.length() != 0)
+				{
+					_bool isDuplicate{};
+					for (const auto tNode : m_Nodes)
+						if (0 == tNode.Conditions.strCondition.compare(Temp.strCondition))
+						{
+							isDuplicate = true;
+							break;
+						}
+					if (false == isDuplicate)
+						m_RequireConditionKey.erase(Temp.strCondition);
+				}
+				if (Temp.strConst.length() != 0)
+				{
+					_bool isDuplicate{};
+					for (const auto tNode : m_Nodes)
+						if (0 == tNode.Conditions.strConst.compare(Temp.strConst))
+						{
+							isDuplicate = true;
+							break;
+						}
+					if (false == isDuplicate)
+						m_RequireConstKey.erase(Temp.strConst);
+				}
+
 				m_isConditionCreate = false;
 			}
 		}
@@ -694,6 +733,9 @@ void CASM_Interface::Load_BT_Data()
 		m_Links.clear();
 		m_Templates.clear();
 		m_iNodeCount = 0;
+		m_RequireValueKey.clear();
+		m_RequireConditionKey.clear();
+		m_RequireConstKey.clear();
 
 		json BT_Data;
 		file >> BT_Data;
@@ -778,6 +820,7 @@ void CASM_Interface::Load_BT_Data()
 			m_pBehaviorTree = CBehavior_Tree::Create(m_pDevice, m_pContext, strFilePath.c_str());
 			m_isLoadtoComponent = false;
 		}
+		m_iCurrentNodeIndex = -1;
 		m_isShowLoadFile = false;
 	}
 }

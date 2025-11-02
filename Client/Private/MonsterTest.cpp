@@ -1,6 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "MonsterTest.h"
-#include  "GameInstance.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -82,10 +81,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-
-	// 2025 10 29	루트모션 앞뒤는 재대로 적용되는데 좌우가 반전됨.
-	//				모델 preMatrix 0,00001로 바로 설정하면 루트모션 값이 크게 튀어나감
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -156,8 +152,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::DETECT)){}
-	else
-		m_isTrigger = false;
+	//else
+	//	m_isTrigger = false;
 }
 
 HRESULT CMonsterTest::Bind_Resources()
@@ -199,7 +195,10 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
-	
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		BeHit(iLayer, pDesc, Manifold);
+		});
+
 	m_pColliderCom->Set_Desc(m_pTransformCom);
 
 
@@ -219,7 +218,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 		CRASH("MonsterTest/Com_Model");
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
-	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
+	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
 	//Com_AnimMachine
 	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
@@ -246,7 +245,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
 	//Com_BehaviorTree
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
+	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		TEXT("MonsterTest/Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
@@ -286,8 +285,8 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 
 		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 #ifdef _DEBUG
-		cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
-		cout << "distance: " << m_fDistance << endl;
+		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
+		//cout << "distance: " << m_fDistance << endl;
 #endif
 	}
 	for(_uint i = 0; i < 10; ++i)
@@ -317,6 +316,16 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+}
+
+void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	{
+#ifdef _DEBUG
+		cout << "On Hit! (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 }
 
 _bool CMonsterTest::isKnockDown()

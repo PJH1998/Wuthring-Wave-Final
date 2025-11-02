@@ -27,9 +27,10 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
 	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
-	m_iNumLOD = m_pModelComArray.size() - 1;
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
-	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
+	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
+	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
+	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 
 	return S_OK;
 }
@@ -117,6 +118,11 @@ void CMapObject::Render()
 	}
 }
 
+BoundingBox* CMapObject::Get_BoundingBox()
+{
+	return m_pModelComArray[0]->Get_BoundingBox();
+}
+
 void CMapObject::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
@@ -146,24 +152,25 @@ void CMapObject::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 
-	// Com_Rigidbody
-	//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eShape = SHAPE::MESH;
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//RigidbodyDesc.eType = EMotionType::Static;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	//RigidbodyDesc.pModel = m_pModelCom;
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.pModel = m_pModelComArray[0];
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	if (!m_pBoundingBox)
+		CRASH("Failed");
 
-	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	if(pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	{
+		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::MESH;
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		RigidbodyDesc.eType = EMotionType::Static;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.pModel = m_pModelComArray[0];
+
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	}
+
 }
 
 CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -198,6 +205,7 @@ void CMapObject::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Delete(m_pBoundingBox);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);

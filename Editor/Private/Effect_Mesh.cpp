@@ -37,10 +37,11 @@ HRESULT CEffect_Mesh::Initialize_Clone(void* pArg)
 
     m_IsRoot = pDesc->IsRootOn;
     
-    if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-    //�ӽ�ó��
     m_isActivate = true;
+
+    XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
+    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
+
 
     return S_OK;
 }
@@ -54,20 +55,17 @@ void CEffect_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    if(m_IsRoot)
-        Root_Transform();
-
-
     m_pVIBufferCom->Bind_CSResources(m_pComputeShaderCom, fTimeDelta);
-    //������ ó�� ��� ?
-   /* m_pVIBufferCom->Bind_CSResources(m_pComputeShader, fTimeDelta);*/
 
-   // m_vLifeTime.x += fTimeDelta;
-   //
-   // if (m_vLifeTime.x >= m_vLifeTime.y)
-   //     m_isActivate = false;
-   //
-    //������Ÿ�� ������ ��Ȱ��ȭ
+    m_vLifeTime.x += fTimeDelta;
+   
+    if (m_vLifeTime.x >= m_vLifeTime.y)
+    {
+        m_isActivate = false;
+        m_vLifeTime.x = 0.f;
+        m_pVIBufferCom->Reset_UAV();
+    }
+
 }
 
 void CEffect_Mesh::Late_Update(_float fTimeDelta)
@@ -75,7 +73,7 @@ void CEffect_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
 }
 
 void CEffect_Mesh::Render()
@@ -90,16 +88,25 @@ void CEffect_Mesh::Render()
     m_pVIBufferCom->Render();
 }
 
-//Test
-void CEffect_Mesh::Root_Transform()
+void CEffect_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    _matrix RootMatrix = XMLoadFloat4x4(m_ParentMatrix);
+    if (_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
 
-    for (size_t i = 0; i < 3; i++)
-        RootMatrix.r[i] = XMVector3Normalize(RootMatrix.r[i]);
+   m_vLifeTime.x = 0.f;
+   Root_Transform(WorldMatrix);
+   m_pVIBufferCom->Reset_UAV();
+}
+
+void CEffect_Mesh::Root_Transform(_fmatrix WorldMatrix)
+{
+    _matrix SpawnMatrix = WorldMatrix;
+
+    SpawnMatrix.r[3] = XMVectorSetW(SpawnMatrix.r[3], 1.f);
 
     XMStoreFloat4x4(&m_ComBindMatrix,
-        (m_pTransformCom->Get_WorldMatrix() * RootMatrix));
+        m_pTransformCom->Get_WorldMatrix() *
+        SpawnMatrix);
 }
 
 HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
@@ -112,7 +119,6 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //�ؽ�ó ������ ����ϴµ� ��� ���� ����غ���
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -126,16 +132,8 @@ HRESULT CEffect_Mesh::Ready_Components(EFFECTMESH_DESC& Desc)
 
 HRESULT CEffect_Mesh::Bind_ShaderResources()
 {
-    if (!m_IsRoot)
-    {
-        if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-            return E_FAIL;
-    }
-    else
-    {
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
-            return E_FAIL;
-    }
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+       return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;

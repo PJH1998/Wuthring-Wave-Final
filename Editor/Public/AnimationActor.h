@@ -41,8 +41,6 @@ public:
 	virtual	void Render() override;
 	virtual void Render_Shadow() override;
 
-
-
 #ifdef _DEBUG
 public:
 	const vector<_string>& Get_AnimationNames() const;
@@ -62,11 +60,13 @@ public:
 	void Register_AllNotifies(const _string& strFolderPath);
 
 
+	
 	void Collider_Active(const _wstring& tag, _bool IsActive);
 	void Effect_Active(const _wstring& tag);
 
 	class CModel* Get_ModelCom() { return m_pModelCom; }
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
+	const _float4x4* Get_WorldMatrixPtr();
 
 	void Set_ChildActor(CAnimationActor* pChildActor) { m_pChildActor = pChildActor; }
 	_bool Is_ChildActor() { return m_pChildActor != nullptr; }

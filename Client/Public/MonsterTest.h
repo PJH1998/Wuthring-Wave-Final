@@ -72,6 +72,7 @@ private:
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();

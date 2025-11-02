@@ -141,7 +141,10 @@ void CAnimationActor::Update(_float fTimeDelta)
     if (m_IsPlayAnimation)
     {
         IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
-        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, true, 1.f);
+
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
@@ -361,6 +364,11 @@ const _float4x4* CAnimationActor::Get_BoneMatrix(const _string& strBoneName)
 
     return pBoneMatrix;
 }
+const _float4x4* CAnimationActor::Get_WorldMatrixPtr()
+{
+    return m_pTransformCom->Get_WorldMatrixPtr();
+}
+
 void CAnimationActor::Child_Render()
 {
 	ASSERT_CRASH(m_pChildActor);

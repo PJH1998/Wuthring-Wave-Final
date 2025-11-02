@@ -38,16 +38,17 @@ public:
 	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 	void		Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
 	void		Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
+	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
 private:
-	ID3D11Device*						m_pDevice = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*			m_pContext = { nullptr };
 	class CGameInstance*			m_pGameInstance = { nullptr };
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	list<class CGameObject*>		m_StaticObjects[2];
-	atomic<_uint>						m_iDoubleBufferIndex = {};
+	atomic<_uint>					m_iDoubleBufferIndex = {};
 
 	class CShader*					m_pShader = { nullptr };
 	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };

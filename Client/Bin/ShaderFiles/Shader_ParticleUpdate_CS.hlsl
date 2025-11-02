@@ -16,12 +16,15 @@ struct ParticleState
     float4 VelTail;         //x,y,z = Vel / w = Tail
     
     float Phase;
+    float3 _pad0;
 };
 
 struct ParticleStatic
 {
     float4 DefaultPos;
-    float Speed; float3 _pad0; 
+    float Speed; 
+    float Delay;
+    float2 _pad0; 
 };
 
 
@@ -33,7 +36,8 @@ cbuffer OptionCB : register(b0)
     
     uint IsStretch;
     uint IsSprite;
-    float2 _pad0;
+    uint IsDelay;
+    float _pad0;
 }
 
 cbuffer SpeedCB : register(b1)
@@ -110,6 +114,21 @@ void main(uint3 tid : SV_DispatchThreadID)
 {
     uint i = tid.x;
     
+    if (IsDelay == 1)
+    {
+        if (g_ParticleStatic[i].Delay >= g_ParticleState[i].Delay.x)
+        {
+            g_ParticleState[i].Delay.x += DeltaTime;
+            g_ParticleState[i].Delay.y = 1.f;
+            return;
+        }
+        else
+        {
+            g_ParticleState[i].Delay.y = 0.f;
+        }
+    }
+    
+    
     //if (g_ParticleState[i].LifeTime.x <= g_ParticleState[i].LifeTime.y)
     //{
     float4 PreviousPos = g_ParticleState[i].Pos;
@@ -163,7 +182,7 @@ void main(uint3 tid : SV_DispatchThreadID)
         
         float fPhase = g_ParticleState[i].Phase;     
         
-        fPhase += (fSpriteDefault + fSpriteWeight * fSpeed) * DeltaTime;
+        fPhase += (fSpriteDefault + (fSpriteWeight * fSpeed)) * DeltaTime;
         
         g_ParticleState[i].Phase = fPhase;
     }
@@ -177,6 +196,9 @@ void main(uint3 tid : SV_DispatchThreadID)
             g_ParticleState[i].Pos = g_ParticleStatic[i].DefaultPos;
             g_ParticleState[i].VelTail = float4(0.f, 0.f, 0.f, 0.f);
             g_ParticleState[i].Phase = 0.f;
+            g_ParticleState[i].Delay.x = 0.f; 
+            g_ParticleState[i].Delay.y = 1.f;
+
         }
     }
     else

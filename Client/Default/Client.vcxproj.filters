@@ -85,9 +85,6 @@
     <Filter Include="03. GameObject\Camera\Spring">
       <UniqueIdentifier>{ede301d8-870a-4741-b3fc-ef4ad81d9087}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\MonsterTest">
-      <UniqueIdentifier>{2c3f6197-3925-414b-870c-256facfb484c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI">
       <UniqueIdentifier>{e3e754ff-d915-4aa3-b5f5-0d09b20d656d}</UniqueIdentifier>
     </Filter>
@@ -160,6 +157,18 @@
     <Filter Include="03. GameObject\Weapon\Augusta">
       <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect">
+      <UniqueIdentifier>{0bd0ad0c-ce59-4ec2-bbee-d7fe62618a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab">
+      <UniqueIdentifier>{4d8babfa-3c25-448e-8b30-d7fda6e85546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Particle">
+      <UniqueIdentifier>{5bdbb908-4119-4d78-a40e-4a501a3c2497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\TrailMesh">
+      <UniqueIdentifier>{9c4ff355-bd13-4b3e-94a1-15e0b1f6cb7f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Common">
       <UniqueIdentifier>{d56cb8b9-0472-4119-9694-c75f26e7e168}</UniqueIdentifier>
     </Filter>
@@ -184,11 +193,23 @@
     <Filter Include="03. GameObject\Weapon\Rover">
       <UniqueIdentifier>{469434cf-11b1-4aa1-aee2-d91080f9ced2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\MonsterTest\AttackVolume">
-      <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster">
+      <UniqueIdentifier>{5e9c0d4e-a9fe-420d-af13-5a6fe9e85554}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest">
+      <UniqueIdentifier>{2c3f6197-3925-414b-870c-256facfb484c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\AttackVolume">
+      <UniqueIdentifier>{45e65600-37bd-4981-9870-e96835e72dc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\HavocWarrior">
+      <UniqueIdentifier>{53439f99-8c0e-4db1-8bef-57b3bbbabe9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\ElectroPredator">
+      <UniqueIdentifier>{da785c09-916c-4fe0-a759-16e111b51508}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Weapon\Common">
       <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
@@ -271,7 +292,7 @@
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MonsterTest.h">
-      <Filter>03. GameObject\Actor\MonsterTest</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Animator_UI.h">
       <Filter>03. GameObject\UI\_Component</Filter>
@@ -396,6 +417,15 @@
     <ClInclude Include="..\Public\AugustaGroundSpecial.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Character.h">
       <Filter>03. GameObject\Actor\Player\Common</Filter>
     </ClInclude>
@@ -427,7 +457,7 @@
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
     <ClInclude Include="CAttackVolume.h">
-      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Camera.h">
       <Filter>97. Event</Filter>
@@ -459,6 +489,13 @@
     <ClInclude Include="..\Public\AugustaAirFly.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\HavocWarrior.h">
+      <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\ElectroPredator.h">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -524,7 +561,7 @@
       <Filter>03. GameObject\Camera\Spring</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MonsterTest.cpp">
-      <Filter>03. GameObject\Actor\MonsterTest</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest</Filter>
     </ClCompile>
     <ClCompile Include="..\private\Animator_UI.cpp">
       <Filter>03. GameObject\UI\_Component</Filter>
@@ -557,9 +594,6 @@
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Augusta.cpp">
-      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\AugustaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AirState.cpp">
@@ -643,6 +677,15 @@
     <ClCompile Include="..\Private\AugustaGroundSpecial.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Prefab.cpp">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Character.cpp">
       <Filter>03. GameObject\Actor\Player\Common</Filter>
     </ClCompile>
@@ -665,7 +708,10 @@
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="CAttackVolume.cpp">
-      <Filter>03. GameObject\Actor\MonsterTest\AttackVolume</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Director.cpp">
       <Filter>01. GameSystem\Director</Filter>
@@ -694,6 +740,13 @@
     <ClCompile Include="..\Private\AugustaAirFly.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\HavocWarrior.cpp">
+      <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\ElectroPredator.cpp">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -728,6 +781,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
@@ -737,6 +793,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

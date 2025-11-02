@@ -1,6 +1,6 @@
 #include "Engine_Shader_State.hlsli"
 
-// Emissive �ּ�ġ
+// Emissive �ּ�ġ
 // Blur Weight
 float g_fWeights[13] =
 {
@@ -9,14 +9,14 @@ float g_fWeights[13] =
 
 float g_fLUT_Size = 16.f;
 
-
-float g_fEmissiveThreshold = 0.6f;
+//���������� �������� ���� �� �������� ?
+float g_fEmissiveThreshold = 0.7f;
 
 float g_fLuminence[3] = { 0.2126f, 0.7152f, 0.0722f };
 
 //PBR
-float g_fGlobalRoughness = 0.2f; // PBR.y
 float g_fGlobalMetallic = 0.f;  // PBR.x
+float g_fGlobalRoughness = 0.25f; // PBR.y
 
 float Luminance(float3 vColor)
 {

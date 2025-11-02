@@ -30,7 +30,9 @@ CModel::CModel(const CModel& Prototype)
 	m_Buffers {Prototype.m_Buffers},
 	m_SRVs { Prototype.m_SRVs },
 	m_isRibAnimation { Prototype.m_isRibAnimation },
-	m_pBoundingBox{ Prototype.m_pBoundingBox }
+	pMin{Prototype.pMin},
+	pMax{Prototype.pMax}
+	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
 		Safe_AddRef(pMesh);
@@ -292,8 +294,10 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 			return E_FAIL;
 
 	}
-	
-
+#ifdef _DEBUG
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+		Ready_BoundingBox(pMin, pMax);
+#endif
     return S_OK;
 }
 
@@ -492,8 +496,9 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 
 void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
-	_float3 vCenter = {};
+	_float3 vCenter = _float3(0.f, 0.f, 0.f);
 	_float3 vExtends = {};
+
 	vCenter.x = (pMaxPos[0] + pMinPos[0]) * 0.5f;
 	vCenter.y = (pMaxPos[1] + pMinPos[1]) * 0.5f;
 	vCenter.z = (pMaxPos[2] + pMinPos[2]) * 0.5f;
@@ -667,7 +672,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
+
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
@@ -786,9 +791,10 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
 
-	_float* pMin = nullptr;
-	_float* pMax = nullptr;
+	//_float* pMin = nullptr;
+	//_float* pMax = nullptr;
 
+#ifdef _DEBUG
 	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO== m_eType)
 	{
 		pMin = new _float[3];
@@ -800,7 +806,7 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 			pMax[i] = FLT_MIN;
 		}
 	}
-
+#endif
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
 		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
@@ -808,13 +814,13 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 		m_Meshes.push_back(pMesh);
 	}
 
-	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
-	{
-		Ready_BoundingBox(pMin, pMax);
+	//if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+	//{
+	//	//Ready_BoundingBox(pMin, pMax);
 
-		Safe_Delete_Array(pMin);
-		Safe_Delete_Array(pMax);
-	}
+	//	Safe_Delete_Array(pMin);
+	//	Safe_Delete_Array(pMax);
+	//}
 
 	return S_OK;
 }
@@ -1097,7 +1103,18 @@ void CModel::Free()
 		Safe_Release(pUAV);
 	m_UAVs.clear();
 
-	if (!m_isClone)
-		Safe_Delete(m_pBoundingBox);
 
+#ifdef _DEBUG
+
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+	{
+		if (m_isClone)
+			Safe_Delete(m_pBoundingBox);
+		else
+		{
+			Safe_Delete_Array(pMin);
+			Safe_Delete_Array(pMax);
+		}
+	}
+#endif
 }

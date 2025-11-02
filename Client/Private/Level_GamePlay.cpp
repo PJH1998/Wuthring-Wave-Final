@@ -28,7 +28,6 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_ShadowNF();
 
-
 	// UI
 	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
@@ -49,6 +48,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+
+	Ready_Effect();
+
+
 	return S_OK;
 }
 
@@ -119,6 +122,11 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
+}
+
+void CLevel_GamePlay::Ready_Effect()
+{
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
 }
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
