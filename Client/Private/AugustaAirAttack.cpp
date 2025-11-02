@@ -14,7 +14,7 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-	// Parts 등록.
+	// 매핑.
 
     return S_OK;
 }
@@ -107,7 +107,6 @@ void CAugustaAirAttack::OnEnter()
 	// 공통으로 무기는 다 나옴.
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-
     
 
 

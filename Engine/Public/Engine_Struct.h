@@ -221,16 +221,16 @@ namespace Engine
 		_float fPadding;            // 4 
 
 		// RL Blend Clip
-		_uint iClipIndexL;          // 4 
-		_uint iClipIndexMidLR;      // 4 
-		_uint iClipIndexR;          // 4 
-		_uint iWeightClipLR;       // 4 
+		_string strClipxL;          // 4 
+		_string strClipMidLR;      // 4 
+		_string strClipxR;          // 4 
+		_string strWeightClipLR;       // 4 
 
 		// UD Blend Clip
-		_uint iClipIndexD;          // 4 
-		_uint iClipIndexMidDU;      // 4 
-		_uint iClipIndexU;          // 4 
-		_uint iWeightClipDU;       // 4 
+		_string strClipxD;          // 4 
+		_string strClipMidDU;      // 4 
+		_string strClipxU;          // 4 
+		_string strWeightClipDU;       // 4 
 	}GPU_BLEND_INFO;
 
 	typedef struct tagCollisionData {

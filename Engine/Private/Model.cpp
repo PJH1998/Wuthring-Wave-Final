@@ -619,7 +619,6 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	}
 
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
-
 	// Blend Enabled가 True 라면? 정보 바인딩.
 	if (gpuBlendInfo.IsBlendEnabled)
 	{
@@ -628,17 +627,38 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 		pAnimCBInfo->fBlendParamDU = gpuBlendInfo.fBlendParamDU;
 
 		// RL
-		pAnimCBInfo->iClipIndexL = gpuBlendInfo.iClipIndexL;
-		pAnimCBInfo->iClipIndexMidLR = gpuBlendInfo.iClipIndexMidLR;
-		pAnimCBInfo->iClipIndexR = gpuBlendInfo.iClipIndexR;
-		pAnimCBInfo->iWeightClipLR = gpuBlendInfo.iWeightClipLR;
+		pAnimCBInfo->iClipIndexL = m_AnimationNameToIndex[gpuBlendInfo.strClipxL];
+		pAnimCBInfo->iClipIndexMidLR = m_AnimationNameToIndex[gpuBlendInfo.strClipMidLR];
+		pAnimCBInfo->iClipIndexR = m_AnimationNameToIndex[gpuBlendInfo.strClipxR];
+		pAnimCBInfo->iWeightClipLR = m_AnimationNameToIndex[gpuBlendInfo.strWeightClipLR];
 
 		// UD
-		pAnimCBInfo->iClipIndexD = gpuBlendInfo.iClipIndexD;
-		pAnimCBInfo->iClipIndexMidDU = gpuBlendInfo.iClipIndexMidDU;
-		pAnimCBInfo->iClipIndexR = gpuBlendInfo.iClipIndexR;
-		pAnimCBInfo->iWeightClipDU = gpuBlendInfo.iWeightClipDU;
+		pAnimCBInfo->iClipIndexD = m_AnimationNameToIndex[gpuBlendInfo.strClipxD];
+		pAnimCBInfo->iClipIndexMidDU = m_AnimationNameToIndex[gpuBlendInfo.strClipMidDU];
+		pAnimCBInfo->iClipIndexU = m_AnimationNameToIndex[gpuBlendInfo.strClipxU];
+		pAnimCBInfo->iWeightClipDU = m_AnimationNameToIndex[gpuBlendInfo.strWeightClipDU];
 	}
+	else //
+	{
+		// Blending이 비활성화되었음을 GPU에 명확히 알립니다.
+		pAnimCBInfo->IsBlendEnabled = false;
+
+		// (안전 장치) HLSL에서 쓰레기 값을 읽는 것을 방지하기 위해
+		// 나머지 블렌드 관련 필드들을 0으로 초기화합니다.
+		pAnimCBInfo->fBlendParamLR = 0.f;
+		pAnimCBInfo->fBlendParamDU = 0.f;
+
+		pAnimCBInfo->iClipIndexL = 0;
+		pAnimCBInfo->iClipIndexMidLR = 0;
+		pAnimCBInfo->iClipIndexR = 0;
+		pAnimCBInfo->iWeightClipLR = 0;
+
+		pAnimCBInfo->iClipIndexD = 0;
+		pAnimCBInfo->iClipIndexMidDU = 0;
+		pAnimCBInfo->iClipIndexU = 0;
+		pAnimCBInfo->iWeightClipDU = 0;
+	}
+
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 	// 3. Compute Shader에 리소스 바인딩

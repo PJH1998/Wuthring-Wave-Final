@@ -63,6 +63,7 @@ void CAugustaAirFly::OnEnter()
 	m_vGravity = { 0.f, -4.9f, 0.f }; // '활공용 중력' (조정 필요)
 	m_fLift = 4.7f;     // '양력' (중력보다 약간 작게 설정)
 	m_fDrag = 0.98f;    // '공기 저항' (속도 감쇄)
+ 
 	
 }
 
@@ -105,7 +106,8 @@ void CAugustaAirFly::OnExit()
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 
 	// Blending 정보 초기화
-	ZeroMemory(&m_GpuBlendInfo, sizeof(GPU_BLEND_INFO));
+	/*ZeroMemory(&m_GpuBlendInfo, sizeof(GPU_BLEND_INFO));*/
+	m_GpuBlendInfo = {};
 }
 
 void CAugustaAirFly::Handle_Input()
@@ -128,6 +130,177 @@ void CAugustaAirFly::Handle_Input()
     m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 }
 
+
+//void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
+//{
+//	// 0. 애니메이션 체크.
+//	EAugustaAirFlyType eAirFlyType = static_cast<EAugustaAirFlyType>(m_iCurrentAnimIdx);
+//
+//	// 1-1. 기본 애니메이션 이름 결정
+//	_string strBaseAnimName = m_Animations[m_iCurrentAnimIdx].strAnimName;
+//
+//	// 1-2. XA_START가 재생 중이 아니면, 기본(Base) 애니메이션은 항상 "XA_Loop_Stand"입니다.
+//	if (eAirFlyType != EAugustaAirFlyType::XA_START)
+//	{
+//		strBaseAnimName = "XA_Loop_Stand";
+//	}
+//
+//	// 1-2. XA_START 중에는 블렌딩을 비활성화하고, 그 외에는 활성화합니다.
+//	if (eAirFlyType == EAugustaAirFlyType::XA_START)
+//	{
+//		m_GpuBlendInfo.IsBlendEnabled = false;
+//	}
+//	else
+//	{
+//		m_GpuBlendInfo.IsBlendEnabled = true;
+//
+//		// (신규) 블렌딩 보간 속도 (초당 1.0에 도달하는 속도)
+//		// 이 값을 높이면 더 빠르게 반응하고, 낮추면 더 부드럽게 움직입니다.
+//		const _float fBlendInterpSpeed = 1.0f; // (예: 5.0f는 0.2초만에 0 -> 1.0에 도달)
+//
+//		// --- 1-3. 좌/우(LR) 파라미터 계산 (수정됨) ---
+//		if (m_States[INPUT_L])
+//			m_GpuBlendInfo.fBlendParamLR -= fTimeDelta * fBlendInterpSpeed;
+//		else if (m_States[INPUT_R])
+//			m_GpuBlendInfo.fBlendParamLR += fTimeDelta * fBlendInterpSpeed;
+//		else // (신규) 키 입력이 없으면 0.0으로 복귀
+//		{
+//			if (m_GpuBlendInfo.fBlendParamLR > 0.0f)
+//				m_GpuBlendInfo.fBlendParamLR -= fTimeDelta * fBlendInterpSpeed;
+//			else if (m_GpuBlendInfo.fBlendParamLR < 0.0f)
+//				m_GpuBlendInfo.fBlendParamLR += fTimeDelta * fBlendInterpSpeed;
+//
+//			// (신규) 0에 근접하면 0으로 스냅 (떨림 방지)
+//			if (abs(m_GpuBlendInfo.fBlendParamLR) < fTimeDelta * fBlendInterpSpeed)
+//				m_GpuBlendInfo.fBlendParamLR = 0.0f;
+//		}
+//
+//		// --- 1-4. 상/하(DU) 파라미터 계산 (수정됨) ---
+//		if (m_States[INPUT_D]) // S
+//			m_GpuBlendInfo.fBlendParamDU -= fTimeDelta * fBlendInterpSpeed;
+//		else if (m_States[INPUT_U])
+//		{
+//			if (m_GpuBlendInfo.fBlendParamDU < 0.f || m_States[INPUT_ACCEL])
+//				m_GpuBlendInfo.fBlendParamDU += fTimeDelta * fBlendInterpSpeed;
+//		}
+//			
+//		else // (신규) 키 입력이 없으면 0.0으로 복귀
+//		{
+//			if (m_GpuBlendInfo.fBlendParamDU > 0.0f)
+//				m_GpuBlendInfo.fBlendParamDU -= fTimeDelta * fBlendInterpSpeed;
+//			else if (m_GpuBlendInfo.fBlendParamDU < 0.0f)
+//				m_GpuBlendInfo.fBlendParamDU += fTimeDelta * fBlendInterpSpeed;
+//
+//			// (신규) 0에 근접하면 0으로 스냅 (떨림 방지)
+//			if (abs(m_GpuBlendInfo.fBlendParamDU) < fTimeDelta * fBlendInterpSpeed)
+//				m_GpuBlendInfo.fBlendParamDU = 0.0f;
+//		}
+//
+//		// 1-5. 파라미터 값 제한 (기존과 동일)
+//		m_GpuBlendInfo.fBlendParamLR = Clamp(m_GpuBlendInfo.fBlendParamLR, -1.f, 1.f);
+//		m_GpuBlendInfo.fBlendParamDU = Clamp(m_GpuBlendInfo.fBlendParamDU, -1.f, 1.f);
+//
+//		// 1-6. 문자열 매핑 (기존과 동일)
+//		m_GpuBlendInfo.strClipxL = "XA_Loop_L";
+//		m_GpuBlendInfo.strClipMidLR = "XA_Loop_RL_Mid";
+//		m_GpuBlendInfo.strClipxR = "XA_Loop_R";
+//		m_GpuBlendInfo.strWeightClipLR = "XA_Loop_RL_Mid";
+//
+//		// BS_XA_UD.json ("Up/Down") 매핑
+//		m_GpuBlendInfo.strClipxD = "XA_Loop_D";
+//		m_GpuBlendInfo.strClipMidDU = "XA_Loop_Stand";
+//		m_GpuBlendInfo.strClipxU = "XA_Loop_U";
+//		m_GpuBlendInfo.strWeightClipDU = "XA_Loop_Stand";
+//	}
+//
+//	// 2. 애니메이션 실행 (기존과 동일)
+//	m_IsAnimationEnd = CCharacterState::Play_Animation(
+//		m_pAugusta,
+//		fTimeDelta,
+//		m_GpuBlendInfo
+//	);
+//
+//	// 3. 조향 (Steering) - 캐릭터를 직접 회전시킵니다.
+//	_vector vLook = m_pAugusta->Get_LookVector();
+//	_vector vRight = m_pAugusta->Get_RightVector();
+//	_vector vTargetDir = vLook; // 기본값: 현재 방향
+//
+//#ifdef _DEBUG
+//	_float4 vTargetDebug = {};
+//	XMStoreFloat4(&vTargetDebug, vTargetDir);
+//	OutPutDebugFloat4(TEXT("현재 방향"), vTargetDebug);
+//#endif // _DEBUG
+//
+//
+//	// 입력에 따라 목표 방향(TargetDir)을 설정
+//	if (m_States[INPUT_L])
+//		vTargetDir = XMVector3Normalize(vTargetDir - vRight * 0.5f); // 회전 민감도 (0.5f)
+//	if (m_States[INPUT_R])
+//		vTargetDir = XMVector3Normalize(vTargetDir + vRight * 0.5f);
+//
+//	// 캐릭터를 목표 방향으로 부드럽게 회전 (Character.h/cpp에 있는 함수 활용)
+//	if (!XMVector3Equal(vTargetDir, vLook))
+//	{
+//		m_pAugusta->Rotate_DirectionLerp(vTargetDir, fTimeDelta, 4.f);
+//	}
+//
+//	// 3. 물리 계산 (가속도 -> 속도 -> 위치)
+//
+//	// 3-1. 가속도(Acceleration) 계산
+//	_vector vGravityAccel = XMLoadFloat3(&m_vGravity);
+//	_vector vLiftAccel = XMVectorSet(0.f, m_fLift, 0.f, 0.f);
+//
+//	// 3-2. W/S로 상승/하강 가속도
+//	_vector vVerticalAccel = XMVectorZero();
+//	if (m_States[INPUT_U] && m_States[INPUT_ACCEL]) // W (상승)
+//		vVerticalAccel = XMVectorSet(0.f, m_fAccel, 0.f, 0.f);
+//	else if (m_States[INPUT_D] && m_States[INPUT_ACCEL]) // S (하강)
+//		vVerticalAccel = XMVectorSet(0.f, -m_fAccel, 0.f, 0.f);
+//
+//	// 3-3 . LShift(가속) 입력이 있다면 추진력 증가
+//	_float fCurrentThrust = m_fSpeed;
+//
+//	if (m_States[INPUT_ACCEL])
+//		fCurrentThrust *= 3.0f; // 3배 가속
+//
+//
+//	// 캐릭터가 바라보는 방향으로 '추진 가속도'
+//	_vector vThrustAccel = m_pAugusta->Get_LookVector_NoPitch() * fCurrentThrust;
+//
+//	// 모든 가속도를 합산
+//	_vector vTotalAccel = vThrustAccel + vGravityAccel + vLiftAccel + vVerticalAccel;
+//
+//	// 3-2. 속도 (Velocity) 계산
+//	// 공기 저항 적용
+//	m_vForce *= m_fDrag;
+//	// 가속도를 속도에 적용 (v = v0 + at)
+//	m_vForce += vTotalAccel * fTimeDelta;
+//
+//	// 3-3. 최대/최소 속도 제한 (Optional)
+//	_float fVerticalSpeed = XMVectorGetY(m_vForce);
+//	if (fVerticalSpeed < -15.f) // 최대 낙하 속도 (예: -15 m/s)
+//		m_vForce = XMVectorSetY(m_vForce, -15.f);
+//	if (fVerticalSpeed > 8.f) // 최대 상승 속도 (예: 8 m/s)
+//		m_vForce = XMVectorSetY(m_vForce, 8.f);
+//
+//
+//	// 4. 최종 이동 적용 (Transform.cpp의 Go_Force는 velocity * fTimeDelta를 적용)
+//	// Add_Force가 내부적으로 Go_Force(m_vForce, fTimeDelta)를 호출
+//	m_pAugusta->Add_Force(m_vForce, fTimeDelta);
+//
+//
+//	// Parts Wing은 항상 실행됨
+//	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+//	{
+//		// 애니메이션 속도 서로 Sync 맞추기.
+//		m_pAugusta->Play_PartAnimation(
+//			m_iPartType,
+//			m_Animations[m_iCurrentAnimIdx].strAnimName,
+//			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+//		);
+//	}
+//}
+
 void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 {
 	// 0. 애니메이션 체크.
@@ -135,7 +308,7 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 
 	// 1-1. 기본 애니메이션 이름 결정
 	_string strBaseAnimName = m_Animations[m_iCurrentAnimIdx].strAnimName;
-	
+
 	// 1-2. XA_START가 재생 중이 아니면, 기본(Base) 애니메이션은 항상 "XA_Loop_Stand"입니다.
 	if (eAirFlyType != EAugustaAirFlyType::XA_START)
 	{
@@ -151,30 +324,76 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	{
 		m_GpuBlendInfo.IsBlendEnabled = true;
 
-		// 1-3. 좌/우(LR) 파라미터 계산
-		if (m_States[INPUT_L])
-			m_GpuBlendInfo.fBlendParamLR = -1.f;
-		else if (m_States[INPUT_R])
-			m_GpuBlendInfo.fBlendParamLR = 1.f;
-		else
-			m_GpuBlendInfo.fBlendParamLR = 0.f;
+		const _float fBlendInterpSpeed = 2.0f;
+		_float fInterpStep = fTimeDelta * fBlendInterpSpeed; // 이번 프레임에 보간할 스텝
 
-		// 1-4. 상/하(DU) 파라미터 계산
-		if (m_States[INPUT_U]) // W
-			m_GpuBlendInfo.fBlendParamDU = 1.f;
-		else if (m_States[INPUT_D]) // S
-			m_GpuBlendInfo.fBlendParamDU = -1.f;
-		else
-			m_GpuBlendInfo.fBlendParamDU = 0.f;
+		// --- (수정) 1-3. 좌/우(LR) 파라미터 계산 (진동 수정) ---
+		if (m_States[INPUT_L])
+			m_GpuBlendInfo.fBlendParamLR -= fInterpStep;
+		else if (m_States[INPUT_R])
+			m_GpuBlendInfo.fBlendParamLR += fInterpStep;
+		else // 키 입력이 없으면 0.0으로 복귀 (진동 방지 로직)
+		{
+			if (m_GpuBlendInfo.fBlendParamLR > 0.0f)
+			{
+				m_GpuBlendInfo.fBlendParamLR -= fInterpStep;
+				// 0을 지나쳐 음수가 되었으면 0으로 스냅
+				if (m_GpuBlendInfo.fBlendParamLR < 0.0f)
+					m_GpuBlendInfo.fBlendParamLR = 0.0f;
+			}
+			else if (m_GpuBlendInfo.fBlendParamLR < 0.0f)
+			{
+				m_GpuBlendInfo.fBlendParamLR += fInterpStep;
+				// 0을 지나쳐 양수가 되었으면 0으로 스냅
+				if (m_GpuBlendInfo.fBlendParamLR > 0.0f)
+					m_GpuBlendInfo.fBlendParamLR = 0.0f;
+			}
+		}
+
+		// --- (수정) 1-4. 상/하(DU) 파라미터 계산 (진동 수정 및 요구사항 반영) ---
+		if (m_States[INPUT_D]) // S (하강)
+			m_GpuBlendInfo.fBlendParamDU -= fInterpStep;
+		else if (m_States[INPUT_ACCEL] && m_States[INPUT_U]) // W + ACCEL (상승)
+			m_GpuBlendInfo.fBlendParamDU += fInterpStep;
+		else // 그 외 (W만 누르거나, 아무것도 안 누름)
+		{
+			// 0.0으로 복귀 (진동 방지 로직)
+			if (m_GpuBlendInfo.fBlendParamDU > 0.0f)
+			{
+				m_GpuBlendInfo.fBlendParamDU -= fInterpStep;
+				if (m_GpuBlendInfo.fBlendParamDU < 0.0f)
+					m_GpuBlendInfo.fBlendParamDU = 0.0f;
+			}
+			else if (m_GpuBlendInfo.fBlendParamDU < 0.0f)
+			{
+				m_GpuBlendInfo.fBlendParamDU += fInterpStep;
+				if (m_GpuBlendInfo.fBlendParamDU > 0.0f)
+					m_GpuBlendInfo.fBlendParamDU = 0.0f;
+			}
+		}
+
+		// 1-5. 파라미터 값 제한
+		m_GpuBlendInfo.fBlendParamLR = Clamp(m_GpuBlendInfo.fBlendParamLR, -1.f, 1.f);
+		m_GpuBlendInfo.fBlendParamDU = Clamp(m_GpuBlendInfo.fBlendParamDU, -1.f, 1.f);
+
+		// --- (수정) 1-6. 문자열 매핑 (데이터 오류 수정) ---
+		m_GpuBlendInfo.strClipxL = "XA_Loop_L";
+		m_GpuBlendInfo.strClipMidLR = "XA_Loop_Stand"; // "XA_Loop_Stand" -> "XA_Loop_RL_Mid"로 수정
+		m_GpuBlendInfo.strClipxR = "XA_Loop_R";
+		m_GpuBlendInfo.strWeightClipLR = "XA_Loop_Stand"; // "XA_Loop_Stand" -> "XA_Loop_RL_Mid"로 수정
+
+		// BS_XA_UD.json ("Up/Down") 매핑 (이 부분은 올바름)
+		m_GpuBlendInfo.strClipxD = "XA_Loop_D";
+		m_GpuBlendInfo.strClipMidDU = "XA_Loop_Stand";
+		m_GpuBlendInfo.strClipxU = "XA_Loop_U";
+		m_GpuBlendInfo.strWeightClipDU = "XA_Loop_Stand";
 	}
 
-	// 2. (수정) 애니메이션 실행
-	// CCharacterState::Play_Animation 함수에 m_GpuBlendInfo를 전달합니다.
-	// (이전 단계에서 CharacterState::Play_Animation이 GPU_BLEND_INFO를 받도록 수정했다고 가정)
+	// 2. 애니메이션 실행
 	m_IsAnimationEnd = CCharacterState::Play_Animation(
 		m_pAugusta,
 		fTimeDelta,
-		m_GpuBlendInfo // <--- 핵심: 계산된 블렌드 정보 전달
+		m_GpuBlendInfo
 	);
 
 	// 3. 조향 (Steering) - 캐릭터를 직접 회전시킵니다.
@@ -207,17 +426,18 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	_vector vGravityAccel = XMLoadFloat3(&m_vGravity);
 	_vector vLiftAccel = XMVectorSet(0.f, m_fLift, 0.f, 0.f);
 
-	// W/S로 상승/하강 가속도
+	// 3-2. W/S로 상승/하강 가속도
 	_vector vVerticalAccel = XMVectorZero();
-	if (m_States[INPUT_U]) // W (상승)
+	if (m_States[INPUT_U] && m_States[INPUT_ACCEL]) // W (상승)
 		vVerticalAccel = XMVectorSet(0.f, m_fAccel, 0.f, 0.f);
-	else if (m_States[INPUT_D]) // S (하강)
+	else if (m_States[INPUT_D] && m_States[INPUT_ACCEL]) // S (하강)
 		vVerticalAccel = XMVectorSet(0.f, -m_fAccel, 0.f, 0.f);
 
-	// LShift(가속) 입력이 있다면 추진력 증가
+	// 3-3 . LShift(가속) 입력이 있다면 추진력 증가
 	_float fCurrentThrust = m_fSpeed;
+
 	if (m_States[INPUT_ACCEL])
-		fCurrentThrust *= 2.0f; // 2배 가속
+		fCurrentThrust *= 3.0f; // 3배 가속
 
 
 	// 캐릭터가 바라보는 방향으로 '추진 가속도'
@@ -244,18 +464,19 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	// Add_Force가 내부적으로 Go_Force(m_vForce, fTimeDelta)를 호출
 	m_pAugusta->Add_Force(m_vForce, fTimeDelta);
 
-	
+
 	// Parts Wing은 항상 실행됨
-    if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
-    {
+	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
 		// 애니메이션 속도 서로 Sync 맞추기.
-        m_pAugusta->Play_PartAnimation(
-            m_iPartType,
-            m_Animations[m_iCurrentAnimIdx].strAnimName,
+		m_pAugusta->Play_PartAnimation(
+			m_iPartType,
+			m_Animations[m_iCurrentAnimIdx].strAnimName,
 			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
-        );
-    }
+		);
+	}
 }
+
 
 void CAugustaAirFly::Check_Physics(_float fTimeDelta)
 {
@@ -273,6 +494,7 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 		// 1. Jump키 눌렀을 때 => 점프로 변환.
 		if (m_States[JUMP])
 		{
+
 			m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 			return;
@@ -281,6 +503,7 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 		// 2. 땅에 닿았을때
 		if (m_States[LAND])
 		{
+
 			m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_ROLL;
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
 			return;
@@ -315,12 +538,12 @@ void CAugustaAirFly::SetUp_Animations()
 {
     
 	// 이동 용도는 Root모션 모두 제거.
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 20.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 20.f, 1.f, false);
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 20.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 20.f, 1.f, false);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 20.f, 1.f, true);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 20.f, 1.f, true);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 20.f, 1.f, true);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 20.f, 1.f, true);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f, 1.f, true);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f, 1.f, true);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_SHAKE_LOOP), "XA_Shake_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_START), "XA_Start", 1.f, 30.f, 1.f);
 	
