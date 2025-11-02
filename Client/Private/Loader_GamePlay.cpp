@@ -55,7 +55,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
-
+	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     return S_OK;
 }
 
@@ -344,6 +344,15 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Effect()
+{
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	return S_OK;
 }
