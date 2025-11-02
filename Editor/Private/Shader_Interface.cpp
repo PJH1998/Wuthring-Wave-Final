@@ -147,6 +147,10 @@ void CShader_Interface::Setting_Shader()
 #ifdef _DEBUG
 			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::BLUR);
 #endif
+		if (ImGui::Button("MOTION ON"))
+#ifdef _DEBUG
+			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::MOTION);
+#endif
 		if(ImGui::Button("OFF"))
 #ifdef _DEBUG
 			m_pGameInstance->End_ScreenEffect();
@@ -169,7 +173,9 @@ void CShader_Interface::Setting_Shader()
 #endif
 	}
 
+#pragma endregion
 
+#pragma region PBR
 	if (ImGui::CollapsingHeader("PBR"))
 	{
 #ifdef _DEBUG
@@ -193,8 +199,19 @@ void CShader_Interface::Setting_Shader()
 		m_pGameInstance->Set_Roughness(m_fRoughness);
 #endif
 	}
-	
 #pragma endregion
+	
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+		ImGui::InputFloat("DISTANCE_SCALE", &m_fBlurDistanceScale);
+#ifdef _DEBUG
+		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
+#endif
+	}
 	ImGui::End();
 }
 

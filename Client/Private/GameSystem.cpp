@@ -39,7 +39,28 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
 }
 #pragma endregion
 
+void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Effect(strFolderPath, eLevel);
+}
+
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectTexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
 #pragma region FACTORY
+
 void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)
 {
 	m_pFactory->Create_MonsterDummy(eLayerLevel, vPos, PreTransformationMatrix);
@@ -65,6 +86,33 @@ void CGameSystem::Stop_Action()
 void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 {
 	m_Stats = eCharacterStat;
+}
+
+#pragma endregion
+
+#pragma region TRIGGER
+
+void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
+{
+	m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+}
+
+void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)
+{
+	auto iter = m_TriggerEvents.find(iNumTriggerMapIndex);
+	if (iter == m_TriggerEvents.end())
+		return;
+
+	for (auto& pTriggerFunc : m_TriggerEvents[iNumTriggerMapIndex])
+	{
+		pTriggerFunc(pArg);
+	}
+}
+void CGameSystem::Clear_TriggerCallBack()
+{
+	for (auto& TriggerVector : m_TriggerEvents)
+		TriggerVector.second.clear();
+	m_TriggerEvents.clear();
 }
 #pragma endregion
 

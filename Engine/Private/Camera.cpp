@@ -69,9 +69,6 @@ void CCamera::Update_Matrix()
 
 	XMStoreFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::VIEW)], CurViewMatrix);
 	XMStoreFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::PROJ)], CurProjMatrix);
-
-	//m_pGameInstance->Set_TransformState(D3DTS::VIEW, m_pTransformCom->Get_WorldMatrix_Inv());
-	//m_pGameInstance->Set_TransformState(D3DTS::PROJ, XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar));
 }
 
 void CCamera::Key_Move(_float fTimeDelta)

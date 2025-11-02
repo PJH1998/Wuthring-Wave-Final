@@ -3,9 +3,12 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
-
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
 #include "GameSystem.h"
 #include "Player.h"
+#include"Trigger_Box.h"
+#include "ShadowMap.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -24,6 +27,8 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
     Ready_MonsterTest();
+
+    Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
 	//DummyDesc.fSpeedPerSec = 10.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
@@ -43,9 +48,9 @@ HRESULT CLevel_Test::Initialize()
 
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
-    LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+    LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
     LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
-    LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
+	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
     LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
@@ -55,6 +60,31 @@ HRESULT CLevel_Test::Initialize()
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
+	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
+
+	CTrigger_Box::TRIGGER Tri;
+	Tri.iLevel = iLevel;
+	Tri.vExtends = _float3(5.f, 10.f, 5.f);
+	_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(10.f, -3.f, 10.f, 1.f));
+	_float4x4 TT;
+	XMStoreFloat4x4(&TT, Mat);
+	Tri.WorldMatrix = &TT;
+	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
+
+
+	//TEST
+	CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
+	ShadowMapDesc.iNumSectorX = 2;
+	ShadowMapDesc.iNumSectorY = 2;
+	ShadowMapDesc.iSectorSizeX = 2048;
+	ShadowMapDesc.iSectorSizeY = 2048;
+	ShadowMapDesc.vCenterPos = _float3(3000.f, 0.f, 2000.f);
+	ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
+	ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
+
+	CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
+
     return S_OK;
 }
 
@@ -62,6 +92,9 @@ void CLevel_Test::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Test"));
     
+#ifdef _DEBUG
+	Shader_Gui();
+#endif
 }
 
 void CLevel_Test::Render()
@@ -112,6 +145,7 @@ void CLevel_Test::Ready_Dummy()
 
 void CLevel_Test::Ready_MonsterTest()
 {
+	// False Sovereign
     CMonsterTest::MONSTERTEST_DESC MobDesc{};
     MobDesc.eCurLevel = m_eCurLevel;
     MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
@@ -125,7 +159,61 @@ void CLevel_Test::Ready_MonsterTest()
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
+
+	// Havoc Warrior
+	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+		CRASH("Failed Ready Monster");
+
+	// Electro Predator
+	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
+	ADesc.eCurLevel = m_eCurLevel;
+	ADesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
+	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	ADesc.fRotationPerSec = XMConvertToRadians(90.f);
+	ADesc.fSpeedPerSec = 10.f;
+	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
+	ADesc.pAnimationTag = "Stand2";
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
+		CRASH("Failed Ready Monster");
 }
+
+void CLevel_Test::Ready_Effect()
+{
+    m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+}
+
+#ifdef _DEBUG
+void CLevel_Test::Shader_Gui()
+{
+	ImGui::Begin("Test");
+
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+		ImGui::InputFloat("DISTANCE_SCALE", &m_fBlurDistanceScale);
+
+		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
+	}
+	ImGui::End();
+}
+#endif
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {
@@ -246,7 +334,7 @@ void CLevel_Test::Read_Map_Dat(const _string pFilePath)
 			File.read(Desc.ModelName, NameLength);
 
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CMapObject::OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
 			_float4x4 Matrix = {};
 			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 			Desc.WorldMatrix = &Matrix;

@@ -1,19 +1,23 @@
 ﻿#pragma once
+#include "VIBuffer.h"
+
 #include "VIBuffer_Instance.h"
+
 
 NS_BEGIN(Engine)
 
-class ENGINE_DLL CVIBuffer_Mesh final : public CVIBuffer_Instance
+class ENGINE_DLL CVIBuffer_Mesh final : public CVIBuffer
 {
+
 public:
 	enum FacingMod { OutWard, InWard, TangentCW, TangentCCW, Offset, LookAt };
-	// 설정해줘야하는 값이 너무 많은데 이렇게 해야할거 같은데 ?, 방향 설정 고민 많이 해봐야할거 같음  bool로 하기에는 설정해줘야하는 방향과 값이 꽤 많을거같음.
-	// 이걸 받아서, 체크해줘야할거 같은데 흠..
+	// ?ㅼ젙?댁쨾?쇳븯??媛믪씠 ?덈Т 留롮????대젃寃??댁빞?좉굅 媛숈????, 諛⑺뼢 ?ㅼ젙 怨좊? 留롮씠 ?대킄?쇳븷嫄?媛숈쓬  bool濡??섍린?먮뒗 ?ㅼ젙?댁쨾?쇳븯??諛⑺뼢怨?媛믪씠 苑?留롮쓣嫄곌컳??
+	// ?닿구 諛쏆븘?? 泥댄겕?댁쨾?쇳븷嫄?媛숈?????.
 
 	typedef struct tagtMeshFXInstanceDesc : public CVIBuffer_Instance::INSTANCE_DESC
 	{
-		_char DatFilePath[MAX_PATH] = {};				//Dat위치 알려면 이렇게 해야되는데 여기 추가?
-		//프로토타입 이름도 추가해둘까? 아니면 조합을 할까 고민해봐야할거 같음.
+		_char DatFilePath[MAX_PATH] = {};				//Dat?꾩튂 ?뚮젮硫??대젃寃??댁빞?섎뒗???ш린 異붽??
+		//?꾨줈?좏????대쫫??異붽??대몮源? ?꾨땲硫?議고빀???좉퉴 怨좊??대킄?쇳븷嫄?媛숈쓬.
 
 		_float3	vPivot;
 		_float2 vSpeed;
@@ -37,30 +41,31 @@ public:
 		_float fSpreadWeight = 0.f;
 		_float fDropWeight = 0.f;
 		_float fRotationWeight = 0.f;
-		//추가 ?
+		//異붽? ?
 	}MESH_FXINSTANCE_DESC;
+
 private:
 	explicit CVIBuffer_Mesh(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CVIBuffer_Mesh(const CVIBuffer_Mesh& Prototype);
 	virtual ~CVIBuffer_Mesh() = default;
 
 public:
-	virtual HRESULT Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath, const INSTANCE_DESC* pDesc);
+	virtual HRESULT Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath);
 	virtual HRESULT Initialize_Clone(void* pArg) override;
 
-	//컴셰로 계산처리 해야할듯
+
+	//而댁뀺濡?怨꾩궛泥섎━ ?댁빞?좊벏
 	void Bind_CSResources(class CComputeShader* pCShader, _float fTimeDelta);
 
 private:
-	ID3D11Buffer* m_pCBBuffer = {};
-	ID3D11Buffer* m_pSRVBuffer = {};
-	ID3D11Buffer* m_pUAVBuffer = {};
-
-	ID3D11ShaderResourceView* m_pSRV = {};
-	ID3D11UnorderedAccessView* m_pUAV = {};
+	//ID3D11Buffer* m_pCBBuffer = {};
+	//ID3D11Buffer* m_pSRVBuffer = {};
+	//ID3D11Buffer* m_pUAVBuffer = {};
+	//ID3D11ShaderResourceView* m_pSRV = {};
+	//ID3D11UnorderedAccessView* m_pUAV = {};
 
 public:
-	static CVIBuffer_Mesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, _fmatrix PreTransformMatrix, const INSTANCE_DESC* pDesc);
+	static CVIBuffer_Mesh* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _char* pFilePath, _fmatrix PreTransformMatrix);
 	virtual CComponent* Clone(void* pArg) override;
 	virtual void Free() override;
 };

@@ -1,11 +1,14 @@
 ﻿#pragma once
 #include "Base.h"
 #include "Effect_Prefab.h"
+#include "Particle_Controller.h"
+#include "Mesh_Controller.h"
+#include "TrailMesh_Controller.h"
+#include "Load_Controller.h"
+
+#include "Rect_Controller.h"
 
 NS_BEGIN(Editor)
-
-
-
 class CEffect_Controller :public CBase
 {
 private:
@@ -15,13 +18,15 @@ private:
 		class CAnimationActor* pAnimActor = { nullptr };
 		_string strAnimName = {};
 		float fDuration = {};
+
+		const _float4x4* pBoneMatrix = { nullptr };
 	}ANIMACTOR_DSEC;
 
 private:
 	explicit CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CEffect_Controller() = default;
 
-#pragma region 湲곕낯
+#pragma region 
 public:
 	HRESULT Initialize();
 	void Update();
@@ -34,10 +39,41 @@ public:
 	void UpdateSelected_PrefabFromIndex();
 	void UpdateSelected_ChildrenFromIndex();
 
-	void Reset_TabInfo();
+public:
+	void Selected_Prefab_Info();
 
+	void Reset_ChildrenInfo();
+	void Reset_PrefabInfo();
+	void Remove_Prefab();
 
+public:
+	void Prefab_To_Json(const _string& strFilePath);
+
+	void Particle_VB_To_Json(json& ParticleVBJson, CVIBuffer_Point_Instance::POINT_INSTANCE_DESC* pVBDesc);
+	void Particle_OB_To_Json(json& ParticleJson, CParticle::PARTICLE_DESC* pParticleDesc);
+
+	void Mesh_VB_To_Json(json& MeshVBJson, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* pVBDesc);
+	void Mesh_OB_To_Json(json& MeshJson, CEffect_Mesh::EFFECTMESH_DESC* pMeshDesc);
+
+	void TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILMESH_DESC* pTrailDesc);
+
+public:
+	void Load_Prefab();
+
+	void Load_Particle(const _wstring& ParticleTag);
+
+	void Load_FXMesh(const _wstring& FXMeshTag);
+
+	void Load_TrailMesh(const _wstring& TrailMeshTag);
+
+public:
+	void Save_SelectedChildren_To_Json();
+	void Load_Children_To_Json();
+	void Load_Children_To_PrefabDesc(_wstring& ChildrenTag, EFFECT_TYPE eChildrenType);
+
+public:
 	void Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc);
+	void PrefabBinding_Tab();
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -45,39 +81,44 @@ private:
 	class CGameInstance*										m_pGameInstance = { nullptr };
 	class CParticle_Controller*									m_pParticle_Controller = { nullptr };
 	class CMesh_Controller*										m_pMesh_Controller = { nullptr };
+	class CTrailMesh_Controller*								m_pTrailMesh_Controller = { nullptr };
+	class CLoad_Controller*										m_pLoad_Controller = { nullptr };
+	class CRect_Controller*										m_pRect_Controller = { nullptr };
 
-	//InputText?먯꽌 諛쏆쓣 ?꾨━???쒓렇
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
 
-	//InputText?먯꽌 諛쏆쓣 ?먯떇 ?쒓렇
 	_char														m_ChildrenTag[MAX_PATH];
 	_bool														m_bChildrenTagFlag = false;
 	_bool														m_bChildrenCreatFlag = false;
 	EFFECT_TYPE													m_eChildrenType = EFFECT_TYPE::END;
 
-	//?댁뿉???꾩옱 ?좏깮???꾨━???뺣낫
 	_int														m_iSelectedPrefab = 0;
 	_bool														m_bSelectedPrefab = false;
 	class CEffect_Prefab*										m_pSelectedPrefab = { nullptr };
 
-	//?댁뿉???꾩옱 ?좏깮???꾨━?뱀쓽 ?먯떇 ?뺣낫
+	CEffect_Prefab::PREFAB_DESC*								m_pSelectedPrefabDesc = { nullptr };
+	CEffect_Prefab::FRAME_DESC*									m_pSelectedPrefabFrame = { nullptr };
+
 	_int														m_iSelectedChildren = 0;
 	_wstring													m_strChildrenTag = {};
 	_bool														m_IsParticle = false;
 	_bool														m_IsMeshEffect = false;
 	_bool														m_IsTrailMesh = false;
-
-	ANIMACTOR_DSEC												m_AnimActorDesc = {};
-	
+	_bool														m_IsRectEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
 
-	// ?꾨━???뺣낫 ?대뼸寃?戮묒븘??留뚮뱾嫄댁? 醫 怨좊??대킄?쇳븷嫄곌컳??
-	// ?꾨━?뱀씠 ?먯떇?ㅼ쓽 ?뺣낫瑜??뚯븘?쇳븿. 利? ?대줎????Desc媛 ?꾩슂??
-	// 踰꾪띁???몃??먯꽌 Desc瑜??듯빐 ?먰삎 ?앹꽦?대넃怨?(?꾨━??留뚮뱾湲??꾩뿉 癒쇱??대넄?쇳븿)
-	// ?댄썑 ?꾨━???대줎 ?섎㈃???먯떇???앹꽦 ?????뚰떚?? 留ㅼ돩 ?깆쓽 Desc媛 ?꾩슂
+	_bool														m_IsLoad = false;
+
+	//프리팹에 바인딩할 애니메 정보 관련
+	ANIMACTOR_DSEC												m_AnimActorDesc = {};
+	_char														m_BoneName[MAX_PATH];
+	_bool														m_bBoneFlag = false;
+	_float														m_fTrackPosition = -1.f;
+	_bool														m_bTest = false;
+
 
 public:
 	static CEffect_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

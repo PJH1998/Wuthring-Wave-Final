@@ -24,7 +24,7 @@ void CCollideComponent::OnCollide_During(_uint iLayer, void* pDesc, const Contac
 	if (nullptr == m_CallBack[ENUM_CLASS(COLLIDE_STATE::DURING)])
 		return;
 
-	m_CallBack[ENUM_CLASS(COLLIDE_STATE::DURING)](iLayer, pDesc, Manifold);
+		m_CallBack[ENUM_CLASS(COLLIDE_STATE::DURING)](iLayer, pDesc, Manifold);
 }
 
 void CCollideComponent::OnCollide_Remove(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

@@ -52,6 +52,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     m_pGriffon->SetActivate(false);
 	m_pWing->SetActivate(false);
     
+	
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
@@ -132,13 +133,21 @@ void CAugusta::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
-            CRASH("Ready Shader Begin Failed");
+		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+			CRASH("Ready Shader Begin Failed");
+        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //    CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
@@ -343,7 +352,7 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 #pragma endregion
 
-
+ 
 
 
 
@@ -386,7 +395,7 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA);
 }
 
 void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
