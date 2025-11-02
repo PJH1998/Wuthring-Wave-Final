@@ -240,6 +240,7 @@
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -349,6 +350,7 @@
     <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
+    <ClCompile Include="..\Private\SkyBox.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -415,6 +417,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">

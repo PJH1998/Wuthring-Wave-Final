@@ -190,6 +190,9 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SkyBox">
+      <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -450,6 +453,9 @@
     <ClInclude Include="..\Public\RoverGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\SkyBox.h">
+      <Filter>03. GameObject\SkyBox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -679,6 +685,9 @@
     <ClCompile Include="..\Private\RoverGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -712,6 +721,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl">
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
