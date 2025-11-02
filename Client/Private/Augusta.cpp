@@ -314,6 +314,7 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 {
 
 }
+
 #endif // _DEBUG
 
 #pragma region NOTIFY

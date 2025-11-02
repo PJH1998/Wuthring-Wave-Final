@@ -85,6 +85,11 @@ public:
 
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
+
+#ifdef _DEBUG
+	void RayDir(_vector vRayDir, _float3 vEndPos);
+#endif // _DEBUG
+
 #pragma endregion
 
 
@@ -101,6 +106,8 @@ public:
 	// Look Vector
 	_vector Get_LookVector();
 	_vector Get_LookVector_NoPitch();
+	_vector Get_RightVector();
+	_vector Get_RightVector_NoPitch();
 
 	// LockOn
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
@@ -120,6 +127,7 @@ public:
 
 	// Move
 	ACTORDIR Calculate_Direction();
+	_vector Get_CameraRightVector();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
 	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
@@ -129,9 +137,13 @@ public:
 
 	// Rotate
 	void Rotate_Direction(_fvector vDir);
+	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
 	void Rotate_HitTarget();
+
+	// Turn
+	
 
 	
 	// Transform

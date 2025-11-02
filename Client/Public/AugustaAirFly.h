@@ -9,10 +9,16 @@ class CAugustaAirFly final : public CAirState
 private:
     enum AIRFLYSTATE // 내부에서 전환 가능한 상태.
     {
+		INPUT_U,
+		INPUT_D,
+		INPUT_L,
+		INPUT_R,
+		INPUT_ACCEL,
 		FLY_U,
 		FLY_D,
 		FLY_L,
 		FLY_R,
+		FLY_STAND,
         MOVE,
 		ATTACK, // 낙하 공격
         JUMP,
@@ -35,9 +41,17 @@ public:
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[AIRFLYSTATE::END] = {};
-    _float m_fSpeed = {};
+    
+	
 
-	_float3 m_vDirection = {};
+	_float m_fSpeed = {}; // Speed (힘)
+	_float m_fAccel = {}; // 가속.
+	_float m_fLift = {}; // 양력
+	_float m_fDrag = {}; // 공기 저항.
+	_float3 m_vDirection = {}; // 이동 방향 (방향)
+	_float3 m_vGravity = {};  // 감속을 위한 Gravity (감속)
+	
+	_vector m_vForce = {}; // 현재 작용하는 힘.
     
 
 private:

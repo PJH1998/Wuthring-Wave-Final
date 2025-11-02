@@ -102,7 +102,7 @@ public:
 		TYPE_END
 	};
 
-#pragma region 0. �⺻ �Լ�
+#pragma region 0. 
 protected:
 	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugusta(const CAugusta& Prototype);
@@ -132,6 +132,8 @@ public:
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
+
+	
 #endif // _DEBUG
 
 #pragma region 2. NOTIFY

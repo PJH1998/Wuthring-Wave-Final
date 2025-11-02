@@ -18,7 +18,7 @@
 
 
 #pragma region PLAYER
-
+#include "Wing.h"
 #include "StateMachine.h"
 
 // Augusta
@@ -105,6 +105,27 @@ HRESULT CLoader_GamePlay::Load_Player()
 		, wStrControllerTag
 		, CPlayer::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+
+#pragma region COMMON 객체 WING
+	_wstring wStrModelTag = L"Prototype_Component_Model_Wing";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Wing/Wing.dat";
+	_float fSize = 0.01f;
+	//fSize = 0.0001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Wing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+#pragma endregion
 
 	return S_OK;
 }

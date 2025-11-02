@@ -31,7 +31,7 @@ void CAugustaGroundIdle::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EAugustaIdleType eIdleType = context.m_eIdleType;
+    EAugustaIdleType eIdleType = context.m_eIdleType; // 애니메이션 ENUM
 
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 

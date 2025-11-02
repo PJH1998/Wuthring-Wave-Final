@@ -53,11 +53,17 @@ void CAugustaAirFly::OnEnter()
 	{
 		m_pAugusta->Set_Gravity(false);
 		_vector vForward = m_pAugusta->Get_LookVector();
-		m_pAugusta->Add_Force(vForward * 5.f, 0.f);  // 즉시 힘 부여 (fTimeDelta = 1.f)
+		m_vForce = vForward * 8.f + XMVectorSet(0.f, 7.f, 0.f, 0.f);  // forward 8m/s, up 7m/s (테스트로 조정) => 초기 가속.
 	}
 
-	// 9. Speed 부여값
-	m_fSpeed = 1.f;
+	// 9. 부여 값
+	// 9. 물리 값 설정 (조정이 필요합니다)
+	m_fSpeed = 5.f * 2.f;     // '추진 가속도' (조정 필요)
+	m_fAccel = 3.f;     // '상승/하강 가속도' (조정 필요)
+	m_vGravity = { 0.f, -4.9f, 0.f }; // '활공용 중력' (조정 필요)
+	m_fLift = 4.7f;     // '양력' (중력보다 약간 작게 설정)
+	m_fDrag = 0.98f;    // '공기 저항' (속도 감쇄)
+	
 }
 
 void CAugustaAirFly::OnUpdate(_float fTimeDelta)
@@ -84,12 +90,15 @@ void CAugustaAirFly::OnExit()
     CAirState::OnExit();
 
 	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
-	{
 		m_pAugusta->PartActivate(m_iPartType, false);
-	}
 
     m_pAugusta->Set_Gravity(true);
+
+
     m_fSpeed = 0.f;
+	m_vDirection = {};
+	m_vGravity = {};
+	m_vForce = XMVectorZero();
     
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
@@ -101,18 +110,18 @@ void CAugustaAirFly::Handle_Input()
 	m_eDir = m_pAugusta->Calculate_Direction();
 
 	// 키 인풋
-	m_States[FLY_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
-	m_States[FLY_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
-	m_States[FLY_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
-	m_States[FLY_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+	m_States[INPUT_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+	m_States[INPUT_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+	m_States[INPUT_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
+	m_States[INPUT_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+	m_States[INPUT_ACCEL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
+	
 	// 상태 변화
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
-    
-	// 이전 E스킬이 그리폰이였다면 까지 조건이 있어야함.
 }
 
 void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
@@ -123,65 +132,74 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
     // 1. 애니메이션 실행. (기본 실행.
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
-    // 2. 애니메이션 마다 움직임 다르게.
-	_vector vTargetDir = XMVectorZero();
+	// 2. 조향 (Steering) - 캐릭터를 직접 회전시킵니다.
+	_vector vLook = m_pAugusta->Get_LookVector();
+	_vector vRight = m_pAugusta->Get_RightVector();
+	_vector vTargetDir = vLook; // 기본값: 현재 방향
 
-	switch (eAirFlyType)
+#ifdef _DEBUG
+	_float4 vTargetDebug = {};
+	XMStoreFloat4(&vTargetDebug, vTargetDir);
+	OutPutDebugFloat4(TEXT("현재 방향"), vTargetDebug);
+#endif // _DEBUG
+
+
+	// 입력에 따라 목표 방향(TargetDir)을 설정
+	if (m_States[INPUT_L])
+		vTargetDir = XMVector3Normalize(vTargetDir - vRight * 0.5f); // 회전 민감도 (0.5f)
+	if (m_States[INPUT_R])
+		vTargetDir = XMVector3Normalize(vTargetDir + vRight * 0.5f);
+
+	// 캐릭터를 목표 방향으로 부드럽게 회전 (Character.h/cpp에 있는 함수 활용)
+	if (!XMVector3Equal(vTargetDir, vLook))
 	{
-	case EAugustaAirFlyType::XA_LOOP_U:  // 위/앞 방향 (W 키)
-		// 앞으로 이동 + 약간 상승
-		//vTargetDir = m_pAugusta->Get_LookVector();  // forward
-		vTargetDir = m_pAugusta->Calculate_Move_Direction(ACTORDIR::U);  // 정면 벡터
-		vTargetDir += XMVectorSet(0.f, 0.5f, 0.f, 0.f);
-		break;
-
-	case EAugustaAirFlyType::XA_LOOP_D:  // 아래/뒤 방향 (S 키)
-		// 뒤로 이동 + 약간 하강
-		//vTargetDir = m_pAugusta->Get_LookVector() * -1.f;  
-
-		vTargetDir = m_pAugusta->Calculate_Move_Direction(ACTORDIR::D);  // 측면 벡터
-		vTargetDir -= XMVectorSet(0.f, 0.5f, 0.f, 0.f);
-		break;
-
-	case EAugustaAirFlyType::XA_LOOP_L:  // 왼쪽 (A 키)
-		vTargetDir = m_pAugusta->Calculate_Move_Direction(ACTORDIR::L);  // 측면 벡터
-		break;
-
-	case EAugustaAirFlyType::XA_LOOP_R:  // 오른쪽 (D 키)
-		vTargetDir = m_pAugusta->Calculate_Move_Direction(ACTORDIR::R);  // 측면 벡터
-		break;
-	case EAugustaAirFlyType::XA_LOOP_STAND:  // 정지가 아니라 현재 방향을 유지한채로 이동.
-		vTargetDir = m_pAugusta->Get_LookVector();
-		break;
-
-	case EAugustaAirFlyType::XA_SHAKE_LOOP:  // 흔들림
-		vTargetDir = vTargetDir = m_pAugusta->Get_LookVector();
-		break;
-
-	case EAugustaAirFlyType::XA_START:  // 초기 발진
-		// 강한 앞으로 추진 (이미 OnEnter에서 추가)
-		vTargetDir = m_pAugusta->Get_LookVector();
-		m_pAugusta->Move_Direction(vTargetDir, fTimeDelta, 0.3f); 
-		break;
-	default:
-		break;
-	}
-    
-	// 공통: 부드러운 회전 (Rotate_DirectionLerp: LookLerp 호출)
-	if (!XMVector3Equal(vTargetDir, XMVectorZero()))
-	{
-		// 현재 이동.
-		//_vector vMoveDirection = m_pAugusta->Get_LookVector();
-		m_pAugusta->Rotate_DirectionLerp(vTargetDir, fTimeDelta, 2.f);  // 턴 속도 8.f (조절 가능)
-		m_pAugusta->Move_Direction(vTargetDir, fTimeDelta, m_fSpeed);  // 이동
-	}
-	else
-	{
-		// 입력 없음: 속도 감쇠 (stall 효과)
-		m_fSpeed = max(0.f, m_fSpeed - 0.2f * fTimeDelta);
-		m_pAugusta->Move_Direction(m_pAugusta->Get_LookVector(), fTimeDelta, m_fSpeed);  // 잔여 직진
+		m_pAugusta->Rotate_DirectionLerp(vTargetDir, fTimeDelta, 4.f);
 	}
 
+	// 3. 물리 계산 (가속도 -> 속도 -> 위치)
+
+	// 3-1. 가속도(Acceleration) 계산
+	_vector vGravityAccel = XMLoadFloat3(&m_vGravity);
+	_vector vLiftAccel = XMVectorSet(0.f, m_fLift, 0.f, 0.f);
+
+	// W/S로 상승/하강 가속도
+	_vector vVerticalAccel = XMVectorZero();
+	if (m_States[INPUT_U]) // W (상승)
+		vVerticalAccel = XMVectorSet(0.f, m_fAccel, 0.f, 0.f);
+	else if (m_States[INPUT_D]) // S (하강)
+		vVerticalAccel = XMVectorSet(0.f, -m_fAccel, 0.f, 0.f);
+
+	// LShift(가속) 입력이 있다면 추진력 증가
+	_float fCurrentThrust = m_fSpeed;
+	if (m_States[INPUT_ACCEL])
+		fCurrentThrust *= 2.0f; // 2배 가속
+
+
+	// 캐릭터가 바라보는 방향으로 '추진 가속도'
+	_vector vThrustAccel = m_pAugusta->Get_LookVector_NoPitch() * fCurrentThrust;
+
+	// 모든 가속도를 합산
+	_vector vTotalAccel = vThrustAccel + vGravityAccel + vLiftAccel + vVerticalAccel;
+
+	// 3-2. 속도 (Velocity) 계산
+	// 공기 저항 적용
+	m_vForce *= m_fDrag;
+	// 가속도를 속도에 적용 (v = v0 + at)
+	m_vForce += vTotalAccel * fTimeDelta;
+
+	// 3-3. 최대/최소 속도 제한 (Optional)
+	_float fVerticalSpeed = XMVectorGetY(m_vForce);
+	if (fVerticalSpeed < -15.f) // 최대 낙하 속도 (예: -15 m/s)
+		m_vForce = XMVectorSetY(m_vForce, -15.f);
+	if (fVerticalSpeed > 8.f) // 최대 상승 속도 (예: 8 m/s)
+		m_vForce = XMVectorSetY(m_vForce, 8.f);
+
+
+	// 4. 최종 이동 적용 (Transform.cpp의 Go_Force는 velocity * fTimeDelta를 적용)
+	// Add_Force가 내부적으로 Go_Force(m_vForce, fTimeDelta)를 호출
+	m_pAugusta->Add_Force(m_vForce, fTimeDelta);
+
+	
 	// Parts Wing은 항상 실행됨
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {
@@ -206,8 +224,8 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-		// 우선순위 별.
-		// Jump키 눌렀을 때 => 점프로 변환.
+		// 우선순위
+		// 1. Jump키 눌렀을 때 => 점프로 변환.
 		if (m_States[JUMP])
 		{
 			m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
@@ -215,7 +233,7 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 			return;
 		}
 		
-		// 땅에 닿았을때
+		// 2. 땅에 닿았을때
 		if (m_States[LAND])
 		{
 			m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_ROLL;
@@ -223,34 +241,41 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 			return;
 		}
 
-		if (m_States[FLY_U])
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U);
-			return;
-		}
-		else if (m_States[FLY_D])
-		{
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D);
-			return;
-		}
-		else if (m_States[FLY_L])
+		// 3. 피드백 기반 애니메이션 전환 로직
+		if (m_States[INPUT_L])
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L);
 			return;
 		}
-		else if (m_States[FLY_R])
+		if (m_States[INPUT_R])
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R);
 			return;
 		}
-		else
+
+		// 우선순위 4: U (Point 1, 2. 상승 조건)
+		if ((m_States[INPUT_U] && m_States[INPUT_ACCEL]) ||             // Point 2: W + LShift (가속)
+			(m_States[INPUT_U] && eAirFlyType == EAugustaAirFlyType::XA_LOOP_D)) // Point 1: W + 하강 중 (급상승)
 		{
-			// 입력이 없다면?
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND);
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U);
+			return;
+		}
+
+		// 우선순위 5: D (Point 4. S키)
+		if (m_States[INPUT_D])
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D);
 			return;
 		}
 		
-		
+		// 우선순위 6: STAND (Point 3. W만 누르거나, 아무것도 안 누름)
+		// 위 조건(L/R/U/D)에 하나도 해당하지 않으면 STAND
+		// (XA_START는 IsEscapePossible이 false이므로 이 로직을 타지 않음)
+		if (eAirFlyType != EAugustaAirFlyType::XA_START)
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND);
+			return;
+		}
     }
 
 	if (m_IsAnimationEnd)
@@ -265,21 +290,13 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 
 			if (m_States[LAND])
 			{
-				// 이동 키를 누르면? => Land Roll
-				if (m_States[MOVE])
-				{
-					m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_ROLL;
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
-					return;
-				}
-				else
-				{
-					m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_HEAVY;
-					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
-					return;
-				}
+				m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_ROLL;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
+				return;
 			}
 		}
+
+		
 	}
 
 }
@@ -287,10 +304,10 @@ void CAugustaAirFly::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirFly::SetUp_Animations()
 {
     
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 0.f, 1.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 0.f, 1.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_U), "XA_Loop_U", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_D), "XA_Loop_D", 1.f, 0.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_L), "XA_Loop_L", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_R), "XA_Loop_R", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_SHAKE_LOOP), "XA_Shake_Loop", 1.f, 0.f);
