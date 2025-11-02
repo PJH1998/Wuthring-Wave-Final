@@ -5,9 +5,9 @@
 #include "MonsterTest.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
-
 #include "GameSystem.h"
 #include "Player.h"
+#include"Trigger_Box.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -56,6 +56,20 @@ HRESULT CLevel_Test::Initialize()
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+
+
+
+	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
+
+	CTrigger_Box::TRIGGER Tri;
+	Tri.iLevel = iLevel;
+	Tri.vExtends = _float3(5.f, 10.f, 5.f);
+	_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(10.f, -3.f, 10.f, 1.f));
+	_float4x4 TT;
+	XMStoreFloat4x4(&TT, Mat);
+	Tri.WorldMatrix = &TT;
+	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
     return S_OK;
 }

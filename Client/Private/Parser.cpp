@@ -72,10 +72,13 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				if (entry2.path().extension() != ".dat")
 					continue;
 
+				if (entry2.path().string().find("Anim") != std::string::npos)
+					continue;
+
 				_string Path = entry2.path().string();
 				_string Prototype = entry2.path().stem().string();
 				//파서 수정중
-				if (entry2.path().string().find("Bone") != std::string::npos)
+				if (entry2.path().string().find("_Bone") != std::string::npos)
 				{
 					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
@@ -155,9 +158,9 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	{
 		return;
 	}
-	//else if (pFilePath.find("Destruction") != std::string::npos)
-	//{
-	//	//continue;
+	else if (pFilePath.find("Destruction") != std::string::npos)
+	{
+		return;
 	//	_uint NameLength;
 
 	//	_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -197,7 +200,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	//				, PROTOTYPE::GAMEOBJECT, &pDesc);
 	//			});
 	//	}
-	//}
+	}
 	else
 	{
 		CMapObject::MAP_LOAD Desc{};

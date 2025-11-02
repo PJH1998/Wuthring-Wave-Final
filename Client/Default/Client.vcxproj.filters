@@ -465,6 +465,7 @@
     <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -700,6 +701,7 @@
     <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

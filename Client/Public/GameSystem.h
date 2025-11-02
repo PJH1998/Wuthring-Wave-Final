@@ -6,6 +6,7 @@ NS_BEGIN(Client)
 class CGameSystem final : public CBase
 {
 	DECLARE_SINGLETON(CGameSystem)
+	using TriggerCallback = function<void(void*)>;
 private:
 	explicit CGameSystem();
 	virtual ~CGameSystem() = default;
@@ -36,13 +37,19 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
-
+#pragma region TRIGGER
+	void TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc);
+	void OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg = nullptr);
+	//레벨 전환시 초기화 고려.
+	void Clear_TriggerCallBack();
+#pragma endregion
 
 private:
 	class		CParser*		m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
 	class		CDirector*	m_pDirector = { nullptr };
 	CHARACTER_STAT m_Stats = {};
+	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 public:
 	virtual		void	Free() override;
 

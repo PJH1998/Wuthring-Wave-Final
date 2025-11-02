@@ -27,7 +27,7 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
 	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
-	m_iNumLOD = m_pModelComArray.size() - 1;
+	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
 	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 	m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 
@@ -115,6 +115,11 @@ void CMapObject::Render()
 
 		m_pModelComArray[m_iLODIndex]->Render(i);
 	}
+}
+
+BoundingBox* CMapObject::Get_BoundingBox()
+{
+	return m_pModelComArray[0]->Get_BoundingBox();
 }
 
 void CMapObject::Ready_Component(void* pArg)

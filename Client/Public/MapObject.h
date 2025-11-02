@@ -40,6 +40,7 @@ public:
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		BoundingBox* Get_BoundingBox()override;
 
 private:
 	CShader* m_pShaderCom = { nullptr };

@@ -243,6 +243,7 @@
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
+    <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -353,6 +354,7 @@
     <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
