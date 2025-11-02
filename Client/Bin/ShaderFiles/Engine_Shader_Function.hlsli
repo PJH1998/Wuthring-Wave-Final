@@ -398,3 +398,17 @@ float Noise(float2 St)
     
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
+
+bool IsInNDC(float4 vProjPos)
+{
+    if(vProjPos.x > 1.f || vProjPos.x < -1.f)
+        return false;
+    
+    if (vProjPos.y > 1.f || vProjPos.y < -1.f)
+        return false;
+    
+    if (vProjPos.z > 1.f || vProjPos.z < 0.f)
+        return false;
+    
+    return true;
+}
