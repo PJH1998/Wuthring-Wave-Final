@@ -27,6 +27,9 @@
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
 
+#define KSTA_DEBUG_ENABLEFONTMGR
+
+
 IMPLEMENT_SINGLETON(CGameInstance)
 
 CGameInstance::CGameInstance()
@@ -45,8 +48,11 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -134,7 +140,10 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	m_pFont_Manager->Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
@@ -169,8 +178,11 @@ HRESULT CGameInstance::Draw()
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
 
-	ASSERT_CRASH(m_pRenderer);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	ASSERT_CRASH(m_pFont_Manager);
 	m_pFont_Manager->Render();
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
@@ -837,7 +849,10 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);

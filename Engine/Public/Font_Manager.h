@@ -33,16 +33,23 @@ public:
 	_bool	/* Update 떄에 한번헤 루프돌리도록?*/	Draw_Font(FTCUSTOM_FONT* pFontInfo, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass);
     
 	static _bool                        Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY);
+	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY);
 	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint);
 	_bool								Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h,
 														const uint8_t* pSrc, _int srcPitch);
 	static _bool						FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot);
 
+
 	//_bool TestGlyph(FTCUSTOM_FONT& font, wchar_t ch);
 private:
 	HRESULT								Ready_FontBuffer();
 	HRESULT                             Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePath, _uint iPixelHeight);
+
+
+	_bool								Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint newH);
+
     HRESULT                             Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW = 1024, _uint iAtlasH = 1024);
+	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH);
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };

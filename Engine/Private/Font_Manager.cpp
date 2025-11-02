@@ -3,8 +3,6 @@
 
 #include "Shader.h"
 
-#include "VIBuffer_Rect.h"
-
 CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext }
 {
@@ -131,6 +129,14 @@ HRESULT CFont_Manager::Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePat
 	return S_OK;
 }
 
+_bool CFont_Manager::Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint newH)
+{
+	Safe_Release(pFont->pAtlasSRV);
+	Safe_Release(pFont->pAtlasTex);
+
+	return SUCCEEDED(Create_EmptyAtlas(pFont, newW, newH));
+}
+
 HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH)
 {
 	// 입력받은 크기에 맞게 빈 아틀라스를 만듭니다.
@@ -170,6 +176,47 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 
 	return S_OK;
 }
+
+_bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH)
+{
+	// 1) 텍스처만 재생성
+	if (!Reset_AtlasTexture(pFontInfo, iAtlasW, iAtlasH))
+		return false;
+
+	// 2) 기존 글리프 다시 채우기 (repack)
+	pFontInfo->iPenX = pFontInfo->iPenY = pFontInfo->iRowH = 0;
+
+	for (auto& [code, glyph] : pFontInfo->mapGlyphs)
+	{
+		FT_GlyphSlot slot = nullptr;
+		if (!FT_RenderGlyph(pFontInfo->pFace, code, slot))
+			return false;
+
+		FT_Bitmap& bmp = slot->bitmap;
+		int gw = bmp.width;
+		int gh = bmp.rows;
+
+		int x, y;
+		if (!Atlas_AllocRect(pFontInfo, gw, gh, x, y))
+			return false; // (이 경우는 새 크기로도 부족하다는 뜻)
+
+		if (gw > 0 && gh > 0)
+			Atlas_UploadBitmap(*pFontInfo, x, y, gw, gh, bmp.buffer, bmp.pitch);
+
+		glyph.sOffsetX = slot->bitmap_left;
+		glyph.sOffsetY = slot->bitmap_top;
+		glyph.sWidth = gw;
+		glyph.sHeight = gh;
+		glyph.sAdvance = (slot->advance.x >> 6);
+
+		glyph.fU0 = float(x) / pFontInfo->iAtlasW;
+		glyph.fV0 = float(y) / pFontInfo->iAtlasH;
+		glyph.fU1 = float(x + gw) / pFontInfo->iAtlasW;
+		glyph.fV1 = float(y + gh) / pFontInfo->iAtlasH;
+	}
+	return true;
+}
+
 
 //HRESULT CFont_Manager::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
 //{
@@ -339,6 +386,32 @@ _bool CFont_Manager::Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth,
     return true;
 }
 
+_bool CFont_Manager::Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY)
+{
+	// 먼저 시도
+	if (Atlas_AllocRect(pFontInfo, gw, gh, outX, outY))
+		return true;
+
+	// 리빌드 정책: 가로/세로 중 더 필요한 방향 위주로 2배 증가
+	_uint newW = pFontInfo->iAtlasW;
+	_uint newH = pFontInfo->iAtlasH;
+
+	// 간단 정책: 둘 다 2배 (안전)
+	newW = max(newW * 2, (_uint)(pFontInfo->iAtlasW + gw + 8));
+	newH = max(newH * 2, (_uint)(pFontInfo->iAtlasH + gh + 8));
+
+	// 상한 (원하면 제한)
+	const _uint MAX_ATLAS = 4096;
+	newW = min(newW, MAX_ATLAS);
+	newH = min(newH, MAX_ATLAS);
+
+	if (!Rebuild_Atlas(pFontInfo, newW, newH))
+		return false;
+
+	// 리빌드 후 다시 시도
+	return Atlas_AllocRect(pFontInfo, gw, gh, outX, outY);
+}
+
 _bool CFont_Manager::Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h, const uint8_t* pSrc, _int srcPitch)
 {
 	// 얻은 비트맵 데이터를 실제 GPU 텍스쳐로 복사합니다.
@@ -378,7 +451,7 @@ _bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint)
 	int gh = (int)bmp.rows;
 
 	int x, y;
-	if (!Atlas_AllocRect(pFontInfo, gw, gh, x, y))
+	if (!Atlas_CheckSize(pFontInfo, gw, gh, x, y))
 		return false; // 공간 부족
 
 	if (gw > 0 && gh > 0)
@@ -462,11 +535,18 @@ void CFont_Manager::Free()
 
 		FT_Done_Face(face->pFace);
 		Safe_Delete(face);
+		face = nullptr;
 	}
 
 	m_Fonts.clear();
 
-	//m_pFTLibrary = nullptr;
+	if (m_pFTLibrary)
+	{
+		FT_Done_FreeType(m_pFTLibrary);
+		m_pFTLibrary = nullptr;
+	}
+
+	Safe_Release(m_pFontVertexBuffer);
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pDevice);
