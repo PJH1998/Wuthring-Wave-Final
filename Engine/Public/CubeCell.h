@@ -53,7 +53,8 @@ private:
 private:
 	void									Compute_MinMax();
 	_bool									isIn(const _float* pMinMax);
-	void									Compute_LOD(const _fvector& vCamPos);
+	void									Compute_Cell_LOD(const _fvector& vCamPos);
+	_uint									Compute_Object_LOD(class CStaticObject* pObject, const _fvector& vCamPos);
 
 public:
 	static CCubeCell* Create(_float3 vCenter, _float3 vExtent, _uint iDepth);
