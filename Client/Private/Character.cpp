@@ -264,6 +264,25 @@ _fvector CCharacter::Get_Velocity()
 	return m_pTransformCom->Get_Velocity();
 }
 
+void CCharacter::Add_Force(_fvector vForce, _float fTimeDelta)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pTransformCom->Go_Force(vForce, fTimeDelta);
+}
+
+#ifdef _DEBUG
+void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
+{
+	vRayDir = XMVector3Normalize(vRayDir);
+	_vector vEnd = XMLoadFloat3(&vEndPos);
+	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
+}
+#endif // _DEBUG
+
+
+
+
+
 #pragma endregion
 
 
@@ -284,8 +303,37 @@ _vector CCharacter::Get_LookVector()
 
 _vector CCharacter::Get_LookVector_NoPitch()
 {
-    _vector vLook = XMVector3Normalize(XMVectorSetY(Get_LookVector(), 0.f));
+	_vector vLook = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vLook;
+
+    vLook = XMVector3Normalize(XMVectorSetY(Get_LookVector(), 0.f));
     return vLook;
+}
+
+_vector CCharacter::Get_RightVector()
+{
+	_vector vRight = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vRight;
+
+	vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+
+	return vRight;
+}
+
+_vector CCharacter::Get_RightVector_NoPitch()
+{
+	_vector vRight = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vRight;
+
+	vRight = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::RIGHT), 0.f));
+
+	return vRight;
 }
 
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
@@ -330,7 +378,6 @@ _bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, 
 {
     ASSERT_CRASH(m_pModelCom);
     _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     
     return IsPlayAnimationEnd;
@@ -367,6 +414,14 @@ ACTORDIR CCharacter::Calculate_Direction()
     else if (bD)       return ACTORDIR::R;
 
     return ACTORDIR::END;
+}
+
+_vector CCharacter::Get_CameraRightVector()
+{
+	ASSERT_CRASH(m_pSpringCamera);
+
+	return m_pSpringCamera->Get_RightVector_NoPitch();
+
 }
 
 _vector CCharacter::Calculate_Move_Direction(ACTORDIR eDir)
@@ -465,7 +520,7 @@ void CCharacter::Rotate_Direction(_fvector vDir)
     m_pTransformCom->LookDir(vDirFlat);
 }
 
-void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
+void CCharacter::Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
     _vector vDirFlat = XMVectorSetY(vDir, 0.f);
     vDirFlat = XMVector3Normalize(vDirFlat);
@@ -474,6 +529,16 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
         return;
 
     m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
+}
+
+void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
+{
+
+	_vector vDirFlat = XMVector3Normalize(vDir);
+	if (XMVector3Equal(vDirFlat, XMVectorZero()))
+		return;
+
+	m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
 }
 
 

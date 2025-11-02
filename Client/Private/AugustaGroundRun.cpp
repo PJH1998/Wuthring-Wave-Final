@@ -72,6 +72,9 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
+	// 우선순위 제일 높음.
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -166,8 +169,14 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
 			return;
 		}
-        
     }
+
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
 
     // SPACE 누르면 바로 점프로 전환.
     if (m_States[JUMP])

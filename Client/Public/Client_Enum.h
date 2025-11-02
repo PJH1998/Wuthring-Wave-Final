@@ -98,6 +98,11 @@ namespace Client
 	};
 
 	
-	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, AUGUSTA, SHADOW, END };
+	enum class SHADER_ANIMMESH { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX
+		, AUGUSTA
+		, SHADOW
+		, END };
 
 }

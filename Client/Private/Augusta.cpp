@@ -9,6 +9,7 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+#include "Wing.h"
 
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -49,7 +50,9 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pBayonet->SetActivate(false);
     m_pSkillWeapon->SetActivate(false);
     m_pGriffon->SetActivate(false);
+	m_pWing->SetActivate(false);
     
+	
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
 }
@@ -59,15 +62,17 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	// 4. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-    // 4. Parts 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Priority_Update(fTimeDelta);
-    }
+  
 
 }
 
@@ -76,6 +81,13 @@ void CAugusta::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
+
+	// 6. 파츠 갱신.?
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
 
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
@@ -91,12 +103,7 @@ void CAugusta::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-    // 6. 파츠 갱신.?
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Update(fTimeDelta);
-    }
+   
 
 }
 void CAugusta::Late_Update(_float fTimeDelta)
@@ -126,13 +133,21 @@ void CAugusta::Render()
         if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
             CRASH("Ready Diffuse Texture Failed");
 
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0);
+		_bool HasNormal = { false };
+
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			HasNormal = true;
+
+		if(FAILED(m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
+			CRASH("Ready g_HasNormal Failed");
 
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
-            CRASH("Ready Shader Begin Failed");
+		if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+			CRASH("Ready Shader Begin Failed");
+        //if (FAILED(m_pShaderCom->Begin(m_ShaderPaths[i])))
+        //    CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
             CRASH("Ready Render Failed");
@@ -180,6 +195,9 @@ void CAugusta::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _
     case PART_GRIFFON:
 		m_pGriffon->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+    case PART_WING:
+		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+        break;
     }
 }
 
@@ -196,6 +214,9 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     case PART_GRIFFON:
         m_pGriffon->Activate(IsActive);
         break;
+	case PART_WING:
+		m_pWing->Activate(IsActive);
+		break;
     }
 }
 
@@ -211,8 +232,10 @@ void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
         break;
     case PART_GRIFFON:
         m_pGriffon->Clear_Animation(strAnimName);
-
         break;
+	case PART_WING:
+		m_pWing->Clear_Animation(strAnimName);
+		break;
     }
 }
 
@@ -300,6 +323,7 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 {
 
 }
+
 #endif // _DEBUG
 
 #pragma region NOTIFY
@@ -371,7 +395,7 @@ void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA);
 }
 
 void CAugusta::Ready_Positions(const CHARACTER_DESC* pDesc)
@@ -400,7 +424,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         switch (i)
         {
         case PARTTYPE::PART_BAYONET:
@@ -413,7 +437,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(Desc.pSocketMatrix);
             
 
-            // WeaponDesc
+			// PropDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
@@ -432,7 +456,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(Desc.pSocketMatrix);
 
 
-            // WeaponDesc
+			// PropDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
@@ -450,7 +474,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(Desc.pSocketMatrix);
 
 
-            // WeaponDesc
+			// PropDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
@@ -459,7 +483,26 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(m_pGriffon);
             Safe_AddRef(m_pGriffon);
             break;
+
+		case PARTTYPE::PART_WING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pWing = dynamic_cast<CWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pWing);
+			Safe_AddRef(m_pWing);
+			break;
         }
+	
        
     }
 }
@@ -496,4 +539,5 @@ void CAugusta::Free()
     Safe_Release(m_pBayonet);
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
+	Safe_Release(m_pWing);
 }

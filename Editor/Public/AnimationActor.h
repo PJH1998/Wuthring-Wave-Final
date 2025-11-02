@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "EditorProp.h"
 #include "ContainerObject.h"
 NS_BEGIN(Editor)
 class CAnimationActor final : public CContainerObject
@@ -19,7 +20,12 @@ public:
 		_float3 vRotation = {};
 		_float3 vScale = {};
 
+		class CTransform* pParentTransform = { nullptr };
+		_string strBoneName = { };
+		CAnimationActor* pParentActor = { nullptr };
 	}ANIMATION_ACTOR_DESC;
+
+
 
 private:
 	explicit CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -52,6 +58,8 @@ public:
 	void Set_PlayAnimation(_bool IsPlay);
 
 	void Register_AllNotifies(const _string& strFolderPath);
+
+
 	
 	void Collider_Active(const _wstring& tag, _bool IsActive);
 	void Effect_Active(const _wstring& tag);
@@ -60,7 +68,14 @@ public:
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
 	const _float4x4* Get_WorldMatrixPtr();
 
-	_float4 m_vInitPosition = {};
+	void Set_ChildActor(CAnimationActor* pChildActor) { m_pChildActor = pChildActor; }
+	_bool Is_ChildActor() { return m_pChildActor != nullptr; }
+	class CTransform* Get_Transform() { return m_pTransformCom; }
+
+	
+	void Child_Render();
+	void Render_Detail();
+	
 #endif // _DEBUG
 
 
@@ -70,6 +85,13 @@ private:
 	class CShader* m_pShaderCom = { nullptr };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 
+	class CTransform* m_pParentTransform = { nullptr };
+	const _float4x4* m_pSocketMatrix = { nullptr };
+	CAnimationActor* m_pParentActor = { nullptr };
+	CAnimationActor* m_pChildActor = { nullptr };
+	_float4x4 m_CombinedMatrix = {};
+	_float4 m_vInitPosition = {};
+
 	_uint m_iShaderPath = {};
 	_string m_strCurrentAnimation = {};
 	_string m_strCurrentRibAnimation = {};
@@ -78,11 +100,17 @@ private:
 
 	_float m_fTimeDelta = {};
 
-	_string m_strModelDatPath = {}; // 
+	_string m_strModelDatPath = {}; //
 
 	// Camera
 	class CSpringCamera_Edit* m_pSpringCamera = { nullptr };
 	_float	m_fOffsetY = {};
+
+	
+
+#ifdef _DEBUG
+	// PartObject
+#endif
 
 private:
 	void Bind_Resources();

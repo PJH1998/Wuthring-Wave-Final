@@ -168,13 +168,13 @@ namespace Engine
 		_uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
 	}ANIMINFO;
 
-	// 梨꾨꼸 ?뺣낫 援ъ“泥?=> Depth2
+	//
 	typedef struct tagGpuChannelInfo
 	{
-		_uint iStartKeyframeOffset; // Key Frame ?쒖옉 (?꾩쟻 ?몃뜳??
-		_uint iNumKeyframes; // ?꾩옱 Channel?먯꽌??KeyFrame 媛쒖닔.
-		_uint iBoneIndex;  // 異붽?: ??梨꾨꼸???대뼡 堉덈? 而⑦듃濡ㅽ븯?붿?
-		_uint iPadding;    // 16諛붿씠???뺣젹???꾪븳 ?⑤뵫
+		_uint iStartKeyframeOffset; // Key Frame 
+		_uint iNumKeyframes; // 
+		_uint iBoneIndex;  // 
+		_uint iPadding;    // 
 	}GPU_CHANNELINFO;
 
 	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
@@ -186,13 +186,20 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// (留??꾨젅???낅뜲?댄듃)
-	// Constant Buffer??珥??ш린媛 諛섎뱶??16??諛곗닔?ъ빞??
+	// 
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
-		_float fTrackPosition;
-		_uint  iAnimindex;
-		_bool  IsRibAnimUsed = false;
-		_uint  iRibbonAnimIndex;
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 1
+		_uint  iRibbonAnimIndex; // 4
+		
+		// Blending
+		_float fPrevTrackPosition; // 4 => Start, End 프레임 판별.
+		_uint  iPrevAnimIndex; // 4
+		_uint  iRibbonPrevAnimIndex; // 4
+		_bool  IsBlending; // 1
+
 	}ANIMATION_CBINFO;
 
 	typedef struct tagCollisionData {

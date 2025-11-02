@@ -33,7 +33,7 @@ private:
     _bool m_States[AIRATTACKSTATE::END] = {};
     _float m_fSpeed = {};
 
-	map<_string, _string> m_PartsAnimations = {};
+	map<_string, _string> m_PartsAnimations = {}; // Parts의 애니메이션이 서로 달라서?
     
 
 private:

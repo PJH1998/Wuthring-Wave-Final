@@ -3,6 +3,7 @@
 #include "Model.h"
 
 #include "SpringCamera_Edit.h"
+#include "EditorPropWeapon.h"
 
 CAnimationActor::CAnimationActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
@@ -42,6 +43,15 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     // Model의 Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
+	if (!(pDesc->strBoneName.empty()) && nullptr != pDesc->pParentTransform)
+	{
+
+		m_pParentTransform = pDesc->pParentTransform;
+		m_pParentActor = pDesc->pParentActor;
+		m_pSocketMatrix = m_pParentActor->Get_BoneMatrix(pDesc->strBoneName);
+
+		m_pParentActor->Set_ChildActor(this);
+	}
 
     if (FAILED(Ready_Components(pDesc)))
     {
@@ -49,15 +59,18 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
         return E_FAIL;
     }
 
+
+
     // Default는 0번 애니메이션 실행.
 #ifdef _DEBUG
     m_strCurrentAnimation = m_pModelCom->Get_AnimationNames()[0];
 #endif // _DEBUG
 
     
+	
 
     m_IsPlayAnimation = true;
-	m_strCurrentAnimation = "Blend_BasePose";
+	//m_strCurrentAnimation = "Blend_BasePose";
     //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
 
@@ -69,6 +82,11 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
     //m_pTransformCom->Scale(pDesc->vScale);
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
+
+	// ParentActor가 있으면 아래 Ready_Camera 실행하지않음.
+	if (m_pParentActor != nullptr)
+		return S_OK;
+
 	if (FAILED(Ready_Camera()))
 		CRASH("Camera");
 	m_fOffsetY = 1.f;
@@ -79,6 +97,15 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 void CAnimationActor::Priority_Update(_float fTimeDelta)
 {
     CContainerObject::Priority_Update(fTimeDelta);
+
+#ifdef _DEBUG
+    // PartObjects 갱신
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Priority_Update(fTimeDelta);
+    }
+#endif
 }
 
 void CAnimationActor::Update(_float fTimeDelta)
@@ -86,6 +113,15 @@ void CAnimationActor::Update(_float fTimeDelta)
     CContainerObject::Update(fTimeDelta);
 
     m_fTimeDelta = fTimeDelta;
+
+#ifdef _DEBUG
+    // PartObjects 갱신
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Update(fTimeDelta);
+    }
+#endif
    
     //if (m_IsPlayAnimation)
     //{
@@ -104,10 +140,10 @@ void CAnimationActor::Update(_float fTimeDelta)
     _bool IsAnimationEnd = { false };
     if (m_IsPlayAnimation)
     {
-        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, true, true, 1.f);
 
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
@@ -121,8 +157,8 @@ void CAnimationActor::Update(_float fTimeDelta)
 #endif // _DEBUG
 
 
-    //if (IsAnimationEnd)
-    //    m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
+    if (IsAnimationEnd)
+        m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
   
 
     //m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);
@@ -133,18 +169,44 @@ void CAnimationActor::Update(_float fTimeDelta)
 
     m_pModelCom->Render_Gizmo(m_pTransformCom->Get_WorldMatrix());
 #endif // _DEBUG
-	ImGui::Begin("Offset");
-	ImGui::Text("OffsetY : ");
-	ImGui::SameLine();
-	ImGui::InputFloat("##", &m_fOffsetY);
-	ImGui::End();
 
-	m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fOffsetY);
+	if (nullptr != m_pSpringCamera)
+	{
+		ImGui::Begin("Offset");
+		ImGui::Text("OffsetY : ");
+		ImGui::SameLine();
+		ImGui::InputFloat("##", &m_fOffsetY);
+		ImGui::End();
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), m_fOffsetY);
+	}
+	
 }
 
 void CAnimationActor::Late_Update(_float fTimeDelta)
 {
+	if (nullptr != m_pSocketMatrix && nullptr != m_pParentTransform)
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix,
+			m_pTransformCom->Get_WorldMatrix() *
+			XMLoadFloat4x4(m_pSocketMatrix) *
+			m_pParentTransform->Get_WorldMatrix());
+	}
+	else
+	{
+		XMStoreFloat4x4(&m_CombinedMatrix, m_pTransformCom->Get_WorldMatrix());
+	}
+	
+
     CContainerObject::Late_Update(fTimeDelta);
+
+#ifdef _DEBUG
+    // PartObjects 갱신
+    for (auto& pPart : m_PartObjects)
+    {
+        if (pPart.second->IsActivate())
+            pPart.second->Late_Update(fTimeDelta);
+    }
+#endif
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
         return;
@@ -166,7 +228,7 @@ void CAnimationActor::Render()
         if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
             CRASH("Ready Bone Matrices Failed");
 
-        if (FAILED(m_pShaderCom->Begin(m_iShaderPath)))
+        if (FAILED(m_pShaderCom->Begin(2)))
             CRASH("Ready Shader Begin Failed");
 
         if (FAILED(m_pModelCom->Render(i)))
@@ -275,7 +337,7 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
     
 }
 void CAnimationActor::Collider_Active(const _wstring&, _bool)
-{
+{	
 
 }
 void CAnimationActor::Effect_Active(const _wstring& tag)
@@ -307,13 +369,71 @@ const _float4x4* CAnimationActor::Get_WorldMatrixPtr()
     return m_pTransformCom->Get_WorldMatrixPtr();
 }
 
+void CAnimationActor::Child_Render()
+{
+	ASSERT_CRASH(m_pChildActor);
+	m_pChildActor->Render_Detail();
+
+}
+void CAnimationActor::Render_Detail()
+{
+	if (m_strCurrentAnimation.empty())
+		return;
+
+	_float fDuration = m_pModelCom->Get_Duration(m_strCurrentAnimation);
+	_float minTrackPos = 0.f;
+	_float maxTrackPos = fDuration;
+
+	ImGuiIO& io = ImGui::GetIO();
+	ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 200.f);
+	ImVec2 windowSize = ImVec2(600.f, 170.f);
+
+	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+	ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+	ImGui::Begin("Child Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
+
+	ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
+
+	if (!m_strCurrentAnimation.empty())
+		ImGui::Text("Child Duration : %.2f", fDuration);
+	if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
+		Set_TrackPosition(m_fTrackPosition);
+
+	_bool IsChanged = { false };
+
+	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LCONTROL))
+	{
+		IsChanged = true;
+		m_IsPlayAnimation = !m_IsPlayAnimation;
+	}
+
+	if (ImGui::Button("Stop"))
+	{
+		IsChanged = true;
+		m_IsPlayAnimation = false;
+	}
+
+
+	ImGui::SameLine();
+	if (ImGui::Button("Play"))
+	{
+		IsChanged = true;
+		m_IsPlayAnimation = true;
+	}
+
+	ImGui::End();
+}
 #endif
 
 // 1. 행렬 
 void CAnimationActor::Bind_Resources()
 {
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        CRASH("Failed Bind Matrix");
+	/*if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+        CRASH("Failed Bind Matrix");*/
+
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
+		CRASH("Failed Bind Matrix");
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         CRASH("Failed Bind Matrix");
@@ -375,6 +495,10 @@ HRESULT CAnimationActor::Ready_Camera()
 
 	return S_OK;
 }
+
+#ifdef _DEBUG
+
+#endif
 
 CGameObject* CAnimationActor::Clone(void* pArg)
 {

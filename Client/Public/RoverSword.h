@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include "Weapon.h"
+#include "Prop.h"
 
 NS_BEGIN(Client)
-class CRoverSword final : public CWeapon
+class CRoverSword final : public CProp
 {
 public:
-	typedef struct tagRoverWeaponDesc : public CWeapon::WEAPON_DESC {
+	typedef struct tagRoverWeaponDesc : public CProp::PROP_DESC {
 		
-	} ROVER_WEAPON_DESC;
+	} ROVER_PROP_DESC;
 
 protected:
 	explicit CRoverSword(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -29,9 +29,9 @@ private:
 
 
 private:
-	void Ready_Components(const WEAPON_DESC* pDesc);
-	void Ready_Variables(const WEAPON_DESC* pDesc);
-	void Ready_Positions(const WEAPON_DESC* pDesc);
+	void Ready_Components(const PROP_DESC* pDesc);
+	void Ready_Variables(const PROP_DESC* pDesc);
+	void Ready_Positions(const PROP_DESC* pDesc);
 	void Bind_Resources();
 
 public:

@@ -103,8 +103,11 @@ namespace Engine
 	//const unsigned int g_iMaxWidth = 16384;
 	//const unsigned int g_iMaxHeight = 9216;	
 
-	const unsigned int g_iMaxWidth = 8192;
-	const unsigned int g_iMaxHeight = 4608;
+	const unsigned int g_iMaxWidth = 4096;
+	const unsigned int g_iMaxHeight = 2304;
+
+	const unsigned int g_iMaxShadowMapSize = 8192;
+	const unsigned int g_iSectorSize = 2048;
 
 	const unsigned int g_iNumCascade = 4;
 	//const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };

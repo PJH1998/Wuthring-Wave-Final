@@ -2,18 +2,18 @@
 #include "RoverSword.h"
 
 CRoverSword::CRoverSword(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CWeapon{ pDevice, pContext }
+    : CProp{ pDevice, pContext }
 {
 }
 
 CRoverSword::CRoverSword(const CPartObject& Prototype)
-    : CWeapon(Prototype )
+    : CProp(Prototype )
 {
 }
 
 HRESULT CRoverSword::Initialize_Prototype()
 {
-    if (FAILED(CWeapon::Initialize_Prototype()))
+    if (FAILED(CProp::Initialize_Prototype()))
         return E_FAIL;
 
     return S_OK;
@@ -21,7 +21,7 @@ HRESULT CRoverSword::Initialize_Prototype()
 
 HRESULT CRoverSword::Initialize_Clone(void* pArg)
 {
-    WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
+    PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
 
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
@@ -36,16 +36,16 @@ HRESULT CRoverSword::Initialize_Clone(void* pArg)
 
 void CRoverSword::Priority_Update(_float fTimeDelta)
 {
-    CWeapon::Priority_Update(fTimeDelta);
+    CProp::Priority_Update(fTimeDelta);
 }
 
 void CRoverSword::Update(_float fTimeDelta)
 {
-    CWeapon::Update(fTimeDelta);
+    CProp::Update(fTimeDelta);
 
-    // Augusta�� StateMachine���� �ִϸ��̼ǽ���?
+    // Augusta StateMachine
 
-    // Last :  Combined ��� �ʱ�ȭ
+    // Last :  Combined 
     XMStoreFloat4x4(&m_CombinedMatrix,
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
@@ -58,11 +58,11 @@ void CRoverSword::Update(_float fTimeDelta)
 void CRoverSword::Late_Update(_float fTimeDelta)
 {
 
-    CWeapon::Late_Update(fTimeDelta);
+    CProp::Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 
@@ -93,7 +93,7 @@ void CRoverSword::Render()
 #endif // _DEBUG
 }
 
-void CRoverSword::Ready_Components(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -122,7 +122,7 @@ void CRoverSword::Ready_Components(const WEAPON_DESC* pDesc)
         CRASH("Rigidbody");
 }
 
-void CRoverSword::Ready_Variables(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -132,7 +132,7 @@ void CRoverSword::Ready_Variables(const WEAPON_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CRoverSword::Ready_Positions(const WEAPON_DESC* pDesc)
+void CRoverSword::Ready_Positions(const PROP_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -175,5 +175,5 @@ CGameObject* CRoverSword::Clone(void* pArg)
 
 void CRoverSword::Free()
 {
-    CWeapon::Free();
+    CProp::Free();
 }

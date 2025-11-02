@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "RoverSword.h"
+#include "Wing.h"
 #include "RoverFactory.h"
 #include "Collider.h"
 
@@ -44,6 +45,7 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	
 	// 비활성화. 
 	m_pRoverSword->SetActivate(false);
+	m_pWing->SetActivate(false);
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
@@ -54,17 +56,18 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	// 1. Parts 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Priority_Update(fTimeDelta);
+	}
+
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-    // 4. Parts 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Priority_Update(fTimeDelta);
-    }
-
+  
 }
 
 void CRover::Update(_float fTimeDelta)
@@ -72,6 +75,13 @@ void CRover::Update(_float fTimeDelta)
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
         return;
+
+	// 1. 파츠 갱신.?
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
 
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
@@ -85,28 +95,22 @@ void CRover::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-    // 6. 파츠 갱신.?
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Update(fTimeDelta);
-    }
+  
 
 }
 void CRover::Late_Update(_float fTimeDelta)
 {
-    // 파츠 갱신
+    // 1. 파츠 갱신
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
             pPart.second->Late_Update(fTimeDelta);
     }
 
+	// 2. Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
-    // Collider 충돌 처리후 위치에 맞춘다.
 
-    // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
@@ -375,7 +379,7 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
-        CWeapon::WEAPON_DESC Desc{};
+        CProp::PROP_DESC Desc{};
         switch (i)
         {
         case PARTTYPE::PART_SWORD:
@@ -388,7 +392,7 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(Desc.pSocketMatrix);
 
 
-            // WeaponDesc
+            // PropDesc
             if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
                 , strPrototypeName, &Desc)))
                 CRASH("Weapon");
@@ -397,7 +401,24 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(m_pRoverSword);
             Safe_AddRef(m_pRoverSword);
             break;
-        }
+		case PARTTYPE::PART_WING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("Weapon");
+
+			m_pWing = dynamic_cast<CWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pWing);
+			Safe_AddRef(m_pWing);
+			break;
+		}
     }
 }
 
@@ -431,4 +452,5 @@ void CRover::Free()
 {
     CCharacter::Free();
     Safe_Release(m_pRoverSword);
+	Safe_Release(m_pWing);
 }

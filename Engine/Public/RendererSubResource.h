@@ -40,7 +40,7 @@ private:
 	}MOTION_BLUR_DATA;
 
 private:
-	CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRendererSubResource() = default;
 
 #ifdef _DEBUG
