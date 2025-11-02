@@ -89,7 +89,10 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 	_char* pAnimationName = { nullptr };
 	strtok_s(szAnimationName, "|", &pAnimationName);
-	strcpy_s(m_szName, pAnimationName);
+	if(0 == strcmp(pAnimationName, ""))
+		strcpy_s(m_szName, szAnimationName);
+	else
+		strcpy_s(m_szName, pAnimationName);
 
 	InputFile.read(reinterpret_cast<_char*>(&m_fDuration), sizeof(_float));
 	InputFile.read(reinterpret_cast<_char*>(&m_fTickPerSecond), sizeof(_float));

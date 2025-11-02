@@ -199,6 +199,12 @@
     <Filter Include="03. GameObject\Actor\Monster\ElectroPredator">
       <UniqueIdentifier>{da785c09-916c-4fe0-a759-16e111b51508}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\EffectMesh">
+      <UniqueIdentifier>{cf4661a1-f396-4152-8969-b39d1f8f3b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul">
+      <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -465,6 +471,9 @@
     <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Ggobul.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -699,6 +708,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Ggobul.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

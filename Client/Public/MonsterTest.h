@@ -41,6 +41,10 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive);
+	virtual void Effect_Active(const _wstring& wStrEffectTag);
+
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };

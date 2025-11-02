@@ -156,6 +156,19 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	//	m_isTrigger = false;
 }
 
+void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
+{
+}
+
+void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
+{
+	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+	//	return;
+	//
+	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+
 HRESULT CMonsterTest::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
