@@ -6,6 +6,8 @@
 #include "TrailMesh_Controller.h"
 #include "Load_Controller.h"
 
+#include "Rect_Controller.h"
+
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
 {
@@ -81,6 +83,7 @@ private:
 	class CMesh_Controller*										m_pMesh_Controller = { nullptr };
 	class CTrailMesh_Controller*								m_pTrailMesh_Controller = { nullptr };
 	class CLoad_Controller*										m_pLoad_Controller = { nullptr };
+	class CRect_Controller*										m_pRect_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -102,6 +105,7 @@ private:
 	_bool														m_IsParticle = false;
 	_bool														m_IsMeshEffect = false;
 	_bool														m_IsTrailMesh = false;
+	_bool														m_IsRectEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};

@@ -22,7 +22,7 @@ public:
 		_int	fShaderPass = 0;
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
-		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
+		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f};
 
 		_bool	IsSprite = false;

@@ -73,7 +73,7 @@ void CRoverGroundRun::Handle_Input()
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
-    m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
+    m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
     m_States[RUN_U] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
     m_States[RUN_D] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
@@ -92,18 +92,12 @@ void CRoverGroundRun::Handle_Input()
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
 
-    
-
-    
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 
     // 상태에 따라 속도 다르게.
     m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
 }
-
-
-
 
 
 void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
@@ -125,6 +119,7 @@ void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
     else 
         m_pRover->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 
+
 }
 
 void CRoverGroundRun::Check_Physics()
@@ -132,7 +127,8 @@ void CRoverGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pRover->Is_Land(&m_vLandNormal);
+	m_States[LAND] = m_pRover->Is_Land();
+	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.4f);
 }
 
 
@@ -142,26 +138,21 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
     ERoverRunType eRunType = static_cast<ERoverRunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 0.2f;
-    _float fDistanceToGround = m_pRover->Get_DistanceToGround(fOffsetY);
 
-    //// 전방 벽감지.
-    //if (m_States[RUN_U] && m_States[WALL])
-    //{
-    //    m_pRover->GetStateContextForWrite().m_eClimbMoveType = ERoverClimbMoveType::CLIMB_U_1;
-    //    m_pRover->Change_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(ERoverClimbState::CLIMB_MOVE)); // 상위, 하위 상태
-    //    return;
-    //}
-    
-    // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
-    //if (!m_States[LAND] && fDistanceToGround > 0.3f)
-
-    if (fDistanceToGround > 1.f)
-    {
-        m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
-        return;
-    }
+	if (!m_States[LAND])
+	{
+		m_iNotLandFrames++;
+		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		{
+			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+			return;
+		}
+	}
+	else
+	{
+		m_iNotLandFrames = 0;  // 리셋
+	}
 
     // SPACE 누르면 바로 점프로 전환.
     if (m_States[JUMP])
@@ -171,37 +162,23 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
-    if (m_States[BURST_R])
-    {
-        m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST)); // 상위, 하위 상태
-        return;
-    }
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_B;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
 
-    if (m_States[UNIQUE_E])
-    {
-        m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL_STRIKE;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
-        return;
-    }
-
-    // SKILL_E 누르면 
-    if (m_States[SKILL_E])
-    {
-        m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_HACKDOWN_START;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK));
-        return;
-    }
-
-    // Run => Attack
-    if (m_States[ATTACK])
-    {
-        m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
-        return;
-    }
-  
     // Dash 보다 우선순위 높음.
     if (m_States[SPRINT_F])
     {
@@ -209,13 +186,7 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 뛰다가 Dash
-    if (m_States[DASH])
-    {
-        m_pRover->GetStateContextForWrite().m_eDashType = ERoverDashType::MOVE_F;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
+   
 
     if (m_States[MOVE])
     {
@@ -268,13 +239,15 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
         if (eRunType != ERoverRunType::STOP_RUN_L)
         {
+			m_fTrackPosition = 0.f;
             m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::STOP_RUN_L);
             return;
         }
         // Stop Run 이면서 애니메이션 재생이 끝났다면?.
         if ((eRunType == ERoverRunType::STOP_RUN_L || eRunType == ERoverRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
         {
-            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1_ACTION01;
+			
+            m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1;
             m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
             return;
         }

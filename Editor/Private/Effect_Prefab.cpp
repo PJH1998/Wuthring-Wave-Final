@@ -3,6 +3,7 @@
 #include "Particle.h"
 #include "Effect_Mesh.h"
 #include "Trail_Mesh.h"
+#include "Effect_Rect.h"
 
 CEffect_Prefab::CEffect_Prefab(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
@@ -115,6 +116,7 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
     CParticle::PARTICLE_DESC* pParticleDesc = {};
     CEffect_Mesh::EFFECTMESH_DESC* pMeshDesc = {};
     CTrail_Mesh::TRAILMESH_DESC* pTrailDesc = {};
+	CEffect_Rect::FXRECT_DESC* pRectDesc = {};
 
     //프리팹 프레임에 미리 추가.
     FRAME_DESC FrameDesc = {};
@@ -148,6 +150,16 @@ void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
 
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_TrailMesh"), PROTOTYPE::GAMEOBJECT, pArg));
         break;
+	case EFFECT_TYPE::RECT:
+		pRectDesc = static_cast<CEffect_Rect::FXRECT_DESC*>(pArg);
+		strChildrenTag = pRectDesc->strMyTag;
+
+		FrameDesc.strChildrenTag = pRectDesc->strMyTag;
+		FrameDesc.eChildrenType = eType;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectRect"), PROTOTYPE::GAMEOBJECT, pArg));
+		break;
+
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
         break;

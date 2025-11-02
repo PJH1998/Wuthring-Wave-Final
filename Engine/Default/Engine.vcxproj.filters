@@ -256,9 +256,6 @@
     <Filter Include="01. Utility\04. Component\AnimMachine\AnimState">
       <UniqueIdentifier>{a9d127fd-08d8-4cb3-b4cb-bbbe35b6f3ff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\NewFilter1">
-      <UniqueIdentifier>{52fb9c3d-da95-4aa5-ad13-b270ec1b26dc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\Point">
       <UniqueIdentifier>{d53700ab-232b-46f4-b717-d1c2e4b1d9ed}</UniqueIdentifier>
       <UniqueIdentifier>{2f2b1745-bbed-4df1-ae61-6b63d263e6ad}</UniqueIdentifier>
@@ -301,7 +298,7 @@
     </Filter>
     <Filter Include="01. Utility\03. GameObject\Effect">
       <UniqueIdentifier>{d56e481d-7107-4973-93c1-e2162ebe2634}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
       <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
     </Filter>
@@ -619,7 +616,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Effect.h">
       <Filter>01. Utility\03. GameObject\Effect</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClInclude>
@@ -916,7 +913,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Effect.cpp">
       <Filter>01. Utility\03. GameObject\Effect</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
     </ClCompile>

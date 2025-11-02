@@ -150,11 +150,11 @@ HRESULT CParticle::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+		return E_FAIL;
+
     if (m_IsSprite)
     {
-        if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
-            return E_FAIL;
-
         if (FAILED(m_pShaderCom->Bind_Value("g_iRow", &m_iRow, sizeof(_int))))
             return E_FAIL;
 

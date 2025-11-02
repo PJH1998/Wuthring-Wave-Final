@@ -459,6 +459,18 @@
     <ClInclude Include="..\Public\RoverGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -685,6 +697,18 @@
     <ClCompile Include="..\Private\RoverGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\RoverAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -718,6 +742,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

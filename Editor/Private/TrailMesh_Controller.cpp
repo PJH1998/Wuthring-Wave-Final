@@ -1,4 +1,4 @@
-#include "EditorPch.h"
+ï»¿#include "EditorPch.h"
 #include "TrailMesh_Controller.h"
 
 CTrailMesh_Controller::CTrailMesh_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -45,26 +45,26 @@ void CTrailMesh_Controller::Load_AllTextureFromFolder(const _string& strFolderPa
                 MESH_TEXTURE Desc{};
                 CTexture* pTexture = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // í™•ì¥ì ì œì™¸í•œ íŒŒì¼ëª…
                 _string strTextureTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ í…ìŠ¤ì²˜ ì´ë¦„ ì§€ì •
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ í…ìŠ¤ì²˜ ì»´í¬ë„ŒíŠ¸ ì´ë¦„ ì§€ì •
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
-                //ÆÄÀÏ°æ·Î wstring º¯È¯
+                //íŒŒì¼ê²½ë¡œ wstring ë³€í™˜
                 _wstring wstrFilePath = StringToWString(filePath);
     
-                //ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® »ı¼º
+                //í…ìŠ¤ì²˜ ì»´í¬ë„ŒíŠ¸ ìƒì„±
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
                     pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
 
-                //»ı¼ºÇÑ ÅØ½ºÃ³ ÁÖ¼Ò µî·Ï, ¹Ì¸®º¸±â ¶ç¿ï·Á¸é ÁÖ¼Ò·Î SRV°¡Á®¿Í¾ßÇØ¼­ ÀúÀåÇØÁà¾ßÇÔ.
+                //ìƒì„±í•œ í…ìŠ¤ì²˜ ì£¼ì†Œ ë“±ë¡, ë¯¸ë¦¬ë³´ê¸° ë„ìš¸ë ¤ë©´ ì£¼ì†Œë¡œ SRVê°€ì ¸ì™€ì•¼í•´ì„œ ì €ì¥í•´ì¤˜ì•¼í•¨.
                 Desc.pTexture = pTexture;
                 //Safe_AddRef(pTexture);
 
@@ -74,7 +74,7 @@ void CTrailMesh_Controller::Load_AllTextureFromFolder(const _string& strFolderPa
     }
 }
 
-//ÀÌ¸§¸¸ ÀĞ¾î¼­ ¸®½ºÆ®¹Ú½º¿¡ ÀÌ¸§ ¶ç¿ì´Â ¿ëµµ·Î¸¸ »ç¿ëÇÏÀÚ. 
+//ì´ë¦„ë§Œ ì½ì–´ì„œ ë¦¬ìŠ¤íŠ¸ë°•ìŠ¤ì— ì´ë¦„ ë„ìš°ëŠ” ìš©ë„ë¡œë§Œ ì‚¬ìš©í•˜ì. 
 void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
 {
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -89,13 +89,13 @@ void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPa
             {
                 MESH_TAG Desc = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // í™•ì¥ì ì œì™¸í•œ íŒŒì¼ëª…
                 _string strMeshTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ¸Å½¬ ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ ë§¤ì‰¬ ì´ë¦„ ì§€ì •
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strMeshTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ¸Å½¬¹öÆÛ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ ë§¤ì‰¬ë²„í¼ ì»´í¬ë„ŒíŠ¸ ì´ë¦„ ì§€ì •
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Mesh_");
                 strcat_s(szDefault, Desc.szName);
@@ -107,7 +107,7 @@ void CTrailMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPa
 
                 strcpy_s(Desc.szDatPath, sizeof(Desc.szDatPath), DefaultPath.c_str());
 
-                //¸Å½¬¹öÆÛ ÄÄÆ÷³ÍÆ® »ı¼º
+                //ë§¤ì‰¬ë²„í¼ ì»´í¬ë„ŒíŠ¸ ìƒì„±
                 _float fSize = 0.01f;
                 _fmatrix DefualtMatrix = XMMatrixScaling(fSize, fSize, fSize)/* * XMMatrixRotationX(90.f)*/;
                 /* * XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI)*/;
@@ -139,26 +139,26 @@ void CTrailMesh_Controller::Load_AllColorTextureFormFolder(const _string& strFol
                 COLOR_TEXTURE Desc{};
                 CTexture* pTexture = {};
 
-                // È®ÀåÀÚ Á¦¿ÜÇÑ ÆÄÀÏ¸í
+                // í™•ì¥ì ì œì™¸í•œ íŒŒì¼ëª…
                 _string strTextureTag = entry.path().stem().string();
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ í…ìŠ¤ì²˜ ì´ë¦„ ì§€ì •
                 strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
 
-                //ÆÄÀÏ¸íÀ¸·Î ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® ÀÌ¸§ ÁöÁ¤
+                //íŒŒì¼ëª…ìœ¼ë¡œ í…ìŠ¤ì²˜ ì»´í¬ë„ŒíŠ¸ ì´ë¦„ ì§€ì •
                 _char szDefault[MAX_PATH];
                 strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
                 strcat_s(szDefault, Desc.szName);
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
 
-                //ÆÄÀÏ°æ·Î wstring º¯È¯
+                //íŒŒì¼ê²½ë¡œ wstring ë³€í™˜
                 _wstring wstrFilePath = StringToWString(filePath);
 
-                //ÅØ½ºÃ³ ÄÄÆ÷³ÍÆ® »ı¼º
+                //í…ìŠ¤ì²˜ ì»´í¬ë„ŒíŠ¸ ìƒì„±
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
                     pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
 
-                //»ı¼ºÇÑ ÅØ½ºÃ³ ÁÖ¼Ò µî·Ï, ¹Ì¸®º¸±â ¶ç¿ï·Á¸é ÁÖ¼Ò·Î SRV°¡Á®¿Í¾ßÇØ¼­ ÀúÀåÇØÁà¾ßÇÔ.
+                //ìƒì„±í•œ í…ìŠ¤ì²˜ ì£¼ì†Œ ë“±ë¡, ë¯¸ë¦¬ë³´ê¸° ë„ìš¸ë ¤ë©´ ì£¼ì†Œë¡œ SRVê°€ì ¸ì™€ì•¼í•´ì„œ ì €ì¥í•´ì¤˜ì•¼í•¨.
                 Desc.pTexture = pTexture;
                 //Safe_AddRef(pTexture);
 
@@ -192,6 +192,36 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                 ImGui::PushItemWidth(100);
                 ImGui::InputFloat("##SweepWitdh", &(m_pSelectedTrailMeshDesc->fSweepWitdh));
                 ImGui::PopItemWidth();
+
+				ImGui::Text("Soft");
+				ImGui::PushItemWidth(100);
+				ImGui::InputFloat("##Soft", &(m_pSelectedTrailMeshDesc->fSoft));
+				ImGui::PopItemWidth();
+
+				ImGui::Text("ColorSpeed");
+				ImGui::PushItemWidth(100);
+				ImGui::InputFloat("##ColorSpeed", &(m_pSelectedTrailMeshDesc->fColorSpeed));
+				ImGui::PopItemWidth();
+
+				ImGui::Text("MaskSpeed");
+				ImGui::PushItemWidth(100);
+				ImGui::InputFloat("##MaskSpeed", &(m_pSelectedTrailMeshDesc->fMaskSpeed));
+				ImGui::PopItemWidth();
+
+				ImGui::Text("Alpha");
+				ImGui::PushItemWidth(60);
+				ImGui::InputFloat("##Alpha", &(m_pSelectedTrailMeshDesc->fAlpha));
+				ImGui::PopItemWidth();
+
+				ImGui::Text("ColorGain");
+				ImGui::PushItemWidth(60);
+				ImGui::InputFloat("##ColorGain", &(m_pSelectedTrailMeshDesc->fColorGain));
+				ImGui::PopItemWidth();
+
+				ImGui::Text("ColorGamma");
+				ImGui::PushItemWidth(60);
+				ImGui::InputFloat("##ColorGamma", &(m_pSelectedTrailMeshDesc->fColorGamma));
+				ImGui::PopItemWidth();
 
                 ImGui::Text("Dir");
                 ImGui::PushItemWidth(100);
@@ -247,13 +277,13 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                 {
                     szMeshTag.push_back(iter->szName);
                 }
-                //¸Å½¬ ¸®½ºÆ®¹Ú½º ¶ç¿ì±â
+                //ë§¤ì‰¬ ë¦¬ìŠ¤íŠ¸ë°•ìŠ¤ ë„ìš°ê¸°
                 if (ImGui::ListBox("Trail Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
                 {
                     m_pSelectedTrailMeshDesc->strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
                 }
 
-                //¸Å½¬ ±âº» »ö»ó ÅØ½ºÃ³ ¼³Á¤
+                //ë§¤ì‰¬ ê¸°ë³¸ ìƒ‰ìƒ í…ìŠ¤ì²˜ ì„¤ì •
                 if (ImGui::BeginCombo("Texture", "")) {
                     for (size_t i = 0; i < m_Textures.size(); i++)
                     {
@@ -317,14 +347,14 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
             szMeshTag.push_back(iter->szName);
         }
 
-        //¸Å½¬ ¸®½ºÆ®¹Ú½º ¶ç¿ì±â
+        //ë§¤ì‰¬ ë¦¬ìŠ¤íŠ¸ë°•ìŠ¤ ë„ìš°ê¸°
         if (ImGui::ListBox("Trail Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
         {
-            //¼±ÅÃµÈ ¸Å½¬ÅÂ±× ÀÓ½ÃÀúÀå? 
+            //ì„ íƒëœ ë§¤ì‰¬íƒœê·¸ ì„ì‹œì €ì¥? 
             m_bMeshVBTag = true;
         }
 
-        //¸Å½¬ ±âº» »ö»ó ÅØ½ºÃ³ ¼³Á¤
+        //ë§¤ì‰¬ ê¸°ë³¸ ìƒ‰ìƒ í…ìŠ¤ì²˜ ì„¤ì •
         if (ImGui::BeginCombo("Texture", "")) {
             for (size_t i = 0; i < m_Textures.size(); i++)
             {
@@ -364,28 +394,28 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
             ImGui::Image((ImTextureID)m_ColorTextures[m_iSelectedColor].pTexture->Get_SRV(0), ImVec2(256, 256));
         }
 
-        //Root ¼³Á¤
+        //Root ì„¤ì •
         ImGui::Checkbox("Root", &m_IsRoot);
 
-        if (m_bTagFlag && m_bMeshVBTag) //ÀÌÆåÆ® ÄÁÆ®·Ñ·¯°¡ ¼³Á¤ÇØÁØ ÀÌ¸§°ªÀÌ ÀÖ°í, ¼±ÅÃÇÑ ¸Å½¬¹öÆÛ°¡ ÀÖ¾î¾ßÁö¸¸ »ı¼ºÇÒ ¼ö ÀÖ°Ô.
+        if (m_bTagFlag && m_bMeshVBTag) //ì´í™íŠ¸ ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ì„¤ì •í•´ì¤€ ì´ë¦„ê°’ì´ ìˆê³ , ì„ íƒí•œ ë§¤ì‰¬ë²„í¼ê°€ ìˆì–´ì•¼ì§€ë§Œ ìƒì„±í•  ìˆ˜ ìˆê²Œ.
         {
             if (ImGui::Button("Create"))
             {
-                //ÇÁ¸®ÆÕ¿¡°Ô Desc Àü´Ş -> ÇÁ¸®ÆÕÀÌ Desc·Î Å¬·Ğ ÁøÇà
+                //í”„ë¦¬íŒ¹ì—ê²Œ Desc ì „ë‹¬ -> í”„ë¦¬íŒ¹ì´ Descë¡œ í´ë¡  ì§„í–‰
 
                 _tchar TrailMeshTag[MAX_PATH] = {};
                 CTrail_Mesh::TRAILMESH_DESC TrailMeshDesc{};
 
                 MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_TrailMeshTag, strlen(m_TrailMeshTag), TrailMeshTag, MAX_PATH);
 
-                //ÀÌÆåÆ® ¸Å½¬ ÀÌ¸§ ¹× Å¬·ĞÇÒ ÄÄÆ÷³ÍÆ® ÀÌ¸§µé
+                //ì´í™íŠ¸ ë§¤ì‰¬ ì´ë¦„ ë° í´ë¡ í•  ì»´í¬ë„ŒíŠ¸ ì´ë¦„ë“¤
                 TrailMeshDesc.strMyTag = TrailMeshTag;
                 TrailMeshDesc.eMyType = EFFECT_TYPE::TRAIL;
                 TrailMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 TrailMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
                 TrailMeshDesc.strColorTextureTag = m_ColorTextures[m_iSelectedColor].strTextureTag;
 
-                //ÀÌÆåÆ®¸Å½¬(¿ÀºêÁ§Æ®)°¡ °¡Áú µğÆúÆ® ¼³Á¤°ª.
+                //ì´í™íŠ¸ë§¤ì‰¬(ì˜¤ë¸Œì íŠ¸)ê°€ ê°€ì§ˆ ë””í´íŠ¸ ì„¤ì •ê°’.
                 TrailMeshDesc.vLifeTime.y = 10.f;
                 TrailMeshDesc.vPos = _float3(0.f, 0.f, 0.f);
                 TrailMeshDesc.vSize = _float3(0.5f, 0.5f, 0.5f);
@@ -396,7 +426,7 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
                 strcpy_s(szDatPath, sizeof(szDatPath), "../../Client/Bin");
                 strcat_s(szDatPath, sizeof(szDatPath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
 
-                ////Desc¿¡ VBMesh ÀÌ¸§ ÀúÀå?
+                ////Descì— VBMesh ì´ë¦„ ì €ì¥?
                 //_tchar strFXMehsTag[MAX_PATH] = {};
                 //MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_MeshVBTag[m_iSelectedMeshVBTag].szName, strlen(m_MeshVBTag[m_iSelectedMeshVBTag].szName), strFXMehsTag, MAX_PATH);
                
@@ -406,15 +436,15 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
                     m_IsRoot = false;
                 }
 
-                //¸Å½¬ÀÌÆåÆ® ¿Í ¸Å½¬VBÅÂ±×¸¦ ¸ÂÃç¾ßÇÒÁö´Â °í¹ÎÇØº¸ÀÚ.
+                //ë§¤ì‰¬ì´í™íŠ¸ ì™€ ë§¤ì‰¬VBíƒœê·¸ë¥¼ ë§ì¶°ì•¼í• ì§€ëŠ” ê³ ë¯¼í•´ë³´ì.
                 m_tTrailMeshDesc.emplace(TrailMeshTag, TrailMeshDesc);
 
                 tTrailMeshDesc = TrailMeshDesc;
 
-                //»ı¼ºµÆÀ½À» ÀÌÆåÆ® ÄÁÆ®·Ñ·¯¿¡°Ô Àü´Ş
+                //ìƒì„±ëìŒì„ ì´í™íŠ¸ ì»¨íŠ¸ë¡¤ëŸ¬ì—ê²Œ ì „ë‹¬
                 IsCreate = true;
 
-                //ÃÊ±âÈ­
+                //ì´ˆê¸°í™”
                 m_TrailMeshTag[0] = _T('\0');
                 m_bTagFlag = false;
             }
@@ -471,13 +501,13 @@ void CTrailMesh_Controller::Remove_Desc(const _wstring& DescTag)
 
     if (iterEffectMeshDesc != m_tTrailMeshDesc.end())
     {
-        //È¤½Ã °°Àº ÀÌ¸§À¸·Î ´Ù½Ã ¸¸µé¾îÁö´Â°Å ´ëºñÇØ¼­ Áö¿öÁà¾ßÇÒ°Å °°À½.
+        //í˜¹ì‹œ ê°™ì€ ì´ë¦„ìœ¼ë¡œ ë‹¤ì‹œ ë§Œë“¤ì–´ì§€ëŠ”ê±° ëŒ€ë¹„í•´ì„œ ì§€ì›Œì¤˜ì•¼í• ê±° ê°™ìŒ.
         m_pGameInstance->Remove_Prototype(ENUM_CLASS(LEVEL::EFFECT), iterEffectMeshDesc->second.strVIBufferTag);
 
         m_tTrailMeshDesc.erase(iterEffectMeshDesc);
     }
 
-    //ÃÊ±âÈ­
+    //ì´ˆê¸°í™”
     m_bSelectedMesh = false;
     m_pSelectedTrailMeshDesc = nullptr;
 }

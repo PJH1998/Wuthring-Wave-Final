@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+ï»¿#include "EnginePch.h"
 #include "VIBuffer_FXMesh_Instance.h"
 #include "GameInstance.h"
 
@@ -22,7 +22,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 {
     const MESH_FXINSTANCE_DESC* pMeshDesc = static_cast<const MESH_FXINSTANCE_DESC*>(pDesc);
 
-    m_iInstanceVertexStride = sizeof(VTXINSTACNE_FXMESH);     //ÀÏ´Ü ±¸»óÁßÀÎ°ÍÀÌ °¡´ÉÇÏ´Ù¸é, ÀÌ°ª ½áµµ µÊ. ¾ÈµÇ¸é ±¸Á¶Ã¼ Ãß°¡ÇØÁÖÀÚ.
+    m_iInstanceVertexStride = sizeof(VTXINSTACNE_FXMESH);     //ì¼ë‹¨ êµ¬ìƒì¤‘ì¸ê²ƒì´ ê°€ëŠ¥í•˜ë‹¤ë©´, ì´ê°’ ì¨ë„ ë¨. ì•ˆë˜ë©´ êµ¬ì¡°ì²´ ì¶”ê°€í•´ì£¼ì.
     m_iNumInstance = pMeshDesc->iNumInstance;
 
     ifstream EMeshFile(pFilePath, ios::binary);
@@ -32,8 +32,8 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
         return E_FAIL;
     }
 
-    //Ã³À½¿¡ ÀĞ´Â Á¤º¸´Â ¸Å½¬°³¼ö, ·ÎµåÆÄÀÏ¿¡¼­ ¸Å½¬°³¼ö ¸ÕÀú ÀĞÀ½.
-    //ÀÌÆåÆ® ¸Å½¬´Â ´ÜÀÏ ¸Å½¬¶ó ÀÌ Á¤º¸°¡ ÇÊ¿ä¾ø¾î¼­ read·Î ³Ñ°ÜÁà¾ßÇÔ.
+    //ì²˜ìŒì— ì½ëŠ” ì •ë³´ëŠ” ë§¤ì‰¬ê°œìˆ˜, ë¡œë“œíŒŒì¼ì—ì„œ ë§¤ì‰¬ê°œìˆ˜ ë¨¼ì € ì½ìŒ.
+    //ì´í™íŠ¸ ë§¤ì‰¬ëŠ” ë‹¨ì¼ ë§¤ì‰¬ë¼ ì´ ì •ë³´ê°€ í•„ìš”ì—†ì–´ì„œ readë¡œ ë„˜ê²¨ì¤˜ì•¼í•¨.
     _uint MeshIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MeshIndex), sizeof(_uint));
 
@@ -47,8 +47,8 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
     m_iNumIndexPerInstance = m_iNumIndices;
     pIndices = new _uint[m_iNumIndices];
 
-    //¸Å½¬ ¹öÆÛ°¡ ÅØ½ºÃ³ °³¼ö ¾Ë°íÀÖ¾î¾ßÇÏ³ª?
-    //¸Å½¬ ÀÌÆåÆ®¿¡ ³Ö¾îÁÙ°Å °°Àºµ¥ ÀÏ´Ü µ¥ÀÌÅÍ ³»ºÎ¿¡¼­ ÀĞÀ»·Á¸é ³Ñ°ÜÁà¾ßÇÔ ³ªÁß¿¡ °í¹ÎÇØº¸°í ¼öÁ¤ÇÏÀÚ
+    //ë§¤ì‰¬ ë²„í¼ê°€ í…ìŠ¤ì²˜ ê°œìˆ˜ ì•Œê³ ìˆì–´ì•¼í•˜ë‚˜?
+    //ë§¤ì‰¬ ì´í™íŠ¸ì— ë„£ì–´ì¤„ê±° ê°™ì€ë° ì¼ë‹¨ ë°ì´í„° ë‚´ë¶€ì—ì„œ ì½ì„ë ¤ë©´ ë„˜ê²¨ì¤˜ì•¼í•¨ ë‚˜ì¤‘ì— ê³ ë¯¼í•´ë³´ê³  ìˆ˜ì •í•˜ì
     _uint MaterialIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MaterialIndex), sizeof(_uint));
 
@@ -66,7 +66,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
     m_iNumVertexBuffers = 2;
     m_iVertexStride = sizeof(VTXMESH);
 
-    // ¹öÅØ½º ¹öÆÛ »ı¼º
+    // ë²„í…ìŠ¤ ë²„í¼ ìƒì„±
     D3D11_BUFFER_DESC VBDesc = {};
 
     VBDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -85,7 +85,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
     Safe_Delete_Array(pVertices);
 
 
-    //ÀÎµ¦½º ¹öÆÛ »ı¼º
+    //ì¸ë±ìŠ¤ ë²„í¼ ìƒì„±
     m_eIndexFormat = DXGI_FORMAT_R32_UINT;
     m_ePrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     m_iIndexStride = sizeof(_uint);
@@ -107,14 +107,14 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
     Safe_Delete_Array(pIndices);
 
-    //¸Å½¬ ÀÎ½ºÅÏ½ÌÇØ¼­ »ç¿ëÇØº¸°íÀÚ ÇÏ´ÂÁß.
-    //Å¬·ĞÀÌ °¢°¢ °¡Á®¾ßÇÒ Desc µ¥ÀÌÅÍ ¹öÆÛ (±×¸®±â¿ë)
+    //ë§¤ì‰¬ ì¸ìŠ¤í„´ì‹±í•´ì„œ ì‚¬ìš©í•´ë³´ê³ ì í•˜ëŠ”ì¤‘.
+    //í´ë¡ ì´ ê°ê° ê°€ì ¸ì•¼í•  Desc ë°ì´í„° ë²„í¼ (ê·¸ë¦¬ê¸°ìš©)
     m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
     m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
     m_VBInstanceDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     m_VBInstanceDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
     m_VBInstanceDesc.MiscFlags = 0;
-    m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride; //±¸Á¶Ã¼ »çÀÌÁî
+    m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride; //êµ¬ì¡°ì²´ ì‚¬ì´ì¦ˆ
 
     m_pVBInstanceVertices = new VTXINSTACNE_FXMESH[m_iNumInstance];
     FXMESH_SRV* pSRV = new FXMESH_SRV[m_iNumInstance];
@@ -127,14 +127,14 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
             _float fScale = m_pGameInstance->Rand(pMeshDesc->vSize.x, pMeshDesc->vSize.y);
 
-            //°¢ÀÚ ¼Óµµ ´Ù¸£°ÔÇÒ°ÇÁö
+            //ê°ì ì†ë„ ë‹¤ë¥´ê²Œí• ê±´ì§€
             pSRV[i].fSpeed = m_pGameInstance->Rand(pMeshDesc->vSpeed.x, pMeshDesc->vSpeed.y);
 
-            //¸Å½¬ ¼³Á¤ ´Ù¾çÇÏ°Ô ÇÊ¿äÇÒµí.
-            //ÆÄÆ¼Å¬Ã³·³ ·£´ıÀûÀ¸·Î Èğ»Ñ·ÁÁö´Â °Íµµ ÇÊ¿äÇÏ°í , Æ¯Á¤ ¼³Á¤°ª Àâ¾ÆÁÖ¸é ±× ¸Å½¬´Â °£°İ À¯ÁöµÇ´Â ¸µ »óÅÂ·Î »ı¼º µÇ¸é¼­ Æ¯Á¤ ¹æÇâÀ» º¼ ¼ö ÀÖ°Ô ÇØÁà¾ßÇÒ°Å °°Àºµ¥ ?
-            //ÀÏ´Ü ¿òÁ÷ÀÓÀº ³ªÁß¿¡ ¼³Á¤°ªÀ¸·Î Ãß°¡ÇØÁÖ°í, ÆÄÆ¼Å¬Ã³·³¸¸ ¸¸µå´Â°Å Å×½ºÆ® ¸ÕÀú ÁøÇàÇÏÀÚ.
+            //ë§¤ì‰¬ ì„¤ì • ë‹¤ì–‘í•˜ê²Œ í•„ìš”í• ë“¯.
+            //íŒŒí‹°í´ì²˜ëŸ¼ ëœë¤ì ìœ¼ë¡œ í©ë¿Œë ¤ì§€ëŠ” ê²ƒë„ í•„ìš”í•˜ê³  , íŠ¹ì • ì„¤ì •ê°’ ì¡ì•„ì£¼ë©´ ê·¸ ë§¤ì‰¬ëŠ” ê°„ê²© ìœ ì§€ë˜ëŠ” ë§ ìƒíƒœë¡œ ìƒì„± ë˜ë©´ì„œ íŠ¹ì • ë°©í–¥ì„ ë³¼ ìˆ˜ ìˆê²Œ í•´ì¤˜ì•¼í• ê±° ê°™ì€ë° ?
+            //ì¼ë‹¨ ì›€ì§ì„ì€ ë‚˜ì¤‘ì— ì„¤ì •ê°’ìœ¼ë¡œ ì¶”ê°€í•´ì£¼ê³ , íŒŒí‹°í´ì²˜ëŸ¼ë§Œ ë§Œë“œëŠ”ê±° í…ŒìŠ¤íŠ¸ ë¨¼ì € ì§„í–‰í•˜ì.
 
-            //»çÀÌÁî ´ã±â
+            //ì‚¬ì´ì¦ˆ ë‹´ê¸°
             pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
             pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
             pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
@@ -158,17 +158,16 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
             _float fScale = m_pGameInstance->Rand(pMeshDesc->vSize.x, pMeshDesc->vSize.y);
 
-            //°¢ÀÚ ¼Óµµ ´Ù¸£°ÔÇÒ°ÇÁö
             pSRV[i].fSpeed = m_pGameInstance->Rand(pMeshDesc->vSpeed.x, pMeshDesc->vSpeed.y);
 
-            //¸µÀÇ ¹İÁö¸§ ¹üÀ§ ÃÖ¼Ò, ÃÖ´ë
+            //ë§ì˜ ë°˜ì§€ë¦„ ë²”ìœ„ ìµœì†Œ, ìµœëŒ€
             _float fMin = pMeshDesc->fRmin;
             _float fMax = pMeshDesc->fRmax;
 
             _float fAngle = {};
             if (!pMeshDesc->IsRingAngle)
             {
-                //¼¾ÅÍ ±âÁØ X,Z¸¦ ¿øÇüÀ¸·Î ÆÛÁö°Ô ÇØÁÖ±â À§ÇØ ¾Ş±ÛÀ» 0 ~ 360µµ°¡ ³ª¿À°Ô ¼³Á¤.
+                //ì„¼í„° ê¸°ì¤€ X,Zë¥¼ ì›í˜•ìœ¼ë¡œ í¼ì§€ê²Œ í•´ì£¼ê¸° ìœ„í•´ ì•µê¸€ì„ 0 ~ 360ë„ê°€ ë‚˜ì˜¤ê²Œ ì„¤ì •.
                 fAngle = m_pGameInstance->Rand(0.f, XM_2PI);
             }
             else
@@ -179,24 +178,24 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
                 fAngle = fStartRadian + ((_float)Index  / (m_iNumInstance - 1)) * fSweepRadian;
             }
-            //¹İÁö¸§ ÃÖ¼Ò,ÃÖ´ë¿¡ °öÇØ MIN~MAXÀÇ ·£´ı°ªÀÌ ³ª¿Ã ¼ö ÀÖ°Ô ÇØÁÖ±â À§ÇÑ °ª.
+            //ë°˜ì§€ë¦„ ìµœì†Œ,ìµœëŒ€ì— ê³±í•´ MIN~MAXì˜ ëœë¤ê°’ì´ ë‚˜ì˜¬ ìˆ˜ ìˆê²Œ í•´ì£¼ê¸° ìœ„í•œ ê°’.
             _float fRatio = m_pGameInstance->Rand(0.f, 1.f);
 
-            //sqrt´Â Á¦°ö±ÙÀ» °è»êÇØÁÖ´Â ÇÔ¼ö, sqrt(4) -> 2 / ¿©±â¼­ ³ª¿Â Radius°¡ ½ÇÁúÀû ¹İÁö¸§ÀÇ ·£´ı °ªÀÓ.
+            //sqrtëŠ” ì œê³±ê·¼ì„ ê³„ì‚°í•´ì£¼ëŠ” í•¨ìˆ˜, sqrt(4) -> 2 / ì—¬ê¸°ì„œ ë‚˜ì˜¨ Radiusê°€ ì‹¤ì§ˆì  ë°˜ì§€ë¦„ì˜ ëœë¤ ê°’ì„.
             _float fRadius = sqrt(fRatio * ((fMax * fMax) - (fMin * fMin)) + (fMin * fMin));
 
-            //AngleÀÇ °ªÀº 0 ~ 360µµ, / 0ÀÌ¸é cos°ª 1, sin 0 / 180ÀÌ¸é -1 , 0 / Áï, ÀÌ°ªÀ¸·Î ¿ŞÂÊ ¿À¸¥ÂÊ À§ ¾Æ·¡ ¹æÇâÀÌ Á¤ÇØÁö´Â °Í.
+            //Angleì˜ ê°’ì€ 0 ~ 360ë„, / 0ì´ë©´ cosê°’ 1, sin 0 / 180ì´ë©´ -1 , 0 / ì¦‰, ì´ê°’ìœ¼ë¡œ ì™¼ìª½ ì˜¤ë¥¸ìª½ ìœ„ ì•„ë˜ ë°©í–¥ì´ ì •í•´ì§€ëŠ” ê²ƒ.
             _float fPosX = fRadius * cosf(fAngle);
             _float fPosZ = fRadius * sinf(fAngle);
 
             pInstanceVertices[i].vTranslation = _float4(
                 pMeshDesc->vCenter.x + fPosX,
-                pMeshDesc->vCenter.y,                   //¼¾ÅÍ°ªÀÏ´Ü ÆòÆòÇÏ°Ô ¼³Á¤, ·£´ı°ª ÁÖ°í½ÍÀ¸¸é °ª ÇÏ³ª ´õ ¹Ş¾Æ¿Í¾ßÇÔ.
+                pMeshDesc->vCenter.y,                   //ì„¼í„°ê°’ì¼ë‹¨ í‰í‰í•˜ê²Œ ì„¤ì •, ëœë¤ê°’ ì£¼ê³ ì‹¶ìœ¼ë©´ ê°’ í•˜ë‚˜ ë” ë°›ì•„ì™€ì•¼í•¨.
                 pMeshDesc->vCenter.z + fPosZ,
                 1.f
             );
 
-            //»çÀÌÁî , È¸Àü ´ã±â.
+            //ì‚¬ì´ì¦ˆ , íšŒì „ ë‹´ê¸°.
             if (pMeshDesc->IsInWard)
             {
                 _vector vPos = XMVectorSet(pInstanceVertices[i].vTranslation.x, pInstanceVertices[i].vTranslation.y, pInstanceVertices[i].vTranslation.z, 0.f);
@@ -244,12 +243,12 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
         }
     }
 
-    //SRV¿ë ¹öÆÛ »ı¼º, ÀÎ½ºÅÏ½Ì °´Ã¼°¡ °¢°¢ °¡Á®¾ßÇÒ °ª, ºÒº¯ÇÒ °ª
+    //SRVìš© ë²„í¼ ìƒì„±, ì¸ìŠ¤í„´ì‹± ê°ì²´ê°€ ê°ê° ê°€ì ¸ì•¼í•  ê°’, ë¶ˆë³€í•  ê°’
     D3D11_BUFFER_DESC SRV_BufferDesc = {};
     SRV_BufferDesc.StructureByteStride = sizeof(FXMESH_SRV);
     SRV_BufferDesc.ByteWidth = SRV_BufferDesc.StructureByteStride * m_iNumInstance;
-    SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//ºÒº¯
-    SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//¸®¼Ò½º
+    SRV_BufferDesc.Usage = D3D11_USAGE_IMMUTABLE;				//ë¶ˆë³€
+    SRV_BufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;		//ë¦¬ì†ŒìŠ¤
     SRV_BufferDesc.CPUAccessFlags = 0;
     SRV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
@@ -261,7 +260,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
     Safe_Delete_Array(pSRV);
 
-    //SRV ¹öÆÛ¸¦ ÅëÇØ ¸®¼Ò½ººä »ı¼º
+    //SRV ë²„í¼ë¥¼ í†µí•´ ë¦¬ì†ŒìŠ¤ë·° ìƒì„±
     D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
     SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
     SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -271,7 +270,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
     if (FAILED(m_pDevice->CreateShaderResourceView(m_pSRVBuffer, &SRVDesc, &m_pSRV)))
         return E_FAIL;
 
-    //CB ¹öÆÛ »ı¼º, °ø¿ëÀ¸·Î °¡Áú °ªµé ¼öÁ¤°¡´É°ª
+    //CB ë²„í¼ ìƒì„±, ê³µìš©ìœ¼ë¡œ ê°€ì§ˆ ê°’ë“¤ ìˆ˜ì •ê°€ëŠ¥ê°’
     FXMESH_CB* pCB = new FXMESH_CB;
     pCB->vPivot = pMeshDesc->vPivot;
     pCB->fTimeDelta = 0.1f;
@@ -282,9 +281,9 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
     D3D11_BUFFER_DESC CB_BufferDesc = {};
     CB_BufferDesc.StructureByteStride = 0;
-    CB_BufferDesc.ByteWidth = sizeof(FXMESH_CB);				 //16¹ÙÀÌÆ® ¹è¼ö·Î ¸ÂÃá ±¸Á¶Ã¼ ÇÊ¿ä
-    CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC;					//ÀÚÁÖº¯ÇÔ
-    CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//ºä ¾øÀ½
+    CB_BufferDesc.ByteWidth = sizeof(FXMESH_CB);				 //16ë°”ì´íŠ¸ ë°°ìˆ˜ë¡œ ë§ì¶˜ êµ¬ì¡°ì²´ í•„ìš”
+    CB_BufferDesc.Usage = D3D11_USAGE_DYNAMIC;					//ìì£¼ë³€í•¨
+    CB_BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;		//ë·° ì—†ìŒ
     CB_BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     CB_BufferDesc.MiscFlags = 0;
 
@@ -297,7 +296,7 @@ HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMat
 
     Safe_Delete(pCB);
 
-    //ÃÊ±âÈ­ Àü¿ë UAV¹öÆÛ µ¥ÀÌÅÍ, Å¬·Ğ³¢¸® °øÀ¯ÇØµµ »ó°ü¾øÀ½ ÃÊ±â°ªÀ¸·Î µÇµ¹·ÁÁÖ±â À§ÇÑ °ª.
+    //ì´ˆê¸°í™” ì „ìš© UAVë²„í¼ ë°ì´í„°, í´ë¡ ë¼ë¦¬ ê³µìœ í•´ë„ ìƒê´€ì—†ìŒ ì´ˆê¸°ê°’ìœ¼ë¡œ ë˜ëŒë ¤ì£¼ê¸° ìœ„í•œ ê°’.
     D3D11_BUFFER_DESC Default_UAV_BufferDesc = {};
     Default_UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTACNE_FXMESH);
     Default_UAV_BufferDesc.ByteWidth = Default_UAV_BufferDesc.StructureByteStride * m_iNumInstance;
@@ -352,7 +351,7 @@ void CVIBuffer_FXMesh_Instance::Bind_CSResources(CComputeShader* pCShader, _floa
 {
     D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-    //»ó¼ö¹öÆÛ ¼öÁ¤ÇÒ °ª ÀÖÀ¸¸é ¿©±â¼­ ¼öÁ¤ÇØÁà¾ßÇÔ
+    //ìƒìˆ˜ë²„í¼ ìˆ˜ì •í•  ê°’ ìˆìœ¼ë©´ ì—¬ê¸°ì„œ ìˆ˜ì •í•´ì¤˜ì•¼í•¨
     m_pContext->Map(m_pCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
 
     FXMESH_CB* pCB = static_cast<FXMESH_CB*>(SubResource.pData);
@@ -370,7 +369,7 @@ void CVIBuffer_FXMesh_Instance::Bind_CSResources(CComputeShader* pCShader, _floa
 
     pCShader->Dispatch(128, 1, 1);
 
-    //GPU¿¡¼­ º¹»ç ÁøÇàÇÔ. ³»ºÎ¿¡¼­ ¿¬»êÀÛ¾÷ÀÌ ³¡³µ´ÂÁö È®ÀÎÇÏ°í º¹»ç ÁøÇàÇØÁØ´Ù°í ÇÔ.
+    //GPUì—ì„œ ë³µì‚¬ ì§„í–‰í•¨. ë‚´ë¶€ì—ì„œ ì—°ì‚°ì‘ì—…ì´ ëë‚¬ëŠ”ì§€ í™•ì¸í•˜ê³  ë³µì‚¬ ì§„í–‰í•´ì¤€ë‹¤ê³  í•¨.
     m_pContext->CopyResource(m_pVBInstance, m_pUAVBuffer);
 }
 

@@ -71,29 +71,88 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
-	for (size_t i = 0; i < m_iNumInstance; i++)
+	if (pPointDesc->IsSpawnBox)
 	{
-		VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
+		for (size_t i = 0; i < m_iNumInstance; i++)
+		{
+			VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
 
-		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
-		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
+			_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
+			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 
-		pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
-		pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
+			pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+			pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
 
-		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
-		pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
-		pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
-		pInstanceVertices[i].vTranslation = _float4(
-			m_pGameInstance->Rand(pPointDesc->vCenter.x - pPointDesc->vRange.x * 0.5f, pPointDesc->vCenter.x + pPointDesc->vRange.x * 0.5f),
-			m_pGameInstance->Rand(pPointDesc->vCenter.y - pPointDesc->vRange.y * 0.5f, pPointDesc->vCenter.y + pPointDesc->vRange.y * 0.5f),
-			m_pGameInstance->Rand(pPointDesc->vCenter.z - pPointDesc->vRange.z * 0.5f, pPointDesc->vCenter.z + pPointDesc->vRange.z * 0.5f),
-			1.f
-		);
+			pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
+			pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
+			pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
+			pInstanceVertices[i].vTranslation = _float4(
+				m_pGameInstance->Rand(pPointDesc->vCenter.x - pPointDesc->vRange.x * 0.5f, pPointDesc->vCenter.x + pPointDesc->vRange.x * 0.5f),
+				m_pGameInstance->Rand(pPointDesc->vCenter.y - pPointDesc->vRange.y * 0.5f, pPointDesc->vCenter.y + pPointDesc->vRange.y * 0.5f),
+				m_pGameInstance->Rand(pPointDesc->vCenter.z - pPointDesc->vRange.z * 0.5f, pPointDesc->vCenter.z + pPointDesc->vRange.z * 0.5f),
+				1.f
+			);
 
-		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
+			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+		}
+	}
+	else if (pPointDesc->IsSpawnRing)
+	{
+	
+		for (size_t i = 0; i < m_iNumInstance; i++)
+		{
+			VTXINSTACNE_FXMESH* pInstanceVertices = static_cast<VTXINSTACNE_FXMESH*>(m_pVBInstanceVertices);
+
+			_float fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
+
+			pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+
+			//링의 반지름 범위 최소, 최대
+			_float fMin = pPointDesc->fRmin;
+			_float fMax = pPointDesc->fRmax;
+
+			_float fAngle = {};
+			if (!pPointDesc->IsRingAngle)
+			{
+				//센터 기준 X,Z를 원형으로 퍼지게 해주기 위해 앵글을 0 ~ 360도가 나오게 설정.
+				fAngle = m_pGameInstance->Rand(0.f, XM_2PI);
+			}
+			else
+			{
+				_int Index = i;
+				_float fStartRadian = XMConvertToRadians(pPointDesc->fDegreeAngle.x);
+				_float fSweepRadian = XMConvertToRadians(pPointDesc->fDegreeAngle.y);
+
+				fAngle = fStartRadian + ((_float)Index / (m_iNumInstance - 1)) * fSweepRadian;
+			}
+			//반지름 최소,최대에 곱해 MIN~MAX의 랜덤값이 나올 수 있게 해주기 위한 값.
+			_float fRatio = m_pGameInstance->Rand(0.f, 1.f);
+
+			//sqrt는 제곱근을 계산해주는 함수, sqrt(4) -> 2 / 여기서 나온 Radius가 실질적 반지름의 랜덤 값임.
+			_float fRadius = sqrt(fRatio * ((fMax * fMax) - (fMin * fMin)) + (fMin * fMin));
+
+			//Angle의 값은 0 ~ 360도, / 0이면 cos값 1, sin 0 / 180이면 -1 , 0 / 즉, 이값으로 왼쪽 오른쪽 위 아래 방향이 정해지는 것.
+			_float fPosX = fRadius * cosf(fAngle);
+			_float fPosZ = fRadius * sinf(fAngle);
+
+			pInstanceVertices[i].vTranslation = _float4(
+				pPointDesc->vCenter.x + fPosX,
+				pPointDesc->vCenter.y,                   //센터값일단 평평하게 설정, 랜덤값 주고싶으면 값 하나 더 받아와야함.
+				pPointDesc->vCenter.z + fPosZ,
+				1.f
+			);
+
+			pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
+			pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
+			pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
+
+			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
+			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
+
+			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+		}
 	}
 
 	//초기화 전용 UAV버퍼 데이터, 클론끼리 공유해도 상관없음 초기값으로 되돌려주기 위한 값.

@@ -91,12 +91,14 @@ private:
 	_bool								m_isRecovery = { false };
 	_float4							m_vPreQuaternion = {};
 	_float3							m_vPreTranslation = {};
+	_float								m_fPreFovy = {};
 	_float4							m_vEndQuaternion = {};
 	_float3							m_vEndTranslation = {};
 	_float								m_fPreFixedDistance = {};
 	_float								m_fTrackPosition = {};
 	_float								m_fDuration = {};
 	_bool								m_isMaintain = { false };
+	_bool								m_isLerp = { true };
 
 private:
 	// Default

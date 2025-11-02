@@ -42,10 +42,17 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
     m_IsRoot = pDesc->IsRootOn;
-    
+	
+	m_fSoft = pDesc->fSoft;
+	m_fColorSpeed = pDesc->fColorSpeed;
+	m_fMaskSpeed = pDesc->fMaskSpeed;
+	m_fAlpha = pDesc->fAlpha;
+	m_fColorGain = pDesc->fColorGain;
+	m_fColorGamma = pDesc->fColorGamma;
+	    
     //임시처리
     m_isActivate = false;
-    m_fColorSpeed = 1.f;
+
 
     XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
     Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
@@ -65,6 +72,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
+	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
@@ -73,6 +81,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_isActivate = false;
         m_fColorSweep = 0.f;
         m_vLifeTime.x = 0.f;
+		m_fMaskSweep = 0.f;
     }
 
     if (m_fSweep >= 1.f + m_fSweepWitdh)
@@ -80,6 +89,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_fSweep = 0.f;
         m_isActivate = false;
         m_fColorSweep = 0.f;
+		m_fMaskSweep = 0.f;
     }
 }
 
@@ -198,6 +208,21 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     //셰이더에 바인딩 해주자.
     if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
         return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_Soft", &m_fSoft, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_Alpha", &m_fAlpha, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGain", &m_fColorGain, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGamma", &m_fColorGamma, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSweep", &m_fMaskSweep, sizeof(_float))))
+		return E_FAIL;
 
     if(FAILED(m_pShaderCom->Bind_Value("g_SweepWitdh", &m_fSweepWitdh, sizeof(_float))))
         return E_FAIL;

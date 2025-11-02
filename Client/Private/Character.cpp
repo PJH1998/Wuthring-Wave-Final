@@ -181,68 +181,18 @@ _float CCharacter::Get_DistanceToGround(_float fStartYOffset)
 
 
 
-_float CCharacter::Get_DistanceToGround(_float3* pNormal, _float fStartYOffset)
+
+//_bool CCharacter::Is_LandCollider(_float3* pNormal, _float fLandDistance)
+//{
+//    ASSERT_CRASH(m_pColliderCom);
+//    return m_pColliderCom->IsOnGround(pNormal, fLandDistance);
+//}
+
+_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
 {
-    ASSERT_CRASH(m_pTransformCom);
+    _float fDistanceToGround = Get_DistanceToGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
 
-
-    //_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-    _vector vCurrentPos = m_pColliderCom->Get_Position();
-    _vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-    _vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
-
-    _vector vFootPos = vCurrentPos + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
-
-    // 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
-    _vector vPositions[5] = {
-        vFootPos + vLook * m_fColliderRadius,  // 앞
-        vFootPos + vRight * m_fColliderRadius, // 왼쪽
-        vFootPos,                              // 중앙
-        vFootPos - vRight * m_fColliderRadius, // 오른쪽
-        vFootPos - vLook * m_fColliderRadius   // 뒤
-    };
-
-
-    _float fMinDistance = 3.f;  // 가장 가까운 거리 저장
-    _bool bAnyHit = false;
-
-    // 5개 지점에서 각각 레이 발사
-    for (_uint i = 0; i < 5; ++i)
-    {
-        _vector vStartPos = vPositions[i];
-        _vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
-
-        _float4 vHitPoint = {};
-        _bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
-
-        if (bHit)
-        {
-            bAnyHit = true;
-            _vector vHitPos = XMLoadFloat4(&vHitPoint);
-            _vector vDistance = vPositions[i] - vHitPos;
-            _float fDistance = XMVectorGetX(XMVector3Length(vDistance));
-
-            // 가장 가까운 거리 저장
-            if (fDistance < fMinDistance)
-                fMinDistance = fDistance;
-
-            XMStoreFloat3(pNormal, XMVector3Normalize(vDistance));
-        }
-    }
-    return bAnyHit ? fMinDistance : 3.f;
-}
-
-_bool CCharacter::Is_Land(_float3* pNormal)
-{
-    ASSERT_CRASH(m_pColliderCom);
-    return m_pColliderCom->IsLand(pNormal);
-}
-
-_bool CCharacter::Is_Land(_float fLandOffsetY)
-{
-    _float fDistanceToGround = Get_DistanceToGround(0.1f);
-
-    if (fDistanceToGround > fLandOffsetY)
+    if (fDistanceToGround > fLandDistance)
         return false;
 
     return true;

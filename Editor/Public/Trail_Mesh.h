@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Editor_Define.h"
 #include "GameObject.h"
 
@@ -24,8 +24,17 @@ public:
 		
 		_float	fSweep = 0.f;
 		_float	fSweepWitdh = 0.f;
+		_float	fSoft = 0.3f;
 
 		_int	iDirFlag = 0;
+		
+		_float	fColorSpeed = 1.f;
+		_float	fMaskSpeed = 1.f;
+		_float  fAlpha = 1.f;
+
+		_float fColorGain = 0.f;
+		_float fColorGamma = 1.f;
+
 
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
@@ -61,16 +70,23 @@ private:
 
 	_int						m_iShaderPass = 0;
 		
-	//¼ÎÀÌ´õ¿¡ Àü´ŞÇÒ °ª ¿¬»ê¿ë
+	//ì…°ì´ë”ì— ì „ë‹¬í•  ê°’ ì—°ì‚°ìš©
 	_float						m_fSweepSpeed = 0.f;
 
-	//¼ÎÀÌ´õ¿¡ Àü´ŞÇÒ °ª
+	//ì…°ì´ë”ì— ì „ë‹¬í•  ê°’
 	_float						m_fSweep = 0.f;
 	_float						m_fSweepWitdh = 0.f;
 	_float						m_fSoft = 0.f;
 
 	_float						m_fColorSpeed = 0.f;
 	_float						m_fColorSweep = 0.f;
+	_float						m_fColorGain = 0.f;
+	_float						m_fColorGamma = 1.f;
+
+	_float						m_fMaskSweep = 0.f;
+	_float						m_fMaskSpeed = 3.f;
+	_float						m_fAlpha = {};
+
 
 	_float3						m_vPos = {};
 	_float3						m_vColor = {};

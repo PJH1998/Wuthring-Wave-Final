@@ -340,6 +340,28 @@ void CLoad_Controller::Load_Particle_VB_FromJson(const _string& strFilePath, con
     if (ParticleVBJson.contains("Loop"))
         Desc.IsLoop = ParticleVBJson["Loop"].get<_bool>();
 
+	if (ParticleVBJson.contains("SpawnBox"))
+		Desc.IsSpawnBox = ParticleVBJson["SpawnBox"].get<_bool>();
+
+	if (ParticleVBJson.contains("SpawnRing"))
+		Desc.IsSpawnRing = ParticleVBJson["SpawnRing"].get<_bool>();
+
+	if (ParticleVBJson.contains("RingAngle"))
+		Desc.IsRingAngle = ParticleVBJson["RingAngle"].get<_bool>();
+
+	if (ParticleVBJson.contains("RingAngle_Min"))
+		Desc.fRmin = ParticleVBJson["RingAngle_Min"].get<_float>();
+
+	if (ParticleVBJson.contains("RingAngle_max"))
+		Desc.fRmax = ParticleVBJson["RingAngle_max"].get<_float>();
+
+	if (ParticleVBJson.contains("DegreeAngle") && ParticleVBJson["DegreeAngle"].is_array())
+	{
+		json DegreeJson = ParticleVBJson["DegreeAngle"];
+		Desc.fDegreeAngle.x = DegreeJson[0].get<_float>();
+		Desc.fDegreeAngle.y = DegreeJson[1].get<_float>();
+	}
+
     if (ParticleVBJson.contains("Stretch"))
         Desc.IsStretch = ParticleVBJson["Stretch"].get<_bool>();
 
@@ -674,8 +696,27 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("SweepWitdh"))
         Desc.fSweepWitdh = TrailMeshJson["SweepWitdh"].get<_float>();
 
+	if (TrailMeshJson.contains("SweepSoft"))
+		Desc.fSoft = TrailMeshJson["SweepSoft"].get<_float>();
+
     if (TrailMeshJson.contains("DirFlag"))
         Desc.iDirFlag = TrailMeshJson["DirFlag"].get<_int>();
+
+	if (TrailMeshJson.contains("ColorSpeed"))
+		Desc.fColorSpeed = TrailMeshJson["ColorSpeed"].get<_float>();
+
+	if (TrailMeshJson.contains("MaskSpeed"))
+		Desc.fMaskSpeed = TrailMeshJson["MaskSpeed"].get<_float>();
+
+	if (TrailMeshJson.contains("Alpha"))
+		Desc.fAlpha = TrailMeshJson["Alpha"].get<_float>();
+
+	if (TrailMeshJson.contains("ColorGain"))
+		Desc.fColorGain = TrailMeshJson["ColorGain"].get<_float>();
+
+	if (TrailMeshJson.contains("ColorGamma"))
+		Desc.fColorGamma = TrailMeshJson["ColorGamma"].get<_float>();
+
 
     if (TrailMeshJson.contains("Size") && TrailMeshJson["Size"].is_array())
     {

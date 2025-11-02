@@ -10,9 +10,9 @@ public:
 	enum CHARACTERTYPE
 	{
 		NONE = -1,
-		AUGUSTA = 0,
-		GALBRENA = 1,
-		ROVER = 2,
+		ROVER = 0,
+		AUGUSTA = 1,
+		GALBRENA = 2,
 		TYPE_END
 	};
 

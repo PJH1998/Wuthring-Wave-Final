@@ -551,7 +551,6 @@ void CCustom_UI::Update_InputState()
 
 void CCustom_UI::Free()
 {
-    m_pGameInstance->Unscribe();
     __super::Free(); 
 
     Safe_Release(m_pShaderCom);

@@ -61,7 +61,11 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     //m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
     m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, "Blend_BasePose", 0.f, &m_fTrackPosition, true, 0.01f);
 
-    XMStoreFloat4(&m_vInitPosition, m_pTransformCom->Get_State(STATE::POSITION));
+#ifdef _DEBUG
+	XMStoreFloat4(&m_vInitPosition, m_pTransformCom->Get_State(STATE::POSITION));
+#endif // _DEBUG
+
+    
 
     //m_pTransformCom->Scale(pDesc->vScale);
     // Look 벡터 설정한 방향으로 잘갑니다 지금.
@@ -101,6 +105,8 @@ void CAnimationActor::Update(_float fTimeDelta)
     if (m_IsPlayAnimation)
     {
         IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
 
@@ -113,8 +119,8 @@ void CAnimationActor::Update(_float fTimeDelta)
 #endif // _DEBUG
 
 
-    if (IsAnimationEnd)
-        m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
+    //if (IsAnimationEnd)
+    //    m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vInitPosition));
   
 
     //m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);

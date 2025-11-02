@@ -193,7 +193,7 @@ HRESULT CLoader_GamePlay::Load_Augusta()
 HRESULT CLoader_GamePlay::Load_Rover()
 {
 	_wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/DarkRover.dat";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;

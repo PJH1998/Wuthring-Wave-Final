@@ -43,10 +43,19 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
     m_pTransformCom->Scale(_float3(m_tDesc.vSize.x, m_tDesc.vSize.y, m_tDesc.vSize.z));
 
     m_IsRoot = m_tDesc.IsRootOn;
+
+	m_fSoft = m_tDesc.fSoft;
+	m_fColorSpeed = m_tDesc.fColorSpeed;
+	m_fMaskSpeed = m_tDesc.fMaskSpeed;
+	m_fAlpha = m_tDesc.fAlpha;
+	m_fColorGain = m_tDesc.fColorGain;
+	m_fColorGamma = m_tDesc.fColorGamma;
+
     
     //임시처리
     m_isActivate = false;
     m_fColorSpeed = 1.f;
+	
 
     XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
     Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
@@ -66,14 +75,16 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
+	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
-        m_fSweep = 0.f;
+         m_fSweep = 0.f;
         m_isActivate = false;
         m_fColorSweep = 0.f;
         m_vLifeTime.x = 0.f;
+		m_fMaskSweep = 0.f;;
     }
 
     if (m_fSweep >= 1.f + m_fSweepWitdh)
@@ -81,6 +92,8 @@ void CTrail_Mesh::Update(_float fTimeDelta)
         m_fSweep = 0.f;
         m_isActivate = false;
         m_fColorSweep = 0.f;
+		m_fMaskSweep = 0.f;
+		m_vLifeTime.x = 0.f;
     }
 }
 
@@ -111,6 +124,7 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
     m_fSweep = 0.f;
     m_fColorSweep = 0.f;
+	m_fMaskSweep = 0.f;
     m_vLifeTime.x = 0.f;
     Root_Transform(WorldMatrix);
 }
@@ -161,15 +175,30 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0)))
         return E_FAIL;
 
-    //셰이더에 바인딩 해주자.
-    if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
-        return E_FAIL;
+	//셰이더에 바인딩 해주자.
+	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
+		return E_FAIL;
 
-    if(FAILED(m_pShaderCom->Bind_Value("g_SweepWitdh", &m_fSweepWitdh, sizeof(_float))))
-        return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Value("g_Soft", &m_fSoft, sizeof(_float))))
+		return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Value("g_ColorSpeed", &m_fColorSweep, sizeof(_float))))
-        return E_FAIL;
+	if (FAILED(m_pShaderCom->Bind_Value("g_Alpha", &m_fAlpha, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGain", &m_fColorGain, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorGamma", &m_fColorGamma, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSweep", &m_fMaskSweep, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_SweepWitdh", &m_fSweepWitdh, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_ColorSpeed", &m_fColorSweep, sizeof(_float))))
+		return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fTime, sizeof(_float))))
         return E_FAIL;

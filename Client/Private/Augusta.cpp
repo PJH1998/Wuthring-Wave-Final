@@ -119,8 +119,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
     
-    
-
     // 사용이 끝났으면 반환.
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;

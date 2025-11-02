@@ -233,8 +233,12 @@
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
     <ClInclude Include="..\Public\Rover.h" />
+    <ClInclude Include="..\Public\RoverAirFall.h" />
+    <ClInclude Include="..\Public\RoverAirJump.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverGroundDash.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
+    <ClInclude Include="..\Public\RoverGroundLand.h" />
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
@@ -343,8 +347,12 @@
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
+    <ClCompile Include="..\Private\RoverAirFall.cpp" />
+    <ClCompile Include="..\Private\RoverAirJump.cpp" />
     <ClCompile Include="..\Private\RoverFactory.cpp" />
+    <ClCompile Include="..\Private\RoverGroundDash.cpp" />
     <ClCompile Include="..\Private\RoverGroundIdle.cpp" />
+    <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
@@ -408,6 +416,7 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxInstance_PointParticle.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />

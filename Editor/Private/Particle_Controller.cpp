@@ -81,8 +81,37 @@ void CParticle_Controller::Particle_Tab()
                         m_pSelectedParticleDesc->IsSprite = m_pSelectedVBDesc->IsSprite;
                     }
                     ImGui::Checkbox("Delay", &(m_pSelectedVBDesc->IsDelay));
+
+					if (ImGui::Checkbox("SpawnRing", &(m_pSelectedVBDesc->IsSpawnRing)))
+					{
+						m_pSelectedVBDesc->IsSpawnBox = false;
+					}
+
+					ImGui::Checkbox("RingAngle", &(m_pSelectedVBDesc->IsRingAngle));
+
+					if (ImGui::Checkbox("SpawnBox", &(m_pSelectedVBDesc->IsSpawnBox)))
+					{
+						m_pSelectedVBDesc->IsSpawnRing = false;
+					}
                     ImGui::Separator();
 
+					if (m_pSelectedVBDesc->IsSpawnRing)
+					{
+						ImGui::Text("RMin/RMax");
+						ImGui::PushItemWidth(60);
+						ImGui::InputFloat("##RMin", &(m_pSelectedVBDesc->fRmin));
+						ImGui::SameLine();
+						ImGui::InputFloat("##RMax", &(m_pSelectedVBDesc->fRmax));
+						ImGui::PopItemWidth();
+
+						ImGui::Text("Degree Start/End");
+						ImGui::PushItemWidth(60);
+						ImGui::InputFloat("##DegreeX", &(m_pSelectedVBDesc->fDegreeAngle.x));
+						ImGui::SameLine();
+						ImGui::InputFloat("##DegreeY", &(m_pSelectedVBDesc->fDegreeAngle.y));
+						ImGui::PopItemWidth();
+						ImGui::Separator();
+					}
 
                     ImGui::Text("NumInstance");
                     ImGui::PushItemWidth(100);

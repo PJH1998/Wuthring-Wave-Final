@@ -4,6 +4,7 @@
 #include "Particle_Controller.h"
 #include "Mesh_Controller.h"
 #include "AnimationActor.h"
+#include "Rect_Controller.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -21,6 +22,7 @@ HRESULT CEffect_Controller::Initialize()
     m_pMesh_Controller = CMesh_Controller::Create(m_pDevice, m_pContext);
     m_pTrailMesh_Controller = CTrailMesh_Controller::Create(m_pDevice, m_pContext);
     m_pLoad_Controller = CLoad_Controller::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
+	m_pRect_Controller = CRect_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -131,7 +133,6 @@ void CEffect_Controller::Prefab_Tab()
 
                 if (m_bChildrenTagFlag)
                 {
-                   
                     // 생성 버튼
                     if (ImGui::Button("Particle"))
                     {
@@ -154,6 +155,15 @@ void CEffect_Controller::Prefab_Tab()
 
                         m_eChildrenType = EFFECT_TYPE::TRAIL;
                     }
+					ImGui::SameLine(0.f, 20.f);
+
+					if (ImGui::Button("Rect"))
+					{
+						m_pRect_Controller->Set_RectTag(m_ChildrenTag);
+
+						m_eChildrenType = EFFECT_TYPE::RECT;
+					}
+
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
                     {
@@ -229,6 +239,30 @@ void CEffect_Controller::Prefab_Tab()
 
                     }
 
+					if (m_eChildrenType == EFFECT_TYPE::RECT)
+					{
+						CEffect_Rect::FXRECT_DESC pDesc = {};
+
+						m_pRect_Controller->Rect_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+						if (m_bChildrenCreatFlag)
+						{
+							m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+							CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
+							Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+							Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::RECT;
+
+							m_pSelectedPrefabDesc->ChildrenCount += 1;
+							m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
+
+							m_ChildrenTag[0] = _T('\0');
+							m_bChildrenCreatFlag = false;
+							m_bChildrenTagFlag = false;
+							m_eChildrenType == EFFECT_TYPE::END;
+						}
+					}
+
                 }
 
                 if (ImGui::Button("Load Children"))
@@ -270,6 +304,9 @@ void CEffect_Controller::Prefab_Tab()
 
                     if (m_IsTrailMesh)
                         m_pTrailMesh_Controller->Update();
+
+					if (m_IsRectEffect)
+						m_pRect_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -318,6 +355,15 @@ void CEffect_Controller::Prefab_Tab()
 
                            m_pSelectedPrefab->Add_Children(pTrailMeshDesc, EFFECT_TYPE::TRAIL);
                        }
+
+					   if (m_IsRectEffect)
+					   {
+						   CEffect_Rect::FXRECT_DESC* pRectDesc = m_pRect_Controller->Get_RectDesc(m_strChildrenTag);
+
+						   m_pSelectedPrefab->Remove_Children(pRectDesc->strMyTag);
+
+						   m_pSelectedPrefab->Add_Children(pRectDesc, EFFECT_TYPE::RECT);
+					   }
                     }
 
                     if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
@@ -350,6 +396,15 @@ void CEffect_Controller::Prefab_Tab()
 
                                 Reset_ChildrenInfo();
                             }
+
+							if (m_IsRectEffect)
+							{
+								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
+
+								m_pRect_Controller->Remove_Desc(m_strChildrenTag);
+
+								Reset_ChildrenInfo();
+							}
                         }
                     }
                   
@@ -408,6 +463,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsParticle = true;
         m_IsMeshEffect = false;
         m_IsTrailMesh = false;
+		m_IsRectEffect = false;
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
@@ -416,6 +472,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsParticle = false;
         m_IsMeshEffect = true;
         m_IsTrailMesh = false;
+		m_IsRectEffect = false;
 
         m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
     }
@@ -424,9 +481,19 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsParticle = false;
         m_IsMeshEffect = false;
         m_IsTrailMesh = true;
+		m_IsRectEffect = false;
 
         m_pTrailMesh_Controller->UpdateSelected_TrailMeshFormTag(m_strChildrenTag);
     }
+	else if (dynamic_cast<CEffect_Rect*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+	{
+		m_IsParticle = false;
+		m_IsMeshEffect = false;
+		m_IsTrailMesh = false;
+		m_IsRectEffect = true;
+
+		m_pRect_Controller->UpdateSelected_RectFormTag(m_strChildrenTag);
+	}
 
     //프리팹이 들고 있는 구조체에서 자식과 동일한 프레임 찾기
     for (auto& Frame : m_pSelectedPrefabDesc->FrameDesc)
@@ -537,6 +604,7 @@ void CEffect_Controller::Reset_ChildrenInfo()
     m_IsParticle = false;
     m_IsMeshEffect = false;
     m_IsTrailMesh = false;
+	m_IsRectEffect = false;
 }
 
 void CEffect_Controller::Reset_PrefabInfo()
@@ -802,6 +870,22 @@ void CEffect_Controller::Particle_VB_To_Json(json& ParticleVBJson, CVIBuffer_Poi
     //Loop저장
     ParticleVBJson["Loop"] = pVBDesc->IsLoop;
 
+	//스폰 저장
+	ParticleVBJson["SpawnBox"] = pVBDesc->IsSpawnBox;
+	ParticleVBJson["SpawnRing"] = pVBDesc->IsSpawnRing;
+
+	//스폰설정 저장
+	ParticleVBJson["RingAngle"] = pVBDesc->IsRingAngle;
+
+	ParticleVBJson["RingAngle_Min"] = pVBDesc->fRmin;
+	ParticleVBJson["RingAngle_Max"] = pVBDesc->fRmax;
+
+	json DegreeJson = json::array();
+	DegreeJson.push_back(pVBDesc->fDegreeAngle.x);
+	DegreeJson.push_back(pVBDesc->fDegreeAngle.y);
+
+	ParticleVBJson["DegreeAngle"] = DegreeJson;
+
     //스트레치 빌보드시 옵션 저장
     ParticleVBJson["Stretch"] = pVBDesc->IsStretch;
 
@@ -1002,8 +1086,17 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
 
     TrailMesh["SweepSpeed"] = pTrailDesc->fSweep;
     TrailMesh["SweepWitdh"] = pTrailDesc->fSweepWitdh;
+	TrailMesh["SweepSoft"] = pTrailDesc->fSoft;
 
     TrailMesh["DirFlag"] = pTrailDesc->iDirFlag;
+
+	TrailMesh["ColorSpeed"] = pTrailDesc->fColorSpeed;
+	TrailMesh["MaskSpeed"] = pTrailDesc->fMaskSpeed;
+
+	TrailMesh["Alpha"] = pTrailDesc->fAlpha;
+
+	TrailMesh["ColorGain"] = pTrailDesc->fColorGain;
+	TrailMesh["ColorGamma"] = pTrailDesc->fColorGamma;
 
     json SizeJson = json::array();
     SizeJson.push_back(pTrailDesc->vSize.x);
@@ -1088,7 +1181,6 @@ void CEffect_Controller::Load_Particle(const _wstring& ParticleTag)
     //컨트롤러에 Desc 저장
     m_pParticle_Controller->Set_ParticleDesc(Tag, ParticleDesc);
     m_pParticle_Controller->Set_VBDesc(Tag, ParticleVBDesc);
-
 }
 
 void CEffect_Controller::Load_FXMesh(const _wstring& FXMeshTag)
@@ -1413,11 +1505,14 @@ void CEffect_Controller::Import_AnimationData(const EFFECTACTOR_DESC& effectActo
         return;
     }
 
-    // 있으면 정보를 채워준다.
-    m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
-    m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
-    m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
-    m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+#ifdef _DEBUG
+	// 있으면 정보를 채워준다.
+	m_AnimActorDesc.pAnimActor = effectActorDesc.pAnimActor;
+	m_AnimActorDesc.pModelCom = effectActorDesc.pAnimActor->Get_ModelCom();
+	m_AnimActorDesc.strAnimName = effectActorDesc.pAnimActor->Get_CurrentAnimationNames();
+	m_AnimActorDesc.fDuration = effectActorDesc.fDuration;
+#endif // _DEBUG
+
 }
 
 void CEffect_Controller::PrefabBinding_Tab()

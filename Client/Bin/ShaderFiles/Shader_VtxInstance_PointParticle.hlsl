@@ -202,9 +202,10 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.a < 0.3f)
+    if (Out.vDiffuse.a < 0.2f)
         discard;
-    //Out.vColor = 1.f;
+
+    Out.vDiffuse *= g_vColor;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -239,9 +240,9 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse = g_vColor * Out.vDiffuse;
     
-    Out.vDiffuse.a = Out.vDiffuse.r;
+    Out.vDiffuse.a = Out.vDiffuse.r; //?
     
-    if (Out.vDiffuse.a <= 0.3)
+    if (Out.vDiffuse.a < 0.3)
         discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);

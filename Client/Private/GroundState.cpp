@@ -37,6 +37,7 @@ void CGroundState::OnUpdate(_float fTimeDelta)
 void CGroundState::OnExit()
 {
     CCharacterState::OnExit();
+	m_iNotLandFrames = 0;
 
     // 지상 상태 탈출 시 공통 처리
 }

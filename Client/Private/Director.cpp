@@ -7,6 +7,15 @@ CDirector::CDirector()
 	Safe_AddRef(m_pGameInstance);
 }
 
+void CDirector::Add_Action(const _char* pFolderPath)
+{
+
+}
+
+void CDirector::Play_Action(const _wstring& strActionTag, _bool isMaintain)
+{
+}
+
 CDirector* CDirector::Create()
 {
     return new CDirector();

@@ -64,6 +64,7 @@ namespace Engine
 		float				fDistance = {};		// Distance
 		float				fStartFrame = {};
 		float				fFovy = {};
+		bool				isLerp = { true };
 	}CAMERA_FRAME;
 
 	typedef struct tagMapObject

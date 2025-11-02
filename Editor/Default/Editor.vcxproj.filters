@@ -154,8 +154,14 @@
     <Filter Include="01. Level\Camera\Sequencer">
       <UniqueIdentifier>{11fc27fe-040e-443a-b82b-7ad88739045e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Level\Effect\Effect_Controller\Flare_Controller">
-      <UniqueIdentifier>{8b171076-f75d-4db9-9502-07e527d0f6cb}</UniqueIdentifier>
+    <Filter Include="03. GameObject\MapObject\Destruction">
+      <UniqueIdentifier>{1e367e59-8695-45e4-8839-a31fb74b2d93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller">
+      <UniqueIdentifier>{246c0645-080c-48f3-994e-e9ce1033609b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect">
+      <UniqueIdentifier>{78b70b79-18c1-4b75-b8a8-2322db63397f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -327,15 +333,24 @@
     </ClInclude>
     <ClInclude Include="..\Public\Level_Effect.h">
       <Filter>01. Level\Effect</Filter>
-	</ClInclude>
-    <ClInclude Include="..\Public\Map_Object_Destruction.h">
-      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Scene_Edit.h">
       <Filter>97. Event</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_Map_Object_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Rect.h">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Rect_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -487,8 +502,17 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Map_Object_Destruction.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
+    <ClCompile Include="..\Private\Edit_Map_Object_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Rect.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Rect_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

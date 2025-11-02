@@ -11,6 +11,7 @@ private:
     {
         JUMP = 0,
         DASH,
+		LAND,
         SPRINT,
         MOVE,
         ATTACK,
@@ -50,8 +51,6 @@ private:
     void Update_IdleAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
-    void LockOn_StateTransition(_float fTimeDelta);
-
     void Setup_Animations();
     void State_Reset(); // 상태 초기화
 

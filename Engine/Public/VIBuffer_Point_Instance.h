@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "VIBuffer_Instance.h"
 
@@ -14,20 +14,28 @@ public:
 		_float2		vLifeTime;
 		_bool		IsLoop;
 
-		//½ºÆ®·¹Ä¡ ºôº¸µå ¼³Á¤°ª 
+		//ìŠ¤í° ì„¤ì •
+		_bool IsSpawnBox = true;
+		_bool IsSpawnRing = false;
+		_bool IsRingAngle = false;
+		_float fRmin = 0.f;
+		_float fRmax = 0.f;
+		_float2 fDegreeAngle = { 0.f, 360.f };
+
+		//ìŠ¤íŠ¸ë ˆì¹˜ ë¹Œë³´ë“œ ì„¤ì •ê°’ 
 		_bool		IsStretch = false;
 		_float		fStretchWeight = 1.f;
 		_float2		fStretchRange = { 1.f, 1.f };
 
-		//½ºÇÁ¶óÀÌÆ® ÀÌ¹ÌÁö ¼³Á¤°ª
+		//ìŠ¤í”„ë¼ì´íŠ¸ ì´ë¯¸ì§€ ì„¤ì •ê°’
 		_bool		IsSprite = false;
 		_float		fSpriteWeight = 1.f;
-		_float		fDefualtSpeed = 2.5f;			//½ºÇÁ¶óÀÌÆ® ÀÌ¹ÌÁö°¡ ¹Ù²î´Â ¼Óµµ ±âº»°ª.
+		_float		fDefualtSpeed = 2.5f;			//ìŠ¤í”„ë¼ì´íŠ¸ ì´ë¯¸ì§€ê°€ ë°”ë€ŒëŠ” ì†ë„ ê¸°ë³¸ê°’.
 
 		_bool		IsDelay = false;
 		_float2		fDelay = { 0.f, 0.f };
 
-		//°¡ÁßÄ¡
+		//ê°€ì¤‘ì¹˜
 		_float		fSpreadWeight = 0;
 		_float		fDropWeight = 0;
 		_float		fRotationWeight = 0;
@@ -45,7 +53,7 @@ public:
 	virtual HRESULT Bind_Resources() override;
 	virtual HRESULT Render() override;
 
-	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // ¹Ù²Ü ÀÏ ÀÖÀ» °æ¿ì ¿©±â¿¡ °ª Ãß°¡ÇØ¼­ ¹Ù²ãÁà¾ßÇÔ.
+	void Bind_CS_Option(PARTICLE_DefaultCB* pOptionCB); // ë°”ê¿€ ì¼ ìˆì„ ê²½ìš° ì—¬ê¸°ì— ê°’ ì¶”ê°€í•´ì„œ ë°”ê¿”ì¤˜ì•¼í•¨.
 	void Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc = nullptr);
 	void Bind_CSResources(class CComputeShader* pCShader);
 	void Reset_UAV(class CComputeShader* pCShader);
@@ -56,7 +64,7 @@ public:
 //	void Rotation(_float fTimeDelta);
 
 private:
-	_float3					m_vPivot = {};			//¾îÂ÷ÇÇ ÄÄ¼Î·Î °è»êÇÏ´Âµ¥ ÇÊ¿ä¾ø¾îº¸ÀÓ.
+	_float3					m_vPivot = {};			//ì–´ì°¨í”¼ ì»´ì…°ë¡œ ê³„ì‚°í•˜ëŠ”ë° í•„ìš”ì—†ì–´ë³´ì„.
 	_float*					m_pSpeeds = {};
 	_bool					m_isLoop = {};
 

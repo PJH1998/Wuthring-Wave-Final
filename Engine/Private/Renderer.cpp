@@ -50,6 +50,7 @@ HRESULT CRenderer::Initialize()
 	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(static_cast<_float>( m_iWinSizeX ), static_cast<_float>( m_iWinSizeY ), 0.f, 1.f));
 
 	m_fMaxEffectIntensity = 10.f;
+	m_iInterval = 5;
 
 #ifdef _DEBUG
 	if (FAILED(m_pGameInstance->Ready_Debug_RT(TEXT("RT_Diffuse"), 150.0f, 150.0f, 300.f, 300.f)))
@@ -85,10 +86,13 @@ void CRenderer::Render()
 {
 	//m_pGameInstance->Wait_Thread_End();
 
+	m_iCurTime = (++m_iCurTime) % m_iInterval;
+
 	Render_Priority();
 	Render_Shadow();
 	Render_Outline();
 	Render_NonBlend();
+	Render_Static();
 	Render_SSAO();
 	Render_Dynamic();
 	Render_Light();
@@ -184,12 +188,19 @@ void CRenderer::Render_Shadow()
 
 	m_pGameInstance->Begin_CSM();
 
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::SHADOW));
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::SHADOW)])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_Shadow();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::SHADOW)].clear();
 
 	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 
 	m_pGameInstance->End_CSM();
-
 }
 
 void CRenderer::Render_Outline()
@@ -197,7 +208,15 @@ void CRenderer::Render_Outline()
 	if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
 	   CRASH("Failed Begin MRT");
 
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::OUTLINE));
+	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_OutLine();
+
+		Safe_Release(pRenderObject);
+	}
+
+	m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)].clear();
 
 	m_pGameInstance->End_MRT();
 }
@@ -205,6 +224,30 @@ void CRenderer::Render_Outline()
 void CRenderer::Render_NonBlend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
+		CRASH("Render Fail");
+
+	//// Buffer Index
+	//_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
+	//// Static Object Render
+	//for (auto& pStaticObject : m_StaticObjects[iReadIndex])
+	//{
+	//	if (nullptr != pStaticObject)
+	//		pStaticObject->Render();
+	//}
+	//if (m_pGameInstance->IsWorkFinish())
+	//{
+	//	m_StaticObjects[iReadIndex].clear();
+	//	m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+	//}
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONBLEND));
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_Static()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"), nullptr, false)))
 		CRASH("Render Fail");
 
 	// Buffer Index
@@ -221,7 +264,7 @@ void CRenderer::Render_NonBlend()
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
 	}
 
-	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONBLEND));
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
 
 	m_pGameInstance->End_MRT();
 }
@@ -250,7 +293,9 @@ void CRenderer::Render_SSAO()
 		return;
 	}
 #endif
-	
+	if (!m_iCurTime)
+		return;
+
 #pragma region SSAO
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_SSAO"))))
 		CRASH("Render Fail");
@@ -402,6 +447,9 @@ void CRenderer::Render_Emissive()
 
 void CRenderer::Render_Bloom()
 {
+	if (!m_iCurTime)
+		return;
+
 	// DOWNSAMPLE
 	for (_uint i = 0; i <= 2; i++)
 	{
@@ -567,6 +615,10 @@ void CRenderer::Render_ScreenEffect()
 
 		case SFX_TYPE::DOF:
 			Render_DOF();
+			break;
+
+		case SFX_TYPE::MOTION:
+			Render_MotionBlur();
 			break;
 		}
 	}
@@ -749,6 +801,26 @@ void CRenderer::Render_DOF()
 	m_pVIBuffer->Render();
 }
 
+void CRenderer::Render_MotionBlur()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_VELOCITY_MAP"))))
+		CRASH("Failed Begin MRT_VELOCITY_MAP");
+
+	if (FAILED(m_pShader->Bind_Matrix("g_PrevCamViewMatrix", m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::VIEW))))
+		CRASH("Failed Bind ViewMatrixInv");
+	if (FAILED(m_pShader->Bind_Matrix("g_PrevCamProjMatrix", m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::PROJ))))
+		CRASH("Failed Bind ProjMatrixInv");
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::VELOCITY_MAP));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+
+	
+}
+
 #ifdef _DEBUG
 void CRenderer::Render_Debug()
 {
@@ -861,7 +933,12 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Distortion"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget Dof */
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Dof"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R32G32B32A32_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
+	/* RenderTarget VelocityMap */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_VelocityMap"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
 #ifdef _DEBUG
@@ -934,6 +1011,11 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_DOF
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DOF"), TEXT("RT_Dof"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_VELOCITY_MAP
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_VELOCITY_MAP"), TEXT("RT_VelocityMap"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
