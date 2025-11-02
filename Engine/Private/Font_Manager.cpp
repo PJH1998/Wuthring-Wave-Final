@@ -229,7 +229,7 @@ HRESULT CFont_Manager::Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW
 	return S_OK;
 }
 
-_bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH)
+_bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH, _uint iPadding)
 {
 	// 1) 텍스처만 재생성
 	if (!Reset_AtlasTexture(pFontInfo, iAtlasW, iAtlasH))
@@ -247,13 +247,15 @@ _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uin
 		FT_Bitmap& bmp = slot->bitmap;
 		int gw = bmp.width;
 		int gh = bmp.rows;
+		int paddedW = gw + iPadding * 2;
+		int paddedH = gh + iPadding * 2;
 
 		int x, y;
-		if (!Atlas_AllocRect(pFontInfo, gw, gh, x, y))
+		if (!Atlas_AllocRect(pFontInfo, paddedW, paddedH, x, y))
 			return false; // (이 경우는 새 크기로도 부족하다는 뜻)
 
 		if (gw > 0 && gh > 0)
-			Atlas_UploadBitmap(*pFontInfo, x, y, gw, gh, bmp.buffer, bmp.pitch);
+			Atlas_UploadBitmap(*pFontInfo, x + iPadding, y + iPadding, gw, gh, bmp.buffer, bmp.pitch);
 
 		glyph.sOffsetX = slot->bitmap_left;
 		glyph.sOffsetY = slot->bitmap_top;
@@ -261,10 +263,10 @@ _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uin
 		glyph.sHeight = gh;
 		glyph.sAdvance = (slot->advance.x >> 6);
 
-		glyph.fU0 = float(x) / pFontInfo->iAtlasW;
-		glyph.fV0 = float(y) / pFontInfo->iAtlasH;
-		glyph.fU1 = float(x + gw) / pFontInfo->iAtlasW;
-		glyph.fV1 = float(y + gh) / pFontInfo->iAtlasH;
+		glyph.fU0 = float(x + iPadding) / pFontInfo->iAtlasW;
+		glyph.fV0 = float(y + iPadding) / pFontInfo->iAtlasH;
+		glyph.fU1 = float(x + iPadding + gw) / pFontInfo->iAtlasW;
+		glyph.fV1 = float(y + iPadding + gh) / pFontInfo->iAtlasH;
 	}
 	return true;
 }
@@ -331,7 +333,7 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 		}
 
 		// 글리프가 atlas에 없으면 Bake
-		if (!BakeOneGlyph(pFontInfo, cp))
+		if (!BakeOneGlyph(pFontInfo, cp, fFontOutlineWidth * 20.f)) // ksta : 
 			continue;
 		FTCUSTOM_FONT_GLYPH glyph = pFontInfo->mapGlyphs[cp];
 
@@ -482,7 +484,7 @@ _bool CFont_Manager::Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth,
     return true;
 }
 
-_bool CFont_Manager::Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY)
+_bool CFont_Manager::Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY, _uint iPadding)
 {
 	// 먼저 시도
 	if (Atlas_AllocRect(pFontInfo, gw, gh, outX, outY))
@@ -501,7 +503,7 @@ _bool CFont_Manager::Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh,
 	newW = min(newW, MAX_ATLAS);
 	newH = min(newH, MAX_ATLAS);
 
-	if (!Rebuild_Atlas(pFontInfo, newW, newH))
+	if (!Rebuild_Atlas(pFontInfo, newW, newH, iPadding))
 		return false;
 
 	// 리빌드 후 다시 시도
@@ -530,7 +532,7 @@ _bool CFont_Manager::FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot
 	return true;
 }
 
-_bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint)
+_bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint, _uint iPadding)
 {
 	unordered_map<_uint, FTCUSTOM_FONT_GLYPH>& vecGlyphMap = pFontInfo->mapGlyphs;
 
@@ -545,26 +547,28 @@ _bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint)
 	FT_Bitmap& bmp = slot->bitmap;
 	int gw = (int)bmp.width;
 	int gh = (int)bmp.rows;
+	int paddedW = gw + iPadding * 2;
+	int paddedH = gh + iPadding * 2;
 
 	int x, y;
-	if (!Atlas_CheckSize(pFontInfo, gw, gh, x, y))
+	if (!Atlas_CheckSize(pFontInfo, paddedW, paddedH, x, y, iPadding))
 		return false; // 공간 부족
 
 	if (gw > 0 && gh > 0)
-		Atlas_UploadBitmap(*pFontInfo, x, y, gw, gh, bmp.buffer, bmp.pitch);
+		Atlas_UploadBitmap(*pFontInfo, x + iPadding, y + iPadding, gw, gh, bmp.buffer, bmp.pitch);
 
 	FTCUSTOM_FONT_GLYPH tFontGlyph = {};
-	tFontGlyph.iCodepoint = iCodePoint;
-	tFontGlyph.sOffsetX = (SHORT)slot->bitmap_left;   // bearing X
-	tFontGlyph.sOffsetY = (SHORT)slot->bitmap_top;    // bearing Y
-	tFontGlyph.sWidth = (SHORT)gw;
-	tFontGlyph.sHeight = (SHORT)gh;
-	tFontGlyph.sAdvance = (SHORT)(slot->advance.x >> 6); // 픽셀 단위 advance
+	tFontGlyph.iCodepoint	= iCodePoint;
+	tFontGlyph.sOffsetX		= (_short)slot->bitmap_left;   // bearing X
+	tFontGlyph.sOffsetY		= (_short)slot->bitmap_top;    // bearing Y
+	tFontGlyph.sWidth		= (_short)gw;
+	tFontGlyph.sHeight		= (_short)gh;
+	tFontGlyph.sAdvance		= (_short)(slot->advance.x >> 6); // 픽셀 단위 advance
 
-	tFontGlyph.fU0 = (float)x / pFontInfo->iAtlasW;
-	tFontGlyph.fV0 = (float)y / pFontInfo->iAtlasH;
-	tFontGlyph.fU1 = (float)(x + gw) / pFontInfo->iAtlasW;
-	tFontGlyph.fV1 = (float)(y + gh) / pFontInfo->iAtlasH;
+	tFontGlyph.fU0 = (float)(x + iPadding) / pFontInfo->iAtlasW;
+	tFontGlyph.fV0 = (float)(y + iPadding) / pFontInfo->iAtlasH;
+	tFontGlyph.fU1 = (float)(x + gw + iPadding) / pFontInfo->iAtlasW;
+	tFontGlyph.fV1 = (float)(y + gh + iPadding) / pFontInfo->iAtlasH;
 
 	vecGlyphMap[iCodePoint] = tFontGlyph;
 	return true;

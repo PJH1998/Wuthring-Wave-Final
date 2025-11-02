@@ -70,9 +70,9 @@ void CLevel_Test_UI::Update(_float fTimeDelta)
 		tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
 		tDesc.vColor = vRandColor;
 
-		tDesc.vOutlineColor = { 0.f, 0.f, 0.f, .1f };
+		tDesc.vOutlineColor = { 1.f, 1.f, 1.f, .5f };
 		//tDesc.vFontTexPerPixel = ;// ?
-		tDesc.fFontOutlineWidth = .5f;
+		tDesc.fFontOutlineWidth = 2.f;
 
 		//m_pGameInstance->Add_FloatingText(L"WW_Bold", L"Test 테스트입니다.", { 920.f + vRandPos.x, 1045.f + vRandPos.y }, 1.f, 10.f, 0, vRandColor);
 		m_pGameInstance->Add_FloatingText(tDesc);

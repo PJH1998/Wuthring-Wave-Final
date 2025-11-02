@@ -46,12 +46,12 @@ private:
 
 
 	static _bool                        Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY);
-	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY);
-	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint);
+	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY, _uint iPadding);
+	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint, _uint iPadding);
 	_bool								Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h,
 														const uint8_t* pSrc, _int srcPitch);
 	static _bool						FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot);
-	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH);
+	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH, _uint iPadding);
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };
