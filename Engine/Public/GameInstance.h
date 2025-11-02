@@ -133,6 +133,7 @@ public:
 	void		SetPBR(_bool IsStylized);
 	void		Set_Metallic(_float fMetallic);
 	void		Set_Roughness(_float fRoughness);
+	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 #pragma endregion
 

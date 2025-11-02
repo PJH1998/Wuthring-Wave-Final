@@ -38,6 +38,7 @@ public:
 	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 	void		Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
 	void		Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
+	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
 private:
