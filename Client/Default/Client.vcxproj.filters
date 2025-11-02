@@ -190,6 +190,9 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI_Font">
+      <UniqueIdentifier>{2360616c-913e-4bd3-b736-e70576703212}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">

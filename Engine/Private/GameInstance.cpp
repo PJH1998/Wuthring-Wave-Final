@@ -128,21 +128,29 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Priority_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pObject_Manager->Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Late_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 
-#ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Update(fTimeDelta);
-#endif // KSTA_DEBUG_ENABLEFONTMGR
 
 
 	m_pFrustrum->Update();
@@ -180,7 +188,7 @@ HRESULT CGameInstance::Draw()
 
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
 	ASSERT_CRASH(m_pFont_Manager);
-	m_pFont_Manager->Render();
+	//m_pFont_Manager->Render();
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 
 
@@ -258,6 +266,10 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 //{
 //	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
 //}
+_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar * pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
+{
+	return m_pFont_Manager->Draw_Font(strFontTag, pText, fPos, fScale, vColor, iPass);
+}
 void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
 {
 	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iPassIndex, vColor);

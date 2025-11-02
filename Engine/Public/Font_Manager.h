@@ -26,29 +26,29 @@ public:
 	//void								Add_FloatingText(/*const _wstring& strFontTag, const _tchar* pText, */FONT_SINGLEDESC tSingleFontDesc);
 	void								Add_FloatingText(const _wstring& strFontTag, const _wstring& pText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
 
+	void								Priority_Update(_float fTimeDelta);
 	void								Update(_float fTimeDelta);
-	void								Render();
+	void								Late_Update(_float fTimeDelta);
+	//void								Render();
 
 public:
-	_bool	/* Update 떄에 한번헤 루프돌리도록?*/	Draw_Font(FTCUSTOM_FONT* pFontInfo, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass);
+	_bool								Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass);
     
-	static _bool                        Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY);
-	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY);
-	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint);
-	_bool								Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h,
-														const uint8_t* pSrc, _int srcPitch);
-	static _bool						FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot);
-
-
-	//_bool TestGlyph(FTCUSTOM_FONT& font, wchar_t ch);
 private:
 	HRESULT								Ready_FontBuffer();
 	HRESULT                             Load_Font(FTCUSTOM_FONT* pFontInfo, const _char* pFilePath, _uint iPixelHeight);
 
 
 	_bool								Reset_AtlasTexture(FTCUSTOM_FONT* pFont, _uint newW, _uint newH);
-
     HRESULT                             Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW = 1024, _uint iAtlasH = 1024);
+
+
+	static _bool                        Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY);
+	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY);
+	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint);
+	_bool								Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h,
+														const uint8_t* pSrc, _int srcPitch);
+	static _bool						FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot);
 	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH);
 
 private:
@@ -64,14 +64,18 @@ private:
 	map<_wstring, FTCUSTOM_FONT*>	    m_Fonts;
 
 
-	vector<FONT_SINGLEDESC>				m_vecActiveFonts;
+	//vector<FONT_SINGLEDESC>				m_vecActiveFonts;
+	vector<CCustomFont*>				m_vecActiveFonts;
 
 
 	_uint								m_iWinSizeX = {};
 	_uint								m_iWinSizeY = {};
 
 
-private:
+
+	class CGameInstance*				m_pGameInstance = { nullptr };
+
+public:
     FTCUSTOM_FONT*						Find_Font(const _wstring& strFontTag);
 
 public:

@@ -49,7 +49,7 @@ void CLevel_Test_UI::Update(_float fTimeDelta)
 			m_pGameInstance->Rand_Normal(),
 			m_pGameInstance->Rand_Normal(),
 			m_pGameInstance->Rand_Normal(),
-			m_pGameInstance->Rand_Normal()
+			1.f //m_pGameInstance->Rand_Normal()
 		};
 		m_pGameInstance->Add_FloatingText(L"WW_Medium", L"Test 테스트입니다.", { 920.f, 1045.f }, 1.f, 1.f, 0, vRandColor);
 	}

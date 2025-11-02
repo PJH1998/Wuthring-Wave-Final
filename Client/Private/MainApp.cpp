@@ -13,6 +13,9 @@
 
 #include "SpringCamera.h"
 
+
+#include "CustomFont.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -192,9 +195,9 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CRASH("Shader_VtxAnimMesh");
 
 	// Shader_UI_VtxPosTex ..Shader for UI
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-		CRASH("Shader_UI_VtxPosTex");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
+	//	CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+	//	CRASH("Shader_UI_VtxPosTex");
 		
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
@@ -228,6 +231,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SpringCamera"),
 		CSpringCamera::Create(m_pDevice, m_pContext))))
 		CRASH("SpringCamera");
+
+	//
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Font"),
+		CCustomFont::Create(m_pDevice, m_pContext))))
+		CRASH("Text Prototype Create Failed.");
 }
 
 void CMainApp::Start_Level()

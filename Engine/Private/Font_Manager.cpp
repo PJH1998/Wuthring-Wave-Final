@@ -2,9 +2,12 @@
 #include "Font_Manager.h"
 
 #include "Shader.h"
+#include "CustomFont.h"
+#include "GameInstance.h"
 
 CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext }
+	, m_pGameInstance{ CGameInstance::GetInstance() }
 {
 	Safe_AddRef(m_pDevice);
 	Safe_AddRef(m_pContext);
@@ -57,50 +60,92 @@ HRESULT CFont_Manager::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 
 void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor)
 {
-	FONT_SINGLEDESC tDesc = {};
-	tDesc.strFontTag = strFontTag;
-	tDesc.strText = strText;
-	tDesc.vScreenPos = vScreenPos;
-	tDesc.fScale = fScale;
-	tDesc.vLifeTime = _float2{0.f, fLifeTime};
-	tDesc.iPassIndex = iPassIndex;
-	tDesc.vColor = vColor;
+	CCustomFont::CUSTOMFONT_DESC fontDesc = {};
+	
+	fontDesc.strFontTag = strFontTag;
+	fontDesc.strText = strText;
+	fontDesc.vScreenPos = vScreenPos;
+	fontDesc.fScale = fScale;
+	fontDesc.vLifeTime = _float2{0.f, fLifeTime};
+	fontDesc.iPassIndex = iPassIndex;
+	fontDesc.vColor = vColor;
 
-	m_vecActiveFonts.push_back(tDesc);
+	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	CCustomFont* pCustomFont = dynamic_cast<CCustomFont*>(m_pGameInstance->Clone_Prototype(0, L"Prototype_GameObject_Font", PROTOTYPE::GAMEOBJECT, &fontDesc));
+	m_vecActiveFonts.push_back(pCustomFont);
+
+
+
+	//FONT_SINGLEDESC tDesc = {};
+	//tDesc.strFontTag = strFontTag;
+	//tDesc.strText = strText;
+	//tDesc.vScreenPos = vScreenPos;
+	//tDesc.fScale = fScale;
+	//tDesc.vLifeTime = _float2{0.f, fLifeTime};
+	//tDesc.iPassIndex = iPassIndex;
+	//tDesc.vColor = vColor;
+	//
+	//m_vecActiveFonts.push_back(tDesc);
+}
+
+
+void CFont_Manager::Priority_Update(_float fTimeDelta)
+{
+	for (auto& activeFont : m_vecActiveFonts)
+		activeFont->Priority_Update(fTimeDelta);
 }
 
 void CFont_Manager::Update(_float fTimeDelta)
 {
-	// 폰트들의 시간 경과를 업데이트하며, 시간이 이미 지나버린 폰트는 제거한다.
 	for (_uint i = 0; i < m_vecActiveFonts.size(); i++)
-	{
-		if (m_vecActiveFonts[i].vLifeTime.y <= m_vecActiveFonts[i].vLifeTime.x)
+		if (m_vecActiveFonts[i]->Get_Active() == false)
 		{
+			Safe_Release(m_vecActiveFonts[i]);
 			m_vecActiveFonts.erase(m_vecActiveFonts.begin() + i);
 			i--;
 			continue;
 		}
 
-		m_vecActiveFonts[i].vLifeTime.x += fTimeDelta;
-	}
-}
-
-void CFont_Manager::Render()
-{
-	// 폰트들을 그린다.
 	for (auto& activeFont : m_vecActiveFonts)
-	{
-		Draw_Font(
-			Find_Font(activeFont.strFontTag), 
-			activeFont.strText.c_str(), 
-			activeFont.vScreenPos, 
-			activeFont.fScale, 
-			activeFont.vColor,
-			activeFont.iPassIndex
-		);
-	}
+		activeFont->Update(fTimeDelta);
 
+//	// 폰트들의 시간 경과를 업데이트하며, 시간이 이미 지나버린 폰트는 제거한다.
+//	for (_uint i = 0; i < m_vecActiveFonts.size(); i++)
+//	{
+//		if (m_vecActiveFonts[i].vLifeTime.y <= m_vecActiveFonts[i].vLifeTime.x)
+//		{
+//			m_vecActiveFonts.erase(m_vecActiveFonts.begin() + i);
+//			i--;
+//			continue;
+//		}
+//
+//		m_vecActiveFonts[i].vLifeTime.x += fTimeDelta;
+//	}
 }
+
+void CFont_Manager::Late_Update(_float fTimeDelta)
+{
+	for (auto& activeFont : m_vecActiveFonts)
+		activeFont->Late_Update(fTimeDelta);
+}
+
+
+//void CFont_Manager::Render()
+//{
+//	// 폰트들을 그린다.
+//	for (auto& activeFont : m_vecActiveFonts)
+//	{
+//		Draw_Font(
+//			Find_Font(activeFont.strFontTag), 
+//			activeFont.strText.c_str(), 
+//			activeFont.vScreenPos, 
+//			activeFont.fScale, 
+//			activeFont.vColor,
+//			activeFont.iPassIndex
+//		);
+//	}
+//
+//}
 
 HRESULT CFont_Manager::Ready_FontBuffer()
 {
@@ -228,8 +273,11 @@ _bool CFont_Manager::Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uin
 //	return S_OK;
 //}
 
-_bool CFont_Manager::Draw_Font(FTCUSTOM_FONT* pFontInfo, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
+_bool CFont_Manager::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 fPos, _float fScale, _float4 vColor, _uint iPass)
 {
+	FTCUSTOM_FONT* pFontInfo = Find_Font(strFontTag);
+
+
 	if (!pFontInfo || !pText)
 		return false;
 
@@ -284,13 +332,8 @@ _bool CFont_Manager::Draw_Font(FTCUSTOM_FONT* pFontInfo, const _tchar* pText, _f
 
 		VTXUITEXT vtx[6] =				// 정점 6개
 		{
-			{{x0, y0}, {u0, v0}},
-			{{x1, y0}, {u1, v0}},
-			{{x1, y1}, {u1, v1}},
-
-			{{x0, y0}, {u0, v0}},
-			{{x1, y1}, {u1, v1}},
-			{{x0, y1}, {u0, v1}},
+			{{x0, y0}, {u0, v0}},	{{x1, y0}, {u1, v0}},	{{x1, y1}, {u1, v1}},
+			{{x0, y0}, {u0, v0}},	{{x1, y1}, {u1, v1}},	{{x0, y1}, {u0, v1}},
 		};
 
 		vecVertices.insert(vecVertices.end(), vtx, vtx + 6);
@@ -526,6 +569,12 @@ void CFont_Manager::Free()
 
 	//for (auto& Pair : m_Fonts)
 	//	Pair.second = nullptr;
+
+	for (auto& activeFont : m_vecActiveFonts)
+	{
+		Safe_Release(activeFont);
+		activeFont = nullptr;
+	}
 
 	for (auto& [tag, face] : m_Fonts)
 	{
