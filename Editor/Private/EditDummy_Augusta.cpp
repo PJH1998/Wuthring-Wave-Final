@@ -43,6 +43,15 @@ void CEditDummy_Augusta::Update(_float fTimeDelta)
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_F10) == KEYSTATE::DOWN)
 		m_IsEmissive = !m_IsEmissive;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Force(XMVectorSet(0.f , 0.f, 200.f, 0.f), fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_S) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Force(XMVectorSet(0.f, 0.f, -200.f, 0.f), fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_A) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Force(XMVectorSet(-200.f, 0.f, 0.f, 0.f), fTimeDelta);
+	if (m_pGameInstance->Get_DIKeyState(DIK_D) == KEYSTATE::PRESS)
+		m_pTransformCom->Go_Force(XMVectorSet(200.f, 0.f, 0.f, 0.f), fTimeDelta);
 }
 
 void CEditDummy_Augusta::Late_Update(_float fTimeDelta)
@@ -70,9 +79,9 @@ void CEditDummy_Augusta::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-		_bool HasNormal = { true };
-		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-			HasNormal = false;
+		_bool HasNormal = { false};
+		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			HasNormal = true;
 
 		_bool HasMetallic = { false };
 		if (SUCCEEDED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MetallicTexture", i, TEXTURETYPE::MASK)))

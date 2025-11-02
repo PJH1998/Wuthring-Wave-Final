@@ -38,6 +38,8 @@ void CRoverGroundIdle::OnEnter()
 
     // 3. Idle 상태 초기화
     State_Reset();
+
+	m_pRover->Set_Gravity(true);
 }
 
 void CRoverGroundIdle::OnUpdate(_float fTimeDelta)
@@ -116,6 +118,12 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
     ERoverIdleType eIdleType = static_cast<ERoverIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
+
+	//if (!m_States[LAND])
+	//{
+	//	m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+	//	m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
+	//}
 
     // 우선순위 순으로 전환조건 진행.
     // 점프

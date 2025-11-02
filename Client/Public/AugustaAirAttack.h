@@ -14,6 +14,7 @@ private:
         JUMP,
         DOUBLE_JUMP,
         LAND,
+		UNIQUE_GRIFFON,
         END
     };
 
@@ -31,6 +32,8 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[AIRATTACKSTATE::END] = {};
     _float m_fSpeed = {};
+
+	map<_string, _string> m_PartsAnimations = {};
     
 
 private:

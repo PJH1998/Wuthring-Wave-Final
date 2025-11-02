@@ -340,17 +340,18 @@
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Effect_Rect.h">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Rect_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_TriggerBox.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -502,17 +503,18 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Effect_Rect.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Rect_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

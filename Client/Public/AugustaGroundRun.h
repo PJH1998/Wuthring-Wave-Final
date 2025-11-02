@@ -47,6 +47,8 @@ private:
     _bool m_States[RUNSTATE::END] = {};
     _float m_fSpeed = {};
 
+	
+
 private:
     virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);

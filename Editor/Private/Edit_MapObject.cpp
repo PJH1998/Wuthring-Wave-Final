@@ -42,7 +42,6 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     m_iNumLOD = m_pModelComArray.size()-1;
 
 
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
     //박스 모델에서 종합해서 최종 크기.
     //m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox(0));
@@ -64,36 +63,42 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
-    m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
-        if (!m_isActivate)
-            return;
+	m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
+		if (!m_isActivate)
+			return;
 
-        //寃쎈줈 吏?뺥븷 ???곸쐞 ?대뜑???ㅼ뿉 LOD 鍮쇨퀬. ?대뜑瑜?吏?? 洹몃━怨?洹??덉뿉 ?덈뒗 ?대뜑 ?섏쐞 1媛??뚮㈃??.dat???쎄퀬 媛앹껜 ?덉뿉 ?ｊ린?
-        
-        /*OBJECT_SAVE Save{};
-        Save.m_iNameLength = strlen(m_ModelName);
-        strcpy_s(Save.ModelName, m_ModelName);
-        Save.iShaderPassIndex = m_iShaderPassIndex;
-        XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
-        
-        event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
-        auto iter = event.ModelName.find(m_ModelName);
+		//寃쎈줈 吏?뺥븷 ???곸쐞 ?대뜑???ㅼ뿉 LOD 鍮쇨퀬. ?대뜑瑜?吏?? 洹몃━怨?洹??덉뿉 ?덈뒗 ?대뜑 ?섏쐞 1媛??뚮㈃??.dat???쎄퀬 媛앹껜 ?덉뿉 ?ｊ린?
 
-        if (iter == event.ModelName.end())
-            event.ModelName.insert(m_ModelName);
+		/*OBJECT_SAVE Save{};
+		Save.m_iNameLength = strlen(m_ModelName);
+		strcpy_s(Save.ModelName, m_ModelName);
+		Save.iShaderPassIndex = m_iShaderPassIndex;
+		XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
 
-        _uint Length = strlen(m_ModelName);
-        event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
-        event.File.write(m_ModelName, Length);
-        
-        if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
-            m_iShaderPassIndex = 0;
-        event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
-        event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
-        _float4x4 WorldMatrix;
-        XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
-        event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
-        });
+		event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
+		auto iter = event.ModelName.find(m_ModelName);
+
+		if (iter == event.ModelName.end())
+			event.ModelName.insert(m_ModelName);
+
+		_uint Length = strlen(m_ModelName);
+		event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
+		event.File.write(m_ModelName, Length);
+
+		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
+			m_iShaderPassIndex = 0;
+		event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+		event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
+		_float4x4 WorldMatrix;
+		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
+		event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
+
+		_float3 vBoundingBoxPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
+		_float3 vBoundingBoxExtends = m_pModelComArray[0]->Get_BoundingBox()->Extents;
+		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxPos), sizeof(_float3));
+		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxExtends), sizeof(_float3));
+
+		});
 #endif
 
     m_pDiffuseTextureCom.resize(m_pModelCom->Get_NumMesh());
@@ -270,7 +275,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-    const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox" };
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -316,55 +321,70 @@ void CEdit_MapObject::Set_ImGuiOption()
 
 HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 {
-    //m_pGameInstance->Wait_Thread_End();
-    MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	//m_pGameInstance->Wait_Thread_End();
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
-    m_iLevel = pDesc->iLevel;
-    
-    _tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
-    _tchar Name[MAX_PATH] = {};
+	m_iLevel = pDesc->iLevel;
 
-    MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
-    lstrcat(Model, Name);
-    _uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
-    
-    m_pModelComArray.resize(V);
+	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
+	_tchar Name[MAX_PATH] = {};
 
-    for (_uint i = 0; i < V; ++i)
-    {
-        _wstring ModelCom = Model;
-        ModelCom.pop_back();
-        ModelCom += to_wstring(i);
-        
-        _char ModelName[MAX_PATH] = {};
-        sprintf_s(ModelName, "Com_Model%d", i);
-        if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
-            StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
-            CRASH("FAILED");
+	MultiByteToWideChar(CP_ACP, 0, m_ModelName, -1, Name, strlen(m_ModelName));
+	lstrcat(Model, Name);
+	_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
 
-    }
-    //m_pGameInstance->Wait_Thread_End();
+	m_pModelComArray.resize(V);
 
-    if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
-        TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
-        return E_FAIL;
-    
-	CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-	RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-	RigidbodyDesc.eShape = SHAPE::MESH;
-	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	RigidbodyDesc.eType = EMotionType::Static;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-	RigidbodyDesc.pModel = m_pModelComArray[0];
+	for (_uint i = 0; i < V; ++i)
+	{
+		_wstring ModelCom = Model;
+		ModelCom.pop_back();
+		ModelCom += to_wstring(i);
 
-    Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-        TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+		_char ModelName[MAX_PATH] = {};
+		sprintf_s(ModelName, "Com_Model%d", i);
+		if (FAILED(Add_Component(pDesc->iLevel, ModelCom,
+			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
+			CRASH("FAILED");
 
-    m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
-    //m_pGameInstance->Wait_Thread_End();
-    m_pModelCom = m_pModelComArray[0];
-    return S_OK;
+	}
+	//m_pGameInstance->Wait_Thread_End();
+
+	if (FAILED(__super::Add_Component(pDesc->iLevel, TEXT("Prototype_Component_Shader_NonAnimMesh"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		return E_FAIL;
+
+	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+
+	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	{
+		//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		//RigidbodyDesc.eShape = SHAPE::MESH;
+		//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		//RigidbodyDesc.eType = EMotionType::Static;
+		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		//RigidbodyDesc.pModel = m_pModelComArray[0];
+
+		CRigidbody::BOXBODY_DESC RigidbodyDesc{};
+		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::BOX;
+		RigidbodyDesc.vPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
+		RigidbodyDesc.eType = EMotionType::Kinematic;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
+		RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
+		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+	}
+
+
+
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
+	//m_pGameInstance->Wait_Thread_End();
+	m_pModelCom = m_pModelComArray[0];
+	return S_OK;
 }
 
 void CEdit_MapObject::Bind_Resources()

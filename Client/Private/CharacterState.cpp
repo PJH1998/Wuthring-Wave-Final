@@ -25,6 +25,8 @@ void CCharacterState::OnUpdate(_float fTimeDelta)
 
 void CCharacterState::OnExit()
 {
+	m_IsPartAnimationEnd = false; //
+	m_IsSubPartAnimationEnd = false; //
 }
 
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta)

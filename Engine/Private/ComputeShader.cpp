@@ -120,6 +120,17 @@ void CComputeShader::Set_ConstantBuffer(const string& strName, ID3D11Buffer* pCB
         m_CBs_To_Bind[iter->second] = pCB;
 }
 
+void CComputeShader::Set_Sampler(_uint iSlotIndex, ID3D11SamplerState* pSampler)
+{
+	auto iter = m_SAMPLERs_To_Bind.find(iSlotIndex);
+	if (iter != m_SAMPLERs_To_Bind.end())
+	{
+		MSG_BOX("Duplicate Sampler");
+		return;
+	}
+	m_SAMPLERs_To_Bind.emplace(iSlotIndex, pSampler);
+}
+
 void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY, _uint iThreadGroupCountZ)
 {
     m_pContext->CSSetShader(m_pComputeShader, nullptr, 0);
@@ -130,6 +141,8 @@ void CComputeShader::Dispatch(_uint iThreadGroupCountX, _uint iThreadGroupCountY
         m_pContext->CSSetUnorderedAccessViews(Pair.first, 1, &Pair.second, nullptr);
     for (auto& Pair : m_CBs_To_Bind)
         m_pContext->CSSetConstantBuffers(Pair.first, 1, &Pair.second);
+	for (auto& Pair : m_SAMPLERs_To_Bind)
+		m_pContext->CSSetSamplers(Pair.first, 1, &Pair.second);
 
     m_pContext->Dispatch(iThreadGroupCountX, iThreadGroupCountY, iThreadGroupCountZ);
 
@@ -198,9 +211,16 @@ void CComputeShader::Clear_Resources()
         m_pContext->CSSetUnorderedAccessViews(Pair.first, 1, &pNullUAV, nullptr);
     }
 
+	for (auto& Pair : m_SAMPLERs_To_Bind)
+	{
+		ID3D11SamplerState* pSampler = nullptr;
+		m_pContext->CSSetSamplers(Pair.first, 1, &pSampler);
+	}
+
     m_SRVs_To_Bind.clear();
     m_UAVs_To_Bind.clear();
     m_CBs_To_Bind.clear();
+	m_SAMPLERs_To_Bind.clear();
 }
 
 CComputeShader* CComputeShader::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* pFilePath, const SHADER_MACRO& eShaderMacro, _string strEntryPoint)

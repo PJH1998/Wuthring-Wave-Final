@@ -139,6 +139,7 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vDepth.y = In.vProjPos.w;
     
     Out.vPBR.y = 0.2f;
+    Out.vPBR.z = 1.f;
     
     return Out;
 }
@@ -169,6 +170,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    // 
     float4 vNormalDesc = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
         
     float4 vNormal = normalize(vNormalDesc * 2.f - 1.f);

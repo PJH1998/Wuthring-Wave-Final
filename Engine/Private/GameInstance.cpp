@@ -454,6 +454,10 @@ void CGameInstance::Set_Roughness(_float fRoughness)
 {
 	m_pRenderer->Set_Roughness(fRoughness);
 }
+void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
+{
+	m_pRenderer->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
+}
 #endif
 #pragma endregion
 
@@ -552,9 +556,9 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
-Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut)
 {
-    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData, pOut);
 }
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
@@ -779,6 +783,10 @@ HRESULT CGameInstance::Add_SRVData(const _wstring& strRCSTag, const _char* pCons
 {
 	return m_pRCS_Manager->Add_SRVData(strRCSTag, pConstantName, pSRV);
 }
+HRESULT CGameInstance::Add_SamplerState(const _wstring& strRCSTag, _uint iSlotIndex, ID3D11SamplerState* pSampler)
+{
+	return m_pRCS_Manager->Add_SamplerState(strRCSTag, iSlotIndex, pSampler);
+}
 HRESULT CGameInstance::Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName)
 {
 	return m_pRCS_Manager->Setting_UAV_Data(strRCSTag, pConstantName);
@@ -787,9 +795,9 @@ HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShad
 {
 	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName, iMipLevel);
 }
-HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
+HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Begin_RCS(strRCSTag, iMipLevel);
+	return m_pRCS_Manager->Begin_RCS(strRCSTag, iWidth, iHeight, iMipLevel);
 }
 void CGameInstance::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {

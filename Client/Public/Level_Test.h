@@ -24,9 +24,19 @@ private:
 	void			Ready_Effect();
 	//void Ready_Layer_Augusta();
 
+#ifdef _DEBUG
+	void			Shader_Gui();
+#endif
+
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };
 	class CGameSystem* m_pGameSystem = { nullptr };
+
+#ifdef _DEBUG
+	_float m_fLimitVelocity = { 30.f };
+	_float m_fLimitDepth = { 300.f };
+	_float m_fBlurDistanceScale = { 1.5f };
+#endif
 
 public:
 	static		CLevel_Test* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
