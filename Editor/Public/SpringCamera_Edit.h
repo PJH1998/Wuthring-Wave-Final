@@ -37,16 +37,16 @@ public:
 	// Lock-On
 	void							Lock_On()
 	{
-		if (CAMERA_STATE::LOCKON == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::TARGET;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-		}
-		else if (CAMERA_STATE::TARGET == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::LOCKON;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
-		}
+		//if (CAMERA_STATE::LOCKON == m_eCameraState)
+		//{
+		//	m_eCameraState = CAMERA_STATE::TARGET;
+		//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		//}
+		//else if (CAMERA_STATE::TARGET == m_eCameraState)
+		//{
+		//	m_eCameraState = CAMERA_STATE::LOCKON;
+		//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
+		//}
 	}
 
 public:
