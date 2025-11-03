@@ -3,12 +3,14 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "GameSystem.h"
 #include "Player.h"
 #include"Trigger_Box.h"
 #include "ShadowMap.h"
+#include "SkyBox.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -72,6 +74,7 @@ HRESULT CLevel_Test::Initialize()
 	Tri.WorldMatrix = &TT;
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
+	Ready_Skybox();
 
 	//TEST
 	CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
@@ -156,9 +159,24 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.fSpeedPerSec = 10.f;
     MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
+
+	//Ggobul
+	CGgobul::GGOBUL_DESC Ggobul{};
+	Ggobul.eCurLevel = m_eCurLevel;
+	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
+	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
+	Ggobul.fSpeedPerSec = 10.f;
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel),TEXT("Prototype_GameObject_Ggobul"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"),TEXT("Pool_Ggobul"), 3, &Ggobul)))
+		CRASH("Failed Ready Ggobul");
 
 	// Havoc Warrior
 	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
@@ -194,6 +212,19 @@ void CLevel_Test::Ready_MonsterTest()
 void CLevel_Test::Ready_Effect()
 {
     m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+}
+
+void CLevel_Test::Ready_Skybox()
+{
+	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
+	SkyboxDesc.iNumModel = 2;
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"), &SkyboxDesc)))
+		CRASH("Skybox");
 }
 
 #ifdef _DEBUG

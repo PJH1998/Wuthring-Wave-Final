@@ -44,6 +44,7 @@ public:
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) ;
 	virtual void Effect_Active(const _wstring& wStrEffectTag);
+	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
 	void Collider_Active(_bool isActive);
 #pragma endregion
 

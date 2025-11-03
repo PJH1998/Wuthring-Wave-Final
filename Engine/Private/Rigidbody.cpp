@@ -20,6 +20,11 @@ CRigidbody::CRigidbody(const CRigidbody& Prototype)
 {
 }
 
+void CRigidbody::Set_Position(const _fvector& vPos)
+{
+	m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vPos), EActivation::Activate);
+}
+
 HRESULT CRigidbody::Initialize_Prototype()
 {
 	return S_OK;
@@ -83,8 +88,8 @@ HRESULT CRigidbody::Initialize_Clone(void* pArg)
 HRESULT CRigidbody::Render()
 {
 #ifdef _DEBUG
-	/*if(nullptr != m_pBody)
-		m_pGameInstance->DrawShape(m_pBody->GetShape());*/
+	if(nullptr != m_pBody)
+		m_pGameInstance->DrawShape(m_pBody->GetShape(),m_pBody->GetWorldTransform());
 #endif
 	return S_OK;
 }
@@ -96,7 +101,7 @@ void CRigidbody::Update_Rigidbody(const _fmatrix& Matrix, _float fTimeDelta)
 	XMMatrixDecompose(&vScale, &vRotation, &vTranslation, Matrix);
 
 	m_pBodyInterface->MoveKinematic(m_BodyID, LoadVec3(vTranslation), LoadQuat(vRotation), fTimeDelta);
-
+	
 	//m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vTranslation), EActivation::Activate);
 }
 

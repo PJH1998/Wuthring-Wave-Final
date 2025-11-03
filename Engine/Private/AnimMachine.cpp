@@ -165,8 +165,21 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
-void CAnimMachine::Reset()
+void CAnimMachine::Reset(_string& strAnimTag)
 {
+	if (m_AnimStates.end() == m_AnimStates.find(strAnimTag))
+		return;
+
+	CAnimState::ANIMSTATE_DESC Desc{};
+	m_AnimStates[strAnimTag]->Enter(nullptr, nullptr, &m_strCurrentAnimTag, Desc);
+
+	m_isRootMotion = Desc.isRootMotion;
+	m_isRootMotionRotate = Desc.isRootMotionRotate;
+	m_isRootMotionTranslate = Desc.isRootMotionTranslate;
+	m_isLoop = Desc.isLoop;
+	m_fRootMotionRate = Desc.fRootMotionRate;
+	m_fTransitTrackPos = Desc.fTransitTrackPos;
+	m_fAnimationSpeed = Desc.fAnimationSpeed;
 }
 
 #ifdef _DEBUG
