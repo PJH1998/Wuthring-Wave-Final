@@ -27,7 +27,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
-	m_fAttackCoolTime[1] = 30.f;
+	m_fAttackCoolTime[1] = 20.f;
 	m_fAttackCoolTime[2] = 30.f;
 #pragma endregion
 

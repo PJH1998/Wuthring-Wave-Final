@@ -223,6 +223,9 @@
     <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul">
       <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe">
+      <UniqueIdentifier>{fb294f3f-0f7c-4162-8fcc-f57d572d10c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -511,6 +514,9 @@
     <ClInclude Include="..\Public\AttackVolume.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\FS_Scythe.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -767,6 +773,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AttackVolume.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\FS_Scythe.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

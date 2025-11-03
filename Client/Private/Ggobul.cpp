@@ -43,12 +43,12 @@ void CGgobul::Priority_Update(_float fTimeDelta)
 void CGgobul::Update(_float fTimeDelta)
 {
 	_bool isAnimFinished{};
-	_uint temp{};
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &temp, isAnimFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
 	if (isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
+		m_pAttackVolume[m_eType]->IsActivate(false);
 		return;
 	}
 	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pAttackTransform) * m_pTransformCom->Get_WorldMatrix();
@@ -98,18 +98,9 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	GGOBUL_RESET* pDesc = static_cast<GGOBUL_RESET*>(pArg);
 	m_eType = pDesc->eType;
-	//m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->pWorldMatrix));
-	//m_isRootMotion = pDesc->isRootMotion;
-	//m_isRootMotionRotate = pDesc->isRootMotionRotate;
-	//m_isRootMotionTranslate = pDesc->isRootMotionTranslate;
-	//m_fRootMotionRate = pDesc->fRootMotionRate;
-	//m_fAnimationSpeed = pDesc->fAnimationSpeed;
-	//m_fAttackDamage = pDesc->fAttackDamage;
-	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
-	//m_pTransformCom->LookDir(XMLoadFloat3(&pDesc->vInitDirection));
 	m_strAnimKey = pDesc->strPatternKey;
 	m_pAnimMachineCom->Reset(m_strAnimKey);
-
+	m_pModelCom->Clear_Animation(m_strAnimKey);
 	for (_uint i = 0; i < GGOBULTYPE::END; ++i)
 	{
 		m_pAttackVolume[i]->IsActivate(false);
@@ -127,7 +118,7 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_MeshEnables = { true, true, false, true, false, false };
 	else
 		m_MeshEnables = { true, false, false, true, false, false };
-
+	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 	m_isActivate = true;
 }
 

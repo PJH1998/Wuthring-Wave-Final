@@ -532,9 +532,9 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
 			if (IsDeleted)
 			{
-				auto iterDelete = next(m_SoundNotifies.begin(), iDeleteIndex);
+				auto iterDelete = next(m_ObjectNotifies.begin(), iDeleteIndex);
 				Safe_Release(*iterDelete);
-				m_SoundNotifies.erase(iterDelete);
+				m_ObjectNotifies.erase(iterDelete);
 			}
 
 			ImGui::EndTabItem();
@@ -556,6 +556,7 @@ void CAnimNotifyTool::Save_Notify()
     {
         IGFD::FileDialogConfig config;
         config.path = m_strCurrentFolderPath;
+		config.fileName = m_strCurrentAnimName;
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
         ImGuiFileDialog::Instance()->OpenDialog("Save Notify", "Export File", ".json", config);
