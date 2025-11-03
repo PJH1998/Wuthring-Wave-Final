@@ -38,8 +38,10 @@ void CAugustaGroundSpecial::OnEnter()
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
-    m_pAugusta->Set_Gravity(true);
-    
+    m_pAugusta->Set_Gravity(false);
+
+	if(eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
+		m_pAugusta->Set_Gravity(true);
 }
 
 void CAugustaGroundSpecial::OnUpdate(_float fTimeDelta)
@@ -97,7 +99,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     }
     else
     {
-        m_pAugusta->Rotate_Target();
+        //m_pAugusta->Rotate_Target();
     }
 
     
@@ -207,7 +209,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 50.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 80.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);
