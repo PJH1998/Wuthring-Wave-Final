@@ -14,7 +14,7 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-	// Parts 등록.
+	// 매핑.
 
     return S_OK;
 }
@@ -58,6 +58,7 @@ void CAugustaAirAttack::OnEnter()
 			{
 				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
 				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
+				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
@@ -77,6 +78,7 @@ void CAugustaAirAttack::OnEnter()
 			{
 				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
 				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
+				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 
@@ -106,8 +108,8 @@ void CAugustaAirAttack::OnEnter()
 	
 	// 공통으로 무기는 다 나옴.
     m_pAugusta->PartActivate(m_iPartType, true);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-
     
 
 
