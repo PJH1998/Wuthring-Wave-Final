@@ -51,6 +51,41 @@ void CActor::Render()
 {
 
 }
+
+SKILL_STATE CActor::Check_Skill(const _string& strSkillName, const _string& strPrevName)
+{
+	if (nullptr == m_pAbillityCom)
+		return SKILL_STATE::NOT_EXIST;
+
+	return m_pAbillityCom->Check_SkillState(strSkillName, strPrevName);
+}
+
+SKILL_STATE CActor::Use_Skill(const _string& strSkillName)
+{
+	if (nullptr == m_pAbillityCom)
+		return SKILL_STATE::NOT_EXIST;
+
+	return m_pAbillityCom->TryUseSkill(strSkillName);
+}
+
+#ifdef _DEBUG
+void CActor::Print_Cost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_Cost();
+}
+void CActor::Print_CoolTime()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_CoolTime();
+}
+#endif // _DEBUG
+
+
 #pragma endregion
 
 void CActor::Register_AllNotifies(const _string& strFolderPath)
@@ -67,9 +102,11 @@ void CActor::Register_AllNotifies(const _string& strFolderPath)
     m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
 }
 
-void CActor::Register_AllStatFiles(const _string& strFolderPath)
+// Ability Files 등록.
+void CActor::Register_AbilityFiles(const _string& strFolderPath)
 {
-
+	ASSERT_CRASH(m_pAbillityCom);
+	m_pAbillityCom->Register_AllAbilityFiles(strFolderPath);
 }
 
 

@@ -106,27 +106,26 @@ void CAugustaGroundIdle::Handle_Input()
     m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
     m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
-	m_States[UNIQUE_R] = m_States[SKILL_R] && m_pAugusta->Is_UniqueGaugeFull();
+
+	// Ability System.
+	m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // Skill Hack
+	m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // BurstR
+	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // 궁극기.
+	m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY ==  m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
+	
 
     m_States[AIR_ATTACK_E] = m_States[SKILL_E];
 
-    // 그리폰
-    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pAugusta->Is_UniqueGaugeFull();
-
-    // BurstR
-    m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
-
-	
+    
+    
 }
 
 
 // Idle 간의 전환 지정.
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
-
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
-
 
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
@@ -181,31 +180,53 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     }
 
     // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
-    if (m_States[BURST_R])
+    if (m_States[SWORD_R])
     {
-        m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
+		// 위에 서체크하긴 했지만? 다시 체크.
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
+			return;
+
+		m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
     }
 
-    if (m_States[UNIQUE_E])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-        return;
-    }
+  
 
-    if (m_States[UNIQUE_R])
+    if (m_States[ECHO_R])
     {
-		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_PULL;
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Attack_SpeedDrive"))
+			return;
+
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPEEDDRIVE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL)); // 상위, 하위 상태
 		return;
     }
 
-    
-	// SKILL_E 누르면 => 
-	if (m_States[SKILL_E])
+
+	if (m_States[POINT_E])
 	{
+		// 위에 서체크하긴 했지만? 다시 체크.
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
+			return;
+
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+		return;
+	}
+    
+	// SKILL _E
+	if (m_States[NORMAL_E])
+	{
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Hack"))
+			return;
+
+#ifdef _DEBUG
+		m_pAugusta->Print_CoolTime();
+#endif // _DEBUG
+
+		
+
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_HACK;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 		return;

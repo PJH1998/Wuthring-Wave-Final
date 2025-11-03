@@ -178,20 +178,28 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
-		//m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
-	{
-		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
-		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
-	}
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
-	{
-		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
-	}
+#endif // _DEBUG
+
+
+	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
+	//{
+	//	m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
+	//	//m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+	//}
+	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
+	//{
+	//	m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
+	//	m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
+	//}
+	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
+	//{
+	//	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
+	//}
 }
 
 

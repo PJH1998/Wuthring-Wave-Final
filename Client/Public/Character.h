@@ -156,23 +156,29 @@ public:
 #pragma endregion
 
 
+#ifdef _DEBUG
 public:
-	class CPlayer* Get_Owenr() { return m_pOwner; }
+	void Debug_FullCost();
 
-#pragma region UI Interface
+
+#endif // _DEBUG
+
+
+#pragma region UI Interface 
 public:
-	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-	void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
-	_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
-	void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
+	
+	//const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
+	//void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
+	//_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
+	//void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
 
-	void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
-	_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
-	void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
+	//void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
+	//_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
+	//void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
 
-	void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
-	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
-	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
+	//void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
+	//_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
+	//void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
 
 	void Sync_UI(); // UI
 #pragma endregion
@@ -182,7 +188,6 @@ public:
 
 protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
-	class CPlayer* m_pOwner = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
@@ -197,7 +202,7 @@ protected:
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 
-	CHARACTER_STAT m_Stats = {};
+	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
 protected:
 	_bool m_IsLockOn = { false };

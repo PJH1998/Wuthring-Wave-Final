@@ -108,10 +108,6 @@ void CAugustaAirAttack::OnEnter()
     m_pAugusta->PartActivate(m_iPartType, true);
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-    
-
-	
-
 }
 
 void CAugustaAirAttack::OnUpdate(_float fTimeDelta)

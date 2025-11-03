@@ -1,1 +1,4 @@
-StateName,AnimName
+Name,Hp,MaxHp,MaxStamina,fStamina,fCost1Max,fCost2Max,fCost3Max,fCost4Max,fCost5Max,Attack,AddMin,AddMax
+Augusta,1000,1000,100,100,100,100,100,100,100,700,100,300
+,,,,,,,,,,,,
+,,,,,,,,,,,,

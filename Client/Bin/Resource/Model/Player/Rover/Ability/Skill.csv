@@ -1,4 +1,4 @@
-Name,PrevName,SkillType,CostStatType,Cost,CoolDown,KeyInput,Damage,Description
+Name,PrevName,CostType,CostStatType,Cost,CoolDown,KeyInput,Damage,Description
 Skill_Strike,None,AUGUSTA_POINT,2,-100,20,E,200,POINT 100 E키
 Skill_Rise_Zero,Strike,NONE,0,0,0,E,300,E연타
 Skill_Rise,RiseZero,NONE,0,0,0,E,400,E연타

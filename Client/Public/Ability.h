@@ -4,29 +4,71 @@
 NS_BEGIN(Client)
 class CAbility final : public CComponent
 {
-public:
-	typedef struct tagAbillityDesc
-	{
-		const _char* pFilePath = {}; // 읽어서 등록할. Ability 파일
-	}ABILLITY_DESC;
-
-
 private:
 	explicit CAbility(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAbility(const CAbility& Prototype);
 	virtual ~CAbility() = default;
 
 public:
-	virtual HRESULT		Initialize_Prototype();
-	virtual HRESULT		Initialize_Clone(void* pArg);
-	virtual HRESULT		Render();
+	virtual HRESULT Initialize_Prototype();
+	virtual HRESULT Initialize_Clone(void* pArg);
+	virtual void Update(_float fTimeDelta);
+	void Register_AllAbilityFiles(const _string& strFolderPath);
+
+public:
+	const SKILL_INFO* Get_SkillInfo(const _string& strSkillName);
+	const CHARACTER_INFO& Get_CharacterInfo() const { return m_CharacterInfo; }
+	_float Get_Cost(COST_TYPE eType) const;
+	
+	SKILL_STATE Check_SkillState(const _string& strSkillName, const _string& strPrevName = "");
+	SKILL_STATE TryUseSkill(const _string& strSkillName); // 스킬 사용 시도
+
+	void Set_Cost(COST_TYPE eType, _float fValue);
+	void Add_Cost(COST_TYPE eType, _float fvalue);
+
+
+#ifdef _DEBUG
+public:
+	void Debug_FullCost();
+
+	void Print_Cost();
+	void Print_CoolTime();
+#endif // _DEBUG
+
+
+private:
+	class CGameSystem* m_pGameSystem = { nullptr };
+	// 1. 스킬 원본 데이터를 저장 (Key: 스킬 이름, Value: 스킬 정보)
+	unordered_map<_string, SKILL_INFO> m_mapSkills;
+
+	// 2. 스킬 체인 데이터 (Key : 이전 스킬 이름, Value : 다음 스킬 정보)
+	unordered_map<_string, _string> m_mapSkillChain;
+
+	// 3. 현재 쿨타임이 돌고 있는 스킬 목록 (Key : 스킬 이름, Value: 남은 쿨타임)
+	unordered_map<_string, _float> m_mapSkillCooldowns;
+
+	CHARACTER_INFO m_CharacterInfo = {};
+	_string m_strPrevSkillName = {};
+
+	/*
+	* 소모값 기본 0.f으로 소유
+	* 사용 예시.
+		SKILL_INFO eSkillInfo
+		Costs[ENUM_CLASS(eSkillInfo.eStatType)] -= eSkillInfo.fCost;
+	*/
+	vector<_float> m_Costs;
+	const _float m_fCostMax = { 100.f };
+
+private:
+	void Read_Skill(const _char* pFilePath);
+	void Read_Stat(const _char* pFilePath);
 
 
 private:
 	
+	SKILL_TYPE ConvertSkillType(const _string& strCostType);
+	COST_TYPE ConvertCostType(const _string& strCostType);
 
-private:
-	void Read_File(const _char* pFilePath);
 
 public:
 	static CAbility* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
