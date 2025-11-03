@@ -105,6 +105,7 @@ public:
 
 	// Look Vector
 	_vector Get_LookVector();
+	_vector Get_CameraLookVector();
 	_vector Get_LookVector_NoPitch();
 	_vector Get_RightVector();
 	_vector Get_RightVector_NoPitch();

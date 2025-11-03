@@ -19,6 +19,12 @@ void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
 	XMStoreFloat4(&m_vTargetPosition, TargetPos);
 }
 
+_vector CSpringCamera::Get_LookVector()
+{
+	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+	return vLook;
+}
+
 _vector CSpringCamera::Get_LookVector_NoPitch()
 {
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));

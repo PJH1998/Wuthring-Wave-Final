@@ -103,6 +103,7 @@ _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 	ASSERT_CRASH(m_pTransformCom);
 
 	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
 	_vector vCurrentPos = m_pColliderCom->Get_Position();
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
@@ -111,11 +112,11 @@ _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 
 	// 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
 	_vector vPositions[5] = {
-		vFootPos + vLook * m_fColliderRadius,  // 앞
-		vFootPos + vRight * m_fColliderRadius, // 왼쪽
+		vFootPos + vLook * (m_fColliderRadius -0.05f),  // 앞
+		vFootPos + vRight * (m_fColliderRadius - 0.05f), // 왼쪽
 		vFootPos,                              // 중앙
-		vFootPos - vRight * m_fColliderRadius, // 오른쪽
-		vFootPos - vLook * m_fColliderRadius   // 뒤
+		vFootPos - vRight * (m_fColliderRadius - 0.05f), // 오른쪽
+		vFootPos - vLook * (m_fColliderRadius - 0.05f)   // 뒤
 	};
 
 	_float fMinDistance = 3.f;  // 가장 가까운 거리 저장
@@ -299,6 +300,18 @@ _vector CCharacter::Get_LookVector()
     vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
  
     return vLook;
+}
+
+_vector CCharacter::Get_CameraLookVector()
+{
+	_vector vLook = XMVectorZero();
+
+	if (nullptr == m_pSpringCamera)
+		return vLook;
+
+	vLook = XMVector3Normalize(m_pSpringCamera->Get_LookVector());
+
+	return vLook;
 }
 
 _vector CCharacter::Get_LookVector_NoPitch()

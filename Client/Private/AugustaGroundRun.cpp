@@ -34,7 +34,7 @@ void CAugustaGroundRun::OnEnter()
     // 4. 현재 상태 초기화
     State_Reset();
 
-    m_pAugusta->Set_Gravity(true);
+    m_pAugusta->Set_Gravity(false);
 }
 
 void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
@@ -136,7 +136,7 @@ void CAugustaGroundRun::Check_Physics()
     // Land Check
 
 	//m_States[LAND] = m_pAugusta->Is_Land();
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.4f);
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f); // 경사에 따라서 좀더 널널하게 줘야하나?
 	//m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
 }
@@ -160,17 +160,32 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (!m_States[LAND])
+  //  if (!m_States[LAND])
+  //  {
+		//m_iNotLandFrames++;
+		//if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		//{
+		//	m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		//	return;
+		//}
+  //  }
+//#ifdef _DEBUG
+//	_float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(0.2f);
+//	OutPutDebugFloat(TEXT("아우구스타 발 부터 땅까지 거리"), fDistanceToGround);
+//#endif // _DEBUG
+
+	if (!m_States[LAND])
     {
-		m_iNotLandFrames++;
-		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		{
-			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-			return;
-		}
+
+
+		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		return;
     }
 
+	// Land가 아닌 판정이면 0 초기화.
+	m_iNotLandFrames = 0;
 	if (m_States[FLY])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
