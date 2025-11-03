@@ -651,8 +651,9 @@ void CLevel_Map::Load_Objects()
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
     //string FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-    string FolderPath = "../../Client/Bin/Resource/Map/Test/";
-    //string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+    //string FolderPath = "../../Client/Bin/Resource/Map/Test/";
+	string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
     //string FolderPath = "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
@@ -945,34 +946,25 @@ void CLevel_Map::Ready_Event()
 		});
 	m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), [this](const MAP_CREATE& event) {
 		CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
-		if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 		{
-
 			lock_guard<mutex> lock(m_Mutex);
+			if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 			{
+
 				m_SaveObjects["Map_Object"].push_back(m_pPickedObject);
 				Safe_AddRef(m_pPickedObject);
 			}
-		}
-		else if (m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(pObject))
-		{
-			lock_guard<mutex> lock(m_Mutex);
+			else if (m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(pObject))
 			{
 				m_SaveObjects["Map_Object_Instance"].push_back(m_pPickedInstanceObject);
 				Safe_AddRef(m_pPickedInstanceObject);
 			}
-		}
-		else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
-		{
-			lock_guard<mutex> lock(m_Mutex);
+			else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 			{
 				m_SaveObjects["Map_Object_Destruction"].push_back(m_pPickedDestructObject);
 				Safe_AddRef(m_pPickedDestructObject);
 			}
-		}
-		else if (m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(pObject))
-		{
-			lock_guard<mutex> lock(m_Mutex);
+			else if (m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(pObject))
 			{
 				m_SaveObjects["Map_Object_TriggerBox"].push_back(m_pPickedTriggerBox);
 				Safe_AddRef(m_pPickedTriggerBox);
