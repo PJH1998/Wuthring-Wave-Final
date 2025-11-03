@@ -16,7 +16,7 @@ public:
 		_float3 vExtends;
 		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 		OBJECTTYPE eObjectType;
-
+		_uint iTriggerIndex = {};
 	}TRIGGER;
 
 private:
@@ -32,6 +32,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta)override;
 
 
+	virtual void Set_ImGuiOption();
 private:
 	void Ready_Components(void* pArg);
 
@@ -42,9 +43,10 @@ private:
 	void Collision();
 
 private:
-	vector< TriggerCallback> m_Functions;
 	_uint m_iTriggerIndex = {};
 	_float3 m_vExtends = {};
+public:
+	static _uint iTriggerIndex;
 public:
 	static CEdit_TriggerBox* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

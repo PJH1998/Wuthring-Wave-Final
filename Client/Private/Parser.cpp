@@ -1,6 +1,8 @@
 ﻿#include "ClientPch.h"
 #include "Parser.h"
-#include	"MapObject.h"
+#include "MapObject.h"
+#include "Trigger_Box.h"
+#include "MapObject_Destruction.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -160,50 +162,67 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{
-		return;
-	//	_uint NameLength;
+		_uint NameLength;
 
-	//	_matrix PreTransformMatrix = XMMatrixIdentity();
-	//	_float fSize = 0.01f;
-	//	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+		_matrix PreTransformMatrix = XMMatrixIdentity();
+		_float fSize = 0.01f;
+		PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
-	//	CMapObject_Destruction::MAP_LOAD Desc{};
+		CMapObject_Destruction::MAP_LOAD Desc{};
 
-	//	while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-	//	{
-	//		memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-	//		File.read(Desc.ModelName, NameLength);
-	//		_string Name = Desc.ModelName;
+		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+		{
+			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+			File.read(Desc.ModelName, NameLength);
+			_string Name = Desc.ModelName;
+			OBJECTTYPE Type;
+			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+			_float4x4 Matrix = {};
+			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+			Desc.WorldMatrix = &Matrix;
+			Desc.iLevel = ENUM_CLASS(eLevel);
+			File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
-	//		File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-	//		File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
-	//		_float4x4 Matrix = {};
-	//		File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-	//		Desc.WorldMatrix = &Matrix;
-	//		Desc.iLevel = m_iLevel;
-	//		File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
-	//		File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
+			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
-	//		File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
+			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+				, PROTOTYPE::GAMEOBJECT, &Desc);
 
-	//		m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
-	//			Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
-	//			vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower]() mutable {
-	//			CMapObject_Destruction::MAP_LOAD pDesc{};
-	//			strcpy_s(pDesc.ModelName, ModelName.c_str());
-	//			pDesc.iShaderPassIndex = ShaderPass;
-	//			pDesc.eObjectType = eObjectType;
-	//			pDesc.WorldMatrix = &Matrix;
-	//			pDesc.iLevel = ENUM_CLASS(eLevel);
-	//			pDesc.m_vImpulsePos = vImpulsePos;
-	//			pDesc.m_vImpulsePower = vImpulsePower;
-	//			pDesc.vBoundingPos = BoundingPos;
-	//			pDesc.vBoundingExtends = BoundingExtends;
-	//			m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-	//				, PROTOTYPE::GAMEOBJECT, &pDesc);
-	//			});
-	//	}
+			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
+			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
+			//	vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower, TriggerIndex = Desc.iTriggerIndex]() mutable {
+			//	CMapObject_Destruction::MAP_LOAD pDesc{};
+			//	strcpy_s(pDesc.ModelName, ModelName.c_str());
+			//	pDesc.iShaderPassIndex = ShaderPass;
+			//	pDesc.WorldMatrix = &Matrix;
+			//	pDesc.iLevel = ENUM_CLASS(eLevel);
+			//	pDesc.m_vImpulsePos = vImpulsePos;
+			//	pDesc.m_vImpulsePower = vImpulsePower;
+			//	pDesc.vBoundingPos = BoundingPos;
+			//	pDesc.vBoundingExtends = BoundingExtends;
+			//	pDesc.iTriggerIndex = TriggerIndex;
+			//	m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+			//		, PROTOTYPE::GAMEOBJECT, &pDesc);
+			//	});
+		}
+	}
+	else if (pFilePath.find("TriggerBox") != std::string::npos)
+	{
+		//_uint iTriggerIndex;
+		CTrigger_Box::TRIGGER Desc{};
+		while (File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint)))
+		{
+			File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
+			_float4x4 Matrix = {};
+			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+			Desc.WorldMatrix = &Matrix;
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_TriggerBox")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Test"), &Desc);
+		}
 	}
 	else
 	{

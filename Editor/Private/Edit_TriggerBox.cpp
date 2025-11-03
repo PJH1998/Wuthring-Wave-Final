@@ -1,6 +1,10 @@
 ﻿#include"EditorPch.h"
 #include "Edit_TriggerBox.h"
 #include"Event_Level.h"
+#include"Map_Interface.h"
+
+_uint CEdit_TriggerBox::iTriggerIndex = 0;
+
 CEdit_TriggerBox::CEdit_TriggerBox(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CGameObject(pDevice,pContext)
 {
@@ -24,10 +28,16 @@ HRESULT CEdit_TriggerBox::Initialize_Clone(void* pArg)
 		return E_FAIL;
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
 	Ready_Components(pArg);
+
 	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [&](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		iLayer = ENUM_CLASS(LEVEL::MAP);
 		int a = 0;
 		});
+
+	_char Tag[MAX_PATH] = "Trigger";
+	MAP_CREATE event(Tag, this);
+
+	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
 	//m_pGameInstance->Publish()
 	//똥 생김, 트리거박스 저장 방법 및 트리거 번호 설정 및 저장.
@@ -35,13 +45,17 @@ HRESULT CEdit_TriggerBox::Initialize_Clone(void* pArg)
 		if (!m_isActivate)
 			return;
 
-		event.File.write(reinterpret_cast<const char*>(&m_vExtends), sizeof(_float3));
 		event.File.write(reinterpret_cast<const char*>(&m_iTriggerIndex), sizeof(_uint));
+		event.File.write(reinterpret_cast<const char*>(&m_vExtends), sizeof(_float3));
 		_float4x4 WorldMatrix;
 		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
 		event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
 		});
-    return S_OK;
+
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
+
+ 	m_iTriggerIndex = iTriggerIndex++;
+	return S_OK;
 }
 
 void CEdit_TriggerBox::Priority_Update(_float fTimeDelta)
@@ -60,6 +74,13 @@ void CEdit_TriggerBox::Late_Update(_float fTimeDelta)
 
 }
 
+void CEdit_TriggerBox::Set_ImGuiOption()
+{
+	ImGui::Text(to_string(m_iTriggerIndex).c_str());
+
+	m_pMapInterface->Set_Transform(m_pTransformCom);
+}
+
 void CEdit_TriggerBox::Ready_Components(void* pArg)
 {
 	TRIGGER* pDesc = static_cast<TRIGGER*>(pArg);
@@ -76,15 +97,6 @@ void CEdit_TriggerBox::Ready_Components(void* pArg)
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
-}
-
-void CEdit_TriggerBox::Collision()
-{
-	for (const auto& Func:m_Functions)
-	{
-		if (Func)
-			Func(nullptr);
-	}
 }
 
 CEdit_TriggerBox* CEdit_TriggerBox::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -118,5 +130,5 @@ void CEdit_TriggerBox::Free()
 	__super::Free();
 
 	Safe_Release(m_pRigidbodyCom);
-
+	Safe_Release(m_pMapInterface);
 }

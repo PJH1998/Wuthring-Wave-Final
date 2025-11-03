@@ -1,4 +1,5 @@
-﻿#include"EditorPch.h"
+﻿#include "MapObject_Destruction.h"
+#include"EditorPch.h"
 #include "Edit_MapObject_Destruction.h"
 #include "Edit_MapObject_Destruction_Piece.h"
 #include"Level_Map.h"
@@ -136,8 +137,11 @@ HRESULT CEdit_MapObject_Destruction::Initialize_Clone(void* pArg)
 		event.File.write(reinterpret_cast<const _char*>(&m_vImpulsePos), sizeof(_float3));
 		event.File.write(reinterpret_cast<const _char*>(&m_vImpulsePower), sizeof(_float3));
 
+		event.File.write(reinterpret_cast<const _char*>(&m_iTriggerIndex), sizeof(_uint));
+
 		});
 #endif
+	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	return S_OK;
 }
@@ -258,6 +262,14 @@ void CEdit_MapObject_Destruction::Set_ImGuiOption()
 		ImGui::PushItemWidth(300.0f);
 		ImGui::InputFloat3("ImPulse_Pos", m_vImpulsePos);
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Cam Pos"))
+	{
+		_float4 Pos = *m_pGameInstance->Get_CamPos();
+		m_vImpulsePos[0] = Pos.x;
+		m_vImpulsePos[1] = Pos.y;
+		m_vImpulsePos[2] = Pos.z;
+	}
 
 	ImGui::Text("ImPulse Power");
 	{
@@ -265,14 +277,7 @@ void CEdit_MapObject_Destruction::Set_ImGuiOption()
 		ImGui::InputFloat3("ImPulse_Power", m_vImpulsePower);
 	}
 
-	ImGui::SameLine();
-	if (ImGui::Button("Cam Pos"))
-	{
-		_float4 Pos = *m_pGameInstance->Get_CamPos();
-		m_vImpulsePower[0] = Pos.x;
-		m_vImpulsePower[1] = Pos.y;
-		m_vImpulsePower[2] = Pos.z;
-	}
+	ImGui::InputScalar("TriggerIndex", ImGuiDataType_U32, &m_iTriggerIndex);
 
 	if (ImGui::Button("Create_Particles"))
 		Create_Particles();
@@ -327,9 +332,14 @@ void CEdit_MapObject_Destruction::Create_Particles()
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
 
 		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
-		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
-			//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-			, m_iLevel, TEXT("Layer_Destruction_Peice"), &Desc);
+		//m_pGameInstance->Add_PoolingObject(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
+		//	, m_iLevel, TEXT("Layer_Destruction_Peice"), TEXT("Pool_Test")+to_wstring(i), 2, &Desc);
+
+		//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
+		//	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+		//	, m_iLevel, TEXT("Layer_Destruction_Peice"), &Desc);
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Test") + to_wstring(i), XMLoadFloat4x4(Desc.WorldMatrix), &Desc);
 	}
 }
 
@@ -381,6 +391,52 @@ HRESULT CEdit_MapObject_Destruction::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
 
+	_string ModelName = m_ModelName;
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
+	ModelName.pop_back();
+
+	for (_uint i = 2; i < m_pBoneModel->Get_BoneSize() - 1; ++i)
+	{
+		_string Name = ModelName; // 예: "SM_Sev_Roc_24BS_"
+
+		// 1. 문자열 스트림 생성
+		std::stringstream ss;
+
+		// 2. 스트림에 포맷팅 룰 적용
+		//    (3자리로 고정하고, 빈 칸은 '0'으로 채우기)
+		ss << std::setw(3) << std::setfill('0') << i - 2;
+
+		// 3. 스트림의 문자열을 Name에 추가
+		Name += ss.str(); // ss.str()이 "000", "001", ..., "010", ..., "100" 등을 반환
+		Name += "_LOD0";
+		CEdit_MapObject_Destruction_Piece::MAP_LOAD Desc;
+		Desc.eObjectType = OBJECTTYPE::INTERACTION;
+		Desc.iLevel = m_iLevel;
+		Desc.iShaderPassIndex = 0;
+		strcpy_s(Desc.ModelName, Name.c_str());
+		_vector vScale, vRot, vTrans;
+		_float4x4 TestMat = *m_pBoneModel->Get_BoneMatrixPtr(i);
+		XMMatrixDecompose(&vScale, &vRot, &vTrans, XMLoadFloat4x4(&TestMat));
+		_vector TT = XMQuaternionNormalize(vRot);
+		_float4x4 Mat;
+		XMStoreFloat4x4(&Mat,
+			XMMatrixRotationQuaternion(TT) *
+			XMMatrixTranslationFromVector(vTrans) *
+			m_pTransformCom->Get_WorldMatrix());
+		Desc.WorldMatrix = &Mat;
+
+		_vector Pos = XMVectorSet(m_vImpulsePos[0], m_vImpulsePos[1], m_vImpulsePos[2], 1.f);
+		_vector Power = XMVectorSet(m_vImpulsePower[0], m_vImpulsePower[1], m_vImpulsePower[2], 0.f);
+
+		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
+
+		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
+		if (FAILED(m_pGameInstance->Add_PoolingObject(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
+			, m_iLevel, TEXT("Layer_Destruction_Peice"), TEXT("Pool_Test") + to_wstring(i), 7, &Desc)))
+			return S_OK;
+	}
 	return S_OK;
 }
 

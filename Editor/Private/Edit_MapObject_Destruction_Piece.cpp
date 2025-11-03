@@ -47,9 +47,10 @@ HRESULT CEdit_MapObject_Destruction_Piece::Initialize_Clone(void* pArg)
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_eObjectType = pDesc->eObjectType;
 
+	Save_Map_Destruction
 
 	//XMStoreFloat3(&vImpluse, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) * -100.f);
-	m_pRigidbodyCom->Impulse(pDesc->vImpulse);
+	//m_pRigidbodyCom->Impulse(pDesc->vImpulse);
 	return S_OK;
 }
 
@@ -63,6 +64,10 @@ void CEdit_MapObject_Destruction_Piece::Update(_float fTimeDelta)
 	{
 		m_pRigidbodyCom->IsActivate(false);
 	}
+
+	m_fTimeDelta += fTimeDelta;
+	if (m_fTimeDelta >= 3.f)
+		m_isActivate = false;
 }
 
 void CEdit_MapObject_Destruction_Piece::Late_Update(_float fTimeDelta)
@@ -113,13 +118,14 @@ void CEdit_MapObject_Destruction_Piece::Render()
 
 			m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 			m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-
+			
 			m_pShaderCom->Begin(m_iShaderPassIndex);
 
 			m_pModelComArray[DrawModel]->Render(i);
 		}
 	}
 }
+
 void CEdit_MapObject_Destruction_Piece::Render_Shadow()
 {
 }
@@ -164,6 +170,18 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 
 void CEdit_MapObject_Destruction_Piece::Bind_Resources()
 {
+}
+
+void CEdit_MapObject_Destruction_Piece::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	m_pRigidbodyCom->IsActivate(false);
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
+	m_pRigidbodyCom->Impulse(pDesc->vImpulse);
+	m_fTimeDelta = 0.f;
+	//지호형이 리지드바디의 위치를 옮기는 거 만들어주면 사용할것.
+	//m_pRigidbodyCom->
+	m_isActivate = true;
 }
 
 CEdit_MapObject_Destruction_Piece* CEdit_MapObject_Destruction_Piece::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

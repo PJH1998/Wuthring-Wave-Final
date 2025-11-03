@@ -466,6 +466,8 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
+    <ClInclude Include="..\Public\MapObject_Destruction.h" />
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -702,6 +704,8 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

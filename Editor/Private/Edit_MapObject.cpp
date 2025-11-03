@@ -375,8 +375,8 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Kinematic;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 		RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
-		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+		//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}
 
 
