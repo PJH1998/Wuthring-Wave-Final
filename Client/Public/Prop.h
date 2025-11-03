@@ -45,7 +45,8 @@ public:
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) ;
 	virtual void Effect_Active(const _wstring& wStrEffectTag);
-	void Collider_Active(_bool isActive);
+	virtual void Object_Func(const _wstring& wStrEffectTag) {}
+	void		Collider_Active(_bool isActive);
 #pragma endregion
 
 

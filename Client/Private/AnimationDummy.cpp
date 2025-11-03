@@ -209,8 +209,9 @@ void CAnimationDummy::Register_AllNotifies(const _string& strFolderPath)
     auto effectCallBack = [this](const _wstring& tag) {
         this->Effect_Active();
     };
-
-    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+	auto objectCallBack = [this](const _wstring& tag) {
+		};
+    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
     
 }
 void CAnimationDummy::Collider_Active(const _wstring&, _bool)

@@ -81,6 +81,7 @@
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />

@@ -28,6 +28,7 @@ protected:
     function<void(const _wstring&)> m_EffectCallback;
 
 
+
 public:
     virtual void Free() override;
 };
