@@ -90,6 +90,7 @@ void CAugustaGroundRun::Handle_Input()
     m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
+	// 이런 Is_UniqueGaugueFull 같은 관리를 Ability System으로..
     m_States[UNIQUE_E] = m_States[SKILL_E] && m_pAugusta->Is_UniqueGaugeFull();
     m_States[UNIQUE_R] = m_States[SKILL_R] && m_pAugusta->Is_UniqueGaugeFull();
     m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
@@ -216,13 +217,20 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
+    // 구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
     if (m_States[BURST_R])
     {
         m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
     }
+
+	if (m_States[UNIQUE_R])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPEEDDRIVE;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL)); // 상위, 하위 상태
+		return;
+	}
 
     if (m_States[UNIQUE_E])
     {

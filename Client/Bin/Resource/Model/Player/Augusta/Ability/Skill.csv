@@ -1,0 +1,10 @@
+Name,PrevName,CostType,Cost,CoolDown,,KeyInput,Description
+Skill_Strike,None,Unique,100,20,,E,UniqueE
+Skill_Rise_Zero,Strike,Unique,0,0,,E,UniqueE
+Skill_Rise,RiseZero,Unique,0,0,,E,UniqueE
+AirAttack_HackDown_Start,Skill_Rise,Unique,0,0,,E,UniqueE
+AirAttack_HackDown_Sp_End,AirAttack_HackDown_Start,Unique,0,0,,E,UniqueE
+,,,,,,,
+,,,,,,,
+,,,,,,,
+Ultimate,Burst,100,30,BurstR,,,

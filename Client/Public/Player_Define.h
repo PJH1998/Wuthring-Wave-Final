@@ -32,6 +32,7 @@ namespace PlayerData
         //Desc.controllerData = make_pair(eLevel, TEXT("Prototype_Component_Controller_Augusta"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
+        Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Augusta/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;

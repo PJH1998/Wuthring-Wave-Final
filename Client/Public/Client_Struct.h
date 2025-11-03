@@ -7,13 +7,13 @@ namespace Client
 	{
 		_float fHp;
 		_float fAttack;
-		_float fSwitchGauge; // ���� ������
+		_float fSwitchGauge; 
 		_float fMaxSwitchGauge;
 
-		_float fBurstGauge; // ����� Burst Gauge
+		_float fBurstGauge; 
 		_float fMaxBurstGauge;
 
-		_float fUniqueGauge; // ĳ���� Ư�� Gauge
+		_float fUniqueGauge;
 		_float fMaxUniqueGauge; 
 	}CHARACTER_STAT;
 

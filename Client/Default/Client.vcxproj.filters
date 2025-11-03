@@ -214,6 +214,9 @@
     <Filter Include="03. GameObject\Weapon\Common">
       <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="04. Component\03. Ability">
+      <UniqueIdentifier>{72eb9125-bdcb-4c46-a6cb-95cba32d4604}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -496,6 +499,9 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
+    <ClInclude Include="..\Public\Ability.h">
+      <Filter>04. Component\03. Ability</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -747,6 +753,9 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    <ClCompile Include="..\Private\Ability.cpp">
+      <Filter>04. Component\03. Ability</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

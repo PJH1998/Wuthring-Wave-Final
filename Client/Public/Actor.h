@@ -15,6 +15,7 @@ public:
 		pair<LEVEL, _wstring> rigidBodyData = {};
 		pair<LEVEL, _wstring> modelData = {};
 		_string strFolderPath = {};
+		_string strAbilityFolderPath = {};
 	}ACTOR_DESC;
 
 
@@ -47,12 +48,14 @@ protected:
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
 	class CRigidbody* m_pRigidBodyCom = { nullptr };
+	class CAbility* m_pAbillityCom = { nullptr };
 	vector<_uint> m_ShaderPaths = {}; 
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_float m_fTrackPosition = {};
 
 protected:
 	void Register_AllNotifies(const _string& strFolderPath);
+	void Register_AllStatFiles(const _string& strFolderPath);
 	// void Ready_Components(const ACTOR_DESC* pDesc);
 
 

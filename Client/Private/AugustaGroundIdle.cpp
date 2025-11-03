@@ -106,7 +106,8 @@ void CAugustaGroundIdle::Handle_Input()
     m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
     m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
-    
+	m_States[UNIQUE_R] = m_States[SKILL_R] && m_pAugusta->Is_UniqueGaugeFull();
+
     m_States[AIR_ATTACK_E] = m_States[SKILL_E];
 
     // 그리폰
@@ -192,6 +193,13 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
         return;
+    }
+
+    if (m_States[UNIQUE_R])
+    {
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_PULL;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL)); // 상위, 하위 상태
+		return;
     }
 
     

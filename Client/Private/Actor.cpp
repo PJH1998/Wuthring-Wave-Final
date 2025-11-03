@@ -1,7 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "Actor.h"
+#include "Ability.h"
 
-#pragma region �⺻ �Լ�
+
+#pragma region
 CActor::CActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
 {
@@ -65,6 +67,12 @@ void CActor::Register_AllNotifies(const _string& strFolderPath)
     m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
 }
 
+void CActor::Register_AllStatFiles(const _string& strFolderPath)
+{
+
+}
+
+
 void CActor::Free()
 {
     CContainerObject::Free();
@@ -73,4 +81,5 @@ void CActor::Free()
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pRigidBodyCom);
     Safe_Release(m_pColliderCom);
+	Safe_Release(m_pAbillityCom);
 }

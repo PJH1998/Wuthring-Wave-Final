@@ -181,7 +181,7 @@ void CPlayer::Player_KeyInput()
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
-		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+		//m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
 	}
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
 	{
