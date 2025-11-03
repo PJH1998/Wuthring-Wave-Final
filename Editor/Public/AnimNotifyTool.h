@@ -8,6 +8,7 @@ class CAnimNotify;
 class CSoundNotify;
 class CColliderNotify;
 class CEffectNotify;
+class CObjectFuncNotify;
 NS_END
 
 NS_BEGIN(Editor)
@@ -20,6 +21,7 @@ public:
 		EFFECT = 1,   // EFFECT 
 		COLLIDER = 2, // 
 		LIGHT = 3,    // LIGHT?
+		OBJECT = 4,
 		END
 	};
 
@@ -59,6 +61,7 @@ private:
 	void RenderUI_EditSound();
 	void RenderUI_EditEffect();
 	void RenderUI_EditCollider();
+	void RenderUI_EditObjectFunc();
 	void RenderUI_SaveNotify();
 	void RenderUI_LoadNotify();
 	
@@ -113,6 +116,7 @@ private:
 	list<CSoundNotify*>    m_SoundNotifies;
 	list<CColliderNotify*> m_ColliderNotifies;
 	list<CEffectNotify*> m_EffectNotifies;
+	list<CObjectFuncNotify*> m_ObjectNotifies;
 
 private:
 	HRESULT Ready_Sound();

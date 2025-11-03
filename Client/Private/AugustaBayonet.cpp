@@ -46,11 +46,7 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
     CProp::Update(fTimeDelta);
 
-    // Combined Matrix 
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
+  
 
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
     m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
@@ -58,6 +54,11 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
+	// Combined Matrix 
+	XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		XMLoadFloat4x4(m_pSocketMatrix) *
+		m_pParentTransform->Get_WorldMatrix());
 
     CProp::Late_Update(fTimeDelta);
 

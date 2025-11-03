@@ -107,6 +107,19 @@ void CElectroPredator::Render()
 #endif
 }
 
+void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
+{
+}
+
+void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
+{
+	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+	//	return;
+	//
+	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+
 HRESULT CElectroPredator::Bind_Resources()
 {
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");

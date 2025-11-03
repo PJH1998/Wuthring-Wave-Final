@@ -47,6 +47,9 @@ private:
 	virtual ~CRigidbody() = default;
 
 public:
+	void							Set_Position(const _fvector& vPos);
+
+public:
 	virtual		HRESULT			Initialize_Prototype()			override;
 	virtual		HRESULT			Initialize_Clone(void* pArg)	override;
 	virtual		HRESULT			Render() override;

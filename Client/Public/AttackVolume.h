@@ -13,6 +13,7 @@ public:
 	{
 		const _float4x4* pSocketMatrix;
 		_float3 vExtent;
+		function<void()> CollisionCallback;
 	}ATKVOLUME_DESC;
 
 private:
@@ -31,9 +32,11 @@ public:
 private:
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	CRigidbody* m_pRigidBodyCom = { nullptr };
+
+	function<void()> m_CollisionCallback;
 private:
 	void Ready_Component(ATKVOLUME_DESC* pDesc);
-	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
 	static		CAttackVolume*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

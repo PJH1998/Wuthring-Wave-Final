@@ -150,6 +150,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     vector vLightResult = g_LightAccTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    if(vLightResult.a == 0.f)
+        discard;
+    
     Out.vColor = vLightResult;
     
     if (any(vPBRDesc.z))
@@ -174,6 +177,9 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         if (fViewZ > g_vClipDistances[i])
             iCascadeIndex = i;
     }
+    
+    if(fViewZ >= g_fLastDistance)
+        return Out;
    
     if(fViewZ >= g_fLastDistance)
         return Out;

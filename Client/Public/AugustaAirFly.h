@@ -44,15 +44,19 @@ private:
     
 	
 
-	_float m_fSpeed = {}; // Speed (힘)
-	_float m_fAccel = {}; // 가속.
-	_float m_fLift = {}; // 양력
-	_float m_fDrag = {}; // 공기 저항.
-	_float3 m_vDirection = {}; // 이동 방향 (방향)
-	_float3 m_vGravity = {};  // 감속을 위한 Gravity (감속)
-	
+	_float m_fSpeed = {};		// Speed (힘)
+	_float m_fAccel = {};		// 가속.
+	_float m_fLift = {};		// 양력
+	_float m_fDrag = {};		// 공기 저항.
+	_float3 m_vGravity = {};    // Gravity (감속)
 	_vector m_vForce = {}; // 현재 작용하는 힘.
-    
+
+	GPU_BLEND_INFO m_GpuBlendInfo = {};
+
+	_float m_fVerticalBoostTimer = {};
+	_float m_fMaxVerticalAccel = { 15.f }; // 최대 수직 가속도
+	
+     
 
 private:
     virtual void Handle_Input() override;

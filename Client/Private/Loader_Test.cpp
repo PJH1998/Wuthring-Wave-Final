@@ -5,6 +5,7 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 
@@ -73,6 +74,14 @@ HRESULT CLoader_Test::Load_Model()
     //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreMatrix, "../Bin/Resource/Model/Player/FalseSovereign/False_SovereignTest1.dat"))))
     //    return E_FAIL;
 
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Background"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground21.dat"))))
+		CRASH("SkyBackground");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Dome"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
+		CRASH("SkyDome");
+
 	cout << "Model" << endl;
 
     return S_OK;
@@ -116,7 +125,7 @@ HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
 
-
+#pragma region FALSE_SOVEREIGN
     // Prototype_Component_BehaviorTree_Test
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
@@ -138,6 +147,25 @@ HRESULT CLoader_Test::Load_MonsterTest()
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         CMonsterTest::Create(m_pDevice, m_pContext))))
         CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region GGOBUL
+	// Prototype_Component_Model_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Ggobul"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Ggobul/Ggobul.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Ggobul/Animation/Ggobul_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
+		CGgobul::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+
+#pragma endregion
 
 	// Prototype_Component_BehaviorTree_Ordinary
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Ordinary"),

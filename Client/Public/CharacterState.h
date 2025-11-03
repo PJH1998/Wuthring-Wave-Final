@@ -17,7 +17,7 @@ public:
     virtual void OnExit() override;
 
 protected:
-    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta);
+    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 protected:
     _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)

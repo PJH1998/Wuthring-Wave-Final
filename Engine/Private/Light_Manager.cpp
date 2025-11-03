@@ -17,6 +17,16 @@ const LIGHT_DESC* CLight_Manager::Get_LightDesc(const _wstring& strLightTag)
 	return iter->second->Get_LightDesc();
 }
 
+void CLight_Manager::Set_Active(const _wstring& strLightTag, _bool isActive)
+{
+	auto iter = m_Lights.find(strLightTag);
+
+	if (iter == m_Lights.end())
+		return;
+
+	iter->second->Set_Active(isActive);
+}
+
 #ifdef _DEBUG
 LIGHT_DESC* CLight_Manager::Get_LightDesc_For_Map(const _wstring& strLightTag)
 {

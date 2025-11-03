@@ -406,7 +406,6 @@ PS_OUT_EMISSIVE PS_EMISSIVE(PS_IN In)
     return Out;
 }
 
-
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0

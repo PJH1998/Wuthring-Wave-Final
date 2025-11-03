@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="99. Define">
@@ -196,6 +196,9 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\SkyBox">
+      <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Monster">
       <UniqueIdentifier>{5e9c0d4e-a9fe-420d-af13-5a6fe9e85554}</UniqueIdentifier>
     </Filter>
@@ -216,6 +219,12 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\FXRect">
       <UniqueIdentifier>{caa502bb-f52f-4f86-998f-d40a1855a591}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect">
+      <UniqueIdentifier>{cf4661a1-f396-4152-8969-b39d1f8f3b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul">
+      <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -459,9 +468,6 @@
     <ClInclude Include="..\Public\RoverState_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
-    <ClInclude Include="CAttackVolume.h">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Event_Camera.h">
       <Filter>97. Event</Filter>
     </ClInclude>
@@ -486,6 +492,9 @@
     <ClInclude Include="..\Public\RoverGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\SkyBox.h">
+      <Filter>03. GameObject\SkyBox</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Wing.h">
       <Filter>03. GameObject\Weapon\Common</Filter>
     </ClInclude>
@@ -501,6 +510,12 @@
     <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\Public\Effect_Rect.h">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
+	</ClInclude>
+    <ClInclude Include="..\public\Ggobul.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AttackVolume.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -713,9 +728,6 @@
     <ClCompile Include="..\Private\RoverSword.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="CAttackVolume.cpp">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\AugustaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
@@ -740,6 +752,9 @@
     <ClCompile Include="..\Private\RoverGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\SkyBox.cpp">
+      <Filter>03. GameObject\SkyBox</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Wing.cpp">
       <Filter>03. GameObject\Weapon\Common</Filter>
     </ClCompile>
@@ -755,6 +770,12 @@
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
+	</ClCompile>
+    <ClCompile Include="..\private\Ggobul.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AttackVolume.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -789,6 +810,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl">
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
       <Filter>96. ShaderFiles</Filter>
