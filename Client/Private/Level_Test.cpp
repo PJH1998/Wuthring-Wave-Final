@@ -3,6 +3,7 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "GameSystem.h"
@@ -159,6 +160,19 @@ void CLevel_Test::Ready_MonsterTest()
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
+
+	//Ggobul
+	CGgobul::GGOBUL_DESC Ggobul{};
+	Ggobul.eCurLevel = m_eCurLevel;
+	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
+	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
+	Ggobul.fSpeedPerSec = 10.f;
+	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel),TEXT("Prototype_GameObject_Ggobul"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"),TEXT("Pool_Ggobul"), 3, &Ggobul)))
+		CRASH("Failed Ready Ggobul");
 
 	// Havoc Warrior
 	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};

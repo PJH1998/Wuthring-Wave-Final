@@ -2,12 +2,12 @@
 #include "Ggobul.h"
 
 CGgobul::CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CGameObject { pDevice, pContext }
+	: CActor { pDevice, pContext }
 {
 }
 
 CGgobul::CGgobul(const CGgobul& Prototype)
-	:CGameObject { Prototype }
+	:CActor { Prototype }
 {
 }
 
@@ -23,7 +23,7 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 
 	GGOBUL_DESC* pDesc = static_cast<GGOBUL_DESC*>(pArg);
 	Ready_Component(pDesc);
-	Register_AllNotifies(pDesc->strFolderPath);
+	//Register_AllNotifies(pDesc->strFolderPath);
 
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{
@@ -40,9 +40,10 @@ void CGgobul::Priority_Update(_float fTimeDelta)
 
 void CGgobul::Update(_float fTimeDelta)
 {
-	_float fTrackPos{};
-	if (m_pModelCom->Play_Animation_CPU(m_strAnimKey, fTimeDelta * m_fAnimationSpeed, &fTrackPos,
-		m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate))
+	_bool isAnimFinished{};
+	_uint temp{};
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &temp, isAnimFinished, fTimeDelta);
+	if (isAnimFinished)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
@@ -52,13 +53,14 @@ void CGgobul::Update(_float fTimeDelta)
 	_vector vScale, vQuaternion, vTransition;
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	XMStoreFloat4x4(&m_CombindMatrix, NonScaleMatrix);
-	m_pRigidBodyCom[m_eType]->Update_Rigidbody(XMLoadFloat4x4(&m_CombindMatrix), fTimeDelta);
+	XMStoreFloat4x4(&m_BoneCombindMatrix, NonScaleMatrix);
+	m_pRigidBodyCom[m_eType]->Update_Rigidbody(XMLoadFloat4x4(&m_BoneCombindMatrix), fTimeDelta);
 }
 
 void CGgobul::Late_Update(_float fTimeDelta)
 {
-	m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
+	//뼈 공격 볼륨 동기화 설정, 뼈에다가 맞추려면 sync 사용 X
+	//m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
@@ -85,24 +87,46 @@ void CGgobul::Render()
 		m_pModelCom->Render(i);
 	}
 #ifdef _DEBUG
+	m_pRigidBodyCom[m_eType]->Render();
 #endif
 }
 
 void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	GGOBUL_RESET* pDesc = static_cast<GGOBUL_RESET*>(pArg);
 	m_eType = pDesc->eType;
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->pWorldMatrix));
-	m_isRootMotion = pDesc->isRootMotion;
-	m_isRootMotionRotate = pDesc->isRootMotionRotate;
-	m_isRootMotionTranslate = pDesc->isRootMotionTranslate;
-	m_fRootMotionRate = pDesc->fRootMotionRate;
-	m_fAnimationSpeed = pDesc->fAnimationSpeed;
+	//m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->pWorldMatrix));
+	//m_isRootMotion = pDesc->isRootMotion;
+	//m_isRootMotionRotate = pDesc->isRootMotionRotate;
+	//m_isRootMotionTranslate = pDesc->isRootMotionTranslate;
+	//m_fRootMotionRate = pDesc->fRootMotionRate;
+	//m_fAnimationSpeed = pDesc->fAnimationSpeed;
+	//m_fAttackDamage = pDesc->fAttackDamage;
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
+	//m_pTransformCom->LookDir(XMLoadFloat3(&pDesc->vInitDirection));
+	m_strAnimKey = pDesc->strPatternKey;
+	m_pAnimMachineCom->Reset(m_strAnimKey);
 
 	for (_uint i = 0; i < GGOBULTYPE::END; ++i)
 	{
 		m_pRigidBodyCom[i]->IsActivate(false);
 	}
+	if (m_strAnimKey == "SAttack03")
+		//				  body, down,  hammer, head, knife, fx
+		m_MeshEnables = { true, false, false, false, true, false };
+	else if (m_strAnimKey == "SAttack03_1")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SAttack03_2")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SBehit_Block")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SAttack01_1")
+		m_MeshEnables = { true, true, false, true, false, false };
+	else
+		m_MeshEnables = { true, false, false, true, false, false };
+
+	m_isActivate = true;
 }
 
 void CGgobul::Bind_Resources()
@@ -125,9 +149,16 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 		CRASH("ComputeShader");
 
 	// Com_Model
-	if (FAILED(Add_Component(pDesc->modelData.first, pDesc->modelData.second,
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
+
+	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
+	AnimMachineDesc.pAnimationTag = "SAttack01_2";
+	//Com_AnimMachine
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
+		CRASH("Ggobul/Com_AnimMachine");
 
 	// Com_Rigidbody(Head)
 	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
@@ -138,7 +169,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	if (FAILED(Add_Component(pDesc->rigidBodyData.first, pDesc->rigidBodyData.second,
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
 		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::HEAD]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
@@ -147,7 +178,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 		});
 
 	// Com_Rigidbody(Hammer)
-	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
@@ -155,7 +186,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	if (FAILED(Add_Component(pDesc->rigidBodyData.first, pDesc->rigidBodyData.second,
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
 		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::HAMMER]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
@@ -164,7 +195,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 		});
 
 	// Com_Rigidbody(Knife)
-	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
@@ -172,7 +203,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
-	if (FAILED(Add_Component(pDesc->rigidBodyData.first, pDesc->rigidBodyData.second,
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
 		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::KNIFE]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
@@ -202,6 +233,10 @@ void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 }
 
 void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
+{
+}
+
+void CGgobul::Object_Func(const _wstring& wStrObjectTag)
 {
 }
 
@@ -241,6 +276,7 @@ void CGgobul::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pComputeShaderCom);
+	Safe_Release(m_pAnimMachineCom);
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{
 		Safe_Release(m_pRigidBodyCom[i]);

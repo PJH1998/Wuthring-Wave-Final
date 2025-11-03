@@ -1,5 +1,5 @@
 ﻿#include "ClientPch.h"
-#include "CAttackVolume.h"
+#include "AttackVolume.h"
 
 CAttackVolume::CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject { pDevice, pContext }
@@ -22,7 +22,7 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     Ready_Component(pDesc);
 
     m_pSocketMatrix = pDesc->pSocketMatrix;
-
+	m_CollisionCallback = pDesc->CollisionCallback;
     return S_OK;
 }
 
@@ -57,16 +57,17 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
-	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollide_During(iLayer, pDesc, Manifold);
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
 }
 
-void CAttackVolume::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	if(ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
 	{
-
+		if (m_CollisionCallback)
+			m_CollisionCallback();
 	}
 }
 

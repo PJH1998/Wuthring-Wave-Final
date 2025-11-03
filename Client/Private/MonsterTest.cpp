@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -167,6 +168,31 @@ void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
 	//
 	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+
+void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring strTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring strAnimTag = wStrObjectTag.substr(Index);
+	if(strTypeTag == TEXT("GGOBUL"))
+	{
+		CGgobul::GGOBUL_RESET Desc{};
+		Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
+		//Desc.pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+		//Desc.vInitPosition = m_vTargetPosition;
+		//XMStoreFloat3(&Desc.vInitDirection,m_pTransformCom->Get_State(STATE::LOOK));
+		Desc.strPatternKey = WStringToString(strAnimTag);
+		_matrix WorldMatrix;
+		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+		_vector vRight = XMVector3Cross(vLook, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		_vector vUp = XMVector3Cross(vLook, vRight);
+		WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
+		WorldMatrix.r[ENUM_CLASS(STATE::UP)] = vUp;
+		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
+		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Ggobul"), WorldMatrix, &Desc);
+	}
 }
 
 HRESULT CMonsterTest::Bind_Resources()
@@ -394,6 +420,15 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 	if(Result)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
+		//if (iIndex == 2)
+		//{
+		//	CGgobul::GGOBUL_RESET Desc{};
+		//	Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
+		//	Desc.pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+		//	Desc.strPatternKey = "SAttack03";
+		//	//Desc.
+		//	//m_pGameInstance->Spawn_PoolingObject()
+		//}
 	}
 	return Result;
 }

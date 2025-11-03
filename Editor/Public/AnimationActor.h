@@ -63,6 +63,7 @@ public:
 	
 	void Collider_Active(const _wstring& tag, _bool IsActive);
 	void Effect_Active(const _wstring& tag);
+	void Object_Func(const _wstring& tag) {}
 
 	class CModel* Get_ModelCom() { return m_pModelCom; }
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);

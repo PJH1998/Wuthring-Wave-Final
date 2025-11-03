@@ -1,35 +1,32 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "Actor.h"
 
 NS_BEGIN(Engine)
+class CComputeShader;
+class CShader;
+class CModel;
+class CRigidbody;
+class CAnimMachine;
 NS_END
 
 NS_BEGIN(Client)
-class CGgobul final : public CGameObject
+class CGgobul final : public CActor
 {
 public:
 	enum GGOBULTYPE { HEAD, HAMMER, KNIFE, END};
-	typedef struct tagGgobulDesc : public CGameObject::GAMEOBJECT_DESC
+	typedef struct tagGgobulDesc : public CActor::ACTOR_DESC
 	{
-		pair<_uint, _wstring> shaderData;
-		pair<_uint, _wstring> computeShaderData;
-		pair<_uint, _wstring> modelData;
-		pair<_uint, _wstring> rigidBodyData;
-		_string strFolderPath;
 	}GGOBUL_DESC;
 
 	typedef struct tagGgobulReset
 	{
-		_float4x4* pWorldMatrix;
+		//const _float4x4* pWorldMatrix;
+		//_float3 vInitPosition{};
+		//_float3 vInitDirection{};
 		GGOBULTYPE eType;
 		_float fChangeTrackPos;
 		_string strPatternKey;
 
-		_bool isRootMotion;
-		_bool isRootMotionRotate;
-		_bool isRootMotionTranslate;
-		_float fRootMotionRate;
-		_float fAnimationSpeed;
 	}GGOBUL_RESET;
 
 private:
@@ -47,31 +44,35 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg);
 
+	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 private:
-	class CComputeShader*	m_pComputeShaderCom = { nullptr };
-	class CShader*			m_pShaderCom = { nullptr };
-	class CModel*			m_pModelCom = { nullptr };
-	class CRigidbody*		m_pRigidBodyCom[3] = {nullptr,};
+	CComputeShader*		m_pComputeShaderCom = { nullptr };
+	CShader*			m_pShaderCom = { nullptr };
+	CModel*				m_pModelCom = { nullptr };
+	CRigidbody*			m_pRigidBodyCom[GGOBULTYPE::END] = {nullptr,};
+	CAnimMachine*		m_pAnimMachineCom = { nullptr };
 
-	GGOBULTYPE				m_eType{};
+	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
 	const _float4x4*		m_pAttackTransform = { nullptr };
-	_float4x4				m_CombindMatrix{};
+	_float4x4				m_BoneCombindMatrix{};
 	vector<_bool>			m_MeshEnables;
 
-	_string m_strAnimKey;
+	_string		m_strAnimKey;
+	_uint		m_iState{};
+	//_bool m_isRootMotion;
+	//_bool m_isRootMotionRotate;
+	//_bool m_isRootMotionTranslate;
+	//_float m_fRootMotionRate;
+	//_float m_fAnimationSpeed;
 
-	_bool m_isRootMotion;
-	_bool m_isRootMotionRotate;
-	_bool m_isRootMotionTranslate;
-	_float m_fRootMotionRate;
-	_float m_fAnimationSpeed;
+	_float m_fAttackDamage{};
 
 private:
 	void			Bind_Resources();
 	void			Ready_Component(GGOBUL_DESC* pDesc);
 	void			Register_AllNotifies(const _string& strFolderPath);
-	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive);
-	virtual void	Effect_Active(const _wstring& wStrEffectTag);
 	void			OnCollide_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 public:
 	static CGgobul* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

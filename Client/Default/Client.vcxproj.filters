@@ -462,7 +462,7 @@
     <ClInclude Include="..\Public\RoverState_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
-    <ClInclude Include="CAttackVolume.h">
+    <ClInclude Include="AttackVolume.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Camera.h">
@@ -503,7 +503,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\public\Ggobul.h">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\EffectMEsh\Ggobul</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -716,7 +716,7 @@
     <ClCompile Include="..\Private\RoverSword.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="CAttackVolume.cpp">
+    <ClCompile Include="AttackVolume.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\AugustaFactory.cpp">

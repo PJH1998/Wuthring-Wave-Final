@@ -332,8 +332,11 @@ void CAnimationActor::Register_AllNotifies(const _string& strFolderPath)
     auto effectCallBack = [this](const _wstring& tag) {
         this->Effect_Active(tag);
     };
+	auto objectCallBack = [this](const _wstring& tag) {
+		this->Object_Func(tag);
+		};
 
-    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
     
 }
 void CAnimationActor::Collider_Active(const _wstring&, _bool)

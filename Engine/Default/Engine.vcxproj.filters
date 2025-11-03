@@ -641,6 +641,9 @@
     <ClInclude Include="..\public\ShadowMap.h">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ObjectFuncNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -940,6 +943,9 @@
     </ClCompile>
     <ClCompile Include="..\private\ShadowMap.cpp">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
