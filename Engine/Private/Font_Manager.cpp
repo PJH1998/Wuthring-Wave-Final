@@ -5,6 +5,8 @@
 #include "CustomFont.h"
 #include "GameInstance.h"
 
+#define KSTA_DEBUGATLASTEST
+
 CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext }
 	, m_pGameInstance{ CGameInstance::GetInstance() }
@@ -303,7 +305,6 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 	// for shader : additional info for extra pass 
 	// - outline
 	_float4 vOutlineColor		= pDesc->vOutlineColor;
-	//_float2 vFontTexPerPixel	= pDesc->vFontTexPerPixel;		//??
 	_float fFontOutlineWidth	= pDesc->fFontOutlineWidth;
 	// - grad
 	_float4 vFontGradColor		= pDesc->vFontGradColor;		// Right Dir
@@ -396,6 +397,10 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 	//m_pShaderCom->Bind_Value("g_FontTexPerPixel", &vFontTexPerPixel, sizeof(vFontTexPerPixel)); // 이건 아래에서
 	m_pShaderCom->Bind_Value("g_FontOutlineWidth", &fFontOutlineWidth, sizeof(fFontOutlineWidth));
 	m_pShaderCom->Bind_Value("g_FontGradColor", &vFontGradColor, sizeof(vFontGradColor));
+	_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
+	_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
+	m_pShaderCom->Bind_Value("g_ViewMatrix", &matPipelineView, sizeof(matPipelineView));
+	m_pShaderCom->Bind_Value("g_ProjMatrix", &matPipelineProj, sizeof(matPipelineProj));
 
 	// 상수.. Atlas Texel
 	ID3D11Resource* pRes = nullptr;
@@ -422,8 +427,11 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 	m_pContext->Draw(vecVertices.size(), 0);
 
 
+#ifdef KSTA_DEBUGATLASTEST
 
 	ImGui::Image(pFontInfo->pAtlasSRV, ImVec2(512, 512));
+
+#endif // KSTA_DEBUGATLASTEST
 
 
 

@@ -14,4 +14,5 @@ namespace Editor
 
 	// Sequence
 	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SCREEN, ACTOR, EFFECT, END };
+
 }

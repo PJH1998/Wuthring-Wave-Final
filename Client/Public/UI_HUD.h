@@ -30,6 +30,9 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
+public:
+	HRESULT					Sync_StatusValue(CHARACTER_STAT& eStat);
+
 private:
 	HRESULT					Load_ChildObjects(_wstring strFilePath);
 	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
@@ -52,13 +55,16 @@ private:					// �ڽ� UI�� ���� ��� ������ ��
 	
 
 private:
+	// 데이터 받게 되는 대로 폐기
 	_uint					m_iSelectedCHIndex = 0;
 	_float					m_fPlayerEnergy[CH_END] = { 0.f, 0.f, 0.f };
 
 	const   _float			m_fPlayerMaxEnergy[CH_END] = { 100.f, 100.f, 100.f };
-
-
 	_uint					m_iEnergyBarMode = 0;		// 0 : normal, 1 : ult or  mode change
+
+
+
+	CHARACTER_STAT			m_tPlayerStat = {};	// 임시
 
 public:
 	static CUI_HUD* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

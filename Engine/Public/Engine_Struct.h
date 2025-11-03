@@ -259,10 +259,11 @@ namespace Engine
 		// for shader : additional info for extra pass 
 		// - [Flag 1] outline
 		_float4 vOutlineColor;
-		_float2 vFontTexPerPixel;
 		_float fFontOutlineWidth;
 		// - [Flag 2] grad
 		_float4 vFontGradColor;		// Right Dir
+		// - [Flag 3] fixed
+		_float4 vTargetWorldPos;
 
 
 		//..

@@ -187,11 +187,11 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI_Font">
-      <UniqueIdentifier>{2360616c-913e-4bd3-b736-e70576703212}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Parents\_SubParents">
       <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\UIHelper">
+      <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -441,6 +441,15 @@
     <ClInclude Include="..\Public\RoverGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_ControlHelper.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_FontPreset.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_StatusSyncer.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -657,6 +666,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_ControlHelper.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_FontPreset.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_StatusSyncer.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

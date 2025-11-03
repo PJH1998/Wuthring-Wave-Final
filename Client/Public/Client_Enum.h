@@ -66,7 +66,19 @@ namespace Client
 		FL_OUTLINE			= 1 << 0,
 		FL_GRAD				= 1 << 1,
 
-		FL_END				= 1 << 2
+		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
+
+		FL_END				= 1 << 3
+	};
+
+	enum class FONT_DMG_PRESET
+	{
+		HEAL,
+		DARK,
+		ELECTRO,
+		FUSION,
+
+		END
 	};
 	
 	enum class  TEST_STATE : unsigned int

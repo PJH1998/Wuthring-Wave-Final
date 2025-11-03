@@ -110,31 +110,31 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 
 	// test
-	static _bool isToggled = false;
-
-	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
-	{
-		isToggled = !isToggled;
-
-
-		if (isToggled)
-		{
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-		}
-		else
-		{
-
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-			static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-		}
-	}
+	//static _bool isToggled = false;
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+	//{
+	//	isToggled = !isToggled;
+	//
+	//
+	//	if (isToggled)
+	//	{
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
+	//	}
+	//	else
+	//	{
+	//
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//	}
+	//}
 
 	
 
@@ -155,6 +155,13 @@ void CUI_HUD::Render()
 {
     //__super::Render();                      // Nothing. �����׷� �߰��� �� ���� ���������� �˾Ƽ� �ڽĵ���� Render ����
 }
+
+HRESULT CUI_HUD::Sync_StatusValue(CHARACTER_STAT& eStat)
+{
+	m_tPlayerStat = eStat;
+	return S_OK;	// 임시
+}
+
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
 {

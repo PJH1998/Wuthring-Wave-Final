@@ -59,9 +59,6 @@ HRESULT CLoader_Test_UI::Load_Texture()
             const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
             const   _uint       iNumFiles   = infoDesc.tUIDesc.iNumFiles;
 
-            if (strFileName == L"T_JiabeilinaEnergyBgCombined")
-                int i = 10;
-
             infoDesc.tUIDesc.strFilePath;
             if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
                 CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))

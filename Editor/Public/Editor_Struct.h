@@ -47,4 +47,7 @@ namespace Editor
 		float fDuration = {}; // 현재선택한 Animation Duration
 	}EFFECTACTOR_DESC;
 #pragma endregion
+
+
+
 }

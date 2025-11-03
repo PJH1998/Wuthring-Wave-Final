@@ -29,21 +29,29 @@ cbuffer FontFlag : register(b2)
 // Requires from Flag..
 cbuffer FontOutLine : register(b3)
 {
-    float4 g_FontOutlineColor;  // [16] RGBA Outline Color
-    float2 g_FontTexPerPixel;   // [8] 1.f / Texture Size 
-    float g_FontOutlineWidth;   // [4] Outline Width Size
+    float4 g_FontOutlineColor;      // [16] RGBA Outline Color
+    float2 g_FontTexPerPixel;       // [8] 1.f / Texture Size 
+    float g_FontOutlineWidth;       // [4] Outline Width Size
 }
 cbuffer FontGrad : register(b4)
 {
-    float4 g_FontGradColor;     // [16] RGBA Gradiant Color (->)
+    float4 g_FontGradColor;         // [16] RGBA Gradiant Color (->)
 }
+cbuffer FontFixed : register(b5)
+{
+    float4 g_TargetWorldPos;                // [16] RGBA Gradiant Color (->)
+    float4x4 g_ViewMatrix, g_ProjMatrix;    // [256 * 2]  Camera Pipeline
+}
+
+
 
 
 #define FL_NONE         0
 #define FL_OUTLINE      1 << 0
 #define FL_GRAD         1 << 1
+#define FL_FIXED        1 << 2
 
-#define FL_END          1 << 2
+#define FL_END          1 << 3
 
 
 // 여기서 상태 정의
@@ -89,6 +97,14 @@ VS_OUT VS_Font(VS_IN In)
     Out.vPosition = float4(ndc, 0, 1);
     Out.vTexcoord = In.vTexcoord;
     
+    if (g_FontFlag & FL_FIXED)
+    {
+        
+        
+    }
+    
+    
+    
     return Out;
 }
 
@@ -98,68 +114,78 @@ VS_OUT VS_Font(VS_IN In)
 // * Pixel Shader
 // ==============================
 // 픽셀 셰이더: 폰트 아틀라스 {R채널 = Alpha}로 사용!!!!
-float4 PS_Font(VS_OUT In) : SV_Target
+struct PS_IN
 {
-    float alpha = g_FontAtlas.Sample(FontSampler, In.vTexcoord).r;
+    float4 vPosition : SV_Position;
+    float2 vTexcoord : TEXCOORD;
+};
+struct PS_OUT
+{
+    float4 vColor : SV_TARGET0;
+};
+
+
+PS_OUT PS_Font(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
     
+    float2 uv = In.vTexcoord;
+    float alphaCenter = g_FontAtlas.Sample(FontSampler, uv).r;          // 현재 바라보는 픽셀 색상에서 a값 추출
+        
+    
+
+    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter);             // 글자에 색상 채워진 정도를 저장. 경계 부드럽게
+    float4 fillColor = float4(g_FontColor.rgb, g_FontColor.a * fillMask);
+
+    Out.vColor.rgb = g_FontColor.rgb;
+    Out.vColor.a = g_FontColor.a * fillMask;
     
         
     
-    if (g_FontFlag & FL_GRAD)
+    if (g_FontFlag & FL_GRAD)           // ===== grad (wip) =====
     {
         // Gradiant
-        float4 GradRColor = g_FontGradColor;
+        const float4 GradRColor = g_FontGradColor;
         
         
-        
-   
-    }
+        #ifdef KSTA_DEBUG_1_RETURN_AFTERGRAD
+            return Out;
+        #endif   
+    }                                   // END== grad (wip) =====
     
     
-    if (g_FontFlag & FL_OUTLINE)
+    
+    
+    if (g_FontFlag & FL_OUTLINE)        // ===== outline =====
     {
-        // Outline
-        float4 OutlineColor = g_FontOutlineColor;
-        
-        
-        float2 uv = In.vTexcoord;
-        float alphaCenter = g_FontAtlas.Sample(FontSampler, uv).r;          // 현재 바라보는 픽셀 색상에서 a값 추출
-        
-        if (alphaCenter > 0.5f)                                             // 불투명에 가깝다 = 경계선에 있지 않다 판단.
-            return float4(g_FontColor.rgb, alphaCenter * g_FontColor.a);    // 정해둔 글자 색으로 return.
-        
-        
-        float outline = 0.0f;
-        int width = (int) g_FontOutlineWidth;                               // Outline 확인 할 픽셀 범위
+        float outline = 0.0f;   // mask
+        int width = (int) g_FontOutlineWidth;
 
-        for (int x = -width; x <= width; x++)                                // 현재 바라보는 픽셀 기준, 상하좌우로 범위만큼 탐색
+        // 주변 탐색
+        for (int x = -width; x <= width; x++)                                   // 픽셀 단위로 탐색
         {
             for (int y = -width; y <= width; y++)
             {
-                float2 offsetUV = uv + float2(x * g_FontTexPerPixel.x,      // 받아온 텍스쳐 크기 값을 이용, 픽셀 단위로 변경 후 적용.
-                                              y * g_FontTexPerPixel.y);     //  uv는 0~1 사이이므로, 1 / 텍스쳐크기 값 단위로 계산하여
-                outline += g_FontAtlas.SampleLevel(FontSampler, offsetUV, 0).r; //  픽셀 단위의 탐색이 가능.
-            } // 탐색 시 확인한 알파값을 누적 저장하여, 이를 기반으로 아웃라인 여부 구분.
+                float2 offsetUV = uv + float2(x * g_FontTexPerPixel.x,          // g_FontTexPerPixel 를 이용하여 x, y 를 실제 픽셀 단위로 변환한 UV좌표를 계산
+                                              y * g_FontTexPerPixel.y);
+                float alphaLevel = g_FontAtlas.SampleLevel(FontSampler, offsetUV, 0).r;     // 해당 픽셀의 알파 추출
+                outline = max(outline, smoothstep(0.45f, 0.5f, alphaLevel));     // 루프를 도는 동안 가장 높은 outline 값을 갱신, 이를 통해 알파 값을 부드럽게 처리
+            }
         }
 
-        // 주변 어딘가에서 픽셀이 발견되면 → 그 영역부터는 아웃라인 처리
-        if (outline > 0.0f)
-            return g_FontOutlineColor;
+        // 글자 내부가 아닌 픽셀에만 아웃라인 적용
+        float outlineOnly = saturate(outline - fillMask);
 
+        Out.vColor.rgb = lerp(Out.vColor.rgb, g_FontOutlineColor.rgb, outlineOnly);
+        Out.vColor.a = max(Out.vColor.a, outlineOnly * g_FontOutlineColor.a);
         
-        // 정리하면,
-        // 알파값이 0.5 초과로 불투명하면 원색,
-        // 반대로 0.5 이하로 투명한데, 단 0.01이라도 색이 존재는 한다면 아웃라인
-        // 알파값이 0이면 투명(discard). 알파값은 r채널에 존재함에 유의
-        
-        // -> 알파값이 0과 그 이상이 만나는 부분은 딱 갈라져 계산현상 발생함
-        
-        discard;
-   
-    }
+        #ifdef KSTA_DEBUG_2_RETURN_AFTEROUTLINE
+            return Out;
+        #endif   
+    }                                   // END== outline =====
     
     
-    return float4(g_FontColor.rgb, alpha * g_FontColor.a);
+    return Out;
 }
 
 

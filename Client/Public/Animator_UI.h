@@ -63,45 +63,45 @@ public:
 	virtual HRESULT			Render()								override;
 
 public:
-	HRESULT		Insert_Animation(UI_ANIM_DESC& Desc);
-	HRESULT		Remove_Animation(_wstring strAnimName);
-	HRESULT		Clear_Animation();
+	HRESULT					Insert_Animation(UI_ANIM_DESC& Desc);
+	HRESULT					Remove_Animation(_wstring strAnimName);
+	HRESULT					Clear_Animation();
 
-	HRESULT		Change_Animation(_wstring strAnimName);
-	HRESULT		Change_Animation(_uint iAnimIndex);
-	HRESULT		Deselect_Animation();
+	HRESULT					Change_Animation(_wstring strAnimName);
+	HRESULT					Change_Animation(_uint iAnimIndex);
+	HRESULT					Deselect_Animation();
 
-	UI_ANIM_DESC* Find_Animation(_wstring strAnimName);
-	UI_ANIM_DESC* Find_Animation(_uint iAnimIndex);
+	UI_ANIM_DESC*			Find_Animation(_wstring strAnimName);
+	UI_ANIM_DESC*			Find_Animation(_uint iAnimIndex);
 
-	UI_ANIM_DESC* Get_CurAnimation() { return m_pCurAnimDesc; }
+	UI_ANIM_DESC*			Get_CurAnimation() { return m_pCurAnimDesc; }
 
 
-	UI_ANIM_KEYFRAME_DESC* Get_CalcedAnimKeyframeDesc() { return &m_tCalcedKeyFrameDesc; }
-	UI_ANIM_KEYFRAME_DESC* Get_CurCombinedAnimKeyframeDesc() { return &m_tCombinedKeyFrameDesc; }
-	void Set_CurCombinedAnimKeyframeDesc(UI_ANIM_KEYFRAME_DESC tCombinedKeyFrameDesc) { m_tCombinedKeyFrameDesc = tCombinedKeyFrameDesc; }
-
-private:
-	_float		Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ���� �����, LerpType�� ���� ���� fIn���� ������ ��ȯ (0 -> 1 �� ���� �׷����� �ȭ)
-	_float		Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ���� �ܼ��� Ratio �� ���� Start�� End ������ ���� ��ȯ
-
-	_float3		Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Ű�������� ������ ���� �ִϸ��̼��� ���� position�� �´� ���� ��ȯ (catmull-rom ����)
-
-	void		Update_Animation();
+	UI_ANIM_KEYFRAME_DESC*	Get_CalcedAnimKeyframeDesc() { return &m_tCalcedKeyFrameDesc; }
+	UI_ANIM_KEYFRAME_DESC*	Get_CurCombinedAnimKeyframeDesc() { return &m_tCombinedKeyFrameDesc; }
+	void					Set_CurCombinedAnimKeyframeDesc(UI_ANIM_KEYFRAME_DESC tCombinedKeyFrameDesc) { m_tCombinedKeyFrameDesc = tCombinedKeyFrameDesc; }
 
 private:
-	const _uint					m_iKeyFrameRate = 60;
-	vector<UI_ANIM_DESC>		m_vecAnimationDescs = {};
-	UI_ANIM_DESC*				m_pCurAnimDesc = { nullptr };
+	_float					Fix_LerpRatio(_float fIn, _uint iLerpType);					// Calc_Lerp ���� �����, LerpType�� ���� ���� fIn���� ������ ��ȯ (0 -> 1 �� ���� �׷����� �ȭ)
+	_float					Calc_LerpRatio(_float fStart, _float fEnd, _float Ratio);	// ���� �ܼ��� Ratio �� ���� Start�� End ������ ���� ��ȯ
 
-	UI_ANIM_KEYFRAME_DESC*		m_pCurKeyFrameDesc = { nullptr };
+	_float3					Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Ű�������� ������ ���� �ִϸ��̼��� ���� position�� �´� ���� ��ȯ (catmull-rom ����)
 
-	UI_ANIM_KEYFRAME_DESC		m_tCalcedKeyFrameDesc = {};			// 실시간 desc 정보를 받아와 자식 계산에 사용하기 위함
-	UI_ANIM_KEYFRAME_DESC		m_tCombinedKeyFrameDesc = {};
+	void					Update_Animation();
 
-	CCustom_UI*					m_pOwner = { nullptr };
+private:
+	const _uint				m_iKeyFrameRate = 60;
+	vector<UI_ANIM_DESC>	m_vecAnimationDescs = {};
+	UI_ANIM_DESC*			m_pCurAnimDesc = { nullptr };
 
-	_float						m_fElapsedTime = {};
+	UI_ANIM_KEYFRAME_DESC*	m_pCurKeyFrameDesc = { nullptr };
+
+	UI_ANIM_KEYFRAME_DESC	m_tCalcedKeyFrameDesc = {};			// 실시간 desc 정보를 받아와 자식 계산에 사용하기 위함
+	UI_ANIM_KEYFRAME_DESC	m_tCombinedKeyFrameDesc = {};
+
+	CCustom_UI*				m_pOwner = { nullptr };
+
+	_float					m_fElapsedTime = {};
 
 public:
 	static CAnimator_UI*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
