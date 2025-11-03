@@ -189,18 +189,49 @@ namespace Engine
 	// 
 	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
+		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
-		_bool  IsRibAnimUsed = false; // 1
+		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
 		_uint  iRibbonAnimIndex; // 4
 		
-		// Blending
-		_float fPrevTrackPosition; // 4 => Start, End 프레임 판별.
-		_uint  iPrevAnimIndex; // 4
-		_uint  iRibbonPrevAnimIndex; // 4
-		_bool  IsBlending; // 1
+		// 2. Blend Layer Control
+		_bool  IsBlendEnabled;     // 4 (전체 조준 블렌드 On/Off)
+		_float fBlendParamLR;       // 4 (좌/우 파라미터, -1 to 1)
+		_float fBlendParamDU;       // 4 (하/상 파라미터, -1 to 1)
+		_float fPadding;            // 4 (16바이트 정렬)
 
+		// 3. RL Blend Clip
+		_uint iClipIndexL;          // 4 
+		_uint iClipIndexMidLR;      // 4 
+		_uint iClipIndexR;          // 4 
+		_uint iWeightClipLR;       // 4 
+
+		// 4. UD Blend Clip
+		_uint iClipIndexD;          // 4 
+		_uint iClipIndexMidDU;      // 4 
+		_uint iClipIndexU;          // 4 
+		_uint iWeightClipDU;       // 4 
 	}ANIMATION_CBINFO;
+
+	typedef struct tagGpuBlendInfo {
+		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.
+		_float fBlendParamLR;       // 4 
+		_float fBlendParamDU;       // 4 
+		_float fPadding;            // 4 
+
+		// RL Blend Clip
+		_string strClipxL;          // 4 
+		_string strClipMidLR;      // 4 
+		_string strClipxR;          // 4 
+		_string strWeightClipLR;       // 4 
+
+		// UD Blend Clip
+		_string strClipxD;          // 4 
+		_string strClipMidDU;      // 4 
+		_string strClipxU;          // 4 
+		_string strWeightClipDU;       // 4 
+	}GPU_BLEND_INFO;
 
 	typedef struct tagCollisionData {
 		class CCollideComponent* pComponent = { nullptr };
@@ -227,9 +258,13 @@ namespace Engine
 	// Sequence Item Data => Item Reset시 던질 Data
 	typedef struct tagSequenceItemData
 	{
-
+		_float		fStartFrame = {};
+		_float		fEndFrame = {};
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
+
+	// Default 초기화 용도.
+	inline const GPU_BLEND_INFO G_DefaultBlendInfo = {};
 }
 
 

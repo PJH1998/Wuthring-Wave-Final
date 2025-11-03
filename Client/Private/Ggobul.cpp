@@ -185,7 +185,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
-	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
+	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
@@ -202,7 +202,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
-	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
+	RigidbodyDesc.vExtent = _float3(10.f, 4.f, 4.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,

@@ -45,6 +45,7 @@ public:
 	}
 
 public:
+	_vector Get_LookVector();
 	_vector Get_LookVector_NoPitch();
 	_vector Get_RightVector_NoPitch();
 

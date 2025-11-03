@@ -188,6 +188,7 @@
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
     <ClInclude Include="..\Public\AugustaState_Enum.h" />
     <ClInclude Include="..\Public\AugustaFactory.h" />
+    <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
     <ClInclude Include="..\Public\Client_Debug.h" />
@@ -246,6 +247,7 @@
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
@@ -276,7 +278,6 @@
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\Wing.h" />
-    <ClInclude Include="AttackVolume.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -311,6 +312,7 @@
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
+    <ClCompile Include="..\Private\AttackVolume.cpp" />
     <ClCompile Include="..\Private\Character.cpp" />
     <ClCompile Include="..\Private\CharacterState.cpp" />
     <ClCompile Include="..\Private\ClientPch.cpp">
@@ -365,6 +367,7 @@
     <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
+    <ClCompile Include="..\Private\SkyBox.cpp" />
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -393,7 +396,6 @@
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
-    <ClCompile Include="AttackVolume.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClientPch.h</PrecompiledHeaderFile>
@@ -434,6 +436,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl" />
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,7 @@
 #include "Level_Test_UI.h"
 
 #include "SpringCamera.h"
-
+#include "SkyBox.h"
 #include "Effect_Prefab.h"
 
 CMainApp::CMainApp()
@@ -200,6 +200,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 		CRASH("Shader_UI_VtxPosTex");
+
+	// Shader_VtxSkyBox
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxSkyBox");
 		
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
@@ -233,6 +238,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SpringCamera"),
 		CSpringCamera::Create(m_pDevice, m_pContext))))
 		CRASH("SpringCamera");
+
+	// Skybox
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"),
+		CSkyBox::Create(m_pDevice, m_pContext))))
+		CRASH("Skybox");
 
 	// Prefab
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),

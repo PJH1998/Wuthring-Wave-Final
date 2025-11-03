@@ -13,6 +13,5 @@ namespace Editor
 	enum class WEAPONTYPE { NONANIM, ANIM, END };
 
 	// Sequence
-	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SCREEN, ACTOR, EFFECT, END };
-
+	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SFX, ACTOR, EFFECT, END };
 }
