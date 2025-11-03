@@ -11,7 +11,7 @@ NS_BEGIN(Client)
 class CSkyBox final : public CGameObject
 {
 public:
-	enum class SKYTYPE { DOME, FX1, CLOUD, END };
+	enum class SKYTYPE { DOME, BACKGROUND, FX1, CLOUD, END };
 public:
 	typedef struct tagSkyBoxDesc {
 		vector<_wstring>	strModelTags;

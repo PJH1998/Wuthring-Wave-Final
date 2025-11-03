@@ -50,7 +50,7 @@ void CSkyBox::Late_Update(_float fTimeDelta)
 
 void CSkyBox::Render()
 {
-	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(m_pGameInstance->Get_CamPos()));
+	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(m_pGameInstance->Get_CamPos()) + XMVectorSet(0.f, -100.f, 0.f, 0.f));
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
@@ -61,6 +61,7 @@ void CSkyBox::Render()
 	for (_uint i = 0; i < m_iNumModels; ++i)
 	{
 		m_pModelCom[i]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", 0, TEXTURETYPE::DIFFUSE);
+		//m_pModelCom[i]->Bind_Materials(m_pShaderCom, "g_MaskTexture", 0, TEXTURETYPE::MASK);
 		m_pShaderCom->Begin(i);
 		m_pModelCom[i]->Render(0);
 	}
@@ -86,15 +87,22 @@ void CSkyBox::Ready_Component(const vector<_wstring>& strModelTags)
 		TEXT("Com_Model_Dome"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::DOME)]), nullptr)))
 		CRASH("Com_Model_Dome");
 
-	// Com_Model_FX1
-	if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::FX1)],
-		TEXT("Com_Model_FX1"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::FX1)]), nullptr)))
-		CRASH("Com_Model_FX1");
+	// Com_Model_Background
+	if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::BACKGROUND)],
+		TEXT("Com_Model_Background"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::BACKGROUND)]), nullptr)))
+		CRASH("Com_Model_Background");
 
 	// Com_Model_Cloud
-	if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::CLOUD)],
-		TEXT("Com_Model_Cloud"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::CLOUD)]), nullptr)))
-		CRASH("Com_Model_Cloud");
+	//if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::CLOUD)],
+	//	TEXT("Com_Model_Cloud"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::CLOUD)]), nullptr)))
+	//	CRASH("Com_Model_Cloud");
+
+	//// Com_Model_FX1
+	//if (FAILED(Add_Component(m_iCurrentLevel, strModelTags[ENUM_CLASS(SKYTYPE::FX1)],
+	//	TEXT("Com_Model_FX1"), reinterpret_cast<CComponent**>(&m_pModelCom[ENUM_CLASS(SKYTYPE::FX1)]), nullptr)))
+	//	CRASH("Com_Model_FX1");
+	//
+
 }
 
 CSkyBox* CSkyBox::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

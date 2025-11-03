@@ -20,6 +20,11 @@ CRigidbody::CRigidbody(const CRigidbody& Prototype)
 {
 }
 
+void CRigidbody::Set_Position(const _fvector& vPos)
+{
+	m_pBodyInterface->SetPosition(m_BodyID, LoadVec3(vPos), EActivation::Activate);
+}
+
 HRESULT CRigidbody::Initialize_Prototype()
 {
 	return S_OK;

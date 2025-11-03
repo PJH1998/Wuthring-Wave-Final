@@ -59,7 +59,7 @@ VS_OUT VS_EFFECT(VS_IN In)
     
     matrix matWV, matWVP;
     
-    In.vPosition *= 20.f;
+    In.vPosition *= 50.f;
     
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
     matWVP = mul(matWV, g_ProjMatrix);
@@ -86,15 +86,23 @@ struct PS_OUT_SKYBOX
     float4 vDiffuse : SV_TARGET0;
 };
 
+PS_OUT_SKYBOX PS_BACKGROUND(PS_IN In)
+{
+    PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
+    
+    //float2 vTexcoord = float2(cos(g_fCloudSpeed), sin(g_fCloudSpeed));
+    Out.vDiffuse = g_DiffuseTexture[0].Sample(PointClampSampler, In.vTexcoord);
+    Out.vDiffuse.rgba = Out.vDiffuse.r;
+
+    return Out;
+}
+
 PS_OUT_SKYBOX PS_DOME(PS_IN In)
 {
     PS_OUT_SKYBOX Out = (PS_OUT_SKYBOX) 0;
     
-    Out.vDiffuse = g_DiffuseTexture[0].Sample(PointClampSampler, In.vTexcoord);
-    
-    //float4 vSkyColor = float4(0.6f, 0.6f, 0.8f, 1.f);
-    //Out.vDiffuse = Out.vDiffuse * Out.vDiffuse.a + vSkyColor * (1.f - Out.vDiffuse.a);
-    
+    Out.vDiffuse = g_DiffuseTexture[0].Sample(DefaultSampler, In.vTexcoord);
+
     return Out;
 }
 
@@ -133,7 +141,18 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_DOME();
     }
 
-    pass Effect            //1
+    pass Background //1
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_BACKGROUND();
+    }
+
+    pass Effect            //2
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_None, 0);
@@ -144,7 +163,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_EFFECT();
     }
 
-    pass Cloud          //2
+    pass Cloud          //3
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_None, 0);

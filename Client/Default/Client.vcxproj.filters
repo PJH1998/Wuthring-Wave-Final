@@ -485,7 +485,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\SkyBox.h">
       <Filter>03. GameObject\SkyBox</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\Public\Wing.h">
       <Filter>03. GameObject\Weapon\Common</Filter>
     </ClInclude>
@@ -739,7 +739,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\SkyBox.cpp">
       <Filter>03. GameObject\SkyBox</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\Private\Wing.cpp">
       <Filter>03. GameObject\Weapon\Common</Filter>
     </ClCompile>
@@ -791,11 +791,11 @@
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
-		<Filter>96. ShaderFiles</Filter>
-	</FxCompile>
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
