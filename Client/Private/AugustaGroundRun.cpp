@@ -72,6 +72,9 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
+	// 우선순위 제일 높음.
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
@@ -132,9 +135,26 @@ void CAugustaGroundRun::Check_Physics()
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
 
-	//m_States[LAND] = m_pAugusta->Is_Land();
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.4f);
-	//m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+
+	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
+	m_pAugusta->Is_LandCollider(&m_vLandNormal);
+
+	// 2. 기본 LandDistance 설정
+	_float fLandDistance = 0.5f;
+
+	// 3. 땅의 경사도(m_vLandNormal.y)를 확인합니다.
+	// m_vLandNormal.y가 1.0(평지)보다 작고 0.3(약 72도)보다 크다면 경사로로 판단.
+
+	if (m_vLandNormal.y < 0.98f && m_vLandNormal.y > 0.3f)
+	{
+		// 경사로에서는 Ray 판정 거리를 1.0f (혹은 1.2f) 정도로 늘려서
+		// 빠르게 내려가도 땅으로 인식되도록 합니다.
+		fLandDistance = 1.3f;
+	}
+
+	// 4. 동적으로 조절된 fLandDistance 값으로 RayCast Land 체크를 수행합니다.
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
+
 
 }
 
@@ -157,17 +177,36 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (!m_States[LAND])
+  //  if (!m_States[LAND])
+  //  {
+		//m_iNotLandFrames++;
+		//if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		//{
+		//	m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		//	return;
+		//}
+  //  }
+//#ifdef _DEBUG
+//	_float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(0.2f);
+//	OutPutDebugFloat(TEXT("아우구스타 발 부터 땅까지 거리"), fDistanceToGround);
+//#endif // _DEBUG
+
+	if (!m_States[LAND])
     {
-		m_iNotLandFrames++;
-		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		{
-			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-			return;
-		}
-        
+		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		return;
     }
+
+	// Land가 아닌 판정이면 0 초기화.
+	m_iNotLandFrames = 0;
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
 
     // SPACE 누르면 바로 점프로 전환.
     if (m_States[JUMP])

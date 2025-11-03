@@ -98,45 +98,96 @@ void CCharacter::Set_Collider(CCollider* pColliderCom, _float3 vColliderOffset, 
 	m_fColliderRadius = fColliderRadius;
 }
 
+//_float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
+//{
+//	ASSERT_CRASH(m_pTransformCom);
+//
+//	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+//	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
+//	_vector vCurrentPos = m_pColliderCom->Get_Position();
+//	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+//	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+//
+//	_vector vFootPos = vCurrentPos + XMVectorSet(0.f, fStartYOffset, 0.f, 0.f);
+//
+//	// 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
+//	_vector vPositions[5] = {
+//		vFootPos + vLook * (m_fColliderRadius -0.05f),  // 앞
+//		vFootPos + vRight * (m_fColliderRadius - 0.05f), // 왼쪽
+//		vFootPos,                              // 중앙
+//		vFootPos - vRight * (m_fColliderRadius - 0.05f), // 오른쪽
+//		vFootPos - vLook * (m_fColliderRadius - 0.05f)   // 뒤
+//	};
+//
+//	_float fMinDistance = 3.f;  // 가장 가까운 거리 저장
+//	_bool bAnyHit = false;
+//
+//	// 5개 지점에서 각각 레이 발사
+//	for (_uint i = 0; i < 5; ++i)
+//	{
+//		_vector vStartPos = vPositions[i];
+//		_vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
+//
+//		_float4 vHitPoint = {};
+//		_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
+//
+//		if (bHit)
+//		{
+//			bAnyHit = true;
+//			_vector vHitPos = XMLoadFloat4(&vHitPoint);
+//			_vector vDistance = vPositions[i] - vHitPos;
+//			_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
+//
+//			// 가장 가까운 거리 저장
+//			if (fDistance < fMinDistance)
+//				fMinDistance = fDistance;
+//		}
+//	}
+//	return bAnyHit ? fMinDistance : 3.f;
+//}
+
 _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 {
 	ASSERT_CRASH(m_pTransformCom);
 
-	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vCurrentPos = m_pColliderCom->Get_Position();
+	_vector vCurrentPos = m_pColliderCom->Get_Position(); // 캡슐 중심
 	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
 
-	_vector vFootPos = vCurrentPos + XMVectorSet(0.f, fStartYOffset, 0.f, 0.f);
+	// 1. 캡슐의 실제 바닥 위치를 계산합니다. (중심 - 절반 높이)
+	_vector vCapsuleBottom = vCurrentPos;
 
-	// 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
+	// 2. fStartYOffset(0.2f) 만큼 바닥에서 띄운 위치에서 Ray를 시작합니다.
+	_vector vFootPos = vCapsuleBottom + XMVectorSet(0.f, fStartYOffset, 0.f, 0.f);
+
+	// 3. 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤 (이후 로직은 동일)
 	_vector vPositions[5] = {
-		vFootPos + vLook * m_fColliderRadius,  // 앞
-		vFootPos + vRight * m_fColliderRadius, // 왼쪽
+		vFootPos + vLook * (m_fColliderRadius - 0.05f),  // 앞
+		vFootPos + vRight * (m_fColliderRadius - 0.05f), // 왼쪽
 		vFootPos,                              // 중앙
-		vFootPos - vRight * m_fColliderRadius, // 오른쪽
-		vFootPos - vLook * m_fColliderRadius   // 뒤
+		vFootPos - vRight * (m_fColliderRadius - 0.05f), // 오른쪽
+		vFootPos - vLook * (m_fColliderRadius - 0.05f)   // 뒤
 	};
 
 	_float fMinDistance = 3.f;  // 가장 가까운 거리 저장
 	_bool bAnyHit = false;
-
+	
 	// 5개 지점에서 각각 레이 발사
 	for (_uint i = 0; i < 5; ++i)
 	{
 		_vector vStartPos = vPositions[i];
 		_vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
-
+	
 		_float4 vHitPoint = {};
 		_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
-
+	
 		if (bHit)
 		{
 			bAnyHit = true;
 			_vector vHitPos = XMLoadFloat4(&vHitPoint);
 			_vector vDistance = vPositions[i] - vHitPos;
 			_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
-
+	
 			// 가장 가까운 거리 저장
 			if (fDistance < fMinDistance)
 				fMinDistance = fDistance;
@@ -151,9 +202,10 @@ _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 _bool CCharacter::Is_LandCollider(_float3* pNormal)
 {
 	ASSERT_CRASH(m_pColliderCom);
-	return m_pColliderCom->IsLand();
+	return m_pColliderCom->IsLand(pNormal);
 }
 
+// fDistanceGround (Ray 쏴서 땅에 닿은 거리가 매개변수로 받은 거리보다 크다면 => 땅이아니다)
 _bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
 {
 	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
@@ -264,6 +316,25 @@ _fvector CCharacter::Get_Velocity()
 	return m_pTransformCom->Get_Velocity();
 }
 
+void CCharacter::Add_Force(_fvector vForce, _float fTimeDelta)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pTransformCom->Go_Force(vForce, fTimeDelta);
+}
+
+#ifdef _DEBUG
+void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
+{
+	vRayDir = XMVector3Normalize(vRayDir);
+	_vector vEnd = XMLoadFloat3(&vEndPos);
+	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
+}
+#endif // _DEBUG
+
+
+
+
+
 #pragma endregion
 
 
@@ -282,10 +353,51 @@ _vector CCharacter::Get_LookVector()
     return vLook;
 }
 
+_vector CCharacter::Get_CameraLookVector()
+{
+	_vector vLook = XMVectorZero();
+
+	if (nullptr == m_pSpringCamera)
+		return vLook;
+
+	vLook = XMVector3Normalize(m_pSpringCamera->Get_LookVector());
+
+	return vLook;
+}
+
 _vector CCharacter::Get_LookVector_NoPitch()
 {
-    _vector vLook = XMVector3Normalize(XMVectorSetY(Get_LookVector(), 0.f));
+	_vector vLook = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vLook;
+
+    vLook = XMVector3Normalize(XMVectorSetY(Get_LookVector(), 0.f));
     return vLook;
+}
+
+_vector CCharacter::Get_RightVector()
+{
+	_vector vRight = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vRight;
+
+	vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
+
+	return vRight;
+}
+
+_vector CCharacter::Get_RightVector_NoPitch()
+{
+	_vector vRight = XMVectorZero();
+
+	if (nullptr == m_pTransformCom)
+		return vRight;
+
+	vRight = XMVector3Normalize(XMVectorSetY(m_pTransformCom->Get_State(STATE::RIGHT), 0.f));
+
+	return vRight;
 }
 
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
@@ -326,14 +438,18 @@ _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 }
 
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
     ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
-
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
-    
+	
     return IsPlayAnimationEnd;
+}
+
+void CCharacter::Start_FlyBlending(_float fDuration)
+{
+	
 }
 
 
@@ -367,6 +483,14 @@ ACTORDIR CCharacter::Calculate_Direction()
     else if (bD)       return ACTORDIR::R;
 
     return ACTORDIR::END;
+}
+
+_vector CCharacter::Get_CameraRightVector()
+{
+	ASSERT_CRASH(m_pSpringCamera);
+
+	return m_pSpringCamera->Get_RightVector_NoPitch();
+
 }
 
 _vector CCharacter::Calculate_Move_Direction(ACTORDIR eDir)
@@ -465,7 +589,7 @@ void CCharacter::Rotate_Direction(_fvector vDir)
     m_pTransformCom->LookDir(vDirFlat);
 }
 
-void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
+void CCharacter::Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
 {
     _vector vDirFlat = XMVectorSetY(vDir, 0.f);
     vDirFlat = XMVector3Normalize(vDirFlat);
@@ -474,6 +598,16 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
         return;
 
     m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
+}
+
+void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed)
+{
+
+	_vector vDirFlat = XMVector3Normalize(vDir);
+	if (XMVector3Equal(vDirFlat, XMVectorZero()))
+		return;
+
+	m_pTransformCom->LookLerp(vDirFlat, fTimeDelta, fSpeed);
 }
 
 

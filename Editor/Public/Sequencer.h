@@ -59,6 +59,26 @@ struct RampEdit : public ImCurveEdit::Delegate
 			frame.fStartFrame = 0.f;
 			mTargetCameraFrames.push_back(frame);
 		}
+		else if (ENUM_CLASS(ITEM_TYPE::ACTOR) == iType)
+		{
+			SQ_ACTOR_DATA ActorData = {};
+		}
+		else if (ENUM_CLASS(ITEM_TYPE::SCENE) == iType)
+		{
+
+		}
+		else if (ENUM_CLASS(ITEM_TYPE::SOUND) == iType)
+		{
+
+		}
+		else if (ENUM_CLASS(ITEM_TYPE::SFX) == iType)
+		{
+
+		}
+		else if (ENUM_CLASS(ITEM_TYPE::EFFECT) == iType)
+		{
+
+		}
 
 		SortValues();
 	}
@@ -66,15 +86,42 @@ struct RampEdit : public ImCurveEdit::Delegate
 	virtual ImVec2& GetMin() { return mMin; }
 	virtual unsigned int GetBackgroundColor() { return 0; }
 
-	void Update_Frame() {
+	void Update_Frame(ITEM_TYPE eType) {
 		for (size_t i = 0; i < mPoints.size(); ++i)
-			mTargetCameraFrames[i].fStartFrame = mPoints[i].x;
+		{
+			switch (eType)
+			{
+			case ITEM_TYPE::ACTION:
+				mTargetCameraFrames[i].fStartFrame = mPoints[i].x;
+				break;
+			case ITEM_TYPE::ACTOR:
+				mSQActorDatas[i].fStartFrame = mPoints[i].x;
+				break;
+			case ITEM_TYPE::SCENE:
+				mSQCameraDatas[i].fStartFrame = mPoints[i].x;
+				break;
+			case ITEM_TYPE::SFX:
+				mSQSFXDatas[i].fStartFrame = mPoints[i].x;
+				break;
+			case ITEM_TYPE::SOUND:
+				mSQAudioDatas[i].fStartFrame = mPoints[i].x;
+				break;
+			case ITEM_TYPE::EFFECT:
+				mSQEffectDatas[i].fStartFrame = mPoints[i].x;
+				break;
+			}
+		}
 	}
 
 	vector<ImVec2>		mPoints;
-	vector<CAMERA_FRAME> mTargetCameraFrames;
-	vector<_float3>		mPositions;
-	vector<_float3>		mRotations;
+
+	vector<CAMERA_FRAME>		mTargetCameraFrames;
+	vector<SQ_ACTOR_DATA>		mSQActorDatas;
+	vector<SQ_CAMERA_DATA>	mSQCameraDatas;
+	vector<SQ_SFX_DATA>			mSQSFXDatas;
+	vector<SQ_AUDIO_DATA>		mSQAudioDatas;
+	vector<SQ_EFFECT_DATA>		mSQEffectDatas;
+
 	size_t			mPointCount = {};
 	_bool			mbVisible[3];
 	ImVec2		mMin;
@@ -119,8 +166,8 @@ public:
 			case ENUM_CLASS(ITEM_TYPE::SCENE):
 				eType = ITEM_TYPE::SCENE;
 				break;
-			case ENUM_CLASS(ITEM_TYPE::SCREEN):
-				eType = ITEM_TYPE::SCREEN;
+			case ENUM_CLASS(ITEM_TYPE::SFX):
+				eType = ITEM_TYPE::SFX;
 				break;
 			case ENUM_CLASS(ITEM_TYPE::SOUND):
 				eType = ITEM_TYPE::SOUND;

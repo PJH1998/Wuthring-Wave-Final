@@ -40,13 +40,20 @@ HRESULT CMapObject_Destruction_Debris::Initialize_Clone(void* pArg)
 
 void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 {
+	if (m_IsTriggered)
+	{
+		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		m_pRigidbodyCom->Impulse(m_vImpulse);
+		m_IsTriggered = false;
+	}
+
 }
 
 void CMapObject_Destruction_Debris::Update(_float fTimeDelta)
 {
 	m_fTimeDelta += fTimeDelta;
 
-	if (m_fTimeDelta >= 3.f)
+	if (m_fTimeDelta >= 2.f)
 	{
 		m_pRigidbodyCom->IsActivate(false);
 		m_isActivate = false;
@@ -153,15 +160,13 @@ void CMapObject_Destruction_Debris::Bind_Resources()
 
 void CMapObject_Destruction_Debris::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	//m_pRigidbodyCom->IsActivate(true);
 	m_isActivate = true;
+	m_IsTriggered = true;
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	RESET_DESC* pDesc = static_cast<RESET_DESC*>(pArg);
-	//m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
-	//m_pRigidbodyCom->Impulse(pDesc->vImpulse);
+	m_vImpulse = pDesc->vImpulse;
+	
 	m_fTimeDelta = 0.f;
-	//지호형이 리지드바디의 위치를 옮기는 거 만들어주면 사용할것.
-	//m_pRigidbodyCom->
 }
 
 CMapObject_Destruction_Debris* CMapObject_Destruction_Debris::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

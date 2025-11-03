@@ -254,7 +254,7 @@ _float CCSM::Compute_Radius(const _float4* pFrustrumPoints, _vector vCenterPos )
 
 	for (_uint i = 0; i < 8; i++)
 	{
-		fDistance = XMVectorGetX(XMVectorSubtract(vCenterPos, XMLoadFloat4(&pFrustrumPoints[i])));
+		fDistance = XMVectorGetX(XMVector3Length(XMVectorSubtract(vCenterPos, XMLoadFloat4(&pFrustrumPoints[i]))));
 		fRadius = max(fRadius, fDistance);
 	}
 

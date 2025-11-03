@@ -1,4 +1,3 @@
-
 #ifndef Engine_Shader_State_h__
 #define Engine_Shader_State_h__
 

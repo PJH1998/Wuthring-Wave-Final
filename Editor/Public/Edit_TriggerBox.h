@@ -1,6 +1,7 @@
 ﻿#pragma once
-#include "C:\Users\dnheu\source\repos\Wuthering_Wave_Final\EngineSDK\Inc\GameObject.h"
+#include "GameObject.h"
 #include"Editor_Enum.h"
+
 NS_BEGIN(Engine)
 class CRigidbody;
 NS_END

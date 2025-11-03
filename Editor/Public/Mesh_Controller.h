@@ -47,7 +47,9 @@ public:
 	void UpdateSelected_FXMeshFormTag(_wstring FMMeshTag);
 
 	CEffect_Mesh::EFFECTMESH_DESC* Get_EffectMeshDesc(_wstring& EffectMeshTag);
-	CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* Get_VBMeshDesc(_wstring& VBMesTag);
+	CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* Get_VBMeshDesc(_wstring& VBMesTag);
+	void Set_EffectMeshDesc(_wstring& MeshTag, CEffect_Mesh::EFFECTMESH_DESC& MeshDesc);
+	void Set_MeshVBDesc(_wstring& MeshTag, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC& MeshVBDesc);
 
 	void Remove_Desc(const _wstring& DescTag);
 
@@ -73,17 +75,17 @@ private:
 	_int														m_iSelectedMeshVBTag = -1;
 	_bool														m_bMeshVBTag = false;
 
-	_char														m_EffectMeshTag[MAX_PATH] = {};
+	_char														m_TrailMeshTag[MAX_PATH] = {};
 	_bool														m_bTagFlag = false;
 
 	_bool														m_IsRoot = false;
 
-	map<const _wstring, CVIBuffer_Mesh::MESH_FXINSTANCE_DESC>	m_tVBMeshDesc = {};
+	map<const _wstring, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC>	m_tVBMeshDesc = {};
 	map<const _wstring, CEffect_Mesh::EFFECTMESH_DESC>			m_tEffectMeshDesc = {};
 
 	_bool														m_bSelectedMesh = false;
 	CEffect_Mesh::EFFECTMESH_DESC*								m_pSelectedEffectMeshDesc = { nullptr };
-	CVIBuffer_Mesh::MESH_FXINSTANCE_DESC*						m_pSelectedVBFXDesc = { nullptr };
+	CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC*						m_pSelectedVBFXDesc = { nullptr };
 
 	//_int														m_iSelectedParticle = 0;
 	//_bool														m_bSelectedParticle = false;

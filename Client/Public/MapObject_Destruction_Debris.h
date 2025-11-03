@@ -51,6 +51,8 @@ private:
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	CShader* m_pShaderCom = { nullptr };
 
+	_bool m_IsTriggered = { false };
+	_float3 m_vImpulse = {};
 private:
 	_float m_fTimeDelta = {};
 

@@ -19,7 +19,7 @@ HRESULT CRendererSubResource::Initialize()
 
     //SSAO
     m_iNumKernel = 16;
-    m_fRadius = 1.f;
+    m_fRadius = 3.f;
     m_fMaxDistance = 5.f;
     m_fOutDistance = 500.f;
     
@@ -115,6 +115,8 @@ HRESULT CRendererSubResource::Bind_LimitVelocity(CShader* pShader)
 {
 	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_fLimitVelocity, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
+
+	return S_OK;
 }
 
 HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)

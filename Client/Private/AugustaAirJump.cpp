@@ -31,7 +31,7 @@ void CAugustaAirJump::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eJumpType);
 
-    m_pAugusta->Set_Gravity(true);
+    m_pAugusta->Set_Gravity(false);
 
 }
 
@@ -64,6 +64,7 @@ void CAugustaAirJump::Handle_Input()
     EAugustaJumpType eJumpType = static_cast<EAugustaJumpType>(m_iCurrentAnimIdx);
 
     m_eDir = m_pAugusta->Calculate_Direction(); 
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
  
@@ -100,6 +101,13 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     // 1. 우선순위 제일 높음.
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
+
     if (m_States[DOUBLE_JUMP])
     {
         m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
@@ -137,10 +145,10 @@ void CAugustaAirJump::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_LOOP), "Jump_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_RUN_LF), "Jump_Run_LF", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_RUN_RF), "Jump_Run_RF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 5.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 5.f, 3.f); // 더블 점프
-    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f, 3.f); // 제자리 점프
+    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 5.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 5.f, 1.f); // 더블 점프
+    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f, 1.f); // 제자리 점프
 }
 
 

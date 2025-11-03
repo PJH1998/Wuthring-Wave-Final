@@ -35,10 +35,12 @@ public:
 	void							Update();
 
 private:
+
 	_float4x4						m_TransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
 	_float4x4						m_TransformMatrixes_Inv[ENUM_CLASS(D3DTS::END)] = {};
 	_float4x4						m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
 	_float4							m_vCamPos = {};
+
 
 public:
 	static		CPipeLine*		Create();

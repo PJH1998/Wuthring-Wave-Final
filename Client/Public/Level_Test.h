@@ -21,6 +21,8 @@ private:
 	void 			Ready_Layer_Player();
 	void			Ready_Dummy();
 	void			Ready_MonsterTest();
+	void			Ready_Effect();
+	void			Ready_Skybox();
 	//void Ready_Layer_Augusta();
 
 #ifdef _DEBUG

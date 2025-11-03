@@ -14,6 +14,7 @@ private:
         DASH,
         SPRINT,
         MOVE,
+		FLY,
         ATTACK,
         MOVE_U,
         MOVE_D,

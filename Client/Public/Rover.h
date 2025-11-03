@@ -87,6 +87,7 @@ public:
 	enum PARTTYPE : _uint
 	{
 		PART_SWORD = 0,
+		PART_WING = 1,
 		TYPE_END
 	};
 
@@ -133,6 +134,7 @@ public:
 #pragma endregion
 private:
 	class CRoverSword* m_pRoverSword = { nullptr };
+	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

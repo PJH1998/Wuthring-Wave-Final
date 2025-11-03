@@ -75,15 +75,15 @@ void CMapObject::Render()
 		//	m_pModelComArray[m_iLODIndex]->Render(i);
 		//}
 	}
-
-	if (m_iNumLOD <= m_iLODIndex)
-		m_iLODIndex = m_iNumLOD;
+	_uint iLODIndex = m_iLODIndex;
+	if (m_iNumLOD <= iLODIndex)
+		iLODIndex = m_iNumLOD;
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
 
-	_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+	_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
@@ -94,20 +94,20 @@ void CMapObject::Render()
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
-		if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
 			HasMask = false;
 		if (HasMask)
 		{
-			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
 
-			if (FAILED(m_pModelComArray[m_iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
 				HasNormal = false;
 		}
 
@@ -115,13 +115,13 @@ void CMapObject::Render()
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 
-		m_pModelComArray[m_iLODIndex]->Render(i);
+		m_pModelComArray[iLODIndex]->Render(i);
 	}
 }
 
 BoundingBox* CMapObject::Get_BoundingBox()
 {
-	return m_pModelComArray[0]->Get_BoundingBox();
+	return m_pBoundingBox;
 }
 
 void CMapObject::Ready_Component(void* pArg)

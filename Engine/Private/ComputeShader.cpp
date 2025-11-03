@@ -14,7 +14,6 @@ CComputeShader::CComputeShader(CComputeShader& Prototype)
     , m_CB_BindPoints{ Prototype.m_CB_BindPoints }
     , m_ThreadInfo{ Prototype.m_ThreadInfo }
 {
-
     Safe_AddRef(m_pComputeShader);
 }
 

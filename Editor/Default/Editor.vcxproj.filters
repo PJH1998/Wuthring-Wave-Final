@@ -133,6 +133,21 @@
     <Filter Include="03. GameObject\Dummy\Map">
       <UniqueIdentifier>{c0abfd4d-8622-45a6-8c1d-49ec5cf5026a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\TrailMesh_Controller">
+      <UniqueIdentifier>{efd448f7-af3a-4925-88dc-5ae7a3652045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh">
+      <UniqueIdentifier>{04a9b020-ab0c-441f-94d2-06b0a6e4d851}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Load_Controller">
+      <UniqueIdentifier>{0182cffd-05d2-48b1-832b-37a4b99f7a27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Spectrum_Controller">
+      <UniqueIdentifier>{0c131423-5c6c-48ab-bfa3-5c0f120f37cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Spectrum_Controller\Spectrum">
+      <UniqueIdentifier>{dc01c551-693d-4efd-b197-55a3163b4754}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Dummy\Target">
       <UniqueIdentifier>{022955cb-36e1-47b4-90d3-440b456680b3}</UniqueIdentifier>
     </Filter>
@@ -141,6 +156,30 @@
     </Filter>
     <Filter Include="03. GameObject\MapObject\Destruction">
       <UniqueIdentifier>{1e367e59-8695-45e4-8839-a31fb74b2d93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence">
+      <UniqueIdentifier>{3226be9e-5451-4b8f-b216-4b07b5a01ffc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Actor">
+      <UniqueIdentifier>{6509f61d-c948-4490-930a-9a3acb78e0b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Camera">
+      <UniqueIdentifier>{0348049c-4ba5-4984-a77d-03ef1f4b9e1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Audio">
+      <UniqueIdentifier>{ed778718-71c4-4e24-98a3-b46352eb56c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\SFX">
+      <UniqueIdentifier>{c97249cc-c410-4aa1-866e-1c7d8a0f8093}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Sequence\Effect">
+      <UniqueIdentifier>{c46f0d49-ab5a-47fb-b030-3debd47973e2}</UniqueIdentifier>
+	</Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller">
+      <UniqueIdentifier>{246c0645-080c-48f3-994e-e9ce1033609b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect">
+      <UniqueIdentifier>{78b70b79-18c1-4b75-b8a8-2322db63397f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -176,9 +215,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Level_Shader.h">
       <Filter>01. Level\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Level_Effect.h">
-      <Filter>01. Level\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Level_Map.h">
       <Filter>01. Level\Map</Filter>
@@ -298,8 +334,23 @@
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\TrailMesh_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Load_Controller.h">
+      <Filter>01. Level\Effect\Load_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Spectrum.h">
+      <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Sequencer.h">
       <Filter>01. Level\Camera\Sequencer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Level_Effect.h">
+      <Filter>01. Level\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Event_Scene_Edit.h">
       <Filter>97. Event</Filter>
@@ -307,13 +358,44 @@
     <ClInclude Include="..\Public\Editor_Struct.h">
       <Filter>99. Define</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_MapObject_Destruction.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    <ClInclude Include="..\Public\Effect_Rect.h">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Rect_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_TriggerBox.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\SQ_Item_Edit.h">
+      <Filter>03. GameObject\Sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Actor_Edit.h">
+      <Filter>03. GameObject\Sequence\Actor</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Camera_Edit.h">
+      <Filter>03. GameObject\Sequence\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Audio_Edit.h">
+      <Filter>03. GameObject\Sequence\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_Effect_Edit.h">
+      <Filter>03. GameObject\Sequence\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SQ_SFX_Edit.h">
+      <Filter>03. GameObject\Sequence\SFX</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Edit_TriggerBox.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\EditorProp.h">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\EditorPropWeapon.h">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -443,6 +525,18 @@
     <ClCompile Include="..\Private\EditDummy_Map.cpp">
       <Filter>03. GameObject\Dummy\Map</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller\Trail_Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\TrailMesh_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\TrailMesh_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Load_Controller.cpp">
+      <Filter>01. Level\Effect\Load_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Spectrum.cpp">
+      <Filter>01. Level\Effect\Spectrum_Controller\Spectrum</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\EditDummy_Target.cpp">
       <Filter>03. GameObject\Dummy\Target</Filter>
     </ClCompile>
@@ -452,13 +546,44 @@
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    <ClCompile Include="..\Private\Effect_Rect.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Rect_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\SQ_Item_Edit.cpp">
+      <Filter>03. GameObject\Sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Actor_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Actor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Camera_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Audio_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Audio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_Effect_Edit.cpp">
+      <Filter>03. GameObject\Sequence\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SQ_SFX_Edit.cpp">
+      <Filter>03. GameObject\Sequence\SFX</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EditorProp.cpp">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\EditorPropWeapon.cpp">
+      <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

@@ -38,8 +38,8 @@ void CSequencer::Add(_int iType)
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Sound" });
 		break;
-	case ENUM_CLASS(ITEM_TYPE::SCREEN):
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Screen" });
+	case ENUM_CLASS(ITEM_TYPE::SFX):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "SFX" });
 		break;
 	case ENUM_CLASS(ITEM_TYPE::ACTOR):
 		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Actor" });
@@ -61,8 +61,8 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 		return "Scene";
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		return "Sound";
-	case ENUM_CLASS(ITEM_TYPE::SCREEN):
-		return "Screen";
+	case ENUM_CLASS(ITEM_TYPE::SFX):
+		return "SFX";
 	case ENUM_CLASS(ITEM_TYPE::ACTOR):
 		return "Actor";
 	case ENUM_CLASS(ITEM_TYPE::EFFECT):
@@ -240,7 +240,7 @@ void CSequencer::Selectable_Item()
 
 		ImGui::End();
 
-		item.mRampEdit.Update_Frame();
+		item.mRampEdit.Update_Frame(item.eType);
 	}
 }
 

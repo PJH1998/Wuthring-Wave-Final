@@ -47,7 +47,6 @@ HRESULT CEdit_MapObject_Destruction_Piece::Initialize_Clone(void* pArg)
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_eObjectType = pDesc->eObjectType;
 
-	Save_Map_Destruction
 
 	//XMStoreFloat3(&vImpluse, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) * -100.f);
 	//m_pRigidbodyCom->Impulse(pDesc->vImpulse);
