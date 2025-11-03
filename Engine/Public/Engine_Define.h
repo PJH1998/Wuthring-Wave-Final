@@ -116,6 +116,7 @@ namespace Engine
 	const float g_fLODGap = { 400.f };
 }
 
+#define MAX_RENDER_THREAD 5
 #define MAX_DEPTH 5
 
 #include "Engine_Enum.h"

@@ -317,6 +317,9 @@
     <Filter Include="01. Utility\07. Shadow\ShadowMap">
       <UniqueIdentifier>{7722a407-534c-4be0-99ae-0976cb6c7923}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\DeferredShader">
+      <UniqueIdentifier>{c7e868cf-24a3-4e3e-8bc7-c0b0a47ea02c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -641,6 +644,9 @@
     <ClInclude Include="..\public\ShadowMap.h">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\DeferredShader.h">
+      <Filter>01. Utility\04. Component\DeferredShader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -940,6 +946,9 @@
     </ClCompile>
     <ClCompile Include="..\private\ShadowMap.cpp">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\DeferredShader.cpp">
+      <Filter>01. Utility\04. Component\DeferredShader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

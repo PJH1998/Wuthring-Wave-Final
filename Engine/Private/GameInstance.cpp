@@ -109,7 +109,7 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
 
-	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
+	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext, m_pPooling_Manager->Get_NumThread());
 	ASSERT_CRASH(m_pRenderer);
 	return S_OK;
 }
@@ -292,6 +292,10 @@ HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstr
 #pragma endregion
 
 #pragma region POOLING_MANAGER
+_uint CGameInstance::Get_NumThread()
+{
+	return m_pPooling_Manager->Get_NumThread();
+}
 HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
@@ -352,6 +356,10 @@ HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilVi
 {
 	return m_pTargetManager->Begin_MRT(strMRTTag, pDSV, isClear);
 }
+HRESULT CGameInstance::SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag)
+{
+    return m_pTargetManager->SetUp_MRT(pContext, strMRTTag);
+}
 void CGameInstance::End_MRT()
 {
 	m_pTargetManager->End_MRT();
@@ -385,7 +393,7 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 {
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
-HRESULT CGameInstance::Add_Render_StaticObject(CGameObject* pObject)
+HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
@@ -396,6 +404,14 @@ void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
 void CGameInstance::End_ScreenEffect()
 {
 	m_pRenderer->End_ScreenEffect();
+}
+void CGameInstance::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
+{
+	m_pRenderer->Add_Effects(strEffectTag, Effects);
+}
+ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex)
+{
+    return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)

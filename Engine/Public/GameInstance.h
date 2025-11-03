@@ -78,6 +78,7 @@ public:
 #pragma endregion
 
 #pragma region POOLING_MANAGER
+	_uint			Get_NumThread();
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	// Thread Work Assign
@@ -101,6 +102,7 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
+	HRESULT		SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag);
 	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 #ifdef _DEBUG
@@ -115,9 +117,11 @@ public:
 #pragma region RENDERER
 public:
 	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	HRESULT		Add_Render_StaticObject(class CGameObject* pObject);
+	HRESULT		Add_Render_StaticObject(class CStaticObject* pObject);
 	void			Begin_ScreenEffect(SFX_TYPE eType);
 	void			End_ScreenEffect();
+	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 #ifdef _DEBUG
 	void			Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);

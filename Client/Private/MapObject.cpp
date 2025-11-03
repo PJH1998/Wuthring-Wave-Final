@@ -49,7 +49,7 @@ void CMapObject::Late_Update(_float fTimeDelta)
 	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
-void CMapObject::Render()
+void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
 	//For_Test, when Object's m_iNumLOD is Lower Than m_iLODIndex Clip Operation Disable
 	
@@ -78,43 +78,44 @@ void CMapObject::Render()
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
 
-	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
-	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
-	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	ID3DX11Effect* pEffect = m_pGameInstance->Get_Shader_Effect(TEXT("Shader_Map"), iIndex);
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix", pEffect);
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW), pEffect);
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ), pEffect);
 
 	_uint iNumMesh = m_pModelComArray[iLODIndex]->Get_NumMesh();
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
+		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr, pEffect);
+		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr, pEffect);
 
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
-		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+		if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect)))
 			HasMask = false;
 		if (HasMask)
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect)))
 				HasNormal = false;
 		}
 		else
 		{
-			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
+			m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0, pEffect);
 
-			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+			if (FAILED(m_pModelComArray[iLODIndex]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0, pEffect)))
 				HasNormal = false;
 		}
 
-		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
-		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
-		m_pShaderCom->Begin(m_iShaderPassIndex);
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
+		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
 
-		m_pModelComArray[iLODIndex]->Render(i);
+		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
 	}
 }
 
@@ -148,7 +149,7 @@ void CMapObject::Ready_Component(void* pArg)
 			CRASH("FAILED");
 
 	}
-	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("FAILED");
 

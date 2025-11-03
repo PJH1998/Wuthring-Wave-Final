@@ -21,7 +21,7 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta) {};
 	virtual		void			Update(_float fTimeDelta) {};
 	virtual		void			Late_Update(_float fTimeDelta) {};
-	virtual		void			Render() {};
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) {};
 	virtual		void			Render_Shadow() {};
 	virtual		BoundingBox* Get_BoundingBox() { return nullptr; }
 

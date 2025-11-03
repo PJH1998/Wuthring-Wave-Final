@@ -14,8 +14,10 @@ public:
 	virtual HRESULT		Initialize_Prototype();
 	virtual HRESULT		Initialize_Clone(void* pArg);
 	virtual HRESULT		Render();
+	virtual HRESULT		Render(ID3D11DeviceContext* pDC);
 
 	virtual HRESULT		Bind_Resources();
+	virtual HRESULT		Bind_Resources(ID3D11DeviceContext* pDC);
 
 protected:
 	ID3D11Buffer*						m_pVB = { nullptr };
