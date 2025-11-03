@@ -333,7 +333,7 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 		}
 
 		// 글리프가 atlas에 없으면 Bake
-		if (!BakeOneGlyph(pFontInfo, cp, fFontOutlineWidth * 20.f)) // ksta : 
+		if (!BakeOneGlyph(pFontInfo, cp, fFontOutlineWidth /** 2.f*/)) // ksta : 
 			continue;
 		FTCUSTOM_FONT_GLYPH glyph = pFontInfo->mapGlyphs[cp];
 
@@ -350,8 +350,9 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 		}
 
 		// 실제 그려질 사각형 위치 계산 (bearing 적용)
-		_float x0 = penX + glyph.sOffsetX * fScale;
-		_float y0 = penY - glyph.sOffsetY * fScale;
+		_float pad = fFontOutlineWidth;
+		_float x0 = penX + (glyph.sOffsetX - pad) * fScale;
+		_float y0 = penY - (glyph.sOffsetY + pad) * fScale;
 		_float x1 = x0 + glyph.sWidth * fScale;
 		_float y1 = y0 + glyph.sHeight * fScale;
 
@@ -561,14 +562,14 @@ _bool CFont_Manager::BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint, _u
 	tFontGlyph.iCodepoint	= iCodePoint;
 	tFontGlyph.sOffsetX		= (_short)slot->bitmap_left;   // bearing X
 	tFontGlyph.sOffsetY		= (_short)slot->bitmap_top;    // bearing Y
-	tFontGlyph.sWidth		= (_short)gw;
-	tFontGlyph.sHeight		= (_short)gh;
+	tFontGlyph.sWidth		= (_short)(gw + iPadding * 2);
+	tFontGlyph.sHeight		= (_short)(gh + iPadding * 2);
 	tFontGlyph.sAdvance		= (_short)(slot->advance.x >> 6); // 픽셀 단위 advance
 
-	tFontGlyph.fU0 = (float)(x + iPadding) / pFontInfo->iAtlasW;
-	tFontGlyph.fV0 = (float)(y + iPadding) / pFontInfo->iAtlasH;
-	tFontGlyph.fU1 = (float)(x + gw + iPadding) / pFontInfo->iAtlasW;
-	tFontGlyph.fV1 = (float)(y + gh + iPadding) / pFontInfo->iAtlasH;
+	tFontGlyph.fU0 = float(x) / pFontInfo->iAtlasW;
+	tFontGlyph.fV0 = float(y) / pFontInfo->iAtlasH;
+	tFontGlyph.fU1 = float(x + iPadding * 2 + gw) / pFontInfo->iAtlasW;
+	tFontGlyph.fV1 = float(y + iPadding * 2 + gh) / pFontInfo->iAtlasH;
 
 	vecGlyphMap[iCodePoint] = tFontGlyph;
 	return true;
