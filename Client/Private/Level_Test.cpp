@@ -157,6 +157,7 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.fSpeedPerSec = 10.f;
     MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
         CRASH("Failed Ready MonsterTest");
@@ -168,6 +169,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel),TEXT("Prototype_GameObject_Ggobul"),

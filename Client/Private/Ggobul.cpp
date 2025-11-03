@@ -27,10 +27,12 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{
-		m_pRigidBodyCom[i]->IsActivate(false);
+		m_pAttackVolume[i]->IsActivate(false);
 	}
-
+	m_pAttackTransform = m_pModelCom->Get_BoneMatrixPtr("HitCase");
 	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
+	//풀링 오브젝트 자체적으로 activate 끄기
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -54,7 +56,7 @@ void CGgobul::Update(_float fTimeDelta)
 	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
 	XMStoreFloat4x4(&m_BoneCombindMatrix, NonScaleMatrix);
-	m_pRigidBodyCom[m_eType]->Update_Rigidbody(XMLoadFloat4x4(&m_BoneCombindMatrix), fTimeDelta);
+	m_pAttackVolume[m_eType]->Update_Rigidbody(XMLoadFloat4x4(&m_BoneCombindMatrix), fTimeDelta);
 }
 
 void CGgobul::Late_Update(_float fTimeDelta)
@@ -87,7 +89,7 @@ void CGgobul::Render()
 		m_pModelCom->Render(i);
 	}
 #ifdef _DEBUG
-	m_pRigidBodyCom[m_eType]->Render();
+	m_pAttackVolume[m_eType]->Render();
 #endif
 }
 
@@ -110,7 +112,7 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 	for (_uint i = 0; i < GGOBULTYPE::END; ++i)
 	{
-		m_pRigidBodyCom[i]->IsActivate(false);
+		m_pAttackVolume[i]->IsActivate(false);
 	}
 	if (m_strAnimKey == "SAttack03")
 		//				  body, down,  hammer, head, knife, fx
@@ -170,10 +172,10 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::HEAD]), &RigidbodyDesc)))
+		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HEAD]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
-	m_pRigidBodyCom[GGOBULTYPE::HEAD]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pAttackVolume[GGOBULTYPE::HEAD]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
 
@@ -187,10 +189,10 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::HAMMER]), &RigidbodyDesc)))
+		TEXT("Com_Rigidbody_Hammer"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HAMMER]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
-	m_pRigidBodyCom[GGOBULTYPE::HAMMER]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pAttackVolume[GGOBULTYPE::HAMMER]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
 
@@ -204,32 +206,18 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pRigidBodyCom[GGOBULTYPE::KNIFE]), &RigidbodyDesc)))
+		TEXT("Com_Rigidbody_Knife"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::KNIFE]), &RigidbodyDesc)))
 		CRASH("Rigidbody");
 
-	m_pRigidBodyCom[GGOBULTYPE::KNIFE]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pAttackVolume[GGOBULTYPE::KNIFE]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
-}
-
-void CGgobul::Register_AllNotifies(const _string& strFolderPath)
-{
-	ASSERT_CRASH(m_pModelCom);
-	auto colliderCallback = [this](const _wstring& tag, bool active) {
-		this->Collider_Active(tag, active);
-		};
-
-	auto effectCallBack = [this](const _wstring& tag) {
-		this->Effect_Active(tag);
-		};
-
-	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
 }
 
 void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
 	if(wStrColliderTag == L"Attack Trig")
-		m_pRigidBodyCom[m_eType]->IsActivate(Isactive);
+		m_pAttackVolume[m_eType]->IsActivate(Isactive);
 }
 
 void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
@@ -274,13 +262,13 @@ void CGgobul::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pShaderCom);
-	Safe_Release(m_pComputeShaderCom);
+	//Safe_Release(m_pShaderCom);
+	//Safe_Release(m_pComputeShaderCom);
 	Safe_Release(m_pAnimMachineCom);
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{
-		Safe_Release(m_pRigidBodyCom[i]);
+		Safe_Release(m_pAttackVolume[i]);
 	}
 
-	Safe_Release(m_pModelCom);
+	//Safe_Release(m_pModelCom);
 }

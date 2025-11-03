@@ -146,6 +146,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Ggobul"),
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Ggobul/Ggobul.dat"))))
 		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Ggobul/Animation/Ggobul_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
 	// Prototype_GameObject_Ggobul
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
 		CGgobul::Create(m_pDevice, m_pContext))))

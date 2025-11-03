@@ -143,7 +143,7 @@ void CAnimationActor::Update(_float fTimeDelta)
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, true, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, false, true, true, 1.f);
 
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }

@@ -46,12 +46,12 @@ public:
 
 	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
-	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
 private:
-	CComputeShader*		m_pComputeShaderCom = { nullptr };
-	CShader*			m_pShaderCom = { nullptr };
-	CModel*				m_pModelCom = { nullptr };
-	CRigidbody*			m_pRigidBodyCom[GGOBULTYPE::END] = {nullptr,};
+	//CComputeShader*		m_pComputeShaderCom = { nullptr };
+	//CShader*			m_pShaderCom = { nullptr };
+	//CModel*				m_pModelCom = { nullptr };
+	CRigidbody*			m_pAttackVolume[GGOBULTYPE::END] = {nullptr,};
 	CAnimMachine*		m_pAnimMachineCom = { nullptr };
 
 	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
@@ -72,7 +72,6 @@ private:
 private:
 	void			Bind_Resources();
 	void			Ready_Component(GGOBUL_DESC* pDesc);
-	void			Register_AllNotifies(const _string& strFolderPath);
 	void			OnCollide_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 public:
 	static CGgobul* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

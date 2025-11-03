@@ -45,6 +45,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	//Ready_PartObjects(pDesc);
 	Ready_Component(pDesc);
 
+	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_iHP = 1;
 	m_fParalysisAcc = 5.f;
 	return S_OK;
@@ -174,7 +175,7 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 {
 	size_t Index = wStrObjectTag.find(TEXT("|"));
 	_wstring strTypeTag = wStrObjectTag.substr(0, Index);
-	_wstring strAnimTag = wStrObjectTag.substr(Index);
+	_wstring strAnimTag = wStrObjectTag.substr(Index + 1);
 	if(strTypeTag == TEXT("GGOBUL"))
 	{
 		CGgobul::GGOBUL_RESET Desc{};
@@ -185,7 +186,7 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		Desc.strPatternKey = WStringToString(strAnimTag);
 		_matrix WorldMatrix;
 		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
-		_vector vRight = XMVector3Cross(vLook, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
 		_vector vUp = XMVector3Cross(vLook, vRight);
 		WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
 		WorldMatrix.r[ENUM_CLASS(STATE::UP)] = vUp;
@@ -416,8 +417,12 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	_bool Result = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
-	if(Result)
+	if (iIndex == 2)
+		return true;
+	else
+		return false;
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	if(bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
 		//if (iIndex == 2)
@@ -430,7 +435,7 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 		//	//m_pGameInstance->Spawn_PoolingObject()
 		//}
 	}
-	return Result;
+	return bResult;
 }
 
 _bool CMonsterTest::Back()
