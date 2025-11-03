@@ -214,6 +214,9 @@
     <Filter Include="03. GameObject\Weapon\Common">
       <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\FXRect">
+      <UniqueIdentifier>{caa502bb-f52f-4f86-998f-d40a1855a591}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -496,6 +499,9 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
+    <ClInclude Include="..\Public\Effect_Rect.h">
+      <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -747,6 +753,9 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    <ClCompile Include="..\Private\Effect_Rect.cpp">
+      <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

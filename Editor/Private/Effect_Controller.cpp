@@ -825,6 +825,27 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
             jsonStream << TrailMeshJson.dump(2);
             jsonStream.close();
         }
+		if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::RECT)
+		{
+			_string RectPath = {};
+			CEffect_Rect::FXRECT_DESC* pRectDesc = {};
+
+			pRectDesc = m_pRect_Controller->Get_RectDesc(Prefab->second.FrameDesc[i].strChildrenTag);
+
+			RectPath = DefaultPath;
+			RectPath += "/FXRect/";
+			RectPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
+			RectPath += ".json";
+
+			ofstream jsonStream(RectPath);
+
+			json RectJson;
+
+			Rect_To_Json(RectJson, pRectDesc);
+
+			jsonStream << RectJson.dump(2);
+			jsonStream.close();
+		}
     }
 }
 
@@ -1116,6 +1137,41 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
     TrailMesh["LifeTime"] = LifeTimeJson;
 }
 
+void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRectDesc)
+{
+	Rect["MyTag"] = WStringToString(pRectDesc->strMyTag);
+	Rect["MyType"] = pRectDesc->eMyType;
+	Rect["Root"] = pRectDesc->IsRootOn;
+
+	Rect["TextureTag"] = WStringToString(pRectDesc->strTextureTag);
+
+	Rect["ShaderPass"] = pRectDesc->iShaderPass;
+
+	Rect["SweepSpeed"] = pRectDesc->fSweepSpeed;
+	Rect["SweepSoft"] = pRectDesc->fSoft;
+
+	Rect["SizeX"] = pRectDesc->fXSize;
+	Rect["SizeY"] = pRectDesc->fYSize;
+
+	json PosJson = json::array();
+	PosJson.push_back(pRectDesc->vPos.x);
+	PosJson.push_back(pRectDesc->vPos.y);
+	PosJson.push_back(pRectDesc->vPos.z);
+	Rect["Position"] = PosJson;
+
+	json LifeTimeJson = json::array();
+	LifeTimeJson.push_back(pRectDesc->vLifeTime.x);
+	LifeTimeJson.push_back(pRectDesc->vLifeTime.y);
+	Rect["LifeTime"] = LifeTimeJson;
+
+	json ColorJson = json::array();
+	ColorJson.push_back(pRectDesc->vColor.x);
+	ColorJson.push_back(pRectDesc->vColor.y);
+	ColorJson.push_back(pRectDesc->vColor.z);
+	ColorJson.push_back(pRectDesc->vColor.w);
+	Rect["Color"] = ColorJson;
+}
+
 void CEffect_Controller::Load_Prefab()
 {
     CEffect_Prefab::PREFAB_DESC PrefabDesc = {};
@@ -1160,6 +1216,11 @@ void CEffect_Controller::Load_Prefab()
         {
             Load_TrailMesh(FrameDesc.strChildrenTag);
         }
+
+		if (FrameDesc.eChildrenType == EFFECT_TYPE::RECT)
+		{
+			Load_FXRect(FrameDesc.strChildrenTag);
+		}
     }
 }
 
@@ -1216,6 +1277,18 @@ void CEffect_Controller::Load_TrailMesh(const _wstring& TrailMeshTag)
     m_pSelectedPrefab->Add_Children(&TrailDesc, EFFECT_TYPE::TRAIL);
 
     m_pTrailMesh_Controller->Set_TrailMeshDesc(Tag, TrailDesc);
+}
+
+void CEffect_Controller::Load_FXRect(const _wstring& RectTag)
+{
+	CEffect_Rect::FXRECT_DESC RectDesc = {};
+	_wstring Tag = RectTag;
+
+	m_pLoad_Controller->Get_FXRect_Desc(Tag, RectDesc);
+
+	m_pSelectedPrefab->Add_Children(&RectDesc, EFFECT_TYPE::RECT);
+
+	m_pRect_Controller->Set_RectDesc(Tag, RectDesc);
 }
 
 void CEffect_Controller::Save_SelectedChildren_To_Json()
@@ -1344,6 +1417,27 @@ void CEffect_Controller::Save_SelectedChildren_To_Json()
                 JsonStream << TrailJson.dump(2);
                 JsonStream.close();
             }
+			else if (m_IsRectEffect)
+			{
+				//트레일저장
+				CEffect_Rect::FXRECT_DESC* pRectDesc = {};
+
+				pRectDesc = m_pRect_Controller->Get_RectDesc(m_strChildrenTag);
+
+				_string RectPath = {};
+				RectPath = strFolderPath;
+				RectPath += "/FXRect/";
+				RectPath += WStringToString(m_strChildrenTag);
+				RectPath += ".json";
+
+				ofstream JsonStream(RectPath);
+				json RectJson;
+
+				Rect_To_Json(RectJson, pRectDesc);
+
+				JsonStream << RectJson.dump(2);
+				JsonStream.close();
+			}
         }
 
         ImGuiFileDialog::Instance()->Close();
@@ -1481,6 +1575,27 @@ void CEffect_Controller::Load_Children_To_Json()
 
                 Load_Children_To_PrefabDesc(TrailMeshTag, eChildrenType);
             }
+
+			//렉트 읽기
+			if (eChildrenType == EFFECT_TYPE::RECT)
+			{
+				_string FXRect = {};
+				FXRect = strFolderPath;
+				FXRect += "/FXRect/";
+				FXRect += strChildrenTag;
+				FXRect += ".json";
+
+				_wstring FXRectTag = StringToWString(strChildrenTag);
+
+				m_pLoad_Controller->Load_FXRect_FromJson(FXRect, FXRectTag);
+
+				Load_FXRect(FXRectTag);
+
+				m_pLoad_Controller->Reset_Load();
+
+				Load_Children_To_PrefabDesc(FXRectTag, eChildrenType);
+			}
+
             ImGuiFileDialog::Instance()->Close();
         }
     }

@@ -47,15 +47,16 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });w
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	
+	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
-	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     return S_OK;
 }
 

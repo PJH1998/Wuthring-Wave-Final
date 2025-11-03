@@ -402,7 +402,7 @@ void CAnimationActor::Render_Detail()
 
 	_bool IsChanged = { false };
 
-	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LCONTROL))
+	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LALT))
 	{
 		IsChanged = true;
 		m_IsPlayAnimation = !m_IsPlayAnimation;

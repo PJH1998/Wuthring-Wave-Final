@@ -9,6 +9,13 @@ vector g_vCamPosition;
 
 vector g_vColor;
 
+float g_fXSize;
+float g_fYSize;
+
+float g_Sweep;      // 0 -> 1
+float g_Soft;       //
+
+
 struct VS_IN
 {
     float3 vPosition : POSITION;
@@ -46,8 +53,8 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
     vector vRight, vUp, vLook;
     
     vLook = g_vCamPosition - In[0].vPosition;
-    vRight = normalize(vector(cross(float3(0.f, 1.f, 0.f), vLook.xyz), 0.f)) * 1 * 0.5f;
-    vUp = normalize(vector(cross(vLook.xyz, vRight.xyz), 0.f)) * 1 * 0.5f;
+    vRight = normalize(vector(cross(float3(0.f, 1.f, 0.f), vLook.xyz), 0.f)) * g_fXSize * 0.5f;
+    vUp = normalize(vector(cross(vLook.xyz, vRight.xyz), 0.f)) * g_fYSize * 0.5f;
     
     matrix matVP = mul(g_ViewMatrix, g_ProjMatrix);
     
@@ -94,10 +101,10 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    //if (Out.vDiffuse.a < 0.2f)
-    //    discard;
+    if (Out.vDiffuse.r < 0.2f)
+        discard;
 
-    //Out.vDiffuse *= g_vColor;
+    Out.vDiffuse *= g_vColor;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -106,6 +113,67 @@ PS_OUT PS_MAIN(PS_IN In)
     
     return Out;
 }
+
+PS_OUT PS_TEST(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(ClampSampler, In.vTexcoord);
+    
+    if (Out.vDiffuse.r < 0.25f)
+        discard;
+    
+    float fCenter = In.vTexcoord - (0.5, 0.5);
+    
+    float fCircle = length(fCenter) / 0.5f;
+    
+    float fVisible = smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
+    
+    Out.vDiffuse *= fVisible;
+    
+    if(Out.vDiffuse.a < 0.25f)
+        discard;
+    
+    Out.vDiffuse *= g_vColor;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    return Out;
+}
+
+PS_OUT PS_TESTA(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(ClampSampler, In.vTexcoord);
+    
+    if (Out.vDiffuse.r < 0.25f)
+        discard;
+    
+    float fCenter = In.vTexcoord - (0.5, 0.5);
+    
+    float fCircle = length(fCenter) / 0.5f;
+    
+    float fVisible = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
+    
+    Out.vDiffuse *= fVisible;
+    
+    if (Out.vDiffuse.r < 0.2f)
+        discard;
+    
+    Out.vDiffuse *= g_vColor;
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    return Out;
+}
+
 
 technique11 DefaultTechnique
 {
@@ -118,5 +186,49 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_MAIN();
+    }
+ 
+    pass OutPass
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_TEST();
+    }
+
+    pass InPass
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_TESTA();
+    }
+    
+    pass BlendOut
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_TEST();
+    }
+
+    pass BlendIn
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_TESTA();
     }
 }

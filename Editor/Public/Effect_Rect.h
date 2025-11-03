@@ -18,11 +18,16 @@ public:
 		_wstring strTextureTag;
 		//_wstring strVIBufferTag;
 
-		_int	fShaderPass = 0;
-		_float3	vSize = { 1.f, 1.f, 1.f };
+		_float	fSweepSpeed = 1.f;
+		_float	fSoft = 0.3f;
+
+		_float	fXSize = 1.f;
+		_float	fYSize = 1.f;
+
+		_int	iShaderPass = 0;
 		_float3 vPos = { 0.f, 0.f, 0.f };
-		_float4 vColor = { 0.f, 0.f, 0.f, 0.f };
-		_float2	vLifeTime = { 0.f, 10.f};
+		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
+		_float2	vLifeTime = { 0.f, 10.f };
 
 	}FXRECT_DESC;
 
@@ -38,19 +43,19 @@ public:
 	virtual void Update(_float fTimeDelta);
 	virtual void Late_Update(_float fTimeDelta);
 	virtual void Render();
-	
+
 public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
 	void Root_Transform(_fmatrix WorldMatrix);
 	void Bind_CS_SpriteInfo();
-	
+
 
 private:
-	CShader*					m_pShaderCom = { nullptr };
-	CTexture*					m_pTextureCom = { nullptr };
-	CVIBuffer_Point*	m_pVIBufferCom = { nullptr };
+	CShader* m_pShaderCom = { nullptr };
+	CTexture* m_pTextureCom = { nullptr };
+	CVIBuffer_Point* m_pVIBufferCom = { nullptr };
 
 	//FXRECT_DESC					m_tDesc = {};
 
@@ -58,6 +63,13 @@ private:
 	_float3						m_vPos = {};
 	_float4						m_vColor = {};
 	_float2						m_vLifeTime = {};
+
+	_float						m_fXSize = {};
+	_float						m_fYSize = {};
+
+	_float						m_fSweep = 0.f;
+	_float						m_fSweepSpeed = {};
+	_float						m_fSoft = {};
 
 private:
 	HRESULT Ready_Components(FXRECT_DESC& Desc);
