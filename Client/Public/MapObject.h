@@ -11,7 +11,7 @@ NS_BEGIN(Client)
 class CMapObject final: public CStaticObject
 {
 public:
-	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, END };
+	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, NONRIGID, END };
 
 	typedef struct tagMapLoad
 	{
@@ -21,6 +21,8 @@ public:
 		_float4x4* WorldMatrix = { nullptr };
 		OBJECTTYPE eObjectType;
 		_uint iLevel = {};
+		_float3 vBoundingPos;
+		_float3 vBoundingExtends;
 	}MAP_LOAD;
 
 private:
@@ -40,6 +42,7 @@ public:
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		BoundingBox* Get_BoundingBox()override;
 
 private:
 	CShader* m_pShaderCom = { nullptr };

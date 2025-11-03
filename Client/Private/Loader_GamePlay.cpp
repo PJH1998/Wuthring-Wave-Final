@@ -18,7 +18,7 @@
 
 
 #pragma region PLAYER
-
+#include "Wing.h"
 #include "StateMachine.h"
 
 // Augusta
@@ -55,7 +55,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
-
+	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     return S_OK;
 }
 
@@ -68,9 +68,10 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
 	cout << "Model" << endl;
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
 
     return S_OK;
 }
@@ -105,6 +106,27 @@ HRESULT CLoader_GamePlay::Load_Player()
 		, wStrControllerTag
 		, CPlayer::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+
+
+#pragma region COMMON 객체 WING
+	_wstring wStrModelTag = L"Prototype_Component_Model_Wing";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Wing/Wing.dat";
+	_float fSize = 0.01f;
+	//fSize = 0.0001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Wing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+#pragma endregion
 
 	return S_OK;
 }
@@ -343,6 +365,15 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Effect()
+{
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	return S_OK;
 }

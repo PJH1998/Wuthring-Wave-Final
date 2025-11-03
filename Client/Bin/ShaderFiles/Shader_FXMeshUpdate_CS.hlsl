@@ -1,4 +1,3 @@
-// --- Resources (CModel::Ready_GPU_Buffers에서 생성한 버퍼들) ---
 #define THREAD_X 64
 #define THREAD_Y 1
 #define THREAD_Z 1

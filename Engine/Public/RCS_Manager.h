@@ -12,7 +12,7 @@ private:
 	typedef map<const _wstring, CRendererCS*> RCS;
 
 private:
-	CRCS_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CRCS_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRCS_Manager() = default;
 
 public:

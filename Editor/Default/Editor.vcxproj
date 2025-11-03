@@ -176,15 +176,19 @@
     <ClInclude Include="..\public\EditDummy_Wolf.h" />
     <ClInclude Include="..\Public\EditorApp.h" />
     <ClInclude Include="..\Public\EditorPch.h" />
+    <ClInclude Include="..\Public\EditorPropWeapon.h" />
     <ClInclude Include="..\Public\Editor_Define.h" />
     <ClInclude Include="..\Public\Editor_Enum.h" />
     <ClInclude Include="..\Public\Editor_Struct.h" />
     <ClInclude Include="..\Public\Edit_Brush.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Sonora.h" />
+    <ClInclude Include="..\Public\Edit_TriggerBox.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
     <ClInclude Include="..\Public\Effect_Mesh.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
+    <ClInclude Include="..\Public\Effect_Rect.h" />
     <ClInclude Include="..\Public\Event_Level.h" />
     <ClInclude Include="..\Public\Event_Scene_Edit.h" />
     <ClInclude Include="..\Public\Interface_Edit.h" />
@@ -199,18 +203,23 @@
     <ClInclude Include="..\Public\Edit_MapObject.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Instance.h" />
     <ClInclude Include="..\Public\Edit_LightObject.h" />
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction.h" />
-    <ClInclude Include="..\Public\Edit_Map_Object_Destruction_Piece.h" />
+    <ClInclude Include="..\Public\Load_Controller.h" />
+    <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h" />
     <ClInclude Include="..\Public\Mesh_Controller.h" />
     <ClInclude Include="..\Public\Map_Interface.h" />
     <ClInclude Include="..\Public\ModelLoader.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\Particle_Controller.h" />
     <ClInclude Include="..\Public\Editor_Define_UI.h" />
+    <ClInclude Include="..\Public\Rect_Controller.h" />
+    <ClInclude Include="..\Public\EditorProp.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
     <ClInclude Include="..\public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\public\Shader_Interface.h" />
+    <ClInclude Include="..\Public\Spectrum.h" />
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
+    <ClInclude Include="..\Public\TrailMesh_Controller.h" />
+    <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -236,12 +245,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Private\EditorPropWeapon.cpp" />
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp" />
+    <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />
     <ClCompile Include="..\Private\Effect_Mesh.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
+    <ClCompile Include="..\Private\Effect_Rect.cpp" />
     <ClCompile Include="..\Private\Interface_Edit.cpp" />
     <ClCompile Include="..\Private\Level_Animation.cpp" />
     <ClCompile Include="..\Private\Level_Camera.cpp" />
@@ -254,17 +267,22 @@
     <ClCompile Include="..\Private\Edit_MapObject.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\Edit_LightObject.cpp" />
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction.cpp" />
-    <ClCompile Include="..\Private\Edit_Map_Object_Destruction_Piece.cpp" />
+    <ClCompile Include="..\Private\Load_Controller.cpp" />
+    <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp" />
     <ClCompile Include="..\Private\Mesh_Controller.cpp" />
     <ClCompile Include="..\Private\Map_Interface.cpp" />
     <ClCompile Include="..\Private\ModelLoader.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\Particle_Controller.cpp" />
+    <ClCompile Include="..\Private\Rect_Controller.cpp" />
+    <ClCompile Include="..\Private\EditorProp.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />
     <ClCompile Include="..\private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\private\Shader_Interface.cpp" />
+    <ClCompile Include="..\Private\Spectrum.cpp" />
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
+    <ClCompile Include="..\Private\TrailMesh_Controller.cpp" />
+    <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

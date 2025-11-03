@@ -2,18 +2,18 @@
 #include "AugustaBayonet.h"
 
 CAugustaBayonet::CAugustaBayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CWeapon{ pDevice, pContext }
+    : CProp{ pDevice, pContext }
 {
 }
 
 CAugustaBayonet::CAugustaBayonet(const CPartObject& Prototype)
-    : CWeapon(Prototype )
+    : CProp(Prototype )
 {
 }
 
 HRESULT CAugustaBayonet::Initialize_Prototype()
 {
-    if (FAILED(CWeapon::Initialize_Prototype()))
+    if (FAILED(CProp::Initialize_Prototype()))
         return E_FAIL;
 
     return S_OK;
@@ -21,7 +21,7 @@ HRESULT CAugustaBayonet::Initialize_Prototype()
 
 HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
 {
-    WEAPON_DESC* pDesc = static_cast<WEAPON_DESC*>(pArg);
+    PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
 
     if (FAILED(CPartObject::Initialize_Clone(pDesc)))
@@ -37,18 +37,16 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
 
 void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
-    CWeapon::Priority_Update(fTimeDelta);
+    CProp::Priority_Update(fTimeDelta);
 }
 
 void CAugustaBayonet::Update(_float fTimeDelta)
 {
-    CWeapon::Update(fTimeDelta);
+	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
+	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
+    CProp::Update(fTimeDelta);
 
-    // Last :  Combined ��� �ʱ�ȭ
-    XMStoreFloat4x4(&m_CombinedMatrix,
-        m_pTransformCom->Get_WorldMatrix() *
-        XMLoadFloat4x4(m_pSocketMatrix) *
-        m_pParentTransform->Get_WorldMatrix());
+  
 
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
     m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
@@ -56,12 +54,17 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
+	// Combined Matrix 
+	XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		XMLoadFloat4x4(m_pSocketMatrix) *
+		m_pParentTransform->Get_WorldMatrix());
 
-    CWeapon::Late_Update(fTimeDelta);
+    CProp::Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 
@@ -94,10 +97,10 @@ void CAugustaBayonet::Render()
 
 void CAugustaBayonet::Activate(_bool IsActivate)
 {
-	CWeapon::Activate(IsActivate);
+	CProp::Activate(IsActivate);
 }
 
-void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
+void CAugustaBayonet::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -126,7 +129,7 @@ void CAugustaBayonet::Ready_Components(const WEAPON_DESC* pDesc)
         CRASH("Rigidbody");
 }
 
-void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)
+void CAugustaBayonet::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -136,7 +139,7 @@ void CAugustaBayonet::Ready_Variables(const WEAPON_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CAugustaBayonet::Ready_Positions(const WEAPON_DESC* pDesc)
+void CAugustaBayonet::Ready_Positions(const PROP_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -179,5 +182,5 @@ CGameObject* CAugustaBayonet::Clone(void* pArg)
 
 void CAugustaBayonet::Free()
 {
-    CWeapon::Free();
+    CProp::Free();
 }

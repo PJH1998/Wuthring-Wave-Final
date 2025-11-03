@@ -16,11 +16,13 @@ CVIBuffer_Point_Instance::CVIBuffer_Point_Instance(const CVIBuffer_Point_Instanc
 	, m_pSpeedCBBuffer { Prototype.m_pSpeedCBBuffer }
 	, m_pSRV { Prototype.m_pSRV }
 	, m_pSRVBuffer { Prototype.m_pSRVBuffer}
+	, m_pDefaultUAVBufer { Prototype.m_pDefaultUAVBufer }
 {
 	Safe_AddRef(m_pOptionCBBuffer);
 	Safe_AddRef(m_pSpeedCBBuffer);
 	Safe_AddRef(m_pSRVBuffer);
 	Safe_AddRef(m_pSRV);
+	Safe_AddRef(m_pDefaultUAVBufer);
 }
 
 HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDesc)
@@ -36,7 +38,6 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_iVertexStride = sizeof(VTXPOS);
 	m_iNumVertexBuffers = 2;
 	m_ePrimitiveType = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-
 
 	D3D11_BUFFER_DESC		VBDesc{};
 	VBDesc.ByteWidth = m_iNumVertices * m_iVertexStride;
@@ -66,44 +67,108 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	m_VBInstanceDesc.StructureByteStride = m_iInstanceVertexStride;
 
 	m_pVBInstanceVertices = new VTXINSTANCE_PARTICLE[m_iNumInstance];
-	m_pSpeeds = new _float[m_iNumInstance];
+	//m_pSpeeds = new _float[m_iNumInstance];
 
 	PARTICLE_SRV* pSRV = new PARTICLE_SRV[m_iNumInstance];
 
-	for (size_t i = 0; i < m_iNumInstance; i++)
+	if (pPointDesc->IsSpawnBox)
 	{
-		VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
+		for (size_t i = 0; i < m_iNumInstance; i++)
+		{
+			VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
 
-		_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
-		_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
-		m_pSpeeds[i] = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+			_float		fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
+			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
 
-		pSRV[i].fSpeed = m_pSpeeds[i];
+			pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+			pSRV[i].fDelay = pPointDesc->fDelay.y * (i + 1);
 
-		pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
-		pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
-		pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
-		pInstanceVertices[i].vTranslation = _float4(
-			m_pGameInstance->Rand(pPointDesc->vCenter.x - pPointDesc->vRange.x * 0.5f, pPointDesc->vCenter.x + pPointDesc->vRange.x * 0.5f),
-			m_pGameInstance->Rand(pPointDesc->vCenter.y - pPointDesc->vRange.y * 0.5f, pPointDesc->vCenter.y + pPointDesc->vRange.y * 0.5f),
-			m_pGameInstance->Rand(pPointDesc->vCenter.z - pPointDesc->vRange.z * 0.5f, pPointDesc->vCenter.z + pPointDesc->vRange.z * 0.5f),
-			1.f
-		);
+			pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
+			pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
+			pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
+			pInstanceVertices[i].vTranslation = _float4(
+				m_pGameInstance->Rand(pPointDesc->vCenter.x - pPointDesc->vRange.x * 0.5f, pPointDesc->vCenter.x + pPointDesc->vRange.x * 0.5f),
+				m_pGameInstance->Rand(pPointDesc->vCenter.y - pPointDesc->vRange.y * 0.5f, pPointDesc->vCenter.y + pPointDesc->vRange.y * 0.5f),
+				m_pGameInstance->Rand(pPointDesc->vCenter.z - pPointDesc->vRange.z * 0.5f, pPointDesc->vCenter.z + pPointDesc->vRange.z * 0.5f),
+				1.f
+			);
 
-		//_float3	vPivot;
-		//_float fSpeed;
-		//_float fLifeTime;
-		//_bool IsLoop;
+			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
 
-		//_float fSpreadWeight = 0;
-		//_float fDropWeight = 0;
-		//_float fRotationWeight = 0;
-
-
-		pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
-
-		pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+		}
 	}
+	else if (pPointDesc->IsSpawnRing)
+	{
+	
+		for (size_t i = 0; i < m_iNumInstance; i++)
+		{
+			VTXINSTACNE_FXMESH* pInstanceVertices = static_cast<VTXINSTACNE_FXMESH*>(m_pVBInstanceVertices);
+
+			_float fScale = m_pGameInstance->Rand(pPointDesc->vSize.x, pPointDesc->vSize.y);
+
+			pSRV[i].fSpeed = m_pGameInstance->Rand(pPointDesc->vSpeed.x, pPointDesc->vSpeed.y);
+
+			//링의 반지름 범위 최소, 최대
+			_float fMin = pPointDesc->fRmin;
+			_float fMax = pPointDesc->fRmax;
+
+			_float fAngle = {};
+			if (!pPointDesc->IsRingAngle)
+			{
+				//센터 기준 X,Z를 원형으로 퍼지게 해주기 위해 앵글을 0 ~ 360도가 나오게 설정.
+				fAngle = m_pGameInstance->Rand(0.f, XM_2PI);
+			}
+			else
+			{
+				_int Index = i;
+				_float fStartRadian = XMConvertToRadians(pPointDesc->fDegreeAngle.x);
+				_float fSweepRadian = XMConvertToRadians(pPointDesc->fDegreeAngle.y);
+
+				fAngle = fStartRadian + ((_float)Index / (m_iNumInstance - 1)) * fSweepRadian;
+			}
+			//반지름 최소,최대에 곱해 MIN~MAX의 랜덤값이 나올 수 있게 해주기 위한 값.
+			_float fRatio = m_pGameInstance->Rand(0.f, 1.f);
+
+			//sqrt는 제곱근을 계산해주는 함수, sqrt(4) -> 2 / 여기서 나온 Radius가 실질적 반지름의 랜덤 값임.
+			_float fRadius = sqrt(fRatio * ((fMax * fMax) - (fMin * fMin)) + (fMin * fMin));
+
+			//Angle의 값은 0 ~ 360도, / 0이면 cos값 1, sin 0 / 180이면 -1 , 0 / 즉, 이값으로 왼쪽 오른쪽 위 아래 방향이 정해지는 것.
+			_float fPosX = fRadius * cosf(fAngle);
+			_float fPosZ = fRadius * sinf(fAngle);
+
+			pInstanceVertices[i].vTranslation = _float4(
+				pPointDesc->vCenter.x + fPosX,
+				pPointDesc->vCenter.y,                   //센터값일단 평평하게 설정, 랜덤값 주고싶으면 값 하나 더 받아와야함.
+				pPointDesc->vCenter.z + fPosZ,
+				1.f
+			);
+
+			pInstanceVertices[i].vRight = _float4(fScale, 0.f, 0.f, 0.f);
+			pInstanceVertices[i].vUp = _float4(0.f, fScale, 0.f, 0.f);
+			pInstanceVertices[i].vLook = _float4(0.f, 0.f, fScale, 0.f);
+
+			_float		fLifeTime = m_pGameInstance->Rand(pPointDesc->vLifeTime.x, pPointDesc->vLifeTime.y);
+			pInstanceVertices[i].vLifeTime = _float2(0.f, fLifeTime);
+
+			pSRV[i].DefaultPos = pInstanceVertices[i].vTranslation;
+		}
+	}
+
+	//초기화 전용 UAV버퍼 데이터, 클론끼리 공유해도 상관없음 초기값으로 되돌려주기 위한 값.
+	D3D11_BUFFER_DESC Default_UAV_BufferDesc = {};
+	Default_UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	Default_UAV_BufferDesc.ByteWidth = Default_UAV_BufferDesc.StructureByteStride * m_iNumInstance;
+	Default_UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	Default_UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	Default_UAV_BufferDesc.CPUAccessFlags = 0;
+	Default_UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
+	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
+
+	if (FAILED(m_pDevice->CreateBuffer(&Default_UAV_BufferDesc, &UAVInitialDesc, &m_pDefaultUAVBufer)))
+		return E_FAIL;
 	
 	D3D11_BUFFER_DESC SRV_BufferDesc = {};
 	SRV_BufferDesc.StructureByteStride = sizeof(PARTICLE_SRV);
@@ -121,7 +186,6 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 
 	Safe_Delete_Array(pSRV);
 
-	//SRV 踰꾪띁瑜??듯빐 由ъ냼?ㅻ럭 ?앹꽦
 	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
 	SRVDesc.Format = DXGI_FORMAT_UNKNOWN;
 	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -136,12 +200,13 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	pOptionCB->IsLoop = m_isLoop ? 1 : 0;
 	pOptionCB->IsStretch = pPointDesc->IsStretch ? 1 : 0;
 	pOptionCB->IsSprite = pPointDesc->IsSprite ? 1 : 0;
+	pOptionCB->IsDelay = (pPointDesc->fDelay.y > 0.f) ? 1 : 0;
 
 	D3D11_BUFFER_DESC CB_OptionBufferDesc = {};
 	CB_OptionBufferDesc.StructureByteStride = 0;
-	CB_OptionBufferDesc.ByteWidth = sizeof(PARTICLE_DefaultCB);				 //16����Ʈ ����� ���� ����ü �ʿ�
-	CB_OptionBufferDesc.Usage = D3D11_USAGE_DYNAMIC ;							//���ֺ���? ���� ����?
-	CB_OptionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;				//�� ����
+	CB_OptionBufferDesc.ByteWidth = sizeof(PARTICLE_DefaultCB);				
+	CB_OptionBufferDesc.Usage = D3D11_USAGE_DYNAMIC ;							
+	CB_OptionBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;				
 	CB_OptionBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	CB_OptionBufferDesc.MiscFlags = 0;
 
@@ -155,7 +220,7 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	Safe_Delete(pOptionCB);
 
 	PARTICLE_SPEEDCB* pSpeedCB = new PARTICLE_SPEEDCB;
-	pSpeedCB->fTimeDelta = 0.1f; //���߿�
+	pSpeedCB->fTimeDelta = 0.1f;
 	pSpeedCB->fSpreadWeight = pPointDesc->fSpreadWeight;
 	pSpeedCB->fDropWeight = pPointDesc->fDropWeight;
 	pSpeedCB->fRotationWeight = pPointDesc->fRotationWeight;
@@ -180,6 +245,32 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 		return E_FAIL;
 
 	Safe_Delete(pSpeedCB);
+
+	//// ==디버깅 //
+	//D3D11_BUFFER_DESC bufferDesc = {};
+	//bufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	//bufferDesc.ByteWidth = sizeof(VTXINSTANCE_PARTICLE) * m_iNumInstance;
+	//bufferDesc.Usage = D3D11_USAGE_STAGING;
+	//bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	//if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_pDebugBuffer)))
+	//	return E_FAIL;
+
+	////==디버깅==
+	//m_pContext->CopyResource(m_pDebugBuffer, m_pDefaultUAVBufer);
+
+	//D3D11_MAPPED_SUBRESOURCE mapped{};
+
+	//m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+
+	//VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
+
+	//for (UINT i = 0; i < m_iNumInstance; ++i)
+	//{
+	//	pData[i].vTranslation;
+	//	pData[i];
+	//}
+
 
 	return S_OK;
 }
@@ -214,8 +305,15 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
 		return E_FAIL;
 
+	// ==디버깅 //
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+	bufferDesc.ByteWidth = sizeof(VTXINSTANCE_PARTICLE) * m_iNumInstance;
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
-
+	if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_pDebugBuffer)))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -266,7 +364,6 @@ void CVIBuffer_Point_Instance::Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB
 
 	if (SpeedDesc != nullptr)
 	{
-		//�Ѱ��� ������ ����
 		pCB->fDropWeight = SpeedDesc->fDropWeight;
 		pCB->fSpreadWeight = SpeedDesc->fSpreadWeight;
 		pCB->fRotationWeight = SpeedDesc->fRotationWeight;
@@ -290,110 +387,39 @@ void CVIBuffer_Point_Instance::Bind_CSResources(CComputeShader* pCShader)
 
 	pCShader->Dispatch(128, 1, 1);
 
-	//GPU?먯꽌 蹂듭궗 吏꾪뻾?? ?대??먯꽌 ?곗궛?묒뾽???앸궗?붿? ?뺤씤?섍퀬 蹂듭궗 吏꾪뻾?댁??ㅺ퀬 ??
 	m_pContext->CopyResource(m_pVBInstance, m_pUABuffer);
 }
 
-//�ļη� ���� ó���ؼ� ���� �ʿ�����
-//void CVIBuffer_Point_Instance::Spread(_float fTimeDelta)
-//{
-//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-//
-//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-//
-//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-//
-//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-//
-//
-//	for (size_t i = 0; i < m_iNumInstance; i++)
-//	{
-//		_vector	vMoveDir = XMVector3Normalize(XMVectorSetW(XMLoadFloat4(&pVertices[i].vTranslation) - XMLoadFloat3(&m_vPivot), 0.f));
-//
-//		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
-//		pVertices[i].vLifeTime.x += fTimeDelta;
-//
-//		if (true == m_isLoop)
-//		{
-//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-//			{
-//				pVertices[i].vLifeTime.x = 0.f;
-//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-//			}
-//		}
-//	}
-//
-//	m_pContext->Unmap(m_pVBInstance, 0);
-//}
-//
-//void CVIBuffer_Point_Instance::Drop(_float fTimeDelta)
-//{
-//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-//
-//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-//
-//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-//
-//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-//
-//
-//	for (size_t i = 0; i < m_iNumInstance; i++)
-//	{
-//		_vector	vMoveDir = XMVectorSet(0.f, -1.f, 0.f, 0.f);
-//
-//		XMStoreFloat4(&pVertices[i].vTranslation, XMLoadFloat4(&pVertices[i].vTranslation) + vMoveDir * m_pSpeeds[i] * fTimeDelta);
-//		pVertices[i].vLifeTime.x += fTimeDelta;
-//
-//		if (true == m_isLoop)
-//		{
-//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-//			{
-//				pVertices[i].vLifeTime.x = 0.f;
-//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-//			}
-//		}
-//	}
-//
-//	m_pContext->Unmap(m_pVBInstance, 0);
-//}
-//
-//void CVIBuffer_Point_Instance::Rotation(_float fTimeDelta)
-//{
-//	D3D11_MAPPED_SUBRESOURCE	SubResource{};
-//
-//	VTXINSTANCE_PARTICLE* pInstanceVertices = static_cast<VTXINSTANCE_PARTICLE*>(m_pVBInstanceVertices);
-//
-//	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
-//
-//	VTXINSTANCE_PARTICLE* pVertices = static_cast<VTXINSTANCE_PARTICLE*>(SubResource.pData);
-//
-//	for (size_t i = 0; i < m_iNumInstance; i++)
-//	{
-//		_vector vTranslation = XMLoadFloat4(&pVertices[i].vTranslation);
-//		_vector vPivot = XMLoadFloat3(&m_vPivot);
-//
-//		_vector vLocal = vTranslation - vPivot;
-//
-//		_vector vAxis = XMVectorSet(0.f, 1.f, 0.f, 0.f);
-//		_float fAngle = m_pSpeeds[i] * fTimeDelta;
-//
-//		_matrix matRot = XMMatrixRotationAxis(vAxis, fAngle);
-//		vLocal = XMVector3TransformNormal(vLocal, matRot);
-//
-//		vTranslation = vLocal + vPivot;
-//
-//		pVertices[i].vLifeTime.x += fTimeDelta;
-//
-//		if (true == m_isLoop)
-//		{
-//			if (pVertices[i].vLifeTime.x >= pVertices[i].vLifeTime.y)
-//			{
-//				pVertices[i].vLifeTime.x = 0.f;
-//				pVertices[i].vTranslation = pInstanceVertices[i].vTranslation;
-//			}
-//		}
-//	}
-//}
+void CVIBuffer_Point_Instance::Reset_UAV(class CComputeShader* pCShader)
+{
+	pCShader->Clear_Resources();
+
+	//UAV 내용을 기본값으로 롤백
+	m_pContext->CopyResource(m_pUABuffer, m_pDefaultUAVBufer);
+
+	// 카운터 0으로 초기화
+	//const UINT zero[4] = { 0,0,0,0 };
+	//m_pContext->ClearUnorderedAccessViewUint(m_pUAV, zero);
+
+	//// m_pVBInstacne도 초기화 진행.
+	//m_pContext->CopyResource(m_pVBInstance, m_pDefaultUAVBufer);
+
+	////==디버깅==
+	m_pContext->CopyResource(m_pDebugBuffer, m_pUABuffer);
+
+
+	//D3D11_MAPPED_SUBRESOURCE mapped{};
+
+	//m_pContext->Map(m_pDebugBuffer, 0, D3D11_MAP_READ, 0, &mapped);
+
+	//VTXINSTANCE_PARTICLE* pData = static_cast<VTXINSTANCE_PARTICLE*>(mapped.pData);
+
+	//for (size_t i = 0; i < m_iNumInstance; i++)
+	//{
+	//	pData[i];
+	//}
+
+}
 
 CVIBuffer_Point_Instance* CVIBuffer_Point_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const INSTANCE_DESC* pDesc)
 {
@@ -425,10 +451,10 @@ void CVIBuffer_Point_Instance::Free()
 {
 	__super::Free();
 
-	if (false == m_isClone)
-	{
-		Safe_Delete_Array(m_pSpeeds);
-	}
+	//if (false == m_isClone)
+	//{
+	//	Safe_Delete_Array(m_pSpeeds);
+	//}
 
 	Safe_Release(m_pSRV);
 	Safe_Release(m_pOptionCBBuffer);
@@ -436,4 +462,6 @@ void CVIBuffer_Point_Instance::Free()
 	Safe_Release(m_pSRVBuffer);
 	Safe_Release(m_pUABuffer);
 	Safe_Release(m_pUAV);
+	Safe_Release(m_pDefaultUAVBufer);
+	Safe_Release(m_pDebugBuffer);
 }

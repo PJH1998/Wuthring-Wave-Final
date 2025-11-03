@@ -19,7 +19,7 @@ HRESULT CRendererSubResource::Initialize()
 
     //SSAO
     m_iNumKernel = 16;
-    m_fRadius = 1.f;
+    m_fRadius = 3.f;
     m_fMaxDistance = 5.f;
     m_fOutDistance = 500.f;
     
@@ -31,12 +31,18 @@ HRESULT CRendererSubResource::Initialize()
 
     m_vFogColor = _float4(1.f, 1.f, 1.f, 1.f);
 
+	//BLUR
     m_iNumWeights = 5;
     m_fIntensity = 0.25f;
 
+	//DOF
     m_fDofDepth = 50.f;
     m_fDofRange = 100.f;
     m_fDofScale = 0.3f;
+
+	m_fLimitVelocity = 30.f;
+	m_fLimitDepth = 300.f;
+	m_fLengthScale = 5.f;
 
     if (FAILED(Ready_Shader_Filters()))
         CRASH("Failed Ready Shader Filters");
@@ -103,6 +109,12 @@ HRESULT CRendererSubResource::Bind_SSAO_Resources(CShader* pShader)
         CRASH("Failed Bind g_fSSAO_OutDistance");
     
     return S_OK;
+}
+
+HRESULT CRendererSubResource::Bind_LimitVelocity(CShader* pShader)
+{
+	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_fLimitVelocity, sizeof(_float))))
+		CRASH("Failed Bind g_fLimitVelocity");
 }
 
 HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
@@ -180,6 +192,19 @@ HRESULT CRendererSubResource::Add_Bloom_BufferData(const _wstring& strRCSTag, _f
         return E_FAIL;
 
     return S_OK;
+}
+
+HRESULT CRendererSubResource::Add_MotionBlur_BufferData(const _wstring& strRCSTag)
+{
+	MOTION_BLUR_DATA Data = {};
+	Data.fLimitVelocity = m_fLimitVelocity;
+	Data.fLimitDepth = m_fLimitDepth;
+	Data.fLengthScale = m_fLengthScale;
+
+	if (FAILED(m_pGameInstance->Add_BufferData(strRCSTag, "MOTION_DATA", reinterpret_cast<void*>(&Data), sizeof(MOTION_BLUR_DATA))))
+		return E_FAIL;
+
+	return S_OK;
 }
 
 HRESULT CRendererSubResource::Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot)

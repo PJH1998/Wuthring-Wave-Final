@@ -454,6 +454,10 @@ void CGameInstance::Set_Roughness(_float fRoughness)
 {
 	m_pRenderer->Set_Roughness(fRoughness);
 }
+void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
+{
+	m_pRenderer->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
+}
 #endif
 #pragma endregion
 

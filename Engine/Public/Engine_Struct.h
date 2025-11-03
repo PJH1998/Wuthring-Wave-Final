@@ -85,7 +85,9 @@ namespace Engine
 		_wstring	strMyTag;
 		EFFECT_TYPE eMyType = EFFECT_TYPE::END;
 		_bool		IsRootOn = false;
-		const _float4x4*  RootMatrix = {};
+		const _float4x4**  RootMatrix = {};
+		const _float4x4** ParentMatrix = {};
+		_uint	CurrentLevel;
 	}EFFECT_DESC;
 
 	typedef struct ParticleSRV	
@@ -93,7 +95,8 @@ namespace Engine
 		_float4 DefaultPos; 
 
 		_float  fSpeed;
-		_float	_pad0[3];
+		_float  fDelay;
+		_float	_pad0[2];
 
 	}PARTICLE_SRV;
 
@@ -104,7 +107,8 @@ namespace Engine
 		
 		_uint	IsStretch;
 		_uint	IsSprite;
-		_float	_pad[2];
+		_uint   IsDelay;
+		_float	_pad;
 	}PARTICLE_DefaultCB;
 
 	typedef struct ParticleSpeedCB
@@ -129,7 +133,6 @@ namespace Engine
 
 		_float fSpeed;						
 		_float3 vColor;
-
 	}FXMESH_SRV;
 
 	typedef struct FXMeshCB
@@ -165,13 +168,13 @@ namespace Engine
 		_uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
 	}ANIMINFO;
 
-	// 梨꾨꼸 ?뺣낫 援ъ“泥?=> Depth2
+	//
 	typedef struct tagGpuChannelInfo
 	{
-		_uint iStartKeyframeOffset; // Key Frame ?쒖옉 (?꾩쟻 ?몃뜳??
-		_uint iNumKeyframes; // ?꾩옱 Channel?먯꽌??KeyFrame 媛쒖닔.
-		_uint iBoneIndex;  // 異붽?: ??梨꾨꼸???대뼡 堉덈? 而⑦듃濡ㅽ븯?붿?
-		_uint iPadding;    // 16諛붿씠???뺣젹???꾪븳 ?⑤뵫
+		_uint iStartKeyframeOffset; // Key Frame 
+		_uint iNumKeyframes; // 
+		_uint iBoneIndex;  // 
+		_uint iPadding;    // 
 	}GPU_CHANNELINFO;
 
 	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
@@ -183,19 +186,34 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// (留??꾨젅???낅뜲?댄듃)
-	// Constant Buffer??珥??ш린媛 諛섎뱶??16??諛곗닔?ъ빞??
+	// 
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
-		_float fTrackPosition;
-		_uint  iAnimindex;
-		_bool  IsRibAnimUsed = false;
-		_uint  iRibbonAnimIndex;
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 1
+		_uint  iRibbonAnimIndex; // 4
+		
+		// Blending
+		_float fPrevTrackPosition; // 4 => Start, End 프레임 판별.
+		_uint  iPrevAnimIndex; // 4
+		_uint  iRibbonPrevAnimIndex; // 4
+		_bool  IsBlending; // 1
+
 	}ANIMATION_CBINFO;
 
 	typedef struct tagCollisionData {
 		class CCollideComponent* pComponent = { nullptr };
 		void* pDesc = { nullptr };
 	}COLLISION_DATA;
+
+
+	typedef struct tagSampleDesc
+	{
+		_float3 vPos = {};
+		_float fSpawnTime = {};
+
+	}SAMPLE_DESC;
 
 #pragma region SEQUENCE
 	// Sequence Item Frame, Tag => Sequence가 갖고 있음

@@ -167,6 +167,7 @@
     <ClInclude Include="..\Public\Actor.h" />
     <ClInclude Include="..\Public\AnimationDummy.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
+    <ClInclude Include="..\Public\AugustaAirFly.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
     <ClInclude Include="..\Public\AugustaAirSkill.h" />
     <ClInclude Include="..\Public\AugustaBayonet.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="..\Public\Client_Debug.h" />
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
+    <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
     <ClInclude Include="..\Public\ElectroPredator.h" />
     <ClInclude Include="..\Public\Event_Camera.h" />
@@ -199,6 +201,7 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\MonsterDummy.h" />
@@ -244,6 +247,8 @@
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
+    <ClInclude Include="..\Public\Trail_Mesh.h" />
+    <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\public\UI_Button.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -269,7 +274,8 @@
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
-    <ClInclude Include="..\Public\Weapon.h" />
+    <ClInclude Include="..\Public\Prop.h" />
+    <ClInclude Include="..\Public\Wing.h" />
     <ClInclude Include="CAttackVolume.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="framework.h" />
@@ -286,11 +292,13 @@
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
     <ClCompile Include="..\Private\AugustaAirAttack.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
+    <ClCompile Include="..\Private\AugustaAirFly.cpp" />
     <ClCompile Include="..\Private\AugustaAirJump.cpp" />
     <ClCompile Include="..\Private\AugustaAirSkill.cpp" />
     <ClCompile Include="..\Private\AugustaBayonet.cpp" />
     <ClCompile Include="..\Private\AugustaClimbExit.cpp" />
     <ClCompile Include="..\Private\AugustaClimbMove.cpp" />
+    <ClCompile Include="..\Private\AugustaFactory.cpp" />
     <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
@@ -316,6 +324,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Director.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
+    <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
@@ -344,8 +353,9 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
-    <ClCompile Include="..\Private\AugustaFactory.cpp" />
+    <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
+    <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
     <ClCompile Include="..\Private\RoverAirJump.cpp" />
@@ -355,6 +365,7 @@
     <ClCompile Include="..\Private\RoverGroundLand.cpp" />
     <ClCompile Include="..\Private\RoverGroundRun.cpp" />
     <ClCompile Include="..\Private\RoverSword.cpp" />
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
     <ClCompile Include="..\private\UI_Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -380,7 +391,8 @@
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
-    <ClCompile Include="..\Private\Weapon.cpp" />
+    <ClCompile Include="..\Private\Prop.cpp" />
+    <ClCompile Include="..\Private\Wing.cpp" />
     <ClCompile Include="CAttackVolume.cpp" />
     <ClCompile Include="Client.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -416,11 +428,13 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxInstance_PointParticle.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">

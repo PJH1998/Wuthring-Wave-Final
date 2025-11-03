@@ -8,6 +8,7 @@ namespace Client
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
+	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, DESTRUCTION, NONRIGID, END };
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
@@ -97,6 +98,11 @@ namespace Client
 	};
 
 	
-	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, AUGUSTA, SHADOW, END };
+	enum class SHADER_ANIMMESH { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX
+		, AUGUSTA
+		, SHADOW
+		, END };
 
 }

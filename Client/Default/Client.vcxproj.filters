@@ -157,6 +157,18 @@
     <Filter Include="03. GameObject\Weapon\Augusta">
       <UniqueIdentifier>{773c40a9-6ea7-49bd-8e7b-86f777edf214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect">
+      <UniqueIdentifier>{0bd0ad0c-ce59-4ec2-bbee-d7fe62618a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab">
+      <UniqueIdentifier>{4d8babfa-3c25-448e-8b30-d7fda6e85546}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Particle">
+      <UniqueIdentifier>{5bdbb908-4119-4d78-a40e-4a501a3c2497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\TrailMesh">
+      <UniqueIdentifier>{9c4ff355-bd13-4b3e-94a1-15e0b1f6cb7f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Common">
       <UniqueIdentifier>{d56cb8b9-0472-4119-9694-c75f26e7e168}</UniqueIdentifier>
     </Filter>
@@ -199,10 +211,13 @@
     <Filter Include="03. GameObject\Actor\Monster\ElectroPredator">
       <UniqueIdentifier>{da785c09-916c-4fe0-a759-16e111b51508}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\EffectMesh">
+    <Filter Include="03. GameObject\Weapon\Common">
+      <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect">
       <UniqueIdentifier>{cf4661a1-f396-4152-8969-b39d1f8f3b25}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul">
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul">
       <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -378,7 +393,7 @@
     <ClInclude Include="..\Public\AugustaBayonet.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Weapon.h">
+    <ClInclude Include="..\Public\Prop.h">
       <Filter>03. GameObject\Weapon</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h">
@@ -407,6 +422,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\AugustaGroundSpecial.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Particle.h">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trail_Mesh.h">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Prefab.h">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Character.h">
       <Filter>03. GameObject\Actor\Player\Common</Filter>
@@ -465,14 +489,22 @@
     <ClInclude Include="..\Public\RoverGroundDash.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Wing.h">
+      <Filter>03. GameObject\Weapon\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\HavocWarrior.h">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h" />
+    </ClInclude>
     <ClInclude Include="..\public\Ggobul.h">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -574,9 +606,6 @@
     <ClCompile Include="..\Private\Augusta.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\AugustaFactory.cpp">
-      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\AirState.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air</Filter>
     </ClCompile>
@@ -634,7 +663,7 @@
     <ClCompile Include="..\Private\AugustaBayonet.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Weapon.cpp">
+    <ClCompile Include="..\Private\Prop.cpp">
       <Filter>03. GameObject\Weapon</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp">
@@ -657,6 +686,15 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundSpecial.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Particle.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trail_Mesh.cpp">
+      <Filter>03. GameObject\Effect\Prefab\TrailMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Prefab.cpp">
+      <Filter>03. GameObject\Effect\Prefab</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Character.cpp">
       <Filter>03. GameObject\Actor\Player\Common</Filter>
@@ -682,6 +720,9 @@
     <ClCompile Include="CAttackVolume.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\AugustaFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Augusta</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Director.cpp">
       <Filter>01. GameSystem\Director</Filter>
     </ClCompile>
@@ -703,14 +744,22 @@
     <ClCompile Include="..\Private\RoverGroundDash.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Wing.cpp">
+      <Filter>03. GameObject\Weapon\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Augusta</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\HavocWarrior.cpp">
       <Filter>03. GameObject\Actor\Monster\HavocWarrior</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    </ClCompile>
     <ClCompile Include="..\private\Ggobul.cpp">
-      <Filter>03. GameObject\Actor\Monster\MonsterTest\EffectMesh\Ggobul</Filter>
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -746,6 +795,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
@@ -755,6 +807,9 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

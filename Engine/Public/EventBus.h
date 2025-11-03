@@ -19,7 +19,10 @@ public:
 		auto wrapper = [handler](const CEvent& event) {
 				handler(static_cast<const TEvent&>(event));
 			};
+		{
+			lock_guard<mutex>lock(m_Mutex);
 			m_Listener[iStatic][strEventTag].push_back(wrapper);
+		}
 	}
 
 	void Unscribe() {
@@ -40,7 +43,7 @@ private:
 	unordered_map<_wstring, vector<function<void(const CEvent&)>>> m_Listener[2];
 	typedef unordered_map<_wstring, vector<function<void(const CEvent&)>>> LISTENER;
 
-
+	mutex m_Mutex;
 public:
 	static CEventBus* Create();
 	virtual void Free() override;

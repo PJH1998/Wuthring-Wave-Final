@@ -35,20 +35,15 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
     m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
 
-
-    m_IsRoot = pDesc->IsRootOn;
-
-    if (m_IsRoot)
-        m_ParentMatrix = pDesc->RootMatrix;
-
     if (m_IsSprite = pDesc->IsSprite)
     {
 
         m_iRow = pDesc->iRows;
         m_iCol = pDesc->iCols;
     }
-   // m_isActivate = true;
 
+    //처음 만들어질 땐 무조건 활성화 ?
+    m_isActivate = true;
 
     return S_OK;
 }
@@ -65,11 +60,13 @@ void CParticle::Update(_float fTimeDelta)
     m_pVIBufferCom->Bind_CS_Speed(fTimeDelta);
     m_pVIBufferCom->Bind_CSResources(m_pComputeShader);
 
-//   m_vLifeTime.x += fTimeDelta;
-//
-//   if (m_vLifeTime.x >= m_vLifeTime.y)
-//       m_isActivate = false;
-//
+   m_vLifeTime.x += fTimeDelta;
+
+   if (m_vLifeTime.x >= m_vLifeTime.y)
+   {
+       m_isActivate = false;
+       m_vLifeTime.x = 0.f;
+   }
 }
 
 void CParticle::Late_Update(_float fTimeDelta)
@@ -77,7 +74,7 @@ void CParticle::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
 }
 
 void CParticle::Render()
@@ -92,8 +89,21 @@ void CParticle::Render()
     m_pVIBufferCom->Render();
 }
 
-void CParticle::Root_Transform()
+void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
+    if(_bool* IsActivate = static_cast<_bool*>(pArg))
+        m_isActivate = *IsActivate;
+
+     m_vLifeTime.x = 0.f;
+     Root_Transform(WorldMatrix);
+     m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+}
+
+void CParticle::Root_Transform(_fmatrix WorldMatrix)
+{
+    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+    m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
 void CParticle::Bind_CS_SpriteInfo()
@@ -123,7 +133,8 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 
 HRESULT CParticle::Bind_ShaderResources()
 {
-    if(FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+
+    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         return E_FAIL;
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
@@ -138,10 +149,11 @@ HRESULT CParticle::Bind_ShaderResources()
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DiffuseTexture", 0)))
         return E_FAIL;
 
+	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+		return E_FAIL;
+
     if (m_IsSprite)
     {
-        if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
-            return E_FAIL;
 
         if (FAILED(m_pShaderCom->Bind_Value("g_iRow", &m_iRow, sizeof(_int))))
             return E_FAIL;

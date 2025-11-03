@@ -10,6 +10,8 @@
 
 #include "StateMachine.h"
 
+#include "Wing.h"
+
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
@@ -38,8 +40,15 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
+
+    m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     
+
+    m_pGameInstance->Wait_Thread_End();
+
 	Load_Action();
+
     //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
@@ -53,8 +62,9 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
     m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
@@ -105,6 +115,7 @@ HRESULT CLoader_Test::Load_Object()
 HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
+
 
     // Prototype_Component_BehaviorTree_Test
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
@@ -172,6 +183,15 @@ HRESULT CLoader_Test::Load_MonsterTest()
     return S_OK;
 }
 
+HRESULT CLoader_Test::Load_Effect()
+{
+    m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+    m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+    m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+
+    return S_OK;
+}
+
 HRESULT CLoader_Test::Load_Player()
 {
 
@@ -186,6 +206,27 @@ HRESULT CLoader_Test::Load_Player()
         , wStrControllerTag
         , CPlayer::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
+
+#pragma region COMMON 객체 WING
+	_wstring wStrModelTag = L"Prototype_Component_Model_Wing";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Wing/Wing.dat";
+	_float fSize = 0.01f;
+	//fSize = 0.0001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Wing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+#pragma endregion
+
 
     return S_OK;
 }

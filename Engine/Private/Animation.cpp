@@ -301,7 +301,7 @@ _bool CAnimation::Update_TrackPosition(_float fTimeDelta, _float* pTrackPosition
 	* ?먮옒 ?ш린??Animation 媛깆떊 濡쒖쭅??議댁옱.
 	*/
 
-	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
+ 	m_fCurrentTrackPosition += m_fTickPerSecond * fTimeDelta;
 
 	
 

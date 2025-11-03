@@ -31,7 +31,7 @@ void CAugustaGroundIdle::OnEnter()
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EAugustaIdleType eIdleType = context.m_eIdleType;
+    EAugustaIdleType eIdleType = context.m_eIdleType; // 애니메이션 ENUM
 
     m_iCurrentAnimIdx = ENUM_CLASS(eIdleType);
 
@@ -42,6 +42,7 @@ void CAugustaGroundIdle::OnEnter()
     {
         _string strBoneName = "Root";
         m_pAugusta->PartActivate(m_iPartType, true);
+		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
         m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
     }
 
@@ -81,6 +82,8 @@ void CAugustaGroundIdle::OnExit()
 
 void CAugustaGroundIdle::Handle_Input()
 {
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     
     m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
@@ -97,6 +100,7 @@ void CAugustaGroundIdle::Handle_Input()
     m_States[MOVE_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
     m_States[MOVE_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
 
+	
     
     // 기본 Skill E
     m_States[SKILL_E] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
@@ -110,6 +114,8 @@ void CAugustaGroundIdle::Handle_Input()
 
     // BurstR
     m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
+
+	
 }
 
 
@@ -149,12 +155,22 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     _uint iKeyInput = {};
 
+
     // 우선순위 순으로 전환조건 진행.
 	if (!m_States[LAND])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		return;
 	}
+
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
+
     // 점프
     if (m_States[JUMP])
     {

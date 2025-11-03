@@ -6,6 +6,7 @@ NS_BEGIN(Client)
 class CGameSystem final : public CBase
 {
 	DECLARE_SINGLETON(CGameSystem)
+	using TriggerCallback = function<void(void*)>;
 private:
 	explicit CGameSystem();
 	virtual ~CGameSystem() = default;
@@ -17,6 +18,15 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	
+	//============================Effect
+	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
+	void							Create_Effect(const string& strFolderPath, LEVEL eLevel); 
+	void							Create_Prefab(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	//============================Effect
+
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
 #pragma endregion
@@ -36,13 +46,19 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
-
+#pragma region TRIGGER
+	void TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc);
+	void OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg = nullptr);
+	//레벨 전환시 초기화 고려.
+	void Clear_TriggerCallBack();
+#pragma endregion
 
 private:
 	class		CParser*		m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
 	class		CDirector*	m_pDirector = { nullptr };
 	CHARACTER_STAT m_Stats = {};
+	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 public:
 	virtual		void	Free() override;
 
