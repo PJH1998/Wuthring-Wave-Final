@@ -99,7 +99,7 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	GGOBUL_RESET* pDesc = static_cast<GGOBUL_RESET*>(pArg);
 	m_eType = pDesc->eType;
 	m_strAnimKey = pDesc->strPatternKey;
-	m_pAnimMachineCom->Reset(m_strAnimKey);
+	m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	m_pModelCom->Clear_Animation(m_strAnimKey);
 	for (_uint i = 0; i < GGOBULTYPE::END; ++i)
 	{

@@ -103,7 +103,7 @@ void CFS_Scythe::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	SCYTHE_RESET* pDesc = static_cast<SCYTHE_RESET*>(pArg);
 	m_strAnimKey = pDesc->strPatternKey;
-	m_pAnimMachineCom->Reset(m_strAnimKey);
+	m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
 	if (m_strAnimKey == "SAttack04_1_Start")
 		m_iState = 1;
 	else

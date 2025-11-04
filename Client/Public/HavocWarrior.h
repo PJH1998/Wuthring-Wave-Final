@@ -68,6 +68,7 @@ private:
 	void						Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						After_Condition(_float fTimeDelta);
 	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
