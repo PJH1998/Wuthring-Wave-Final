@@ -9,6 +9,7 @@
 #include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
+#include "AttackVolume.h"
 
 #include "StateMachine.h"
 
@@ -125,6 +126,10 @@ HRESULT CLoader_Test::Load_Object()
 HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
+	// Prototype_GameObject_AttackVolume
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
+		CAttackVolume::Create(m_pDevice, m_pContext))))
+		CRASH("AttackVolume Create Failed");
 
 #pragma region FALSE_SOVEREIGN
     // Prototype_Component_BehaviorTree_Test
