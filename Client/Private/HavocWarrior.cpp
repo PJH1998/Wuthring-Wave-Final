@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "HavocWarrior.h"
+#include "AttackVolume.h"
 
 CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -32,6 +33,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 #pragma endregion
 
 	Ready_Component(pDesc);
+	Ready_PartObjects(pDesc);
 	m_iHP = 1;
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
@@ -41,12 +43,6 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 void CHavocWarrior::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
-	if (m_isTrigger == true)
-		m_isDetecting = true;
-	else
-		m_isDetecting = false;
-	m_isTrigger = false;
-
 }
 
 void CHavocWarrior::Update(_float fTimeDelta)
@@ -58,13 +54,14 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-	//_float temp;
-	//m_pModelCom->Play_Animation_CPU("Walk_B", fTimeDelta, &temp, false, true, false, true, 1.f);
-	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+
 	// 3. Collider Update
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+
+	//Tigger Volume Update
+	m_pAtkVolume->Update(fTimeDelta);
 }
 
 void CHavocWarrior::Late_Update(_float fTimeDelta)
@@ -101,6 +98,8 @@ void CHavocWarrior::Render()
 	}
 
 #ifdef _DEBUG
+	//Tigger Volume Render
+	m_pAtkVolume->Render();
 
 	//m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
@@ -139,7 +138,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(10.f, 8.f, 10.f);
+	RigidbodyDesc.vExtent = _float3(13.f, 9.f, 13.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -216,18 +215,46 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 {
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RHand");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 2.f);
+	TriggerDesc.vOffsetPos = _float3(0.f, -0.5f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.CollisionCallback = [this]() {this->OnTriggerTest(); };
+
+	//CContainerObject::Add_PartObject(TEXT("Part_ATKVolume"), m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), &TriggerDesc);
+	m_pAtkVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolume)
+		CRASH(m_pAtkVolume);
+	m_pAtkVolume->TriggerActivate(false);
 }
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 {
 	if (m_isAnimationFinished)
 	{
+		_uint iRemainState{};
+		if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
+			iRemainState |= ENUM_CLASS(TEST_STATE::ATTACK_3);
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
-
+		m_iState |= iRemainState;
 	}
+	if (m_isTrigger == true)
+	{
+		if (m_isAggro != m_isDetecting)
+			m_iState |= ENUM_CLASS(TEST_STATE::SPAWN);
+		m_isDetecting = true;
+	}
+	else
+		m_isDetecting = false;
 	if (m_isDetecting)
 	{
 		Calculate_PosAndDir();
+
 #ifdef _DEBUG
 		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
 		//cout << "distance: " << m_fDistance << endl;
@@ -291,12 +318,21 @@ void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactMa
 	}
 }
 
+void CHavocWarrior::OnTriggerTest()
+{
+	if(m_iState & ENUM_CLASS(TEST_STATE::ATTACK_2))
+		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
+#ifdef _DEBUG
+	cout << "On Hit! (Havoc Warrior)" << endl;
+#endif // _DEBUG
+}
+
 void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 #ifdef _DEBUG
-		cout << "On Hit! (Havoc Warrior)" << endl;
+		cout << "Be Hit! (Havoc Warrior)" << endl;
 #endif // _DEBUG
 
 	}
@@ -429,6 +465,7 @@ void CHavocWarrior::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pAtkVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
 }

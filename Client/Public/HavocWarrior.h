@@ -9,6 +9,7 @@ class CBehavior_Tree;
 NS_END
 
 NS_BEGIN(Client)
+class CAttackVolume;
 
 class CHavocWarrior final : public CActor
 {
@@ -41,6 +42,7 @@ public:
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
+	CAttackVolume* m_pAtkVolume = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
 
@@ -72,6 +74,7 @@ private:
 	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						OnTriggerTest();
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						Patrol();
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
