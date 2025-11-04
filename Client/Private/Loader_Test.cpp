@@ -6,6 +6,7 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 #include "Ggobul.h"
+#include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 
@@ -164,7 +165,23 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
 		CGgobul::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
 
+#pragma region SCYTHE_TANTACLE
+	// Prototype_Component_Model_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Scythe"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FS_Scythe/FS_Scythe.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Scythe"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FS_Scythe/Animation/FS_Scythe_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		CFS_Scythe::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
 	// Prototype_Component_BehaviorTree_Ordinary

@@ -4,6 +4,7 @@
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
 #include "Ggobul.h"
+#include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "GameSystem.h"
@@ -176,6 +177,20 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.fSpeedPerSec = 10.f;
 	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel),TEXT("Prototype_GameObject_Ggobul"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"),TEXT("Pool_Ggobul"), 3, &Ggobul)))
+		CRASH("Failed Ready Ggobul");
+
+	//Scythe
+	CFS_Scythe::SCYTHE_DESC Tantacle{};
+	Tantacle.eCurLevel = m_eCurLevel;
+	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
+	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
+	Tantacle.fSpeedPerSec = 10.f;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
 		CRASH("Failed Ready Ggobul");
 
 	// Havoc Warrior

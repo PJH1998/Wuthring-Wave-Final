@@ -226,6 +226,9 @@
     <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul">
       <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe">
+      <UniqueIdentifier>{fb294f3f-0f7c-4162-8fcc-f57d572d10c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -517,6 +520,9 @@
     <ClInclude Include="..\Public\Ability.h">
       <Filter>04. Component\03. Ability</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\FS_Scythe.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h" />
   </ItemGroup>
   <ItemGroup>
@@ -779,6 +785,9 @@
       <Filter>04. Component\03. Ability</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\FS_Scythe.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
