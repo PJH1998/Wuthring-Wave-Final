@@ -134,6 +134,8 @@ void CAnimMachine::Update(CModel* pModelCom, CTransform* pTransform, _uint* pSta
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
+	if (m_isLoop)
+		isAnimFinished = true;
 }
 
 //gpu
