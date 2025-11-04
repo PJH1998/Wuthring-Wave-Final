@@ -49,6 +49,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_fHP = 1;
+	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fParalysisAcc = 5.f;
 	return S_OK;
 }
@@ -67,7 +68,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	//m_pBehaviorTreeCom->tick(this);
+	m_pBehaviorTreeCom->tick(this);
 
 	//그로기 특수상황
 	if(m_isParalysis)
@@ -174,6 +175,25 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 
 void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Attack"))
+	{
+		if(wstrPartTag == TEXT("HR"))
+			m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(Isactive);
+		else if(wstrPartTag == TEXT("HL"))
+			m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(Isactive);
+		else if (wstrPartTag == TEXT("WR"))
+			m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
+		else if (wstrPartTag == TEXT("WL"))
+			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
+	}
+	if (wstrTypeTag == TEXT("Gravity"))
+	{
+		m_pColliderCom->Set_Gravity(Isactive);
+	}
 }
 
 void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
@@ -345,11 +365,13 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Weapon002");
-	TriggerDesc.vExtent = _float3(0.3f, 1.5f, 0.3f);
-	TriggerDesc.vOffsetPos = _float3(0.f, 0.5f, 0.f);
+	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
+	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
-	TriggerDesc.CollisionCallback = [this]() {this->OnHitEnter(); };
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold); 
+		};
 
 	//CContainerObject::Add_PartObject(TEXT("Part_ATKVolume"), m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), &TriggerDesc);
 	m_pAtkVolumes[ATK_SOCKET::WEAPON_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), 
@@ -359,8 +381,8 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Weapon003");
-	TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
+	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::WEAPON_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -368,25 +390,25 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_R]);
 	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(false);
 
-	//TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
-	//TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	//TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	//TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	//m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
-	//	TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	//if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
-	//	CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
-	//m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
-	//
-	//TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
-	//TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	//TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	//TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	//m_pAtkVolumes[ATK_SOCKET::WHIP_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
-	//	TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	//if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
-	//	CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
-	//m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
+	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
+		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
+		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
+	
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
+	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pAtkVolumes[ATK_SOCKET::WHIP_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
+		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
+		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
 
 }
 
@@ -450,7 +472,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	}
 }
 
-void CMonsterTest::OnHitEnter()
+void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 }
 
@@ -503,8 +525,8 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex != 3)
-	//	return false;
+	if (iIndex != 3)
+		return false;
 	//else
 	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
@@ -512,15 +534,6 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
 		Attack_Arrange();
-		//if (iIndex == 2)
-		//{
-		//	CGgobul::GGOBUL_RESET Desc{};
-		//	Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
-		//	Desc.pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
-		//	Desc.strPatternKey = "SAttack03";
-		//	//Desc.
-		//	//m_pGameInstance->Spawn_PoolingObject()
-		//}
 	}
 	return bResult;
 }

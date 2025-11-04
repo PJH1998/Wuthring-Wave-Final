@@ -21,7 +21,7 @@ public:
 		_float3			vExtent;
 		_float3			vOffsetPos;
 		_float3			vOffsetRadian;
-		function<void()> CollisionCallback;
+		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
 	}ATKVOLUME_DESC;
 
 private:
@@ -58,7 +58,7 @@ private:
 	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
 
 	CALLBACK_CLIENT			m_CallBack{};
-	function<void()> m_CollisionCallback;
+	function<void(_uint, void*, const ContactManifold&)> m_CollisionCallback;
 private:
 	void Ready_Component(ATKVOLUME_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);

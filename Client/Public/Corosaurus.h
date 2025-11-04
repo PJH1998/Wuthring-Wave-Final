@@ -2,8 +2,6 @@
 #include "Actor.h"
 
 NS_BEGIN(Engine)
-class CShader;
-class CModel;
 class CAnimMachine;
 class CBehavior_Tree;
 NS_END
@@ -11,21 +9,21 @@ NS_END
 NS_BEGIN(Client)
 class CAttackVolume;
 
-class CHavocWarrior final : public CActor
+class CCorosaurus final : public CActor
 {
 public:
-	typedef struct tagHavocWarriorDesc : public CActor::ACTOR_DESC
+	typedef struct tagCorrosaurusDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
-		_float fHp;
-		_float fAttackDmg;
-	}HAVOCWARRIOR_DESC;
+	}CORROSAURUS_DESC;
 
 private:
-	explicit CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CHavocWarrior(const CHavocWarrior& Prototype);
-	virtual ~CHavocWarrior() = default;
+	enum ATK_SOCKET { HEAD, TAIL, END };
+private:
+	explicit CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CCorosaurus(const CCorosaurus& Prototype);
+	virtual ~CCorosaurus() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype() override;
@@ -44,9 +42,7 @@ public:
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
-	CAttackVolume* m_pAtkVolume = { nullptr };
-
-	queue<_float3>			m_PatrolPoints;
+	CAttackVolume* m_pAtkVolume[ATK_SOCKET::END] = {nullptr};
 
 	_uint					m_iState{};
 	_bool					m_isAggro{};
@@ -54,26 +50,23 @@ private:
 	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
-	_float					m_fAttackCoolTime[3]{};
-	_float					m_fAttackAcc[3]{};
+	_float					m_fAttackCoolTime[9]{};
+	_float					m_fAttackAcc[9]{};
 	_float					m_fDistance{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
 
 	_float					m_fHP{};
-	_float					m_fAttackDmg{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
-	_float					m_fIdleDuration{};
-	_float					m_fIdleAcc{};
 
 	CALLBACK_CLIENT			m_tCallDesc{};
 
 private:
 	HRESULT						Bind_Resources();
-	void						Ready_Component(HAVOCWARRIOR_DESC* pDesc);
-	void						Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc);
+	void						Ready_Component(CORROSAURUS_DESC* pDesc);
+	void						Ready_PartObjects(CORROSAURUS_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
 	void						After_Condition(_float fTimeDelta);
@@ -82,22 +75,10 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
-	void						Patrol();
-	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
-	_bool						isKnockDown();
-	_bool						isAttackEnable();
-	_bool						Attack(_uint iIndex, _float fInterval);
-	_bool						isChase();
-	_bool						isPatrol();
-	_bool						Back();
-	_bool						Front();
-	_bool						Left();
-	_bool						Right();
 
 public:
-	static		CHavocWarrior* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject* Clone(void* pArg) override;
+	static		CCorosaurus*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	virtual		CGameObject*			Clone(void* pArg) override;
 	virtual		void					Free() override;
 };
-
 NS_END

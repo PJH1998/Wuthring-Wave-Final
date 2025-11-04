@@ -19,6 +19,8 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float		fHP;
+		_float fAttackDmg;
 	}MONSTERTEST_DESC;
 
 private:
@@ -84,7 +86,7 @@ private:
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
-	void						OnHitEnter();
+	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

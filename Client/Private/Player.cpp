@@ -324,7 +324,7 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
 		return;
 
     CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
