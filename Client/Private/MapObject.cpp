@@ -32,6 +32,11 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 
+	Sync_Sectors();
+
+	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+		return E_FAIL;
+
 	return S_OK;
 }
 
@@ -115,6 +120,29 @@ void CMapObject::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 
 		m_pModelComArray[m_iLODIndex]->Render(i);
+	}
+}
+
+void CMapObject::Render_Shadow()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+	for (auto& iSector : m_Sectors)
+	{
+		m_pGameInstance->Bind_ShadowMap_Resources_StaticObject(m_pShaderCom, "g_ShadowMapViewMatrix", "g_ShadowMapProjMatrix", iSector);
+
+		_uint iLayer = m_pGameInstance->Get_ShadowMapLayer(iSector);
+		if (FAILED(m_pShaderCom->Bind_Value("g_iShadowMapLayer", &iLayer, sizeof(_uint))))
+			CRASH("Failed Bind ShadowMapLayer");
+
+		_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+
+		for (_uint i = 0; i < iNumMesh; ++i)
+		{
+			m_pShaderCom->Begin(8);
+
+			m_pModelComArray[m_iLODIndex]->Render(i);
+		}
 	}
 }
 

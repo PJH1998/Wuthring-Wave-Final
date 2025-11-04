@@ -15,6 +15,20 @@ HRESULT CLevel_GamePlay::Initialize()
 {
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
+	//TEST
+	SHADOW_MAP_DESC ShadowMapDesc = {};
+	ShadowMapDesc.iNumSectorX = 8;
+	ShadowMapDesc.iNumSectorZ = 8;
+	ShadowMapDesc.iSectorSizeX = 2048;
+	ShadowMapDesc.iSectorSizeZ = 2048;
+
+	ShadowMapDesc.vCenterPos = _float3(2200.f, 150.f, 1200.f);
+	ShadowMapDesc.vExtents = _float3(128.f, 300.f, 128.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+
+	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
+		CRASH("Test");
+
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
 	LIGHT_DESC LightDesc{};
@@ -62,6 +76,9 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 void CLevel_GamePlay::Render()
 {
+#ifdef _DEBUG
+	Shader_Gui();
+#endif
 }
 
 void CLevel_GamePlay::Ready_Layer_Player()
@@ -128,6 +145,27 @@ void CLevel_GamePlay::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
 }
+
+#ifdef _DEBUG
+void CLevel_GamePlay::Shader_Gui()
+{
+	ImGui::Begin("Test");
+	
+	
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+				ImGui::InputFloat("RADIUS", &m_fRadius);
+		
+				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+		
+		#ifdef _DEBUG
+				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
+		#endif // _DEBUG
+	}
+	ImGui::End();
+
+}
+#endif
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

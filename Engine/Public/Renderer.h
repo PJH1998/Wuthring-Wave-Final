@@ -10,8 +10,6 @@ class CTexture;
 class CRenderer final : public CBase
 {
 private:
-
-private:
 	explicit CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRenderer() = default;
 
@@ -19,6 +17,7 @@ public:
 	HRESULT		Initialize();
 	HRESULT		Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
 	HRESULT		Add_Render_StaticObject(class CGameObject* pRenderObject);
+	HRESULT		Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void		Render();
 	void		Begin_ScreenEffect(SFX_TYPE eType);
 	void		End_ScreenEffect();
@@ -47,6 +46,7 @@ private:
 	class CGameInstance*			m_pGameInstance = { nullptr };
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
+	list<class CGameObject*>		m_ShadowMapObjects;
 	list<class CGameObject*>		m_StaticObjects[2];
 	atomic<_uint>					m_iDoubleBufferIndex = {};
 
@@ -86,6 +86,8 @@ private:
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 
 private:
+	void						Render_ShadowMap();
+
 	void						Render_Priority();
 	void						Render_Shadow();
 	void						Render_Outline();
@@ -127,6 +129,8 @@ private:
 	HRESULT						Ready_SubResource();
 	HRESULT						Ready_RCS();
 	HRESULT						Ready_Shadow_DSV();
+
+
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

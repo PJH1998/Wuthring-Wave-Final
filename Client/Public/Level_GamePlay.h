@@ -22,6 +22,12 @@ private:
 	void			Ready_Effect();
 
 
+#ifdef _DEBUG
+private:
+	void Shader_Gui();
+	_float m_fRadius = {1.f};
+	_float m_fMaxDistance = { 5.f };
+#endif
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };

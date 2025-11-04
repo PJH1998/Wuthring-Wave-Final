@@ -19,13 +19,13 @@
 #include "PipeLine.h"
 #include "Light_Manager.h"
 #include "Picking.h"
-#include "Shadow.h"
 #include "GUIManager.h"
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
+#include "ShadowMap.h"
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -91,9 +91,6 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pPicking = CPicking::Create(*ppDevice, *ppContext, EngineDesc.hWnd, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pPicking);
 
-	m_pShadow = CShadow::Create(static_cast<_float>(EngineDesc.iSizeX), static_cast<_float>(EngineDesc.iSizeY));
-	ASSERT_CRASH(m_pShadow);
-
 	m_pGUIManager = CGUIManager::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
 	ASSERT_CRASH(m_pGUIManager);
 
@@ -108,6 +105,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
+
+	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pShadowMap);
 
 	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRenderer);
@@ -389,6 +389,10 @@ HRESULT CGameInstance::Add_Render_StaticObject(CGameObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
+HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
+{
+	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
+}
 void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
 {
 	m_pRenderer->Begin_ScreenEffect(eType);
@@ -660,26 +664,6 @@ _bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* Num
 }
 #pragma endregion
 
-#pragma region SHADOW
-const _float4x4* CGameInstance::Get_ShadowLight_Matrix(D3DTS eType)
-{
-	return m_pShadow->Get_Matrix(eType);
-}
-HRESULT CGameInstance::Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc)
-{
-//	return m_pShadow->Ready_ShadowLight(Desc);
-	return S_OK;
-}
-HRESULT CGameInstance::Bind_Shadow_Resource(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName)
-{
-    return m_pShadow->Bind_Shadow_Resource(pShader, pViewName, pProjName, pFarName);
-}
-void CGameInstance::Update_ShadowLight_Transform(const _fvector& vAt)
-{
-	m_pShadow->Update_Transform(vAt);
-}
-#pragma endregion
-
 #pragma region GUIMANAGER
 ImGuiContext* CGameInstance::Get_ImGuiContext()
 {
@@ -815,6 +799,53 @@ HRESULT CGameInstance::Debug_Render_RCS()
 #endif
 #pragma endregion
 
+#pragma region SHADOW_MAP
+HRESULT CGameInstance::Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc)
+{
+	return m_pShadowMap->Setting_ShadowMap(MapDesc);
+}
+const _uint CGameInstance::Get_ShadowMapLayer(_uint iSectorIndex)
+{
+	return m_pShadowMap->Get_ShadowMapLayer(iSectorIndex);
+}
+const vector<BoundingBox*>& CGameInstance::Get_ShadowMapSectors()
+{
+	return m_pShadowMap->Get_ShadowMapSectors();
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector)
+{
+	return m_pShadowMap->Bind_ShadowMap_Resources(pShader, pViewName, pProjName, iSector);
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Resources_Renderer(CShader* pShader)
+{
+	return m_pShadowMap->Bind_ShadowMap_Resources(pShader);
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Buffer(_uint iBufferIndex)
+{
+	return m_pShadowMap->Bind_ShadowMap_Buffer(iBufferIndex);
+}
+
+HRESULT CGameInstance::Begin_ShadowMap()
+{
+	return m_pShadowMap->Begin_ShadowMap();
+}
+
+HRESULT CGameInstance::End_ShadowMap()
+{
+	return m_pShadowMap->End_ShadowMap();
+}
+
+#ifdef _DEBUG
+void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
+{
+	m_pShadowMap->Render(pShader, pVIBuffer);
+}
+#endif
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -867,7 +898,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
-	Safe_Release(m_pShadow);
+	Safe_Release(m_pShadowMap);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);

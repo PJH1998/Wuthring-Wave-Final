@@ -244,9 +244,6 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
-      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
       <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
     </Filter>
@@ -450,9 +447,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Shader.h">
       <Filter>01. Utility\04. Component\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Shadow.h">
-      <Filter>01. Utility\07. Shadow</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Sound_Manager.h">
       <Filter>00. System\02. Sound\Manager</Filter>
@@ -756,9 +750,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Shader.cpp">
       <Filter>01. Utility\04. Component\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Shadow.cpp">
-      <Filter>01. Utility\07. Shadow</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Sound_Manager.cpp">
       <Filter>00. System\02. Sound\Manager</Filter>
