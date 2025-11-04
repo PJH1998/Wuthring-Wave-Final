@@ -106,7 +106,6 @@
     <ClInclude Include="..\Public\RenderTarget.h" />
     <ClInclude Include="..\Public\Rigidbody.h" />
     <ClInclude Include="..\Public\Shader.h" />
-    <ClInclude Include="..\Public\Shadow.h" />
     <ClInclude Include="..\Public\Sound_Manager.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h" />
@@ -210,7 +209,6 @@
     <ClCompile Include="..\Private\RenderTarget.cpp" />
     <ClCompile Include="..\Private\Rigidbody.cpp" />
     <ClCompile Include="..\Private\Shader.cpp" />
-    <ClCompile Include="..\Private\Shadow.cpp" />
     <ClCompile Include="..\Private\Sound_Manager.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp" />

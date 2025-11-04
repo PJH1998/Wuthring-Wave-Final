@@ -38,6 +38,19 @@ namespace Engine
 		_float		fFar;
 	}SHADOW_LIGHT_DESC;
 
+	typedef struct tagShadowMapDesc
+	{
+		_uint iSectorSizeX;		// Texture Size
+		_uint iSectorSizeZ;		// Texture Size
+
+		_uint iNumSectorX;		// Sector
+		_uint iNumSectorZ;		// Sector
+
+		_float3 vCenterPos;
+		_float3 vExtents;
+		_float3 vLightDir;
+	}SHADOW_MAP_DESC;
+
 	typedef struct tagNotify
 	{
 		_float fTrackPosition;
