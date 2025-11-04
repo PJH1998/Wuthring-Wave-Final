@@ -44,13 +44,12 @@ namespace Client
 
 	typedef enum class ESkillType : _uint
 	{
-		NONE = 0,			// (비용 없음)
+		NONE = 0,	    // (비용 없음)
 		RESONANCE,		// 공명 게이지
 		AUGUSTA_POINT,	// 특수 원형 게이지
 		AUGUSTA_ULTI,	// 기본 궁극기 게이지
 		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
-		// CSV 파싱 실패 등을 위한 END
-		SKILL_TYPE_END
+		SKILL_TYPE_END // CSV 파싱 실패 등을 위한 END
 	}SKILL_TYPE;
 
 	typedef enum class ECostType : unsigned int
@@ -92,6 +91,27 @@ namespace Client
 		UIFLAG_SIMPLEMASK,
 		UIFLAG_ACTIVEFEEDBACK,
 		UIFLAG_END
+	};
+
+	enum class FONT_FLAG
+	{
+		FL_NONE				= 0,
+		FL_OUTLINE			= 1 << 0,
+		FL_GRAD				= 1 << 1,
+
+		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
+
+		FL_END				= 1 << 3
+	};
+
+	enum class FONT_DMG_PRESET
+	{
+		HEAL,
+		DARK,
+		ELECTRO,
+		FUSION,
+
+		END
 	};
 	
 	enum class  TEST_STATE : unsigned int

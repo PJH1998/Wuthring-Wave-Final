@@ -7,7 +7,9 @@
 #include "RoverState_Enum.h"
 #include "SpringCamera.h"
 #include "PlayerFactory.h"
+#include "Ability.h"
 #include "GameSystem.h"
+#include "PlayerStatus.h"
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -71,6 +73,15 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_iCurrentCharacterIdx = AUGUSTA;
     //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
+	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
+	Safe_AddRef(m_pPlayerStatus);
+
+	// 6. Ability 참조 제공
+	for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
+	{
+		if (nullptr != m_Characters[i])
+			m_Characters[i]->Set_Ability(m_pPlayerStatus->Get_Ability(i));
+	}
 
     return S_OK;
 }
@@ -98,6 +109,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 		m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
 
+
+	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
+	if (nullptr != m_pPlayerStatus)
+		m_pPlayerStatus->Update(fTimeDelta);
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -144,6 +159,19 @@ void CPlayer::Render_Shadow()
 
 }
 
+
+
+#pragma endregion
+
+#pragma region UI Interface
+// UI Transfer Current Ability Pointer
+CAbility* CPlayer::Get_AbilityCom(CHARACTERTYPE eCharacterType)
+{
+	if (NONE == eCharacterType)
+		return nullptr;
+
+	return m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom();
+}
 #pragma endregion
 
 void CPlayer::Player_KeyInput()
@@ -157,7 +185,7 @@ void CPlayer::Player_KeyInput()
 			m_eNextCharacter = CHARACTERTYPE::ROVER;
 			return;
 		}
-		
+
 	}
 	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
 	{
@@ -183,25 +211,8 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
-#endif // _DEBUG
-
-
-	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
-	//{
-	//	m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
-	//	//m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
-	//}
-	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
-	//{
-	//	m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
-	//	m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
-	//}
-	//if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
-	//{
-	//	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
-	//}
+#endif // _DEBUGs
 }
-
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
@@ -528,4 +539,5 @@ void CPlayer::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pColliderCom);
+	Safe_Release(m_pPlayerStatus);
 }

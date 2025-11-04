@@ -1,20 +1,16 @@
 ﻿#include "ClientPch.h"
 #include "Ability.h"
-#include "GameSystem.h"
 #include "GameInstance.h"
+#include "GameSystem.h"
 
 CAbility::CAbility(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CComponent { pDevice, pContext }
-	, m_pGameSystem { CGameSystem::GetInstance() }
 {
-	Safe_AddRef(m_pGameSystem);
 }
 
 CAbility::CAbility(const CAbility& Prototype)
 	: CComponent ( Prototype)
-	, m_pGameSystem { Prototype.m_pGameSystem }
 {
-	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CAbility::Initialize_Prototype()
@@ -61,6 +57,33 @@ void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
 	Read_Stat(statPath.c_str());
 }
 
+#pragma region UI Interface
+_float CAbility::Get_RemainingCooldown(const _string& strSkillName) const
+{
+	auto iter = m_mapSkillCooldowns.find(strSkillName);
+	return (iter != m_mapSkillCooldowns.end()) ? iter->second : 0.f;
+}
+
+_float CAbility::Get_MaxCooldown(const _string& strSkillName)
+{
+	const SKILL_INFO* pInfo = Get_SkillInfo(strSkillName);
+	return (pInfo) ? pInfo->fCoolDown : 0.f;
+}
+
+_float CAbility::Get_CostRatio(COST_TYPE eType) const
+{
+	_float fCost = Get_Cost(eType);
+	return (m_fCostMax > 0.f) ? fCost / m_fCostMax : 0.f;
+}
+
+_float CAbility::Get_HpRatio() const
+{
+	return m_CharacterInfo.fMaxHp > 0.f ? m_CharacterInfo.fHp / m_CharacterInfo.fMaxHp : 0.f;
+}
+
+#pragma endregion
+
+
 
 
 const SKILL_INFO* CAbility::Get_SkillInfo(const _string& strSkillName)
@@ -87,8 +110,10 @@ _float CAbility::Get_Cost(COST_TYPE eType) const
 	return m_Costs[iType];
 }
 
+// 사용 전에 무조건 Check_SkillState호출?
 SKILL_STATE CAbility::TryUseSkill(const _string& strSkillName)
 {
+	
 	// 1. 먼저 스킬 사용이 가능한지 상태를 체크
 	const SKILL_STATE eState = Check_SkillState(strSkillName);
 
@@ -147,7 +172,12 @@ void CAbility::Debug_FullCost()
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
 	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
 	for (_uint i = 1; i < iEnd; ++i)
+	{
+		if (i == 4)
+			continue;
 		m_Costs[i] = m_fCostMax;
+		
+	}
 }
 
 void CAbility::Print_Cost()
@@ -175,7 +205,7 @@ void CAbility::Print_CoolTime()
 
 void CAbility::Read_Skill(const _char* pFilePath)
 {
-	vector<vector<_string>> data = m_pGameSystem->Load_CSV(pFilePath);
+	vector<vector<_string>> data = CGameSystem::GetInstance()->Load_CSV(pFilePath);
 
 	if (data.size() < 2)
 	{
@@ -211,7 +241,7 @@ void CAbility::Read_Skill(const _char* pFilePath)
 
 void CAbility::Read_Stat(const _char* pFilePath)
 {
-	vector<vector<_string>> data = m_pGameSystem->Load_CSV(pFilePath);
+	vector<vector<_string>> data = CGameSystem::GetInstance()->Load_CSV(pFilePath);
 
 	if (data.size() < 2)
 	{
@@ -236,6 +266,7 @@ void CAbility::Read_Stat(const _char* pFilePath)
 	m_CharacterInfo.fAttackAddMin = stof(data[1][10]);
 	m_CharacterInfo.fAttackAddMax = stof(data[1][11]);
 }
+
 
 SKILL_STATE CAbility::Check_SkillState(const _string& strSkillName, const _string& strPrevName)
 {
@@ -336,7 +367,6 @@ CComponent* CAbility::Clone(void* pArg)
 void CAbility::Free()
 {
 	CComponent::Free();
-	Safe_Release(m_pGameSystem);
 
 	m_mapSkills.clear();
 	m_mapSkillChain.clear();

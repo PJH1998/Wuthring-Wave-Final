@@ -21,9 +21,6 @@ public:
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
-
-
-
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
 	{
 		class CPlayer* pOwner = { nullptr };
@@ -62,6 +59,7 @@ public:
 	void Set_InputController(class CInputController* pInputControllerCom);
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
+	void Set_Ability(class CAbility* pAbilityCom);
 #pragma endregion
 
 
@@ -166,20 +164,9 @@ public:
 
 #pragma region UI Interface 
 public:
-	
-	//const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-	//void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
-	//_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
-	//void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
-
-	//void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
-	//_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
-	//void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
-
-	//void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
-	//_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
-	//void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
-
+	// Ability 업데이트는 플레이어의 Priority Update에서
+	void Ability_Update(_float fTimeDelta);
+	class CAbility* Get_AbilityCom();
 	void Sync_UI(); // UI
 #pragma endregion
 

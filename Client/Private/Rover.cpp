@@ -344,9 +344,9 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
 
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
-		, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
-		CRASH("Ability");
+	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
+	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
+	//	CRASH("Ability");
 }
 
 void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)

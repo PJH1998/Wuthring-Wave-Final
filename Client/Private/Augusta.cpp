@@ -48,7 +48,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
-	Register_AbilityFiles(pDesc->strAbilityFolderPath);
+
+	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
 	m_pBayonet->SetActivate(false);
@@ -77,8 +78,8 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
 
-	// 3. Ability Update();
-	m_pAbillityCom->Update(fTimeDelta);
+	//// 3. Ability Update();
+	//m_pAbillityCom->Update(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -395,9 +396,9 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         CRASH("StateMachine");
 
 
-	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
-		, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
-		CRASH("Ability");
+	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
+	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
+	//	CRASH("Ability");
 
 }
 

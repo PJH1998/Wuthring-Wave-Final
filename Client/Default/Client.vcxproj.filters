@@ -103,9 +103,6 @@
     <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
       <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
-      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
     </Filter>
@@ -195,6 +192,12 @@
     </Filter>
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
+      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\UIHelper">
+      <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\SkyBox">
       <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
@@ -483,6 +486,15 @@
     <ClInclude Include="..\Public\RoverGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_ControlHelper.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_FontPreset.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_StatusSyncer.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClInclude>
@@ -523,6 +535,7 @@
     <ClInclude Include="..\Public\FS_Scythe.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -746,6 +759,15 @@
     <ClCompile Include="..\Private\RoverGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_ControlHelper.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_FontPreset.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_StatusSyncer.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\RoverAirJump.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClCompile>
@@ -783,6 +805,7 @@
     <ClCompile Include="..\Private\Ability.cpp">
       <Filter>04. Component\03. Ability</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClCompile>
@@ -818,6 +841,9 @@
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl">

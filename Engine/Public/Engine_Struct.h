@@ -263,6 +263,66 @@ namespace Engine
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
 
+#pragma region FONT
+	typedef struct tFontGlyph
+	{
+		_uint   iCodepoint;         // 유니코드 코드포인트
+		_short  sOffsetX;           // bearingX
+		_short  sOffsetY;           // bearingY (상향 +)
+		_short  sWidth;             // bitmap.width
+		_short  sHeight;            // bitmap.rows
+		_short  sAdvance;           // advance.x >> 6
+		_float  fU0, fV0, fU1, fV1; // 아틀라스 UV
+	}FTCUSTOM_FONT_GLYPH;
+
+	typedef struct tFontInfo
+	{
+		FT_Face                                     pFace;                      // 폰트 객체
+
+		_int                                        iPixelHeight;               // 설정한 픽셀 사이즈
+		ID3D11ShaderResourceView* pAtlasSRV;
+		ID3D11Texture2D* pAtlasTex;
+		ID3D11SamplerState* pSampler;
+		unordered_map<_uint, FTCUSTOM_FONT_GLYPH>   mapGlyphs;                  // 코드포인트→글리프
+
+		//  iAtlasW / iAtlasH   : 아틀라스(폰트 텍스처)의 전체 너비·높이.
+		//  iPenX / iPenY       : 현재 글리프를 채워 넣을 "펜" 위치(다음 글리프 배치 시작 좌표).
+		//  iRowH               : 현재 줄(row)에서 가장 높은 글리프의 높이(줄바꿈 간격 계산용).
+		_int                                        iAtlasW, iAtlasH, iPenX, iPenY, iRowH;
+		_bool                                       isHasKerning;
+	}FTCUSTOM_FONT;
+
+
+	typedef struct tFontSingleDesc
+	{
+		_wstring strFontTag;
+		_wstring strText;
+
+		_float2 vScreenPos;
+		_float  fScale;
+
+		_float2 vLifeTime;
+		_int	iShaderFlag;
+
+		// for shader
+		_float4 vColor;				// Font Color
+
+		// for shader : additional info for extra pass 
+		// - [Flag 1] outline
+		_float4 vOutlineColor;
+		_float fFontOutlineWidth;
+		// - [Flag 2] grad
+		_float4 vFontGradColor;		// Right Dir
+		// - [Flag 3] fixed
+		_bool isTargetExist = false;
+		_float4 vTargetWorldPos;
+
+
+		//..
+	}FONT_SINGLEDESC;
+
+#pragma endregion
+
 	// Default 초기화 용도.
 	inline const GPU_BLEND_INFO G_DefaultBlendInfo = {};
 }

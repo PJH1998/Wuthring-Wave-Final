@@ -16,6 +16,9 @@
 #include "Effect_Prefab.h"
 #include "Ability.h"
 
+
+#include "CustomFont.h"
+
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
 	m_pGameSystem{ CGameSystem::GetInstance() }
@@ -198,10 +201,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CRASH("Shader_VtxAnimMesh");
 
 	// Shader_UI_VtxPosTex ..Shader for UI
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-		CRASH("Shader_UI_VtxPosTex");
-
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
+	//	CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+	//	CRASH("Shader_UI_VtxPosTex");
+	
 	// Shader_VtxSkyBox
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
@@ -240,6 +243,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CSpringCamera::Create(m_pDevice, m_pContext))))
 		CRASH("SpringCamera");
 
+	//
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Font"),
+		CCustomFont::Create(m_pDevice, m_pContext))))
+		CRASH("Text Prototype Create Failed.");
+		
 	// Skybox
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"),
 		CSkyBox::Create(m_pDevice, m_pContext))))
@@ -305,8 +313,8 @@ void CMainApp::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
-	Safe_Release(m_pGameSystem);
-
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
+
+	Safe_Release(m_pGameSystem);
 }

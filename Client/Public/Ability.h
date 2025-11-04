@@ -15,16 +15,30 @@ public:
 	virtual void Update(_float fTimeDelta);
 	void Register_AllAbilityFiles(const _string& strFolderPath);
 
+
+#pragma region UI Interface
+public:
+	_float Get_RemainingCooldown(const _string& strSkillName) const;  // 기존
+	_float Get_MaxCooldown(const _string& strSkillName);        // 기존
+	_float Get_CostRatio(COST_TYPE eType) const;
+	_float Get_HpRatio() const;
+#pragma endregion
+
+
+
+
+#pragma region USE Character State Machine
 public:
 	const SKILL_INFO* Get_SkillInfo(const _string& strSkillName);
 	const CHARACTER_INFO& Get_CharacterInfo() const { return m_CharacterInfo; }
 	_float Get_Cost(COST_TYPE eType) const;
-	
 	SKILL_STATE Check_SkillState(const _string& strSkillName, const _string& strPrevName = "");
 	SKILL_STATE TryUseSkill(const _string& strSkillName); // 스킬 사용 시도
-
 	void Set_Cost(COST_TYPE eType, _float fValue);
 	void Add_Cost(COST_TYPE eType, _float fvalue);
+
+#pragma endregion
+
 
 
 #ifdef _DEBUG
@@ -37,7 +51,6 @@ public:
 
 
 private:
-	class CGameSystem* m_pGameSystem = { nullptr };
 	// 1. 스킬 원본 데이터를 저장 (Key: 스킬 이름, Value: 스킬 정보)
 	unordered_map<_string, SKILL_INFO> m_mapSkills;
 
@@ -49,6 +62,7 @@ private:
 
 	CHARACTER_INFO m_CharacterInfo = {};
 	_string m_strPrevSkillName = {};
+
 
 	/*
 	* 소모값 기본 0.f으로 소유
@@ -62,7 +76,7 @@ private:
 private:
 	void Read_Skill(const _char* pFilePath);
 	void Read_Stat(const _char* pFilePath);
-
+	const vector<vector<_string>>& Load_CSV(const _char* pFolderPath);
 
 private:
 	

@@ -27,6 +27,9 @@
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
 
+#define KSTA_DEBUG_ENABLEFONTMGR
+
+
 IMPLEMENT_SINGLETON(CGameInstance)
 
 CGameInstance::CGameInstance()
@@ -45,8 +48,11 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -122,17 +128,31 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Priority_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pObject_Manager->Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Late_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
+
+
+
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
 	m_pOctoTree->Update();
@@ -165,6 +185,12 @@ HRESULT CGameInstance::Draw()
 {
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
+
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	ASSERT_CRASH(m_pFont_Manager);
+	//m_pFont_Manager->Render();
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
@@ -236,10 +262,27 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath, iPixelHeight);
 }
-HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//{
+//	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+//}
+_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
 {
-	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
 }
+_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
+{
+	return m_pFont_Manager->Draw_Font(pSingleDesc);
+}
+void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
+{
+	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
+}
+void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
+{
+	m_pFont_Manager->Add_FloatingText(tDesc);
+}
+
 #pragma endregion
 
 #pragma region LEVEL_MANAGER
@@ -858,7 +901,10 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);

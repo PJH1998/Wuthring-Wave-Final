@@ -1,5 +1,8 @@
 ﻿#include "ClientPch.h"
 #include "Level_Test_UI.h"
+#include "GameSystem.h"
+
+#define KSTA_FONTTEXTTEST
 
 CLevel_Test_UI::CLevel_Test_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice, pContext)
@@ -33,6 +36,73 @@ HRESULT CLevel_Test_UI::Initialize()
 void CLevel_Test_UI::Update(_float fTimeDelta)
 {
     SetWindowText(g_hWnd, TEXT("Test_UI"));
+
+
+
+
+
+#ifdef KSTA_FONTTEXTTEST
+	static _float fTimeElapsed = 0.f;
+	const _float fTimeCheckCycle = 1.f;
+
+	fTimeElapsed += fTimeDelta;
+	if (fTimeElapsed >= fTimeCheckCycle)
+	{
+#ifdef old
+		fTimeElapsed = 0.f;
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { 0.f, 0.f }	, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { 0.5f, 0.5f }	, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		//m_pGameInstance->Add_FloatingText(L"WW_Medium", L"This is Test", { -0.5f, -0.5f }, 1.f, 3.f, 0, {.5f, .5f, .5f, 1.f});
+		_float4 vRandColor = _float4{
+			m_pGameInstance->Rand_Normal(),
+			m_pGameInstance->Rand_Normal(),
+			m_pGameInstance->Rand_Normal(),
+			1.f //m_pGameInstance->Rand_Normal()
+		};
+		_float2 vRandPos = _float2{
+			m_pGameInstance->Rand(-100.f, +100.f),
+			m_pGameInstance->Rand(-100.f, +100.f)
+		};
+		FONT_SINGLEDESC tDesc = {};
+		tDesc.strFontTag = L"WW_Bold";
+		tDesc.strText = L"Test 테스트입니다.";
+		tDesc.vScreenPos = { 820.f + vRandPos.x, 545.f + vRandPos.y };
+		tDesc.fScale = 1.f;
+		tDesc.vLifeTime = { 0.f, 10.f };
+		tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
+		tDesc.vColor = vRandColor;
+
+		tDesc.vOutlineColor = { 1.f, 1.f, 1.f, .9f };
+		tDesc.fFontOutlineWidth = 3.f;
+
+		//m_pGameInstance->Add_FloatingText(L"WW_Bold", L"Test 테스트입니다.", { 920.f + vRandPos.x, 1045.f + vRandPos.y }, 1.f, 10.f, 0, vRandColor);
+		m_pGameInstance->Add_FloatingText(tDesc);
+#endif // old
+
+
+		CGameSystem::GetInstance()->Render_Damage(_float4(0.f, 0.f, 0.f, 1.f), 153, ENUM_CLASS(FONT_DMG_PRESET::HEAL));
+	}
+#endif // KSTA_FONTTEXTTEST
+
+
+	static _bool isToggled = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+	{
+		isToggled = !isToggled;
+
+
+		if (isToggled)
+		{
+			CGameSystem::GetInstance()->HUD_FadeOut();
+		}
+		else
+		{
+			CGameSystem::GetInstance()->HUD_FadeIn();
+		}
+	}
+
+
 }
 
 void CLevel_Test_UI::Render()
