@@ -18,6 +18,11 @@ cbuffer FontColorCB : register(b1)
     float4 g_FontColor;         // [16] RGB + A
 };
 
+//float4 g_TargetWorldPos;
+//float4x4 g_ViewMatrix;
+//float4x4 g_ProjMatrix;
+//float4 g_CamPos;
+
 
 
 // Flag Variables..
@@ -37,11 +42,12 @@ cbuffer FontGrad : register(b4)
 {
     float4 g_FontGradColor;         // [16] RGBA Gradiant Color (->)
 }
-cbuffer FontFixed : register(b5)
-{
-    float4 g_TargetWorldPos;                // [16] RGBA Gradiant Color (->)
-    float4x4 g_ViewMatrix, g_ProjMatrix;    // [256 * 2]  Camera Pipeline
-}
+//cbuffer FontFixed : register(b5)
+//{
+//    float4 g_TargetWorldPos;                // [16] RGBA Gradiant Color (->)
+//    float4 g_CamPos;                        // [16] Camera Position
+//    float4x4 g_ViewMatrix, g_ProjMatrix;    // [256 * 2]  Camera Pipeline
+//}
 
 
 
@@ -92,17 +98,27 @@ struct VS_OUT
 // 정점 셰이더: 화면 좌표를 NDC(-1~1)로 변환
 VS_OUT VS_Font(VS_IN In)
 {
-    VS_OUT Out;
-    float2 ndc = (In.vPosition / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
-    Out.vPosition = float4(ndc, 0, 1);
-    Out.vTexcoord = In.vTexcoord;
+    VS_OUT Out = (VS_OUT) 0;
+
     
     if (g_FontFlag & FL_FIXED)
     {
-        
-        
+
+    }
+
+    
+    
+    if ((g_FontFlag & FL_NONE) ||
+        (g_FontFlag & FL_OUTLINE) ||
+        (g_FontFlag & FL_GRAD))
+    {
+        float2 ndc = (In.vPosition / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
+        Out.vPosition = float4(ndc, 0, 1);
+        Out.vTexcoord = In.vTexcoord;
     }
     
+    
+
     
     
     return Out;
@@ -132,6 +148,9 @@ PS_OUT PS_Font(PS_IN In)
     float2 uv = In.vTexcoord;
     float alphaCenter = g_FontAtlas.Sample(FontSampler, uv).r;          // 현재 바라보는 픽셀 색상에서 a값 추출
         
+    // test
+    Out.vColor = float4(1.0f, 0.f, 1.0f, 1.0f);
+    return Out;
     
 
     float fillMask = smoothstep(0.5f, 0.8f, alphaCenter);             // 글자에 색상 채워진 정도를 저장. 경계 부드럽게

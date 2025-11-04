@@ -6,6 +6,7 @@
 #include "GameInstance.h"
 
 #define KSTA_DEBUGATLASTEST
+#define KSTA_FONTSCREEN_TO3D
 
 CFont_Manager::CFont_Manager(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext }
@@ -75,19 +76,6 @@ void CFont_Manager::Add_FloatingText(const _wstring& strFontTag, const _wstring&
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	CCustomFont* pCustomFont = dynamic_cast<CCustomFont*>(m_pGameInstance->Clone_Prototype(0, L"Prototype_GameObject_Font", PROTOTYPE::GAMEOBJECT, &fontDesc));
 	m_vecActiveFonts.push_back(pCustomFont);
-
-
-
-	//FONT_SINGLEDESC tDesc = {};
-	//tDesc.strFontTag = strFontTag;
-	//tDesc.strText = strText;
-	//tDesc.vScreenPos = vScreenPos;
-	//tDesc.fScale = fScale;
-	//tDesc.vLifeTime = _float2{0.f, fLifeTime};
-	//tDesc.iPassIndex = iPassIndex;
-	//tDesc.vColor = vColor;
-	//
-	//m_vecActiveFonts.push_back(tDesc);
 }
 
 void CFont_Manager::Add_FloatingText(FONT_SINGLEDESC tDesc)
@@ -308,6 +296,9 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 	_float fFontOutlineWidth	= pDesc->fFontOutlineWidth;
 	// - grad
 	_float4 vFontGradColor		= pDesc->vFontGradColor;		// Right Dir
+	// - Fixed
+	_bool isTargetExist			= pDesc->isTargetExist;
+	_float4 vTargetWorldPos		= pDesc->vTargetWorldPos;		// Right Dir
 
 
 
@@ -318,8 +309,37 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 
 	vector<VTXUITEXT> vecVertices;
 	vecVertices.reserve(512); // 대략 문자 80~100개 정도 버퍼 확보
+
 	_float penX = vScreenPos.x;
 	_float penY = vScreenPos.y;
+
+#ifdef KSTA_FONTSCREEN_TO3D
+	if (isTargetExist)
+	{
+		_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
+		_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
+
+		_float3 world = { vTargetWorldPos.x, vTargetWorldPos.y, vTargetWorldPos.z };   // (x,y,z)
+		_matrix view = XMLoadFloat4x4(&matPipelineView);
+		_matrix proj = XMLoadFloat4x4(&matPipelineProj);
+		_vector pos = XMVectorSet(world.x, world.y, world.z, 1.0f);
+
+		pos = XMVector3Transform(pos, view);
+		pos = XMVector3Transform(pos, proj);
+		_vector ndc = pos / XMVectorSplatW(pos);
+
+		_float3 ndc3;
+		XMStoreFloat3(&ndc3, ndc);
+		_float screenX = (ndc3.x * 0.5f + 0.5f) * m_iWinSizeX;     // 화면 해상도 X
+		_float screenY = (1.0f - (ndc3.y * 0.5f + 0.5f)) * m_iWinSizeY; // Y 반전
+
+		pDesc->vScreenPos = _float2(screenX, screenY);
+	}
+#endif // KSTA_FONTSCREEN_POSTEST
+
+
+
+
 	_uint prevCode = 0;
 
 	for (_uint i = 0; pText[i] != 0; )
@@ -399,8 +419,11 @@ _bool CFont_Manager::Draw_Font(FONT_SINGLEDESC* pDesc)
 	m_pShaderCom->Bind_Value("g_FontGradColor", &vFontGradColor, sizeof(vFontGradColor));
 	_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 	_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
-	m_pShaderCom->Bind_Value("g_ViewMatrix", &matPipelineView, sizeof(matPipelineView));
-	m_pShaderCom->Bind_Value("g_ProjMatrix", &matPipelineProj, sizeof(matPipelineProj));
+	_float4 vCamPos = *m_pGameInstance->Get_CamPos();;
+	//m_pShaderCom->Bind_Value("g_TargetWorldPos", &vTargetWorldPos, sizeof(vTargetWorldPos));
+	//m_pShaderCom->Bind_Value("g_ViewMatrix", &matPipelineView, sizeof(matPipelineView));
+	//m_pShaderCom->Bind_Value("g_ProjMatrix", &matPipelineProj, sizeof(matPipelineProj));
+	//m_pShaderCom->Bind_Value("g_CamPos", &vCamPos, sizeof(vCamPos));
 
 	// 상수.. Atlas Texel
 	ID3D11Resource* pRes = nullptr;

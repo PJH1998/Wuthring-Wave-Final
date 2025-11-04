@@ -263,6 +263,7 @@ namespace Engine
 		// - [Flag 2] grad
 		_float4 vFontGradColor;		// Right Dir
 		// - [Flag 3] fixed
+		_bool isTargetExist = false;
 		_float4 vTargetWorldPos;
 
 

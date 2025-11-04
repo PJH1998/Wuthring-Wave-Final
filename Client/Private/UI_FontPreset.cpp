@@ -15,10 +15,11 @@ HRESULT CUI_FontPreset::Initialize()
 	// Const
 	FONT_SINGLEDESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
-	tDesc.fScale			= 50.f;	
+	tDesc.fScale			= 5.f;	
 	tDesc.vLifeTime			= { 0.0f, 500.0f }; // ksta
 	tDesc.fFontOutlineWidth	= 3.f;
-	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_FIXED);
+	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE);//| ENUM_CLASS(FONT_FLAG::FL_FIXED);
+	tDesc.isTargetExist		= false;
 
 	// Const per Types..
 	// - Heal (회복)
@@ -54,7 +55,7 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 	FONT_SINGLEDESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
 	tDesc.strText			= to_wstring(iDamage);
-	tDesc.vScreenPos		= { 500.f, 500.f };
+	tDesc.vScreenPos		= { 500.f, 500.f }; 
 	tDesc.vTargetWorldPos	= vTargetPos;
 	//tDesc.vFontGradColor	= {};
 
