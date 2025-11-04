@@ -36,7 +36,7 @@ public:
 	// gpu
 	void Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, CTransform* pTransform, _uint* pState, _bool& m_isAnimFinished, _float fTimeDelata);
 	
-	void Reset(_string& strAnimTag);
+	void Reset(CModel* pModelCom, _string& strAnimTag);
 
 #ifdef _DEBUG
 	void Create_AnimStates(const vector<_string>& AnimationNames);

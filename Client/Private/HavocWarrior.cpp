@@ -27,7 +27,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
-	m_fAttackCoolTime[1] = 30.f;
+	m_fAttackCoolTime[1] = 20.f;
 	m_fAttackCoolTime[2] = 30.f;
 #pragma endregion
 
@@ -55,8 +55,7 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
-	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
+	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 	//_float temp;
@@ -245,6 +244,25 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
 		m_fIdleAcc = m_fIdleDuration;
+	}
+}
+
+void CHavocWarrior::After_Condition(_float fTimeDelta)
+{
+	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
+	else if (m_iState & (ENUM_CLASS(TEST_STATE::MOVE_FORWARD) | ENUM_CLASS(TEST_STATE::MOVE_BACKWARD) | ENUM_CLASS(TEST_STATE::MOVE_LEFT) | ENUM_CLASS(TEST_STATE::MOVE_RIGHT)))
+	{
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
+	}
+	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_3)))
+	{
+		if (m_fDistance < 4.f)
+		{
+			m_iState &= ~(ENUM_CLASS(TEST_STATE::ATTACK_3));
+		}
+		else
+			m_iState |= (ENUM_CLASS(TEST_STATE::ATTACK_3));
 	}
 }
 

@@ -10,29 +10,24 @@ class CAnimMachine;
 NS_END
 
 NS_BEGIN(Client)
-class CGgobul final : public CActor
+class CFS_Scythe final : public CActor
 {
 public:
-	enum GGOBULTYPE { HEAD, HAMMER, KNIFE, END};
-	typedef struct tagGgobulDesc : public CActor::ACTOR_DESC
+	typedef struct tagScytheDesc : public CActor::ACTOR_DESC
 	{
-	}GGOBUL_DESC;
+	}SCYTHE_DESC;
 
-	typedef struct tagGgobulReset
+	typedef struct tagsScytheReset
 	{
-		//const _float4x4* pWorldMatrix;
-		//_float3 vInitPosition{};
-		//_float3 vInitDirection{};
-		GGOBULTYPE eType;
 		_float fChangeTrackPos;
 		_string strPatternKey;
 
-	}GGOBUL_RESET;
+	}SCYTHE_RESET;
 
 private:
-	explicit CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CGgobul(const CGgobul& Prototype);
-	virtual ~CGgobul() = default;
+	explicit CFS_Scythe(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CFS_Scythe(const CFS_Scythe& Prototype);
+	virtual ~CFS_Scythe() = default;
 
 public:
 	virtual	HRESULT				Initialize_Prototype() override;
@@ -47,26 +42,26 @@ public:
 	virtual void	Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
+
 private:
-	CRigidbody*			m_pAttackVolume[GGOBULTYPE::END] = {nullptr,};
+	CRigidbody*			m_pAttackVolume[5] = {nullptr,};
 	CAnimMachine*		m_pAnimMachineCom = { nullptr };
 
-	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
-	const _float4x4*		m_pAttackTransform = { nullptr };
+	const _float4x4*		m_pAttackTransform[5] = {nullptr,};
 	_float4x4				m_BoneCombindMatrix{};
-	vector<_bool>			m_MeshEnables;
 
 	_string		m_strAnimKey;
 	_uint		m_iState{};
+	_float		m_fLifeTime{};
 
 	_float m_fAttackDamage{};
 
 private:
 	void			Bind_Resources();
-	void			Ready_Component(GGOBUL_DESC* pDesc);
+	void			Ready_Component(SCYTHE_DESC* pDesc);
 	void			OnCollide_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 public:
-	static CGgobul* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CFS_Scythe* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	CGameObject* Clone(void* pArg) override;
 	virtual	void Free() override;
 };

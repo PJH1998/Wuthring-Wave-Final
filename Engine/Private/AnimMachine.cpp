@@ -86,7 +86,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 	if(0 != m_strCurrentAnimTag.compare(strAnimTag))
 	{
 		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
-
+		pModelCom->Clear_Animation(m_strCurrentAnimTag);
 		// Enter 새로운 상태
 		CAnimState::ANIMSTATE_DESC Desc{};
 		m_AnimStates[strAnimTag]->Enter(pModelCom, pState, &m_strCurrentAnimTag, Desc);
@@ -134,6 +134,8 @@ void CAnimMachine::Update(CModel* pModelCom, CTransform* pTransform, _uint* pSta
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
+	if (m_isLoop)
+		isAnimFinished = true;
 }
 
 //gpu
@@ -165,11 +167,14 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
-void CAnimMachine::Reset(_string& strAnimTag)
+void CAnimMachine::Reset(CModel* pModelCom, _string& strAnimTag)
 {
 	if (m_AnimStates.end() == m_AnimStates.find(strAnimTag))
 		return;
-
+	for (auto& Pair : m_AnimStates)
+	{
+		pModelCom->Clear_Animation(Pair.first);
+	}
 	CAnimState::ANIMSTATE_DESC Desc{};
 	m_AnimStates[strAnimTag]->Enter(nullptr, nullptr, &m_strCurrentAnimTag, Desc);
 
