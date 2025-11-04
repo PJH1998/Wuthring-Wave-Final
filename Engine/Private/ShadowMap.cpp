@@ -427,7 +427,6 @@ void CShadowMap::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-
 	for (auto& pBounding : m_Boundings)
 		Safe_Delete(pBounding);
 	m_Boundings.clear();
@@ -435,7 +434,4 @@ void CShadowMap::Free()
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
 	Safe_Release(m_pConstantBuffer);
-
-	Safe_Release(m_pBackBuffer);
-	Safe_Release(m_pOriginalDSV);
 }
