@@ -25,6 +25,14 @@ HRESULT CAbility::Initialize_Clone(void* pArg)
 	if (FAILED(CComponent::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_UISlots.reserve(5);
+	m_Keys = { "LB", "T", "E", "Q", "R" };
+
+
+	m_CharacterInfo = {
+		""
+	};
+
 	return S_OK;
 }
 
@@ -46,6 +54,9 @@ void CAbility::Update(_float fTimeDelta)
 
 	// 매프레임 Stamina 자동 회복. // 초당 10
 	Add_Cost(COST_TYPE::STAMINA, fTimeDelta * 10.f);
+
+	// UI 슬롯 업데이트
+	UISlotUpdate(fTimeDelta);
 }
 
 void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
@@ -57,7 +68,54 @@ void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
 	Read_Stat(statPath.c_str());
 }
 
+void CAbility::UISlotUpdate(_float fTimeDelta)
+{
+	// UI 슬롯 업데이트 (매 프레임 재계산)
+	m_UISlots.clear();  // 기존 내용 지우기 (재사용)
+
+	for (const auto& strKey : m_Keys) {
+		UISKILL_SLOT slot;
+		slot.strKeyInput = strKey;
+
+		// 1. 현재 아이콘에 스킬 결정: 체인 우선 > 기본 (기존 로직 동일)
+		_string strSkill = "";
+		if (!m_strPrevSkillName.empty()) {
+			auto iter = m_mapSkillChain.find(m_strPrevSkillName);
+			if (iter != m_mapSkillChain.end()) {
+				_string chainSkill = iter->second;
+				const SKILL_INFO* pChainInfo = Get_SkillInfo(chainSkill);
+				if (pChainInfo && pChainInfo->strKeyInput == strKey) {
+					strSkill = chainSkill;
+				}
+			}
+		}
+		if (strSkill.empty()) {
+			auto defaultIter = m_mapKeyToDefaultSkill.find(strKey);
+			if (defaultIter != m_mapKeyToDefaultSkill.end()) {
+				strSkill = defaultIter->second;
+			}
+		}
+		slot.strSkillName = strSkill;
+
+		// 2. 상태/비율 계산 (기존 로직 동일)
+		if (!strSkill.empty()) {
+			slot.eState = Check_SkillState(strSkill, m_strPrevSkillName);
+			slot.fCooldownRatio = Get_RemainingCooldown(strSkill) / Get_MaxCooldown(strSkill);
+			const SKILL_INFO* pInfo = Get_SkillInfo(strSkill);
+			slot.fCostRatio = Get_CostRatio(pInfo->eCostType);
+		}
+		else {
+			slot.eState = SKILL_STATE::NOT_EXIST;
+			slot.fCooldownRatio = 0.f;
+			slot.fCostRatio = 0.f;
+		}
+
+		m_UISlots.push_back(slot);
+	}
+}
+
 #pragma region UI Interface
+// 지금 쿨타임 돌고 있는 스킬들 쿨타임 검색.
 _float CAbility::Get_RemainingCooldown(const _string& strSkillName) const
 {
 	auto iter = m_mapSkillCooldowns.find(strSkillName);
@@ -70,6 +128,7 @@ _float CAbility::Get_MaxCooldown(const _string& strSkillName)
 	return (pInfo) ? pInfo->fCoolDown : 0.f;
 }
 
+// Cost 
 _float CAbility::Get_CostRatio(COST_TYPE eType) const
 {
 	_float fCost = Get_Cost(eType);
@@ -146,25 +205,42 @@ SKILL_STATE CAbility::TryUseSkill(const _string& strSkillName)
 	return SKILL_STATE::READY;
 }
 
-void CAbility::Set_Cost(COST_TYPE eType, _float fValue)
+void CAbility::Set_Cost(COST_TYPE eType, _float fCost)
 {
 	_uint iType = ENUM_CLASS(eType);
 
 	if (iType >= m_Costs.size())
 		return;
 
-	m_Costs[iType] = min(fValue, m_fCostMax);
+	m_Costs[iType] = min(fCost, m_fCostMax);
 }
 
-void CAbility::Add_Cost(COST_TYPE eType, _float fValue)
+void CAbility::Add_Cost(COST_TYPE eType, _float fCost)
 {
 	_uint iType = ENUM_CLASS(eType);
 
 	if (iType >= m_Costs.size())
 		return;
 
-	m_Costs[iType] = max(m_Costs[iType] + fValue, m_fCostMax);
+	m_Costs[iType] = max(m_Costs[iType] + fCost, m_fCostMax);
 }
+
+void CAbility::Set_Hp(_float fHp)
+{
+	m_CharacterInfo.fHp = fHp;
+}
+
+void CAbility::Add_Hp(_float fHp)
+{
+	m_CharacterInfo.fHp += fHp;
+
+	// 0보다 아래로 안가도록.
+	m_CharacterInfo.fHp = max(0.f, m_CharacterInfo.fHp);
+
+	// MaxHp보다 안커지도록.
+	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
+}
+
 
 #ifdef _DEBUG
 void CAbility::Debug_FullCost()
@@ -236,6 +312,16 @@ void CAbility::Read_Skill(const _char* pFilePath)
 		if (eSkill.strPrevName != "None" && !eSkill.strPrevName.empty())
 			m_mapSkillChain.emplace(eSkill.strPrevName, eSkill.strSkillName);
 
+		// 키 매핑 저장 (기본)
+		if (eSkill.strKeyInput != "NONE" && eSkill.strKeyInput != "WB") {
+			m_mapKeyToDefaultSkill[eSkill.strKeyInput] = eSkill.strSkillName;
+		}
+
+		// 체인 매핑 (PrevName 기반)
+		if (eSkill.strPrevName != "None" && !eSkill.strPrevName.empty()) {
+			m_mapSkillChain[eSkill.strPrevName] = eSkill.strSkillName;
+		}
+
 	}
 }
 
@@ -270,7 +356,6 @@ void CAbility::Read_Stat(const _char* pFilePath)
 
 SKILL_STATE CAbility::Check_SkillState(const _string& strSkillName, const _string& strPrevName)
 {
-
 	const SKILL_INFO* pSkillInfo = Get_SkillInfo(strSkillName);
 
 	// 1. 스킬이 존재하는가?
@@ -335,8 +420,6 @@ COST_TYPE CAbility::ConvertCostType(const _string& strCostType)
 	COST_TYPE eCostType = static_cast<COST_TYPE>(stoul(strCostType));
 	return eCostType;
 }
-
-
 
 CAbility* CAbility::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

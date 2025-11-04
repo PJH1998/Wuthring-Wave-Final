@@ -1,11 +1,5 @@
 #include "Engine_Shader_State.hlsli"
 
-// Emissive �ּ�ġ
-// Blur Weight
-float g_fWeights[13] =
-{
-    0.020597f, 0.037981f, 0.062950f, 0.093995f, 0.127324f, 0.153170f, 0.163967f, 0.153170f, 0.127324f, 0.093995f, 0.062950f, 0.037981f, 0.020597f
-};
 
 float g_fLUT_Size = 16.f;
 
@@ -25,4 +19,18 @@ float Luminance(float3 vColor)
     fWeight = (vColor.r * g_fLuminence[0]) + (vColor.g * g_fLuminence[1]) + (vColor.b * g_fLuminence[2]);
     
     return fWeight;
+}
+
+bool IsInNDC(float4 vProjPos)
+{
+    if (vProjPos.x > 1.f || vProjPos.x < -1.f)
+        return false;
+    
+    if (vProjPos.y > 1.f || vProjPos.y < -1.f)
+        return false;
+    
+    if (vProjPos.z > 1.f || vProjPos.z < 0.f)
+        return false;
+    
+    return true;
 }

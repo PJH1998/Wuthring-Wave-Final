@@ -269,19 +269,6 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
     }
 }
 
-void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
-{
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
-		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
-    if (nullptr == pTargetTransform)
-    {
-        return;
-    }
-        
-    m_TargetTransforms.push_back(pTargetTransform);
-}
 
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 {
@@ -344,6 +331,30 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
     if (nullptr == pTargetTransform)
         return;
     m_TargetTransforms.push_back(pTargetTransform);
+}
+
+
+
+void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	// 공격과 스킬이 아니라면 호출하지 않습니다.
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer)
+		return;
+
+	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
+		return;
+
+	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CCharacter::HIT_DESC Desc{};
+	Desc.pTransform = static_cast<CTransform*>(pDesc);
+	Desc.fAttack = pClientDesc.fAttack;
+	Desc.iLayer = iLayer;
+
+	
+	// Hit 판정 전달.
+	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&Desc);
 }
 
 void CPlayer::Sorting_Target()
@@ -474,8 +485,13 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
         CRASH("Rigidbody");
 
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-        OnCollide_During(iLayer, pDesc, Manifold);
+		OnCollider_During(iLayer, pDesc, Manifold);
     });
+
+
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

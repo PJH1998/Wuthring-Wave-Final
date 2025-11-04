@@ -14,14 +14,18 @@ public:
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Update(_float fTimeDelta);
 	void Register_AllAbilityFiles(const _string& strFolderPath);
-
+	void UISlotUpdate(_float fTimeDelta);
 
 #pragma region UI Interface
 public:
+	// 쿨타임 중인 얘들
+	// 최소 쿨타임 / 최대 쿨타임.
 	_float Get_RemainingCooldown(const _string& strSkillName) const;  // 기존
 	_float Get_MaxCooldown(const _string& strSkillName);        // 기존
 	_float Get_CostRatio(COST_TYPE eType) const;
 	_float Get_HpRatio() const;
+
+	const vector<UISKILL_SLOT>& Get_UISkillSlots() const { return m_UISlots; }
 #pragma endregion
 
 
@@ -34,8 +38,12 @@ public:
 	_float Get_Cost(COST_TYPE eType) const;
 	SKILL_STATE Check_SkillState(const _string& strSkillName, const _string& strPrevName = "");
 	SKILL_STATE TryUseSkill(const _string& strSkillName); // 스킬 사용 시도
-	void Set_Cost(COST_TYPE eType, _float fValue);
-	void Add_Cost(COST_TYPE eType, _float fvalue);
+	void Set_Cost(COST_TYPE eType, _float fCost);
+	void Add_Cost(COST_TYPE eType, _float fCost);
+	void Set_Hp(_float fHp);
+	void Add_Hp(_float fHp);
+
+	
 
 #pragma endregion
 
@@ -59,6 +67,18 @@ private:
 
 	// 3. 현재 쿨타임이 돌고 있는 스킬 목록 (Key : 스킬 이름, Value: 남은 쿨타임)
 	unordered_map<_string, _float> m_mapSkillCooldowns;
+
+	// 4. 기본 키 → 스킬 매핑 ("Q" → "BasicQ")
+	unordered_map<_string, _string> m_mapKeyToDefaultSkill;  
+
+	// 5. 체인 키 매핑 (동적)
+	unordered_map<_string, _string> m_mapKeyToChainSkill;
+
+	// 6. UI에 전달할 SkillSLot
+	vector<UISKILL_SLOT> m_UISlots; // 매프레임 업데이트
+	
+	// 7. Keys.
+	vector<_string> m_Keys = {};
 
 	CHARACTER_INFO m_CharacterInfo = {};
 	_string m_strPrevSkillName = {};

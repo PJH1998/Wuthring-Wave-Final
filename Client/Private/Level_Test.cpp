@@ -24,6 +24,19 @@ HRESULT CLevel_Test::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
+	//TEST
+	SHADOW_MAP_DESC ShadowMapDesc = {};
+	ShadowMapDesc.iNumSectorX = 2;
+	ShadowMapDesc.iNumSectorZ = 2;
+	ShadowMapDesc.iSectorSizeX = 2048;
+	ShadowMapDesc.iSectorSizeZ = 2048;
+	ShadowMapDesc.vCenterPos = _float3(0.f, 0.f, 0.f);
+	ShadowMapDesc.vExtents = _float3(500.f, 250.f, 500.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+
+	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
+		CRASH("Test");
+
 	//로더에서 부른 것과 같은 거 부르기.
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
@@ -246,6 +259,7 @@ void CLevel_Test::Ready_Skybox()
 void CLevel_Test::Shader_Gui()
 {
 	ImGui::Begin("Test");
+
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{

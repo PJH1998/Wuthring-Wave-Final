@@ -114,6 +114,8 @@ namespace Engine
 	//const float g_fLODGap = { 1500.f };
 	//const float g_fLODDistance[4] = { 0.f, 800.f, 1600.f, 2400.f };
 	const float g_fLODGap = { 400.f };
+
+	const unsigned int g_iMaxSector = 16;
 }
 
 #define MAX_DEPTH 5

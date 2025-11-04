@@ -34,7 +34,7 @@ void CAugustaHit::OnEnter()
     State_Reset();
 
     // 4. 현재 때린 객체를 바라보게.? 임시로 Target
-    m_pAugusta->Rotate_HitTarget();
+    //m_pAugusta->Rotate_HitTarget();
 
 
     m_pAugusta->Set_Gravity(true);
@@ -81,7 +81,7 @@ void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceFromGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }
