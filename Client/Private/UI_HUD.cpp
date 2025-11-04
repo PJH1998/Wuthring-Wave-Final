@@ -2,35 +2,20 @@
 #include "UI_HUD.h"
 #include "Animator_UI.h"
 
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Player.h"
+#include "Ability.h"
+
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
 //#define KSTA_UI_HPBARBOSSTEST
 //#define KSTA_UI_ENERGYBARTEST
 
 
-/**
-*   �׽�Ʈ ����
-*   
-*   U : ĳ���� ���� ��ȯ (�����ڴ� �������� ����, �ƿ챸��Ÿ�� �ø��� ���� ��)
-*   I : ���� ������ �����ϰ� UP
-*   O : ���� ü��/�Ƹ� �����ϰ� DOWN
-* 
-*   (�ƿ챸��Ÿ)
-*   J : �ϴ� �� �ڿ� ���� ���� (0 - 1 - 2��)
-*   K : �ϴ� ���� �ڿ� �����ϰ� UP
-*   L : �ñر� ���� �� Į�� �ٲ� �ڿ� �����ϰ� UP
-* 
-*   (���극��)
-*   Y : ���� ���� ���������� 10�� UP (50�� �ִ�ġ. 5�� ���� �ִ�ġ�� ���ٴ���..)
-* 
-*   * �� ��ġ�� �ֻ����� ��ũ�θ� �ּ� �����ϸ� cout���� ����
-*/
-
-
-// ��� ������Ʈ �Ŵ����� ������ ����.
-// �ڽĵ��� ���� ������ ����. ���� ����.
 CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
+	, m_pGameSystem ( CGameSystem::GetInstance() )
 {
 }
 
@@ -55,14 +40,11 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
 
     // Load Objects description & Create Objects. from json.  Textures already pre-loaded by Loader.
     _wstring strFilePath = 
-        //L"../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json";
         L"../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json";
     Load_ChildObjects(strFilePath);
 
     // Load Animations from json.
-    vector<_wstring> vecAnimFilePaths = {   // �ε��� �ִϸ��̼��� ���⿡ �߰�
-        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/statustest.json"
-        //L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_Disappear_Test.json"
+    vector<_wstring> vecAnimFilePaths = {
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeOut.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/PartyFrame_FadeIn.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/Status_FadeOut.json",
@@ -76,14 +58,6 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     };
     Load_Animations(vecAnimFilePaths);
 
-	//static_cast<CAnimator_UI*>(Find_ChildObject(L"EnergyBar")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-
-    //Find_ChildObject(L"UI_ParentTest")->Set_Active(false);
-
     return S_OK;
 }
 
@@ -94,51 +68,42 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
-    Update_UI_SkillSection(fTimeDelta);
-    Update_UI_SkillSection_OnFeedback(fTimeDelta);
-    Update_UI_PlayerHPBar(fTimeDelta);
-    Update_UI_BossHPBar(fTimeDelta);
-    Update_UI_KeyGuide(fTimeDelta);
 
-    Update_UI_PlayerEnergyFrame(fTimeDelta);
-    Update_UI_PlayerEnergyBar(fTimeDelta);
-    Update_UI_PlayerEnergyBar_Augusta(fTimeDelta);
-    Update_UI_PlayerEnergyBar_Galbrena(fTimeDelta);
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-    Update_CombinedMatrix();
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
+
+	vector<UISKILL_SLOT> vecRenderSlots = {};		// 정보가 존재하는 슬롯만을 가져옵니다.
+	_bool isBurst = false;							// 버스트 여부를 특정 스킬이 떠있는지로 판별..?
+	for (auto& slot : UISlots)
+	{
+		if (slot.eState == SKILL_STATE::NOT_EXIST)
+			continue;
+
+		if (slot.strSkillName == "Burst01")
+			isBurst = true;
+
+		vecRenderSlots.push_back(slot);
+	}
+
+
+
+	Ready_Presets();
+
+	Update_UI_SkillSection(fTimeDelta);
+	Update_UI_SkillSection_OnFeedback(fTimeDelta);
+	Update_UI_PlayerHPBar(fTimeDelta);
+	Update_UI_BossHPBar(fTimeDelta);
+	Update_UI_KeyGuide(fTimeDelta);
+
+	Update_UI_PlayerEnergyFrame(fTimeDelta);
+	Update_UI_PlayerEnergyBar(fTimeDelta);
+	Update_UI_PlayerEnergyBar_Augusta(fTimeDelta);
+	Update_UI_PlayerEnergyBar_Galbrena(fTimeDelta);
+
+	Update_CombinedMatrix();
 	Update_CombinedDesc();
-
-
-	// test
-	//static _bool isToggled = false;
-	//
-	//if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
-	//{
-	//	isToggled = !isToggled;
-	//
-	//
-	//	if (isToggled)
-	//	{
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1);
-	//	}
-	//	else
-	//	{
-	//
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//		static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	//	}
-	//}
-
-	
-
-
 
     __super::Update(fTimeDelta);            // Update Animator_UI Component
 }
@@ -155,13 +120,6 @@ void CUI_HUD::Render()
 {
     //__super::Render();                      // Nothing. �����׷� �߰��� �� ���� ���������� �˾Ƽ� �ڽĵ���� Render ����
 }
-
-HRESULT CUI_HUD::Sync_StatusValue(CHARACTER_STAT& eStat)
-{
-	m_tPlayerStat = eStat;
-	return S_OK;	// 임시
-}
-
 
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
 {
@@ -268,46 +226,67 @@ HRESULT CUI_HUD::Ready_Components(void* pArg)
     return S_OK;
 }
 
+HRESULT CUI_HUD::Ready_Presets()
+{
+	// ========== Image Sizes ==========
+
+	array<_uint, 2> iImgSize_Rover = { 14, 1 };
+	array<_uint, 2> iImgSize_Augusta = { 7, 2 };
+	array<_uint, 2> iImgSize_Galbrena = { 14, 1 };
+
+	m_mapSkillTexIndices.emplace(L"Rover_E", Calc_SpriteSpace(0, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_R", Calc_SpriteSpace(2, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_E_Burst", Calc_SpriteSpace(1, 0, iImgSize_Rover));
+
+	m_mapSkillTexIndices.emplace(L"Augusta_E", Calc_SpriteSpace(5, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo1", Calc_SpriteSpace(3, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo2", Calc_SpriteSpace(4, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo3", Calc_SpriteSpace(3, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_Burst", Calc_SpriteSpace(0, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_R", Calc_SpriteSpace(0, 1, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_R_Enforce", Calc_SpriteSpace(1, 1, iImgSize_Rover));
+
+	m_mapSkillTexIndices.emplace(L"Galbrena_E", Calc_SpriteSpace(4, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_E_BurstOn", Calc_SpriteSpace(5, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_R", Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst", Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
+
+
+
+
+	return S_OK;
+}
+
 void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
-    // Ű���带 ������ ��Ÿ���� ���� ���� �׽�Ʈ��.
+	// Temp assumed Value
+	_float fMaxChangeCD[3] = { 2.f, 2.f, 2.f};
 
-    // - ����
-    // 
-    // 1, pass�� Variant (index : 5) �� �Ǿ��־�� �۵���.
-    // 
-    // 2. �Ʒ� �ڵ带 ���� ��Ÿ�� ������, Custom_UI ��ü���� ���̴��� ���� �� ������, desc�� �������޿� ��� ���� [0][0]�� ����.
-    //   �̴� �ν��Ͻ����� ���޵Ǿ�, �ν��Ͻ����� ������ �̷����..
-    // 
-    // 3. �ش��ϴ� Custom_UI ���� Render �Լ�����, ��ο��� ���� iShaderFlag ��, ���̴� ���������� ������ �־�� ��.
-    //   �̴� �� �н� ������ ���� ��쿡 ������Ű�� ���� �� �÷����̸�, Custom_UI�� �������.
-    //   hlsl ���� �ֻ�ܿ��� ���� Ȯ�� ���� (���� ��Ÿ�� UI����, �簢������ ��)
+	// ==============================
 
-    // - Variant ����
-    // 
-    // 1. ���̴����� Variant Pass �� switch-case ���� ���ϴ� ���̴� ����
-    // 
-    // 2. �ش� ȿ���� ����� UI�� CCustom_UI::VARIANTREADY_UI_DESC ����
-    //   flag ������ ����� ���� matVariantValues �� �����Ͽ� ���� (�ν��Ͻ����� ������ �����ؾ� �ϱ⿡ vector �����̳� ���)
-    //
-    // 3. pass�� �ݵ�� Variant ��, flag �� �䱸 �ν��Ͻ� ���� �� �������ֱ�
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
+	
+	// Status Load
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
 
+	_float fBasicSkillCD[CH_END][SK_END] = {
+		{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
+		{/* CH_AUGUSTA  */ pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Skill_Hack"),	pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Attack_SpeedDrive")},
+		{/* CH_GALBRENA */ pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")}
+	};
+	_float fBasicSkillMaxCD[CH_END][SK_END] = {
+		{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
+		{/* CH_AUGUSTA  */ pStatus->Get_MaxCooldown(CH_AUGUSTA	, "Skill_Hack"),	pStatus->Get_MaxCooldown(CH_AUGUSTA		, "Attack_SpeedDrive")},
+		{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
+	};
+	_float fChangeCD[CH_END] = {
 
-    // ���߿� �����ʿ������� 2~5�� ������ ���������� ��ȭ �� ���ĵǵ��� �ϱ�
-    // �ƿ챸��Ÿ ���� ĳ���ʹ� �������� 2���� �ٰ� �׷��ٴ� ��
+	};
+	_float fChangeMaxCD[CH_END] = {
+		2.f, 2.f, 2.f
+	};
 
-
-    enum HUD_CHAR_INDEX     { CH_ROVER, CH_AUGUSTA, CH_GALBRENA, CH_END };
-
-
-    // ksta : ���߿� �÷��̾� ���� ���յǸ� �ű�κ��� �޾ƿ� ����
-                    m_iSelectedCHIndex;
-    static _float   fSkillCD[CH_END][SK_END] = {};                                                  // left cooldown
-    static _float   fChangeCD[CH_END] = {};                                                         // left cooldown
-
-    const _float    fMaxSkillCD[CH_END][SK_END] = { {15.f, 20.f}, {15.f, 20.f}, {15.f, 20.f} };     // const cooldown
-    const _float    fMaxChangeCD[CH_END] = { 2.f, 2.f, 2.f };                                       // const cooldown
-
+	// UI Load
     CCustom_UI* pSkillUI[CH_END] = {                  // Skill Indicator UI per Character.
         Find_ChildObject(L"Skill_Rover"),
         Find_ChildObject(L"Skill_Auguata"),
@@ -320,6 +299,12 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         Find_ChildObject(L"Icon_Galbrena")
     };
 
+	// ==============================
+
+
+
+
+
     static _bool    isFirstUpdate = true;               // Temp
     if (isFirstUpdate)
     {
@@ -329,23 +314,23 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         pSkillUI[2]->Set_Active(false);
     }
 
-    for (auto& chCD : fSkillCD)                         // update cooldown
-    {
-        for (auto& cd : chCD)
-        {
-            cd -= fTimeDelta;
-            if (cd <= 0) cd = 0;
-        }
-    }
-
-    for (auto& cd : fChangeCD)
-    {
-        cd -= fTimeDelta;
-        if (cd <= 0) cd = 0;
-    }
+    //for (auto& chCD : fSkillCD)                         // update cooldown
+    //{
+    //    for (auto& cd : chCD)
+    //    {
+    //        cd -= fTimeDelta;
+    //        if (cd <= 0) cd = 0;
+    //    }
+    //}
+	//
+    //for (auto& cd : fChangeCD)
+    //{
+    //    cd -= fTimeDelta;
+    //    if (cd <= 0) cd = 0;
+    //}
     
 
-    switch (m_iSelectedCHIndex)
+    switch (iSelectedCHIndex)
     {
     case CH_ROVER:
         pSkillUI[0]->Set_Active(true);
@@ -364,72 +349,69 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         break;
     }
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::DOWN)           // trigger cooldowns
-    {
-        if (fChangeCD[0] == 0 && m_iSelectedCHIndex != 0)
-        {
-            m_iSelectedCHIndex = 0;
-            fChangeCD[0] = fMaxChangeCD[0];
-        }
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::DOWN)
-    {
-        if (fChangeCD[1] == 0 && m_iSelectedCHIndex != 1)
-        {
-            m_iSelectedCHIndex = 1;
-            fChangeCD[1] = fMaxChangeCD[1];
-        }
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_3) == KEYSTATE::DOWN)
-    {
-        if (fChangeCD[2] == 0 && m_iSelectedCHIndex != 2)
-        {
-            m_iSelectedCHIndex = 2;
-            fChangeCD[2] = fMaxChangeCD[2];
-        }
-    }
+    //if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::DOWN)           // trigger cooldowns
+    //{
+    //    if (fChangeCD[0] == 0 && iSelectedCHIndex != 0)
+    //    {
+    //        m_iSelectedCHIndex = 0;
+    //        fChangeCD[0] = fMaxChangeCD[0];
+    //    }
+    //}
+    //if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::DOWN)
+    //{
+    //    if (fChangeCD[1] == 0 && iSelectedCHIndex != 1)
+    //    {
+    //        m_iSelectedCHIndex = 1;
+    //        fChangeCD[1] = fMaxChangeCD[1];
+    //    }
+    //}
+    //if (m_pGameInstance->Get_DIKeyState(DIK_3) == KEYSTATE::DOWN)
+    //{
+    //    if (fChangeCD[2] == 0 && iSelectedCHIndex != 2)
+    //    {
+    //        m_iSelectedCHIndex = 2;
+    //        fChangeCD[2] = fMaxChangeCD[2];
+    //    }
+    //}
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
-    {
-        if (fSkillCD[m_iSelectedCHIndex][SK_E] == 0)
-        {
-            fSkillCD[m_iSelectedCHIndex][SK_E] = fMaxSkillCD[m_iSelectedCHIndex][SK_E];
-            if (m_iSelectedCHIndex == CH_AUGUSTA &&
-                m_iEnergyBarMode == 1)
-                Add_UI_SkillSection_OnFeedback(1);
-            else
-                Add_UI_SkillSection_OnFeedback(2);
-        }
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
-    {
-        if (fSkillCD[m_iSelectedCHIndex][SK_R] == 0)
-        {
-            fSkillCD[m_iSelectedCHIndex][SK_R] = fMaxSkillCD[m_iSelectedCHIndex][SK_R];
-            Add_UI_SkillSection_OnFeedback(0);
-        }
-    }
-
-
-    // UI���� ĳ���� ������ŭ ����.
-
-    // 1. ��ųUI �� ����� ER / �ƿ� ER / ���� ER ��Ÿ�� �Ҵ�
-    // 2. ��üUI �� ����� / �ƿ� / ���� ��Ÿ�� �Ҵ�
-    
+    //if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
+    //{
+    //    if (fSkillCD[m_iSelectedCHIndex][SK_E] == 0)
+    //    {
+    //        fSkillCD[m_iSelectedCHIndex][SK_E] = fMaxSkillCD[m_iSelectedCHIndex][SK_E];
+    //        if (m_iSelectedCHIndex == CH_AUGUSTA &&
+    //            m_iEnergyBarMode == 1)
+    //            Add_UI_SkillSection_OnFeedback(1);
+    //        else
+    //            Add_UI_SkillSection_OnFeedback(2);
+    //    }
+    //}
+    //if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+    //{
+    //    if (fSkillCD[m_iSelectedCHIndex][SK_R] == 0)
+    //    {
+    //        fSkillCD[m_iSelectedCHIndex][SK_R] = fMaxSkillCD[m_iSelectedCHIndex][SK_R];
+    //        Add_UI_SkillSection_OnFeedback(0);
+    //    }
+    //}
     // skill
+	
     for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
     {
         auto targetUI = pSkillUI[i];
 
         vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
 
-        vecVariantMat[0].m[0][0] = fSkillCD[i][SK_E] / fMaxSkillCD[i][SK_E];
-        vecVariantMat[1].m[0][0] = fSkillCD[i][SK_R] / fMaxSkillCD[i][SK_R];
+        vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
+        vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
         vecVariantMat[0].m[0][1] = 0.5f;
         vecVariantMat[1].m[0][1] = 0.5f;
 
         vecVariantMat[0].m[0][2] = 0.95f;
         vecVariantMat[1].m[0][2] = 0.95f;
+
+
+
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
@@ -440,54 +422,137 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         targetUI->Set_VariantUIDesc(tVariantDesc);
 
 
-
+		// ==============================
+		// * [SK Icon Update] Rover
+		// =============================
         if      (   i == CH_ROVER &&
-                    m_iSelectedCHIndex == CH_ROVER)
+                    iSelectedCHIndex == CH_ROVER)
         {
             auto roverUIDesc = pSkillUI[CH_ROVER]->Get_UIDesc();
 
-            if (m_iEnergyBarMode == 1)
-            {
-                roverUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.07142857142f, 0.14285714285f };
-            }
-            else
-            {
-                roverUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.0f, 0.07142857142f };
-            }
+			switch (m_iPlayerEnhancedMode)
+			{
+			case 0 :		// Rover Normal
+				roverUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E"][0]; 
+				roverUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0]; 
+				break;
+			case 1 :		// Rover DarkSerge
+				roverUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E_Burst"][0];
+				roverUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0];
+				break;
+			}
             pSkillUI[CH_ROVER]->Set_UIDesc(roverUIDesc);
         }
 
+		// ==============================
+		// * [SK Icon Update] Augusta
+		// =============================
         else if (   i == CH_AUGUSTA &&
-                    m_iSelectedCHIndex == CH_AUGUSTA)
+                    iSelectedCHIndex == CH_AUGUSTA)
         {
             auto augustaUIDesc = pSkillUI[CH_AUGUSTA]->Get_UIDesc();
 
-            if (m_iEnergyBarMode == 1)
-            {
-                augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.0f, 0.14285714285f };
-                augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = { 0.0f, 0.5f };
-                augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+			switch (m_iPlayerEnhancedMode)
+			{
+			case 0:			// Augusta Normal
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
+				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
 
-                augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = { 0.0f, 0.1428571492433548f };
-                augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = { 0.5f, 1.0f };
-             }
-            else
-            {
-                augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = { 0.7142857313156128f, 0.8571428656578064f };
-                augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = { 0.0f, 0.5f };
-                augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+				break;
+			case 1:			// Augusta Normal - Combo 1
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo1"][0];
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo1"][1];
+				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
 
-                augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = { 0.1428571492433548f, 0.28571428571f };
-                augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = { 0.5f, 1.0f };
-            }
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+				break;
+			case 2:			// Augusta Normal - Combo 2
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo2"][0];
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo2"][1];
+				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+				break;
+			case 3:			// Augusta Normal - Combo 3
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo3"][0];
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo3"][1];
+				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+				break;
+			case 4:			// Augusta Ult
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Burst"][0]; 
+				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Burst"][1]; 
+				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
+				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
+				break;
+			}
 
             pSkillUI[CH_AUGUSTA]->Set_UIDesc(augustaUIDesc);
         }
 
-        
+        // ==============================
+		// * [SK Icon Update] Galbrena
+		// =============================
+        else if (   i == CH_GALBRENA &&
+                    iSelectedCHIndex == CH_GALBRENA)
+		{
+			auto galbrenaUIDesc = pSkillUI[CH_GALBRENA]->Get_UIDesc();
+
+			switch (m_iPlayerEnhancedMode)
+			{
+			case 0:			// Galbrena Normal
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
+				break;
+			case 1:			// Galbrena Normal - Burst Ready
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][0];
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E_BurstOn"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 0.f };
+				break;
+			case 2:			// Galbrena Burst
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_E"][0];
+				galbrenaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_E"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+				galbrenaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordX = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][0];
+				galbrenaUIDesc.vecInstanceDescs[2].vSInstCoordY = m_mapSkillTexIndices[L"Galbrena_LB_Burst"][1];
+				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
+				break;
+			}
+		}
+
+
     }
 
-    // change
+
+
+    // ==============================
+	// * [Change Update] Cooldown
+	// =============================
     for (_uint i = 0; i < CH_END; i++)
     {
         _float fCooldown = fChangeCD[i];
@@ -506,10 +571,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
         targetUI->Set_VariantUIDesc(tVariantDesc);
     }
-
-
-
-
 
 
 
@@ -563,28 +624,18 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 {
-    // Feedback ��ü�� �ð��� ���� �����ϴ� �Լ�.
-    // (�ð��� ���� �� �����Ͽ� �ν��Ͻ����� �Ѱ��ָ�,
-    // ������ �ð��� ������ �ش� ���� ���Ҹ� �����Ѵ�.)
-
-    // ������ ���⼭ ������
-
     CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");    
     const _float2 fDestScale = { 1.2f, 1.2f };
     const _float fStartAlpha = 0.f;     // 0�� ����, 1�� �Ⱥ������� ����.
     const _float fLifeTime = .5f;
     _float4 vColor = { 0.f, 0.f, 0.f, 1.f };
 
-
     auto uiDesc = pFeedbackUI->Get_UIDesc();
     auto& uiInstDescs = uiDesc.vecInstanceDescs;
 
 
-
-    // ���ο� �ν��Ͻ��� �߰��Ǿ����� �ð� ������ ���庤�͵� �׸�ŭ �ø�.
     static vector<_float> vecLifeTimeElapsed = {};
     
-    // �߰��� ���Ұ� �ִٸ� �׸�ŭ�� �����ϰ� �� �ڸ��� �߰�
     if (uiInstDescs.size() > vecLifeTimeElapsed.size())
     {
         _uint iAddLoopTime = uiInstDescs.size() - vecLifeTimeElapsed.size();
@@ -592,7 +643,6 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
             vecLifeTimeElapsed.push_back(0.f);
     }
 
-    // ���̴� ������ ���� ���� ����
     vector<_float4x4> vecVariantMat = {};
     vecVariantMat.resize(uiInstDescs.size());
 
@@ -612,7 +662,6 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 
     pFeedbackUI->Set_VariantUIDesc(tVariantDesc);
 
-    // �ð��� ������ ���Ұ� �ִٸ� ����
     for (_uint i = 0; i < vecLifeTimeElapsed.size(); i++)
     {
         if (vecLifeTimeElapsed[i] >= fLifeTime)
@@ -633,13 +682,6 @@ void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
 
 void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 {
-    // Feedback ��ü�� �ν��Ͻ� �߰��ϴ� �Լ�.
-    // ��ư�� ������ ���� ���� ȿ���� �����ϱ� ����.
-    // ��ġ�� �Ʒ��� vStartPos �� fDeltaPosX �� ���� ������.
-    // 
-    // �ð� ������ ���� Ŀ����, �ð��� �� ���� �� �ν��Ͻ��� �����ϴ� ���� 
-    // Update_UI_SkillSection_OnFeedback ���� ����.
-
     CCustom_UI* pFeedbackUI = Find_ChildObject(L"Skill_OnFeedback");
 
     const _float4 vStartPos = { 850.f, -415.f, 0.f, 1.f };
@@ -672,21 +714,27 @@ void CUI_HUD::Add_UI_SkillSection_OnFeedback(_uint iSectionIndex)
 
 void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 {
-    // �÷��̾��� HP �ٸ� �����մϴ�.
+	// - required info list..
+	// fPlayerHPRatio
+	
 
-    // 1. �ڵ������ ü�¹ٱ��� �����Ͽ� �ν��Ͻ��� 2������ �����.
-    // 2. ������ ���̴��� ����, ���� ü�¹ٿ� �ڵ������ ü�¹� 2����, ���� 2���� ���� ����Ͽ� �׶���Ʈ�ǵ��� ����
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-    // ksta : ���߿� �÷��̾� ���� ���յǸ� �ű��κ��� �޾ƿ� ����
-    static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
-    static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
-    const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
+	// 공통 정보 받아옴
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+
+    //static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
+    //static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
+    //const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     static _bool isHit = false;
     static _float fHPReduceLeftTime = 0.f;
     
 
-    _float fPlayerHPRatio = fPlayerHP[m_iSelectedCHIndex] / fPlayerMaxHP[m_iSelectedCHIndex];
-    static _float fPlayerHPBackRatio = fPlayerHPRatio;
+
+    //_float fPlayerHPRatio = fPlayerHP[iSelectedCHIndex] / fPlayerMaxHP[iSelectedCHIndex];
+	_float fPlayerHPRatio = pStatus->Get_HpRatio(iSelectedCHIndex);
+	static _float fPlayerHPPrevRatio = 0.f;
+	static _float fPlayerHPBackRatio = 0.f; //  = fPlayerHPRatio;
 
     _float4 vHPColor        = { 1.f, 1.f, 1.f, 1.f };
     _float4 vHPBackColor    = { 1.f, 0.f, 0.f, 1.f };
@@ -694,6 +742,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
 
     const auto targetUI = Find_ChildObject(L"Inst_HPBar");
+
 
 
     
@@ -720,23 +769,36 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     }
 
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_P) == KEYSTATE::DOWN)       // [Test]
-    {
-        if (fPlayerHP[m_iSelectedCHIndex] == 0) fPlayerHP[m_iSelectedCHIndex] = fPlayerMaxHP[m_iSelectedCHIndex];
-        isHit = true;
-    }
+    //if (m_pGameInstance->Get_DIKeyState(DIK_P) == KEYSTATE::DOWN)       // [Test]
+    //{
+    //    if (fPlayerHP[m_iSelectedCHIndex] == 0) fPlayerHP[m_iSelectedCHIndex] = fPlayerMaxHP[m_iSelectedCHIndex];
+    //    isHit = true;
+    //}
+	//
+    //if (isHit == true)
+    //{
+	//
+    //    _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
+	//
+    //    // HP�� ��� ����
+    //    fPlayerHP[m_iSelectedCHIndex] -= fRandDamage;
+    //    if (fPlayerHP[m_iSelectedCHIndex] < 0) fPlayerHP[m_iSelectedCHIndex] = 0;
+	//
+    //    fHPReduceLeftTime = fHPReduceTime;
+    //}
+	
 
-    if (isHit == true)
-    {
+	// HP 변화를 감지하여 피격 여부 확인
+	if (fPlayerHPPrevRatio > fPlayerHPRatio)
+	{
+		isHit = true;
+	}
+	// 피격 여부 확인 시 뒷 HP바가 따라가기 시작
+	if (isHit == true)
+	{
+		fHPReduceLeftTime = fHPReduceTime;
+	}
 
-        _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
-
-        // HP�� ��� ����
-        fPlayerHP[m_iSelectedCHIndex] -= fRandDamage;
-        if (fPlayerHP[m_iSelectedCHIndex] < 0) fPlayerHP[m_iSelectedCHIndex] = 0;
-
-        fHPReduceLeftTime = fHPReduceTime;
-    }
 
 
     // change
@@ -756,8 +818,9 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
     
     targetUI->Set_VariantUIDesc(tVariantDesc);
 
-    isHit = false;
 
+    isHit = false;
+	fPlayerHPPrevRatio = fPlayerHPRatio;
 
 
 #ifdef KSTA_UI_HPBARTEST
@@ -917,11 +980,18 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 {
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
+
+	// 공통 정보 받아옴
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+
+
+
     // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
     CCustom_UI* pKeyButtonUI = Find_ChildObject(L"Inst_KeyButton");
     auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
-    switch (m_iSelectedCHIndex)
+    switch (iSelectedCHIndex)
     {
     case Client::CUI_HUD::CH_ROVER:
         keyButtonDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 0.0f };
@@ -944,19 +1014,29 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 {
-    switch (m_iSelectedCHIndex)
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
+
+	// 공통 정보 받아옴
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	auto& tUISlot = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
+
+	//tUISlot.
+
+
+
+    switch (iSelectedCHIndex)
     {
     case Client::CUI_HUD::CH_ROVER:
         Find_ChildObject(L"Group_Rover")    ->Set_Active(true);     // CH change visible
         Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
         Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
 
-        if      (m_iEnergyBarMode == 0)     
+        if	(	m_iPlayerEnhancedMode == 0	)
         {
             Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(false);
             // Find_ChildObject(L"Frame_Rover")->Set_Active(true); // nullptr
         } 
-        else if (m_iEnergyBarMode == 1)
+        else if(m_iPlayerEnhancedMode == 1)
         {
             Find_ChildObject(L"Frame_Rover_Dark")->Set_Active(true);
             // Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
@@ -968,13 +1048,16 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
         Find_ChildObject(L"Group_Augusta")  ->Set_Active(true);
         Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
 
-        if      (m_iEnergyBarMode == 0)
+        if  (	m_iPlayerEnhancedMode == 0 ||
+				m_iPlayerEnhancedMode == 1 ||
+				m_iPlayerEnhancedMode == 2 ||
+				m_iPlayerEnhancedMode == 3	)
         {
             Find_ChildObject(L"Frame_Augusta")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
         }
-        else if (m_iEnergyBarMode == 1)
+        else if(m_iPlayerEnhancedMode == 4)
         {
             Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
@@ -987,13 +1070,14 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
         Find_ChildObject(L"Group_Augusta")  ->Set_Active(false);
         Find_ChildObject(L"Group_Galbrena") ->Set_Active(true);
 
-        if      (m_iEnergyBarMode == 0)
+        if  (	m_iPlayerEnhancedMode == 0 ||
+				m_iPlayerEnhancedMode == 2	)
         {
             Find_ChildObject(L"Frame_Galbrena")->Set_Active(true);
             Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Galbrena_RageMode")->Set_Active(false);
         }
-        else if (m_iEnergyBarMode == 1)
+        else if(m_iPlayerEnhancedMode == 1)
         {
             Find_ChildObject(L"Frame_Galbrena")->Set_Active(false);
             Find_ChildObject(L"Frame_Galbrena_Icon")->Set_Active(false);
@@ -1014,7 +1098,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
         Find_ChildObject(L"Icon_ElementThunder"),
         Find_ChildObject(L"Icon_ElementFire")
     };
-    CCustom_UI* pElementTargetUI = pElementIcons[m_iSelectedCHIndex];
+    CCustom_UI* pElementTargetUI = pElementIcons[iSelectedCHIndex];
     const vector<_float4> vecElemColors = {
         {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
         {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
@@ -1022,7 +1106,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     };
 
     vector<_float4x4> vecElementVariantMat = { _float4x4() };
-    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = vecElemColors[m_iSelectedCHIndex];
+    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = vecElemColors[iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementVariantMat[0]._21) = static_cast<_float>(true);
 
     CCustom_UI::VARIANTREADY_UI_DESC tElementVariantDesc = {
@@ -1055,11 +1139,11 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     //auto elementGuageDesc = pElementGuageUI->Get_UIDesc();
 
     vector<_float4x4> vecElementGuageVariantMat = { _float4x4() };
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[iSelectedCHIndex] / fMaxElementAmounts[iSelectedCHIndex]);
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._12) = 0.0f;
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._13) = 1.0f;
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_bool>(true);
-    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[m_iSelectedCHIndex];
+    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
 
 
@@ -1076,18 +1160,27 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 {
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-    // ksta : ���� ����ȸ�� ��ġ ���߿� �޾ƿ� ��
-    m_fPlayerEnergy;
-    m_fPlayerMaxEnergy;
+	// Load Status..
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	//auto& tUISlot = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
+	pStatus->Get_CostRatio(iSelectedCHIndex, COST_TYPE::COST1);
 
-    _float fCurPlayerEnergy         = m_fPlayerEnergy[m_iSelectedCHIndex];
-    _float fCurPlayerMaxEnergy      = m_fPlayerMaxEnergy[m_iSelectedCHIndex];
-    
+
+    //m_fPlayerEnergy;
+    //m_fPlayerMaxEnergy;
+	//
+    //_float fCurPlayerEnergy         = m_fPlayerEnergy[m_iSelectedCHIndex];
+    //_float fCurPlayerMaxEnergy      = m_fPlayerMaxEnergy[m_iSelectedCHIndex];
+	//
+	//_float fCurPlayerEnergy		=
+	//_float fCurPlayerMaxEnergy	=
+	    
     static _float fGalbEchoEnergy   = 0.f;
     const _float fGalbMaxEchoEnergy = 50.f;
 
-    _float fCurPlayerEnergyRatio    = fCurPlayerEnergy / fCurPlayerMaxEnergy;
+    _float fCurPlayerEnergyRatio    = pStatus->Get_CostRatio(iSelectedCHIndex, COST_TYPE::COST1); //fCurPlayerEnergy / fCurPlayerMaxEnergy;
     
 
     _float4     vSingleColor[2] = {};   // for Gradiant
@@ -1102,39 +1195,18 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     const auto targetUI = Find_ChildObject(L"Inst_EnergyItems");
 
 
-
-    // �׽�Ʈ�� �Է��� ���� �� ����
-    if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
-    {
-        _float fRandEnergy = m_pGameInstance->Rand(10.f, 40.f);
-        
-        if (m_fPlayerEnergy[m_iSelectedCHIndex] == m_fPlayerMaxEnergy[m_iSelectedCHIndex])
-            m_fPlayerEnergy[m_iSelectedCHIndex] = 0;
-        else if (m_fPlayerEnergy[m_iSelectedCHIndex] < m_fPlayerMaxEnergy[m_iSelectedCHIndex])
-            m_fPlayerEnergy[m_iSelectedCHIndex] += fRandEnergy;
-        
-        if (m_fPlayerEnergy[m_iSelectedCHIndex] > m_fPlayerMaxEnergy[m_iSelectedCHIndex])
-            m_fPlayerEnergy[m_iSelectedCHIndex] = m_fPlayerMaxEnergy[m_iSelectedCHIndex];
-    }
-    if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
-    {
-        m_iEnergyBarMode++;
-        if (m_iEnergyBarMode >= 2)
-            m_iEnergyBarMode = 0;
-    }
-
-    // [Galbrena]
-    if (m_pGameInstance->Get_DIKeyState(DIK_Y) == KEYSTATE::DOWN)
-    {
-        if (fGalbEchoEnergy == fGalbMaxEchoEnergy) fGalbEchoEnergy = 0;
-        fGalbEchoEnergy += 10;
-        if (fGalbEchoEnergy >= fGalbMaxEchoEnergy) fGalbEchoEnergy = fGalbMaxEchoEnergy;
-    }
+    //// [Galbrena]
+    //if (m_pGameInstance->Get_DIKeyState(DIK_Y) == KEYSTATE::DOWN)
+    //{
+    //    if (fGalbEchoEnergy == fGalbMaxEchoEnergy) fGalbEchoEnergy = 0;
+    //    fGalbEchoEnergy += 10;
+    //    if (fGalbEchoEnergy >= fGalbMaxEchoEnergy) fGalbEchoEnergy = fGalbMaxEchoEnergy;
+    //}
 
 
 
     enum HUD_PLAYER_ENERGYBAR { VALUE, TARGET, END };
-    enum HUD_PLAYER_ENCOLOR {           // ���������� ���� ���п� ������
+    enum HUD_PLAYER_ENCOLOR {
         ENCL_ROVER_NORMAL, 
         ENCL_AUGUSTA_NORMAL,
         ENCL_AUGUSTA_ULT,
@@ -1145,10 +1217,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         ENCL_STATIC,
         ENCL_END
     };
-    const _uint iNumSpectrums = 41;     // ����Ʈ���� �� ���� �� ������ �ִ� 41���� ����
+    const _uint iNumSpectrums = 41;					// draws 41 instance at once.
 
-
-    // �÷� ������ ����
     vector<array<_float4, 2>> vecColorPreset;       // { start color (bottom), end color (top) }
     vecColorPreset.resize(ENCL_END);
 
@@ -1163,39 +1233,31 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
 
 
-    static vector<_float> vSpectrumHeights[END] = {};
+    static vector<_float> vSpectrumHeights[END] = {};		// front instances height
     vSpectrumHeights[VALUE].resize(iNumSpectrums);
     vSpectrumHeights[TARGET].resize(iNumSpectrums);
-    static vector<_float> vBackSpectrumHeights[END] = {};
+    static vector<_float> vBackSpectrumHeights[END] = {};	// back instances height
     vBackSpectrumHeights[VALUE].resize(iNumSpectrums);
     vBackSpectrumHeights[TARGET].resize(iNumSpectrums);
 
-    vector<_bool> vIsVisible = {};
+    vector<_bool> vIsVisible = {};							// visible mask for front & back indices information
     vIsVisible.resize(iNumSpectrums);
-    vector<_bool> vIsVisibleStatic = {};
+    vector<_bool> vIsVisibleStatic = {};					// visible mask for static indices information
     vIsVisibleStatic.resize(iNumSpectrums);
 
-    //vIsVisible.assign(vIsVisible.size(), true);
 
-    // �߰��� �ڿ��� ������ ���� ����Ʈ���� ����, �̴� ���� ���� �������� ���� �ܼ��� ����ŷ�� �� ��. �׷��Ƿ� ���� 1.f ����.
-    // ��, �ν��Ͻ� 41���� ���� ��ü 3���� �׸��ų�, ������ ���ļ� �ѹ��� 41*3���� �׸��ų� �� ��
 
-    // ����, ���� �κ� ������ ���� �������� ĳ���� ������ ����
-    // ksta : 1) ���극�� ���� �����°� �Ʒ� ���� �����ÿ� �б��� ���� �� (��)
-    // ksta : 2) �������� ������ ���� ���� �÷��̾�� �ٸ�. �̴� �ش� �б⿡�� ����.
-    // ksta : 3) ĳ���Ϳ� ���� �߰��ڿ��� �ִ� ���쵵 ����.(�ƿ챸��Ÿ �߰���, Į. ���� �ް�����)
-    //          �̴� ���� �Լ� ���� �ļ� �ű⼭ ����.
 
-    switch (m_iSelectedCHIndex)
+    switch (iSelectedCHIndex)
     {
     case CH_ROVER:     
         {
-            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            if      (m_iPlayerEnhancedMode == 0)     /* Normal */  
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
                 vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1];
 
-                //vIsVisible.assign(vIsVisible.size(), true);                     // isvisible
+                //vIsVisible.assign(vIsVisible.size(), true);                    // isvisible
 
                 _uint iVisibleBarRange = static_cast<_uint>(fCurPlayerEnergyRatio * 41.f);      // applying player energy
                 fill(vIsVisible.begin(), vIsVisible.end() - (41 - iVisibleBarRange), true);
@@ -1204,7 +1266,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                 for (_uint i = 0; i < vIsVisible.size(); i++)
                     vIsVisibleStatic[i] = !vIsVisible[i];
             }
-            else if (m_iEnergyBarMode == 1)     /* Ult    */  
+            else if (m_iPlayerEnhancedMode == 1)     /* Ult    */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_ROVER_NORMAL][0];         // color
                 vSingleColor[1] = vecColorPreset[ENCL_ROVER_NORMAL][1]; 
@@ -1224,7 +1286,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         }break;
     case CH_AUGUSTA:   
         {
-            if      (m_iEnergyBarMode == 0 && fCurPlayerEnergyRatio != 1.f)     /* Normal */
+            if  ((	m_iPlayerEnhancedMode == 0 ||
+					m_iPlayerEnhancedMode == 1 ||
+					m_iPlayerEnhancedMode == 2 ||
+					m_iPlayerEnhancedMode == 3 )	&&
+				 (fCurPlayerEnergyRatio != 1.f) )
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_NORMAL][0];       // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_NORMAL][1]; 
@@ -1243,7 +1309,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
-            else if (m_iEnergyBarMode == 0 && fCurPlayerEnergyRatio == 1.f)     /* Ult?   */
+            else if((m_iPlayerEnhancedMode == 0 ||
+					m_iPlayerEnhancedMode == 1 ||
+					m_iPlayerEnhancedMode == 2 ||
+					m_iPlayerEnhancedMode == 3 )	&&
+					(fCurPlayerEnergyRatio == 1.f))     /* Ult?   */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_ULT][0];          // color
                 vSingleColor[1] = vecColorPreset[ENCL_AUGUSTA_ULT][1]; 
@@ -1262,14 +1332,15 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
-            else if (m_iEnergyBarMode == 1)
+            else if (m_iPlayerEnhancedMode == 4)
             {
                 fill(vIsVisibleStatic.begin(), vIsVisibleStatic.end(), false);
             }
         }break;
     case CH_GALBRENA:  
         {
-            if      (m_iEnergyBarMode == 0)     /* Normal */  
+            if  (	m_iPlayerEnhancedMode == 0 ||
+					m_iPlayerEnhancedMode == 1)     /* Normal */  
             { 
                 vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][0];   // color
                 vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_NORMAL_L][1];  
@@ -1291,7 +1362,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 11, vIsVisibleStatic.end() - 26, false);
             }
-            else if (m_iEnergyBarMode == 1)     /* Ult    */  
+            else if(m_iPlayerEnhancedMode == 2)     /* Burst   */
             { 
                 vSingleColor [0] = vecColorPreset[ENCL_GALBRENA_ULT][0];        // color
                 vSingleColor [1] = vecColorPreset[ENCL_GALBRENA_ULT][1];       
@@ -1319,14 +1390,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vBackColor[0].w *= 0.4f;
     vBackColor[1].w *= 0.4f;
 
-    // ���� ��ġ �Ҵ�
     for (_uint i = 0; i < iNumSpectrums; ++i)
     {
-        // ��ǥġ�� õõ�� ���� (�ε巴�� ����)
         vSpectrumHeights[VALUE][i] += (vSpectrumHeights[TARGET][i] - vSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
         vBackSpectrumHeights[VALUE][i] += (vBackSpectrumHeights[TARGET][i] - vBackSpectrumHeights[VALUE][i]) * fTimeDelta * 5.0f;
 
-        // ���� Ȯ���� ���ο� ��ǥ�� ����
         if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
             vSpectrumHeights[TARGET][i] = m_pGameInstance->Rand(1.f, 2.f);
         if (m_pGameInstance->Rand(0.f, 100.f) < 3.f)
@@ -1342,46 +1410,44 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     vecVariantStaticMat.resize(41);
 
 
-    // ���̴� ���޿� ���Ŀ� �� ����
-    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum. �տ��� �� �������� �����̴� �װ�.
+    for (uint i = 0; i < vecVariantMat.size(); i++)         // front spectrum.
     {
         *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vSingleColor[0];
         *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vSingleColor[1];
         vecVariantMat[i]._31 = static_cast<_float>(vIsVisible[i]);
         vecVariantMat[i]._32 = vSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum.  �ڿ��� ���� ������ ä�� �����̴� �װ�.
+    for (uint i = 0; i < vecVariantBackMat.size(); i++)     // back spectrum. 
     {
         *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._11) = vBackColor[0];
         *reinterpret_cast<_float4*>(&vecVariantBackMat[i]._21) = vBackColor[1];
         vecVariantBackMat[i]._31 = static_cast<_float>(vIsVisible[i]);
-        //vecVariantBackMat[i]._31 = false;5
+        //vecVariantBackMat[i]._31 = false;
         vecVariantBackMat[i]._32 = vBackSpectrumHeights[VALUE][i];
     }
-    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum. �տ��� ���������� �� á�� �� �������� �ʴ� �װ�.
+    for (uint i = 0; i < vecVariantStaticMat.size(); i++)   // static spectrum.
     {
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];   // �⺻�� ���� ����.
-        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];   // �⺻�� ���� ����.
-        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);                  // �������� ���� �ʾ� �׷����� �ʴ� �κи� �׸�.
-        //vecVariantStaticMat[i]._31 = false;                                                     // �������� ���� �ʾ� �׷����� �ʴ� �κи� �׸�.
-        vecVariantStaticMat[i]._32 = 1.f;                                                       // ũ�� 1�� ����
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._11) = vecColorPreset[ENCL_STATIC][0];
+        *reinterpret_cast<_float4*>(&vecVariantStaticMat[i]._21) = vecColorPreset[ENCL_STATIC][1];
+        vecVariantStaticMat[i]._31 = static_cast<_float>(vIsVisibleStatic[i]);               
+        //vecVariantStaticMat[i]._31 = false;                                                
+        vecVariantStaticMat[i]._32 = 1.f;                                                    
     }
 
-    // ���극�� ����ó�� - �¿� ���� ����
-    if (m_iSelectedCHIndex == CH_GALBRENA)
+
+	// galbrena energy bar
+    if (iSelectedCHIndex == CH_GALBRENA)
     {
-        if (m_iEnergyBarMode == 0)
+        if (m_iPlayerEnhancedMode == 0 ||
+			m_iPlayerEnhancedMode == 1)
         {
             for (uint i = 0; i < vecVariantMat.size(); i++)
-            {
                 if (i >= 15)
                 {
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraColor[0];
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraColor[1];
                 }
-            }
             for (uint i = 0; i < vecVariantBackMat.size(); i++)
-            {
                 if (i >= 15)
                 {
                     _float4 vExtraBackColor[2];
@@ -1390,7 +1456,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._11) = vExtraBackColor[0];
                     *reinterpret_cast<_float4*>(&vecVariantMat[i]._21) = vExtraBackColor[1];
                 }   
-            }
         }
     }
 
@@ -1407,82 +1472,84 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         true
     };
     
-    targetUI->Set_VariantUIDesc(tVariantDesc);  // �ν��Ͻ� 123���� ���� �ѹ��� �׸��Բ� ����
-
-#ifdef KSTA_UI_ENERGYBARTEST
-    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] ============================== : " << std::endl;
-    std::cout << "[UI_HUD][Update_UI_PlayerEnergyBar] fPlayerEnergy : " << m_fPlayerEnergy[m_iSelectedCHIndex] << std::endl;
-#endif // KSTA_UI_ENERGYBARTEST
-
+    targetUI->Set_VariantUIDesc(tVariantDesc);  // draws 123 instances in once.
 }
 
 void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 {
-    if (m_iSelectedCHIndex != CH_AUGUSTA)
+	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
+
+	// 공통 정보 받아옴
+	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+    if (iSelectedCHIndex != CH_AUGUSTA)
         return;
 
+    static _uint	iSwordEnergy		= pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST4);            // mAX = 2
 
-    // �߾� ������, Į�� �� �� ����
-    // ksta : ���߿� �޾ƿ;� ��
+    //static _float	fPointEnergy		= 0,f;
+    //const _float	fMaxPointEnergy		= 100.f;
+	//
+    //static _float	fUltBladeEnergy		= 0.f;
+    //const _float	fMaxUltBladeEnergy	= 100.;
 
-    static _uint iSwordEnergy = 0;            // mAX = 2
-
-    static _float fPointEnergy = 0.f;
-    const _float fMaxPointEnergy = 100.f;
-
-    static _float fUltBladeEnergy = 0.f;
-    const _float fMaxUltBladeEnergy = 100.;
-
-
-    CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");          // �ν��Ͻ� 0���� ����, 1���� ������ Į �ڿ�.
-    CCustom_UI* pPointUI    = Find_ChildObject(L"Frame_Augusta_Inst_CenterPointEnergy");    // �ϴܺ� ���� �ڿ�
-
-    CCustom_UI* pUltBladeUI = Find_ChildObject(L"Frame_Augusta_Inst_UltModeEnergy");        // �ñر� �� �����ϴ� �ڿ�. ����. 
+	_float fPointEnergyRatio	= pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST2);
+	_float fUltBladeEnergyRatio = pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST3);
 
 
+    CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");         
+    CCustom_UI* pPointUI    = Find_ChildObject(L"Frame_Augusta_Inst_CenterPointEnergy");   
 
-    // Į �ڿ�
-    if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+    CCustom_UI* pUltBladeUI = Find_ChildObject(L"Frame_Augusta_Inst_UltModeEnergy");       
+
+
+	auto& UISkillSlot = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	
+
+
+    //// Į �ڿ�
+    //if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+    //{
+    //    iSwordEnergy++;
+    //    if (iSwordEnergy > 2) iSwordEnergy = 0;
+    //}
+	//
+    //// ���� �ڿ�
+    //if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+    //{
+    //    if (fPointEnergy == 100) fPointEnergy = 0;
+    //    else
+    //    {
+    //        fPointEnergy += m_pGameInstance->Rand(10.f, 40.f);
+    //        if (fPointEnergy >= 100) fPointEnergy = 100;
+    //    }
+    //}
+	//
+    //// �ñر� �ڿ�
+    //if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
+    //{
+    //    if (fUltBladeEnergy == 100) fUltBladeEnergy = 0;
+    //    else
+    //    {
+    //        //fUltBladeEnergy += m_pGameInstance->Rand(10.f, 40.f);
+    //        fUltBladeEnergy += 100.f / 7.f;
+    //        if (fUltBladeEnergy >= 99.9f) fUltBladeEnergy = 100;
+    //    }
+    //}
+
+
+    if	(	m_iPlayerEnhancedMode == 0 ||
+			m_iPlayerEnhancedMode == 1 ||
+			m_iPlayerEnhancedMode == 2 ||
+			m_iPlayerEnhancedMode == 3	)
     {
-        iSwordEnergy++;
-        if (iSwordEnergy > 2) iSwordEnergy = 0;
-    }
-
-    // ���� �ڿ�
-    if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
-    {
-        if (fPointEnergy == 100) fPointEnergy = 0;
-        else
-        {
-            fPointEnergy += m_pGameInstance->Rand(10.f, 40.f);
-            if (fPointEnergy >= 100) fPointEnergy = 100;
-        }
-    }
-
-    // �ñر� �ڿ�
-    if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
-    {
-        if (fUltBladeEnergy == 100) fUltBladeEnergy = 0;
-        else
-        {
-            //fUltBladeEnergy += m_pGameInstance->Rand(10.f, 40.f);
-            fUltBladeEnergy += 100.f / 7.f;
-            if (fUltBladeEnergy >= 99.9f) fUltBladeEnergy = 100;
-        }
-    }
-
-
-    if (m_iEnergyBarMode == 0)
-    {
-        // �Ϲ� UI
         pBladeUI    ->Set_Active(true);
         pPointUI    ->Set_Active(true);
         pUltBladeUI ->Set_Active(false);
     }
 
-    else if (m_iEnergyBarMode == 1)
+    else if(m_iPlayerEnhancedMode == 4)
     {
-        // �� UI
         pBladeUI    ->Set_Active(false);
         pPointUI    ->Set_Active(false);
         pUltBladeUI ->Set_Active(true);
@@ -1524,7 +1591,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     // ! �ݵ��� pass ���� �ʿ�
     vector<_float4x4> vecPointVariantMat = { _float4x4() };
 
-    vecPointVariantMat[0].m[0][0] = 1 - fPointEnergy / fMaxPointEnergy;
+    vecPointVariantMat[0].m[0][0] = 1 - (fPointEnergyRatio);
     vecPointVariantMat[0].m[0][1] = 0.f;
     vecPointVariantMat[0].m[0][2] = 1.f;
     vecPointVariantMat[0].m[0][3] = static_cast<_float>(true);
@@ -1542,11 +1609,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 
     // �ñر� �ڿ�
     // ���� ���̴��� �������� �� Ȱ��. alpha pass �̿�.
-    _float ultRatio = fUltBladeEnergy / fMaxUltBladeEnergy;
+    _float ultRatio = fUltBladeEnergyRatio;
     static _float fPreUltRatio = 0.f;
 
-    if (ultRatio > fPreUltRatio) fPreUltRatio += fTimeDelta * 1.5f;
-    if (ultRatio <= fPreUltRatio) fPreUltRatio = ultRatio;
+    if (ultRatio > fPreUltRatio)	fPreUltRatio += fTimeDelta * 1.5f;
+    if (ultRatio <= fPreUltRatio)	fPreUltRatio = ultRatio;
 
     ultBladeDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, fPreUltRatio };
 
@@ -1562,11 +1629,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 
 
     // ��ȭ ���� ����
-    if (m_iSelectedCHIndex != CH_GALBRENA)
-        return;
-
-    if (m_iEnergyBarMode != 1)
-        return;
+    //if (m_iSelectedCHIndex != CH_GALBRENA)
+    //    return;
+	//
+    //if (m_iEnergyBarMode != 1)
+    //    return;
 
 
 
@@ -1578,6 +1645,23 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 
 
 }
+
+array<_float2, 2> CUI_HUD::Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize)
+{
+	_float2 vXSpace, vYSpace;;
+	_float fXNumSize, fYNumSize;
+
+	fXNumSize = (_float)(vSpriteSize.x / iNumMax[0]);
+	fYNumSize = (_float)(vSpriteSize.y / iNumMax[1]);
+
+	vXSpace = { fXNumSize * iIndexX, fXNumSize * (iIndexX + 1) };
+	vYSpace = { fYNumSize * iIndexY, fYNumSize * (iIndexY + 1) };
+
+	array<_float2, 2> output = { vXSpace, vYSpace };
+
+	return output; // x 범위, y 범위 반환
+}
+
 
 CUI_HUD* CUI_HUD::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

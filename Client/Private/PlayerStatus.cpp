@@ -58,6 +58,14 @@ _float CPlayerStatus::Get_HpRatio(_uint iCharIndex) const
     return m_Abilities[iCharIndex]->Get_HpRatio();
 }
 
+_float CPlayerStatus::Get_CostRatio(_uint iCharIndex, COST_TYPE eType) const
+{
+	if (nullptr == m_Abilities[iCharIndex])
+		return 0.f;
+
+	return m_Abilities[iCharIndex]->Get_CostRatio(eType);
+}
+
 _float CPlayerStatus::Get_Cost(_uint iCharIndex, COST_TYPE eType) const
 {
 	if (nullptr == m_Abilities[iCharIndex])
