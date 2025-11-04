@@ -24,7 +24,7 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
     Ready_Component(pDesc);
 
-	m_pParentMatrix = pDesc->pParentMatrix;
+	m_pParenTransform = pDesc->pParenTransform;
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	m_eTargetLayer = pDesc->eTargetLayer;
@@ -33,6 +33,7 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 	m_CollisionCallback = pDesc->CollisionCallback;
 	m_vOffsetPos = pDesc->vOffsetPos;
 	m_vOffsetRot = pDesc->vOffsetRadian;
+
     return S_OK;
 }
 
@@ -52,7 +53,7 @@ void CAttackVolume::Update(_float fTimeDelta)
 	_matrix ComBinedMatrix;
 	if (nullptr == m_pSocketMatrix)
 	{
-		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * XMLoadFloat4x4(m_pParentMatrix);
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * m_pParenTransform->Get_WorldMatrix();
 	}
 	else
 	{
@@ -60,7 +61,7 @@ void CAttackVolume::Update(_float fTimeDelta)
 		_vector vScale, vQuaternion, vTransition;
 		XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 		NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * XMLoadFloat4x4(m_pParentMatrix);
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParenTransform->Get_WorldMatrix();
 	}
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 
@@ -116,6 +117,11 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
+
+	m_CallBack.pTransform = m_pParenTransform;
+	m_CallBack.fAttack = pDesc->fAttackDmg;
+
+	//m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

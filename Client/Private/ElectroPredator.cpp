@@ -164,7 +164,9 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
 
 	// Com_Shader

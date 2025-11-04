@@ -12,14 +12,15 @@ public:
 	typedef struct tagAttackVolumeDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		const _float4x4* pSocketMatrix;
-		const _float4x4* pParentMatrix;
+		CTransform* pParenTransform;
 		
-		SHAPE	eShape;
-		COLLISIONLAYER eLayer;
-		COLLISIONLAYER eTargetLayer;
-		_float3 vExtent;
-		_float3 vOffsetPos;
-		_float3 vOffsetRadian;
+		SHAPE			eShape;
+		COLLISIONLAYER	eLayer;
+		COLLISIONLAYER	eTargetLayer;
+		_float			fAttackDmg;
+		_float3			vExtent;
+		_float3			vOffsetPos;
+		_float3			vOffsetRadian;
 		function<void()> CollisionCallback;
 	}ATKVOLUME_DESC;
 
@@ -41,7 +42,7 @@ public:
 
 private:
 	const _float4x4*	m_pSocketMatrix = { nullptr };
-	const _float4x4*	m_pParentMatrix = { nullptr };
+	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 
@@ -51,6 +52,7 @@ private:
 	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
 	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
 
+	CALLBACK_CLIENT			m_CallBack{};
 	function<void()> m_CollisionCallback;
 private:
 	void Ready_Component(ATKVOLUME_DESC* pDesc);

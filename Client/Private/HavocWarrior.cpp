@@ -164,7 +164,9 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		BeHit(iLayer, pDesc, Manifold);
 		});
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	m_tCallDesc.pTransform = m_pTransformCom;
+	m_tCallDesc.fAttack = 10.f;
+	m_pColliderCom->Set_Desc(&m_tCallDesc);
 
 
 	// Com_Shader
@@ -220,7 +222,7 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RHand");
 	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
@@ -231,7 +233,7 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	m_pAtkVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolume)
 		CRASH(m_pAtkVolume);
-	m_pAtkVolume->TriggerActivate(true);
+	m_pAtkVolume->TriggerActivate(false);
 }
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)

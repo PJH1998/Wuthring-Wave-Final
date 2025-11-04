@@ -25,17 +25,17 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
 	//TEST
-	SHADOW_MAP_DESC ShadowMapDesc = {};
-	ShadowMapDesc.iNumSectorX = 2;
-	ShadowMapDesc.iNumSectorZ = 2;
-	ShadowMapDesc.iSectorSizeX = 2048;
-	ShadowMapDesc.iSectorSizeZ = 2048;
-	ShadowMapDesc.vCenterPos = _float3(0.f, 0.f, 0.f);
-	ShadowMapDesc.vExtents = _float3(500.f, 250.f, 500.f);
-	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
-
-	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
-		CRASH("Test");
+	//SHADOW_MAP_DESC ShadowMapDesc = {};
+	//ShadowMapDesc.iNumSectorX = 2;
+	//ShadowMapDesc.iNumSectorZ = 2;
+	//ShadowMapDesc.iSectorSizeX = 2048;
+	//ShadowMapDesc.iSectorSizeZ = 2048;
+	//ShadowMapDesc.vCenterPos = _float3(0.f, 0.f, 0.f);
+	//ShadowMapDesc.vExtents = _float3(500.f, 250.f, 500.f);
+	//ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+	//
+	//if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
+	//	CRASH("Test");
 
 	//로더에서 부른 것과 같은 거 부르기.
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
@@ -91,14 +91,14 @@ HRESULT CLevel_Test::Initialize()
 	Ready_Skybox();
 
 	//TEST
-	CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
-	ShadowMapDesc.iNumSectorX = 2;
-	ShadowMapDesc.iNumSectorY = 2;
-	ShadowMapDesc.iSectorSizeX = 2048;
-	ShadowMapDesc.iSectorSizeY = 2048;
-	ShadowMapDesc.vCenterPos = _float3(3000.f, 0.f, 2000.f);
-	ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
-	ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
+	//CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
+	//ShadowMapDesc.iNumSectorX = 2;
+	//ShadowMapDesc.iNumSectorY = 2;
+	//ShadowMapDesc.iSectorSizeX = 2048;
+	//ShadowMapDesc.iSectorSizeY = 2048;
+	//ShadowMapDesc.vCenterPos = _float3(3000.f, 0.f, 2000.f);
+	//ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
+	//ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
 
 	//CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
 

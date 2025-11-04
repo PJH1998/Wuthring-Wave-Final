@@ -489,9 +489,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     });
 
 
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollider_Enter(iLayer, pDesc, Manifold);
-		});
+	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	//	OnCollider_Enter(iLayer, pDesc, Manifold);
+	//	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
@@ -513,7 +513,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_pColliderCom->Set_Desc(m_pTransformCom);
-
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
     return S_OK;
 }
 

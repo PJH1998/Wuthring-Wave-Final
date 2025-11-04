@@ -269,7 +269,10 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
 
 	// Com_Shader
@@ -324,7 +327,22 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 
 void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 {
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RHand");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.CollisionCallback = [this]() {this->OnHitEnter(); };
 
+	//CContainerObject::Add_PartObject(TEXT("Part_ATKVolume"), m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), &TriggerDesc);
+	m_pAtkVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolume)
+		CRASH(m_pAtkVolume);
+	m_pAtkVolume->TriggerActivate(true);
 }
 
 void CMonsterTest::Calculate_PosAndDir()
@@ -392,6 +410,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		cout << "On Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
+}
+
+void CMonsterTest::OnHitEnter()
+{
 }
 
 _bool CMonsterTest::isKnockDown()

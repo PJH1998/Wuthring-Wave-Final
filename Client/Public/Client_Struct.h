@@ -89,6 +89,18 @@ namespace Client
 		_float fCostRatio;        // 0.f ~ 1.f (현재 코스트 / 최대)
 	}UISKILL_SLOT;
 
+	typedef struct tagMonsterInfo
+	{
+		_uint	iMonsterID;			//참조용 몬스터ID
+		_string strName;
+		_float	fMaxHp;
+		_float	fMaxStamina;		// 거랑급 이상 무력화 게이지
+		_float	fAttack;			// 기본 공격 값.
+		_float	fAttackAddMin;		// 공격 최소 값.
+		_float	fAttackAddMax;		// 공격 최대 값.
+
+
+	}MONSTER_INFO;
 	
 	typedef struct tagCallBackClientDesc
 	{

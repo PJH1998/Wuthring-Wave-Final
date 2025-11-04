@@ -65,6 +65,8 @@ private:
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
 
+	CALLBACK_CLIENT			m_tCallDesc{};
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(HAVOCWARRIOR_DESC* pDesc);
