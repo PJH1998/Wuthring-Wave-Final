@@ -54,7 +54,14 @@ public:
 
 #pragma endregion
 
-public:
+#pragma region UI Interface
+	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
+	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
+
+
+#pragma endregion
+
+
 	
 
 public:
@@ -72,6 +79,8 @@ private:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
+
+	
 	
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
@@ -81,6 +90,8 @@ private:
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };
+	class CPlayerStatus* m_pPlayerStatus = { nullptr }; // 플레이어 Interface
+
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };

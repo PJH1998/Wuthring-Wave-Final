@@ -207,6 +207,7 @@
     <ClInclude Include="..\Public\PlayerFactory.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\MonsterDummy.h" />
+    <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\Player_Define.h" />
     <ClInclude Include="..\Public\ClientPch.h" />
     <ClInclude Include="..\Public\Client_Define.h" />
@@ -359,6 +360,7 @@
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />

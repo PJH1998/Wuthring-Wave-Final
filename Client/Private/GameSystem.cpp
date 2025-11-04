@@ -4,6 +4,8 @@
 #include "Parser.h"
 #include "Factory.h"
 #include "Director.h"
+#include "PlayerStatus.h"
+#include "Player.h"
 
 IMPLEMENT_SINGLETON(CGameSystem)
 
@@ -21,6 +23,15 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pDirector = CDirector::Create();
 	ASSERT_CRASH(m_pDirector);
+
+	// 파일 목록 만들기.
+	vector<_string> AbilityFolders = {};
+	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
+
+	AbilityFolders[CPlayer::CHARACTERTYPE::ROVER] = "../Bin/Resource/Model/Player/Rover/Ability/";
+	AbilityFolders[CPlayer::CHARACTERTYPE::AUGUSTA] = "../Bin/Resource/Model/Player/Augusta/Ability/";
+	AbilityFolders[CPlayer::CHARACTERTYPE::GALBRENA] = "../Bin/Resource/Model/Player/Galbrena/Ability/";
+	m_pPlayerStatus = CPlayerStatus::Create(pDevice, pContext, AbilityFolders);
 }
 #pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
@@ -90,6 +101,11 @@ void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 
 #pragma endregion
 
+#pragma region PLAYER STATUS
+
+#pragma endregion
+
+
 #pragma region TRIGGER
 
 void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
@@ -123,4 +139,5 @@ void CGameSystem::Free()
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
 	Safe_Release(m_pDirector);
+	Safe_Release(m_pPlayerStatus);
 }

@@ -305,8 +305,8 @@ void CMainApp::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
-	Safe_Release(m_pGameSystem);
-
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
+
+	Safe_Release(m_pGameSystem);
 }

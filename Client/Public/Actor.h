@@ -14,9 +14,9 @@ public:
 		pair<LEVEL, _wstring> colliderData = {};
 		pair<LEVEL, _wstring> rigidBodyData = {};
 		pair<LEVEL, _wstring> modelData = {};
-		pair<LEVEL, _wstring> abilityData = {};
+		//pair<LEVEL, _wstring> abilityData = {};
 		_string strFolderPath = {};
-		_string strAbilityFolderPath = {};
+		//_string strAbilityFolderPath = {};
 	}ACTOR_DESC;
 
 

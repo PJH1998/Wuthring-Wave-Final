@@ -46,6 +46,11 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
+#pragma region PLAYER STATUS
+	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
+#pragma endregion
+
+
 #pragma region TRIGGER
 	void TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc);
 	void OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg = nullptr);
@@ -54,9 +59,11 @@ public:
 #pragma endregion
 
 private:
-	class		CParser*		m_pParser = { nullptr };
+	class		CParser*	m_pParser = { nullptr };
 	class		CFactory*	m_pFactory = { nullptr };
 	class		CDirector*	m_pDirector = { nullptr };
+	class		CPlayerStatus* m_pPlayerStatus = { nullptr };
+	
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 public:

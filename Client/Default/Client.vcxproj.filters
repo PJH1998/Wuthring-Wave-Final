@@ -517,6 +517,7 @@
     <ClInclude Include="..\Public\Ability.h">
       <Filter>04. Component\03. Ability</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -777,6 +778,7 @@
     <ClCompile Include="..\Private\Ability.cpp">
       <Filter>04. Component\03. Ability</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

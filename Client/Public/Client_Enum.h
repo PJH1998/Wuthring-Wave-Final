@@ -44,13 +44,12 @@ namespace Client
 
 	typedef enum class ESkillType : _uint
 	{
-		NONE = 0,			// (비용 없음)
+		NONE = 0,	    // (비용 없음)
 		RESONANCE,		// 공명 게이지
 		AUGUSTA_POINT,	// 특수 원형 게이지
 		AUGUSTA_ULTI,	// 기본 궁극기 게이지
 		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
-		// CSV 파싱 실패 등을 위한 END
-		SKILL_TYPE_END
+		SKILL_TYPE_END // CSV 파싱 실패 등을 위한 END
 	}SKILL_TYPE;
 
 	typedef enum class ECostType : unsigned int
