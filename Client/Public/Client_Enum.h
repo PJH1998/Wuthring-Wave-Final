@@ -42,6 +42,39 @@ namespace Client
 		D6 = 1 << 19
 	};
 
+	typedef enum class ESkillType : _uint
+	{
+		NONE = 0,			// (비용 없음)
+		RESONANCE,		// 공명 게이지
+		AUGUSTA_POINT,	// 특수 원형 게이지
+		AUGUSTA_ULTI,	// 기본 궁극기 게이지
+		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
+		// CSV 파싱 실패 등을 위한 END
+		SKILL_TYPE_END
+	}SKILL_TYPE;
+
+	typedef enum class ECostType : unsigned int
+	{
+		NONE = 0, // Stat 아님.
+		COST1, // 1
+		COST2, // 2
+		COST3, // 3
+		COST4, // 4
+		COST5,
+		STAMINA, // 5
+		COST_TYPE_END
+	}COST_TYPE;
+
+
+	enum class SKILL_STATE : unsigned int
+	{
+		READY = 0,		 // 사용 가능
+		COOLING_DOWN,	 // 쿨타임
+		NOT_ENOUGH_COST, // 자원 부족
+		NOT_EXIST,		 // 정보가 없음.
+		END
+	};
+
 	enum class DIRECTION {
 		FRONT, BACK, LEFT, RIGHT, UP, DOWN, END
 	};

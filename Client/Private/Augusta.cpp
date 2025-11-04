@@ -3,12 +3,15 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "Collider.h"
+#include "Ability.h"
 
 #include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+
+
 #include "Wing.h"
 
 
@@ -45,6 +48,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
+	Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
 	m_pBayonet->SetActivate(false);
@@ -72,8 +76,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-  
 
+	// 3. Ability Update();
+	m_pAbillityCom->Update(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -90,7 +95,8 @@ void CAugusta::Update(_float fTimeDelta)
 	}
 
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
+    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
@@ -383,15 +389,20 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
-
+	
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
+		, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
+		CRASH("Ability");
+
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
-    m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)

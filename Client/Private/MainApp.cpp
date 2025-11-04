@@ -14,6 +14,7 @@
 #include "SpringCamera.h"
 #include "SkyBox.h"
 #include "Effect_Prefab.h"
+#include "Ability.h"
 
 CMainApp::CMainApp()
 	: m_pGameInstance { CGameInstance::GetInstance() },
@@ -269,6 +270,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	string strEntryParticle = "main";
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+
+	// Ability 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),
+		CAbility::Create(m_pDevice, m_pContext))))
+		CRASH("Ability");
 
 }
 

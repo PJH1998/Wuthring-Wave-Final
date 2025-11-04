@@ -4,6 +4,7 @@
 #include "SpringCamera.h"
 #include "GameSystem.h"
 #include "Collider.h"
+#include "Ability.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -34,7 +35,7 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
     // 1. State 초기화
-    m_Stats = pDesc->eStat;
+    //m_Stats = pDesc->eStat;
 
 
     return S_OK;
@@ -672,13 +673,21 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 
 }
 
+void CCharacter::Debug_FullCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Debug_FullCost();
+}
+
 #pragma endregion
 
 #pragma region UI
 void CCharacter::Sync_UI()
 {
     // Character Info Sync 
-    m_pGameSystem->Sync_CharacterInfo(m_Stats);
+    //m_pGameSystem->Sync_CharacterInfo(m_Stats);
 }
 #pragma endregion
 

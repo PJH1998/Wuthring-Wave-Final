@@ -29,9 +29,10 @@ namespace PlayerData
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Augusta"));
-        //Desc.controllerData = make_pair(eLevel, TEXT("Prototype_Component_Controller_Augusta"));
+        Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.strFolderPath = "../Bin/Resource/Model/Player/Augusta/Notify/";
+        Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Augusta/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
@@ -94,8 +95,8 @@ namespace PlayerData
         CProp::PROP_DESC Desc{};
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.fSpeedPerSec = 10.f;
-        Desc.pSocketMatrix = { nullptr }; // Augusta���� ä������ϴ� ������.
-        Desc.pParentTransform = { nullptr }; // Augusta���� ä������ϴ� ������.
+        Desc.pSocketMatrix = { nullptr }; 
+        Desc.pParentTransform = { nullptr };
         Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
         Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Augusta_Griffon"));
@@ -119,8 +120,10 @@ namespace PlayerData
         Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
         Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover"));
         Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Rover"));
+		Desc.abilityData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Ability"));
         Desc.fRotationPerSec = XMConvertToRadians(90.f);
         Desc.strFolderPath = "../Bin/Resource/Model/Player/Rover/Notify/";
+		Desc.strAbilityFolderPath = "../Bin/Resource/Model/Player/Rover/Ability/"; // 스탯 정보 폴더.
         Desc.fSpeedPerSec = 10.f;
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;

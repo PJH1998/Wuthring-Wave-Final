@@ -21,12 +21,17 @@ private:
         MOVE_L,
         MOVE_R,
         AIR_ATTACK_E,
-        SKILL_E,
-        SKILL_Q,
-        SKILL_R,
-        UNIQUE_E, // Unique E상태. => 그리폰 타서 공격.
-        UNIQUE_R,
-        BURST_R, // Burst R 상태 => Skill 검으로 바뀜.
+        SKILL_E, // Normal E 상태
+        SKILL_Q, // Echo Q 상태
+        SKILL_R, 
+
+		// 쿨타임만 있는 얘들
+		NORMAL_E,
+
+		// 소모값 있는 얘들 => Cost가 있을때만 쓸 수 있음.
+        POINT_E,  // 중앙 Point가 가득찬 상태.
+        ECHO_R,  // 중앙 Echo가 가득 찬 상태. 
+        SWORD_R, // Sword R 상태 => Skill 검으로 바뀜. (Sword UI가 가득 찼을때)
         END
     };
 
