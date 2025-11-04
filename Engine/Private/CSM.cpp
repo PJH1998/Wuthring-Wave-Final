@@ -118,6 +118,8 @@ HRESULT CCSM::End_CSM()
 
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
 
 	return S_OK;
 }
@@ -362,4 +364,7 @@ void CCSM::Free()
 	Safe_Release(m_pShadowDSV);
 	Safe_Release(m_pShadowSRV);
 	Safe_Release(m_pConstantBuffer);
+
+	Safe_Release(m_pBackBuffer);
+	Safe_Release(m_pOriginalDSV);
 }

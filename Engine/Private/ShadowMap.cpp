@@ -302,7 +302,12 @@ HRESULT CShadowMap::Ready_Matrices()
 			_uint iWeightX = (x * 2) + 1;
 			_uint iWeightZ = (z * 2) + 1;
 			_float3 vCenterPos = Compute_CenterPos(iWeightX, iWeightZ, m_MapDesc.vCenterPos, m_MapDesc.vExtents);
-			BoundingBox* Bounding = new BoundingBox(vCenterPos, m_MapDesc.vExtents);
+
+			_float vMarginX = m_MapDesc.vExtents.x + (m_MapDesc.vExtents.x * 0.1f);
+			_float vMarginZ = m_MapDesc.vExtents.z + (m_MapDesc.vExtents.z * 0.1f);
+
+			_float3 vMarginExtents = _float3(vMarginX, m_MapDesc.vExtents.y, vMarginZ);
+			BoundingBox* Bounding = new BoundingBox(vCenterPos, vMarginExtents);
 
 			_float4x4 ViewMatrix = Make_ViewMatrix(vCenterPos, Bounding, m_MapDesc.vLightDir);
 			_float4x4 ProjMatrix = Make_ProjMatrix(Bounding, ViewMatrix);

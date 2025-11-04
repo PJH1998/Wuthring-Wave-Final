@@ -190,7 +190,7 @@ void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
 
 void CRenderer::Render_ShadowMap()
 {
-	if (m_ShadowMapObjects.size() <= 0)
+	if (m_ShadowMapObjects.empty())
 		return;
 
 	m_pGameInstance->Begin_ShadowMap();

@@ -11,7 +11,8 @@ class CCSM final : public CBase
 private:
 	typedef struct alignas(16) CSMDatas
 	{
-		_float fDistance[5];
+		_float fDistance[4];
+		_float fLastDistance;
 		_float3 padding;
 	}CSM_DATA;
 

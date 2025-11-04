@@ -314,6 +314,12 @@
     <Filter Include="01. Utility\07. Shadow\ShadowMap">
       <UniqueIdentifier>{7722a407-534c-4be0-99ae-0976cb6c7923}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\16. Decal">
+      <UniqueIdentifier>{5b31ed4e-a5af-4f3e-99ce-0723b781518b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\16. Decal\Manager">
+      <UniqueIdentifier>{a88ed5dc-e561-4d7e-80ba-bbf2a2622553}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -638,6 +644,12 @@
     <ClInclude Include="..\public\ObjectFuncNotify.h">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Decal.h">
+      <Filter>01. Utility\16. Decal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Decal_Manager.h">
+      <Filter>01. Utility\16. Decal\Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -937,6 +949,12 @@
     </ClCompile>
     <ClCompile Include="..\private\ObjectFuncNotify.cpp">
       <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Decal.cpp">
+      <Filter>01. Utility\16. Decal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Decal_Manager.cpp">
+      <Filter>01. Utility\16. Decal\Manager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
