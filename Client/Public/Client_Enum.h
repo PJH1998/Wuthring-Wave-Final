@@ -55,10 +55,10 @@ namespace Client
 	typedef enum class ECostType : unsigned int
 	{
 		NONE = 0, // Stat 아님.
-		COST1, // 1
-		COST2, // 2
-		COST3, // 3
-		COST4, // 4
+		COST1, // 1 RESONANCE
+		COST2, // 2 AUGUSTA POINT
+		COST3, // 3 AUGUSTA_ULTI
+		COST4, // 4 AUGUSTA_SWORD
 		COST5,
 		STAMINA, // 5
 		COST_TYPE_END
@@ -71,6 +71,15 @@ namespace Client
 		COOLING_DOWN,	 // 쿨타임
 		NOT_ENOUGH_COST, // 자원 부족
 		NOT_EXIST,		 // 정보가 없음.
+		END
+	};
+
+	// 어떤걸 올려줘야하는가?
+	enum class HITTYPE : unsigned int
+	{
+		NONE = 0, // 없음
+		HEAVY,    // 강공
+		ULTI,     // 궁극기
 		END
 	};
 

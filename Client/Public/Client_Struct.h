@@ -80,4 +80,12 @@ namespace Client
 		
 
 	}CHARACTER_INFO;
+
+	typedef struct tagUISkillSlot {
+		_string strKeyInput;      // "Q", "E", "T", "R", "LB"
+		_string strSkillName;     // 현재 할당된 스킬 이름
+		SKILL_STATE eState;       // READY, COOLING_DOWN, NOT_ENOUGH_COST, NOT_CHAINED
+		_float fCooldownRatio;    // 0.f (쿨타임 완료) ~ 1.f (최대)
+		_float fCostRatio;        // 0.f ~ 1.f (현재 코스트 / 최대)
+	}UISKILL_SLOT;
 }
