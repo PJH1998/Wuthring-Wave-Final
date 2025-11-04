@@ -29,8 +29,6 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
     m_strMyTag = pDesc->strPrefabTag;
     m_strBoneTag = pDesc->strBoneTag;
 
-	//불타임
-	if(!Root)
     for (size_t i = 0; i < pDesc->ChildrenCount; i++)
     {
        _wstring strChildrenTag = pDesc->FrameDesc[i].strChildrenTag;
