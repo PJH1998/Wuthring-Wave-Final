@@ -29,6 +29,10 @@ HRESULT CAbility::Initialize_Clone(void* pArg)
 	m_Keys = { "LB", "T", "E", "Q", "R" };
 
 
+	m_CharacterInfo = {
+		""
+	};
+
 	return S_OK;
 }
 
@@ -221,6 +225,22 @@ void CAbility::Add_Cost(COST_TYPE eType, _float fCost)
 	m_Costs[iType] = max(m_Costs[iType] + fCost, m_fCostMax);
 }
 
+void CAbility::Set_Hp(_float fHp)
+{
+	m_CharacterInfo.fHp = fHp;
+}
+
+void CAbility::Add_Hp(_float fHp)
+{
+	m_CharacterInfo.fHp += fHp;
+
+	// 0보다 아래로 안가도록.
+	m_CharacterInfo.fHp = max(0.f, m_CharacterInfo.fHp);
+
+	// MaxHp보다 안커지도록.
+	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
+}
+
 
 #ifdef _DEBUG
 void CAbility::Debug_FullCost()
@@ -336,7 +356,6 @@ void CAbility::Read_Stat(const _char* pFilePath)
 
 SKILL_STATE CAbility::Check_SkillState(const _string& strSkillName, const _string& strPrevName)
 {
-
 	const SKILL_INFO* pSkillInfo = Get_SkillInfo(strSkillName);
 
 	// 1. 스킬이 존재하는가?
@@ -401,8 +420,6 @@ COST_TYPE CAbility::ConvertCostType(const _string& strCostType)
 	COST_TYPE eCostType = static_cast<COST_TYPE>(stoul(strCostType));
 	return eCostType;
 }
-
-
 
 CAbility* CAbility::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

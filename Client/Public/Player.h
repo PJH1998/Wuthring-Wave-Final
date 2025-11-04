@@ -72,7 +72,8 @@ public:
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
 public:
-	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 private:
 	vector<class CCharacter*> m_Characters; 
@@ -111,7 +112,6 @@ private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
-	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void Sorting_Target();
 	void Toggle_LockOn();
 

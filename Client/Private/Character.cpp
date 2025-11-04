@@ -567,17 +567,15 @@ void CCharacter::Rotate_Target()
     return;
 }
 
-void CCharacter::Rotate_HitTarget()
+
+void CCharacter::Rotate_HitTarget(CTransform* pTransform)
 {
     // 1. 타겟이 없는 경우 Return
-    if (nullptr == m_pTargetTransform)
+    if (nullptr == pTransform)
         return;
 
-    //if (nullptr == m_pHitTargetTransform)
-    //    return;
-
     // 2. 타겟이 있으면 즉시 회전.
-    _vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    _vector vTarget = pTransform->Get_State(STATE::POSITION);
     _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 

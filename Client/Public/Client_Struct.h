@@ -88,4 +88,11 @@ namespace Client
 		_float fCooldownRatio;    // 0.f (쿨타임 완료) ~ 1.f (최대)
 		_float fCostRatio;        // 0.f ~ 1.f (현재 코스트 / 최대)
 	}UISKILL_SLOT;
+
+	
+	typedef struct tagCallBackClientDesc
+	{
+		void* pTransform = { nullptr };  // Transform;
+		_float fAttack = {};			 // 공격력
+	}CALLBACK_CLIENT;
 }
