@@ -110,8 +110,10 @@ _float CAbility::Get_Cost(COST_TYPE eType) const
 	return m_Costs[iType];
 }
 
+// 사용 전에 무조건 Check_SkillState호출?
 SKILL_STATE CAbility::TryUseSkill(const _string& strSkillName)
 {
+	
 	// 1. 먼저 스킬 사용이 가능한지 상태를 체크
 	const SKILL_STATE eState = Check_SkillState(strSkillName);
 
@@ -170,7 +172,12 @@ void CAbility::Debug_FullCost()
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
 	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
 	for (_uint i = 1; i < iEnd; ++i)
+	{
+		if (i == 4)
+			continue;
 		m_Costs[i] = m_fCostMax;
+		
+	}
 }
 
 void CAbility::Print_Cost()

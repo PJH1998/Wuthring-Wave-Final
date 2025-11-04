@@ -246,8 +246,12 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			m_States[SKILL_RISE] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Rise", m_strSkillName));
 			m_States[AIRATTACK_HACKDOWN_START] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("AirAttack_HackDown_Start", m_strSkillName));
 
-			if (eSkillType == EAugustaSkillType::SKILL_STRIKE)
+			//if (eSkillType == EAugustaSkillType::SKILL_STRIKE)
+			if (m_States[SKILL_RISE_ZERO])
 			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise_Zero"))
+					return;
+
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE_ZERO;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
@@ -256,14 +260,20 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			// 1. Skill Rise Zero
 			if (eSkillType == EAugustaSkillType::SKILL_RISE_ZERO)
 			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise"))
+					return;
+
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
 			}
 
 			// 2. Skill Rise
-			if (eSkillType == EAugustaSkillType::SKILL_RISE)
+			if (m_States[AIRATTACK_HACKDOWN_START])
 			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Start"))
+					return;
+
 				m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
 				m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
