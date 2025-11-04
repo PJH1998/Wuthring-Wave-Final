@@ -6,11 +6,11 @@ class CShader;
 class CModel;
 class CAnimMachine;
 class CBehavior_Tree;
-//class CRigidbody;
-//class CCollider;
 NS_END
 
 NS_BEGIN(Client)
+
+class CAttackVolume;
 
 class CMonsterTest final : public CActor
 {
@@ -50,7 +50,7 @@ private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 
-	//CTransform*				m_pTargetTransformCom = { nullptr };
+	CAttackVolume*			m_pAtkVolume = { nullptr };
 
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
@@ -63,6 +63,7 @@ private:
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
+	//_float2					m_vDistanceRange{};
 
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
@@ -76,6 +77,7 @@ private:
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
+	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 

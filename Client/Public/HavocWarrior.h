@@ -57,6 +57,7 @@ private:
 	_float					m_fDistance{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
+	_float2					m_vDistanceRange{};
 
 	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};

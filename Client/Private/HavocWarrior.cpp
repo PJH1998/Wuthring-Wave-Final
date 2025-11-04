@@ -34,6 +34,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
+	m_vDistanceRange = _float2(2.7f, 3.3f);
 	m_iHP = 1;
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
@@ -221,8 +222,8 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RHand");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 2.f);
-	TriggerDesc.vOffsetPos = _float3(0.f, -0.5f, 0.f);
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this]() {this->OnTriggerTest(); };
 
@@ -230,7 +231,7 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	m_pAtkVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolume)
 		CRASH(m_pAtkVolume);
-	m_pAtkVolume->TriggerActivate(false);
+	m_pAtkVolume->TriggerActivate(true);
 }
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
@@ -333,6 +334,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	{
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 
 	}
@@ -417,12 +419,12 @@ _bool CHavocWarrior::isPatrol()
 
 _bool CHavocWarrior::Back()
 {
-	return m_fFrontDot < 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance < m_vDistanceRange.x;
 }
 
 _bool CHavocWarrior::Front()
 {
-	return m_fFrontDot > 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance > m_vDistanceRange.y;
 }
 
 _bool CHavocWarrior::Left()

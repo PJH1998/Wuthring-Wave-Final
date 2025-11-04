@@ -48,6 +48,8 @@ private:
 	_float3 m_vOffsetPos{};
 	_float3 m_vOffsetRot{};
 	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
+	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
+	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
 
 	function<void()> m_CollisionCallback;
 private:

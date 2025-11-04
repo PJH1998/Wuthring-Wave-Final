@@ -2,6 +2,7 @@
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
+#include "AttackVolume.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -326,6 +327,19 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 
 }
 
+void CMonsterTest::Calculate_PosAndDir()
+{
+	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	_vector vDir = vTargetPos - vPosition;
+	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	vDir = XMVector3Normalize(vDir);
+	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+}
+
 void CMonsterTest::Reset_Condition(_float fTimeDelta)
 {
 	if(m_isAnimationFinished)
@@ -335,15 +349,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	if(m_isDetecting)
 	{
-		_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-		_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		_vector vDir = vTargetPos - vPosition;
-		m_fDistance = XMVectorGetX(XMVector3Length(vDir));
-		vDir = XMVector3Normalize(vDir);
-		m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
-		m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
-
-		XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+		Calculate_PosAndDir();
 #ifdef _DEBUG
 		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
 		//cout << "distance: " << m_fDistance << endl;
@@ -516,6 +522,7 @@ void CMonsterTest::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pAtkVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
 }

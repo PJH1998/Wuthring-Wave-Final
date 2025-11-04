@@ -28,6 +28,8 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	m_eTargetLayer = pDesc->eTargetLayer;
+	m_eLayer = pDesc->eLayer;
+	m_eCurrentLayer = m_eLayer;
 	m_CollisionCallback = pDesc->CollisionCallback;
 	m_vOffsetPos = pDesc->vOffsetPos;
 	m_vOffsetRot = pDesc->vOffsetRadian;
@@ -47,11 +49,19 @@ void CAttackVolume::Update(_float fTimeDelta)
 
 	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), 
 													XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
-	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
-	_vector vScale, vQuaternion, vTransition;
-	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
-	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	_matrix ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * NonScaleMatrix * matOffset * XMLoadFloat4x4(m_pParentMatrix);
+	_matrix ComBinedMatrix;
+	if (nullptr == m_pSocketMatrix)
+	{
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * XMLoadFloat4x4(m_pParentMatrix);
+	}
+	else
+	{
+		_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
+		_vector vScale, vQuaternion, vTransition;
+		XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
+		NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * XMLoadFloat4x4(m_pParentMatrix);
+	}
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 
 	m_pRigidBodyCom->Update_Rigidbody(ComBinedMatrix, fTimeDelta);
@@ -74,7 +84,17 @@ void CAttackVolume::Render()
 void CAttackVolume::TriggerActivate(_bool isActivate)
 {
 	m_pRigidBodyCom->IsActivate(isActivate);
-	m_isActivate = isActivate;
+	if (isActivate)
+	{
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
+		m_eCurrentLayer = m_eLayer;
+	}
+	else
+	{
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		m_eCurrentLayer = COLLISIONLAYER::NONE;
+	}
+	//m_isActivate = isActivate;
 }
 
 
@@ -100,6 +120,8 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (m_eCurrentLayer == COLLISIONLAYER::NONE)
+		return;
 	if(ENUM_CLASS(m_eTargetLayer) == iLayer)
 	{
 		if (m_CollisionCallback)
