@@ -134,7 +134,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_CallBack.pTransform = m_pParenTransform;
 	m_CallBack.fAttack = pDesc->fAttackDmg;
 
-	//m_pRigidBodyCom->Set_Desc(&m_CallBack);
+	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)

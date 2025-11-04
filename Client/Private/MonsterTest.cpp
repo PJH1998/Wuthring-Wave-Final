@@ -67,7 +67,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 {
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	m_pBehaviorTreeCom->tick(this);
+	//m_pBehaviorTreeCom->tick(this);
 
 	//그로기 특수상황
 	if(m_isParalysis)
@@ -345,8 +345,8 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Weapon002");
-	TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(0.3f, 1.5f, 0.3f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.5f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
 	TriggerDesc.CollisionCallback = [this]() {this->OnHitEnter(); };
@@ -368,25 +368,25 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_R]);
 	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(false);
 
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
-	TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
-		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
-		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
-
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
-	TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	m_pAtkVolumes[ATK_SOCKET::WHIP_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
-		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
-		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
+	//TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
+	//TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
+	//TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	//TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	//m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
+	//	TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	//if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
+	//	CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
+	//m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
+	//
+	//TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
+	//TriggerDesc.vExtent = _float3(0.3f, 0.3f, 1.5f);
+	//TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	//TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	//m_pAtkVolumes[ATK_SOCKET::WHIP_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
+	//	TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	//if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
+	//	CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
+	//m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
 
 }
 
