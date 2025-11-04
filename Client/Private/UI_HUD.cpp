@@ -21,6 +21,7 @@ CUI_HUD::CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CUI_HUD::CUI_HUD(const CUI_HUD& Prototype)
     :CCustom_UI(Prototype)
+	, m_pGameSystem(CGameSystem::GetInstance())
 {
 }
 
@@ -280,7 +281,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
 	};
 	_float fChangeCD[CH_END] = {
-
+		.3f, .5f, .8f
 	};
 	_float fChangeMaxCD[CH_END] = {
 		2.f, 2.f, 2.f
