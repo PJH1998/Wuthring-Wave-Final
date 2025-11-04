@@ -51,6 +51,7 @@
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
     <ClInclude Include="..\Public\DebugRender.h" />
+    <ClInclude Include="..\Public\Effect.h" />
     <ClInclude Include="..\Public\EffectNotify.h" />
     <ClInclude Include="..\Public\EnginePch.h" />
     <ClInclude Include="..\Public\Engine_Define.h" />
@@ -80,12 +81,14 @@
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
     <ClInclude Include="..\Public\Sequence.h" />
     <ClInclude Include="..\Public\Sequence_Manager.h" />
+    <ClInclude Include="..\public\ShadowMap.h" />
     <ClInclude Include="..\Public\SoundNotify.h" />
     <ClInclude Include="..\Public\State.h" />
     <ClInclude Include="..\Public\StateMachine.h" />
@@ -116,10 +119,12 @@
     <ClInclude Include="..\Public\VIBuffer_Cell.h" />
     <ClInclude Include="..\Public\VIBuffer_Cube.h" />
     <ClInclude Include="..\Public\VIBuffer_Instance.h" />
+    <ClInclude Include="..\Public\VIBuffer_FXMesh_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Mesh.h" />
     <ClInclude Include="..\Public\VIBuffer_Point.h" />
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect.h" />
+    <ClInclude Include="..\Public\VIBuffer_Spectrum.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
@@ -154,6 +159,7 @@
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />
     <ClCompile Include="..\Private\DebugRender.cpp" />
+    <ClCompile Include="..\Private\Effect.cpp" />
     <ClCompile Include="..\Private\EffectNotify.cpp" />
     <ClCompile Include="..\Private\EnginePch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -179,12 +185,14 @@
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
     <ClCompile Include="..\Private\Sequence.cpp" />
     <ClCompile Include="..\Private\Sequence_Manager.cpp" />
+    <ClCompile Include="..\private\ShadowMap.cpp" />
     <ClCompile Include="..\Private\SoundNotify.cpp" />
     <ClCompile Include="..\Private\State.cpp" />
     <ClCompile Include="..\Private\StateMachine.cpp" />
@@ -215,10 +223,12 @@
     <ClCompile Include="..\Private\VIBuffer_Cell.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Cube.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Instance.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_FXMesh_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Mesh.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect.cpp" />
+    <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />

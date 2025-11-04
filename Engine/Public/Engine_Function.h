@@ -94,6 +94,11 @@ namespace Engine
 		return XMFLOAT4(fStartU, fStartV, fEndU, fEndV);
 	}
 
+	inline _float floatlerp(_float fCur, _float fMax, _float fRatio)
+	{
+		return Clamp((fCur * (1 - fRatio) + fMax * fRatio), 0.f, 1.f);
+	}
+
 #ifdef _DEBUG
 	inline void OutPutDebugFloat4(_wstring strPrePix, _float4 fVector)
 	{
@@ -125,6 +130,8 @@ namespace Engine
 		OutputDebugString(TEXT("\n"));
 		
 	}
+
+	
 #endif
 
 	inline Vec3 LoadVec3(const _float3& vVector) { return Vec3(vVector.x, vVector.y, vVector.z); }

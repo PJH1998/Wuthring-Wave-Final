@@ -12,6 +12,9 @@
 #include "Level_Test_UI.h"
 
 #include "SpringCamera.h"
+#include "SkyBox.h"
+#include "Effect_Prefab.h"
+#include "Ability.h"
 
 
 #include "CustomFont.h"
@@ -149,6 +152,7 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(BPLAYER::SENSOR));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ATTACK), ENUM_CLASS(BPLAYER::SENSOR));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK), ENUM_CLASS(BPLAYER::SENSOR));
 
 
 	// Object VS Object
@@ -158,6 +162,7 @@ void CMainApp::SetUp_CollisionLayer()
 	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::MAP));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK), ENUM_CLASS(COLLISIONLAYER::PLAYER));
 	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::PLAYER)); //몬스터 인식 볼륨
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
@@ -171,6 +176,7 @@ void CMainApp::SetUp_CollisionLayer()
 
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ATTACK), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK), ENUM_CLASS(BPLAYER::MOVE));
 }
 
 void CMainApp::Ready_Event()
@@ -198,6 +204,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
 	//	CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
 	//	CRASH("Shader_UI_VtxPosTex");
+	
+	// Shader_VtxSkyBox
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxSkyBox");
 		
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
@@ -236,6 +247,43 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Font"),
 		CCustomFont::Create(m_pDevice, m_pContext))))
 		CRASH("Text Prototype Create Failed.");
+		
+	// Skybox
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"),
+		CSkyBox::Create(m_pDevice, m_pContext))))
+		CRASH("Skybox");
+
+	// Prefab
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
+		CEffect_Prefab::Create(m_pDevice, m_pContext))))
+		CRASH("Prefab");
+
+	// Shader_VtxInstance_PointParticle
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxInstance_PointParticle"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxInstance_PointParticle.hlsl"), VTXPOINTPARTICLE::Elements, VTXPOINTPARTICLE::iNumElements))))
+		CRASH("Shader_VtxInstance_PointParticle");
+
+	//Shader_VtxTrailMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_VtxTrailMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxTrailMesh");
+
+	//Shader_ComputeShader_Particle
+	SHADER_MACRO eShaderMacroParticle = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
+	string strEntryParticle = "main";
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Shader_ComputeShader_Particle"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ParticleUpdate_CS.hlsl"), eShaderMacroParticle, strEntryParticle));
+
+	// Ability 
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),
+		CAbility::Create(m_pDevice, m_pContext))))
+		CRASH("Ability");
+
 }
 
 void CMainApp::Start_Level()
@@ -265,8 +313,8 @@ void CMainApp::Free()
 
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
-	Safe_Release(m_pGameSystem);
-
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
+
+	Safe_Release(m_pGameSystem);
 }

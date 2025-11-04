@@ -4,14 +4,15 @@ namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
-	enum class COLLISIONLAYER { NONE, MAP, PLAYER, CHARACTER, CAMERA, ATTACK, SKILL, ENEMY, ENEMY_ATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
+	enum class COLLISIONLAYER { NONE, MAP, PLAYER, ATTACK, SKILL, ENEMY, ENEMY_ATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
+	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, DESTRUCTION, NONRIGID, END };
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
-
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
+	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 
 	enum class PLAYER_STATE : unsigned int {
 		NONE = 0, IDLE, WALK, RUN, ATTACK,
@@ -39,6 +40,38 @@ namespace Client
 		D4 = 1 << 17,
 		D5 = 1 << 18,
 		D6 = 1 << 19
+	};
+
+	typedef enum class ESkillType : _uint
+	{
+		NONE = 0,	    // (비용 없음)
+		RESONANCE,		// 공명 게이지
+		AUGUSTA_POINT,	// 특수 원형 게이지
+		AUGUSTA_ULTI,	// 기본 궁극기 게이지
+		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
+		SKILL_TYPE_END // CSV 파싱 실패 등을 위한 END
+	}SKILL_TYPE;
+
+	typedef enum class ECostType : unsigned int
+	{
+		NONE = 0, // Stat 아님.
+		COST1, // 1
+		COST2, // 2
+		COST3, // 3
+		COST4, // 4
+		COST5,
+		STAMINA, // 5
+		COST_TYPE_END
+	}COST_TYPE;
+
+
+	enum class SKILL_STATE : unsigned int
+	{
+		READY = 0,		 // 사용 가능
+		COOLING_DOWN,	 // 쿨타임
+		NOT_ENOUGH_COST, // 자원 부족
+		NOT_EXIST,		 // 정보가 없음.
+		END
 	};
 
 	enum class DIRECTION {
@@ -90,13 +123,14 @@ namespace Client
 		MOVE_RIGHT			= 1 << 3,
 		SPLINT				= 1 << 4,
 		DODGE				= 1 << 5,
-
+		TURN				= 1 << 6,
 		JUMP				= 1 << 8,
 		AIR					= 1 << 9,
 		GLIDING				= 1 << 10,
 		LAND				= 1 << 11,
 
-		TURN				= 1 << 12,
+		STRIKE				= 1 << 12,
+		BEHIT				= 1 << 13,
 		BLOCK				= 1 << 14,
 		PARALYSIS			= 1 << 15,
 
@@ -116,6 +150,12 @@ namespace Client
 		DEAD				= 1 << 29
 	};
 
-	enum class SHADER_ANIMMESH { DEFAULT_NORMAL, NORMAL_TEX, SHADOW, END };
+	
+	enum class SHADER_ANIMMESH { 
+		DEFAULT_NORMAL = 0
+		, NORMAL_TEX
+		, AUGUSTA
+		, SHADOW
+		, END };
 
 }

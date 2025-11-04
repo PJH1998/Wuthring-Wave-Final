@@ -35,7 +35,7 @@ private:
 		// Hit
 		ERoverHitType m_eHitType = ERoverHitType::END;
 
-		// ���ؽ�Ʈ ��� �� �ʱ�ȭ
+		// �
 		void Clear()
 		{
 			// Land
@@ -87,6 +87,7 @@ public:
 	enum PARTTYPE : _uint
 	{
 		PART_SWORD = 0,
+		PART_WING = 1,
 		TYPE_END
 	};
 
@@ -109,13 +110,14 @@ public:
 
 #pragma region 1. STATE
 public:
-	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true) override;
+	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
+	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
-
+	
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
@@ -132,6 +134,7 @@ public:
 #pragma endregion
 private:
 	class CRoverSword* m_pRoverSword = { nullptr };
+	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

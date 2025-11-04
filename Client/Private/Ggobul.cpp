@@ -1,0 +1,265 @@
+﻿#include "ClientPch.h"
+#include "Ggobul.h"
+
+CGgobul::CGgobul(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+	: CActor { pDevice, pContext }
+{
+}
+
+CGgobul::CGgobul(const CGgobul& Prototype)
+	:CActor { Prototype }
+{
+}
+
+HRESULT CGgobul::Initialize_Prototype()
+{
+    return S_OK;
+}
+
+HRESULT CGgobul::Initialize_Clone(void* pArg)
+{
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+
+	GGOBUL_DESC* pDesc = static_cast<GGOBUL_DESC*>(pArg);
+	Ready_Component(pDesc);
+	//Register_AllNotifies(pDesc->strFolderPath);
+
+	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
+	{
+		m_pAttackVolume[i]->IsActivate(false);
+	}
+	m_pAttackTransform = m_pModelCom->Get_BoneMatrixPtr("HitCase");
+	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
+	//풀링 오브젝트 자체적으로 activate 끄기
+	m_isActivate = false;
+    return S_OK;
+}
+
+void CGgobul::Priority_Update(_float fTimeDelta)
+{
+}
+
+void CGgobul::Update(_float fTimeDelta)
+{
+	_bool isAnimFinished{};
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
+	if (isAnimFinished)
+	{
+		m_pModelCom->Clear_Animation(m_strAnimKey);
+		m_isActivate = false;
+		m_pAttackVolume[m_eType]->IsActivate(false);
+		return;
+	}
+	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pAttackTransform) * m_pTransformCom->Get_WorldMatrix();
+	_vector vScale, vQuaternion, vTransition;
+	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
+	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
+	XMStoreFloat4x4(&m_BoneCombindMatrix, NonScaleMatrix);
+	m_pAttackVolume[m_eType]->Update_Rigidbody(XMLoadFloat4x4(&m_BoneCombindMatrix), fTimeDelta);
+}
+
+void CGgobul::Late_Update(_float fTimeDelta)
+{
+	//뼈 공격 볼륨 동기화 설정, 뼈에다가 맞추려면 sync 사용 X
+	//m_pRigidBodyCom[m_eType]->Sync_Rigidbody(m_pTransformCom);
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
+}
+
+void CGgobul::Render()
+{
+	Bind_Resources();
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (false == m_MeshEnables[i])
+			continue;
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+		m_pShaderCom->Begin(0);
+
+		m_pModelCom->Render(i);
+	}
+#ifdef _DEBUG
+	m_pAttackVolume[m_eType]->Render();
+#endif
+}
+
+void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	GGOBUL_RESET* pDesc = static_cast<GGOBUL_RESET*>(pArg);
+	m_eType = pDesc->eType;
+	m_strAnimKey = pDesc->strPatternKey;
+	m_pAnimMachineCom->Reset(m_pModelCom, m_strAnimKey);
+	m_pModelCom->Clear_Animation(m_strAnimKey);
+	for (_uint i = 0; i < GGOBULTYPE::END; ++i)
+	{
+		m_pAttackVolume[i]->IsActivate(false);
+	}
+	if (m_strAnimKey == "SAttack03")
+		//				  body, down,  hammer, head, knife, fx
+		m_MeshEnables = { true, false, false, false, true, false };
+	else if (m_strAnimKey == "SAttack03_1")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SAttack03_2")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SBehit_Block")
+		m_MeshEnables = { true, true, true, false, false, false };
+	else if (m_strAnimKey == "SAttack01_1")
+		m_MeshEnables = { true, true, false, true, false, false };
+	else
+		m_MeshEnables = { true, false, false, true, false, false };
+	m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	m_isActivate = true;
+}
+
+void CGgobul::Bind_Resources()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+}
+
+void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
+{
+	// Com_Shader
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		CRASH("Shader");
+
+	// Com_ComputeShader
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
+		, pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
+		CRASH("ComputeShader");
+
+	// Com_Model
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("Model");
+
+	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
+	AnimMachineDesc.pAnimationTag = "SAttack01_2";
+	//Com_AnimMachine
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
+		CRASH("Ggobul/Com_AnimMachine");
+
+	// Com_Rigidbody(Head)
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
+		TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HEAD]), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pAttackVolume[GGOBULTYPE::HEAD]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_Enter(iLayer, pDesc, Manifold);
+		});
+
+	// Com_Rigidbody(Hammer)
+	RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RigidbodyDesc.vExtent = _float3(10.f, 10.f, 10.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
+		TEXT("Com_Rigidbody_Hammer"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HAMMER]), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pAttackVolume[GGOBULTYPE::HAMMER]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_Enter(iLayer, pDesc, Manifold);
+		});
+
+	// Com_Rigidbody(Knife)
+	RigidbodyDesc = {};
+	RigidbodyDesc.eBodyType = CRigidbody::BODY;
+	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eType = EMotionType::Kinematic;
+	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RigidbodyDesc.vExtent = _float3(10.f, 4.f, 4.f);
+	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
+		TEXT("Com_Rigidbody_Knife"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::KNIFE]), &RigidbodyDesc)))
+		CRASH("Rigidbody");
+
+	m_pAttackVolume[GGOBULTYPE::KNIFE]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_Enter(iLayer, pDesc, Manifold);
+		});
+}
+
+void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
+{
+	if(wStrColliderTag == L"Attack Trig")
+		m_pAttackVolume[m_eType]->IsActivate(Isactive);
+}
+
+void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
+{
+}
+
+void CGgobul::Object_Func(const _wstring& wStrObjectTag)
+{
+}
+
+void CGgobul::OnCollide_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+}
+
+CGgobul* CGgobul::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+{
+	CGgobul* pInstance = new CGgobul(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize_Prototype()))
+	{
+		MSG_BOX("Failed to Create : CGgobul");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
+}
+
+CGameObject* CGgobul::Clone(void* pArg)
+{
+	CGgobul* pClone = new CGgobul(*this);
+
+	if (FAILED(pClone->Initialize_Clone(pArg)))
+	{
+		MSG_BOX("Failed to Create : CGgobul (Clone)");
+		Safe_Release(pClone);
+	}
+
+	return pClone;
+}
+
+void CGgobul::Free()
+{
+	__super::Free();
+
+	//Safe_Release(m_pShaderCom);
+	//Safe_Release(m_pComputeShaderCom);
+	Safe_Release(m_pAnimMachineCom);
+	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
+	{
+		Safe_Release(m_pAttackVolume[i]);
+	}
+
+	//Safe_Release(m_pModelCom);
+}

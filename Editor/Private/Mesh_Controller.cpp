@@ -87,7 +87,7 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
             if (extension == ".Dat" || extension == ".dat")
             {
                 MESH_TAG Desc = {};
-                CVIBuffer_Mesh::MESH_FXINSTANCE_DESC FXMeshDesc = {};
+                CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC FXMeshDesc = {};
 
                 // Ȯ���� ������ ���ϸ�
                 _string strMeshTag = entry.path().stem().string();
@@ -107,17 +107,6 @@ void CMesh_Controller::Load_AllMeshDatFromFolder(const _string& strFolderPath)
 
                 strcpy_s(Desc.szDatPath, sizeof(Desc.szDatPath), DefaultPath.c_str());
 
-                ////�Ž����� ������Ʈ ����
-                //_fmatrix DefualtMatrix = XMMatrixIdentity();
-
-                //FXMeshDesc.vSize = _float2(1.f, 1.f);
-                //FXMeshDesc.iNumInstance = 1;
-
-                //m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strMeshTag,
-                //   CVIBuffer_Mesh::Create(m_pDevice, m_pContext, filePath.c_str(), DefualtMatrix, &FXMeshDesc));
-
-
-                //m_tVBMeshDesc.emplace(strMeshTag, FXMeshDesc);
                 m_MeshVBTag.push_back(Desc);
             }
         }
@@ -200,11 +189,14 @@ void CMesh_Controller::EffectMesh_Tab()
                 ImGui::Checkbox("InWard", &(m_pSelectedVBFXDesc->IsInWard));
                 /////////////////////////////////////// ���� ����
 
-                ImGui::Text("Pitch");
-                ImGui::PushItemWidth(60);
-                ImGui::InputFloat("##Pitch", &(m_pSelectedVBFXDesc->fPitch));
-                ImGui::PopItemWidth();
-                ImGui::Separator();
+                if (m_pSelectedVBFXDesc->IsInWard)
+                {
+                    ImGui::Text("Pitch");
+                    ImGui::PushItemWidth(60);
+                    ImGui::InputFloat("##Pitch", &(m_pSelectedVBFXDesc->fPitch));
+                    ImGui::PopItemWidth();
+                    ImGui::Separator();
+                }
                 ///////////////////////////////////////
         
                 ImGui::Text("Center");
@@ -256,7 +248,7 @@ void CMesh_Controller::EffectMesh_Tab()
                 ImGui::PopItemWidth();
             }
 
-            if (ImGui::CollapsingHeader("Particle", ImGuiTreeNodeFlags_DefaultOpen))
+            if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
             {
                 /*      ImGui::Checkbox("Spread", &(m_pSelectedEffectMeshDesc->bSpread));
                       ImGui::Checkbox("Drop", &(m_pSelectedEffectMeshDesc->bDrop));*/
@@ -264,37 +256,70 @@ void CMesh_Controller::EffectMesh_Tab()
 
                 ImGui::Text("Size");
                 ImGui::PushItemWidth(60);
-                ImGui::InputFloat("##ParticleSizeX", &(m_pSelectedEffectMeshDesc->vSize.x));
+                ImGui::InputFloat("##FXMeshSizeX", &(m_pSelectedEffectMeshDesc->vSize.x));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticleSizeY", &(m_pSelectedEffectMeshDesc->vSize.y));
+                ImGui::InputFloat("##FXMeshSizeY", &(m_pSelectedEffectMeshDesc->vSize.y));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticleSizeZ", &(m_pSelectedEffectMeshDesc->vSize.z));
+                ImGui::InputFloat("##FXMeshSizeZ", &(m_pSelectedEffectMeshDesc->vSize.z));
                 ImGui::PopItemWidth();
 
                 ImGui::Text("Position");
                 ImGui::PushItemWidth(60);
-                ImGui::InputFloat("##ParticlePosX", &(m_pSelectedEffectMeshDesc->vPos.x));
+                ImGui::InputFloat("##FXMeshPosX", &(m_pSelectedEffectMeshDesc->vPos.x));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticlePosY", &(m_pSelectedEffectMeshDesc->vPos.y));
+                ImGui::InputFloat("##FXMeshPosY", &(m_pSelectedEffectMeshDesc->vPos.y));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticlePosZ", &(m_pSelectedEffectMeshDesc->vPos.z));
+                ImGui::InputFloat("#FX#MeshPosZ", &(m_pSelectedEffectMeshDesc->vPos.z));
                 ImGui::PopItemWidth();
 
                 ImGui::Text("Color");
                 ImGui::PushItemWidth(60);
-                ImGui::InputFloat("##ParticleColorX", &(m_pSelectedEffectMeshDesc->vColor.x));
+                ImGui::InputFloat("##FXMeshColorX", &(m_pSelectedEffectMeshDesc->vColor.x));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticleColorY", &(m_pSelectedEffectMeshDesc->vColor.y));
+                ImGui::InputFloat("##FXMeshColorY", &(m_pSelectedEffectMeshDesc->vColor.y));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticleColorZ", &(m_pSelectedEffectMeshDesc->vColor.z));
+                ImGui::InputFloat("##FXMeshColorZ", &(m_pSelectedEffectMeshDesc->vColor.z));
                 ImGui::PopItemWidth();
 
                 ImGui::Text("LifeTime");
                 ImGui::PushItemWidth(60);
-                ImGui::InputFloat("##ParticleLifeTimeX", &(m_pSelectedEffectMeshDesc->vLifeTime.x));
+                ImGui::InputFloat("##FXMeshLifeTimeX", &(m_pSelectedEffectMeshDesc->vLifeTime.x));
                 ImGui::SameLine();
-                ImGui::InputFloat("##ParticleLifeTimeY", &(m_pSelectedEffectMeshDesc->vLifeTime.y));
+                ImGui::InputFloat("##FXMeshLifeTimeY", &(m_pSelectedEffectMeshDesc->vLifeTime.y));
                 ImGui::PopItemWidth();
+            }
+
+            if (ImGui::CollapsingHeader("Base", ImGuiTreeNodeFlags_DefaultOpen))
+            {
+                vector<const _char*> szMeshTag = {};
+
+                for (auto iter = m_MeshVBTag.begin(); iter != m_MeshVBTag.end(); ++iter)
+                {
+                    szMeshTag.push_back(iter->szName);
+                }
+
+                //�Ž� ����Ʈ�ڽ� ����
+                if (ImGui::ListBox("Effect Mesh", &m_iSelectedMeshVBTag, szMeshTag.data(), int(szMeshTag.size()), int(szMeshTag.size() + 2)))
+                {
+                    m_pSelectedEffectMeshDesc->strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
+                }
+
+                //�Ž� �⺻ ���� �ؽ�ó ����
+                if (ImGui::BeginCombo("Texture", "")) {
+                    for (size_t i = 0; i < m_Textures.size(); i++)
+                    {
+                        bool IsSelected = (m_iSelectedTexture == i);
+                        if (ImGui::Selectable(m_Textures[i].szName, IsSelected))
+                        {
+                            m_iSelectedTexture = i;
+                            m_pSelectedEffectMeshDesc->strTextureTag = m_Textures[i].strTextureTag;
+                        }
+                        if (IsSelected)
+                            ImGui::SetItemDefaultFocus();
+
+                    }
+                    ImGui::EndCombo();
+                }
             }
             ImGui::End();
         }
@@ -359,14 +384,15 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 _tchar EffectMeshTag[MAX_PATH] = {};
                 CEffect_Mesh::EFFECTMESH_DESC EffectMeshDesc{};
-                CVIBuffer_Mesh::MESH_FXINSTANCE_DESC VBFXMhesDesc{};
+                CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC VBFXMhesDesc{};
 
-                MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_EffectMeshTag, strlen(m_EffectMeshTag), EffectMeshTag, MAX_PATH);
+                MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, m_TrailMeshTag, strlen(m_TrailMeshTag), EffectMeshTag, MAX_PATH);
 
                 //EffectMeshDesc.strMyTag = EffectMeshTag;
 
                 //����Ʈ �Ž� �̸� �� Ŭ���� ������Ʈ �̸���
                 EffectMeshDesc.strMyTag = EffectMeshTag;
+                EffectMeshDesc.eMyType = EFFECT_TYPE::MESH;
                 EffectMeshDesc.strTextureTag = m_Textures[m_iSelectedTexture].strTextureTag;
                 EffectMeshDesc.strVIBufferTag = m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag;
 
@@ -388,7 +414,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
                 //���� ����
                 m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), m_MeshVBTag[m_iSelectedMeshVBTag].strMeshTag,
-                CVIBuffer_Mesh::Create(m_pDevice, m_pContext, szDatPath, DefualtMatrix, &VBFXMhesDesc));
+                CVIBuffer_FXMesh_Instance::Create(m_pDevice, m_pContext, szDatPath, DefualtMatrix, &VBFXMhesDesc));
                 
                 //������ ���� Dat ��� VB�� ����������Ұ� ����.
                 strcpy_s(VBFXMhesDesc.DatFilePath, sizeof(VBFXMhesDesc.DatFilePath), m_MeshVBTag[m_iSelectedMeshVBTag].szDatPath);
@@ -405,16 +431,16 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
                     m_IsRoot = false;
                 }
 
-                //�Ž�����Ʈ �� �Ž�VB�±׸� ����������� ����غ���.
+  
                 m_tEffectMeshDesc.emplace(EffectMeshTag, EffectMeshDesc);
 
                 tEffectMeshDesc = EffectMeshDesc;
 
-                //���������� ����Ʈ ��Ʈ�ѷ����� ����
                 IsCreate = true;
 
-                //�ʱ�ȭ
-                m_EffectMeshTag[0] = _T('\0');
+                m_TrailMeshTag[0] = _T('\0');
+     
+
                 m_bTagFlag = false;
             }
         }
@@ -426,7 +452,7 @@ void CMesh_Controller::EffectMesh_Base_Tab(CEffect_Mesh::EFFECTMESH_DESC& tEffec
 
 void CMesh_Controller::Set_EffectMeshTag(const _char* szEffectMeshTag)
 {
-    strcat_s(m_EffectMeshTag, szEffectMeshTag);
+    strcat_s(m_TrailMeshTag, szEffectMeshTag);
 
     m_bTagFlag = true;
 }
@@ -462,7 +488,7 @@ CEffect_Mesh::EFFECTMESH_DESC* CMesh_Controller::Get_EffectMeshDesc(_wstring& Ef
     return &iter->second;
 }
 
-CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* CMesh_Controller::Get_VBMeshDesc(_wstring& VBMesTag)
+CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC* CMesh_Controller::Get_VBMeshDesc(_wstring& VBMesTag)
 {
     auto iter = m_tVBMeshDesc.find(VBMesTag);
 
@@ -470,6 +496,22 @@ CVIBuffer_Mesh::MESH_FXINSTANCE_DESC* CMesh_Controller::Get_VBMeshDesc(_wstring&
         return nullptr;
 
     return &iter->second;
+}
+
+void CMesh_Controller::Set_EffectMeshDesc(_wstring& MeshTag, CEffect_Mesh::EFFECTMESH_DESC& MeshDesc)
+{
+    CEffect_Mesh::EFFECTMESH_DESC Desc = {};
+    Desc = MeshDesc;
+
+    m_tEffectMeshDesc.emplace(MeshTag, Desc);
+}
+
+void CMesh_Controller::Set_MeshVBDesc(_wstring& MeshTag, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC& MeshVBDesc)
+{
+    CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC Desc = {};
+    Desc = MeshVBDesc;
+
+    m_tVBMeshDesc.emplace(MeshTag, MeshVBDesc); 
 }
 
 void CMesh_Controller::Remove_Desc(const _wstring& DescTag)
@@ -518,7 +560,5 @@ void CMesh_Controller::Free()
     Safe_Release(m_pContext);
     Safe_Release(m_pGameInstance);
 
-    //for (auto& pTexture : m_Textures)
-    //    Safe_Release(pTexture.pTexture);
     m_Textures.clear();
 }

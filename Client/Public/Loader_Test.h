@@ -18,10 +18,12 @@ private:
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
 	HRESULT				Load_MonsterTest();
+	HRESULT				Load_Effect();
 
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();	
 	HRESULT				Load_Rover();
+	HRESULT				Load_Action();
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };

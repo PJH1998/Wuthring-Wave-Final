@@ -38,16 +38,17 @@ public:
 	void		SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
 	void		Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
 	void		Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
+	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
 private:
-	ID3D11Device*						m_pDevice = { nullptr };
+	ID3D11Device*					m_pDevice = { nullptr };
 	ID3D11DeviceContext*			m_pContext = { nullptr };
 	class CGameInstance*			m_pGameInstance = { nullptr };
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	list<class CGameObject*>		m_StaticObjects[2];
-	atomic<_uint>						m_iDoubleBufferIndex = {};
+	atomic<_uint>					m_iDoubleBufferIndex = {};
 
 	class CShader*					m_pShader = { nullptr };
 	class CVIBuffer_Rect*			m_pVIBuffer = { nullptr };
@@ -67,14 +68,17 @@ private:
 
 	recursive_mutex					m_RecursiveMutex;
 
+	_uint							m_iCurTime = {};
+	_uint							m_iInterval = {};
+
 #ifdef _DEBUG
 	list<class CComponent*>			m_DebugComponents;
 	_bool							m_isRenderDebug = { true };
 	_bool							m_IsSSAO = { true };
 	_bool							m_IsSSAO_Blur = { true };
 	_bool							m_IsStylized = { true };
-	_float							m_fDebugRoughness = {};
-	_float							m_fDebugMetallic = { false };
+	_float							m_fDebugRoughness = 0.2f;
+	_float							m_fDebugMetallic = 0.f;
 #endif
 
 private:
@@ -85,7 +89,8 @@ private:
 	void						Render_Priority();
 	void						Render_Shadow();
 	void						Render_Outline();
-	void						Render_NonBlend();
+	void						Render_NonBlend();	// 임시
+	void						Render_Static();
 	void						Render_SSAO();
 	void						Render_Dynamic();
 	void						Render_Light();
@@ -108,6 +113,7 @@ private:
 	void						Update_EffectIntensity();
 	void						Render_Blur();
 	void						Render_DOF();
+	void						Render_MotionBlur();
 
 #ifdef _DEBUG
 	void						Render_Debug();

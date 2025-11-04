@@ -37,16 +37,16 @@ public:
 	// Lock-On
 	void							Lock_On()
 	{
-		if (CAMERA_STATE::LOCKON == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::TARGET;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-		}
-		else if (CAMERA_STATE::TARGET == m_eCameraState)
-		{
-			m_eCameraState = CAMERA_STATE::LOCKON;
-			m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
-		}
+		//if (CAMERA_STATE::LOCKON == m_eCameraState)
+		//{
+		//	m_eCameraState = CAMERA_STATE::TARGET;
+		//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		//}
+		//else if (CAMERA_STATE::TARGET == m_eCameraState)
+		//{
+		//	m_eCameraState = CAMERA_STATE::LOCKON;
+		//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::CAMERA));
+		//}
 	}
 
 public:
@@ -91,12 +91,14 @@ private:
 	_bool								m_isRecovery = { false };
 	_float4							m_vPreQuaternion = {};
 	_float3							m_vPreTranslation = {};
+	_float								m_fPreFovy = {};
 	_float4							m_vEndQuaternion = {};
 	_float3							m_vEndTranslation = {};
 	_float								m_fPreFixedDistance = {};
 	_float								m_fTrackPosition = {};
 	_float								m_fDuration = {};
 	_bool								m_isMaintain = { false };
+	_bool								m_isLerp = { true };
 
 private:
 	// Default

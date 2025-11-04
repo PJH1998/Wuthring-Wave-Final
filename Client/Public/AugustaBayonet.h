@@ -1,11 +1,11 @@
 ﻿#pragma once
-#include "Weapon.h"
+#include "Prop.h"
 
 NS_BEGIN(Client)
-class CAugustaBayonet final : public CWeapon
+class CAugustaBayonet final : public CProp
 {
 public:
-	typedef struct tagAugustaBayonetDesc : public CWeapon::WEAPON_DESC {
+	typedef struct tagAugustaBayonetDesc : public CProp::PROP_DESC {
 		
 	} AUGUSTA_BAYONET_DESC;
 
@@ -22,6 +22,7 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+	virtual void Activate(_bool IsActivate) override;
 
 private:
 	vector<_uint> m_ShaderPaths = {};
@@ -29,9 +30,9 @@ private:
 
 
 private:
-	void Ready_Components(const WEAPON_DESC* pDesc);
-	void Ready_Variables(const WEAPON_DESC* pDesc);
-	void Ready_Positions(const WEAPON_DESC* pDesc);
+	void Ready_Components(const PROP_DESC* pDesc);
+	void Ready_Variables(const PROP_DESC* pDesc);
+	void Ready_Positions(const PROP_DESC* pDesc);
 	void Bind_Resources();
 
 public:

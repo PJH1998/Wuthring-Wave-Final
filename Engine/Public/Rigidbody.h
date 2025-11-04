@@ -47,6 +47,9 @@ private:
 	virtual ~CRigidbody() = default;
 
 public:
+	void							Set_Position(const _fvector& vPos);
+
+public:
 	virtual		HRESULT			Initialize_Prototype()			override;
 	virtual		HRESULT			Initialize_Clone(void* pArg)	override;
 	virtual		HRESULT			Render() override;
@@ -62,6 +65,9 @@ public:
 	void							Impulse(const _float3& vForce) { m_pBodyInterface->AddImpulse(m_BodyID, LoadVec3(vForce)); }
 
 	_bool							IsLand(_float3* pNormalOut = nullptr);
+
+	void							IsActivate(_bool isActive);
+	void							Change_MotionType(EMotionType eType);
 
 private:
 	SHAPE						m_eShape = {};

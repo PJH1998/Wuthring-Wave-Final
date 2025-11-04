@@ -17,7 +17,7 @@ public:
     virtual void OnExit() override;
 
 protected:
-    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta);
+    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 protected:
     _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)
@@ -25,9 +25,14 @@ protected:
 
     _float3 m_vWallNormal = {}; // 정면 방향 WallNormal
     _float3 m_vLandNormal = {};
-    _uint m_iPartType = {}; // 현재 State에서 실행해야할 PartType;
-
+    _uint m_iPartType = {};	   // 현재 State에서 실행해야할 PartType;
+	_uint m_iSubPartType = {}; // 현재 State에서 실행해야 할 SubPartType;
+	_bool m_IsPartAnimationEnd = {}; //
+	_bool m_IsSubPartAnimationEnd = {}; //
+	_string m_strPrevInfo = {};
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
+
+
 
 public:
     virtual void Free() override;

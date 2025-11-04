@@ -40,6 +40,7 @@ void CAugustaAirSkill::OnEnter()
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "WeaponProp05";
     m_pAugusta->PartActivate(m_iPartType, true);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
     // 7. 다른 애니메이션당 필요한 상태 재정의
@@ -128,7 +129,7 @@ void CAugustaAirSkill::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirSkill::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(&m_vLandNormal, 0.1f) < 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land();
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 
@@ -145,7 +146,7 @@ void CAugustaAirSkill::Check_StateTransition(_float fTimeDelta)
     EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     _float fOffsetY = 0.1f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
+    _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(fOffsetY);
 
     if (IsEscapePossible)
     {

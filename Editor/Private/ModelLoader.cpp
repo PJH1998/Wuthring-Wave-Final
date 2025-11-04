@@ -219,10 +219,21 @@ HRESULT CModelLoader::Save_Animation(const _char* pFileName)
 				if (k < pChannel->mNumRotationKeys)
 				{
 					KeyFrame.fTrackPosition = pChannel->mRotationKeys[k].mTime;
-					vRotation.x = pChannel->mRotationKeys[k].mValue.x;
-					vRotation.y = pChannel->mRotationKeys[k].mValue.y;
-					vRotation.z = pChannel->mRotationKeys[k].mValue.z;
-					vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+					//_string temp = "MO1AnjinMd00601";
+					//if (0 == temp.compare(pChannel->mNodeName.C_Str()))
+					//{
+					//	vRotation.x = 0.f;
+					//	vRotation.y = 0.f;
+					//	vRotation.z = 0.f;
+					//	vRotation.w = 1.f;
+					//}
+					//else
+					{
+						vRotation.x = pChannel->mRotationKeys[k].mValue.x;
+						vRotation.y = pChannel->mRotationKeys[k].mValue.y;
+						vRotation.z = pChannel->mRotationKeys[k].mValue.z;
+						vRotation.w = pChannel->mRotationKeys[k].mValue.w;
+					}
 				}
 				if (k < pChannel->mNumPositionKeys)
 				{

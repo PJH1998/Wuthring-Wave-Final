@@ -41,6 +41,11 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
+
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
@@ -72,12 +77,14 @@ private:
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
 	_bool						Attack(_uint iIndex, _float fInterval);
+	void						Attack_Arrange();
 	_bool						Back();
 	_bool						Front();
 	_bool						Left();

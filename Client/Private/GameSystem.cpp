@@ -3,6 +3,9 @@
 
 #include "Parser.h"
 #include "Factory.h"
+#include "Director.h"
+#include "PlayerStatus.h"
+#include "Player.h"
 
 #include "UI_FontPreset.h"
 #include "UI_ControlHelper.h"
@@ -32,8 +35,19 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pUI_StatusSyncer = CUI_StatusSyncer::Create();
 	ASSERT_CRASH(m_pUI_ControlHelper);
 
-}
+	m_pDirector = CDirector::Create();
+	ASSERT_CRASH(m_pDirector);
 
+	// 파일 목록 만들기.
+	vector<_string> AbilityFolders = {};
+	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
+
+	AbilityFolders[CPlayer::CHARACTERTYPE::ROVER] = "../Bin/Resource/Model/Player/Rover/Ability/";
+	AbilityFolders[CPlayer::CHARACTERTYPE::AUGUSTA] = "../Bin/Resource/Model/Player/Augusta/Ability/";
+	AbilityFolders[CPlayer::CHARACTERTYPE::GALBRENA] = "../Bin/Resource/Model/Player/Galbrena/Ability/";
+	m_pPlayerStatus = CPlayerStatus::Create(pDevice, pContext, AbilityFolders);
+}
+#pragma region PARSER
 const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 {
 	return m_pParser->Load_CSV(pFilePath);
@@ -48,17 +62,58 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
 {
 	m_pParser->Clone_MapObjects(eLevel, iIndex);
 }
+#pragma endregion
+
+void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Effect(strFolderPath, eLevel);
+}
+
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectTexture_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
+{
+	return m_pParser->Load_EffectMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
+#pragma region FACTORY
 
 void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)
 {
 	m_pFactory->Create_MonsterDummy(eLayerLevel, vPos, PreTransformationMatrix);
 }
+#pragma endregion
 
+#pragma region DIRECTOR
+void CGameSystem::Add_Action(const _char* pFolderPath)
+{
+	m_pDirector->Add_Action(pFolderPath);
+}
+void CGameSystem::Play_Action(const _wstring& strActionTag, const _fmatrix& WorldMatrix, _bool isMaintain)
+{
+	m_pDirector->Play_Action(strActionTag, WorldMatrix, isMaintain);
+}
+void CGameSystem::Stop_Action()
+{
+	m_pDirector->Stop_Action();
+}
+#pragma endregion
+
+#pragma region CHARACTER INFO
 void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 {
 	m_Stats = eCharacterStat;
 }
 
+#pragma endregion
 
 void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType)
 {
@@ -89,6 +144,36 @@ HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 {
 	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
 }
+#pragma region PLAYER STATUS
+
+#pragma endregion
+
+
+#pragma region TRIGGER
+
+void CGameSystem::TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc)
+{
+	m_TriggerEvents[iNumTriggerMapIndex].push_back(pFunc);
+}
+
+void CGameSystem::OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg)
+{
+	auto iter = m_TriggerEvents.find(iNumTriggerMapIndex);
+	if (iter == m_TriggerEvents.end())
+		return;
+
+	for (auto& pTriggerFunc : m_TriggerEvents[iNumTriggerMapIndex])
+	{
+		pTriggerFunc(pArg);
+	}
+}
+void CGameSystem::Clear_TriggerCallBack()
+{
+	for (auto& TriggerVector : m_TriggerEvents)
+		TriggerVector.second.clear();
+	m_TriggerEvents.clear();
+}
+#pragma endregion
 
 void CGameSystem::Free()
 {
@@ -100,4 +185,6 @@ void CGameSystem::Free()
 	Safe_Release(m_pUI_FontPreset);
 	Safe_Release(m_pUI_ControlHelper);
 	Safe_Release(m_pUI_StatusSyncer);
+	Safe_Release(m_pDirector);
+	Safe_Release(m_pPlayerStatus);
 }

@@ -14,6 +14,8 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
+	// 매핑.
+
     return S_OK;
 }
 
@@ -27,6 +29,7 @@ void CAugustaAirAttack::OnEnter()
 
     // 2. 복사본에서 필요한 값 읽기
     EAugustaAirAttackType eAirAttackType = context.m_eAirAttackType;
+	m_strPrevInfo = context.m_strPrevInfo; // 복사본에서 받은 정보.
 
     // 3. 애니메이션 세팅.
     m_iCurrentAnimIdx = ENUM_CLASS(eAirAttackType);
@@ -49,6 +52,18 @@ void CAugustaAirAttack::OnEnter()
             strBoneName = "WeaponProp05";
             m_fSpeed = 0.5f;
             m_pAugusta->Set_Gravity(true);
+
+			
+			if (m_strPrevInfo == "Griffon")
+			{
+				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
+				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
+				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+				m_pAugusta->PartActivate(m_iSubPartType, true);
+			}
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
+
             break;
         }
 
@@ -57,28 +72,42 @@ void CAugustaAirAttack::OnEnter()
             strBoneName = "WeaponProp05";
             m_fSpeed = 0.f;
             m_pAugusta->Set_Gravity(true);
+			if (m_strPrevInfo == "Griffon")
+			{
+				m_iSubPartType = CAugusta::PARTTYPE::PART_GRIFFON;
+				m_pAugusta->Set_SocketMatrixToParts(m_iPartType, "Root");
+				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+				m_pAugusta->PartActivate(m_iSubPartType, true);
+			}
+
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_START:
         {
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
+
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_END:
         {
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			m_pAugusta->Rotate_Target();
+
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
             break;
         }
     }
-
+	
+	// 공통으로 무기는 다 나옴.
     m_pAugusta->PartActivate(m_iPartType, true);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-
-    // 8. Enter에 들어오면 한번 회전.
-    m_pAugusta->Rotate_Target(); 
-
 }
 
 void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
@@ -104,11 +133,21 @@ void CAugustaAirAttack::OnExit()
 {
     CAirState::OnExit();
 
-    m_pAugusta->PartActivate(m_iPartType, false); 
+	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iPartType, false);
+	}
+
+	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		m_pAugusta->PartActivate(m_iSubPartType, false);
+	}
+
     m_pAugusta->Set_Gravity(true);
     m_fSpeed = 0.f;
     
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
 }
 
 void CAugustaAirAttack::Handle_Input()
@@ -117,7 +156,8 @@ void CAugustaAirAttack::Handle_Input()
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DOUBLE_JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
-        
+    
+	// 이전 E스킬이 그리폰이였다면 까지 조건이 있어야함.
 }
 
 void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
@@ -142,18 +182,30 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {
+		// 애니메이션 속도 서로 Sync 맞추기.
         m_pAugusta->Play_PartAnimation(
             m_iPartType,
             m_Animations[m_iCurrentAnimIdx].strAnimName,
-            fTimeDelta, nullptr
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
         );
     }
+
+	// Griffon
+	if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
+	{
+		
+		m_pAugusta->Play_PartAnimation(
+			m_iSubPartType,
+			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true, false
+		);
+	}
     
 }
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceToGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_Land();
 }
 
 void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
@@ -161,10 +213,20 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
     _bool IsEscapePossible = CState::Is_EscapePossible();
     _float fOffsetY = 0.1f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
+    _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(fOffsetY);
+
 
     if (IsEscapePossible)
     {
+		//// 모션 끝날때까지 기달리기.
+		//if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
+		//{
+		//	m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END;
+		//	m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
+		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+		//	return;
+		//}
+
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
         {
             if (m_States[DOUBLE_JUMP])
@@ -191,12 +253,13 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                     return;
                 }
-                else
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-                    return;
-                }
+
+				if (!m_States[MOVE])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
             }
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_END)
@@ -215,7 +278,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
         {
-            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END);
+			m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END;
+			m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
             return;
         }
 
@@ -302,12 +367,16 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.3f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 3.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.3f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 3.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);
+
+	// Griffon 전용 애니메이션 맵 등록.
+	m_PartsAnimations.emplace("AirAttack_HackDown_Start", "SA1Shouwangjiu_AirAttack_Start");
+	m_PartsAnimations.emplace("AirAttack_HackDown_Sp_End", "SA1Shouwangjiu_AirAttack_End");
 }
 
 void CAugustaAirAttack::State_Reset()

@@ -180,11 +180,11 @@ enum class ERoverUniqueType : _uint // �׸��� ���..
 enum class ERoverJumpType : _uint
 {
 	JUMP_LOOP = 0,
-	JUMP_RUN_LF, // ������
+	JUMP_RUN_LF,
 	JUMP_RUN_RF,
-	JUMP_SECOND_B, // ���� ����
+	JUMP_SECOND_B,
 	JUMP_SECOND_F,
-	JUMP_WALK_LF, // ���ڸ�
+	JUMP_WALK_LF, 
 	JUMP_WALK_RF,
 	END
 };

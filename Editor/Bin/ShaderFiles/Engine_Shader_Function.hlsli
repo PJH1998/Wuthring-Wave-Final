@@ -3,8 +3,13 @@
 static float PI = 3.1415926535f;
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+
 matrix g_CamViewMatrix, g_CamProjMatrix;
+
 matrix g_ViewMatrixInv, g_ProjMatrixInv;
+
+matrix g_PrevCamViewMatrix, g_PrevCamProjMatrix;
+
 float g_fFar;
 vector g_vCamPosition;
 
@@ -104,6 +109,19 @@ float3 Compute_Stylized_PBR(float3 vNormal, float3 vViewDir, float3 vLightDir, f
     return (vDiffuse + Specular);
 }
 
+float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
+{
+    float fRimPower = 0.f;
+    
+    fRimPower = 1.f - abs(dot(vNormal, vLook));
+    
+    fRimPower *= smoothstep(0.2f, 1.f, NdotL);
+    
+    fRimPower = pow(fRimPower, 3.f);
+    
+    return fRimPower;
+}
+
 float2 Compute_Texcoord(float2 vProjXY)
 {
     float2 vTexcoord = 0.f;
@@ -118,7 +136,6 @@ float4 Compute_WorldPos(float2 vTexcoord, Texture2D DepthTexture)
 {
     float4 vWorldPos = 0.f;
 
-    
     vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
     
     vWorldPos.x = vTexcoord.x * 2.f - 1.f;
@@ -156,6 +173,26 @@ float4 Compute_ViewPos_Sampler(float2 vTexcoord, Texture2D DepthTexture, sampler
     float4 vViewPos = 0.f;
     
     vector vDepthDesc = DepthTexture.Sample(Sampler, vTexcoord);
+    
+    vViewPos.x = vTexcoord.x * 2.f - 1.f;
+    vViewPos.y = vTexcoord.y * -2.f + 1.f;
+    vViewPos.z = vDepthDesc.x;
+    vViewPos.w = 1.f;
+    
+    vViewPos = vViewPos * vDepthDesc.y;
+    vViewPos = mul(vViewPos, g_ProjMatrixInv);
+    
+    return vViewPos;
+}
+
+float4 Compute_ViewPos_SSAO(float2 vTexcoord, Texture2D DepthTexture)
+{
+    float4 vViewPos = 0.f;
+    
+    vector vDepthDesc = DepthTexture.Sample(DefaultSampler, vTexcoord);
+    
+    if(vDepthDesc.z == 1.f)
+        return vViewPos;
     
     vViewPos.x = vTexcoord.x * 2.f - 1.f;
     vViewPos.y = vTexcoord.y * -2.f + 1.f;
@@ -360,4 +397,18 @@ float Noise(float2 St)
     float2 u = f * f * (3.0 - 2.0 * f);
     
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+bool IsInNDC(float4 vProjPos)
+{
+    if(vProjPos.x > 1.f || vProjPos.x < -1.f)
+        return false;
+    
+    if (vProjPos.y > 1.f || vProjPos.y < -1.f)
+        return false;
+    
+    if (vProjPos.z > 1.f || vProjPos.z < 0.f)
+        return false;
+    
+    return true;
 }

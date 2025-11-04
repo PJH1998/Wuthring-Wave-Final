@@ -497,6 +497,10 @@ void CGameInstance::Set_Roughness(_float fRoughness)
 {
 	m_pRenderer->Set_Roughness(fRoughness);
 }
+void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
+{
+	m_pRenderer->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
+}
 #endif
 #pragma endregion
 
@@ -504,6 +508,10 @@ void CGameInstance::Set_Roughness(_float fRoughness)
 const LIGHT_DESC* CGameInstance::Get_LightDesc(const _wstring& strLightTag)
 {
 	return m_pLight_Manager->Get_LightDesc(strLightTag);
+}
+void CGameInstance::Set_Active(const _wstring& strLightTag, _bool isActive)
+{
+	m_pLight_Manager->Set_Active(strLightTag, isActive);
 }
 HRESULT	CGameInstance::Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc)
 {
@@ -595,9 +603,9 @@ Character* CGameInstance::Register_Character(const CharacterSettings& CharacterS
 {
 	return m_pPhysicsManager->Register_Character(CharacterSetting, vPos, vQuat, pUserData);
 }
-Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData)
+Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSettings& VirtualSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut)
 {
-    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData);
+    return m_pPhysicsManager->Register_CharacterVirtual(VirtualSetting, vPos, vQuat, pUserData, pOut);
 }
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
@@ -644,6 +652,16 @@ _matrix CGameInstance::Get_TransformState_Matrix_Inv(D3DTS eState) const
 	return m_pPipeLine->Get_TransformState_Matrix_Inv(eState);
 }
 
+const _float4x4* CGameInstance::Get_PrevTransformState_Float4x4(D3DTS eState) const
+{
+	return m_pPipeLine->Get_PrevTransformState_Float4x4(eState);
+}
+
+_matrix CGameInstance::Get_PrevTransformState_Matrix(D3DTS eState) const
+{
+	return m_pPipeLine->Get_PrevTransformState_Matrix(eState);
+}
+
 void CGameInstance::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 {
 	m_pPipeLine->Set_TransformState(eState, Matrix);
@@ -652,6 +670,16 @@ void CGameInstance::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 void CGameInstance::Set_TransformState(D3DTS eState, const _float4x4& Matrix)
 {
 	m_pPipeLine->Set_TransformState(eState, Matrix);
+}
+
+void CGameInstance::Set_PrevTransformState(D3DTS eState, _fmatrix Matrix)
+{
+	m_pPipeLine->Set_PrevTransformState(eState, Matrix);
+}
+
+void CGameInstance::Set_PrevTransformState(D3DTS eState, const _float4x4& Matrix)
+{
+	m_pPipeLine->Set_PrevTransformState(eState, Matrix);
 }
 
 const _float4* CGameInstance::Get_CamPos() const
@@ -802,6 +830,10 @@ HRESULT CGameInstance::Add_SRVData(const _wstring& strRCSTag, const _char* pCons
 {
 	return m_pRCS_Manager->Add_SRVData(strRCSTag, pConstantName, pSRV);
 }
+HRESULT CGameInstance::Add_SamplerState(const _wstring& strRCSTag, _uint iSlotIndex, ID3D11SamplerState* pSampler)
+{
+	return m_pRCS_Manager->Add_SamplerState(strRCSTag, iSlotIndex, pSampler);
+}
 HRESULT CGameInstance::Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName)
 {
 	return m_pRCS_Manager->Setting_UAV_Data(strRCSTag, pConstantName);
@@ -810,9 +842,9 @@ HRESULT CGameInstance::Bind_RendererCS(const _wstring& strRCSTag, CShader* pShad
 {
 	return m_pRCS_Manager->Bind_RendererCS(strRCSTag, pShader, pConstantName, iMipLevel);
 }
-HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel)
+HRESULT CGameInstance::Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel)
 {
-	return m_pRCS_Manager->Begin_RCS(strRCSTag, iMipLevel);
+	return m_pRCS_Manager->Begin_RCS(strRCSTag, iWidth, iHeight, iMipLevel);
 }
 void CGameInstance::Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel)
 {

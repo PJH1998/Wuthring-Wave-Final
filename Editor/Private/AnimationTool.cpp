@@ -26,7 +26,11 @@ HRESULT CAnimationTool::Initialize(LEVEL eLevel)
 
     m_pAnimNotifyTool = CAnimNotifyTool::Create(m_pDevice, m_pContext, m_eCurLevel);
     
-    m_pAnimMachineCom = CAnimMachine::Create(m_pDevice, m_pContext);
+#ifdef _DEBUG
+	m_pAnimMachineCom = CAnimMachine::Create(m_pDevice, m_pContext);
+#endif // _DEBUG
+
+    
 
     return S_OK;
 }
@@ -232,6 +236,16 @@ void CAnimationTool::RenderUI_EditAnimation()
             iSelectedIndex = id;
             m_Selected_AnimActorTag = actorName;
             m_wSelected_AnimActorTag = StringToWString(actorName);
+
+			if (m_wSelected_AnimActorTag != m_wPrevSelected_AnimActorTag)
+			{
+				m_wPrevSelected_AnimActorTag = m_wSelected_AnimActorTag;
+				m_PrevSelected_AnimActorTag = m_Selected_AnimActorTag;
+				m_Selected_AnimationTag.clear(); // 현재 선택중인 Animation 비우기
+				m_IsVisibleNotify = false; // Notifiy 끄기?
+			}
+			// 선택할때마다 NotifyVisible 끄기?
+
         }
     }
     ImGui::EndChild();
@@ -694,6 +708,8 @@ void CAnimationTool::LoadDat()
 
     CModel* pModelCom = { nullptr };
 
+	static bool isPart = { false };
+	ImGui::Checkbox("Part", &isPart);
 
     if (ImGui::Button("Load DAT File"))
     {
@@ -732,6 +748,11 @@ void CAnimationTool::LoadDat()
             //_float fSize = 1.f;
             _float fSize = 0.0001f;
             PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+			if (isPart)
+			{
+				PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+			}
 
             wStrModelName = StringToWString(strModelName);
 
@@ -827,7 +848,6 @@ void CAnimationTool::RenderUI_AnimationList()
         {
             iSelectedIndex = id;
             m_Selected_AnimationTag = animName;
-
             m_fDuration = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag);
             m_AnimationActors[m_wSelected_AnimActorTag]->Change_CurrentAnimation(m_Selected_AnimationTag);
 
@@ -851,6 +871,7 @@ void CAnimationTool::RenderUI_AnimationList()
     ImGui::EndChild();
 
     // 애니메이션 상세 정보 조절.
+
     Render_Animation_Detail();
 
 
@@ -902,7 +923,16 @@ void CAnimationTool::Render_Model_Detail()
     ImGui::SliderScalar("Shader Path", ImGuiDataType_U32, &iShaderPath, &min_val, &max_val);
 
 	
+	static char textBone[256] = "";
+	ImGui::InputText("Bone Name", textBone, sizeof(textBone));
 
+	static char textObject[256] = "";
+	ImGui::InputText("Object Name", textObject, sizeof(textObject));
+	
+
+
+	static bool IsPart = { false };
+	ImGui::Checkbox("Parts", &IsPart);
 
     if (ImGui::Button("Create Instance"))
     {
@@ -917,6 +947,24 @@ void CAnimationTool::Render_Model_Detail()
         memcpy(&Desc.vRotation, fRotation, sizeof(_float3));
         memcpy(&Desc.vScale, fScale, sizeof(_float3));
         Desc.eLevel = m_eCurLevel;
+		
+		if (IsPart)
+		{
+			_wstring wstrObjTag = TEXT("Prototype_GameObject_Actor_");
+			_wstring wStrActorName = StringToWString(textObject);
+
+			wstrObjTag += wStrActorName;
+
+			CAnimationActor* pActor = m_AnimationActors[wstrObjTag];
+			if (nullptr == pActor)
+			{
+				MSG_BOX("Anim Actor Not Exist");
+				return;
+			}
+			Desc.pParentActor = pActor;
+			Desc.pParentTransform = pActor->Get_Transform();
+			Desc.strBoneName = textBone;
+		}
 
         _wstring wstrObjTag = TEXT("Prototype_GameObject_Actor_");
         
@@ -968,6 +1016,7 @@ void CAnimationTool::Render_Model_Detail()
 void CAnimationTool::Render_Animation_Detail()
 {
 #ifdef _DEBUG
+
     if (!m_Selected_AnimationTag.empty())
         m_fTrackPosition = *m_AnimationActors[m_wSelected_AnimActorTag]->Get_TrackPositionPtr(m_Selected_AnimationTag);
 #endif
@@ -1035,6 +1084,14 @@ void CAnimationTool::Render_Animation_Detail()
     {
         Export_AnimationData(m_pEffectController);
     }
+
+
+	if (!m_wSelected_AnimActorTag.empty())
+	{
+		Render_Animation_ChildDetail();
+	}
+
+
 #endif // _DEBUG
 
 
@@ -1049,6 +1106,19 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGui::End();
 }
+
+#ifdef _DEBUG
+void CAnimationTool::Render_Animation_ChildDetail()
+{
+	if (m_AnimationActors[m_wSelected_AnimActorTag]->Is_ChildActor())
+	{
+		m_AnimationActors[m_wSelected_AnimActorTag]->Child_Render();
+	}
+	
+}
+
+#endif // _DEBUG
+
 
 #pragma endregion
 

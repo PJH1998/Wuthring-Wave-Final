@@ -9,6 +9,10 @@
 #include"Edit_Brush.h"
 #include"Shader_Interface.h"
 #include"AnimationTool.h"
+#include"Edit_MapObject_Destruction.h"
+#include"Edit_MapObject_Destruction_Piece.h"
+#include"Edit_TriggerBox.h"
+
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
 _float4 CLevel_Map::m_vPickedPos = _float4(0.f,0.f,0.f,1.f);
@@ -28,71 +32,82 @@ CLevel_Map::CLevel_Map(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Map::Initialize()
 {
-    Ready_Event();
+	Ready_Event();
 
-    if (FAILED(Ready_Static_Component()))
-        return E_FAIL;
+	if (FAILED(Ready_Static_Component()))
+		return E_FAIL;
 
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
-    //ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
-    pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
+	//ImGui::GetIO().DisplayFramebufferScale = ImVec2(1.25f, 1.25f);
+	pShaderInterface = CShader_Interface::Create(m_pDevice, m_pContext);
 
-    LEVEL m_eCurLevel = LEVEL::MAP;
-    //m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
+	LEVEL m_eCurLevel = LEVEL::MAP;
+	//m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
-    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-    //    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
-    //        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
-    //{
-    //    CRASH("Failed Load AnimMesh Shader");
-    //    return E_FAIL;
-    //}
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	//{
+	//    CRASH("Failed Load AnimMesh Shader");
+	//    return E_FAIL;
+	//}
 
-    //SHADER_MACRO eShaderMacro = {
-    //    {"THREAD_X", "64" }
-    //    ,{"THREAD_Y", "1" }
-    //    ,{"THREAD_Z", "1" }
-    //    , { NULL, NULL }
-    //};
+	//SHADER_MACRO eShaderMacro = {
+	//    {"THREAD_X", "64" }
+	//    ,{"THREAD_Y", "1" }
+	//    ,{"THREAD_Z", "1" }
+	//    , { NULL, NULL }
+	//};
 
-    //string strEntryPoint = "CSMain";
-    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
-    //    CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
-    //        , eShaderMacro, strEntryPoint))))
-    //{
-    //    CRASH("Failed Load AnimMesh Shader");
-    //    return E_FAIL;
-    //}
+	//string strEntryPoint = "CSMain";
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+	//    CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+	//        , eShaderMacro, strEntryPoint))))
+	//{
+	//    CRASH("Failed Load AnimMesh Shader");
+	//    return E_FAIL;
+	//}
 
 
-    //if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-    //    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
-    //        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
-    //{
-    //    CRASH("Failed Load AnimMesh Shader");
-    //    return E_FAIL;
-    //}
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+	//    CShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl")
+	//        , VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	//{
+	//    CRASH("Failed Load AnimMesh Shader");
+	//    return E_FAIL;
+	//}
 
-    SHADER_MACRO eShaderMacro = {
-        {"THREAD_X", "64" }
-        ,{"THREAD_Y", "1" }
-        ,{"THREAD_Z", "1" }
-        , { NULL, NULL }
-    };
+	SHADER_MACRO eShaderMacro = {
+		{"THREAD_X", "64" }
+		,{"THREAD_Y", "1" }
+		,{"THREAD_Z", "1" }
+		, { NULL, NULL }
+	};
 
-    string strEntryPoint = "CSMain";
-    if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
-        CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
-            , eShaderMacro, strEntryPoint))))
-    {
-        CRASH("Failed Load AnimMesh Shader");
-        return E_FAIL;
-    }
+	string strEntryPoint = "CSMain";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
+			, eShaderMacro, strEntryPoint))))
+	{
+		CRASH("Failed Load AnimMesh Shader");
+		return E_FAIL;
+	}
 
-    m_eObjectType = CEdit_MapObject::OBJECTTYPE::DEFAULT;
+	m_eObjectType = ENUM_CLASS(OBJECTTYPE::DEFAULT);
 
-    return S_OK;
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_TriggerBox"),
+		CEdit_TriggerBox::Create(m_pDevice, m_pContext));
+
+	//CEdit_TriggerBox::TRIGGER Tri;
+	//Tri.iLevel = m_iLevel;
+	//Tri.vExtends = _float3(20.f, 20.f, 20.f);
+	//_matrix Mat = XMMatrixIdentity();
+	//_float4x4 TT;
+	//XMStoreFloat4x4(&TT, Mat);
+	//Tri.WorldMatrix = &TT;
+	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+	return S_OK;
 }
 
 void CLevel_Map::Update(_float fTimeDelta)
@@ -184,8 +199,15 @@ void CLevel_Map::Menu_Object()
 {
     ImGui::Begin("Menu_Object");
 
-        if (m_pPickedObject)
-            m_pPickedObject->Set_ImGuiOption();
+	if (m_eObjectType != static_cast<_uint>(OBJECTTYPE::TRIGGERBOX))
+	{
+		if (m_pPickedObject)
+			m_pPickedObject->Set_ImGuiOption();
+		else if (m_pPickedDestructObject)
+			m_pPickedDestructObject->Set_ImGuiOption();
+	}
+	else
+		Create_TriggerBox();
 
     ImGui::End();
 }
@@ -268,18 +290,39 @@ void CLevel_Map::Menu_Model_Load()
             _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
 
-            if (ImGui::Selectable(FileName))
-            {
-                CEdit_MapObject::MAP_LOAD Desc{};
-                _float4x4 DefaultMatrix{};
-                XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
-                Desc.WorldMatrix = &DefaultMatrix;
-                strcpy_s(Desc.ModelName, FileName);
-                Desc.eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(m_eObjectType);
-                //m_pGameInstance->Clone_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject"), PROTOTYPE::GAMEOBJECT, &Desc);
-                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-                    , m_iLevel, TEXT("Layer_MapObject"), &Desc);
-            }
+			if (ImGui::Selectable(FileName))
+			{
+				if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::DESTRUCTION)
+				{
+					_string Name = FileName;
+					if ((Name.find("Roc_24BS") == string::npos) && (Name.find("Roc_28BS") == string::npos))
+						continue;
+
+					CEdit_MapObject_Destruction::MAP_LOAD Desc{};
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.WorldMatrix = &DefaultMatrix;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					Desc.iLevel = m_iLevel;
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+						, m_iLevel, TEXT("Layer_MapObject_Destruction"), &Desc);
+				}
+				else
+				{
+					CEdit_MapObject::MAP_LOAD Desc{};
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.WorldMatrix = &DefaultMatrix;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					Desc.iLevel = m_iLevel;
+
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+						, m_iLevel, TEXT("Layer_MapObject"), &Desc);
+				}
+			}
+
             if (ImGui::IsItemHovered())
             {
                 ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);
@@ -301,14 +344,14 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-    const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" };
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
-        for (_uint i = 0; i < CEdit_MapObject::OBJECTTYPE::END; ++i)
+        for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
         {
             if (ImGui::Selectable(pObejceTType[i]))
             {
-                m_eObjectType = static_cast<CEdit_MapObject::OBJECTTYPE>(i);
+                m_eObjectType = static_cast<_uint>(i);
             }
         }
         ImGui::EndCombo();
@@ -346,8 +389,10 @@ void CLevel_Map::Menu_Save_Load()
                 MAP_SAVE event(File, Test);
                 if (Pair.first.find("Instance") != std::string::npos)
                     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
-                else
-                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
+                //else if(Pair.first.find("Destruction") != std::string::npos)
+                //    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Destruction"), event);
+				else
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 
                 File.close();
             }
@@ -355,88 +400,70 @@ void CLevel_Map::Menu_Save_Load()
 
         ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("Save All"))
-    {
-        if (ImGui::MenuItem("Save All Check"))
-        {
-            for (auto& Pair : m_SaveObjects)
-            {
-                string MapName = config.path;
-                MapName += exportText;
-                MapName += "/";
-                if (!filesystem::exists(MapName))
-                    filesystem::create_directories(MapName);
-                MapName += exportText;
-                MapName += "_";
-                MapName += Pair.first;
-                MapName += ".dat";
-                ofstream File(MapName, ios::binary);
-                unordered_set<_string> Test;
+	if (ImGui::BeginMenu("Save All"))
+	{
+		if (ImGui::MenuItem("Save All Check"))
+		{
+			unordered_set<_string> UsingPrototypeNames;
+			for (auto& Pair : m_SaveObjects)
+			{
+				string MapName = config.path;
+				MapName += exportText;
+				MapName += "/";
+				if (!filesystem::exists(MapName))
+					filesystem::create_directories(MapName);
+				MapName += exportText;
+				MapName += "_";
+				MapName += Pair.first;
+				MapName += ".dat";
+				ofstream File(MapName, ios::binary);
 
-                MAP_SAVE event(File, Test);
-                if (Pair.first.find("Instance") != std::string::npos)
-                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
-                else
-                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
+				MAP_SAVE event(File, UsingPrototypeNames);
+				if (Pair.first.find("Instance") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
+				else if (Pair.first.find("Destruction") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Destruction"), event);
+				else
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
+				File.flush();
+				File.close();
+			}
+			_string PrototypeSave = config.path;
+			PrototypeSave += exportText;
+			PrototypeSave += "/";
+			if (!filesystem::exists(PrototypeSave))
+				filesystem::create_directories(PrototypeSave);
+			PrototypeSave += exportText;
+			PrototypeSave += "_";
+			_string PrototypeSaveNames = PrototypeSave;
+			PrototypeSaveNames += ".txt";
+			PrototypeSave += "_Prototype.dat";
+			ofstream File2(PrototypeSave, ios::binary);
+			ofstream File3(PrototypeSaveNames, ios::trunc);
 
-                File.flush();
-                File.close();
-
-                _string PrototypeSave = config.path;
-                PrototypeSave += exportText;
-                PrototypeSave += "/";
-                if (!filesystem::exists(PrototypeSave))
-                    filesystem::create_directories(PrototypeSave);
-                PrototypeSave += exportText;
-                PrototypeSave += "_";
-                _string PrototypeSaveNames = PrototypeSave;
-                PrototypeSaveNames += ".txt";
-                PrototypeSave += "_Prototype.dat";
-                ofstream File2(PrototypeSave, ios::binary);
-                ofstream File3(PrototypeSaveNames, ios::trunc);
-
-                _uint i = 0;
-                for (const auto& Data : Test)
-                {
-                    //_uint i = strlen(Data.c_str());
-                    _uint StrSize = strlen(Data.c_str());
-                    File2.write(reinterpret_cast<const _char*>(&StrSize), sizeof(_uint));
-                    File2.write(reinterpret_cast<const _char*>(Data.c_str()), StrSize);
-                    File3 << Data.c_str() << endl;
-                    i++;
-                }
-                File2.flush();
-                File2.close();
-                File3.write(reinterpret_cast<const _char*>(&i), sizeof(_uint));
-                File3.close();
-            }
-        }
-        ImGui::EndMenu();
-    }
+			_uint i = 0;
+			for (const auto& Data : UsingPrototypeNames)
+			{
+				//_uint i = strlen(Data.c_str());
+				_uint StrSize = static_cast<_uint>(strlen(Data.c_str()));
+				File2.write(reinterpret_cast<const _char*>(&StrSize), sizeof(_uint));
+				File2.write(reinterpret_cast<const _char*>(Data.c_str()), StrSize);
+				File3 << Data.c_str() << endl;
+				i++;
+			}
+			File2.flush();
+			File2.close();
+			File3.write(reinterpret_cast<const _char*>(&i), sizeof(_uint));
+			File3.close();
+		}
+		ImGui::EndMenu();
+	}
 
 
     ImGui::MenuItem("Load", nullptr, &m_LoadMenu);
     if (m_LoadMenu)
     {
         ImGui::Begin("Map Save & Load");
-
-        //ifstream File("../../Client/Bin/Resource/Map/MapData/Save_Test.dat", ios::binary);
-        //_uint NameLength = {};
-
-        //vector<_string> TestName;
-        //_char Name[MAX_PATH] = {};
-        //while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-        //{
-        //    memset(Name, 0, sizeof(Name));
-
-        //    
-        //    File.read(reinterpret_cast<_char*>(&Name), NameLength);
-        //    TestName.push_back(Name);
-        //    int a = 0;
-        //}
-
-        //File.close();
-
 
         ImGuiFileDialog::Instance()->OpenDialog("Map File Load", "Import File", ".dat", config);
 
@@ -493,30 +520,77 @@ void CLevel_Map::Menu_Save_Load()
                             }
 
                         }
+						else if (strFilePath.find("Destruction") != std::string::npos)
+						{
+							//continue;
+							_uint NameLength;
+
+							_matrix PreTransformMatrix = XMMatrixIdentity();
+							_float fSize = 0.01f;
+							PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+							CEdit_MapObject_Destruction::MAP_LOAD Desc{};
+	
+							while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+							{
+								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+								File.read(Desc.ModelName, NameLength);
+								_string Name = Desc.ModelName;
+
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+								_float4x4 Matrix = {};
+								File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+								Desc.WorldMatrix = &Matrix;
+								Desc.iLevel = m_iLevel;
+
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
+								File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
+
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+									, m_iLevel, TEXT("Layer_Test"), &Desc);
+							}
+						}
                         else
                         {
                             _uint NameLength;
 
                             CEdit_MapObject::MAP_LOAD Desc{};
 
-                            while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-                            {
-                                memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-                                File.read(Desc.ModelName, NameLength);
+							while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+							{
+								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+								File.read(Desc.ModelName, NameLength);
 								_string Name = Desc.ModelName;
 
-                                File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-                                File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(CEdit_MapObject::OBJECTTYPE));
-                                _float4x4 Matrix = {};
-                                File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
-                                Desc.WorldMatrix = &Matrix;
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+								_float4x4 Matrix = {};
+								File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
+								Desc.WorldMatrix = &Matrix;
+								/*File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));*/
 
-                                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-                                    , m_iLevel, TEXT("Layer_Test"), &Desc);
 
-                            }
+								m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType, Matrix = *Desc.WorldMatrix]() mutable {
+									CEdit_MapObject::MAP_LOAD pDesc{};
+									strcpy_s(pDesc.ModelName, ModelName.c_str());
+									pDesc.iShaderPassIndex = ShaderPass;
+									pDesc.eObjectType = eObjectType;
+									pDesc.WorldMatrix = &Matrix;
+									pDesc.iLevel = m_iLevel;
+
+									m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+										, m_iLevel, TEXT("Layer_Test"), &pDesc);
+									});
+
+							}
                         }
-                        File.close();
+						m_pGameInstance->Wait_Thread_End();
+						File.close();
 
                     }
                 }
@@ -562,6 +636,9 @@ void CLevel_Map::Load_Objects()
             if (entry.path().string().find("MapData") != std::string::npos)
                 continue;
 
+			if (entry.path().string().find("Anim") != std::string::npos)
+				continue;
+
             if (entry.path().extension() == ".dat") {
 
                 _char FileDrive[MAX_PATH] = {};
@@ -569,6 +646,23 @@ void CLevel_Map::Load_Objects()
                 _char FileName[MAX_PATH] = {};
                 _char FileExt[MAX_PATH] = {};
                 _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+				_wstring PrototypeName = L"Prototype_Component_Model_";
+				PrototypeName += StringToWString(FileName);
+
+				_string VersionPath = FileDir;
+				VersionPath += FileName;
+				VersionPath += ".dat";
+
+				if (entry.path().string().find("_Bone") != std::string::npos)
+				{
+					m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+							CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, Path.c_str()))))
+							CRASH("Prototype Create Failed");
+						});
+					continue;
+				}
 
                 _wstring baseName = StringToWString(FileName);
 
@@ -580,12 +674,9 @@ void CLevel_Map::Load_Objects()
                 version = stoi(numberPart);
 
                 _wstring key = L"Prototype_Component_Model_" + namePart;
-                _string VersionPath = FileDir;
-                VersionPath += FileName;
-                VersionPath += ".dat";
 
-                _wstring PrototypeName = L"Prototype_Component_Model_";
-                PrototypeName += StringToWString(FileName);
+
+
 
                 m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
                     if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
@@ -655,6 +746,25 @@ void CLevel_Map::Load_Objects()
 
 }
 
+void CLevel_Map::Create_TriggerBox()
+{
+	ImGui::Text("TriggerBox Info");
+	ImGui::InputFloat3("TriggerBox Pos", reinterpret_cast<_float*>(&m_vPickedPos), "%.1f");
+
+	ImGui::InputFloat3("TriggerBox Extends", m_TriggerBoxExtends);
+	if (ImGui::Button("Create"))
+	{
+	CEdit_TriggerBox::TRIGGER Tri;
+		Tri.iLevel = m_iLevel;
+		Tri.vExtends = _float3(m_TriggerBoxExtends[0], m_TriggerBoxExtends[1], m_TriggerBoxExtends[2]);
+		_matrix Mat = XMMatrixTranslationFromVector(XMVectorSet(m_vPickedPos.x, m_vPickedPos.y, m_vPickedPos.z, 1.f));
+		_float4x4 TT;
+		XMStoreFloat4x4(&TT, Mat);
+		Tri.WorldMatrix = &TT;
+		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+	}
+}
+
 HRESULT CLevel_Map::Ready_Static_Component()
 {
     _matrix PreTransformMatrix = XMMatrixIdentity();
@@ -710,6 +820,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
     m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_LightObject"),
         CEdit_LightObject::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice"),
+		CEdit_MapObject_Destruction_Piece::Create(m_pDevice, m_pContext));
+
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
 
@@ -718,6 +831,10 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
+
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CEdit_MapObject_Destruction::Create(m_pDevice, m_pContext));
+
     return S_OK;
 }
 
@@ -733,23 +850,45 @@ void CLevel_Map::Ready_Event()
 
         switch (m_eMenu)
         {
-        case Editor::CLevel_Map::MENU_OBJECT:
-        {
-            if (event.fDistance <= m_fNearDistance)
-            {
-                if (m_pPickedObject)
-                    m_pPickedObject->Set_ShaderPass(0);
+		case Editor::CLevel_Map::MENU_OBJECT:
+		{
+			if (event.fDistance <= m_fNearDistance)
+			{
+				if (m_pPickedObject)
+					m_pPickedObject->Set_ShaderPass(0);
+				if (m_pPickedDestructObject)
+					m_pPickedDestructObject->Set_ShaderPass(0);
+				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject)))
+				{
 
-                m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject));
-                m_pPickedObject->Set_ShaderPass(3);
 
-                if (m_pChildObject)
-                {
-                    m_pPickedObject->Add_Child(m_pChildObject);
-                    m_pChildObject = nullptr;
-                }
-            }
-        }
+					m_pPickedObject->Set_ShaderPass(3);
+
+					if (m_pPickedDestructObject)
+					{
+						m_pPickedDestructObject->Set_ShaderPass(0);
+						m_pPickedDestructObject = nullptr;
+					}
+
+					if (m_pChildObject)
+					{
+						m_pPickedObject->Add_Child(m_pChildObject);
+						m_pChildObject = nullptr;
+					}
+				}
+				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(reinterpret_cast<CGameObject*>(event.pObject)))
+				{
+
+					m_pPickedDestructObject->Set_ShaderPass(3);
+
+					if (m_pPickedObject)
+					{
+						m_pPickedObject->Set_ShaderPass(0);
+						m_pPickedObject = nullptr;
+					}
+				}
+			}
+		}
         break;
 
         case Editor::CLevel_Map::MENU_RANDSCAPE:
@@ -770,14 +909,29 @@ void CLevel_Map::Ready_Event()
         CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
         if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
         {
-            m_SaveObjects["Map_Object"].push_back(m_pPickedObject);
-            Safe_AddRef(m_pPickedObject);
+
+			lock_guard<mutex> lock(m_Mutex);
+			{
+				m_SaveObjects["Map_Object"].push_back(m_pPickedObject);
+				Safe_AddRef(m_pPickedObject);
+			}
         }
         else if (m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(pObject))
         {
-            m_SaveObjects["Map_Object_Instance"].push_back(m_pPickedInstanceObject);
-            Safe_AddRef(m_pPickedInstanceObject);
+			lock_guard<mutex> lock(m_Mutex);
+			{
+				m_SaveObjects["Map_Object_Instance"].push_back(m_pPickedInstanceObject);
+				Safe_AddRef(m_pPickedInstanceObject);
+			}
         }
+		else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
+		{
+			lock_guard<mutex> lock(m_Mutex);
+			{
+				m_SaveObjects["Map_Object_Destruction"].push_back(m_pPickedDestructObject);
+				Safe_AddRef(m_pPickedDestructObject);
+			}
+		}
         });
 
     m_pGameInstance->Subscribe<MAP_CREATE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Set_Parent"), [this](const MAP_CREATE& event) {
@@ -875,7 +1029,9 @@ void CLevel_Map::Free()
     m_pPickedObject = nullptr;
     m_pPickedInstanceObject = nullptr;
     m_pPickedLightObject = nullptr;
-    m_pGameInstance->Unscribe();
+	m_pPickedDestructObject = nullptr;
+
+    //m_pGameInstance->Unscribe();
 
     Safe_Release(m_pPreViewObject);
     Safe_Release(m_pBrush);

@@ -38,8 +38,8 @@ void CSequencer::Add(_int iType)
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Sound" });
 		break;
-	case ENUM_CLASS(ITEM_TYPE::SCREEN):
-		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "Screen" });
+	case ENUM_CLASS(ITEM_TYPE::SFX):
+		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, false, "SFX" });
 		break;
 	case ENUM_CLASS(ITEM_TYPE::ACTOR):
 		m_Items.push_back(SEQUENCE_ITEM{ iType, 10, 30, true, "Actor" });
@@ -61,8 +61,8 @@ const _char* CSequencer::GetItemTypeName(_int iIndex) const
 		return "Scene";
 	case ENUM_CLASS(ITEM_TYPE::SOUND):
 		return "Sound";
-	case ENUM_CLASS(ITEM_TYPE::SCREEN):
-		return "Screen";
+	case ENUM_CLASS(ITEM_TYPE::SFX):
+		return "SFX";
 	case ENUM_CLASS(ITEM_TYPE::ACTOR):
 		return "Actor";
 	case ENUM_CLASS(ITEM_TYPE::EFFECT):
@@ -240,7 +240,7 @@ void CSequencer::Selectable_Item()
 
 		ImGui::End();
 
-		item.mRampEdit.Update_Frame();
+		item.mRampEdit.Update_Frame(item.eType);
 	}
 }
 
@@ -284,6 +284,9 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::PushID(103);
 	ImGui::InputFloat("##", &CameraFrame.fFovy);
 	ImGui::PopID();
+
+	if (ImGui::RadioButton("[Lerp]", CameraFrame.isLerp))
+		CameraFrame.isLerp = !CameraFrame.isLerp;
 
 	ImGui::SameLine();
 	if (ImGui::Button("Delete"))
@@ -379,6 +382,8 @@ void CSequencer::Save_CameraAction()
 
 				FrameJson["FOV"] = Frames[i].fFovy;
 
+				FrameJson["Lerp"] = Frames[i].isLerp;
+
 				ActionJson["Frame"].push_back(FrameJson);
 			}
 
@@ -424,6 +429,8 @@ void CSequencer::Load_CameraAction()
 					CameraFrame.vTranslation = _float3(Frame["Translation"][0], Frame["Translation"][1], Frame["Translation"][2]);
 					CameraFrame.fDistance = Frame["Distance"];
 					CameraFrame.fFovy = Frame["FOV"];
+					if (Frame.contains("Lerp"))
+						CameraFrame.isLerp = Frame["Lerp"];
 
 					item.mRampEdit.mPoints.push_back(ImVec2(CameraFrame.fStartFrame, 0.5f));
 					item.mRampEdit.mTargetCameraFrames.push_back(CameraFrame);

@@ -10,9 +10,9 @@ public:
 	enum CHARACTERTYPE
 	{
 		NONE = -1,
-		AUGUSTA = 0,
-		GALBRENA = 1,
-		ROVER = 2,
+		ROVER = 0,
+		AUGUSTA = 1,
+		GALBRENA = 2,
 		TYPE_END
 	};
 
@@ -54,17 +54,20 @@ public:
 
 #pragma endregion
 
-public:
-	void Change_CharacterCheck();
-	void Change_Character(CHARACTERTYPE eNextCharacter);
-	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
-	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+#pragma region UI Interface
+	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
+	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
+
+
+#pragma endregion
+
+
+	
 
 public:
 	void Switch_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
 	void Notify_EnsembleEnd();
-
 	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
@@ -76,6 +79,8 @@ private:
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
+
+	
 	
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
@@ -85,15 +90,28 @@ private:
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };
+	class CPlayerStatus* m_pPlayerStatus = { nullptr }; // 플레이어 Interface
+
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };
+	class CCollider* m_pColliderCom = { nullptr };
+
 	_bool m_IsLockOn = { false };
 
 	_bool m_IsChanage = { false };
 	CHARACTERTYPE m_eNextCharacter = {};
 	
+
+	_float3 m_vColliderOffSet = {};
+	_float m_fColliderHeight = {};
+	_float m_fColliderRadius = {};
+
 private:
+	void Player_KeyInput();
+	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
+	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void Sorting_Target();
 	void Toggle_LockOn();
 

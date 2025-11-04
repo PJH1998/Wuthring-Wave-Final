@@ -3,7 +3,9 @@
 #include "AnimationActor.h"
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
+
 #include "EffectNotify.h"
+#include "ObjectFuncNotify.h"
 
 
 #pragma region 
@@ -79,7 +81,9 @@ void CAnimNotifyTool::Clear()
 
     m_EffectNotifies.clear();
 
-
+	for (auto& notify : m_ObjectNotifies)
+		Safe_Release(notify);
+	m_ObjectNotifies.clear();
     
     //m_SoundNotifies.clear();
     //m_ColliderNotifies.clear();
@@ -121,6 +125,13 @@ void CAnimNotifyTool::RenderUI_EditNotify()
             m_eType = NOTIFYTYPE::COLLIDER;
             ImGui::EndTabItem();
         }
+
+		if (ImGui::BeginTabItem("Object"))
+		{
+			RenderUI_EditObjectFunc();
+			m_eType = NOTIFYTYPE::OBJECT;
+			ImGui::EndTabItem();
+		}
 
         if (ImGui::BeginTabItem("Save"))
         {
@@ -227,6 +238,30 @@ void CAnimNotifyTool::RenderUI_EditCollider()
     }
 
 
+}
+
+void CAnimNotifyTool::RenderUI_EditObjectFunc()
+{
+	static float fTrackPosition = {};
+	ImGui::SetNextItemWidth(120.f);
+	ImGui::InputFloat("TrackPosition", &fTrackPosition);
+
+	static string strObjectTag;
+
+	if (strObjectTag.empty())
+		strObjectTag.resize(256);
+
+	ImGui::SetNextItemWidth(120.f);
+	ImGui::InputText("Tag (Type|Key)", strObjectTag.data(), strObjectTag.capacity());
+
+	if (ImGui::Button("Apply Object Notify"))
+	{
+		json ObjectJson;
+		ObjectJson["TrackPosition"] = fTrackPosition;
+		ObjectJson["ObjectTag"] = strObjectTag.c_str();
+		CObjectFuncNotify* pObjectNotify = CObjectFuncNotify::From_Json(ObjectJson);
+		m_ObjectNotifies.emplace_back(pObjectNotify);
+	}
 }
 
 void CAnimNotifyTool::RenderUI_SaveNotify()
@@ -469,6 +504,42 @@ void CAnimNotifyTool::Render_CurrentNotify()
         {
             ImGui::EndTabItem();
         }
+
+		if (ImGui::BeginTabItem("Object List"))
+		{
+			_uint iDeleteIndex = {};
+
+			_uint iIndex = { 0 };
+			for (auto& pObjectNotify : m_ObjectNotifies)
+			{
+				ImGui::PushID(iIndex);
+
+				pObjectNotify->ImGui_Print();
+
+				if (ImGui::Button("Delete"))
+				{
+					IsDeleted = true;
+					iDeleteIndex = iIndex;
+				}
+
+				ImGui::PopID();
+
+				if (iIndex < m_ObjectNotifies.size() - 1)
+					ImGui::Separator();
+
+				iIndex++;
+			}
+
+			if (IsDeleted)
+			{
+				auto iterDelete = next(m_ObjectNotifies.begin(), iDeleteIndex);
+				Safe_Release(*iterDelete);
+				m_ObjectNotifies.erase(iterDelete);
+			}
+
+			ImGui::EndTabItem();
+		}
+
         ImGui::EndTabBar();
     }
 
@@ -485,6 +556,7 @@ void CAnimNotifyTool::Save_Notify()
     {
         IGFD::FileDialogConfig config;
         config.path = m_strCurrentFolderPath;
+		config.fileName = m_strCurrentAnimName;
         config.flags = ImGuiFileDialogFlags_ConfirmOverwrite;
 
         ImGuiFileDialog::Instance()->OpenDialog("Save Notify", "Export File", ".json", config);
@@ -652,6 +724,10 @@ void CAnimNotifyTool::Save_NotifyToJson(const _string& strFilePath)
     for (auto& colliderNotify : m_ColliderNotifies)
         notifyJson["Notifies"].emplace_back(colliderNotify->To_Json());
 
+	//4. ObjectFunc
+	for (auto& pObjectNotify : m_ObjectNotifies)
+		notifyJson["Notifies"].emplace_back(pObjectNotify->To_Json());
+
     jsonStream << notifyJson.dump(4);
     jsonStream.close();
 }
@@ -697,6 +773,12 @@ void CAnimNotifyTool::Load_NotifyFromJson(const _string& strFilePath)
                 m_EffectNotifies.emplace_back(pEffectNofiy);
             }
             
+			else if (type == "Object")
+			{
+				CObjectFuncNotify* pEffectNofiy = CObjectFuncNotify::From_Json(notifyObject);
+				m_ObjectNotifies.emplace_back(pEffectNofiy);
+			}
+
             // else if (type == "Effect") { ... }
         }
     }

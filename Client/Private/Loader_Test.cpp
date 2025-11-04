@@ -5,8 +5,14 @@
 #include "MapObject.h"
 #include "AnimationDummy.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
+#include "FS_Scythe.h"
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
 
 #include "StateMachine.h"
+
+#include "Wing.h"
 
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
@@ -36,7 +42,15 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
+
+    m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
     
+
+    m_pGameInstance->Wait_Thread_End();
+
+	Load_Action();
+
     //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
@@ -50,8 +64,9 @@ HRESULT CLoader_Test::Load_Texture()
 
 HRESULT CLoader_Test::Load_Model()
 {
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1031_Final/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1030_second_final/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
     m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign
@@ -59,6 +74,14 @@ HRESULT CLoader_Test::Load_Model()
     //if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_FalseSoverign"),
     //    CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreMatrix, "../Bin/Resource/Model/Player/FalseSovereign/False_SovereignTest1.dat"))))
     //    return E_FAIL;
+
+	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Background"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyBackground21.dat"))))
+		CRASH("SkyBackground");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_Model_Skybox_Dome"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
+		CRASH("SkyDome");
 
 	cout << "Model" << endl;
 
@@ -103,12 +126,13 @@ HRESULT CLoader_Test::Load_MonsterTest()
 {
     cout << "MonsterTest" << endl;
 
-    // Prototype_Component_BehaviorTree_TestLoad_MonsterTest
-	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
+#pragma region FALSE_SOVEREIGN
+    // Prototype_Component_BehaviorTree_Test
+	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
         CRASH("BehaviorTree Create Failed");
 
-    // Prototype_Component_AnimMachine_Test
+    // Prototype_Component_AnimMachine_FalseSovereign
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
         CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/Animation/FalseSovereign_StateMachine.json"))))
         CRASH("Monster AnimMachine Create Failed");
@@ -124,6 +148,91 @@ HRESULT CLoader_Test::Load_MonsterTest()
     if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         CMonsterTest::Create(m_pDevice, m_pContext))))
         CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region GGOBUL
+	// Prototype_Component_Model_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Ggobul"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Ggobul/Ggobul.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Ggobul/Animation/Ggobul_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
+		CGgobul::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region SCYTHE_TANTACLE
+	// Prototype_Component_Model_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Scythe"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FS_Scythe/FS_Scythe.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_Scythe"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FS_Scythe/Animation/FS_Scythe_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		CFS_Scythe::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+	// Prototype_Component_BehaviorTree_Ordinary
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/MonsterOrdinary_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+	
+#pragma region HAVOC_WARRIOR
+	// Prototype_Component_AnimMachine_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_HavocWarrior"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/Animation/HavocWarrior_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_HavocWarrior
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_HavocWarrior"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/HavocWarrior/HavocWarrior.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		CHavocWarrior::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region ELECTRO_PREDATOR
+	// Prototype_Component_AnimMachine_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_ElectroPredator"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/ElectroPredator/Animation/ElectroPredator_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_ElectroPredator
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_ElectroPredator"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/ElectroPredator/ElectroPredator.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		CElectroPredator::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+    return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Effect()
+{
+    m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+    m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+    m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
     return S_OK;
 }
@@ -142,6 +251,27 @@ HRESULT CLoader_Test::Load_Player()
         , wStrControllerTag
         , CPlayer::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
+
+#pragma region COMMON 객체 WING
+	_wstring wStrModelTag = L"Prototype_Component_Model_Wing";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Wing/Wing.dat";
+	_float fSize = 0.01f;
+	//fSize = 0.0001f;
+	_matrix PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrBayonetTag = TEXT("Prototype_GameObject_Wing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrBayonetTag
+		, CWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+#pragma endregion
+
 
     return S_OK;
 }
@@ -233,7 +363,7 @@ HRESULT CLoader_Test::Load_Augusta()
 HRESULT CLoader_Test::Load_Rover()
 {
     _wstring wStrModelTag = L"Prototype_Component_Model_Rover";
-    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/DarkRover.dat";
+    _string strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Rover.dat";
     _matrix	PreTransformMatrix = XMMatrixIdentity();
     //_float fSize = 0.01f;
     _float fSize = 0.0001f;
@@ -283,6 +413,13 @@ HRESULT CLoader_Test::Load_Rover()
 #pragma endregion
 
     return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Action()
+{
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	return S_OK;
 }
 
 CLoader_Test* CLoader_Test::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

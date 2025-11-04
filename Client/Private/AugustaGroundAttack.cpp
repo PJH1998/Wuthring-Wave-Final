@@ -44,6 +44,8 @@ void CAugustaGroundAttack::OnEnter()
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+
+
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
@@ -60,10 +62,7 @@ void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
     Check_Physics(fTimeDelta);
 
     // 3. LockOn 여부 확인 및 상태 전환
-    /*if (m_pAugusta->Is_LockOn())
-        LockOn_StateTransition(fTimeDelta);
-    else
-        Check_StateTransition(fTimeDelta);*/
+
     Check_StateTransition(fTimeDelta);
 
     State_Reset();
@@ -86,8 +85,10 @@ void CAugustaGroundAttack::Handle_Input()
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
-    m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAugustaAttackType::ATTACK01 
-        && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
+
+	m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAugustaAttackType::ATTACK01)
+		&& (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
+		
 
 
 
@@ -109,8 +110,6 @@ void CAugustaGroundAttack::Handle_Input()
         if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS))
             m_IsNextAttackInput = true;
     }
-
-        
     
 }
 
@@ -156,10 +155,13 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {
-        m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
-		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
-        m_fAttackPressTime = 0.f;
-        return;
+		if (SKILL_STATE::READY == m_pAugusta->Use_Skill("Attack_HeavyHack"))
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+			m_fAttackPressTime = 0.f;
+			return;
+		}
     }
 
     /*if (m_States[HEAVY_ATTACK_PENDING] && IsEscapePossible)

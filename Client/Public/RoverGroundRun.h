@@ -22,6 +22,8 @@ private:
         SKILL_E,
         SKILL_Q,
         SKILL_R,
+
+		// 소모값 필요한 얘들.
         UNIQUE_E, 
         UNIQUE_R,
         BURST_R,

@@ -75,7 +75,7 @@ _bool CMesh::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float*
 }
 #endif
 
-// ?닿쾬??怨꾩궛 ?곗씠?붽? ?곸슜?섏뼱???섎뒗 遺遺?
+// 
 HRESULT CMesh::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, const vector<class CBone*>& Bones)
 {
     for (size_t i = 0; i < m_iNumBones; ++i)
@@ -270,6 +270,8 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, 
 
 		// Mesh Shape??Container
 		m_VertexPositions.push_back(pVertices[i].vPosition);
+#ifdef _DEBUG
+
         MaxPos[0] = max(pVertices[i].vPosition.x, MaxPos[0]);
 		MaxPos[1] = max(pVertices[i].vPosition.y, MaxPos[1]);
 		MaxPos[2] = max(pVertices[i].vPosition.z, MaxPos[2]);
@@ -277,6 +279,7 @@ HRESULT CMesh::Ready_Mesh_Map(_fmatrix PreTransformMatrix, ifstream& InputFile, 
         MinPos[0] = min(pVertices[i].vPosition.x, MinPos[0]);
 		MinPos[1] = min(pVertices[i].vPosition.y, MinPos[1]);
 		MinPos[2] = min(pVertices[i].vPosition.z, MinPos[2]);
+#endif
 	}
 
 	m_iVertexStride = sizeof(VTXMESH);

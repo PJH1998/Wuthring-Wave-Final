@@ -30,6 +30,7 @@ enum class EAugustaAirState : _uint
 	AIR_ATTACK,		// 공중 공격 (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
 	HOOK,			// 갈고리 (Hook_Up)
 	AIR_SKILL,		// 공중 스킬 (Air
+	FLY,			// 날기.
 	AIR_END
 };
 
@@ -143,6 +144,9 @@ enum class EAugustaSkillType : _uint
 	SKILL_RISE_ZERO,
 	SKILL_STRIKE,
 	SKILLQTE,
+	ATTACK_PULL,
+	ATTACK_SPEEDDRIVE,
+	ATTACK_SPSKILL,
 	END
 };
 
@@ -210,11 +214,27 @@ enum class EAugustaAirAttackType : _uint
 	END
 };
 
-enum class EAirSkillType : _uint
+enum class EAugustaAirSkillType : _uint
 {
 
 	END
 };
+
+// Fly Type
+enum class EAugustaAirFlyType : _uint
+{
+	XA_LOOP_U = 0,
+	XA_LOOP_D,
+	XA_LOOP_L,
+	XA_LOOP_R,
+	XA_LOOP_RL_MID,
+	XA_LOOP_STAND,
+	XA_SHAKE_LOOP,
+	XA_START,
+	END
+};
+
+
 #pragma endregion
 
 #pragma region CLIMB

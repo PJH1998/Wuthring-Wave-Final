@@ -21,9 +21,15 @@
 #include "DirectXTK/Effects.h"
 using namespace DirectX;
 
+// Comptr
+#include <wrl/client.h>
+using Microsoft::WRL::ComPtr;
+
 // Fmod
 #include "Fmod/fmod.hpp"
 #define FMOD_CHANNEL_MAX 32
+
+
 
 // Json
 #include "Json/json.hpp"
@@ -97,12 +103,17 @@ namespace Engine
 	//const unsigned int g_iMaxWidth = 16384;
 	//const unsigned int g_iMaxHeight = 9216;	
 
-	const unsigned int g_iMaxWidth = 8192;
-	const unsigned int g_iMaxHeight = 4608;
+	const unsigned int g_iMaxWidth = 4096;
+	const unsigned int g_iMaxHeight = 2304;
+
+	const unsigned int g_iMaxShadowMapSize = 8192;
+	const unsigned int g_iSectorSize = 2048;
 
 	const unsigned int g_iNumCascade = 4;
-	const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };
-	const float g_fLODGap = { 1500.f };
+	//const float g_fLODDistance[4] = { 0.f, 1500.f, 3000.f, 4500.f };
+	//const float g_fLODGap = { 1500.f };
+	//const float g_fLODDistance[4] = { 0.f, 800.f, 1600.f, 2400.f };
+	const float g_fLODGap = { 400.f };
 }
 
 #define MAX_DEPTH 5

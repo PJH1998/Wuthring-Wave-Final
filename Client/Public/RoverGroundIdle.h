@@ -11,6 +11,7 @@ private:
     {
         JUMP = 0,
         DASH,
+		LAND,
         SPRINT,
         MOVE,
         ATTACK,
@@ -22,6 +23,8 @@ private:
         SKILL_E,
         SKILL_Q,
         SKILL_R,
+
+		// 소모값 필요한 얘들
         UNIQUE_E, // Unique E상태. => 그리폰 타서 공격.
         UNIQUE_R,
         BURST_R, // Burst R 상태 => Skill 검으로 바뀜.
@@ -50,8 +53,6 @@ private:
     void Update_IdleAnimations(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
-    void LockOn_StateTransition(_float fTimeDelta);
-
     void Setup_Animations();
     void State_Reset(); // 상태 초기화
 

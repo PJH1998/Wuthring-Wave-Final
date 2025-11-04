@@ -18,6 +18,17 @@ private:
        JUMP, 
        LAND,
        SKILL_E,
+       SKILL_R,
+
+	   SKILL_RISE_ZERO,
+	   SKILL_RISE,
+	   AIRATTACK_HACKDOWN_START,
+
+	   ATTACK_SPEEDDRIVE,
+
+	   POINT_E,
+	   SWORD_R,
+
        AIR_ATTACK,
        FALL,
        END
@@ -38,7 +49,7 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[SKILLSTATE::END] = {};
     map<_string, _string> m_PartsAnimations = {};
-
+	_string m_strSkillName = {};
 private:
     virtual void Handle_Input() override;
     void Update_SkillAnimations(_float fTimeDelta);

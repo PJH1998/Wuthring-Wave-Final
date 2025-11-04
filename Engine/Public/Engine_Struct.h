@@ -64,6 +64,7 @@ namespace Engine
 		float				fDistance = {};		// Distance
 		float				fStartFrame = {};
 		float				fFovy = {};
+		bool				isLerp = { true };
 	}CAMERA_FRAME;
 
 	typedef struct tagMapObject
@@ -84,7 +85,9 @@ namespace Engine
 		_wstring	strMyTag;
 		EFFECT_TYPE eMyType = EFFECT_TYPE::END;
 		_bool		IsRootOn = false;
-		const _float4x4*  RootMatrix = {};
+		const _float4x4**  RootMatrix = {};
+		const _float4x4** ParentMatrix = {};
+		_uint	CurrentLevel;
 	}EFFECT_DESC;
 
 	typedef struct ParticleSRV	
@@ -92,7 +95,8 @@ namespace Engine
 		_float4 DefaultPos; 
 
 		_float  fSpeed;
-		_float	_pad0[3];
+		_float  fDelay;
+		_float	_pad0[2];
 
 	}PARTICLE_SRV;
 
@@ -103,7 +107,8 @@ namespace Engine
 		
 		_uint	IsStretch;
 		_uint	IsSprite;
-		_float	_pad[2];
+		_uint   IsDelay;
+		_float	_pad;
 	}PARTICLE_DefaultCB;
 
 	typedef struct ParticleSpeedCB
@@ -128,7 +133,6 @@ namespace Engine
 
 		_float fSpeed;						
 		_float3 vColor;
-
 	}FXMESH_SRV;
 
 	typedef struct FXMeshCB
@@ -164,13 +168,13 @@ namespace Engine
 		_uint iPadding;  // 4 諛붿씠???⑤뵫??異붽?
 	}ANIMINFO;
 
-	// 梨꾨꼸 ?뺣낫 援ъ“泥?=> Depth2
+	//
 	typedef struct tagGpuChannelInfo
 	{
-		_uint iStartKeyframeOffset; // Key Frame ?쒖옉 (?꾩쟻 ?몃뜳??
-		_uint iNumKeyframes; // ?꾩옱 Channel?먯꽌??KeyFrame 媛쒖닔.
-		_uint iBoneIndex;  // 異붽?: ??梨꾨꼸???대뼡 堉덈? 而⑦듃濡ㅽ븯?붿?
-		_uint iPadding;    // 16諛붿씠???뺣젹???꾪븳 ?⑤뵫
+		_uint iStartKeyframeOffset; // Key Frame 
+		_uint iNumKeyframes; // 
+		_uint iBoneIndex;  // 
+		_uint iPadding;    // 
 	}GPU_CHANNELINFO;
 
 	// 채널이 소유하는 KeyFrame(매 TrackPosition마다 뼈의 이동 정보) 구조체 => Depth3
@@ -182,19 +186,65 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// (留??꾨젅???낅뜲?댄듃)
-	// Constant Buffer??珥??ш린媛 諛섎뱶??16??諛곗닔?ъ빞??
+	// 
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
-		_float fTrackPosition;
-		_uint  iAnimindex;
-		_bool  IsRibAnimUsed = false;
-		_uint  iRibbonAnimIndex;
+		// 1. Default Animation CB info
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibbonAnimIndex; // 4
+		
+		// 2. Blend Layer Control
+		_bool  IsBlendEnabled;     // 4 (전체 조준 블렌드 On/Off)
+		_float fBlendParamLR;       // 4 (좌/우 파라미터, -1 to 1)
+		_float fBlendParamDU;       // 4 (하/상 파라미터, -1 to 1)
+		_float fPadding;            // 4 (16바이트 정렬)
+
+		// 3. RL Blend Clip
+		_uint iClipIndexL;          // 4 
+		_uint iClipIndexMidLR;      // 4 
+		_uint iClipIndexR;          // 4 
+		_uint iWeightClipLR;       // 4 
+
+		// 4. UD Blend Clip
+		_uint iClipIndexD;          // 4 
+		_uint iClipIndexMidDU;      // 4 
+		_uint iClipIndexU;          // 4 
+		_uint iWeightClipDU;       // 4 
 	}ANIMATION_CBINFO;
+
+	typedef struct tagGpuBlendInfo {
+		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.
+		_float fBlendParamLR;       // 4 
+		_float fBlendParamDU;       // 4 
+		_float fPadding;            // 4 
+
+		// RL Blend Clip
+		_string strClipxL;          // 4 
+		_string strClipMidLR;      // 4 
+		_string strClipxR;          // 4 
+		_string strWeightClipLR;       // 4 
+
+		// UD Blend Clip
+		_string strClipxD;          // 4 
+		_string strClipMidDU;      // 4 
+		_string strClipxU;          // 4 
+		_string strWeightClipDU;       // 4 
+	}GPU_BLEND_INFO;
 
 	typedef struct tagCollisionData {
 		class CCollideComponent* pComponent = { nullptr };
 		void* pDesc = { nullptr };
 	}COLLISION_DATA;
+
+
+	typedef struct tagSampleDesc
+	{
+		_float3 vPos = {};
+		_float fSpawnTime = {};
+
+	}SAMPLE_DESC;
 
 #pragma region SEQUENCE
 	// Sequence Item Frame, Tag => Sequence가 갖고 있음
@@ -208,7 +258,8 @@ namespace Engine
 	// Sequence Item Data => Item Reset시 던질 Data
 	typedef struct tagSequenceItemData
 	{
-
+		_float		fStartFrame = {};
+		_float		fEndFrame = {};
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
 
@@ -272,6 +323,8 @@ namespace Engine
 
 #pragma endregion
 
+	// Default 초기화 용도.
+	inline const GPU_BLEND_INFO G_DefaultBlendInfo = {};
 }
 
 

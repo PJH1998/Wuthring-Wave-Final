@@ -28,6 +28,16 @@ _matrix CPipeLine::Get_TransformState_Matrix_Inv(D3DTS eState) const
 	return XMLoadFloat4x4(&m_TransformMatrixes_Inv[ENUM_CLASS(eState)]);
 }
 
+const _float4x4* CPipeLine::Get_PrevTransformState_Float4x4(D3DTS eState) const
+{
+	return &m_PrevTransformMatrixes[ENUM_CLASS(eState)];
+}
+
+_matrix CPipeLine::Get_PrevTransformState_Matrix(D3DTS eState) const
+{
+	return XMLoadFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(eState)]);
+}
+
 void CPipeLine::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 {
 	XMStoreFloat4x4(&m_TransformMatrixes[ENUM_CLASS(eState)], Matrix);
@@ -36,6 +46,16 @@ void CPipeLine::Set_TransformState(D3DTS eState, _fmatrix Matrix)
 void CPipeLine::Set_TransformState(D3DTS eState, const _float4x4& Matrix)
 {
 	m_TransformMatrixes[ENUM_CLASS(eState)] = Matrix;
+}
+
+void CPipeLine::Set_PrevTransformState(D3DTS eState, _fmatrix Matrix)
+{
+	XMStoreFloat4x4(&m_PrevTransformMatrixes[ENUM_CLASS(eState)], Matrix);
+}
+
+void CPipeLine::Set_PrevTransformState(D3DTS eState, const _float4x4& Matrix)
+{
+	m_PrevTransformMatrixes[ENUM_CLASS(eState)] = Matrix;
 }
 
 _float CPipeLine::Compute_Distance(CGameObject* pObject)
@@ -51,6 +71,7 @@ HRESULT CPipeLine::Initialize()
 	{
 		XMStoreFloat4x4(&m_TransformMatrixes[i], XMMatrixIdentity());
 		XMStoreFloat4x4(&m_TransformMatrixes_Inv[i], XMMatrixIdentity());
+		XMStoreFloat4x4(&m_PrevTransformMatrixes[i], XMMatrixIdentity());
 	}
 
 	return S_OK;

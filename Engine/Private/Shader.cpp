@@ -8,11 +8,14 @@ CShader::CShader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CShader::CShader(const CShader& Prototype)
     : CComponent { Prototype },
-    m_pEffect { Prototype.m_pEffect },
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
-    Safe_AddRef(m_pEffect);
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		m_pEffect = Prototype.m_pEffect;
+	}
+    //Safe_AddRef(m_pEffect);
     for (auto& pInputLayOut : m_InputLayouts)
         Safe_AddRef(pInputLayOut);
 }
@@ -27,10 +30,17 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
     iHlslFlag = D3DCOMPILE_OPTIMIZATION_LEVEL1;
 #endif
 
-    if (FAILED(D3DX11CompileEffectFromFile(pFilePath, nullptr,
-        D3D_COMPILE_STANDARD_FILE_INCLUDE, iHlslFlag, 0,
-        m_pDevice, &m_pEffect, nullptr)))
-        return E_FAIL;
+	// 1. 임시 변수가 필요 없습니다. ComPtr이 & 연산자를 오버로딩합니다.
+	// m_pEffect.GetAddressOf()는 &pRawEffect와 동일한 역할을 합니다.
+	if (FAILED(D3DX11CompileEffectFromFile(pFilePath, nullptr,
+		D3D_COMPILE_STANDARD_FILE_INCLUDE, iHlslFlag, 0,
+		m_pDevice, m_pEffect.GetAddressOf(), nullptr))) // <-- ComPtr 사용
+		return E_FAIL;
+
+	// 3. nullptr 체크
+	if (nullptr == m_pEffect) // m_pEffect.Get()을 쓸 필요 없이 바로 비교 가능
+		return E_FAIL;
+
 
     ID3DX11EffectTechnique* pTechnique = m_pEffect->GetTechniqueByIndex(0);
     if (nullptr == pTechnique)
@@ -188,5 +198,8 @@ void CShader::Free()
         Safe_Release(pInputLayout);
     m_InputLayouts.clear();
 
-    Safe_Release(m_pEffect);
+	
+	m_pEffect = nullptr;
+	
+    //Safe_Release(m_pEffect);
 }

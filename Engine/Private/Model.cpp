@@ -30,7 +30,9 @@ CModel::CModel(const CModel& Prototype)
 	m_Buffers {Prototype.m_Buffers},
 	m_SRVs { Prototype.m_SRVs },
 	m_isRibAnimation { Prototype.m_isRibAnimation },
-	m_pBoundingBox{ Prototype.m_pBoundingBox }
+	pMin{Prototype.pMin},
+	pMax{Prototype.pMax}
+	//m_pBoundingBox{ Prototype.m_pBoundingBox }
 {
 	for (auto& pMesh : m_Meshes)
 		Safe_AddRef(pMesh);
@@ -96,18 +98,13 @@ void CModel::Sync_RootNode(CTransform* pOwnerTransform, _float fTimeDelta)
 	_matrix matWorld = pOwnerTransform->Get_WorldMatrix();
 	_matrix ResultMatrix = m_RootMatrix * pOwnerTransform->Get_WorldMatrix();
 
-	
-
 	/*_vector vScale, vRotation, vPosition;
 	XMMatrixDecompose(&vScale, &vRotation, &vPosition, ResultMatrix);*/
 
 	pOwnerTransform->Set_WorldMatrix(ResultMatrix);
+
+
 }
-
-
-
-
-
 
 const _float4x4* CModel::Get_BoneMatrixPtr(const _char* pBoneName)
 {
@@ -212,7 +209,7 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
-void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback)
 {
 	for (auto& pair : m_Animations)
 	{
@@ -231,7 +228,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 			inputFile.close();
 
 			if (notifyData.contains("Notifies") && notifyData["Notifies"].is_array())
-				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback);
+				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback, ObjectCallback);
 			
 		}
 
@@ -260,6 +257,11 @@ HRESULT CModel::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatri
 			return E_FAIL;
 
 		if (FAILED(Ready_Animation(pFilePath)))
+			return E_FAIL;
+	}
+	else if (MODELTYPE::ECO == m_eType)
+	{
+		if (FAILED(Ready_Bone(InputFile, -1)))
 			return E_FAIL;
 	}
 
@@ -292,8 +294,10 @@ HRESULT CModel::Initialize_Clone(void* pArg)
 			return E_FAIL;
 
 	}
-	
-
+#ifdef _DEBUG
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+		Ready_BoundingBox(pMin, pMax);
+#endif
     return S_OK;
 }
 
@@ -319,7 +323,7 @@ HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, 
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
 }
 
-_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
+_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
 	// 다른 Animation 들어올 시, 이전 Animation 저장
 	//if (m_strPreAnimation != strAnimationName)
@@ -362,7 +366,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 
 		// Root Node Translation 조정
 		if (true == isRootMotion)
-			Compute_RootAnimation(fRootMotionRate);
+			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
 	}
 
 
@@ -374,7 +378,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 }
 
 
-_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate)
+_bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 	ASSERT_CRASH(pTrackPosition);
@@ -401,7 +405,7 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 	*pTrackPosition = fTrackPosition;
 
 	// 3. 뼈_행렬 계산 부분을 Compute Shader에 전달 및 갱신.
-	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName);
+	FetchLocalMatrices_FromCompute(pComputeShaderCom, fTrackPosition, strAnimationName, gpuBlendInfo);
 	// Root Node Translation 조정
 	if (true == isRootMotion)
 		Compute_RootAnimation(fRootMotionRate, isRootMotionRotate, isRootMotionTranslate);
@@ -428,6 +432,8 @@ _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _strin
 
 	return false;
 }
+
+
 
 _bool CModel::Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _float fRootMotionRate)
 {
@@ -492,25 +498,37 @@ void CModel::Clear_Animation(const _string& strAnimationName, _float fTrackPosit
 
 void CModel::Ready_BoundingBox(_float* pMinPos, _float* pMaxPos)
 {
-	_float3 vCenter = {};
+	_float3 vCenter = _float3(0.f, 0.f, 0.f);
 	_float3 vExtends = {};
-	vCenter.x = (pMaxPos[0] + pMinPos[0]) / 2.f;
-	vCenter.y = (pMaxPos[1] + pMinPos[1]) / 2.f;
-	vCenter.z = (pMaxPos[2] + pMinPos[2]) / 2.f;
 
-	vExtends.x = (pMaxPos[0] - pMinPos[0]) / 2.f;
-	vExtends.y = (pMaxPos[1] - pMinPos[1]) / 2.f;
-	vExtends.z = (pMaxPos[2] - pMinPos[2]) / 2.f;
+	vCenter.x = (pMaxPos[0] + pMinPos[0]) * 0.5f;
+	vCenter.y = (pMaxPos[1] + pMinPos[1]) * 0.5f;
+	vCenter.z = (pMaxPos[2] + pMinPos[2]) * 0.5f;
+
+	vExtends.x = (pMaxPos[0] - pMinPos[0]) * 0.5f;
+	vExtends.y = (pMaxPos[1] - pMinPos[1]) * 0.5f;
+	vExtends.z = (pMaxPos[2] - pMinPos[2]) * 0.5f;
 	m_pBoundingBox = new BoundingBox(vCenter, vExtends);
-
 }
 
 BoundingBox* CModel::Get_BoundingBox()
 {
-	if (m_eType != MODELTYPE::MAP)
+	if (!(m_eType == MODELTYPE::MAP || m_eType == MODELTYPE::ECO))
+	//if (m_eType != MODELTYPE::MAP || MODELTYPE::ECO != m_eType)
 		ASSERT_CRASH("Is Not Map Object");
 
 	return m_pBoundingBox;
+}
+
+const _float4x4* CModel::Get_BoneMatrixPtr(_uint iBoneIndex)
+{
+	return m_Bones[iBoneIndex]->Get_CombinedTransformationMatrix();
+}
+
+void CModel::Update_BoneMatrix_Map()
+{
+	for (auto& pBone : m_Bones)
+		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
 }
 
 HRESULT CModel::Render(_uint iMeshIndex)
@@ -570,7 +588,7 @@ void CModel::ApplyComputeResults_ToBones()
 	m_pContext->Unmap(m_Buffers[BUFFER_STAGING], 0);
 }
 
-void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName)
+void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	ASSERT_CRASH(pComputeShaderCom);
 
@@ -601,6 +619,46 @@ void CModel::FetchLocalMatrices_FromCompute(CComputeShader* pComputeShaderCom, _
 	}
 
 	pAnimCBInfo->IsRibAnimUsed = IsRibAnimUsed;
+	// Blend Enabled가 True 라면? 정보 바인딩.
+	if (gpuBlendInfo.IsBlendEnabled)
+	{
+		pAnimCBInfo->IsBlendEnabled = gpuBlendInfo.IsBlendEnabled;
+		pAnimCBInfo->fBlendParamLR = gpuBlendInfo.fBlendParamLR;
+		pAnimCBInfo->fBlendParamDU = gpuBlendInfo.fBlendParamDU;
+
+		// RL
+		pAnimCBInfo->iClipIndexL = m_AnimationNameToIndex[gpuBlendInfo.strClipxL];
+		pAnimCBInfo->iClipIndexMidLR = m_AnimationNameToIndex[gpuBlendInfo.strClipMidLR];
+		pAnimCBInfo->iClipIndexR = m_AnimationNameToIndex[gpuBlendInfo.strClipxR];
+		pAnimCBInfo->iWeightClipLR = m_AnimationNameToIndex[gpuBlendInfo.strWeightClipLR];
+
+		// UD
+		pAnimCBInfo->iClipIndexD = m_AnimationNameToIndex[gpuBlendInfo.strClipxD];
+		pAnimCBInfo->iClipIndexMidDU = m_AnimationNameToIndex[gpuBlendInfo.strClipMidDU];
+		pAnimCBInfo->iClipIndexU = m_AnimationNameToIndex[gpuBlendInfo.strClipxU];
+		pAnimCBInfo->iWeightClipDU = m_AnimationNameToIndex[gpuBlendInfo.strWeightClipDU];
+	}
+	else //
+	{
+		// Blending이 비활성화되었음을 GPU에 명확히 알립니다.
+		pAnimCBInfo->IsBlendEnabled = false;
+
+		// (안전 장치) HLSL에서 쓰레기 값을 읽는 것을 방지하기 위해
+		// 나머지 블렌드 관련 필드들을 0으로 초기화합니다.
+		pAnimCBInfo->fBlendParamLR = 0.f;
+		pAnimCBInfo->fBlendParamDU = 0.f;
+
+		pAnimCBInfo->iClipIndexL = 0;
+		pAnimCBInfo->iClipIndexMidLR = 0;
+		pAnimCBInfo->iClipIndexR = 0;
+		pAnimCBInfo->iWeightClipLR = 0;
+
+		pAnimCBInfo->iClipIndexD = 0;
+		pAnimCBInfo->iClipIndexMidDU = 0;
+		pAnimCBInfo->iClipIndexU = 0;
+		pAnimCBInfo->iWeightClipDU = 0;
+	}
+
 	m_pContext->Unmap(m_Buffers[BUFFER_ANIM_INFOCB], 0);
 
 	// 3. Compute Shader에 리소스 바인딩
@@ -656,7 +714,7 @@ void CModel::Compute_RootAnimation(_float fRootMotionRate, _bool isRootMotionRot
 
 	// 축 변환 쿼터니언 생성
 	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixScaling(-1.f, 1.f, 1.f);
-	//_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(-1.f, 1.f, 1.f);
+
 	_matrix matConversion = XMMatrixRotationX(XM_PIDIV2) * XMMatrixRotationY(XM_PI) * XMMatrixScaling(1.f, 1.f, 1.f);
 	_vector qConversion = XMQuaternionRotationMatrix(matConversion);
 
@@ -775,10 +833,11 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
 
-	_float* pMin = nullptr;
-	_float* pMax = nullptr;
+	//_float* pMin = nullptr;
+	//_float* pMax = nullptr;
 
-	if (MODELTYPE::MAP == m_eType)
+#ifdef _DEBUG
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO== m_eType)
 	{
 		pMin = new _float[3];
 		pMax = new _float[3];
@@ -789,7 +848,7 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 			pMax[i] = FLT_MIN;
 		}
 	}
-
+#endif
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
 		CMesh* pMesh = CMesh::Create(m_pDevice, m_pContext, m_eType, m_Bones, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, pMin, pMax);
@@ -797,13 +856,13 @@ HRESULT CModel::Ready_Mesh(ifstream& InputFile)
 		m_Meshes.push_back(pMesh);
 	}
 
-	if (MODELTYPE::MAP == m_eType)
-	{
-		Ready_BoundingBox(pMin, pMax);
+	//if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+	//{
+	//	//Ready_BoundingBox(pMin, pMax);
 
-		Safe_Delete_Array(pMin);
-		Safe_Delete_Array(pMax);
-	}
+	//	Safe_Delete_Array(pMin);
+	//	Safe_Delete_Array(pMax);
+	//}
 
 	return S_OK;
 }
@@ -1086,7 +1145,18 @@ void CModel::Free()
 		Safe_Release(pUAV);
 	m_UAVs.clear();
 
-	if (!m_isClone)
-		Safe_Delete(m_pBoundingBox);
 
+#ifdef _DEBUG
+
+	if (MODELTYPE::MAP == m_eType || MODELTYPE::ECO == m_eType)
+	{
+		if (m_isClone)
+			Safe_Delete(m_pBoundingBox);
+		else
+		{
+			Safe_Delete_Array(pMin);
+			Safe_Delete_Array(pMax);
+		}
+	}
+#endif
 }

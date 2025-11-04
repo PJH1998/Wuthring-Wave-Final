@@ -26,6 +26,7 @@ private:
 	HRESULT				Load_Rover();
 
 	HRESULT				Load_UI();
+	HRESULT				Load_Effect();
 
 
 private:

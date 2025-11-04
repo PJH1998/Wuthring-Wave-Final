@@ -10,6 +10,7 @@ private:
     enum JUMPSTATE
     {
         JUMP = 0,
+		FLY,
         LAND,
         MOVE,
         DOUBLE_JUMP,

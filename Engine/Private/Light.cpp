@@ -17,6 +17,9 @@ HRESULT CLight::Initialize(const LIGHT_DESC& LightDesc)
 
 HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 {
+	if (false == m_isActive)
+		return S_OK;
+
 	if (FAILED(pShader->Bind_Value("g_vLightDiffuse", &m_LightDesc.vDiffuse, sizeof(_float4))))
 		return E_FAIL;
 	if (FAILED(pShader->Bind_Value("g_vLightAmbient", &m_LightDesc.vAmbient, sizeof(_float4))))
@@ -35,6 +38,10 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	else if(ENUM_CLASS(LIGHT_DESC::POINT) == m_LightDesc.eType)
 	{
 		iPassIndex = ENUM_CLASS(SHADER_DEFFERED::POINT);
+		if (FAILED(pShader->Bind_Value("g_vLightPosition", &m_LightDesc.vPosition, sizeof(_float4))))
+			return E_FAIL;
+		if (FAILED(pShader->Bind_Value("g_fLightRange", &m_LightDesc.fRange, sizeof(_float))))
+			return E_FAIL;
 	}
 
 	pShader->Begin(iPassIndex);

@@ -138,11 +138,13 @@ public:
 	void		SetPBR(_bool IsStylized);
 	void		Set_Metallic(_float fMetallic);
 	void		Set_Roughness(_float fRoughness);
+	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 #pragma endregion
 
 #pragma region LIGHT_MANAGER
 	const LIGHT_DESC*		Get_LightDesc(const _wstring& strLightTag);
+	void						Set_Active(const _wstring& strLightTag, _bool isActive);
 	HRESULT					Add_Light(const _wstring& strLightTag, const LIGHT_DESC& LightDesc);
 	HRESULT					Render_Light(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #ifdef _DEBUG
@@ -178,7 +180,7 @@ public:
 	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
 	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
-	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
@@ -205,9 +207,15 @@ public:
 	const _float4x4*		Get_TransformState_Float4x4_Inv(D3DTS eState) const;
 	_matrix					Get_TransformState_Matrix_Inv(D3DTS eState) const;
 
+	const _float4x4*		Get_PrevTransformState_Float4x4(D3DTS eState) const;
+	_matrix					Get_PrevTransformState_Matrix(D3DTS eState) const;
+
 	void					Set_TransformState(D3DTS eState, _fmatrix Matrix);
 	void					Set_TransformState(D3DTS eState, const _float4x4& Matrix);
 
+	void					Set_PrevTransformState(D3DTS eState, _fmatrix Matrix);
+	void					Set_PrevTransformState(D3DTS eState, const _float4x4& Matrix);
+	
 	const _float4*			Get_CamPos() const;
 	_float					Compute_Distance_ToCam(class CGameObject* pObject);
 #pragma endregion
@@ -267,9 +275,10 @@ public:
 	HRESULT						Add_RCS(const _wstring& strRCSTag, void* pDesc);
 	HRESULT						Add_BufferData(const _wstring& strRCSTag, const _char* pConstantName, void* pData, _uint iLength);
 	HRESULT						Add_SRVData(const _wstring& strRCSTag, const _char* pConstantName, ID3D11ShaderResourceView* pSRV);
+	HRESULT						Add_SamplerState(const _wstring& strRCSTag, _uint iSlotIndex, ID3D11SamplerState* pSampler);
 	HRESULT						Setting_UAV_Data(const _wstring& strRCSTag, const _char* pConstantName);
 	HRESULT						Bind_RendererCS(const _wstring& strRCSTag, CShader* pShader, const _char* pConstantName, _uint iMipLevel = 0);
-	HRESULT						Begin_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
+	HRESULT						Begin_RCS(const _wstring& strRCSTag, _uint iWidth, _uint iHeight, _uint iMipLevel = 0);
 	void						Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
 	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel = 0);
 #ifdef _DEBUG

@@ -18,10 +18,15 @@ public:
     virtual void OnExit() override;
 
 
+protected:
+	_uint m_iNotLandFrames = {};
+	const _uint MAX_NOT_LAND_FRAMES = 2;  // 3프레임 여유 // 공중에 15프레임 까진..
 
 protected:
     void Apply_Gravity(_float fTimeDelta);
     void Check_GroundCollision();
+
+
 
     
 

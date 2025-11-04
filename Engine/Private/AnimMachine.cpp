@@ -86,7 +86,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 	if(0 != m_strCurrentAnimTag.compare(strAnimTag))
 	{
 		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
-
+		pModelCom->Clear_Animation(m_strCurrentAnimTag);
 		// Enter 새로운 상태
 		CAnimState::ANIMSTATE_DESC Desc{};
 		m_AnimStates[strAnimTag]->Enter(pModelCom, pState, &m_strCurrentAnimTag, Desc);
@@ -104,7 +104,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 }
 
 //cpu
-void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
+void CAnimMachine::Update(CModel* pModelCom, CTransform* pTransform, _uint* pState, _bool& isAnimFinished, _float fTimeDelata)
 {
 	_bool AnyStateResult{};
 	_string strNextAnimation;
@@ -127,12 +127,15 @@ void CAnimMachine::Update(CModel* pModelCom, _uint* pState, _bool& isAnimFinishe
 	}
 
 	// 2. 애니메이션 재생
-	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon);
+	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon, false, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
 
 	// 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
 
 	// 3. 결과 피드백 (우선 Norify에서 해결하는 방식으로 생각 중)
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
+	if (m_isLoop)
+		isAnimFinished = true;
 }
 
 //gpu
@@ -164,8 +167,24 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
-void CAnimMachine::Reset()
+void CAnimMachine::Reset(CModel* pModelCom, _string& strAnimTag)
 {
+	if (m_AnimStates.end() == m_AnimStates.find(strAnimTag))
+		return;
+	for (auto& Pair : m_AnimStates)
+	{
+		pModelCom->Clear_Animation(Pair.first);
+	}
+	CAnimState::ANIMSTATE_DESC Desc{};
+	m_AnimStates[strAnimTag]->Enter(nullptr, nullptr, &m_strCurrentAnimTag, Desc);
+
+	m_isRootMotion = Desc.isRootMotion;
+	m_isRootMotionRotate = Desc.isRootMotionRotate;
+	m_isRootMotionTranslate = Desc.isRootMotionTranslate;
+	m_isLoop = Desc.isLoop;
+	m_fRootMotionRate = Desc.fRootMotionRate;
+	m_fTransitTrackPos = Desc.fTransitTrackPos;
+	m_fAnimationSpeed = Desc.fAnimationSpeed;
 }
 
 #ifdef _DEBUG
@@ -174,7 +193,7 @@ void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 	Clear_States();
 	for(auto& strAnimationName : AnimationNames)
 	{
-		CAnimState::ANIMSTATE_DESC Temp{};
+		CAnimState::ANIMSTATE_DESC Temp{ false, false, false, false, 1.f, 0.f, 1.f };
 		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
 	}
 }

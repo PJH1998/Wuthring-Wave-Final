@@ -63,6 +63,8 @@ void CAugustaGroundRun::OnExit()
 {
     CGroundState::OnExit();
     m_pAugusta->Set_Gravity(true);
+
+	m_iNotLandFrames = 0;
 }
 
 void CAugustaGroundRun::Handle_Input()
@@ -70,10 +72,13 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
+	// 우선순위 제일 높음.
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
-    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT) | ENUM_CLASS(KEYINPUT::RB));
+    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
     m_States[RUN_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
     m_States[RUN_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
@@ -85,15 +90,16 @@ void CAugustaGroundRun::Handle_Input()
     m_States[SKILL_Q] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
-    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pAugusta->Is_UniqueGaugeFull();
-    m_States[UNIQUE_R] = m_States[SKILL_R] && m_pAugusta->Is_UniqueGaugeFull();
-    m_States[BURST_R] = m_States[SKILL_R] && m_pAugusta->Is_BurstGaugeFull();
+
+
+	// Ability System
+	m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // 기본 E스킬
+	m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // 궁극기 R스킬(검뽑는거)
+	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
+	m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
 
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
-
-    
-
     
     // 공격 상태가 아니라 공격 판정 상태로 전달.
     m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
@@ -132,7 +138,28 @@ void CAugustaGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-    m_States[LAND] = m_pAugusta->Is_Land(&m_vLandNormal);
+
+
+	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
+	m_pAugusta->Is_LandCollider(&m_vLandNormal);
+
+	// 2. 기본 LandDistance 설정
+	_float fLandDistance = 0.5f;
+
+	// 3. 땅의 경사도(m_vLandNormal.y)를 확인합니다.
+	// m_vLandNormal.y가 1.0(평지)보다 작고 0.3(약 72도)보다 크다면 경사로로 판단.
+
+	if (m_vLandNormal.y < 0.98f && m_vLandNormal.y > 0.3f)
+	{
+		// 경사로에서는 Ray 판정 거리를 1.0f (혹은 1.2f) 정도로 늘려서
+		// 빠르게 내려가도 땅으로 인식되도록 합니다.
+		fLandDistance = 1.3f;
+	}
+
+	// 4. 동적으로 조절된 fLandDistance 값으로 RayCast Land 체크를 수행합니다.
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
+
+
 }
 
 
@@ -142,8 +169,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
-    _float fOffsetY = 0.2f;
-    _float fDistanceToGround = m_pAugusta->Get_DistanceToGround(fOffsetY);
 
     //// 전방 벽감지.
     //if (m_States[RUN_U] && m_States[WALL])
@@ -156,12 +181,33 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (fDistanceToGround > 1.f)
+  //  if (!m_States[LAND])
+  //  {
+		//m_iNotLandFrames++;
+		//if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		//{
+		//	m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		//	return;
+		//}
+  //  }
+
+
+	if (!m_States[LAND])
     {
-        m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-        return;
+		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		return;
     }
+
+	// Land가 아닌 판정이면 0 초기화.
+	m_iNotLandFrames = 0;
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
 
     // SPACE 누르면 바로 점프로 전환.
     if (m_States[JUMP])
@@ -171,26 +217,56 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 아직 미구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
-    if (m_States[BURST_R])
+    // 구현. => Burst 게이지 모두 찼을때 궁 누르면 공격기 모션.
+    if (m_States[SWORD_R])
     {
+		// 위에 서체크하긴 했지만? 다시 체크.
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
+			return;
+
         m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
     }
+	if (m_States[ECHO_R])
+	{
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Attack_SpeedDrive"))
+			return;
 
-    if (m_States[UNIQUE_E])
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPEEDDRIVE;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL)); // 상위, 하위 상태
+		return;
+	}
+
+
+	if (m_States[POINT_E])
+	{
+		// 위에 서체크하긴 했지만? 다시 체크.
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
+			return;
+
+#ifdef _DEBUG
+		m_pAugusta->Print_Cost();
+		m_pAugusta->Print_CoolTime();
+#endif // _DEBUG
+
+
+		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+		return;
+	}    // SKILL_E 누르면 => 
+
+    if (m_States[NORMAL_E])
     {
-        m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
+		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Hack"))
+			return;
+
+#ifdef _DEBUG
+		m_pAugusta->Print_CoolTime();
+#endif // _DEBUG
+
+        m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_HACK;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-        return;
-    }
-
-    // SKILL_E 누르면 
-    if (m_States[SKILL_E])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
         return;
     }
 
@@ -202,6 +278,23 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
   
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
     // Dash 보다 우선순위 높음.
     if (m_States[SPRINT_F])
     {
@@ -209,13 +302,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    // 뛰다가 Dash
-    if (m_States[DASH])
-    {
-        m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-        return;
-    }
+  
 
     if (m_States[MOVE])
     {

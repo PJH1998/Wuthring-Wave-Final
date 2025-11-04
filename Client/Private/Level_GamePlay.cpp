@@ -4,6 +4,7 @@
 #include "MonsterTest.h"
 
 #include "Player.h"
+#include "SkyBox.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -19,7 +20,7 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.4f, 0.4f, 0.4f, 1.f);
+	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
 	LightDesc.vDiffuse = _float4(1.f, 1.f, 1.f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
@@ -27,7 +28,6 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_ShadowNF();
-
 
 	// UI
 	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
@@ -49,6 +49,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
+
+	Ready_Effect();
+	Ready_Skybox();
+
 	return S_OK;
 }
 
@@ -119,6 +123,24 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
+}
+
+void CLevel_GamePlay::Ready_Effect()
+{
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+}
+
+void CLevel_GamePlay::Ready_Skybox()
+{
+	CSkyBox::SKYBOX_DESC SkyboxDesc = {};
+	SkyboxDesc.iNumModel = 2;
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Dome"));
+	SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_Background"));
+	//SkyboxDesc.strModelTags.push_back(TEXT("Prototype_Component_Model_Skybox_FX2"));
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"), &SkyboxDesc)))
+		CRASH("Skybox");
 }
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

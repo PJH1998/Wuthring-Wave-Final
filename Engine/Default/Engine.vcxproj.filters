@@ -244,6 +244,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
+      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
       <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
     </Filter>
@@ -266,6 +269,15 @@
     <Filter Include="01. Utility\04. Component\CollideComponent\Rigidbody">
       <UniqueIdentifier>{0d93e3eb-9062-4c7a-a368-f815a45ce444}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Instance\FXMesh">
+      <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Mesh">
+      <UniqueIdentifier>{da561277-f2b7-45b9-b933-b84b897fff21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\VIBuffer\Spectrum">
+      <UniqueIdentifier>{58425932-23ce-483e-883c-e023a4407ca6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\State">
       <UniqueIdentifier>{4e83e446-24dc-48f7-ac40-29ab7119a130}</UniqueIdentifier>
     </Filter>
@@ -284,6 +296,9 @@
     <Filter Include="01. Utility\99. Renderer\RendererSubResource">
       <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\03. GameObject\Effect">
+      <UniqueIdentifier>{d56e481d-7107-4973-93c1-e2162ebe2634}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Transition">
       <UniqueIdentifier>{005d9100-44f0-4ce8-9a34-897258bf0195}</UniqueIdentifier>
     </Filter>
@@ -298,6 +313,9 @@
     </Filter>
     <Filter Include="01. Utility\04. Component\AnimMachine\Factory">
       <UniqueIdentifier>{cc380aed-f6ac-4cc7-a43a-13cf8d3d8a86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\07. Shadow\ShadowMap">
+      <UniqueIdentifier>{7722a407-534c-4be0-99ae-0976cb6c7923}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -541,8 +559,8 @@
     <ClInclude Include="..\Public\StaticObject.h">
       <Filter>01. Utility\03. GameObject\Static</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\VIBuffer_Mesh.h">
-      <Filter>01. Utility\04. Component\VIBuffer\VBMesh</Filter>
+    <ClInclude Include="..\Public\VIBuffer_FXMesh_Instance.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FXMesh</Filter>
     </ClInclude>
     <ClInclude Include="..\public\CSM.h">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
@@ -577,6 +595,13 @@
     <ClInclude Include="..\Public\CollideComponent.h">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Mesh.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\VIBuffer_Spectrum.h">
+      <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\InputController.h" />
     <ClInclude Include="..\Public\State.h">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClInclude>
@@ -591,6 +616,9 @@
     </ClInclude>
     <ClInclude Include="..\public\RCS_Manager.h">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect.h">
+      <Filter>01. Utility\03. GameObject\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\public\AnimTransition.h">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
@@ -609,6 +637,12 @@
     </ClInclude>
     <ClInclude Include="..\public\AnimStateFactory.h">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\ShadowMap.h">
+      <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\ObjectFuncNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -828,8 +862,8 @@
     <ClCompile Include="..\Private\StaticObject.cpp">
       <Filter>01. Utility\03. GameObject\Static</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\VIBuffer_Mesh.cpp">
-      <Filter>01. Utility\04. Component\VIBuffer\VBMesh</Filter>
+    <ClCompile Include="..\Private\VIBuffer_FXMesh_Instance.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Instance\FXMesh</Filter>
     </ClCompile>
     <ClCompile Include="..\private\CSM.cpp">
       <Filter>01. Utility\07. Shadow\Cascade</Filter>
@@ -864,6 +898,13 @@
     <ClCompile Include="..\Private\CollideComponent.cpp">
       <Filter>01. Utility\04. Component\CollideComponent</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Mesh.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp">
+      <Filter>01. Utility\04. Component\VIBuffer\Spectrum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\InputController.cpp" />
     <ClCompile Include="..\Private\State.cpp">
       <Filter>01. Utility\04. Component\State</Filter>
     </ClCompile>
@@ -878,6 +919,9 @@
     </ClCompile>
     <ClCompile Include="..\private\RCS_Manager.cpp">
       <Filter>01. Utility\99. Renderer\RCS\RCS_Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect.cpp">
+      <Filter>01. Utility\03. GameObject\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\private\AnimTransition.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Transition</Filter>
@@ -896,6 +940,12 @@
     </ClCompile>
     <ClCompile Include="..\private\AnimStateFactory.cpp">
       <Filter>01. Utility\04. Component\AnimMachine\Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ShadowMap.cpp">
+      <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
