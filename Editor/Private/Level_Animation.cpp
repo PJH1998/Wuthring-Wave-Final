@@ -36,7 +36,6 @@ HRESULT CLevel_Animation::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
-
     return S_OK;
 }
 

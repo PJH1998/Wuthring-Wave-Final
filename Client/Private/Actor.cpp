@@ -1,7 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "Actor.h"
+#include "Ability.h"
 
-#pragma region �⺻ �Լ�
+
+#pragma region
 CActor::CActor(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CContainerObject{ pDevice, pContext }
 {
@@ -49,6 +51,41 @@ void CActor::Render()
 {
 
 }
+
+SKILL_STATE CActor::Check_Skill(const _string& strSkillName, const _string& strPrevName)
+{
+	if (nullptr == m_pAbillityCom)
+		return SKILL_STATE::NOT_EXIST;
+
+	return m_pAbillityCom->Check_SkillState(strSkillName, strPrevName);
+}
+
+SKILL_STATE CActor::Use_Skill(const _string& strSkillName)
+{
+	if (nullptr == m_pAbillityCom)
+		return SKILL_STATE::NOT_EXIST;
+
+	return m_pAbillityCom->TryUseSkill(strSkillName);
+}
+
+#ifdef _DEBUG
+void CActor::Print_Cost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_Cost();
+}
+void CActor::Print_CoolTime()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_CoolTime();
+}
+#endif // _DEBUG
+
+
 #pragma endregion
 
 void CActor::Register_AllNotifies(const _string& strFolderPath)
@@ -62,8 +99,20 @@ void CActor::Register_AllNotifies(const _string& strFolderPath)
         this->Effect_Active(tag);
         };
 
-    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+	auto objectCallBack = [this](const _wstring& tag) {
+		this->Object_Func(tag);
+		};
+
+    m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
 }
+
+// Ability Files 등록.
+void CActor::Register_AbilityFiles(const _string& strFolderPath)
+{
+	ASSERT_CRASH(m_pAbillityCom);
+	m_pAbillityCom->Register_AllAbilityFiles(strFolderPath);
+}
+
 
 void CActor::Free()
 {
@@ -73,4 +122,5 @@ void CActor::Free()
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pRigidBodyCom);
     Safe_Release(m_pColliderCom);
+	Safe_Release(m_pAbillityCom);
 }

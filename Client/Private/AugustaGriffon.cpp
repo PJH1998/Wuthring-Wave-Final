@@ -90,7 +90,7 @@ void CAugustaGriffon::Render()
     }
 
 #ifdef _DEBUG
-    m_pRigidbodyCom->Render();
+    // m_pRigidbodyCom->Render();
 #endif // _DEBUG
 }
 

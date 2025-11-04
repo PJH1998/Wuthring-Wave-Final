@@ -872,6 +872,8 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 
 	_string strLine;
 
+	m_Data.clear();
+
 	while (getline(InputFile, strLine))
 	{
 		stringstream ss(strLine);
@@ -884,6 +886,7 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 		m_Data.push_back(row);
 	}
 
+	
 	InputFile.close();
 
 	return m_Data;

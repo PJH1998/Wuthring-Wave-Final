@@ -209,7 +209,7 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
-void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback)
 {
 	for (auto& pair : m_Animations)
 	{
@@ -228,7 +228,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 			inputFile.close();
 
 			if (notifyData.contains("Notifies") && notifyData["Notifies"].is_array())
-				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback);
+				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback, ObjectCallback);
 			
 		}
 
@@ -316,6 +316,22 @@ HRESULT CModel::Bind_Materials(CShader* pShader, const _char* pConstantName, _ui
 
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType);
 
+}
+
+HRESULT CModel::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return E_FAIL;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
+}
+
+HRESULT CModel::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return S_OK;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
 }
 
 HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, _uint iMeshIndex)
@@ -537,6 +553,15 @@ HRESULT CModel::Render(_uint iMeshIndex)
 		return E_FAIL;
 	m_Meshes[iMeshIndex]->Render();
 	
+	return S_OK;
+}
+
+HRESULT CModel::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+{
+	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources(pDC)))
+		return E_FAIL;
+	m_Meshes[iMeshIndex]->Render(pDC);
+
 	return S_OK;
 }
 

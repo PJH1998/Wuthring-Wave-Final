@@ -7,7 +7,9 @@
 #include "RoverState_Enum.h"
 #include "SpringCamera.h"
 #include "PlayerFactory.h"
+#include "Ability.h"
 #include "GameSystem.h"
+#include "PlayerStatus.h"
 
 #pragma region 
 CPlayer::CPlayer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -71,6 +73,15 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_iCurrentCharacterIdx = AUGUSTA;
     //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
+	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
+	Safe_AddRef(m_pPlayerStatus);
+
+	// 6. Ability 참조 제공
+	for (_uint i = CHARACTERTYPE::ROVER; i < CHARACTERTYPE::TYPE_END; ++i)
+	{
+		if (nullptr != m_Characters[i])
+			m_Characters[i]->Set_Ability(m_pPlayerStatus->Get_Ability(i));
+	}
 
     return S_OK;
 }
@@ -98,6 +109,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 		m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
 		m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
 
+
+	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
+	if (nullptr != m_pPlayerStatus)
+		m_pPlayerStatus->Update(fTimeDelta);
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -144,6 +159,19 @@ void CPlayer::Render_Shadow()
 
 }
 
+
+
+#pragma endregion
+
+#pragma region UI Interface
+// UI Transfer Current Ability Pointer
+CAbility* CPlayer::Get_AbilityCom(CHARACTERTYPE eCharacterType)
+{
+	if (NONE == eCharacterType)
+		return nullptr;
+
+	return m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom();
+}
 #pragma endregion
 
 void CPlayer::Player_KeyInput()
@@ -157,7 +185,7 @@ void CPlayer::Player_KeyInput()
 			m_eNextCharacter = CHARACTERTYPE::ROVER;
 			return;
 		}
-		
+
 	}
 	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
 	{
@@ -178,22 +206,13 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(100.f);
-		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(100.f);
+		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
-	{
-		m_Characters[m_iCurrentCharacterIdx]->Add_UniqueGauge(-100.f);
-		m_Characters[m_iCurrentCharacterIdx]->Add_BurstGauge(-100.f);
-	}
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6)))
-	{
-		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(nullptr);
-	}
+#endif // _DEBUGs
 }
-
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 {
@@ -250,19 +269,6 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
     }
 }
 
-void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
-{
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
-		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
-    if (nullptr == pTargetTransform)
-    {
-        return;
-    }
-        
-    m_TargetTransforms.push_back(pTargetTransform);
-}
 
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 {
@@ -325,6 +331,30 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
     if (nullptr == pTargetTransform)
         return;
     m_TargetTransforms.push_back(pTargetTransform);
+}
+
+
+
+void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	// 공격과 스킬이 아니라면 호출하지 않습니다.
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer)
+		return;
+
+	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
+		return;
+
+	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CCharacter::HIT_DESC Desc{};
+	Desc.pTransform = static_cast<CTransform*>(pDesc);
+	Desc.fAttack = pClientDesc.fAttack;
+	Desc.iLayer = iLayer;
+
+	
+	// Hit 판정 전달.
+	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&Desc);
 }
 
 void CPlayer::Sorting_Target()
@@ -455,8 +485,13 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
         CRASH("Rigidbody");
 
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-        OnCollide_During(iLayer, pDesc, Manifold);
+		OnCollider_During(iLayer, pDesc, Manifold);
     });
+
+
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
@@ -520,4 +555,5 @@ void CPlayer::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pRigidbodyCom);
 	Safe_Release(m_pColliderCom);
+	Safe_Release(m_pPlayerStatus);
 }

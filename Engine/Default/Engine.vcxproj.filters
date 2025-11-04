@@ -244,9 +244,6 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Instance\Mesh">
       <UniqueIdentifier>{d8200d95-9b19-4047-afe6-e83b6c58e734}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\99. Renderer\ShaderFilter">
-      <UniqueIdentifier>{28858385-0907-4fa8-a7da-46b62521e2dd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="01. Utility\04. Component\VIBuffer\VBMesh">
       <UniqueIdentifier>{55e268bd-c4b6-465a-9f57-7ea6821216f3}</UniqueIdentifier>
     </Filter>
@@ -316,6 +313,9 @@
     </Filter>
     <Filter Include="01. Utility\07. Shadow\ShadowMap">
       <UniqueIdentifier>{7722a407-534c-4be0-99ae-0976cb6c7923}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\04. Component\DeferredShader">
+      <UniqueIdentifier>{c7e868cf-24a3-4e3e-8bc7-c0b0a47ea02c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -450,9 +450,6 @@
     </ClInclude>
     <ClInclude Include="..\Public\Shader.h">
       <Filter>01. Utility\04. Component\Shader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\Shadow.h">
-      <Filter>01. Utility\07. Shadow</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Sound_Manager.h">
       <Filter>00. System\02. Sound\Manager</Filter>
@@ -641,6 +638,12 @@
     <ClInclude Include="..\public\ShadowMap.h">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\DeferredShader.h">
+      <Filter>01. Utility\04. Component\DeferredShader</Filter>
+	</ClInclude>
+    <ClInclude Include="..\public\ObjectFuncNotify.h">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -756,9 +759,6 @@
     </ClCompile>
     <ClCompile Include="..\Private\Shader.cpp">
       <Filter>01. Utility\04. Component\Shader</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\Shadow.cpp">
-      <Filter>01. Utility\07. Shadow</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Sound_Manager.cpp">
       <Filter>00. System\02. Sound\Manager</Filter>
@@ -941,6 +941,12 @@
     <ClCompile Include="..\private\ShadowMap.cpp">
       <Filter>01. Utility\07. Shadow\ShadowMap</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\DeferredShader.cpp">
+      <Filter>01. Utility\04. Component\DeferredShader</Filter>
+	</ClCompile>
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp">
+      <Filter>01. Utility\04. Component\Model\Animation\Notify</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -956,6 +962,9 @@
       <Filter>01. Utility\04. Component\Model\Animation</Filter>
     </None>
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli">
+      <Filter>97. ShaderFiles</Filter>
+    </None>
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli">
       <Filter>97. ShaderFiles</Filter>
     </None>
   </ItemGroup>

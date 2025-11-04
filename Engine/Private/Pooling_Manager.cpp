@@ -17,7 +17,10 @@ HRESULT CPooling_Manager::Initialize()
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	for (_uint i = 0; i < m_iNumThread; ++i)
+	{
 		m_Threads.emplace_back([this]() { this->Work_Thread(); });
+		m_RenderThreads.emplace_back([this]() { this->Render_Thread(); });
+	}
 
 	return S_OK;
 }
@@ -92,13 +95,21 @@ void CPooling_Manager::Update_Pooling()
 
 void CPooling_Manager::Add_Work(function<void()> Work)
 {
-
+	m_iRemainWork.fetch_add(1, memory_order_release);
 	{
 		lock_guard<mutex> lock(m_Mutex);
 		m_Works.push(Work);
 	}
-	m_iRemainWork.fetch_add(1, memory_order_release);
 	m_CV.notify_one();
+}
+
+void CPooling_Manager::Add_Render_Work(function<void()> Work)
+{
+	{
+		lock_guard<mutex> lock(m_RenderMutex);
+		m_RenderWorks.push(Work);
+	}
+	m_RenderCV.notify_one();
 }
 
 void CPooling_Manager::Wait_Thread_End()
@@ -122,11 +133,28 @@ void CPooling_Manager::Work_Thread()
 		function<void()> Work = move(m_Works.front());
 		m_Works.pop();
 		lock.unlock();
-		m_iRemainWork.fetch_sub(1, memory_order_release);
 
 		m_iLiveWork.fetch_add(1, memory_order_release);
 		Work();
 		m_iLiveWork.fetch_sub(1, memory_order_release);
+		m_iRemainWork.fetch_sub(1, memory_order_release);
+	}
+}
+
+void CPooling_Manager::Render_Thread()
+{
+	while (true)
+	{
+		unique_lock<mutex> lock(m_RenderMutex);
+		m_RenderCV.wait(lock, [this]() { return 0 < m_RenderWorks.size() || true == m_isAllStop; });
+
+		if (true == m_isAllStop)
+			return;
+
+		function<void()> RenderWork = move(m_RenderWorks.front());
+		m_RenderWorks.pop();
+		lock.unlock();
+		RenderWork();
 	}
 }
 
@@ -168,6 +196,9 @@ void CPooling_Manager::Free()
 	m_isAllStop = true;
 	m_CV.notify_all();
 	for (auto& Thread : m_Threads)
+		Thread.join();
+	m_RenderCV.notify_all();
+	for (auto& Thread : m_RenderThreads)
 		Thread.join();
 
     Safe_Release(m_pGameInstance);

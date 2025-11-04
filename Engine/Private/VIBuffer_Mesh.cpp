@@ -23,8 +23,6 @@ HRESULT CVIBuffer_Mesh::Initialize_Prototype(_fmatrix PreTransformMatrix, const 
         return E_FAIL;
     }
 
-    //ó���� �д� ������ �Ž�����, �ε����Ͽ��� �Ž����� ���� ����.
-    //����Ʈ �Ž��� ���� �Ž��� �� ������ �ʿ��� read�� �Ѱ������.
     _uint MeshIndex = {};
     EMeshFile.read(reinterpret_cast<_char*>(&MeshIndex), sizeof(_uint));
 

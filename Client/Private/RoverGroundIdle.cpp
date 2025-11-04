@@ -93,11 +93,8 @@ void CRoverGroundIdle::Handle_Input()
     
     m_States[AIR_ATTACK_E] = m_States[SKILL_E];
 
-    // 그리폰
-    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pRover->Is_UniqueGaugeFull();
-
-    // BurstR
-    m_States[BURST_R] = m_States[SKILL_R] && m_pRover->Is_BurstGaugeFull();
+    //m_States[UNIQUE_E] = m_States[SKILL_E] && m_pRover->Is_UniqueGaugeFull();
+    //m_States[BURST_R] = m_States[SKILL_R] && m_pRover->Is_BurstGaugeFull();
 }
 
 

@@ -2,23 +2,28 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D   g_DiffuseTexture[2];
-texture2D   g_NormalTexture[2];
-texture2D   g_MaskDiffuseTexture;
-texture2D   g_MetallicTexture;
+Texture2D   g_DiffuseTexture[2];
+Texture2D   g_NormalTexture[2];
+Texture2D   g_MaskDiffuseTexture;
+Texture2D   g_MetallicTexture;
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector      g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
 
-texture2D   g_MaskTexture[4] : register(t8);
+Texture2D   g_MaskTexture[4] : register(t8);
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
+
+matrix g_ShadowMapViewMatrix;
+matrix g_ShadowMapProjMatrix;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
 bool g_HasMetallic = false;
 bool g_IsDynamicObject = false;
 int g_iIndex = 0;
+
+int g_iShadowMapLayer = 0;
 
 struct VS_IN
 {
@@ -332,7 +337,6 @@ void PS_SHADOW(PS_IN_SHADOW In)
 
 /*======================================================SHADOW_END======================================================*/
 
-
 /*======================================================OUTLINE_BEGIN======================================================*/
 
 struct VS_OUT_OUTLINE
@@ -382,6 +386,51 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 }
 
 /*======================================================OUTLINE_END======================================================*/
+
+/*======================================================SHADOW_MAP_BEGIN======================================================*/
+
+
+struct VS_OUT_SHADOW_MAP
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+VS_OUT_SHADOW_MAP VS_SHADOW_MAP(VS_IN In)
+{
+    VS_OUT_SHADOW_MAP Out = (VS_OUT_SHADOW_MAP) 0;
+    
+    matrix matWV, matWVP;
+    
+    matWV = mul(g_WorldMatrix, g_ShadowMapViewMatrix);
+    matWVP = mul(matWV, g_ShadowMapProjMatrix);
+
+    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = Out.vPosition;
+    Out.iIndex = g_iShadowMapLayer;
+    
+    return Out;
+}
+
+struct PS_IN_SHADOW_MAP
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+void PS_SHADOW_MAP(PS_IN_SHADOW_MAP In)
+{
+    if (false == IsInNDC(In.vProjPos))
+        discard;
+}
+
+
+/*======================================================SHADOW_MAP_END======================================================*/
 
 struct PS_OUT_EMISSIVE
 {
@@ -491,5 +540,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_EMISSIVE();
+    }
+    
+    pass ShadowMapPass // 8
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_SHADOW_MAP();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SHADOW_MAP();
     }
 }

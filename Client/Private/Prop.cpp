@@ -132,7 +132,11 @@ void CProp::Register_AllNotifies(const _string& strFolderPath)
 		this->Effect_Active(tag);
 		};
 
-	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack);
+	auto objectCallBack = [this](const _wstring& tag) {
+		this->Object_Func(tag);
+		};
+
+	m_pModelCom->Register_AllNotifies(strFolderPath, colliderCallback, effectCallBack, objectCallBack);
 }
 
 void CProp::Free()

@@ -51,7 +51,7 @@ BlendState BS_AlphaBlend
 
 // Basic Variables
 matrix      g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-texture2D   g_Texture;
+Texture2D   g_Texture;
 float       g_AlphaStrength;
 
 

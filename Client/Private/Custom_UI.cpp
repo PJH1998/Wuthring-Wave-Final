@@ -6,7 +6,7 @@
 #include "Event_Level.h"
 
 //#define KSTA_UICLICKTEST
-#define KSTA_UIEVENTTEST
+//#define KSTA_UIEVENTTEST
 
 CCustom_UI::CCustom_UI(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CUIObject(pDevice, pContext)
@@ -60,7 +60,6 @@ void CCustom_UI::Update(_float fTimeDelta)
 
     Update_InputState();
     Update_CacheTransform(fTimeDelta);
-
 
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
@@ -456,9 +455,6 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
 
 void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 {
-    if (this->m_tUIDesc.strUIName == L"Icon_Augusta")
-        int i = 10;
-
     if (pParentMatrix)
         XMStoreFloat4x4(&m_CombinedWorldMatrix, m_pTransformCom->Get_WorldMatrix() * *pParentMatrix);
     else
@@ -469,6 +465,42 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
         _matrix LoadCombinedMatrix = XMLoadFloat4x4(&m_CombinedWorldMatrix);
         child->Update_CombinedMatrix(&LoadCombinedMatrix);
     }
+}
+
+void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
+{
+	if (m_pAnimator_UICom)
+	{
+		if (!pParentAnimatorCom)
+		{
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+			if (thisCalcedKFDesc)
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(*thisCalcedKFDesc);
+		}
+		else
+		{
+			auto pParentKFDesc = pParentAnimatorCom->Get_CurCombinedAnimKeyframeDesc();
+			auto thisCalcedKFDesc = m_pAnimator_UICom->Get_CalcedAnimKeyframeDesc();
+
+			if (pParentKFDesc)
+			{
+				CAnimator_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
+				tDesc = *thisCalcedKFDesc;
+
+				// 일단은 Alpha만 연결되도록.. 
+				tDesc.fAlpha = 1.f - ((1.f - thisCalcedKFDesc->fAlpha) * (1.f - pParentKFDesc->fAlpha)); // 다시 사라짐 값으로 되돌림
+				m_pAnimator_UICom->Set_CurCombinedAnimKeyframeDesc(tDesc);
+			}
+
+		}
+	}
+
+
+
+	// transfer to child..
+	for (auto& child : m_vecChildObjects)
+		child->Update_CombinedDesc(m_pAnimator_UICom);
+
 }
 
 void CCustom_UI::Update_InputState()

@@ -42,6 +42,47 @@ namespace Client
 		D6 = 1 << 19
 	};
 
+	typedef enum class ESkillType : _uint
+	{
+		NONE = 0,	    // (비용 없음)
+		RESONANCE,		// 공명 게이지
+		AUGUSTA_POINT,	// 특수 원형 게이지
+		AUGUSTA_ULTI,	// 기본 궁극기 게이지
+		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
+		SKILL_TYPE_END // CSV 파싱 실패 등을 위한 END
+	}SKILL_TYPE;
+
+	typedef enum class ECostType : unsigned int
+	{
+		NONE = 0, // Stat 아님.
+		COST1, // 1 RESONANCE
+		COST2, // 2 AUGUSTA POINT
+		COST3, // 3 AUGUSTA_ULTI
+		COST4, // 4 AUGUSTA_SWORD
+		COST5,
+		STAMINA, // 5
+		COST_TYPE_END
+	}COST_TYPE;
+
+
+	enum class SKILL_STATE : unsigned int
+	{
+		READY = 0,		 // 사용 가능
+		COOLING_DOWN,	 // 쿨타임
+		NOT_ENOUGH_COST, // 자원 부족
+		NOT_EXIST,		 // 정보가 없음.
+		END
+	};
+
+	// 어떤걸 올려줘야하는가?
+	enum class HITTYPE : unsigned int
+	{
+		NONE = 0, // 없음
+		HEAVY,    // 강공
+		ULTI,     // 궁극기
+		END
+	};
+
 	enum class DIRECTION {
 		FRONT, BACK, LEFT, RIGHT, UP, DOWN, END
 	};
@@ -59,6 +100,27 @@ namespace Client
 		UIFLAG_SIMPLEMASK,
 		UIFLAG_ACTIVEFEEDBACK,
 		UIFLAG_END
+	};
+
+	enum class FONT_FLAG
+	{
+		FL_NONE				= 0,
+		FL_OUTLINE			= 1 << 0,
+		FL_GRAD				= 1 << 1,
+
+		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
+
+		FL_END				= 1 << 3
+	};
+
+	enum class FONT_DMG_PRESET
+	{
+		HEAL,
+		DARK,
+		ELECTRO,
+		FUSION,
+
+		END
 	};
 	
 	enum class  TEST_STATE : unsigned int

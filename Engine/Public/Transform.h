@@ -52,6 +52,7 @@ public:
 	HRESULT		Initialize_Clone(void* pArg);
 
 	HRESULT		Bind_Matrix(class CShader* pShader, const _char* ConstantName);
+	HRESULT		Bind_Matrix(class CDeferredShader* pShader, const _char* ConstantName, ID3DX11Effect* pEffect);
 
 public:
 	void			Scale(_float3 vScale);		// vScale 조정

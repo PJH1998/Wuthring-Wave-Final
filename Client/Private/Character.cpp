@@ -4,6 +4,7 @@
 #include "SpringCamera.h"
 #include "GameSystem.h"
 #include "Collider.h"
+#include "Ability.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -34,7 +35,7 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
     if (FAILED(CActor::Initialize_Clone(pDesc)))
         return E_FAIL;
     // 1. State 초기화
-    m_Stats = pDesc->eStat;
+    //m_Stats = pDesc->eStat;
 
 
     return S_OK;
@@ -98,53 +99,11 @@ void CCharacter::Set_Collider(CCollider* pColliderCom, _float3 vColliderOffset, 
 	m_fColliderRadius = fColliderRadius;
 }
 
-//_float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
-//{
-//	ASSERT_CRASH(m_pTransformCom);
-//
-//	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-//	//_vector vCurrentPos = m_pTransformCom->Get_State(STATE::POSITION);
-//	_vector vCurrentPos = m_pColliderCom->Get_Position();
-//	_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-//	_vector vRight = XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT));
-//
-//	_vector vFootPos = vCurrentPos + XMVectorSet(0.f, fStartYOffset, 0.f, 0.f);
-//
-//	// 5개 지점: 앞, 왼쪽, 중앙, 오른쪽, 뒤
-//	_vector vPositions[5] = {
-//		vFootPos + vLook * (m_fColliderRadius -0.05f),  // 앞
-//		vFootPos + vRight * (m_fColliderRadius - 0.05f), // 왼쪽
-//		vFootPos,                              // 중앙
-//		vFootPos - vRight * (m_fColliderRadius - 0.05f), // 오른쪽
-//		vFootPos - vLook * (m_fColliderRadius - 0.05f)   // 뒤
-//	};
-//
-//	_float fMinDistance = 3.f;  // 가장 가까운 거리 저장
-//	_bool bAnyHit = false;
-//
-//	// 5개 지점에서 각각 레이 발사
-//	for (_uint i = 0; i < 5; ++i)
-//	{
-//		_vector vStartPos = vPositions[i];
-//		_vector vEndPos = vStartPos - XMVectorSet(0.f, 3.f, 0.f, 0.f);
-//
-//		_float4 vHitPoint = {};
-//		_bool bHit = m_pGameInstance->Ray_Cast(vStartPos, vEndPos, &vHitPoint);
-//
-//		if (bHit)
-//		{
-//			bAnyHit = true;
-//			_vector vHitPos = XMLoadFloat4(&vHitPoint);
-//			_vector vDistance = vPositions[i] - vHitPos;
-//			_float fDistance = XMVectorGetX(XMVector3Length(vDistance));
-//
-//			// 가장 가까운 거리 저장
-//			if (fDistance < fMinDistance)
-//				fMinDistance = fDistance;
-//		}
-//	}
-//	return bAnyHit ? fMinDistance : 3.f;
-//}
+void CCharacter::Set_Ability(CAbility* pAbilityCom)
+{
+	m_pAbillityCom = pAbilityCom;
+	Safe_AddRef(m_pAbillityCom);
+}
 
 _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 {
@@ -453,11 +412,6 @@ void CCharacter::Start_FlyBlending(_float fDuration)
 }
 
 
-
-
-
-
-
 void CCharacter::Change_State(_uint iCategory, _uint iSubState)
 {
     ASSERT_CRASH(m_pStateMachineCom);
@@ -528,26 +482,7 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
     // 1. 회전.
     Rotate_Target();
 
-    //// 2. 회전 후 Right / Look 가져오기.
-    //_vector vRight = m_pTransformCom->Get_State(STATE::RIGHT);
-    //_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
-    //_vector vMoveDir = XMVectorZero();
-
-    //switch (eDir)
-    //{
-    //case ACTORDIR::U:   vMoveDir = vLook; break;
-    //case ACTORDIR::D:   vMoveDir = -vLook; break;
-    //case ACTORDIR::L:   vMoveDir = -vRight; break;
-    //case ACTORDIR::R:   vMoveDir = vRight; break;
-    //case ACTORDIR::LU:  vMoveDir = XMVector3Normalize(vLook - vRight); break;
-    //case ACTORDIR::RU:  vMoveDir = XMVector3Normalize(vLook + vRight); break;
-    //case ACTORDIR::LD:  vMoveDir = XMVector3Normalize(-vLook - vRight); break;
-    //case ACTORDIR::RD:  vMoveDir = XMVector3Normalize(-vLook + vRight); break;
-    //default: return;
-    //}
-
-    //vMoveDir = XMVectorSetY(vMoveDir, 0.f) * -1.f;
-    //vMoveDir = XMVector3Normalize(vMoveDir);
+	// 2. 이동 방향.
     _vector vMoveDir = Calculate_Move_Direction(eDir);
 
     // 3. 이동 적용
@@ -632,17 +567,15 @@ void CCharacter::Rotate_Target()
     return;
 }
 
-void CCharacter::Rotate_HitTarget()
+
+void CCharacter::Rotate_HitTarget(CTransform* pTransform)
 {
     // 1. 타겟이 없는 경우 Return
-    if (nullptr == m_pTargetTransform)
+    if (nullptr == pTransform)
         return;
 
-    //if (nullptr == m_pHitTargetTransform)
-    //    return;
-
     // 2. 타겟이 있으면 즉시 회전.
-    _vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+    _vector vTarget = pTransform->Get_State(STATE::POSITION);
     _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 
@@ -672,13 +605,37 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 
 }
 
+#ifdef _DEBUG
+void CCharacter::Debug_FullCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Debug_FullCost();
+}
+#endif // _DEBUG
+
+
+
+
 #pragma endregion
 
 #pragma region UI
+void CCharacter::Ability_Update(_float fTimeDelta)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Update(fTimeDelta);
+}
+CAbility* CCharacter::Get_AbilityCom()
+{
+    return m_pAbillityCom;
+}
 void CCharacter::Sync_UI()
 {
     // Character Info Sync 
-    m_pGameSystem->Sync_CharacterInfo(m_Stats);
+    //m_pGameSystem->Sync_CharacterInfo(m_Stats);
 }
 #pragma endregion
 

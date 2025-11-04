@@ -3,6 +3,7 @@
 
 // [Component]
 #include "Shader.h"
+#include "DeferredShader.h"
 #include "ComputeShader.h"
 #include "Texture.h"
 #include "Model.h"

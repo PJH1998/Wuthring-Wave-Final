@@ -6,6 +6,7 @@
 #include "SoundNotify.h"
 #include "ColliderNotify.h"
 #include "EffectNotify.h"
+#include "ObjectFuncNotify.h"
 
 CAnimation::CAnimation()
 {
@@ -32,7 +33,7 @@ void CAnimation::Register_Notify(const NOTIFY& AnimNotify)
 	m_Notifies.push_back(AnimNotify);
 }
 
-void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
+void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback)
 {
 	for (const auto& notifyObject : notifyJson)
 	{
@@ -52,6 +53,12 @@ void CAnimation::Load_Notify(const json& notifyJson, function<void(const _wstrin
 			// EffectNotify
 			pAnimNotify = CEffectNotify::From_Json(notifyObject);
 			pAnimNotify->Set_EffectCallback(EffectCallback);
+		}
+		else if (type == "Object")
+		{
+			// ObjectNotify
+			pAnimNotify = CObjectFuncNotify::From_Json(notifyObject);
+			dynamic_cast<CObjectFuncNotify*>(pAnimNotify)->Set_ObjectCallback(ObjectCallback);
 		}
 		ASSERT_CRASH(pAnimNotify);
 
@@ -89,7 +96,10 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 	_char* pAnimationName = { nullptr };
 	strtok_s(szAnimationName, "|", &pAnimationName);
-	strcpy_s(m_szName, pAnimationName);
+	if(0 == strcmp(pAnimationName, ""))
+		strcpy_s(m_szName, szAnimationName);
+	else
+		strcpy_s(m_szName, pAnimationName);
 
 	InputFile.read(reinterpret_cast<_char*>(&m_fDuration), sizeof(_float));
 	InputFile.read(reinterpret_cast<_char*>(&m_fTickPerSecond), sizeof(_float));
