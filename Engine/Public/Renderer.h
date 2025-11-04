@@ -10,20 +10,19 @@ class CTexture;
 class CRenderer final : public CBase
 {
 private:
-
-private:
 	explicit CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRenderer() = default;
 
 public:
-	HRESULT		Initialize(_uint iNumThread);
-	HRESULT		Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
-	HRESULT		Add_Render_StaticObject(class CStaticObject* pRenderObject);
-	void			Render();
-	void			Begin_ScreenEffect(SFX_TYPE eType);
-	void			End_ScreenEffect();
-	void			Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
-	ID3DX11Effect*	 Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	HRESULT				Initialize(_uint iNumThread);
+	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
+	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
+	void					Render();
+	void					Begin_ScreenEffect(SFX_TYPE eType);
+	void					End_ScreenEffect();
+	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -61,6 +60,8 @@ private:
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	vector<class CStaticObject*>	m_StaticObjects[2];
 	atomic<_uint>						m_iDoubleBufferIndex = {};
+	list<class CGameObject*>		m_ShadowMapObjects;
+
 
 	class CShader*						m_pShader = { nullptr };
 	class CVIBuffer_Rect*				m_pVIBuffer = { nullptr };
@@ -101,6 +102,8 @@ private:
 	void						Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex);
 
 private:
+	void						Render_ShadowMap();
+
 	void						Render_Priority();
 	void						Render_Shadow();
 	void						Render_Outline();
@@ -143,6 +146,8 @@ private:
 	HRESULT						Ready_RCS();
 	HRESULT						Ready_Shadow_DSV();
 	HRESULT						Ready_DC();
+
+
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumThread);

@@ -23,6 +23,8 @@ private:
         SKILL_E,
         SKILL_Q,
         SKILL_R,
+
+		// 소모값 필요한 얘들
         UNIQUE_E, // Unique E상태. => 그리폰 타서 공격.
         UNIQUE_R,
         BURST_R, // Burst R 상태 => Skill 검으로 바뀜.

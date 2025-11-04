@@ -53,7 +53,12 @@ public:
 
 #pragma region FONT_MANAGER
 	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
-	HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
+	//HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
+	//void		Add_FloatingText(const _wstring& strFontTag, const _tchar* pText, FONT_SINGLEDESC tSingleFontDesc);
+	_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
+	_bool		Draw_Font(FONT_SINGLEDESC* pSingleDesc);
+	void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
+	void		Add_FloatingText(FONT_SINGLEDESC pDesc);
 #pragma endregion
 
 
@@ -118,14 +123,15 @@ public:
 
 #pragma region RENDERER
 public:
-	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	HRESULT		Add_Render_StaticObject(class CStaticObject* pObject);
-	void			Begin_ScreenEffect(SFX_TYPE eType);
-	void			End_ScreenEffect();
+	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
+	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
+	void					Begin_ScreenEffect(SFX_TYPE eType);
+	void					End_ScreenEffect();
 	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void					Set_LUT_Index(_uint iIndex);
 #ifdef _DEBUG
-	void			Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
@@ -180,7 +186,7 @@ public:
 	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);
 	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Character*				Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
@@ -226,13 +232,6 @@ public:
 	POINT					Get_MousePoint();
 	_bool					isPicked(_float3* pOut);
 	_bool					Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos);
-#pragma endregion
-
-#pragma region SHADOW
-	const _float4x4*		Get_ShadowLight_Matrix(D3DTS eType);
-	HRESULT					Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc);
-	HRESULT					Bind_Shadow_Resource(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName);
-	void					Update_ShadowLight_Transform(const _fvector& vAt);
 #pragma endregion
 
 #pragma region GUIMANAGER
@@ -283,41 +282,55 @@ public:
 	void						Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
 	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel = 0);
 #ifdef _DEBUG
-	HRESULT					Debug_Render_RCS();
+	HRESULT						Debug_Render_RCS();
+#endif
+#pragma endregion
+
+#pragma region SHADOW_MAP
+	HRESULT						Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc);
+	const _uint					Get_ShadowMapLayer(_uint iSectorIndex);
+	const vector<BoundingBox*>& Get_ShadowMapSectors();
+	HRESULT						Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector);
+	HRESULT						Bind_ShadowMap_Resources_Renderer(CShader* pShader);
+	HRESULT						Bind_ShadowMap_Buffer(_uint iBufferIndex);
+	HRESULT						Begin_ShadowMap();
+	HRESULT						End_ShadowMap();
+#ifdef _DEBUG
+	void						Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
 
 public:
-	HRESULT				Clear_Resource(_uint iLevelID);
-	HRESULT				Clear_Memory();
+	HRESULT					Clear_Resource(_uint iLevelID);
+	HRESULT					Clear_Memory();
 	void					Release_Engine();
 
 private:
 	class CGraphic_Device*		m_pGraphic_Device = { nullptr };
-	class CInput_Device*			m_pInput_Device = { nullptr };
+	class CInput_Device*		m_pInput_Device = { nullptr };
 	class CSound_Manager*		m_pSound_Manager = { nullptr };
 	class CFont_Manager*		m_pFont_Manager = { nullptr };
 	class CLevel_Manager*		m_pLevel_Manager = { nullptr };
 	class CPrototype_Manager*	m_pPrototype_Manager = { nullptr };
 	class CObject_Manager*		m_pObject_Manager = { nullptr };
-	class CPooling_Manager*	m_pPooling_Manager = { nullptr };
-	class COctoTree*				m_pOctoTree = { nullptr };
+	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
+	class COctoTree*			m_pOctoTree = { nullptr };
 	class CTarget_Manager*		m_pTargetManager = { nullptr };
-	class CRenderer*				m_pRenderer = { nullptr };
+	class CRenderer*			m_pRenderer = { nullptr };
 	class CLight_Manager*		m_pLight_Manager = { nullptr };
-	class CCamera_Manager*	m_pCamera_Manager = { nullptr };
-	class CSequence_Manager* m_pSequence_Manager = { nullptr };
+	class CCamera_Manager*		m_pCamera_Manager = { nullptr };
+	class CSequence_Manager*	m_pSequence_Manager = { nullptr };
 	class CTimer_Manager*		m_pTimer_Manager = { nullptr };
 	class CPhysicsManager*		m_pPhysicsManager = { nullptr };
-	class CEventBus*				m_pEventBus = { nullptr };
-	class CPipeLine*				m_pPipeLine = { nullptr };
-	class CPicking*					m_pPicking = { nullptr };
-	class CShadow*				m_pShadow = { nullptr };
+	class CEventBus*			m_pEventBus = { nullptr };
+	class CPipeLine*			m_pPipeLine = { nullptr };
+	class CPicking*				m_pPicking = { nullptr };
 	class CGUIManager*			m_pGUIManager = { nullptr };
-	class CFrustrum*				m_pFrustrum = { nullptr };
-	class CCSM*						m_pCSM = { nullptr };
+	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CUI_Manager*			m_pUI_Manager = { nullptr };
+	class CCSM*					m_pCSM = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
+	class CShadowMap*			m_pShadowMap = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

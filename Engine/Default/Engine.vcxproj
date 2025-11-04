@@ -82,6 +82,7 @@
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
@@ -106,7 +107,6 @@
     <ClInclude Include="..\Public\RenderTarget.h" />
     <ClInclude Include="..\Public\Rigidbody.h" />
     <ClInclude Include="..\Public\Shader.h" />
-    <ClInclude Include="..\Public\Shadow.h" />
     <ClInclude Include="..\Public\Sound_Manager.h" />
     <ClInclude Include="..\Public\Target_Manager.h" />
     <ClInclude Include="..\Public\Texture.h" />
@@ -186,6 +186,7 @@
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
@@ -210,7 +211,6 @@
     <ClCompile Include="..\Private\RenderTarget.cpp" />
     <ClCompile Include="..\Private\Rigidbody.cpp" />
     <ClCompile Include="..\Private\Shader.cpp" />
-    <ClCompile Include="..\Private\Shadow.cpp" />
     <ClCompile Include="..\Private\Sound_Manager.cpp" />
     <ClCompile Include="..\Private\Target_Manager.cpp" />
     <ClCompile Include="..\Private\Texture.cpp" />
@@ -233,6 +233,7 @@
   <ItemGroup>
     <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />
     <None Include="..\Bin\ShaderFiles\Engine_ComputeShader_Function.hlsli" />
+    <None Include="..\Bin\ShaderFiles\Engine_Shader_Shadow.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Function.hlsli" />
     <None Include="..\Bin\ShaderFiles\Engine_Shader_State.hlsli" />

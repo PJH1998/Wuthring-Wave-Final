@@ -54,7 +54,14 @@ public:
 
 #pragma endregion
 
-public:
+#pragma region UI Interface
+	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
+	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
+
+
+#pragma endregion
+
+
 	
 
 public:
@@ -65,13 +72,16 @@ public:
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
 public:
-	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
+
+	
 	
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
@@ -81,6 +91,8 @@ private:
 
 private:
 	class CGameSystem* m_pGameSystem = { nullptr };
+	class CPlayerStatus* m_pPlayerStatus = { nullptr }; // 플레이어 Interface
+
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };
@@ -100,7 +112,6 @@ private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
-	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void Sorting_Target();
 	void Toggle_LockOn();
 

@@ -3,6 +3,7 @@
 
 NS_BEGIN(Engine)
 class CDeferredShader;
+class CShader;
 class CModel;
 class CRigidbody;
 NS_END
@@ -37,6 +38,7 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	virtual		void			Render_Shadow() override;
 
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold){};
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
@@ -46,6 +48,7 @@ public:
 
 private:
 	CDeferredShader*		m_pShaderCom = { nullptr };
+	CShader*					m_pShadowShaderCom = { nullptr };
 	CRigidbody*			m_pRigidbodyCom = { nullptr };
 	vector<CModel*>		m_pModelComArray;
 

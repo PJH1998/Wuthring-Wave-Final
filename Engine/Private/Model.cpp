@@ -209,7 +209,7 @@ void CModel::Register_Notify(const _string& strFilePath, const vector<function<v
 		Pair.second->Sort_Notify();
 }
 
-void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback)
+void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<void(const _wstring&, _bool)> ColliderCallback, function<void(const _wstring&)> EffectCallback, function<void(const _wstring&)> ObjectCallback)
 {
 	for (auto& pair : m_Animations)
 	{
@@ -228,7 +228,7 @@ void CModel::Register_AllNotifies(const _string& strNotifyFolderPath, function<v
 			inputFile.close();
 
 			if (notifyData.contains("Notifies") && notifyData["Notifies"].is_array())
-				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback);
+				pAnimation->Load_Notify(notifyData["Notifies"], ColliderCallback, EffectCallback, ObjectCallback);
 			
 		}
 

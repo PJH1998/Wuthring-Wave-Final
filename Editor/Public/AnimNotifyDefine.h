@@ -40,3 +40,8 @@ typedef struct tagLightNotify : BASENOTIFY
 	_string strLightTag;
 	_bool IsActive = { false };
 }LIGHTNOTIFY;
+
+typedef struct tagObjectNotify : BASENOTIFY
+{
+	_string strColliderTag;
+}OBJECTNOTIFY;

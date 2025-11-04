@@ -4,6 +4,13 @@
 NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
+public:
+	typedef struct tagHitDesc
+	{
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+	}HIT_DESC;
 
 public:
 	using EnsembleEndCallback = function<void()>;
@@ -21,9 +28,6 @@ public:
 	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
 
 public:
-
-
-
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
 	{
 		class CPlayer* pOwner = { nullptr };
@@ -62,6 +66,7 @@ public:
 	void Set_InputController(class CInputController* pInputControllerCom);
 	void Set_SpringCamera(class CSpringCamera* pSpringCamera);
 	void Set_Collider(class CCollider* pColliderCom, _float3 vColliderOffset, _float fColliderHeight, _float fColliderRadius);
+	void Set_Ability(class CAbility* pAbilityCom);
 #pragma endregion
 
 
@@ -95,6 +100,7 @@ public:
 
 #pragma region STATE
 public:
+
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
 
@@ -144,11 +150,9 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
-	void Rotate_HitTarget();
+	void Rotate_HitTarget(class CTransform* pTransform);
 
 	// Turn
-	
-
 	
 	// Transform
 	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevVeloctiy, _float fTimeDelta);
@@ -156,24 +160,19 @@ public:
 #pragma endregion
 
 
+#ifdef _DEBUG
 public:
-	class CPlayer* Get_Owenr() { return m_pOwner; }
+	void Debug_FullCost();
 
-#pragma region UI Interface
+
+#endif // _DEBUG
+
+
+#pragma region UI Interface 
 public:
-	const CHARACTER_STAT& Get_CharacterStat() { return m_Stats; }
-	void Add_SwitchGauge(_float fSwitchGauge) { m_Stats.fSwitchGauge = min(m_Stats.fSwitchGauge + fSwitchGauge, m_Stats.fMaxSwitchGauge); }
-	_bool Is_SwitchGaugeFull() const { return  m_Stats.fSwitchGauge >= m_Stats.fMaxSwitchGauge; }
-	void Reset_SwitchGauge() { m_Stats.fSwitchGauge = 0.f; }
-
-	void Add_BurstGauge(_float fBurstGauge) { m_Stats.fBurstGauge = min(m_Stats.fBurstGauge + fBurstGauge, m_Stats.fMaxBurstGauge); }
-	_bool Is_BurstGaugeFull() const { return  m_Stats.fBurstGauge >= m_Stats.fMaxBurstGauge; }
-	void Reset_BurstGauge() { m_Stats.fBurstGauge = 0.f; }
-
-	void Add_UniqueGauge(_float fUniqueGauge) { m_Stats.fUniqueGauge = min(m_Stats.fUniqueGauge + fUniqueGauge, m_Stats.fMaxUniqueGauge); }
-	_bool Is_UniqueGaugeFull() const { return  m_Stats.fUniqueGauge >= m_Stats.fMaxUniqueGauge; }
-	void Reset_UniqueGauge() { m_Stats.fUniqueGauge = 0.f; }
-
+	// Ability 업데이트는 플레이어의 Priority Update에서
+	void Ability_Update(_float fTimeDelta);
+	class CAbility* Get_AbilityCom();
 	void Sync_UI(); // UI
 #pragma endregion
 
@@ -182,7 +181,6 @@ public:
 
 protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
-	class CPlayer* m_pOwner = { nullptr };
 	class CInputController* m_pInputControllerCom = { nullptr };
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
@@ -197,7 +195,7 @@ protected:
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 
-	CHARACTER_STAT m_Stats = {};
+	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
 protected:
 	_bool m_IsLockOn = { false };

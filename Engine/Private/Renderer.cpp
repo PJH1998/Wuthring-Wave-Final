@@ -88,6 +88,16 @@ HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 	return S_OK;
 }
 
+HRESULT CRenderer::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
+{
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_ShadowMapObjects.push_back(pRenderObject);
+	}
+
+	return S_OK;
+}
+
 void CRenderer::Render()
 {
 	//m_pGameInstance->Wait_Thread_End();
@@ -96,11 +106,13 @@ void CRenderer::Render()
 
 	Render_Priority();
 	Render_Shadow();
+	Render_ShadowMap();
 	Render_NonBlend();
-	Render_Static();
-	Render_SSAO();
+	Render_Static();		
+	Render_SSAO();			
 	Render_Outline();
 	Render_Dynamic();
+
 	Render_Light();
 	Render_Combined();
 	Render_NonLight();
@@ -222,6 +234,29 @@ void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
 {
 	lock_guard<mutex> lock(m_RenderMutex);
 	m_CommandLists[iIndex] = pCL;
+}
+
+void CRenderer::Render_ShadowMap()
+{
+	if (m_ShadowMapObjects.size() <= 0)
+		return;
+
+	m_pGameInstance->Begin_ShadowMap();
+
+	for (auto& pRenderObject : m_ShadowMapObjects)
+	{
+		if (nullptr != pRenderObject)
+			pRenderObject->Render_Shadow();
+	}
+
+	if (m_pGameInstance->IsWorkFinish())
+	{
+		m_ShadowMapObjects.clear();
+	}
+
+	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
+
+	m_pGameInstance->End_ShadowMap();
 }
 
 void CRenderer::Render_Priority()
@@ -489,7 +524,7 @@ void CRenderer::Render_Combined()
 	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR_Y"), m_pShader, "g_SsaoTexture")))
 		CRASH("Failed Bind_SsaoTexture");
 
-	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_ShadowMap")))
+	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_Cascade")))
 		CRASH("Failed Bind_CSM_SRV");
 	
 	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vLightDirection")))
@@ -499,6 +534,9 @@ void CRenderer::Render_Combined()
 		CRASH("Render Fail");
 	
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 2)))
+		return;
+
+	if (FAILED(m_pGameInstance->Bind_ShadowMap_Resources_Renderer(m_pShader)))
 		return;
 
 #ifdef _DEBUG
@@ -1050,7 +1088,8 @@ void CRenderer::Render_Debug()
 		CRASH("ProjMatrix");
 
 	m_pGameInstance->Render_CSM(m_pShader, m_pVIBuffer);
-		
+
+	m_pGameInstance->Render_ShadowMap(m_pShader, m_pVIBuffer);
 }
 #endif
 
@@ -1410,7 +1449,8 @@ void CRenderer::Free()
 		m_RenderObjects[i].clear();
 	}
 
-	
+	m_ShadowMapObjects.clear();
+
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);
 	Safe_Release(m_pSubResource);

@@ -9,7 +9,7 @@
 
 // Basic Variables
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-texture2D g_Texture;
+Texture2D g_Texture;
 float g_AlphaStrength;
 
 
@@ -326,7 +326,7 @@ VS_OUT VS_INSTANCE_VARIANT(VS_IN_INSTANCE In)
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
     // 이후 픽셀에서 사용
-    \
+    
     // Pixel에서 사용 위해 바로 Output
     Out.vSInstCoordX = In.vSInstCoordX;
     Out.vSInstCoordY = In.vSInstCoordY;
@@ -376,9 +376,9 @@ struct PS_OUT
 
 // 여러 적들의 HP바를 한번에 그리는 등에 사용하기 위해, 인스턴스마다 제각각,
 // 본인 좌표 및 크기를 기준으로 클리핑을 적용한다.
-bool Calc_InstClip(float2 CoordPos, float2 InstPos, float2 InstScale, float2 ClipX /* 0~1 */, float2 ClipY /* 0~1 */) // true 일 시 Clip (discard)
-{
-}
+//bool Calc_InstClip(float2 CoordPos, float2 InstPos, float2 InstScale, float2 ClipX /* 0~1 */, float2 ClipY /* 0~1 */) // true 일 시 Clip (discard)
+//{
+//}
 
 /*
 
@@ -713,13 +713,18 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             if (angle < 0) angle += 2.f * PI;             // 정규화 ([-180 ~ 0], [0 ~ 180] to [180 ~ 360], [0 ~ 180])
     
             float fCooldownAngle = 2.f * PI * fCooldown;  // 진행각도. cooldown 이 0~1 이므로 0도~360도로 치환됨.
-    
+            
+            
+            Out.vColor = g_Texture.Sample(DefaultSampler, fixedUV);
+            
             if (angle <= fCooldownAngle)
             {
                 // 이미 지난 부분은 원래의 색으로
                 Out.vColor.rgba *= fColorMul1;
                 if (isUseCustomColor)
                     Out.vColor *= vCustomColor;
+                
+                Out.vColor.a *= (1 - g_AlphaStrength);
                 return Out;
             }
             else
@@ -729,6 +734,8 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
                     Out.vColor.rgba *= fColorMul2;
                 if (isUseCustomColor)
                     Out.vColor *= vCustomColor;
+                
+                Out.vColor.a *= (1 - g_AlphaStrength);
                 return Out;
             }
             
@@ -750,17 +757,14 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             // g_fLeftCDRate 가 1 일때는 어두운 색으로
             // g_fLeftCDRate 가 0 일때는 경계가 아래로 내려가며 밝아지도록
             if (fixedUV.y < fCooldown)
-            {
             // 밝게 표시될 부분
-                Out.vColor *= fColorMul1;
                 return Out;
-            }
             else
-            {
             // 어둡게 표시될 부분
                 Out.vColor *= fColorMul2;
-                return Out;
-            }
+            
+            Out.vColor.a *= (1 - g_AlphaStrength);
+            return Out;
         }
         case UIFLAG_PLAYER_HP:           // 3
         {
@@ -800,7 +804,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             
             //Out.vColor.rgb = vColor.rgb;
             Out.vColor.rgb = lerp(vColor1, vColor2, fixedUV.x).rgb;
-            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
+            Out.vColor.a = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
             
             return Out;
         } break;
@@ -846,7 +850,7 @@ PS_OUT PS_VARIENT_UI(PS_IN In)
             //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
             Out.vColor.rgb  = Out.vColor.rgb * lerp(vColor1, vColor2, fixedUV.y).rgb; // 색상 추가
             Out.vColor.a    = saturate(Out.vColor.a * 1.5f);
-            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a;
+            Out.vColor.a    = Out.vColor.a * lerp(vColor1, vColor2, fixedUV.x).a * (1 - g_AlphaStrength);
             
             return Out;
         } break;

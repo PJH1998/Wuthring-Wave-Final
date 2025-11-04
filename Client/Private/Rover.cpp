@@ -40,6 +40,7 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
+	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
 	
@@ -342,11 +343,14 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
+	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
+	//	CRASH("Ability");
 }
 
 void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
-    m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)

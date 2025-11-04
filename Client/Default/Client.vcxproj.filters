@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="99. Define">
@@ -103,9 +103,6 @@
     <Filter Include="03. GameObject\UI\Child_Containers\EscMenu">
       <UniqueIdentifier>{dc1d0669-5845-400e-ab27-396b2a391465}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
-      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="03. GameObject\UI\_Shader">
       <UniqueIdentifier>{6311667a-6633-4d98-b396-f880dffcd42a}</UniqueIdentifier>
     </Filter>
@@ -196,6 +193,12 @@
     <Filter Include="01. GameSystem\Director">
       <UniqueIdentifier>{ece30e9d-6040-4c28-956f-43f2ccbcebe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\_Parents\_SubParents">
+      <UniqueIdentifier>{2536bb3e-6fce-40d4-9520-e3359bee88b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\UIHelper">
+      <UniqueIdentifier>{f2a52eca-0c90-49ba-9695-7b431df79306}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\SkyBox">
       <UniqueIdentifier>{25c10625-9aa4-4fb8-8519-67af907e7911}</UniqueIdentifier>
     </Filter>
@@ -216,6 +219,18 @@
     </Filter>
     <Filter Include="03. GameObject\Weapon\Common">
       <UniqueIdentifier>{01321058-29ab-45a8-896e-029732d1879b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Component\03. Ability">
+      <UniqueIdentifier>{72eb9125-bdcb-4c46-a6cb-95cba32d4604}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect">
+      <UniqueIdentifier>{cf4661a1-f396-4152-8969-b39d1f8f3b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul">
+      <UniqueIdentifier>{b5315e54-c9c6-48dc-a171-446c31ca3017}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe">
+      <UniqueIdentifier>{fb294f3f-0f7c-4162-8fcc-f57d572d10c3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -471,6 +486,15 @@
     <ClInclude Include="..\Public\RoverGroundRun.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_ControlHelper.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_FontPreset.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_StatusSyncer.h">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\RoverAirJump.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClInclude>
@@ -499,9 +523,19 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
+    <ClInclude Include="..\public\Ggobul.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\AttackVolume.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Ability.h">
+      <Filter>04. Component\03. Ability</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\FS_Scythe.h">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -725,6 +759,15 @@
     <ClCompile Include="..\Private\RoverGroundRun.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_ControlHelper.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_FontPreset.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_StatusSyncer.cpp">
+      <Filter>03. GameObject\UI\UIHelper</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\RoverAirJump.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClCompile>
@@ -753,8 +796,18 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
+    <ClCompile Include="..\private\Ggobul.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\AttackVolume.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Ability.cpp">
+      <Filter>04. Component\03. Ability</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\Private\FS_Scythe.cpp">
+      <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -788,6 +841,9 @@
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxPosTex.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl">

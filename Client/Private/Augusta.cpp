@@ -3,12 +3,15 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "Collider.h"
+#include "Ability.h"
 
 #include "AugustaFactory.h"
 #include "AugustaState_Enum.h"
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+
+
 #include "Wing.h"
 
 
@@ -46,6 +49,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_PartObjects(pDesc); // Parts 추가.
     Register_AllNotifies(pDesc->strFolderPath);
 
+	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
+
     CAugustaFactory::Register_States(m_pStateMachineCom, this);
 	m_pBayonet->SetActivate(false);
     m_pSkillWeapon->SetActivate(false);
@@ -72,8 +77,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-  
 
+	//// 3. Ability Update();
+	//m_pAbillityCom->Update(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -90,7 +96,8 @@ void CAugusta::Update(_float fTimeDelta)
 	}
 
     // 2. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
+    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
+	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
     // 3. 현재 위치 - 1Frame 이전 위치 값 계산
@@ -264,52 +271,46 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
 // Hit 판정.
 void CAugusta::Hit_Judge(void* pArg)
 {
-    // 임시
-    _bool IsLand = Is_Land(0.2f);
+	if (nullptr == pArg)
+		return;
+
+	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
+	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
+
+	// 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
+	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
+		return;
+	
+	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+
+	// 0. 현재 레이어
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
+
+    // 1. 맞았을 때 땅판정.
+    _bool IsLand = Is_Land(0.2f, 0.5f);
     
-    // 강공?
-    
+    // 2. 스킬 판정?
+	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
 
-    // 몬스터 공격 Dir
-    ACTORDIR eAttackDir = ACTORDIR::RU;
-    // Behit S = SMALL(기본 공 Big), B = Big (Skill로 맞으면 Big)
-    if (IsLand)
-    {
-        // 특수 조건 우선순위에 따라 Change_State
-        
-        switch (eAttackDir)
-        {
-        case ACTORDIR::LU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::RU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
-            break;
-        case ACTORDIR::U: 
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::LD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::RD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_R;
-            break;
-        case ACTORDIR::D:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::L: // L, R은 정면 판단.
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::R:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
-            break;
-        }
+	// 3. 일단 바로 회전.
+	Rotate_HitTarget(pDesc->pTransform);
 
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
-    }
-    else
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START));
+	// 4. 방향 판정.
+	if (!IsLand)
+		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_START;
+	else
+	{
+		if (IsSkill)  // Skill인지 
+			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_B_L;
+		else // Skill이 아니라면
+			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
+	}
 
+	// 5. Hit 상태 적용
+	CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+
+	// 6. 데미지 적용
+	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 }
 
 
@@ -383,15 +384,20 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
-
+	
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+
+	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
+	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
+	//	CRASH("Ability");
+
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
-    m_pOwner = pDesc->pOwner;
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)

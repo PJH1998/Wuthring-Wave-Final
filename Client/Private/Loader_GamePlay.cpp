@@ -81,6 +81,7 @@ HRESULT CLoader_GamePlay::Load_Model()
 		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreTransformMatrix, "../Bin/Resource/Skybox/SkyDome.dat"))))
 		CRASH("SkyDome");
 
+
 	cout << "Model" << endl;
 
     return S_OK;
