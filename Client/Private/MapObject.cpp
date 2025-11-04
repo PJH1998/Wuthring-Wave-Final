@@ -114,7 +114,7 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
 		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
-
+		
 		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
 	}
 }
@@ -167,6 +167,13 @@ void CMapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Static;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		RigidbodyDesc.pModel = m_pModelComArray[0];
+
+		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
+		//RigidbodyDesc.vPos = m_pBoundingBox->Center;
+		//RigidbodyDesc.eShape = SHAPE::BOX;
+		//RigidbodyDesc.eType = EMotionType::Static;
+		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		//RigidbodyDesc.vExtent = m_pBoundingBox->Extents;
 
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);

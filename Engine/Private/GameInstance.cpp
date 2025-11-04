@@ -308,6 +308,10 @@ void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
 }
+void CGameInstance::Add_Render_Work(function<void()> Work)
+{
+	m_pPooling_Manager->Add_Render_Work(Work);
+}
 _bool CGameInstance::IsWorkFinish()
 {
 	return m_pPooling_Manager->IsWorkFinish();

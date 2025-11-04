@@ -83,6 +83,8 @@ public:
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	// Thread Work Assign
 	void			Add_Work(function<void()> Work);
+	// Render Work Assing
+	void			Add_Render_Work(function<void()> Work);
 	// Thread Work Finish -> bool
 	_bool			IsWorkFinish();
 	// Thread Wait End

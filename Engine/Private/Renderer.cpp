@@ -20,6 +20,7 @@ CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CRenderer::Initialize(_uint iNumThread)
 {
 	m_iNumThread = iNumThread;
+	m_CommandLists.resize(m_iNumThread);
 
 	_uint iNumViewPort = { 1 };
 	D3D11_VIEWPORT ViewPort = {};
@@ -217,10 +218,10 @@ void CRenderer::Setting_Viewport(ID3D11DeviceContext* pContext, _uint iWinSizeX,
 	pContext->RSSetViewports(1, &Viewport);
 }
 
-void CRenderer::Merge_CommandList(ID3D11CommandList* pCL)
+void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
 {
 	lock_guard<mutex> lock(m_RenderMutex);
-	m_CommandLists.push_back(pCL);
+	m_CommandLists[iIndex] = pCL;
 }
 
 void CRenderer::Render_Priority()
@@ -304,21 +305,17 @@ void CRenderer::Render_Static()
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
 
-	//for (auto& pStaticObject : m_StaticObjects[iReadIndex])
-	//{
-	//	if (nullptr != pStaticObject)
-	//		pStaticObject->Render();
-	//}
-
 	// Static Object Render
 	size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
 	for (_uint i = 0; i < m_iNumThread; ++i)
 	{
 		_uint iStartIndex = i * iNumObjects;
 		_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
-		//cout << iStartIndex << " " << iEndIndex << endl;
-		m_pGameInstance->Add_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
-
+		if (i == m_iNumThread - 1)
+			iEndIndex = m_StaticObjects[iReadIndex].size();
+		
+		m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
+	
 			if (iStartIndex < iEndIndex)
 			{
 				m_pDeferredContext[i]->ClearState();
@@ -328,27 +325,39 @@ void CRenderer::Render_Static()
 					m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
 				
 				ID3D11CommandList* pCL = { nullptr };
-				m_pDeferredContext[i]->FinishCommandList(true, &pCL);
-				Merge_CommandList(pCL);
+				m_pDeferredContext[i]->FinishCommandList(false, &pCL);
+				Merge_CommandList(pCL, i);
 			}
-			m_iNumEndThread.fetch_add(1);
+			{
+				lock_guard<mutex> lock(m_RenderAddMutex);
+				m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+			}
+			m_CV.notify_one();
 		});
 	}
+	{
+		unique_lock<mutex> lock(m_RenderAddMutex);
+		m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
+		m_iNumEndThread.store(0);
+	}
 
-	// Render Thread 종료까지 대기
-	while (m_iNumEndThread != m_iNumThread) {};
-	m_iNumEndThread.store(0);
 	// CommandLists Execute
 	for (auto& pCL : m_CommandLists)
 	{
-		m_pContext->ExecuteCommandList(pCL, true);
-		Safe_Release(pCL);
+		if (nullptr != pCL)
+		{
+			m_pContext->ExecuteCommandList(pCL, true);
+			Safe_Release(pCL);
+		}
 	}
-	m_CommandLists.clear();
+	//m_CommandLists.clear();
+
+	//m_pContext->Flush();
 
 	// Swap Chain
 	if (m_pGameInstance->IsWorkFinish())
 	{
+		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
 	}

@@ -16,6 +16,8 @@ public:
 
 	// Gizmo ?곸슜??媛앹껜??Transform ?꾨떖
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Use_Gizmo_Offset(_float3* pScale, _float4* pQuat, _float3* pTranslation);
+
 	// Gizmo Render??
 	void					Render_Gizmo(const _fmatrix& Matrix);
 

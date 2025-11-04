@@ -55,6 +55,8 @@ private:
 	vector<ID3D11CommandList*> m_CommandLists;
 	map<const _wstring, vector<ID3DX11Effect*>> m_Effects;
 	mutex									m_RenderMutex;
+	mutex									m_RenderAddMutex;
+	condition_variable					m_CV;
 
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	vector<class CStaticObject*>	m_StaticObjects[2];
@@ -96,7 +98,7 @@ private:
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
 	void						Setting_Viewport(ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY);
 	// Command List Merge
-	void						Merge_CommandList(ID3D11CommandList* pCL);
+	void						Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex);
 
 private:
 	void						Render_Priority();
