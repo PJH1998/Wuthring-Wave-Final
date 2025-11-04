@@ -46,8 +46,13 @@ private:
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 
-	_float3 m_vOffsetPos{};
-	_float3 m_vOffsetRot{};
+#ifdef _DEBUG
+	_float3			m_vOffsetPos{};
+	_float3			m_vOffsetRot{};
+#else
+	_float4x4		m_OffsetMatrix{};
+#endif
+
 	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
 	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
 	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};

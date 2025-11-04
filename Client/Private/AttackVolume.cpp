@@ -25,14 +25,23 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     Ready_Component(pDesc);
 
 	m_pParenTransform = pDesc->pParenTransform;
+	Safe_AddRef(m_pTransformCom);
+
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	m_eTargetLayer = pDesc->eTargetLayer;
 	m_eLayer = pDesc->eLayer;
 	m_eCurrentLayer = m_eLayer;
 	m_CollisionCallback = pDesc->CollisionCallback;
+#ifdef _DEBUG
 	m_vOffsetPos = pDesc->vOffsetPos;
 	m_vOffsetRot = pDesc->vOffsetRadian;
+#else
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+													XMQuaternionRotationRollPitchYaw(pDesc->vOffsetRadian.x, pDesc->vOffsetRadian.y, pDesc->vOffsetRadian.z),
+													XMVectorSetW(XMLoadFloat3(&pDesc->vOffsetPos), 1.f));
+	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
+#endif // _DEBUG
 
     return S_OK;
 }
@@ -45,11 +54,15 @@ void CAttackVolume::Priority_Update(_float fTimeDelta)
 
 void CAttackVolume::Update(_float fTimeDelta)
 {
-	if (!m_isActivate)
-		return;
+	//if (!m_isActivate)
+	//	return;
+#ifdef _DEBUG
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
+#else
+	_matrix matOffset = XMLoadFloat4x4(&m_OffsetMatrix);
+#endif // _DEBUG
 
-	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), 
-													XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
 	_matrix ComBinedMatrix;
 	if (nullptr == m_pSocketMatrix)
 	{
@@ -166,4 +179,6 @@ void CAttackVolume::Free()
 	__super::Free();
 
 	Safe_Release(m_pRigidBodyCom);
+	Safe_Release(m_pParenTransform);
+
 }

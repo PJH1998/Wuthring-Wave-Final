@@ -21,7 +21,8 @@ public:
 		const _char* pAnimationTag;
 	}MONSTERTEST_DESC;
 
-
+private:
+	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 
 private:
 	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -50,7 +51,7 @@ private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 
-	CAttackVolume*			m_pAtkVolume = { nullptr };
+	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
@@ -73,7 +74,7 @@ private:
 	_float					m_fParalysisAcc{};
 #pragma endregion
 	
-	_int					m_iHP{};
+	_float					m_fHP{};
 	_float					m_fAttackDmg{};
 private:
 	HRESULT						Bind_Resources();
@@ -85,6 +86,7 @@ private:
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter();
 
+#pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
@@ -95,6 +97,7 @@ private:
 	_bool						Front();
 	_bool						Left();
 	_bool						Right();
+#pragma endregion
 
 public:
 	static		CMonsterTest*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
