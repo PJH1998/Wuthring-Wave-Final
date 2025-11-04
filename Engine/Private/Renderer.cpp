@@ -3,6 +3,7 @@
 
 #include "GameInstance.h"
 #include "GameObject.h"
+#include "StaticObject.h"
 #include "RendererSubResource.h"
 #include "RendererCS.h"
 
@@ -16,8 +17,11 @@ CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CRenderer::Initialize()
+HRESULT CRenderer::Initialize(_uint iNumThread)
 {
+	m_iNumThread = iNumThread;
+	m_CommandLists.resize(m_iNumThread);
+
 	_uint iNumViewPort = { 1 };
 	D3D11_VIEWPORT ViewPort = {};
 	m_pContext->RSGetViewports(&iNumViewPort, &ViewPort);
@@ -35,6 +39,8 @@ HRESULT CRenderer::Initialize()
 	if (FAILED(Ready_SubResource()))
 		return E_FAIL;
 	if (FAILED(Ready_RCS()))
+		return E_FAIL;
+	if (FAILED(Ready_DC()))
 		return E_FAIL;
 
 	m_pVIBuffer = CVIBuffer_Rect::Create(m_pDevice, m_pContext);
@@ -71,7 +77,7 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 	return S_OK;
 }
 
-HRESULT CRenderer::Add_Render_StaticObject(CGameObject* pRenderObject)
+HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
@@ -138,6 +144,29 @@ void CRenderer::End_ScreenEffect()
 	m_IsEffectEnd = true;
 }
 
+void CRenderer::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
+{
+	auto iter = m_Effects.find(strEffectTag);
+
+	if (iter != m_Effects.end())
+		CRASH("Tag");
+
+	m_Effects.emplace(strEffectTag, Effects);
+}
+
+ID3DX11Effect* CRenderer::Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex)
+{
+	auto iter = m_Effects.find(strEffectTag);
+
+	if (iter == m_Effects.end())
+		return nullptr;
+
+	if (iter->second.size() <= iIndex)
+		return nullptr;
+
+	return iter->second[iIndex];
+}
+
 #ifdef _DEBUG
 HRESULT CRenderer::Add_Render_Debug(CComponent* pDebugComponent)
 {
@@ -186,6 +215,25 @@ void CRenderer::Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY)
 	Viewport.MaxDepth = 1.f;
 
 	m_pContext->RSSetViewports(1, &Viewport);
+}
+
+void CRenderer::Setting_Viewport(ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
+{
+	D3D11_VIEWPORT Viewport = {};
+	Viewport.TopLeftX = 0.f;
+	Viewport.TopLeftY = 0.f;
+	Viewport.Width = static_cast<_float>(iWinSizeX);
+	Viewport.Height = static_cast<_float>(iWinSizeY);
+	Viewport.MinDepth = 0.f;
+	Viewport.MaxDepth = 1.f;
+
+	pContext->RSSetViewports(1, &Viewport);
+}
+
+void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
+{
+	lock_guard<mutex> lock(m_RenderMutex);
+	m_CommandLists[iIndex] = pCL;
 }
 
 void CRenderer::Render_ShadowMap()
@@ -291,17 +339,60 @@ void CRenderer::Render_Static()
 
 	// Buffer Index
 	_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
-	// Static Object Render
-	for (auto& pStaticObject : m_StaticObjects[iReadIndex])
-	{
-		if (nullptr != pStaticObject)
-		{
-			pStaticObject->Render();
-		}
 
+	// Static Object Render
+	size_t iNumObjects = max(1, m_StaticObjects[iReadIndex].size() / m_iNumThread);
+	for (_uint i = 0; i < m_iNumThread; ++i)
+	{
+		_uint iStartIndex = i * iNumObjects;
+		_uint iEndIndex = min((i + 1) * iNumObjects, m_StaticObjects[iReadIndex].size());
+		if (i == m_iNumThread - 1)
+			iEndIndex = m_StaticObjects[iReadIndex].size();
+		
+		m_pGameInstance->Add_Render_Work([this, iStartIndex, iEndIndex, iReadIndex, i]() {
+	
+			if (iStartIndex < iEndIndex)
+			{
+				m_pDeferredContext[i]->ClearState();
+				Setting_Viewport(m_pDeferredContext[i], m_fWinSizeX, m_fWinSizeY);
+				m_pGameInstance->SetUp_MRT(m_pDeferredContext[i], TEXT("MRT_Object"));
+				for (_uint iIndex = iStartIndex; iIndex < iEndIndex; ++iIndex)
+					m_StaticObjects[iReadIndex][iIndex]->Render(m_pDeferredContext[i], i);
+				
+				ID3D11CommandList* pCL = { nullptr };
+				m_pDeferredContext[i]->FinishCommandList(false, &pCL);
+				Merge_CommandList(pCL, i);
+			}
+			{
+				lock_guard<mutex> lock(m_RenderAddMutex);
+				m_iNumEndThread.fetch_add(1, memory_order_relaxed);
+			}
+			m_CV.notify_one();
+		});
 	}
+	{
+		unique_lock<mutex> lock(m_RenderAddMutex);
+		m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
+		m_iNumEndThread.store(0);
+	}
+
+	// CommandLists Execute
+	for (auto& pCL : m_CommandLists)
+	{
+		if (nullptr != pCL)
+		{
+			m_pContext->ExecuteCommandList(pCL, true);
+			Safe_Release(pCL);
+		}
+	}
+	//m_CommandLists.clear();
+
+	//m_pContext->Flush();
+
+	// Swap Chain
 	if (m_pGameInstance->IsWorkFinish())
 	{
+		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
 	}
@@ -1292,6 +1383,21 @@ HRESULT CRenderer::Ready_Shadow_DSV()
 	return S_OK;
 }
 
+HRESULT CRenderer::Ready_DC()
+{
+	m_pDeferredContext = new ID3D11DeviceContext*[m_iNumThread];
+
+	_uint iNumViewPort = {};
+	D3D11_VIEWPORT ViewPort = {};
+	m_pContext->RSGetViewports(&iNumViewPort, &ViewPort);
+
+	for (_uint i = 0; i < m_iNumThread; ++i)
+		m_pDevice->CreateDeferredContext(0, &m_pDeferredContext[i]);
+	
+
+	return S_OK;
+}
+
 HRESULT CRenderer::Ready_SubResource()
 {
 	m_pSubResource = CRendererSubResource::Create(m_pDevice, m_pContext);
@@ -1300,11 +1406,11 @@ HRESULT CRenderer::Ready_SubResource()
 	return S_OK;
 }
 
-CRenderer* CRenderer::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CRenderer* CRenderer::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumThread)
 {
 	CRenderer* pInstance = new CRenderer(pDevice, pContext);
 
-	if (FAILED(pInstance->Initialize()))
+	if (FAILED(pInstance->Initialize(iNumThread)))
 	{
 		MSG_BOX("Failed to Created : Renderer");
 		Safe_Release(pInstance);
@@ -1322,6 +1428,18 @@ void CRenderer::Free()
 		Safe_Release(pComponent);
 	m_DebugComponents.clear();
 #endif
+
+	for (_uint i = 0; i < m_iNumThread; ++i)
+		Safe_Release(m_pDeferredContext[i]);
+	Safe_Delete_Array(m_pDeferredContext);
+
+	for (auto& Pair : m_Effects)
+	{
+		for (size_t i = 0; i < Pair.second.size(); ++i)
+			Safe_Release(Pair.second[i]);
+		Pair.second.clear();
+	}
+	m_Effects.clear();
 
 	for (size_t i = 0; i < ENUM_CLASS(RENDERGROUP::END); i++)
 	{

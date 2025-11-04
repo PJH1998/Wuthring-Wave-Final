@@ -1,5 +1,7 @@
+#ifndef Engine_Shader_Function_h__
+#define Engine_Shader_Function_h__
+
 #include "Engine_Shader_State.hlsli"
-#define MAX_SECTOR 64
 
 static float PI = 3.1415926535f;
 
@@ -17,9 +19,6 @@ vector g_vCamPosition;
 float g_fWidth = 1920.f;
 float g_fHeight = 1080.f;
 
-float g_iCascadeSizeX = 4096;
-float g_iCascadeSizeY = 2304;
-
 float g_fFocusDepth;
 float g_fFocusMinCoc;
 float g_fFocusRange;
@@ -34,16 +33,6 @@ cbuffer ShadowMapDatas : register(b2)
 //    float2 vMin;
 //    float Padding2[2];
 };
-
-int iNumSectorX;
-int iNumSectorToLayer;
-float2 vSectorWorldSize;
-float2 vMin;
-float2 vShadowMapSize;
- 
-float4x4 g_SectorViewMatrix[MAX_SECTOR];
-float4x4 g_SectorProjMatrix[MAX_SECTOR];
-float4 g_vSectorUV[16];
 
 float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , 미세면 표면의 거칠기 분포
 {
@@ -235,53 +224,6 @@ float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord
     return vNormal;
 }
 
-float ShadowPCF(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float> ShadowMap, float2 vTexSize, float2 vMinUV, float2 vMaxUV)
-{
-    float2 vTexelSize = float2((1.f / vTexSize.x), (1.f / vTexSize.y));
-    float fShadow = 0.f;
-    
-    int iRadius = iNumWeight * 2 + 1;
-    
-    [unroll]
-    for (int x = -iNumWeight; x <= iNumWeight; ++x)
-    {
-        [unroll]
-        for (int y = -iNumWeight; y <= iNumWeight; ++y)
-        {
-            float2 vOffset = float2(x, y) * vTexelSize;
-            
-            float2 vUV = UVDepth.xy + vOffset;
-            
-            vUV.x = clamp(vUV.x, vMinUV.x, vMaxUV.x);
-            vUV.y = clamp(vUV.y, vMinUV.y, vMaxUV.y);
-            
-            float fDepth = ShadowMap.SampleLevel(PointClampSampler, float3(vUV, iIndex), 0).r;
-            
-            fShadow += smoothstep(UVDepth.z, UVDepth.z + 0.01f, fDepth);
-            
-            //fShadow += ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vUV, iIndex), UVDepth.z);
-        }
-    }
-    
-    
-    fShadow = fShadow / pow(iRadius, 2);
-    
-    return fShadow;
-}
-
-float RPB_Gradiant(float fViewDepth)
-{
-    float DepthDDX = ddx(fViewDepth * 0.0001f);
-    float DepthDDY = ddy(fViewDepth * 0.0001f);
-    
-    float GradiantX = abs(DepthDDX);
-    float GradiantY = abs(DepthDDY);
-    
-    float Gradiant = length(float2(GradiantX, GradiantY));
-   
-    return Gradiant;
-}
-
 bool Outline(sampler Sampler, float2 UV, float fCompareDepth, float fWeight, Texture2D DepthTexture)
 {
     float2 vTexelSize = float2((1.f / g_fWidth), (1.f / g_fHeight));
@@ -399,58 +341,6 @@ float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
     return fCoc;
 }
 
-int2 Find_Sector(float4 vWorldPos)
-{
-    float2 vSectorPos = vWorldPos.xz - vMin;
-    
-    int2 vSector = (int2) floor(vSectorPos / vSectorWorldSize);
-    
-    int iIndex = vSector.x + (vSector.y * iNumSectorX);
-    
-    int iLayer = floor(iIndex / iNumSectorToLayer);
-    
-    int2 vIndex = int2(iIndex, iLayer);
-    
-    return vIndex;
-}
-
-float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture, float fBias)
-{
-    float fShadow = 1.f;
-    
-    int2 vSector = Find_Sector(vWorldPos);
-    
-    int iIndex = vSector.x;
-    
-    //for (int i = 0; i < 64; ++i)
-    //{
-    //    iIndex = i;
-    
-    float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
-    float4 vProjPos = mul(vWorldPos, matVP);
-    vProjPos.xyz /= vProjPos.w;
-        
-    float2 vTexcoord = Compute_Texcoord(vProjPos.xy);
-    
-    int iUVIndex = iIndex % iNumSectorToLayer;
-    
-    float2 vStartTex = g_vSectorUV[iUVIndex].xy;
-    float2 vEndTex = g_vSectorUV[iUVIndex].zw;
-    
-    float2 vTexRange = vEndTex - vStartTex;
-    
-    vTexcoord = (vTexcoord * vTexRange) + vStartTex;
-    
-    float fDepth = vProjPos.z - 0.01f;
-    
-    fShadow = ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vShadowMapSize, vStartTex, vEndTex);
-    
-//    fShadow = min(ShadowMapTexture.SampleCmpLevelZero(ShadowSampler, float3(vTexcoord, vSector.y), fDepth), fShadow);
-  //  }
-    
-    return fShadow;
-}
-
 float Random(float2 St)
 {
     return frac(sin(dot(St.xy, float2(12.9898, 78.233))) * 43758.5453123);
@@ -470,3 +360,6 @@ float Noise(float2 St)
     
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
+
+
+#endif //Engine_Shader_Function_h__

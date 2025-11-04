@@ -1,5 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
-#include "Engine_Shader_Function.hlsli"
+#include "Engine_Shader_Shadow.hlsli"
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
@@ -69,20 +69,6 @@ vector  g_vLightPosition;
 float   g_fLightRange; 
 vector  g_vLightSpecular = 1.f;
 vector  g_vMtrlSpecular = 1.f;
-
-//CASCADE
-Texture2DArray<float> g_Cascade : register(t2);
-cbuffer CSMDatas : register(b1)
-{
-    float4  g_vClipDistances;
-    float   g_fLastDistance;
-    float3  padding;
-};
-matrix g_ShadowViewMatrix[4];
-matrix g_ShadowProjMatrix[4];
-float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
-float4 g_fMinShadowBias = 0.01f;
-float g_DebugSlopeScale = 2.f;
 
 int g_DebugCSMIndex;
 
@@ -179,92 +165,12 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     }
     
     vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-    
 
-    int iCascadeIndex = 0;
-    
-    for (int i = 0; i < 4; i++)
-    {
-        if (fViewZ > g_vClipDistances[i])
-            iCascadeIndex = i;
-    }
-    
-    if(fViewZ >= g_fLastDistance)
-        return Out;
+    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
    
-    if (fViewZ >= g_fLastDistance)
-        return Out;
-   
-    float Gradiant = RPB_Gradiant(fViewZ);
-    float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
-   
-    //float fSlopeFactor = (1.f - fDot); // Row
-    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // High
-
-    float BlendFactor = 0.f;
+    float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos);
     
-    float fShadowBlend = 0.f;
-    
-    float2 vTexelSize = float2((1.f / g_iCascadeSizeX), (1.f / g_iCascadeSizeY));
-    
-    // Blend Cascade
-    if (iCascadeIndex < 3)          // Max Cascade Check
-    {
-        int iBlendCascadeIndex = iCascadeIndex + 1;
-    
-        float CurrentNear = g_vClipDistances[iCascadeIndex];
-        float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
-        
-        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f; // Cascade Blend Distance ( Begin ratio 0.85)
-        
-        BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
-        
-        vector vShadowBlendPos;
-        matrix matShadowBlendLightVP;
-        
-        matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
-        vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
-        
-        if (IsInNDC(vShadowBlendPos))
-        {
-            float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy); // ������ w ������ X
-        
-            float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
-    
-            fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
-            float fBlendDepth = vShadowBlendPos.z - fBlendBias;
-
-            fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_Cascade, float2(g_iCascadeSizeX, g_iCascadeSizeY), float2(0.f, 0.f), float2(1.f, 1.f)); // 2 == Kernel size
-        }
-    }
-    
-    // Current Cascade
-    
-    vector vShadowPos;
-    matrix matShadowLightVP;
-    float fBias = 0.f;
-    
-    matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
-    vShadowPos = mul(vWorldPos, matShadowLightVP);
-    if (IsInNDC(vShadowPos))
-    {
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // ������ w ������ X
-    
-        fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
-    
-        fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
-    
-        float fDepth = vShadowPos.z - fBias;
-    
-        float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_Cascade, float2(g_iCascadeSizeX, g_iCascadeSizeY), float2(0.f, 0.f), float2(1.f, 1.f));
-        
-        float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
-    
-        fFinalShadow = saturate(fFinalShadow + 0.3f);          
-    
-        Out.vColor.xyz *= fFinalShadow;
-    }
-    
+    Out.vColor.xyz *= fShadow;
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
 

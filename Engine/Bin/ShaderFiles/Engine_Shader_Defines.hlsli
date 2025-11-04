@@ -1,5 +1,7 @@
-#include "Engine_Shader_State.hlsli"
+#ifndef Engine_Shader_Defines_h__
+#define Engine_Shader_Defines_h__
 
+#include "Engine_Shader_State.hlsli"
 
 float g_fLUT_Size = 16.f;
 
@@ -34,3 +36,6 @@ bool IsInNDC(float4 vProjPos)
     
     return true;
 }
+
+
+#endif //Engine_Shader_Defines_h__

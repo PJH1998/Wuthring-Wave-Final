@@ -53,7 +53,6 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	ASSERT_CRASH(m_pFont_Manager);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 
-
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_iNumLevel = EngineDesc.iNumLevel;
@@ -112,11 +111,12 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
 
+	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext, m_pPooling_Manager->Get_NumThread());
+	ASSERT_CRASH(m_pRenderer);
+
 	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pShadowMap);
 
-	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
-	ASSERT_CRASH(m_pRenderer);
 	return S_OK;
 }
 
@@ -335,6 +335,10 @@ HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstr
 #pragma endregion
 
 #pragma region POOLING_MANAGER
+_uint CGameInstance::Get_NumThread()
+{
+	return m_pPooling_Manager->Get_NumThread();
+}
 HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
@@ -346,6 +350,10 @@ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const 
 void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
+}
+void CGameInstance::Add_Render_Work(function<void()> Work)
+{
+	m_pPooling_Manager->Add_Render_Work(Work);
 }
 _bool CGameInstance::IsWorkFinish()
 {
@@ -395,6 +403,10 @@ HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilVi
 {
 	return m_pTargetManager->Begin_MRT(strMRTTag, pDSV, isClear);
 }
+HRESULT CGameInstance::SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag)
+{
+    return m_pTargetManager->SetUp_MRT(pContext, strMRTTag);
+}
 void CGameInstance::End_MRT()
 {
 	m_pTargetManager->End_MRT();
@@ -428,7 +440,7 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 {
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
-HRESULT CGameInstance::Add_Render_StaticObject(CGameObject* pObject)
+HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
@@ -443,6 +455,14 @@ void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
 void CGameInstance::End_ScreenEffect()
 {
 	m_pRenderer->End_ScreenEffect();
+}
+void CGameInstance::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
+{
+	m_pRenderer->Add_Effects(strEffectTag, Effects);
+}
+ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex)
+{
+    return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
@@ -723,6 +743,10 @@ void CGameInstance::Add_GUI_Func(function<void()> func)
 void CGameInstance::Use_Gizmo(CTransform* pTransform)
 {
 	m_pGUIManager->Use_Gizmo(pTransform);
+}
+void CGameInstance::Use_Gizmo_Offset(_float3* pScale, _float3* pRotation, _float3* pTranslation)
+{
+	m_pGUIManager->Use_Gizmo_Offset(pScale, pRotation, pTranslation);
 }
 void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
 {
