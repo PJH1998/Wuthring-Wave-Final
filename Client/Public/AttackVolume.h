@@ -6,13 +6,20 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
-class CAttackVolume final : public CPartObject
+class CAttackVolume final : public CGameObject
 {
 public:
-	typedef struct tagAttackVolumeDesc : public CPartObject::PART_DESC
+	typedef struct tagAttackVolumeDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		const _float4x4* pSocketMatrix;
+		const _float4x4* pParentMatrix;
+		
+		SHAPE	eShape;
+		COLLISIONLAYER eLayer;
+		COLLISIONLAYER eTargetLayer;
 		_float3 vExtent;
+		_float3 vOffsetPos;
+		_float3 vOffsetRadian;
 		function<void()> CollisionCallback;
 	}ATKVOLUME_DESC;
 
@@ -29,9 +36,18 @@ public:
 	virtual		void					Late_Update(_float fTimeDelta) override;
 	virtual		void					Render() override;
 
+public:
+	void TriggerActivate(_bool isActivate);
+
 private:
-	const _float4x4* m_pSocketMatrix = { nullptr };
-	CRigidbody* m_pRigidBodyCom = { nullptr };
+	const _float4x4*	m_pSocketMatrix = { nullptr };
+	const _float4x4*	m_pParentMatrix = { nullptr };
+	_float4x4			m_CombinedMatrix{};
+	CRigidbody*			m_pRigidBodyCom = { nullptr };
+
+	_float3 m_vOffsetPos{};
+	_float3 m_vOffsetRot{};
+	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
 
 	function<void()> m_CollisionCallback;
 private:
