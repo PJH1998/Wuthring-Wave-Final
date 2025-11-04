@@ -156,6 +156,7 @@ protected:
 	_bool m_IsFlying = { false };
 	_float m_fDlayTime = {};
 	_bool m_fMode = { false };
+	_float m_fTotalTime = {};
 protected:
 	static _uint g_iNumObjects;
 

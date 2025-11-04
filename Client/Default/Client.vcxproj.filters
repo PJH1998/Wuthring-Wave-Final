@@ -523,14 +523,11 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h" />
-<<<<<<< HEAD
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
-=======
     <ClInclude Include="..\public\Ggobul.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClInclude>
->>>>>>> dev
     <ClInclude Include="..\Public\AttackVolume.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClInclude>
@@ -801,14 +798,11 @@
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp" />
-<<<<<<< HEAD
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
-=======
     <ClCompile Include="..\private\Ggobul.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClCompile>
->>>>>>> dev
     <ClCompile Include="..\Private\AttackVolume.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\AttackVolume</Filter>
     </ClCompile>

@@ -153,6 +153,7 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
 	{
+
 		m_fMode = true;
 		m_IsFlying = true;
 		if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
@@ -172,21 +173,21 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 		//	m_fDlayTime = 1.f;
 
 		float minDistance = 0.0f;
-		float maxDistance = 100.0f;
+		float maxDistance = 600.0f;
 
-		float maxDelay = 0.3f;
+		float maxDelay = 1.7f;
 		float minDelay = 0.0f;
 
 		// 1. (InverseLerp) 거리를 0.0 ~ 1.0 사이의 비율(t)로 정규화
 		float t = (fDistance - minDistance) / (maxDistance - minDistance);
 
 		// 2. (InverseLerp의 핵심) C++17의 std::clamp로 t값을 0.0f와 1.0f 사이로 제한
-		float t_clamped = std::clamp(t, 0.0f, 1.0f);
+		//float t_clamped = std::clamp(t, 0.0f, 1.0f);
 
 		// 3. (Lerp) C++17에는 std::lerp가 없으므로 (C++20부터 지원),
 		//    수동으로 선형 보간 공식을 적용합니다.
 		//    공식: start + (end - start) * t
-		float m_fDlayTime = maxDelay + (minDelay - maxDelay) * t_clamped;
+		m_fDlayTime = maxDelay + (minDelay - maxDelay) * t;
 
 	}
 
@@ -206,7 +207,7 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 
 	if (m_fMode)
 	{
-
+		m_fTotalTime += fTimeDelta;
 		if (m_fDlayTime <= 0.f)
 		{
 			if (m_IsFlying)
@@ -215,7 +216,7 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 				if (m_fFlyingTime < 2.f)
 				{
 					if (m_eObjectType == OBJECTTYPE::SONORA)
-						m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+						m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 0.4f, 0.f, 0.f));
 				}
 				else
 				{
@@ -232,6 +233,18 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 			m_fDlayTime -= fTimeDelta;
 	}
 
+	if (m_fTotalTime >= 3.f)
+	{
+		m_fMode = false;
+		m_IsFlying = false;
+		m_fFlyingTime = 0.f;
+		if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
+			m_IsRender = false;
+		else if (m_eObjectType == OBJECTTYPE::NONSONORA)
+			m_IsRender = true;
+		m_fTotalTime = 0.f;
+
+	}
 
 	//if(m_IsFlying)
 	//{
