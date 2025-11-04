@@ -744,6 +744,10 @@ void CGameInstance::Use_Gizmo(CTransform* pTransform)
 {
 	m_pGUIManager->Use_Gizmo(pTransform);
 }
+void CGameInstance::Use_Gizmo_Offset(_float3* pScale, _float3* pRotation, _float3* pTranslation)
+{
+	m_pGUIManager->Use_Gizmo_Offset(pScale, pRotation, pTranslation);
+}
 void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
 {
 	m_pGUIManager->Render_Gizmo(Matrix);

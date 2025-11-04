@@ -239,6 +239,7 @@ public:
 	ImGuiContext*			Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Use_Gizmo_Offset(_float3* pScale = nullptr, _float3* pRotation = nullptr, _float3* pTranslation = nullptr);
 	void					Render_Gizmo(const _fmatrix& Matrix);
 #pragma endregion
 
