@@ -462,9 +462,6 @@ void CRenderer::Render_Combined()
 
 	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(1)))
 		CRASH("Render Fail");
-	
-	if(FAILED(m_pGameInstance->Bind_ShadowMap_Buffer(2)))
-		CRASH("Render Fail");
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();

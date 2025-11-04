@@ -88,6 +88,7 @@ int g_DebugCSMIndex;
 
 //SHADOWMAP
 Texture2DArray<float> g_ShadowMap;
+bool g_HasShadowMap;
 
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
@@ -170,10 +171,13 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 
     vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    float fShadowMap = Compute_ShadowMap(vWorldPos, g_ShadowMap, 0.0001f);
+    if (g_HasShadowMap)
+    {
+        float fShadowMap = Compute_ShadowMap(vWorldPos, g_ShadowMap, 0.0001f);
     
-    Out.vColor.xyz *= (fShadowMap + 0.5f);
-
+        Out.vColor.xyz *= (fShadowMap + 0.5f);
+    }
+    
     vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
 

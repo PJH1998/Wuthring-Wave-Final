@@ -57,8 +57,18 @@ HRESULT CShadowMap::Bind_ShadowMap_Buffer(_uint iBufferIndex)
 
 HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 {
+	_bool HasShadowMap = true;
+
 	if (m_iNumSector <= 0)
+	{
+		HasShadowMap = false;
+		if (FAILED(pShader->Bind_Value("g_HasShadowMap", &HasShadowMap, sizeof(_bool))))
+			return E_FAIL;
 		return S_OK;
+	}
+
+	if (FAILED(pShader->Bind_Value("g_HasShadowMap", &HasShadowMap, sizeof(_bool))))
+		CRASH("Failed Bind HasShadowMap");
 
 	if (FAILED(pShader->Bind_Texture("g_ShadowMap", m_pShadowMapSRV)))
 		CRASH("Failed Bind ShadowMap");
