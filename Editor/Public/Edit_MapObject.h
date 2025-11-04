@@ -89,6 +89,8 @@ protected:
 
 	_bool m_ExportAllLOD = { true };
 	_float4x4 m_ChildLocalMat = {};
+
+	_float4x4 m_DefaultMat = {};
 protected:
 
 	_char m_ModelName[MAX_PATH];
@@ -147,6 +149,13 @@ protected:
 
 	_uint m_iLevel = {};
 	OBJECTTYPE m_eObjectType = { OBJECTTYPE::END };
+
+	_bool m_IsSonoro = { false };
+	_bool m_IsRender = { true };
+	_float m_fFlyingTime = {};
+	_bool m_IsFlying = { false };
+	_float m_fDlayTime = {};
+	_bool m_fMode = { false };
 protected:
 	static _uint g_iNumObjects;
 

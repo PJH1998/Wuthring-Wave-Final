@@ -76,7 +76,7 @@ void CEdit_TriggerBox::Late_Update(_float fTimeDelta)
 
 void CEdit_TriggerBox::Set_ImGuiOption()
 {
-	ImGui::Text(to_string(m_iTriggerIndex).c_str());
+	ImGui::InputScalar("TriggerIndex : ", ImGuiDataType_U32, &m_iTriggerIndex);
 
 	m_pMapInterface->Set_Transform(m_pTransformCom);
 }
