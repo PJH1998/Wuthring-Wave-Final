@@ -17,19 +17,27 @@ private:
        DASH,
        STOP,
        LAND,
+
+	   ATTACK01,
+	   ATTACK02,
+	   ATTACK03,
+	   ATTACK04,
+	   ATTACK05,
+	   ATTACK06,
+	   ATTACKOMNI,
        END
     };
 
     enum COMBO
     {
         NONE = 0,
-        ATTACK01,
-        ATTACK02,
-        ATTACK03,
-        ATTACK04,
-        ATTACK05,
-        ATTACK06,
-        ATTACKOMNI,
+        COMBO_ATTACK01,
+        COMBO_ATTACK02,
+        COMBO_ATTACK03,
+        COMBO_ATTACK04,
+        COMBO_ATTACK05,
+        COMBO_ATTACK06,
+        COMBO_ATTACKOMNI,
         COMBO_END
     };
 
