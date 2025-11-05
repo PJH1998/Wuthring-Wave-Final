@@ -24,8 +24,8 @@ HRESULT CFS_Scythe::Initialize_Clone(void* pArg)
 
 	SCYTHE_DESC* pDesc = static_cast<SCYTHE_DESC*>(pArg);
 	Ready_Component(pDesc);
-	//Ready_PartObjects(pDesc);
-	//Register_AllNotifies(pDesc->strFolderPath);
+	Ready_PartObjects(pDesc);
+	Register_AllNotifies(pDesc->strFolderPath);
 
 	//for (size_t i = 0; i < 5; ++i)
 	//{
