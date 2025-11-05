@@ -37,7 +37,6 @@ VS_OUT VS_MAIN(VS_IN In)
     //vector vPosition = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
     //Out.vPosition = mul(vPosition, g_WorldMatrix);
     
-    
     vector vPosition = vector(In.TransformMatrix._41_42_43, 1.f);
     Out.vPosition = mul(vPosition, g_WorldMatrix);
     
@@ -47,7 +46,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.fPhase = In.fPhase;
     Out.fDelay = In.fDelay;
     
-    return Out;     
+    return Out;
 }
 
 struct GS_IN

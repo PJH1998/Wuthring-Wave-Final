@@ -17,6 +17,9 @@ matrix g_ShadowProjMatrix[4];
 matrix g_ShadowMapViewMatrix;
 matrix g_ShadowMapProjMatrix;
 
+float g_fOutLineRadius = 0.0005f;
+float g_fOutLineRadiusZ = 0.0005f;
+
 bool g_HasNormal = false;
 bool g_HasMask = false;
 bool g_HasMetallic = false;
@@ -276,7 +279,6 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
 struct VS_OUT_SHADOW
 {
     float4 vPosition : POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 VS_OUT_SHADOW VS_SHADOW(VS_IN In)
@@ -284,21 +286,18 @@ VS_OUT_SHADOW VS_SHADOW(VS_IN In)
     VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
     
     Out.vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-    Out.vTexcoord = In.vTexcoord;
-    
+
     return Out;
 }
 
 struct GS_IN
 {
     float4 vPosition : POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 struct GS_OUT
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
     uint iIndex : SV_RenderTargetArrayIndex;
 };
 
@@ -316,7 +315,6 @@ void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
         for (int i = 0; i < 3; i++)
         {
             Out.vPosition = mul(In[i].vPosition, matVP);
-            Out.vTexcoord = In[i].vTexcoord;
             Vertices.Append(Out);
         }
         Vertices.RestartStrip();
@@ -326,7 +324,6 @@ void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
 struct PS_IN_SHADOW
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 void PS_SHADOW(PS_IN_SHADOW In)
@@ -357,9 +354,9 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.12f), 0.f);
-   
-    vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * g_fOutLineRadiusZ), 0.f);
+  
+    vector vOutLinePos = vWorldPos + (vNormal * g_fOutLineRadius);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     
