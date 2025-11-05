@@ -100,6 +100,9 @@ public:
 
 #pragma region STATE
 public:
+	// Ability에 제공. => 상태 판별할때 사용.
+	void Bind_Condition_ToAbillity(_uint iCondition);
+	void Remove_Condition_ToAbillity(_uint iCondition);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
@@ -194,11 +197,13 @@ protected:
 
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
+	
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
 protected:
 	_bool m_IsLockOn = { false };
+	_bool m_IsLand = { false };
 	
 
 public:

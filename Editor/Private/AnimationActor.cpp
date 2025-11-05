@@ -143,7 +143,11 @@ void CAnimationActor::Update(_float fTimeDelta)
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
+
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, true, true, 1.f);
+
+        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
+
 
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
@@ -405,7 +409,7 @@ void CAnimationActor::Render_Detail()
 
 	_bool IsChanged = { false };
 
-	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LCONTROL))
+	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LALT))
 	{
 		IsChanged = true;
 		m_IsPlayAnimation = !m_IsPlayAnimation;

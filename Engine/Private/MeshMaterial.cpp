@@ -70,6 +70,13 @@ HRESULT CMeshMaterial::Bind_Resource(CDeferredShader* pShader, const _char* pCon
 	return pShader->Bind_Textures(pConstantName, &m_SRVs[ENUM_CLASS(eTextureType)].front(), m_SRVs[ENUM_CLASS(eTextureType)].size(), pEffect);
 }
 
+HRESULT CMeshMaterial::Clear_Resource(CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+	return pShader->Clear_Textures(pConstantName, m_SRVs[ENUM_CLASS(eTextureType)].size(), pEffect);
+}
+
 HRESULT CMeshMaterial::Load_File(const _char* pFilePath, const json& MaterialData, const _char* pTextureTag, TEXTURETYPE eTextureType)
 {
 	json TextureData = MaterialData[pTextureTag];

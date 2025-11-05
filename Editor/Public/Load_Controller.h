@@ -1,13 +1,13 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Particle.h"
 #include "Effect_Prefab.h"
 #include "Effect_Mesh.h"
 #include "Trail_Mesh.h"
-
+#include "Effect_Rect.h"
 NS_BEGIN(Editor)
 
-//´Ù¸¥ °÷¿¡¼­ ÀÌÆåÆ® ºÒ·¯¿À´Â ¿¬µ¿¼ºÀ» À§ÇØ Ãß°¡ÇÑ °Í.?
+//ë‹¤ë¥¸ ê³³ì—ì„œ ì´í™íŠ¸ ë¶ˆëŸ¬ì˜¤ëŠ” ì—°ë™ì„±ì„ ìœ„í•´ ì¶”ê°€í•œ ê²ƒ.?
 class CLoad_Controller final : public CBase
 {
 
@@ -15,7 +15,7 @@ private:
 	explicit CLoad_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CLoad_Controller() = default;
 
-#pragma region ±âº»
+#pragma region ê¸°ë³¸
 public:
 	HRESULT Initialize(LEVEL eCurrentLevel);
 	void Update();
@@ -24,8 +24,8 @@ public:
 #pragma endregion
 
 private:
-	//´Ù¸¥°÷¿¡¼­ ÀÌ¿ëÇÒ ¶§¸é ÅØ½ºÃ³, ¸Å½¬ µî ´Ù¾çÇÑ ¾êµé ¿øÇüÀÌ ÇÊ¿äÇÒ°Å °°À½. °í¹ÎµÇ´Â°Ç, ¹Ì¸® ´Ù ¿Ã·Á³õÁö ¸»°í
-	//°¢°¢ÀÇ ÀÌÆåÆ®°¡ ÇÊ¿äÇÑ ÆÄÀÏµéÀÇ °æ·Î¸¦ µé°íÀÖ°Ô ÇÒ±î? Èì.. °í¹Î ÇÊ¿ä.
+	//ë‹¤ë¥¸ê³³ì—ì„œ ì´ìš©í•  ë•Œë©´ í…ìŠ¤ì²˜, ë§¤ì‰¬ ë“± ë‹¤ì–‘í•œ ì–˜ë“¤ ì›í˜•ì´ í•„ìš”í• ê±° ê°™ìŒ. ê³ ë¯¼ë˜ëŠ”ê±´, ë¯¸ë¦¬ ë‹¤ ì˜¬ë ¤ë†“ì§€ ë§ê³ 
+	//ê°ê°ì˜ ì´í™íŠ¸ê°€ í•„ìš”í•œ íŒŒì¼ë“¤ì˜ ê²½ë¡œë¥¼ ë“¤ê³ ìˆê²Œ í• ê¹Œ? í .. ê³ ë¯¼ í•„ìš”.
 	void Load_TrailMesh_AllTextureFromFolder(const _string& strFolderPath);
 	void Load_TrailMesh_AllMeshDatFromFolder(const _string& strFolderPath);
 	void Load_TrailMesh_AllColorTextureFormFolder(const _string& strFolderPath);
@@ -44,6 +44,8 @@ public:
 
 	void Load_TrailMesh_FromJson(const _string& strFilePath, const _wstring& TrailMeshTag);
 
+	void Load_FXRect_FromJson(const _string& strFilePath, const _wstring& RectTag);
+
 public:
 	void Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc);
 
@@ -54,6 +56,8 @@ public:
 	void Get_FXMesh_OB_Desc(const _wstring& FXMeshTag, CEffect_Mesh::EFFECTMESH_DESC& MeshDesc);
 
 	void Get_TrailMesh_Desc(const _wstring& TrailMeshTag, CTrail_Mesh::TRAILMESH_DESC& TrailMesh);
+
+	void Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FXRECT_DESC& RectDesc);
 
 public:
 	void Reset_Load();
@@ -66,20 +70,23 @@ private:
 	class CGameInstance*										m_pGameInstance = { nullptr };
 	LEVEL														m_eCurrentLevel = {};
 
-	//Effect·¹º§¿¡¼­ ·Îµå½Ã Desc Á¤º¸µé ÄÁÆ®·Ñ·¯¿¡ ³Ñ°ÜÁà¾ßÇØ¼­ ÀúÀå¿ë
-	//ÇÁ¸®ÆÕ ÀúÀå
+	//Effectë ˆë²¨ì—ì„œ ë¡œë“œì‹œ Desc ì •ë³´ë“¤ ì»¨íŠ¸ë¡¤ëŸ¬ì— ë„˜ê²¨ì¤˜ì•¼í•´ì„œ ì €ì¥ìš©
+	//í”„ë¦¬íŒ¹ ì €ì¥
 	CEffect_Prefab::PREFAB_DESC								   m_tPrefabDesc = {};
 
-	//ÆÄÆ¼Å¬ ÀúÀå
+	//íŒŒí‹°í´ ì €ì¥
 	map<const _wstring, CParticle::PARTICLE_DESC>						m_tParticleDesc = {};
 	map<const _wstring, CVIBuffer_Point_Instance::POINT_INSTANCE_DESC>	m_tParticleVBDesc = {};
 
-	//FXMesh ÀúÀå
+	//FXMesh ì €ì¥
 	map<const _wstring, CVIBuffer_FXMesh_Instance::MESH_FXINSTANCE_DESC>	m_tMeshVBDesc = {};
 	map<const _wstring, CEffect_Mesh::EFFECTMESH_DESC>						m_tEffectMeshDesc = {};
 
-	//Trail ÀúÀå
+	//Trail ì €ì¥
 	map<const _wstring, CTrail_Mesh::TRAILMESH_DESC>						m_tTrailMeshDesc = {};
+
+	//Rect ì €ì¥
+	map<const _wstring, CEffect_Rect::FXRECT_DESC>							m_tRectDesc = {};
 public:
 	static CLoad_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eCurrentLevel);
 	virtual	void Free() override;

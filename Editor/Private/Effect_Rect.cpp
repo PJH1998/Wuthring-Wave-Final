@@ -26,14 +26,23 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
     if (FAILED(Ready_Components(*pDesc)))
         return E_FAIL;
 
-    m_iShaderPass = pDesc->fShaderPass;
+    m_iShaderPass = pDesc->iShaderPass;
+	m_iMaskFlag = pDesc->iMaskFlag;
+
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
+
+	m_fSweepSpeed = pDesc->fSweepSpeed;
+	m_fSoft = pDesc->fSoft;
+
+	m_fXSize = pDesc->fXSize;
+	m_fYSize = pDesc->fYSize;
 
     _vector Pos = XMVectorSet(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z, 1.f);
 
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
-    m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
+
+
 
     //if (m_IsSprite = pDesc->IsSprite)
     //{
@@ -58,11 +67,13 @@ void CEffect_Rect::Update(_float fTimeDelta)
         return;
 
    m_vLifeTime.x += fTimeDelta;
+   m_fSweep += fTimeDelta * m_fSweepSpeed;
 
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
        m_isActivate = false;
        m_vLifeTime.x = 0.f;
+	   m_fSweep = 0.f;
    }
 }
 
@@ -92,6 +103,7 @@ void CEffect_Rect::Reset(const _fmatrix& WorldMatrix, void* pArg)
         m_isActivate = *IsActivate;
 
      m_vLifeTime.x = 0.f;
+	 m_fSweep = 0.f;
      Root_Transform(WorldMatrix);
 }
 
@@ -142,6 +154,21 @@ HRESULT CEffect_Rect::Bind_ShaderResources()
         return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_Soft", &m_fSoft, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fXSize", &m_fXSize, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fYSize", &m_fYSize, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
 
     return S_OK;

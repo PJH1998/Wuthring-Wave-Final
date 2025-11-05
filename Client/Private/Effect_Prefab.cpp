@@ -40,6 +40,7 @@ HRESULT CEffect_Prefab::Initialize_Clone(void* pArg)
     }
     //m_vLifeTime = pDesc->vLifeTime;
     //프리팹 라이프 타임 필요할까 ?
+
     m_vLifeTime.y = 8.f;
     m_vLifeTime.x = 0.f;
 
@@ -155,6 +156,7 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
 
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
+
    /* case EFFECT_TYPE::MESH:
         pMeshDesc = static_cast<CEffect_Mesh::EFFECTMESH_DESC*>(pArg);
         strChildrenTag = pMeshDesc->strMyTag;
@@ -167,12 +169,21 @@ void CEffect_Prefab::Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType
 
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(ENUM_CLASS(LEVEL::EFFECT), TEXT("Prototype_GameObject_EffectMesh"), PROTOTYPE::GAMEOBJECT, pArg));
         break;*/
+
     case EFFECT_TYPE::TRAIL:
         strChildrenProtoTag += TEXT("TrailMesh_");
         strChildrenProtoTag += strChildrenNameTag;
 
         pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
         break;
+
+	case EFFECT_TYPE::RECT:
+		strChildrenProtoTag += TEXT("FXRect_");
+		strChildrenProtoTag += strChildrenNameTag;
+
+		pChildren = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(CurrentLevel, strChildrenProtoTag, PROTOTYPE::GAMEOBJECT));
+		break;
+
     case EFFECT_TYPE::END:
         CRASH("Failed Children Desc");
         break;

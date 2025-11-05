@@ -66,10 +66,10 @@ void CProp::Activate(_bool IsActive)
     if (nullptr == m_pRigidbodyCom)
         return;
 
-    if (IsActive)
+  /*  if (IsActive)
         m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
     else
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));*/
         
 }
 

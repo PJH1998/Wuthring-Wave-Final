@@ -93,10 +93,6 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr, pEffect);
-		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr, pEffect);
-		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr, pEffect);
-
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
@@ -122,6 +118,11 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
 		
 		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
+
+		// Clear Pre Resource
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
 	}
 }
 
@@ -159,7 +160,8 @@ void CMapObject::Ready_Component(void* pArg)
 
 	_tchar Model[MAX_PATH] = TEXT("Prototype_Component_Model_");
 	lstrcat(Model, StringToWString(pDesc->ModelName).c_str());
-	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 

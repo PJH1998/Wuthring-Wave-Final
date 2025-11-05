@@ -49,7 +49,9 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_fAlpha = pDesc->fAlpha;
 	m_fColorGain = pDesc->fColorGain;
 	m_fColorGamma = pDesc->fColorGamma;
-	    
+	m_iDirFalg = pDesc->iDirFlag;
+	m_iMaskFlag = pDesc->iMaskFlag;
+
     //임시처리
     m_isActivate = false;
 
@@ -230,8 +232,11 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
     if (FAILED(m_pShaderCom->Bind_Value("g_ColorSpeed", &m_fColorSweep, sizeof(_float))))
         return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fTime, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_Value("g_Dir", &m_iDirFalg, sizeof(_int))))
         return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
+		return E_FAIL;
 
     return S_OK;
 }

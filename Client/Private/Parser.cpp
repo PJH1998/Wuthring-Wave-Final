@@ -9,6 +9,7 @@
 #include "Trail_Mesh.h"
 #include "Particle.h"
 
+#include "Effect_Rect.h"
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -110,6 +111,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 							CRASH("Prototype Create Failed");
 						});
+					break;
 				}
 				//프로토타입 생성
 			}
@@ -279,25 +281,25 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
     //파티클 VB 원형 생성
     _string strEffectPath = strDefaultPath;
     strEffectPath += "/ParticleVB/";
-    for (const auto& entry : filesystem::directory_iterator(strEffectPath))
-    {
-        if (entry.is_regular_file())
-        {
-            //파일 경로
-            _string filePath = entry.path().string();
-            //파일 이름
-            _string fileName = entry.path().filename().string();
-            //파일 정보
-            _string extension = entry.path().extension().string();
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (!entry.is_regular_file())
+			continue;
+		//파일 경로
+		_string filePath = entry.path().string();
+		//파일 이름
+		_string fileName = entry.path().filename().string();
+		//파일 정보
+		_string extension = entry.path().extension().string();
 
-            if (extension == ".json")
-            {
-                _string strParticleVBTag = entry.path().stem().string();
+		if (extension == ".json")
+		{
+			_string strParticleVBTag = entry.path().stem().string();
 
-                Load_Particle_VB_FromJson(filePath, strParticleVBTag, eLevel);
-            }
-        }
-    }
+			Load_Particle_VB_FromJson(filePath, strParticleVBTag, eLevel);
+		}
+
+	}
 
     //파티클 OB 원형 생성
     strEffectPath = strDefaultPath;
@@ -344,6 +346,29 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
             }
         }
     }
+
+	strEffectPath = strDefaultPath;
+	strEffectPath += "/FXRect/";
+	for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	{
+		if (entry.is_regular_file())
+		{
+			//파일 경로
+			_string filePath = entry.path().string();
+			//파일 이름
+			_string fileName = entry.path().filename().string();
+			//파일 정보
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+				_string strRectTag = entry.path().stem().string();
+
+				Load_FXRect_FromJson(filePath, strRectTag, eLevel);
+			}
+		}
+	}
+
 
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
 }
@@ -737,8 +762,8 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
     if (TrailMeshJson.contains("ShaderPass"))
         Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
 
-	if (TrailMeshJson.contains("ShaderPass"))
-		Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
+	if (TrailMeshJson.contains("MaskFlag"))
+		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
 
 	if (TrailMeshJson.contains("SweepSpeed"))
 		Desc.fSweep = TrailMeshJson["SweepSpeed"].get<_float>();
@@ -798,6 +823,88 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
         MSG_BOX("Trail_Mesh Load Fail");
         return;
     }
+}
+
+void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& RectTag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_FXRect_";
+	strProtoTag += RectTag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+	
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json RectJson;
+	JsonStream >> RectJson;
+	JsonStream.close();
+
+	CEffect_Rect::FXRECT_DESC Desc = {};
+
+	if (RectJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(RectJson["MyTag"].get<_string>());
+
+	if (RectJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(RectJson["MyType"].get<double>());
+
+	if (RectJson.contains("Root"))
+		Desc.IsRootOn = RectJson["Root"].get<_bool>();
+
+	if (RectJson.contains("TextureTag"))
+		Desc.strTextureTag = StringToWString(RectJson["TextureTag"].get<_string>());
+
+	if (RectJson.contains("ShaderPass"))
+		Desc.iShaderPass = RectJson["ShaderPass"].get<_int>();
+
+	if (RectJson.contains("MaskFlag"))
+		Desc.iMaskFlag = RectJson["MaskFlag"].get<_int>();
+
+	if (RectJson.contains("SweepSpeed"))
+		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();
+
+	if (RectJson.contains("SweepSoft"))
+		Desc.fSoft = RectJson["SweepSoft"].get<_float>();
+
+	if (RectJson.contains("SizeX"))
+		Desc.fXSize = RectJson["SizeX"].get<_float>();
+
+	if (RectJson.contains("SizeY"))
+		Desc.fYSize = RectJson["SizeY"].get<_float>();
+
+	if (RectJson.contains("Position") && RectJson["Position"].is_array())
+	{
+		json PosJson = RectJson["Position"];
+		Desc.vPos.x = PosJson[0].get<_float>();
+		Desc.vPos.y = PosJson[1].get<_float>();
+		Desc.vPos.z = PosJson[2].get<_float>();
+	}
+
+	if (RectJson.contains("LifeTime") && RectJson["LifeTime"].is_array())
+	{
+		json LifeTimeJson = RectJson["LifeTime"];
+		Desc.vLifeTime.x = LifeTimeJson[0].get<_float>();
+		Desc.vLifeTime.y = LifeTimeJson[1].get<_float>();
+	}
+
+	if (RectJson.contains("Color") && RectJson["Color"].is_array())
+	{
+		json ColorJson = RectJson["Color"];
+		Desc.vColor.x = ColorJson[0].get<_float>();
+		Desc.vColor.y = ColorJson[1].get<_float>();
+		Desc.vColor.z = ColorJson[2].get<_float>();
+		Desc.vColor.w = ColorJson[3].get<_float>();
+	}
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CEffect_Rect::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Effect_Rect Load Fail");
+		return;
+	}
 }
 
 void CParser::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)

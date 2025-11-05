@@ -127,7 +127,7 @@ void CAnimMachine::Update(CModel* pModelCom, CTransform* pTransform, _uint* pSta
 	}
 
 	// 2. 애니메이션 재생
-	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon, false, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
+	isAnimFinished = pModelCom->Play_Animation_CPU(m_strCurrentAnimTag, fTimeDelata, &m_fCurrentTrackPositon, true, m_isRootMotion, m_isRootMotionRotate, m_isRootMotionTranslate, m_fRootMotionRate);
 	pModelCom->Sync_RootNode(pTransform, fTimeDelata);
 
 	// 모델 클래스가 애니메이션 한 트랙이 끝까지 재생되었을 때 true 반환, 이후 모델 내에서 트랙 위치 초기화
@@ -193,7 +193,7 @@ void CAnimMachine::Create_AnimStates(const vector<_string>& AnimationNames)
 	Clear_States();
 	for(auto& strAnimationName : AnimationNames)
 	{
-		CAnimState::ANIMSTATE_DESC Temp{ false, false, false, false, 1.f, 0.f, 1.f };
+		CAnimState::ANIMSTATE_DESC Temp{ true, false, true, false, 1.f, 0.f, 1.f };
 		m_AnimStates.emplace(strAnimationName, CAnimState::Create(strAnimationName, Temp));
 	}
 }
