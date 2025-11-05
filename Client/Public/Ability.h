@@ -79,7 +79,8 @@ public:
 #pragma endregion
 
 
-
+public:
+	void Debug_FullCost();
 #ifdef _DEBUG
 public:
 	void Debug_FullCost();
