@@ -46,6 +46,30 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
+#pragma region [UI] FONT_PRESET
+	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0);
+#pragma endregion
+
+#pragma region [UI] CONTROL_HELPER
+	class CCustom_UI*	Find_RootUI(_wstring strName);
+	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
+
+	HRESULT		HUD_FadeOut();
+	HRESULT		HUD_FadeIn();
+#pragma endregion
+
+
+#pragma region [UI] STATUS_SYNCER
+	HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
+
+
+#pragma endregion
+
+#pragma region PLAYER STATUS
+	class CPlayerStatus* Get_PlayerStatus() const { return m_pPlayerStatus; }
+#pragma endregion
+
+
 #pragma region TRIGGER
 	void TriggerRegister(_uint iNumTriggerMapIndex, TriggerCallback pFunc);
 	void OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg = nullptr);
@@ -53,10 +77,20 @@ public:
 	void Clear_TriggerCallBack();
 #pragma endregion
 
+
+
 private:
-	class		CParser*		m_pParser = { nullptr };
-	class		CFactory*	m_pFactory = { nullptr };
-	class		CDirector*	m_pDirector = { nullptr };
+	class	CParser*			m_pParser						= { nullptr };
+	class	CFactory*			m_pFactory						= { nullptr };
+
+	class	CUI_FontPreset*		m_pUI_FontPreset				= { nullptr };
+	class	CUI_ControlHelper*	m_pUI_ControlHelper				= { nullptr };
+	class	CUI_StatusSyncer*	m_pUI_StatusSyncer				= { nullptr };
+
+	class	CDirector*			m_pDirector 					= { nullptr };
+	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
+
+
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;
 public:

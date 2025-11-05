@@ -25,7 +25,7 @@ HRESULT CCSM::SetUp_ShadowLight(const _wstring& strLightTag)
 HRESULT CCSM::SetUp_ShadowNF()
 {
 	m_fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();
-	m_fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
+	m_fCameraFar = m_pGameInstance->Get_CurrentCamera_Far() * 0.3f;
 
 	for (_uint i = 0; i < m_iNumClipDistance; i++)
 		m_fClipDistance[i] = Compute_ClipDistance(m_fCameraNear, m_fCameraFar, i, m_iNumClip, 0.5f);

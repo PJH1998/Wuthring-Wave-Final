@@ -2,10 +2,10 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-texture2D g_DiffuseTexture[2];
-texture2D g_NormalTexture;
-texture2D g_MaskDiffuseTexture;
-texture2D g_MaskTexture[4] : register(t8);
+Texture2D g_DiffuseTexture[2];
+Texture2D g_NormalTexture;
+Texture2D g_MaskDiffuseTexture;
+Texture2D g_MaskTexture[4] : register(t8);
 
 vector g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);

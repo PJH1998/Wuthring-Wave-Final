@@ -16,6 +16,8 @@ public:
 
 	// Gizmo ?곸슜??媛앹껜??Transform ?꾨떖
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Use_Gizmo_Offset(_float3* pScale, _float3* pRotation, _float3* pTranslation);
+
 	// Gizmo Render??
 	void					Render_Gizmo(const _fmatrix& Matrix);
 
@@ -34,6 +36,11 @@ private:
 
 	vector<function<void()>>	m_Functions;
 
+	// Gizmo Offset
+	_float3*							m_pScale = { nullptr };
+	_float3*							m_pRotation = { nullptr };
+	_float3*							m_pTranslation = { nullptr };
+
 	// Gizmo ?ъ슜?????꾩슂??Transform
 	class CTransform*				m_pTransform = { nullptr };
 	_float4x4							m_ObjectWorldMatrix = {};
@@ -47,6 +54,7 @@ private:
 
 private:
 	void					Gizmo();
+	void					Gizmo_Offset();
 
 public:
 	static		CGUIManager*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, HWND hWnd);

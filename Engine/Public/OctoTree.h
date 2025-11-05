@@ -3,6 +3,8 @@
 
 NS_BEGIN(Engine)
 
+static atomic<_int>		m_iLODCnt;
+
 class COctoTree final : public CBase
 {
 private:

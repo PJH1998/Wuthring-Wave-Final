@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Base.h"
 
+#define MAX_LOD 10
+
 NS_BEGIN(Engine)
 
 class CCubeCell final : public CBase

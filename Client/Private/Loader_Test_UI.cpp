@@ -59,9 +59,6 @@ HRESULT CLoader_Test_UI::Load_Texture()
             const   _wstring	strFileName = infoDesc.tUIDesc.strFileName;
             const   _uint       iNumFiles   = infoDesc.tUIDesc.iNumFiles;
 
-            if (strFileName == L"T_JiabeilinaEnergyBgCombined")
-                int i = 10;
-
             infoDesc.tUIDesc.strFilePath;
             if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
                 CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
@@ -163,10 +160,23 @@ HRESULT CLoader_Test_UI::Load_Prototype()
 
 HRESULT CLoader_Test_UI::Load_Font()
 {
-    cout << "[CLoader_Test_UI] .. " << endl;
+	// ==============================
+    cout << "[CLoader_Test_UI] Font " << endl;
+	// ==============================
+	_uint iPixelHeight = 64U;
 
-    if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", 16)))
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", iPixelHeight)))
         OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_SemiBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-SemiBold.ttf", iPixelHeight)))
+        OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_Bold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Bold.ttf", iPixelHeight)))
+        OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_ExtraBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-ExtraBold.ttf", iPixelHeight)))
+        OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+    if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
+        OutputDebugString(L"[Loader_Test_UI::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+
+	
 
     return S_OK;
 }

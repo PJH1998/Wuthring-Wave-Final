@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "MonsterTest.h"
 #include "Ggobul.h"
+#include "FS_Scythe.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -174,25 +175,53 @@ void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
 void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 {
 	size_t Index = wStrObjectTag.find(TEXT("|"));
-	_wstring strTypeTag = wStrObjectTag.substr(0, Index);
-	_wstring strAnimTag = wStrObjectTag.substr(Index + 1);
-	if(strTypeTag == TEXT("GGOBUL"))
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+	if(wstrTypeTag == TEXT("GGOBUL"))
 	{
 		CGgobul::GGOBUL_RESET Desc{};
-		Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
+		
 		//Desc.pWorldMatrix = m_pTransformCom->Get_WorldMatrixPtr();
 		//Desc.vInitPosition = m_vTargetPosition;
 		//XMStoreFloat3(&Desc.vInitDirection,m_pTransformCom->Get_State(STATE::LOOK));
-		Desc.strPatternKey = WStringToString(strAnimTag);
+		Desc.strPatternKey = WStringToString(wstrAnimTag);
 		_matrix WorldMatrix;
-		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+
+		_vector vLook;
+		if (wstrAnimTag == TEXT("SAttack03"))
+		{
+			Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
+			vLook = XMLoadFloat3(&m_vTargetDir);
+			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		}
+		else
+		{
+			Desc.eType = CGgobul::GGOBULTYPE::HEAD;
+			vLook = m_pTransformCom->Get_State(STATE::LOOK);
+			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
+		}
 		_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
 		_vector vUp = XMVector3Cross(vLook, vRight);
 		WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
 		WorldMatrix.r[ENUM_CLASS(STATE::UP)] = vUp;
 		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
-		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Ggobul"), WorldMatrix, &Desc);
+	}
+	else if (wstrTypeTag == TEXT("SCYTHE"))
+	{
+		CFS_Scythe::SCYTHE_RESET Desc{};
+		Desc.strPatternKey = WStringToString(wstrAnimTag);
+
+		_matrix WorldMatrix;
+		_vector vLook;
+		vLook = m_pTransformCom->Get_State(STATE::LOOK);
+		_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
+		_vector vUp = XMVector3Cross(vLook, vRight);
+		WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
+		WorldMatrix.r[ENUM_CLASS(STATE::UP)] = vUp;
+		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
+		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Scythe"), WorldMatrix, &Desc);
 	}
 }
 
@@ -294,15 +323,6 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 
 void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 {
-	//CMonsterBody::MONSTERBODY_DESC BodyDesc{};
-	//BodyDesc.pParentTransform = m_pTransformCom;
-	//BodyDesc.pState = &m_iState;
-	//BodyDesc.szPrototypeModelTag = pDesc->szPrototypeModelTag;
-	//BodyDesc.pAnimationTag = pDesc->pAnimationTag;
-	//if(FAILED(CContainerObject::Add_PartObject(TEXT("Part_Body"),m_pGameInstance->Get_CurrentLevel(), 
-	//											TEXT("Prototype_GameObject_MonsterBody"), &BodyDesc)))
-	//	CRASH("Part_Body")
-
 
 }
 
@@ -417,14 +437,15 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex == 2)
-		return true;
-	else
-		return false;
+	//if (iIndex != 3)
+	//	return false;
+	//else
+	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
 	if(bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
+		Attack_Arrange();
 		//if (iIndex == 2)
 		//{
 		//	CGgobul::GGOBUL_RESET Desc{};
@@ -436,6 +457,13 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 		//}
 	}
 	return bResult;
+}
+
+void CMonsterTest::Attack_Arrange()
+{
+	_float fRand = m_pGameInstance->Rand_Normal();
+	if (fRand < 0.5f)
+		m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
 }
 
 _bool CMonsterTest::Back()

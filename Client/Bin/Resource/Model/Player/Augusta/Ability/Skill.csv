@@ -1,0 +1,16 @@
+Name,PrevName,SkillType,CostStatType,Cost,CoolDown,KeyInput,Damage,Description
+Skill_Strike,None,AUGUSTA_POINT,2,-100,0,E,200,POINT 100 E키
+Skill_Rise_Zero,Skill_Strike,NONE,0,0,0,E,300,E연타
+Skill_Rise,Skill_Rise_Zero,AUGUSTA_SWORD,4,50,0,E,400,E연타
+AirAttack_HackDown_Start,Skill_Rise,NONE,0,0,0,E,500,E연타
+AirAttack_HackDown_Sp_End,AirAttack_HackDown_Start,NONE,0,0,0,E,400,E연타
+Attack_HeavyHack,None,RESONANCE,1,-100,20,E,300,강공 (공명 소모)
+Skill_Hack,None,NONE,0,0,20,E,300,기본 E키
+Attack_SpeedDrive,None,AUGUSTA_ULTI,3,-100,25,R,200,ULTI 100 R키
+Attack_SpSkill,Attack_SpeedDrive,NONE,0,0,0,R,200,R연타
+Burst01,None,AUGUSTA_SWORD,4,-100,30,R,0,SWORD 100 R키
+Burst_Stand,Burst01,NONE,0,0,0,-,0,자동 변환
+SpAttack01,Burst_Stand,NONE,0,0,0,R,700,마우스 LB 연타
+SpAttack02,SpAttack01,NONE,0,0,0,R,800,마우스 LB 연타
+SpAttack03,SpAttack02,NONE,0,0,0,R,900,마우스 LB 연타
+SpAttackOmni,SpAttack03,NONE,0,0,0,R,1200,마우스 LB 연타

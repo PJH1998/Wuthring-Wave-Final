@@ -20,13 +20,21 @@ private:
         RUN_L,
         RUN_R,
         SPRINT_F,
+		MOVE,
+
         SKILL_E,
         SKILL_Q,
         SKILL_R,
-        UNIQUE_E, 
-        UNIQUE_R,
-        BURST_R,
-        MOVE,
+
+		// 소모값 없음 => 쿨타임 존재.
+		NORMAL_E,
+
+		// 소모값 있는 얘들 => Cost가 있을때만
+		
+		POINT_E,  // 중앙 Point가 가득찬 상태.
+		ECHO_R,  // 중앙 Echo가 가득 찬 상태. 
+		SWORD_R, // Sword R 상태 => Skill 검으로 바뀜. (Sword UI가 가득 찼을때)
+        
         END
     };
 

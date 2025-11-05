@@ -19,13 +19,16 @@
 #include "PipeLine.h"
 #include "Light_Manager.h"
 #include "Picking.h"
-#include "Shadow.h"
 #include "GUIManager.h"
 #include "OctoTree.h"
 #include "Frustrum.h"
 #include "CSM.h"
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
+#include "ShadowMap.h"
+
+#define KSTA_DEBUG_ENABLEFONTMGR
+
 
 IMPLEMENT_SINGLETON(CGameInstance)
 
@@ -45,8 +48,10 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pSound_Manager = CSound_Manager::Create(EngineDesc.iNumChannel);
 	ASSERT_CRASH(m_pSound_Manager);
 
-	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager = CFont_Manager::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
 
 	m_pLevel_Manager = CLevel_Manager::Create();
 	ASSERT_CRASH(m_pLevel_Manager);
@@ -91,9 +96,6 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pPicking = CPicking::Create(*ppDevice, *ppContext, EngineDesc.hWnd, EngineDesc.iSizeX, EngineDesc.iSizeY);
 	ASSERT_CRASH(m_pPicking);
 
-	m_pShadow = CShadow::Create(static_cast<_float>(EngineDesc.iSizeX), static_cast<_float>(EngineDesc.iSizeY));
-	ASSERT_CRASH(m_pShadow);
-
 	m_pGUIManager = CGUIManager::Create(*ppDevice, *ppContext, EngineDesc.hWnd);
 	ASSERT_CRASH(m_pGUIManager);
 
@@ -109,8 +111,12 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pRCS_Manager = CRCS_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pRCS_Manager);
 
-	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext);
+	m_pRenderer = CRenderer::Create(*ppDevice, *ppContext, m_pPooling_Manager->Get_NumThread());
 	ASSERT_CRASH(m_pRenderer);
+
+	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pShadowMap);
+
 	return S_OK;
 }
 
@@ -122,17 +128,31 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pInput_Device->Update();
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Priority_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pObject_Manager->Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pCamera_Manager->Update(fTimeDelta);
 	m_pPhysicsManager->Update(fTimeDelta);
 	m_pPhysicsManager->Late_Update();
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	m_pFont_Manager->Late_Update(fTimeDelta);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+	
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
+
+
+
 	m_pFrustrum->Update();
 	m_pPooling_Manager->Add_Work([this]() {m_pCSM->Update_CSM(); });
 	m_pOctoTree->Update();
@@ -165,6 +185,12 @@ HRESULT CGameInstance::Draw()
 {
 	ASSERT_CRASH(m_pRenderer);
 	m_pRenderer->Render();
+
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
+	ASSERT_CRASH(m_pFont_Manager);
+	//m_pFont_Manager->Render();
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 
 	ASSERT_CRASH(m_pLevel_Manager);
 	m_pLevel_Manager->Render();
@@ -236,10 +262,27 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath, iPixelHeight);
 }
-HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
+//{
+//	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+//}
+_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
 {
-	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
+	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
 }
+_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
+{
+	return m_pFont_Manager->Draw_Font(pSingleDesc);
+}
+void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
+{
+	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
+}
+void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
+{
+	m_pFont_Manager->Add_FloatingText(tDesc);
+}
+
 #pragma endregion
 
 #pragma region LEVEL_MANAGER
@@ -292,6 +335,10 @@ HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstr
 #pragma endregion
 
 #pragma region POOLING_MANAGER
+_uint CGameInstance::Get_NumThread()
+{
+	return m_pPooling_Manager->Get_NumThread();
+}
 HRESULT CGameInstance::Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg)
 {
 	return m_pPooling_Manager->Add_PoolingObject(iPrototypeLevelID, strPrototypeTag, iLayerLevelID, strLayerTag, strPoolingTag, iNumObjects, pArg);
@@ -303,6 +350,10 @@ HRESULT CGameInstance::Spawn_PoolingObject(const _wstring& strPoolingTag, const 
 void CGameInstance::Add_Work(function<void()> Work)
 {
 	m_pPooling_Manager->Add_Work(Work);
+}
+void CGameInstance::Add_Render_Work(function<void()> Work)
+{
+	m_pPooling_Manager->Add_Render_Work(Work);
 }
 _bool CGameInstance::IsWorkFinish()
 {
@@ -352,6 +403,10 @@ HRESULT CGameInstance::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilVi
 {
 	return m_pTargetManager->Begin_MRT(strMRTTag, pDSV, isClear);
 }
+HRESULT CGameInstance::SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag)
+{
+    return m_pTargetManager->SetUp_MRT(pContext, strMRTTag);
+}
 void CGameInstance::End_MRT()
 {
 	m_pTargetManager->End_MRT();
@@ -385,9 +440,13 @@ HRESULT CGameInstance::Add_Render_Object(RENDERGROUP eGroup, CGameObject* pObjec
 {
 	return m_pRenderer->Add_Render_Object(eGroup, pObject);
 }
-HRESULT CGameInstance::Add_Render_StaticObject(CGameObject* pObject)
+HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
+}
+HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
+{
+	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
 }
 void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
 {
@@ -396,6 +455,14 @@ void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
 void CGameInstance::End_ScreenEffect()
 {
 	m_pRenderer->End_ScreenEffect();
+}
+void CGameInstance::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
+{
+	m_pRenderer->Add_Effects(strEffectTag, Effects);
+}
+ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex)
+{
+    return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
@@ -664,26 +731,6 @@ _bool CGameInstance::Get_Points(_float fRange, vector<_float4>& pOut, _uint* Num
 }
 #pragma endregion
 
-#pragma region SHADOW
-const _float4x4* CGameInstance::Get_ShadowLight_Matrix(D3DTS eType)
-{
-	return m_pShadow->Get_Matrix(eType);
-}
-HRESULT CGameInstance::Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc)
-{
-//	return m_pShadow->Ready_ShadowLight(Desc);
-	return S_OK;
-}
-HRESULT CGameInstance::Bind_Shadow_Resource(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName)
-{
-    return m_pShadow->Bind_Shadow_Resource(pShader, pViewName, pProjName, pFarName);
-}
-void CGameInstance::Update_ShadowLight_Transform(const _fvector& vAt)
-{
-	m_pShadow->Update_Transform(vAt);
-}
-#pragma endregion
-
 #pragma region GUIMANAGER
 ImGuiContext* CGameInstance::Get_ImGuiContext()
 {
@@ -696,6 +743,10 @@ void CGameInstance::Add_GUI_Func(function<void()> func)
 void CGameInstance::Use_Gizmo(CTransform* pTransform)
 {
 	m_pGUIManager->Use_Gizmo(pTransform);
+}
+void CGameInstance::Use_Gizmo_Offset(_float3* pScale, _float3* pRotation, _float3* pTranslation)
+{
+	m_pGUIManager->Use_Gizmo_Offset(pScale, pRotation, pTranslation);
 }
 void CGameInstance::Render_Gizmo(const _fmatrix& Matrix)
 {
@@ -819,6 +870,53 @@ HRESULT CGameInstance::Debug_Render_RCS()
 #endif
 #pragma endregion
 
+#pragma region SHADOW_MAP
+HRESULT CGameInstance::Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc)
+{
+	return m_pShadowMap->Setting_ShadowMap(MapDesc);
+}
+const _uint CGameInstance::Get_ShadowMapLayer(_uint iSectorIndex)
+{
+	return m_pShadowMap->Get_ShadowMapLayer(iSectorIndex);
+}
+const vector<BoundingBox*>& CGameInstance::Get_ShadowMapSectors()
+{
+	return m_pShadowMap->Get_ShadowMapSectors();
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector)
+{
+	return m_pShadowMap->Bind_ShadowMap_Resources(pShader, pViewName, pProjName, iSector);
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Resources_Renderer(CShader* pShader)
+{
+	return m_pShadowMap->Bind_ShadowMap_Resources(pShader);
+}
+
+HRESULT CGameInstance::Bind_ShadowMap_Buffer(_uint iBufferIndex)
+{
+	return m_pShadowMap->Bind_ShadowMap_Buffer(iBufferIndex);
+}
+
+HRESULT CGameInstance::Begin_ShadowMap()
+{
+	return m_pShadowMap->Begin_ShadowMap();
+}
+
+HRESULT CGameInstance::End_ShadowMap()
+{
+	return m_pShadowMap->End_ShadowMap();
+}
+
+#ifdef _DEBUG
+void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
+{
+	m_pShadowMap->Render(pShader, pVIBuffer);
+}
+#endif
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -858,7 +956,10 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pGUIManager);																																																							
 	Safe_Release(m_pLevel_Manager);
 	Safe_Release(m_pSound_Manager);
+#ifdef KSTA_DEBUG_ENABLEFONTMGR
 	Safe_Release(m_pFont_Manager);
+#endif // KSTA_DEBUG_ENABLEFONTMGR
+
 	Safe_Release(m_pOctoTree);
 	Safe_Release(m_pObject_Manager);
 	Safe_Release(m_pPooling_Manager);
@@ -871,7 +972,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pEventBus);
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
-	Safe_Release(m_pShadow);
+	Safe_Release(m_pShadowMap);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);

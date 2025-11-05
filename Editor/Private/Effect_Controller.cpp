@@ -545,13 +545,16 @@ void CEffect_Controller::Selected_Prefab_Info()
             ImGui::InputFloat("##Offset Rot.z", &(m_pSelectedPrefabFrame->vOffsetRot.z));
             ImGui::PopItemWidth();
 
-            if (ImGui::Button("Frame Apply"))
+			m_pGameInstance->Use_Gizmo_Offset(&m_pSelectedPrefabFrame->vOffsetSize, &m_pSelectedPrefabFrame->vOffsetRot,
+				&m_pSelectedPrefabFrame->vOffsetPos);
+
+            if (ImGui::Button("Frame Apply") || m_pGameInstance->Get_DIKeyState(DIK_LSHIFT) == KEYSTATE::DOWN)
             {
                 //여기서 현재 프리팹에 Frame 수정해줘야할거 같은데 
                 m_pSelectedPrefab->Set_FrameDesc(m_pSelectedPrefabFrame);
             }
             ImGui::SameLine(0.f, 30.f);
-            if (ImGui::Button("Reset Frame"))
+            if (ImGui::Button("Reset Frame") || m_pGameInstance->Get_DIKeyState(DIK_LALT) == KEYSTATE::DOWN )
             {
                 m_pSelectedPrefab->Reset_Prefab_Info();
                 m_pSelectedPrefab->SetActivate(true);
@@ -1110,6 +1113,7 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
 	TrailMesh["SweepSoft"] = pTrailDesc->fSoft;
 
     TrailMesh["DirFlag"] = pTrailDesc->iDirFlag;
+	TrailMesh["MaskFloag"] = pTrailDesc->iMaskFlag;
 
 	TrailMesh["ColorSpeed"] = pTrailDesc->fColorSpeed;
 	TrailMesh["MaskSpeed"] = pTrailDesc->fMaskSpeed;

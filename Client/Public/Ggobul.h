@@ -48,9 +48,6 @@ public:
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
 private:
-	//CComputeShader*		m_pComputeShaderCom = { nullptr };
-	//CShader*			m_pShaderCom = { nullptr };
-	//CModel*				m_pModelCom = { nullptr };
 	CRigidbody*			m_pAttackVolume[GGOBULTYPE::END] = {nullptr,};
 	CAnimMachine*		m_pAnimMachineCom = { nullptr };
 
@@ -61,11 +58,6 @@ private:
 
 	_string		m_strAnimKey;
 	_uint		m_iState{};
-	//_bool m_isRootMotion;
-	//_bool m_isRootMotionRotate;
-	//_bool m_isRootMotionTranslate;
-	//_float m_fRootMotionRate;
-	//_float m_fAnimationSpeed;
 
 	_float m_fAttackDamage{};
 

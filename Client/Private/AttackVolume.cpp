@@ -2,12 +2,12 @@
 #include "AttackVolume.h"
 
 CAttackVolume::CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CPartObject { pDevice, pContext }
+    : CGameObject { pDevice, pContext }
 {
 }
 
 CAttackVolume::CAttackVolume(const CAttackVolume& Prototype)
-    : CPartObject { Prototype }
+    : CGameObject{ Prototype }
 {
 }
 
@@ -18,38 +18,74 @@ HRESULT CAttackVolume::Initialize_Prototype()
 
 HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 {
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		return E_FAIL;
+
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
     Ready_Component(pDesc);
 
+	m_pParentMatrix = pDesc->pParentMatrix;
     m_pSocketMatrix = pDesc->pSocketMatrix;
+
+	m_eTargetLayer = pDesc->eTargetLayer;
 	m_CollisionCallback = pDesc->CollisionCallback;
+	m_vOffsetPos = pDesc->vOffsetPos;
+	m_vOffsetRot = pDesc->vOffsetRadian;
     return S_OK;
 }
 
 void CAttackVolume::Priority_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
 }
 
 void CAttackVolume::Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
+
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), 
+													XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
+	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
+	_vector vScale, vQuaternion, vTransition;
+	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
+	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
+	_matrix ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * NonScaleMatrix * matOffset * XMLoadFloat4x4(m_pParentMatrix);
+	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
+
+	m_pRigidBodyCom->Update_Rigidbody(ComBinedMatrix, fTimeDelta);
 }
 
 void CAttackVolume::Late_Update(_float fTimeDelta)
 {
+	if (!m_isActivate)
+		return;
 }
 
 void CAttackVolume::Render()
 {
+#ifdef _DEBUG
+	m_pRigidBodyCom->Render();
+#endif // _DEBUG
+
 }
+
+void CAttackVolume::TriggerActivate(_bool isActivate)
+{
+	m_pRigidBodyCom->IsActivate(isActivate);
+	m_isActivate = isActivate;
+}
+
 
 void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 {
 	// Com_Rigidbody
 	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::BOX;
+	RigidbodyDesc.eShape = pDesc->eShape;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
-	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	RigidbodyDesc.iLayer = ENUM_CLASS(pDesc->eLayer);
 	RigidbodyDesc.vExtent = pDesc->vExtent;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
@@ -64,7 +100,7 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if(ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+	if(ENUM_CLASS(m_eTargetLayer) == iLayer)
 	{
 		if (m_CollisionCallback)
 			m_CollisionCallback();
@@ -73,14 +109,33 @@ void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactMani
 
 CAttackVolume* CAttackVolume::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    return nullptr;
+	CAttackVolume* pInstance = new CAttackVolume(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize_Prototype()))
+	{
+		MSG_BOX("Failed to Create : CAttackVolume");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
 }
 
 CGameObject* CAttackVolume::Clone(void* pArg)
 {
-    return nullptr;
+	CAttackVolume* pClone = new CAttackVolume(*this);
+
+	if (FAILED(pClone->Initialize_Clone(pArg)))
+	{
+		MSG_BOX("Failed to Create : CAttackVolume (Clone)");
+		Safe_Release(pClone);
+	}
+
+	return pClone;
 }
 
 void CAttackVolume::Free()
 {
+	__super::Free();
+
+	Safe_Release(m_pRigidBodyCom);
 }

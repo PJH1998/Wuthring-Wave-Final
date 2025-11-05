@@ -21,6 +21,7 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_Shader_Resource(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV, _bool isClear);
+	HRESULT		SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag);
 	void	    End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 

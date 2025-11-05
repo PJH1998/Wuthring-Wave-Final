@@ -69,8 +69,6 @@ void CAugustaAirAttack::OnEnter()
 
         case EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END:
         {
-			
-
             strBoneName = "WeaponProp05";
             m_fSpeed = 0.f;
             m_pAugusta->Set_Gravity(true);
@@ -110,9 +108,6 @@ void CAugustaAirAttack::OnEnter()
     m_pAugusta->PartActivate(m_iPartType, true);
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-    
-
-
 }
 
 void CAugustaAirAttack::OnUpdate(_float fTimeDelta)
@@ -258,6 +253,13 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
                     return;
                 }
+
+				if (!m_States[MOVE])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
             }
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_END)
@@ -367,7 +369,7 @@ void CAugustaAirAttack::SetUp_Animations()
     
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 3.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 20.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 3.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);

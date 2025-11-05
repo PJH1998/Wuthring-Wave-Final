@@ -231,16 +231,35 @@ void CAnimator_UI::Update_Animation()
     if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))
         return;
 
-    CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
 
-    if (m_pCurAnimDesc == nullptr)
+	CAnimator_UI* pParentAnimator = nullptr;
+	CLevel_UI::UI_ANIM_KEYFRAME_DESC* pParentCombinedDesc = nullptr;
+	CCustom_UI* pParentUI = dynamic_cast<CCustom_UI*>(m_pOwner->Get_UIDesc().pParentObject);
+
+	if (pParentUI)
+		pParentAnimator = dynamic_cast<CAnimator_UI*>(pParentUI->Get_Component(L"Com_Animator_UI"));
+	if (pParentAnimator && pParentAnimator->Get_CurAnimation() != nullptr)
+		pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
+
+
+	CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+
+	if (m_pOwner->Get_UIDesc().strUIName == L"Inst_EnergyItems")
+		int i = 10;
+	if (m_pOwner->Get_UIDesc().strUIName == L"EnergyBar")
+		int i = 10;
+
+
+    if (m_pCurAnimDesc == nullptr) // 자식들도 부모의 움직임이랑 알파값 그런건 따라와야하거늘
     {
-        CLevel_UI::UI_ANIM_KEYFRAME_DESC tDesc = {};
+		_float fCombinedAlpha = (pParentCombinedDesc) ? (1.f - (1.f - pParentCombinedDesc->fAlpha) * (1.f - tDesc.fAlpha)) : tDesc.fAlpha;
+        pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
+  //      pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
+  //      pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
+  //      pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
 
-        pTargetShader->Bind_Value("g_AlphaStrength", &tDesc.fAlpha, sizeof(tDesc.fAlpha));
-        pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
-        pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
-        pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+		m_tCombinedKeyFrameDesc.fAlpha = fCombinedAlpha;
         return;
     }
 
@@ -249,6 +268,7 @@ void CAnimator_UI::Update_Animation()
     const _float    fSingleFrameTime    = 1.f / iKeyFrameRate;
 
     _float fCurFrame = m_fElapsedTime / fSingleFrameTime;                   // 현재 키프레임
+
     if (fCurFrame >= m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex)
     {
         if (m_pCurAnimDesc->isLoop)
@@ -269,7 +289,7 @@ void CAnimator_UI::Update_Animation()
 
     for (_uint i = 0; i < m_pCurAnimDesc->vecKeyFrames.size(); i++)
     {
-        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex <= iCurFrame)
+        if (m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex < iCurFrame) // ksta
         {
             iFrame_LerpStart = m_pCurAnimDesc->vecKeyFrames[i].iKeyframeIndex;
             iFrame_StartIndex = i;
@@ -344,20 +364,37 @@ void CAnimator_UI::Update_Animation()
     // ==============================
     // * Apply Results..
     // ==============================
+		// 셰이더에 바인드
+	pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
+	pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+	pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+	pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
+
+	// 위치 적용
+	CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
+
+	_matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
+	_matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
+	_matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
+
+	_matrix matTransform = matSca * matRot * matPos;
+
     m_pOwner->Set_CurTexIndex(iResultTexIndex);
-    
-    pTargetShader->Bind_Value("g_AlphaStrength", &fResultAlpha, sizeof(fResultAlpha));
-    pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
-    pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
-    pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
-    CTransform* pOwnerTransformCom = dynamic_cast<CTransform*>(m_pOwner->Get_Component(L"Com_Transform"));
-    
-    _matrix matPos = XMMatrixTranslationFromVector(XMLoadFloat3(&vResultPos));
-    _matrix matRot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&vResultRotRad));
-    _matrix matSca = XMMatrixScalingFromVector(XMLoadFloat3(&vResultSca));
 
-    _matrix matTransform = matSca * matRot * matPos;
+	// 복사
+	m_tCombinedKeyFrameDesc = m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex];
+	m_tCombinedKeyFrameDesc.vPos = vResultPos;
+	m_tCombinedKeyFrameDesc.vRot = vResultRotRad;
+	m_tCombinedKeyFrameDesc.vSca = vResultSca;
+	m_tCombinedKeyFrameDesc.vScreenLT = vResultScreenLT;
+	m_tCombinedKeyFrameDesc.vScreenRB = vResultScreenRB;
+	m_tCombinedKeyFrameDesc.vBlendToOuterWidth = vResultOuterWidth;
+	m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha;
+
+	if (pParentCombinedDesc)
+		m_tCombinedKeyFrameDesc.fAlpha = fResultAlpha * pParentCombinedDesc->fAlpha;		// 알파값만 부모 키프레임값을 가져와 계산
+	
 
     pOwnerTransformCom->Set_WorldMatrix(matTransform);
 }

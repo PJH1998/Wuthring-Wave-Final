@@ -85,9 +85,9 @@ void CRoverGroundRun::Handle_Input()
     m_States[SKILL_Q] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
-    m_States[UNIQUE_E] = m_States[SKILL_E] && m_pRover->Is_UniqueGaugeFull();
+   /* m_States[UNIQUE_E] = m_States[SKILL_E] && m_pRover->Is_UniqueGaugeFull();
     m_States[UNIQUE_R] = m_States[SKILL_R] && m_pRover->Is_UniqueGaugeFull();
-    m_States[BURST_R] = m_States[SKILL_R] && m_pRover->Is_BurstGaugeFull();
+    m_States[BURST_R] = m_States[SKILL_R] && m_pRover->Is_BurstGaugeFull();*/
 
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));

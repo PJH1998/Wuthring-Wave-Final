@@ -1,7 +1,7 @@
 #include "Engine_Shader_Defines.hlsli"
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-texture2D g_DiffuseTexture;
+Texture2D g_DiffuseTexture;
 
 vector g_vCamPosition;
 
@@ -202,7 +202,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.r < 0.2f)
+    if (Out.vDiffuse.a < 0.3f)
         discard;
 
     Out.vDiffuse *= g_vColor;
@@ -238,9 +238,10 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
+
     Out.vDiffuse = g_vColor * Out.vDiffuse;
     
-    Out.vDiffuse.a = Out.vDiffuse.r; //?
+    //Out.vDiffuse.a = Out.vDiffuse.r; //?
     
     if (Out.vDiffuse.a < 0.3)
         discard;

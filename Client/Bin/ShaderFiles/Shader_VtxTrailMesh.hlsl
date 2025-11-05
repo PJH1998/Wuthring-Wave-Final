@@ -11,9 +11,10 @@ float   g_SweepWitdh;
 float   g_Soft = 0.3f;  //툴에서 받아올 수 있게 해주자.
 
 //공용
-int     g_Dir; //안쓰는중
+int     g_Dir;          //안쓰는중
 float   g_Time;
 float   g_Alpha;
+int   g_MaskFlag;     // 0이면 R로, 1이면 알파로
 
 //밝기 죽이기?
 float g_ColorGain;      // 밝기 스케일 0~1
@@ -89,7 +90,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
    
-    if (Out.vDiffuse.a < 0.2f)
+    if (Out.vDiffuse.a < 0.3f)
         discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -149,9 +150,24 @@ PS_OUT PS_TrailDefault(PS_IN In)
     
     float4 vMask = g_MaskTexture.Sample(ClampSampler, MaskUV);
     
-    if (vMask.r < 0.35f)
-        discard;
+    float MaskAlpha;
     
+    if( g_MaskFlag == 1)
+    {
+        if(vMask.a < 0.3f)
+            discard;
+        
+        MaskAlpha = vMask.a;
+
+    }
+    else
+    {
+        if (vMask.r < 0.35f)
+            discard;
+        
+        MaskAlpha = vMask.r;
+    }
+
     float2 ColorUV = In.vTexcoord;
     ColorUV -= g_Sweep; //X로 긴 텍스처니까 색상 움직이듯 보여질려면 이렇게 해야하나?
     float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, ColorUV);
@@ -160,23 +176,40 @@ PS_OUT PS_TrailDefault(PS_IN In)
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
     
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
     
-    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    float alpha;
     
-    float fVisible = fTailFad * fHeadFad;
+    if(g_Dir == 1)
+    {
+        float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
+    
+        float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    
+        float fVisible = fTailFad * fHeadFad;
    
-    float alpha = fVisible * vMask.a;
+        alpha = fVisible * MaskAlpha;
+    }
+    else
+    {
+        float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
     
-    Out.vDiffuse = float4(vColor.rgb * alpha, alpha);
+        float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep,1 - In.vTexcoord.x);
     
-    if (Out.vDiffuse.r < 0.35f)      //테스트
+        float fVisible = fTailFad * fHeadFad;
+   
+        alpha = fVisible * MaskAlpha;
+    }
+    
+    if (alpha < 0.3f)
         discard;
+    
+    Out.vDiffuse = float4(vColor.rgb, alpha);
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
     
     return Out;
 }

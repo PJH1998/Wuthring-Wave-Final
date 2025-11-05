@@ -11,17 +11,6 @@ CLevel_Animation::CLevel_Animation(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLevel_Animation::Initialize()
 {
-	LIGHT_DESC LightDesc{};
-	LightDesc.eType = LIGHT_DESC::DIRECTION;
-	LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
-	LightDesc.vDiffuse = _float4(0.8f, 0.8f, 1.f, 1.f);
-	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
-	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-
-	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
-	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-	m_pGameInstance->SetUp_ShadowNF();
-
     m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, m_eCurLevel);
 
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
@@ -47,7 +36,6 @@ HRESULT CLevel_Animation::Initialize()
         CRASH("Failed Load AnimMesh Shader");
         return E_FAIL;
     }
-
     return S_OK;
 }
 

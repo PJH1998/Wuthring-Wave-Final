@@ -84,6 +84,7 @@ private:
 	_bool						isAttackEnable();
 	_bool						DodgeCooldown();
 	_bool						Attack(_uint iIndex, _float fInterval);
+	void						Attack_Arrange();
 	_bool						Back();
 	_bool						Front();
 	_bool						Left();
