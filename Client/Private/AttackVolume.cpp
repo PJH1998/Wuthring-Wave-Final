@@ -8,6 +8,7 @@ CAttackVolume::CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CAttackVolume::CAttackVolume(const CAttackVolume& Prototype)
     : CGameObject{ Prototype }
+	, m_eType { Prototype.m_eType }
 {
 }
 
@@ -24,6 +25,7 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
     Ready_Component(pDesc);
 
+	m_eType = pDesc->eType;
 	m_pParenTransform = pDesc->pParenTransform;
 	Safe_AddRef(m_pParenTransform);
 
@@ -64,8 +66,11 @@ void CAttackVolume::Update(_float fTimeDelta)
 #endif // _DEBUG
 
 	_matrix ComBinedMatrix;
+
 	if (nullptr == m_pSocketMatrix)
 	{
+		if (nullptr == m_pParenTransform)
+			CRASH("need parent transform : Bone type");
 		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * m_pParenTransform->Get_WorldMatrix();
 	}
 	else
@@ -74,8 +79,12 @@ void CAttackVolume::Update(_float fTimeDelta)
 		_vector vScale, vQuaternion, vTransition;
 		XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
 		NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParenTransform->Get_WorldMatrix();
+		if(COMBINED_TYPE::BONE == m_eType)
+			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParenTransform->Get_WorldMatrix();
+		else
+			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix;
 	}
+
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 
 	m_pRigidBodyCom->Update_Rigidbody(ComBinedMatrix, fTimeDelta);
@@ -102,12 +111,12 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 	//m_pRigidBodyCom->IsActivate(isActivate);
 	if (isActivate)
 	{
-		//m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
 		m_eCurrentLayer = m_eLayer;
 	}
 	else
 	{
-		//m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
 	}
 	m_isActivate = isActivate;

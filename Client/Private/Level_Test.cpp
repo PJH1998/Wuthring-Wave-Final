@@ -200,19 +200,20 @@ void CLevel_Test::Ready_MonsterTest()
 		CRASH("Failed Ready Scythe");
 
 	// Havoc Warrior
-	//CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
-	//tDesc.eCurLevel = m_eCurLevel;
-	//tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	//tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	//tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
-	//tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	//tDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	//tDesc.fSpeedPerSec = 10.f;
-	//tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
-	//tDesc.pAnimationTag = "Stand1";
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
-	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
-	//	CRASH("Failed Ready Monster");
+	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+		CRASH("Failed Ready Monster");
 
 	// Electro Predator
 	//CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
@@ -221,6 +222,7 @@ void CLevel_Test::Ready_MonsterTest()
 	//ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 	//ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	//ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	//ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
 	//ADesc.fRotationPerSec = XMConvertToRadians(90.f);
 	//ADesc.fSpeedPerSec = 10.f;
 	//ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);

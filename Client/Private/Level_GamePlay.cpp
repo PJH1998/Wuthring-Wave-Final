@@ -137,7 +137,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
-	MobDesc.vInitPosition = _float3(3522.1f, 136.2f, 3379.2f);
+	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = 100.f;
