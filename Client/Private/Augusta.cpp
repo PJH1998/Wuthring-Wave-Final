@@ -287,7 +287,8 @@ void CAugusta::Hit_Judge(void* pArg)
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
 
     // 1. 맞았을 때 땅판정.
-    _bool IsLand = Is_Land(0.2f, 0.5f);
+    //_bool IsLand = Is_Land(0.2f, 0.5f);
+	_bool IsLand = true;
     
     // 2. 스킬 판정?
 	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);

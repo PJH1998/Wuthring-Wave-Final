@@ -45,7 +45,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[9] = 3.f;
 #pragma endregion
 	Ready_Component(pDesc);
-	//Ready_PartObjects(pDesc);
+	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	///////////////////////
 	m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));

@@ -37,7 +37,6 @@ HRESULT CPlayer::Initialize_Prototype()
 
 HRESULT CPlayer::Initialize_Clone(void* pArg)
 {
-
     PLAYER_DESC* pDesc = static_cast<PLAYER_DESC*>(pArg);
 
     m_eCurLevel = pDesc->eCurLevel;
@@ -489,9 +488,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     });
 
 
-	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollider_Enter(iLayer, pDesc, Manifold);
-	//	});
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

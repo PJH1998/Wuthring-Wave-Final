@@ -92,11 +92,6 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
-		// Clear Pre Resource
-		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
-		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
-		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
-
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
@@ -122,6 +117,11 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 		m_pShaderCom->Begin(m_iShaderPassIndex, pDeferredContext, pEffect);
 		
 		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
+
+		// Clear Pre Resource
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, pEffect);
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
+		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
 	}
 }
 
