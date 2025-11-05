@@ -91,91 +91,132 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
     EAugustaHitType eHitType = static_cast<EAugustaHitType>(m_iCurrentAnimIdx);
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
-    // 땅이 아닌 경우/
-    if (m_States[!LAND])
-    {
-        if (IsEscapePossible)
-        {
-            if (m_States[JUMP])
-            {
-                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
-                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
-                    || eHitType == EAugustaHitType::BEHIT_S_R || eHitType == EAugustaHitType::BEHIT_FLY_START
-                    || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
-                    return;
-                }
-            }
-        }
 
-        // 애니메이션이 끝났음에도 땅이 아니라면?
-        if (m_IsAnimationEnd)
-        {
-            if (eHitType == EAugustaHitType::BEHIT_FLY_START)
-            {
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP);
-                return;
-            }
+	if (IsEscapePossible)
+	{
+		if (m_States[LAND])
+		{
+			if (m_States[MOVE])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+		        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+				return;
+			}
+
+			if (m_States[JUMP])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+				return;
+			}
+		}
+	}
+
+	if (m_IsAnimationEnd)
+	{
+		if (m_States[LAND])
+		{
+			if (m_States[MOVE])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+				return;
+			}
+
+			if (m_States[JUMP])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+				return;
+			}
+		}
+	}
+
+    //// 땅이 아닌 경우/
+    //if (m_States[!LAND])
+    //{
+    //    if (IsEscapePossible)
+    //    {
+    //        if (m_States[JUMP])
+    //        {
+    //            if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+    //                || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+    //                || eHitType == EAugustaHitType::BEHIT_S_R || eHitType == EAugustaHitType::BEHIT_FLY_START
+    //                || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
+    //            {
+    //                m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
+    //                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+    //                return;
+    //            }
+    //        }
+    //    }
+
+    //    // 애니메이션이 끝났음에도 땅이 아니라면?
+    //    if (m_IsAnimationEnd)
+    //    {
+    //        if (eHitType == EAugustaHitType::BEHIT_FLY_START)
+    //        {
+    //            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP);
+    //            return;
+    //        }
 
 
-            if (eHitType == EAugustaHitType::BEHIT_PUSH_START)
-            {
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_LOOP);
-                return;
-            }
-        }
-    }
+    //        if (eHitType == EAugustaHitType::BEHIT_PUSH_START)
+    //        {
+    //            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_PUSH_LOOP);
+    //            return;
+    //        }
+    //    }
+    //}
 
-    // 땅인 경우.
-    if (m_States[LAND])
-    {
-        // 탈출 가능할때 키입력 확인.
-        if (IsEscapePossible)
-        {
-            if (m_States[JUMP])
-            {
-                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
-                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
-                    || eHitType == EAugustaHitType::BEHIT_S_R)
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
-                    return;
-                }
-            }
+    //// 땅인 경우.
+    //if (m_States[LAND])
+    //{
+    //    // 탈출 가능할때 키입력 확인.
+    //    if (IsEscapePossible)
+    //    {
+    //        if (m_States[JUMP])
+    //        {
+    //            if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+    //                || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+    //                || eHitType == EAugustaHitType::BEHIT_S_R)
+    //            {
+    //                m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_WALK_LF;
+    //                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
+    //                return;
+    //            }
+    //        }
 
-            if (m_States[MOVE])
-            {
-                if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
-                    || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
-                    || eHitType == EAugustaHitType::BEHIT_S_R)
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
-                    return;
-                }
-            }
-           
-        }
+    //        if (m_States[MOVE])
+    //        {
+    //            if (eHitType == EAugustaHitType::BEHIT_FLY_FALL || eHitType == EAugustaHitType::BEHIT_B_L
+    //                || eHitType == EAugustaHitType::BEHIT_B_R || eHitType == EAugustaHitType::BEHIT_S_L
+    //                || eHitType == EAugustaHitType::BEHIT_S_R)
+    //            {
+    //                m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+    //                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+    //                return;
+    //            }
+    //        }
+    //       
+    //    }
 
-        if (m_IsAnimationEnd)
-        {
-            if (eHitType == EAugustaHitType::BEHIT_FLY_START || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
-            {
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
-                return;
-            }
-            else 
-            {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-                return;
-            }
-            
-        }
-    }
+    //    if (m_IsAnimationEnd)
+    //    {
+    //        if (eHitType == EAugustaHitType::BEHIT_FLY_START || eHitType == EAugustaHitType::BEHIT_FLY_LOOP)
+    //        {
+    //            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+    //            return;
+    //        }
+    //        else 
+    //        {
+    //            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+    //            m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+    //            return;
+    //        }
+    //        
+    //    }
+    //}
     
 }
 
