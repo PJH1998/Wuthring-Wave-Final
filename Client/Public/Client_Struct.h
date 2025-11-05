@@ -83,6 +83,18 @@ namespace Client
 	}CHARACTER_INFO;
 
 
+	typedef struct tagMonsterInfo
+	{
+		_uint	iMonsterID;			//참조용 몬스터ID
+		_string strName;
+		_float	fMaxHp;
+		_float	fMaxStamina;		// 거랑급 이상 무력화 게이지
+		_float	fAttack;			// 기본 공격 값.
+		_float	fAttackAddMin;		// 공격 최소 값.
+		_float	fAttackAddMax;		// 공격 최대 값.
+
+
+	}MONSTER_INFO;
 	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
 	typedef struct tagUISkillSlot {
 		_string strKeyInput;      // "LB", "E", "Q" 등

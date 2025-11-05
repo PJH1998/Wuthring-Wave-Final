@@ -127,6 +127,22 @@ HRESULT CDeferredShader::Bind_Value(const _char* pConstantName, const void* pVal
 
 }
 
+HRESULT CDeferredShader::Clear_Textures(const _char* pConstantName, _uint iNumTexture, ID3DX11Effect* pEffect)
+{
+	ID3DX11EffectVariable* pVariable = pEffect->GetVariableByName(pConstantName);
+	if (nullptr == pVariable)
+		return E_FAIL;
+
+	ID3DX11EffectShaderResourceVariable* pSRVariable = pVariable->AsShaderResource();
+	if (nullptr == pSRVariable)
+		return E_FAIL;
+
+	ID3D11ShaderResourceView** nullSRV = new ID3D11ShaderResourceView * [iNumTexture] {nullptr};
+	pSRVariable->SetResourceArray(nullSRV, 0, iNumTexture);
+	Safe_Delete_Array(nullSRV);
+	return S_OK;
+}
+
 CDeferredShader* CDeferredShader::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, const _tchar* strFilePath, const D3D11_INPUT_ELEMENT_DESC* Elements, _uint iNumElements, const _wstring& strEffectTag)
 {
     CDeferredShader* pInstance = new CDeferredShader(pDevice, pContext);

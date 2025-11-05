@@ -106,6 +106,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
 							CRASH("Prototype Create Failed");
 						});
+					break;
 				}
 				//프로토타입 생성
 			}

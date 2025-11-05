@@ -37,7 +37,6 @@ HRESULT CPlayer::Initialize_Prototype()
 
 HRESULT CPlayer::Initialize_Clone(void* pArg)
 {
-
     PLAYER_DESC* pDesc = static_cast<PLAYER_DESC*>(pArg);
 
     m_eCurLevel = pDesc->eCurLevel;
@@ -339,8 +338,8 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer || ENUM_CLASS(COLLISIONLAYER::NONE) == iLayer)
 		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
     if (nullptr == pTargetTransform)
         return;
     m_TargetTransforms.push_back(pTargetTransform);
@@ -361,7 +360,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
 
 	CCharacter::HIT_DESC Desc{};
-	Desc.pTransform = static_cast<CTransform*>(pDesc);
+	Desc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 	Desc.fAttack = pClientDesc.fAttack;
 	Desc.iLayer = iLayer;
 
@@ -526,7 +525,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_pColliderCom->Set_Desc(m_pTransformCom);
-
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
     return S_OK;
 }
 
