@@ -80,16 +80,33 @@ void CRect_Controller::Rect_Tab()
 
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
-                    ImGui::DragInt("##ShaderPass", &(m_pSelectedRectDesc->fShaderPass), 1.f, 0, 6);
+                    ImGui::DragInt("##ShaderPass", &(m_pSelectedRectDesc->iShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
+
+					ImGui::Text("Mask");
+					ImGui::PushItemWidth(100);
+					if (ImGui::Button("R Cut"))
+						m_pSelectedRectDesc->iMaskFlag = 0;
+					ImGui::SameLine();
+					if (ImGui::Button("A Cut"))
+						m_pSelectedRectDesc->iMaskFlag = 1;
+					ImGui::PopItemWidth();
+
+					ImGui::Text("SweepSpeed");
+					ImGui::PushItemWidth(100);
+					ImGui::InputFloat("##SweepSpeed", &(m_pSelectedRectDesc->fSweepSpeed));
+					ImGui::PopItemWidth();
+
+					ImGui::Text("Soft");
+					ImGui::PushItemWidth(100);
+					ImGui::InputFloat("##Soft", &(m_pSelectedRectDesc->fSoft));
+					ImGui::PopItemWidth();
 
                     ImGui::Text("Size");
                     ImGui::PushItemWidth(60);
-                    ImGui::InputFloat("##RectSizeX", &(m_pSelectedRectDesc->vSize.x));
+                    ImGui::InputFloat("##RectSizeX", &(m_pSelectedRectDesc->fXSize));
                     ImGui::SameLine();
-                    ImGui::InputFloat("##RectSizeY", &(m_pSelectedRectDesc->vSize.y));
-                    ImGui::SameLine();
-                    ImGui::InputFloat("##RectSizeZ", &(m_pSelectedRectDesc->vSize.z));
+                    ImGui::InputFloat("##RectSizeY", &(m_pSelectedRectDesc->fYSize));
                     ImGui::PopItemWidth();
 
                     ImGui::Text("Position");
@@ -108,7 +125,13 @@ void CRect_Controller::Rect_Tab()
                     ImGui::InputFloat("##RectLifeTimeY", &(m_pSelectedRectDesc->vLifeTime.y));
                     ImGui::PopItemWidth();
 
-                    if (ImGui::ColorEdit4("Color", m_fColor, ImGuiColorEditFlags_AlphaBar | ImGuiColorEditFlags_AlphaPreview))
+                    if (ImGui::ColorEdit4("Color", m_fColor, 
+						ImGuiColorEditFlags_NoOptions          // 설정 메뉴 비활성화 (HSV 등 변환 방지)
+						| ImGuiColorEditFlags_NoInputs         // 텍스트 입력 비활성 (정확히 선택한 색 유지)
+						| ImGuiColorEditFlags_DisplayRGB       // 항상 RGB로 표시
+						| ImGuiColorEditFlags_InputRGB         // RGB 입력값으로 유지
+						| ImGuiColorEditFlags_AlphaBar         // 알파 바 표시
+						| ImGuiColorEditFlags_AlphaPreview))   // 알파 미리보기
                     {
                         m_pSelectedRectDesc->vColor = _float4(m_fColor[0], m_fColor[1], m_fColor[2], m_fColor[3]);
                     }

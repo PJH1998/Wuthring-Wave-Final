@@ -12,10 +12,12 @@ CVIBuffer_FXMesh_Instance::CVIBuffer_FXMesh_Instance(const CVIBuffer_FXMesh_Inst
     , m_pCBBuffer{ Prototype.m_pCBBuffer }
     , m_pSRV{ Prototype.m_pSRV }
     , m_pSRVBuffer{ Prototype.m_pSRVBuffer }
+	, m_pDefaultUAVBufer { Prototype.m_pDefaultUAVBufer}
 {
     Safe_AddRef(m_pCBBuffer);
     Safe_AddRef(m_pSRVBuffer);
     Safe_AddRef(m_pSRV);
+	Safe_AddRef(m_pDefaultUAVBufer);
 }
 
 HRESULT CVIBuffer_FXMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, const _char* pFilePath, const INSTANCE_DESC* pDesc)
@@ -413,4 +415,5 @@ void CVIBuffer_FXMesh_Instance::Free()
     Safe_Release(m_pSRVBuffer);
     Safe_Release(m_pUAVBuffer);
     Safe_Release(m_pUAV);
+	Safe_Release(m_pDefaultUAVBufer);
 }

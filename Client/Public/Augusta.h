@@ -116,6 +116,7 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 	virtual void	Render_Shadow() override;
+	virtual void	Render_OutLine() override;
 #pragma endregion
 
 
@@ -132,8 +133,6 @@ public:
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-
-	
 #endif // _DEBUG
 
 #pragma region 2. NOTIFY

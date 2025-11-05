@@ -53,6 +53,7 @@ private:
 	_float				m_fLimitDepth = { 300.f};
 	_float				m_fBlurDistanceScale = {2.f};
 
+
 private:
 	void				Setting_Bias(const _char* pName, _float* pFloat);
 

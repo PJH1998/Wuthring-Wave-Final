@@ -8,6 +8,11 @@ Texture2D g_SecondDiffuseTexture;
 Texture2D g_NormalTexture;
 Texture2D g_MaskTexture[4] : register(t8);
 
+matrix g_ShadowViewMatrix[4];
+matrix g_ShadowProjMatrix[4];
+
+float g_fOutLineRadius = 0.0015f;
+
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
 
@@ -47,7 +52,6 @@ VS_OUT VS_MAIN(VS_IN In)
     
     matrix matBone, matBW, matWV, matWVP;
     
-    
     uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
     uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
     uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
@@ -76,37 +80,6 @@ VS_OUT VS_MAIN(VS_IN In)
 
     return Out;
 }
-
-struct VS_OUT_SHADOW
-{
-    float4 vPosition : SV_POSITION;
-    float4 vProjPos : TEXCOORD0;
-};
-
-VS_OUT_SHADOW VS_SHADOW(VS_IN In)
-{
-    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
-    
-    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
-    matrix matBone =
-    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
-    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
-    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
-    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
-    
-    matrix matWV, matWVP;
-    
-    matWV = mul(g_WorldMatrix, g_ViewMatrix);
-    matWVP = mul(matWV, g_ProjMatrix);
-    
-    
-    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
-    Out.vPosition = mul(vPosition, matWVP);
-    Out.vProjPos = Out.vPosition;
-    
-    return Out;
-}
-
 
 struct PS_IN
 {
@@ -216,27 +189,137 @@ PS_OUT PS_AUGUSTA(PS_IN In)
 }
 
 
+/*------------------------------------------------SHADOW BEGIN------------------------------------------------*/
+
+struct VS_OUT_SHADOW
+{
+    float4 vPosition : POSITION;
+};
+
+VS_OUT_SHADOW VS_SHADOW(VS_IN In)
+{
+    VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
+    
+    uint iX = max(In.vBlendIndex.x, g_iNumBlendWeightsToUse);
+    uint iY = max(In.vBlendIndex.y, g_iNumBlendWeightsToUse);
+    uint iZ = max(In.vBlendIndex.z, g_iNumBlendWeightsToUse);
+    uint iW = max(In.vBlendIndex.w, g_iNumBlendWeightsToUse);
+    
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    matrix matBone =
+    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
+    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
+    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
+    
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    
+    Out.vPosition = mul(vPosition, g_WorldMatrix);
+
+    return Out;
+}
+
+struct GS_IN
+{
+    float4 vPosition : POSITION;
+};
+
+struct GS_OUT
+{
+    float4 vPosition : SV_POSITION;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+[maxvertexcount(12)]
+void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
+{
+    for (int Face = 0; Face < 4; Face++)
+    {
+        GS_OUT Out = (GS_OUT) 0;
+        Out.iIndex = Face;
+        
+        matrix matVP;
+        matVP = mul(g_ShadowViewMatrix[Face], g_ShadowProjMatrix[Face]);
+
+        for (int i = 0; i < 3; i++)
+        {
+            Out.vPosition = mul(In[i].vPosition, matVP);
+            Vertices.Append(Out);
+        }
+        Vertices.RestartStrip();
+    }
+}
+
 struct PS_IN_SHADOW
 {
     float4 vPosition : SV_POSITION;
-    float4 vProjPos : TEXCOORD0;
 };
 
-struct PS_OUT_LIGHTDEPTH
+void PS_SHADOW(PS_IN_SHADOW In)
 {
-    float4 vLightDepth : SV_TARGET0;
+    if (In.vPosition.z >= 1.f)
+        discard;
+}
+/*------------------------------------------------SHADOW END------------------------------------------------*/
+
+
+/*------------------------------------------------OULTINE BEGIN------------------------------------------------*/
+
+struct VS_OUT_OUTLINE
+{
+    float4 vPosition : SV_POSITION;
 };
 
-PS_OUT_LIGHTDEPTH PS_SHADOW(PS_IN_SHADOW In)
+VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
 {
-    PS_OUT_LIGHTDEPTH Out = (PS_OUT_LIGHTDEPTH) 0;
+    VS_OUT_OUTLINE Out = (VS_OUT_OUTLINE) 0;
     
-    //Out.vLightDepth = float4(In.vProjPos.w / g_fLightFar, 0.f, 0.f, 0.f);
-    Out.vLightDepth = float4(In.vProjPos.z, 0.f, 0.f, 0.f);
+    float fWeightW = 1.f - (In.vBlendWeight.x + In.vBlendWeight.y + In.vBlendWeight.z);
+    matrix matBone =
+    g_BoneMatrices[In.vBlendIndex.x] * In.vBlendWeight.x +
+    g_BoneMatrices[In.vBlendIndex.y] * In.vBlendWeight.y +
+    g_BoneMatrices[In.vBlendIndex.z] * In.vBlendWeight.z +
+    g_BoneMatrices[In.vBlendIndex.w] * fWeightW;
+    
+    matrix matWV;
+    
+    matWV = mul(g_WorldMatrix, g_ViewMatrix);
+   
+    float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    
+    vector vViewPos = mul(vPosition, matWV);
+    
+    vector vViewNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
+   
+    vViewNormal = float4(vViewNormal.x, vViewNormal.y, 0.f, 0.f);
+   
+    vector vOutLinePos = vViewPos + (vViewNormal * g_fOutLineRadius);
+    
+    Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     
     return Out;
 }
 
+struct PS_IN_OUTLINE
+{
+    float4 vPosition : SV_POSITION;
+};
+
+struct PS_OUT_OUTLINE
+{
+    float4 vColor : SV_TARGET0;
+};
+
+PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
+{
+    PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
+
+    Out.vColor = float4(0.3f, 0.15f, 0.f, 1.f);
+    
+    return Out;
+}
+
+/*------------------------------------------------OULTINE END------------------------------------------------*/
 
 technique11 DefaultTechnique
 {
@@ -275,13 +358,24 @@ technique11 DefaultTechnique
 
     pass Shadow // 3
     {
-        SetRasterizerState(RS_Default);
+        SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_SHADOW();
-        GeometryShader = NULL;
+        GeometryShader = compile gs_5_0 GS_SHADOW();
         PixelShader = compile ps_5_0 PS_SHADOW();
+    }
+ 
+    pass Outline //4
+    {
+        SetRasterizerState(RS_Cull_Front);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_OUTLINE();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_OUTLINE();
     }
     
 }

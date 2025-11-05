@@ -27,6 +27,7 @@ public:
 		_float	fSoft = 0.3f;
 
 		_int	iDirFlag = 0;
+		_int	iMaskFlag = 0;
 
 		_float	fColorSpeed = 1.f;
 		_float	fMaskSpeed = 1.f;
@@ -88,6 +89,9 @@ private:
 	_float						m_fMaskSweep = 0.f;
 	_float						m_fMaskSpeed = 3.f;
 	_float						m_fAlpha = {};
+
+	_int						m_iDirFalg = {};
+	_int						m_iMaskFlag = {};
 
 	_float3						m_vPos = {};
 	_float3						m_vColor = {};

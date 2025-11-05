@@ -998,7 +998,7 @@ void CAnimationTool::Render_Model_Detail()
             , TEXT("Layer_Actor"), pActor)))
         {
             MSG_BOX("Animation Actor 없습니다. ");
-            return;
+            return; 
         }
 
         m_ActorNames.emplace_back(WStringToString(wstrObjTag));
