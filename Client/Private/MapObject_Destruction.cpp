@@ -129,6 +129,8 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 	MultiByteToWideChar(CP_ACP, 0, pDesc->ModelName, -1, Name, strlen(pDesc->ModelName));
 	lstrcat(Model, Name);
 	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+	// 임시
+	V = 1;
 
 	m_pModelComArray.resize(V);
 
