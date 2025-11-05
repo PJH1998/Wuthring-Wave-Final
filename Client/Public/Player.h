@@ -57,8 +57,6 @@ public:
 #pragma region UI Interface
 	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
 	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
-
-
 #pragma endregion
 
 
@@ -114,6 +112,11 @@ private:
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
 	void Sorting_Target();
 	void Toggle_LockOn();
+
+#ifdef _DEBUG
+	_float3		m_vDebugTeleportPos = {};
+	void GUI_Teleport();
+#endif
 
 private:
 	HRESULT Ready_Players(const PLAYER_DESC* pDesc);

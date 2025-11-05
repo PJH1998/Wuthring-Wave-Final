@@ -133,6 +133,10 @@ void CPlayer::Update(_float fTimeDelta)
 
     Sorting_Target(); // Update => 
     Toggle_LockOn();
+
+#ifdef _DEBUG
+	GUI_Teleport();
+#endif
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
@@ -339,9 +343,10 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) || (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer) ||
-		(ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer))
+	// Detect Body 탐지용
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) 
 		return;
+
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
     CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
     if (nullptr == pTargetTransform)
@@ -422,10 +427,25 @@ void CPlayer::Toggle_LockOn()
     //}
 
     m_pTargetTransform = nullptr;
-    
 }
+#ifdef _DEBUG
+void CPlayer::GUI_Teleport()
+{
+	ImGui::Begin("Player Teleport");
 
+	ImGui::Text("[Position]");
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vDebugTeleportPos));
 
+	if (ImGui::Button("Apply"))
+	{
+		_vector vChagePos = XMVectorSetW(XMLoadFloat3(&m_vDebugTeleportPos), 1.f);
+		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
+		m_pColliderCom->Set_Position(vChagePos);
+	}
+
+	ImGui::End();
+}
+#endif
 HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
