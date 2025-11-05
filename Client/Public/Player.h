@@ -102,7 +102,7 @@ private:
 
 	_bool m_IsChanage = { false };
 	CHARACTERTYPE m_eNextCharacter = {};
-	
+	CALLBACK_CLIENT m_CallBack = {};
 
 	_float3 m_vColliderOffSet = {};
 	_float m_fColliderHeight = {};

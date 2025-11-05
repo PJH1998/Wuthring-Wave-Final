@@ -339,8 +339,7 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) || (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer) ||
-		(ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer))
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
 		return;
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
     CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
@@ -528,7 +527,12 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = 700.f;
+	//m_pColliderCom->Set_Desc(&m_CallBack);
+
 	m_pColliderCom->Set_Desc(m_pTransformCom);
+
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);
 		});
