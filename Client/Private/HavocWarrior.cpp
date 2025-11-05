@@ -33,7 +33,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 #pragma endregion
 
 	Ready_Component(pDesc);
-	Ready_PartObjects(pDesc);
+	//Ready_PartObjects(pDesc);
 	m_vDistanceRange = _float2(2.7f, 3.3f);
 	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;

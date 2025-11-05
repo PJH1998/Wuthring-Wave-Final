@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Corosaurus.h"
+#include "AttackVolume.h"
 
 CCorosaurus::CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CActor { pDevice, pContext }
@@ -26,7 +27,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 	m_vDistanceRange = _float2(4.f, 5.f);
 	Ready_Component(pDesc);
-	Ready_PartObjects(pDesc);
+	//Ready_PartObjects(pDesc);
 
 	return S_OK;
 }

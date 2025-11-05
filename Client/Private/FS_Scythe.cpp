@@ -24,7 +24,7 @@ HRESULT CFS_Scythe::Initialize_Clone(void* pArg)
 
 	SCYTHE_DESC* pDesc = static_cast<SCYTHE_DESC*>(pArg);
 	Ready_Component(pDesc);
-	Ready_PartObjects(pDesc);
+	//Ready_PartObjects(pDesc);
 	//Register_AllNotifies(pDesc->strFolderPath);
 
 	//for (size_t i = 0; i < 5; ++i)
@@ -225,10 +225,13 @@ void CFS_Scythe::Ready_PartObjects(SCYTHE_DESC* pDesc)
 
 void CFS_Scythe::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
-	if(wStrColliderTag == TEXT("Attack Trig"))
+	if(wStrColliderTag == TEXT("Attack"))
 	{
 		for (_uint i = 0; i < 5; ++i)
-			m_pAttackVolumes[i]->TriggerActivate(m_isVolumeActive[i]);
+		{
+			if(nullptr != m_pAttackVolumes[i])
+				m_pAttackVolumes[i]->TriggerActivate(m_isVolumeActive[i]);
+		}
 	}
 }
 
@@ -242,6 +245,14 @@ void CFS_Scythe::Object_Func(const _wstring& wStrObjectTag)
 
 void CFS_Scythe::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::NONE))
+		return;
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+#ifdef _DEBUG
+		cout << "On Hit! scythe)" << endl;
+#endif // _DEBUG
+	}
 }
 
 CFS_Scythe* CFS_Scythe::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

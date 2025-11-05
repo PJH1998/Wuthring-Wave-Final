@@ -348,7 +348,7 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
 
 	CCharacter::HIT_DESC Desc{};
-	Desc.pTransform = static_cast<CTransform*>(pDesc);
+	Desc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
 	Desc.fAttack = pClientDesc.fAttack;
 	Desc.iLayer = iLayer;
 

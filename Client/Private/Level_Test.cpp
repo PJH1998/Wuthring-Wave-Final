@@ -175,6 +175,7 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
 	Ggobul.fAttackDmg = MobDesc.fAttackDmg;
@@ -190,12 +191,13 @@ void CLevel_Test::Ready_MonsterTest()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
 	Tantacle.fAttackDamage = MobDesc.fAttackDmg;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
-		CRASH("Failed Ready Ggobul");
+		CRASH("Failed Ready Scythe");
 
 	// Havoc Warrior
 	//CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};

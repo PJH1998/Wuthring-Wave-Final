@@ -99,15 +99,15 @@ void CAttackVolume::Render()
 
 void CAttackVolume::TriggerActivate(_bool isActivate)
 {
-	m_pRigidBodyCom->IsActivate(isActivate);
+	//m_pRigidBodyCom->IsActivate(isActivate);
 	if (isActivate)
 	{
-		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
+		//m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
 		m_eCurrentLayer = m_eLayer;
 	}
 	else
 	{
-		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		//m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
 	}
 	m_isActivate = isActivate;

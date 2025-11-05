@@ -24,12 +24,13 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 
 	GGOBUL_DESC* pDesc = static_cast<GGOBUL_DESC*>(pArg);
 	Ready_Component(pDesc);
-	Ready_Volumes(pDesc);
+	//Ready_Volumes(pDesc);
 	//Register_AllNotifies(pDesc->strFolderPath);
 
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{
-		m_pAttackVolumes[i]->TriggerActivate(false);
+		if(nullptr != m_pAttackVolumes[i])
+			m_pAttackVolumes[i]->TriggerActivate(false);
 	}
 	m_pAttackTransform = m_pModelCom->Get_BoneMatrixPtr("HitCase");
 	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
@@ -50,7 +51,8 @@ void CGgobul::Update(_float fTimeDelta)
 	{
 		m_pModelCom->Clear_Animation(m_strAnimKey);
 		m_isActivate = false;
-		m_pAttackVolumes[m_eType]->TriggerActivate(false);
+		if (nullptr != m_pAttackVolumes[m_eType])
+			m_pAttackVolumes[m_eType]->TriggerActivate(false);
 		return;
 	}
 
@@ -257,8 +259,9 @@ void CGgobul::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Man
 
 void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
-	if(wStrColliderTag == TEXT("Attack Trig"))
-		m_pAttackVolumes[m_eType]->TriggerActivate(Isactive);
+	if(wStrColliderTag == TEXT("Attack"))
+		if (nullptr != m_pAttackVolumes[m_eType])
+			m_pAttackVolumes[m_eType]->TriggerActivate(Isactive);
 }
 
 void CGgobul::Effect_Active(const _wstring& wStrEffectTag)

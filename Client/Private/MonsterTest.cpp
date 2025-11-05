@@ -44,10 +44,12 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[8] = 4.f;
 	m_fAttackCoolTime[9] = 3.f;
 #pragma endregion
-	//Ready_PartObjects(pDesc);
 	Ready_Component(pDesc);
-	Ready_PartObjects(pDesc);
+	//Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
+	///////////////////////
+	m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
+	/////////////////////
 	m_fHP = 1;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fParalysisAcc = 5.f;
@@ -87,7 +89,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-
+	//_float temp{};
+	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -175,25 +178,25 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 
 void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
-	size_t Index = wStrColliderTag.find(TEXT("|"));
-	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
-	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
-
-	if (wstrTypeTag == TEXT("Attack"))
-	{
-		if(wstrPartTag == TEXT("HR"))
-			m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(Isactive);
-		else if(wstrPartTag == TEXT("HL"))
-			m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(Isactive);
-		else if (wstrPartTag == TEXT("WR"))
-			m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
-		else if (wstrPartTag == TEXT("WL"))
-			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
-	}
-	if (wstrTypeTag == TEXT("Gravity"))
-	{
-		m_pColliderCom->Set_Gravity(Isactive);
-	}
+	//size_t Index = wStrColliderTag.find(TEXT("|"));
+	//_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	//_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
+	//
+	//if (wstrTypeTag == TEXT("Attack"))
+	//{
+	//	if(wstrPartTag == TEXT("HR"))
+	//		m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(Isactive);
+	//	else if(wstrPartTag == TEXT("HL"))
+	//		m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(Isactive);
+	//	else if (wstrPartTag == TEXT("WR"))
+	//		m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
+	//	else if (wstrPartTag == TEXT("WL"))
+	//		m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
+	//}
+	//if (wstrTypeTag == TEXT("Gravity"))
+	//{
+	//	m_pColliderCom->Set_Gravity(Isactive);
+	//}
 }
 
 void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
@@ -325,7 +328,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
 	//Com_AnimMachine
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
+	if(FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_AnimMachine_FalseSovereign"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
 		CRASH("MonsterTest/Com_AnimMachine");
 
@@ -350,7 +353,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
 	//Com_BehaviorTree
-	if(FAILED(Add_Component(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_Test"),
+	if(FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_Component_BehaviorTree_Test"),
 		TEXT("MonsterTest/Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
@@ -378,7 +381,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 																		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WEAPON_L])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_L]);
-	m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(true);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Weapon003");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -388,7 +391,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WEAPON_R])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_R]);
-	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(true);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -398,7 +401,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(true);
 	
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -408,7 +411,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(true);
 
 }
 
@@ -467,7 +470,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 #ifdef _DEBUG
-		cout << "On Hit! (False Sovereign)" << endl;
+		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
 }
