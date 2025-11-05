@@ -12,15 +12,16 @@ public:
 	typedef struct tagAttackVolumeDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		const _float4x4* pSocketMatrix;
-		const _float4x4* pParentMatrix;
+		CTransform* pParenTransform;
 		
-		SHAPE	eShape;
-		COLLISIONLAYER eLayer;
-		COLLISIONLAYER eTargetLayer;
-		_float3 vExtent;
-		_float3 vOffsetPos;
-		_float3 vOffsetRadian;
-		function<void()> CollisionCallback;
+		SHAPE			eShape;
+		COLLISIONLAYER	eLayer;
+		COLLISIONLAYER	eTargetLayer;
+		_float			fAttackDmg;
+		_float3			vExtent;
+		_float3			vOffsetPos;
+		_float3			vOffsetRadian;
+		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
 	}ATKVOLUME_DESC;
 
 private:
@@ -41,15 +42,23 @@ public:
 
 private:
 	const _float4x4*	m_pSocketMatrix = { nullptr };
-	const _float4x4*	m_pParentMatrix = { nullptr };
+	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 
-	_float3 m_vOffsetPos{};
-	_float3 m_vOffsetRot{};
-	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
+#ifdef _DEBUG
+	_float3			m_vOffsetPos{};
+	_float3			m_vOffsetRot{};
+#else
+	_float4x4		m_OffsetMatrix{};
+#endif
 
-	function<void()> m_CollisionCallback;
+	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
+	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
+	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
+
+	CALLBACK_CLIENT			m_CallBack{};
+	function<void(_uint, void*, const ContactManifold&)> m_CollisionCallback;
 private:
 	void Ready_Component(ATKVOLUME_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
