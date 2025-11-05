@@ -113,6 +113,30 @@ HRESULT CTarget_Manager::Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencil
 	return S_OK;
 }
 
+HRESULT CTarget_Manager::SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag)
+{
+	ID3D11ShaderResourceView* pSRV[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT] = {
+	nullptr
+	};
+	pContext->PSSetShaderResources(0, D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT, pSRV);
+
+	list<CRenderTarget*>* pMRTs = Find_MRT(strMRTTag);
+	if (nullptr == pMRTs)
+		return E_FAIL;
+
+	ID3D11RenderTargetView* RTVs[8] = { nullptr };
+	_uint iNumRTV = {};
+
+	for (auto& pRenderTarget : *pMRTs)
+	{
+		RTVs[iNumRTV++] = pRenderTarget->Get_RTV();
+	}
+
+	pContext->OMSetRenderTargets(iNumRTV, RTVs, m_pOriginalDSV);
+
+    return S_OK;
+}
+
 void CTarget_Manager::End_MRT()
 {
 	m_pContext->OMSetRenderTargets(1, &m_pBackBuffer, m_pOriginalDSV);

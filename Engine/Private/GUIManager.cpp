@@ -32,6 +32,16 @@ void CGUIManager::Use_Gizmo(CTransform* pTransform)
 	Safe_AddRef(m_pTransform);
 }
 
+void CGUIManager::Use_Gizmo_Offset(_float3* pScale, _float3* pRotation, _float3* pTranslation)
+{
+	if (nullptr == pScale || nullptr == pRotation || nullptr == pTranslation)
+		return;
+
+	m_pScale = pScale;
+	m_pRotation = pRotation;
+	m_pTranslation = pTranslation;
+}
+
 void CGUIManager::Render_Gizmo(const _fmatrix& Matrix)
 {
 	_float4x4 ViewMatrix = {};
@@ -94,6 +104,7 @@ void CGUIManager::Update()
 		Func();
 
 	Gizmo();
+	Gizmo_Offset();
 
 	// ImGui Render
 	if (m_pGameInstance->Get_DIKeyState(DIK_END) == KEYSTATE::DOWN)
@@ -174,6 +185,102 @@ void CGUIManager::Gizmo()
 		reinterpret_cast<const _float*>(&vTranslation),
 		reinterpret_cast<const _float*>(&vRotation),
 		reinterpret_cast<const _float*>(&vScale),
+		reinterpret_cast<_float*>(&m_ObjectWorldMatrix)
+	);
+
+	if (ImGuizmo::SCALE != m_CurrentGizmoMode)
+	{
+		if (ImGui::RadioButton("Local", m_CurrentGizmoMode == ImGuizmo::LOCAL))
+			m_CurrentGizmoMode = ImGuizmo::LOCAL;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("World", m_CurrentGizmoMode == ImGuizmo::WORLD))
+			m_CurrentGizmoMode = ImGuizmo::WORLD;
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
+		m_isSnap = !m_isSnap;
+
+	//ImGui::Separator();
+#pragma region Gizmo
+	ImGuiIO io = ImGui::GetIO();
+	ImGui::Text("X: %f Y: %f", io.MousePos.x, io.MousePos.y);
+	//POINT ptMouse = m_pGameInstance->Get_MousePoint();
+	//io.MousePos = ImVec2(ptMouse.x, ptMouse.y);
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::PRESS)
+		io.MouseDown[0] = true;
+
+	//ImGui::SetNextWindowPos(ImVec2(0, 0));
+	//ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y));
+	//ImGui::Begin("Gizmo", 0, ImGuiWindowFlags_NoInputs);
+
+
+	_float4x4 ViewMatrix = {};
+	_float4x4 ProjMatrix = {};
+	XMStoreFloat4x4(&ViewMatrix, m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW));
+	XMStoreFloat4x4(&ProjMatrix, m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ));
+	//XMStoreFloat4x4(&ViewMatrix, XMMatrixTranspose(m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW)));
+	//XMStoreFloat4x4(&ProjMatrix, XMMatrixTranspose(m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ)));
+
+#pragma endregion
+	ImGui::End();
+
+	ImGuizmo::SetRect(0.f, 0.f, io.DisplaySize.x, io.DisplaySize.y);
+	//ImGuizmo::SetRect(0.f, 0.f, 1920.f, 1080.f);
+	ImGuizmo::BeginFrame();
+	ImGuizmo::Manipulate(
+		reinterpret_cast<const _float*>(&ViewMatrix),
+		reinterpret_cast<const _float*>(&ProjMatrix),
+		m_CurrentGizmoOperation,
+		m_CurrentGizmoMode,
+		reinterpret_cast<_float*>(&m_ObjectWorldMatrix)
+	);
+}
+
+void CGUIManager::Gizmo_Offset()
+{
+	if (nullptr == m_pScale || nullptr == m_pRotation || nullptr == m_pTranslation)
+		return;
+
+	ImGui::Begin("Editor Transform");
+
+	if (ImGuizmo::IsUsing())
+	{
+		ImGui::Text("Using gizmo");
+		// Scale, Rotation, Traslation 媛깆떊
+		ImGuizmo::DecomposeMatrixToComponents(
+			reinterpret_cast<const _float*>(&m_ObjectWorldMatrix),
+			reinterpret_cast<_float*>(m_pTranslation),
+			reinterpret_cast<_float*>(m_pRotation),
+			reinterpret_cast<_float*>(m_pScale)
+		);
+	}
+	else
+	{
+		ImGui::Text(ImGuizmo::IsOver() ? "Over gizmo" : "");
+		ImGui::Text(ImGuizmo::IsOver(ImGuizmo::TRANSLATE) ? "Over translate gizmo" : "");
+		ImGui::SameLine();
+		ImGui::Text(ImGuizmo::IsOver(ImGuizmo::ROTATE) ? "Over rotate gizmo" : "");
+		ImGui::SameLine();
+		ImGui::Text(ImGuizmo::IsOver(ImGuizmo::SCALE) ? "Over scale gizmo" : "");
+	}
+
+	ImGuizmo::SetDrawlist();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_Q) == KEYSTATE::DOWN)
+		m_CurrentGizmoOperation = ImGuizmo::TRANSLATE;
+	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+		m_CurrentGizmoOperation = ImGuizmo::SCALE;
+	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::DOWN)
+		m_CurrentGizmoOperation = ImGuizmo::ROTATE;
+
+	ImGui::InputFloat3("Scale", reinterpret_cast<_float*>(m_pScale));
+	ImGui::InputFloat3("Rotation", reinterpret_cast<_float*>(m_pRotation));
+	ImGui::InputFloat3("Translation", reinterpret_cast<_float*>(m_pTranslation));
+
+	ImGuizmo::RecomposeMatrixFromComponents(
+		reinterpret_cast<const _float*>(m_pTranslation),
+		reinterpret_cast<const _float*>(m_pRotation),
+		reinterpret_cast<const _float*>(m_pScale),
 		reinterpret_cast<_float*>(&m_ObjectWorldMatrix)
 	);
 

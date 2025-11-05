@@ -50,6 +50,9 @@ void CEditDummy_Map::Render()
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+	
+	_bool IsDynamicObject = false;
+	m_pShaderCom->Bind_Value("g_IsDynamicObject", &IsDynamicObject, sizeof(_bool));
 
 	_uint iNumMesh = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMesh; ++i)

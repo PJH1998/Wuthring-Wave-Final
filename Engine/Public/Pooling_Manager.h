@@ -10,6 +10,9 @@ private:
 	virtual ~CPooling_Manager() = default;
 
 public:
+	_uint									Get_NumThread() { return m_iNumThread; }
+
+public:
 	HRESULT								Initialize();
 
 	// Object Pooling
@@ -20,8 +23,9 @@ public:
 
 	// Thread Pooling
 	void									Add_Work(function<void()> Work);
+	void									Add_Render_Work(function<void()> Work);
 	_bool									IsWorkFinish() { 
-		this_thread::sleep_for(chrono::milliseconds(1));
+		this_thread::sleep_for(chrono::nanoseconds(10));
 		_int iLiveWork = m_iLiveWork.load(memory_order_acquire);
 		_int iRemainWork = m_iRemainWork.load(memory_order_acquire);
 		return 0 == iLiveWork && 0 == iRemainWork; }
@@ -37,14 +41,25 @@ private:
 
 	// Thread
 	vector<thread>					m_Threads;
+	// Render Thread
+	vector<thread>					m_RenderThreads;
+
 	// Hardware Supported CPU Core
 	_uint								m_iNumThread = {};
-	// Thread???좊떦???묒뾽??
+	// CPU Works 
 	queue<function<void()>>	m_Works;
+	// Render Works
+	queue<function<void()>>	m_RenderWorks;
 	// Mutex (Data)
 	mutex								m_Mutex;
-	// Thread Wait ?곹깭 留뚮뱾湲??꾪븳 媛앹껜
+	// Mutex (Render)
+	mutex								m_RenderMutex;
+
+	// Thread Wait (CPU)
 	condition_variable				m_CV;
+	// Thread Wait (GPU)
+	condition_variable				m_RenderCV;
+
 	// Thread All Stop
 	_bool								m_isAllStop = { false };
 	// 진행중인 Work Count
@@ -54,6 +69,7 @@ private:
 
 private:
 	void									Work_Thread();
+	void									Render_Thread();
 
 public:
 	static		CPooling_Manager*	Create();
