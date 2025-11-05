@@ -325,8 +325,8 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
 		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
     if (nullptr == pTargetTransform)
         return;
     m_TargetTransforms.push_back(pTargetTransform);
