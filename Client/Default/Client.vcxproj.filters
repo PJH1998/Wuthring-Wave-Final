@@ -235,6 +235,9 @@
     <Filter Include="01. GameSystem\PlayerStatus">
       <UniqueIdentifier>{dc0998f1-d9ed-4465-91f2-b7faeceee93b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\Corrosaurus">
+      <UniqueIdentifier>{c59da4dd-7fea-4db6-aa1b-7da52d69e092}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -541,6 +544,9 @@
     <ClInclude Include="..\Public\PlayerStatus.h">
       <Filter>01. GameSystem\PlayerStatus</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Corosaurus.h">
+      <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -815,6 +821,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\PlayerStatus.cpp">
       <Filter>01. GameSystem\PlayerStatus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Corosaurus.cpp">
+      <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

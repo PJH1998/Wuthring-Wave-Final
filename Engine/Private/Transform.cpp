@@ -2,6 +2,7 @@
 #include "Transform.h"
 
 #include "Shader.h"
+#include "DeferredShader.h"
 #include "Navigation.h"
 
 CTransform::CTransform(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -26,6 +27,11 @@ HRESULT CTransform::Initialize_Clone(void* pArg)
 HRESULT CTransform::Bind_Matrix(class CShader* pShader, const _char* ConstantName)
 {
 	return pShader->Bind_Matrix(ConstantName, &m_WorldMatrix);
+}
+
+HRESULT CTransform::Bind_Matrix(CDeferredShader* pShader, const _char* ConstantName, ID3DX11Effect* pEffect)
+{
+	return pShader->Bind_Matrix(ConstantName, &m_WorldMatrix, pEffect);
 }
 
 void CTransform::Scale(_float3 vScale)

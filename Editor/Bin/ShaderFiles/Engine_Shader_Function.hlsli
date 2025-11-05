@@ -1,3 +1,6 @@
+#ifndef Engine_Shader_Function_h__
+#define Engine_Shader_Function_h__
+
 #include "Engine_Shader_State.hlsli"
 
 static float PI = 3.1415926535f;
@@ -16,12 +19,20 @@ vector g_vCamPosition;
 float g_fWidth = 1920.f;
 float g_fHeight = 1080.f;
 
-float g_iShadowMapSizeX = 8192;
-float g_iShadowMapSizeY = 4608;
-
 float g_fFocusDepth;
 float g_fFocusMinCoc;
 float g_fFocusRange;
+
+cbuffer ShadowMapDatas : register(b2)
+{
+//    int iNumSectorX;
+//    int iNumSectorToLayer;
+//    float Padding0[2];
+//    float2 vSectorWorldSize;
+//    float Padding1[2];
+//    float2 vMin;
+//    float Padding2[2];
+};
 
 float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , 미세면 표면의 거칠기 분포
 {
@@ -115,9 +126,9 @@ float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
     
     fRimPower = 1.f - abs(dot(vNormal, vLook));
     
-    fRimPower *= smoothstep(0.2f, 1.f, NdotL);
+    fRimPower *= smoothstep(0.5f, 1.f, NdotL);
     
-    fRimPower = pow(fRimPower, 3.f);
+    fRimPower = pow(fRimPower, 5.f);
     
     return fRimPower;
 }
@@ -211,41 +222,6 @@ float4 Compute_Normal(Texture2D NormalTexture, sampler Sampler, float2 vTexcoord
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
     return vNormal;
-}
-
-float ShadowPCF(float3 UVDepth, int iCascadeIndex, int iNumWeight, Texture2DArray<float> ShadowMap)
-{
-    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
-    float fShadow = 0.f;
-    
-    [unroll]
-    for (int x = -iNumWeight; x <= iNumWeight; ++x)
-    {
-        [unroll]
-        for (int y = -iNumWeight; y <= iNumWeight; ++y)
-        {
-            float2 vOffset = float2(x, y) * vTexelSize;
-            
-            fShadow += ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(UVDepth.xy + vOffset, iCascadeIndex), UVDepth.z);
-        }
-    }
-    
-    fShadow = fShadow / pow((iNumWeight * 2 + 1), 2);
-    
-    return fShadow;
-}
-
-float RPB_Gradiant(float fViewDepth)
-{
-    float DepthDDX = ddx(fViewDepth * 0.0001f);
-    float DepthDDY = ddy(fViewDepth * 0.0001f);
-    
-    float GradiantX = abs(DepthDDX);
-    float GradiantY = abs(DepthDDY);
-    
-    float Gradiant = length(float2(GradiantX, GradiantY));
-   
-    return Gradiant;
 }
 
 bool Outline(sampler Sampler, float2 UV, float fCompareDepth, float fWeight, Texture2D DepthTexture)
@@ -350,22 +326,8 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
 
 float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
 {
-    //float fDepth = DepthTexture.Sample(DefaultSampler, vTexcoord).y;
-    
     float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
-    
-//    float3 vViewDir = normalize(vViewPos.xyz);
-    
-    
-//    float3 vCamDir = float3(0.f, 0.f, 1.f);
-    
-    //float fDot = dot(vViewDir, vCamDir);
-    //float fDepth = fDot * vViewPos.z;
-    
-    //float fCoc = 0.f;
-    
-    //fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (fDepth * g_fFocusRange));
-    
+
     float3 vCamDir = float3(0.f, 0.f, g_fFocusDepth);
     float3 vViewDir = vViewPos.xyz - vCamDir;
     
@@ -399,16 +361,5 @@ float Noise(float2 St)
     return lerp(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
-bool IsInNDC(float4 vProjPos)
-{
-    if(vProjPos.x > 1.f || vProjPos.x < -1.f)
-        return false;
-    
-    if (vProjPos.y > 1.f || vProjPos.y < -1.f)
-        return false;
-    
-    if (vProjPos.z > 1.f || vProjPos.z < 0.f)
-        return false;
-    
-    return true;
-}
+
+#endif //Engine_Shader_Function_h__

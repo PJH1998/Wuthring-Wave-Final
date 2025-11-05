@@ -40,6 +40,10 @@ public:
 	SKILL_STATE TryUseSkill(const _string& strSkillName); // 스킬 사용 시도
 	void Set_Cost(COST_TYPE eType, _float fCost);
 	void Add_Cost(COST_TYPE eType, _float fCost);
+	void Set_Hp(_float fHp);
+	void Add_Hp(_float fHp);
+
+	
 
 #pragma endregion
 

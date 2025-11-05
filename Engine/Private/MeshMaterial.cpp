@@ -2,6 +2,7 @@
 #include "MeshMaterial.h"
 
 #include "Shader.h"
+#include "DeferredShader.h"
 
 CMeshMaterial::CMeshMaterial(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice }, m_pContext { pContext}
@@ -53,6 +54,27 @@ HRESULT CMeshMaterial::Bind_Resource(CShader* pShader, const _char* pConstantNam
 	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())
 		return E_FAIL;
 	return pShader->Bind_Textures(pConstantName, &m_SRVs[ENUM_CLASS(eTextureType)].front(), m_SRVs[ENUM_CLASS(eTextureType)].size());
+}
+
+HRESULT CMeshMaterial::Bind_Resource(CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+{
+	if (iTextureIndex >= m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+	return pShader->Bind_Texture(pConstantName, m_SRVs[ENUM_CLASS(eTextureType)][iTextureIndex], pEffect);
+}
+
+HRESULT CMeshMaterial::Bind_Resource(CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+	return pShader->Bind_Textures(pConstantName, &m_SRVs[ENUM_CLASS(eTextureType)].front(), m_SRVs[ENUM_CLASS(eTextureType)].size(), pEffect);
+}
+
+HRESULT CMeshMaterial::Clear_Resource(CDeferredShader* pShader, const _char* pConstantName, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (0 == m_SRVs[ENUM_CLASS(eTextureType)].size())
+		return E_FAIL;
+	return pShader->Clear_Textures(pConstantName, m_SRVs[ENUM_CLASS(eTextureType)].size(), pEffect);
 }
 
 HRESULT CMeshMaterial::Load_File(const _char* pFilePath, const json& MaterialData, const _char* pTextureTag, TEXTURETYPE eTextureType)

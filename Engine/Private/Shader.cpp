@@ -41,7 +41,6 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
 	if (nullptr == m_pEffect) // m_pEffect.Get()을 쓸 필요 없이 바로 비교 가능
 		return E_FAIL;
 
-
     ID3DX11EffectTechnique* pTechnique = m_pEffect->GetTechniqueByIndex(0);
     if (nullptr == pTechnique)
         return E_FAIL;
@@ -79,6 +78,16 @@ HRESULT CShader::Begin(_uint iPassIndex)
     m_pContext->IASetInputLayout(m_InputLayouts[iPassIndex]);
 
     return S_OK;
+}
+
+HRESULT CShader::Begin(_uint iPassIndex, ID3D11DeviceContext* pDC)
+{
+	if (FAILED(m_pEffect->GetTechniqueByIndex(0)->GetPassByIndex(iPassIndex)->Apply(0, pDC)))
+		return E_FAIL;
+
+	pDC->IASetInputLayout(m_InputLayouts[iPassIndex]);
+
+	return S_OK;
 }
 
 HRESULT CShader::Bind_Matrix(const _char* pConstantName, const _float4x4* pMatrix)

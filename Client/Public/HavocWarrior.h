@@ -18,6 +18,8 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float fHp;
+		_float fAttackDmg;
 	}HAVOCWARRIOR_DESC;
 
 private:
@@ -36,7 +38,7 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive);
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive);
 	virtual void Effect_Active(const _wstring& wStrEffectTag);
 
 private:
@@ -57,12 +59,16 @@ private:
 	_float					m_fDistance{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
+	_float2					m_vDistanceRange{};
 
-	_int					m_iHP{};
+	_float					m_fHP{};
+	_float					m_fAttackDmg{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
+
+	CALLBACK_CLIENT			m_tCallDesc{};
 
 private:
 	HRESULT						Bind_Resources();
@@ -74,7 +80,7 @@ private:
 	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
-	void						OnTriggerTest();
+	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						Patrol();
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

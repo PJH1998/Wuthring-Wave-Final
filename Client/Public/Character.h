@@ -4,6 +4,13 @@
 NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
+public:
+	typedef struct tagHitDesc
+	{
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+	}HIT_DESC;
 
 public:
 	using EnsembleEndCallback = function<void()>;
@@ -93,6 +100,7 @@ public:
 
 #pragma region STATE
 public:
+
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
 
@@ -142,11 +150,9 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
-	void Rotate_HitTarget();
+	void Rotate_HitTarget(class CTransform* pTransform);
 
 	// Turn
-	
-
 	
 	// Transform
 	void Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevVeloctiy, _float fTimeDelta);

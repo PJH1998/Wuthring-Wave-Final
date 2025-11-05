@@ -48,6 +48,8 @@ private:
 
 public:
 	void							Set_Position(const _fvector& vPos);
+	// Data (void*)
+	void							Set_Desc(void* pData) { m_tCollisionData.pDesc = pData; }
 
 public:
 	virtual		HRESULT			Initialize_Prototype()			override;

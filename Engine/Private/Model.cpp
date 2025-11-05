@@ -318,9 +318,33 @@ HRESULT CModel::Bind_Materials(CShader* pShader, const _char* pConstantName, _ui
 
 }
 
+HRESULT CModel::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return E_FAIL;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
+}
+
+HRESULT CModel::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return S_OK;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
+}
+
 HRESULT CModel::Bind_BoneMatrices(CShader* pShader, const _char* pConstantName, _uint iMeshIndex)
 {
 	return m_Meshes[iMeshIndex]->Bind_BoneMatrices(pShader, pConstantName, m_Bones);
+}
+
+HRESULT CModel::Clear_Materials(CDeferredShader* pShader, const _char* pConstanceName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return S_OK;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Clear_Resource(pShader, pConstanceName, eTextureType, pEffect);
 }
 
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
@@ -376,7 +400,6 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 
 	return false;
 }
-
 
 _bool CModel::Play_Animation_GPU(CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion, _bool isRootMotionRotate, _bool isRootMotionTranslate, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
@@ -537,6 +560,15 @@ HRESULT CModel::Render(_uint iMeshIndex)
 		return E_FAIL;
 	m_Meshes[iMeshIndex]->Render();
 	
+	return S_OK;
+}
+
+HRESULT CModel::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+{
+	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources(pDC)))
+		return E_FAIL;
+	m_Meshes[iMeshIndex]->Render(pDC);
+
 	return S_OK;
 }
 

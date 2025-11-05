@@ -24,6 +24,19 @@ HRESULT CLevel_Test::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
+	//TEST
+	//SHADOW_MAP_DESC ShadowMapDesc = {};
+	//ShadowMapDesc.iNumSectorX = 2;
+	//ShadowMapDesc.iNumSectorZ = 2;
+	//ShadowMapDesc.iSectorSizeX = 2048;
+	//ShadowMapDesc.iSectorSizeZ = 2048;
+	//ShadowMapDesc.vCenterPos = _float3(0.f, 0.f, 0.f);
+	//ShadowMapDesc.vExtents = _float3(500.f, 250.f, 500.f);
+	//ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+
+	//if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
+	//	CRASH("Test");
+
 	//로더에서 부른 것과 같은 거 부르기.
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
@@ -76,18 +89,6 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
 	Ready_Skybox();
-
-	//TEST
-	CShadowMap::SHADOW_MAP_DESC ShadowMapDesc = {};
-	ShadowMapDesc.iNumSectorX = 2;
-	ShadowMapDesc.iNumSectorY = 2;
-	ShadowMapDesc.iSectorSizeX = 2048;
-	ShadowMapDesc.iSectorSizeY = 2048;
-	ShadowMapDesc.vCenterPos = _float3(3000.f, 0.f, 2000.f);
-	ShadowMapDesc.vExtents = _float3(1000.f, 500.f, 1000.f);
-	ShadowMapDesc.vLightDir = _float3(1.f, -0.5f, -1.f);
-
-	//CShadowMap* Test = CShadowMap::Create(m_pDevice, m_pContext, ShadowMapDesc);
 
     return S_OK;
 }
@@ -150,20 +151,21 @@ void CLevel_Test::Ready_Dummy()
 void CLevel_Test::Ready_MonsterTest()
 {
 	// False Sovereign
-    //CMonsterTest::MONSTERTEST_DESC MobDesc{};
-    //MobDesc.eCurLevel = m_eCurLevel;
-    //MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-    //MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-    //MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
-    //MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-    //MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
-    //MobDesc.fSpeedPerSec = 10.f;
-    //MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
-    //MobDesc.pAnimationTag = "Born1";
-	//MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
-    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
-    //    ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
-    //    CRASH("Failed Ready MonsterTest");
+    CMonsterTest::MONSTERTEST_DESC MobDesc{};
+    MobDesc.eCurLevel = m_eCurLevel;
+    MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
+    MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+    MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    MobDesc.fSpeedPerSec = 10.f;
+    MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+    MobDesc.pAnimationTag = "Born1";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	MobDesc.fAttackDmg = 1.f;
+    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+        ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+        CRASH("Failed Ready MonsterTest");
 
 	//Ggobul
 	CGgobul::GGOBUL_DESC Ggobul{};
@@ -173,8 +175,10 @@ void CLevel_Test::Ready_MonsterTest()
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
 	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
 	Ggobul.fSpeedPerSec = 10.f;
+	Ggobul.fAttackDmg = MobDesc.fAttackDmg;
 	if(FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel),TEXT("Prototype_GameObject_Ggobul"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"),TEXT("Pool_Ggobul"), 3, &Ggobul)))
 		CRASH("Failed Ready Ggobul");
@@ -187,26 +191,28 @@ void CLevel_Test::Ready_MonsterTest()
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
 	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
 	Tantacle.fSpeedPerSec = 10.f;
+	Tantacle.fAttackDamage = MobDesc.fAttackDmg;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
-		CRASH("Failed Ready Ggobul");
+		CRASH("Failed Ready Scythe");
 
 	// Havoc Warrior
-	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
-	tDesc.eCurLevel = m_eCurLevel;
-	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
-	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	tDesc.fSpeedPerSec = 10.f;
-	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
-	tDesc.pAnimationTag = "Stand1";
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
-		CRASH("Failed Ready Monster");
+	//CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	//tDesc.eCurLevel = m_eCurLevel;
+	//tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	//tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	//tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	//tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	//tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	//tDesc.fSpeedPerSec = 10.f;
+	//tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	//tDesc.pAnimationTag = "Stand1";
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+	//	CRASH("Failed Ready Monster");
 
 	// Electro Predator
 	//CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
@@ -246,6 +252,7 @@ void CLevel_Test::Ready_Skybox()
 void CLevel_Test::Shader_Gui()
 {
 	ImGui::Begin("Test");
+
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{

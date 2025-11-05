@@ -68,6 +68,8 @@ protected:
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_float m_fTrackPosition = {};
 
+	CALLBACK_CLIENT m_CallBack = {};
+
 protected:
 	void Register_AllNotifies(const _string& strFolderPath);
 	void Register_AbilityFiles(const _string& strFolderPath);

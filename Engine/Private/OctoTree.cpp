@@ -43,6 +43,7 @@ void COctoTree::Update()
 	if (nullptr == m_pRootCell)
 		return;
 
+	m_iLODCnt.store(0);
 	m_pRootCell->Update(XMLoadFloat4(m_pGameInstance->Get_CamPos()));
 }
 

@@ -34,7 +34,7 @@ void CAugustaHit::OnEnter()
     State_Reset();
 
     // 4. 현재 때린 객체를 바라보게.? 임시로 Target
-    m_pAugusta->Rotate_HitTarget();
+    //m_pAugusta->Rotate_HitTarget();
 
 
     m_pAugusta->Set_Gravity(true);

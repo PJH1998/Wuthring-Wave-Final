@@ -19,8 +19,8 @@ HRESULT CRendererSubResource::Initialize()
 
     //SSAO
     m_iNumKernel = 16;
-    m_fRadius = 3.f;
-    m_fMaxDistance = 5.f;
+    m_fRadius = 1.f;
+    m_fMaxDistance = 3.f;
     m_fOutDistance = 500.f;
     
     // SSAO_Blur

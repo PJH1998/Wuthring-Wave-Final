@@ -2,6 +2,8 @@
 #include "Level_GamePlay.h"
 #include"GameSystem.h"
 #include "MonsterTest.h"
+#include "Ggobul.h"
+#include "FS_Scythe.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -15,6 +17,20 @@ CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 HRESULT CLevel_GamePlay::Initialize()
 {
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+
+	//TEST
+	SHADOW_MAP_DESC ShadowMapDesc = {};
+	ShadowMapDesc.iNumSectorX = 8;
+	ShadowMapDesc.iNumSectorZ = 8;
+	ShadowMapDesc.iSectorSizeX = 2048;
+	ShadowMapDesc.iSectorSizeZ = 2048;
+
+	ShadowMapDesc.vCenterPos = _float3(2200.f, 150.f, 1200.f);
+	ShadowMapDesc.vExtents = _float3(128.f, 300.f, 128.f);
+	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
+
+	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
+		CRASH("Test");
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 
@@ -46,7 +62,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	// _UI
 
 	Ready_Layer_Player();
-	
+	Ready_MonsterTest();
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
@@ -63,6 +79,9 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 void CLevel_GamePlay::Render()
 {
+#ifdef _DEBUG
+	Shader_Gui();
+#endif
 }
 
 void CLevel_GamePlay::Ready_Layer_Player()
@@ -118,11 +137,46 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
-	MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	MobDesc.vInitPosition = _float3(3522.1f, 136.2f, 3379.2f);
 	MobDesc.pAnimationTag = "Born1";
+	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	MobDesc.fHP = 100.f;
+	MobDesc.fAttackDmg = 1.f;
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
+
+	//Ggobul
+	CGgobul::GGOBUL_DESC Ggobul{};
+	Ggobul.eCurLevel = m_eCurLevel;
+	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
+	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
+	Ggobul.fSpeedPerSec = 10.f;
+	Ggobul.fAttackDmg = MobDesc.fAttackDmg;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Ggobul"), 3, &Ggobul)))
+		CRASH("Failed Ready Ggobul");
+
+	//Scythe
+	CFS_Scythe::SCYTHE_DESC Tantacle{};
+	Tantacle.eCurLevel = m_eCurLevel;
+	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
+	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
+	Tantacle.fSpeedPerSec = 10.f;
+	Tantacle.fAttackDamage = MobDesc.fAttackDmg;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
+		CRASH("Failed Ready Scythe");
 }
 
 void CLevel_GamePlay::Ready_Effect()
@@ -142,6 +196,26 @@ void CLevel_GamePlay::Ready_Skybox()
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
 		CRASH("Skybox");
 }
+#ifdef _DEBUG
+void CLevel_GamePlay::Shader_Gui()
+{
+	ImGui::Begin("Test");
+	
+	
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+				ImGui::InputFloat("RADIUS", &m_fRadius);
+		
+				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+		
+		#ifdef _DEBUG
+				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
+		#endif // _DEBUG
+	}
+	ImGui::End();
+
+}
+#endif
 
 CLevel_GamePlay* CLevel_GamePlay::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
