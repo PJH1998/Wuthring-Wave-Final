@@ -132,7 +132,6 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 	// 임시
 	V = 1;
 
-
 	m_pModelComArray.resize(V);
 
 	for (_uint i = 0; i < V; ++i)

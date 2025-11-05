@@ -115,7 +115,7 @@ private:
 
 #ifdef _DEBUG
 	_float3		m_vDebugTeleportPos = {};
-	void GUI_Teleport();
+	void			GUI_Teleport();
 #endif
 
 private:

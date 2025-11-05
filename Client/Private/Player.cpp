@@ -230,8 +230,6 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 	}
-
-	
 #endif // _DEBUGs
 }
 
