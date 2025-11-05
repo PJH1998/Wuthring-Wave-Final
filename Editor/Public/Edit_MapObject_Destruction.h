@@ -23,6 +23,7 @@ public:
 		_float3 vBoundingExtends;
 		_float3 m_vImpulsePos = {};
 		_float3 m_vImpulsePower = _float3(1.f, 1.f, 1.f);
+		_uint iTriggerIndex = {};
 	}MAP_LOAD;
 
 private:
@@ -73,6 +74,8 @@ private:
 
 	_float m_vImpulsePos[3] = {};
 	_float m_vImpulsePower[3] = { 1.f,1.f,1.f };
+
+	_uint m_iTriggerIndex = {};
 
 public:
 	static CEdit_MapObject_Destruction* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

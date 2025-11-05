@@ -76,7 +76,8 @@ HRESULT CLevel_Test::Initialize()
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
-	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_TriggerBox"),
+	m_pGameInstance->Add_Prototype(iLevel, TEXT("Prototype_GameObject_TriggerBox"),
+
 		CTrigger_Box::Create(m_pDevice, m_pContext));
 
 	CTrigger_Box::TRIGGER Tri;
@@ -86,7 +87,7 @@ HRESULT CLevel_Test::Initialize()
 	_float4x4 TT;
 	XMStoreFloat4x4(&TT, Mat);
 	Tri.WorldMatrix = &TT;
-	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
+	m_pGameInstance->Add_GameObject_ToLayer(iLevel, TEXT("Prototype_GameObject_TriggerBox"), iLevel, TEXT("Layer_Trigger"), &Tri);
 
 	Ready_Skybox();
 

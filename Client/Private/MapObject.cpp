@@ -1,5 +1,6 @@
 ﻿#include"ClientPch.h"
 #include "MapObject.h"
+#include "MapObject_Destruction.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
@@ -192,7 +193,7 @@ void CMapObject::Ready_Component(void* pArg)
 	if (!m_pBoundingBox)
 		CRASH("Failed");
 
-	if(pDesc->eObjectType != OBJECTTYPE::NONRIGID)
+	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 	{
 		CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
@@ -213,6 +214,8 @@ void CMapObject::Ready_Component(void* pArg)
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}
+	else
+		int a = 0;
 
 }
 

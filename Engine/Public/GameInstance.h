@@ -64,7 +64,7 @@ public:
 
 #pragma region LEVEL_MANAGER
 public:
-	_uint				Get_CurrentLevel();
+	_uint			Get_CurrentLevel();
 	HRESULT			Open_Level(_uint iNextLevelID, class CLevel* pLevel);
 	HRESULT			Clear_CurrentLevel_Resources(_uint iNextLevel);
 #pragma endregion
