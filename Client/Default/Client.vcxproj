@@ -195,6 +195,7 @@
     <ClInclude Include="..\Public\Client_Debug.h" />
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
+    <ClInclude Include="..\public\Corosaurus.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
@@ -328,6 +329,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\Private\ClimbState.cpp" />
+    <ClCompile Include="..\private\Corosaurus.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

@@ -164,7 +164,9 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
 
 	// Com_Shader
@@ -296,7 +298,8 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 #ifdef _DEBUG
-		cout << "On Hit! (Electro Predator)" << endl;
+		cout << "Be Hit! (Electro Predator)" << endl;
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 	}
 }
