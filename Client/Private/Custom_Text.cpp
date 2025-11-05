@@ -342,6 +342,7 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
             TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
             return E_FAIL;
     }
+    
     CAnimator_UI::ANIMATOR_UI_DESC tAnimatorUIDesc = { this };
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
         TEXT("Com_Animator_UI"), reinterpret_cast<CComponent**>(&m_pAnimator_UICom), &tAnimatorUIDesc)))
