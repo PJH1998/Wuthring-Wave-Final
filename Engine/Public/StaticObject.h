@@ -15,14 +15,14 @@ public:
 	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:
-	virtual		HRESULT			Initialize_Prototype() { return S_OK; };
-	virtual		HRESULT			Initialize_Clone(void* pArg) { return __super::Initialize_Clone(pArg); };
-	virtual		void				Priority_Update(_float fTimeDelta) {};
-	virtual		void				Update(_float fTimeDelta) {};
-	virtual		void				Late_Update(_float fTimeDelta) {};
-	virtual		void				Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) {};
-	virtual		void				Render_Shadow() {};
-	virtual		BoundingBox*	Get_BoundingBox() { return nullptr; }
+	virtual		HRESULT		Initialize_Prototype() { return S_OK; };
+	virtual		HRESULT		Initialize_Clone(void* pArg) { return __super::Initialize_Clone(pArg); };
+	virtual		void			Priority_Update(_float fTimeDelta) {};
+	virtual		void			Update(_float fTimeDelta) {};
+	virtual		void			Late_Update(_float fTimeDelta) {};
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) {};
+	virtual		void			Render_Shadow() {};
+	virtual		BoundingBox* Get_BoundingBox() { return m_pBoundingBox; }
 
 protected:
 	// LOD 개수

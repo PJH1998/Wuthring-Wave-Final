@@ -25,10 +25,11 @@ HRESULT CCSM::SetUp_ShadowLight(const _wstring& strLightTag)
 HRESULT CCSM::SetUp_ShadowNF()
 {
 	m_fCameraNear = m_pGameInstance->Get_CurrentCamera_Near();
-	m_fCameraFar = m_pGameInstance->Get_CurrentCamera_Far() * 0.3f;
+	m_fCameraFar = m_pGameInstance->Get_CurrentCamera_Far();
+	m_fCutFar = m_fCameraFar * 0.3f;
 
 	for (_uint i = 0; i < m_iNumClipDistance; i++)
-		m_fClipDistance[i] = Compute_ClipDistance(m_fCameraNear, m_fCameraFar, i, m_iNumClip, 0.5f);
+		m_fClipDistance[i] = Compute_ClipDistance(m_fCameraNear, m_fCutFar, i, m_iNumClip, 0.8f);
 
 	CSM_DATA Data = {};
 	ZeroMemory(&Data, sizeof(CSM_DATA));
@@ -118,6 +119,8 @@ HRESULT CCSM::End_CSM()
 
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
+	m_pBackBuffer = nullptr;
+	m_pOriginalDSV = nullptr;
 
 	return S_OK;
 }
@@ -216,8 +219,8 @@ void CCSM::Make_Matrices(const _float4* pFrustrumPoints)
 	{
 		fClipNear = m_fClipDistance[j];
 		fClipFar = m_fClipDistance[j + 1];
-
-		fNearRatio = ( fClipNear - m_fCameraNear ) / ( m_fCameraFar - m_fCameraNear );
+		
+		fNearRatio = ( fClipNear - m_fCameraNear ) / (m_fCameraFar - m_fCameraNear );
 		fFarRatio = ( fClipFar - m_fCameraNear ) / ( m_fCameraFar - m_fCameraNear );
 
 		_float4 vClipPoints[8] = {};
@@ -362,4 +365,7 @@ void CCSM::Free()
 	Safe_Release(m_pShadowDSV);
 	Safe_Release(m_pShadowSRV);
 	Safe_Release(m_pConstantBuffer);
+
+	Safe_Release(m_pBackBuffer);
+	Safe_Release(m_pOriginalDSV);
 }

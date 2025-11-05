@@ -418,7 +418,10 @@ void CModelLoader::Load_File()
 
 							filesystem::create_directories(SaveFilePath);
 
-							CutPos = FileName.find(".mo");
+							if (FileName.find(".mo") != string::npos)
+								CutPos = FileName.find(".mo");
+							else if (FileName.find(".ao") != string::npos)
+								CutPos = FileName.find(".ao");
 							if (CutPos != std::string::npos)
 								FileName = FileName.substr(0, CutPos);
 

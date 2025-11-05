@@ -110,11 +110,13 @@ void CRenderer::Render()
 	Render_NonBlend();
 	Render_Static();		
 	Render_SSAO();			
-	Render_Outline();
 	Render_Dynamic();
 
 	Render_Light();
 	Render_Combined();
+	
+	Render_Outline();
+	
 	Render_NonLight();
 	Render_Emissive();
 	Render_Bloom();
@@ -238,7 +240,7 @@ void CRenderer::Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex)
 
 void CRenderer::Render_ShadowMap()
 {
-	if (m_ShadowMapObjects.size() <= 0)
+	if (m_ShadowMapObjects.empty())
 		return;
 
 	m_pGameInstance->Begin_ShadowMap();
@@ -478,6 +480,12 @@ void CRenderer::Render_SSAO()
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO_BLUR_Y"), m_iWinSizeX, m_iWinSizeY)))
 		CRASH("Failed RCS_SSAO_BLUR_Y");
 #pragma endregion
+}
+
+void CRenderer::Render_Decal()
+{
+
+
 }
 
 void CRenderer::Render_Dynamic()
