@@ -208,6 +208,8 @@
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
+    <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
     <ClInclude Include="..\Public\Factory.h" />
@@ -368,6 +370,8 @@
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />

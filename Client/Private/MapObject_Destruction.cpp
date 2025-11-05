@@ -47,7 +47,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
 		Spawn_Particles();
 		});
-
+	m_IsDestroy = false;
 	return S_OK;
 }
 
@@ -80,9 +80,7 @@ void CMapObject_Destruction::Render()
 
 	for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
 	{
-		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
-		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+
 		_bool HasNormal = { true };
 		_bool HasMask = { true };
 
@@ -111,6 +109,10 @@ void CMapObject_Destruction::Render()
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 
 		m_pModelComArray[DrawModel]->Render(i);
+
+		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
 	}
 }
 
@@ -128,7 +130,8 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 	
 	MultiByteToWideChar(CP_ACP, 0, pDesc->ModelName, -1, Name, strlen(pDesc->ModelName));
 	lstrcat(Model, Name);
-	_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+	//_uint V = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0' + 1;
+	_uint V = 1;
 
 	m_pModelComArray.resize(V);
 
@@ -284,12 +287,12 @@ void CMapObject_Destruction::Free()
 
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pBoneModel);
+	Safe_Release(m_pGameSystem);
+	Safe_Delete(m_pBoundingBox);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);
-
-	Safe_Release(m_pGameSystem);
-
-	Safe_Delete(m_pBoundingBox);
 	m_pModelComArray.clear();
+
+
 }

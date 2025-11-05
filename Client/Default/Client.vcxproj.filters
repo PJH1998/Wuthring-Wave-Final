@@ -222,7 +222,7 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\FXRect">
       <UniqueIdentifier>{caa502bb-f52f-4f86-998f-d40a1855a591}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="04. Component\03. Ability">
       <UniqueIdentifier>{72eb9125-bdcb-4c46-a6cb-95cba32d4604}</UniqueIdentifier>
     </Filter>
@@ -533,7 +533,7 @@
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\Effect_Rect.h">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\Ggobul.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClInclude>
@@ -550,6 +550,8 @@
     <ClInclude Include="..\public\Corosaurus.h">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h" />
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -814,7 +816,7 @@
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\private\Ggobul.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClCompile>
@@ -831,6 +833,8 @@
     <ClCompile Include="..\private\Corosaurus.cpp">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

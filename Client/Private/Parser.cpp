@@ -197,25 +197,26 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-				, PROTOTYPE::GAMEOBJECT, &Desc);
+			/*m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+				, PROTOTYPE::GAMEOBJECT, &Desc);*/
 
-			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
-			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
-			//	vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower, TriggerIndex = Desc.iTriggerIndex]() mutable {
-			//	CMapObject_Destruction::MAP_LOAD pDesc{};
-			//	strcpy_s(pDesc.ModelName, ModelName.c_str());
-			//	pDesc.iShaderPassIndex = ShaderPass;
-			//	pDesc.WorldMatrix = &Matrix;
-			//	pDesc.iLevel = ENUM_CLASS(eLevel);
-			//	pDesc.m_vImpulsePos = vImpulsePos;
-			//	pDesc.m_vImpulsePower = vImpulsePower;
-			//	pDesc.vBoundingPos = BoundingPos;
-			//	pDesc.vBoundingExtends = BoundingExtends;
-			//	pDesc.iTriggerIndex = TriggerIndex;
-			//	m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-			//		, PROTOTYPE::GAMEOBJECT, &pDesc);
-			//	});
+			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
+				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
+				vImpulsePos = Desc.m_vImpulsePos, vImpulsePower = Desc.m_vImpulsePower, TriggerIndex = Desc.iTriggerIndex]() mutable {
+				CMapObject_Destruction::MAP_LOAD pDesc{};
+				strcpy_s(pDesc.ModelName, ModelName.c_str());
+				pDesc.iShaderPassIndex = ShaderPass;
+				pDesc.WorldMatrix = &Matrix;
+				pDesc.iLevel = ENUM_CLASS(eLevel);
+				pDesc.m_vImpulsePos = vImpulsePos;
+				pDesc.m_vImpulsePower = vImpulsePower;
+				pDesc.vBoundingPos = BoundingPos;
+				pDesc.vBoundingExtends = BoundingExtends;
+				pDesc.iTriggerIndex = TriggerIndex;
+				m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"), pDesc.iLevel, TEXT("Layer_Destruction"), &pDesc);
+				/*m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+					, PROTOTYPE::GAMEOBJECT, &pDesc);*/
+				});
 		}
 	}
 	else if (pFilePath.find("TriggerBox") != std::string::npos)
@@ -256,16 +257,25 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
 				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
-				CMapObject::MAP_LOAD pDesc{};
-				strcpy_s(pDesc.ModelName, ModelName.c_str());
-				pDesc.iShaderPassIndex = ShaderPass;
-				pDesc.eObjectType = eObjectType;
-				pDesc.WorldMatrix = &Matrix;
-				pDesc.iLevel = ENUM_CLASS(eLevel);
-				pDesc.vBoundingPos = BoundingPos;
-				pDesc.vBoundingExtends = BoundingExtends;
-				m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
-					, PROTOTYPE::GAMEOBJECT, &pDesc);
+					CMapObject::MAP_LOAD pDesc{};
+					strcpy_s(pDesc.ModelName, ModelName.c_str());
+					pDesc.iShaderPassIndex = ShaderPass;
+					pDesc.eObjectType = eObjectType;
+					pDesc.WorldMatrix = &Matrix;
+					pDesc.iLevel = ENUM_CLASS(eLevel);
+					pDesc.vBoundingPos = BoundingPos;
+					pDesc.vBoundingExtends = BoundingExtends;
+					if (pDesc.eObjectType == OBJECTTYPE::NONSONORA)
+					{
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+
+					}
+					else
+					{
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
+					}
 				});
 		}
 		m_pGameInstance->Wait_Thread_End();

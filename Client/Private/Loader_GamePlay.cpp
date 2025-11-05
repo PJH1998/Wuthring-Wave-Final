@@ -63,6 +63,9 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
+
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
     return S_OK;
 }
 
