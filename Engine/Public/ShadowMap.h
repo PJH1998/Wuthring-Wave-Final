@@ -9,7 +9,7 @@ class CStaticObject;
 
 class CShadowMap final : public CBase
 {
-private:
+public:
 	typedef struct tagShadowMapData {
 		_int iNumSectorX;            
 		_int iNumSectorToLayer;

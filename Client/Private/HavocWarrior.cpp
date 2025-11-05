@@ -8,7 +8,7 @@ CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 }
 
 CHavocWarrior::CHavocWarrior(const CHavocWarrior& Prototype)
-	: CActor{ Prototype }
+	: CActor { Prototype }
 {
 }
 
@@ -33,8 +33,10 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 #pragma endregion
 
 	Ready_Component(pDesc);
-	Ready_PartObjects(pDesc);
-	m_iHP = 1;
+	//Ready_PartObjects(pDesc);
+	m_vDistanceRange = _float2(2.7f, 3.3f);
+	m_fHP = pDesc->fHp;
+	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	return S_OK;
@@ -108,8 +110,10 @@ void CHavocWarrior::Render()
 #endif
 }
 
-void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
+void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
 {
+	if (wStrColliderTag == TEXT("Attack Trig"))
+		m_pAtkVolume->TriggerActivate(isActive);
 }
 
 void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
@@ -163,7 +167,9 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		BeHit(iLayer, pDesc, Manifold);
 		});
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	m_tCallDesc.pTransform = m_pTransformCom;
+	m_tCallDesc.fAttack = 10.f;
+	m_pColliderCom->Set_Desc(&m_tCallDesc);
 
 
 	// Com_Shader
@@ -219,12 +225,14 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.pParentMatrix = m_pTransformCom->Get_WorldMatrixPtr();
+	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RHand");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 2.f);
-	TriggerDesc.vOffsetPos = _float3(0.f, -0.5f, 0.f);
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.CollisionCallback = [this]() {this->OnTriggerTest(); };
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold); 
+		};
 
 	//CContainerObject::Add_PartObject(TEXT("Part_ATKVolume"), m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), &TriggerDesc);
 	m_pAtkVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -318,9 +326,9 @@ void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactMa
 	}
 }
 
-void CHavocWarrior::OnTriggerTest()
+void CHavocWarrior::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-	if(m_iState & ENUM_CLASS(TEST_STATE::ATTACK_2))
+	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_2))
 		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
 #ifdef _DEBUG
 	cout << "On Hit! (Havoc Warrior)" << endl;
@@ -333,6 +341,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	{
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 
 	}
@@ -417,12 +426,12 @@ _bool CHavocWarrior::isPatrol()
 
 _bool CHavocWarrior::Back()
 {
-	return m_fFrontDot < 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance < m_vDistanceRange.x;
 }
 
 _bool CHavocWarrior::Front()
 {
-	return m_fFrontDot > 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance > m_vDistanceRange.y;
 }
 
 _bool CHavocWarrior::Left()
