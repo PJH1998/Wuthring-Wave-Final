@@ -68,6 +68,8 @@ SKILL_STATE CActor::Use_Skill(const _string& strSkillName)
 	return m_pAbillityCom->TryUseSkill(strSkillName);
 }
 
+
+
 #ifdef _DEBUG
 void CActor::Print_Cost()
 {

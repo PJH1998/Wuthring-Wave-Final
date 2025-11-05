@@ -15,6 +15,7 @@ private:
         DOUBLE_JUMP,
         LAND,
 		UNIQUE_GRIFFON,
+		AIRATTACK_HACKDOWN_END,
         END
     };
 

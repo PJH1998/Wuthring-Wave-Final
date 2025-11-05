@@ -19,6 +19,69 @@ namespace Client
 		END
 	};
 
+	
+	enum class UI_CHARACTERTYPE : unsigned int {
+		ROVER = 0,
+		AUGUSTA,
+		GALBRENA,
+		END
+	};
+
+	enum class UI_AUGUSTA_STATE : unsigned int {
+		LB_STRONG_READY = 0,		// 강공 실행 가능
+		LB_SWORD_READY = 1,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
+		T_INTERACTION_READY = 2,		// T 실행 가능.  => 활공, 기타등등
+		T_INTERACTION_FAILED = 3,		// T 실행 불가.  => 활공, 기타 등등
+		E_GRIFFON_READY = 4,		// 그리폰 E 실행 가능 => GRIFFON_E_READY = 
+		E_RISE_READY = 5,			// Rise E 실행 가능.
+		E_DEFAULT_READY = 6,		// 기본 E 실행 가능.
+		Q_ECHO_READY = 7,			// Echo 실행 가능.
+		Q_ECHO_FAILED = 8,	    // Echo 실행 불가.
+		R_ULTI_READY = 9,			// 기본 R 실행 가능
+		R_SWORD_READY = 10,			// SWORD R 아이콘 출력 가능.
+		R_SWORD_ULTI_READY = 11,	// SWORD R 궁극기 아이콘 출력 가능.
+		DEFAULT,				// 기본?
+		END
+	};
+
+	
+
+	enum class UI_AUGUSTA_CONDITION : unsigned int {
+		LB_SP_ATTACK = 1 << 0, // Special Attack (궁 쓸수 있는 상태)
+		LB_RESONANCE = 1 << 1, // 강공
+		E_GRIFFON = 1 << 2, // 그리폰.
+		E_RISE = 1 << 3, // 그리폰 Rise
+		R_SP_ATTACK = 1 << 4, // 최종 궁 이전 상태 사용 가능.
+		R_SP_ATTACKOMNI = 1 << 5, // Special Attack 최종 궁 사용 가능
+
+		
+		END
+	};
+
+
+	enum class UI_ROVER_STATE : unsigned int {
+		ROVER_READY = 0,
+		END
+	};
+
+	// UI에서 사용하기 위해서 State Machine에서 전달.
+	enum class UI_ROVER_CONDITION : unsigned int {
+		BURST = 0,
+
+		END
+	};
+
+	enum class UI_GABRENA_STATE : unsigned int {
+		ROVER_READY = 1,
+		END
+	};
+
+	enum class UI_GALBRENA_CONDITION : unsigned int {
+		BURST = 0,
+
+		END
+	};
+
 	enum class KEYINPUT : unsigned int {
 		NONE = 1 << 0, 
 		W = 1 << 1, 
@@ -49,6 +112,7 @@ namespace Client
 		AUGUSTA_POINT,	// 특수 원형 게이지
 		AUGUSTA_ULTI,	// 기본 궁극기 게이지
 		AUGUSTA_SWORD,	// 특수 칼 게이지 (갯수)
+		AUGUSTA_UITI_SWORD, // 칼 사용 후 썼을때 공격 게이지?
 		SKILL_TYPE_END // CSV 파싱 실패 등을 위한 END
 	}SKILL_TYPE;
 
@@ -57,12 +121,13 @@ namespace Client
 		NONE = 0, // Stat 아님.
 		COST1, // 1 RESONANCE
 		COST2, // 2 AUGUSTA POINT
-		COST3, // 3 AUGUSTA_ULTI
-		COST4, // 4 AUGUSTA_SWORD
-		COST5,
+		COST3, // 3 AUGUSTA_SWORD
+		COST4, // 4 AUGUSTA_ULTI_SWORD
+		COST5, // 5. AUGUTA_ULTI
 		STAMINA, // 5
 		COST_TYPE_END
 	}COST_TYPE;
+
 
 
 	enum class SKILL_STATE : unsigned int

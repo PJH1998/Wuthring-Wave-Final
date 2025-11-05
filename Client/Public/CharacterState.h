@@ -30,6 +30,7 @@ protected:
 	_bool m_IsPartAnimationEnd = {}; //
 	_bool m_IsSubPartAnimationEnd = {}; //
 	_string m_strPrevInfo = {};
+	_string m_strSkillName = {};
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
 
 

@@ -278,6 +278,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
         {
+			if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Sp_End"))
+				return;
+
 			m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END;
 			m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
@@ -321,6 +324,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
             {
+
                 if (m_States[MOVE])
                 {
                     m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;

@@ -288,6 +288,7 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 	_vector vEnd = XMLoadFloat3(&vEndPos);
 	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
 }
+
 #endif // _DEBUG
 
 
@@ -298,7 +299,21 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 
 #pragma region STATE
+void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
 
+	m_pAbillityCom->Bind_Condition(iCondition);
+}
+
+void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Remove_Condition(iCondition);
+}
 
 _vector CCharacter::Get_LookVector()
 {
