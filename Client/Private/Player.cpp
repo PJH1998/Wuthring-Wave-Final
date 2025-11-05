@@ -37,7 +37,6 @@ HRESULT CPlayer::Initialize_Prototype()
 
 HRESULT CPlayer::Initialize_Clone(void* pArg)
 {
-
     PLAYER_DESC* pDesc = static_cast<PLAYER_DESC*>(pArg);
 
     m_eCurLevel = pDesc->eCurLevel;
@@ -183,6 +182,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::ROVER;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
 			return;
 		}
 
@@ -193,6 +193,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
 			return;
 		}
 	}
@@ -202,15 +203,29 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
 			return;
 		}
 	}
 
 #ifdef _DEBUG
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
+		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+	}
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+	}
+
+	
 #endif // _DEBUGs
 }
 
@@ -324,10 +339,11 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
+	if ((ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) || (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer) ||
+		(ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer))
 		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
     if (nullptr == pTargetTransform)
         return;
     m_TargetTransforms.push_back(pTargetTransform);

@@ -22,6 +22,8 @@ public:
 	HRESULT					Bind_Textures(const _char* pConstantName, ID3D11ShaderResourceView** ppSRV, _uint iNumTextures, ID3DX11Effect* pEffect);
 	HRESULT					Bind_Value(const _char* pConstantName, const void* pValue, _uint iLength, ID3DX11Effect* pEffect);
 
+	HRESULT					Clear_Textures(const _char* pConstantName, _uint iNumTexture, ID3DX11Effect* pEffect);
+
 private:
 	vector<ID3D11InputLayout*>	m_InputLayouts;
 

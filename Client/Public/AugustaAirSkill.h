@@ -13,6 +13,8 @@ private:
         JUMP,
         FALL,
         LAND,
+		AIRATTACK_HACKDOWN_START,
+		AIRATTACK_HACKDOWN_END,
         END
     };
 

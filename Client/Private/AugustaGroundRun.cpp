@@ -92,14 +92,19 @@ void CAugustaGroundRun::Handle_Input()
 
 
 
-	// Ability System
-	m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // 기본 E스킬
+	if (m_States[SKILL_E])
+	{
+		// Ability System
+		m_States[NORMAL_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Hack")); // 기본 E스킬
+		m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
+	}
+	
 
 	if (m_States[SKILL_R])
 		m_States[SWORD_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Burst01")); // 궁극기 R스킬(검뽑는거)
 	
 	m_States[ECHO_R] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive")); // Echo 궁극기. (기본 궁극기)
-	m_States[POINT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Skill_Strike"));// 그리폰
+	
 
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
@@ -239,6 +244,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
 			return;
 
+		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
         m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
@@ -260,11 +266,7 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
 			return;
 
-#ifdef _DEBUG
-		m_pAugusta->Print_Cost();
-		m_pAugusta->Print_CoolTime();
-#endif // _DEBUG
-
+		//m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));

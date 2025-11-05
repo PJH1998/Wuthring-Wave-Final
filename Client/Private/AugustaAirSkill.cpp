@@ -129,7 +129,7 @@ void CAugustaAirSkill::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirSkill::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 
@@ -150,51 +150,72 @@ void CAugustaAirSkill::Check_StateTransition(_float fTimeDelta)
 
     if (IsEscapePossible)
     {
-        if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
-        {
-            if (m_States[MOVE])
-            {
-                if (fDistanceToGround <= 0.2f)
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
-                    return;
-                }
-                if (fDistanceToGround > 0.2f)
-                {
-                    m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-                    m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-                    return;
-                }
-            }
-        }
-    }
+		if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+		{
+			if (m_States[MOVE])
+			{
+				if (m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
+					return;
+				}
+				if (!m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+					return;
+				}
+			}
+		}
+		else
+		{
+			m_States[AIRATTACK_HACKDOWN_END] = SKILL_STATE::READY != m_pAugusta->Check_Skill("AirAttack_HackDown_End");
+			if (m_States[AIRATTACK_HACKDOWN_END])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_End"))
+					return;
+			}
+		}
+	}
+
+		
+
+		
 
     // 우선순위 순서대로
     if (m_IsAnimationEnd)
     {
-        if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
-        {
-            m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END);
-            return;
-        }
 
-        if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
-        {
-            if (fDistanceToGround <= 0.2f)
-            {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
-                return;
-            }
-            if (fDistanceToGround > 0.2f)
-            {
-                m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-                m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-                return;
-            }
-            
-        }
+		if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
+		{
+			if (m_States[MOVE])
+			{
+				if (m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F; // 애니메이션 상태 => 블랙보드에 기입.        
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
+					return;
+				}
+				if (!m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+					return;
+				}
+			}
+		}
+		else 
+		{
+			m_States[AIRATTACK_HACKDOWN_END] = SKILL_STATE::READY != m_pAugusta->Check_Skill("AirAttack_HackDown_End");
+
+			if (m_States[AIRATTACK_HACKDOWN_END])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_End"))
+					return;
+			}
+
+		}
     }
 
 }
