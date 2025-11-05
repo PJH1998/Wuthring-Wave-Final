@@ -331,15 +331,10 @@ void CEdit_MapObject_Destruction::Create_Particles()
 
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
 
-		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
-		//m_pGameInstance->Add_PoolingObject(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
-		//	, m_iLevel, TEXT("Layer_Destruction_Peice"), TEXT("Pool_Test")+to_wstring(i), 2, &Desc);
+		CEdit_MapObject_Destruction_Piece::RESET_DESC Reset{};
+		XMStoreFloat3(&Reset.vImpulse, vDeltaPos * Power);
 
-		//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice")
-		//	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-		//	, m_iLevel, TEXT("Layer_Destruction_Peice"), &Desc);
-
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Test") + to_wstring(i), XMLoadFloat4x4(Desc.WorldMatrix), &Desc);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Test") + to_wstring(i), XMLoadFloat4x4(Desc.WorldMatrix), &Reset);
 	}
 }
 

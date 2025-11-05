@@ -61,8 +61,8 @@ void CMapObject_Destruction::Update(_float fTimeDelta)
 
 void CMapObject_Destruction::Late_Update(_float fTimeDelta)
 {
-	//if (!m_IsDestroy)
-	//	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	if (!m_IsDestroy)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMapObject_Destruction::Render()
@@ -206,8 +206,8 @@ HRESULT CMapObject_Destruction::Ready_Component(void* pArg)
 		_vector vDeltaPos = XMVectorSetW(XMLoadFloat3(reinterpret_cast<_float3*>(&Mat.m[3])) - Pos, 0.f);
 
 		XMStoreFloat3(&Desc.vImpulse, vDeltaPos * Power);
-		if (FAILED(m_pGameInstance->Add_PoolingObject(pDesc->iLevel, TEXT("Prototype_GameObject_Destruction_Piece")
-			, pDesc->iLevel, TEXT("Layer_Destruction_Piece"), TEXT("24BS_Debris") + to_wstring(i), 3, &Desc)))
+		if (FAILED(m_pGameInstance->Add_PoolingObject(pDesc->iLevel, TEXT("Prototype_GameObject_MapObject_Destruction_Debris")
+			, pDesc->iLevel, TEXT("Layer_Destruction_Debris"), TEXT("24BS_Debris") + to_wstring(i), 3, &Desc)))
 			return S_OK;
 	}
 	return S_OK;

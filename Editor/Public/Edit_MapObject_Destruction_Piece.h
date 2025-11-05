@@ -21,7 +21,11 @@ public:
 		OBJECTTYPE eObjectType;
 		_float3 vImpulse = {};
 	}MAP_LOAD;
-	
+
+	typedef struct tagResetDesc {
+		_float3 vImpulse;
+	}RESET_DESC;
+
 private:
 	CEdit_MapObject_Destruction_Piece(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	CEdit_MapObject_Destruction_Piece(const CEdit_MapObject_Destruction_Piece& Prototype);
@@ -66,6 +70,8 @@ private:
 	_float3 m_vNewRotation = {};
 	_float3 m_vNewTranslation = {};
 	_float m_fTimeDelta = {};
+	_float3 m_vImpulse = {};
+	_bool m_IsTriggered = { false };
 public:
 	static CEdit_MapObject_Destruction_Piece* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

@@ -2,6 +2,9 @@
 #include "Loader_GamePlay.h"
 #include"GameSystem.h"
 #include"MapObject.h"
+#include"Trigger_Box.h"
+#include"MapObject_Destruction.h"
+#include"MapObject_Destruction_Debris.h"
 
 #pragma region FALSE_SOVEREIGN
 #include "MonsterTest.h"
@@ -68,8 +71,8 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1105/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1105/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
 
 	// SkyBox
@@ -101,7 +104,17 @@ HRESULT CLoader_GamePlay::Load_Object()
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
 
-    return S_OK;
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CMapObject_Destruction::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction_Debris"),
+		CMapObject_Destruction_Debris::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
+
+
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Player()

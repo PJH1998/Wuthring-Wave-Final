@@ -266,8 +266,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 					, PROTOTYPE::GAMEOBJECT, &pDesc);
 				});
 		}
+		m_pGameInstance->Wait_Thread_End();
 	}
-	m_pGameInstance->Wait_Thread_End();
 	File.close();
 }
 

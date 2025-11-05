@@ -55,7 +55,7 @@ private:
 	_float3 m_vImpulse = {};
 private:
 	_float m_fTimeDelta = {};
-
+	_float4x4 m_FixedPos = {};
 public:
 	static CMapObject_Destruction_Debris* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

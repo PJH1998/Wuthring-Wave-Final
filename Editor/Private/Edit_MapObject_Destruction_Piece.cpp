@@ -55,18 +55,28 @@ HRESULT CEdit_MapObject_Destruction_Piece::Initialize_Clone(void* pArg)
 
 void CEdit_MapObject_Destruction_Piece::Priority_Update(_float fTimeDelta)
 {
+	if (m_IsTriggered)
+	{
+		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		m_pRigidbodyCom->Impulse(m_vImpulse);
+		m_IsTriggered = false;
+	}
 }
 
 void CEdit_MapObject_Destruction_Piece::Update(_float fTimeDelta)
 {
 	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
 	{
+		m_isActivate = false;
 		m_pRigidbodyCom->IsActivate(false);
 	}
 
 	m_fTimeDelta += fTimeDelta;
 	if (m_fTimeDelta >= 3.f)
+	{
 		m_isActivate = false;
+		m_pRigidbodyCom->IsActivate(false);
+	}
 }
 
 void CEdit_MapObject_Destruction_Piece::Late_Update(_float fTimeDelta)
@@ -164,6 +174,26 @@ HRESULT CEdit_MapObject_Destruction_Piece::Ready_Component(void* pArg)
 	Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
+
+	//CRigidbody::BOXBODY_DESC RigidbodyDesc{};
+	////CRigidbody::CONVEXHULLBODY_DESC RigidbodyDesc{};
+	////RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+	//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+	//RigidbodyDesc.eShape = SHAPE::BOX;
+	////RigidbodyDesc.eShape = SHAPE::CONVEXHULL;
+	////RigidbodyDesc.pModel = m_pModelCom;
+	////RigidbodyDesc.eBodyType = BODYTYPE::
+	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+	//RigidbodyDesc.eType = EMotionType::Dynamic;
+	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+	//RigidbodyDesc.vExtent = _float3(1.f, 1.f, 1.f);
+	////RigidbodyDesc.vExtent = m_pModelCom->Get_BoundingBox()->Extents;
+
+	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
+
+
     return S_OK;
 }
 
@@ -173,14 +203,13 @@ void CEdit_MapObject_Destruction_Piece::Bind_Resources()
 
 void CEdit_MapObject_Destruction_Piece::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	m_pRigidbodyCom->IsActivate(false);
-	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-	m_pRigidbodyCom->Impulse(pDesc->vImpulse);
-	m_fTimeDelta = 0.f;
-	//지호형이 리지드바디의 위치를 옮기는 거 만들어주면 사용할것.
-	//m_pRigidbodyCom->
 	m_isActivate = true;
+	m_IsTriggered = true;
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	RESET_DESC* pDesc = static_cast<RESET_DESC*>(pArg);
+	m_vImpulse = pDesc->vImpulse;
+
+	m_fTimeDelta = 0.f;
 }
 
 CEdit_MapObject_Destruction_Piece* CEdit_MapObject_Destruction_Piece::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
