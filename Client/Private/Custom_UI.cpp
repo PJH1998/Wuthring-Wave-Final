@@ -102,8 +102,8 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-    //if (m_tUIDesc.strUIName == L"Background_Dummy")
-    //    return;
+    if (m_tUIDesc.strUIName == L"Skill_Galbrena")
+        return;
 
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)

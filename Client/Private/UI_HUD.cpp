@@ -59,6 +59,10 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     };
     Load_Animations(vecAnimFilePaths);
 
+
+	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
+	
+
     return S_OK;
 }
 
@@ -69,24 +73,14 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
+	_uint iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
+	m_pAbility = m_pPlayerStatus->Get_Ability(iSelectedCHIndex);
 
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+
 	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
 
-	vector<UISKILL_SLOT> vecRenderSlots = {};		// 정보가 존재하는 슬롯만을 가져옵니다.
-	_bool isBurst = false;							// 버스트 여부를 특정 스킬이 떠있는지로 판별..?
-	for (auto& slot : UISlots)
-	{
-		if (slot.eState == SKILL_STATE::NOT_EXIST)
-			continue;
-
-		if (slot.strSkillName == "Burst01")
-			isBurst = true;
-
-		vecRenderSlots.push_back(slot);
-	}
 
 
 
@@ -231,29 +225,29 @@ HRESULT CUI_HUD::Ready_Presets()
 {
 	// ========== Image Sizes ==========
 
+	// 재정립 필요
+
 	array<_uint, 2> iImgSize_Rover = { 14, 1 };
 	array<_uint, 2> iImgSize_Augusta = { 7, 2 };
 	array<_uint, 2> iImgSize_Galbrena = { 14, 1 };
 
-	m_mapSkillTexIndices.emplace(L"Rover_E", Calc_SpriteSpace(0, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Rover_R", Calc_SpriteSpace(2, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Rover_E_Burst", Calc_SpriteSpace(1, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_E",				Calc_SpriteSpace(0, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_R",				Calc_SpriteSpace(2, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_E_Burst",			Calc_SpriteSpace(1, 0, iImgSize_Rover));
 
-	m_mapSkillTexIndices.emplace(L"Augusta_E", Calc_SpriteSpace(5, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo1", Calc_SpriteSpace(3, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo2", Calc_SpriteSpace(4, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_Combo3", Calc_SpriteSpace(3, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_Burst", Calc_SpriteSpace(0, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_R", Calc_SpriteSpace(0, 1, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Augusta_R_Enforce", Calc_SpriteSpace(1, 1, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Augusta_E",				Calc_SpriteSpace(5, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_GriffonReady", Calc_SpriteSpace(3, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_RiseReady",	Calc_SpriteSpace(4, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_LB_Burst",		Calc_SpriteSpace(0, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R",				Calc_SpriteSpace(0, 1, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R_Enforce",		Calc_SpriteSpace(1, 1, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R_Ready",		Calc_SpriteSpace(6, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_EnforceBasicATK",		Calc_SpriteSpace(2, 0, iImgSize_Augusta));
 
-	m_mapSkillTexIndices.emplace(L"Galbrena_E", Calc_SpriteSpace(4, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_E_BurstOn", Calc_SpriteSpace(5, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_R", Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst", Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
-
-
-
+	m_mapSkillTexIndices.emplace(L"Galbrena_E",				Calc_SpriteSpace(4, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_E_BurstOn",		Calc_SpriteSpace(5, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_R",				Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst",		Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
 
 	return S_OK;
 }
@@ -266,22 +260,36 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// ==============================
 
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
-	
+
+
+
+
 	// Status Load
 	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
 
+	//_float fBasicSkillCD[CH_END][SK_END] = {
+	//	{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
+	//	{/* CH_AUGUSTA  */ pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Skill_Hack"),	pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Attack_SpeedDrive")},
+	//	{/* CH_GALBRENA */ pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")}
+	//};
+	//_float fBasicSkillMaxCD[CH_END][SK_END] = {
+	//	{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
+	//	{/* CH_AUGUSTA  */ pStatus->Get_MaxCooldown(CH_AUGUSTA	, "Skill_Hack"),	pStatus->Get_MaxCooldown(CH_AUGUSTA		, "Attack_SpeedDrive")},
+	//	{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
+	//};
 	_float fBasicSkillCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
-		{/* CH_AUGUSTA  */ pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Skill_Hack"),	pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Attack_SpeedDrive")},
+		{/* CH_AUGUSTA  */ UISlots[CAbility::KEY_E].fCurrentCoolTime,	UISlots[CAbility::KEY_R].fCurrentCoolTime},
 		{/* CH_GALBRENA */ pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")}
 	};
 	_float fBasicSkillMaxCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
-		{/* CH_AUGUSTA  */ pStatus->Get_MaxCooldown(CH_AUGUSTA	, "Skill_Hack"),	pStatus->Get_MaxCooldown(CH_AUGUSTA		, "Attack_SpeedDrive")},
+		{/* CH_AUGUSTA  */ UISlots[CAbility::KEY_E].fMaxCoolTime,	UISlots[CAbility::KEY_R].fMaxCoolTime},
 		{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
 	};
 	_float fChangeCD[CH_END] = {
-		.3f, .5f, .8f
+		.0f, .0f, .0f
 	};
 	_float fChangeMaxCD[CH_END] = {
 		2.f, 2.f, 2.f
@@ -302,17 +310,18 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	// ==============================
 
-
-
+	
+	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
 
     static _bool    isFirstUpdate = true;               // Temp
     if (isFirstUpdate)
     {
         isFirstUpdate = false;
-        pSkillUI[0]->Set_Active(true);
-        pSkillUI[1]->Set_Active(false);
+        pSkillUI[0]->Set_Active(false);
+        pSkillUI[1]->Set_Active(true);
         pSkillUI[2]->Set_Active(false);
+		iSelectedCHIndex = 1;
     }
 
     //for (auto& chCD : fSkillCD)                         // update cooldown
@@ -423,89 +432,48 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         targetUI->Set_VariantUIDesc(tVariantDesc);
 
 
-		// ==============================
-		// * [SK Icon Update] Rover
-		// =============================
-        if      (   i == CH_ROVER &&
-                    iSelectedCHIndex == CH_ROVER)
-        {
-            auto roverUIDesc = pSkillUI[CH_ROVER]->Get_UIDesc();
+
+
+
+		// ksta : must separate later..
+		auto& UISlots = m_pAbility->Get_UISkillSlots();
+		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(iSelectedCHIndex);
+		switch (eCharacterType)
+		{
+
+			// ==============================
+			// * [SK Icon Update] Rover
+			// =============================
+		case UI_CHARACTERTYPE::ROVER:
+		{
+			auto roverUIDesc = pSkillUI[CH_ROVER]->Get_UIDesc();
 
 			switch (m_iPlayerEnhancedMode)
 			{
-			case 0 :		// Rover Normal
-				roverUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E"][0]; 
-				roverUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0]; 
+			case 0:		// Rover Normal
+				roverUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E"][0];
+				roverUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0];
 				break;
-			case 1 :		// Rover DarkSerge
+			case 1:		// Rover DarkSerge
 				roverUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Rover_E_Burst"][0];
 				roverUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Rover_R"][0];
 				break;
 			}
-            pSkillUI[CH_ROVER]->Set_UIDesc(roverUIDesc);
-        }
+			pSkillUI[CH_ROVER]->Set_UIDesc(roverUIDesc);
+		}break;
 
-		// ==============================
-		// * [SK Icon Update] Augusta
-		// =============================
-        else if (   i == CH_AUGUSTA &&
-                    iSelectedCHIndex == CH_AUGUSTA)
-        {
-            auto augustaUIDesc = pSkillUI[CH_AUGUSTA]->Get_UIDesc();
+			// ==============================
+			// * [SK Icon Update] Augusta
+			// =============================
+		case UI_CHARACTERTYPE::AUGUSTA:
+			// Augusta
+			Update_AugustaIcon(UISlots);
+			break;
 
-			switch (m_iPlayerEnhancedMode)
-			{
-			case 0:			// Augusta Normal
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
-				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-				break;
-			case 1:			// Augusta Normal - Combo 1
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo1"][0];
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo1"][1];
-				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-				break;
-			case 2:			// Augusta Normal - Combo 2
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo2"][0];
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo2"][1];
-				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-				break;
-			case 3:			// Augusta Normal - Combo 3
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo3"][0];
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo3"][1];
-				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
-				break;
-			case 4:			// Augusta Ult
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Burst"][0]; 
-				augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Burst"][1]; 
-				augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
-
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
-				augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
-				break;
-			}
-
-            pSkillUI[CH_AUGUSTA]->Set_UIDesc(augustaUIDesc);
-        }
-
-        // ==============================
-		// * [SK Icon Update] Galbrena
-		// =============================
-        else if (   i == CH_GALBRENA &&
-                    iSelectedCHIndex == CH_GALBRENA)
-		{
+			// ==============================
+			// * [SK Icon Update] Galbrena
+			// =============================
+		case UI_CHARACTERTYPE::GALBRENA:
 			auto galbrenaUIDesc = pSkillUI[CH_GALBRENA]->Get_UIDesc();
 
 			switch (m_iPlayerEnhancedMode)
@@ -544,7 +512,14 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
 				break;
 			}
+			break;
+
 		}
+
+
+		
+		
+		
 
 
     }
@@ -1485,7 +1460,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     if (iSelectedCHIndex != CH_AUGUSTA)
         return;
 
-    static _uint	iSwordEnergy		= pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST4);            // mAX = 2
+    static _uint	iSwordEnergy		= static_cast<_uint>(pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST3) * 0.02f);            // mAX = 2
 
     //static _float	fPointEnergy		= 0,f;
     //const _float	fMaxPointEnergy		= 100.f;
@@ -1494,7 +1469,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     //const _float	fMaxUltBladeEnergy	= 100.;
 
 	_float fPointEnergyRatio	= pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST2);
-	_float fUltBladeEnergyRatio = pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST3);
+	_float fUltBladeEnergyRatio = pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST4);
 
 
     CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");         
@@ -1585,11 +1560,6 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     
 
 
-
-    // ���� �ڿ�
-    // ������ ��Ÿ�ӿ� ���̴� Ȱ��. vatiant pass �̿�.
-
-    // ! �ݵ��� pass ���� �ʿ�
     vector<_float4x4> vecPointVariantMat = { _float4x4() };
 
     vecPointVariantMat[0].m[0][0] = 1 - (fPointEnergyRatio);
@@ -1646,6 +1616,92 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 
 
 }
+
+void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
+{
+	auto augustaUIDesc = Find_ChildObject(L"Skill_Auguata")->Get_UIDesc();
+
+	// LB도 대응해야 함
+
+
+	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
+
+	switch (eState_Augusta_E)
+	{
+	case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 이 상황에 5번째 키도 추가됨
+		//	
+
+	case Client::UI_AUGUSTA_STATE::E_GRIFFON_READY:
+		// Augusta Normal - E Combo Start
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][0];
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][1];
+		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+		break;
+	case Client::UI_AUGUSTA_STATE::E_RISE_READY:
+		// Augusta Normal - E Combo 2
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][0];
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][1];
+		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+		break;
+	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+		// Augusta Ult Progress
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_Burst"][1];
+		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+		break;
+	case Client::UI_AUGUSTA_STATE::E_DEFAULT_READY:
+	default:
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
+		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
+		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+		break;		
+	}
+
+
+
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	switch (eState_Augusta_R)
+	{
+	case Client::UI_AUGUSTA_STATE::R_SWORD_READY:
+	//	// Augusta Normal - Ult Ready
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo3"][0];
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo3"][1];
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+	
+		// Augusta Normal - Ult Ready
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Ready"][0];
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Ready"][1];
+		break;
+	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+	//	// Augusta Ult
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Burst"][0];
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Burst"][1];
+	//	augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+	
+		// Augusta Ult
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
+		break;
+	default:
+		//// Augusta Normal
+		//augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
+		//augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
+		//augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+
+		// Augusta Normal
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+		break;
+	}
+
+
+
+	Find_ChildObject(L"Skill_Auguata")->Set_UIDesc(augustaUIDesc);
+
+}
+
+
 
 array<_float2, 2> CUI_HUD::Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize)
 {

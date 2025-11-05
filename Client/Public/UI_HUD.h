@@ -51,13 +51,19 @@ private:					// ï¿½Ú½ï¿½ UIï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ø
 	void					Update_UI_PlayerEnergyBar(_float fTimeDelta);				// [Energy] Normal Energy. shared.
 	void					Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta);		// [Energy] about Augusta's unique resources
 	void					Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta);		// [Energy] about Galbrena's unique resources
+
+private:
+	void					Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots);
 	
 
 private:
-	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {});
+	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
 
 private:
 	class CGameSystem*		m_pGameSystem = { nullptr };
+
+	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
+	class CAbility*			m_pAbility = { nullptr };
 
 	// * Temp assumed value.
 	//		| ROVER		|  AUGUSTA			| GARBENA
