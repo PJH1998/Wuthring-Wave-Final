@@ -57,11 +57,14 @@ namespace Client
 	{
 		_string strSkillName;   // 스킬 이름 (Key)
 		_string strPrevName;    // 이전 스킬 이름 (체인용)
+
+		_string strKeyInput;    // 키 입력 (enum으로 관리하면 더 좋음)
+		_string strKeyType;		// 키 타입.
+
 		SKILL_TYPE eSkillType;    // SKill 타입.
 		_float  fCost;			// Cost 소모
 		COST_TYPE eCostType;    // CostStat이 어떤 타입인지?
 		_float  fCoolDown;      // 쿨타임 (숫자로 변환하여 저장)
-		_string strKeyInput;    // 키 입력 (enum으로 관리하면 더 좋음)
 		_float  fDamage;			// 스킬 데미지
 		_string strDescription; // 설명
 	}SKILL_INFO;
@@ -77,18 +80,21 @@ namespace Client
 		_float fAttack;		 // 기본 공격 값.
 		_float fAttackAddMin;	 // 공격 최소 값.
 		_float fAttackAddMax;	 // 공격 최대 값.
-		
-
 	}CHARACTER_INFO;
 
-	typedef struct tagUISkillSlot {
-		_string strKeyInput;      // "Q", "E", "T", "R", "LB"
-		_string strSkillName;     // 현재 할당된 스킬 이름
-		SKILL_STATE eState;       // READY, COOLING_DOWN, NOT_ENOUGH_COST, NOT_CHAINED
-		_float fCooldownRatio;    // 0.f (쿨타임 완료) ~ 1.f (최대)
-		_float fCostRatio;        // 0.f ~ 1.f (현재 코스트 / 최대)
-	}UISKILL_SLOT;
 
+	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
+	typedef struct tagUISkillSlot {
+		_string strKeyInput;      // "LB", "E", "Q" 등
+		_uint iCharacterType;	  // 캐릭터 타입. => Rover, Augusta, Galbrena => UI_CHARACTERTYPE
+		_uint iStateType;		  // 캐릭터에 따른 State => Character Type을 확인하고 그에 맞게 캐스팅해서 사용. 
+		// => iStateType은 UI_AUGUSTA_STATE 또는 ROVER_STATE GABRENA_STATE
+		 // ex) AUGUSTA면 UI_AUGUSTA_STATE eState = static_cast<UI_AUGUSTA_STATE>(iStateType);
+
+		_float  fCurrentCoolTime; // 현재 쿨타임.
+		_float  fMaxCoolTime;     // Max 쿨타임
+		_string  strSkillName; // Skill Name 디버그 용도.
+	} UISKILL_SLOT;
 	
 	typedef struct tagCallBackClientDesc
 	{

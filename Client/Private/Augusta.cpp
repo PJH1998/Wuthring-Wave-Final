@@ -163,7 +163,6 @@ void CAugusta::Render()
 #ifdef _DEBUG
     m_pColliderCom->Render();
 #endif // _DEBUG
-
 }
 
 void CAugusta::Render_Shadow()

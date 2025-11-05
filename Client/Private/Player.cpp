@@ -211,6 +211,19 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5)))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
+		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+	}
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+	}
+
+	
 #endif // _DEBUGs
 }
 
@@ -324,7 +337,7 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer || ENUM_CLASS(COLLISIONLAYER::NONE) == iLayer)
 		return;
 
     CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
@@ -489,9 +502,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     });
 
 
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		OnCollider_Enter(iLayer, pDesc, Manifold);
-		});
+	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	//	OnCollider_Enter(iLayer, pDesc, Manifold);
+	//	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };

@@ -252,6 +252,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise_Zero"))
 					return;
 
+				m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE_ZERO;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
@@ -262,7 +263,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			{
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise"))
 					return;
-
+				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
@@ -323,6 +324,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
         // 더블 점프 형태로만 변경 가능.
         if (m_States[JUMP])
         {
+			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+
             m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
             return;
@@ -331,6 +334,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
         //// 땅에 닿으면. 우선 순위
 		if (m_States[LAND])
 		{
+			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 			if (m_States[MOVE])
 			{
 				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
@@ -346,6 +350,9 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
     // 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
     {
+		// 아무것도 안했다면? => 컨디션 제거.
+		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+
         if (m_States[LAND])
         {
             m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
@@ -359,6 +366,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
             return;
         }
+
+		
     }
     
 }

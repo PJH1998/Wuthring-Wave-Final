@@ -46,7 +46,7 @@ void CInputController::Update_KeyInput()
             m_KeyInput |= keyMapping.first;
     }
 
-    // 3. ���콺 �Է� Ȯ��.
+    // 3. 
     for (_uint i = 0; i < m_MouseMappings.size(); ++i)
     {
         const auto& keyMapping = m_MouseMappings[i];

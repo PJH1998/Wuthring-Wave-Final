@@ -179,6 +179,9 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
 			return;
 
+		// Bind Condition SP_ATTACK
+		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+
 		m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
@@ -202,6 +205,8 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		// 위에 서체크하긴 했지만? 다시 체크.
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
 			return;
+
+		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON)); // 상태 바인딩.
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
