@@ -11,7 +11,7 @@ private:
 
 public:
 	const LIGHT_DESC*		Get_LightDesc() { return &m_LightDesc; }
-	void							Set_Active(_bool isActive) { m_isActive = isActive; }
+	void					Set_Active(_bool isActive) { m_isActive = isActive; }
 
 #ifdef _DEBUG
 	LIGHT_DESC* Get_LightDesc_For_Map() { return &m_LightDesc; }
