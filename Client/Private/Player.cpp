@@ -182,6 +182,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::ROVER;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
 			return;
 		}
 
@@ -192,6 +193,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
 			return;
 		}
 	}
@@ -201,6 +203,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
 			return;
 		}
 	}
