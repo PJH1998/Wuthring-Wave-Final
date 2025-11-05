@@ -197,11 +197,13 @@ protected:
 
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
+	
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
 protected:
 	_bool m_IsLockOn = { false };
+	_bool m_IsLand = { false };
 	
 
 public:

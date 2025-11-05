@@ -110,7 +110,8 @@ void CAugusta::Update(_float fTimeDelta)
     // 5. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-   
+	// 6. Land Check
+	m_IsLand = Is_Land(0.2f, 0.5f);
 
 }
 void CAugusta::Late_Update(_float fTimeDelta)
@@ -123,7 +124,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
     }
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
-    
+	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
@@ -287,7 +288,7 @@ void CAugusta::Hit_Judge(void* pArg)
 
     // 1. 맞았을 때 땅판정.
     //_bool IsLand = Is_Land(0.2f, 0.5f);
-	_bool IsLand = true;
+	
     
     // 2. 스킬 판정?
 	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
@@ -296,8 +297,8 @@ void CAugusta::Hit_Judge(void* pArg)
 	Rotate_HitTarget(pDesc->pTransform);
 
 	// 4. 방향 판정.
-	if (!IsLand)
-		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_START;
+	if (!m_IsLand)
+		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_FALL;
 	else
 	{
 		if (IsSkill)  // Skill인지 
