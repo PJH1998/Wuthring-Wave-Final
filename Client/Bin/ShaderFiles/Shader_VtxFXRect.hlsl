@@ -14,6 +14,7 @@ float g_fYSize;
 
 float g_Sweep;      // 0 -> 1
 float g_Soft;       //
+int g_MaskFlag;
 
 
 struct VS_IN
@@ -101,8 +102,19 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.r < 0.2f)
-        discard;
+    if(g_MaskFlag == 0)
+    {
+        if (Out.vDiffuse.r < 0.2f)
+            discard;
+        
+        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    }
+    else
+    {
+        if (Out.vDiffuse.a < 0.2f)
+            discard;
+    }
+    
 
     Out.vDiffuse *= g_vColor;
     
@@ -120,8 +132,19 @@ PS_OUT PS_TEST(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(ClampSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.r < 0.25f)
-        discard;
+    if (g_MaskFlag == 0) // 알파컷 설정 0 이면 r,g,b 체크해서 -> a 에 저장해주는거. 1이면 걍 어차피 알파있는 텍스처니까 알파 그대로사용
+    {
+   
+        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+        
+       if (Out.vDiffuse.a < 0.2f)
+           discard;
+    }
+    else
+    {
+        if (Out.vDiffuse.a < 0.2f)
+            discard;
+    }
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
@@ -131,7 +154,7 @@ PS_OUT PS_TEST(PS_IN In)
     
     Out.vDiffuse *= fVisible;
     
-    if(Out.vDiffuse.a < 0.25f)
+    if (Out.vDiffuse.a < 0.2f)
         discard;
     
     Out.vDiffuse *= g_vColor;
@@ -150,8 +173,18 @@ PS_OUT PS_TESTA(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(ClampSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.r < 0.25f)
-        discard;
+    if (g_MaskFlag == 0)
+    {
+        if (Out.vDiffuse.r < 0.2f)
+            discard;
+        
+        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    }
+    else
+    {
+        if (Out.vDiffuse.a < 0.2f)
+            discard;
+    }
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
@@ -162,7 +195,7 @@ PS_OUT PS_TESTA(PS_IN In)
     Out.vDiffuse *= fVisible;
     
     if (Out.vDiffuse.r < 0.2f)
-        discard;
+    discard;
     
     Out.vDiffuse *= g_vColor;
     
@@ -181,7 +214,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();

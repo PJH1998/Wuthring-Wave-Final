@@ -740,8 +740,8 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
     if (TrailMeshJson.contains("ShaderPass"))
         Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
 
-	if (TrailMeshJson.contains("ShaderPass"))
-		Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
+	if (TrailMeshJson.contains("MaskFlag"))
+		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
 
 	if (TrailMeshJson.contains("SweepSpeed"))
 		Desc.fSweep = TrailMeshJson["SweepSpeed"].get<_float>();
@@ -835,6 +835,9 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 
 	if (RectJson.contains("ShaderPass"))
 		Desc.iShaderPass = RectJson["ShaderPass"].get<_int>();
+
+	if (RectJson.contains("MaskFlag"))
+		Desc.iMaskFlag = RectJson["MaskFlag"].get<_int>();
 
 	if (RectJson.contains("SweepSpeed"))
 		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();

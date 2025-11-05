@@ -24,6 +24,8 @@ public:
 		_float	fYSize = 1.f;
 
 		_int	iShaderPass = 0;
+		_int	iMaskFlag = 0;
+
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f };
@@ -69,6 +71,8 @@ private:
 	_float						m_fSweep = 0.f;
 	_float						m_fSweepSpeed = {};
 	_float						m_fSoft = {};
+
+	_int						m_iMaskFlag = 0;
 
 private:
 	HRESULT Ready_Components(FXRECT_DESC& Desc);

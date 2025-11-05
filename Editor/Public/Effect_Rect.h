@@ -24,7 +24,9 @@ public:
 		_float	fXSize = 1.f;
 		_float	fYSize = 1.f;
 
+		_int	iMaskFlag = 0;
 		_int	iShaderPass = 0;
+
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f };
@@ -60,6 +62,8 @@ private:
 	//FXRECT_DESC					m_tDesc = {};
 
 	_int						m_iShaderPass = 0;
+	_int						m_iMaskFlag = 0;
+
 	_float3						m_vPos = {};
 	_float4						m_vColor = {};
 	_float2						m_vLifeTime = {};

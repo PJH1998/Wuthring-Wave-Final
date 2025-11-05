@@ -83,6 +83,15 @@ void CRect_Controller::Rect_Tab()
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedRectDesc->iShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
 
+					ImGui::Text("Mask");
+					ImGui::PushItemWidth(100);
+					if (ImGui::Button("R Cut"))
+						m_pSelectedRectDesc->iMaskFlag = 0;
+					ImGui::SameLine();
+					if (ImGui::Button("A Cut"))
+						m_pSelectedRectDesc->iMaskFlag = 1;
+					ImGui::PopItemWidth();
+
 					ImGui::Text("SweepSpeed");
 					ImGui::PushItemWidth(100);
 					ImGui::InputFloat("##SweepSpeed", &(m_pSelectedRectDesc->fSweepSpeed));
