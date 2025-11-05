@@ -11,7 +11,7 @@ Texture2D g_MaskTexture[4] : register(t8);
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
-float g_fOutLineRadius = 0.0015f;
+float g_fOutLineRadius = 0.001f;
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
@@ -21,7 +21,6 @@ bool g_HasNormal = false;
 
 cbuffer GlobalConstants
 {
-    // <-- �ٷ� �� ����Դϴ�. C++���� 2�� ����.
     int g_iNumBlendWeightsToUse = 2; 
 }
 
@@ -268,6 +267,7 @@ void PS_SHADOW(PS_IN_SHADOW In)
 struct VS_OUT_OUTLINE
 {
     float4 vPosition : SV_POSITION;
+    bool IsDraw : TEXCOORD0;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -286,16 +286,24 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     matWV = mul(g_WorldMatrix, g_ViewMatrix);
    
     float4 vPosition = mul(float4(In.vPosition, 1.f), matBone);
+    float4 vNormal = mul(float4(In.vNormal, 0.f), matBone);
     
     vector vViewPos = mul(vPosition, matWV);
     
-    vector vViewNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
+    vector vViewNormal = normalize(mul(vNormal, matWV));
    
-    vViewNormal = float4(vViewNormal.x, vViewNormal.y, 0.f, 0.f);
-   
+    if(vViewNormal.z < 0.f)
+    {
+        vViewNormal.z *= -1.f;
+    }
+    
+    vViewNormal = normalize(float4(vViewNormal.x, vViewNormal.y, vViewNormal.z * 0.01f, 0.f));
+    
     vector vOutLinePos = vViewPos + (vViewNormal * g_fOutLineRadius);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
+    
+    Out.IsDraw = true;
     
     return Out;
 }
@@ -303,6 +311,7 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
 struct PS_IN_OUTLINE
 {
     float4 vPosition : SV_POSITION;
+    bool IsDraw : TEXCOORD0;
 };
 
 struct PS_OUT_OUTLINE
@@ -314,8 +323,11 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 {
     PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
 
-    Out.vColor = float4(0.3f, 0.15f, 0.f, 1.f);
-    
+    if (In.IsDraw)
+        Out.vColor = float4(0.3f, 0.15f, 0.f, 1.f);
+    else
+        discard;
+        
     return Out;
 }
 
