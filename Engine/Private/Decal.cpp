@@ -1,5 +1,6 @@
 ﻿#include "EnginePch.h"
 #include "Decal.h"
+#include "Texture.h"
 #include "Shader.h"
 #include "VIBuffer_Rect.h"
 
@@ -11,7 +12,7 @@ CDecal::CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pContext);
 }
 
-HRESULT CDecal::Initialize(CTexture* pTexture, _uint iMaxDecal)
+HRESULT CDecal::Initialize_Prototype(CTexture* pTexture, _uint iMaxDecal)
 {
 	ASSERT_CRASH(pTexture);
 
@@ -93,13 +94,13 @@ void CDecal::Update_Buffer()
 
 CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CTexture* pTexture, _uint iMaxDecal)
 {
-	CDecal* pInstance = new CDecal(pDevice, pContext);
-	if (FAILED(pInstance->Initialize(pTexture, iMaxDecal)))
-	{
-		MSG_BOX("Failed to Created : CDecal");
-		Safe_Release(pInstance);
-	}
-    return pInstance;
+	//CDecal* pInstance = new CDecal(pDevice, pContext);
+	//if (FAILED(pInstance->Initialize(pTexture, iMaxDecal)))
+	//{
+	//	MSG_BOX("Failed to Created : CDecal");
+	//	Safe_Release(pInstance);
+	//}
+    return nullptr;
 }
 
 void CDecal::Free()

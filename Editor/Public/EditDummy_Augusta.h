@@ -37,6 +37,8 @@ private:
 
 	_bool				m_IsEmissive = { false };
 
+	_float				m_fOutLine = { 0.003f };
+	_float				m_fOutLineZ = { 0.002f };
 private:
 	HRESULT				Ready_Components(_fmatrix PreTransformMatrix);
 

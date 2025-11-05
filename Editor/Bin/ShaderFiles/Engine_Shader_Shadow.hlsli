@@ -13,8 +13,10 @@ cbuffer CSMDatas : register(b1)
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
-float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
-float4 g_fMinShadowBias = 0.01f;
+float4 g_fShadowBais = 0.0001f;//float4(0.0001f, 0.02f, 0.03f, 0.05f);
+float4 g_fMinShadowBias = 0.0001f;
+
+float g_fShadowMapBais = 0.001f;
 
 float g_DebugSlopeScale = 2.f;
 
@@ -113,10 +115,8 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArra
         return fFinalShadow;
 
     float Gradiant = RPB_Gradiant(fViewZ);
-
     //float fSlopeFactor = (1.f - fDot); // Row
-    float fSlopeFactor = 1.f;
-//    sqrt(1.f - pow(NdotL, 2)); // High
+    float fSlopeFactor = sqrt(1.f - pow(NdotL, 2)); // High
 
     float BlendFactor = 0.f;
     
@@ -184,7 +184,7 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArra
     return fFinalShadow;
 }
 
-float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture, float fBias)
+float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArray<float> ShadowMapTexture)
 {
     float fShadow = 1.f;
     
@@ -207,9 +207,18 @@ float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture
     
     vTexcoord = (vTexcoord * vTexRange) + vStartTex;
     
-    float fDepth = vProjPos.z - 0.01f;
     
     float2 vTexelSize = 1.f / vShadowMapSize;
+    
+    float Gradiant = RPB_Gradiant(fViewZ);
+    //float fSlopeFactor = (1.f - fDot); // Row
+    float fSlopeFactor = sqrt(1.f - pow(NdotL, 2)); // High
+
+    float BiasFactor = 0.f;
+    
+    float fBias = max(g_fShadowMapBais, g_DebugSlopeScale * fSlopeFactor * Gradiant);
+    
+    float fDepth = vProjPos.z - fBias;
     
     fShadow = ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vTexelSize, vStartTex, vEndTex);
     

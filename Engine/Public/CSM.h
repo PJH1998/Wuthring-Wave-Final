@@ -62,6 +62,7 @@ private:
 	_float						m_fClipDistance[5];
 
 	_float						m_fCameraNear = {};
+	_float						m_fCutFar = {};
 	_float						m_fCameraFar = {};
 
 private:

@@ -165,6 +165,7 @@ namespace Client
 		, NORMAL_TEX
 		, AUGUSTA
 		, SHADOW
+		, OUNTLINE
 		, END };
 
 }

@@ -127,11 +127,16 @@ void CAugusta::Late_Update(_float fTimeDelta)
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
-    
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+		return;
+
+	if(FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CAugusta::Render()
 {
+
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
@@ -168,6 +173,45 @@ void CAugusta::Render()
 
 void CAugusta::Render_Shadow()
 {
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CAugusta::Render_OutLine()
+{
+	Bind_Resources();
+	
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (i == 5)	//Cloths
+			continue;
+
+		_bool HasNormal = { false };
+
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+		
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
 }
 
 void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
@@ -367,7 +411,6 @@ void CAugusta::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
-
 }
 
 void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)

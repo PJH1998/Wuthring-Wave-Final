@@ -104,11 +104,13 @@ void CRenderer::Render()
 	Render_NonBlend();
 	Render_Static();		
 	Render_SSAO();			
-	Render_Outline();
 	Render_Dynamic();
 
 	Render_Light();
 	Render_Combined();
+	
+	Render_Outline();
+	
 	Render_NonLight();
 	Render_Emissive();
 	Render_Bloom();
@@ -387,6 +389,12 @@ void CRenderer::Render_SSAO()
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_SSAO_BLUR_Y"), m_iWinSizeX, m_iWinSizeY)))
 		CRASH("Failed RCS_SSAO_BLUR_Y");
 #pragma endregion
+}
+
+void CRenderer::Render_Decal()
+{
+
+
 }
 
 void CRenderer::Render_Dynamic()

@@ -14,11 +14,13 @@ public:
 		_float3 vScale;
 		_float3 vRotation;
 		_float3 vPosition;
+		_float3 vColor;
 		_float  fLifeTime;
 	}DECAL_DESC;
 
 	typedef struct tagDecalData {
 		_float4x4	WorldMatrixInv;
+		_float3		vColor;
 		_float2		vLifeTime;
 		_float		Padding[3];
 	}DECAL_DATA;
@@ -28,11 +30,18 @@ private:
 	virtual ~CDecal() = default;
 
 public:
-	HRESULT						Initialize(CTexture* pTexture, _uint iMaxDecal);
 	void						Update(_float fTimeDelta);
 	HRESULT						Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 	void						Add_Decal(const DECAL_DESC& DecalDesc);
 
+			HRESULT			Initialize_Prototype(CTexture* pTexture, _uint iMaxDecal);
+	/*virtual		HRESULT			Initialize_Clone(void* pArg);
+	virtual		void			Priority_Update(_float fTimeDelta);
+	virtual		void			Update(_float fTimeDelta);
+	virtual		void			Late_Update(_float fTimeDelta);
+	virtual		void			Render();
+	*/
+	
 private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
@@ -40,7 +49,6 @@ private:
 	_uint						m_iMaxDecal = {};
 	_uint						m_iNumDecals = {};
 	list<DECAL_DATA>			m_DecalDatas = {};
-
 
 	CTexture*					m_pDecalTexture = { nullptr };
 	ID3D11Buffer*				m_pBuffer = { nullptr };

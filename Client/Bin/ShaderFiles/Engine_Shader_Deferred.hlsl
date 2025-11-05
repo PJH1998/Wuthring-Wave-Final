@@ -162,14 +162,14 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     
     float fShadowMap = 1.f;
     
+    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
+    
+    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
+    
     if (g_HasShadowMap)
     {
-        fShadowMap = Compute_ShadowMap(vWorldPos, g_ShadowMap, 0.0001f);
+        fShadowMap = Compute_ShadowMap(fViewZ, fNdotL, vWorldPos, g_ShadowMap);
     }
-    
-    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-
-    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
    
     float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos, g_Cascade);
     
@@ -412,6 +412,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     }
     
     float AO = (Occlusion / g_iSampleSize);
+    
+    if(AO >= 0.8f)
+        AO = 1.f;
     
     AO = pow(AO, 2.f);
     

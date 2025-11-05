@@ -24,7 +24,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
 	ShadowMapDesc.vCenterPos = _float3(2200.f, 150.f, 1200.f);
-	ShadowMapDesc.vExtents = _float3(128.f, 300.f, 128.f);
+	ShadowMapDesc.vExtents = _float3(160.f, 300.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
 
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
@@ -78,7 +78,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 void CLevel_GamePlay::Render()
 {
 #ifdef _DEBUG
-	Shader_Gui();
+//	Shader_Gui();
 #endif
 }
 
@@ -165,7 +165,7 @@ void CLevel_GamePlay::Shader_Gui()
 	ImGui::Begin("Test");
 	
 	
-	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	if (ImGui::CollapsingHeader("SSAO"))
 	{
 				ImGui::InputFloat("RADIUS", &m_fRadius);
 		
@@ -176,6 +176,41 @@ void CLevel_GamePlay::Shader_Gui()
 		#endif // _DEBUG
 	}
 	ImGui::End();
+
+	if (ImGui::CollapsingHeader("CASCADE"))
+	{
+		if (ImGui::CollapsingHeader("Base Bias"))
+		{
+			ImGui::InputFloat("CASCADE[0]", &m_fBias[0], 0.001f, 0.001f);
+			ImGui::InputFloat("CASCADE[1]", &m_fBias[1], 0.001f, 0.001f);
+			ImGui::InputFloat("CASCADE[2]", &m_fBias[2], 0.001f, 0.001f);
+			ImGui::InputFloat("CASCADE[3]", &m_fBias[3], 0.001f, 0.001f);
+		}
+
+		if (ImGui::CollapsingHeader("Min Bias"))
+		{
+
+			ImGui::InputFloat("MIN_BIAS_CASCADE[0]", &m_fMinBias[0], 0.001f, 0.001f);
+			ImGui::InputFloat("MIN_BIAS_CASCADE[1]", &m_fMinBias[1], 0.001f, 0.001f);
+			ImGui::InputFloat("MIN_BIAS_CASCADE[2]", &m_fMinBias[2], 0.001f, 0.001f);
+			ImGui::InputFloat("MIN_BIAS_CASCADE[3]", &m_fMinBias[3], 0.001f, 0.001f);
+		}
+
+		if (ImGui::CollapsingHeader("Map Bias"))
+		{
+			ImGui::InputFloat("MAP", &m_fMapBias, 0.001f, 0.001f);
+		}
+
+		if (ImGui::CollapsingHeader("SLOPE_SCALE"))
+		{
+			ImGui::InputFloat("SCALE", &m_fSlopeScale);
+		}
+
+		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowBais", &m_fBias, sizeof(_float4));
+		m_pGameInstance->Bind_RawValue_Renderer("g_fMinShadowBias", &m_fMinBias, sizeof(_float4));
+		m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
+		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
+	}
 
 }
 #endif

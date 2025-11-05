@@ -94,9 +94,8 @@ private:
 	void						Render_NonBlend();	// 임시
 	void						Render_Static();
 	void						Render_SSAO();
-	void						Render_StaticDecal();
+	void						Render_Decal();
 	void						Render_Dynamic();
-	void						Render_DynamicDecal();
 	void						Render_Light();
 	void						Render_Combined();
 	void						Render_NonLight();

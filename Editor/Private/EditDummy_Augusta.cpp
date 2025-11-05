@@ -62,7 +62,11 @@ void CEditDummy_Augusta::Late_Update(_float fTimeDelta)
 //	m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this);
 
 	m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this);
-	m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this);
+
+
+	_float fDistance = XMVectorGetX(XMVectorSubtract(m_pTransformCom->Get_State(STATE::POSITION), XMLoadFloat4(m_pGameInstance->Get_CamPos())));
+	if(fDistance < 100.f)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this);
 }
 
 void CEditDummy_Augusta::Render()
@@ -116,7 +120,20 @@ void CEditDummy_Augusta::Render_Shadow()
 
 void CEditDummy_Augusta::Render_OutLine()
 {
+	ImGui::Begin("PLAYER_OUTLINE");
+
+	ImGui::DragFloat("OUTLINE", &m_fOutLine, 0.000001f, 0.000001f, 0.003f, "%.6f");
+	ImGui::DragFloat("OUTLINE_Z", &m_fOutLineZ, 0.000001f, 0.000001f, 0.003f, "%.6f");
+
+	ImGui::End();
+
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadius", &m_fOutLine, sizeof(_float))))
+		CRASH("Failed to Bind g_fOutLineRadius");
+	if (FAILED(m_pShaderCom->Bind_Value("g_fOutLineRadiusZ", &m_fOutLineZ, sizeof(_float))))
+		CRASH("Failed to Bind g_fOutLineRadius");
+
 
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
 	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
@@ -125,6 +142,9 @@ void CEditDummy_Augusta::Render_OutLine()
 
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
+		if (i == 5) // Cloths
+			continue;
+
 		m_pShaderCom->Begin(6);
 
 		m_pModelCom->Render(i);
