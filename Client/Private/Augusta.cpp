@@ -10,6 +10,8 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
+#include "AttackVolume.h"
+
 
 
 #include "Wing.h"
@@ -41,6 +43,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
@@ -59,6 +62,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     
 	
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	
     return S_OK;
 }
 
@@ -95,6 +100,10 @@ void CAugusta::Update(_float fTimeDelta)
 			pPart.second->Update(fTimeDelta);
 	}
 
+	for (auto& pAttackVolume : m_AttackVolumes)
+		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
+			pAttackVolume->Update(fTimeDelta);
+
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
@@ -122,6 +131,11 @@ void CAugusta::Late_Update(_float fTimeDelta)
         if (pPart.second->IsActivate())
             pPart.second->Late_Update(fTimeDelta);
     }
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
+			pAttackVolume->Late_Update(fTimeDelta);
+
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
 	
@@ -168,6 +182,11 @@ void CAugusta::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
+			pAttackVolume->Render();
+
 #endif // _DEBUG
 }
 
@@ -258,6 +277,7 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
+		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);
@@ -396,6 +416,13 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
 }
+void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+#ifdef _DEBUG
+	cout << "On Hit! Augusta Bayonet" << endl;
+#endif // _DEBUG
+
+}
 #pragma endregion
 
  
@@ -469,12 +496,16 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
     _float3 vRotation = {};
     _float3 vPosition = {};
 
+	m_AttackVolumes.resize(PARTTYPE::TYPE_END);
+
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
     {
         _wstring strPartName = pDesc->PartPrototypes[i].first;
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
         CProp::PROP_DESC Desc{};
+		CAttackVolume::ATKVOLUME_DESC VolumeDesc{};
+
         switch (i)
         {
         case PARTTYPE::PART_BAYONET:
@@ -495,6 +526,26 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
             ASSERT_CRASH(m_pBayonet);
             Safe_AddRef(m_pBayonet);
+
+			
+			VolumeDesc.eLayer = COLLISIONLAYER::ATTACK;
+			VolumeDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+			VolumeDesc.eShape = SHAPE::BOX;
+			VolumeDesc.pParenTransform = m_pTransformCom;
+			VolumeDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+			VolumeDesc.vExtent = _float3(1.f, 1.f, 1.f);
+			VolumeDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+			VolumeDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+			VolumeDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+					this->OnHitEnter(iLayer, pOther, Manifold);
+				};
+
+			m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
+				Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
+			if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
+				CRASH(m_pMainAttackVolume);
+
+			m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
         case PARTTYPE::PART_SKILLWEAPON:
@@ -590,4 +641,12 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (pAttackVolume != nullptr)
+			Safe_Release(pAttackVolume);
+	}
+
+	m_AttackVolumes.clear();
 }

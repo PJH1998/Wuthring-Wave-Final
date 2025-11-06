@@ -148,6 +148,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK01;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 
@@ -158,6 +159,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK02;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 
@@ -168,6 +170,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK03;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 
@@ -178,6 +181,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
 				m_iComboCount = COMBO::COMBO_ATTACK04;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 
@@ -188,6 +192,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
 				m_iComboCount = COMBO::COMBO_ATTACK05;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 
@@ -198,6 +203,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
 				m_iComboCount = COMBO::COMBO_ATTACK06;
+				m_pAugusta->Rotate_Target();
 
 				// Bind Condition Burst 궁
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
@@ -216,6 +222,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
 				m_iComboCount = COMBO::COMBO_ATTACKOMNI;
+				m_pAugusta->Rotate_Target();
 				return;
 			}
 

@@ -24,15 +24,21 @@ public:
 
 	virtual void Activate(_bool IsActivate) override;
 
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+
 private:
 	vector<_uint> m_ShaderPaths = {};
 
+
+private:
+	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 
 
 private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);
 	void Ready_Positions(const PROP_DESC* pDesc);
+	void Ready_AttackVolumes();
 	void Bind_Resources();
 
 public:

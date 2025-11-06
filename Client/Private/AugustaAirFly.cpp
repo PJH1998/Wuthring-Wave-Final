@@ -116,7 +116,7 @@ void CAugustaAirFly::Handle_Input()
 	m_States[INPUT_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
 	m_States[INPUT_L] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
 	m_States[INPUT_R] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
-	m_States[INPUT_ACCEL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+	m_States[INPUT_ACCEL] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) || m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
 
 	
 	// 상태 변화
