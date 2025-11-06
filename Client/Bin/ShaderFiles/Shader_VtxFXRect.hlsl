@@ -212,7 +212,7 @@ technique11 DefaultTechnique
 {
     pass DefaultPass // 0
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -223,7 +223,7 @@ technique11 DefaultTechnique
  
     pass OutPass
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -234,7 +234,7 @@ technique11 DefaultTechnique
 
     pass InPass
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -245,7 +245,7 @@ technique11 DefaultTechnique
     
     pass BlendOut
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -256,7 +256,7 @@ technique11 DefaultTechnique
 
     pass BlendIn
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
