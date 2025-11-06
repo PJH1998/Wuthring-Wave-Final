@@ -33,10 +33,10 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 	m_iNumLOD = m_pModelComArray.size() - 1;
 
-	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
-	if (!m_pBoundingBox)
-		CRASH("Failed");
-	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
+	//m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	//if (!m_pBoundingBox)
+	//	CRASH("Failed");
+	//m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
 	m_vImpulsePos = pDesc->m_vImpulsePos;
 	m_vImpulsePower = pDesc->m_vImpulsePower;

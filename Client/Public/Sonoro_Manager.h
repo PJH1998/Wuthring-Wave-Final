@@ -7,17 +7,25 @@ NS_BEGIN(Client)
 class CSonoro_Manager final: public CBase
 {
 private:
-	//using SonoroObjects = variant<class CMapObject_Sonoro, class CMapObject_NonSonoro>;
 
 private:
 	explicit CSonoro_Manager();
 	virtual ~CSonoro_Manager() = default;
 
 public:
-	void Add_To_Management(OBJECTTYPE eType, void* pObjects);
+	void Initialize();
+	void Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
+	void Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	void Update(_float fTimeDelta);
+	void Change_Sonoro(_bool IsSonoro);
 
 private:
-	//unordered_map<OBJECTTYPE, vector<SonoroObjects*>> Objects;
+	vector<class CMapObject_Sonoro*> m_SonoroObjects;
+	vector<class CMapObject_NonSonoro*> m_NonSonoroObjects;
+	_bool m_LastSonoroMode = { false };
+	class CGameInstance* m_pGameInstance = { nullptr };
+	_float m_fTriggerdTime = {};
+	_float4 m_vUpSpeed = {};
 
 public:
 	static CSonoro_Manager* Create();

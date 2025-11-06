@@ -43,7 +43,9 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 	virtual		BoundingBox* Get_BoundingBox()override;
+	void Compute_DelayTime(_float4 vCamPos);
 
+	void Turn_Sonoro(_fvector vUpSpeed);
 private:
 	CDeferredShader* m_pShaderCom = { nullptr };
 	CShader* m_pShadowShaderCom = { nullptr };
@@ -51,7 +53,8 @@ private:
 	vector<CModel*>		m_pModelComArray;
 
 	_uint						m_iShaderPassIndex = {};
-
+	_float m_fDlayTime = {};
+	_float4x4 m_DefaultMatrix = {};
 private:
 	void						Ready_Component(void* pArg);
 
