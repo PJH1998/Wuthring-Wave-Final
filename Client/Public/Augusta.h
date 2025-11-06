@@ -116,6 +116,7 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 	virtual void	Render_Shadow() override;
+	virtual void	Render_OutLine() override;
 #pragma endregion
 
 
@@ -132,8 +133,6 @@ public:
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-
-	
 #endif // _DEBUG
 
 #pragma region 2. NOTIFY
@@ -143,6 +142,11 @@ public:
 
 #pragma endregion
 
+#pragma region 3. CALLBACK
+	public:
+		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
 
 #pragma endregion
 private:
@@ -150,6 +154,9 @@ private:
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

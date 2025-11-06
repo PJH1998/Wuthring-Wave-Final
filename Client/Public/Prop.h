@@ -56,6 +56,8 @@ protected:
 	class CModel* m_pModelCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CTransform* m_pParentTransform = { nullptr };
+
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
 	
 	_float3 m_vRotationOffset = {};
