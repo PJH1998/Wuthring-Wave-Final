@@ -48,10 +48,11 @@ private:
 	CDeferredShader* m_pShaderCom = { nullptr };
 	CShader* m_pShadowShaderCom = { nullptr };
 	CRigidbody* m_pRigidbodyCom = { nullptr };
+	class CGameSystem* m_pGameSystem = { nullptr };
 	vector<CModel*>		m_pModelComArray;
 
 	_uint						m_iShaderPassIndex = {};
-
+	_bool*						m_IsRender = { nullptr };
 private:
 	void						Ready_Component(void* pArg);
 
