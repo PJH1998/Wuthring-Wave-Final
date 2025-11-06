@@ -152,10 +152,14 @@ void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
-
 	_float fLandDistance = 0.5f;
 
-	if (!m_States[LAND])
+
+	if (m_States[LAND])
+	{
+		m_fFallTime = 0.f;
+	}
+	else if (!m_States[LAND])
 	{
 		m_fFallTime += fTimeDelta;
 

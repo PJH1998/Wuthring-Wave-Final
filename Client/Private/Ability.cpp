@@ -380,6 +380,8 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 	// 우선 MOUSE LB
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
+	skillSlot.fMaxCoolTime = 0.f;
+	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::DEFAULT);
 	if (strKey == "LB")
 	{
 		// Bit And 연산해서 걸리면?
