@@ -138,6 +138,8 @@ public:
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
+	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
+	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
 
@@ -236,9 +238,11 @@ protected:
 	_float3 m_vAnimColliderOffset = {};
 	
 
+	_float m_fTargetDistance = {}; // Target과의 Distance
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	
 
 
 protected:

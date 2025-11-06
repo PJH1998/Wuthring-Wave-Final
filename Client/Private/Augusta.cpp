@@ -79,7 +79,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-
+	// 3. 몬스터가 있다면?
+	m_pTargetTransform;
+	
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
 }
@@ -97,12 +99,7 @@ void CAugusta::Update(_float fTimeDelta)
 			pPart.second->Update(fTimeDelta);
 	}
 
-	// 3. Attack Volume 갱신
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Update(fTimeDelta);
-
-    // 4. 상태 머신 갱신
+    // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
@@ -132,10 +129,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
         if (pPart.second->IsActivate())
             pPart.second->Late_Update(fTimeDelta);
     }
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Late_Update(fTimeDelta);
 
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -183,10 +176,6 @@ void CAugusta::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Render();
 
 #endif // _DEBUG
 }
@@ -278,7 +267,6 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
-		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);
@@ -290,6 +278,45 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
 		m_pWing->Activate(IsActive);
 		break;
     }
+}
+
+void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Change_Volume(iVolumeIdx);
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+		m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
+}
+
+void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Volume_Activate(IsActive); // MainVolume 켜기
+		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
+		break;
+	case PART_SKILLWEAPON:
+	//	m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+	//	m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+	//	m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
 }
 
 void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
@@ -369,6 +396,7 @@ void CAugusta::Sync_Position()
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
+
 #ifdef _DEBUG
 void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 {
@@ -380,18 +408,15 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 #pragma region NOTIFY
 void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Player"))
-    {
-		m_pColliderCom->IsActivate(IsActive);
-    }
-    else if (wStrColliderTag == TEXT("Bayonet"))
-    {
-        
-    }
-    else if (wStrColliderTag == TEXT("SkillWeapon"))
-    {
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
 
-    }
+	// Main Attack Volume의 TriggerActivate
+	if (wstrTypeTag == TEXT("Bayonet"))
+	{
+		m_pBayonet->Volume_Activate(IsActive);
+	}
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -400,6 +425,20 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+void CAugusta::Object_Func(const _wstring& wStrObjectTag)
+{
+	/*size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Bayonet"))
+	{
+		if (wstrAnimTag == TEXT("Attack01"))
+		{
+
+		}
+	}*/
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
@@ -480,8 +519,6 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
     _float3 vScale = {};
     _float3 vRotation = {};
     _float3 vPosition = {};
-
-	m_AttackVolumes.resize(PARTTYPE::TYPE_END);
 
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
     {
@@ -626,12 +663,4 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (pAttackVolume != nullptr)
-			Safe_Release(pAttackVolume);
-	}
-
-	m_AttackVolumes.clear();
 }

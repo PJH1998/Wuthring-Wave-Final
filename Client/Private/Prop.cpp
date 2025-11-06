@@ -77,6 +77,15 @@ void CProp::Activate(_bool IsActive)
         
 }
 
+void CProp::Volume_Activate(_bool IsActive)
+{
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+}
+
+
+
+
 
 void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
 {
@@ -150,6 +159,17 @@ void CProp::Free()
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pModelCom);
     Safe_Release(m_pRigidbodyCom);
-	Safe_Release(m_pMainAttackVolume);
+	
+	// AttackVolumes 제거.
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+		
+
+	m_AttackVolumes.clear();
+
+	//Safe_Release(m_pMainAttackVolume);
     m_pParentTransform = { nullptr };
 }

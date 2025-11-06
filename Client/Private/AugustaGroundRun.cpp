@@ -40,7 +40,6 @@ void CAugustaGroundRun::OnEnter(void* pArg)
 
 void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
 {
-    
     CGroundState::OnUpdate(fTimeDelta);
 
     // 0. 키입력 감지.
@@ -213,16 +212,16 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-  //  if (!m_States[LAND])
-  //  {
-		//m_iNotLandFrames++;
-		//if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		//{
-		//	m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-		//	return;
-		//}
-  //  }
+    if (!m_States[LAND])
+    {
+		m_iNotLandFrames++;
+		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		{
+			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+			return;
+		}
+    }
 
 	// 상위, 하위 상태
 	if (m_States[HIT])

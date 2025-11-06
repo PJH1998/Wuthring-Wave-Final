@@ -500,35 +500,39 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     {
         switch (i)
         {
-        case CHARACTERTYPE::AUGUSTA:
-        {
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::ROVER:
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-
-        }
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+			break;
         case CHARACTERTYPE::GALBRENA:
+		{
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;	
+		}
             break;
-        case CHARACTERTYPE::ROVER:
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+
+		}
+		break;
         default:
             break;
         }
