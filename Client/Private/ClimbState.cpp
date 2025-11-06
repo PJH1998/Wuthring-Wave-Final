@@ -11,9 +11,9 @@ HRESULT CClimbState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CClimbState::OnEnter()
+void CClimbState::OnEnter(void* pArg)
 {
-    CCharacterState::OnEnter();
+    CCharacterState::OnEnter(pArg);
 }
 
 void CClimbState::OnUpdate(_float fTimeDelta)

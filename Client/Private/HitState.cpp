@@ -10,9 +10,9 @@ HRESULT CHitState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CHitState::OnEnter()
+void CHitState::OnEnter(void* pArg)
 {
-    CCharacterState::OnEnter();
+    CCharacterState::OnEnter(pArg);
 }
 
 void CHitState::OnUpdate(_float fTimeDelta)
@@ -22,10 +22,6 @@ void CHitState::OnUpdate(_float fTimeDelta)
     Apply_KnockbackForce(fTimeDelta);
     Check_HitRecovery();
 
-    if (nullptr != m_pCurrentSubState)
-    {
-        m_pCurrentSubState->OnUpdate(fTimeDelta);
-    }
 }
 
 void CHitState::OnExit()
@@ -35,21 +31,14 @@ void CHitState::OnExit()
 
 void CHitState::Apply_KnockbackForce(_float fTimeDelta)
 {
-    // TODO: 넉백 힘 적용
 }
 
 void CHitState::Check_HitRecovery()
 {
-    // TODO: 피격 복구 체크
 }
 
 void CHitState::Change_SubState(const _string& strSubStateName, CStateMachine* pStateMachine)
 {
-    if (nullptr != m_pCurrentSubState)
-    {
-        m_pCurrentSubState->OnExit();
-    }
-
 }
 
 void CHitState::Free()

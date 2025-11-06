@@ -10,9 +10,9 @@ HRESULT CAirState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAirState::OnEnter()
+void CAirState::OnEnter(void* pArg)
 {
-    CCharacterState::OnEnter();
+    CCharacterState::OnEnter(pArg);
 }
 
 void CAirState::OnUpdate(_float fTimeDelta)

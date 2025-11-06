@@ -670,21 +670,21 @@ void CLevel_Map::Load_Objects()
     _string LastVersionPath;
 
     //마지막 폴더 못읽음. 프로토타입 안생김.
-    for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
-        if (entry.is_regular_file()) {
-            if (entry.path().string().find("MapData") != std::string::npos)
-                continue;
+	for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
+		if (entry.is_regular_file()) {
+			if (entry.path().string().find("MapData") != std::string::npos)
+				continue;
 
 			if (entry.path().string().find("Anim") != std::string::npos)
 				continue;
 
-            if (entry.path().extension() == ".dat") {
+			if (entry.path().extension() == ".dat") {
 
-                _char FileDrive[MAX_PATH] = {};
-                _char FileDir[MAX_PATH] = {};
-                _char FileName[MAX_PATH] = {};
-                _char FileExt[MAX_PATH] = {};
-                _splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+				_char FileDrive[MAX_PATH] = {};
+				_char FileDir[MAX_PATH] = {};
+				_char FileName[MAX_PATH] = {};
+				_char FileExt[MAX_PATH] = {};
+				_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
 				_wstring PrototypeName = L"Prototype_Component_Model_";
 				PrototypeName += StringToWString(FileName);
@@ -703,56 +703,57 @@ void CLevel_Map::Load_Objects()
 					continue;
 				}
 
-                _wstring baseName = StringToWString(FileName);
+				_wstring baseName = StringToWString(FileName);
 
-                // LOD 마지막에 붙은 숫자 추출
-                size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
-                _wstring namePart = baseName.substr(0, pos + 1);
+				// LOD 마지막에 붙은 숫자 추출
+				size_t pos = baseName.find_last_not_of(TEXT("0123456789"));
+				_wstring namePart = baseName.substr(0, pos + 1);
 
-                _wstring numberPart = baseName.substr(pos + 1);
-                version = stoi(numberPart);
+				_wstring numberPart = baseName.substr(pos + 1);
+				version = stoi(numberPart);
 
-                _wstring key = L"Prototype_Component_Model_" + namePart;
-
-
+				_wstring key = L"Prototype_Component_Model_" + namePart;
 
 
-                m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
-                    if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-                        CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
-                        CRASH("Prototype Create Failed");
-                    });
-                
-                if (entry.path().string().find("Foliage") != std::string::npos)
-                {
-                    _wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
-                    ProtoName += StringToWString(FileName);
 
-                    m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
-                        if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-                            CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str()))))
-                            CRASH("Prototype Create Failed");
-                        });
-                }
-                if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
-                {
-                    if (entry.path().string().find("Foliage") != std::string::npos)
-                    {
-                        m_FoliageNames.push_back(LastVersionName + to_wstring(version));
-                        m_FoliagePaths.push_back(LastVersionPath);
-                    }
-                    else
-                    {
-                        m_PrototypeNames.push_back(LastVersionName + to_wstring(version));
-                        m_ModelPaths.push_back(LastVersionPath);
-                    }
-                }
-                Lastversion = version;
-                LastVersionName = key;
-                LastVersionPath = VersionPath;
-            }
-        }
-    }
+
+				m_pGameInstance->Add_Work([&, ProtoName = PrototypeName, Path = VersionPath]() {
+					if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+						CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, Path.c_str()))))
+						CRASH("Prototype Create Failed");
+					});
+
+				if (entry.path().string().find("Foliage") != std::string::npos)
+				{
+					_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
+					ProtoName += StringToWString(FileName);
+
+					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
+						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
+							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str()))))
+							CRASH("Prototype Create Failed");
+						});
+				}
+				if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
+				{
+					if (entry.path().string().find("Foliage") != std::string::npos)
+					{
+						m_FoliageNames.push_back(LastVersionName + to_wstring(version));
+						m_FoliagePaths.push_back(LastVersionPath);
+					}
+					else
+					{
+
+						m_PrototypeNames.push_back(LastVersionName + to_wstring(version));
+						m_ModelPaths.push_back(LastVersionPath);
+					}
+				}
+				Lastversion = version;
+				LastVersionName = key;
+				LastVersionPath = VersionPath;
+			}
+		}
+	}
 
     if (!LastVersionName.empty())
     {
@@ -1028,9 +1029,10 @@ void CLevel_Map::Load_Foliage()
         _char FileName[MAX_PATH] = {};
         _char FileExt[MAX_PATH] = {};
         _splitpath_s(m_FoliagePaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-        if (ImGui::Selectable(FileName))
+		m_szPreViewModelName = StringToWString(FileName);
+		if (ImGui::Selectable(FileName))
         {
-            m_szPreViewModelName = StringToWString(FileName);
+            //m_szPreViewModelName = StringToWString(FileName);
             _wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
             ProtoName += StringToWString(FileName);
             m_pBrush->Set_ModelName(ProtoName);

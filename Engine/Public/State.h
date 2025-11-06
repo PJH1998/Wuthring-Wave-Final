@@ -27,7 +27,7 @@ protected:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner);
-    virtual void OnEnter();
+    virtual void OnEnter(void* pArg = nullptr);
     virtual void OnUpdate(_float fTimeDelta); // Update
     virtual void OnExit(); // Exit
 

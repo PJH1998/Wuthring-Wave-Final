@@ -9,12 +9,14 @@ class CAugustaGroundRun final : public CGroundState
 private:
     enum RUNSTATE // Transition에 사용하는 상태들을 정의 해두기.
     {
-        JUMP = 0,
+		HIT = 0, // 피격 상태 최우선순위
+        JUMP,
 		FLY,
         DASH,
         ATTACK,
         WALL,
         LAND,
+		FALL,
         RUN_U,
         RUN_D,
         RUN_L,
@@ -44,7 +46,7 @@ private:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
-    virtual void OnEnter() override;
+    virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
@@ -56,12 +58,13 @@ private:
     _bool m_States[RUNSTATE::END] = {};
     _float m_fSpeed = {};
 
+	_float m_fFallTime = {};
 	
 
 private:
     virtual void Handle_Input() override;
     void Update_RunAnimation(_float fTimeDelta);
-    void Check_Physics();
+    void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
 
     void Setup_Animations();

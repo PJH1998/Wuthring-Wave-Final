@@ -69,7 +69,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 4. Parts 갱신
+	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
@@ -90,39 +90,39 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 6. 파츠 갱신.?
+	// 2. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
 
+	// 3. Attack Volume 갱신
 	for (auto& pAttackVolume : m_AttackVolumes)
 		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
 			pAttackVolume->Update(fTimeDelta);
 
-    // 2. 상태 머신 갱신
+    // 4. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
-    // 3. 현재 위치 - 1Frame 이전 위치 값 계산
+    // 5. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
 
-    // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+    // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Camera 갱신 => 위치 따라오게
+    // 7. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-	// 6. Land Check
+	// 8. Land Check
 	m_IsLand = Is_Land(0.2f, 0.5f);
-
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    // 파츠 갱신
+    // 1. 파츠 갱신
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
@@ -335,43 +335,24 @@ void CAugusta::Hit_Judge(void* pArg)
 	if (nullptr == pArg)
 		return;
 
-	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
-	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
 
 	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
 	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
 		return;
 	
-	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 
-	// 2. 현재 레이어
-	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
-    
-    // 3. 스킬 판정?
-	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
+	// 2. 캐스팅 해서? => 들고 있기.
+	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	m_PendingHitDesc = *pDesc;
 
-	// 3. 일단 바로 회전.
-	Rotate_HitTarget(pDesc->pTransform);
-
-	// 4. 방향 판정.
-	if (!m_IsLand)
-		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_FALL;
-	else
-	{
-		if (IsSkill)  // Skill인지 
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_B_L;
-		else // Skill이 아니라면
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
-	}
-
-	// 5. Hit 상태 바로 적용하는게 아니라. Queue에 등록.
-	StateKey eState{ iCategory, iSubState };
-	CCharacter::CHANGE_STATE_DESC Desc { eState, nullptr};
-
-	//CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
-
-	// 6. 데미지 적용
+	// 3. 데미지 적용은 바로
 	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+
+	// 4. 현재 상태 변경.
+	m_IsHit = true;
 }
 
 
