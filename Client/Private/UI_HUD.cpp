@@ -722,7 +722,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
     const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
 
-    const auto targetUI = Find_ChildObject(L"Inst_HPBar");
+    CCustom_UI* targetUI = Find_ChildObject(L"Inst_HPBar");
 
 
 
@@ -1692,7 +1692,6 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 		break;
 	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
 		// Augusta in Ult, Useable Final Ult
-
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
 		break;
@@ -1710,13 +1709,29 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 
 	}
 
+	// E Button Ctrl.. via R Button State
+	switch (eState_Augusta_R)
+	{
+	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+		// Augusta in Ult, Useable Final Ult
+		augustaUIDesc.vecInstanceDescs[BTN_E].vClipTexcoordX = { 0.f, 0.f };
+	default:
+		if (isIn_AdvUltMode)
+		{	// Autusta in Ult, Not Useable Final Ult.
+			augustaUIDesc.vecInstanceDescs[BTN_E].vClipTexcoordX = { 0.f, 0.f };
+			break;
+		}
+		augustaUIDesc.vecInstanceDescs[BTN_E].vClipTexcoordX = { 0.f, 1.f };
+		break;
+	}
+
 
 	// ==============================
 	// [Get] [LB] Button Slot State
 	// ==============================
 	
-	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
 	
+	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
 	
 	switch (eState_Augusta_LB)
 	{
@@ -1727,6 +1742,7 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
 		break;
 	case Client::UI_AUGUSTA_STATE::LB_SWORD_READY:			// 궁 사용 상태 ( 0, 0 )	// 2번째 칸에 위치
+	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
 		// Augusta in Ult.
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_Burst"][1];
@@ -1748,7 +1764,7 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 
 array<_float2, 2> CUI_HUD::Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize)
 {
-	_float2 vXSpace, vYSpace;;
+	_float2 vXSpace, vYSpace;
 	_float fXNumSize, fYNumSize;
 
 	fXNumSize = (_float)(vSpriteSize.x / iNumMax[0]);
