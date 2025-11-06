@@ -78,101 +78,6 @@ void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
 	Read_Stat(statPath.c_str());
 }
 
-
-//void CAbility::UISlotUpdate(_float fTimeDelta)
-//{
-//	// UI 슬롯 업데이트 (매 프레임 재계산)
-//
-//	// 1. 기존 내용 지우기 (재사용)
-//	m_UISlots.clear();
-//
-//	/*
-//	* 1. P1 (우선순위) => 연계 스킬 상태인가?
-//	* 2. P2 (우선순위) => P1이 없다면 조건부 스킬이 있는가?
-//	* 3. P3 (우선순위) => P2가 없다면 기본 스킬이 있는가?
-//	* 4. => 걸러진 스킬로 현재 스킬의 쿨타임을 가져와서 매핑.
-//	*/
-//
-//	for (const auto& strKey : m_Keys)
-//	{
-//		UISKILL_SLOT slot;
-//		slot.strKeyInput = strKey; // 1. 현재 키 입력
-//		slot.iCharacterType = m_iCharacter; // 2. 현재 캐릭터 타입?
-//
-//		// 3. 아이콘과 매칭되는 Skill 이름을 어떻게 찾지?
-//		_string strSkillName = ""; // 찾으려는 스킬 이름.
-//
-//		//// Priority 1 : Chain Skill (Key -> [Key, Value])
-//		//// 3-1. 먼저 현재 진행 중인 스킬 체인이 있는지 확인(마지막 스킬을 썼는가?). P1 (우선순위)
-//		//if (!m_strPrevSkillName.empty())
-//		//{
-//		//	auto chainIter = m_mapSkillChain.find(m_strPrevSkillName); // => Chain 스킬 찾기.
-//		//	if (chainIter != m_mapSkillChain.end())
-//		//	{
-//		//		const _string& nextSkillName = chainIter->second;
-//		//		const SKILL_INFO* pNextSkillInfo = Get_SkillInfo(nextSkillName);
-//
-//		//		if (Check_SkillState(nextSkillName) == SKILL_STATE::READY)
-//		//		{
-//		//			// => 이 연계 스킬이 현재 키(strKey)와 일치하는지 확인
-//		//			if (pNextSkillInfo != nullptr && pNextSkillInfo->strKeyInput == strKey)
-//		//				strSkillName = nextSkillName;
-//		//		}
-//		//		
-//		//	}
-//		//}
-//
-//		//// Priority 2 : 조건부 스킬
-//		//// P1 스킬을 못 찾았다면, 조건부 스킬(P2)을 찾습니다.
-//		//if (strSkillName.empty())
-//		//{
-//		//	auto condIter = m_mapConditionalChainSkills.find(strKey);
-//		//	if (condIter != m_mapConditionalChainSkills.end())
-//		//	{
-//		//		// 이 키에 해당하는 조건부 스킬 하나만 등록됨.
-//		//		const _string& condSkillName = condIter->second;
-//		//		if (Check_SkillState(condSkillName) == SKILL_STATE::READY)
-//		//		{
-//		//			const SKILL_INFO* pCondSkillInfo = Get_SkillInfo(condSkillName);
-//		//			if (pCondSkillInfo != nullptr && pCondSkillInfo->strKeyInput == strKey)
-//		//				strSkillName = condSkillName;
-//		//		}
-//		//		
-//		//	}
-//		//}
-//
-//		//// Priority 3 : 기본 스킬
-//		//// P2 스킬을 못 찾았다면, 기본 키 스킬(P3)을 찾습니다.
-//		//if (strSkillName.empty())
-//		//{
-//		//	auto defaultIter = m_mapKeyToDefaultSkill.find(strKey);
-//		//	if (defaultIter != m_mapKeyToDefaultSkill.end())
-//		//	{
-//		//		// 이 키에 해당하는 조건부 스킬 하나만 등록됨.
-//		//		const _string& defaultSkillName = defaultIter->second;
-//		//		if (Check_SkillState(defaultSkillName) == SKILL_STATE::READY)
-//		//		{
-//		//			const SKILL_INFO* pCondSkillInfo = Get_SkillInfo(defaultSkillName);
-//		//			if (pCondSkillInfo != nullptr && pCondSkillInfo->strKeyInput == strKey)
-//		//				strSkillName = defaultSkillName;
-//		//		}
-//		//		
-//		//	}
-//		//}
-//
-//		// 4. State에 대한 타입이 설정됩니다.
-//		//slot.iStateType = Determine_State(slot.iCharacterType, strKey, strSkillName);
-//		//// 5. 현재 스킬의 쿨타임은?; => 스킬 이름을 알아야하는데?
-//		//slot.fCurrentCoolTime = Get_RemainingCooldown(slot.strSkillName);
-//		//// 6. 현재 스킬 이름 => 디버깅용도
-//		//slot.strSkillName = strSkillName;
-//		//const SKILL_INFO* pSkillInfo = Get_SkillInfo(slot.strSkillName);
-//		//if (nullptr != pSkillInfo)
-//		//	slot.fMaxCoolTime = pSkillInfo->fCoolDown; // 5. 현재 스킬의 Max 쿨타임은?; => 스킬 이름을 알아야하는데?
-//		//m_UISlots.emplace_back(slot);
-//	}
-//}
-
 void CAbility::UISlotUpdate(_float fTimeDelta)
 {
 	// 1. 기존 내용 지우기 (재사용)
@@ -498,13 +403,17 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 	}
 	else if (strKey == "E")
 	{
+
+
+		// 1. Skill Strike에 진입하자마자 컨디션을 E_RISE_READY로 변경.
 		if (m_iCondition & ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
 			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_RISE_READY);
 		}
-		else if (m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax)
+		// 2. Griffon의 컨디션 상태면 Griffon Ready가 가능하게?
+		else if ((m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax) || Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON)))
 		{
 			skillSlot.fCurrentCoolTime = 0.f;
 			skillSlot.fMaxCoolTime = 0.f;
@@ -512,12 +421,23 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 		}
 		else
 		{
+			// 3. 아무런 상태가 아닌 경우 기본 E가 나오게?
 			skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill_Hack");
 			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill_Hack");
 			if (nullptr != pSkillInfo)
 				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
 			skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_DEFAULT_READY);
 		}
+
+		//else if (m_Costs[ENUM_CLASS(COST_TYPE::COST2)] >= m_fCostMax)
+		//{
+		//	skillSlot.fCurrentCoolTime = 0.f;
+		//	skillSlot.fMaxCoolTime = 0.f;
+		//	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::E_GRIFFON_READY);
+		//}
+		//// Rise 다음 단계에서 그리폰이 나와야하는데 바로 기본 스킬이 나옴.
+
+		
 	}
 	else if (strKey == "Q")
 	{
@@ -647,7 +567,6 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 //}
 
 #ifdef _DEBUG
-
 void CAbility::Debug_FullCost()
 {
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
@@ -657,7 +576,7 @@ void CAbility::Debug_FullCost()
 		if (i == 3 || i == 4)
 			continue;
 		m_Costs[i] = m_fCostMax;
-		
+
 	}
 }
 

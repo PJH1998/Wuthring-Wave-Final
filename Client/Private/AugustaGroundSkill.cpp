@@ -48,8 +48,12 @@ void CAugustaGroundSkill::OnEnter()
             m_pAugusta->Set_Gravity(false);
             m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
             
-			// 진입할때 한번만. => Griffon
+			// 진입할때 한번만 회전 => Griffon
 			m_pAugusta->Rotate_Target();
+
+			// 진입했을 때 Condition E_RISE로 변환? => E_GRIFFON도 활성화.
+			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
+			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
             break;
         }
         case EAugustaSkillType::SKILL_RISE:
@@ -180,6 +184,10 @@ void CAugustaGroundSkill::OnExit()
     
 
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+
+	/* 컨디션 제거*/
+	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
+	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 }
 
 void CAugustaGroundSkill::Handle_Input()
@@ -252,7 +260,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise_Zero"))
 					return;
 
-				m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE_ZERO;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
@@ -263,6 +270,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			{
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Rise"))
 					return;
+
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_RISE;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
@@ -275,6 +283,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Start"))
 					return;
 
+				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 				m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_START;
 				m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
@@ -321,20 +330,22 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			}
 		}
 
-        // 더블 점프 형태로만 변경 가능.
+        // 더블 점프 형태로만 변경 가능. => 도중에 바꿨을때는 E스킬 사용을 초기화
         if (m_States[JUMP])
         {
 			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 
             m_pAugusta->GetStateContextForWrite().m_eJumpType = EAugustaJumpType::JUMP_SECOND_F;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
             return;
         }
 
-        //// 땅에 닿으면. 우선 순위
+        // 땅에 닿으면. 우선 순위 => 도중에 바꿨을때는 E스킬 사용을 초기화
 		if (m_States[LAND])
 		{
 			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+			m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 			if (m_States[MOVE])
 			{
 				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
@@ -352,6 +363,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
     {
 		// 아무것도 안했다면? => 컨디션 제거.
 		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 
         if (m_States[LAND])
         {
