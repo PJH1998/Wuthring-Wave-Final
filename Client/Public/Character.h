@@ -5,6 +5,13 @@ NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
 public:
+	typedef struct tagChangeStateDesc
+	{
+		StateKey eStateKey;
+		void* pEvent;
+	}CHANGE_STATE_DESC;
+
+public:
 	typedef struct tagHitDesc
 	{
 		_uint iLayer;
@@ -210,9 +217,15 @@ protected:
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+
+
 protected:
+	queue<CHANGE_STATE_DESC> m_StateChangeQueue; // 특정한 이벤트가 발생해서 StateMachine 외부에서 상태가 변경되야 하는 경우 ex) Hit 등등
+
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+
+	
 	
 
 public:
