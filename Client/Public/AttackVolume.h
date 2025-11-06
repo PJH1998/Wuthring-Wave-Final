@@ -41,6 +41,7 @@ public:
 	virtual		void					Render() override;
 
 public:
+	// 절대 콜백 안에서 선언하지마.
 	void TriggerActivate(_bool isActivate);
 
 private:
