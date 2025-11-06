@@ -13,9 +13,9 @@ private:
 	virtual ~CSonoro_Manager() = default;
 
 public:
-	void Initialize();
-	void Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
-	void Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	HRESULT Initialize();
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
 
@@ -26,6 +26,10 @@ private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 	_float m_fTriggerdTime = {};
 	_float4 m_vUpSpeed = {};
+
+	_bool m_SonoroRender = { false };
+	_bool m_IsUpdate = { false };
+	mutex m_Mutex;
 
 public:
 	static CSonoro_Manager* Create();
