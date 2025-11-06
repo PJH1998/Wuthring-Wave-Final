@@ -353,9 +353,14 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
     CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
-
-	// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
-    m_TargetTransforms.push_back(pTargetTransform);
+	
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+	}
+	
 }
 
 

@@ -108,6 +108,9 @@ private:
 	_float m_fColliderHeight = {};
 	_float m_fColliderRadius = {};
 
+	// Mutex
+	mutex m_Mutex;
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
