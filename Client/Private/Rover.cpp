@@ -229,51 +229,26 @@ void CRover::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName
 // Hit 판정.
 void CRover::Hit_Judge(void* pArg)
 {
-    // 임시
-    _bool IsLand = Is_Land(0.2f);
+	if (nullptr == pArg)
+		return;
 
-    // 강공?
+	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
+	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
 
-    // 몬스터 공격 Dir
-    ACTORDIR eAttackDir = ACTORDIR::RU;
+	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
+	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
+		return;
 
-    if (IsLand)
-    {
-        // 특수 조건 우선순위에 따라 Change_State
+	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 
-        switch (eAttackDir)
-        {
-        case ACTORDIR::LU:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::RU:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_R;
-            break;
-        case ACTORDIR::U:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::LD:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::RD:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_R;
-            break;
-        case ACTORDIR::D:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::L: // L, R은 정면 판단.
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::R:
-            m_StateContext.m_eHitType = ERoverHitType::BEHIT_S_R;
-            break;
-        }
+	// 2. 현재 레이어
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
 
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
-    }
-    else
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitType::BEHIT_FLY_START));
+	// 3. 스킬 판정?
+	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
 
+	// 4. 일단 맞은 곳으로 회전? 캐릭터를
+	Rotate_HitTarget(pDesc->pTransform);
 }
 
 void CRover::Sync_Position()

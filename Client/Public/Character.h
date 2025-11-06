@@ -93,6 +93,9 @@ public:
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
 
+	// WorldMatrix
+	_matrix Get_WorldMatrix();
+
 #ifdef _DEBUG
 	void RayDir(_vector vRayDir, _float3 vEndPos);
 #endif // _DEBUG
@@ -102,6 +105,9 @@ public:
 
 #pragma region STATE
 public:
+	// Camera Action
+	void Play_Action(const _wstring& strActionTag);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
@@ -166,10 +172,10 @@ public:
 
 #ifdef _DEBUG
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #else
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
 
 
