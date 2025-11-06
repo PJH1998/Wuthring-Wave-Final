@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "StaticObject.h"
 #include"Client_Enum.h"
-
 NS_BEGIN(Engine)
 class CDeferredShader;
 class CShader;
@@ -10,9 +9,8 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
-class CMapObject final: public CStaticObject
+class CMapObject_Sonoro final : public CStaticObject
 {
-public:
 	typedef struct tagMapLoad
 	{
 
@@ -26,9 +24,9 @@ public:
 	}MAP_LOAD;
 
 private:
-	explicit CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CMapObject(const CMapObject& Prototype);
-	virtual ~CMapObject() = default;
+	explicit CMapObject_Sonoro(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CMapObject_Sonoro(const CMapObject_Sonoro& Prototype);
+	virtual ~CMapObject_Sonoro() = default;
 
 public:
 	virtual		HRESULT		Initialize_Prototype() override;
@@ -39,16 +37,16 @@ public:
 	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
 	virtual		void			Render_Shadow() override;
 
-	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold){};
+	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 	virtual		BoundingBox* Get_BoundingBox()override;
 
 private:
-	CDeferredShader*		m_pShaderCom = { nullptr };
-	CShader*					m_pShadowShaderCom = { nullptr };
-	CRigidbody*			m_pRigidbodyCom = { nullptr };
+	CDeferredShader* m_pShaderCom = { nullptr };
+	CShader* m_pShadowShaderCom = { nullptr };
+	CRigidbody* m_pRigidbodyCom = { nullptr };
 	vector<CModel*>		m_pModelComArray;
 
 	_uint						m_iShaderPassIndex = {};
@@ -57,7 +55,7 @@ private:
 	void						Ready_Component(void* pArg);
 
 public:
-	static		CMapObject* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CMapObject_Sonoro* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 };
