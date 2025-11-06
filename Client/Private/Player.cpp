@@ -215,24 +215,28 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
-
-#ifdef _DEBUG
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
+	}
 
-
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
+#ifdef _DEBUG
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
 	}
 
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
+	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 	}
+
+	
 #endif // _DEBUGs
 }
 

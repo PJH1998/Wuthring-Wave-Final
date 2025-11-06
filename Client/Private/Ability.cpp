@@ -380,6 +380,8 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 	// 우선 MOUSE LB
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
+	skillSlot.fMaxCoolTime = 0.f;
+	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::DEFAULT);
 	if (strKey == "LB")
 	{
 		// Bit And 연산해서 걸리면?
@@ -566,16 +568,27 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 //	return iReseut;
 //}
 #ifdef _DEBUG
-void CAbility::Debug_FullCost()
+void CAbility::Debug_FullCost(_bool IsAll)
 {
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
 	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
-	for (_uint i = 1; i < iEnd; ++i)
-	{
-		if (i == 3 || i == 4)
-			continue;
-		m_Costs[i] = m_fCostMax;
 
+	if (!IsAll)
+	{
+		for (_uint i = 1; i < iEnd; ++i)
+		{
+			if (i == 3 || i == 4)
+				continue;
+
+			m_Costs[i] = m_fCostMax;
+		}
+	}
+	else
+	{
+		for (_uint i = 1; i < iEnd; ++i)
+		{
+			m_Costs[i] = m_fCostMax;
+		}
 	}
 }
 
@@ -599,16 +612,29 @@ void CAbility::Print_CoolTime()
 	cout << "Cool Down End" << endl;
 }
 #else
-void CAbility::Debug_FullCost()
+void CAbility::Debug_FullCost(_bool IsAll)
 {
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
 	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
-	for (_uint i = 1; i < iEnd; ++i)
-	{
-		if (i == 3 || i == 4)
-			continue;
-		m_Costs[i] = m_fCostMax;
 
+	if (!IsAll)
+	{
+		for (_uint i = 1; i < iEnd; ++i)
+		{
+
+			if (i == 3 || i == 4)
+				continue;
+
+			m_Costs[i] = m_fCostMax;
+
+		}
+	}
+	else
+	{
+		for (_uint i = 1; i < iEnd; ++i)
+		{
+			m_Costs[i] = m_fCostMax;
+		}
 	}
 }
 #endif // _DEBUG

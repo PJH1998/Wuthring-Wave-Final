@@ -20,9 +20,9 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirAttack::OnEnter()
+void CAugustaAirAttack::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();

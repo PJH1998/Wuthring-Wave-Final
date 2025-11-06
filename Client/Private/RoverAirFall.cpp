@@ -18,9 +18,9 @@ HRESULT CRoverAirFall::Initialize(class CGameObject* pOwner)
 
 
 
-void CRoverAirFall::OnEnter()
+void CRoverAirFall::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();

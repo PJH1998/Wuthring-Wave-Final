@@ -18,9 +18,9 @@ HRESULT CAugustaGroundRun::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaGroundRun::OnEnter()
+void CAugustaGroundRun::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -34,6 +34,7 @@ void CAugustaGroundRun::OnEnter()
     // 4. 현재 상태 초기화
     State_Reset();
 
+	// 5. 중력 켰다.
     m_pAugusta->Set_Gravity(true);
 }
 
@@ -49,7 +50,7 @@ void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
     Update_RunAnimation(fTimeDelta);
 
     // 2. 물리 체크.
-    Check_Physics();
+    Check_Physics(fTimeDelta);
 
     // 3. 전환 제어
     Check_StateTransition(fTimeDelta);
@@ -65,6 +66,7 @@ void CAugustaGroundRun::OnExit()
     m_pAugusta->Set_Gravity(true);
 
 	m_iNotLandFrames = 0;
+	m_fFallTime = 0.f;
 }
 
 void CAugustaGroundRun::Handle_Input()
@@ -141,27 +143,33 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
 
 }
 
-void CAugustaGroundRun::Check_Physics()
+void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 {
-    // Wall인지?
-    m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
+	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
+    m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal); // Wall인지?
     // Land Check
 
 
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
-
 	_float fLandDistance = 0.5f;
 
-	if (!m_States[LAND])
-	{
-		m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
-	}
 
-	if (!m_States[LAND])
+	if (m_States[LAND])
 	{
-		int x = 10;
+		m_fFallTime = 0.f;
 	}
+	else if (!m_States[LAND])
+	{
+		m_fFallTime += fTimeDelta;
+
+		cout << "FallTime : " << m_fFallTime << endl;
+		if (m_fFallTime >= 0.8f)
+			m_States[FALL] = true;
+
+		//m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
+	}
+	
 
 	//// 2. 기본 LandDistance 설정
 	//_float fLandDistance = 0.5f;
@@ -212,8 +220,14 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		//}
   //  }
 
+	// 상위, 하위 상태
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT)); 
+		return;
+	}
 
-	if (!m_States[LAND])
+	if (m_States[FALL])
     {
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -296,18 +310,9 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
-		if (m_States[RUN_D])
-		{
-			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
+		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+		return;
 	}
 
     // Dash 보다 우선순위 높음.

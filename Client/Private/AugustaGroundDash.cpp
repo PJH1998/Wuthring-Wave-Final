@@ -18,10 +18,10 @@ HRESULT CAugustaGroundDash::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundDash::OnEnter()
+void CAugustaGroundDash::OnEnter(void* pArg)
 {
     // 상위 객체 수행 작업.
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -72,8 +72,6 @@ void CAugustaGroundDash::Handle_Input()
 
 
 
-
-
 void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
 {
     // 1. 누른키에 따른 방향 계산
@@ -83,7 +81,7 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
     if (m_pAugusta->Is_LockOn())
     {
         _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-        m_pAugusta->Rotate_Direction(vMoveDir);
+        //m_pAugusta->Rotate_Direction(vMoveDir);
     }
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
     
@@ -100,13 +98,7 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-    // 애니메이션 끝나면?
-    if (m_IsAnimationEnd)
-    {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
-        return;
-    }
+ 
   
 
     switch (eDashType)
@@ -132,6 +124,14 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
     }
         break;
     }
+
+	// 애니메이션 끝나면?
+	if (m_IsAnimationEnd)
+	{
+		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
+		return;
+	}
 
 }
 

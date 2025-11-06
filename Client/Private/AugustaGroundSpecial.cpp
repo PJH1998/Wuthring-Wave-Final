@@ -18,9 +18,9 @@ HRESULT CAugustaGroundSpecial::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundSpecial::OnEnter()
+void CAugustaGroundSpecial::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -222,7 +222,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
 				m_iComboCount = COMBO::COMBO_ATTACKOMNI;
-				m_pAugusta->Rotate_Target();
+				m_pAugusta->Play_Action(TEXT("Action_Augusta_SpAttackOmni"));
+				//m_pAugusta->Rotate_Target();
 				return;
 			}
 

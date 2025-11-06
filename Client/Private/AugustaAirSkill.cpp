@@ -18,9 +18,9 @@ HRESULT CAugustaAirSkill::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirSkill::OnEnter()
+void CAugustaAirSkill::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();

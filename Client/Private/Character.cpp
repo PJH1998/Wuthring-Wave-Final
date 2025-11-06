@@ -15,10 +15,11 @@ CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CCharacter::CCharacter(const CCharacter& Prototype)
     : CActor(Prototype)
-    
+	, m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
-
+    
 HRESULT CCharacter::Initialize_Prototype()
 {
     if (FAILED(CActor::Initialize_Prototype()))
@@ -37,6 +38,7 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
     // 1. State 초기화
     //m_Stats = pDesc->eStat;
 
+	//m_EventDatas.resize(CHARACTER_EVENT_ID::EVENT_END);
 
     return S_OK;
 }
@@ -104,6 +106,7 @@ void CCharacter::Set_Ability(CAbility* pAbilityCom)
 	m_pAbillityCom = pAbilityCom;
 	Safe_AddRef(m_pAbillityCom);
 }
+
 
 _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 {
@@ -281,6 +284,12 @@ void CCharacter::Add_Force(_fvector vForce, _float fTimeDelta)
 	m_pTransformCom->Go_Force(vForce, fTimeDelta);
 }
 
+_matrix CCharacter::Get_WorldMatrix()
+{
+	ASSERT_CRASH(m_pTransformCom);
+	return m_pTransformCom->Get_WorldMatrix();
+}
+
 #ifdef _DEBUG
 void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 {
@@ -299,6 +308,13 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 
 #pragma region STATE
+
+void CCharacter::Play_Action(const _wstring& strActionTag)
+{
+	ASSERT_CRASH(m_pTransformCom);
+	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+}
+
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
 {
 	if (nullptr == m_pAbillityCom)
@@ -427,10 +443,10 @@ void CCharacter::Start_FlyBlending(_float fDuration)
 }
 
 
-void CCharacter::Change_State(_uint iCategory, _uint iSubState)
+void CCharacter::Change_State(_uint iCategory, _uint iSubState, void* pArg)
 {
     ASSERT_CRASH(m_pStateMachineCom);
-    m_pStateMachineCom->Change_State(iCategory, iSubState);
+    m_pStateMachineCom->Change_State(iCategory, iSubState, pArg);
 }
 
 
@@ -621,20 +637,21 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 }
 
 #ifdef _DEBUG
-void CCharacter::Debug_FullCost()
+void CCharacter::Debug_FullCost(_bool IsAll)
 {
 	if (nullptr == m_pAbillityCom)
 		return;
 
-	m_pAbillityCom->Debug_FullCost();
+	m_pAbillityCom->Debug_FullCost(IsAll);
 }
+
 #else
-void CCharacter::Debug_FullCost()
+void CCharacter::Debug_FullCost(_bool IsAll)
 {
 	if (nullptr == m_pAbillityCom)
 		return;
 
-	m_pAbillityCom->Debug_FullCost();
+	m_pAbillityCom->Debug_FullCost(IsAll);
 }
 #endif // _DEBUG
 
@@ -673,4 +690,5 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	
 }

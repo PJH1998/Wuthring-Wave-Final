@@ -13,12 +13,6 @@ namespace Client
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
 	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
-
-	enum class PLAYER_STATE : unsigned int {
-		NONE = 0, IDLE, WALK, RUN, ATTACK,
-		END
-	};
-
 	
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
@@ -28,19 +22,19 @@ namespace Client
 	};
 
 	enum class UI_AUGUSTA_STATE : unsigned int {
-		LB_STRONG_READY = 0,		// 강공 실행 가능
-		LB_SWORD_READY = 1,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
-		T_INTERACTION_READY = 2,		// T 실행 가능.  => 활공, 기타등등
-		T_INTERACTION_FAILED = 3,		// T 실행 불가.  => 활공, 기타 등등
-		E_GRIFFON_READY = 4,		// 그리폰 E 실행 가능 => GRIFFON_E_READY = 
-		E_RISE_READY = 5,			// Rise E 실행 가능.
-		E_DEFAULT_READY = 6,		// 기본 E 실행 가능.
-		Q_ECHO_READY = 7,			// Echo 실행 가능.
-		Q_ECHO_FAILED = 8,	    // Echo 실행 불가.
-		R_ULTI_READY = 9,			// LB_RESONANCE기본 R 실행 가능
-		R_SWORD_READY = 10,			// SWORD R 아이콘 출력 가능.
-		R_SWORD_ULTI_READY = 11,	// SWORD R 궁극기 아이콘 출력 가능.
-		DEFAULT,				// 기본?
+		DEFAULT = 0,				// 기본?
+		LB_STRONG_READY = 1,		// 강공 실행 가능
+		LB_SWORD_READY = 2,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
+		T_INTERACTION_READY = 3,		// T 실행 가능.  => 활공, 기타등등
+		T_INTERACTION_FAILED = 4,		// T 실행 불가.  => 활공, 기타 등등
+		E_GRIFFON_READY = 5,		// 그리폰 E 실행 가능 => GRIFFON_E_READY = 
+		E_RISE_READY = 6,			// Rise E 실행 가능.
+		E_DEFAULT_READY = 7,		// 기본 E 실행 가능.
+		Q_ECHO_READY = 8,			// Echo 실행 가능.
+		Q_ECHO_FAILED = 9,	    // Echo 실행 불가.
+		R_ULTI_READY = 10,			// LB_RESONANCE기본 R 실행 가능
+		R_SWORD_READY = 11,			// SWORD R 아이콘 출력 가능.
+		R_SWORD_ULTI_READY = 12,	// SWORD R 궁극기 아이콘 출력 가능.
 		END
 	};
 
