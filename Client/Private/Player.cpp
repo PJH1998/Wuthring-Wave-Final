@@ -115,6 +115,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
 	if (nullptr != m_pPlayerStatus)
 		m_pPlayerStatus->Update(fTimeDelta);
+
+	// 5. 몬스터 사이와의 거리는 Priority Update에서 계산
+	if (nullptr != m_pTargetTransform)
+		m_fTargetDistance = 0.f;
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -234,6 +238,26 @@ void CPlayer::Player_KeyInput()
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(-10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
 	}
 
 	
