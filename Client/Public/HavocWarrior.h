@@ -60,6 +60,7 @@ private:
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
+	_bool					m_beHit{};
 
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};

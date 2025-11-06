@@ -30,7 +30,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
 
-	m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
+	//m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 3.f;
@@ -48,8 +48,10 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	///////////////////////
-	m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
+	//m_pTransformCom->Rotation(XMVectorSet(0.f, 1.f, 0.f, 0.f), XMConvertToRadians(180.f));
 	/////////////////////
+	_float temp{};
+	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
 	m_fHP = 1;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fParalysisAcc = 5.f;
@@ -68,23 +70,14 @@ void CMonsterTest::Priority_Update(_float fTimeDelta)
 
 void CMonsterTest::Update(_float fTimeDelta)
 {
+	if (!m_isAggro)
+		return;
+
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
 	m_pBehaviorTreeCom->tick(this);
 
-	//그로기 특수상황
-	if(m_isParalysis)
-	{
-		if(m_isKnockDownTrig)
-			m_iState = ENUM_CLASS(TEST_STATE::PARALYSIS);
-		else
-		{
-			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
-			m_isKnockDownTrig = true;
-		}
-	}
-	else
-		m_isKnockDownTrig = m_isParalysis;
+	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
@@ -108,9 +101,6 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 void CMonsterTest::Late_Update(_float fTimeDelta)
 {
-	//m_pColliderCom->Sync_Position(m_pTransformCom);
-	//for(auto& Pair : m_PartObjects)
-	//	Pair.second->Late_Update(fTimeDelta);
 #ifdef _DEBUG
 	if(KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE))
 		m_isParalysis = true;
@@ -166,7 +156,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 		m_isTrigger = true;
 		CTransform* pTransform = static_cast<CTransform*>(pOther);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
-
+		if (false == m_isAggro)
+			m_isAggro = true;
 	}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY)){}
 	else if(iLayer == ENUM_CLASS(COLLISIONLAYER::NONE)){}
@@ -178,25 +169,25 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 
 void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
-	//size_t Index = wStrColliderTag.find(TEXT("|"));
-	//_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
-	//_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
-	//
-	//if (wstrTypeTag == TEXT("Attack"))
-	//{
-	//	if(wstrPartTag == TEXT("HR"))
-	//		m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(Isactive);
-	//	else if(wstrPartTag == TEXT("HL"))
-	//		m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(Isactive);
-	//	else if (wstrPartTag == TEXT("WR"))
-	//		m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
-	//	else if (wstrPartTag == TEXT("WL"))
-	//		m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
-	//}
-	//if (wstrTypeTag == TEXT("Gravity"))
-	//{
-	//	m_pColliderCom->Set_Gravity(Isactive);
-	//}
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
+	
+	if (wstrTypeTag == TEXT("Attack"))
+	{
+		if(wstrPartTag == TEXT("HR"))
+			m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(Isactive);
+		else if(wstrPartTag == TEXT("HL"))
+			m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(Isactive);
+		else if (wstrPartTag == TEXT("WR"))
+			m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
+		else if (wstrPartTag == TEXT("WL"))
+			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
+	}
+	if (wstrTypeTag == TEXT("Gravity"))
+	{
+		m_pColliderCom->Set_Gravity(Isactive);
+	}
 }
 
 void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
@@ -381,7 +372,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 																		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WEAPON_L])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_L]);
-	m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::WEAPON_L]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Weapon003");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -391,7 +382,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WEAPON_R])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WEAPON_R]);
-	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::WEAPON_R]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone021");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -401,7 +392,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
 	
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
 	TriggerDesc.vExtent = _float3(1.5f, 0.3f, 0.3f);
@@ -411,7 +402,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
 
 }
 
@@ -465,10 +456,34 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 }
 
+void CMonsterTest::After_Condition(_float fTimeDelta)
+{
+	//그로기 특수상황
+	if (m_isParalysis)
+	{
+		if (m_isKnockDownTrig)
+			m_iState = ENUM_CLASS(TEST_STATE::PARALYSIS);
+		else
+		{
+			m_iState = (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+			m_isKnockDownTrig = true;
+		}
+	}
+	else
+		m_isKnockDownTrig = m_isParalysis;
+
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
+}
+
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
+		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG

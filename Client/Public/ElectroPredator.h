@@ -58,6 +58,7 @@ private:
 
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
+	_bool					m_beHit{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
 
