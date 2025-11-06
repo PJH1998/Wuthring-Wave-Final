@@ -83,13 +83,13 @@ public:
 
 #ifdef _DEBUG
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 
 	void Print_Cost();
 	void Print_CoolTime();
 #else
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
 
 

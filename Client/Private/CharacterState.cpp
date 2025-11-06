@@ -14,9 +14,9 @@ HRESULT CCharacterState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CCharacterState::OnEnter()
+void CCharacterState::OnEnter(void* pArg)
 {
-    CState::OnEnter();
+    CState::OnEnter(pArg);
 }
 
 void CCharacterState::OnUpdate(_float fTimeDelta)
@@ -29,10 +29,11 @@ void CCharacterState::OnExit()
 	m_IsSubPartAnimationEnd = false; //
 }
 
-_bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
+	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
 	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations[m_iCurrentAnimIdx].strAnimName, fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, &m_fTrackPosition
-		, m_Animations[m_iCurrentAnimIdx].fRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion
+		, fStateRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion
 		, m_Animations[m_iCurrentAnimIdx].IsRootMotionRotate, m_Animations[m_iCurrentAnimIdx].IsRootMotionTranslate, gpuBlendInfo
 	);
 

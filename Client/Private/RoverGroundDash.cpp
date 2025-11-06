@@ -18,10 +18,10 @@ HRESULT CRoverGroundDash::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CRoverGroundDash::OnEnter()
+void CRoverGroundDash::OnEnter(void* pArg)
 {
     // 상위 객체 수행 작업.
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();

@@ -11,9 +11,9 @@ HRESULT CGroundState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CGroundState::OnEnter()
+void CGroundState::OnEnter(void* pArg)
 {
-    CCharacterState::OnEnter();
+    CCharacterState::OnEnter(pArg);
 
     // 지상 상태 진입 시 공통 처리
     // ex) 착지 이펙트, 사운드 등

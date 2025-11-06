@@ -8,7 +8,7 @@ HRESULT CState::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CState::OnEnter()
+void CState::OnEnter(void* pArg)
 {
     m_fTrackPosition = 0.f;
     m_IsAnimationEnd = false;

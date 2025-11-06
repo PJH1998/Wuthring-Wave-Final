@@ -23,9 +23,9 @@ HRESULT CAugustaGroundIdle::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundIdle::OnEnter()
+void CAugustaGroundIdle::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -147,6 +147,12 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
+
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
 
 
     // 우선순위 순으로 전환조건 진행.

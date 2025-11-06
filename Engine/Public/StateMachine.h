@@ -53,8 +53,8 @@ public:
 	// HSM: 계층적 State 전환 (Category + SubState)
 	/*void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);
 	void Change_State(const StateKey& key, void* pArg = nullptr);*/
-	void Change_State(_uint iCategory, _uint iSubState);
-	void Change_State(const StateKey& key);
+	void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);
+	void Change_State(const StateKey& key, void* pArg = nullptr);
 
 	// State 추가
 	void Add_State(_uint iCategory, _uint iSubState, class CState* pState);

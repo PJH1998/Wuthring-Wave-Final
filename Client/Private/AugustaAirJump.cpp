@@ -18,9 +18,9 @@ HRESULT CAugustaAirJump::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaAirJump::OnEnter()
+void CAugustaAirJump::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();

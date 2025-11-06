@@ -43,16 +43,10 @@ HRESULT CLoader_Test::Initialize()
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
-
-
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
-    
-
-    m_pGameInstance->Wait_Thread_End();
 
 	Load_Action();
 
-    //m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 

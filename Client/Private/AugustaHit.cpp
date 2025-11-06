@@ -16,11 +16,9 @@ HRESULT CAugustaHit::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-
-
-void CAugustaHit::OnEnter()
+void CAugustaHit::OnEnter(void* pArg)
 {
-    CHitState::OnEnter();
+    CHitState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -31,11 +29,13 @@ void CAugustaHit::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eHitType);
 
+	// 4. 상태 리셋.
     State_Reset();
 
-    // 4. 현재 때린 객체를 바라보게.? 임시로 Target
-    //m_pAugusta->Rotate_HitTarget();
-
+	// 5. Hit Description을 이용하여 시작 초기 작업을 정의합니다.
+	Enter_Hit();
+	
+	// 6. 중력 적용
     m_pAugusta->Set_Gravity(true);
 }
 
@@ -63,6 +63,43 @@ void CAugustaHit::OnExit()
 {
     CHitState::OnExit();
     m_pAugusta->Set_Gravity(false);
+
+	// Hit 판정 끝났으므로 정보 초기화
+	m_pAugusta->Set_Hit(false);
+	m_pAugusta->ClearPendingHit();
+}
+
+
+
+void CAugustaHit::Enter_Hit()
+{
+	// 0. Hit 정보 가져오기.
+	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+
+	// 1. 현재 레이어
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
+
+	// 2. 스킬 판정.
+	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
+
+	// 3. 바로 회전.
+	m_pAugusta->Rotate_HitTarget(pDesc->pTransform);
+
+	// 4. 땅 판정.
+	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+
+	// 5. 애니메이션 선정.
+	if (!m_States[LAND])
+	{
+		m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+	}
+	else
+	{
+		if (IsSkill)
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_B_L);
+	}
+
+	
 }
 
 void CAugustaHit::Handle_Input()
