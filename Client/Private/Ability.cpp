@@ -218,6 +218,16 @@ _float CAbility::Get_HpRatio() const
 	return m_CharacterInfo.fMaxHp > 0.f ? m_CharacterInfo.fHp / m_CharacterInfo.fMaxHp : 0.f;
 }
 
+_bool CAbility::Check_AnyCondition(_uint iConditionFlag)
+{
+	return (m_iCondition & iConditionFlag) != 0;
+}
+
+_bool CAbility::Check_AllCondition(_uint iConditionFlag)
+{
+	return (m_iCondition & iConditionFlag) == iConditionFlag;
+}
+
 #pragma endregion
 
 
@@ -635,8 +645,6 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 //
 //	return iReseut;
 //}
-
-
 
 #ifdef _DEBUG
 

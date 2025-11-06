@@ -2,6 +2,11 @@
 #include "Loader_GamePlay.h"
 #include"GameSystem.h"
 #include"MapObject.h"
+#include"Trigger_Box.h"
+#include"MapObject_Destruction.h"
+#include"MapObject_Destruction_Debris.h"
+#include"MapObject_NonSonoro.h"
+#include"MapObject_Sonoro.h"
 
 #pragma region FALSE_SOVEREIGN
 #include "MonsterTest.h"
@@ -60,6 +65,9 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
+
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
     return S_OK;
 }
 
@@ -72,9 +80,9 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1105/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1105/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1106_SonoroPatch/", m_eCurLevel);
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -102,10 +110,26 @@ HRESULT CLoader_GamePlay::Load_Object()
 {
 	cout << "Object" << endl;
 
+#pragma region MAP
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
 
-    return S_OK;
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CMapObject_Destruction::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction_Debris"),
+		CMapObject_Destruction_Debris::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Sonoro"),
+		CMapObject_Sonoro::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_NonSonoro"),
+		CMapObject_NonSonoro::Create(m_pDevice, m_pContext));
+#pragma endregion
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Player()

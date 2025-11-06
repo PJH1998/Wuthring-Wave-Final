@@ -37,7 +37,6 @@ VS_OUT VS_MAIN(VS_IN In)
     //vector vPosition = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
     //Out.vPosition = mul(vPosition, g_WorldMatrix);
     
-    
     vector vPosition = vector(In.TransformMatrix._41_42_43, 1.f);
     Out.vPosition = mul(vPosition, g_WorldMatrix);
     
@@ -47,7 +46,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.fPhase = In.fPhase;
     Out.fDelay = In.fDelay;
     
-    return Out;     
+    return Out;
 }
 
 struct GS_IN
@@ -262,7 +261,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();   
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_MAIN();
@@ -273,7 +272,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_Stretch();
         PixelShader = compile ps_5_0 PS_MAIN();
@@ -284,7 +283,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_SPRITE();
@@ -295,7 +294,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default); 
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_Stretch();
         PixelShader = compile ps_5_0 PS_SPRITE();

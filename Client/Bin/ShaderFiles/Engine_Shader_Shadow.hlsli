@@ -3,8 +3,6 @@
 
 #define MAX_SECTOR 64
 
-//CASCADE
-Texture2DArray<float> g_Cascade : register(t2);
 cbuffer CSMDatas : register(b1)
 {
     float4 g_vClipDistances;
@@ -14,8 +12,12 @@ cbuffer CSMDatas : register(b1)
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
-float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
-float4 g_fMinShadowBias = 0.01f;
+
+float4 g_fShadowBais = 0.0001f;//float4(0.0001f, 0.02f, 0.03f, 0.05f);
+float4 g_fMinShadowBias = 0.0001f;
+
+float g_fShadowMapBais = 0.001f;
+
 float g_DebugSlopeScale = 2.f;
 
 float g_iCascadeSizeX = 4096;
@@ -31,9 +33,8 @@ float4x4 g_SectorViewMatrix[MAX_SECTOR];
 float4x4 g_SectorProjMatrix[MAX_SECTOR];
 float4 g_vSectorUV[16];
 
-float ShadowPCF(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float> ShadowMap, float2 vTexSize, float2 vMinUV, float2 vMaxUV)
+float ShadowPCF(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float> ShadowMap, float2 vTexelSize, float2 vMinUV, float2 vMaxUV)
 {
-    float2 vTexelSize = float2((1.f / vTexSize.x), (1.f / vTexSize.y));
     float fShadow = 0.f;
     
     int iRadius = iNumWeight * 2 + 1;
@@ -51,16 +52,21 @@ float ShadowPCF(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float
             vUV.x = clamp(vUV.x, vMinUV.x, vMaxUV.x);
             vUV.y = clamp(vUV.y, vMinUV.y, vMaxUV.y);
             
-            float fDepth = ShadowMap.SampleLevel(PointClampSampler, float3(vUV, iIndex), 0).r;
-            
-            fShadow += smoothstep(UVDepth.z, UVDepth.z + 0.01f, fDepth);
-            
-            //fShadow += ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vUV, iIndex), UVDepth.z);
+            fShadow += ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(vUV, iIndex), UVDepth.z);
         }
     }
     
+    fShadow /= pow(iRadius, 2);
     
-    fShadow = fShadow / pow(iRadius, 2);
+    return fShadow;
+}
+
+float ShadowPCSS(float3 UVDepth, int iIndex, int iNumWeight, Texture2DArray<float> ShadowMap, float2 vTexelSize, float2 vMinUV, float2 vMaxUV)
+{
+    float fShadow = 1.f;
+    
+    
+    
     
     return fShadow;
 }
@@ -93,11 +99,11 @@ int2 Find_Sector(float4 vWorldPos)
     return vIndex;
 }
 
-float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos)
+float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArray<float> Cascade)
 {
     int iCascadeIndex = 0;
     
-    float fShadow = 1.f;
+    float fFinalShadow = 1.f;
     
     for (int i = 0; i < 4; i++)
     {
@@ -106,10 +112,9 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos)
     }
     
     if (fViewZ >= g_fLastDistance)
-        return fShadow;
+        return fFinalShadow;
 
     float Gradiant = RPB_Gradiant(fViewZ);
-
     //float fSlopeFactor = (1.f - fDot); // Row
     float fSlopeFactor = sqrt(1.f - pow(NdotL, 2)); // High
 
@@ -137,16 +142,16 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos)
         matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
         vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
         
-        if (IsInNDC(vShadowBlendPos))
+    //    if (IsInNDC(vShadowBlendPos))
         {
-            float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy);
+            float2 vBlendTexcoord = Compute_Texcoord(vShadowBlendPos.xy);
         
             float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
             fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
             float fBlendDepth = vShadowBlendPos.z - fBlendBias;
 
-            fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_Cascade, float2(g_iCascadeSizeX, g_iCascadeSizeY), float2(0.f, 0.f), float2(1.f, 1.f)); // 2 == Kernel size
+            fShadowBlend = ShadowPCF(float3(vBlendTexcoord, fBlendDepth), iBlendCascadeIndex, 1, Cascade, vTexelSize, float2(0.f, 0.f), float2(1.f, 1.f)); // 2 == Kernel size
         }
     }
     
@@ -158,9 +163,10 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos)
     
     matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
     vShadowPos = mul(vWorldPos, matShadowLightVP);
-    if (IsInNDC(vShadowPos))
+    
+    //if (IsInNDC(vShadowPos))
     {
-        float2 vTexcood = Compute_Texcoord(vShadowPos.xy);
+        float2 vTexcoord = Compute_Texcoord(vShadowPos.xy);
     
         fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
     
@@ -168,28 +174,23 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos)
     
         float fDepth = vShadowPos.z - fBias;
     
-        float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_Cascade, float2(g_iCascadeSizeX, g_iCascadeSizeY), float2(0.f, 0.f), float2(1.f, 1.f));
+        float fShadow = ShadowPCF(float3(vTexcoord, fDepth), iCascadeIndex, 1, Cascade, vTexelSize, float2(0.f, 0.f), float2(1.f, 1.f));
         
-        float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
+        fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
     
-        fShadow = saturate(fFinalShadow + 0.3f);
-    
+        fFinalShadow = saturate(fFinalShadow + 0.3f);
     }
     
-    return fShadow;
+    return fFinalShadow;
 }
 
-float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture, float fBias)
+float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArray<float> ShadowMapTexture)
 {
     float fShadow = 1.f;
     
     int2 vSector = Find_Sector(vWorldPos);
     
     int iIndex = vSector.x;
-    
-    //for (int i = 0; i < 64; ++i)
-    //{
-    //    iIndex = i;
     
     float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
     float4 vProjPos = mul(vWorldPos, matVP);
@@ -206,12 +207,20 @@ float Compute_ShadowMap(float4 vWorldPos, Texture2DArray<float> ShadowMapTexture
     
     vTexcoord = (vTexcoord * vTexRange) + vStartTex;
     
-    float fDepth = vProjPos.z - 0.01f;
     
-    fShadow = ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vShadowMapSize, vStartTex, vEndTex);
+    float2 vTexelSize = 1.f / vShadowMapSize;
     
-//    fShadow = min(ShadowMapTexture.SampleCmpLevelZero(ShadowSampler, float3(vTexcoord, vSector.y), fDepth), fShadow);
-  //  }
+    float Gradiant = RPB_Gradiant(fViewZ);
+    //float fSlopeFactor = (1.f - fDot); // Row
+    float fSlopeFactor = sqrt(1.f - pow(NdotL, 2)); // High
+
+    float BiasFactor = 0.f;
+    
+    float fBias = max(g_fShadowMapBais, g_DebugSlopeScale * fSlopeFactor * Gradiant);
+    
+    float fDepth = vProjPos.z - fBias;
+    
+    fShadow = ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vTexelSize, vStartTex, vEndTex);
     
     return fShadow;
 }

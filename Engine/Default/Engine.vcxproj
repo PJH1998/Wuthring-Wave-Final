@@ -51,6 +51,8 @@
     <ClInclude Include="..\Public\CustomFont.h" />
     <ClInclude Include="..\Public\DebugDraw.h" />
     <ClInclude Include="..\Public\DebugRender.h" />
+    <ClInclude Include="..\public\Decal.h" />
+    <ClInclude Include="..\public\Decal_Manager.h" />
     <ClInclude Include="..\Public\DeferredShader.h" />
     <ClInclude Include="..\Public\Effect.h" />
     <ClInclude Include="..\Public\EffectNotify.h" />
@@ -159,6 +161,8 @@
     <ClCompile Include="..\Private\CustomFont.cpp" />
     <ClCompile Include="..\Private\DebugDraw.cpp" />
     <ClCompile Include="..\Private\DebugRender.cpp" />
+    <ClCompile Include="..\private\Decal.cpp" />
+    <ClCompile Include="..\private\Decal_Manager.cpp" />
     <ClCompile Include="..\Private\DeferredShader.cpp" />
     <ClCompile Include="..\Private\Effect.cpp" />
     <ClCompile Include="..\Private\EffectNotify.cpp" />

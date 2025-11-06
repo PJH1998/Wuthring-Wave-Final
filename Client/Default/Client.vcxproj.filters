@@ -222,7 +222,7 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\FXRect">
       <UniqueIdentifier>{caa502bb-f52f-4f86-998f-d40a1855a591}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="04. Component\03. Ability">
       <UniqueIdentifier>{72eb9125-bdcb-4c46-a6cb-95cba32d4604}</UniqueIdentifier>
     </Filter>
@@ -237,6 +237,12 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Corrosaurus">
       <UniqueIdentifier>{c59da4dd-7fea-4db6-aa1b-7da52d69e092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Sonoro">
+      <UniqueIdentifier>{161aa14f-2312-430c-af31-723b10d206bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Destruction">
+      <UniqueIdentifier>{e3875d88-8833-4ff7-9c1b-25cbaa1bb20c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -528,10 +534,9 @@
     <ClInclude Include="..\Public\ElectroPredator.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Trigger_Box.h" />
     <ClInclude Include="..\Public\Effect_Rect.h">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\Ggobul.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClInclude>
@@ -547,6 +552,24 @@
     <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\Corosaurus.h">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Trigger_Box.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Sonoro_Manager.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -807,10 +830,9 @@
     <ClCompile Include="..\Private\ElectroPredator.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Trigger_Box.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp">
       <Filter>03. GameObject\Effect\Prefab\FXRect</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\private\Ggobul.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Ggobul</Filter>
     </ClCompile>
@@ -826,6 +848,24 @@
     </ClCompile>
     <ClCompile Include="..\private\Corosaurus.cpp">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Trigger_Box.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
+      <Filter>03. GameObject\MapObject\Sonoro</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
+      <Filter>03. GameObject\MapObject\Destruction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Sonoro_Manager.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
