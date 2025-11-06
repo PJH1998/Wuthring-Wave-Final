@@ -346,10 +346,15 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
 		return;
+
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
-    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+
+	// CallBack Client Transform에 이상한 값이 들어가 있음.
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
+
+	// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
     m_TargetTransforms.push_back(pTargetTransform);
 }
 

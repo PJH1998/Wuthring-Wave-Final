@@ -23,11 +23,12 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
-    Ready_Component(pDesc);
-
+    
 	m_eType = pDesc->eType;
 	m_pParenTransform = pDesc->pParenTransform;
 	Safe_AddRef(m_pParenTransform);
+
+	Ready_Component(pDesc);
 
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
