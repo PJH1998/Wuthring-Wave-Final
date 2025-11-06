@@ -5,6 +5,13 @@ NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
 public:
+	typedef struct tagChangeStateDesc
+	{
+		StateKey eStateKey;
+		void* pEvent;
+	}CHANGE_STATE_DESC;
+
+public:
 	typedef struct tagHitDesc
 	{
 		_uint iLayer;
@@ -93,6 +100,9 @@ public:
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
 
+	// WorldMatrix
+	_matrix Get_WorldMatrix();
+
 #ifdef _DEBUG
 	void RayDir(_vector vRayDir, _float3 vEndPos);
 #endif // _DEBUG
@@ -102,6 +112,9 @@ public:
 
 #pragma region STATE
 public:
+	// Camera Action
+	void Play_Action(const _wstring& strActionTag);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
@@ -166,10 +179,10 @@ public:
 
 #ifdef _DEBUG
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #else
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
 
 
@@ -204,9 +217,15 @@ protected:
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+
+
 protected:
+	queue<CHANGE_STATE_DESC> m_StateChangeQueue; // 특정한 이벤트가 발생해서 StateMachine 외부에서 상태가 변경되야 하는 경우 ex) Hit 등등
+
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+
+	
 	
 
 public:
