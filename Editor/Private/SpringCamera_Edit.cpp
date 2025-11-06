@@ -271,6 +271,7 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMMatrixRotationQuaternion(vPreQuaternion));
 		// Fov
 		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
@@ -286,7 +287,7 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
 
@@ -303,7 +304,7 @@ void CSpringCamera_Edit::Action(_float fTimeDelta)
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 
 		m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;

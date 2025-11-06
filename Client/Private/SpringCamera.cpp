@@ -52,7 +52,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fDistance = 3.f;
 	m_fFixedDistance = 3.f;
-	m_fLerpSpeed = 0.5f;
+	m_fLerpSpeed = 1.5f;
 	m_fMinDistance = 1.f;
 	m_fMaxDistance = 6.f;
 
@@ -261,7 +261,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
 		vPreQuaternion = XMQuaternionMultiply(vPreQuaternion, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
-		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMMatrixRotationQuaternion(vPreQuaternion));
 		// Fov
 		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
@@ -277,7 +277,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
 		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
@@ -297,7 +297,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
 		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);

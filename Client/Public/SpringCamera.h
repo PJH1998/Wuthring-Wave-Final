@@ -37,7 +37,10 @@ public:
 	void							Lock_On(class CTransform* pTargetTransform, _bool IsLockOn)
 	{
 		if (nullptr == pTargetTransform || false == IsLockOn)
-			m_eCameraState = CAMERA_STATE::TARGET;
+		{
+			if(CAMERA_STATE::LOCKON == m_eCameraState)
+				m_eCameraState = CAMERA_STATE::TARGET;
+		}
 		else
 			m_eCameraState = CAMERA_STATE::LOCKON;
 

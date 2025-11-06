@@ -157,7 +157,7 @@ void CAugustaGroundRun::Check_Physics()
 	{
 		m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
 	}
-
+	
 	if (!m_States[LAND])
 	{
 		int x = 10;
