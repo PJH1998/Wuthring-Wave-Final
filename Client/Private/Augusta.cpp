@@ -364,7 +364,7 @@ void CAugusta::Hit_Judge(void* pArg)
 			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
 	}
 
-	// 5. Hit 상태 적용
+	// 5. Hit 상태 바로 적용하는게 아니라.
 	//CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
 
 	// 6. 데미지 적용

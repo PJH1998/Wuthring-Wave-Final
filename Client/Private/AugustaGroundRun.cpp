@@ -296,18 +296,9 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 	// 뛰다가 Dash
 	if (m_States[DASH])
 	{
-		if (m_States[RUN_D])
-		{
-			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_B;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
-		else
-		{
-			m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
-			return;
-		}
+		m_pAugusta->GetStateContextForWrite().m_eDashType = EAugustaDashType::MOVE_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH)); // 상위, 하위 상태
+		return;
 	}
 
     // Dash 보다 우선순위 높음.
