@@ -80,6 +80,8 @@ namespace Client
 		_float fAttack;		 // 기본 공격 값.
 		_float fAttackAddMin;	 // 공격 최소 값.
 		_float fAttackAddMax;	 // 공격 최대 값.
+		_float fResonance;       // 협주 게이지
+		_float fMaxResonance;    // 협주 게이지 최대값.
 	}CHARACTER_INFO;
 
 

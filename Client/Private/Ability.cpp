@@ -317,6 +317,22 @@ void CAbility::Add_Hp(_float fHp)
 	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
 }
 
+void CAbility::Set_Resonance(_float fResonance)
+{
+	m_CharacterInfo.fResonance = fResonance;
+}
+
+void CAbility::Add_Resonance(_float fResonance)
+{
+	m_CharacterInfo.fResonance += fResonance;
+
+	// 0보다 아래로 안가도록.
+	m_CharacterInfo.fResonance = max(0.f, m_CharacterInfo.fResonance);
+
+	// MaxHp보다 안커지도록.
+	m_CharacterInfo.fResonance = min(m_CharacterInfo.fMaxResonance, m_CharacterInfo.fResonance);
+}
+
 void CAbility::Bind_Condition(_uint iCondition)
 {
 	m_iCondition |= iCondition;
