@@ -635,20 +635,6 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 //
 //	return iReseut;
 //}
-
-void CAbility::Debug_FullCost()
-{
-	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
-	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
-	for (_uint i = 1; i < iEnd; ++i)
-	{
-		if (i == 3 || i == 4)
-			continue;
-		m_Costs[i] = m_fCostMax;
-
-	}
-}
-
 #ifdef _DEBUG
 
 void CAbility::Debug_FullCost()
@@ -682,6 +668,19 @@ void CAbility::Print_CoolTime()
 		cout << pair.first << " : " << pair.second << endl;
 	}
 	cout << "Cool Down End" << endl;
+}
+#else
+void CAbility::Debug_FullCost()
+{
+	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
+	_uint iEnd = ENUM_CLASS(COST_TYPE::COST_TYPE_END);
+	for (_uint i = 1; i < iEnd; ++i)
+	{
+		if (i == 3 || i == 4)
+			continue;
+		m_Costs[i] = m_fCostMax;
+
+	}
 }
 #endif // _DEBUG
 

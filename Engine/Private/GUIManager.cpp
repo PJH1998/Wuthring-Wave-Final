@@ -243,16 +243,36 @@ void CGUIManager::Gizmo_Offset()
 
 	ImGui::Begin("Editor Transform");
 
+	_float3 vRotation = {};
 	if (ImGuizmo::IsUsing())
 	{
 		ImGui::Text("Using gizmo");
 		// Scale, Rotation, Traslation 媛깆떊
+
 		ImGuizmo::DecomposeMatrixToComponents(
 			reinterpret_cast<const _float*>(&m_ObjectWorldMatrix),
 			reinterpret_cast<_float*>(m_pTranslation),
-			reinterpret_cast<_float*>(m_pRotation),
+			reinterpret_cast<_float*>(&vRotation),
 			reinterpret_cast<_float*>(m_pScale)
 		);
+
+		m_pRotation->x += vRotation.x;
+		if (m_pRotation->x < -180.f)
+			m_pRotation->x = 180.f;
+		else if (m_pRotation->x > 180.f)
+			m_pRotation->x = -180.f;
+
+		m_pRotation->y += vRotation.y;
+		if (m_pRotation->y < -180.f)
+			m_pRotation->y = 180.f;
+		else if (m_pRotation->y > 180.f)
+			m_pRotation->y = -180.f;
+
+		m_pRotation->z += vRotation.z;
+		if (m_pRotation->z < -180.f)
+			m_pRotation->z = 180.f;
+		else if (m_pRotation->z > 180.f)
+			m_pRotation->z = -180.f;
 	}
 	else
 	{
@@ -277,9 +297,10 @@ void CGUIManager::Gizmo_Offset()
 	ImGui::InputFloat3("Rotation", reinterpret_cast<_float*>(m_pRotation));
 	ImGui::InputFloat3("Translation", reinterpret_cast<_float*>(m_pTranslation));
 
+	vRotation = _float3(0.f, 0.f, 0.f);
 	ImGuizmo::RecomposeMatrixFromComponents(
 		reinterpret_cast<const _float*>(m_pTranslation),
-		reinterpret_cast<const _float*>(m_pRotation),
+		reinterpret_cast<const _float*>(&vRotation),
 		reinterpret_cast<const _float*>(m_pScale),
 		reinterpret_cast<_float*>(&m_ObjectWorldMatrix)
 	);
