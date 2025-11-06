@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "MapObject_NonSonoro.h"
+#include"GameSystem.h"
 
 CMapObject_NonSonoro::CMapObject_NonSonoro(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
@@ -7,8 +8,9 @@ CMapObject_NonSonoro::CMapObject_NonSonoro(ID3D11Device* pDevice, ID3D11DeviceCo
 }
 
 CMapObject_NonSonoro::CMapObject_NonSonoro(const CMapObject_NonSonoro& Prototype)
-	: CStaticObject{ Prototype }
+	: CStaticObject{ Prototype },m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject_NonSonoro::Initialize_Prototype()
@@ -39,6 +41,8 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 		return E_FAIL;*/
 	XMStoreFloat4x4(&m_DefaultMatrix, m_pTransformCom->Get_WorldMatrix());
 
+	m_eObjectType = pDesc->eObjectType;
+	m_IsRender = m_pGameSystem->Add_To_Management(m_eObjectType, this);
 	return S_OK;
 }
 
@@ -58,6 +62,9 @@ void CMapObject_NonSonoro::Late_Update(_float fTimeDelta)
 
 void CMapObject_NonSonoro::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
+	if ((*m_IsRender))
+		return;
+
 	_uint iLODIndex = m_iLODIndex;
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
@@ -134,6 +141,9 @@ BoundingBox* CMapObject_NonSonoro::Get_BoundingBox()
 
 void CMapObject_NonSonoro::Compute_DelayTime(_float4 vCamPos)
 {
+	if (m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+		return;
+
 	_float fDistance = XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) - XMVectorSetY(XMLoadFloat4(&vCamPos), 0.f)));
 
 	float minDistance = 0.0f;
@@ -147,9 +157,17 @@ void CMapObject_NonSonoro::Compute_DelayTime(_float4 vCamPos)
 	m_fDlayTime = maxDelay + (minDelay - maxDelay) * t;
 }
 
-void CMapObject_NonSonoro::Turn_Sonoro(_fvector vUpSpeed)
+void CMapObject_NonSonoro::Turn_Sonoro(_fvector vUpSpeed,_float fTriggerdTime)
 {
-	m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + vUpSpeed);
+	if (m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+		return;
+	if (m_fDlayTime <= fTriggerdTime)
+		m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + vUpSpeed);
+}
+
+void CMapObject_NonSonoro::ReturnPos()
+{
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMatrix));
 }
 
 void CMapObject_NonSonoro::Ready_Component(void* pArg)
@@ -250,6 +268,7 @@ void CMapObject_NonSonoro::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pGameSystem);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);
