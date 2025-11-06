@@ -119,6 +119,9 @@ void CAugusta::Update(_float fTimeDelta)
 
 	// 8. Land Check
 	m_IsLand = Is_Land(0.2f, 0.5f);
+
+	// 9. Hit 초기화
+	m_IsHit = false;
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
@@ -339,17 +342,21 @@ void CAugusta::Hit_Judge(void* pArg)
 	_uint iCategory = eKey.iCategory;
 	_uint iSubState = eKey.iSubState;
 
-	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
-	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
-		return;
+	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
 	
+	// 1. 맞는데 또맞진 말자..
+	if (EStateCategory::HIT == eCategory)
+		return;
 
-	// 2. 캐스팅 해서? => 들고 있기.
+	// 2. 데미지는 바로 감소시킵니다.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+
+
+	// 3. 캐스팅 해서? => 들고 있기.
 	m_PendingHitDesc = *pDesc;
 
-	// 3. 데미지 적용은 바로
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	
 
 	// 4. 현재 상태 변경.
 	m_IsHit = true;

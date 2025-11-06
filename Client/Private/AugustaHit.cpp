@@ -97,6 +97,8 @@ void CAugustaHit::Enter_Hit()
 	{
 		if (IsSkill)
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_B_L);
+		else
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_S_L);
 	}
 
 	

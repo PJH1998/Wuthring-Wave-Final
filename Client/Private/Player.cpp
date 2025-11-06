@@ -252,7 +252,7 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(-10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
