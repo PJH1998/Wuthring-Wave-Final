@@ -9,8 +9,8 @@ class CAugustaGroundAttack final : public CGroundState
 private:
     enum ATTACKSTATE // 내부에서 전환 가능한 상태.
     {
-		ATTACK,
-        FIRST_ATTACK = 0,
+		ATTACK = 0,
+        FIRST_ATTACK,
         SECOND_ATTACK,
         THIRED_ATTACK,
         LAST_ATTACK,
@@ -20,6 +20,7 @@ private:
         SKILL_E,
         SKILL_R,
         MOVE,
+		HIT,
         JUMP,
         END
     };
@@ -44,6 +45,8 @@ private:
     _bool m_IsNextAttackInput = { false };
     
     
+private:
+	_bool Hit_Judge();
 
 private:
     virtual void Handle_Input() override;

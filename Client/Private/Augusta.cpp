@@ -118,9 +118,9 @@ void CAugusta::Update(_float fTimeDelta)
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
 	// 8. Land Check
-	m_IsLand = Is_Land(0.2f, 0.5f);
+	m_IsLand = Is_LandCollider();
 
-	// 9. Hit 초기화
+	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
 	m_IsHit = false;
 }
 void CAugusta::Late_Update(_float fTimeDelta)
@@ -335,7 +335,7 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
 // Hit 판정.
 void CAugusta::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg)
+	if (nullptr == pArg || m_IsHit)
 		return;
 
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
