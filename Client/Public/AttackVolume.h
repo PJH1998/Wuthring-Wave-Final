@@ -9,18 +9,21 @@ NS_BEGIN(Client)
 class CAttackVolume final : public CGameObject
 {
 public:
+	enum COMBINED_TYPE { BONE, PROP};
 	typedef struct tagAttackVolumeDesc : public CGameObject::GAMEOBJECT_DESC
 	{
-		const _float4x4* pSocketMatrix;
-		CTransform* pParenTransform;
+		COMBINED_TYPE		eType{ COMBINED_TYPE::BONE };
+		//Bone type : 뼈 매트릭스, Prop type : 장비 combined 매트릭스
+		const _float4x4*	pSocketMatrix;
+		CTransform*			pParenTransform;
 		
-		SHAPE			eShape;
-		COLLISIONLAYER	eLayer;
-		COLLISIONLAYER	eTargetLayer;
-		_float			fAttackDmg;
-		_float3			vExtent;
-		_float3			vOffsetPos;
-		_float3			vOffsetRadian;
+		SHAPE				eShape;
+		COLLISIONLAYER		eLayer;
+		COLLISIONLAYER		eTargetLayer;
+		_float				fAttackDmg;
+		_float3				vExtent;
+		_float3				vOffsetPos;
+		_float3				vOffsetRadian;
 		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
 	}ATKVOLUME_DESC;
 
@@ -38,9 +41,12 @@ public:
 	virtual		void					Render() override;
 
 public:
+	// 절대 콜백 안에서 선언하지마.
 	void TriggerActivate(_bool isActivate);
+	void Change_Layer(COLLISIONLAYER eLayer);
 
 private:
+	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
 	const _float4x4*	m_pSocketMatrix = { nullptr };
 	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};

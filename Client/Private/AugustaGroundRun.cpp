@@ -258,8 +258,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL)); // 상위, 하위 상태
 		return;
 	}
-
-
 	if (m_States[POINT_E])
 	{
 		// 위에 서체크하긴 했지만? 다시 체크.

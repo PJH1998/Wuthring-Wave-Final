@@ -142,6 +142,11 @@ public:
 
 #pragma endregion
 
+#pragma region 3. CALLBACK
+	public:
+		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
 
 #pragma endregion
 private:
@@ -149,6 +154,9 @@ private:
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

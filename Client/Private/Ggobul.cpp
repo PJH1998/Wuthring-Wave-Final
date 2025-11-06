@@ -24,8 +24,8 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 
 	GGOBUL_DESC* pDesc = static_cast<GGOBUL_DESC*>(pArg);
 	Ready_Component(pDesc);
-	//Ready_Volumes(pDesc);
-	//Register_AllNotifies(pDesc->strFolderPath);
+	Ready_Volumes(pDesc);
+	Register_AllNotifies(pDesc->strFolderPath);
 
 	for (size_t i = 0; i < GGOBULTYPE::END; ++i)
 	{

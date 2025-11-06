@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "StaticObject.h"
+#include"Client_Enum.h"
 
 NS_BEGIN(Engine)
 class CDeferredShader;
@@ -12,8 +13,6 @@ NS_BEGIN(Client)
 class CMapObject final: public CStaticObject
 {
 public:
-	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, NONRIGID, END };
-
 	typedef struct tagMapLoad
 	{
 

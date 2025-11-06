@@ -24,8 +24,8 @@ HRESULT CFS_Scythe::Initialize_Clone(void* pArg)
 
 	SCYTHE_DESC* pDesc = static_cast<SCYTHE_DESC*>(pArg);
 	Ready_Component(pDesc);
-	//Ready_PartObjects(pDesc);
-	//Register_AllNotifies(pDesc->strFolderPath);
+	Ready_PartObjects(pDesc);
+	Register_AllNotifies(pDesc->strFolderPath);
 
 	//for (size_t i = 0; i < 5; ++i)
 	//{
@@ -229,8 +229,8 @@ void CFS_Scythe::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive
 	{
 		for (_uint i = 0; i < 5; ++i)
 		{
-			if(nullptr != m_pAttackVolumes[i])
-				m_pAttackVolumes[i]->TriggerActivate(m_isVolumeActive[i]);
+			if(nullptr != m_pAttackVolumes[i] && m_isVolumeActive[i])
+				m_pAttackVolumes[i]->TriggerActivate(Isactive);
 		}
 	}
 }

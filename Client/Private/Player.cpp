@@ -41,6 +41,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
+	
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
@@ -215,11 +216,11 @@ void CPlayer::Player_KeyInput()
 	}
 
 
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
-#ifdef _DEBUG
 
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
@@ -350,10 +351,18 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 		return;
 
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
-    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+
+	// CallBack Client Transform에 이상한 값이 들어가 있음.
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
-    m_TargetTransforms.push_back(pTargetTransform);
+	
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+	}
 }
 
 
@@ -550,7 +559,12 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = 700.f;
+	//m_pColliderCom->Set_Desc(&m_CallBack);
+
 	m_pColliderCom->Set_Desc(m_pTransformCom);
+
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);
 		});

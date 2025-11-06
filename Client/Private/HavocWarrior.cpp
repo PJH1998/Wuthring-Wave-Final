@@ -33,7 +33,8 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 #pragma endregion
 
 	Ready_Component(pDesc);
-	//Ready_PartObjects(pDesc);
+	Ready_PartObjects(pDesc);
+	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_vDistanceRange = _float2(2.7f, 3.3f);
 	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;
@@ -112,7 +113,7 @@ void CHavocWarrior::Render()
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
 {
-	if (wStrColliderTag == TEXT("Attack Trig"))
+	if (wStrColliderTag == TEXT("Attack"))
 		m_pAtkVolume->TriggerActivate(isActive);
 }
 
@@ -168,9 +169,9 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 	m_tCallDesc.pTransform = m_pTransformCom;
-	m_tCallDesc.fAttack = 10.f;
+	m_tCallDesc.fAttack = m_fAttackDmg;
 	m_pColliderCom->Set_Desc(&m_tCallDesc);
-
+	m_pColliderCom->Set_Gravity(true);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
@@ -280,6 +281,7 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
 		m_fIdleAcc = m_fIdleDuration;
 	}
+	
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -298,6 +300,11 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 		}
 		else
 			m_iState |= (ENUM_CLASS(TEST_STATE::ATTACK_3));
+	}
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
 	}
 }
 
@@ -339,11 +346,18 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
+		m_beHit = true;
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 
+	}
+
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	}
 }
 
@@ -362,6 +376,9 @@ void CHavocWarrior::Patrol()
 
 _bool CHavocWarrior::isKnockDown()
 {
+	if (m_beHit)
+		return true;
+
 	return m_iState & (ENUM_CLASS(TEST_STATE::BEHIT) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::AIR));
 }
 

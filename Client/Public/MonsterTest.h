@@ -74,6 +74,8 @@ private:
 	_bool					m_isParalysis{};
 	_bool					m_isKnockDownTrig{};
 	_float					m_fParalysisAcc{};
+	_bool					m_beHit{};
+	_bool					m_isAggro{};
 #pragma endregion
 	
 	_float					m_fHP{};
@@ -85,6 +87,7 @@ private:
 
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
+	void						After_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
@@ -103,7 +106,7 @@ private:
 
 public:
 	static		CMonsterTest*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject*		Clone(void* pArg) override;
+	virtual		CGameObject*			Clone(void* pArg) override;
 	virtual		void					Free() override;
 };
 

@@ -33,6 +33,7 @@ HRESULT CLevel_GamePlay::Initialize()
 		CRASH("Test");
 
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -137,7 +138,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
-	MobDesc.vInitPosition = _float3(3522.1f, 136.2f, 3379.2f);
+	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = 100.f;

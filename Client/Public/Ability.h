@@ -39,6 +39,9 @@ public:
 	_float Get_MaxCooldown(const _string& strSkillName);        // 기존
 	_float Get_HpRatio() const;
 
+	_bool Check_AnyCondition(_uint iConditionFlag); // 현재 컨디션 제어
+	_bool Check_AllCondition(_uint iConditionFlag); // 모든 컨디션 확인
+
 	// 수치 값들 (공명 , HP 게이지 등등)
 	_float Get_CostRatio(COST_TYPE eType) const; // 게이지 1 (공명), 2 (POINT), 3 (ULTI), 4(SWORD), 5. 
 	_float Get_Hp() { return m_CharacterInfo.fHp; } // 현재 Hp
@@ -77,8 +80,6 @@ public:
 	UISKILL_SLOT Determine_StateGalbrena(_uint iCharacterIdx, const _string& strKey); // CharacterIdx와 누른 키.
 
 #pragma endregion
-
-
 
 #ifdef _DEBUG
 public:

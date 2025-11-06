@@ -72,6 +72,8 @@ public:
 
 #pragma region PHYSICS
 public:
+	// Hit 판단.
+	virtual void Hit_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -162,13 +164,12 @@ public:
 	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
 #pragma endregion
 
-
 #ifdef _DEBUG
 public:
 	void Debug_FullCost();
 #else
-	public:
-		void Debug_FullCost();
+public:
+	void Debug_FullCost();
 #endif // _DEBUG
 
 
@@ -199,6 +200,7 @@ protected:
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
+	_bool m_IsHit = { false };
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
