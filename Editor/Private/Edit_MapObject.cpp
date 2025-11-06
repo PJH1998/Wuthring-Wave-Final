@@ -156,9 +156,9 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 
 		m_fMode = true;
 		m_IsFlying = true;
-		if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
 		m_fFlyingTime += fTimeDelta;
-		else if (m_eObjectType == OBJECTTYPE::NONSONORA)
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
 			m_IsRender = false;
 
 		_float fDistance = XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) - XMVectorSetY(XMLoadFloat4(m_pGameInstance->Get_CamPos()), 0.f)));
@@ -179,12 +179,12 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 	{
 		m_fMode = false;
 		m_IsFlying = false;
-		if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
 		{
 			m_IsRender = true;
 			m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMat));
 		}
-		else if (m_eObjectType == OBJECTTYPE::NONSONORA)
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
 			m_IsRender = false;
 	}
 
@@ -198,16 +198,16 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 				m_fFlyingTime += fTimeDelta;
 				if (m_fFlyingTime < 2.f)
 				{
-					if (m_eObjectType == OBJECTTYPE::SONORA)
+					if (m_eObjectType == OBJECTTYPE::NONSONORA)
 						m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 0.4f, 0.f, 0.f));
 				}
 				else
 				{
 					m_IsFlying = false;
 					m_fFlyingTime = 0.f;
-					if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
+					if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
 						m_IsRender = false;
-					else if (m_eObjectType == OBJECTTYPE::NONSONORA)
+					else if (m_eObjectType == OBJECTTYPE::SONORA)
 						m_IsRender = true;
 				}
 			}
@@ -221,12 +221,13 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 		m_fMode = false;
 		m_IsFlying = false;
 		m_fFlyingTime = 0.f;
-		if (m_eObjectType == OBJECTTYPE::SONORA || m_eObjectType == OBJECTTYPE::SONORA_FLOOR)
-			m_IsRender = false;
-		else if (m_eObjectType == OBJECTTYPE::NONSONORA)
-			m_IsRender = true;
-		m_fTotalTime = 0.f;
 
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+			m_IsRender = false;
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
+			m_IsRender = true;
+
+		m_fTotalTime = 0.f;
 	}
 }
 

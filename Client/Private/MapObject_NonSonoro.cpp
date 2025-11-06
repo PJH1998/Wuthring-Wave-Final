@@ -13,6 +13,9 @@ CMapObject_NonSonoro::CMapObject_NonSonoro(const CMapObject_NonSonoro& Prototype
 
 HRESULT CMapObject_NonSonoro::Initialize_Prototype()
 {
+	//현재 Sonoro가 침식된 놈들, Sonoro_Floor가 침식된 바닥.
+	//NonSonoro가 침식안된 놈들. 바닥 포함.
+	//사실 반대가 되어야함. 수정핤것.
 	return S_OK;
 }
 
@@ -24,8 +27,6 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));
-	//_vector vPos = XMVectorSet(m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), m_pGameInstance->Rand(-2000.f, 2000.f), 1.f);
-	//m_pTransformCom->Set_State(STATE::POSITION, vPos);
 	Ready_Component(pArg);
 	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
@@ -34,8 +35,8 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
-	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
-		return E_FAIL;
+	/*if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
+		return E_FAIL;*/
 
 	return S_OK;
 }
