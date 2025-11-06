@@ -275,9 +275,11 @@ void CSpringCamera::Action(_float fTimeDelta)
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
-		vLerpTranslation = XMVector4Transform(vLerpTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		// Distance
 		m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
@@ -293,8 +295,10 @@ void CSpringCamera::Action(_float fTimeDelta)
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
+		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 		m_fDistance = m_fFixedDistance;
@@ -330,7 +334,7 @@ void CSpringCamera::SetUp_Recovery()
 		m_isRecovery = true;
 	m_fFixedDistance = m_fPreFixedDistance;
 	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
-	m_vEndTranslation = _float3(0.f, 0.f, 0.f);
+	//m_vEndTranslation = _float3(0.f, 0.f, 0.f);
 }
 
 void CSpringCamera::Ready_Event()
@@ -338,7 +342,10 @@ void CSpringCamera::Ready_Event()
 	m_pGameInstance->Subscribe<CAMERA_ACTION_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), [this](const CAMERA_ACTION_EVENT& event) {
 		if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction)
 		{
-			m_OwnerMatrix = event.WorldMatrix;
+			_matrix Matrix = XMLoadFloat4x4(&event.WorldMatrix);
+			_vector vScale{}, vQuat{}, vTranslation{};
+			XMMatrixDecompose(&vScale, &vQuat, &vTranslation, Matrix);
+			XMStoreFloat4x4(&m_OwnerMatrix, XMMatrixRotationQuaternion(vQuat));
 			m_iFrameIndex = -1;
 			m_fTrackPosition = static_cast<_float>(event.iStart);
 			m_fFirstFrame = m_fTrackPosition;

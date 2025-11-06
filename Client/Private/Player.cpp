@@ -136,6 +136,10 @@ void CPlayer::Update(_float fTimeDelta)
 
     Sorting_Target(); // Update => 
     Toggle_LockOn();
+
+#ifdef _DEBUG
+	GUI_Teleport();
+#endif
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
@@ -229,8 +233,6 @@ void CPlayer::Player_KeyInput()
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 	}
-
-	
 #endif // _DEBUGs
 }
 
@@ -344,7 +346,8 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
+	// Detect Body 탐지용
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) 
 		return;
 
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
@@ -353,9 +356,13 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
     CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
-
-	// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
-    m_TargetTransforms.push_back(pTargetTransform);
+	
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+	}
 }
 
 
@@ -431,10 +438,25 @@ void CPlayer::Toggle_LockOn()
     //}
 
     m_pTargetTransform = nullptr;
-    
 }
+#ifdef _DEBUG
+void CPlayer::GUI_Teleport()
+{
+	ImGui::Begin("Player Teleport");
 
+	ImGui::Text("[Position]");
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vDebugTeleportPos));
 
+	if (ImGui::Button("Apply"))
+	{
+		_vector vChagePos = XMVectorSetW(XMLoadFloat3(&m_vDebugTeleportPos), 1.f);
+		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
+		m_pColliderCom->Set_Position(vChagePos);
+	}
+
+	ImGui::End();
+}
+#endif
 HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
