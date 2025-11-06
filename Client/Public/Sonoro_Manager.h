@@ -7,7 +7,7 @@ NS_BEGIN(Client)
 class CSonoro_Manager final: public CBase
 {
 private:
-	using SonoroObjects = variant<class CMapObject_Sonoro, class CMapObject_NonSonoro>;
+	//using SonoroObjects = variant<class CMapObject_Sonoro, class CMapObject_NonSonoro>;
 
 private:
 	explicit CSonoro_Manager();
@@ -17,7 +17,7 @@ public:
 	void Add_To_Management(OBJECTTYPE eType, void* pObjects);
 
 private:
-	unordered_map<OBJECTTYPE, vector<SonoroObjects*>> Objects;
+	//unordered_map<OBJECTTYPE, vector<SonoroObjects*>> Objects;
 
 public:
 	static CSonoro_Manager* Create();
