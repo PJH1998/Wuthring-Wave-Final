@@ -130,7 +130,9 @@ private:
 
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
-	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ m_tUIDesc = tUIDesc; }
+	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ 
+		m_tUIDesc = tUIDesc; 
+	}
 	void					Set_VariantUIDesc(VARIANTREADY_UI_DESC tVarUIDesc)	{ 
 		m_cachedVariantUIDesc = tVarUIDesc;  
 	}

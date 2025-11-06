@@ -91,6 +91,8 @@ HRESULT CLevel_Test::Initialize()
 
 	Ready_Skybox();
 
+	Ready_UI();
+
     return S_OK;
 }
 
@@ -251,6 +253,26 @@ void CLevel_Test::Ready_Skybox()
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
 		CRASH("Skybox");
+}
+
+void CLevel_Test::Ready_UI()
+{
+	// UI
+	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
+	const _wstring strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+
+	// _UI
 }
 
 #ifdef _DEBUG

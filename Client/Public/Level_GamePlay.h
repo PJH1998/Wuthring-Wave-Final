@@ -21,6 +21,7 @@ private:
 	void			Ready_MonsterTest();
 	void			Ready_Effect();
 	void			Ready_Skybox();
+	void			Ready_UI();
 
 #ifdef _DEBUG
 private:

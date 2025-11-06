@@ -52,6 +52,9 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if (m_tUIDesc.strUIName == L"Skill_Augusta")
+		int i = 10;
+
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
@@ -132,7 +135,6 @@ void CCustom_UI::Render()
         if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
             CRASH("Binding_Value_Failed");
 
-        // �̹��� ũ�� �Ѱ��ֱ�
         if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
             CRASH("Binding_Value_Failed");
         if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
@@ -141,13 +143,14 @@ void CCustom_UI::Render()
             CRASH("Binding_Value_Failed");
 
 
+
         m_pShaderCom->Begin(m_tUIDesc.iPassType);
         m_pVIBufferCom->Bind_Resources();
         m_pVIBufferCom->Render();
     }
-
-   //for (auto& child : m_vecChildObjects)          // 얘 살려두니까 이중렌더됨.
-   //    child->Render();
+	
+	//for (auto& child : m_vecChildObjects)          // 얘 살려두니까 이중렌더됨.
+	//    child->Render();
 
 }
 

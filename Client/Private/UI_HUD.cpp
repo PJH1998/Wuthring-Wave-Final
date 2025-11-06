@@ -76,14 +76,6 @@ void CUI_HUD::Update(_float fTimeDelta)
 	_uint iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
 	m_pAbility = m_pPlayerStatus->Get_Ability(iSelectedCHIndex);
 
-	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
-
-
-	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
-
-
-
-
 	Ready_Presets();
 
 	Update_UI_SkillSection(fTimeDelta);
@@ -231,23 +223,24 @@ HRESULT CUI_HUD::Ready_Presets()
 	array<_uint, 2> iImgSize_Augusta = { 7, 2 };
 	array<_uint, 2> iImgSize_Galbrena = { 14, 1 };
 
-	m_mapSkillTexIndices.emplace(L"Rover_E",				Calc_SpriteSpace(0, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Rover_R",				Calc_SpriteSpace(2, 0, iImgSize_Rover));
-	m_mapSkillTexIndices.emplace(L"Rover_E_Burst",			Calc_SpriteSpace(1, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_E",					Calc_SpriteSpace(0, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_R",					Calc_SpriteSpace(2, 0, iImgSize_Rover));
+	m_mapSkillTexIndices.emplace(L"Rover_E_Burst",				Calc_SpriteSpace(1, 0, iImgSize_Rover));
 
-	m_mapSkillTexIndices.emplace(L"Augusta_E",				Calc_SpriteSpace(5, 0, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_GriffonReady", Calc_SpriteSpace(3, 0, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_RiseReady",	Calc_SpriteSpace(4, 0, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_LB_Burst",		Calc_SpriteSpace(0, 0, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_R",				Calc_SpriteSpace(0, 1, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_R_Enforce",		Calc_SpriteSpace(1, 1, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_R_Ready",		Calc_SpriteSpace(6, 0, iImgSize_Augusta));
-	m_mapSkillTexIndices.emplace(L"Augusta_E_EnforceBasicATK",		Calc_SpriteSpace(2, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E",					Calc_SpriteSpace(5, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_GriffonReady",		Calc_SpriteSpace(3, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_RiseReady",		Calc_SpriteSpace(4, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_LB_Burst",			Calc_SpriteSpace(0, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_LB_StrongATK",		Calc_SpriteSpace(1, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R",					Calc_SpriteSpace(0, 1, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R_Enforce",			Calc_SpriteSpace(1, 1, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_R_Ready",			Calc_SpriteSpace(6, 0, iImgSize_Augusta));
+	m_mapSkillTexIndices.emplace(L"Augusta_E_EnforceBasicATK",	Calc_SpriteSpace(2, 0, iImgSize_Augusta));
 
-	m_mapSkillTexIndices.emplace(L"Galbrena_E",				Calc_SpriteSpace(4, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_E_BurstOn",		Calc_SpriteSpace(5, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_R",				Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
-	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst",		Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_E",					Calc_SpriteSpace(4, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_E_BurstOn",			Calc_SpriteSpace(5, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_R",					Calc_SpriteSpace(6, 0, iImgSize_Galbrena));
+	m_mapSkillTexIndices.emplace(L"Galbrena_LB_Burst",			Calc_SpriteSpace(2, 0, iImgSize_Galbrena));
 
 	return S_OK;
 }
@@ -286,7 +279,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	_float fBasicSkillMaxCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
 		{/* CH_AUGUSTA  */ UISlots[CAbility::KEY_E].fMaxCoolTime,	UISlots[CAbility::KEY_R].fMaxCoolTime},
-		{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
+		{/* CH_GALBRENA */ 1.f/*pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")*/,	1.f /*pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")*/} // ksta : 갈브레나 들어오면 수정 필요
 	};
 	_float fChangeCD[CH_END] = {
 		.0f, .0f, .0f
@@ -298,7 +291,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	// UI Load
     CCustom_UI* pSkillUI[CH_END] = {                  // Skill Indicator UI per Character.
         Find_ChildObject(L"Skill_Rover"),
-        Find_ChildObject(L"Skill_Auguata"),
+        Find_ChildObject(L"Skill_Augusta"),
         Find_ChildObject(L"Skill_Galbrena")
     };
 
@@ -406,19 +399,31 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     //}
     // skill
 	
-    for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
-    {
-        auto targetUI = pSkillUI[i];
+	for (_uint i = 0; i < CH_END; i++)                                  // Apply cooldown values
+	{
+		auto targetUI = pSkillUI[i];
 
-        vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
+
+		// 스킬 ui 인스턴스 갯수는 캐릭터마다 다름. 이에 따라 인스턴스 갯수만큼 리사이징 및 할당 
+		vector<_float4x4> vecVariantMat = {/* _float4x4() , _float4x4() */};	
+
+		_uint iTargetNumInstance = targetUI->Get_UIDesc().vecInstanceDescs.size();
+		vecVariantMat.resize(iTargetNumInstance);
 
         vecVariantMat[0].m[0][0] = fBasicSkillCD[i][SK_E] / fBasicSkillMaxCD[i][SK_E];
-        vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
         vecVariantMat[0].m[0][1] = 0.5f;
-        vecVariantMat[1].m[0][1] = 0.5f;
-
         vecVariantMat[0].m[0][2] = 0.95f;
+
+        vecVariantMat[1].m[0][0] = fBasicSkillCD[i][SK_R] / fBasicSkillMaxCD[i][SK_R];
+        vecVariantMat[1].m[0][1] = 0.5f;
         vecVariantMat[1].m[0][2] = 0.95f;
+
+		if (vecVariantMat.size() >= 3)
+		{
+			vecVariantMat[2].m[0][0] = 0.0f;	// for LB Btn
+			vecVariantMat[2].m[0][1] = 0.5f;
+			vecVariantMat[2].m[0][2] = 0.95f;
+		}
 
 
 
@@ -440,10 +445,9 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(iSelectedCHIndex);
 		switch (eCharacterType)
 		{
-
 			// ==============================
 			// * [SK Icon Update] Rover
-			// =============================
+			// ==============================
 		case UI_CHARACTERTYPE::ROVER:
 		{
 			auto roverUIDesc = pSkillUI[CH_ROVER]->Get_UIDesc();
@@ -464,15 +468,14 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 			// ==============================
 			// * [SK Icon Update] Augusta
-			// =============================
+			// ==============================
 		case UI_CHARACTERTYPE::AUGUSTA:
 			// Augusta
 			Update_AugustaIcon(UISlots);
 			break;
-
 			// ==============================
 			// * [SK Icon Update] Galbrena
-			// =============================
+			// ==============================
 		case UI_CHARACTERTYPE::GALBRENA:
 			auto galbrenaUIDesc = pSkillUI[CH_GALBRENA]->Get_UIDesc();
 
@@ -512,6 +515,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 				galbrenaUIDesc.vecInstanceDescs[2].vClipTexcoordX = { 0.f, 1.f };
 				break;
 			}
+			pSkillUI[CH_ROVER]->Set_UIDesc(galbrenaUIDesc);
 			break;
 
 		}
@@ -528,7 +532,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
     // ==============================
 	// * [Change Update] Cooldown
-	// =============================
+	// ==============================
     for (_uint i = 0; i < CH_END; i++)
     {
         _float fCooldown = fChangeCD[i];
@@ -579,6 +583,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
         ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLEMASK),
         true
     };
+
 
     pSkillBGUI->Set_VariantUIDesc(tBGVariantDesc);
 
@@ -1619,85 +1624,123 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta)
 
 void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 {
-	auto augustaUIDesc = Find_ChildObject(L"Skill_Auguata")->Get_UIDesc();
+	enum BTN_INDEX { BTN_E, BTN_R, BTN_LB /* 아우구스타, 갈브만 존재 */, BTN_END };
+
+
+	auto augustaUIDesc = Find_ChildObject(L"Skill_Augusta")->Get_UIDesc();
 
 	// LB도 대응해야 함
 
 
+
+	// if True, In Advanced Ult Mode
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	// ㄴ 이걸 기점으로 아이콘 조건 주어야 할 듯. 지금 궁 사용 상태에서 안보임
+
+	_bool isAvailable_Griffon = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
+	_bool isAvailable_Rise = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+
+
+
+	// ==============================
+	// [Get] [E] Button Slot State
+	// ==============================
+
 	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
+
+	cout << "============================================================" << endl;
+	cout << "[CUI_HUD::Update_AugustaIcon] Augusta E State      : " << ENUM_CLASS(eState_Augusta_E) << endl;
+	cout << "[CUI_HUD::Update_AugustaIcon] In Ult               : " << ((isIn_AdvUltMode) ? "True " : "False") << endl;
+	cout << "[CUI_HUD::Update_AugustaIcon] Is Available Griffon : " << ((isAvailable_Griffon) ? "True " : "False") << endl;
+	cout << "[CUI_HUD::Update_AugustaIcon] Is Available Rise    : " << ((isAvailable_Rise) ? "True " : "False") << endl;
 
 	switch (eState_Augusta_E)
 	{
-	case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 이 상황에 5번째 키도 추가됨
-		//	
+
 
 	case Client::UI_AUGUSTA_STATE::E_GRIFFON_READY:
 		// Augusta Normal - E Combo Start
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][0];
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][1];
-		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_GriffonReady"][1];
 		break;
 	case Client::UI_AUGUSTA_STATE::E_RISE_READY:
 		// Augusta Normal - E Combo 2
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][0];
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][1];
-		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-		break;
-	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
-		// Augusta Ult Progress
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_Burst"][1];
-		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_RiseReady"][1];
 		break;
 	case Client::UI_AUGUSTA_STATE::E_DEFAULT_READY:
 	default:
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
-		augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
-		augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-		break;		
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_E].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
+		break;
 	}
 
 
-
+	// ==============================
+	// [Get] [R] Button Slot State
+	// ==============================
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	
 
+	// R Button Ctrl..
 	switch (eState_Augusta_R)
 	{
 	case Client::UI_AUGUSTA_STATE::R_SWORD_READY:
-	//	// Augusta Normal - Ult Ready
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Combo3"][0];
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Combo3"][1];
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-	
 		// Augusta Normal - Ult Ready
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Ready"][0];
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Ready"][1];
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Ready"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Ready"][1];
 		break;
 	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
-	//	// Augusta Ult
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E_Burst"][0];
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E_Burst"][1];
-	//	augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 750.f;
-	
-		// Augusta Ult
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
+		// Augusta in Ult, Useable Final Ult
+
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
 		break;
 	default:
-		//// Augusta Normal
-		//augustaUIDesc.vecInstanceDescs[0].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_E"][0];
-		//augustaUIDesc.vecInstanceDescs[0].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_E"][1];
-		//augustaUIDesc.vecInstanceDescs[0].vSInstTrans.x = 650.f;
-
+		if (isIn_AdvUltMode)
+		{	// Autusta in Ult, Not Useable Final Ult.
+			augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R_Enforce"][0];
+			augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R_Enforce"][1];
+			break;
+		}
 		// Augusta Normal
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
-		augustaUIDesc.vecInstanceDescs[1].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_R"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_R].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_R"][1];
+		break;
+
+	}
+
+
+	// ==============================
+	// [Get] [LB] Button Slot State
+	// ==============================
+	
+	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
+	
+	
+	switch (eState_Augusta_LB)
+	{
+	case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 강공. ( 1, 0 )			// 5번째 칸에 위치
+		// Strong Attack Ready.
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
+		break;
+	case Client::UI_AUGUSTA_STATE::LB_SWORD_READY:			// 궁 사용 상태 ( 0, 0 )	// 2번째 칸에 위치
+		// Augusta in Ult.
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_Burst"][1];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 750.f;
+		break;
+	default : 
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 0.0f };
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 450.f;
 		break;
 	}
 
 
-
-	Find_ChildObject(L"Skill_Auguata")->Set_UIDesc(augustaUIDesc);
+	Find_ChildObject(L"Skill_Augusta")->Set_UIDesc(augustaUIDesc);
 
 }
 
