@@ -48,6 +48,7 @@ private:
 
 	queue<_float3>			m_PatrolPoints;
 
+#pragma region STATE_VARIABLE
 	_uint					m_iState{};
 	_bool					m_isAggro{};
 	_bool					m_isDetecting{};
@@ -60,17 +61,22 @@ private:
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
-	_bool					m_beHit{};
-
-	_float					m_fHP{};
-	_float					m_fAttackDmg{};
-	_bool					m_isAnimationFinished{};
-	_bool					m_isBlocked{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
+	_bool					m_beHit{};
+	_bool					m_isBlocked{};
+	_bool					m_isAnimationFinished{};
+#pragma endregion
 
+#pragma region STATUS
+	_float					m_fHP{};
+	_float					m_fAttackDmg{};
+#pragma endregion
+
+#pragma region PHYSICS
+	_float3					m_vBeHit_Normal{};
 	CALLBACK_CLIENT			m_tCallDesc{};
-
+#pragma endregion
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(HAVOCWARRIOR_DESC* pDesc);

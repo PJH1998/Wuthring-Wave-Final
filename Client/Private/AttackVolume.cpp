@@ -123,6 +123,12 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 	m_isActivate = isActivate;
 }
 
+void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
+{
+	m_eLayer = eLayer;
+	TriggerActivate(true);
+}
+
 
 void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 {

@@ -164,12 +164,9 @@ public:
 	void Sync_Transform_ToPlayer(class CTransform* pTransformCom); // Player로 보낸다.
 #pragma endregion
 
-
 #ifdef _DEBUG
 public:
 	void Debug_FullCost();
-
-
 #endif // _DEBUG
 
 

@@ -88,6 +88,7 @@ public:
 
 	void Print_Cost();
 	void Print_CoolTime();
+
 #endif // _DEBUG
 
 

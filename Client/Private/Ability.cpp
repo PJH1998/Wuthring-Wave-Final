@@ -567,7 +567,6 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 //}
 
 #ifdef _DEBUG
-
 void CAbility::Debug_FullCost()
 {
 	_uint iStart = ENUM_CLASS(COST_TYPE::COST1);
@@ -577,7 +576,7 @@ void CAbility::Debug_FullCost()
 		if (i == 3 || i == 4)
 			continue;
 		m_Costs[i] = m_fCostMax;
-		
+
 	}
 }
 

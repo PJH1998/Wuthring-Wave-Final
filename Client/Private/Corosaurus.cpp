@@ -28,6 +28,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_vDistanceRange = _float2(4.f, 5.f);
 	Ready_Component(pDesc);
 	//Ready_PartObjects(pDesc);
+	//CActor::Register_AllNotifies(pDesc->strFolderPath);
 
 	return S_OK;
 }
