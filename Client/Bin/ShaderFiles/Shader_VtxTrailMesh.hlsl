@@ -200,8 +200,8 @@ PS_OUT PS_TrailDefault(PS_IN In)
         alpha = fVisible * MaskAlpha;
     }
     
-    //if (alpha < 0.3f)
-    //    discard;
+    if (alpha < 0.3f)
+        discard;
     
     Out.vDiffuse = float4(vColor.rgb, alpha);
     
