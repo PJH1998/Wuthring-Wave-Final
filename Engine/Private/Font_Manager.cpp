@@ -22,7 +22,7 @@ HRESULT CFont_Manager::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 		CRASH("FT Library");
 	
 	m_pShaderCom = CShader::Create(m_pDevice, m_pContext,
-		TEXT("../Bin/ShaderFiles/Shader_UIText.hlsl"), VTXUITEXT::Elements, VTXUITEXT::iNumElements);
+		TEXT("../../Client/Bin/ShaderFiles/Shader_UIText.hlsl"), VTXUITEXT::Elements, VTXUITEXT::iNumElements);
 
 	Ready_FontBuffer();
 
