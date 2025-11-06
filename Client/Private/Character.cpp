@@ -628,6 +628,14 @@ void CCharacter::Debug_FullCost()
 
 	m_pAbillityCom->Debug_FullCost();
 }
+#else
+void CCharacter::Debug_FullCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Debug_FullCost();
+}
 #endif // _DEBUG
 
 

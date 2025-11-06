@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "StaticObject.h"
 #include"Client_Enum.h"
+
 NS_BEGIN(Engine)
 class CDeferredShader;
 class CShader;

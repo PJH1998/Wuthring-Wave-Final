@@ -123,7 +123,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 void CParser::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
 {
 	if (!m_LoadingMap[eLevel][iIndex])
-		CRASH("Failed");
+		MSG_BOX("Map Clone Failed");
 
 	_char FileDrive[MAX_PATH] = {};
 	_char FileDir[MAX_PATH] = {};

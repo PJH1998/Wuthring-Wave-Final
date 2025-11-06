@@ -57,8 +57,6 @@ public:
 #pragma region UI Interface
 	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
 	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
-
-
 #pragma endregion
 
 
@@ -108,12 +106,20 @@ private:
 	_float m_fColliderHeight = {};
 	_float m_fColliderRadius = {};
 
+	// Mutex
+	mutex m_Mutex;
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
 	void Sorting_Target();
 	void Toggle_LockOn();
+
+#ifdef _DEBUG
+	_float3		m_vDebugTeleportPos = {};
+	void			GUI_Teleport();
+#endif
 
 private:
 	HRESULT Ready_Players(const PLAYER_DESC* pDesc);

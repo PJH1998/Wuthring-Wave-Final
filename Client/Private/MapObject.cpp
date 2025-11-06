@@ -252,7 +252,6 @@ void CMapObject::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
-	Safe_Delete(m_pBoundingBox);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);
