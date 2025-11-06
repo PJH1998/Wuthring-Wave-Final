@@ -259,7 +259,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 	else
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
+		vPreQuaternion = XMVector4Transform(vPreQuaternion, XMLoadFloat4x4(&m_OwnerMatrix));
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		// Fov
 		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
@@ -269,13 +271,13 @@ void CSpringCamera::Action(_float fTimeDelta)
 	if (true == m_isLerp)
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+		vDestQuat = XMVector4Transform(vDestQuat, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
-		vLerpQuat = XMVector4Transform(vLerpQuat, XMLoadFloat4x4(&m_OwnerMatrix));
 		m_pTransformCom->Rotation_Quaternion(vLerpQuat);
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
@@ -295,7 +297,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
