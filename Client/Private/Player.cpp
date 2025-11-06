@@ -53,6 +53,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
+	m_pGameInstance->SetUp_ShadowNF();
+
     for (auto& pCharacter : m_Characters)
     {
         if (nullptr != pCharacter)
@@ -208,11 +210,13 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
-#ifdef _DEBUG
+
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+#ifdef _DEBUG
+
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
 	{

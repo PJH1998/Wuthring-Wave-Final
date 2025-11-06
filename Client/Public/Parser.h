@@ -41,6 +41,7 @@ private:
 	void						Load_Particle_VB_FromJson(const _string& strFilePath, const _string& VBTag, LEVEL eLevel);
 	void						Load_Particle_OB_FromJson(const _string& strFilePath, const _string& ParticleTag, LEVEL eLevel);
 	void						Load_TrailMesh_FromJson(const _string& strFilePath, const _string& TrailMeshTag, LEVEL eLevel);
+	void						Load_FXRect_FromJson(const _string& strFilePath, const _string& RectTag, LEVEL eLevel);
 #pragma endregion
 public:
 	HRESULT						Initialize();

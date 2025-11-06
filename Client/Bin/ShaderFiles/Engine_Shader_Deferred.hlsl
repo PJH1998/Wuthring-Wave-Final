@@ -76,6 +76,9 @@ int g_DebugCSMIndex;
 Texture2DArray<float> g_ShadowMap;
 bool g_HasShadowMap;
 
+//CASCADE
+Texture2DArray<float> g_Cascade : register(t2);
+
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
 
@@ -157,20 +160,25 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
 
     vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    if (g_HasShadowMap)
-    {
-        float fShadowMap = Compute_ShadowMap(vWorldPos, g_ShadowMap, 0.0001f);
-    
-        Out.vColor.xyz *= (fShadowMap + 0.5f);
-    }
+    float fShadowMap = 1.f;
     
     vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-
-    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
-   
-    float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos);
     
-    Out.vColor.xyz *= fShadow;
+    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
+    
+    if (g_HasShadowMap)
+    {
+        fShadowMap = Compute_ShadowMap(fViewZ, fNdotL, vWorldPos, g_ShadowMap);
+    }
+   
+    float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos, g_Cascade);
+    
+    float fFinalShadow = min(fShadowMap, fShadow);
+    
+    fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
+   
+    Out.vColor.xyz *= fFinalShadow;
+    
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
 
@@ -404,6 +412,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     }
     
     float AO = (Occlusion / g_iSampleSize);
+    
+    if(AO >= 0.8f)
+        AO = 1.f;
     
     AO = pow(AO, 2.f);
     

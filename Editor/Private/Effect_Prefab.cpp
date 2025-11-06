@@ -247,6 +247,12 @@ void CEffect_Prefab::Set_FrameDesc(FRAME_DESC* pFrameDesc)
         if (pFrameDesc->strChildrenTag == Frame.strChildrenTag)
         {
             Frame = *pFrameDesc;
+			_bool IsActivated = true;
+			_matrix OffsetMatrix = {};
+			Children_Offset(Frame, OffsetMatrix);
+			Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
+
+			m_vLifeTime.x = 0.f;
             return;
         }
     }

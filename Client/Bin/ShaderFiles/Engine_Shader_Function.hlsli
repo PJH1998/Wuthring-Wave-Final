@@ -23,17 +23,6 @@ float g_fFocusDepth;
 float g_fFocusMinCoc;
 float g_fFocusRange;
 
-cbuffer ShadowMapDatas : register(b2)
-{
-//    int iNumSectorX;
-//    int iNumSectorToLayer;
-//    float Padding0[2];
-//    float2 vSectorWorldSize;
-//    float Padding1[2];
-//    float2 vMin;
-//    float Padding2[2];
-};
-
 float Compute_NDF(float NdotH, float Roughness) // ThrowBridgeReitzNormalDistribution   , 미세면 표면의 거칠기 분포
 {
     float RoughnessSqr = pow(Roughness, 2.f);                       
@@ -336,7 +325,6 @@ float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
     float fCoc = 0.f;
     
     fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
-    
     
     return fCoc;
 }

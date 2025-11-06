@@ -57,6 +57,8 @@ public:
 
 	void TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILMESH_DESC* pTrailDesc);
 
+	void Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRectDesc);
+
 public:
 	void Load_Prefab();
 
@@ -65,6 +67,8 @@ public:
 	void Load_FXMesh(const _wstring& FXMeshTag);
 
 	void Load_TrailMesh(const _wstring& TrailMeshTag);
+
+	void Load_FXRect(const _wstring& RectTag);
 
 public:
 	void Save_SelectedChildren_To_Json();

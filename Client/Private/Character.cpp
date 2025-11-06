@@ -620,6 +620,15 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 
 }
 
+
+void CCharacter::Debug_FullCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Debug_FullCost();
+}
+
 #ifdef _DEBUG
 void CCharacter::Debug_FullCost()
 {
