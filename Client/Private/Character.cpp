@@ -687,4 +687,5 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	
 }
