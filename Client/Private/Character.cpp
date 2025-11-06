@@ -440,10 +440,10 @@ void CCharacter::Start_FlyBlending(_float fDuration)
 }
 
 
-void CCharacter::Change_State(_uint iCategory, _uint iSubState)
+void CCharacter::Change_State(_uint iCategory, _uint iSubState, void* pArg)
 {
     ASSERT_CRASH(m_pStateMachineCom);
-    m_pStateMachineCom->Change_State(iCategory, iSubState);
+    m_pStateMachineCom->Change_State(iCategory, iSubState, pArg);
 }
 
 

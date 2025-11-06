@@ -18,9 +18,9 @@ HRESULT CAugustaHit::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaHit::OnEnter()
+void CAugustaHit::OnEnter(void* pArg)
 {
-    CHitState::OnEnter();
+    CHitState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -31,11 +31,16 @@ void CAugustaHit::OnEnter()
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eHitType);
 
+	// 4. 상태 리셋.
     State_Reset();
 
-    // 4. 현재 때린 객체를 바라보게.? 임시로 Target
-    //m_pAugusta->Rotate_HitTarget();
+	// 5. Hit Description 가져오기?
+	CCharacter::HIT_DESC* pDesc = static_cast<CCharacter::HIT_DESC*>(pArg);
 
+	// 6. Hit Description을 이용하여 시작 초기 작업을 정의합니다.
+	//Enter_Hit(pDesc);
+
+	// 7. 중력 적용
     m_pAugusta->Set_Gravity(true);
 }
 
@@ -64,6 +69,8 @@ void CAugustaHit::OnExit()
     CHitState::OnExit();
     m_pAugusta->Set_Gravity(false);
 }
+
+
 
 void CAugustaHit::Handle_Input()
 {

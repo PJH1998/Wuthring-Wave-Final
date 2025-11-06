@@ -69,16 +69,29 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 4. Parts 갱신
+	// 1. Event Queue 있으면 실행.
+	while (!m_StateChangeQueue.empty())
+	{
+		auto event = m_StateChangeQueue.front();
+		m_StateChangeQueue.pop();
+
+		// 1-1. State 변경. (Stete Category와 SubState 그리고 Event Description을 전달)
+		Change_State(event.eStateKey.iCategory, event.eStateKey.iSubState, event.pEvent);
+	}
+
+
+	// 2. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
-    // 2. 이전 위치 저장
+    // 3. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
+	
+	
 
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
@@ -335,43 +348,50 @@ void CAugusta::Hit_Judge(void* pArg)
 	if (nullptr == pArg)
 		return;
 
-	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
-	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
 
 	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
 	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
 		return;
 	
-	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	// 2. 캐스팅 해서? => State 클래스
+	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 
-	// 2. 현재 레이어
-	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
-    
-    // 3. 스킬 판정?
-	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
+	// 3. 데미지 적용은 바로
+	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 3. 일단 바로 회전.
-	Rotate_HitTarget(pDesc->pTransform);
+	// 4. 큐에 등록.
+	m_StateChangeQueue.push({ eKey, pDesc });
 
-	// 4. 방향 판정.
-	if (!m_IsLand)
-		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_FALL;
-	else
-	{
-		if (IsSkill)  // Skill인지 
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_B_L;
-		else // Skill이 아니라면
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
-	}
+	//// 2. 현재 레이어
+	//COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
+ //   
+ //   // 3. 스킬 판정?
+	//_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
 
-	// 5. Hit 상태 바로 적용하는게 아니라. Queue에 등록.
-	StateKey eState{ iCategory, iSubState };
-	CCharacter::CHANGE_STATE_DESC Desc { eState, nullptr};
+	//// 3. 일단 바로 회전.
+	//Rotate_HitTarget(pDesc->pTransform);
+
+	//// 4. 방향 판정.
+	//if (!m_IsLand)
+	//	GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_FALL;
+	//else
+	//{
+	//	if (IsSkill)  // Skill인지 
+	//		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_B_L;
+	//	else // Skill이 아니라면
+	//		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
+	//}
+
+	//// 5. Hit 상태 바로 적용하는게 아니라. Queue에 등록.
+	//StateKey eState{ iCategory, iSubState };
+	//CCharacter::CHANGE_STATE_DESC Desc { eState, nullptr};
 
 	//CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
 
-	// 6. 데미지 적용
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	
 }
 
 

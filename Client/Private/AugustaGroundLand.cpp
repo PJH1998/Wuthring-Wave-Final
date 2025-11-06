@@ -18,9 +18,9 @@ HRESULT CAugustaGroundLand::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaGroundLand::OnEnter()
+void CAugustaGroundLand::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();

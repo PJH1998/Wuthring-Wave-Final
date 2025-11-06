@@ -18,10 +18,10 @@ HRESULT CAugustaGroundDash::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundDash::OnEnter()
+void CAugustaGroundDash::OnEnter(void* pArg)
 {
     // 상위 객체 수행 작업.
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();

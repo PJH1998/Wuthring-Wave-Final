@@ -20,9 +20,9 @@ HRESULT CAugustaAirFly::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirFly::OnEnter()
+void CAugustaAirFly::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -219,6 +219,7 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	m_IsAnimationEnd = CCharacterState::Play_Animation(
 		m_pAugusta,
 		fTimeDelta,
+		1.f,
 		m_GpuBlendInfo
 	);
 

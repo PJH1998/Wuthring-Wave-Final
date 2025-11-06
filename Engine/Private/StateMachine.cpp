@@ -44,12 +44,12 @@ void CStateMachine::Update(_float fTimeDelta)
     }
 }
 
-void CStateMachine::Change_State(_uint iCategory, _uint iSubState)
+void CStateMachine::Change_State(_uint iCategory, _uint iSubState, void* pArg)
 {
-    Change_State(StateKey(iCategory, iSubState));
+    Change_State(StateKey(iCategory, iSubState), pArg);
 }
 
-void CStateMachine::Change_State(const StateKey& key)
+void CStateMachine::Change_State(const StateKey& key, void* pArg)
 {
     auto iter = m_States.find(key);
     if (iter == m_States.end())
@@ -62,7 +62,7 @@ void CStateMachine::Change_State(const StateKey& key)
 
     m_CurrentStateKey = key;
     m_pCurrentState = iter->second;
-    m_pCurrentState->OnEnter(); // pArg를 전달하며 Enter 호출
+    m_pCurrentState->OnEnter(pArg); // pArg를 전달하며 Enter 호출
 }
 
 void CStateMachine::Add_State(_uint iCategory, _uint iSubState, CState* pState)

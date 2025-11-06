@@ -18,9 +18,9 @@ HRESULT CRoverGroundRun::Initialize(class CGameObject* pOwner)
 
 
 
-void CRoverGroundRun::OnEnter()
+void CRoverGroundRun::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();

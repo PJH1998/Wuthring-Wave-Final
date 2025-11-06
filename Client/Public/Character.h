@@ -20,6 +20,12 @@ public:
 	}HIT_DESC;
 
 public:
+	enum class CHARACTER_STATE
+	{
+
+	};
+
+public:
 	using EnsembleEndCallback = function<void()>;
 
 	void Set_EnsembleEndCallback(EnsembleEndCallback callback)
@@ -150,7 +156,7 @@ public:
 	void Start_FlyBlending(_float fDuration);
 
 	// Change State
-	void Change_State(_uint iCategory, _uint iSubState);
+	void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);
 	
 
 	// Move

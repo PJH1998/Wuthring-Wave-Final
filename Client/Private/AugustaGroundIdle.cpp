@@ -23,9 +23,9 @@ HRESULT CAugustaGroundIdle::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundIdle::OnEnter()
+void CAugustaGroundIdle::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
