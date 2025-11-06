@@ -110,6 +110,7 @@ void CAugusta::Update(_float fTimeDelta)
     // 5. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
+	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
 
     // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -524,12 +525,12 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 					this->OnHitEnter(iLayer, pOther, Manifold);
 				};
 
-			m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
-				Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
-			if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
-				CRASH(m_pMainAttackVolume);
-			
-			m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
+			//	Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
+			//if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
+			//	CRASH(m_pMainAttackVolume);
+			//
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
         case PARTTYPE::PART_SKILLWEAPON:

@@ -95,13 +95,19 @@ void CAugustaHit::Enter_Hit()
 	}
 	else
 	{
-		if (IsSkill)
-			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_B_L);
-		else
+		switch (eLayer)
+		{
+		case COLLISIONLAYER::ENEMY_ATTACK:
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_S_L);
+			break;
+		case COLLISIONLAYER::ENEMY_HARDATTACK:
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_B_L);
+			break;
+		case COLLISIONLAYER::ENEMY_SKILL:
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+			break;
+		}
 	}
-
-	
 }
 
 void CAugustaHit::Handle_Input()

@@ -41,7 +41,8 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-	//m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CAugustaBayonet::Update(_float fTimeDelta)
@@ -53,7 +54,8 @@ void CAugustaBayonet::Update(_float fTimeDelta)
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
     m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
 
-	//m_pMainAttackVolume->Update(fTimeDelta);
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
 }
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
@@ -67,7 +69,8 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
     CProp::Late_Update(fTimeDelta);
 
 
-	//m_pMainAttackVolume->Late_Update(fTimeDelta);
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
@@ -99,14 +102,15 @@ void CAugustaBayonet::Render()
 
 #ifdef _DEBUG
     m_pRigidbodyCom->Render();
-	/*if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();*/
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
 void CAugustaBayonet::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
+	m_pMainAttackVolume->TriggerActivate(IsActivate);
 }
 
 void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -162,24 +166,31 @@ void CAugustaBayonet::Ready_Positions(const PROP_DESC* pDesc)
 
 void CAugustaBayonet::Ready_AttackVolumes()
 {
-	//CAttackVolume::ATKVOLUME_DESC TriggerDesc;
-	//TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
-	//TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	//TriggerDesc.eShape = SHAPE::BOX;
-	//TriggerDesc.pParenTransform = m_pTransformCom;
-	//TriggerDesc.pSocketMatrix = nullptr;
-	//TriggerDesc.vExtent = _float3(1.f, 1.f, 1.f);
-	//TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	//TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	//TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
-	//		this->OnHitEnter(iLayer, pOther, Manifold);
-	//	};
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
+	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
+	TriggerDesc.pParenTransform = m_pTransformCom;
 
-	//m_pMainAttackVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	//if (nullptr == m_pMainAttackVolume)
-	//	CRASH(m_pMainAttackVolume);
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 
-	//m_pMainAttackVolume->TriggerActivate(false); // 끄고 켜기.
+	TriggerDesc.vExtent = _float3(1.f, 1.f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+			this->OnHitEnter(iLayer, pOther, Manifold);
+	};
+
+	m_pMainAttackVolume = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+		, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	if (nullptr == m_pMainAttackVolume)
+		CRASH(m_pMainAttackVolume);
+
+	m_pMainAttackVolume->TriggerActivate(false); // 끄고 켜기.
 }
 
 void CAugustaBayonet::Bind_Resources()

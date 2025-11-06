@@ -42,7 +42,7 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
 	//Ready_Dummy();
-    Ready_MonsterTest();
+	Ready_MonsterTest();
 
     Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};

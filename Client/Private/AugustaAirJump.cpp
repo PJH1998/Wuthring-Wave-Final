@@ -32,7 +32,6 @@ void CAugustaAirJump::OnEnter(void* pArg)
     m_iCurrentAnimIdx = ENUM_CLASS(eJumpType);
 
     m_pAugusta->Set_Gravity(false);
-
 }
 
 void CAugustaAirJump::OnUpdate(_float fTimeDelta)
