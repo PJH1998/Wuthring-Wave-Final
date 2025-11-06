@@ -1,11 +1,11 @@
 ﻿#include "ClientPch.h"
-#include "UI_HUD.h"
 #include "Animator_UI.h"
+#include "UI_HUD.h"
 
-#include "GameSystem.h"
-#include "PlayerStatus.h"
-#include "Player.h"
 #include "Ability.h"
+#include "GameSystem.h"
+#include "Player.h"
+#include "PlayerStatus.h"
 
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
@@ -79,6 +79,7 @@ void CUI_HUD::Update(_float fTimeDelta)
 	Ready_Presets();
 
 	Update_UI_SkillSection(fTimeDelta);
+	Update_UI_SkillSection_BG(fTimeDelta);
 	Update_UI_SkillSection_OnFeedback(fTimeDelta);
 	Update_UI_PlayerHPBar(fTimeDelta);
 	Update_UI_BossHPBar(fTimeDelta);
@@ -261,20 +262,10 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
 	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
 
-	//_float fBasicSkillCD[CH_END][SK_END] = {
-	//	{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
-	//	{/* CH_AUGUSTA  */ pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Skill_Hack"),	pStatus->Get_RemainingCooldown(CH_AUGUSTA , "Attack_SpeedDrive")},
-	//	{/* CH_GALBRENA */ pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")}
-	//};
-	//_float fBasicSkillMaxCD[CH_END][SK_END] = {
-	//	{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
-	//	{/* CH_AUGUSTA  */ pStatus->Get_MaxCooldown(CH_AUGUSTA	, "Skill_Hack"),	pStatus->Get_MaxCooldown(CH_AUGUSTA		, "Attack_SpeedDrive")},
-	//	{/* CH_GALBRENA */ pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_GALBRENA	, "KSTA::EMPTY")}
-	//};
 	_float fBasicSkillCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
 		{/* CH_AUGUSTA  */ UISlots[CAbility::KEY_E].fCurrentCoolTime,	UISlots[CAbility::KEY_R].fCurrentCoolTime},
-		{/* CH_GALBRENA */ pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")}
+		{/* CH_GALBRENA */ 1.f/*pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")*/,  1.f/*pStatus->Get_RemainingCooldown(CH_GALBRENA, "KSTA::EMPTY")*/}
 	};
 	_float fBasicSkillMaxCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_MaxCooldown(CH_ROVER	, "KSTA::EMPTY"),	pStatus->Get_MaxCooldown(CH_ROVER		, "KSTA::EMPTY")},
@@ -305,33 +296,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	
 	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
-
-
-    static _bool    isFirstUpdate = true;               // Temp
-    if (isFirstUpdate)
-    {
-        isFirstUpdate = false;
-        pSkillUI[0]->Set_Active(false);
-        pSkillUI[1]->Set_Active(true);
-        pSkillUI[2]->Set_Active(false);
-		iSelectedCHIndex = 1;
-    }
-
-    //for (auto& chCD : fSkillCD)                         // update cooldown
-    //{
-    //    for (auto& cd : chCD)
-    //    {
-    //        cd -= fTimeDelta;
-    //        if (cd <= 0) cd = 0;
-    //    }
-    //}
-	//
-    //for (auto& cd : fChangeCD)
-    //{
-    //    cd -= fTimeDelta;
-    //    if (cd <= 0) cd = 0;
-    //}
-    
 
     switch (iSelectedCHIndex)
     {
@@ -558,34 +522,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
 
-    // ==============================
-    // * Skill_BackgroundImage
-    // =============================='
 
-
-    // custom var
-    static _uint iNumActiveBG = 4;
-    _float4 vBGColor = _float4{.5f, .5f, .5f, .3f};
-
-    CCustom_UI* pSkillBGUI = Find_ChildObject(L"Skill_BackgroundImage");    // �ν��Ͻ� 4����
-
-    vector<_float4x4> vecBGVariantMat = {};
-    vecBGVariantMat.resize(5);
-
-    for (_uint i = 0; i < iNumActiveBG; i++)
-    {
-        *reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
-        *reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
-    }
-
-    CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
-        vecBGVariantMat,
-        ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLEMASK),
-        true
-    };
-
-
-    pSkillBGUI->Set_VariantUIDesc(tBGVariantDesc);
 
 
 
@@ -601,6 +538,77 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
     std::cout << "[UI_HUD][Update_UI_Cooldown] R fSkillCD  : " << fSkillCD[iSelectedCHIndex][SK_R] << std::endl;
 #endif // KSTA_UI_COOLDOWNTEST
 
+}
+
+void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
+{
+	// ==============================
+	// * Skill_BackgroundImage
+	// =============================='
+
+	
+	static _uint iNumActiveBG = 4;
+
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_ROVER:
+	{
+		iNumActiveBG = 4;
+	}break;
+	case CH_AUGUSTA:
+	{
+		if (isIn_Augusta_AdvUlt)
+			iNumActiveBG = 2;
+		else if (isReady_Augusta_StrongATK) //
+			iNumActiveBG = 5;
+		else
+			iNumActiveBG = 4;
+	}break;
+	case CH_GALBRENA:
+	{	// ksta : 버스트 모드 시에 5로 늘려야 함
+		if (isIn_Galbrena_BurstMode)
+			iNumActiveBG = 5;
+		else
+			iNumActiveBG = 4;
+	}break;
+	default:
+		break;
+	}
+
+
+
+	_float4 vBGColor = _float4{ .5f, .5f, .5f, .3f };
+
+	CCustom_UI* pSkillBGUI = Find_ChildObject(L"Skill_BackgroundImage");    // �ν��Ͻ� 4����
+
+	vector<_float4x4> vecBGVariantMat = {};
+	vecBGVariantMat.resize(5);
+
+	for (_uint i = 0; i < iNumActiveBG; i++)
+	{
+		*reinterpret_cast<_float4*>(&vecBGVariantMat[i]._11) = vBGColor;
+		*reinterpret_cast<_float*>(&vecBGVariantMat[i]._21) = (i < iNumActiveBG) ? static_cast<_float>(true) : static_cast<_float>(false);
+	}
+
+	CCustom_UI::VARIANTREADY_UI_DESC tBGVariantDesc = {
+		vecBGVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_SIMPLEMASK),
+		true
+	};
+
+
+	pSkillBGUI->Set_VariantUIDesc(tBGVariantDesc);
 }
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
@@ -699,10 +707,8 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 	// fPlayerHPRatio
 	
 
-	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
-
 	// 공통 정보 받아옴
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	_uint iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
 
     //static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     //static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
@@ -713,7 +719,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
 
     //_float fPlayerHPRatio = fPlayerHP[iSelectedCHIndex] / fPlayerMaxHP[iSelectedCHIndex];
-	_float fPlayerHPRatio = pStatus->Get_HpRatio(iSelectedCHIndex);
+	_float fPlayerHPRatio = m_pPlayerStatus->Get_HpRatio(iSelectedCHIndex);
 	static _float fPlayerHPPrevRatio = 0.f;
 	static _float fPlayerHPBackRatio = 0.f; //  = fPlayerHPRatio;
 
@@ -1023,6 +1029,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
             // Find_ChildObject(L"Frame_Rover")->Set_Active(false); // nullptr
         }
                                     
+                                    
         break;
     case Client::CUI_HUD::CH_AUGUSTA:
         Find_ChildObject(L"Group_Rover")    ->Set_Active(false);
@@ -1038,7 +1045,8 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
         }
-        else if(m_iPlayerEnhancedMode == 4)
+		else if(m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK) ||
+			static_cast<UI_AUGUSTA_STATE>((m_pAbility->Get_UISkillSlots())[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY))
         {
             Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
@@ -1110,9 +1118,11 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     static _float fMaxElementAmounts[CH_END] = {100.f, 100.f, 100.f};
 
     // ksta : test 
-    fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
-    fElementAmounts[1] = (fElementAmounts[1] >= 100)? 0 : fElementAmounts[1] + 1.5f * 30.f * fTimeDelta;
-    fElementAmounts[2] = (fElementAmounts[2] >= 100)? 0 : fElementAmounts[2] + 1.f  * 30.f * fTimeDelta;
+
+	fElementAmounts[iSelectedCHIndex] = m_pAbility->Get_Resonance();
+    //fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
+    //fElementAmounts[1] = (fElementAmounts[1] >= 100)? 0 : fElementAmounts[1] + 1.5f * 30.f * fTimeDelta;
+    //fElementAmounts[2] = (fElementAmounts[2] >= 100)? 0 : fElementAmounts[2] + 1.f  * 30.f * fTimeDelta;
 
     
 
@@ -1632,9 +1642,16 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// LB도 대응해야 함
 
 
+	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
+
+
 
 	// if True, In Advanced Ult Mode
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 	// ㄴ 이걸 기점으로 아이콘 조건 주어야 할 듯. 지금 궁 사용 상태에서 안보임
 
 	_bool isAvailable_Griffon = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
@@ -1646,13 +1663,6 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// [Get] [E] Button Slot State
 	// ==============================
 
-	UI_AUGUSTA_STATE eState_Augusta_E = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_E].iStateType);
-
-	cout << "============================================================" << endl;
-	cout << "[CUI_HUD::Update_AugustaIcon] Augusta E State      : " << ENUM_CLASS(eState_Augusta_E) << endl;
-	cout << "[CUI_HUD::Update_AugustaIcon] In Ult               : " << ((isIn_AdvUltMode) ? "True " : "False") << endl;
-	cout << "[CUI_HUD::Update_AugustaIcon] Is Available Griffon : " << ((isAvailable_Griffon) ? "True " : "False") << endl;
-	cout << "[CUI_HUD::Update_AugustaIcon] Is Available Rise    : " << ((isAvailable_Rise) ? "True " : "False") << endl;
 
 	switch (eState_Augusta_E)
 	{
@@ -1679,7 +1689,6 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// ==============================
 	// [Get] [R] Button Slot State
 	// ==============================
-	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
 	
 
 	// R Button Ctrl..
@@ -1712,9 +1721,11 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// E Button Ctrl.. via R Button State
 	switch (eState_Augusta_R)
 	{
+	case Client::UI_AUGUSTA_STATE::R_SWORD_READY: break;
 	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
 		// Augusta in Ult, Useable Final Ult
 		augustaUIDesc.vecInstanceDescs[BTN_E].vClipTexcoordX = { 0.f, 0.f };
+		break;
 	default:
 		if (isIn_AdvUltMode)
 		{	// Autusta in Ult, Not Useable Final Ult.
@@ -1730,30 +1741,50 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// [Get] [LB] Button Slot State
 	// ==============================
 	
-	
-	UI_AUGUSTA_STATE eState_Augusta_LB = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType);
-	
-	switch (eState_Augusta_LB)
+
+	cout << "============================================================" << endl;
+	cout << "[CUI_HUD::Update_UI_SkillSection_BG] isIn_Augusta_AdvUlt : " << ((isIn_Augusta_AdvUlt) ? "True " : "False") << endl;
+	cout << "============================================================" << endl;
+	cout << "[CUI_HUD::Update_UI_SkillSection_BG] eState_Augusta_R    : " << ((eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) ? "True " : "False") << endl;
+	cout << "[CUI_HUD::Update_UI_SkillSection_BG] isIn_AdvUltMode     : " << ((isIn_AdvUltMode) ? "True " : "False") << endl;
+
+
+	//switch (eState_Augusta_LB)
+	//{
+	//case Client::UI_AUGUSTA_STATE::R_SWORD_READY: break;
+	//case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 강공. ( 1, 0 )			// 5번째 칸에 위치
+	//	// Strong Attack Ready.
+	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
+	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
+	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
+	//	break;
+	//case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
+	//default : 
+	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 0.0f };
+	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 450.f;
+	//	break;
+	//}
+
+	if (isIn_Augusta_AdvUlt)
 	{
-	case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 강공. ( 1, 0 )			// 5번째 칸에 위치
-		// Strong Attack Ready.
-		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
-		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
-		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
-		break;
-	case Client::UI_AUGUSTA_STATE::LB_SWORD_READY:			// 궁 사용 상태 ( 0, 0 )	// 2번째 칸에 위치
-	case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
-		// Augusta in Ult.
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_Burst"][1];
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 750.f;
-		break;
-	default : 
+	}
+	else if (eState_Augusta_LB == UI_AUGUSTA_STATE::LB_STRONG_READY)
+	{
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
+		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 450.f;
+	}
+	else
+	{
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 0.0f };
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 450.f;
-		break;
 	}
+
 
 
 	Find_ChildObject(L"Skill_Augusta")->Set_UIDesc(augustaUIDesc);

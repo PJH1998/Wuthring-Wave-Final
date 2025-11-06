@@ -103,6 +103,8 @@ void CLevel_Test::Update(_float fTimeDelta)
 #ifdef _DEBUG
 	Shader_Gui();
 #endif
+
+	Toggle_HUD();
 }
 
 void CLevel_Test::Render()
@@ -292,8 +294,27 @@ void CLevel_Test::Shader_Gui()
 		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
 	}
 	ImGui::End();
-}
 #endif
+}
+
+void CLevel_Test::Toggle_HUD()
+{
+	static _bool isToggled_HUD = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		isToggled_HUD = !isToggled_HUD;
+
+		if (isToggled_HUD)
+		{
+			CGameSystem::GetInstance()->HUD_FadeOut();
+		}
+		else
+		{
+			CGameSystem::GetInstance()->HUD_FadeIn();
+		}
+	}
+}
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {

@@ -667,9 +667,6 @@
     <ClCompile Include="..\private\UI_Text.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Custom_UI.cpp">
-      <Filter>03. GameObject\UI\_Parents</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
     </ClCompile>
@@ -874,6 +871,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

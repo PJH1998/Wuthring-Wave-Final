@@ -41,7 +41,8 @@ private:
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
-	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);
+	void					Update_UI_SkillSection_BG(_float fTimeDelta);
+	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);		/* manunally calls on update.. onfeedback*/
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
 	void					Update_UI_BossHPBar(_float fTimeDelta);
@@ -64,6 +65,7 @@ private:
 
 	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
 	class CAbility*			m_pAbility = { nullptr };
+	
 
 	// * Temp assumed value.
 	//		| ROVER		|  AUGUSTA			| GARBENA
