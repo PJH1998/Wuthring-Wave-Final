@@ -93,7 +93,7 @@ void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target
-    m_pAugusta->Rotate_Target();
+    // m_pAugusta->Rotate_Target();
 
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {

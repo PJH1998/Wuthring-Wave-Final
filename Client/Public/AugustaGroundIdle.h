@@ -9,7 +9,8 @@ class CAugustaGroundIdle final : public CGroundState
 private:
     enum IDLESTATE
     {
-        JUMP = 0,
+        HIT = 0,
+		JUMP,
 		LAND,
         DASH,
         SPRINT,

@@ -34,6 +34,9 @@ void CAugustaGroundLand::OnEnter(void* pArg)
     // 4. 상태 초기화
     State_Reset();
 
+	// 5. 중력 켰다.
+	m_pAugusta->Set_Gravity(true);
+
 }
 
 void CAugustaGroundLand::OnUpdate(_float fTimeDelta)
@@ -57,6 +60,7 @@ void CAugustaGroundLand::OnUpdate(_float fTimeDelta)
 void CAugustaGroundLand::OnExit()
 {
     CGroundState::OnExit();
+	m_pAugusta->Set_Gravity(true);
 }
 
 

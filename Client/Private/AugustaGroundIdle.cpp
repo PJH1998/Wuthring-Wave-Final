@@ -148,6 +148,12 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     _uint iKeyInput = {};
 
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
 
     // 우선순위 순으로 전환조건 진행.
 	if (!m_States[LAND])

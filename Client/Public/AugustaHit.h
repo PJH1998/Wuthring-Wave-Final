@@ -31,6 +31,7 @@ private:
 
 private:
 	// Enter 초기에 작업해야할 것들 정의하기.
+	void Enter_Hit();
 
 private:
     virtual void Handle_Input() override;

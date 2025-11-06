@@ -31,7 +31,13 @@ protected:
 	_bool m_IsSubPartAnimationEnd = {}; //
 	_string m_strPrevInfo = {};
 	_string m_strSkillName = {};
+
+
+	_float m_fRootMotionRate = { 1.f }; // 몬스터와 거리에 따라 보간해서 RootMotion Rate를 조절한다..
+
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
+
+
 
 
 

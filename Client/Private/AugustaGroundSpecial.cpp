@@ -222,7 +222,7 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				
 				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
 				m_iComboCount = COMBO::COMBO_ATTACKOMNI;
-				m_pAugusta->Rotate_Target();
+				//m_pAugusta->Rotate_Target();
 				return;
 			}
 
