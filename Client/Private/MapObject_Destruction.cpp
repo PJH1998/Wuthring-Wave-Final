@@ -110,6 +110,8 @@ void CMapObject_Destruction::Render()
 
 		m_pModelComArray[DrawModel]->Render(i);
 
+		// TODO
+		// Clear 함수 변경 필요
 		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
 		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
 		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
