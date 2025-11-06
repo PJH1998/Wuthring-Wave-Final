@@ -259,7 +259,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 	else
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
-		vPreQuaternion = XMVector4Transform(vPreQuaternion, XMLoadFloat4x4(&m_OwnerMatrix));
+		vPreQuaternion = XMQuaternionMultiply(vPreQuaternion, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
 		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		// Fov
@@ -271,7 +271,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 	if (true == m_isLerp)
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
-		vDestQuat = XMVector4Transform(vDestQuat, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestQuat = XMQuaternionMultiply(vDestQuat, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
 		m_pTransformCom->Rotation_Quaternion(vLerpQuat);
 
@@ -293,7 +293,7 @@ void CSpringCamera::Action(_float fTimeDelta)
 	else
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
-		vDestQuat = XMVector4Transform(vDestQuat, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestQuat = XMQuaternionMultiply(vDestQuat, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
@@ -320,6 +320,7 @@ void CSpringCamera::Recovery(_float fTimeDelta)
 	{
 		m_isRecovery = false;
 		m_eCameraState = CAMERA_STATE::TARGET;
+		m_pTransformCom->Rotation_Quaternion(XMLoadFloat4(&m_vPreQuaternion));
 		return;
 	}
 
