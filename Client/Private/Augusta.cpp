@@ -277,7 +277,7 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
-		m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
+		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);
