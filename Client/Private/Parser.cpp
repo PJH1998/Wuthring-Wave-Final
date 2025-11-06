@@ -197,8 +197,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-				, PROTOTYPE::GAMEOBJECT, &Desc);
+			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
@@ -213,8 +213,9 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			//	pDesc.vBoundingPos = BoundingPos;
 			//	pDesc.vBoundingExtends = BoundingExtends;
 			//	pDesc.iTriggerIndex = TriggerIndex;
-			//	m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
-			//		, PROTOTYPE::GAMEOBJECT, &pDesc);
+			//	m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"), pDesc.iLevel, TEXT("Layer_Destruction"), &pDesc);
+			//	/*m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction")
+			//		, PROTOTYPE::GAMEOBJECT, &pDesc);*/
 			//	});
 		}
 	}
@@ -256,16 +257,37 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
 				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
-				CMapObject::MAP_LOAD pDesc{};
-				strcpy_s(pDesc.ModelName, ModelName.c_str());
-				pDesc.iShaderPassIndex = ShaderPass;
-				pDesc.eObjectType = eObjectType;
-				pDesc.WorldMatrix = &Matrix;
-				pDesc.iLevel = ENUM_CLASS(eLevel);
-				pDesc.vBoundingPos = BoundingPos;
-				pDesc.vBoundingExtends = BoundingExtends;
-				m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
-					, PROTOTYPE::GAMEOBJECT, &pDesc);
+					CMapObject::MAP_LOAD pDesc{};
+					strcpy_s(pDesc.ModelName, ModelName.c_str());
+					pDesc.iShaderPassIndex = ShaderPass;
+					pDesc.eObjectType = eObjectType;
+					pDesc.WorldMatrix = &Matrix;
+					pDesc.iLevel = ENUM_CLASS(eLevel);
+					pDesc.vBoundingPos = BoundingPos;
+					pDesc.vBoundingExtends = BoundingExtends;
+
+					switch (pDesc.eObjectType)
+					{
+					case OBJECTTYPE::SONORA:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+						break;
+
+					case OBJECTTYPE::NONSONORA:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						break;
+
+					case OBJECTTYPE::NONSONORA_FLOOR:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						break;
+
+					default:
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
+						break;
+					}
 				});
 		}
 		m_pGameInstance->Wait_Thread_End();

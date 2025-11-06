@@ -8,7 +8,7 @@ namespace Client
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
-	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, DESTRUCTION, NONRIGID, TRIGGERBOX, NONSONORA, END };
+	enum class OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, DESTRUCTION, NONRIGID, TRIGGERBOX, NONSONORA, NONSONORA_FLOOR, END };
 
 	enum class ACTORDIR { U, RU, R, RD, D, LD, L, LU, END };
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
@@ -37,7 +37,7 @@ namespace Client
 		E_DEFAULT_READY = 6,		// 기본 E 실행 가능.
 		Q_ECHO_READY = 7,			// Echo 실행 가능.
 		Q_ECHO_FAILED = 8,	    // Echo 실행 불가.
-		R_ULTI_READY = 9,			// 기본 R 실행 가능
+		R_ULTI_READY = 9,			// LB_RESONANCE기본 R 실행 가능
 		R_SWORD_READY = 10,			// SWORD R 아이콘 출력 가능.
 		R_SWORD_ULTI_READY = 11,	// SWORD R 궁극기 아이콘 출력 가능.
 		DEFAULT,				// 기본?

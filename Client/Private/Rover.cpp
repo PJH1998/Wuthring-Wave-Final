@@ -45,8 +45,9 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
 	
 	// 비활성화. 
-	m_pRoverSword->SetActivate(false);
-	m_pWing->SetActivate(false);
+
+	PartActivate(PART_SWORD, false);
+	PartActivate(PART_WING, false);
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;

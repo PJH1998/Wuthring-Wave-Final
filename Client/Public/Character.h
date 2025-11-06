@@ -72,6 +72,8 @@ public:
 
 #pragma region PHYSICS
 public:
+	// Hit 판단.
+	virtual void Hit_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -195,6 +197,7 @@ protected:
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
+	_bool m_IsHit = { false };
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };

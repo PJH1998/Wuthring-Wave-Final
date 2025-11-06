@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Prop.h"
 #include "Character.h"
+#include "AttackVolume.h"
 
 CProp::CProp(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject{ pDevice, pContext }
@@ -58,6 +59,9 @@ void CProp::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
 
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+	
 	if (!IsActive)
 	{
 		m_fTrackPosition = 0.f;
@@ -146,5 +150,6 @@ void CProp::Free()
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pModelCom);
     Safe_Release(m_pRigidbodyCom);
+	Safe_Release(m_pMainAttackVolume);
     m_pParentTransform = { nullptr };
 }
