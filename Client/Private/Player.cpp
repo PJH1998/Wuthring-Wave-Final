@@ -41,6 +41,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
+	
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 

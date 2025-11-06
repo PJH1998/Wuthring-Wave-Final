@@ -43,6 +43,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);

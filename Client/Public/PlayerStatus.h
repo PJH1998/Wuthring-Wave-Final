@@ -21,6 +21,7 @@ public:
 	_float Get_Cost(_uint iCharIndex, COST_TYPE eType) const;
 	_float Get_RemainingCooldown(_uint iCharIndex, const _string& strSkillName) const;
 	_float Get_MaxCooldown(_uint iCharIndex, const _string& strSkillName) const;
+	
 	_uint Get_CurrentCharIndex() const { return m_iCurrentCharIndex; }
 
 	// Player/Character가 참조할 Getter (내부용)
