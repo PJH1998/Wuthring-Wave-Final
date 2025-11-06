@@ -2,6 +2,7 @@
 #include "AugustaGroundBurst.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "GameSystem.h"
 
 HRESULT CAugustaGroundBurst::Initialize(class CGameObject* pOwner)
 {
@@ -41,6 +42,15 @@ void CAugustaGroundBurst::OnEnter()
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
 	m_pAugusta->Set_Gravity(false);
+
+	// 궁극기 실행 시?
+	//m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
+	// 끝나고 유지 시킬것인지, 돌아올것인지
+
+	///ASSERT_CRASH(m_pTransformCom);
+	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
+	//CGameSystem::GetInstance()->Play_Action(TEXT("Action_Augusta_Burst01"), m_pAugusta->Get_WorldMatrix(), false);
+	
 }
 
 void CAugustaGroundBurst::OnUpdate(_float fTimeDelta)
