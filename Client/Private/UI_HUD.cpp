@@ -80,6 +80,7 @@ void CUI_HUD::Update(_float fTimeDelta)
 
 	Update_UI_SkillSection(fTimeDelta);
 	Update_UI_SkillSection_BG(fTimeDelta);
+	Update_UI_SkillFeedback_Trigger(fTimeDelta);
 	Update_UI_SkillSection_OnFeedback(fTimeDelta);
 	Update_UI_PlayerHPBar(fTimeDelta);
 	Update_UI_BossHPBar(fTimeDelta);
@@ -552,7 +553,7 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
 	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
-	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
+	_bool isIn_Galbrena_BurstMode = false; /* ksta : 나중에 버스트 모드 조건 삽입 */
 
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
@@ -609,6 +610,96 @@ void CUI_HUD::Update_UI_SkillSection_BG(_float fTimeDelta)
 
 
 	pSkillBGUI->Set_VariantUIDesc(tBGVariantDesc);
+}
+
+void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
+{
+	// ==============================
+	// * SkillBtn_FeedBack
+	// =============================='
+
+	if (!Find_ChildObject(L"SectorRB_SkillIcons")->IsActivate())
+		return;
+
+
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
+
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+
+	_uint iIndex_EBtn =	 2;
+	_uint iIndex_RBtn =  0;
+	_uint iIndex_LBBtn = 4;
+	//_uint iIndex_TBtn = ..
+
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_AUGUSTA:
+	{
+		if (isIn_Augusta_AdvUlt)
+		{
+			iIndex_EBtn = 2;
+			iIndex_RBtn = 0;
+			iIndex_LBBtn = 1;
+		}
+	}break;
+	case CH_GALBRENA:
+	{	// ksta : 버스트 모드 시에 5로 늘려야 함
+	}break;
+	default:
+		iIndex_EBtn = 2;
+		iIndex_RBtn = 0;
+		iIndex_LBBtn = 4;
+		break;
+	}
+
+	
+
+	_bool isChar_LBBtnFeedbackAble = false;
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_ROVER:
+	{
+		isChar_LBBtnFeedbackAble = false;
+	}break;
+	case CH_AUGUSTA:
+	{
+		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+		UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+		if (isIn_Augusta_AdvUlt)
+			isChar_LBBtnFeedbackAble = true;
+		else
+			isChar_LBBtnFeedbackAble = false;
+	}break;
+	case CH_GALBRENA:
+	{
+		_bool isIn_Galbrena_BurstMode = false; /* ksta : 나중에 버스트 모드 조건 삽입 */
+		if (isIn_Galbrena_BurstMode)
+			isChar_LBBtnFeedbackAble = true;
+		else
+			isChar_LBBtnFeedbackAble = false;
+	}break;
+	}
+
+
+	
+	// 클릭마다 해당 위치에 피드백 생성
+	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
+		Add_UI_SkillSection_OnFeedback(iIndex_EBtn);
+	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
+		Add_UI_SkillSection_OnFeedback(iIndex_RBtn);
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
+		isChar_LBBtnFeedbackAble)
+		Add_UI_SkillSection_OnFeedback(iIndex_LBBtn);
+
 }
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
@@ -1005,7 +1096,14 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 	// 공통 정보 받아옴
 	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
-	auto& tUISlot = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
+	auto& skillSlots = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
+
+
+		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
 
 	//tUISlot.
 
@@ -1036,17 +1134,13 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
         Find_ChildObject(L"Group_Augusta")  ->Set_Active(true);
         Find_ChildObject(L"Group_Galbrena") ->Set_Active(false);
 
-        if  (	m_iPlayerEnhancedMode == 0 ||
-				m_iPlayerEnhancedMode == 1 ||
-				m_iPlayerEnhancedMode == 2 ||
-				m_iPlayerEnhancedMode == 3	)
+        if  (	!isIn_Augusta_AdvUlt	)
         {
             Find_ChildObject(L"Frame_Augusta")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(true);
             Find_ChildObject(L"FrameGroup_Augusta_UltMode")->Set_Active(false);
         }
-		else if(m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK) ||
-			static_cast<UI_AUGUSTA_STATE>((m_pAbility->Get_UISkillSlots())[CAbility::KEY_R].iStateType) == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY))
+		else if(isIn_Augusta_AdvUlt)
         {
             Find_ChildObject(L"Frame_Augusta")->Set_Active(false);
             Find_ChildObject(L"FrameGroup_Augusta_OtherEnergy")->Set_Active(false);
@@ -1158,6 +1252,11 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	//auto& tUISlot = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
 	pStatus->Get_CostRatio(iSelectedCHIndex, COST_TYPE::COST1);
 
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
     //m_fPlayerEnergy;
     //m_fPlayerMaxEnergy;
@@ -1277,10 +1376,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
         }break;
     case CH_AUGUSTA:   
         {
-            if  ((	m_iPlayerEnhancedMode == 0 ||
-					m_iPlayerEnhancedMode == 1 ||
-					m_iPlayerEnhancedMode == 2 ||
-					m_iPlayerEnhancedMode == 3 )	&&
+            if  (!isIn_Augusta_AdvUlt &&
 				 (fCurPlayerEnergyRatio != 1.f) )
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_NORMAL][0];       // color
@@ -1300,10 +1396,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
-            else if((m_iPlayerEnhancedMode == 0 ||
-					m_iPlayerEnhancedMode == 1 ||
-					m_iPlayerEnhancedMode == 2 ||
-					m_iPlayerEnhancedMode == 3 )	&&
+            else if(!isIn_Augusta_AdvUlt &&
 					(fCurPlayerEnergyRatio == 1.f))     /* Ult?   */
             { 
                 vSingleColor[0] = vecColorPreset[ENCL_AUGUSTA_ULT][0];          // color
@@ -1323,7 +1416,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
                     vIsVisibleStatic[i] = !vIsVisible[i];
                 fill(vIsVisibleStatic.begin() + 16, vIsVisibleStatic.end() - 16, false);
             }
-            else if (m_iPlayerEnhancedMode == 4)
+            else if (isIn_Augusta_AdvUlt)
             {
                 fill(vIsVisibleStatic.begin(), vIsVisibleStatic.end(), false);
             }
@@ -1475,7 +1568,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     if (iSelectedCHIndex != CH_AUGUSTA)
         return;
 
-    static _uint	iSwordEnergy		= static_cast<_uint>(pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST3) * 0.02f);            // mAX = 2
+    static _uint	iSwordEnergy		= static_cast<_uint>(pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) * 2.f);            // mAX = 2
 
     //static _float	fPointEnergy		= 0,f;
     //const _float	fMaxPointEnergy		= 100.f;
@@ -1483,8 +1576,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     //static _float	fUltBladeEnergy		= 0.f;
     //const _float	fMaxUltBladeEnergy	= 100.;
 
-	_float fPointEnergyRatio	= pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST2);
-	_float fUltBladeEnergyRatio = pStatus->Get_Cost(CH_AUGUSTA, COST_TYPE::COST4);
+	_float fPointEnergyRatio	= pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST2);
+	_float fUltBladeEnergyRatio = pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4);
 
 
     CCustom_UI* pBladeUI    = Find_ChildObject(L"Frame_Augusta_Inst_SwordEnergy");         
@@ -1529,17 +1622,21 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     //}
 
 
-    if	(	m_iPlayerEnhancedMode == 0 ||
-			m_iPlayerEnhancedMode == 1 ||
-			m_iPlayerEnhancedMode == 2 ||
-			m_iPlayerEnhancedMode == 3	)
+
+	// Control Active
+	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+    if	(!isIn_Augusta_AdvUlt)
     {
         pBladeUI    ->Set_Active(true);
         pPointUI    ->Set_Active(true);
         pUltBladeUI ->Set_Active(false);
     }
-
-    else if(m_iPlayerEnhancedMode == 4)
+    else
     {
         pBladeUI    ->Set_Active(false);
         pPointUI    ->Set_Active(false);
@@ -1748,22 +1845,6 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	cout << "[CUI_HUD::Update_UI_SkillSection_BG] eState_Augusta_R    : " << ((eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) ? "True " : "False") << endl;
 	cout << "[CUI_HUD::Update_UI_SkillSection_BG] isIn_AdvUltMode     : " << ((isIn_AdvUltMode) ? "True " : "False") << endl;
 
-
-	//switch (eState_Augusta_LB)
-	//{
-	//case Client::UI_AUGUSTA_STATE::R_SWORD_READY: break;
-	//case Client::UI_AUGUSTA_STATE::LB_STRONG_READY:			// 강공. ( 1, 0 )			// 5번째 칸에 위치
-	//	// Strong Attack Ready.
-	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][0];
-	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordY = m_mapSkillTexIndices[L"Augusta_LB_StrongATK"][1];
-	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 1.0f };
-	//	break;
-	//case Client::UI_AUGUSTA_STATE::R_SWORD_ULTI_READY:
-	//default : 
-	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vClipTexcoordX = { 0.0f, 0.0f };
-	//	augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstTrans.x = 450.f;
-	//	break;
-	//}
 
 	if (isIn_Augusta_AdvUlt)
 	{

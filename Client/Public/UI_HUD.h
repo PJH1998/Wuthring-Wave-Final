@@ -42,8 +42,7 @@ private:
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
 	void					Update_UI_SkillSection_BG(_float fTimeDelta);
-	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);		/* manunally calls on update.. onfeedback*/
-	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
+	void					Update_UI_SkillFeedback_Trigger(_float fTimeDelta);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
 	void					Update_UI_BossHPBar(_float fTimeDelta);
 	void					Update_UI_KeyGuide(_float fTimeDelta);
@@ -54,8 +53,10 @@ private:					// �ڽ� UI�� ���� ��� ������ ��
 	void					Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta);		// [Energy] about Galbrena's unique resources
 
 private:
+	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);		/* manunally calls on update.. onfeedback*/
 	void					Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots);
 	
+	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 
 private:
 	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
