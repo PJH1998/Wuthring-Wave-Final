@@ -52,8 +52,10 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	/////////////////////
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
-	m_fHP = 1;
+	m_fHP = pDesc->fHP;
 	m_fAttackDmg = pDesc->fAttackDmg;
+	m_fMaxStamina = pDesc->fMaxStamina;
+	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	return S_OK;
 }
@@ -86,6 +88,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
+	//	m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	// y축 수직 회전 lerp 사용할 함수 : CTransform->LookLerp
@@ -102,7 +105,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 void CMonsterTest::Late_Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
-	if(KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE))
+	//if(KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_APOSTROPHE))
+	if(m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
 		m_isParalysis = true;
 #endif // _DEBUG
 	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
@@ -184,7 +188,7 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 		else if (wstrPartTag == TEXT("WL"))
 			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
 	}
-	if (wstrTypeTag == TEXT("Gravity"))
+	else if (wstrTypeTag == TEXT("Gravity"))
 	{
 		m_pColliderCom->Set_Gravity(Isactive);
 	}
@@ -299,6 +303,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	m_CallBack.fAttack = m_fAttackDmg;
 
 	m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Gravity(true);
 
 
 	// Com_Shader
@@ -450,6 +455,7 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 			//그로기 유지시간 정의하기
 			m_fParalysisAcc = 5.f;
 			m_isParalysis = false;
+			m_fStamina = m_fMaxStamina;
 		}
 	}
 	else
@@ -484,6 +490,8 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
+		if(m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG

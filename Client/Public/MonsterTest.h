@@ -21,6 +21,7 @@ public:
 		const _char* pAnimationTag;
 		_float		fHP;
 		_float fAttackDmg;
+		_float fMaxStamina;
 	}MONSTERTEST_DESC;
 
 private:
@@ -78,8 +79,13 @@ private:
 	_bool					m_isAggro{};
 #pragma endregion
 	
+#pragma region STATUS
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
+	_float					m_fStamina{};
+	_float					m_fMaxStamina{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);

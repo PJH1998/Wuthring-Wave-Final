@@ -92,7 +92,7 @@ namespace Client
 		_float	fAttack;			// 기본 공격 값.
 		_float	fAttackAddMin;		// 공격 최소 값.
 		_float	fAttackAddMax;		// 공격 최대 값.
-
+		_float	fImpluseRate;		// 넉백 보정 수치(몬스터 무게, 가벼울수록 높게)
 
 	}MONSTER_INFO;
 	// 스킬에 대한 Slot을 제공할것이니까 Cost는 상관 없음 State 다 결정해서 제공. 
