@@ -620,7 +620,6 @@ void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 
 }
 
-
 #ifdef _DEBUG
 void CCharacter::Debug_FullCost()
 {

@@ -1688,8 +1688,10 @@ void CEffect_Controller::PrefabBinding_Tab()
                 {
                     _float4x4 SpawnMatrix = {};
 
-                     if (m_AnimActorDesc.pBoneMatrix == nullptr)
-                        XMStoreFloat4x4(&SpawnMatrix, XMMatrixIdentity());
+					if (m_AnimActorDesc.pBoneMatrix == nullptr)
+					{
+						SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+					}
                      else
                      {
                          _matrix BoneMatrix = XMLoadFloat4x4(m_AnimActorDesc.pBoneMatrix);

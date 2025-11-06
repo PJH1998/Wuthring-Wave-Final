@@ -212,11 +212,11 @@ void CPlayer::Player_KeyInput()
 	}
 
 
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
-#ifdef _DEBUG
 
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
@@ -346,11 +346,21 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
 		return;
+
 	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
-    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform);
+
+	// CallBack Client Transform에 이상한 값이 들어가 있음.
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
-    m_TargetTransforms.push_back(pTargetTransform);
+	
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+	}
+	
 }
 
 
