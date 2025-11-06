@@ -275,8 +275,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
-		vLerpTranslation = XMVector4Transform(vLerpTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
@@ -294,7 +295,8 @@ void CSpringCamera::Action(_float fTimeDelta)
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()) * XMLoadFloat4x4(&m_OwnerMatrix));
+		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
 		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
