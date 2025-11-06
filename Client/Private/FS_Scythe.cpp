@@ -229,8 +229,8 @@ void CFS_Scythe::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive
 	{
 		for (_uint i = 0; i < 5; ++i)
 		{
-			if(nullptr != m_pAttackVolumes[i])
-				m_pAttackVolumes[i]->TriggerActivate(m_isVolumeActive[i]);
+			if(nullptr != m_pAttackVolumes[i] && m_isVolumeActive[i])
+				m_pAttackVolumes[i]->TriggerActivate(Isactive);
 		}
 	}
 }

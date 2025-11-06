@@ -169,7 +169,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 	m_tCallDesc.pTransform = m_pTransformCom;
-	m_tCallDesc.fAttack = 10.f;
+	m_tCallDesc.fAttack = m_fAttackDmg;
 	m_pColliderCom->Set_Desc(&m_tCallDesc);
 	m_pColliderCom->Set_Gravity(true);
 
@@ -281,6 +281,7 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 		m_iState |= ENUM_CLASS(TEST_STATE::LAND);
 		m_fIdleAcc = m_fIdleDuration;
 	}
+	
 }
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
@@ -346,10 +347,17 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
+		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 
+	}
+
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	}
 }
 
