@@ -165,11 +165,6 @@ public:
 #ifdef _DEBUG
 public:
 	void Debug_FullCost();
-#else
-public:
-	void Debug_FullCost();
-
-
 #endif // _DEBUG
 
 
