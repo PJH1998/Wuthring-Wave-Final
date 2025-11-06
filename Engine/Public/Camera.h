@@ -43,6 +43,11 @@ protected:
 
 	_float4x4						m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::END)] = {};
 
+	// Shaking
+	_bool							m_isShake = { false };
+	_float							m_fShakeDuration = {};
+	_float							m_fShakeTimeAcc = {};
+
 protected:
 	void							Lerp_Distance(_float fTimeDelta);
 	void							Key_Move(_float fTimeDelta);
