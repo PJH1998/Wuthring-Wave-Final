@@ -11,9 +11,6 @@
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
 #include "AttackVolume.h"
-
-
-
 #include "Wing.h"
 
 
@@ -341,20 +338,16 @@ void CAugusta::Hit_Judge(void* pArg)
 	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
 	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
 
-	// 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
+	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
 	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
 		return;
 	
 	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 
-	// 0. 현재 레이어
+	// 2. 현재 레이어
 	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
-
-    // 1. 맞았을 때 땅판정.
-    //_bool IsLand = Is_Land(0.2f, 0.5f);
-	
     
-    // 2. 스킬 판정?
+    // 3. 스킬 판정?
 	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
 
 	// 3. 일단 바로 회전.
@@ -372,7 +365,7 @@ void CAugusta::Hit_Judge(void* pArg)
 	}
 
 	// 5. Hit 상태 적용
-	CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+	//CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
 
 	// 6. 데미지 적용
 	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
