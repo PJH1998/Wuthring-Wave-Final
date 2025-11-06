@@ -104,11 +104,6 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, pEffect);
 		m_pModelComArray[iLODIndex]->Clear_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK, pEffect);
 	}
-	if (pDeferredContext)
-	{
-		ID3D11ShaderResourceView* nullSRVs[4] = { nullptr, nullptr, nullptr,nullptr };
-		pDeferredContext->PSSetShaderResources(8, 4, nullSRVs);
-	}
 }
 
 void CMapObject::Render_Shadow()
