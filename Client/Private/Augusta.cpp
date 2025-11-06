@@ -537,7 +537,7 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 				Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
 			if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
 				CRASH(m_pMainAttackVolume);
-
+			
 			m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
