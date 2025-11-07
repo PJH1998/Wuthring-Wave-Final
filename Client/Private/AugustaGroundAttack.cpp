@@ -40,7 +40,7 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
     _string strBoneName = "WeaponProp02";
-	m_pAugusta->Part_VolumeChange(m_iPartType, CAugustaBayonet::VOLUME::VOLUME_ATTACK); // 공격 판정 Volume 변경
+	//m_pAugusta->Part_VolumeChange(m_iPartType, CAugustaBayonet::VOLUME::VOLUME_ATTACK); // 공격 판정 Volume 변경
     m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);

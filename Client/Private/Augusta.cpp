@@ -81,7 +81,17 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
 	// 3. 몬스터가 있다면?
-	m_pTargetTransform;
+	if (nullptr != m_pTargetTransform)
+	{
+		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
+		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+		/*
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		//m_fDistance : 플레이어와 몬스터 사이의 거리
+		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
+		*/
+	}
 	
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
@@ -111,7 +121,7 @@ void CAugusta::Update(_float fTimeDelta)
 	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
 
     // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-    m_pColliderCom->Update(vVelocity / fTimeDelta);
+	m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 7. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
@@ -459,17 +469,36 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	
 	_uint iVolumeIdx = stoul(var3);
 
+
+
 	/* BAYONET|ATTACK|0*/
 	// 1. 어떤 무기인가?
 	if (var1 == TEXT("BAYONET"))
 	{
+		if (var2 == TEXT("NONE"))
+		{
+			// 볼륨 끄기.
+			m_pBayonet->Volume_Activate(false);
+			return;
+		}
+		// 볼륨 인덱스로 볼륨 변경.
+		m_pBayonet->Change_Volume(iVolumeIdx);
+
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
 		else if (var2 == TEXT("SKILL"))
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		
+	}
+	else if (var1 == TEXT("GRIFFON"))
+	{
+
 	}
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)

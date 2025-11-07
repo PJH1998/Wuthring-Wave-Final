@@ -1,6 +1,10 @@
 ﻿#include "ClientPch.h"
 #include "AugustaBayonet.h"
 #include "AttackVolume.h"
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Ability.h"
+
 
 CAugustaBayonet::CAugustaBayonet(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
@@ -32,7 +36,6 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	Ready_AttackVolumes();
-	Register_AllNotifies(pDesc->strFolderPath);
 
     return S_OK;
 }
@@ -50,9 +53,7 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
     CProp::Update(fTimeDelta);
-
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
-    //m_pRigidbodyCom->Update_Rigidbody(matWorld, fTimeDelta);
 
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Update(fTimeDelta);
@@ -114,10 +115,15 @@ void CAugustaBayonet::Activate(_bool IsActivate)
 
 void CAugustaBayonet::Change_Volume(_uint iVolumeIdx)
 {
-	if (m_AttackVolumes[iVolumeIdx] == nullptr)
+	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
 		return;
 
+	// 교체.
+	m_pMainAttackVolume->TriggerActivate(false);
+	m_iVolumeIdx = iVolumeIdx;
 	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+	m_pMainAttackVolume->TriggerActivate(true);
+	
 }
 
 void CAugustaBayonet::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
@@ -129,7 +135,27 @@ void CAugustaBayonet::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 
 void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	// 게이지 올리기?
+	CAbility* pAbility = CGameSystem::GetInstance()
+		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::AUGUSTA));
 
+	if (nullptr == pAbility)
+		return;
+
+
+	switch (m_iVolumeIdx)
+	{
+	case VOLUME::VOLUME_ATTACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
+		pAbility->Add_Cost(COST_TYPE::COST1, 8.f);
+		pAbility->Add_Cost(COST_TYPE::COST2, 5.f);
+		pAbility->Add_Cost(COST_TYPE::COST5, 3.f);
+		break;
+	case VOLUME::VOLUME_STRONG_ATTACK: // 강공 시 POINT 게이지와 궁 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST2, 10.f);
+		pAbility->Add_Cost(COST_TYPE::COST5, 5.f);
+		break;
+	}
+	
 }
 
 void CAugustaBayonet::Ready_Components(const PROP_DESC* pDesc)
@@ -190,7 +216,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 1.f, 2.f);
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;
@@ -207,7 +233,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 1.5f, 3.f);
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f);
 	m_AttackVolumes[VOLUME_STRONG_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -217,7 +243,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(4.f, 1.5f, 4.f); // 평면으로 크게
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 1.5f); // 평면으로 크게
 	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

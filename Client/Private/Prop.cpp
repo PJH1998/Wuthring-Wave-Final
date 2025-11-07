@@ -58,9 +58,6 @@ void CProp::Late_Update(_float fTimeDelta)
 void CProp::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
-
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->TriggerActivate(IsActive);
 	
 	if (!IsActive)
 	{
@@ -69,11 +66,6 @@ void CProp::Activate(_bool IsActive)
 
     if (nullptr == m_pRigidbodyCom)
         return;
-
-  /*  if (IsActive)
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-    else
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));*/
         
 }
 

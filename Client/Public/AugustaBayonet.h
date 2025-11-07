@@ -10,7 +10,6 @@ public:
 		VOLUME_ATTACK = 0,
 		VOLUME_STRONG_ATTACK = 1,
 		VOLUME_ULTI = 2,
-		//VOLUME_EFFECT_GRIFFON = 2,
 		VOLUME_END
 	};
 
@@ -36,6 +35,7 @@ public:
 	virtual void Change_Volume(_uint iVolumeIdx) override;
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
 
+	// Owner의 게이지 채우기?
 	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 
