@@ -17,6 +17,9 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float fHp;
+		_float fAttackDmg;
+		_float fImpluseRate;
 	}ELECTROPREDATOR_DESC;
 
 private:

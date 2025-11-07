@@ -23,7 +23,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
 
-	m_pTransformCom->Scale({ 1.f, 1.f, 1.f });
+
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
@@ -33,11 +33,12 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
-	m_iHP = 1;
+	m_iHP = pDesc->fHp;
+	m_fAttackDmg = pDesc->fAttackDmg;
 	m_vDistanceRange = _float2(7.f, 12.95f);
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
-	m_fImpluseRate = 10.5f;
+	m_fImpluseRate = pDesc->fImpluseRate;
 	//임시 patrol 위치 데이터
 	m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
 	m_PatrolPoints.push(pDesc->vInitPosition);
@@ -122,7 +123,7 @@ void CElectroPredator::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+   		m_pShaderCom->Begin(0);
 
 		m_pModelCom->Render(i);
 	}
@@ -197,6 +198,7 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 1.8f;
 	ColliderDesc.fRadius = 0.4f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -374,12 +376,13 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 	}
 
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
+		m_beHit = true;
 		m_isPushed = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));

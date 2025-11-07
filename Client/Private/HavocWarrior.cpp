@@ -24,7 +24,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 
 	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
 
-	m_pTransformCom->Scale({ 1.f, 1.f, 1.f });
+
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
@@ -40,7 +40,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
-	m_fImpluseRate = 4.5f;
+	m_fImpluseRate = pDesc->fImpluseRate;
 	return S_OK;
 }
 
@@ -128,7 +128,7 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
 	{
 		
-		if (m_fAirAcc >= 0.3f)
+		if (m_fAirAcc >= 0.25f)
 		{
 			if (m_pColliderCom->IsLand() && m_iState & ENUM_CLASS(TEST_STATE::AIR))
 			{
@@ -235,11 +235,12 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 1.1f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 1.8f;
+	ColliderDesc.fHeight = 1.45f;
 	ColliderDesc.fRadius = 0.4f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -459,6 +460,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
+		m_beHit = true;
 		m_isPushed = true;
 		//m_isAir = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
