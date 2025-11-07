@@ -31,6 +31,7 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+public:
 	virtual void Activate(_bool IsActivate) override;
 	virtual void Change_Volume(_uint iVolumeIdx) override;
 	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
@@ -41,10 +42,6 @@ public:
 
 private:
 	vector<_uint> m_ShaderPaths = {};
-
-
-private:
-	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 
 
 private:

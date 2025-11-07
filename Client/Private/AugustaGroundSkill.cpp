@@ -383,7 +383,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
     }
     
 }
-
 void CAugustaGroundSkill::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 65.f);
@@ -428,5 +427,7 @@ CAugustaGroundSkill* CAugustaGroundSkill::Create(class CGameObject* pOwner)
 void CAugustaGroundSkill::Free()
 {
     CGroundState::Free();
+
+
 }
 

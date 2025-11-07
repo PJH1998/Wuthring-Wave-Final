@@ -10,6 +10,7 @@ public:
 	enum VOLUME
 	{
 		VOLUME_RISE = 0,
+		VOLUME_HACKDOWN = 1,
 		VOLUME_END
 	};
 #pragma region STATE
@@ -170,6 +171,8 @@ private:
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
+
+	vector<class CAttackVolume*> m_AttackVolumes;
 
 
 private:

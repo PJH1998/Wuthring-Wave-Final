@@ -1,6 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "AugustaGriffon.h"
-#include "Client_Debug.h"
+#include "AttackVolume.h"
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Ability.h"
 
 CAugustaGriffon::CAugustaGriffon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
@@ -39,9 +42,9 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
-#ifdef _DEBUG
-    ClientDebug::Edit_TransformRotate(m_pTransformCom);
-#endif // _DEBUG
+	// MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CAugustaGriffon::Update(_float fTimeDelta)
@@ -52,12 +55,19 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pTransformCom->Get_WorldMatrix() *
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
+
+	// MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
 {
     CProp::Late_Update(fTimeDelta);
 
+	// MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     /*if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
@@ -92,6 +102,8 @@ void CAugustaGriffon::Render()
 
 #ifdef _DEBUG
     //m_pRigidbodyCom->Render();
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -101,6 +113,28 @@ void CAugustaGriffon::Activate(_bool IsActive)
 	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
 	CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
   
+}
+
+void CAugustaGriffon::Change_Volume(_uint iVolumeIdx)
+{
+	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
+		return;
+
+	// 교체.
+	m_pMainAttackVolume->TriggerActivate(false);
+	m_iVolumeIdx = iVolumeIdx;
+	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+	
+}
+
+void CAugustaGriffon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
+{
+	if (m_AttackVolumes[iVolumeIdx] != nullptr)
+		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
+}
+
+void CAugustaGriffon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
 }
 
 void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
@@ -118,18 +152,6 @@ void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
 
-    //CRigidbody::CAPSULEBODY_DESC RigidbodyDesc{};
-    //RigidbodyDesc.fRadius = 0.3f;
-    //RigidbodyDesc.fHeight = 0.5f;
-    //RigidbodyDesc.eShape = SHAPE::CAPSULE;
-    //RigidbodyDesc.vPos = { 0.f, 0.f, 0.f };
-    //RigidbodyDesc.eType = EMotionType::Kinematic;
-    //RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ATTACK);
-    //RigidbodyDesc.eBodyType = CRigidbody::BODYTYPE::BODY;
-
-    //if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first)
-    //    , pDesc->rigidBodyData.second, TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc)))
-    //    CRASH("Rigidbody");
 }
 
 void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
@@ -151,7 +173,31 @@ void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
 
 void CAugustaGriffon::Ready_AttackVolumes()
 {
+	// size 설정
+	m_AttackVolumes.resize(VOLUME_END);
 
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
+	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f); // x, z 평면 크게 , y축 작게 나오는 범위 찾기.
+	TriggerDesc.vOffsetPos = _float3(0.5f, -1.5f, 0.f); // 조금 앞으로?
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 300.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	// Attack용 만들기.
+	m_AttackVolumes[VOLUME_STRIKE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_STRIKE])
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_STRIKE];
+	m_pMainAttackVolume->TriggerActivate(false);
 }
 
 void CAugustaGriffon::Bind_Resources()

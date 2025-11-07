@@ -122,7 +122,6 @@ void CAugustaBayonet::Change_Volume(_uint iVolumeIdx)
 	m_pMainAttackVolume->TriggerActivate(false);
 	m_iVolumeIdx = iVolumeIdx;
 	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-	m_pMainAttackVolume->TriggerActivate(true);
 	
 }
 
