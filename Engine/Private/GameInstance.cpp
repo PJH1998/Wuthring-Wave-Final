@@ -963,6 +963,8 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
+	m_pShadowMap->Clear();
+	m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

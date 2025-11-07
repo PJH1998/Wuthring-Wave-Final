@@ -23,6 +23,7 @@ public:
 	HRESULT								Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
 	HRESULT								Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT								Render();
+	void								Clear();
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };
