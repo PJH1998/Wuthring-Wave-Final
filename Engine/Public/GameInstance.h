@@ -169,7 +169,7 @@ public:
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
 	void				Play_Sequence(const _wstring& strSequenceTag);
 #pragma endregion
 
@@ -303,8 +303,8 @@ public:
 #pragma endregion
 
 #pragma region DECAL_MANAGER
-	HRESULT						Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType);
-	HRESULT						Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal);
+	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
+	HRESULT						Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT						Render_Decal();
 #pragma endregion
 

@@ -586,7 +586,7 @@ void CGameInstance::OnShake(const _float3& vDir)
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }
@@ -927,13 +927,13 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #pragma endregion
 
 #pragma region DECAL_MANAGER
-HRESULT CGameInstance::Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType)
+HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
 {
-	return m_pDecal_Manager->Add_DecalTexture(strDecalTag, pFilePath, eTextureType);
+	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath);
 }
-HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal)
+HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
 {
-	return m_pDecal_Manager->Add_Decal(strDecalTag, Decal);
+	return m_pDecal_Manager->Add_DecalData(strDecalTag, Decal);
 }
 HRESULT CGameInstance::Render_Decal()
 {
@@ -963,6 +963,8 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
+	m_pShadowMap->Clear();
+	m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

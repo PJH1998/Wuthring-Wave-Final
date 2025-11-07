@@ -37,6 +37,7 @@ public:
 	HRESULT						Begin_ShadowMap();
 	HRESULT						End_ShadowMap();
 
+	void						Clear();
 #ifdef _DEBUG
 	void						Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif

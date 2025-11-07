@@ -1588,7 +1588,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
     if (m_iSelectedCHIndex != CH_AUGUSTA)
         return;
 
-    _uint	iSwordEnergy		= static_cast<_uint>(pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) * 2.f);            // mAX = 2
+    _uint	iSwordEnergy	= static_cast<_uint>(pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) * 2.f);            // mAX = 2
 
     //static _float	fPointEnergy		= 0,f;
     //const _float	fMaxPointEnergy		= 100.f;

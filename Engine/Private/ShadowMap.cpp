@@ -130,6 +130,22 @@ HRESULT CShadowMap::End_ShadowMap()
 	return S_OK;
 }
 
+void CShadowMap::Clear()
+{
+	for (auto& pBounding : m_Boundings)
+		Safe_Delete(pBounding);
+	m_Boundings.clear();
+
+	Safe_Release(m_pShadowMapDSV);
+	Safe_Release(m_pShadowMapSRV);
+	Safe_Release(m_pConstantBuffer);
+
+	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
+		m_Matrices[i].clear();
+
+	m_SectorUV.clear();
+}
+
 #ifdef _DEBUG
 void CShadowMap::Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 {
@@ -434,11 +450,13 @@ void CShadowMap::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-	for (auto& pBounding : m_Boundings)
-		Safe_Delete(pBounding);
-	m_Boundings.clear();
+	Clear();
 
-	Safe_Release(m_pShadowMapDSV);
-	Safe_Release(m_pShadowMapSRV);
-	Safe_Release(m_pConstantBuffer);
+	//for (auto& pBounding : m_Boundings)
+	//	Safe_Delete(pBounding);
+	//m_Boundings.clear();
+
+	//Safe_Release(m_pShadowMapDSV);
+	//Safe_Release(m_pShadowMapSRV);
+	//Safe_Release(m_pConstantBuffer);
 }

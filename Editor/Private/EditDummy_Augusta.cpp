@@ -46,13 +46,23 @@ void CEditDummy_Augusta::Update(_float fTimeDelta)
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_L) == KEYSTATE::DOWN)
 	{
-		DECAL_DESC Data = {};
+		DECAL_DATA Data = {};
+		Data.eType = DECAL_DATA::STATIC;
 		Data.WorldMatrix = XMMatrixScaling(10.f, 10.f, 10.f) * XMMatrixTranslationFromVector(m_pTransformCom->Get_State(STATE::POSITION));
 		Data.vColor = _float4(1.f, 0.f, 0.f, 1.f);
 		Data.fLifeTime = 1.f;
-		m_pGameInstance->Add_Decal(TEXT("Decal_Test"), Data);
+		m_pGameInstance->Add_DecalData(TEXT("Decal_Test"), Data);
 	}
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+	{
+		DECAL_DATA Data = {};
+		Data.eType = DECAL_DATA::NONSTATIC;
+		Data.WorldMatrix = XMMatrixScaling(10.f, 10.f, 10.f) * XMMatrixTranslationFromVector(m_pTransformCom->Get_State(STATE::POSITION));
+		Data.vColor = _float4(1.f, 0.f, 0.f, 1.f);
+		Data.fLifeTime = 1.f;
+		m_pGameInstance->Add_DecalData(TEXT("Decal_Test"), Data);
+	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_W) == KEYSTATE::PRESS)
 		m_pTransformCom->Go_Force(XMVectorSet(0.f , 0.f, 200.f, 0.f), fTimeDelta);
