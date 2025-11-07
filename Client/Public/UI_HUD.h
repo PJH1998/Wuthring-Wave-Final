@@ -76,11 +76,11 @@ private:
 	//	2	| 			| Normal - Combo 2	| Burst
 	//	3	| 			| Normal - Combo 3	|
 	//	4	| 			| Ult				|
-	_uint					m_iPlayerEnhancedMode = 0;
+	_uint					m_iPlayerEnhancedMode = 0;	// 용도 표시용으로 분기 둠. 나중에 제거.
 
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
-
+	_uint m_iSelectedCHIndex = 0;
 
 public:
 	static CUI_HUD* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

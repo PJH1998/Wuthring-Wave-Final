@@ -73,8 +73,12 @@ void CUI_HUD::Priority_Update(_float fTimeDelta)
 
 void CUI_HUD::Update(_float fTimeDelta)
 {
-	_uint iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
-	m_pAbility = m_pPlayerStatus->Get_Ability(iSelectedCHIndex);
+	m_iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
+	if (m_iSelectedCHIndex == 2)
+		m_iSelectedCHIndex = 0;
+
+
+	m_pAbility = m_pPlayerStatus->Get_Ability(m_iSelectedCHIndex);
 
 	Ready_Presets();
 
@@ -259,9 +263,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
 
-	// Status Load
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
-	auto& UISlots = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
+	auto& UISlots = pStatus->Get_Ability(m_iSelectedCHIndex)->Get_UISkillSlots();
 
 	_float fBasicSkillCD[CH_END][SK_END] = {
 		{/* CH_ROVER	*/ pStatus->Get_RemainingCooldown(CH_ROVER	 , "KSTA::EMPTY"),  pStatus->Get_RemainingCooldown(CH_ROVER	 ,	"KSTA::EMPTY")},
@@ -298,7 +300,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	
 	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 
-    switch (iSelectedCHIndex)
+    switch (m_iSelectedCHIndex)
     {
     case CH_ROVER:
         pSkillUI[0]->Set_Active(true);
@@ -407,7 +409,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 		// ksta : must separate later..
 		auto& UISlots = m_pAbility->Get_UISkillSlots();
-		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(iSelectedCHIndex);
+		UI_CHARACTERTYPE eCharacterType = static_cast<UI_CHARACTERTYPE>(m_iSelectedCHIndex);
 		switch (eCharacterType)
 		{
 			// ==============================
@@ -798,9 +800,6 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 	// fPlayerHPRatio
 	
 
-	// 공통 정보 받아옴
-	_uint iSelectedCHIndex = m_pPlayerStatus->Get_CurrentCharIndex();
-
     //static _float fPlayerHP[CH_END] = { 2000.f, 4000.f, 10000.f };
     //static _float fPlayerBackHP[CH_END] = { fPlayerHP[0], fPlayerHP[1], fPlayerHP[2] };
     //const _float fPlayerMaxHP[CH_END] = { 2000.f, 4000.f, 10000.f };
@@ -810,7 +809,7 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
 
     //_float fPlayerHPRatio = fPlayerHP[iSelectedCHIndex] / fPlayerMaxHP[iSelectedCHIndex];
-	_float fPlayerHPRatio = m_pPlayerStatus->Get_HpRatio(iSelectedCHIndex);
+	_float fPlayerHPRatio = m_pPlayerStatus->Get_HpRatio(m_iSelectedCHIndex);
 	static _float fPlayerHPPrevRatio = 0.f;
 	static _float fPlayerHPBackRatio = 0.f; //  = fPlayerHPRatio;
 
@@ -1060,16 +1059,12 @@ void CUI_HUD::Update_UI_KeyGuide(_float fTimeDelta)
 {
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-	// 공통 정보 받아옴
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
-
-
 
     // ĳ���Ϳ� ���� Ű ���̵� ���̱� ���� �б�
     CCustom_UI* pKeyButtonUI = Find_ChildObject(L"Inst_KeyButton");
     auto keyButtonDesc = pKeyButtonUI->Get_UIDesc();
 
-    switch (iSelectedCHIndex)
+    switch (m_iSelectedCHIndex)
     {
     case Client::CUI_HUD::CH_ROVER:
         keyButtonDesc.vecInstanceDescs[0].vClipTexcoordX = { 0.0f, 0.0f };
@@ -1095,7 +1090,6 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 	// 공통 정보 받아옴
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
 	auto& skillSlots = pStatus->Get_Ability(ENUM_CLASS(CH_AUGUSTA))->Get_UISkillSlots();
 
 
@@ -1109,7 +1103,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
 
 
-    switch (iSelectedCHIndex)
+    switch (m_iSelectedCHIndex)
     {
     case Client::CUI_HUD::CH_ROVER:
         Find_ChildObject(L"Group_Rover")    ->Set_Active(true);     // CH change visible
@@ -1181,7 +1175,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
         Find_ChildObject(L"Icon_ElementThunder"),
         Find_ChildObject(L"Icon_ElementFire")
     };
-    CCustom_UI* pElementTargetUI = pElementIcons[iSelectedCHIndex];
+    CCustom_UI* pElementTargetUI = pElementIcons[m_iSelectedCHIndex];
     const vector<_float4> vecElemColors = {
         {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
         {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
@@ -1189,7 +1183,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     };
 
     vector<_float4x4> vecElementVariantMat = { _float4x4() };
-    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = vecElemColors[iSelectedCHIndex];
+    *reinterpret_cast<_float4*>(&vecElementVariantMat[0]._11) = vecElemColors[m_iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementVariantMat[0]._21) = static_cast<_float>(true);
 
     CCustom_UI::VARIANTREADY_UI_DESC tElementVariantDesc = {
@@ -1213,7 +1207,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
     // ksta : test 
 
-	fElementAmounts[iSelectedCHIndex] = m_pAbility->Get_Resonance();
+	fElementAmounts[m_iSelectedCHIndex] = m_pAbility->Get_Resonance();
     //fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
     //fElementAmounts[1] = (fElementAmounts[1] >= 100)? 0 : fElementAmounts[1] + 1.5f * 30.f * fTimeDelta;
     //fElementAmounts[2] = (fElementAmounts[2] >= 100)? 0 : fElementAmounts[2] + 1.f  * 30.f * fTimeDelta;
@@ -1224,11 +1218,11 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     //auto elementGuageDesc = pElementGuageUI->Get_UIDesc();
 
     vector<_float4x4> vecElementGuageVariantMat = { _float4x4() };
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[iSelectedCHIndex] / fMaxElementAmounts[iSelectedCHIndex]);
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._12) = 0.0f;
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._13) = 1.0f;
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_bool>(true);
-    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[iSelectedCHIndex];
+    *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[m_iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
 
 
@@ -1248,9 +1242,9 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 	// Load Status..
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+	m_iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
 	//auto& tUISlot = pStatus->Get_Ability(iSelectedCHIndex)->Get_UISkillSlots();
-	pStatus->Get_CostRatio(iSelectedCHIndex, COST_TYPE::COST1);
+	pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST1);
 
 	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
 	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
@@ -1270,7 +1264,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
     static _float fGalbEchoEnergy   = 0.f;
     const _float fGalbMaxEchoEnergy = 50.f;
 
-    _float fCurPlayerEnergyRatio    = pStatus->Get_CostRatio(iSelectedCHIndex, COST_TYPE::COST1); //fCurPlayerEnergy / fCurPlayerMaxEnergy;
+    _float fCurPlayerEnergyRatio    = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST1); //fCurPlayerEnergy / fCurPlayerMaxEnergy;
     
 
     _float4     vSingleColor[2] = {};   // for Gradiant
@@ -1338,7 +1332,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
 
 
-    switch (iSelectedCHIndex)
+    switch (m_iSelectedCHIndex)
     {
     case CH_ROVER:     
         {
@@ -1520,7 +1514,7 @@ void CUI_HUD::Update_UI_PlayerEnergyBar(_float fTimeDelta)
 
 
 	// galbrena energy bar
-    if (iSelectedCHIndex == CH_GALBRENA)
+    if (m_iSelectedCHIndex == CH_GALBRENA)
     {
         if (m_iPlayerEnhancedMode == 0 ||
 			m_iPlayerEnhancedMode == 1)
@@ -1564,8 +1558,8 @@ void CUI_HUD::Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta)
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
 	// 공통 정보 받아옴
-	_uint iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
-    if (iSelectedCHIndex != CH_AUGUSTA)
+	m_iSelectedCHIndex = pStatus->Get_CurrentCharIndex();
+    if (m_iSelectedCHIndex != CH_AUGUSTA)
         return;
 
     static _uint	iSwordEnergy		= static_cast<_uint>(pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) * 2.f);            // mAX = 2
