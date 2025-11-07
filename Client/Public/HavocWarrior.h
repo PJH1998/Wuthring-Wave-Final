@@ -38,8 +38,9 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive);
-	virtual void Effect_Active(const _wstring& wStrEffectTag);
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive) override;
+	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
@@ -63,18 +64,24 @@ private:
 	_float2					m_vDistanceRange{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
+	_float					m_fStrikeAcc{};
+	_bool					m_AirTrig{};
+	_float					m_fAirAcc{};
 	_bool					m_beHit{};
-	_bool					m_isBlocked{};
+	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
 #pragma endregion
 
 #pragma region STATUS
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
+	_float					m_fImpluseRate{};
 #pragma endregion
 
 #pragma region PHYSICS
 	_float3					m_vBeHit_Normal{};
+	_float					m_fTimeDelta{};
+	_bool					m_isTurnLerp{};
 	CALLBACK_CLIENT			m_tCallDesc{};
 #pragma endregion
 private:
@@ -85,11 +92,16 @@ private:
 	void						Reset_Condition(_float fTimeDelta);
 	void						After_Condition(_float fTimeDelta);
 	void						Calculate_PosAndDir();
-
+	void						TurnFix();
+	void						TurnLerp(_bool isActive);
+#pragma region COLLISION_EVENT
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						Patrol();
+#pragma endregion
+
+#pragma region BEHAVIOR_TREE_CONDITION
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
@@ -100,6 +112,7 @@ private:
 	_bool						Front();
 	_bool						Left();
 	_bool						Right();
+#pragma endregion
 
 public:
 	static		CHavocWarrior* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
