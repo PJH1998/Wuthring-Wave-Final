@@ -228,7 +228,6 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 	}
 
-#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
@@ -261,7 +260,6 @@ void CPlayer::Player_KeyInput()
 	}
 
 	
-#endif // _DEBUGs
 }
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)

@@ -72,6 +72,7 @@ void CAugustaAirFall::Handle_Input()
 
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+	m_States[ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
@@ -103,6 +104,16 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 	{
  		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
 		return;
+	}
+
+	if (m_States[!LAND])
+	{
+		if (m_States[ATTACK])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_START;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK)); // 상위, 하위 상태
+			return;
+		}
 	}
 
     if (m_States[LAND])

@@ -57,8 +57,8 @@ public:
 #ifdef _DEBUG
 public:
 	void Print_KeySlotinfo();
-
-
+#else
+	void Print_KeySlotinfo();
 #endif // _DEBUG
 
 
@@ -94,6 +94,8 @@ public:
 	void Print_Cost();
 	void Print_CoolTime();
 #else
+	void Print_Cost();
+	void Print_CoolTime();
 public:
 	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG

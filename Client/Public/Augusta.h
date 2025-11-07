@@ -6,6 +6,12 @@
 NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
+public:
+	enum VOLUME
+	{
+		VOLUME_RISE = 0,
+		VOLUME_END
+	};
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -173,6 +179,7 @@ private:
 	void Ready_Variables(const CHARACTER_DESC* pDesc);
 	void Ready_Positions(const CHARACTER_DESC* pDesc);
 	void Ready_PartObjects(const CHARACTER_DESC* pDesc);
+	void Ready_AttackVolumes();
 
 public:
 	static		CAugusta* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

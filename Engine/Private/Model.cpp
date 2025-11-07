@@ -183,6 +183,16 @@ void CModel::Render_Gizmo(_fmatrix TransformMatrix)
 	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
+_bool CModel::Find_Animation(const _string& strAnimName)
+{
+	for (_uint i = 0; i < m_AnimationNames.size(); i++)
+	{
+		if (m_AnimationNames[i] == strAnimName)
+			return true;
+	}
+	return false;
+}
+
 
 #endif // _DEBUG
 

@@ -55,6 +55,8 @@ public:
 
 	HRESULT Bind_Bone_to_GUI(_int& iBoneIndex, _fmatrix TransformMatrix);
 	void Render_Gizmo(_fmatrix TransformMatrix);
+
+	_bool Find_Animation(const _string& strAnimName);
 #endif
 
 public:

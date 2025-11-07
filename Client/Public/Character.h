@@ -252,6 +252,9 @@ protected:
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
 	HIT_DESC m_PendingHitDesc = {};
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	
 	
 

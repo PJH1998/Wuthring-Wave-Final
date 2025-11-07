@@ -52,6 +52,9 @@ public:
 #ifdef _DEBUG
 	void Print_Cost();
 	void Print_CoolTime();
+#else
+	void Print_Cost();
+	void Print_CoolTime();
 #endif // _DEBUG
 
 #pragma endregion
