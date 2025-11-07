@@ -108,6 +108,8 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 
 void CMapObject::Render_Shadow()
 {
+
+
 	m_pTransformCom->Bind_Matrix(m_pShadowShaderCom, "g_WorldMatrix");
 
 	for (auto& iSector : m_Sectors)
@@ -118,13 +120,13 @@ void CMapObject::Render_Shadow()
 		if (FAILED(m_pShadowShaderCom->Bind_Value("g_iShadowMapLayer", &iLayer, sizeof(_uint))))
 			CRASH("Failed Bind ShadowMapLayer");
 
-		_uint iNumMesh = m_pModelComArray[m_iLODIndex]->Get_NumMesh();
+		_uint iNumMesh = m_pModelComArray[0]->Get_NumMesh();
 
 		for (_uint i = 0; i < iNumMesh; ++i)
 		{
 			m_pShadowShaderCom->Begin(8);
 
-			m_pModelComArray[m_iLODIndex]->Render(i);
+			m_pModelComArray[0]->Render(i);
 		}
 	}
 }

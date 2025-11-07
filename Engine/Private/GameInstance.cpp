@@ -792,9 +792,9 @@ HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewNa
 {
 	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
 }
-HRESULT CGameInstance::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+HRESULT CGameInstance::Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName)
 {
-	return m_pCSM->Bind_ShadowDistance_Resource(iDataBufferIndex);
+	return m_pCSM->Bind_ShadowDistance_Resource(pShader, pDistanceName, pLastDistanceName);
 }
 HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 {
