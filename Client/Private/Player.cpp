@@ -277,6 +277,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -287,12 +294,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -483,6 +485,10 @@ void CPlayer::GUI_Teleport()
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
 
 	ImGui::End();
 }
@@ -514,12 +520,6 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 			ASSERT_CRASH(pPlayer);
 			m_Characters[i] = pPlayer;
 			break;
-        case CHARACTERTYPE::GALBRENA:
-		{
-			ASSERT_CRASH(pPlayer);
-			m_Characters[i] = pPlayer;	
-		}
-            break;
 		case CHARACTERTYPE::AUGUSTA:
 		{
 			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
@@ -535,6 +535,12 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 
 		}
 		break;
+        case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
+            break;
+	
         default:
             break;
         }

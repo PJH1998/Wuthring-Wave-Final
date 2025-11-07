@@ -205,7 +205,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)

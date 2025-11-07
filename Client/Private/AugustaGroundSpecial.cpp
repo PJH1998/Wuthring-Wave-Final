@@ -118,7 +118,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Is_Land();
+    m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)

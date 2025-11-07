@@ -61,6 +61,12 @@ private:
 
 	_float3							m_vOffset = {};
 	RefConst<Shape>				m_pShape = { nullptr };
+
+	_bool								m_isLand = { true };
+
+	_float								m_fHeight = {};
+	_float								m_fRadius = {};
+
 private:
 	// 경사로에서 이동속도 변화 -> Slide로 보정
 	Vec3								Slide(const Vec3& Velocity);

@@ -168,15 +168,15 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 }
 
 // fDistanceGround (Ray 쏴서 땅에 닿은 거리가 매개변수로 받은 거리보다 크다면 => 땅이아니다)
-_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
-{
-	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
-
-	if (fDistanceToGround > fLandDistance)
-		return false;
-
-	return true;
-}
+//_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
+//{
+//	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
+//
+//	if (fDistanceToGround > fLandDistance)
+//		return false;
+//
+//	return true;
+//}
 
 
 #pragma endregion

@@ -98,7 +98,7 @@ public:
 	// Land Check
 	_float Get_DistanceFromGround(_float fStartYOffset = 0.f);
 	_bool Is_LandCollider(_float3* pNormal = nullptr);
-	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
+	//_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
 
 	// Gravity
 	void Set_Gravity(_bool IsGravity);
