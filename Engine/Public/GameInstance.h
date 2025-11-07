@@ -169,7 +169,7 @@ public:
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
 	void				Play_Sequence(const _wstring& strSequenceTag);
 #pragma endregion
 

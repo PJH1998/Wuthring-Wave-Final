@@ -10,6 +10,7 @@ public:
 		_float3			vPos;
 		_float4			vQuat = _float4(0.f, 0.f, 0.f, 1.f);
 		_float3			vOffset;
+		_float				fRayOffset = { -0.2f };
 		EMotionType	eType;
 		_uint				iLayer;
 		_float				fHeight;		// Capsule Height
@@ -60,13 +61,10 @@ private:
 	_bool								m_isGravity = { true };
 
 	_float3							m_vOffset = {};
+	_float								m_fRayOffset = {};
 	RefConst<Shape>				m_pShape = { nullptr };
 
 	_bool								m_isLand = { true };
-
-	_float								m_fHeight = {};
-	_float								m_fRadius = {};
-
 private:
 	// 경사로에서 이동속도 변화 -> Slide로 보정
 	Vec3								Slide(const Vec3& Velocity);

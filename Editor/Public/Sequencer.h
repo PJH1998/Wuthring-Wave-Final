@@ -65,7 +65,8 @@ struct RampEdit : public ImCurveEdit::Delegate
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::SCENE) == iType)
 		{
-
+			SCENE_CAMERA_FRAME frame = {};
+			mSQCameraDatas.push_back(frame);
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::SOUND) == iType)
 		{
@@ -116,8 +117,9 @@ struct RampEdit : public ImCurveEdit::Delegate
 	vector<ImVec2>		mPoints;
 
 	vector<CAMERA_FRAME>		mTargetCameraFrames;
+
 	vector<SQ_ACTOR_DATA>		mSQActorDatas;
-	vector<SQ_CAMERA_DATA>	mSQCameraDatas;
+	vector<SCENE_CAMERA_FRAME>	mSQCameraDatas;
 	vector<SQ_SFX_DATA>			mSQSFXDatas;
 	vector<SQ_AUDIO_DATA>		mSQAudioDatas;
 	vector<SQ_EFFECT_DATA>		mSQEffectDatas;
@@ -308,9 +310,15 @@ private:
 
 	// Selectable Item
 	void								Selectable_Item();
-	void								SetUp_Point(SEQUENCE_ITEM& item);
-	void								SetUp_Camera(SEQUENCE_ITEM& item);
 	void								Sorting_Item();
+
+	// Item SetUp
+	void								SetUp_Camera(SEQUENCE_ITEM& item);
+	void								SetUp_Scene(SEQUENCE_ITEM& item);
+
+	// Point SetUp
+	void								SetUp_Camera_Point(SEQUENCE_ITEM& item);
+	void								SetUp_Scene_Point(SEQUENCE_ITEM& item);
 
 	// Camera Action
 	void								Save_CameraAction();

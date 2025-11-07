@@ -71,8 +71,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	// Create Shape
 	using namespace JPH;
-	m_fHeight = pDesc->fHeight;
-	m_fRadius = pDesc->fRadius;
+	m_fRayOffset = pDesc->fRayOffset;
 	m_pShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
 	ASSERT_CRASH(m_pShape);
 
@@ -105,10 +104,8 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 void CCollider::Update(const _fvector& vVelocity)
 {
 	// Ray Cast Ground Check
-	_float fRayOffset = m_fHeight * 0.5f + m_fRadius - 0.1f;
-	//_vector vPos = StoreVector3(m_pCharacterVirtual->GetPosition()) + StoreVector3(m_pCharacterVirtual->GetShapeOffset()) - XMVectorSet(0.f, fRayOffset, 0.f, 0.f);
 	_vector vPos = StoreVector3(m_pCharacterVirtual->GetPosition()) + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
-	_vector vEndPos = vPos + XMVectorSet(0.f, -0.2f, 0.f, 0.f);
+	_vector vEndPos = vPos + XMVectorSet(0.f, m_fRayOffset, 0.f, 0.f);
 
 	_float4 vOut = {};
 	m_isLand = m_pGameInstance->Ray_Cast(vPos, vEndPos, &vOut);

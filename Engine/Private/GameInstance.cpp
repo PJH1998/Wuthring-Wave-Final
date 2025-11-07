@@ -586,7 +586,7 @@ void CGameInstance::OnShake(const _float3& vDir)
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }

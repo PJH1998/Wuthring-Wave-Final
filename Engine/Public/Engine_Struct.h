@@ -268,12 +268,12 @@ namespace Engine
 
 #pragma region SEQUENCE
 	// Sequence Item Frame, Tag => Sequence가 갖고 있음
-	typedef struct tagSequenceItem
+	typedef struct tagSequenceItemInfo
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
 		_wstring	strItemTag;
-	}SEQUENCE_ITEM;
+	}SEQUENCE_ITEM_INFO;
 
 	// Sequence Item Data => Item Reset시 던질 Data
 	typedef struct tagSequenceItemData
