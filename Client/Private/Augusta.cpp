@@ -447,9 +447,6 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
-	//size_t Index = wStrObjectTag.find(TEXT("|"));
-	//_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
-	//_wstring wstrLayerTag = wStrObjectTag.substr(Index + 1);
 
 	// 3개의 변수 준비
 	_wstring var1, var2, var3;
@@ -462,6 +459,7 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	
 	_uint iVolumeIdx = stoul(var3);
 
+	/* BAYONET|ATTACK|0*/
 	// 1. 어떤 무기인가?
 	if (var1 == TEXT("BAYONET"))
 	{
