@@ -360,7 +360,12 @@ void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const Contac
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pClient = static_cast<CALLBACK_CLIENT*>(pOther);
+		if (nullptr == pClient)
+			return;
+		
+		CTransform* pTransform = static_cast<CTransform*>(pClient->pTransform);
+
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (!m_isAggro)
 			m_isAggro = true;

@@ -12,11 +12,6 @@ public:
 	};
 
 public:
-	typedef struct tagEventDesc
-	{
-		_uint iEventID = { EVENT_END };
-		function<void()> callBack;
-	}EVENT_DESC;
 
 
 public:
@@ -25,6 +20,13 @@ public:
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}HIT_DESC;
+
+	typedef struct tagParryDesc{
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+	}PARRY_DESC;
+
 
 
 public:
@@ -91,6 +93,7 @@ public:
 public:
 	// Hit 판단.
 	virtual void Hit_Judge(void* pArg = nullptr) {};
+	virtual void Parry_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -257,7 +260,9 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+
 	HIT_DESC m_PendingHitDesc = {};
+	PARRY_DESC m_PendingParryDesc = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

@@ -183,7 +183,7 @@ void CAugustaGriffon::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f); // x, z 평면 크게 , y축 작게 나오는 범위 찾기.
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 평면 크게 , y축 작게 나오는 범위 찾기.
 	TriggerDesc.vOffsetPos = _float3(0.5f, -1.5f, 0.f); // 조금 앞으로?
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 300.f;

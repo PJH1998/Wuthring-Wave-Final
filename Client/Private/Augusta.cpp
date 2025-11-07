@@ -401,7 +401,6 @@ void CAugusta::Hit_Judge(void* pArg)
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-
 	// 3. 캐스팅 해서? => 들고 있기.
 	m_PendingHitDesc = *pDesc;
 
@@ -409,6 +408,15 @@ void CAugusta::Hit_Judge(void* pArg)
 
 	// 4. 현재 상태 변경.
 	m_IsHit = true;
+}
+
+// 패링 판단.
+void CAugusta::Parry_Judge(void* pArg)
+{
+	// 1. 패링 시 ? Layer 변경? => 잠시 무적
+	CCharacter::PARRY_DESC* pDesc = static_cast<PARRY_DESC*>(pArg);
+	
+	
 }
 
 
@@ -511,6 +519,19 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
 	}
+	else if (var1 == TEXT("SKILLWEAPON"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ULTI (0) VOLUME_SWORD_ATTACK(1), VOLUME_SWORD_ULTI(2) )
+		m_pSkillWeapon->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
+		else if (var2 == TEXT("SKILL"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
 	else if (var1 == TEXT("AUGUSTA"))
 	{
 		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
@@ -570,7 +591,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
-
 
 	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
 	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
