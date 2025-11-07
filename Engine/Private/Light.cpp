@@ -45,6 +45,7 @@ HRESULT CLight::Render(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	}
 
 	pShader->Begin(iPassIndex);
+
 	pVIBuffer->Bind_Resources();
 	pVIBuffer->Render();
 

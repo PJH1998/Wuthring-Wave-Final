@@ -81,8 +81,22 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     m_pTransformCom->Save_PreviousPosition();
 
 	// 3. 몬스터가 있다면?
-	m_pTargetTransform;
+	if (nullptr != m_pTargetTransform)
+	{
+		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
+		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+
+		/*
+		_vector vVelocity = m_pTransformCom->Get_Velocity();
+		//m_fDistance : 플레이어와 몬스터 사이의 거리
+		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
+		*/
+	}
 	
+	// 4. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
 }
@@ -111,7 +125,7 @@ void CAugusta::Update(_float fTimeDelta)
 	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
 
     // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-    m_pColliderCom->Update(vVelocity / fTimeDelta);
+	m_pColliderCom->Update(vVelocity / fTimeDelta);
 
     // 7. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
@@ -121,6 +135,10 @@ void CAugusta::Update(_float fTimeDelta)
 
 	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
 	m_IsHit = false;
+
+	// 10. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
@@ -131,6 +149,9 @@ void CAugusta::Late_Update(_float fTimeDelta)
             pPart.second->Late_Update(fTimeDelta);
     }
 
+	// 2. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
 	
@@ -177,7 +198,8 @@ void CAugusta::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
-
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -309,14 +331,11 @@ void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 		break;
 	case PART_SKILLWEAPON:
 		m_pSkillWeapon->Volume_Activate(IsActive); // MainVolume 켜기
-	//	m_pSkillWeapon->Change_Volume(iVolumeIdx);
 		break;
 	case PART_GRIFFON:
 		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
-	//	m_pGriffon->Change_Volume(iVolumeIdx);
 		break;
 	case PART_WING:
-	//	m_pWing->Change_Volume(iVolumeIdx);
 		break;
 	}
 }
@@ -463,20 +482,56 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	// 1. 어떤 무기인가?
 	if (var1 == TEXT("BAYONET"))
 	{
+		// 볼륨 인덱스로 볼륨 변경. (ATTACK (0), STRONG_ATTACK(1), ULTI(2) )
+		m_pBayonet->Change_Volume(iVolumeIdx);
+
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		}
 		else if (var2 == TEXT("SKILL"))
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		
+		
+	}
+	else if (var1 == TEXT("GRIFFON"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (STRIKE (0))
+		m_pGriffon->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
+		else if (var2 == TEXT("SKILL"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("AUGUSTA"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
+		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr != m_pMainAttackVolume)
+			return;
+
+		m_pMainAttackVolume->TriggerActivate(false); // 교체.
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+		
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK); 
+		else if (var2 == TEXT("SKILL"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-#ifdef _DEBUG
-	cout << "On Hit! Augusta Bayonet" << endl;
-#endif // _DEBUG
+
 
 }
 #pragma endregion
@@ -580,26 +635,6 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
             ASSERT_CRASH(m_pBayonet);
             Safe_AddRef(m_pBayonet);
-
-			
-			VolumeDesc.eLayer = COLLISIONLAYER::ATTACK;
-			VolumeDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-			VolumeDesc.eShape = SHAPE::BOX;
-			VolumeDesc.pParenTransform = m_pTransformCom;
-			VolumeDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
-			VolumeDesc.vExtent = _float3(1.f, 1.f, 1.f);
-			VolumeDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-			VolumeDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-			VolumeDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
-					this->OnHitEnter(iLayer, pOther, Manifold);
-				};
-
-			//m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
-			//	Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
-			//if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
-			//	CRASH(m_pMainAttackVolume);
-			//
-			//m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
         case PARTTYPE::PART_SKILLWEAPON:
@@ -668,13 +703,13 @@ void CAugusta::Ready_AttackVolumes()
 	m_AttackVolumes.resize(VOLUME_END);
 
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
-	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 장비
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f);
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 1000.f;
@@ -683,12 +718,25 @@ void CAugusta::Ready_AttackVolumes()
 		};
 
 	// Attack용 만들기.
-	m_AttackVolumes[VOLUME::VOLUME_RISE] = dynamic_cast<CAttackVolume*>(
+	m_AttackVolumes[VOLUME_RISE] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
-	ASSERT_CRASH(m_AttackVolumes[VOLUME::VOLUME_RISE]);
-	m_pMainAttackVolume = m_AttackVolumes[VOLUME::VOLUME_RISE]; // Main Attack Volume 설정.
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_RISE]);
+
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f); // y작게? x, z 평면 크게.
+
+	m_AttackVolumes[VOLUME_HACKDOWN] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_HACKDOWN]);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_RISE]; // Main Attack Volume 설정.
+	m_pMainAttackVolume->TriggerActivate(false); // 꺼놓기.
 }
 
 CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -720,8 +768,19 @@ CGameObject* CAugusta::Clone(void* pArg)
 void CAugusta::Free()
 {
     CCharacter::Free();
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+
+	m_AttackVolumes.clear();
+
     Safe_Release(m_pBayonet);
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
+
+	
+
 }

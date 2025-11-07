@@ -25,7 +25,7 @@ groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * MAX_RADIUS)];
 groupshared float4 vSharedColorY[THREAD_Y + (2 * MAX_RADIUS)][THREAD_X];
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void GaussianBlur_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void GaussianBlur_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     float fBlurRadius = iRadius;
     
@@ -63,7 +63,7 @@ void GaussianBlur_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
 }
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void GaussianBlur_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     float fBlurRadius = (float) iRadius;
     
@@ -106,7 +106,7 @@ void GaussianBlur_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID
 Texture2D<float4> DepthTexture : register(t1);
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void DOF_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void DOF_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
     
@@ -162,7 +162,7 @@ void DOF_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
 }
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void DOF_Y(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
     
@@ -327,7 +327,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
 groupshared float4 vSharedMotionColor[THREAD_Y + 1][THREAD_X + 1];
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void Motion_Blur(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     int2 vInSize;
     InputTexture.GetDimensions(vInSize.x, vInSize.y);
@@ -369,7 +369,6 @@ void Motion_Blur(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
     }
     
     GroupMemoryBarrierWithGroupSync();
-    
     
     for (int i = 0; i < 4; i++)
     {   
