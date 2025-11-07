@@ -151,6 +151,8 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = 100.f;
 	MobDesc.fAttackDmg = 1.f;
+	MobDesc.fMaxStamina = 10.f;
+	MobDesc.vDetectRange = _float3(35.f, 16.f, 35.f);
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
 		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");

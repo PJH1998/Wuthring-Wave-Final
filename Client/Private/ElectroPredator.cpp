@@ -34,7 +34,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
 	m_iHP = 1;
-	m_vDistanceRange = _float2(2.6f, 2.9f);
+	m_vDistanceRange = _float2(7.f, 12.95f);
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = 10.5f;
@@ -69,6 +69,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	{
 		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
 		m_isPushed = false;
+		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
 		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
 	}
@@ -77,6 +78,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 		_vector vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f);
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
 		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+		m_iState &= ~ENUM_CLASS(TEST_STATE::PARALYSIS);
 	}
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -89,7 +91,7 @@ void CElectroPredator::Late_Update(_float fTimeDelta)
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
 	{
 
-		if (m_fAirAcc >= 0.3f)
+		if (m_fAirAcc >= 0.15f)
 		{
 			if (m_pColliderCom->IsLand() && m_iState & ENUM_CLASS(TEST_STATE::AIR))
 			{
@@ -476,12 +478,12 @@ _bool CElectroPredator::isPatrol()
 
 _bool CElectroPredator::Back()
 {
-	return m_fFrontDot < 0.f && fabs(m_fFrontDot) > 0.525f;
+	return  m_fDistance < m_vDistanceRange.x;
 }
 
 _bool CElectroPredator::Front()
 {
-	return m_fFrontDot > 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance > m_vDistanceRange.y;
 }
 
 _bool CElectroPredator::Left()
