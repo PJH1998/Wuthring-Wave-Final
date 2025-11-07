@@ -115,6 +115,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
 	if (nullptr != m_pPlayerStatus)
 		m_pPlayerStatus->Update(fTimeDelta);
+
+	// 5. 몬스터 사이와의 거리는 Priority Update에서 계산
+	if (nullptr != m_pTargetTransform)
+		m_fTargetDistance = 0.f;
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -216,24 +220,47 @@ void CPlayer::Player_KeyInput()
 	}
 
 
-#ifdef _DEBUG
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4, KEYSTATE::UP)))
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
+	}
 
-
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5, KEYSTATE::UP)))
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
 	}
 
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
+	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
 	}
-#endif // _DEBUGs
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+	}
+
+	
 }
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
@@ -247,6 +274,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -257,12 +291,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -453,6 +482,10 @@ void CPlayer::GUI_Teleport()
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
 
 	ImGui::End();
 }
@@ -472,35 +505,39 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     {
         switch (i)
         {
-        case CHARACTERTYPE::AUGUSTA:
-        {
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::ROVER:
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+			break;
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-        }
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+
+		}
+		break;
         case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
             break;
-        case CHARACTERTYPE::ROVER:
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
-
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-            break;
+	
         default:
             break;
         }

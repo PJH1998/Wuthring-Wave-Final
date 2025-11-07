@@ -51,6 +51,15 @@ namespace Engine
 		_float3 vLightDir;
 	}SHADOW_MAP_DESC;
 
+	typedef struct tagDecalData
+	{
+		enum TYPE { STATIC, NONSTATIC};
+		TYPE eType;
+		_matrix WorldMatrix;
+		_float fLifeTime;
+		_float4 vColor;
+	}DECAL_DATA;
+
 	typedef struct tagNotify
 	{
 		_float fTrackPosition;
@@ -261,12 +270,12 @@ namespace Engine
 
 #pragma region SEQUENCE
 	// Sequence Item Frame, Tag => Sequence가 갖고 있음
-	typedef struct tagSequenceItem
+	typedef struct tagSequenceItemInfo
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
 		_wstring	strItemTag;
-	}SEQUENCE_ITEM;
+	}SEQUENCE_ITEM_INFO;
 
 	// Sequence Item Data => Item Reset시 던질 Data
 	typedef struct tagSequenceItemData

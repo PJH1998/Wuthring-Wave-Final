@@ -18,9 +18,9 @@ HRESULT CRoverAirFall::Initialize(class CGameObject* pOwner)
 
 
 
-void CRoverAirFall::OnEnter()
+void CRoverAirFall::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();
@@ -80,7 +80,7 @@ void CRoverAirFall::Update_FallAnimation(_float fTimeDelta)
 
 void CRoverAirFall::Check_Physics(_float fTimeDelta)
 {
-    m_States[LAND] = m_pRover->Is_Land();
+    m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);
 }
 

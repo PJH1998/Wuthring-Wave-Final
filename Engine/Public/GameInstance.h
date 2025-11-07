@@ -165,10 +165,11 @@ public:
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
+	void				OnShake(const _float3& vDir);
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
 	void				Play_Sequence(const _wstring& strSequenceTag);
 #pragma endregion
 
@@ -301,6 +302,12 @@ public:
 #endif
 #pragma endregion
 
+#pragma region DECAL_MANAGER
+	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
+	HRESULT						Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
+	HRESULT						Render_Decal();
+#pragma endregion
+
 public:
 	HRESULT					Clear_Resource(_uint iLevelID);
 	HRESULT					Clear_Memory();
@@ -332,8 +339,9 @@ private:
 	class CCSM*					m_pCSM = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 	class CShadowMap*			m_pShadowMap = { nullptr };
+	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 
-	_uint									m_iNumLevel = {};
+	_uint						m_iNumLevel = {};
 
 public:
 	virtual void Free() override;

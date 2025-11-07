@@ -1,65 +1,48 @@
 ﻿#pragma once
-#include "GameObject.h"
+#include "Base.h"
 
 NS_BEGIN(Engine)
 
 class CTexture;
+class CVIBuffer_Decal;
 class CShader;
-class CVIBuffer_Rect;
+class CGameInstance;
 
-class CDecal final : public CBase
+class ENGINE_DLL CDecal final : public CBase
 {
-public:
-	typedef struct tagDecalDesc {
-		_float3 vScale;
-		_float3 vRotation;
-		_float3 vPosition;
-		_float3 vColor;
-		_float  fLifeTime;
-	}DECAL_DESC;
-
-	typedef struct tagDecalData {
-		_float4x4	WorldMatrixInv;
-		_float3		vColor;
-		_float2		vLifeTime;
-		_float		Padding[3];
-	}DECAL_DATA;
+private:
+	typedef pair<DECAL_DATA::TYPE, VTXINSTANCE_DECAL> DECAL_INSTANCE;
 
 private:
-	explicit CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CDecal() = default;
 
 public:
+	HRESULT						Initialize();
 	void						Update(_float fTimeDelta);
-	HRESULT						Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
-	void						Add_Decal(const DECAL_DESC& DecalDesc);
-
-			HRESULT			Initialize_Prototype(CTexture* pTexture, _uint iMaxDecal);
-	/*virtual		HRESULT			Initialize_Clone(void* pArg);
-	virtual		void			Priority_Update(_float fTimeDelta);
-	virtual		void			Update(_float fTimeDelta);
-	virtual		void			Late_Update(_float fTimeDelta);
-	virtual		void			Render();
-	*/
+	void						Render(CShader* pShader);
 	
+	HRESULT						Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
+	HRESULT						Add_DecalData(const DECAL_DATA& Decal);
+	ID3D11ShaderResourceView*	Get_DecalSRV(TEXTURETYPE eTextureType);
+	
+
 private:
 	ID3D11Device*				m_pDevice = { nullptr };
 	ID3D11DeviceContext*		m_pContext = { nullptr };
-
-	_uint						m_iMaxDecal = {};
+	CGameInstance*				m_pGameInstance = { nullptr };
+	list<DECAL_INSTANCE>		m_DecalDatas;
+	
 	_uint						m_iNumDecals = {};
-	list<DECAL_DATA>			m_DecalDatas = {};
 
-	CTexture*					m_pDecalTexture = { nullptr };
-	ID3D11Buffer*				m_pBuffer = { nullptr };
-	ID3D11ShaderResourceView*	m_pSRV = { nullptr };
+	CTexture*					m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::END)] = { nullptr };
+	CVIBuffer_Decal*			m_pVIBuffer_Decal = { nullptr };
 
 private:
-	HRESULT						Ready_Buffers();
-	void						Update_Buffer();
-	
+	HRESULT						Bind_Resources(CShader* pShader);
+
 public:
-	static CDecal*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, CTexture* pTexture, _uint iMaxDecal);
+	static CDecal*				Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual void				Free() override;
 };
 

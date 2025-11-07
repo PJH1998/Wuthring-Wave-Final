@@ -13,6 +13,13 @@ CCamera::CCamera(const CCamera& Prototype)
 {
 }
 
+void CCamera::OnShake(const _float3& vDir)
+{
+	m_isShake = true;
+	m_fShakeTimeAcc = 0.f;
+	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) + XMLoadFloat3(&vDir) * 10.f);
+}
+
 HRESULT CCamera::Initialize_Prototype()
 {
 	return S_OK;
@@ -36,6 +43,10 @@ HRESULT CCamera::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&(pDesc->vEye)));
 	m_pTransformCom->LookAt(XMLoadFloat4(&(pDesc->vAt)));
+
+	m_fShakeDuration = 0.3f;
+	m_fShakeStiffness = 70.f;
+	m_fShakeDamp = 0.8f;
 
 	return S_OK;
 }
@@ -105,6 +116,28 @@ void CCamera::Mouse_Move_Up()
 	_float fDot = XMVector3Dot(vLook, vUp).m128_f32[0];
 	if (cosf(XMConvertToRadians(10.f)) <= fabsf(fDot))
 		m_pTransformCom->LookDir(XMVector4Normalize(vPreLook));
+}
+
+void CCamera::Shaking(_float fTimeDelta)
+{
+	if (false == m_isShake)
+		return;
+
+	m_fShakeTimeAcc += fTimeDelta;
+
+	if (m_fShakeTimeAcc > m_fShakeDuration)
+	{
+		m_isShake = false;
+		return;
+	}
+
+	_vector vVelocity = XMVector3TransformNormal(XMLoadFloat3(&m_vShakeVelocity), XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()));
+
+	XMStoreFloat3(&m_vShakeOffset, XMLoadFloat3(&m_vShakeOffset) +  vVelocity * fTimeDelta);
+	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) - (XMLoadFloat3(&m_vShakeOffset) * m_fShakeStiffness * fTimeDelta));
+	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) * m_fShakeDamp);
+
+	m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMLoadFloat3(&m_vShakeOffset));
 }
 
 void CCamera::Free()

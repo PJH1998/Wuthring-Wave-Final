@@ -5,12 +5,27 @@ NS_BEGIN(Client)
 class CCharacter abstract : public CActor
 {
 public:
-	typedef struct tagHitDesc
+	enum CHARACTER_EVENT_ID
 	{
+		HIT = 0,
+		EVENT_END
+	};
+
+public:
+	typedef struct tagEventDesc
+	{
+		_uint iEventID = { EVENT_END };
+		function<void()> callBack;
+	}EVENT_DESC;
+
+
+public:
+	typedef struct tagHitDesc{
 		_uint iLayer;
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}HIT_DESC;
+
 
 public:
 	using EnsembleEndCallback = function<void()>;
@@ -70,6 +85,8 @@ public:
 #pragma endregion
 
 
+
+
 #pragma region PHYSICS
 public:
 	// Hit 판단.
@@ -81,7 +98,7 @@ public:
 	// Land Check
 	_float Get_DistanceFromGround(_float fStartYOffset = 0.f);
 	_bool Is_LandCollider(_float3* pNormal = nullptr);
-	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
+	//_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
 
 	// Gravity
 	void Set_Gravity(_bool IsGravity);
@@ -93,6 +110,9 @@ public:
 	_fvector Get_Velocity();
 	void Add_Force(_fvector vForce, _float fTimeDelta);
 
+	// WorldMatrix
+	_matrix Get_WorldMatrix();
+
 #ifdef _DEBUG
 	void RayDir(_vector vRayDir, _float3 vEndPos);
 #endif // _DEBUG
@@ -100,8 +120,15 @@ public:
 #pragma endregion
 
 
+#pragma region EVENT 
+
+#pragma endregion
+
 #pragma region STATE
 public:
+	// Camera Action
+	void Play_Action(const _wstring& strActionTag);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
@@ -111,6 +138,8 @@ public:
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
+	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
+	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
 
@@ -125,6 +154,14 @@ public:
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 	
+	// Hit
+	_bool Is_Hit() { return m_IsHit; }
+	void Set_Hit(_bool IsHit) { m_IsHit = IsHit; }
+	const HIT_DESC* GetPendingHitDesc() const { return &m_PendingHitDesc; } // 읽기 전용 정보 전달.
+	void ClearPendingHit() { m_PendingHitDesc = {}; }
+
+
+
 	// KeyInput
 	_bool Check_AnyInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
 	_bool Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState = KEYSTATE::PRESS);
@@ -137,7 +174,7 @@ public:
 	void Start_FlyBlending(_float fDuration);
 
 	// Change State
-	void Change_State(_uint iCategory, _uint iSubState);
+	void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);
 	
 
 	// Move
@@ -166,10 +203,10 @@ public:
 
 #ifdef _DEBUG
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #else
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
 
 
@@ -181,6 +218,12 @@ public:
 	void Sync_UI(); // UI
 #pragma endregion
 
+#pragma region NOTIFY
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
+	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
+	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
+#pragma endregion
 
 	
 
@@ -200,13 +243,25 @@ protected:
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
-	_bool m_IsHit = { false };
+
+	_float m_fTargetDistance = {}; // Target과의 Distance
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	
+
+
 protected:
+	//queue<EVENT_DESC> m_EventQueue; // 특정한 이벤트가 발생해서 StateMachine 외부에서 상태가 변경되야 하는 경우 ex) Hit 등등
+
+	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+	HIT_DESC m_PendingHitDesc = {};
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
+	
 	
 
 public:

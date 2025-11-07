@@ -18,9 +18,9 @@ HRESULT CAugustaAirJump::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaAirJump::OnEnter()
+void CAugustaAirJump::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -32,7 +32,6 @@ void CAugustaAirJump::OnEnter()
     m_iCurrentAnimIdx = ENUM_CLASS(eJumpType);
 
     m_pAugusta->Set_Gravity(false);
-
 }
 
 void CAugustaAirJump::OnUpdate(_float fTimeDelta)
@@ -64,6 +63,12 @@ void CAugustaAirJump::Handle_Input()
     EAugustaJumpType eJumpType = static_cast<EAugustaJumpType>(m_iCurrentAnimIdx);
 
     m_eDir = m_pAugusta->Calculate_Direction(); 
+	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
+
+	// Hit면 모든 상태 제거
+	if (m_States[HIT])
+		return;
+
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -73,12 +78,13 @@ void CAugustaAirJump::Handle_Input()
         && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) && CState::Is_EscapePossible();
     
     // Jump Attack
-    m_States[AIR_ATTACK] = eJumpType == EAugustaJumpType::JUMP_WALK_LF && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+    m_States[AIR_ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CAugustaAirJump::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+
 }
 
 // 점프에 관련된 Update
@@ -101,6 +107,12 @@ void CAugustaAirJump::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
     // 1. 우선순위 제일 높음.
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
 	if (m_States[FLY])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;

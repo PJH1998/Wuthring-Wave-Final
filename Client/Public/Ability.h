@@ -37,15 +37,18 @@ public:
 	// 최소 쿨타임 / 최대 쿨타임.
 	_float Get_RemainingCooldown(const _string& strSkillName) const;  // 기존
 	_float Get_MaxCooldown(const _string& strSkillName);        // 기존
+
 	_float Get_HpRatio() const;
 
 	_bool Check_AnyCondition(_uint iConditionFlag); // 현재 컨디션 제어
 	_bool Check_AllCondition(_uint iConditionFlag); // 모든 컨디션 확인
 
 	// 수치 값들 (공명 , HP 게이지 등등)
-	_float Get_CostRatio(COST_TYPE eType) const; // 게이지 1 (공명), 2 (POINT), 3 (ULTI), 4(SWORD), 5. 
+	_float Get_CostRatio(COST_TYPE eType) const;    // 그냥 캐릭터들 특수 Cost로 사용할 거같고.
 	_float Get_Hp() { return m_CharacterInfo.fHp; } // 현재 Hp
 	_float Get_MaxHp() { return m_CharacterInfo.fMaxHp; } // Max Hp
+	_float Get_Resonance() { return m_CharacterInfo.fResonance; }
+	
 
 	const vector<UISKILL_SLOT>& Get_UISkillSlots() const { return m_UISlots; }
 #pragma endregion
@@ -54,7 +57,8 @@ public:
 #ifdef _DEBUG
 public:
 	void Print_KeySlotinfo();
-
+#else
+	void Print_KeySlotinfo();
 #endif // _DEBUG
 
 
@@ -70,6 +74,8 @@ public:
 	void Add_Cost(COST_TYPE eType, _float fCost);
 	void Set_Hp(_float fHp);
 	void Add_Hp(_float fHp);
+	void Set_Resonance(_float fResonance);
+	void Add_Resonance(_float fResonance);
 
 	void Bind_Condition(_uint iCondition);
 	void Remove_Condition(_uint iCondition);
@@ -83,13 +89,15 @@ public:
 
 #ifdef _DEBUG
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 
 	void Print_Cost();
 	void Print_CoolTime();
 #else
+	void Print_Cost();
+	void Print_CoolTime();
 public:
-	void Debug_FullCost();
+	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
 
 

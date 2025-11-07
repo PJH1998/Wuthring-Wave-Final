@@ -88,6 +88,9 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 	_float2 vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
 	_float2 vMin = _float2(fMinX, fMinZ);
 
+	if (FAILED(pShader->Bind_Value("iNumSector", &m_iNumSector, sizeof(_int))))
+		CRASH("Failed SectorStartPos");
+
 	if (FAILED(pShader->Bind_Value("iNumSectorX", &m_MapDesc.iNumSectorX, sizeof(_int))))
 		CRASH("Failed SectorStartPos");
 
@@ -102,7 +105,7 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 
 	if (FAILED(pShader->Bind_Value("vShadowMapSize", &m_vShadowMapSize, sizeof(_float2))))
 		CRASH("Failed SectorStartPos");
-
+	
 	return S_OK;
 }
 
@@ -125,6 +128,22 @@ HRESULT CShadowMap::End_ShadowMap()
 	Safe_Release(m_pOriginalDSV);
 
 	return S_OK;
+}
+
+void CShadowMap::Clear()
+{
+	for (auto& pBounding : m_Boundings)
+		Safe_Delete(pBounding);
+	m_Boundings.clear();
+
+	Safe_Release(m_pShadowMapDSV);
+	Safe_Release(m_pShadowMapSRV);
+	Safe_Release(m_pConstantBuffer);
+
+	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
+		m_Matrices[i].clear();
+
+	m_SectorUV.clear();
 }
 
 #ifdef _DEBUG
@@ -326,10 +345,9 @@ _float3 CShadowMap::Compute_CenterPos(_int iWeightX, _int iWeightZ, _float3 vOri
 	_float fExtentsX = vExtents.x * iWeightX;
 	_float fExtentsZ = vExtents.z * iWeightZ;
 
-	_float3 vCenterPos = _float3(vOriginPos.x + fExtentsX, vOriginPos.y, vOriginPos.z + fExtentsZ);
+	_float3 vCenterPos = _float3(vOriginPos.x + fExtentsX, vOriginPos.y + vExtents.y, vOriginPos.z + fExtentsZ);
 
 	return vCenterPos;
-
 }
 
 _float CShadowMap::Compute_MaxRadius(const BoundingBox* Bounding, _float3 vCenterPos)
@@ -432,11 +450,13 @@ void CShadowMap::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-	for (auto& pBounding : m_Boundings)
-		Safe_Delete(pBounding);
-	m_Boundings.clear();
+	Clear();
 
-	Safe_Release(m_pShadowMapDSV);
-	Safe_Release(m_pShadowMapSRV);
-	Safe_Release(m_pConstantBuffer);
+	//for (auto& pBounding : m_Boundings)
+	//	Safe_Delete(pBounding);
+	//m_Boundings.clear();
+
+	//Safe_Release(m_pShadowMapDSV);
+	//Safe_Release(m_pShadowMapSRV);
+	//Safe_Release(m_pConstantBuffer);
 }

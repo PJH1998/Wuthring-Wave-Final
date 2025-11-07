@@ -31,6 +31,7 @@ HRESULT CAugustaGriffon::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+	Ready_AttackVolumes();
     return S_OK;
 }
 
@@ -146,6 +147,11 @@ void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
+}
+
+void CAugustaGriffon::Ready_AttackVolumes()
+{
+
 }
 
 void CAugustaGriffon::Bind_Resources()

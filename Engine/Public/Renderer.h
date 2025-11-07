@@ -93,7 +93,6 @@ private:
 	_float									m_fDebugRoughness = 0.2f;
 	_float									m_fDebugMetallic = 0.f;
 #endif
-
 private:
 	// Viewport Size 
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
@@ -109,20 +108,21 @@ private:
 	void						Render_Outline();
 	void						Render_NonBlend();	// 임시
 	void						Render_Static();
-	void						Render_SSAO();
 	void						Render_Decal();
+	void						Render_SSAO();
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_Combined();
 	void						Render_NonLight();
-	void						Render_Emissive();
-	void						Render_Bloom();
+	void						Render_Emissive();	// 단독 Emissive
+	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
+	void						Render_Bloom();		// Emissvie 처리
 	void						Render_BloomCombined();
 	void						Render_DistortionObject();
 	void						Render_Blend();
-	void						Render_Distortion();
 	void						Render_LUT();
 	void						Render_Fog();
+	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();

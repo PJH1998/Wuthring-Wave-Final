@@ -18,9 +18,9 @@ HRESULT CAugustaAirSkill::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirSkill::OnEnter()
+void CAugustaAirSkill::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -129,7 +129,7 @@ void CAugustaAirSkill::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirSkill::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
     //m_pAugusta->Set_ColliderReferenceBone("Bip001", { 0.f, 0.5f, 0.f }); // 실시간 Offset 수정.
 }
 

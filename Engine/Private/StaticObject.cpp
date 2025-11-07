@@ -37,4 +37,5 @@ void CStaticObject::Sync_Sectors()
 void CStaticObject::Free()
 {
 	__super::Free();
+	Safe_Delete(m_pBoundingBox);
 }

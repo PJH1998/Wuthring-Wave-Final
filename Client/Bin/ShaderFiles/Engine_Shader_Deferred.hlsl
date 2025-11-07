@@ -202,9 +202,11 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
-    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    
-    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    //vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    //
+    //vector vLook = normalize(g_vCamPosition - vWorldPos);
+    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
@@ -218,7 +220,7 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
         float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
         
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fToonShade + fRimPower);
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade) + fRimPower);
     }
     else
     {

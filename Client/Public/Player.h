@@ -109,6 +109,8 @@ private:
 	// Mutex
 	mutex m_Mutex;
 
+	_float m_fTargetDistance = {}; // 몬스터와의 거리
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);

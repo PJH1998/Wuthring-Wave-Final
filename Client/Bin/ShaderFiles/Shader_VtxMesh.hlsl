@@ -9,7 +9,8 @@ Texture2D   g_MetallicTexture;
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector      g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
 
-Texture2D   g_MaskTexture[4] : register(t8);
+//Texture2D   g_MaskTexture[4] : register(t8);
+Texture2D g_MaskTexture[4];
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
@@ -99,6 +100,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     {
         Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
         Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+
     }
     else
     {
@@ -124,24 +126,26 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         if (g_HasMask)
         {
             vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        
+            
             float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
 
-            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+            //vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
         
-            float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
-            if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
-                vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+            //float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+            //if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+            //    vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
 
             //if (vMask.r == 0.f && vMask.g == 0.f)
             //    vNormal = vNormal1;
             //else
             //{
-            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
-            vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+            //vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+            //vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
             //}
+            
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
         }
         else
         {
@@ -456,7 +460,7 @@ technique11 DefaultTechnique
 {
     pass DefaultPass // 0
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 

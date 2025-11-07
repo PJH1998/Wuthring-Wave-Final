@@ -47,6 +47,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
+	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
 
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
@@ -69,7 +70,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 4. Parts 갱신
+	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
@@ -79,7 +80,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-
+	// 3. 몬스터가 있다면?
+	m_pTargetTransform;
+	
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
 }
@@ -90,48 +93,43 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 6. 파츠 갱신.?
+	// 2. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
 
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Update(fTimeDelta);
-
-    // 2. 상태 머신 갱신
+    // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
-    // 3. 현재 위치 - 1Frame 이전 위치 값 계산
+    // 5. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
+	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
 
-    // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+    // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Camera 갱신 => 위치 따라오게
+    // 7. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-	// 6. Land Check
-	m_IsLand = Is_Land(0.2f, 0.5f);
+	// 8. Land Check
+	m_IsLand = Is_LandCollider();
 
+	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
+	m_IsHit = false;
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    // 파츠 갱신
+    // 1. 파츠 갱신
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
             pPart.second->Late_Update(fTimeDelta);
     }
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Late_Update(fTimeDelta);
 
 
     m_pColliderCom->Sync_Position(m_pTransformCom);
@@ -179,10 +177,6 @@ void CAugusta::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-		if (pAttackVolume != nullptr && pAttackVolume->IsActivate())
-			pAttackVolume->Render();
 
 #endif // _DEBUG
 }
@@ -274,7 +268,6 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
-		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);
@@ -286,6 +279,46 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
 		m_pWing->Activate(IsActive);
 		break;
     }
+}
+
+void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Change_Volume(iVolumeIdx);
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+		m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
+}
+
+void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Volume_Activate(IsActive); // MainVolume 켜기
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Volume_Activate(IsActive); // MainVolume 켜기
+	//	m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
+	//	m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+	//	m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
 }
 
 void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
@@ -332,43 +365,31 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
 // Hit 판정.
 void CAugusta::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg)
+	if (nullptr == pArg || m_IsHit)
 		return;
 
-	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
-	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
 
-	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
-	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
-		return;
+	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
 	
-	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	// 1. 맞는데 또맞진 말자..
+	if (EStateCategory::HIT == eCategory)
+		return;
 
-	// 2. 현재 레이어
-	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
-    
-    // 3. 스킬 판정?
-	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
-
-	// 3. 일단 바로 회전.
-	Rotate_HitTarget(pDesc->pTransform);
-
-	// 4. 방향 판정.
-	if (!m_IsLand)
-		GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_FLY_FALL;
-	else
-	{
-		if (IsSkill)  // Skill인지 
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_B_L;
-		else // Skill이 아니라면
-			GetStateContextForWrite().m_eHitType = EAugustaHitType::BEHIT_S_L;
-	}
-
-	// 5. Hit 상태 적용
-	//CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
-
-	// 6. 데미지 적용
+	// 2. 데미지는 바로 감소시킵니다.
+	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+
+
+	// 3. 캐스팅 해서? => 들고 있기.
+	m_PendingHitDesc = *pDesc;
+
+	
+
+	// 4. 현재 상태 변경.
+	m_IsHit = true;
 }
 
 
@@ -376,6 +397,7 @@ void CAugusta::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
+
 
 #ifdef _DEBUG
 void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
@@ -388,18 +410,32 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 #pragma region NOTIFY
 void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Player"))
-    {
-		m_pColliderCom->IsActivate(IsActive);
-    }
-    else if (wStrColliderTag == TEXT("Bayonet"))
-    {
-        
-    }
-    else if (wStrColliderTag == TEXT("SkillWeapon"))
-    {
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
 
-    }
+	// Main Attack Volume의 TriggerActivate
+	if (wstrTypeTag == TEXT("Bayonet"))
+	{
+		if (nullptr != m_pBayonet)
+			m_pBayonet->Volume_Activate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("SkillWeapon"))
+	{
+		if (nullptr != m_pSkillWeapon)
+			m_pSkillWeapon->Volume_Activate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("Griffon"))
+	{
+		if (nullptr != m_pGriffon)
+			m_pGriffon->Volume_Activate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("Augusta"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
+
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -408,6 +444,33 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+void CAugusta::Object_Func(const _wstring& wStrObjectTag)
+{
+
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+
+	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	
+	_uint iVolumeIdx = stoul(var3);
+
+	/* BAYONET|ATTACK|0*/
+	// 1. 어떤 무기인가?
+	if (var1 == TEXT("BAYONET"))
+	{
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	}
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
@@ -489,8 +552,6 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
     _float3 vRotation = {};
     _float3 vPosition = {};
 
-	m_AttackVolumes.resize(PARTTYPE::TYPE_END);
-
     for (_uint i = 0; i < PARTTYPE::TYPE_END; ++i)
     {
         _wstring strPartName = pDesc->PartPrototypes[i].first;
@@ -533,12 +594,12 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 					this->OnHitEnter(iLayer, pOther, Manifold);
 				};
 
-			m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
-				Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
-			if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
-				CRASH(m_pMainAttackVolume);
-			
-			m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
+			//	Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
+			//if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
+			//	CRASH(m_pMainAttackVolume);
+			//
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
         case PARTTYPE::PART_SKILLWEAPON:
@@ -601,6 +662,35 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
     }
 }
 
+void CAugusta::Ready_AttackVolumes()
+{
+	// size 설정
+	m_AttackVolumes.resize(VOLUME_END);
+
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 장비
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 1000.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	// Attack용 만들기.
+	m_AttackVolumes[VOLUME::VOLUME_RISE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME::VOLUME_RISE]);
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME::VOLUME_RISE]; // Main Attack Volume 설정.
+}
+
 CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CAugusta* pInstance = new CAugusta(pDevice, pContext);
@@ -634,12 +724,4 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (pAttackVolume != nullptr)
-			Safe_Release(pAttackVolume);
-	}
-
-	m_AttackVolumes.clear();
 }

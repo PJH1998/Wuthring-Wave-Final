@@ -21,6 +21,7 @@ private:
 	void			Ready_MonsterTest();
 	void			Ready_Effect();
 	void			Ready_Skybox();
+	void			Ready_UI();
 
 #ifdef _DEBUG
 private:
@@ -37,6 +38,7 @@ private:
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
 	class CGameSystem* m_pGameSystem = { nullptr };
+	_bool m_SonoroTest = { false };
 
 public:
 	static		CLevel_GamePlay* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

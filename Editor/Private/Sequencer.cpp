@@ -233,10 +233,15 @@ void CSequencer::Selectable_Item()
 		ImGui::Text("==================================");
 
 		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
-			SetUp_Point(item);
-
-		if(ITEM_TYPE::ACTION == item.eType)
-			SetUp_Camera(item);
+		{
+			if (ITEM_TYPE::ACTION == item.eType)
+			{
+				SetUp_Camera_Point(item);
+				SetUp_Camera(item);
+			}
+			if (ITEM_TYPE::SCENE == item.eType)
+				SetUp_Scene(item);
+		}
 
 		ImGui::End();
 
@@ -244,7 +249,7 @@ void CSequencer::Selectable_Item()
 	}
 }
 
-void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
+void CSequencer::SetUp_Camera_Point(SEQUENCE_ITEM& item)
 {
 	ImGui::Begin("Point Setting");
 
@@ -300,6 +305,11 @@ void CSequencer::SetUp_Point(SEQUENCE_ITEM& item)
 	ImGui::End();
 }
 
+void CSequencer::SetUp_Scene_Point(SEQUENCE_ITEM& item)
+{
+
+}
+
 void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 {
 	ImGui::Text("[Camera Action Setting]");
@@ -327,6 +337,11 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 		m_isLoad = !m_isLoad;
 	if(m_isLoad)
 		Load_CameraAction();
+}
+
+void CSequencer::SetUp_Scene(SEQUENCE_ITEM& item)
+{
+	ImGui::Text("[Scene Camera Setting]");
 }
 
 void CSequencer::Sorting_Item()

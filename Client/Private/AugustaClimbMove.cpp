@@ -18,9 +18,9 @@ HRESULT CAugustaClimbMove::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaClimbMove::OnEnter()
+void CAugustaClimbMove::OnEnter(void* pArg)
 {
-    CClimbState::OnEnter();
+    CClimbState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -101,7 +101,7 @@ void CAugustaClimbMove::Update_ClimbAnimation(_float fTimeDelta)
 void CAugustaClimbMove::Check_Physics(_float fTimeDelta)
 {
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
     // 머리에서 쐈는데 안 맞으면?
     m_States[ONTOP] = m_States[WALL] && (!m_pAugusta->Check_ClimbableWall_Above(1.f, &m_vHeadWallNormal));

@@ -18,10 +18,10 @@ HRESULT CRoverGroundDash::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CRoverGroundDash::OnEnter()
+void CRoverGroundDash::OnEnter(void* pArg)
 {
     // 상위 객체 수행 작업.
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pRover->TakeStateContext();
@@ -62,7 +62,7 @@ void CRoverGroundDash::Handle_Input()
 {
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
-	m_States[LAND] = m_pRover->Is_Land();
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);;
 }
 

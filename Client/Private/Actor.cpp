@@ -85,6 +85,21 @@ void CActor::Print_CoolTime()
 
 	m_pAbillityCom->Print_CoolTime();
 }
+#else
+void CActor::Print_Cost()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_Cost();
+}
+void CActor::Print_CoolTime()
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Print_CoolTime();
+}
 #endif // _DEBUG
 
 

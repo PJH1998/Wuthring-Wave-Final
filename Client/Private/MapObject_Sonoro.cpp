@@ -1,14 +1,15 @@
 ﻿#include "ClientPch.h"
 #include "MapObject_Sonoro.h"
-
+#include"GameSystem.h"
 CMapObject_Sonoro::CMapObject_Sonoro(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
 {
 }
 
 CMapObject_Sonoro::CMapObject_Sonoro(const CMapObject_Sonoro& Prototype)
-	: CStaticObject{ Prototype }
+	: CStaticObject{ Prototype }, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject_Sonoro::Initialize_Prototype()
@@ -29,14 +30,13 @@ HRESULT CMapObject_Sonoro::Initialize_Clone(void* pArg)
 	Ready_Component(pArg);
 	m_iNumLOD = static_cast<_uint>(m_pModelComArray.size()) - 1;
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
-	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
-
 	Sync_Sectors();
-
+	
 	/*if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;*/
 
+	m_IsRender = m_pGameSystem->Add_To_Management(pDesc->eObjectType, this);
 	return S_OK;
 }
 
@@ -51,11 +51,14 @@ void CMapObject_Sonoro::Update(_float fTimeDelta)
 
 void CMapObject_Sonoro::Late_Update(_float fTimeDelta)
 {
-	//m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	//if (m_IsRender)
+	//	m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CMapObject_Sonoro::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
+	if (!*m_IsRender)
+		return;
 	_uint iLODIndex = m_iLODIndex;
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
@@ -190,9 +193,6 @@ void CMapObject_Sonoro::Ready_Component(void* pArg)
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}
-	else
-		int a = 0;
-
 }
 
 CMapObject_Sonoro* CMapObject_Sonoro::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -228,7 +228,7 @@ void CMapObject_Sonoro::Free()
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
-	Safe_Delete(m_pBoundingBox);
+	Safe_Release(m_pGameSystem);
 
 	for (auto& pModel : m_pModelComArray)
 		Safe_Release(pModel);

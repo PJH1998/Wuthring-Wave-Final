@@ -26,6 +26,7 @@
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
 #include "ShadowMap.h"
+#include "Decal_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -117,6 +118,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pShadowMap);
 
+	m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pDecal_Manager);
+
 	return S_OK;
 }
 
@@ -147,6 +151,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pFont_Manager->Late_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
+	m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
@@ -574,10 +579,14 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
+void CGameInstance::OnShake(const _float3& vDir)
+{
+	m_pCamera_Manager->OnShake(vDir);
+}
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }
@@ -917,6 +926,21 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #endif
 #pragma endregion
 
+#pragma region DECAL_MANAGER
+HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
+{
+	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath);
+}
+HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
+{
+	return m_pDecal_Manager->Add_DecalData(strDecalTag, Decal);
+}
+HRESULT CGameInstance::Render_Decal()
+{
+	return m_pDecal_Manager->Render();
+}
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -939,6 +963,8 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
+	m_pShadowMap->Clear();
+	m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;
@@ -973,6 +999,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadowMap);
+	Safe_Release(m_pDecal_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);

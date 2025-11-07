@@ -18,9 +18,9 @@ HRESULT CAugustaGroundWalk::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundWalk::OnEnter()
+void CAugustaGroundWalk::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 }
 
 void CAugustaGroundWalk::OnUpdate(_float fTimeDelta)

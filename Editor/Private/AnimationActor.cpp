@@ -144,7 +144,7 @@ void CAnimationActor::Update(_float fTimeDelta)
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, true, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, true, true, 1.f);
 
         //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
@@ -290,6 +290,20 @@ HRESULT CAnimationActor::Bind_Bone_to_GUI()
 
 // Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
 
+void CAnimationActor::Change_CurrentAnimation(_string strAnimName)
+{
+	if (!strAnimName.empty())
+	{
+		if (!m_pModelCom->Find_Animation(strAnimName))  // 만약 없는 애니메이션이면? 아무것도 하지마라.
+			return;
+		m_strCurrentAnimation = strAnimName;
+		
+		
+		if (nullptr != m_pChildActor)
+			m_pChildActor->Change_CurrentAnimation(strAnimName);
+	}
+}
+
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
@@ -322,6 +336,12 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
+	if (nullptr != m_pChildActor)
+	{
+		/*m_pChildActor->Set_A*/
+		m_pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
+	}
+		
 }
 
 // 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.
@@ -402,8 +422,18 @@ void CAnimationActor::Render_Detail()
 
 	ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
 
+	static float fAnimSpeed = 1.f;
 	if (!m_strCurrentAnimation.empty())
+	{
 		ImGui::Text("Child Duration : %.2f", fDuration);
+		ImGui::InputFloat("|", &fAnimSpeed);
+		ImGui::SameLine();
+		if (ImGui::Button("Apply Speed"))
+		{
+			Set_AnimationSpeed(fAnimSpeed);
+		}
+	}
+		
 	if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
 		Set_TrackPosition(m_fTrackPosition);
 

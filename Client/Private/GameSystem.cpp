@@ -11,6 +11,8 @@
 #include "UI_ControlHelper.h"
 #include "UI_StatusSyncer.h"
 
+#include"Sonoro_Manager.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -37,6 +39,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pDirector = CDirector::Create();
 	ASSERT_CRASH(m_pDirector);
+
+	m_pSonoro_Manager = CSonoro_Manager::Create();
+	ASSERT_CRASH(m_pSonoro_Manager);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -140,10 +145,10 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
-HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
-{
-	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
-}
+//HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
+//{
+//	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
+//}
 #pragma region PLAYER STATUS
 
 #pragma endregion
@@ -175,6 +180,29 @@ void CGameSystem::Clear_TriggerCallBack()
 }
 #pragma endregion
 
+
+#pragma region SONORO_MANAGER
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects)
+{
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+}
+
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects)
+{
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+}
+
+void CGameSystem::Update(_float fTimeDelta)
+{
+	m_pSonoro_Manager->Update(fTimeDelta);
+}
+
+void CGameSystem::Change_Sonoro(_bool IsSonoro)
+{
+	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+}
+#pragma endregion
+
 void CGameSystem::Free()
 {
 	__super::Free();
@@ -187,4 +215,6 @@ void CGameSystem::Free()
 	Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
+	Safe_Release(m_pSonoro_Manager);
+
 }
