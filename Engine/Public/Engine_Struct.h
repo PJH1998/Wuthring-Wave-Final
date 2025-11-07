@@ -51,6 +51,13 @@ namespace Engine
 		_float3 vLightDir;
 	}SHADOW_MAP_DESC;
 
+	typedef struct tagDecalDesc
+	{
+		_matrix WorldMatrix;
+		_float fLifeTime;
+		_float4 vColor;
+	}DECAL_DESC;
+
 	typedef struct tagNotify
 	{
 		_float fTrackPosition;
