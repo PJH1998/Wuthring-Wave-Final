@@ -65,6 +65,13 @@ HRESULT CDecal_Manager::Render()
 	return S_OK;
 }
 
+void CDecal_Manager::Clear()
+{
+	for (auto& Pair : m_Decals)
+		Safe_Release(Pair.second);
+	m_Decals.clear();
+}
+
 HRESULT CDecal_Manager::Ready_Components()
 {
 	m_pShader = CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Engine_Shader_Decal.hlsl"), VTX_DECAL::Elements, VTX_DECAL::iNumElements);
@@ -101,7 +108,6 @@ void CDecal_Manager::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-	
 	for (auto& Pair : m_Decals)
 		Safe_Release(Pair.second);
 	m_Decals.clear();
