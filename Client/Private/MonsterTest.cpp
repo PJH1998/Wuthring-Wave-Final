@@ -161,7 +161,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	{
 
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (false == m_isAggro)
 			m_isAggro = true;
@@ -190,6 +191,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 			m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
 		else if (wstrPartTag == TEXT("WL"))
 			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
+	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pParryVolume->TriggerActivate(Isactive);
 	}
 	else if (wstrTypeTag == TEXT("Gravity"))
 	{
@@ -260,6 +265,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
 		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Scythe"), WorldMatrix, &Desc);
+	}
+	else if (wstrTypeTag == TEXT("Look"))
+	{
+		TurnFix();
 	}
 }
 
@@ -526,6 +535,15 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_beHit = true;
+		if (m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 }
 
 void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -566,20 +584,13 @@ _bool CMonsterTest::isAttackEnable()
 	if(!m_isDetecting)
 		return false;
 	_bool Result{};
-	//for(_uint i = 0; i < 2; ++i)
-	//{
-	//	if(m_fAttackAcc[i] <= 0.f)
-	//	{
-	//		Result = true;
-	//		break;
-	//	}
-	//}
-	if(m_fAttackAcc[0] <= 0.f) Result = true;
-	if(m_fAttackAcc[1] <= 0.f) Result = true;
-	if(m_fAttackAcc[2] <= 0.f) Result = true;
-	if(m_fAttackAcc[3] <= 0.f) Result = true;
-	if(m_fAttackAcc[6] <= 0.f) Result = true;
-	if(m_fAttackAcc[9] <= 0.f) Result = true;
+
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK1] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK2] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK3] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK4] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK7] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK10] <= 0.f) Result = true;
 	if(Result)
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));

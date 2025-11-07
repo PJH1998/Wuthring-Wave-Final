@@ -20,6 +20,7 @@ public:
 		const _char* pAnimationTag;
 		_float fHp;
 		_float fAttackDmg;
+		_float fImpluseRate;
 	}HAVOCWARRIOR_DESC;
 
 private:
