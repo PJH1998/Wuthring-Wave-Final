@@ -167,7 +167,10 @@ void CLevel_Test::Ready_MonsterTest()
     //MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     //MobDesc.pAnimationTag = "Born1";
 	//MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	//MobDesc.fHP = 10.f;
 	//MobDesc.fAttackDmg = 1.f;
+	//MobDesc.fMaxStamina = 5.f;
+	//MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
     //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
     //    ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
     //    CRASH("Failed Ready MonsterTest");

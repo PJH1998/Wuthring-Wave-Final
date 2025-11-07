@@ -32,7 +32,10 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
-	m_eTargetLayer = pDesc->eTargetLayer;
+	if (pDesc->eTargetLayers.empty())
+		m_eTargetLayer.push_back(pDesc->eTargetLayer);
+	else
+		m_eTargetLayer = pDesc->eTargetLayers;
 	m_eLayer = pDesc->eLayer;
 	m_eCurrentLayer = m_eLayer;
 	m_CollisionCallback = pDesc->CollisionCallback;
@@ -158,10 +161,14 @@ void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactMani
 {
 	if (m_eCurrentLayer == COLLISIONLAYER::NONE)
 		return;
-	if(ENUM_CLASS(m_eTargetLayer) == iLayer)
+	for(auto& eLayer : m_eTargetLayer)
 	{
-		if (m_CollisionCallback)
-			m_CollisionCallback(iLayer, pDesc, Manifold);
+		if (ENUM_CLASS(eLayer) == iLayer)
+		{
+			if (m_CollisionCallback)
+				m_CollisionCallback(iLayer, pDesc, Manifold);
+			return;
+		}
 	}
 }
 

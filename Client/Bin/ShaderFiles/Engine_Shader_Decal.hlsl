@@ -96,6 +96,7 @@ PS_OUT PS_MAIN(PS_IN In)
     if (g_HasNormal)
         vNormal = g_NormalTexture.Sample(DefaultSampler, vDecalUV);
     
+    
     if (g_HasMask)
     {
         vMask = g_MaskTexture.Sample(DefaultSampler, vDecalUV);
