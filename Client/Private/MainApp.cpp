@@ -156,6 +156,7 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::SKILL), ENUM_CLASS(BPLAYER::SENSOR));
 	
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK), ENUM_CLASS(BPLAYER::SENSOR));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PARRY), ENUM_CLASS(BPLAYER::SENSOR));
 
 
 	// Object VS Object
@@ -172,6 +173,7 @@ void CMainApp::SetUp_CollisionLayer()
 	//m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(COLLISIONLAYER::PLAYER)); //몬스터 인식 볼륨
 
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PARRY), ENUM_CLASS(COLLISIONLAYER::ATTACK));
 
 	// Object VS BroadPhase
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::NON_MOVE));
@@ -186,6 +188,7 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::KNOCKBACK), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::SKILL), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PARRY), ENUM_CLASS(BPLAYER::SENSOR));
 }
 
 void CMainApp::Ready_Event()
@@ -307,9 +310,9 @@ void CMainApp::Ready_Prototype_ForStatic()
 
 void CMainApp::Start_Level()
 {
-	//CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
-	CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }
 

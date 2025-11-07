@@ -169,6 +169,8 @@
     <ClInclude Include="..\Public\AnimationActor.h" />
     <ClInclude Include="..\Public\AnimationTool.h" />
     <ClInclude Include="..\Public\AnimNotifyTool.h" />
+    <ClInclude Include="..\Public\Decal.h" />
+    <ClInclude Include="..\Public\Decal_Controller.h" />
     <ClInclude Include="..\public\EditDummy.h" />
     <ClInclude Include="..\public\EditDummy_Augusta.h" />
     <ClInclude Include="..\Public\EditDummy_Map.h" />
@@ -241,6 +243,8 @@
     <ClCompile Include="..\Private\AnimationActor.cpp" />
     <ClCompile Include="..\Private\AnimationTool.cpp" />
     <ClCompile Include="..\Private\AnimNotifyTool.cpp" />
+    <ClCompile Include="..\Private\Decal.cpp" />
+    <ClCompile Include="..\Private\Decal_Controller.cpp" />
     <ClCompile Include="..\private\EditDummy.cpp" />
     <ClCompile Include="..\private\EditDummy_Augusta.cpp" />
     <ClCompile Include="..\Private\EditDummy_Map.cpp" />

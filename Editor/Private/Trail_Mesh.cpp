@@ -100,7 +100,7 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CTrail_Mesh::Render()
