@@ -51,12 +51,14 @@ namespace Engine
 		_float3 vLightDir;
 	}SHADOW_MAP_DESC;
 
-	typedef struct tagDecalDesc
+	typedef struct tagDecalData
 	{
+		enum TYPE { STATIC, NONSTATIC};
+		TYPE eType;
 		_matrix WorldMatrix;
 		_float fLifeTime;
 		_float4 vColor;
-	}DECAL_DESC;
+	}DECAL_DATA;
 
 	typedef struct tagNotify
 	{

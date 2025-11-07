@@ -27,22 +27,35 @@ void CDecal::Update(_float fTimeDelta)
 {
 	for (auto iter = m_DecalDatas.begin(); iter != m_DecalDatas.end();)
 	{
-		iter->vLifeTime.x += fTimeDelta;
-
-		if (iter->vLifeTime.x >= iter->vLifeTime.y)
+		if (iter->first == DECAL_DATA::STATIC)
 		{
-			iter = m_DecalDatas.erase(iter);
+			iter++;
 		}
 		else
 		{
-			++iter;
+			iter->second.vLifeTime.x += fTimeDelta;
+
+			if (iter->second.vLifeTime.x >= iter->second.vLifeTime.y)
+			{
+				iter = m_DecalDatas.erase(iter);
+			}
+			else
+			{
+				++iter;
+			}
 		}
+		
 	}
 
 	m_iNumDecals = static_cast<_uint>(m_DecalDatas.size());
-	
+
+	vector<VTXINSTANCE_DECAL> TempDatas;
+	TempDatas.reserve(m_iNumDecals);
+	for (auto& Data : m_DecalDatas)
+		TempDatas.push_back(Data.second);
+
 	if (m_iNumDecals > 0)
-		m_pVIBuffer_Decal->Update_Buffer(m_DecalDatas);
+		m_pVIBuffer_Decal->Update_Buffer(TempDatas);
 	else
 		m_pVIBuffer_Decal->Clear();
 }
@@ -60,20 +73,23 @@ void CDecal::Render(CShader* pShader)
 	m_pVIBuffer_Decal->Render();
 }
 
-HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath, TEXTURETYPE eTextureType)
+HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
 {
-	if (nullptr != m_pDecalTexture[ENUM_CLASS(eTextureType)])
-		return E_FAIL;
+	for (_uint i = 0; i < ENUM_CLASS(TEXTURETYPE::END); ++i)
+	{
+		if (nullptr == pFilePath[i])
+			continue;
 
-	CTexture* pTexture = CTexture::Create(m_pDevice, m_pContext, pFilePath, 1);
-	ASSERT_CRASH(pTexture);
+		CTexture* pTexture = CTexture::Create(m_pDevice, m_pContext, pFilePath[i], 1);
+		ASSERT_CRASH(pTexture);
 
-	m_pDecalTexture[ENUM_CLASS(eTextureType)] = pTexture;
+		m_pDecalTexture[i] = pTexture;
+	}
 
     return S_OK;
 }
 
-HRESULT CDecal::Add_DecalData(const DECAL_DESC& Decal)
+HRESULT CDecal::Add_DecalData(const DECAL_DATA& Decal)
 {
 	if (m_iNumDecals >= g_iMaxDecal)
 		return E_FAIL;
@@ -88,7 +104,9 @@ HRESULT CDecal::Add_DecalData(const DECAL_DESC& Decal)
 	Data.vLifeTime = _float2(0.f, Decal.fLifeTime);
 	Data.vColor = Decal.vColor;
 
-	m_DecalDatas.push_back(Data);
+	DECAL_INSTANCE Pair = make_pair(Decal.eType, Data);
+
+	m_DecalDatas.push_back(Pair);
 
 	return S_OK;
 }
@@ -106,36 +124,38 @@ HRESULT CDecal::Bind_Resources(CShader* pShader)
 	if (nullptr == pShader)
 		return E_FAIL;
 	
-	if (m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::DIFFUSE)])
+	for (_uint i = 0; i < ENUM_CLASS(TEXTURETYPE::END); ++i)
 	{
-		_bool HasDiffuse = false;
-		if (SUCCEEDED(m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::DIFFUSE)]->Bind_Shader_Resource(pShader, "g_DiffuseTexture")))
-			HasDiffuse = true;
+		if (nullptr == m_pDecalTexture[i])
+			continue;
 
-		if (FAILED(pShader->Bind_Value("g_HasDiffuse", &HasDiffuse, sizeof(_bool))))
+		string strTextureConstantName = {};
+		string strBoolConstantName = {};
+		switch (i)
+		{
+		case ENUM_CLASS(TEXTURETYPE::DIFFUSE):
+			strTextureConstantName = "g_DiffuseTexture";
+			strBoolConstantName = "g_HasDiffuse";
+			break;
+		case ENUM_CLASS(TEXTURETYPE::NORMAL):
+			strTextureConstantName = "g_NormalTexture";
+			strBoolConstantName = "g_HasNormal";
+			break;
+		case ENUM_CLASS(TEXTURETYPE::MASK):
+			strTextureConstantName = "g_MaskTexture";
+			strBoolConstantName = "g_HasMask";
+			break;
+		}
+
+
+		_bool HasTexture = false;
+		if (SUCCEEDED(m_pDecalTexture[i]->Bind_Shader_Resource(pShader, strTextureConstantName.c_str())))
+			HasTexture = true;
+
+		if (FAILED(pShader->Bind_Value(strBoolConstantName.c_str(), &HasTexture, sizeof(_bool))))
 			CRASH("Failed Bind Value");
 	}
 
-	if (m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::NORMAL)])
-	{
-		_bool HasNormal = false;
-		if (SUCCEEDED(m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::NORMAL)]->Bind_Shader_Resource(pShader, "g_NormalTexture")))
-			HasNormal = true;
-
-		if (FAILED(pShader->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool))))
-			CRASH("Failed Bind Value");
-	}
-
-	if (m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::MASK)])
-	{
-		_bool HasMask = false;
-		if (SUCCEEDED(m_pDecalTexture[ENUM_CLASS(TEXTURETYPE::MASK)]->Bind_Shader_Resource(pShader, "g_MaskTexture")))
-			HasMask = true;
-
-		if (FAILED(pShader->Bind_Value("g_HasMask", &HasMask, sizeof(_bool))))
-			CRASH("Failed Bind Value");
-	}
-	
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Depth"), pShader, "g_DepthTexture")))
 		CRASH("Failed Bind RT_Depth");
 

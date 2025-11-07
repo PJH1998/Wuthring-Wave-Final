@@ -145,20 +145,15 @@ HRESULT CVIBuffer_Decal::Bind_Resources()
 	return S_OK;
 }
 
-HRESULT CVIBuffer_Decal::Update_Buffer(const list<VTXINSTANCE_DECAL>& Datas)
+HRESULT CVIBuffer_Decal::Update_Buffer(const vector<VTXINSTANCE_DECAL>& Datas)
 {
 	m_iNumInstance = Datas.size();
 
 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
-	vector<VTXINSTANCE_DECAL> TempDatas;
-	TempDatas.reserve(m_iNumInstance);
-	for (auto& Data : Datas)
-		TempDatas.push_back(Data);
-
 	m_pContext->Map(m_pVBInstance, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
 		
-	memcpy(SubResource.pData, TempDatas.data(), sizeof(VTXINSTANCE_DECAL) * m_iNumInstance);
+	memcpy(SubResource.pData, Datas.data(), sizeof(VTXINSTANCE_DECAL) * m_iNumInstance);
 
 	m_pContext->Unmap(m_pVBInstance, 0);
 		

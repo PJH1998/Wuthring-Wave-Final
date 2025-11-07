@@ -25,7 +25,9 @@ HRESULT CLevel_Shader::Initialize()
     if(FAILED(Ready_TestObjects()))
         CRASH("Failed TestObject");
 
-	if (FAILED(m_pGameInstance->Add_DecalTexture(TEXT("Decal_Test"), TEXT("../../Client/Bin/Resource/Decal/T_Decal_160002.png"), TEXTURETYPE::MASK)))
+	const _tchar* pFilePath[3] = { nullptr, nullptr ,TEXT("../../Client/Bin/Resource/Decal/T_Decal_160002.png") };
+
+	if (FAILED(m_pGameInstance->Add_Decal(TEXT("Decal_Test"), pFilePath)))
 		CRASH("Failed Add DecalTexture");
 
     return S_OK;
