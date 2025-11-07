@@ -492,9 +492,9 @@ void CAnimNotifyTool::Render_CurrentNotify()
 
             if (IsDeleted)
             {
-                auto iterDelete = next(m_SoundNotifies.begin(), iDeleteIndex);
+                auto iterDelete = next(m_ColliderNotifies.begin(), iDeleteIndex);
                 Safe_Release(*iterDelete);
-                m_SoundNotifies.erase(iterDelete);
+				m_ColliderNotifies.erase(iterDelete);
             }
 
             ImGui::EndTabItem();

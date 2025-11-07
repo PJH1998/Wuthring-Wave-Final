@@ -12,12 +12,12 @@ protected:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
-    virtual void OnEnter() override;
+    virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
 protected:
-    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+    _bool Play_Animation(class CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate = 1.f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 protected:
     _uint m_iMoveKey = {};  // 입력 키 ( State 마다 사용할 변수)
@@ -30,7 +30,14 @@ protected:
 	_bool m_IsPartAnimationEnd = {}; //
 	_bool m_IsSubPartAnimationEnd = {}; //
 	_string m_strPrevInfo = {};
+	_string m_strSkillName = {};
+
+
+	_float m_fRootMotionRate = { 1.f }; // 몬스터와 거리에 따라 보간해서 RootMotion Rate를 조절한다..
+
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
+
+
 
 
 

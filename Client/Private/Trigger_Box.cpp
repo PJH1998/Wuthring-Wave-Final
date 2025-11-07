@@ -25,22 +25,21 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(pDesc->WorldMatrix));;
 
 	Ready_Components(pArg);
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [&](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		m_pGameSystem->OnTriggerActivate(0);
+	m_iTriggerIndex = pDesc->iTriggerIndex;
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+
+			Collision();
 		});
 
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [&](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		iLayer = ENUM_CLASS(LEVEL::TEST);
 		int a = 0;
 		});
-
-	m_pGameSystem->TriggerRegister(0, [this](void* pArg) {
-		Collision();
-		});
-
+	
 	return S_OK;
 }
 
@@ -80,7 +79,11 @@ void CTrigger_Box::Ready_Components(void* pArg)
 
 void CTrigger_Box::Collision()
 {
-	int a = 9;
+	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+	if (m_iTriggerIndex == 0)
+		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
+	else if(m_iTriggerIndex == 4)
+		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
 }
 
 void CTrigger_Box::CallBack(_uint iFuncIndex, void* pArg)

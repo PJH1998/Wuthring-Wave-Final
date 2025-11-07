@@ -143,7 +143,11 @@ void CAnimationActor::Update(_float fTimeDelta)
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
+
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, true, true, 1.f);
+
+        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
+
 
         m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
     }
@@ -398,14 +402,24 @@ void CAnimationActor::Render_Detail()
 
 	ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
 
+	static float fAnimSpeed = 1.f;
 	if (!m_strCurrentAnimation.empty())
+	{
 		ImGui::Text("Child Duration : %.2f", fDuration);
+		ImGui::InputFloat("|", &fAnimSpeed);
+		ImGui::SameLine();
+		if (ImGui::Button("Apply Speed"))
+		{
+			Set_AnimationSpeed(fAnimSpeed);
+		}
+	}
+		
 	if (ImGui::SliderFloat("Child Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
 		Set_TrackPosition(m_fTrackPosition);
 
 	_bool IsChanged = { false };
 
-	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LCONTROL))
+	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_LALT))
 	{
 		IsChanged = true;
 		m_IsPlayAnimation = !m_IsPlayAnimation;

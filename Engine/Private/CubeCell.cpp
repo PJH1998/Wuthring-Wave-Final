@@ -4,6 +4,8 @@
 #include "GameInstance.h"
 #include "StaticObject.h"
 
+#include "OctoTree.h"
+
 CCubeCell::CCubeCell()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -68,7 +70,7 @@ void CCubeCell::Update(const _fvector& vCamPos)
 	{
 		// LOD SetUp
 		// Low Depth (Cell 단위)
-		if(m_iDepth >= 0)
+		if(m_iDepth >= 3)
 			Compute_Cell_LOD(vCamPos);
 
 		for (auto& pObject : m_Objects)
@@ -77,8 +79,8 @@ void CCubeCell::Update(const _fvector& vCamPos)
 				continue;
 			if (true == m_pGameInstance->IsIn_WorldSpace(pObject->Get_BoundingBox()))
 			{
-				//if (m_iDepth <= 3)
-				//	m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
+				if (m_iDepth <= 3)
+					m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
 				pObject->Set_LOD(0);
 				m_pGameInstance->Add_Render_StaticObject(pObject);
 			}
@@ -160,15 +162,23 @@ _bool CCubeCell::isIn(const _float* pMinMax)
 
 void CCubeCell::Compute_Cell_LOD(const _fvector& vCamPos)
 {
+	if (m_iLODCnt.load(memory_order_acquire) > MAX_LOD)
+		return;
+
 	_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat3(&m_pBoundingBox->Center) - vCamPos));
 	m_iLODIndex = static_cast<_uint>(fDistance / g_fLODGap);
+	m_iLODCnt.fetch_add(1, memory_order_release);
 }
 
 _uint CCubeCell::Compute_Object_LOD(CStaticObject* pObject, const _fvector& vCamPos)
 {
-	_vector vCenter = XMLoadFloat3(&pObject->Get_BoundingBox()->Center);
+	if (m_iLODCnt.load(memory_order_acquire) > MAX_LOD)
+		return m_iLODIndex;
 
+	_vector vCenter = XMLoadFloat3(&pObject->Get_BoundingBox()->Center);
 	_float fDistance = XMVectorGetX(XMVector3Length(vCenter - vCamPos));
+
+	m_iLODCnt.fetch_add(1, memory_order_release);
 
 	return static_cast<_uint>(fDistance / g_fLODGap);
 }

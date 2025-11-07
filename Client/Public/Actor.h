@@ -36,7 +36,7 @@ public:
 
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) {};
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
 	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
 	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
 	virtual void Hit_Judge(void* pArg = nullptr) {};// 임시
@@ -67,6 +67,8 @@ protected:
 	vector<_uint> m_ShaderPaths = {}; 
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_float m_fTrackPosition = {};
+
+	CALLBACK_CLIENT m_CallBack = {};
 
 protected:
 	void Register_AllNotifies(const _string& strFolderPath);

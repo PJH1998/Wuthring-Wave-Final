@@ -2,9 +2,17 @@
 #include "Loader_GamePlay.h"
 #include"GameSystem.h"
 #include"MapObject.h"
+#include"Trigger_Box.h"
+#include"MapObject_Destruction.h"
+#include"MapObject_Destruction_Debris.h"
+#include"MapObject_NonSonoro.h"
+#include"MapObject_Sonoro.h"
 
 #pragma region FALSE_SOVEREIGN
 #include "MonsterTest.h"
+#include "Ggobul.h"
+#include "FS_Scythe.h"
+#include "AttackVolume.h"
 #pragma endregion
 
 #pragma region UI
@@ -47,15 +55,19 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });w
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	
+	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
-	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
+
+	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
     return S_OK;
 }
 
@@ -68,9 +80,9 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1105/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1105/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1106_SonoroPatch/", m_eCurLevel);
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -98,10 +110,26 @@ HRESULT CLoader_GamePlay::Load_Object()
 {
 	cout << "Object" << endl;
 
+#pragma region MAP
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
 
-    return S_OK;
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction"),
+		CMapObject_Destruction::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Destruction_Debris"),
+		CMapObject_Destruction_Debris::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_TriggerBox"),
+		CTrigger_Box::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Sonoro"),
+		CMapObject_Sonoro::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_NonSonoro"),
+		CMapObject_NonSonoro::Create(m_pDevice, m_pContext));
+#pragma endregion
+	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_Player()
@@ -386,15 +414,21 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+
 	return S_OK;
 }
 
 HRESULT CLoader_GamePlay::Load_MonsterTest()
 {
-	//cout << "MonsterTest" << endl;
+	cout << "MonsterTest" << endl;
+		// Prototype_GameObject_AttackVolume
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_AttackVolume"),
+		CAttackVolume::Create(m_pDevice, m_pContext))))
+		CRASH("AttackVolume Create Failed");
 
 	// Prototype_Component_BehaviorTree_Test
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_BehaviorTree_FalseSovereign"),
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_Component_BehaviorTree_Test"),
 		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FalseSovereign/FalseSovereign_BT.json"))))
 		CRASH("BehaviorTree Create Failed");
 
@@ -414,6 +448,41 @@ HRESULT CLoader_GamePlay::Load_MonsterTest()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
 		CMonsterTest::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
+
+#pragma region GGOBUL
+	// Prototype_Component_Model_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Ggobul"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Ggobul/Ggobul.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Ggobul"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Ggobul/Animation/Ggobul_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Ggobul
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
+		CGgobul::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region SCYTHE_TANTACLE
+	// Prototype_Component_Model_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Scythe"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/FS_Scythe/FS_Scythe.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_Component_AnimMachine_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_Scythe"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/FS_Scythe/Animation/FS_Scythe_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_GameObject_Scythe
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		CFS_Scythe::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
 	return S_OK;
 }
 

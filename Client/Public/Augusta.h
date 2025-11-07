@@ -116,6 +116,7 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 	virtual void	Render_Shadow() override;
+	virtual void	Render_OutLine() override;
 #pragma endregion
 
 
@@ -124,23 +125,31 @@ public:
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) override;
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
+	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) override;
+	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
+	
+
 #ifdef _DEBUG
 public:
 	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-
-	
 #endif // _DEBUG
 
 #pragma region 2. NOTIFY
 	public:
 		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
 		virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+		virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
+#pragma endregion
+
+#pragma region 3. CALLBACK
+	public:
+		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 #pragma endregion
 
 
@@ -150,6 +159,7 @@ private:
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
+
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };

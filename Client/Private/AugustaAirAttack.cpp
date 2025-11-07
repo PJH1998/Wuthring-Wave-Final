@@ -20,9 +20,9 @@ HRESULT CAugustaAirAttack::Initialize(class CGameObject* pOwner)
 }
 
 
-void CAugustaAirAttack::OnEnter()
+void CAugustaAirAttack::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -205,7 +205,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 
 void CAugustaAirAttack::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
@@ -278,6 +278,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
     {
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
         {
+			if (SKILL_STATE::READY != m_pAugusta->Use_Skill("AirAttack_HackDown_Sp_End"))
+				return;
+
 			m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END;
 			m_pAugusta->GetStateContextForWrite().m_strPrevInfo = "Griffon";
 			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
@@ -321,6 +324,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
             {
+
                 if (m_States[MOVE])
                 {
                     m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;

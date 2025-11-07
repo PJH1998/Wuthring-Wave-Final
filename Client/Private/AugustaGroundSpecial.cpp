@@ -18,9 +18,9 @@ HRESULT CAugustaGroundSpecial::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundSpecial::OnEnter()
+void CAugustaGroundSpecial::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -42,6 +42,8 @@ void CAugustaGroundSpecial::OnEnter()
 
 	if(eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
 		m_pAugusta->Set_Gravity(true);
+
+	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.
 }
 
 void CAugustaGroundSpecial::OnUpdate(_float fTimeDelta)
@@ -71,6 +73,10 @@ void CAugustaGroundSpecial::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false);
     m_iComboCount = 0;
     m_pAugusta->Set_Gravity(true); 
+
+	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+
 }
 
 void CAugustaGroundSpecial::Handle_Input()
@@ -112,7 +118,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Is_Land();
+    m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
@@ -121,44 +127,109 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
+	// 1. 탈출 가능 시점에서
     if (IsEscapePossible)
     {
-        if (m_States[ATTACK])
-        {
-            switch (m_iComboCount)
-            {
-            case COMBO::NONE:
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
-                m_iComboCount = COMBO::ATTACK01;
-                break;
-            case COMBO::ATTACK01:
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
-                m_iComboCount = COMBO::ATTACK02;
-                break;
-            case COMBO::ATTACK02:
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
-                m_iComboCount = COMBO::ATTACK03;
-                break;
-            case COMBO::ATTACK03:
-				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
-				m_iComboCount = COMBO::ATTACK04;
-                break;
-            case COMBO::ATTACK04:
-				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
-				m_iComboCount = COMBO::ATTACK05;
-                break;
-            case COMBO::ATTACK05:
-				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
-				m_iComboCount = COMBO::ATTACK06;
-                break;
-            case COMBO::ATTACK06:
-				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
-				m_iComboCount = COMBO::ATTACKOMNI;
-                break;
-            }
-            return;
-        }
+		// 2. 어택키를 눌렀을때 => Ability에 사용 가능한 스킬인지를 묻습니다.
+		if (m_States[ATTACK])
+		{
+			m_States[ATTACK01] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack01")) && (m_iComboCount == 0);
+			m_States[ATTACK02] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack02")) && (m_iComboCount == 1);
+			m_States[ATTACK03] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack03")) && (m_iComboCount == 2);
+			m_States[ATTACK04] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack01")) && (m_iComboCount == 3);
+			m_States[ATTACK05] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack02")) && (m_iComboCount == 4);
+			m_States[ATTACK06] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttack03")) && (m_iComboCount == 5);
+			m_States[ATTACKOMNI] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("SpAttackOmni")) && (m_iComboCount == 6);
 
+			if (m_States[ATTACK01])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack01"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
+				m_iComboCount = COMBO::COMBO_ATTACK01;
+				m_pAugusta->Rotate_Target();
+				return;
+			}
+
+			if (m_States[ATTACK02])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack02"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
+				m_iComboCount = COMBO::COMBO_ATTACK02;
+				m_pAugusta->Rotate_Target();
+				return;
+			}
+
+			if (m_States[ATTACK03])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack03"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
+				m_iComboCount = COMBO::COMBO_ATTACK03;
+				m_pAugusta->Rotate_Target();
+				return;
+			}
+
+			if (m_States[ATTACK04])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack01"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK01);
+				m_iComboCount = COMBO::COMBO_ATTACK04;
+				m_pAugusta->Rotate_Target();
+				return;
+			}
+
+			if (m_States[ATTACK05])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack02"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK02);
+				m_iComboCount = COMBO::COMBO_ATTACK05;
+				m_pAugusta->Rotate_Target();
+				return;
+			}
+
+			if (m_States[ATTACK06])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttack03"))
+					return;
+
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACK03);
+				m_iComboCount = COMBO::COMBO_ATTACK06;
+				m_pAugusta->Rotate_Target();
+
+				// Bind Condition Burst 궁
+				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+				m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+
+				return;
+			}
+
+			if (m_States[ATTACKOMNI])
+			{
+				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttackOmni"))
+					return;
+
+				// Remove Condition 마지막 Burst 궁
+				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+				
+				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI);
+				m_iComboCount = COMBO::COMBO_ATTACKOMNI;
+				m_pAugusta->Play_Action(TEXT("Action_Augusta_SpAttackOmni"));
+				//m_pAugusta->Rotate_Target();
+				return;
+			}
+
+
+		}
+    
         if (eSpType != EAugustaSpecialType::SPATTACKOMNI)
         {
             if (m_States[DASH])
@@ -209,7 +280,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 80.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);

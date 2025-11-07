@@ -10,12 +10,16 @@ class CAnimMachine;
 NS_END
 
 NS_BEGIN(Client)
+
+class CAttackVolume;
+
 class CGgobul final : public CActor
 {
 public:
 	enum GGOBULTYPE { HEAD, HAMMER, KNIFE, END};
 	typedef struct tagGgobulDesc : public CActor::ACTOR_DESC
 	{
+		_float fAttackDmg;
 	}GGOBUL_DESC;
 
 	typedef struct tagGgobulReset
@@ -48,8 +52,8 @@ public:
 	virtual void	Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void	Object_Func(const _wstring& wStrObjectTag) override;
 private:
-	CRigidbody*			m_pAttackVolume[GGOBULTYPE::END] = {nullptr,};
-	CAnimMachine*		m_pAnimMachineCom = { nullptr };
+	CAttackVolume*			m_pAttackVolumes[GGOBULTYPE::END] = {nullptr,};
+	CAnimMachine*			m_pAnimMachineCom = { nullptr };
 
 	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
 	const _float4x4*		m_pAttackTransform = { nullptr };
@@ -59,12 +63,14 @@ private:
 	_string		m_strAnimKey;
 	_uint		m_iState{};
 
-	_float m_fAttackDamage{};
+	_float		m_fAttackDmg{};
+	CALLBACK_CLIENT			m_CallBack{};
 
 private:
 	void			Bind_Resources();
 	void			Ready_Component(GGOBUL_DESC* pDesc);
-	void			OnCollide_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void			Ready_Volumes(GGOBUL_DESC* pDesc);
+	void			OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 public:
 	static CGgobul* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	CGameObject* Clone(void* pArg) override;

@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "Prop.h"
 #include "Character.h"
+#include "AttackVolume.h"
 
 CProp::CProp(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CPartObject{ pDevice, pContext }
@@ -58,6 +59,9 @@ void CProp::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
 
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+	
 	if (!IsActive)
 	{
 		m_fTrackPosition = 0.f;
@@ -66,12 +70,21 @@ void CProp::Activate(_bool IsActive)
     if (nullptr == m_pRigidbodyCom)
         return;
 
-    if (IsActive)
+  /*  if (IsActive)
         m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
     else
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));*/
         
 }
+
+void CProp::Volume_Activate(_bool IsActive)
+{
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+}
+
+
+
 
 
 void CProp::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _bool IsLoop)
@@ -146,5 +159,17 @@ void CProp::Free()
     Safe_Release(m_pComputeShaderCom);
     Safe_Release(m_pModelCom);
     Safe_Release(m_pRigidbodyCom);
+	
+	// AttackVolumes 제거.
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+		
+
+	m_AttackVolumes.clear();
+
+	//Safe_Release(m_pMainAttackVolume);
     m_pParentTransform = { nullptr };
 }

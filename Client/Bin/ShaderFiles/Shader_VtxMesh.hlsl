@@ -9,16 +9,25 @@ Texture2D   g_MetallicTexture;
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
 vector      g_vMatrlSpecular = vector(0.4f, 0.4f, 0.4f, 0.4f);
 
-Texture2D   g_MaskTexture[4] : register(t8);
+//Texture2D   g_MaskTexture[4] : register(t8);
+Texture2D g_MaskTexture[4];
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
+
+matrix g_ShadowMapViewMatrix;
+matrix g_ShadowMapProjMatrix;
+
+float g_fOutLineRadius = 0.0005f;
+float g_fOutLineRadiusZ = 0.0005f;
 
 bool g_HasNormal = false;
 bool g_HasMask = false;
 bool g_HasMetallic = false;
 bool g_IsDynamicObject = false;
 int g_iIndex = 0;
+
+int g_iShadowMapLayer = 0;
 
 struct VS_IN
 {
@@ -91,6 +100,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     {
         Out.vDiffuse = vDiffuse * vMask.r + vDiffuse * (1.f - vMask.r);
         Out.vDiffuse = Out.vDiffuse * vMask.g + vMaskDiffiuse * (1.f - vMask.g);
+
     }
     else
     {
@@ -121,19 +131,21 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
 
-            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+            //vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
         
-            float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
-            if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
-                vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+            //float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+            //if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+            //    vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
 
             //if (vMask.r == 0.f && vMask.g == 0.f)
             //    vNormal = vNormal1;
             //else
             //{
-            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
-            vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+            //vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+            //vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
             //}
+            
+            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
         }
         else
         {
@@ -271,7 +283,6 @@ PS_OUT_DEBUG PS_MAIN_DEBUG(PS_IN In)
 struct VS_OUT_SHADOW
 {
     float4 vPosition : POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 VS_OUT_SHADOW VS_SHADOW(VS_IN In)
@@ -279,21 +290,18 @@ VS_OUT_SHADOW VS_SHADOW(VS_IN In)
     VS_OUT_SHADOW Out = (VS_OUT_SHADOW) 0;
     
     Out.vPosition = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-    Out.vTexcoord = In.vTexcoord;
-    
+
     return Out;
 }
 
 struct GS_IN
 {
     float4 vPosition : POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 struct GS_OUT
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
     uint iIndex : SV_RenderTargetArrayIndex;
 };
 
@@ -311,7 +319,6 @@ void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
         for (int i = 0; i < 3; i++)
         {
             Out.vPosition = mul(In[i].vPosition, matVP);
-            Out.vTexcoord = In[i].vTexcoord;
             Vertices.Append(Out);
         }
         Vertices.RestartStrip();
@@ -321,7 +328,6 @@ void GS_SHADOW(triangle GS_IN In[3], inout TriangleStream<GS_OUT> Vertices)
 struct PS_IN_SHADOW
 {
     float4 vPosition : SV_POSITION;
-    float2 vTexcoord : TEXCOORD0;
 };
 
 void PS_SHADOW(PS_IN_SHADOW In)
@@ -331,7 +337,6 @@ void PS_SHADOW(PS_IN_SHADOW In)
 }
 
 /*======================================================SHADOW_END======================================================*/
-
 
 /*======================================================OUTLINE_BEGIN======================================================*/
 
@@ -353,9 +358,9 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vWorldPos = mul(float4(In.vPosition, 1.f), matWV);
     vector vNormal = normalize(mul(float4(In.vNormal, 0.f), matWV));
    
-    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * 0.12f), 0.f);
-   
-    vector vOutLinePos = vWorldPos +(vNormal * 0.08f);
+    vNormal = float4(vNormal.x, vNormal.y, (vNormal.z * g_fOutLineRadiusZ), 0.f);
+  
+    vector vOutLinePos = vWorldPos + (vNormal * g_fOutLineRadius);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
     
@@ -382,6 +387,51 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
 }
 
 /*======================================================OUTLINE_END======================================================*/
+
+/*======================================================SHADOW_MAP_BEGIN======================================================*/
+
+
+struct VS_OUT_SHADOW_MAP
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+VS_OUT_SHADOW_MAP VS_SHADOW_MAP(VS_IN In)
+{
+    VS_OUT_SHADOW_MAP Out = (VS_OUT_SHADOW_MAP) 0;
+    
+    matrix matWV, matWVP;
+    
+    matWV = mul(g_WorldMatrix, g_ShadowMapViewMatrix);
+    matWVP = mul(matWV, g_ShadowMapProjMatrix);
+
+    Out.vPosition = mul(float4(In.vPosition, 1.f), matWVP);
+    Out.vTexcoord = In.vTexcoord;
+    Out.vProjPos = Out.vPosition;
+    Out.iIndex = g_iShadowMapLayer;
+    
+    return Out;
+}
+
+struct PS_IN_SHADOW_MAP
+{
+    float4 vPosition : SV_POSITION;
+    float2 vTexcoord : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
+    uint iIndex : SV_RenderTargetArrayIndex;
+};
+
+void PS_SHADOW_MAP(PS_IN_SHADOW_MAP In)
+{
+    if (false == IsInNDC(In.vProjPos))
+        discard;
+}
+
+
+/*======================================================SHADOW_MAP_END======================================================*/
 
 struct PS_OUT_EMISSIVE
 {
@@ -410,7 +460,7 @@ technique11 DefaultTechnique
 {
     pass DefaultPass // 0
     {
-        SetRasterizerState(RS_Cull_None);
+        SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
@@ -491,5 +541,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_EMISSIVE();
+    }
+    
+    pass ShadowMapPass // 8
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_SHADOW_MAP();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_SHADOW_MAP();
     }
 }

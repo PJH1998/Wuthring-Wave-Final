@@ -19,8 +19,8 @@ HRESULT CRendererSubResource::Initialize()
 
     //SSAO
     m_iNumKernel = 16;
-    m_fRadius = 3.f;
-    m_fMaxDistance = 5.f;
+    m_fRadius = 1.f;
+    m_fMaxDistance = 1.f;
     m_fOutDistance = 500.f;
     
     // SSAO_Blur
@@ -40,8 +40,8 @@ HRESULT CRendererSubResource::Initialize()
     m_fDofRange = 100.f;
     m_fDofScale = 0.3f;
 
-	m_fLimitVelocity = 30.f;
-	m_fLimitDepth = 300.f;
+	m_fLimitVelocity = 15.f;
+	m_fLimitDepth = 150.f;
 	m_fLengthScale = 5.f;
 
     if (FAILED(Ready_Shader_Filters()))

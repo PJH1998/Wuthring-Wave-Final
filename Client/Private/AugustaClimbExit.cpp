@@ -18,9 +18,9 @@ HRESULT CAugustaClimbExit::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaClimbExit::OnEnter()
+void CAugustaClimbExit::OnEnter(void* pArg)
 {
-    CClimbState::OnEnter();
+    CClimbState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -107,7 +107,7 @@ void CAugustaClimbExit::Update_ClimbAnimation(_float fTimeDelta)
 void CAugustaClimbExit::Check_Physics(_float fTimeDelta)
 {
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal);
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaClimbExit::Check_StateTransition(_float fTimeDelta)

@@ -11,9 +11,10 @@ float   g_SweepWitdh;
 float   g_Soft = 0.3f;  //툴에서 받아올 수 있게 해주자.
 
 //공용
-int     g_Dir; //안쓰는중
+int     g_Dir;          //안쓰는중
 float   g_Time;
 float   g_Alpha;
+int   g_MaskFlag;     // 0이면 R로, 1이면 알파로
 
 //밝기 죽이기?
 float g_ColorGain;      // 밝기 스케일 0~1
@@ -89,7 +90,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
    
-    if (Out.vDiffuse.a < 0.2f)
+    if (Out.vDiffuse.a < 0.3f)
         discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -149,9 +150,24 @@ PS_OUT PS_TrailDefault(PS_IN In)
     
     float4 vMask = g_MaskTexture.Sample(ClampSampler, MaskUV);
     
-    if (vMask.r < 0.35f)
-        discard;
+    float MaskAlpha;
     
+    if( g_MaskFlag == 1)
+    {
+        if(vMask.a < 0.3f)
+            discard;
+        
+        MaskAlpha = vMask.a;
+
+    }
+    else
+    {
+        if (vMask.r < 0.35f)
+            discard;
+        
+        MaskAlpha = vMask.r;
+    }
+
     float2 ColorUV = In.vTexcoord;
     ColorUV -= g_Sweep; //X로 긴 텍스처니까 색상 움직이듯 보여질려면 이렇게 해야하나?
     float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, ColorUV);
@@ -160,23 +176,40 @@ PS_OUT PS_TrailDefault(PS_IN In)
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
     
-    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
     
-    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    float alpha;
     
-    float fVisible = fTailFad * fHeadFad;
+    if(g_Dir == 1)
+    {
+        float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.x);
+    
+        float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.x);
+    
+        float fVisible = fTailFad * fHeadFad;
    
-    float alpha = fVisible * vMask.a;
+        alpha = fVisible * MaskAlpha;
+    }
+    else
+    {
+        float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
     
-    Out.vDiffuse = float4(vColor.rgb * alpha, alpha);
+        float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep,1 - In.vTexcoord.x);
     
-    if (Out.vDiffuse.r < 0.35f)      //테스트
+        float fVisible = fTailFad * fHeadFad;
+   
+        alpha = fVisible * MaskAlpha;
+    }
+    
+    if (alpha < 0.3f)
         discard;
+    
+    Out.vDiffuse = float4(vColor.rgb, alpha);
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
     
     return Out;
 }
@@ -255,6 +288,100 @@ PS_OUT PS_TraillTest(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_Y_OUT(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    float2 UV = In.vTexcoord;
+    
+    float MaskR = g_MaskTexture.Sample(ClampSampler, UV).r;
+    
+    if (MaskR < 0.35f)
+        discard;
+    
+    float fY = 1.f - g_MaskSweep;
+    float fVisibleY;
+    
+    fVisibleY = 1.f - step(fY, UV.y);
+    
+    float fVisibleX;
+    
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.y);
+    
+    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, 1 - In.vTexcoord.y);
+    
+    fVisibleX = fTailFad * fHeadFad;
+    
+    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+    
+    float fAlpha = fVisibleY * fVisibleX * MaskR;
+    
+    if (fAlpha < 0.2f)
+        discard;
+    
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vDiffuse *= g_Alpha;
+    
+    return Out;
+}
+
+PS_OUT PS_Y_IN(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    float2 UV = In.vTexcoord;
+    
+    float MaskR = g_MaskTexture.Sample(ClampSampler, UV).r;
+    
+    if (MaskR < 0.35f)
+        discard;
+    
+    float fY = 1.f - g_MaskSweep;
+    float fVisibleY;
+    
+    fVisibleY = 1.f - step(fY, UV.y);
+    
+    float fVisibleX;
+    
+    float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, In.vTexcoord.y);
+    
+    float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, In.vTexcoord.y);
+    
+    fVisibleX = fTailFad * fHeadFad;
+    
+    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+    
+    float fAlpha = fVisibleY * fVisibleX * MaskR;
+    
+    if (fAlpha < 0.2f)
+        discard;
+    
+    Out.vDiffuse = float4(vColor.rgb, fAlpha);
+    
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    if (fWeight >= g_fEmissiveThreshold)
+        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vDiffuse *= g_Alpha;
+    
+    return Out;
+}
+
 PS_OUT PS_TraillTestA(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -287,8 +414,8 @@ PS_OUT PS_TraillTestA(PS_IN In)
     vColor.rgb = pow(vColor.rgb, g_ColorGamma);
     vColor.rgb *= g_ColorGain;
     
-    if (fAlpha < 0.2f)
-        discard;
+   if (fAlpha < 0.2f)
+       discard;
     
     Out.vDiffuse = float4(vColor.rgb, fAlpha);
     
@@ -447,7 +574,29 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TraillDeshB();
     }
 
-    pass PS_Debug //5
+    pass TrailYOut// 5
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_Y_OUT();
+    }
+
+    pass TrailYIn // 6
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_Y_IN();
+    }
+
+    pass PS_Debug //7
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);

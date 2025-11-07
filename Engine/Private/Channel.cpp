@@ -137,7 +137,7 @@ void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, con
 	}
 	else
 	{
-#ifdef _DEBUG //=> �ִϸ��̼� Ʈ�������� ������ => ��������
+#ifdef _DEBUG 
 		while (*pCurrentFrameIndex > 0 && m_KeyFrames[*pCurrentFrameIndex].fTrackPosition > fCurrentTrackPosition)
 			--*pCurrentFrameIndex;
 #endif // _DEBUG
@@ -156,7 +156,28 @@ void CChannel::Update_TransformationMatrix_All(_float fCurrentTrackPosition, con
 		_float fRatio = (fCurrentTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition) / (m_KeyFrames[*pCurrentFrameIndex + 1].fTrackPosition - m_KeyFrames[*pCurrentFrameIndex].fTrackPosition);
 
 		_vector vLerpScale = XMVectorLerp(XMLoadFloat3(&vLeftScale), XMLoadFloat3(&vRightScale), fRatio);
-		_vector vLerpRotation = XMQuaternionSlerp(XMLoadFloat4(&vLeftRotation), XMLoadFloat4(&vRightRotation), fRatio);
+
+
+		_vector qLeft = XMQuaternionNormalize(XMLoadFloat4(&vLeftRotation));
+		_vector qRight = XMQuaternionNormalize(XMLoadFloat4(&vRightRotation));
+
+		// 추가: Dot 계산 후 체크
+		_vector dot = XMVector4Dot(qLeft, qRight);
+		dot = XMVectorClamp(dot, XMVectorSplatOne() * -1.0f, XMVectorSplatOne());  // -1 ~ 1 강제
+
+		float cosOmega = XMVectorGetX(dot);
+		float omega = acosf(cosOmega);
+		float sinOmega = sinf(omega);
+
+		_vector vLerpRotation;
+		if (fabs(sinOmega) < 1e-6f) {  // SinOmega ≈ 0이면 fallback to Lerp or left
+			vLerpRotation = (fRatio < 0.5f) ? qLeft : qRight;  // 또는 XMVectorLerp(qLeft, qRight, fRatio);
+		}
+		else {
+			vLerpRotation = XMQuaternionSlerp(qLeft, qRight, fRatio);
+		}
+
+
 		_vector vLerpPosition = XMVectorSetW(XMVectorLerp(XMLoadFloat3(&vLeftPosition), XMLoadFloat3(&vRightPosition), fRatio), 1.f);
 
 		_matrix LerpMatrix = {};

@@ -56,11 +56,14 @@ private:
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 
-	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
+	_bool					m_beHit{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
+
+	_int					m_iHP{};
+	_float					m_fAttackDmg{};
 
 private:
 	HRESULT						Bind_Resources();

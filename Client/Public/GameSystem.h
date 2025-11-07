@@ -60,7 +60,7 @@ public:
 
 
 #pragma region [UI] STATUS_SYNCER
-	HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
+	//HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
 
 
 #pragma endregion
@@ -77,6 +77,15 @@ public:
 	void Clear_TriggerCallBack();
 #pragma endregion
 
+#pragma region SONORO_MANAGER
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	void Update(_float fTimeDelta);
+	void Change_Sonoro(_bool IsSonoro);
+
+
+#pragma endregion
+
 
 
 private:
@@ -89,7 +98,8 @@ private:
 
 	class	CDirector*			m_pDirector 					= { nullptr };
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
-
+	
+	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

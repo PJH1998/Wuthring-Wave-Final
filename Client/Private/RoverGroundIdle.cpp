@@ -23,9 +23,9 @@ HRESULT CRoverGroundIdle::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CRoverGroundIdle::OnEnter()
+void CRoverGroundIdle::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pRover->TakeStateContext();
@@ -105,7 +105,7 @@ void CRoverGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 
 void CRoverGroundIdle::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pRover->Is_Land();
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 }
 
 // Idles 조건이 아닌 것들.

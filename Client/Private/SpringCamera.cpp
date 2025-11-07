@@ -52,14 +52,14 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fDistance = 3.f;
 	m_fFixedDistance = 3.f;
-	m_fLerpSpeed = 0.5f;
+	m_fLerpSpeed = 1.5f;
 	m_fMinDistance = 1.f;
 	m_fMaxDistance = 6.f;
 
 	m_fStiffness = 0.3f;
 
 	m_fLockOnOffsetY = 3.5f;
-
+	Ready_Event();
     return S_OK;
 }
 
@@ -104,6 +104,13 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 2. Ray Cast => 벽 충돌
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
+		m_pGameInstance->OnShake(_float3(-0.5f, 0.1f, 0.f));
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
+		m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
+
+	Shaking(fTimeDelta);
 }
 
 void CSpringCamera::Late_Update(_float fTimeDelta)
@@ -259,7 +266,9 @@ void CSpringCamera::Action(_float fTimeDelta)
 	else
 	{
 		vPreQuaternion = XMLoadFloat4(&m_Frames[m_iFrameIndex].vRotation);
+		vPreQuaternion = XMQuaternionMultiply(vPreQuaternion, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		vPreTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex].vTranslation);
+		vPreTranslation = XMVector3TransformNormal(vPreTranslation, XMMatrixRotationQuaternion(vPreQuaternion));
 		// Fov
 		m_fPreFovy = XMConvertToRadians(m_Frames[m_iFrameIndex].fFovy);
 	}
@@ -269,15 +278,17 @@ void CSpringCamera::Action(_float fTimeDelta)
 	if (true == m_isLerp)
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
+		vDestQuat = XMQuaternionMultiply(vDestQuat, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		_vector vLerpQuat = XMQuaternionSlerp(vPreQuaternion, vDestQuat, fRatio);
-		vLerpQuat = XMVector4Transform(vLerpQuat, XMLoadFloat4x4(&m_OwnerMatrix));
 		m_pTransformCom->Rotation_Quaternion(vLerpQuat);
 
 		// Translation Offset
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
+		//vDestTranslation = XMVector3TransformCoord(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		_vector vLerpTranslation = XMVectorLerp(vPreTranslation, vDestTranslation, fRatio);
-		vLerpTranslation = XMVector4Transform(vLerpTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vLerpTranslation, 1.f));
+		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		// Distance
 		m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
@@ -289,12 +300,14 @@ void CSpringCamera::Action(_float fTimeDelta)
 	else
 	{
 		_vector vDestQuat = XMLoadFloat4(&m_Frames[m_iFrameIndex + 1].vRotation);
-		vDestQuat = XMVector4Transform(vDestQuat, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestQuat = XMQuaternionMultiply(vDestQuat, XMQuaternionRotationMatrix(XMLoadFloat4x4(&m_OwnerMatrix)));
 		m_pTransformCom->Rotation_Quaternion(vDestQuat);
 
 		_vector vDestTranslation = XMLoadFloat3(&m_Frames[m_iFrameIndex + 1].vTranslation);
-		vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
+		vDestTranslation = XMVector3TransformNormal(vDestTranslation, XMMatrixRotationQuaternion(vDestQuat));
+		//vDestTranslation = XMVector4Transform(vDestTranslation, XMLoadFloat4x4(&m_OwnerMatrix));
 		XMStoreFloat4(&m_vLookPosition, XMVectorSetW(XMLoadFloat4(&m_vLookPosition) + vDestTranslation, 1.f));
+		XMStoreFloat3(&m_vEndTranslation, vDestTranslation);
 
 		m_fFixedDistance = m_fFixedDistance = m_Frames[m_iFrameIndex + 1].fDistance;
 		m_fDistance = m_fFixedDistance;
@@ -314,6 +327,7 @@ void CSpringCamera::Recovery(_float fTimeDelta)
 	{
 		m_isRecovery = false;
 		m_eCameraState = CAMERA_STATE::TARGET;
+		m_pTransformCom->Rotation_Quaternion(XMLoadFloat4(&m_vPreQuaternion));
 		return;
 	}
 
@@ -330,7 +344,7 @@ void CSpringCamera::SetUp_Recovery()
 		m_isRecovery = true;
 	m_fFixedDistance = m_fPreFixedDistance;
 	XMStoreFloat4(&m_vEndQuaternion, m_pTransformCom->Get_Quaternion());
-	m_vEndTranslation = _float3(0.f, 0.f, 0.f);
+	//m_vEndTranslation = _float3(0.f, 0.f, 0.f);
 }
 
 void CSpringCamera::Ready_Event()
@@ -338,7 +352,10 @@ void CSpringCamera::Ready_Event()
 	m_pGameInstance->Subscribe<CAMERA_ACTION_EVENT>(ENUM_CLASS(STATIC::NONE), TEXT("Event_Camera_Action"), [this](const CAMERA_ACTION_EVENT& event) {
 		if (CAMERA_STATE::ACTION != m_eCameraState && true == event.isAction)
 		{
-			m_OwnerMatrix = event.WorldMatrix;
+			_matrix Matrix = XMLoadFloat4x4(&event.WorldMatrix);
+			_vector vScale{}, vQuat{}, vTranslation{};
+			XMMatrixDecompose(&vScale, &vQuat, &vTranslation, Matrix);
+			XMStoreFloat4x4(&m_OwnerMatrix, XMMatrixRotationQuaternion(vQuat));
 			m_iFrameIndex = -1;
 			m_fTrackPosition = static_cast<_float>(event.iStart);
 			m_fFirstFrame = m_fTrackPosition;

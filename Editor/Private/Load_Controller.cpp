@@ -264,6 +264,16 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
                 Load_TrailMesh_FromJson(TrailMeshPath, FrameDesc.strChildrenTag);
             }
+
+			if (FrameDesc.eChildrenType == EFFECT_TYPE::RECT)
+			{
+				_string RectPath = strFolderPath;
+				RectPath += "/FXRect/";
+				RectPath += WStringToString(FrameDesc.strChildrenTag);
+				RectPath += ".json";
+
+				Load_FXRect_FromJson(RectPath, FrameDesc.strChildrenTag);
+			}
         }
     }
 
@@ -702,6 +712,9 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("DirFlag"))
         Desc.iDirFlag = TrailMeshJson["DirFlag"].get<_int>();
 
+	if (TrailMeshJson.contains("MaskFlag"))
+		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
+
 	if (TrailMeshJson.contains("ColorSpeed"))
 		Desc.fColorSpeed = TrailMeshJson["ColorSpeed"].get<_float>();
 
@@ -742,6 +755,76 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     }
 
     m_tTrailMeshDesc.emplace(TrailMeshTag, Desc);
+}
+
+void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _wstring& RectTag)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json RectJson;
+	JsonStream >> RectJson;
+	JsonStream.close();
+
+	CEffect_Rect::FXRECT_DESC Desc = {};
+
+	if (RectJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(RectJson["MyTag"].get<_string>());
+
+	if (RectJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(RectJson["MyType"].get<double>());
+
+	if (RectJson.contains("Root"))
+		Desc.IsRootOn = RectJson["Root"].get<_bool>();
+
+	if (RectJson.contains("TextureTag"))
+		Desc.strTextureTag = StringToWString(RectJson["TextureTag"].get<_string>());
+
+	if (RectJson.contains("ShaderPass"))
+		Desc.iShaderPass = RectJson["ShaderPass"].get<_int>();
+
+	if (RectJson.contains("MaskFlag"))
+		Desc.iMaskFlag = RectJson["MaskFlag"].get<_int>();
+
+	if (RectJson.contains("SweepSpeed"))
+		Desc.fSweepSpeed = RectJson["SweepSpeed"].get<_float>();
+
+	if (RectJson.contains("SweepSoft"))
+		Desc.fSoft = RectJson["SweepSoft"].get<_float>();
+
+	if (RectJson.contains("SizeX"))
+		Desc.fXSize = RectJson["SizeX"].get<_float>();
+
+	if (RectJson.contains("SizeY"))
+		Desc.fYSize = RectJson["SizeY"].get<_float>();
+
+	if (RectJson.contains("Position") && RectJson["Position"].is_array())
+	{
+		json PosJson = RectJson["Position"];
+		Desc.vPos.x = PosJson[0].get<_float>();
+		Desc.vPos.y = PosJson[1].get<_float>();
+		Desc.vPos.z = PosJson[2].get<_float>();
+	}
+
+	if (RectJson.contains("LifeTime") && RectJson["LifeTime"].is_array())
+	{
+		json LifeTimeJson = RectJson["LifeTime"];
+		Desc.vLifeTime.x = LifeTimeJson[0].get<_float>();
+		Desc.vLifeTime.y = LifeTimeJson[1].get<_float>();
+	}
+
+	if (RectJson.contains("Color") && RectJson["Color"].is_array())
+	{
+		json ColorJson = RectJson["Color"];
+		Desc.vColor.x = ColorJson[0].get<_float>();
+		Desc.vColor.y = ColorJson[1].get<_float>();
+		Desc.vColor.z = ColorJson[2].get<_float>();
+		Desc.vColor.w = ColorJson[3].get<_float>();
+	}
+
+	m_tRectDesc.emplace(RectTag, Desc);
 }
 
 void CLoad_Controller::Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc)
@@ -789,6 +872,14 @@ void CLoad_Controller::Get_TrailMesh_Desc(const _wstring& TrailMeshTag, CTrail_M
         TrailMesh = iter->second;
 }
 
+void CLoad_Controller::Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FXRECT_DESC& RectDesc)
+{
+	auto iter = m_tRectDesc.find(RectTag);
+
+	if (iter != m_tRectDesc.end())
+		RectDesc = iter->second;
+}
+
 void CLoad_Controller::Reset_Load()
 {
     m_tEffectMeshDesc.clear();
@@ -796,6 +887,7 @@ void CLoad_Controller::Reset_Load()
     m_tParticleDesc.clear();
     m_tParticleVBDesc.clear();
     m_tTrailMeshDesc.clear();
+	m_tRectDesc.clear();
 
     CEffect_Prefab::PREFAB_DESC Desc = {};
     m_tPrefabDesc = Desc;

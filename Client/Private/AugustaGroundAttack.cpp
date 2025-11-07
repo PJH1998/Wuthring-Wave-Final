@@ -2,6 +2,7 @@
 #include "AugustaGroundAttack.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AugustaBayonet.h"
 
 HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
 {
@@ -14,15 +15,13 @@ HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-    
-
     return S_OK;
 }
 
 
-void CAugustaGroundAttack::OnEnter()
+void CAugustaGroundAttack::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -41,9 +40,11 @@ void CAugustaGroundAttack::OnEnter()
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
     _string strBoneName = "WeaponProp02";
-    m_pAugusta->PartActivate(m_iPartType, true);
+	m_pAugusta->Part_VolumeChange(m_iPartType, CAugustaBayonet::VOLUME::VOLUME_ATTACK); // 공격 판정 Volume 변경
+    m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	m_pAugusta->Set_Gravity(true);
 
 
 }
@@ -78,6 +79,21 @@ void CAugustaGroundAttack::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false); 
 }
 
+_bool CAugustaGroundAttack::Hit_Judge()
+{
+	_bool IsHit = false;
+	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+
+	if (nullptr == pDesc)
+		return false;
+
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pAugusta->GetPendingHitDesc()->iLayer);
+	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
+		IsHit = true;
+
+	return IsHit;
+}
+
 void CAugustaGroundAttack::Handle_Input()
 {
     
@@ -110,6 +126,13 @@ void CAugustaGroundAttack::Handle_Input()
         if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS))
             m_IsNextAttackInput = true;
     }
+
+	// 공격시에 Hit 받았을때는 좀더 판단을 빡빡하게
+	if (m_pAugusta->Is_Hit())
+	{
+		m_States[HIT] = Hit_Judge();
+	}
+	
     
 }
 
@@ -152,6 +175,11 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
+	if (m_States[HIT])
+	{
+
+	}
+
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {

@@ -18,9 +18,9 @@ HRESULT CAugustaAirFall::Initialize(class CGameObject* pOwner)
 
 
 
-void CAugustaAirFall::OnEnter()
+void CAugustaAirFall::OnEnter(void* pArg)
 {
-    CAirState::OnEnter();
+    CAirState::OnEnter(pArg);
 
     // 1. 복사본 context 받아오기.
     const auto context = m_pAugusta->TakeStateContext();
@@ -66,7 +66,12 @@ void CAugustaAirFall::OnExit()
 void CAugustaAirFall::Handle_Input()
 {
     m_eDir = m_pAugusta->Calculate_Direction(); // 방향 계산.
+	m_States[HIT] = m_pAugusta->Is_Hit();
+	if (m_States[HIT])
+		return;
+
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 }
 
 void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
@@ -87,12 +92,18 @@ void CAugustaAirFall::Update_FallAnimation(_float fTimeDelta)
 
 void CAugustaAirFall::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 {
     _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(0.2f);
+
+	if (m_States[HIT])
+	{
+ 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
 
     if (m_States[LAND])
     {
@@ -100,6 +111,13 @@ void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
         return;
     }
+
+	if (m_States[FLY])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FLY));
+		return;
+	}
 
     /*if (m_States[LAND])
     {

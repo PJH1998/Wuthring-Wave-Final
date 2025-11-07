@@ -5,6 +5,15 @@ NS_BEGIN(Client)
 class CAugustaSkillWeapon final : public CProp
 {
 public:
+	enum VOLUME
+	{
+		VOLUME_ATTACK = 0,
+		VOLUME_STRONG_ATTACK = 1,
+		VOLUME_EFFECT_GRIFFON = 2,
+		VOLUME_END
+	};
+
+public:
 	typedef struct tagAugustaSkillWeaponDesc : public CProp::PROP_DESC {
 		
 	} AUGUSTA_SKILLPROP_DESC;

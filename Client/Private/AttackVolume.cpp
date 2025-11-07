@@ -8,6 +8,7 @@ CAttackVolume::CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContex
 
 CAttackVolume::CAttackVolume(const CAttackVolume& Prototype)
     : CGameObject{ Prototype }
+	, m_eType { Prototype.m_eType }
 {
 }
 
@@ -22,15 +23,29 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
     ATKVOLUME_DESC* pDesc = static_cast<ATKVOLUME_DESC*>(pArg);
-    Ready_Component(pDesc);
+    
+	m_eType = pDesc->eType;
+	m_pParenTransform = pDesc->pParenTransform;
+	Safe_AddRef(m_pParenTransform);
 
-	m_pParentMatrix = pDesc->pParentMatrix;
+	Ready_Component(pDesc);
+
     m_pSocketMatrix = pDesc->pSocketMatrix;
 
 	m_eTargetLayer = pDesc->eTargetLayer;
+	m_eLayer = pDesc->eLayer;
+	m_eCurrentLayer = m_eLayer;
 	m_CollisionCallback = pDesc->CollisionCallback;
+#ifdef _DEBUG
 	m_vOffsetPos = pDesc->vOffsetPos;
 	m_vOffsetRot = pDesc->vOffsetRadian;
+#else
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+													XMQuaternionRotationRollPitchYaw(pDesc->vOffsetRadian.x, pDesc->vOffsetRadian.y, pDesc->vOffsetRadian.z),
+													XMVectorSetW(XMLoadFloat3(&pDesc->vOffsetPos), 1.f));
+	XMStoreFloat4x4(&m_OffsetMatrix, matOffset);
+#endif // _DEBUG
+
     return S_OK;
 }
 
@@ -44,14 +59,33 @@ void CAttackVolume::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+#ifdef _DEBUG
+	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
+		XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
+#else
+	_matrix matOffset = XMLoadFloat4x4(&m_OffsetMatrix);
+#endif // _DEBUG
 
-	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), 
-													XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
-	_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
-	_vector vScale, vQuaternion, vTransition;
-	XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
-	NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
-	_matrix ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * NonScaleMatrix * matOffset * XMLoadFloat4x4(m_pParentMatrix);
+	_matrix ComBinedMatrix;
+
+	if (nullptr == m_pSocketMatrix)
+	{
+		if (nullptr == m_pParenTransform)
+			CRASH("need parent transform : Bone type");
+		ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * m_pParenTransform->Get_WorldMatrix();
+	}
+	else
+	{
+		_matrix NonScaleMatrix = XMLoadFloat4x4(m_pSocketMatrix);
+		_vector vScale, vQuaternion, vTransition;
+		XMMatrixDecompose(&vScale, &vQuaternion, &vTransition, NonScaleMatrix);
+		NonScaleMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition);
+		if(COMBINED_TYPE::BONE == m_eType)
+			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix * m_pParenTransform->Get_WorldMatrix();
+		else
+			ComBinedMatrix = m_pTransformCom->Get_WorldMatrix() * matOffset * NonScaleMatrix;
+	}
+
 	XMStoreFloat4x4(&m_CombinedMatrix, ComBinedMatrix);
 
 	m_pRigidBodyCom->Update_Rigidbody(ComBinedMatrix, fTimeDelta);
@@ -65,6 +99,8 @@ void CAttackVolume::Late_Update(_float fTimeDelta)
 
 void CAttackVolume::Render()
 {
+	if (!m_isActivate)
+		return;
 #ifdef _DEBUG
 	m_pRigidBodyCom->Render();
 #endif // _DEBUG
@@ -73,8 +109,24 @@ void CAttackVolume::Render()
 
 void CAttackVolume::TriggerActivate(_bool isActivate)
 {
-	m_pRigidBodyCom->IsActivate(isActivate);
+	//m_pRigidBodyCom->IsActivate(isActivawwwwte);
+	if (isActivate)
+	{
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
+		m_eCurrentLayer = m_eLayer;
+	}
+	else
+	{
+		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+		m_eCurrentLayer = COLLISIONLAYER::NONE;
+	}
 	m_isActivate = isActivate;
+}
+
+void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
+{
+	m_eLayer = eLayer;
+	TriggerActivate(true);
 }
 
 
@@ -96,14 +148,21 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
+
+	m_CallBack.pTransform = m_pParenTransform;
+	m_CallBack.fAttack = pDesc->fAttackDmg;
+
+	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
+	if (m_eCurrentLayer == COLLISIONLAYER::NONE)
+		return;
 	if(ENUM_CLASS(m_eTargetLayer) == iLayer)
 	{
 		if (m_CollisionCallback)
-			m_CollisionCallback();
+			m_CollisionCallback(iLayer, pDesc, Manifold);
 	}
 }
 
@@ -138,4 +197,6 @@ void CAttackVolume::Free()
 	__super::Free();
 
 	Safe_Release(m_pRigidBodyCom);
+	Safe_Release(m_pParenTransform);
+
 }

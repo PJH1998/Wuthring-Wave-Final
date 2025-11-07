@@ -57,8 +57,6 @@ public:
 #pragma region UI Interface
 	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
 	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
-
-
 #pragma endregion
 
 
@@ -72,7 +70,8 @@ public:
 	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
 
 public:
-	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 private:
 	vector<class CCharacter*> m_Characters; 
@@ -101,19 +100,28 @@ private:
 
 	_bool m_IsChanage = { false };
 	CHARACTERTYPE m_eNextCharacter = {};
-	
+	CALLBACK_CLIENT m_CallBack = {};
 
 	_float3 m_vColliderOffSet = {};
 	_float m_fColliderHeight = {};
 	_float m_fColliderRadius = {};
 
+	// Mutex
+	mutex m_Mutex;
+
+	_float m_fTargetDistance = {}; // 몬스터와의 거리
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
-	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void Sorting_Target();
 	void Toggle_LockOn();
+
+#ifdef _DEBUG
+	_float3		m_vDebugTeleportPos = {};
+	void			GUI_Teleport();
+#endif
 
 private:
 	HRESULT Ready_Players(const PLAYER_DESC* pDesc);

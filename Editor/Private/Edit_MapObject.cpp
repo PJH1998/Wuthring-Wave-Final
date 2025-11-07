@@ -141,11 +141,94 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
             m_iShaderPassIndex = 3;
     }*/
 
+	XMStoreFloat4x4(&m_DefaultMat, m_pTransformCom->Get_WorldMatrix());
+	if (m_eObjectType == OBJECTTYPE::NONSONORA)
+		m_IsRender = false;
+
     return S_OK;
 }
 
 void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 {
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+	{
+
+		m_fMode = true;
+		m_IsFlying = true;
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+		m_fFlyingTime += fTimeDelta;
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
+			m_IsRender = false;
+
+		_float fDistance = XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) - XMVectorSetY(XMLoadFloat4(m_pGameInstance->Get_CamPos()), 0.f)));
+
+		float minDistance = 0.0f;
+		float maxDistance = 600.0f;
+
+		float maxDelay = 1.7f;
+		float minDelay = 0.0f;
+
+		float t = (fDistance - minDistance) / (maxDistance - minDistance);
+
+		m_fDlayTime = maxDelay + (minDelay - maxDelay) * t;
+	}
+
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+	{
+		m_fMode = false;
+		m_IsFlying = false;
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+		{
+			m_IsRender = true;
+			m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMat));
+		}
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
+			m_IsRender = false;
+	}
+
+	if (m_fMode)
+	{
+		m_fTotalTime += fTimeDelta;
+		if (m_fDlayTime <= 0.f)
+		{
+			if (m_IsFlying)
+			{
+				m_fFlyingTime += fTimeDelta;
+				if (m_fFlyingTime < 2.f)
+				{
+					if (m_eObjectType == OBJECTTYPE::NONSONORA)
+						m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 0.4f, 0.f, 0.f));
+				}
+				else
+				{
+					m_IsFlying = false;
+					m_fFlyingTime = 0.f;
+					if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+						m_IsRender = false;
+					else if (m_eObjectType == OBJECTTYPE::SONORA)
+						m_IsRender = true;
+				}
+			}
+		}
+		else
+			m_fDlayTime -= fTimeDelta;
+	}
+
+	if (m_fTotalTime >= 3.f)
+	{
+		m_fMode = false;
+		m_IsFlying = false;
+		m_fFlyingTime = 0.f;
+
+		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+			m_IsRender = false;
+		else if (m_eObjectType == OBJECTTYPE::SONORA)
+			m_IsRender = true;
+
+		m_fTotalTime = 0.f;
+	}
 }
 
 void CEdit_MapObject::Update(_float fTimeDelta)
@@ -188,7 +271,8 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 
 void CEdit_MapObject::Late_Update(_float fTimeDelta)
 {
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	if (m_IsRender)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
 }
 
 void CEdit_MapObject::Render()
@@ -203,8 +287,10 @@ void CEdit_MapObject::Render()
 
     for (_uint i = 0; i < m_pModelComArray[DrawModel]->Get_NumMesh(); ++i)
     {
-        m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
-        m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
+		/*m_pShaderCom->Bind_Textures("g_DiffuseTexture", nullptr, 2);
+		m_pShaderCom->Bind_Textures("g_NormalTexture", nullptr, 2);*/
+		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
         m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
         _bool HasNormal = { true };
         _bool HasMask = { true };
@@ -228,7 +314,10 @@ void CEdit_MapObject::Render()
         else
         {
             if (FAILED(m_pModelComArray[DrawModel]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-                HasMask = false;
+			{
+				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+				HasMask = false;
+			}
 
 
             if (HasMask)
@@ -275,7 +364,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor"};
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -375,8 +464,8 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.eType = EMotionType::Kinematic;
 		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
 		RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
-		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
-			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+		//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
+		//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}
 
 
@@ -728,7 +817,7 @@ void CEdit_MapObject::About_Texture()
                                 {
                                     m_EntireNormalTextureName.push_back(Filepath.string());
                                 }
-                                else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_MA") != std::string::npos))
+                                else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_M") != std::string::npos))
                                 {
                                     m_EntireMaskTextureName.push_back(Filepath.string());
                                 }
@@ -742,7 +831,7 @@ void CEdit_MapObject::About_Texture()
                         {
                             m_EntireNormalTextureName.push_back(Filepath.string());
                         }
-                        else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_MA") != std::string::npos))
+                        else if (fileName.string().find("_MA_") != std::string::npos || (fileName.string().find("_M") != std::string::npos))
                         {
                             m_EntireMaskTextureName.push_back(Filepath.string());
                         }

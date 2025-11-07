@@ -8,14 +8,10 @@ CShader::CShader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CShader::CShader(const CShader& Prototype)
     : CComponent { Prototype },
+	m_pEffect { Prototype.m_pEffect },
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
-	{
-		lock_guard<mutex> lock(m_Mutex);
-		m_pEffect = Prototype.m_pEffect;
-	}
-    //Safe_AddRef(m_pEffect);
     for (auto& pInputLayOut : m_InputLayouts)
         Safe_AddRef(pInputLayOut);
 }
@@ -40,7 +36,6 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
 	// 3. nullptr 체크
 	if (nullptr == m_pEffect) // m_pEffect.Get()을 쓸 필요 없이 바로 비교 가능
 		return E_FAIL;
-
 
     ID3DX11EffectTechnique* pTechnique = m_pEffect->GetTechniqueByIndex(0);
     if (nullptr == pTechnique)
@@ -79,6 +74,16 @@ HRESULT CShader::Begin(_uint iPassIndex)
     m_pContext->IASetInputLayout(m_InputLayouts[iPassIndex]);
 
     return S_OK;
+}
+
+HRESULT CShader::Begin(_uint iPassIndex, ID3D11DeviceContext* pDC)
+{
+	if (FAILED(m_pEffect->GetTechniqueByIndex(0)->GetPassByIndex(iPassIndex)->Apply(0, pDC)))
+		return E_FAIL;
+
+	pDC->IASetInputLayout(m_InputLayouts[iPassIndex]);
+
+	return S_OK;
 }
 
 HRESULT CShader::Bind_Matrix(const _char* pConstantName, const _float4x4* pMatrix)
@@ -198,8 +203,5 @@ void CShader::Free()
         Safe_Release(pInputLayout);
     m_InputLayouts.clear();
 
-	
 	m_pEffect = nullptr;
-	
-    //Safe_Release(m_pEffect);
 }

@@ -57,6 +57,11 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
+	if (m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
 
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
@@ -164,8 +169,10 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
-
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Gravity(true);
 
 	// Com_Shader
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->shaderData.first), pDesc->shaderData.second,
@@ -295,8 +302,10 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
+		m_beHit = true;
 #ifdef _DEBUG
-		cout << "On Hit! (Electro Predator)" << endl;
+		cout << "Be Hit! (Electro Predator)" << endl;
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 	}
 }
@@ -322,6 +331,9 @@ void CElectroPredator::Patrol()
 
 _bool CElectroPredator::isKnockDown()
 {
+	if (m_beHit)
+		return true;
+
 	return m_iState & (ENUM_CLASS(TEST_STATE::BEHIT) | ENUM_CLASS(TEST_STATE::BLOCK) | ENUM_CLASS(TEST_STATE::AIR));
 }
 

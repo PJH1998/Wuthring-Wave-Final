@@ -1,5 +1,5 @@
 #include "Engine_Shader_Defines.hlsli"
-#include "Engine_Shader_Function.hlsli"
+#include "Engine_Shader_Shadow.hlsli"
 
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
@@ -70,22 +70,14 @@ float   g_fLightRange;
 vector  g_vLightSpecular = 1.f;
 vector  g_vMtrlSpecular = 1.f;
 
-//CASCADE
-Texture2DArray<float> g_ShadowMap : register(t2);
-cbuffer CSMDatas : register(b1)
-{
-    float4  g_vClipDistances;
-    float   g_fLastDistance;
-    float3  padding;
-};
-matrix g_ShadowViewMatrix[4];
-matrix g_ShadowProjMatrix[4];
-float4 g_fShadowBais = float4(0.01f, 0.02f, 0.03f, 0.05f);
-float4 g_fMinShadowBias = 0.f;
-float g_DebugSlopeScale = 2.f;
-
 int g_DebugCSMIndex;
 
+//SHADOWMAP
+Texture2DArray<float> g_ShadowMap;
+bool g_HasShadowMap;
+
+//CASCADE
+Texture2DArray<float> g_Cascade : register(t2);
 
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
@@ -162,99 +154,31 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
     Out.vColor *= fSSao;
         
 ///////// Shadow Begin /////////
-
-    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
     
     vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     float fViewZ = vViewPos.z;
-    
+
     vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-
-    int iCascadeIndex = 0;
     
-    for (int i = 0; i < 4; i++)
+    float fShadowMap = 1.f;
+    
+    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
+    
+    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
+    
+    if (g_HasShadowMap)
     {
-        if (fViewZ > g_vClipDistances[i])
-            iCascadeIndex = i;
+        fShadowMap = Compute_ShadowMap(fViewZ, fNdotL, vWorldPos, g_ShadowMap);
     }
-    
-    if(fViewZ >= g_fLastDistance)
-        return Out;
    
-    if(fViewZ >= g_fLastDistance)
-        return Out;
+    float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos, g_Cascade);
+    
+    float fFinalShadow = min(fShadowMap, fShadow);
+    
+    fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
    
-    float Gradiant = RPB_Gradiant(fViewZ);
-    float fDot = saturate(dot(vNormal, g_vLightDirection * -1.f));
-   
-    //float fSlopeFactor = (1.f - fDot); // Row
-    float fSlopeFactor = sqrt(1.f - pow(fDot, 2)); // High
-
-    float BlendFactor = 0.f;
+    Out.vColor.xyz *= fFinalShadow;
     
-    float fShadowBlend = 0.f;
-    
-    float2 vTexelSize = float2((1.f / g_iShadowMapSizeX), (1.f / g_iShadowMapSizeY));
-    
-    // Blend Cascade
-    if (iCascadeIndex < 3)          // Max Cascade Check
-    {
-        int iBlendCascadeIndex = iCascadeIndex + 1;
-    
-        float CurrentNear = g_vClipDistances[iCascadeIndex];
-        float CurrentFar = g_vClipDistances[iBlendCascadeIndex];
-        
-        float BlendRegion = (CurrentFar - CurrentNear) * 0.15f;                     // Cascade Blend Distance ( Begin ratio 0.85)
-        
-        BlendFactor = saturate((fViewZ - (CurrentFar - BlendRegion)) / BlendRegion);
-        
-        vector vShadowBlendPos;
-        matrix matShadowBlendLightVP;
-        
-        matShadowBlendLightVP = mul(g_ShadowViewMatrix[iBlendCascadeIndex], g_ShadowProjMatrix[iBlendCascadeIndex]);
-        vShadowBlendPos = mul(vWorldPos, matShadowBlendLightVP);
-        
-        if(IsInNDC(vShadowBlendPos))
-        {
-            float2 vBlendTexcood = Compute_Texcoord(vShadowBlendPos.xy); // Á÷±³¶ó w ³ª´©±â X
-        
-            float fBlendBias = max(g_fShadowBais[iBlendCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
-    
-            fBlendBias = max(fBlendBias, g_fMinShadowBias[iBlendCascadeIndex]);
-            float fBlendDepth = vShadowBlendPos.z - fBlendBias;
-
-            fShadowBlend = ShadowPCF(float3(vBlendTexcood, fBlendDepth), iBlendCascadeIndex, 1, g_ShadowMap); // 2 == Kernel size
-        }
-    }
-    
-    // Current Cascade
-    {
-        vector vShadowPos;
-        matrix matShadowLightVP;
-
-        matShadowLightVP = mul(g_ShadowViewMatrix[iCascadeIndex], g_ShadowProjMatrix[iCascadeIndex]);
-        vShadowPos = mul(vWorldPos, matShadowLightVP);
-        if (IsInNDC(vShadowPos))
-        {
-            float2 vTexcood = Compute_Texcoord(vShadowPos.xy); // Á÷±³¶ó w ³ª´©±â X
-
-            float fBias = 0.f;
-        
-            fBias = max(g_fShadowBais[iCascadeIndex], g_DebugSlopeScale * fSlopeFactor * Gradiant);
-
-            fBias = max(fBias, g_fMinShadowBias[iCascadeIndex]);
-    
-            float fDepth = vShadowPos.z - fBias;
-        
-            float fShadow = ShadowPCF(float3(vTexcood, fDepth), iCascadeIndex, 1, g_ShadowMap);
-
-            float fFinalShadow = lerp(fShadow, fShadowBlend, BlendFactor);
-
-            fFinalShadow = saturate(fFinalShadow + 0.3f);
-    
-            Out.vColor.xyz *= fFinalShadow;
-        }
-    }
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
 
@@ -489,6 +413,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     
     float AO = (Occlusion / g_iSampleSize);
     
+    if(AO >= 0.8f)
+        AO = 1.f;
+    
     AO = pow(AO, 2.f);
     
     Out.vColor.xyz = AO;
@@ -557,7 +484,7 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
-    Out.vColor.z = vViewPos.z;          // Depth ±â·Ï
+    Out.vColor.z = vViewPos.z;          // Depth ï¿½ï¿½ï¿½
     
     float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
@@ -568,7 +495,7 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     
     float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
     
-    float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);    // ÇÈ¼¿ °Å¸®·Î º¸Á¤
+    float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);    // ï¿½È¼ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
     
     float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
@@ -605,7 +532,7 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
     
     float fShadow = 0.f;
    
-    fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, g_DebugCSMIndex), 1.f);
+    fShadow = g_Cascade.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, g_DebugCSMIndex), 1.f);
     
     float4 vColor = 1.f;
    
@@ -636,6 +563,36 @@ PS_OUT_BACKBUFFER PS_MAIN_DEBUG_CSM(PS_IN In)
     return Out;
 }
 
+PS_OUT_BACKBUFFER PS_MAIN_DEBUG_SHADOW_MAP(PS_IN In)
+{
+    PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
+    
+    float fShadow = 0.f;
+   
+    fShadow = g_ShadowMap.SampleCmpLevelZero(ShadowSampler, float3(In.vTexcoord, g_DebugCSMIndex), 1.f);
+    
+    
+    //fShadow = g_ShadowMap.Sample(DefaultSampler, float3(In.vTexcoord, 0.f));
+    
+    float4 vColor = 1.f;
+    
+    vColor.xyz = fShadow;
+    vColor.a = 1.f;
+    
+    if (In.vTexcoord.x == 0.5f || In.vTexcoord.y == 0.5f)
+        vColor = 0.f;
+   
+    //if (fShadow != 1.f)
+    //{
+    //    vColor = float4(fShadow, 0.f, 0.f, 1.f);
+    //}
+   
+    Out.vColor = vColor;
+    
+    return Out;
+}
+
+
 technique11 DefaultTechnique
 {
     pass DebugPass // 0
@@ -658,6 +615,17 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_DEBUG_CSM();
+    }
+    
+    pass SHAODW_MAP // 2
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_None, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_MAIN_DEBUG_SHADOW_MAP();
     }
     
     pass CombinedPass // 2

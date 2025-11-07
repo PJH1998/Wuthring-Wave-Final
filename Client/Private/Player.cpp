@@ -37,11 +37,11 @@ HRESULT CPlayer::Initialize_Prototype()
 
 HRESULT CPlayer::Initialize_Clone(void* pArg)
 {
-
     PLAYER_DESC* pDesc = static_cast<PLAYER_DESC*>(pArg);
 
     m_eCurLevel = pDesc->eCurLevel;
 
+	
     if (FAILED(CGameObject::Initialize_Clone(pDesc)))
         return E_FAIL;
 
@@ -53,6 +53,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
 
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
+
+	m_pGameInstance->SetUp_ShadowNF();
 
     for (auto& pCharacter : m_Characters)
     {
@@ -113,6 +115,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
 	if (nullptr != m_pPlayerStatus)
 		m_pPlayerStatus->Update(fTimeDelta);
+
+	// 5. 몬스터 사이와의 거리는 Priority Update에서 계산
+	if (nullptr != m_pTargetTransform)
+		m_fTargetDistance = 0.f;
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -134,6 +140,10 @@ void CPlayer::Update(_float fTimeDelta)
 
     Sorting_Target(); // Update => 
     Toggle_LockOn();
+
+#ifdef _DEBUG
+	GUI_Teleport();
+#endif
 }
 
 void CPlayer::Late_Update(_float fTimeDelta)
@@ -183,6 +193,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::ROVER;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
 			return;
 		}
 
@@ -193,6 +204,7 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
 			return;
 		}
 	}
@@ -202,15 +214,55 @@ void CPlayer::Player_KeyInput()
 		{
 			m_IsChanage = true;
 			m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
 			return;
 		}
 	}
 
+
 #ifdef _DEBUG
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4)))
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
 	}
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
+	}
+
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
+		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+	}
+
+	
 #endif // _DEBUGs
 }
 
@@ -225,6 +277,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -235,12 +294,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -269,19 +323,6 @@ void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
     }
 }
 
-void CPlayer::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
-{
-	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer)
-		return;
-
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
-    if (nullptr == pTargetTransform)
-    {
-        return;
-    }
-        
-    m_TargetTransforms.push_back(pTargetTransform);
-}
 
 void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 {
@@ -337,13 +378,47 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 
 void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+	// Detect Body 탐지용
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY) != iLayer) 
 		return;
 
-    CTransform* pTargetTransform = static_cast<CTransform*>(pDesc);
+	CALLBACK_CLIENT* pcallDesc = static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	// CallBack Client Transform에 이상한 값이 들어가 있음.
+    CTransform* pTargetTransform = static_cast<CTransform*>(pcallDesc->pTransform); 
     if (nullptr == pTargetTransform)
         return;
-    m_TargetTransforms.push_back(pTargetTransform);
+	
+	{
+		lock_guard<mutex> lock(m_Mutex);
+		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
+		// Vector 컨테이너에 넣어줄 거면 
+		m_TargetTransforms.push_back(pTargetTransform);
+	}
+}
+
+
+
+void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	// 공격과 스킬이 아니라면 호출하지 않습니다.
+	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer)
+		return;
+
+	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
+		return;
+
+	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
+
+	CCharacter::HIT_DESC Desc{};
+	Desc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+	Desc.fAttack = pClientDesc.fAttack;
+	Desc.iLayer = iLayer;
+
+	
+	// Hit 판정 전달.
+	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&Desc);
 }
 
 void CPlayer::Sorting_Target()
@@ -395,10 +470,29 @@ void CPlayer::Toggle_LockOn()
     //}
 
     m_pTargetTransform = nullptr;
-    
 }
+#ifdef _DEBUG
+void CPlayer::GUI_Teleport()
+{
+	ImGui::Begin("Player Teleport");
 
+	ImGui::Text("[Position]");
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&m_vDebugTeleportPos));
 
+	if (ImGui::Button("Apply"))
+	{
+		_vector vChagePos = XMVectorSetW(XMLoadFloat3(&m_vDebugTeleportPos), 1.f);
+		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
+		m_pColliderCom->Set_Position(vChagePos);
+	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
+
+	ImGui::End();
+}
+#endif
 HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 {
     ASSERT_CRASH(pDesc);
@@ -414,35 +508,39 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     {
         switch (i)
         {
-        case CHARACTERTYPE::AUGUSTA:
-        {
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::ROVER:
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+			break;
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-        }
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+
+		}
+		break;
         case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
             break;
-        case CHARACTERTYPE::ROVER:
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
-
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-            break;
+	
         default:
             break;
         }
@@ -474,8 +572,13 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
         CRASH("Rigidbody");
 
     m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-        OnCollide_During(iLayer, pDesc, Manifold);
+		OnCollider_During(iLayer, pDesc, Manifold);
     });
+
+
+	//m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+	//	OnCollider_Enter(iLayer, pDesc, Manifold);
+	//	});
 
 	// Collider 추가했고.
 	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
@@ -496,8 +599,15 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 
 
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = 700.f;
+	//m_pColliderCom->Set_Desc(&m_CallBack);
+
 	m_pColliderCom->Set_Desc(m_pTransformCom);
 
+	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollider_Enter(iLayer, pDesc, Manifold);
+		});
     return S_OK;
 }
 

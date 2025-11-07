@@ -39,6 +39,12 @@ HRESULT CVIBuffer::Render()
     return S_OK;
 }
 
+HRESULT CVIBuffer::Render(ID3D11DeviceContext* pDC)
+{
+	pDC->DrawIndexed(m_iNumIndices, 0, 0);
+	return S_OK;
+}
+
 HRESULT CVIBuffer::Bind_Resources()
 {
     ID3D11Buffer* Buffers[] = {
@@ -58,6 +64,27 @@ HRESULT CVIBuffer::Bind_Resources()
     m_pContext->IASetPrimitiveTopology(m_ePrimitiveType);
 
     return S_OK;
+}
+
+HRESULT CVIBuffer::Bind_Resources(ID3D11DeviceContext* pDC)
+{
+	ID3D11Buffer* Buffers[] = {
+		m_pVB,
+	};
+
+	_uint Strides[] = {
+		m_iVertexStride,
+	};
+
+	_uint Offsets[] = {
+		0,
+	};
+
+	pDC->IASetVertexBuffers(0, m_iNumVertexBuffers, Buffers, Strides, Offsets);
+	pDC->IASetIndexBuffer(m_pIB, m_eIndexFormat, 0);
+	pDC->IASetPrimitiveTopology(m_ePrimitiveType);
+
+	return S_OK;
 }
 
 void CVIBuffer::Free()

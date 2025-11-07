@@ -52,6 +52,9 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	if (m_tUIDesc.strUIName == L"Skill_Augusta")
+		int i = 10;
+
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
@@ -102,9 +105,6 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
-    //if (m_tUIDesc.strUIName == L"Background_Dummy")
-    //    return;
-
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
             m_tUIDesc.vecInstanceDescs[i].matExtraData = m_cachedVariantUIDesc.matVariantValues[i];
@@ -132,7 +132,6 @@ void CCustom_UI::Render()
         if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
             CRASH("Binding_Value_Failed");
 
-        // �̹��� ũ�� �Ѱ��ֱ�
         if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
             CRASH("Binding_Value_Failed");
         if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
@@ -141,13 +140,14 @@ void CCustom_UI::Render()
             CRASH("Binding_Value_Failed");
 
 
+
         m_pShaderCom->Begin(m_tUIDesc.iPassType);
         m_pVIBufferCom->Bind_Resources();
         m_pVIBufferCom->Render();
     }
-
-   //for (auto& child : m_vecChildObjects)          // 얘 살려두니까 이중렌더됨.
-   //    child->Render();
+	
+	//for (auto& child : m_vecChildObjects)          // 얘 살려두니까 이중렌더됨.
+	//    child->Render();
 
 }
 

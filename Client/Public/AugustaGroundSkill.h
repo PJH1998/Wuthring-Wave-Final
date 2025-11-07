@@ -40,7 +40,7 @@ private:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
-    virtual void OnEnter() override;
+    virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
@@ -49,7 +49,7 @@ private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[SKILLSTATE::END] = {};
     map<_string, _string> m_PartsAnimations = {};
-	_string m_strSkillName = {};
+
 private:
     virtual void Handle_Input() override;
     void Update_SkillAnimations(_float fTimeDelta);

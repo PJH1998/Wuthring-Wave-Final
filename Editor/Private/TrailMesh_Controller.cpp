@@ -232,6 +232,15 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                     m_pSelectedTrailMeshDesc->iDirFlag = 1;
                 ImGui::PopItemWidth();
 
+				ImGui::Text("Mask");
+				ImGui::PushItemWidth(100);
+				if (ImGui::Button("R Cut"))
+					m_pSelectedTrailMeshDesc->iMaskFlag = 0;
+				ImGui::SameLine();
+				if (ImGui::Button("A Cut"))
+					m_pSelectedTrailMeshDesc->iMaskFlag = 1;
+				ImGui::PopItemWidth();
+
                 ImGui::Text("Size");
                 ImGui::PushItemWidth(60);
                 ImGui::InputFloat("##ParticleSizeX", &(m_pSelectedTrailMeshDesc->vSize.x));

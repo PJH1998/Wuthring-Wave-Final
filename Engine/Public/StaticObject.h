@@ -12,7 +12,6 @@ protected:
 
 public:
 	void						Set_LOD(_uint iLOD = 0) { m_iLODIndex = iLOD; }
-	void						IsDraw(_bool isDraw) { m_isDraw = isDraw; }
 	_float						Compute_Distance(const _fvector& vCamPos);
 
 public:
@@ -21,18 +20,22 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta) {};
 	virtual		void			Update(_float fTimeDelta) {};
 	virtual		void			Late_Update(_float fTimeDelta) {};
-	virtual		void			Render() {};
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) {};
 	virtual		void			Render_Shadow() {};
-	virtual		BoundingBox* Get_BoundingBox() { return nullptr; }
+	virtual		BoundingBox* Get_BoundingBox() { return m_pBoundingBox; }
 
 protected:
 	// LOD 개수
-	_uint		m_iNumLOD = {};
+	_uint							m_iNumLOD = {};
 	// LOD Index
-	_uint		m_iLODIndex = {};
+	_uint							m_iLODIndex = {};
 	// Render true/false
-	_bool		m_isDraw = { false };
-	BoundingBox* m_pBoundingBox = { nullptr };
+	BoundingBox*				m_pBoundingBox = { nullptr };
+	vector<_uint>				m_Sectors;
+
+protected:
+	void							Sync_Sectors();
+
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;
 	virtual void					Free() override;

@@ -10,8 +10,7 @@
 #include "AugustaBayonet.h"
 #include "AugustaSkillWeapon.h"
 #include "AugustaGriffon.h"
-
-
+#include "AttackVolume.h"
 #include "Wing.h"
 
 
@@ -41,6 +40,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
+	
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
@@ -59,6 +59,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     
 	
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
+	
     return S_OK;
 }
 
@@ -67,7 +69,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 4. Parts 갱신
+	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
@@ -77,7 +79,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
-
+	// 3. 몬스터가 있다면?
+	m_pTargetTransform;
+	
 	//// 3. Ability Update();
 	//m_pAbillityCom->Update(fTimeDelta);
 }
@@ -88,50 +92,60 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 6. 파츠 갱신.?
+	// 2. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
 
-    // 2. 상태 머신 갱신
+    // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
-    // 3. 현재 위치 - 1Frame 이전 위치 값 계산
+    // 5. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
+	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
 
-    // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+    // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Camera 갱신 => 위치 따라오게
+    // 7. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-   
+	// 8. Land Check
+	m_IsLand = Is_LandCollider();
 
+	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
+	m_IsHit = false;
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    // 파츠 갱신
+    // 1. 파츠 갱신
     for (auto& pPart : m_PartObjects)
     {
         if (pPart.second->IsActivate())
             pPart.second->Late_Update(fTimeDelta);
     }
 
+
     m_pColliderCom->Sync_Position(m_pTransformCom);
-    
+	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 
-    
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+		return;
+
+	if(FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CAugusta::Render()
 {
+
     Bind_Resources();
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
@@ -162,12 +176,51 @@ void CAugusta::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
-#endif // _DEBUG
 
+#endif // _DEBUG
 }
 
 void CAugusta::Render_Shadow()
 {
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CAugusta::Render_OutLine()
+{
+	Bind_Resources();
+	
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (i == 5)	//Cloths
+			continue;
+
+		_bool HasNormal = { false };
+
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+		
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
 }
 
 void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
@@ -227,6 +280,45 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     }
 }
 
+void CAugusta::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Change_Volume(iVolumeIdx);
+		break;
+	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+		m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+		m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
+}
+
+void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
+{
+	switch (iPartType)
+	{
+	case PART_BAYONET:
+		m_pBayonet->Volume_Activate(IsActive); // MainVolume 켜기
+		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
+		break;
+	case PART_SKILLWEAPON:
+	//	m_pSkillWeapon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_GRIFFON:
+	//	m_pGriffon->Change_Volume(iVolumeIdx);
+		break;
+	case PART_WING:
+	//	m_pWing->Change_Volume(iVolumeIdx);
+		break;
+	}
+}
+
 void CAugusta::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 {
     switch (iPartType)
@@ -271,52 +363,31 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
 // Hit 판정.
 void CAugusta::Hit_Judge(void* pArg)
 {
-    // 임시
-    _bool IsLand = Is_Land(0.2f);
-    
-    // 강공?
-    
+	if (nullptr == pArg || m_IsHit)
+		return;
 
-    // 몬스터 공격 Dir
-    ACTORDIR eAttackDir = ACTORDIR::RU;
-    // Behit S = SMALL(기본 공 Big), B = Big (Skill로 맞으면 Big)
-    if (IsLand)
-    {
-        // 특수 조건 우선순위에 따라 Change_State
-        
-        switch (eAttackDir)
-        {
-        case ACTORDIR::LU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::RU:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
-            break;
-        case ACTORDIR::U: 
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::LD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::RD:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_R;
-            break;
-        case ACTORDIR::D:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_B_L;
-            break;
-        case ACTORDIR::L: // L, R은 정면 판단.
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_L;
-            break;
-        case ACTORDIR::R:
-            m_StateContext.m_eHitType = EAugustaHitType::BEHIT_S_R;
-            break;
-        }
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
 
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
-    }
-    else
-        CCharacter::Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START));
+	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
+	
+	// 1. 맞는데 또맞진 말자..
+	if (EStateCategory::HIT == eCategory)
+		return;
 
+	// 2. 데미지는 바로 감소시킵니다.
+	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+
+
+	// 3. 캐스팅 해서? => 들고 있기.
+	m_PendingHitDesc = *pDesc;
+
+	
+
+	// 4. 현재 상태 변경.
+	m_IsHit = true;
 }
 
 
@@ -324,6 +395,7 @@ void CAugusta::Sync_Position()
 {
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
+
 
 #ifdef _DEBUG
 void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
@@ -336,18 +408,15 @@ void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
 #pragma region NOTIFY
 void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Player"))
-    {
-		m_pColliderCom->IsActivate(IsActive);
-    }
-    else if (wStrColliderTag == TEXT("Bayonet"))
-    {
-        
-    }
-    else if (wStrColliderTag == TEXT("SkillWeapon"))
-    {
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
 
-    }
+	// Main Attack Volume의 TriggerActivate
+	if (wstrTypeTag == TEXT("Bayonet"))
+	{
+		m_pBayonet->Volume_Activate(IsActive);
+	}
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -356,6 +425,27 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+void CAugusta::Object_Func(const _wstring& wStrObjectTag)
+{
+	/*size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+
+	if (wstrTypeTag == TEXT("Bayonet"))
+	{
+		if (wstrAnimTag == TEXT("Attack01"))
+		{
+
+		}
+	}*/
+}
+void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+#ifdef _DEBUG
+	cout << "On Hit! Augusta Bayonet" << endl;
+#endif // _DEBUG
+
 }
 #pragma endregion
 
@@ -373,7 +463,6 @@ void CAugusta::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
-
 }
 
 void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
@@ -437,6 +526,8 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         _wstring strPrototypeName = pDesc->PartPrototypes[i].second;
 
         CProp::PROP_DESC Desc{};
+		CAttackVolume::ATKVOLUME_DESC VolumeDesc{};
+
         switch (i)
         {
         case PARTTYPE::PART_BAYONET:
@@ -457,6 +548,26 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             m_pBayonet = dynamic_cast<CAugustaBayonet*>(Find_PartObject(strPartName));
             ASSERT_CRASH(m_pBayonet);
             Safe_AddRef(m_pBayonet);
+
+			
+			VolumeDesc.eLayer = COLLISIONLAYER::ATTACK;
+			VolumeDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+			VolumeDesc.eShape = SHAPE::BOX;
+			VolumeDesc.pParenTransform = m_pTransformCom;
+			VolumeDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp02");
+			VolumeDesc.vExtent = _float3(1.f, 1.f, 1.f);
+			VolumeDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+			VolumeDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+			VolumeDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+					this->OnHitEnter(iLayer, pOther, Manifold);
+				};
+
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET] = dynamic_cast<CAttackVolume*>(m_pGameInstance->
+			//	Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &VolumeDesc));
+			//if (nullptr == m_AttackVolumes[PARTTYPE::PART_BAYONET])
+			//	CRASH(m_pMainAttackVolume);
+			//
+			//m_AttackVolumes[PARTTYPE::PART_BAYONET]->TriggerActivate(false); // 끄고 켜기.
             break;
 
         case PARTTYPE::PART_SKILLWEAPON:

@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "StaticObject.h"
+#include"Client_Enum.h"
 
 NS_BEGIN(Engine)
+class CDeferredShader;
 class CShader;
 class CModel;
 class CRigidbody;
@@ -11,8 +13,6 @@ NS_BEGIN(Client)
 class CMapObject final: public CStaticObject
 {
 public:
-	enum OBJECTTYPE { DEFAULT, SONORA, INTERACTION, SPAWNOR, NONRIGID, END };
-
 	typedef struct tagMapLoad
 	{
 
@@ -36,7 +36,8 @@ public:
 	virtual		void			Priority_Update(_float fTimeDelta) override;
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
-	virtual		void			Render() override;
+	virtual		void			Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex) override;
+	virtual		void			Render_Shadow() override;
 
 	virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold){};
 	virtual		void			OnCollide_OnGoing(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {};
@@ -45,11 +46,13 @@ public:
 	virtual		BoundingBox* Get_BoundingBox()override;
 
 private:
-	CShader* m_pShaderCom = { nullptr };
-	CRigidbody* m_pRigidbodyCom = { nullptr };
-	vector<CModel*> m_pModelComArray;
+	CDeferredShader*		m_pShaderCom = { nullptr };
+	CShader*					m_pShadowShaderCom = { nullptr };
+	CRigidbody*			m_pRigidbodyCom = { nullptr };
+	vector<CModel*>		m_pModelComArray;
 
-	_uint m_iShaderPassIndex = {};
+	_uint						m_iShaderPassIndex = {};
+
 private:
 	void						Ready_Component(void* pArg);
 

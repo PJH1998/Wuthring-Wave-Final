@@ -23,18 +23,20 @@ HRESULT CPlayerStatus::Initialize(const vector<_string>& AbilityFolders)
 	// 1. Ability Component Clone.
 	
 	//for (_uint i = CPlayer::CHARACTERTYPE::ROVER; i < CPlayer::CHARACTERTYPE::TYPE_END; ++i)
-	for (_uint i = CPlayer::CHARACTERTYPE::ROVER; i < CPlayer::CHARACTERTYPE::GALBRENA; ++i) // 갈브가 없음 아직.
+	for (_uint i = CPlayer::CHARACTERTYPE::ROVER; i < CPlayer::CHARACTERTYPE::GALBRENA; ++i) // 갈브가 없음 아직. 갈브 만들면 위에도 주석풀기.
 	{
 		// 2. Create 하기
 		m_Abilities[i] = CAbility::Create(m_pDevice, m_pContext); 
 		
 		// 3. 유효하지 않으면 Crash
 		ASSERT_CRASH(m_Abilities[i]);
-		
-		// 4. File .csv 등록
+
+		// 4. 현재 캐릭터 등록;
+		m_Abilities[i]->Set_UICharacterType(i);
+
+		// 5. File .csv 등록
 		m_Abilities[i]->Register_AllAbilityFiles(AbilityFolders[i]);
 	}
-
 
     return S_OK;
 }
@@ -56,6 +58,14 @@ _float CPlayerStatus::Get_HpRatio(_uint iCharIndex) const
 		return 0.f;
 
     return m_Abilities[iCharIndex]->Get_HpRatio();
+}
+
+_float CPlayerStatus::Get_CostRatio(_uint iCharIndex, COST_TYPE eType) const
+{
+	if (nullptr == m_Abilities[iCharIndex])
+		return 0.f;
+
+	return m_Abilities[iCharIndex]->Get_CostRatio(eType);
 }
 
 _float CPlayerStatus::Get_Cost(_uint iCharIndex, COST_TYPE eType) const

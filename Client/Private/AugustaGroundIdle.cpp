@@ -23,9 +23,9 @@ HRESULT CAugustaGroundIdle::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundIdle::OnEnter()
+void CAugustaGroundIdle::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -82,6 +82,9 @@ void CAugustaGroundIdle::OnExit()
 
 void CAugustaGroundIdle::Handle_Input()
 {
+	m_States[HIT] = m_pAugusta->Is_Hit();
+	if (m_States[HIT])
+		return;
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
 
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -137,7 +140,7 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 
 void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 // Idles 조건이 아닌 것들.
@@ -147,6 +150,12 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
+
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
 
 
     // 우선순위 순으로 전환조건 진행.
@@ -179,6 +188,9 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Burst01"))
 			return;
 
+		// Bind Condition SP_ATTACK
+		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+
 		m_pAugusta->GetStateContextForWrite().m_eBurstType = EAugustaBurstType::BURST01;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST)); // 상위, 하위 상태
         return;
@@ -202,6 +214,8 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		// 위에 서체크하긴 했지만? 다시 체크.
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Strike"))
 			return;
+
+		m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON)); // 상태 바인딩.
 
 		m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_STRIKE;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));

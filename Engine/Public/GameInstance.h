@@ -68,7 +68,7 @@ public:
 
 #pragma region LEVEL_MANAGER
 public:
-	_uint				Get_CurrentLevel();
+	_uint			Get_CurrentLevel();
 	HRESULT			Open_Level(_uint iNextLevelID, class CLevel* pLevel);
 	HRESULT			Clear_CurrentLevel_Resources(_uint iNextLevel);
 #pragma endregion
@@ -87,10 +87,13 @@ public:
 #pragma endregion
 
 #pragma region POOLING_MANAGER
+	_uint			Get_NumThread();
 	HRESULT		Add_PoolingObject(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, const _wstring& strPoolingTag, _uint iNumObjects, void* pArg = nullptr);
 	HRESULT		Spawn_PoolingObject(const _wstring& strPoolingTag, const _fmatrix& WorldMatrix, void* pArg = nullptr);
 	// Thread Work Assign
 	void			Add_Work(function<void()> Work);
+	// Render Work Assing
+	void			Add_Render_Work(function<void()> Work);
 	// Thread Work Finish -> bool
 	_bool			IsWorkFinish();
 	// Thread Wait End
@@ -110,6 +113,7 @@ public:
 	HRESULT		Add_MRT(const _wstring& strMRTTag, const _wstring& strTargetTag);
 	HRESULT		Bind_RenderTarget(const _wstring& strTargetTag, class CShader* pShader, const _char* pConstantName);
 	HRESULT		Begin_MRT(const _wstring& strMRTTag, ID3D11DepthStencilView* pDSV = nullptr, _bool isClear = true);
+	HRESULT		SetUp_MRT(ID3D11DeviceContext* pContext, const _wstring& strMRTTag);
 	void		End_MRT();
 	HRESULT		Clear_RT(const _wstring& strTargetTag);
 #ifdef _DEBUG
@@ -123,12 +127,15 @@ public:
 
 #pragma region RENDERER
 public:
-	HRESULT		Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
-	HRESULT		Add_Render_StaticObject(class CGameObject* pObject);
-	void			Begin_ScreenEffect(SFX_TYPE eType);
-	void			End_ScreenEffect();
+	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
+	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
+	void					Begin_ScreenEffect(SFX_TYPE eType);
+	void					End_ScreenEffect();
+	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void					Set_LUT_Index(_uint iIndex);
 #ifdef _DEBUG
-	void			Set_LUT_Index(_uint iIndex);
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
@@ -162,6 +169,7 @@ public:
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
+	void				OnShake(const _float3& vDir);
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
@@ -183,7 +191,7 @@ public:
 	void					SetUp_ObjectFilter(_uint iSrc, _uint iDst);
 	void					SetUp_ObjectVsBPFilter(_uint iObjectLayer, _uint iBPLayer);
 	Body*					Register_Body(const BodyCreationSettings& BodySetting, BodyInterface** pOut);
-	Character*			Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
+	Character*				Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
@@ -231,18 +239,12 @@ public:
 	_bool					Get_Points(_float fRange, vector<_float4>& pOut, _uint* NumPixels, _float4* pOutMousePos);
 #pragma endregion
 
-#pragma region SHADOW
-	const _float4x4*		Get_ShadowLight_Matrix(D3DTS eType);
-	HRESULT					Ready_ShadowLight(const SHADOW_LIGHT_DESC& Desc);
-	HRESULT					Bind_Shadow_Resource(class CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pFarName);
-	void					Update_ShadowLight_Transform(const _fvector& vAt);
-#pragma endregion
-
 #pragma region GUIMANAGER
 public:
 	ImGuiContext*			Get_ImGuiContext();
 	void					Add_GUI_Func(function<void()> func);
 	void					Use_Gizmo(class CTransform* pTransform = nullptr);
+	void					Use_Gizmo_Offset(_float3* pScale = nullptr, _float3* pRotation = nullptr, _float3* pTranslation = nullptr);
 	void					Render_Gizmo(const _fmatrix& Matrix);
 #pragma endregion
 
@@ -286,41 +288,55 @@ public:
 	void						Clear_RCS(const _wstring& strRCSTag, _uint iMipLevel = 0);
 	ID3D11ShaderResourceView*	Get_RCS_SRV(const _wstring& strRCSTag, _uint iMipLevel = 0);
 #ifdef _DEBUG
-	HRESULT					Debug_Render_RCS();
+	HRESULT						Debug_Render_RCS();
+#endif
+#pragma endregion
+
+#pragma region SHADOW_MAP
+	HRESULT						Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc);
+	const _uint					Get_ShadowMapLayer(_uint iSectorIndex);
+	const vector<BoundingBox*>& Get_ShadowMapSectors();
+	HRESULT						Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector);
+	HRESULT						Bind_ShadowMap_Resources_Renderer(CShader* pShader);
+	HRESULT						Bind_ShadowMap_Buffer(_uint iBufferIndex);
+	HRESULT						Begin_ShadowMap();
+	HRESULT						End_ShadowMap();
+#ifdef _DEBUG
+	void						Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
 
 public:
-	HRESULT				Clear_Resource(_uint iLevelID);
-	HRESULT				Clear_Memory();
+	HRESULT					Clear_Resource(_uint iLevelID);
+	HRESULT					Clear_Memory();
 	void					Release_Engine();
 
 private:
 	class CGraphic_Device*		m_pGraphic_Device = { nullptr };
-	class CInput_Device*			m_pInput_Device = { nullptr };
+	class CInput_Device*		m_pInput_Device = { nullptr };
 	class CSound_Manager*		m_pSound_Manager = { nullptr };
 	class CFont_Manager*		m_pFont_Manager = { nullptr };
 	class CLevel_Manager*		m_pLevel_Manager = { nullptr };
 	class CPrototype_Manager*	m_pPrototype_Manager = { nullptr };
 	class CObject_Manager*		m_pObject_Manager = { nullptr };
-	class CPooling_Manager*	m_pPooling_Manager = { nullptr };
-	class COctoTree*				m_pOctoTree = { nullptr };
+	class CPooling_Manager*		m_pPooling_Manager = { nullptr };
+	class COctoTree*			m_pOctoTree = { nullptr };
 	class CTarget_Manager*		m_pTargetManager = { nullptr };
-	class CRenderer*				m_pRenderer = { nullptr };
+	class CRenderer*			m_pRenderer = { nullptr };
 	class CLight_Manager*		m_pLight_Manager = { nullptr };
-	class CCamera_Manager*	m_pCamera_Manager = { nullptr };
-	class CSequence_Manager* m_pSequence_Manager = { nullptr };
+	class CCamera_Manager*		m_pCamera_Manager = { nullptr };
+	class CSequence_Manager*	m_pSequence_Manager = { nullptr };
 	class CTimer_Manager*		m_pTimer_Manager = { nullptr };
 	class CPhysicsManager*		m_pPhysicsManager = { nullptr };
-	class CEventBus*				m_pEventBus = { nullptr };
-	class CPipeLine*				m_pPipeLine = { nullptr };
-	class CPicking*					m_pPicking = { nullptr };
-	class CShadow*				m_pShadow = { nullptr };
+	class CEventBus*			m_pEventBus = { nullptr };
+	class CPipeLine*			m_pPipeLine = { nullptr };
+	class CPicking*				m_pPicking = { nullptr };
 	class CGUIManager*			m_pGUIManager = { nullptr };
-	class CFrustrum*				m_pFrustrum = { nullptr };
-	class CCSM*						m_pCSM = { nullptr };
+	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CUI_Manager*			m_pUI_Manager = { nullptr };
+	class CCSM*					m_pCSM = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
+	class CShadowMap*			m_pShadowMap = { nullptr };
 
 	_uint									m_iNumLevel = {};
 

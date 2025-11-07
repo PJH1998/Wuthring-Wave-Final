@@ -6,11 +6,11 @@ class CShader;
 class CModel;
 class CAnimMachine;
 class CBehavior_Tree;
-//class CRigidbody;
-//class CCollider;
 NS_END
 
 NS_BEGIN(Client)
+
+class CAttackVolume;
 
 class CMonsterTest final : public CActor
 {
@@ -19,9 +19,12 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float		fHP;
+		_float fAttackDmg;
 	}MONSTERTEST_DESC;
 
-
+private:
+	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 
 private:
 	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -50,8 +53,9 @@ private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 
-	//CTransform*				m_pTargetTransformCom = { nullptr };
+	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 
+#pragma region STATE_VARIABLE
 	_uint					m_iState{};
 	_bool					m_isDetecting{};
 	_bool					m_isTrigger{};
@@ -63,22 +67,31 @@ private:
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
+	//_float2					m_vDistanceRange{};
 
-	_int					m_iHP{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
 	_bool					m_isParalysis{};
 	_bool					m_isKnockDownTrig{};
 	_float					m_fParalysisAcc{};
-
+	_bool					m_beHit{};
+	_bool					m_isAggro{};
+#pragma endregion
+	
+	_float					m_fHP{};
+	_float					m_fAttackDmg{};
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
 	void						Ready_PartObjects(MONSTERTEST_DESC* pDesc);
 
+	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
+	void						After_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
+#pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
@@ -89,10 +102,11 @@ private:
 	_bool						Front();
 	_bool						Left();
 	_bool						Right();
+#pragma endregion
 
 public:
 	static		CMonsterTest*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual		CGameObject*		Clone(void* pArg) override;
+	virtual		CGameObject*			Clone(void* pArg) override;
 	virtual		void					Free() override;
 };
 
