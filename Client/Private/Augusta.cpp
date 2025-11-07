@@ -447,17 +447,32 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
-	/*size_t Index = wStrObjectTag.find(TEXT("|"));
-	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
-	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+	//size_t Index = wStrObjectTag.find(TEXT("|"));
+	//_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	//_wstring wstrLayerTag = wStrObjectTag.substr(Index + 1);
 
-	if (wstrTypeTag == TEXT("Bayonet"))
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+
+	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	
+	_uint iVolumeIdx = stoul(var3);
+
+	// 1. 어떤 무기인가?
+	if (var1 == TEXT("BAYONET"))
 	{
-		if (wstrAnimTag == TEXT("Attack01"))
-		{
-
-		}
-	}*/
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	}
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {

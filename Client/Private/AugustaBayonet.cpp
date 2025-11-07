@@ -188,7 +188,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	TriggerDesc.vExtent = _float3(2.f, 1.f, 2.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;
@@ -200,9 +200,28 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 		, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-
-	// 끄고 켜기
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ATTACK])
 	m_AttackVolumes[VOLUME_ATTACK]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(3.f, 1.5f, 3.f);
+	m_AttackVolumes[VOLUME_STRONG_ATTACK] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_STRONG_ATTACK])
+	m_AttackVolumes[VOLUME_STRONG_ATTACK]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(4.f, 1.5f, 4.f); // 평면으로 크게
+	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ULTI])
+	m_AttackVolumes[VOLUME_ULTI]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ATTACK]; // 기본.
 }
