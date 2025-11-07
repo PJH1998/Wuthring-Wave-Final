@@ -133,6 +133,13 @@ BoundingBox* CMapObject_Sonoro::Get_BoundingBox()
 	return m_pBoundingBox;
 }
 
+void CMapObject_Sonoro::Change_Collision_Layer(_bool SonoroMode)
+{
+	SonoroMode ?
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE)) :
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+}
+
 void CMapObject_Sonoro::Ready_Component(void* pArg)
 {
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);

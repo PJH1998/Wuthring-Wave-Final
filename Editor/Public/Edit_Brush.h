@@ -22,13 +22,14 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta)override;
 	virtual		void			Render()override;
 
-
+	void About_InstanceInfo();
 
 	void Set_ModelName(const _wstring& pModelName);
 private:
 	void Bind_Resources();
 	void Ready_Components();
 	void Foliage();
+
 private:
 	CShader* m_pShaderCom = { nullptr };
 	CVIBuffer_Point* m_pVIBufferCom = { nullptr };
@@ -42,6 +43,17 @@ private:
 	_uint m_iMaxNum = {};
 	_float m_vMinRotation = {};
 	_float m_vMaxRotation = {};
+
+	_uint m_iCurSaveIndex = {};
+	_uint m_iPickedSpecipic = {};
+	_uint m_iShaderPassIndex = {};
+	map<_uint, vector<class CEdit_MapObject_Instance*>> m_SaveInstanceObjects;
+	vector<_uint> m_ShaderPasses;
+	union MyFloat4 {
+		_float4 float_4;
+		float arr[4];
+	};
+	MyFloat4 vDiffuseColor = {};
 public:
 	static CEdit_Brush* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) { return nullptr; }

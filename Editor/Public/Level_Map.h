@@ -62,6 +62,7 @@ private:
 	class CAnimationTool* m_pAnimationTool = { nullptr };
 
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
+	unordered_map<_uint , vector<CGameObject*>> m_SaveInstanceObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
@@ -75,6 +76,7 @@ private:
 	_uint m_eObjectType = {};
 	mutex m_Mutex;
 	_float m_TriggerBoxExtends[3] = { 10.f,10.f,10.f };
+	string m_FolderPath;
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

@@ -571,6 +571,7 @@
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -867,6 +868,7 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

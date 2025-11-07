@@ -24,8 +24,10 @@ public:
 	virtual HRESULT		Initialize_Prototype(const INSTANCE_DESC* pDesc);
 	virtual HRESULT		Initialize_Clone(void* pArg) override;
 	virtual HRESULT		Render() override;
+	virtual HRESULT		Render(ID3D11DeviceContext* pDC)override;
 
 	virtual HRESULT		Bind_Resources() override;
+	virtual HRESULT		Bind_Resources(ID3D11DeviceContext* pDC)override;
 
 protected:
 	ID3D11Buffer* m_pVBInstance = { nullptr };

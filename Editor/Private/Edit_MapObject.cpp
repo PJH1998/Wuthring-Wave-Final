@@ -67,15 +67,6 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 		if (!m_isActivate)
 			return;
 
-		//寃쎈줈 吏?뺥븷 ???곸쐞 ?대뜑???ㅼ뿉 LOD 鍮쇨퀬. ?대뜑瑜?吏?? 洹몃━怨?洹??덉뿉 ?덈뒗 ?대뜑 ?섏쐞 1媛??뚮㈃??.dat???쎄퀬 媛앹껜 ?덉뿉 ?ｊ린?
-
-		/*OBJECT_SAVE Save{};
-		Save.m_iNameLength = strlen(m_ModelName);
-		strcpy_s(Save.ModelName, m_ModelName);
-		Save.iShaderPassIndex = m_iShaderPassIndex;
-		XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
-
-		event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
 		auto iter = event.ModelName.find(m_ModelName);
 
 		if (iter == event.ModelName.end())
@@ -87,6 +78,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
 			m_iShaderPassIndex = 0;
+
 		event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
 		event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
 		_float4x4 WorldMatrix;

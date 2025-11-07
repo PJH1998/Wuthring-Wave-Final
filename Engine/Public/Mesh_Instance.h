@@ -20,7 +20,7 @@ private:
 public:
 	
 		//virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile);
-	virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
+	virtual HRESULT		Initialize_Prototype(_fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos);
 	virtual HRESULT		Initialize_Clone(void* pArg);
 	//virtual HRESULT		Render();
 
@@ -35,6 +35,7 @@ private:
 
 private:
 	_uint							m_iMaterialIndex = {};
+	_bool							m_IsEdit = { false };
 	//vector<_float4x4>				m_OffsetMatrices;
 
 #ifdef _DEBUG
@@ -45,7 +46,7 @@ private:
 public:
 	
 		//static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile);
-	static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, ifstream& InputFile, _float* MinPos, _float* MaxPos);
+	static CMesh_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, _bool IsEdit, void* pArg, ifstream& InputFile, _float* MinPos, _float* MaxPos);
 	virtual CMesh_Instance* Clone(void* pArg)override;
 	virtual void Free()override;
 };

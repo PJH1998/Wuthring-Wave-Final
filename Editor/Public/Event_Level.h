@@ -38,3 +38,26 @@ typedef struct tagMapSave : public CEvent
 	unordered_set<_string>& ModelName;
 	tagMapSave(ofstream& _File, unordered_set<_string>& _ModelName) :File(_File), ModelName(_ModelName) {};
 }MAP_SAVE;
+
+typedef struct tagMapInstanceCreate : public CEvent
+{
+	_char ModelName[MAX_PATH];
+	_uint iNumSaveIndex;
+	void* pObject = { nullptr };
+	tagMapInstanceCreate(_char* _ModelName, _uint _iNumSaveIndex, void* _pObject) :iNumSaveIndex(_iNumSaveIndex), pObject(_pObject)
+	{
+		strcpy_s(ModelName, _ModelName);
+	};
+}INSTANCE_CREATE;
+
+
+typedef struct tagMapInstanceSave : public CEvent
+{
+	vector<_float4x4>& Totalmatrix;
+	vector<_vector>& Objectmatrix;
+	_uint* iNumTotalInstance = {};
+
+	tagMapInstanceSave(vector<_float4x4>& _Totalmatrix, vector<_vector>& _Objectmatrix, _uint* _iNumTotalInstance) : Totalmatrix(_Totalmatrix), 
+		Objectmatrix(_Objectmatrix), iNumTotalInstance(_iNumTotalInstance) { };
+
+}INSTANCE_SAVE;
