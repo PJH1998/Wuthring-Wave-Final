@@ -430,7 +430,8 @@ void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactMa
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (!m_isAggro)
 			m_isAggro = true;
@@ -457,7 +458,13 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 #endif // _DEBUG
 
 	}
-
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_beHit = true;
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;

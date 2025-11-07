@@ -193,12 +193,12 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 1.15f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 1.8f;
+	ColliderDesc.fHeight = 1.5f;
 	ColliderDesc.fRadius = 0.4f;
-	ColliderDesc.fRayOffset = -0.15f;
+	ColliderDesc.fRayOffset = -0.11f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -362,7 +362,8 @@ void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const Contac
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (!m_isAggro)
 			m_isAggro = true;
@@ -379,7 +380,13 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 #endif // _DEBUG
 	}
-
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_beHit = true;
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
