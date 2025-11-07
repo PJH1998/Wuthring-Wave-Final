@@ -402,9 +402,6 @@
     <ClInclude Include="..\Public\MonsterDummy.h">
       <Filter>03. GameObject\Dummy</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Factory.h">
-      <Filter>04. Component\94. Factory</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\AugustaBayonet.h">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClInclude>
@@ -540,30 +537,19 @@
     <ClInclude Include="..\Public\FS_Scythe.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerStatus.h">
-      <Filter>01. GameSystem\PlayerStatus</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\Corosaurus.h">
-      <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h">
       <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Sonoro.h">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Destruction.h">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Corosaurus.h" />
+    <ClInclude Include="..\Public\MapObject_Destruction.h" />
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
+    <ClInclude Include="..\Public\MapObject_Sonoro.h" />
+    <ClInclude Include="..\Public\Factory.h" />
+    <ClInclude Include="..\Public\PlayerStatus.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -712,9 +698,6 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp">
       <Filter>03. GameObject\Dummy</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Factory.cpp">
-      <Filter>04. Component\94. Factory</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\AugustaBayonet.cpp">
       <Filter>03. GameObject\Weapon\Augusta</Filter>
     </ClCompile>
@@ -839,23 +822,8 @@
     <ClCompile Include="..\Private\PlayerStatus.cpp">
       <Filter>01. GameSystem\PlayerStatus</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Corosaurus.cpp">
-      <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Trigger_Box.cpp">
       <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
-      <Filter>03. GameObject\MapObject\Sonoro</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
-      <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject</Filter>
@@ -863,6 +831,12 @@
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\Corosaurus.cpp" />
+    <ClCompile Include="..\Private\Factory.cpp" />
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -905,6 +879,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXRect.hlsl">
       <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_TextInstance.hlsl">
+      <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

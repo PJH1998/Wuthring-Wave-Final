@@ -13,6 +13,23 @@
 #include "ShadowMap.h"
 #include "SkyBox.h"
 
+
+
+
+
+
+#define KSTA_UITEST_ONLEVEL
+
+
+
+#ifdef KSTA_UITEST_ONLEVEL
+#include "UI_Text.h"
+#endif // KSTA_UITEST_ONLEVEL
+
+
+
+
+
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
 {
@@ -105,6 +122,9 @@ void CLevel_Test::Update(_float fTimeDelta)
 #endif
 
 	Toggle_HUD();
+
+
+	Testing_UI(fTimeDelta);
 }
 
 void CLevel_Test::Render()
@@ -275,6 +295,62 @@ void CLevel_Test::Ready_UI()
 	}
 
 	// _UI
+}
+
+void CLevel_Test::Testing_UI(_float fTimeDelta)
+{
+#ifdef KSTA_UITEST_ONLEVEL
+
+	_uint iDestLevel = ENUM_CLASS(m_eCurLevel);
+	static _bool isInitialized = false;
+	
+	static CUI_Text* testText = nullptr;
+
+	if (!isInitialized)
+	{
+		// Test Initializing
+		isInitialized = true;
+		
+		if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test",
+			CUI_Text::Create(m_pDevice, m_pContext))))
+			CRASH("프로토타입 못만들었대~~");
+			
+
+		CUI_Text::TEXT_UI_DESC tDesc = {};
+		tDesc.isInstance = true;
+		tDesc.vecInstanceDescs = {};
+
+		tDesc.strFontTag = L"WW_SemiBold";
+		tDesc.strText = L"Test 테스트입니다.";
+		tDesc.vScreenPos = _float2{ 500.f, 500.f };
+		tDesc.fScale = 2.f;
+		tDesc.vLifeTime = { 0.f, 300.f };
+		tDesc.iShaderFlag = {};
+		tDesc.strUIName = L"TestFont";
+
+		tDesc.iPassType = 0;
+
+		tDesc.vColor = _float4{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+		CUI_Text* pTextObj = dynamic_cast<CUI_Text*>
+			(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
+		if (!pTextObj)
+			CRASH("폰트오브젝트 못만들었대~~");
+
+
+		m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Font", pTextObj);
+		testText = pTextObj;
+	}
+	
+	testText;
+	
+
+	// 폰트만들어서테스트>?????
+
+
+
+#endif // KSTA_UITEST_ONLEVEL
+
 }
 
 #ifdef _DEBUG

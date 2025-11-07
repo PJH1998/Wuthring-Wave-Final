@@ -52,9 +52,6 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	if (m_tUIDesc.strUIName == L"Skill_Augusta")
-		int i = 10;
-
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 

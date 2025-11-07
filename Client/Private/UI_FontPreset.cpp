@@ -59,7 +59,7 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 	tDesc.vTargetWorldPos	= vTargetPos;
 	//tDesc.vFontGradColor	= {};
 
-	m_pGameInstance->Add_FloatingText(tDesc);
+	//m_pGameInstance->Add_FloatingText(tDesc);
 }
 
 CUI_FontPreset* CUI_FontPreset::Create()

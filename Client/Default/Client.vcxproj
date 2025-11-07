@@ -447,6 +447,7 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_TextInstance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
