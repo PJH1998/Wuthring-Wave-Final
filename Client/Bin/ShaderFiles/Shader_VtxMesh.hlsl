@@ -114,7 +114,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (g_IsDynamicObject)
     {
         Out.vDepth.z = 1.f;
-        Out.vPBR.z = 1.f;
+ //       Out.vPBR.z = 1.f;
     }
      
     Out.vPBR.a = 1.f;
