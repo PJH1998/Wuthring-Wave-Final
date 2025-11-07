@@ -72,6 +72,7 @@ protected:
 
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
+	
 
 protected:
 	void Bind_Resources();

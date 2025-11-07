@@ -82,6 +82,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 	//_float temp{};
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
+	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
@@ -97,6 +99,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 		if(nullptr != m_pAtkVolumes[i])
 			m_pAtkVolumes[i]->Update(fTimeDelta);
 	}
+	m_pParryVolume->Update(fTimeDelta);
 #pragma endregion
 }
 
@@ -143,6 +146,7 @@ void CMonsterTest::Render()
 		if (nullptr != m_pAtkVolumes[i])
 			m_pAtkVolumes[i]->Render();
 	}
+	m_pParryVolume->Render();
 #pragma endregion
 	//m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
@@ -190,6 +194,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	else if (wstrTypeTag == TEXT("Gravity"))
 	{
 		m_pColliderCom->Set_Gravity(Isactive);
+	}
+	else if (wstrTypeTag == TEXT("Lerp"))
+	{
+		m_isTurnLerp = Isactive;
 	}
 }
 
@@ -422,7 +430,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pParryVolume)
 		CRASH(m_pParryVolume);
-	m_pParryVolume->TriggerActivate(true);
+	m_pParryVolume->TriggerActivate(false);
 }
 
 void CMonsterTest::Calculate_PosAndDir()

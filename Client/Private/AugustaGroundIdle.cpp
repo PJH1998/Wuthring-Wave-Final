@@ -49,6 +49,9 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
     // 3. Idle 상태 초기화
     State_Reset();
 
+	// 4. Attack Volume 끄기
+
+
 	m_pAugusta->Set_Gravity(true);
 }
 

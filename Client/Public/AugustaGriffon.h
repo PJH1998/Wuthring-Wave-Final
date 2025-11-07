@@ -8,7 +8,6 @@ public:
 	enum VOLUME
 	{
 		VOLUME_STRIKE = 0,
-		VOLUME_RISE_ZERO = 1,
 		VOLUME_END
 	};
 public:
@@ -31,7 +30,12 @@ public:
 
 
 public:
-	virtual void Activate(_bool IsActive) override;
+	virtual void Activate(_bool IsActivate) override;
+	virtual void Change_Volume(_uint iVolumeIdx) override;
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
+
+	// Owner의 게이지 채우기?
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 private:
 	vector<_uint> m_ShaderPaths = {};

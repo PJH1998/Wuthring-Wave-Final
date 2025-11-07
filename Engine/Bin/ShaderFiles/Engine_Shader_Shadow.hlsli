@@ -3,12 +3,8 @@
 
 #define MAX_SECTOR 64
 
-cbuffer CSMDatas : register(b1)
-{
-    float4 g_vClipDistances;
-    float g_fLastDistance;
-    float3 padding;
-};
+float4 g_vClipDistances;
+float g_fLastDistance;
 
 matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
@@ -96,7 +92,7 @@ float Compute_Cascade(float fViewZ, float NdotL, float4 vWorldPos, Texture2DArra
         if (fViewZ > g_vClipDistances[i])
             iCascadeIndex = i;
     }
-    
+        
     if (fViewZ >= g_fLastDistance)
         return fFinalShadow;
 
@@ -239,8 +235,6 @@ float Compute_NeighborShadow(int2 vNeighborSector, float4 vWorldPos, Texture2DAr
 {
     int iIndex = vNeighborSector.x;
 
-
-    
     float4x4 matVP = mul(g_SectorViewMatrix[iIndex], g_SectorProjMatrix[iIndex]);
     float4 vProjPos = mul(vWorldPos, matVP);
     vProjPos.xyz /= vProjPos.w;
@@ -311,5 +305,5 @@ float Compute_ShadowMap(float fViewZ, float NdotL, float4 vWorldPos, Texture2DAr
    
     fShadow = min(ShadowPCF(float3(vTexcoord, fDepth), vSector.y, 2, ShadowMapTexture, vTexelSize, vStartTex, vEndTex), fShadow);
     
-    return 1.f;
+    return fShadow;
 }

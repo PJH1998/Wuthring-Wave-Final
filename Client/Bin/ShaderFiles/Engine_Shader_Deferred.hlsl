@@ -79,6 +79,8 @@ bool g_HasShadowMap;
 //CASCADE
 Texture2DArray<float> g_Cascade : register(t2);
 
+float4 g_vShadowLightDirection;
+
 float4 g_vRimColor = float4(0.7f, 0.4f, 0.f, 1.f);
 float4 g_fRimIntensity = 0.8f;
 
@@ -155,30 +157,6 @@ PS_OUT_BACKBUFFER PS_MAIN_COMBINED(PS_IN In)
         
 ///////// Shadow Begin /////////
     
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    float fViewZ = vViewPos.z;
-
-    vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-    float fShadowMap = 1.f;
-    
-    vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
-    
-    float fNdotL = saturate(dot(vNormal, g_vLightDirection * -1.f));
-    
-    if (g_HasShadowMap)
-    {
-        fShadowMap = Compute_ShadowMap(fViewZ, fNdotL, vWorldPos, g_ShadowMap);
-    }
-   
-    float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos, g_Cascade);
-    
-    float fFinalShadow = min(fShadowMap, fShadow);
-    
-    fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
-   
-    Out.vColor.xyz *= fFinalShadow;
-    
     Out.vColor.a = 1.f;
 ///////// Shadow End /////////
 
@@ -225,7 +203,30 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     else
     {
         float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
-        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR);
+        
+        vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+        float fViewZ = vViewPos.z;
+
+        vector vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+    
+        float fShadowMap = 1.f;
+    
+        vector vNormal = Compute_Normal(g_NormalTexture, DefaultSampler, In.vTexcoord);
+    
+        float fNdotL = saturate(dot(vNormal, g_vShadowLightDirection * -1.f));
+    
+        if (g_HasShadowMap)
+        {
+            fShadowMap = Compute_ShadowMap(fViewZ, fNdotL, vWorldPos, g_ShadowMap);
+        }
+   
+        float fShadow = Compute_Cascade(fViewZ, fNdotL, vWorldPos, g_Cascade);
+    
+        float fFinalShadow = min(fShadowMap, fShadow);
+    
+//        fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
+        
+        Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
     }
     
     float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
