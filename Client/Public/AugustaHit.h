@@ -21,13 +21,17 @@ private:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
-    virtual void OnEnter() override;
+    virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 
 private:
     class CAugusta* m_pAugusta = { nullptr };
     _bool m_States[HITSTATE::END] = {};
+
+private:
+	// Enter 초기에 작업해야할 것들 정의하기.
+	void Enter_Hit();
 
 private:
     virtual void Handle_Input() override;

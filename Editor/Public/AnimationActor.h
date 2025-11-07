@@ -76,6 +76,8 @@ public:
 	
 	void Child_Render();
 	void Render_Detail();
+
+	void Set_AnimationSpeed(_float fSpeed) { m_fAnimationSpeed = fSpeed; }
 	
 #endif // _DEBUG
 
@@ -107,6 +109,8 @@ private:
 	class CSpringCamera_Edit* m_pSpringCamera = { nullptr };
 	_float	m_fOffsetY = {};
 
+
+	_float m_fAnimationSpeed = { 1.f };
 	
 
 #ifdef _DEBUG

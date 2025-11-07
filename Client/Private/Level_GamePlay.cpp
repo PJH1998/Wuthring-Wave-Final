@@ -31,7 +31,7 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
-
+	
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
 	//m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
 
@@ -76,6 +76,14 @@ HRESULT CLevel_GamePlay::Initialize()
 void CLevel_GamePlay::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("GamePlay"));
+
+	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
+	{
+		if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+			m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
+
+		m_pGameSystem->Update(fTimeDelta);
+	}
 }
 
 void CLevel_GamePlay::Render()

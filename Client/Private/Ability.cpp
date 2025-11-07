@@ -317,6 +317,22 @@ void CAbility::Add_Hp(_float fHp)
 	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
 }
 
+void CAbility::Set_Resonance(_float fResonance)
+{
+	m_CharacterInfo.fResonance = fResonance;
+}
+
+void CAbility::Add_Resonance(_float fResonance)
+{
+	m_CharacterInfo.fResonance += fResonance;
+
+	// 0보다 아래로 안가도록.
+	m_CharacterInfo.fResonance = max(0.f, m_CharacterInfo.fResonance);
+
+	// MaxHp보다 안커지도록.
+	m_CharacterInfo.fResonance = min(m_CharacterInfo.fMaxResonance, m_CharacterInfo.fResonance);
+}
+
 void CAbility::Bind_Condition(_uint iCondition)
 {
 	m_iCondition |= iCondition;
@@ -380,6 +396,8 @@ UISKILL_SLOT CAbility::Determine_StateAugusta(_uint iCharacterIdx, const _string
 	// 우선 MOUSE LB
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
+	skillSlot.fMaxCoolTime = 0.f;
+	skillSlot.iStateType = ENUM_CLASS(UI_AUGUSTA_STATE::DEFAULT);
 	if (strKey == "LB")
 	{
 		// Bit And 연산해서 걸리면?
@@ -696,9 +714,10 @@ void CAbility::Read_Stat(const _char* pFilePath)
 	m_Costs[ENUM_CLASS(COST_TYPE::COST5)] = 0.f;
 	m_Costs[ENUM_CLASS(COST_TYPE::STAMINA)] = m_CharacterInfo.fMaxStamina;
 
-	m_CharacterInfo.fAttack = stof(data[1][9]);
-	m_CharacterInfo.fAttackAddMin = stof(data[1][10]);
-	m_CharacterInfo.fAttackAddMax = stof(data[1][11]);
+	m_CharacterInfo.fAttack = stof(data[1][10]);
+	m_CharacterInfo.fAttackAddMin = stof(data[1][11]);
+	m_CharacterInfo.fAttackAddMax = stof(data[1][12]);
+	m_CharacterInfo.fMaxResonance = stof(data[1][13]);
 }
 
 

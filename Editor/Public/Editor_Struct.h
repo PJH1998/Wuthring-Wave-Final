@@ -22,8 +22,17 @@ namespace Editor
 		vector<ANIM_DATA>		strAnimDatas;
 	}SQ_ACTOR_DATA;
 
+	typedef struct tagSceneCameraFrame {
+		_float				fSpeedRate{};
+		_float4			vQuaternion{};
+		_float3			vPosition{};
+		_float				fStartFrame{};
+		_float				fFovy{};
+		_bool				isLerp = { true };
+	}SCENE_CAMERA_FRAME;
+
 	typedef struct tagSQCameraData : public SEQUENCE_ITEM_DATA {
-		vector<CAMERA_FRAME> Frames;
+		vector<SCENE_CAMERA_FRAME> Frames;
 	}SQ_CAMERA_DATA;
 
 	typedef struct tagSQAudioData : public SEQUENCE_ITEM_DATA {

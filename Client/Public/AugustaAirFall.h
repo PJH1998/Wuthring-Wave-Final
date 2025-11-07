@@ -11,6 +11,8 @@ private:
     {
         MOVE = 0,
         LAND = 1,
+		FLY = 2,
+		HIT,
         END
     };
 
@@ -20,7 +22,7 @@ private:
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
-    virtual void OnEnter() override;
+    virtual void OnEnter(void* pArg = nullptr) override;
     virtual void OnUpdate(_float fTimeDelta) override;
     virtual void OnExit() override;
 

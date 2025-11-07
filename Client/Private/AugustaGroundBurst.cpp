@@ -19,9 +19,9 @@ HRESULT CAugustaGroundBurst::Initialize(class CGameObject* pOwner)
     return S_OK;
 }
 
-void CAugustaGroundBurst::OnEnter()
+void CAugustaGroundBurst::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter();
+    CGroundState::OnEnter(pArg);
 
     // 1. 복사본 Context 받아오기
     const auto context = m_pAugusta->TakeStateContext();
@@ -93,7 +93,7 @@ void CAugustaGroundBurst::Update_SkillAnimations(_float fTimeDelta)
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target
-    m_pAugusta->Rotate_Target();
+    // m_pAugusta->Rotate_Target();
 
     if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
     {

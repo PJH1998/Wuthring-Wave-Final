@@ -37,6 +37,7 @@ private:
 private:
 	LEVEL m_eCurLevel = { LEVEL::GAMEPLAY };
 	class CGameSystem* m_pGameSystem = { nullptr };
+	_bool m_SonoroTest = { false };
 
 public:
 	static		CLevel_GamePlay* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

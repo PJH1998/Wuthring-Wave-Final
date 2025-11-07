@@ -109,7 +109,7 @@ void CAttackVolume::Render()
 
 void CAttackVolume::TriggerActivate(_bool isActivate)
 {
-	//m_pRigidBodyCom->IsActivate(isActivate);
+	//m_pRigidBodyCom->IsActivate(isActivawwwwte);
 	if (isActivate)
 	{
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));

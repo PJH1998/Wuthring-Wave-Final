@@ -38,6 +38,7 @@ HRESULT CCharacter::Initialize_Clone(void* pArg)
     // 1. State 초기화
     //m_Stats = pDesc->eStat;
 
+	//m_EventDatas.resize(CHARACTER_EVENT_ID::EVENT_END);
 
     return S_OK;
 }
@@ -105,6 +106,7 @@ void CCharacter::Set_Ability(CAbility* pAbilityCom)
 	m_pAbillityCom = pAbilityCom;
 	Safe_AddRef(m_pAbillityCom);
 }
+
 
 _float CCharacter::Get_DistanceFromGround(_float fStartYOffset)
 {
@@ -306,6 +308,7 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 
 #pragma region STATE
+
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
 	ASSERT_CRASH(m_pTransformCom);
@@ -440,10 +443,10 @@ void CCharacter::Start_FlyBlending(_float fDuration)
 }
 
 
-void CCharacter::Change_State(_uint iCategory, _uint iSubState)
+void CCharacter::Change_State(_uint iCategory, _uint iSubState, void* pArg)
 {
     ASSERT_CRASH(m_pStateMachineCom);
-    m_pStateMachineCom->Change_State(iCategory, iSubState);
+    m_pStateMachineCom->Change_State(iCategory, iSubState, pArg);
 }
 
 

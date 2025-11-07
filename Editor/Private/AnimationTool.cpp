@@ -1035,9 +1035,26 @@ void CAnimationTool::Render_Animation_Detail()
 
     ImGui::Text("Animation Name : %s", m_Selected_AnimationTag.c_str());
 
+
+	
+	
+	
+	
+	static float fAnimSpeed = 1.f;
+
 #ifdef _DEBUG
-    if (!m_Selected_AnimationTag.empty())
-        ImGui::Text("Duration : %.2f", m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag));
+	if (!m_Selected_AnimationTag.empty())
+	{
+		ImGui::Text("Duration : %.2f", m_AnimationActors[m_wSelected_AnimActorTag]->Get_Duration(m_Selected_AnimationTag));
+		ImGui::InputFloat("|", &fAnimSpeed);
+
+		ImGui::SameLine();
+		if (ImGui::Button("Apply Speed"))
+		{
+			m_AnimationActors[m_wSelected_AnimActorTag]->Set_AnimationSpeed(fAnimSpeed);
+		}
+	}
+        
     if (ImGui::SliderFloat("Track Position", &m_fTrackPosition, minTrackPos, maxTrackPos))
     {
         if (!m_Selected_AnimationTag.empty())

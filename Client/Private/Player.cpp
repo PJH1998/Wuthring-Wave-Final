@@ -115,6 +115,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
 	if (nullptr != m_pPlayerStatus)
 		m_pPlayerStatus->Update(fTimeDelta);
+
+	// 5. 몬스터 사이와의 거리는 Priority Update에서 계산
+	if (nullptr != m_pTargetTransform)
+		m_fTargetDistance = 0.f;
 }
 
 void CPlayer::Update(_float fTimeDelta)
@@ -234,6 +238,26 @@ void CPlayer::Player_KeyInput()
 	if (m_pGameInstance->Get_DIKeyState(DIK_7) == KEYSTATE::UP)
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Print_KeySlotinfo();
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_8) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(-10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_9) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Hp(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
+	{
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
 	}
 
 	
@@ -457,6 +481,10 @@ void CPlayer::GUI_Teleport()
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
 
 	ImGui::End();
 }
@@ -476,35 +504,39 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     {
         switch (i)
         {
-        case CHARACTERTYPE::AUGUSTA:
-        {
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::ROVER:
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-
-        }
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+			break;
         case CHARACTERTYPE::GALBRENA:
+		{
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;	
+		}
             break;
-        case CHARACTERTYPE::ROVER:
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+
+		}
+		break;
         default:
             break;
         }
