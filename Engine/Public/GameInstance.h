@@ -336,7 +336,8 @@ private:
 	class CGUIManager*			m_pGUIManager = { nullptr };
 	class CFrustrum*			m_pFrustrum = { nullptr };
 	class CUI_Manager*			m_pUI_Manager = { nullptr };
-	class CCSM*					m_pCSM = { nullptr };
+	class CCSM*						m_pCSM = { nullptr };
+	class CHZB*						m_pHZB = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };

@@ -326,6 +326,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Decal">
       <UniqueIdentifier>{46df0862-d4b8-43cc-be16-8844cbffd8d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\17. HZB">
+      <UniqueIdentifier>{f24b0013-be1c-4a83-b7ea-f83034e68158}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -662,6 +665,9 @@
     <ClInclude Include="..\public\Decal.h">
       <Filter>01. Utility\16. Decal</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\HZB.h">
+      <Filter>01. Utility\17. HZB</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -974,6 +980,9 @@
     <ClCompile Include="..\private\Decal.cpp">
       <Filter>01. Utility\16. Decal</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\HZB.cpp">
+      <Filter>01. Utility\17. HZB</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -1012,6 +1021,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Decal.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_HZB.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

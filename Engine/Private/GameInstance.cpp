@@ -27,6 +27,7 @@
 #include "RCS_Manager.h"
 #include "ShadowMap.h"
 #include "Decal_Manager.h"
+#include "HZB.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -106,6 +107,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pCSM);
 
+	m_pHZB = CHZB::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pHZB);
+
 	m_pUI_Manager = CUI_Manager::Create();
 	ASSERT_CRASH(m_pUI_Manager);
 
@@ -126,6 +130,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pHZB->Update();
+
 	m_pGUIManager->Update();
 
 	m_pPicking->Update();
@@ -203,6 +209,8 @@ HRESULT CGameInstance::Draw()
 #ifdef _DEBUG
 	ASSERT_CRASH(m_pPhysicsManager);
 	m_pPhysicsManager->Render();
+	ASSERT_CRASH(m_pHZB);
+	m_pHZB->Render();
 #endif
 	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
@@ -1003,6 +1011,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);
+	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
