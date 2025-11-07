@@ -60,7 +60,7 @@ public:
 
 
 #pragma region [UI] STATUS_SYNCER
-	HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
+	//HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
 
 
 #pragma endregion

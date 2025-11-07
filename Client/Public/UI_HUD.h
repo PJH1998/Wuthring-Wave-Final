@@ -17,6 +17,7 @@ private:
 	enum HUD_BOSS_HPBAR			{ BOHP_BACK, BOHP_NORMAL, BOHP_END };
 	enum HUD_BOSS_SABAR			{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
 
+
 private:
 	explicit				CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CUI_HUD(const CUI_HUD& Prototype);
@@ -30,20 +31,18 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
-public:
-	HRESULT					Sync_StatusValue(CHARACTER_STAT& eStat);
-
 private:
 	HRESULT					Load_ChildObjects(_wstring strFilePath);
 	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
 
 private:
 	HRESULT					Ready_Components(void* pArg);
+	HRESULT					Ready_Presets();
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
-	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);
-	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
+	void					Update_UI_SkillSection_BG(_float fTimeDelta);
+	void					Update_UI_SkillFeedback_Trigger(_float fTimeDelta);
 	void					Update_UI_PlayerHPBar(_float fTimeDelta);
 	void					Update_UI_BossHPBar(_float fTimeDelta);
 	void					Update_UI_KeyGuide(_float fTimeDelta);
@@ -52,19 +51,36 @@ private:					// �ڽ� UI�� ���� ��� ������ ��
 	void					Update_UI_PlayerEnergyBar(_float fTimeDelta);				// [Energy] Normal Energy. shared.
 	void					Update_UI_PlayerEnergyBar_Augusta(_float fTimeDelta);		// [Energy] about Augusta's unique resources
 	void					Update_UI_PlayerEnergyBar_Galbrena(_float fTimeDelta);		// [Energy] about Galbrena's unique resources
-	
 
 private:
-	// 데이터 받게 되는 대로 폐기
-	_uint					m_iSelectedCHIndex = 0;
-	_float					m_fPlayerEnergy[CH_END] = { 0.f, 0.f, 0.f };
+	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);		/* manunally calls on update.. onfeedback*/
+	void					Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots);
+	
+	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 
-	const   _float			m_fPlayerMaxEnergy[CH_END] = { 100.f, 100.f, 100.f };
-	_uint					m_iEnergyBarMode = 0;		// 0 : normal, 1 : ult or  mode change
+private:
+	array<_float2, 2>		Calc_SpriteSpace(_uint iIndexX, _uint iIndexY, array<_uint, 2> iNumMax, _float2 vSpriteSize = {1.f, 1.f});
 
+private:
+	class CGameSystem*		m_pGameSystem = { nullptr };
 
+	class CPlayerStatus*	m_pPlayerStatus = { nullptr };
+	class CAbility*			m_pAbility = { nullptr };
+	
 
-	CHARACTER_STAT			m_tPlayerStat = {};	// 임시
+	// * Temp assumed value.
+	//		| ROVER		|  AUGUSTA			| GARBENA
+	// ------------------------------------------------------------
+	//	0	| Normal	| Normal			| Normal
+	//	1	| DarkSerge	| Normal - Combo 1	| Normal - Burst Ready
+	//	2	| 			| Normal - Combo 2	| Burst
+	//	3	| 			| Normal - Combo 3	|
+	//	4	| 			| Ult				|
+	_uint					m_iPlayerEnhancedMode = 0;	// 용도 표시용으로 분기 둠. 나중에 제거.
+
+	// Update_UI_SkillSection
+	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
+	_uint m_iSelectedCHIndex = 0;
 
 public:
 	static CUI_HUD* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
