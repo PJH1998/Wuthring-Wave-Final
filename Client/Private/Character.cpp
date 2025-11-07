@@ -5,6 +5,7 @@
 #include "GameSystem.h"
 #include "Collider.h"
 #include "Ability.h"
+#include "AttackVolume.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -690,5 +691,14 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+		
+
+	m_AttackVolumes.clear();
 	
 }

@@ -290,6 +290,20 @@ HRESULT CAnimationActor::Bind_Bone_to_GUI()
 
 // Notify에서 사용할 현재 선택된 애니메이션의 최대 프레임 정보?
 
+void CAnimationActor::Change_CurrentAnimation(_string strAnimName)
+{
+	if (!strAnimName.empty())
+	{
+		if (!m_pModelCom->Find_Animation(strAnimName))  // 만약 없는 애니메이션이면? 아무것도 하지마라.
+			return;
+		m_strCurrentAnimation = strAnimName;
+		
+		
+		if (nullptr != m_pChildActor)
+			m_pChildActor->Change_CurrentAnimation(strAnimName);
+	}
+}
+
 void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 {
     ASSERT_CRASH(m_pModelCom);
@@ -322,6 +336,12 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
+	if (nullptr != m_pChildActor)
+	{
+		/*m_pChildActor->Set_A*/
+		m_pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
+	}
+		
 }
 
 // 폴더에 존재하는 모든 애니메이션 json을 읽어와서 등록합니다.

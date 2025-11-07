@@ -35,17 +35,21 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
-	m_vDistanceRange = _float2(2.7f, 3.3f);
+	m_vDistanceRange = _float2(2.6f, 2.9f);
 	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
+	m_fImpluseRate = 4.5f;
 	return S_OK;
 }
 
 void CHavocWarrior::Priority_Update(_float fTimeDelta)
 {
 	m_pTransformCom->Save_PreviousPosition();
+	if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && m_fImpluseRate >= m_fTimeDelta)
+		m_fTimeDelta += fTimeDelta * m_fImpluseRate;
+
 }
 
 void CHavocWarrior::Update(_float fTimeDelta)
@@ -58,9 +62,59 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
 
+	//공격이 성공했을 때 상태 유지 시간 정의
+	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
+	{
+		m_fStrikeAcc += fTimeDelta;
+		if(m_fStrikeAcc >= 1.f)
+		{
+			m_iState &= ~ENUM_CLASS(TEST_STATE::STRIKE);
+			m_fStrikeAcc = 0.f;
+		}
+	}
+
 	// 3. Collider Update
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+		//초안
+	if (m_isPushed)
+	{
+		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		m_isPushed = false;
+		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+	}
+	else if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && (m_iState & ENUM_CLASS(TEST_STATE::BEHIT)))
+	{
+		//if (m_isPushed)
+		//{
+		//	_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		//	m_isPushed = false;
+		//	ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+		//	vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+		//}
+		//else if (m_iState & ENUM_CLASS(TEST_STATE::BEHIT))
+		//{
+			_vector vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+			ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+			vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+		//}
+	}
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
+
+	//_vector vBeHitDir{};
+	//if (m_isPushed)
+	//{
+	//	XMStoreFloat3(&m_vBeHit_Normal, XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f)));
+	//	m_isPushed = false;
+	//}
+	//else if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && (m_iState & ENUM_CLASS(TEST_STATE::BEHIT)))
+	//{
+	//	m_vBeHit_Normal = _float3(0.f, 1.f, 0.f);
+	//}
+	//vBeHitDir = XMLoadFloat3(&m_vBeHit_Normal) * (m_fImpluseRate - m_fTimeDelta);
+	//m_pColliderCom->Update(vVelocity / fTimeDelta + vBeHitDir);
+	
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
 	//Tigger Volume Update
@@ -69,12 +123,24 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 void CHavocWarrior::Late_Update(_float fTimeDelta)
 {
-	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
+	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
-#ifdef _DEBUG
-	if (KEYSTATE::DOWN == m_pGameInstance->Get_DIKeyState(DIK_O))
-		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
-#endif // _DEBUG
+	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
+	{
+		
+		if (m_fAirAcc >= 0.3f)
+		{
+			if (m_pColliderCom->IsLand() && m_iState & ENUM_CLASS(TEST_STATE::AIR))
+			{
+				m_iState &= ~ENUM_CLASS(TEST_STATE::AIR);
+				//m_isAir = false;
+				m_fTimeDelta = 0.f;
+				m_fAirAcc = 0.f;
+			}
+		}
+		else
+			m_fAirAcc += fTimeDelta;
+	}
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
@@ -115,6 +181,10 @@ void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isAct
 {
 	if (wStrColliderTag == TEXT("Attack"))
 		m_pAtkVolume->TriggerActivate(isActive);
+	else if (wStrColliderTag == TEXT("Lerp"))
+	{
+		TurnLerp(isActive);
+	}
 }
 
 void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
@@ -124,6 +194,14 @@ void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 	//
 	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+
+void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
+{
+	if (wStrObjectTag == TEXT("Look"))
+	{
+		TurnFix();
+	}
 }
 
 HRESULT CHavocWarrior::Bind_Resources()
@@ -249,6 +327,8 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 		_uint iRemainState{};
 		if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
 			iRemainState |= ENUM_CLASS(TEST_STATE::ATTACK_3);
+		if(m_iState & ENUM_CLASS(TEST_STATE::AIR))
+			iRemainState |= ENUM_CLASS(TEST_STATE::AIR);
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 		m_iState |= iRemainState;
 	}
@@ -286,26 +366,39 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
 {
-	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
-	else if (m_iState & (ENUM_CLASS(TEST_STATE::MOVE_FORWARD) | ENUM_CLASS(TEST_STATE::MOVE_BACKWARD) | ENUM_CLASS(TEST_STATE::MOVE_LEFT) | ENUM_CLASS(TEST_STATE::MOVE_RIGHT)))
-	{
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
-	}
+	if (m_isTurnLerp)
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+	//else if (m_iState & (ENUM_CLASS(TEST_STATE::MOVE_FORWARD) | ENUM_CLASS(TEST_STATE::MOVE_BACKWARD) | ENUM_CLASS(TEST_STATE::MOVE_LEFT) | ENUM_CLASS(TEST_STATE::MOVE_RIGHT)))
+	//{
+	//	m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+	//}
 	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_3)))
 	{
 		if (m_fDistance < 4.f)
 		{
 			m_iState &= ~(ENUM_CLASS(TEST_STATE::ATTACK_3));
 		}
-		else
-			m_iState |= (ENUM_CLASS(TEST_STATE::ATTACK_3));
 	}
+	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
+	{
+		if (!m_AirTrig)
+		{
+			m_iState = ENUM_CLASS(TEST_STATE::AIR);
+			m_AirTrig = true;
+		}
+	}
+	else
+		m_AirTrig = false;
+
 	if (true == m_beHit)
 	{
 		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
 		m_beHit = false;
 	}
+	else
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
+
+
 }
 
 void CHavocWarrior::Calculate_PosAndDir()
@@ -319,6 +412,16 @@ void CHavocWarrior::Calculate_PosAndDir()
 	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
 
 	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
+}
+
+void CHavocWarrior::TurnFix()
+{
+	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+}
+
+void CHavocWarrior::TurnLerp(_bool isActive)
+{
+	m_isTurnLerp = isActive;
 }
 
 void CHavocWarrior::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -347,7 +450,6 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
-		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -357,7 +459,14 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
+		m_isPushed = true;
+		//m_isAir = true;
+		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+#ifdef _DEBUG
+		cout << "Knock Back! (Havoc Warrior)" << endl;
+		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+#endif // _DEBUG
 	}
 }
 

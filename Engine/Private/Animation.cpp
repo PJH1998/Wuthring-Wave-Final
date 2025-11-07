@@ -248,8 +248,6 @@ _bool CAnimation::Update_TransformationMatrices_All(_float fTimeDelta, const vec
 		return true;
 	}
 
-	// Notfiy ?꾩옱 ?몃뜳?ㅺ? size瑜??섏? ?딄퀬, TrackPosition??Notify???대떦?쒕떎硫? 
-	// Notify???대떦?섎뒗 ?⑥닔瑜??ㅽ뻾?섎씪.
 	
 	//while (m_iNotifyIndex < m_Notifies.size() && m_fCurrentTrackPosition >= m_Notifies[m_iNotifyIndex].fTrackPosition)
 	//	m_Notifies[m_iNotifyIndex++].Func();

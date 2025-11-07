@@ -18,7 +18,8 @@ public:
 		CTransform*			pParenTransform;
 		SHAPE				eShape;
 		COLLISIONLAYER		eLayer;
-		COLLISIONLAYER		eTargetLayer;
+		COLLISIONLAYER	eTargetLayer;
+		vector<COLLISIONLAYER>	eTargetLayers;
 		_float				fAttackDmg;
 		_float3				vExtent;
 		_float3				vOffsetPos;
@@ -59,7 +60,7 @@ private:
 	_float4x4		m_OffsetMatrix{};
 #endif
 
-	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
+	vector<COLLISIONLAYER> m_eTargetLayer;
 	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
 	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
 

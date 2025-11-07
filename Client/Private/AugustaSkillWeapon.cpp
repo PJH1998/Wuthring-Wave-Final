@@ -103,10 +103,10 @@ void CAugustaSkillWeapon::Activate(_bool IsActive)
     _matrix mat = XMMatrixIdentity();
     m_pTransformCom->Set_WorldMatrix(mat);*/
 
-    if (IsActive)
+   /* if (IsActive)
         m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
     else
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));*/
 }
 
 void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)

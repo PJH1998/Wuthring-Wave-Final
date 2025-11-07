@@ -47,6 +47,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
+	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
 
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
@@ -305,12 +306,13 @@ void CAugusta::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 	{
 	case PART_BAYONET:
 		m_pBayonet->Volume_Activate(IsActive); // MainVolume 켜기
-		//m_AttackVolumes[PART_BAYONET]->TriggerActivate(true);
 		break;
 	case PART_SKILLWEAPON:
+		m_pSkillWeapon->Volume_Activate(IsActive); // MainVolume 켜기
 	//	m_pSkillWeapon->Change_Volume(iVolumeIdx);
 		break;
 	case PART_GRIFFON:
+		m_pGriffon->Volume_Activate(IsActive); // MainVolume 켜기
 	//	m_pGriffon->Change_Volume(iVolumeIdx);
 		break;
 	case PART_WING:
@@ -415,8 +417,25 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	// Main Attack Volume의 TriggerActivate
 	if (wstrTypeTag == TEXT("Bayonet"))
 	{
-		m_pBayonet->Volume_Activate(IsActive);
+		if (nullptr != m_pBayonet)
+			m_pBayonet->Volume_Activate(IsActive);
 	}
+	else if (wstrTypeTag == TEXT("SkillWeapon"))
+	{
+		if (nullptr != m_pSkillWeapon)
+			m_pSkillWeapon->Volume_Activate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("Griffon"))
+	{
+		if (nullptr != m_pGriffon)
+			m_pGriffon->Volume_Activate(IsActive);
+	}
+	else if (wstrTypeTag == TEXT("Augusta"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
+
 }
 void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 {
@@ -428,17 +447,30 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 }
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
-	/*size_t Index = wStrObjectTag.find(TEXT("|"));
-	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
-	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
 
-	if (wstrTypeTag == TEXT("Bayonet"))
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+
+	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	
+	_uint iVolumeIdx = stoul(var3);
+
+	/* BAYONET|ATTACK|0*/
+	// 1. 어떤 무기인가?
+	if (var1 == TEXT("BAYONET"))
 	{
-		if (wstrAnimTag == TEXT("Attack01"))
-		{
-
-		}
-	}*/
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	}
 }
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
@@ -628,6 +660,35 @@ void CAugusta::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 	
        
     }
+}
+
+void CAugusta::Ready_AttackVolumes()
+{
+	// size 설정
+	m_AttackVolumes.resize(VOLUME_END);
+
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 장비
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 1000.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	// Attack용 만들기.
+	m_AttackVolumes[VOLUME::VOLUME_RISE] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME::VOLUME_RISE]);
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME::VOLUME_RISE]; // Main Attack Volume 설정.
 }
 
 CAugusta* CAugusta::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

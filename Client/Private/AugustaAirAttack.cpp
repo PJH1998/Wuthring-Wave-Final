@@ -235,6 +235,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP)); // 상위, 하위 상태
                 return;
             }
+
         }
 
         if (m_States[LAND])

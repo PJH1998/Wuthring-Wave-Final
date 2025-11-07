@@ -218,6 +218,12 @@ public:
 	void Sync_UI(); // UI
 #pragma endregion
 
+#pragma region NOTIFY
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
+	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
+	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
+#pragma endregion
 
 	
 
@@ -252,6 +258,9 @@ protected:
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
 	HIT_DESC m_PendingHitDesc = {};
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	
 	
 

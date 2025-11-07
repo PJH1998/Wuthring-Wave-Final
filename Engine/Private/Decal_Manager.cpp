@@ -30,7 +30,7 @@ void CDecal_Manager::Update(_float fTimeDelta)
 		Pair.second->Update(fTimeDelta);
 }
 
-HRESULT CDecal_Manager::Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType)
+HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
 {
 	CDecal* pDecal = Find_Decal(strDecalTag);
 	if (nullptr == pDecal)
@@ -41,13 +41,13 @@ HRESULT CDecal_Manager::Add_DecalTexture(const _wstring& strDecalTag, const _tch
 		m_Decals.emplace(strDecalTag, pDecal);
 	}
 
-	if (FAILED(pDecal->Add_DecalTexture(pFilePath, eTextureType)))
+	if (FAILED(pDecal->Add_DecalTexture(pFilePath)))
 		CRASH("Failed Add DecalTexture");
 
 	return S_OK;
 }
 
-HRESULT CDecal_Manager::Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal)
+HRESULT CDecal_Manager::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
 {
 	CDecal* pDecal = Find_Decal(strDecalTag);
 	ASSERT_CRASH(pDecal);
@@ -63,6 +63,13 @@ HRESULT CDecal_Manager::Render()
 		Pair.second->Render(m_pShader);
 
 	return S_OK;
+}
+
+void CDecal_Manager::Clear()
+{
+	for (auto& Pair : m_Decals)
+		Safe_Release(Pair.second);
+	m_Decals.clear();
 }
 
 HRESULT CDecal_Manager::Ready_Components()
@@ -101,7 +108,6 @@ void CDecal_Manager::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-	
 	for (auto& Pair : m_Decals)
 		Safe_Release(Pair.second);
 	m_Decals.clear();

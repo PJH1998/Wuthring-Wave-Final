@@ -15,7 +15,7 @@ public:
 	virtual HRESULT		Render() override;
 	virtual HRESULT		Bind_Resources() override;
 
-	HRESULT				Update_Buffer(const list<VTXINSTANCE_DECAL>& Datas);
+	HRESULT				Update_Buffer(const vector<VTXINSTANCE_DECAL>& Datas);
 	void				Clear();
 private:
 	ID3D11Buffer*	m_pVBInstance = { nullptr };

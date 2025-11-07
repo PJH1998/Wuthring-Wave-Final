@@ -21,11 +21,13 @@ public:
 		const _char* pAnimationTag;
 		_float		fHP;
 		_float fAttackDmg;
+		_float fMaxStamina;
+		_float3 vDetectRange;
 	}MONSTERTEST_DESC;
 
 private:
 	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
-
+	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
 private:
 	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMonsterTest(const CMonsterTest& Prototype);
@@ -54,6 +56,7 @@ private:
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
+	CAttackVolume*			m_pParryVolume = {nullptr,};
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
@@ -61,13 +64,12 @@ private:
 	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
-	_float					m_fAttackCoolTime[10]{};
-	_float					m_fAttackAcc[10]{};
+	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
+	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
-	//_float2					m_vDistanceRange{};
 
 	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
@@ -76,10 +78,17 @@ private:
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
 	_bool					m_isAggro{};
+	_bool					m_isTurnLerp{};
+	_bool					m_isDist_Interp_Enable{};
 #pragma endregion
 	
+#pragma region STATUS
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
+	_float					m_fStamina{};
+	_float					m_fMaxStamina{};
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
@@ -90,6 +99,11 @@ private:
 	void						After_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+
+	void						TurnFix();
+	void						TurnLerp(_bool isActive);
+	void						DistanceInterpolate(_bool isActive);
 
 #pragma region STATE_FUNC
 	_bool						isAnimationRunning() { return !m_isAnimationFinished; }

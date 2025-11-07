@@ -78,7 +78,7 @@ void CAugustaAirJump::Handle_Input()
         && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) && CState::Is_EscapePossible();
     
     // Jump Attack
-    m_States[AIR_ATTACK] = eJumpType == EAugustaJumpType::JUMP_WALK_LF && m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+    m_States[AIR_ATTACK] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CAugustaAirJump::Check_Physics(_float fTimeDelta)
