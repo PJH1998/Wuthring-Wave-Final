@@ -481,6 +481,10 @@ void CPlayer::GUI_Teleport()
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
 
 	ImGui::End();
 }

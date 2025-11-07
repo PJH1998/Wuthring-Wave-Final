@@ -164,7 +164,7 @@ void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 		m_fFallTime += fTimeDelta;
 
 		cout << "FallTime : " << m_fFallTime << endl;
-		if (m_fFallTime >= 0.8f)
+		if (m_fFallTime >= 0.2f)
 			m_States[FALL] = true;
 
 		//m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);

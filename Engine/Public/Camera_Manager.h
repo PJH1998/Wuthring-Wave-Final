@@ -18,6 +18,8 @@ public:
 	_float			Get_CurrentCamera_Near();
 	_float			Get_CurrentCamera_Far();
 
+	void				OnShake(const _float3& vDir);
+
 public:
 	HRESULT			Initialize(_uint iNumLevel);
 	void			Update(_float fTimeDelta);	// PipeLine Camera Matrix Update
