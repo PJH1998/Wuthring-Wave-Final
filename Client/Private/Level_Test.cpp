@@ -221,6 +221,7 @@ void CLevel_Test::Ready_MonsterTest()
 	//tDesc.pAnimationTag = "Stand1";
 	//tDesc.fHp = 10.f;
 	//tDesc.fAttackDmg = 1.f;
+	//tDesc.fImpluseRate = 7.5f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
 	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
 	//	CRASH("Failed Ready Monster");
@@ -237,6 +238,9 @@ void CLevel_Test::Ready_MonsterTest()
 	ADesc.fSpeedPerSec = 10.f;
 	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
 	ADesc.pAnimationTag = "Stand2";
+	ADesc.fHp = 10.f;
+	ADesc.fAttackDmg = 1.f;
+	ADesc.fImpluseRate = 9.f;
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
 		CRASH("Failed Ready Monster");
