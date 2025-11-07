@@ -31,6 +31,9 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
+	void					Set_TextUIDesc(TEXT_UI_DESC& tDesc) { m_tTextDesc = tDesc; }
+	TEXT_UI_DESC&			Get_TextUIDesc() { return m_tTextDesc; }
+
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Bind_Description(void* pArg);

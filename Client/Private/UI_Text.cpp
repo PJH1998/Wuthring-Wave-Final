@@ -60,7 +60,7 @@ void CUI_Text::Render()
 		if (FAILED(m_pShaderCom->Bind_Value("g_iVariantFlag", &m_cachedVariantUIDesc.iShaderFlag, sizeof(m_cachedVariantUIDesc.iShaderFlag))))
 			CRASH("Binding_Value_Failed");
 
-	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedWorldMatrix)))
+	if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", m_pTransformCom->Get_WorldMatrixPtr())))	// ksta : 부모관계 필요 시 수정
 		CRASH("Binding_Matrix_Failed");
 
 	XMStoreFloat4x4(&m_ViewMatrix, m_pGameInstance->Get_TransformState_Matrix(D3DTS::VIEW));
@@ -85,6 +85,15 @@ void CUI_Text::Render()
 		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
 		CRASH("Binding_Value_Failed");
+
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_isTargetExist", &m_tTextDesc.isTargetExist, sizeof(m_tTextDesc.isTargetExist))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_vTargetWorldPos", &m_tTextDesc.vTargetWorldPos, sizeof(m_tTextDesc.vTargetWorldPos))))
+		CRASH("Binding_Value_Failed");
+
+
+
 
 	m_pShaderCom->Begin(m_tUIDesc.iPassType);
 	m_pVIBufferCom->Bind_Resources();

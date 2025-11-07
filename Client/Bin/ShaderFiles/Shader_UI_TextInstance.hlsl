@@ -1,4 +1,4 @@
-// UI Text ¿ë
+// UI Text
 #include "Engine_Shader_State.hlsli"
 
 #define PI          3.14159265359f
@@ -35,48 +35,42 @@ DepthStencilState DSS_Off
 
 Texture2D g_Texture : register(t0);
 
-cbuffer TextureCB : register(b0)
-{
-	
-	// Basic Variables
-	matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
-	float g_AlphaStrength;
+// Basic Variables
+matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
+float g_AlphaStrength;
 	
 	
-	// Gradient Variables
-	float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f }; // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
-	bool g_InverseScreenDiscard = false; // ÁÂ»ó´Ü ³¡ÀÌ 0, 0 / ¿ìÇÏ´Ü ³¡ÀÌ ½ºÅ©¸°X, ½ºÅ©¸°Y Å©±â¿¡ ÇØ´ç
-	float4 g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f }; // (ÁÂ, ¿ì, »ó, ÇÏ) (left, right, top, bottom)
-	float2 g_ScreenSize = { 1920.f, 1080.f };
+// Gradient Variables
+float2 g_ScreenLT = { 0.f, 0.f }, g_ScreenRB = { 1920.f, 1080.f }; // based on worldspace.         for discard by pos (esc menu, inventory, etc..)
+bool g_InverseScreenDiscard = false; // ì¢Œìƒë‹¨ ëì´ 0, 0 / ìš°í•˜ë‹¨ ëì´ ìŠ¤í¬ë¦°X, ìŠ¤í¬ë¦°Y í¬ê¸°ì— í•´ë‹¹
+float4 g_BlendToOuterWidth = { 0.f, 0.f, 0.f, 0.f }; // (ì¢Œ, ìš°, ìƒ, í•˜) (left, right, top, bottom)
+float2 g_ScreenSize = { 1920.f, 1080.f };
 	
 	
-	// Cutout Variables
-	float g_CutoutAlphaDiscard = 0.3f;
+// Cutout Variables
+float g_CutoutAlphaDiscard = 0.3f;
 	
 	
-	// Nine-Sector Variables
-	float2 g_ImageSize = { 0.f, 0.f };
-	float2 g_SectorBorder = { 0.f, 0.f }; // based on local texcoord.     for 9sector
-	float g_UIScale = 1.f; // UI Scaler
+// Nine-Sector Variables
+float2 g_ImageSize = { 0.f, 0.f };
+float2 g_SectorBorder = { 0.f, 0.f }; // based on local texcoord.     for 9sector
+float g_UIScale = 1.f; // UI Scaler
 
-}
-
-cbuffer FontCB : register(b1)
-{
-	//float2 g_ScreenSize;			// [8]
+//float2 g_ScreenSize;				// [8]
 	
-    float4 g_FontColor;				// [16] RGB + A
+float4		g_FontColor;			// [16] RGB + A
 	
-    uint g_FontFlag = 0;			// [4]
+uint		g_FontFlag = 0;			// [4]
 	
-	float4 g_FontOutlineColor;      // [16] RGBA Outline Color
-    float2 g_FontTexPerPixel;       // [8] 1.f / Texture Size 
-    float g_FontOutlineWidth;       // [4] Outline Width Size
+float4		g_FontOutlineColor;     // [16] RGBA Outline Color
+float2		g_FontTexPerPixel;      // [8] 1.f / Texture Size 
+float		g_FontOutlineWidth;     // [4] Outline Width Size
 	
-	float4 g_FontGradColor;         // [16] RGBA Gradiant Color (->)
+float4		g_FontGradColor;		// [16] RGBA Gradiant Color (->)
 	
 	
-}
+bool		g_isTargetExist;
+float4		g_vTargetWorldPos;
 
 
 #define FL_NONE         0
@@ -148,22 +142,22 @@ float Check_SpaceRatioP(float originPoint, float startPoint, float endPoint)
 	return saturate((originPoint - startPoint) / (endPoint - startPoint));
 }
 
-float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2 imageSize) // 1. texcoord »ó ÁÂÇ¥?
+float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2 imageSize) // 1. texcoord ìƒ ì¢Œí‘œ?
 {
-    // ÀüÃ¼ ´ëºñ ¿ŞÂÊ/À§ ·ÎºÎÅÍ ¾ó¸¶³ª ¿À¸¥ÂÊ/¾Æ·¡¿¡ ÀÖ´ÂÁöÀÇ ºñÀ²
+    // ì „ì²´ ëŒ€ë¹„ ì™¼ìª½/ìœ„ ë¡œë¶€í„° ì–¼ë§ˆë‚˜ ì˜¤ë¥¸ìª½/ì•„ë˜ì— ìˆëŠ”ì§€ì˜ ë¹„ìœ¨
     
 	float2 resultUV;
     
-    // xÃà °è»ê
+    // xì¶• ê³„ì‚°
     
-	if (originPos.x < border.x)                    // ¿ŞÂÊ.
+	if (originPos.x < border.x)                    // ì™¼ìª½.
 		resultUV.x = originPos.x / imageSize.x;
-	else if ((modSize.x - border.x) < originPos.x)      // ¿À¸¥ÂÊ. 
+	else if ((modSize.x - border.x) < originPos.x)      // ì˜¤ë¥¸ìª½. 
 		resultUV.x = (originPos.x - (modSize.x - imageSize.x)) / imageSize.x;
 	else
 	{
-        // [ originPos.x - border.x ] ~ [ originPos.x ] ÀÇ »çÀÕ°ªÀÎ originPosX_OnMod ¸¦
-        // [ border.x ] ~ [ modSize.x - border.x ] »çÀÌ·Î ºñÀ²À» ¸ÂÃç¾ß ÇÔ 
+        // [ originPos.x - border.x ] ~ [ originPos.x ] ì˜ ì‚¬ì‡ê°’ì¸ originPosX_OnMod ë¥¼
+        // [ border.x ] ~ [ modSize.x - border.x ] ì‚¬ì´ë¡œ ë¹„ìœ¨ì„ ë§ì¶°ì•¼ í•¨ 
         
 		float originPosX_OnMod = originPos.x - border.x;
 
@@ -176,9 +170,9 @@ float2 Calc_NineSectorUV(float2 originPos, float2 modSize, float2 border, float2
 	}
     
     
-	if (originPos.y < border.y)                    // À§ÂÊ
+	if (originPos.y < border.y)                    // ìœ„ìª½
 		resultUV.y = originPos.y / imageSize.y;
-	else if ((modSize.y - border.y) < originPos.y)      // ¾Æ·¡ÂÊ.
+	else if ((modSize.y - border.y) < originPos.y)      // ì•„ë˜ìª½.
 		resultUV.y = (originPos.y - (modSize.y - imageSize.y)) / imageSize.y;
 	else
 	{
@@ -251,58 +245,55 @@ struct VS_OUT
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
 	VS_OUT Out = (VS_OUT) 0;
-    // [ ÀÎ½ºÅÏ½Ì¿ë ] °¢ ÀÎ½ºÅÏ½ºº° Vertex ÀÇ Out Á¤ÀÇ
-    
-	//float4x4 matWV, matWVP;
-    //
-	//matWV = mul(g_WorldMatrix, g_ViewMatrix);
-	//matWVP = mul(matWV, g_ProjMatrix);
-    
-    
-	//float4x4 matAdditionalTransform = float4x4(
-    //    In.vSInstRight,
-    //    In.vSInstUp,
-    //    In.vSInstLook,
-    //    In.vSInstTrans
-    //);
-    //
-	//// ==============================
-	//// if needs to create variant vs,
-	//// declare here.
-	//// ==============================
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//// ==============================
-	//
-	//float4 vWorldPos = mul(float4(In.vPosition, 1.f), matAdditionalTransform);
-	//vWorldPos = mul(vWorldPos, matWVP);
-    //
-	//Out.vPosition = vWorldPos;
-	//Out.vTexcoord = In.vTexcoord;
-	//Out.vWorldPos = mul(float4(In.vPosition, 1.f), g_WorldMatrix);
-	//Out.vProjPos = Out.vPosition;
-    //
-	//Out.vSInstPos = In.vSInstTrans.xy;
-	//Out.vSInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+	
 	
 	float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
-    float2 quadLocal = In.vPosition.xy + float2(0.5f, -0.5f); // pivot Á¤·Ä
+    float2 quadLocal = In.vPosition.xy + float2(0.5f, -0.5f); // pivot ì •ë ¬
 
     float2 pixelPos;
     pixelPos.x = In.vSInstTrans.x + quadLocal.x * vInstSca.x;
     pixelPos.y = In.vSInstTrans.y - quadLocal.y * vInstSca.y;
+	
+	
 
-    float2 ndc = (pixelPos / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
+	
+	
+    if (g_isTargetExist)
+    {
+        float3 test = g_vTargetWorldPos.xyz + (In.vPosition.xyz * 5.f);
+		
+        float4 targetWorld = float4(test.xyz, 1.0f);
+        float4 targetView = mul(targetWorld, g_ViewMatrix);
+        float4 targetProj = mul(targetView, g_ProjMatrix);
+		
+        if (targetProj.w <= 0.0f)
+        {
+            Out.vPosition = float4(-2, -2, 0, 1); // ê·¸ëƒ¥ ì•ˆ ë³´ì´ê²Œ ë²„ë¦¼
+            return Out;
+        }
+	
+        float3 targetNDC = targetProj.xyz / targetProj.w;
+	
+        float2 targetScreenPos;
+        targetScreenPos.x = (targetNDC.x + 1.0f) * 0.5f * g_ScreenSize.x;
+        targetScreenPos.y = (1.0f - targetNDC.y) * 0.5f * g_ScreenSize.y;
+	
+        pixelPos = targetScreenPos;
+		
+		// beginì²˜ëŸ¼ ìŠ¤í¬ë¦°ì¢Œí‘œë¡œ ì „í™˜í•œ ë’¤ì—, UIìš© íˆ¬ì˜í–‰ë ¬ ë°›ì•„ì™€ì„œ ê³„ì‚°ì— ì‚¬ìš©í•˜ë©´
+		// ì§€ê¸ˆì²˜ëŸ¼ ì§„ì§œ 3Dìƒ ì¢Œí‘œê°€ ì•„ë‹Œ ë¹Œë³´ë“œ í˜•ì‹ ê°€ëŠ¥í• ìˆ˜ë„
+		
+		
+		// ì•„ë‹ˆë©´ ì§€ì˜¤ë©”íŠ¸ë¦¬ì…°ì´ë” ì“°ê±°ë‚˜, íšŒì „ ë‹¤ ë¹¼ê±°ë‚˜
+    }
+	
+	
+    float2 ndcTarget = (pixelPos / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
+    Out.vPosition = float4(ndcTarget, 0.1f, 1.f);
 	
 	
 	
-	
-    Out.vPosition = float4(ndc, 0, 1);
+    // Out.vPosition = float4(ndc, 0, 1);
     Out.vTexcoord = In.vTexcoord;
 
     Out.vWorldPos = float4(pixelPos, 0, 1);
@@ -344,10 +335,10 @@ struct PS_IN
 	float4 vWorldPos : TEXCOORD1;
 	float4 vProjPos : TEXCOORD2;
     
-	float2 vSInstCoordX : TEXCOORD3; // [°¢ ÀÎ½ºÅÏ½º] °¡ »ç¿ëÇÒ ¿øº» ÅØ½ºÃÄ »óÀÇ Texcoord Á¤º¸ (¾ÆÆ²¶ó½º, ½ºÇÁ¶óÀÌÆ® µî »ç¿ë ¸ñÀû)
-	float2 vSInstCoordY : TEXCOORD4; // [°¢ ÀÎ½ºÅÏ½º] °¡ »ç¿ëÇÒ ¿øº» ÅØ½ºÃÄ »óÀÇ Texcoord Á¤º¸ (¾ÆÆ²¶ó½º, ½ºÇÁ¶óÀÌÆ® µî »ç¿ë ¸ñÀû)
-	float2 vClipTexcoordX : TEXCOORD5; // [°¢ ÀÎ½ºÅÏ½º] °¡ »ç¿ëÇÒ º»ÀÎÀÌ Â÷ÁöÇÏ´Â °ø°£ »ó¿¡¼­ Visible ÇÏ°Ô ÇØ ÁÙ ¹üÀ§. (Ã¼·Â ¹Ù °ÔÀÌÁö µî¿¡ »ç¿ë ¸ñÀû)
-	float2 vClipTexcoordY : TEXCOORD6; // [°¢ ÀÎ½ºÅÏ½º] °¡ »ç¿ëÇÒ º»ÀÎÀÌ Â÷ÁöÇÏ´Â °ø°£ »ó¿¡¼­ Visible ÇÏ°Ô ÇØ ÁÙ ¹üÀ§. (Ã¼·Â ¹Ù °ÔÀÌÁö µî¿¡ »ç¿ë ¸ñÀû)
+	float2 vSInstCoordX : TEXCOORD3; // [ê° ì¸ìŠ¤í„´ìŠ¤] ê°€ ì‚¬ìš©í•  ì›ë³¸ í…ìŠ¤ì³ ìƒì˜ Texcoord ì •ë³´ (ì•„í‹€ë¼ìŠ¤, ìŠ¤í”„ë¼ì´íŠ¸ ë“± ì‚¬ìš© ëª©ì )
+	float2 vSInstCoordY : TEXCOORD4; // [ê° ì¸ìŠ¤í„´ìŠ¤] ê°€ ì‚¬ìš©í•  ì›ë³¸ í…ìŠ¤ì³ ìƒì˜ Texcoord ì •ë³´ (ì•„í‹€ë¼ìŠ¤, ìŠ¤í”„ë¼ì´íŠ¸ ë“± ì‚¬ìš© ëª©ì )
+	float2 vClipTexcoordX : TEXCOORD5; // [ê° ì¸ìŠ¤í„´ìŠ¤] ê°€ ì‚¬ìš©í•  ë³¸ì¸ì´ ì°¨ì§€í•˜ëŠ” ê³µê°„ ìƒì—ì„œ Visible í•˜ê²Œ í•´ ì¤„ ë²”ìœ„. (ì²´ë ¥ ë°” ê²Œì´ì§€ ë“±ì— ì‚¬ìš© ëª©ì )
+	float2 vClipTexcoordY : TEXCOORD6; // [ê° ì¸ìŠ¤í„´ìŠ¤] ê°€ ì‚¬ìš©í•  ë³¸ì¸ì´ ì°¨ì§€í•˜ëŠ” ê³µê°„ ìƒì—ì„œ Visible í•˜ê²Œ í•´ ì¤„ ë²”ìœ„. (ì²´ë ¥ ë°” ê²Œì´ì§€ ë“±ì— ì‚¬ìš© ëª©ì )
     
 	float2 vSInstPos : TEXCOORD7;
 	float2 vSInstSca : TEXCOORD8;
@@ -369,20 +360,20 @@ struct PS_OUT
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-    //return Out;
+    Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    return Out;
 	
 	
 	
     // Apply InstCoord for atlas / sprite style
 	//PS_OUT Out = (PS_OUT) 0;
-	float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),			// ÀÌ°É·Î In.vSInstCoord ¹üÀ§¿¡ µû¶ó.. ÀÌ¿ë?
+	float2 fixedUV = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vTexcoord.x),			// ì´ê±¸ë¡œ In.vSInstCoord ë²”ìœ„ì— ë”°ë¼.. ì´ìš©?
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vTexcoord.y));
     
     // Apply ClipTexcoord for clipped ui. like as HP Bar
     // Calc Clip Space
-	float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),		// ¿¹½Ã·Î ÅØ½ºÃÄ¸¦ 0.2 ~ 0.8 ¹üÀ§¸¸ ¾²´Âµ¥, Å¬¸³ ¹üÀ§´Â 0.5 ~ 1.0 ÀÌ¶ó¸é
-                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));	// 0.2 ~ 0.8 ¹üÀ§ ³»¿¡¼­ÀÇ 0.5 ¹× 1.0À» Å¬¸³ ¹üÀ§·Î »ïÀ½. ( result : 0.5 ~ 0.8 )
+	float2 clipX = float2(lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.x),		// ì˜ˆì‹œë¡œ í…ìŠ¤ì³ë¥¼ 0.2 ~ 0.8 ë²”ìœ„ë§Œ ì“°ëŠ”ë°, í´ë¦½ ë²”ìœ„ëŠ” 0.5 ~ 1.0 ì´ë¼ë©´
+                            lerp(In.vSInstCoordX.x, In.vSInstCoordX.y, In.vClipTexcoordX.y));	// 0.2 ~ 0.8 ë²”ìœ„ ë‚´ì—ì„œì˜ 0.5 ë° 1.0ì„ í´ë¦½ ë²”ìœ„ë¡œ ì‚¼ìŒ. ( result : 0.5 ~ 0.8 )
 	float2 clipY = float2(lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.x),
                             lerp(In.vSInstCoordY.x, In.vSInstCoordY.y, In.vClipTexcoordY.y));
     // discard
@@ -399,11 +390,11 @@ PS_OUT PS_MAIN(PS_IN In)
 	// ==============================
 	
     float2 uv = In.vTexcoord;
-    float alphaCenter = g_Texture.Sample(FontSampler, uv).r; // ÇöÀç ¹Ù¶óº¸´Â ÇÈ¼¿ »ö»ó¿¡¼­ a°ª ÃßÃâ
+    float alphaCenter = g_Texture.Sample(FontSampler, uv).r; // í˜„ì¬ ë°”ë¼ë³´ëŠ” í”½ì…€ ìƒ‰ìƒì—ì„œ aê°’ ì¶”ì¶œ
         
     
 
-    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter); // ±ÛÀÚ¿¡ »ö»ó Ã¤¿öÁø Á¤µµ¸¦ ÀúÀå. °æ°è ºÎµå·´°Ô
+    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter); // ê¸€ìì— ìƒ‰ìƒ ì±„ì›Œì§„ ì •ë„ë¥¼ ì €ì¥. ê²½ê³„ ë¶€ë“œëŸ½ê²Œ
     float4 fillColor = float4(g_FontColor.rgb, g_FontColor.a * fillMask);
 
     Out.vColor.rgb = g_FontColor.rgb;

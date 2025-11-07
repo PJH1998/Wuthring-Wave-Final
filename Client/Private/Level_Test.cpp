@@ -1,17 +1,17 @@
 ﻿#include "ClientPch.h"
+#include "AnimationDummy.h"
+#include "ElectroPredator.h"
+#include "FS_Scythe.h"
+#include "GameSystem.h"
+#include "Ggobul.h"
+#include "HavocWarrior.h"
 #include "Level_Test.h"
 #include "MapObject.h"
-#include "AnimationDummy.h"
 #include "MonsterTest.h"
-#include "Ggobul.h"
-#include "FS_Scythe.h"
-#include "HavocWarrior.h"
-#include "ElectroPredator.h"
-#include "GameSystem.h"
 #include "Player.h"
-#include"Trigger_Box.h"
 #include "ShadowMap.h"
 #include "SkyBox.h"
+#include"Trigger_Box.h"
 
 
 
@@ -322,15 +322,26 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 		tDesc.strFontTag = L"WW_SemiBold";
 		tDesc.strText = L"Test 테스트입니다.";
-		tDesc.vScreenPos = _float2{ 500.f, 500.f };
-		tDesc.fScale = 2.f;
+		tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
+		tDesc.fScale = 1.f;
 		tDesc.vLifeTime = { 0.f, 300.f };
 		tDesc.iShaderFlag = {};
 		tDesc.strUIName = L"TestFont";
 
 		tDesc.iPassType = 0;
 
+		tDesc.isTargetExist = true;
+		tDesc.vTargetWorldPos = _float4{ 2.42f, -10.19f, -3.56f, 1.0f };
+
+
+
+		// ===== test
+
+		// =====
+
+
 		tDesc.vColor = _float4{ 1.0f, 1.0f, 1.0f, 1.0f };
+
 
 		CUI_Text* pTextObj = dynamic_cast<CUI_Text*>
 			(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
@@ -345,7 +356,30 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	testText;
 	
 
-	// 폰트만들어서테스트>?????
+
+
+	CUI_Text::TEXT_UI_DESC tDesc = testText->Get_TextUIDesc();
+		
+	//_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
+	//_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
+	//
+	//_float4 world = { tDesc.vTargetWorldPos.x, tDesc.vTargetWorldPos.y, tDesc.vTargetWorldPos.z, 1.f };   // (x,y,z)
+	//_matrix view = XMLoadFloat4x4(&matPipelineView);
+	//_matrix proj = XMLoadFloat4x4(&matPipelineProj);
+	//_vector pos = XMVectorSet(world.x, world.y, world.z, 1.0f);
+	//
+	//pos = XMVector3Transform(pos, view);
+	//pos = XMVector3Transform(pos, proj);
+	//_vector ndc = pos / XMVectorSplatW(pos);
+	//
+	//_float3 ndc3;
+	//XMStoreFloat3(&ndc3, ndc);
+	//_float screenX = (ndc3.x * 0.5f + 0.5f) * 1920.f;     // 화면 해상도 X
+	//_float screenY = (1.0f - (ndc3.y * 0.5f + 0.5f)) * 1080.f; // Y 반전
+	//
+	//tDesc.vScreenPos = _float2(screenX, screenY);
+
+	testText->Set_TextUIDesc(tDesc);
 
 
 
