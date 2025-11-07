@@ -26,6 +26,7 @@
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
 #include "ShadowMap.h"
+#include "Decal_Manager.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -117,6 +118,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pShadowMap);
 
+	m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pDecal_Manager);
+
 	return S_OK;
 }
 
@@ -147,6 +151,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pFont_Manager->Late_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
+	m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
@@ -921,6 +926,21 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #endif
 #pragma endregion
 
+#pragma region DECAL_MANAGER
+HRESULT CGameInstance::Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType)
+{
+	return m_pDecal_Manager->Add_DecalTexture(strDecalTag, pFilePath, eTextureType);
+}
+HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal)
+{
+	return m_pDecal_Manager->Add_Decal(strDecalTag, Decal);
+}
+HRESULT CGameInstance::Render_Decal()
+{
+	return m_pDecal_Manager->Render();
+}
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -977,6 +997,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadowMap);
+	Safe_Release(m_pDecal_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
 	Safe_Release(m_pCSM);

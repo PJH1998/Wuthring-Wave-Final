@@ -108,7 +108,8 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_ShadowMap();
 	Render_NonBlend();
-	Render_Static();		
+	Render_Static();
+	Render_Decal();
 	Render_SSAO();			
 	Render_Dynamic();
 
@@ -484,8 +485,12 @@ void CRenderer::Render_SSAO()
 
 void CRenderer::Render_Decal()
 {
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_DECAL"), nullptr, false)))
+		CRASH("Failed Begin MRT_Decal");
 
+	m_pGameInstance->Render_Decal();
 
+	m_pGameInstance->End_MRT();
 }
 
 void CRenderer::Render_Dynamic()
@@ -1198,6 +1203,13 @@ HRESULT CRenderer::Ready_MRT()
 
 #pragma region MRT_SSAO
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_SSAO"), TEXT("RT_SSAO"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_DECAL
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Diffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Normal"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

@@ -25,7 +25,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
-	ShadowMapDesc.vCenterPos = _float3(2200.f, 150.f, 1200.f);
+	ShadowMapDesc.vCenterPos = _float3(2200.f, 60.f, 1200.f);
 	ShadowMapDesc.vExtents = _float3(160.f, 300.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
 
@@ -75,7 +75,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 void CLevel_GamePlay::Render()
 {
 #ifdef _DEBUG
-//	Shader_Gui();
+	Shader_Gui();
 #endif
 }
 

@@ -25,6 +25,8 @@ HRESULT CLevel_Shader::Initialize()
     if(FAILED(Ready_TestObjects()))
         CRASH("Failed TestObject");
 
+	if (FAILED(m_pGameInstance->Add_DecalTexture(TEXT("Decal_Test"), TEXT("../../Client/Bin/Resource/Decal/T_Decal_160002.png"), TEXTURETYPE::MASK)))
+		CRASH("Failed Add DecalTexture");
 
     return S_OK;
 }
@@ -82,7 +84,7 @@ HRESULT CLevel_Shader::Ready_Interface()
 HRESULT CLevel_Shader::Ready_TestObjects()
 {
     CEditDummy_Augusta::DUMMY_AUGU_DESC AuguDesc = {};
-    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
     AuguDesc.PreTransformMatrix = PreTransformationMatrix;
 
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),

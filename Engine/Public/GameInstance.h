@@ -302,6 +302,12 @@ public:
 #endif
 #pragma endregion
 
+#pragma region DECAL_MANAGER
+	HRESULT						Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType);
+	HRESULT						Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal);
+	HRESULT						Render_Decal();
+#pragma endregion
+
 public:
 	HRESULT					Clear_Resource(_uint iLevelID);
 	HRESULT					Clear_Memory();
@@ -333,8 +339,9 @@ private:
 	class CCSM*					m_pCSM = { nullptr };
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 	class CShadowMap*			m_pShadowMap = { nullptr };
+	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 
-	_uint									m_iNumLevel = {};
+	_uint						m_iNumLevel = {};
 
 public:
 	virtual void Free() override;
