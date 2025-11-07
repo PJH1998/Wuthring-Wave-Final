@@ -77,7 +77,7 @@ void CRoverAirJump::Handle_Input()
 
 void CRoverAirJump::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pRover->Is_Land();
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);
 }
 

@@ -219,6 +219,8 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
+
+#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
@@ -228,8 +230,8 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 	}
 
-#ifdef _DEBUG
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
+
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D5), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
 		m_Characters[m_iCurrentCharacterIdx]->Print_CoolTime();
@@ -275,6 +277,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -285,12 +294,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -516,12 +520,6 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 			ASSERT_CRASH(pPlayer);
 			m_Characters[i] = pPlayer;
 			break;
-        case CHARACTERTYPE::GALBRENA:
-		{
-			ASSERT_CRASH(pPlayer);
-			m_Characters[i] = pPlayer;	
-		}
-            break;
 		case CHARACTERTYPE::AUGUSTA:
 		{
 			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
@@ -537,6 +535,12 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 
 		}
 		break;
+        case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
+            break;
+	
         default:
             break;
         }

@@ -18,6 +18,7 @@ public:
 
 	// 읽기 전용 Getter (포인터 노출 X)
 	_float Get_HpRatio(_uint iCharIndex) const;
+	_float Get_CostRatio(_uint iCharIndex, COST_TYPE eType) const;
 	_float Get_Cost(_uint iCharIndex, COST_TYPE eType) const;
 	_float Get_RemainingCooldown(_uint iCharIndex, const _string& strSkillName) const;
 	_float Get_MaxCooldown(_uint iCharIndex, const _string& strSkillName) const;

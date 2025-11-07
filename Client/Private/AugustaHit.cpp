@@ -86,7 +86,7 @@ void CAugustaHit::Enter_Hit()
 	m_pAugusta->Rotate_HitTarget(pDesc->pTransform);
 
 	// 4. 땅 판정.
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
 	// 5. 애니메이션 선정.
 	if (!m_States[LAND])
@@ -125,7 +125,7 @@ void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }

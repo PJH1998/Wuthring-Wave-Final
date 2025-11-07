@@ -140,7 +140,7 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 
 void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land();
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 // Idles 조건이 아닌 것들.

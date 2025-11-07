@@ -91,6 +91,8 @@ HRESULT CLevel_Test::Initialize()
 
 	Ready_Skybox();
 
+	Ready_UI();
+
     return S_OK;
 }
 
@@ -101,6 +103,8 @@ void CLevel_Test::Update(_float fTimeDelta)
 #ifdef _DEBUG
 	Shader_Gui();
 #endif
+
+	Toggle_HUD();
 }
 
 void CLevel_Test::Render()
@@ -253,6 +257,26 @@ void CLevel_Test::Ready_Skybox()
 		CRASH("Skybox");
 }
 
+void CLevel_Test::Ready_UI()
+{
+	// UI
+	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
+	const _wstring strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+
+	// _UI
+}
+
 #ifdef _DEBUG
 void CLevel_Test::Shader_Gui()
 {
@@ -272,6 +296,25 @@ void CLevel_Test::Shader_Gui()
 	ImGui::End();
 }
 #endif
+
+void CLevel_Test::Toggle_HUD()
+{
+	static _bool isToggled_HUD = false;
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		isToggled_HUD = !isToggled_HUD;
+
+		if (isToggled_HUD)
+		{
+			CGameSystem::GetInstance()->HUD_FadeOut();
+		}
+		else
+		{
+			CGameSystem::GetInstance()->HUD_FadeIn();
+		}
+	}
+}
 
 HRESULT CLevel_Test::Ready_Layer_Map(const _char* pFilePath)
 {

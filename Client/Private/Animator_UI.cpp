@@ -252,9 +252,6 @@ void CAnimator_UI::Update_Animation()
 	//if (pParentAnimator)
 	//	pParentCombinedDesc = pParentAnimator->Get_CurCombinedAnimKeyframeDesc();
 
-	if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
-		int i = 10;
-
     CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
 
     if (m_pCurAnimDesc == nullptr)
