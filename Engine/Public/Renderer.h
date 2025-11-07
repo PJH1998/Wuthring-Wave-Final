@@ -114,14 +114,15 @@ private:
 	void						Render_Light();
 	void						Render_Combined();
 	void						Render_NonLight();
-	void						Render_Emissive();
-	void						Render_Bloom();
+	void						Render_Emissive();	// 단독 Emissive
+	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
+	void						Render_Bloom();		// Emissvie 처리
 	void						Render_BloomCombined();
 	void						Render_DistortionObject();
 	void						Render_Blend();
-	void						Render_Distortion();
 	void						Render_LUT();
 	void						Render_Fog();
+	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
