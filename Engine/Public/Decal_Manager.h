@@ -20,8 +20,8 @@ private:
 public:
 	HRESULT								Initialize();
 	void								Update(_float fTimeDelta);
-	HRESULT								Add_DecalTexture(const _wstring& strDecalTag, const _tchar* pFilePath, TEXTURETYPE eTextureType);
-	HRESULT								Add_Decal(const _wstring& strDecalTag, const DECAL_DESC& Decal);
+	HRESULT								Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
+	HRESULT								Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT								Render();
 
 private:
