@@ -139,6 +139,11 @@ void CShadowMap::Clear()
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
 	Safe_Release(m_pConstantBuffer);
+
+	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
+		m_Matrices[i].clear();
+
+	m_SectorUV.clear();
 }
 
 #ifdef _DEBUG
