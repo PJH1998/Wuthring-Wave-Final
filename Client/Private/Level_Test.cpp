@@ -294,8 +294,8 @@ void CLevel_Test::Shader_Gui()
 		m_pGameInstance->SetMotionBlur(m_fLimitVelocity, m_fLimitDepth, m_fBlurDistanceScale);
 	}
 	ImGui::End();
-#endif
 }
+#endif
 
 void CLevel_Test::Toggle_HUD()
 {

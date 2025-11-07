@@ -664,6 +664,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	
 
 	_bool isChar_LBBtnFeedbackAble = false;
+
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
 	{
 	case CH_ROVER:
@@ -692,9 +693,34 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	}
 
 
+
+	_bool isChar_EButtonFeedbackAble = true;
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_ROVER:
+	{
+	}break;
+	case CH_AUGUSTA:
+	{
+		_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+		UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+
+		_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+		if (isIn_Augusta_AdvUlt)
+			isChar_EButtonFeedbackAble = false;
+		else
+			isChar_EButtonFeedbackAble = true;
+	}break;
+	case CH_GALBRENA:
+	{
+	}break;
+	}
+
+
 	
 	// 클릭마다 해당 위치에 피드백 생성
-	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN)
+	if (m_pGameInstance->Get_DIKeyState(DIK_E) == KEYSTATE::DOWN &&
+		isChar_EButtonFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_EBtn);
 	if (m_pGameInstance->Get_DIKeyState(DIK_R) == KEYSTATE::DOWN)
 		Add_UI_SkillSection_OnFeedback(iIndex_RBtn);
@@ -1832,14 +1858,6 @@ void CUI_HUD::Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots)
 	// [Get] [LB] Button Slot State
 	// ==============================
 	
-
-	cout << "============================================================" << endl;
-	cout << "[CUI_HUD::Update_UI_SkillSection_BG] isIn_Augusta_AdvUlt : " << ((isIn_Augusta_AdvUlt) ? "True " : "False") << endl;
-	cout << "============================================================" << endl;
-	cout << "[CUI_HUD::Update_UI_SkillSection_BG] eState_Augusta_R    : " << ((eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) ? "True " : "False") << endl;
-	cout << "[CUI_HUD::Update_UI_SkillSection_BG] isIn_AdvUltMode     : " << ((isIn_AdvUltMode) ? "True " : "False") << endl;
-
-
 	if (isIn_Augusta_AdvUlt)
 	{
 		augustaUIDesc.vecInstanceDescs[BTN_LB].vSInstCoordX = m_mapSkillTexIndices[L"Augusta_LB_Burst"][0];
