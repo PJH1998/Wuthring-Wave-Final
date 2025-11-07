@@ -79,14 +79,14 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting = {};
-	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(100.f);
+	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);						// Shape Offset
-	VirtualSetting.mMaxStrength = 10.f;											// 다른 Body를 밀 수 있는 최대 힘
-	VirtualSetting.mCharacterPadding = 0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
-	VirtualSetting.mPenetrationRecoverySpeed = 0.f;							// 겹쳤을 때 복원 속도
-	VirtualSetting.mPredictiveContactDistance = 0.02f;							// 미리 충돌 감지하는 범위
+	VirtualSetting.mMaxStrength = 8.f;											// 다른 Body를 밀 수 있는 최대 힘
+	VirtualSetting.mCharacterPadding = 0.015f; //0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
+	VirtualSetting.mPenetrationRecoverySpeed = 6.0f; //0.f;							// 겹쳤을 때 복원 속도
+	VirtualSetting.mPredictiveContactDistance = 0.08f; //0.02f;							// 미리 충돌 감지하는 범위
 	VirtualSetting.mEnhancedInternalEdgeRemoval = true;					// 각진 부분 부드럽게
 	
 	VirtualSetting.mInnerBodyShape = m_pShape;
