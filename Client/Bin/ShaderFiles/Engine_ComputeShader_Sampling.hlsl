@@ -9,7 +9,7 @@ Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void DownSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     int iIndexX = DTID.x * 2;
     int iIndexY = DTID.y * 2;
@@ -36,7 +36,7 @@ void DownSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
 }
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void UpSample(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void UpSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     int2 vInSize;
     InputTexture.GetDimensions(vInSize.x, vInSize.y);
@@ -78,7 +78,7 @@ cbuffer BLOOM_DATA : register(b1)
 }
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void UpSample_Bloom(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GruopIndex : SV_GroupIndex)
+void UpSample_Bloom(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
     
     float2 fTexcoord = float2(DTID.xy) / vOutSizeBloom;
