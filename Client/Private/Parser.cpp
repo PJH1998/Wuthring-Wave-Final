@@ -504,7 +504,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
     //아니면 json으로 저장할 때 이름으로 할지 == strPrefabTag ex)Dash_Test
 
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
-        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 3, &PrefabDesc)))
+        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 5, &PrefabDesc)))
     {
         MSG_BOX("Prefab Load Fail");
         return;
@@ -784,8 +784,8 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
     if (TrailMeshJson.contains("ShaderPass"))
         Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
 
-	if (TrailMeshJson.contains("MaskFlag"))
-		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
+	if (TrailMeshJson.contains("MaskFloag"))
+		Desc.iMaskFlag = TrailMeshJson["MaskFloag"].get<_int>();
 
 	if (TrailMeshJson.contains("SweepSpeed"))
 		Desc.fSweep = TrailMeshJson["SweepSpeed"].get<_float>();

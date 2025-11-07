@@ -132,7 +132,11 @@ void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
         XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
 
         //프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
-        _float4x4 BoneMatrix = *pModel->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+		_float4x4 BoneMatrix;
+		if (m_strBoneTag == "")
+			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+		else
+			BoneMatrix = *pModel->Get_BoneMatrixPtr(m_strBoneTag.c_str());
 
         //위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
         Set_SpawnMatrix(PlayerMatrix, BoneMatrix);

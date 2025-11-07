@@ -141,9 +141,6 @@ PS_OUT PS_TrailDefault(PS_IN In)
     //if (fWeight >= g_fEmissiveThreshold)
     //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
     
-    
- 
-    
     float2 MaskUV = In.vTexcoord;
     
     MaskUV -= g_Sweep;

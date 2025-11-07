@@ -175,10 +175,10 @@ PS_OUT PS_TESTA(PS_IN In)
     
     if (g_MaskFlag == 0)
     {
-        if (Out.vDiffuse.r < 0.2f)
-            discard;
-        
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+        
+        if (Out.vDiffuse.a < 0.2f)
+            discard;
     }
     else
     {
@@ -194,7 +194,7 @@ PS_OUT PS_TESTA(PS_IN In)
     
     Out.vDiffuse *= fVisible;
     
-    if (Out.vDiffuse.r < 0.2f)
+    if (Out.vDiffuse.a < 0.2f)
     discard;
     
     Out.vDiffuse *= g_vColor;

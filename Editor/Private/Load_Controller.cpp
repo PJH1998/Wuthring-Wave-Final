@@ -712,8 +712,8 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("DirFlag"))
         Desc.iDirFlag = TrailMeshJson["DirFlag"].get<_int>();
 
-	if (TrailMeshJson.contains("MaskFlag"))
-		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
+	if (TrailMeshJson.contains("MaskFloag"))		//오타있음
+		Desc.iMaskFlag = TrailMeshJson["MaskFloag"].get<_int>();
 
 	if (TrailMeshJson.contains("ColorSpeed"))
 		Desc.fColorSpeed = TrailMeshJson["ColorSpeed"].get<_float>();
