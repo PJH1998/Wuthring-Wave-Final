@@ -31,16 +31,6 @@ HRESULT CCSM::SetUp_ShadowNF()
 	for (_uint i = 0; i < m_iNumClipDistance; i++)
 		m_fClipDistance[i] = Compute_ClipDistance(m_fCameraNear, m_fCutFar, i, m_iNumClip, 0.8f);
 
-	CSM_DATA Data = {};
-	ZeroMemory(&Data, sizeof(CSM_DATA));
-
-	memcpy(&Data, m_fClipDistance, sizeof(_float) * 5);
-
-	D3D11_MAPPED_SUBRESOURCE SubResource;
-	m_pContext->Map(m_pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
-	memcpy(SubResource.pData, reinterpret_cast<void*>(&Data), sizeof(CSM_DATA));
-	m_pContext->Unmap(m_pConstantBuffer, 0);
-
 	return S_OK;
 }
 
@@ -87,13 +77,17 @@ HRESULT CCSM::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const
 	return S_OK;
 }
 
-
-HRESULT CCSM::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+HRESULT CCSM::Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName)
 {
-	m_pContext->PSSetConstantBuffers(iDataBufferIndex, 1, &m_pConstantBuffer);
+	if (FAILED(pShader->Bind_Value(pDistanceName, &m_fClipDistance, sizeof(_float4))))
+		CRASH("Failed Bind DistanceName");
+
+	if (FAILED(pShader->Bind_Value(pLastDistanceName, &m_fClipDistance[4], sizeof(_float))))
+		CRASH("Failed Bind DistanceName");
 
 	return S_OK;
 }
+
 
 HRESULT CCSM::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 {
@@ -188,15 +182,6 @@ HRESULT CCSM::Ready_CSM_View()
 		CRASH("Shadow SRV")
 
 	Safe_Release(pTexture2D);
-
-	D3D11_BUFFER_DESC BufferDesc = {};
-	BufferDesc.ByteWidth = sizeof(CSM_DATA);
-	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pConstantBuffer)))
-		CRASH("Shadow Constant Buffer");
 
 	return S_OK;
 }
@@ -364,7 +349,6 @@ void CCSM::Free()
 
 	Safe_Release(m_pShadowDSV);
 	Safe_Release(m_pShadowSRV);
-	Safe_Release(m_pConstantBuffer);
 
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);

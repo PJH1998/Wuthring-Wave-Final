@@ -9,14 +9,6 @@ class CShader;
 class CCSM final : public CBase
 {
 private:
-	typedef struct alignas(16) CSMDatas
-	{
-		_float fDistance[4];
-		_float fLastDistance;
-		_float3 padding;
-	}CSM_DATA;
-
-private:
 	explicit CCSM(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CCSM() = default;
 
@@ -29,6 +21,8 @@ public:
 	void					Clear();
 
 	HRESULT					Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName);
+	HRESULT					Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName);
+
 	HRESULT					Bind_ShadowDistance_Resource(_uint iDataBufferIndex);
 	HRESULT					Bind_CSM_SRV(CShader* pShader, const _char* pConstantName);
 	HRESULT					Begin_CSM();
@@ -51,8 +45,6 @@ private:
 
 	ID3D11RenderTargetView*		m_pBackBuffer = { nullptr };
 	ID3D11DepthStencilView*		m_pOriginalDSV = { nullptr };
-
-	ID3D11Buffer*				m_pConstantBuffer = { nullptr };
 
 	_uint						m_iNumClip = {};
 	_uint						m_iNumClipDistance = {};

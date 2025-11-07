@@ -522,6 +522,21 @@ void CRenderer::Render_Light()
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
 
+	if (FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_Cascade")))
+		CRASH("Failed Bind_CSM_SRV");
+
+	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vShadowLightDirection")))
+		CRASH("Failed Bind CSM Resource");
+
+	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_ShadowMap_Resources_Renderer(m_pShader)))
+		return;
+
+	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(m_pShader, "g_vClipDistances", "g_fLastDistance")))
+		return;
+
 	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
 
 	m_pGameInstance->End_MRT();
@@ -538,20 +553,9 @@ void CRenderer::Render_Combined()
 	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR_Y"), m_pShader, "g_SsaoTexture")))
 		CRASH("Failed Bind_SsaoTexture");
 
-	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_Cascade")))
-		CRASH("Failed Bind_CSM_SRV");
-	
-	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vLightDirection")))
-		CRASH("Failed Bind CSM Resource");
-
-	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Render Fail");
-	
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 2)))
 		return;
 
-	if (FAILED(m_pGameInstance->Bind_ShadowMap_Resources_Renderer(m_pShader)))
-		return;
 
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
@@ -564,9 +568,6 @@ void CRenderer::Render_Combined()
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
 		CRASH("Render Fail")
-
-	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(1)))
-		CRASH("Render Fail");
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
@@ -847,7 +848,7 @@ void CRenderer::Render_Blur()
 		_uint iDownSizeY = m_iWinSizeY >> (i + 1);
 
 		// DOWNSAMPLE SECOND
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", pDown)))//m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), i))))
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", pDown)))
 			CRASH("Failed Add_SRVData");
 
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY, i)))
@@ -1235,7 +1236,6 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
 		ASSERT_CRASH(false);
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Distortion"))))
-
 		ASSERT_CRASH(false);
 #pragma endregion
 
