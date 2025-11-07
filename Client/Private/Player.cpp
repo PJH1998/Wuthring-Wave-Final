@@ -275,6 +275,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -285,12 +292,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -516,12 +518,6 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 			ASSERT_CRASH(pPlayer);
 			m_Characters[i] = pPlayer;
 			break;
-        case CHARACTERTYPE::GALBRENA:
-		{
-			ASSERT_CRASH(pPlayer);
-			m_Characters[i] = pPlayer;	
-		}
-            break;
 		case CHARACTERTYPE::AUGUSTA:
 		{
 			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
@@ -537,6 +533,12 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 
 		}
 		break;
+        case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
+            break;
+	
         default:
             break;
         }

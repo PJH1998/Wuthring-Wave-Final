@@ -127,7 +127,7 @@ void CRoverGroundRun::Check_Physics()
     // Wall인지?
     m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
     // Land Check
-	m_States[LAND] = m_pRover->Is_Land(0.3f, 0.4f);
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 }
 

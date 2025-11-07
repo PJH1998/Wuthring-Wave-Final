@@ -62,7 +62,7 @@ void CRoverGroundDash::Handle_Input()
 {
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
-	m_States[LAND] = m_pRover->Is_Land();
+	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
 	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal, 0.2f);;
 }
 
