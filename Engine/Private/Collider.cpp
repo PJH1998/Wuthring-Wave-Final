@@ -80,7 +80,7 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting = {};
 	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(120.f);			// 허용 경사 각도
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);						// Shape Offset
 	VirtualSetting.mMaxStrength = 10.f;											// 다른 Body를 밀 수 있는 최대 힘

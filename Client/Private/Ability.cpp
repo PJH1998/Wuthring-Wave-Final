@@ -714,9 +714,10 @@ void CAbility::Read_Stat(const _char* pFilePath)
 	m_Costs[ENUM_CLASS(COST_TYPE::COST5)] = 0.f;
 	m_Costs[ENUM_CLASS(COST_TYPE::STAMINA)] = m_CharacterInfo.fMaxStamina;
 
-	m_CharacterInfo.fAttack = stof(data[1][9]);
-	m_CharacterInfo.fAttackAddMin = stof(data[1][10]);
-	m_CharacterInfo.fAttackAddMax = stof(data[1][11]);
+	m_CharacterInfo.fAttack = stof(data[1][10]);
+	m_CharacterInfo.fAttackAddMin = stof(data[1][11]);
+	m_CharacterInfo.fAttackAddMax = stof(data[1][12]);
+	m_CharacterInfo.fMaxResonance = stof(data[1][13]);
 }
 
 

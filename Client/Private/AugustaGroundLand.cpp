@@ -67,7 +67,12 @@ void CAugustaGroundLand::OnExit()
 
 void CAugustaGroundLand::Handle_Input()
 {
-    m_States[RUN] = m_pAugusta->Check_AnyInput(m_iMoveKey);
+	m_States[HIT] = m_pAugusta->Is_Hit();
+	// Hit면 모든 상태 제거
+	if (m_States[HIT])
+		return;
+
+	m_States[RUN] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }
 
 void CAugustaGroundLand::Update_LandAnimation(_float fTimeDelta)
@@ -79,11 +84,23 @@ void CAugustaGroundLand::Update_LandAnimation(_float fTimeDelta)
 void CAugustaGroundLand::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
-    if (IsEscapePossible && m_States[RUN])
+
+	// Hit는 무조건 전환
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
+    if (IsEscapePossible)
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
-        return;
+		if (m_States[RUN])
+		{
+			m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+			return;
+		}
+        
     }
 
     if (m_IsAnimationEnd)

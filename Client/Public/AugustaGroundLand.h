@@ -10,6 +10,7 @@ private:
     enum LANDSTATE
     {
         RUN = 0,
+		HIT,
         END
     };
 
