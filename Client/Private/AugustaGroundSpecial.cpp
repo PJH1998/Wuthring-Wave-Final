@@ -92,7 +92,11 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	// 1. 막타는 이동거리 온전하게 다받기.
+	if (m_iComboCount == COMBO::COMBO_ATTACKOMNI)
+		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
+
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
     // Target이 존재한다면? => Auto Target
     EAugustaSpecialType eSpType = static_cast<EAugustaSpecialType>(m_iCurrentAnimIdx);
@@ -247,6 +251,27 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
                 return;
             }
         }
+
+
+		// 끝났을떄 랜드라면?
+		if (eSpType == EAugustaSpecialType::SPATTACKOMNI)
+		{
+			if (m_States[MOVE])
+			{
+				if (m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+					return;
+				}
+				else if (!m_States[LAND])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
+					return;
+				}
+			}
+		}
     }
 
 
@@ -283,7 +308,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 1.f, true, false);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);

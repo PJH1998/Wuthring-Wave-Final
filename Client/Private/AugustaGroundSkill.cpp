@@ -189,7 +189,10 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	if (eSkillType == EAugustaSkillType::ATTACK_PULL) // 1. 뒤로 이동은 온전하게 이동거리받기.
+		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
+
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
     // Target이 존재한다면? => Auto Target
     if (m_iPartType == CAugusta::PARTTYPE::PART_GRIFFON)
@@ -275,8 +278,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 		if (m_States[SKILL_R])
 		{
 			// 이전 이름에 현재 Skill 이름이 들어감.
-			m_States[ATTACK_PULL] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_Pull", m_strSkillName));
-			m_States[ATTACK_SP_SKILL] = SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpSkill", m_strSkillName);
+			m_States[ATTACK_PULL] = eSkillType == EAugustaSkillType::ATTACK_SPEEDDRIVE;
+			m_States[ATTACK_SP_SKILL] = eSkillType == EAugustaSkillType::ATTACK_PULL;
 
 			if (m_States[ATTACK_PULL])
 			{

@@ -190,7 +190,9 @@ const _float CCharacter::Calculate_RootMotionScale()
 		return 1.f;
 
 	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
-	if (m_fTargetDistance < 3.f)
+	if (m_fTargetDistance < 1.f)
+		return 0.05f; // 거의 이동량 없게.
+	else if (m_fTargetDistance < 3.f)
 		return 0.5f;  // 짧게: 과접근 방지
 	else if (m_fTargetDistance < 3.5f)
 		return 0.6f;  // 짧게: 과접근 방지
