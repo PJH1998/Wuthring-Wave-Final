@@ -113,16 +113,47 @@ void CHZB::Update()
 #ifdef _DEBUG
 void CHZB::Render()
 {
-	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+	ImGui::Begin("HZB_RENDER");
+
+	if (ImGui::BeginCombo("HZB", "List"))
 	{
-		_string strHZB = "HZB";
-		strHZB += to_string(i);
-		ImGui::Begin(strHZB.c_str());
-		ImGui::Image(reinterpret_cast<ImTextureID>(m_pSRV[i]), ImVec2(500.f, 500.f));
+		for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+		{
+			_string strHZB = "HZB";
+			strHZB += to_string(i);
+			
+			if (ImGui::Selectable(strHZB.c_str()))
+			{
+				AddRemoveHZB(strHZB, reinterpret_cast<ImTextureID>(m_pSRV[i]));
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+	ImGui::End();
+
+	for (auto& Pair : m_RenderTextures)
+	{
+		ImGui::Begin(Pair.first.c_str());
+		ImGui::Image(Pair.second, ImVec2(500.f, 500.f));
 		ImGui::End();
 	}
+	
+}
+void CHZB::AddRemoveHZB(const _string& strHZB, ImTextureID TextureID)
+{
+	auto iter = m_RenderTextures.find(strHZB);
+	if (iter != m_RenderTextures.end())
+	{
+		m_RenderTextures.erase(iter);
+		return;
+	}
+
+	m_RenderTextures.emplace(strHZB, TextureID);
+	
 }
 #endif
+
 CHZB* CHZB::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
 {
 	CHZB* pInstance = new CHZB(pDevice, pContext);
