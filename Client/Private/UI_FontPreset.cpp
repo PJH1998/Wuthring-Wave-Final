@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "UI_FontPreset.h"
 #include "GameInstance.h"
+#include "UI_Text_Damage.h"
 
 CUI_FontPreset::CUI_FontPreset()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -13,7 +14,7 @@ HRESULT CUI_FontPreset::Initialize()
 	// for Damage..
 
 	// Const
-	FONT_SINGLEDESC tDesc = {};
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
 	tDesc.fScale			= 5.f;	
 	tDesc.vLifeTime			= { 0.0f, 500.0f }; // ksta
@@ -50,9 +51,9 @@ HRESULT CUI_FontPreset::Initialize()
 	return S_OK;
 }
 
-void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType)	// Heal, Dark, Etc..
+void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType, _float fSpawnRange)	// Heal, Dark, Etc..
 {
-	FONT_SINGLEDESC tDesc = m_FontTypeDesc[iDmgElemType];
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
 	tDesc.strText			= to_wstring(iDamage);
 	tDesc.vScreenPos		= { 500.f, 500.f }; 
@@ -60,6 +61,7 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 	//tDesc.vFontGradColor	= {};
 
 	//m_pGameInstance->Add_FloatingText(tDesc);
+	//m_pGameInstance->Spawn_PoolingObject(); // 데미지 생성?
 }
 
 CUI_FontPreset* CUI_FontPreset::Create()

@@ -101,6 +101,9 @@ void CUI_Text::Render()
 		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_FontOutlineWidth", &m_tTextDesc.fFontOutlineWidth, sizeof(m_tTextDesc.fFontOutlineWidth))))
 		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_tTextDesc.vLifeTime, sizeof(m_tTextDesc.vLifeTime))))
+		CRASH("Binding_Value_Failed");
+	
 
 	FTCUSTOM_FONT* pFontInfo = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	ID3D11Resource* pRes = nullptr;

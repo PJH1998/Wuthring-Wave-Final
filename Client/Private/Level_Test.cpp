@@ -12,7 +12,7 @@
 #include "ShadowMap.h"
 #include "SkyBox.h"
 #include"Trigger_Box.h"
-
+#include "UI_Text_Damage.h"
 
 
 
@@ -294,6 +294,11 @@ void CLevel_Test::Ready_UI()
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		CRASH("Failed Ready Scythe");
+
 	// _UI
 }
 
@@ -306,61 +311,82 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	
 	static CUI_Text* testText = nullptr;
 
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	tDesc.isInstance = true;
+	tDesc.vecInstanceDescs = {};
+
+	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
+	tDesc.vColor = _float4{ 0.0f, 0.0f, 1.0f, 1.0f };
+	tDesc.vOutlineColor = _float4{ 0.0f, 1.0f, 1.0f, 1.0f };
+	tDesc.fFontOutlineWidth = 2.f;
+
+	tDesc.strFontTag = L"WW_SemiBold";
+	tDesc.strText = L"Test 테스트입니다.";
+	tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
+	tDesc.fScale = 1.f;
+	tDesc.vLifeTime = { 0.f, 10.f };
+	tDesc.strUIName = L"TestFont";
+
+	tDesc.iPassType = 0;
+
+	tDesc.isTargetExist = true;
+	tDesc.vTargetWorldPos = _float4{ 2.42f, -10.19f, -3.56f, 1.0f };
+
+
 	if (!isInitialized)
 	{
 		// Test Initializing
 		isInitialized = true;
 		
-		if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test",
-			CUI_Text::Create(m_pDevice, m_pContext))))
-			CRASH("프로토타입 못만들었대~~");
-			
-
-		CUI_Text::TEXT_UI_DESC tDesc = {};
-		tDesc.isInstance = true;
-		tDesc.vecInstanceDescs = {};
-
-		tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
-		tDesc.vColor = _float4{0.0f, 0.0f, 1.0f, 1.0f};
-		tDesc.vOutlineColor = _float4{ 0.0f, 1.0f, 1.0f, 1.0f };
-		tDesc.fFontOutlineWidth = 2.f;
-
-		tDesc.strFontTag = L"WW_SemiBold";
-		tDesc.strText = L"Test 테스트입니다.";
-		tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
-		tDesc.fScale = 1.f;
-		tDesc.vLifeTime = { 0.f, 300.f };
-		tDesc.strUIName = L"TestFont";
-
-		tDesc.iPassType = 0;
-
-		tDesc.isTargetExist = true;
-		tDesc.vTargetWorldPos = _float4{ 2.42f, -10.19f, -3.56f, 1.0f };
+		//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test",
+		//	CUI_Text::Create(m_pDevice, m_pContext))))
+		//	CRASH("프로토타입 못만들었대~~");
 
 
 
+		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
 		// ===== test
 
 		// =====
 
 
 
-		CUI_Text* pTextObj = dynamic_cast<CUI_Text*>
-			(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
-		if (!pTextObj)
-			CRASH("폰트오브젝트 못만들었대~~");
-
-
-		m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Font", pTextObj);
-		testText = pTextObj;
+		//CUI_Text* pTextObj = dynamic_cast<CUI_Text*>w
+		//	(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
+		//if (!pTextObj)
+		//	CRASH("폰트오브젝트 못만들었대~~");
+		//
+		//
+		//m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Font", pTextObj);
+		//testText = pTextObj;
 	}
+
+
+	_float fRandX = m_pGameInstance->Rand(-5.f, 5.f);
+	_float fRandY = m_pGameInstance->Rand(-5.f, 5.f);
+	_float fRandZ = m_pGameInstance->Rand(-5.f, 5.f);
+
+	tDesc.vTargetWorldPos = {
+		tDesc.vTargetWorldPos.x + fRandX,
+		tDesc.vTargetWorldPos.y + fRandX,
+		tDesc.vTargetWorldPos.z + fRandZ,
+		tDesc.vTargetWorldPos.w
+	};
+
 	
-	testText;
-	
+	static _float fElapsedTime_TestSpawn = 0.f;
+	fElapsedTime_TestSpawn += fTimeDelta;
+	const _float fTestSpawnSpace = 5.f;
+	if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
+	{
+		fElapsedTime_TestSpawn = 0.f;
+
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+	}
 
 
 
-	CUI_Text::TEXT_UI_DESC tDesc = testText->Get_TextUIDesc();
+	//CUI_Text::TEXT_UI_DESC tDesc = testText->Get_TextUIDesc();
 		
 	//_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 	//_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
@@ -381,7 +407,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//
 	//tDesc.vScreenPos = _float2(screenX, screenY);
 
-	testText->Set_TextUIDesc(tDesc);
+	//testText->Set_TextUIDesc(tDesc);
 
 
 

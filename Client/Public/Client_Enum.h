@@ -166,8 +166,8 @@ namespace Client
 		FL_NONE				= 0,
 		FL_OUTLINE			= 1 << 0,
 		FL_GRAD				= 1 << 1,
+		FL_ALPHA_EDITABLE	= 1 << 2,	// matExtra 11.
 
-		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
 
 		FL_END				= 1 << 3
 	};

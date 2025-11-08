@@ -30,7 +30,7 @@
 #include "Custom_UI.h"
 #include "UI_Button.h"
 #include "UI_Image.h"
-#include "UI_Text.h"
+#include "UI_Text_Damage.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
 #pragma endregion
@@ -536,7 +536,12 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
 		CUI_Text::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
-
+	
+	// Custom Text
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
+		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+	
 
 	// ==============================
 	cout << "[Loader_Test][UI Custom] Prototype" << endl;

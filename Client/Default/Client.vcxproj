@@ -288,6 +288,7 @@
     <ClInclude Include="..\Public\Augusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
+    <ClInclude Include="..\public\UI_Text_Damage.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\Wing.h" />
@@ -419,6 +420,7 @@
     <ClCompile Include="..\Private\Augusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
+    <ClCompile Include="..\private\UI_Text_Damage.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />

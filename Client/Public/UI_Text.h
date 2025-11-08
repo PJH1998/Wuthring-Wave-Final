@@ -3,7 +3,7 @@
 
 NS_BEGIN(Client)
 
-class CUI_Text final : public CCustom_UI
+class CUI_Text : public CCustom_UI
 {
 public:
 	typedef struct tagUITextDesc : public CUSTOM_UI_DESC, FONT_SINGLEDESC {// 근데 당장에 Font_SingleDesc 반영하는 코드가 있긴함?
@@ -18,7 +18,7 @@ public:
 	// 근데 그러면 CUSTOM_UI_DESC 가 넘겨야 할 정보는 어떻게 넘김? 그냥 렌더단에서 넘길 수 있었네. 그럼 그냥 커스텀 정보 넘김녀 될 듯.
 	// 행렬은 공통 정보가 아닌 인스턴스용 정보임. 이는 명확히 하고
 
-private:
+protected:
 	explicit				CUI_Text(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CUI_Text(const CUI_Text& Prototype);
 	virtual					~CUI_Text() = default;
@@ -34,14 +34,14 @@ public:
 	void					Set_TextUIDesc(TEXT_UI_DESC& tDesc) { m_tTextDesc = tDesc; }
 	TEXT_UI_DESC&			Get_TextUIDesc() { return m_tTextDesc; }
 
-private:
-	HRESULT					Ready_Components(void* pArg);
+protected:
 	HRESULT					Bind_Description(void* pArg);
+	HRESULT					Ready_Components(void* pArg);
 
 	void					Update_Description();
 
 
-private:
+protected:
 
 	vector<ID3D11ShaderResourceView*>	m_SRVs;
 	_uint								m_iNumTextures = {};

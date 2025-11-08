@@ -235,6 +235,12 @@
     <Filter Include="94. Factory">
       <UniqueIdentifier>{3e687868-9155-4652-999c-8356ae6f1f2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Text">
+      <UniqueIdentifier>{568ba8e4-9f3f-4146-bc49-ac3704eb4176}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Text\TextObj">
+      <UniqueIdentifier>{75e993f6-ed2e-457f-a2cb-cb264d5543ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -334,9 +340,6 @@
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClInclude>
     <ClInclude Include="..\public\UI_Interact.h">
-      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\UI_Text.h">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Custom_UI.h">
@@ -550,6 +553,12 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\public\UI_Text.h">
+      <Filter>03. GameObject\UI\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Text_Damage.h">
+      <Filter>03. GameObject\UI\Text\TextObj</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -636,9 +645,6 @@
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClCompile>
     <ClCompile Include="..\private\UI_Interact.cpp">
-      <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
-    </ClCompile>
-    <ClCompile Include="..\private\UI_Text.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp">
@@ -837,6 +843,12 @@
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
+    <ClCompile Include="..\private\UI_Text.cpp">
+      <Filter>03. GameObject\UI\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Text_Damage.cpp">
+      <Filter>03. GameObject\UI\Text\TextObj</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

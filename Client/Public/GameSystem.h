@@ -47,7 +47,7 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
-	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0);
+	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0, _float fSpawnRange = 10.f);
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER

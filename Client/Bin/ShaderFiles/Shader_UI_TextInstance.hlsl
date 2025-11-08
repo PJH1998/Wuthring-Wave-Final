@@ -11,8 +11,18 @@
 //#define KSTA_DEBUG_2_RETURN_AFTEROUTLINE
 
 // ==============================
+// * Custom Value List for Instances (mExtraN)
+// ==============================
+// 1. | 11. [Alpha per Inst] | | | |
+// 2. |                      | | | |
+// 3. |                      | | | |
+// 4. |                      | | | |
+// ==============================
+
+// ==============================
 // * Global Variables
 // ==============================
+
 
 
 SamplerState FontSampler = sampler_state
@@ -79,19 +89,19 @@ float4		g_FontGradColor;		// [16] RGBA Gradiant Color (->)
 bool		g_isTargetExist;
 float4		g_vTargetWorldPos;
 float4		g_vCamPosition;
+float2      g_LifeTime;
 
 
 
 
 
 
+#define FL_NONE                 0
+#define FL_OUTLINE              1 << 0
+#define FL_GRAD                 1 << 1
+#define FL_ALPHA_EDITABLE       1 << 2
 
-#define FL_NONE         0
-#define FL_OUTLINE      1 << 0
-#define FL_GRAD         1 << 1
-#define FL_FIXED        1 << 2
-
-#define FL_END          1 << 3
+#define FL_END                  1 << 3
 
 
 
@@ -434,14 +444,9 @@ PS_OUT PS_MAIN(PS_IN In)
             {
                 float2 uvO = fixedUV + float2(x, y) * g_FontTexPerPixel;
                 float aO = g_Texture.SampleLevel(FontSampler, uvO, 0).r;
-            // 경계 부드럽게 할 거면 여기서 살짝 smoothstep
                 outerMax = max(outerMax, aO);
             }
         }
-
-       
-        
-
         
         // 글자 내부가 아닌 픽셀에만 아웃라인 적용
         float outlineOnly = saturate(outerMax - fillMask);
@@ -455,8 +460,22 @@ PS_OUT PS_MAIN(PS_IN In)
     } // END== outline =====
     
     
+    
+    
+    
+    if (g_FontFlag & FL_ALPHA_EDITABLE)
+    {
+        // 11. Alpha per Inst
+        float fAdditionalAlpha = (1.f - In.mExtra0.x);
+        
+        Out.vColor.a = Out.vColor.a * fAdditionalAlpha;
+    }
+    
+ 
+    
+    
+    
     return Out;
-	
 }
 
 
