@@ -250,6 +250,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\Spawner">
+      <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -585,6 +588,9 @@
     <ClInclude Include="..\public\Projectile.h">
       <Filter>03. GameObject\Projectile</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\Spawner.h">
+      <Filter>03. GameObject\MapObject\Spawner</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -889,6 +895,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Projectile.cpp">
       <Filter>03. GameObject\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Spawner.cpp">
+      <Filter>03. GameObject\MapObject\Spawner</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

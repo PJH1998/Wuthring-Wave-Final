@@ -260,6 +260,7 @@
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
+    <ClInclude Include="..\public\Spawner.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
@@ -384,6 +385,7 @@
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\private\Projectile.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
+    <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
