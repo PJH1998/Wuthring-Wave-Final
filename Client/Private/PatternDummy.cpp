@@ -26,7 +26,8 @@ HRESULT CPatternDummy::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 
-	m_strAnimTag = pDesc->strInitAnimTag;
+	m_strInitAnimTag = pDesc->strInitAnimTag;
+	m_strAnimTag = m_strInitAnimTag;
 	Register_AllNotifies(pDesc->strFolderPath);
 	return S_OK;
 }
@@ -38,8 +39,14 @@ void CPatternDummy::Priority_Update(_float fTimeDelta)
 
 void CPatternDummy::Update(_float fTimeDelta)
 {
-	m_pModelCom->Play_Animation_CPU(m_strAnimTag, fTimeDelta * 1.f, &m_fTrackPosition, false, true, true, true, 1.f);
+	_bool isFinished{};
+	isFinished = m_pModelCom->Play_Animation_CPU(m_strAnimTag, fTimeDelta * 1.f, &m_fTrackPosition, false, m_isRootMotion, m_isRootRotate, m_isRootTranslate, 1.f);
 	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+	XMStoreFloat3(&m_vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+	if (isFinished)
+	{
+		m_strAnimTag = m_strInitAnimTag;
+	}
 	//m_pModelCom->Play_Animation("Stand1", fTimeDelta, nullptr);
 	//_vector vVelocity = m_pTransformCom->Get_Velocity();
 	//m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -72,6 +79,13 @@ void CPatternDummy::Late_Update(_float fTimeDelta)
 			ImGui::EndCombo();
 		}
 	}
+	if (ImGui::DragFloat3("Pos", reinterpret_cast<_float*>(&m_vPosition), 0.1f))
+	{
+		m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_vPosition), 1.f));
+	}
+	ImGui::Checkbox("Root Motion Enable", &m_isRootMotion);
+	ImGui::Checkbox("Root Rotate", &m_isRootRotate);
+	ImGui::Checkbox("Root Translate", &m_isRootTranslate);
 
 #endif // _DEBUG
 
