@@ -73,7 +73,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	m_pBehaviorTreeCom->tick(this);
+	//m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
 
@@ -506,7 +506,11 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 {
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
-
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
 	//그로기 특수상황
 	if (m_isParalysis)
 	{
@@ -520,12 +524,6 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
-
-	if (true == m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		m_beHit = false;
-	}
 }
 
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -533,7 +531,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
-		if(m_fStamina >= 0.f)
+		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
@@ -542,7 +540,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
 		m_beHit = true;
-		if (m_fStamina >= 0.f)
+		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
@@ -551,7 +549,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
-		if (m_fStamina >= 0.f)
+		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
