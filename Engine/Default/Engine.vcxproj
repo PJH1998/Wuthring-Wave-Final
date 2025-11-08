@@ -129,6 +129,7 @@
     <ClInclude Include="..\Public\VIBuffer_Point_Instance.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect.h" />
     <ClInclude Include="..\Public\VIBuffer_Spectrum.h" />
+    <ClInclude Include="..\public\VolumetricFog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp" />
@@ -237,6 +238,7 @@
     <ClCompile Include="..\Private\VIBuffer_Point_Instance.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Spectrum.cpp" />
+    <ClCompile Include="..\private\VolumetricFog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Editor\Default\Editor.vcxproj.filters" />
@@ -252,6 +254,7 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_OcclusionCulling.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Sampling.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_SSAO.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_VF.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_Shader_Cell.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </FxCompile>

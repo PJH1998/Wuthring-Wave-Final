@@ -27,6 +27,7 @@
 #include "RCS_Manager.h"
 #include "ShadowMap.h"
 #include "Decal_Manager.h"
+#include "VolumetricFog.h"
 #include "HZB.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
@@ -124,6 +125,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pDecal_Manager);
+
+	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pVF);
 
 	return S_OK;
 }
@@ -1010,6 +1014,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pDecal_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
+	Safe_Release(m_pVF);
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);

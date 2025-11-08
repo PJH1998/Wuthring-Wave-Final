@@ -25,7 +25,11 @@ public:
 	void						Update();
 
 #ifdef _DEBUG
+public:
 	void						Render();
+private:
+	void AddRemoveHZB(const _string& strHZB, ImTextureID TextureID);
+	map<const _string, ImTextureID> m_RenderTextures;
 #endif
 private:
 	ID3D11Device*										m_pDevice = { nullptr };

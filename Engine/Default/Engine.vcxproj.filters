@@ -326,6 +326,9 @@
     <Filter Include="01. Utility\04. Component\VIBuffer\Decal">
       <UniqueIdentifier>{46df0862-d4b8-43cc-be16-8844cbffd8d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\18.VolumetricFog">
+      <UniqueIdentifier>{353e2dbd-6fa2-4363-a9e9-b54a11292456}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\17. HZB">
       <UniqueIdentifier>{f24b0013-be1c-4a83-b7ea-f83034e68158}</UniqueIdentifier>
     </Filter>
@@ -668,6 +671,9 @@
     <ClInclude Include="..\Public\HZB.h">
       <Filter>01. Utility\17. HZB</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\VolumetricFog.h">
+      <Filter>01. Utility\18.VolumetricFog</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -980,6 +986,9 @@
     <ClCompile Include="..\private\Decal.cpp">
       <Filter>01. Utility\16. Decal</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\VolumetricFog.cpp">
+      <Filter>01. Utility\18.VolumetricFog</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\HZB.cpp">
       <Filter>01. Utility\17. HZB</Filter>
     </ClCompile>
@@ -1027,6 +1036,9 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_OcclusionCulling.hlsl">
+		<Filter>97. ShaderFiles</Filter>
+	</FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_VF.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
