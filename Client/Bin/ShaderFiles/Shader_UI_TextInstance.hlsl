@@ -1,8 +1,15 @@
 // UI Text
+
+// Header
 #include "Engine_Shader_State.hlsli"
 
+// Define (as const / for debug)
 #define PI          3.14159265359f
 #define _BOOL(x)    ((x) != 0.0f)
+
+//#define KSTA_DEBUG_1_RETURN_AFTERGRAD
+//#define KSTA_DEBUG_2_RETURN_AFTEROUTLINE
+
 // ==============================
 // * Global Variables
 // ==============================
@@ -62,7 +69,7 @@ float4		g_FontColor;			// [16] RGB + A
 	
 uint		g_FontFlag = 0;			// [4]
 	
-float4		g_FontOutlineColor;     // [16] RGBA Outline Color
+float4      g_FontOutlineColor = { 1.0f, 0.0f, 1.0f, 1.0f }; // [16] RGBA Outline Color
 float2		g_FontTexPerPixel;      // [8] 1.f / Texture Size 
 float		g_FontOutlineWidth;     // [4] Outline Width Size
 	
@@ -72,12 +79,21 @@ float4		g_FontGradColor;		// [16] RGBA Gradiant Color (->)
 bool		g_isTargetExist;
 float4		g_vTargetWorldPos;
 float4		g_vCamPosition;
+
+
+
+
+
+
+
 #define FL_NONE         0
 #define FL_OUTLINE      1 << 0
 #define FL_GRAD         1 << 1
 #define FL_FIXED        1 << 2
 
 #define FL_END          1 << 3
+
+
 
 
 
@@ -374,34 +390,73 @@ PS_OUT PS_MAIN(PS_IN In)
     Out.vColor = g_Texture.Sample(FontSampler, fixedUV);
 	Out.vColor.a = Out.vColor.a * (1.f - g_AlphaStrength);
 	
-	
 	// ==============================
 	// * declare here.
 	// ==============================
 	
-    float2 uv = In.vTexcoord;
-    float alphaCenter = g_Texture.Sample(FontSampler, uv).r; // 현재 바라보는 픽셀 색상에서 a값 추출
+    float alphaCenter = g_Texture.Sample(FontSampler, fixedUV).r; // [0 ~ 1] 현재 바라보는 픽셀 색상에서 a값 추출
         
     
 
-    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter); // 글자에 색상 채워진 정도를 저장. 경계 부드럽게
+    float fillMask = smoothstep(0.5f, 0.8f, alphaCenter);       // [0 ~ 1] 글자에 색상 채워진 정도를 저장. 경계 부드럽게
     float4 fillColor = float4(g_FontColor.rgb, g_FontColor.a * fillMask);
 
     Out.vColor.rgb = g_FontColor.rgb;
-    Out.vColor.a = g_FontColor.a * fillMask;
-	
-	
-	
-	
-	
-	
+    Out.vColor.a = g_FontColor.a * fillMask;                    // 글자가 존재하는 영역만을 남김. (r채널에 의해 구분)
     
+    //
         
-	// ==============================
     
-    Out.vColor = g_Texture.Sample(FontSampler, fixedUV);
+    if (g_FontFlag & FL_GRAD)           // ===== grad (wip) =====
+    {
+        // Gradiant
+        const float4 GradRColor = g_FontGradColor;
+        
+        
+#ifdef KSTA_DEBUG_1_RETURN_AFTERGRAD
+            return Out;
+#endif   
+    } // END== grad (wip) =====
     
-	return Out;
+    
+    
+    
+    if (g_FontFlag & FL_OUTLINE)        // ===== outline =====
+    {
+        int width = (int) g_FontOutlineWidth;
+
+        // 주변 탐색
+        float outerMax = 0.0f;
+        for (int x = -width; x <= width; ++x)
+        {
+        [loop]
+            for (int y = -width; y <= width; ++y)
+            {
+                float2 uvO = fixedUV + float2(x, y) * g_FontTexPerPixel;
+                float aO = g_Texture.SampleLevel(FontSampler, uvO, 0).r;
+            // 경계 부드럽게 할 거면 여기서 살짝 smoothstep
+                outerMax = max(outerMax, aO);
+            }
+        }
+
+       
+        
+
+        
+        // 글자 내부가 아닌 픽셀에만 아웃라인 적용
+        float outlineOnly = saturate(outerMax - fillMask);
+
+        Out.vColor.rgb = lerp(Out.vColor.rgb, g_FontOutlineColor.rgb, outlineOnly);
+        Out.vColor.a = max(Out.vColor.a, outlineOnly * g_FontOutlineColor.a);
+        
+#ifdef KSTA_DEBUG_2_RETURN_AFTEROUTLINE
+            return Out;
+#endif   
+    } // END== outline =====
+    
+    
+    return Out;
+	
 }
 
 

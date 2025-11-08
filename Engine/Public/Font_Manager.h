@@ -22,7 +22,7 @@ private:
 public:
 	HRESULT								Initialize(_uint iWinSizeX, _uint iWinSizeY);
 
-	HRESULT								Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _uint iPixelHeight);
+	HRESULT								Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _uint iPixelHeight, _uint iPadding = 20);
 	FTCUSTOM_FONT*						Find_Font(const _wstring& strFontTag);
 	ID3D11ShaderResourceView*			Get_AtlasSRV(const _wstring& tag);
 	const FTCUSTOM_FONT_GLYPH*			Get_Glyph(const _wstring& tag, _uint code);
@@ -38,12 +38,12 @@ private:
     HRESULT                             Create_EmptyAtlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW = 1024, _uint iAtlasH = 1024);
 
 	static _bool                        Atlas_AllocRect(FTCUSTOM_FONT* pFontInfo, _int iGlyphWidth, _int iGlyphHeight, _int& outX, _int& outY);
-	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY, _uint iPadding);
-	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint, _uint iPadding);
+	_bool								Atlas_CheckSize(FTCUSTOM_FONT* pFontInfo, _int gw, _int gh, _int& outX, _int& outY);
+	_bool								BakeOneGlyph(FTCUSTOM_FONT* pFontInfo, _uint iCodePoint);
 	_bool								Atlas_UploadBitmap(FTCUSTOM_FONT& Font, _int x, _int y, _int w, _int h,
 														const uint8_t* pSrc, _int srcPitch);
 	static _bool						FT_RenderGlyph(FT_Face face, _uint iCodePoint, FT_GlyphSlot& outSlot);
-	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH, _uint iPadding);
+	_bool								Rebuild_Atlas(FTCUSTOM_FONT* pFontInfo, _uint iAtlasW, _uint iAtlasH);
 
 private:
 	ID3D11Device*						m_pDevice = { nullptr };

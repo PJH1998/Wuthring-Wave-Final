@@ -320,12 +320,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		tDesc.isInstance = true;
 		tDesc.vecInstanceDescs = {};
 
+		tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
+		tDesc.vColor = _float4{0.0f, 0.0f, 1.0f, 1.0f};
+		tDesc.vOutlineColor = _float4{ 0.0f, 1.0f, 1.0f, 1.0f };
+		tDesc.fFontOutlineWidth = 2.f;
+
 		tDesc.strFontTag = L"WW_SemiBold";
 		tDesc.strText = L"Test 테스트입니다.";
 		tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
 		tDesc.fScale = 1.f;
 		tDesc.vLifeTime = { 0.f, 300.f };
-		tDesc.iShaderFlag = {};
 		tDesc.strUIName = L"TestFont";
 
 		tDesc.iPassType = 0;
@@ -339,8 +343,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 		// =====
 
-
-		tDesc.vColor = _float4{ 1.0f, 1.0f, 1.0f, 1.0f };
 
 
 		CUI_Text* pTextObj = dynamic_cast<CUI_Text*>

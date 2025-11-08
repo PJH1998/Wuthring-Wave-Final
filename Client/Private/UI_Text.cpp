@@ -90,10 +90,30 @@ void CUI_Text::Render()
 	if (FAILED(m_pShaderCom->Bind_Value("g_vTargetWorldPos", &m_tTextDesc.vTargetWorldPos, sizeof(m_tTextDesc.vTargetWorldPos))))
 		CRASH("Binding_Value_Failed");
 
-	const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+	const _float4 vCamPos = *m_pGameInstance->Get_CamPos();
 	if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", &vCamPos, sizeof(vCamPos))))
 		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_FontFlag", &m_tTextDesc.iShaderFlag, sizeof(m_tTextDesc.iShaderFlag))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_FontColor", &m_tTextDesc.vColor, sizeof(m_tTextDesc.vColor))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_FontOutlineColor", &m_tTextDesc.vOutlineColor, sizeof(m_tTextDesc.vOutlineColor))))
+		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_FontOutlineWidth", &m_tTextDesc.fFontOutlineWidth, sizeof(m_tTextDesc.fFontOutlineWidth))))
+		CRASH("Binding_Value_Failed");
 
+	FTCUSTOM_FONT* pFontInfo = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
+	ID3D11Resource* pRes = nullptr;
+	pFontInfo->pAtlasSRV->GetResource(&pRes);
+	ID3D11Texture2D* pTex2D = nullptr;
+	pRes->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&pTex2D);
+	D3D11_TEXTURE2D_DESC desc = {};
+	pTex2D->GetDesc(&desc);
+	_float2 vTexPerPixel = { 1.0f / desc.Width,	1.0f / desc.Height };
+	m_pShaderCom->Bind_Value("g_FontTexPerPixel", &vTexPerPixel, sizeof(_float2));
+	pTex2D->Release();
+	pRes->Release();
+	
 
 	m_pShaderCom->Begin(m_tUIDesc.iPassType);
 	m_pVIBufferCom->Bind_Resources();
@@ -183,6 +203,7 @@ void CUI_Text::Update_Description()
 	// 1. 폰트 매니저에서 폰트 정보 받아오기
 	auto* pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	if (!pFont) return;
+	const _uint iPadding = pFont->iPadding;
 
 	_float penX = 0.f;
 	_float penY = 0.f;
@@ -217,18 +238,19 @@ void CUI_Text::Update_Description()
 		inst.vSInstCoordY = { pGlyph->fV0, pGlyph->fV1 };
 
 
+
 		// ksta : 크기 설정!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		inst.vSInstRight	=	{ m_tTextDesc.fScale * pGlyph->sWidth, 0.f, 0.f ,0.f };
+		inst.vSInstRight	=	{ m_tTextDesc.fScale * (pGlyph->sWidth), 0.f, 0.f ,0.f };
 		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
 
 		// 화면 좌표 (기준 위치 + bearing + 현재 pen 이동량)
 		inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
 			+ penX
-			+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale;
+			+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
 
 		inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
-			- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale
+			- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
 			+ penY;
 
 

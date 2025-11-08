@@ -120,7 +120,7 @@ VS_OUT VS_Font(VS_IN In)
     
 
     
-    212¤¡
+    
     return Out;
 }
 
