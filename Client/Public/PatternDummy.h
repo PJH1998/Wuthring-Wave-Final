@@ -48,6 +48,11 @@ private:
 	CCollider*				m_pColliderCom = { nullptr };
 
 	_string					m_strAnimTag;
+	_string					m_strInitAnimTag;
+	_bool					m_isRootMotion{true};
+	_bool					m_isRootRotate{};
+	_bool					m_isRootTranslate{};
+	_float3					m_vPosition{};
 #ifdef _DEBUG
 	vector<_string>			m_strAnimationTags;
 #endif // _DEBUG

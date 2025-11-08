@@ -47,7 +47,7 @@ public:
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
-	CAttackVolume* m_pAtkVolume[ATK_SOCKET::END] = {nullptr};
+	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
 
 	_uint					m_iState{};
 	_bool					m_isAggro{};
