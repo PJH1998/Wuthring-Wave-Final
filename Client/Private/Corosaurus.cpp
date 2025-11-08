@@ -125,31 +125,61 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		CRASH("Corrosaurus/Com_AnimMachine");
 
 #pragma region BlackBoard_Value_&_Condition
-	//CBlackBoard* pBlackBoard = CBlackBoard::Create();
-	//pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
-	//pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
-	//pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
-	//pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
-	//pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(0, 3.f); });
-	//pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(1, 4.f); });
-	//pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(2, 15.f); });
-	//pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
-	//pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
-	//pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
-	//pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
-	//pBlackBoard->Add_Condition("Right", [this]() ->_bool { return Right(); });
-	//
-	//CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
-	//BTDesc.pBlackBoard = pBlackBoard;
-	////Com_BehaviorTree
-	//if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_Corrosaurus"),
-	//	TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
-	//	CRASH(m_pBehaviorTreeCom);
+	CBlackBoard* pBlackBoard = CBlackBoard::Create();
+	pBlackBoard->Add_Data("iState", pBlackBoard->DeduceType(m_iState), &m_iState);
+	pBlackBoard->Add_Condition("isAnimationRunning", [this]()->_bool { return isAnimationRunning(); });
+	pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
+	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
+	pBlackBoard->Add_Condition("ATKArrange", [this]() ->_bool { return AttackArrange(); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 4.f); });
+	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 15.f); });
+	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 15.f); });
+	pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 50.f); });
+	pBlackBoard->Add_Condition("Attack8", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK8, 15.f); });
+	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
+	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
+	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
+	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
+	pBlackBoard->Add_Condition("Right", [this]() ->_bool { return Right(); });
+	
+	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
+	BTDesc.pBlackBoard = pBlackBoard;
+	//Com_BehaviorTree
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_Corrosaurus"),
+		TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
+		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
 }
 
 void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 {
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	m_pAtkVolumes[ATK_SOCKET::HEAD] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD])
+		CRASH(m_pAtkVolume);
+	m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(false);
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
+		CRASH(m_pAtkVolume);
+	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(false);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
@@ -174,6 +204,95 @@ void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& 
 
 void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+#ifdef _DEBUG
+		cout << "Be Hit! (Corro)" << endl;
+		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+#endif // _DEBUG
+
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (Corro)" << endl;
+#endif // _DEBUG
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		//m_isPushed = true;
+		//m_isAir = true;
+		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+#ifdef _DEBUG
+		cout << "Knock Back! (Corro)" << endl;
+		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+#endif // _DEBUG
+	}
+}
+
+_bool CCorosaurus::isKnockDown()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::isAttackEnable()
+{
+	if (!m_isDetecting)
+		return false;
+
+	return _bool();
+}
+
+_bool CCorosaurus::AttackArrange() const
+{
+	if (m_iState == 0)
+	{
+
+	}
+	else
+	{
+
+	}
+	return true;
+}
+
+_bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
+{
+	return _bool();
+}
+
+_bool CCorosaurus::isChase()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::isPatrol()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::Back()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::Front()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::Left()
+{
+	return _bool();
+}
+
+_bool CCorosaurus::Right()
+{
+	return _bool();
 }
 
 CCorosaurus* CCorosaurus::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -208,7 +327,7 @@ void CCorosaurus::Free()
 
 	for (_uint i = 0; i < ATK_SOCKET::END; i++)
 	{
-		Safe_Release(m_pAtkVolume[i]);
+		Safe_Release(m_pAtkVolumes[i]);
 	}
 
 	Safe_Release(m_pBehaviorTreeCom);

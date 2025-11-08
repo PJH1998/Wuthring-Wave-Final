@@ -86,7 +86,10 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
-		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
+	{
+		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
+		m_isDist_Interp_Enable = false;
+	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -134,7 +137,7 @@ void CMonsterTest::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
 		m_pModelCom->Render(i);
 	}
@@ -273,6 +276,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("LookRev"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
+	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = true;
 	}
 }
 
@@ -506,7 +513,11 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 {
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
-
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
 	//그로기 특수상황
 	if (m_isParalysis)
 	{
@@ -520,12 +531,6 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
-
-	if (true == m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		m_beHit = false;
-	}
 }
 
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -533,7 +538,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
-		if(m_fStamina >= 0.f)
+		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
@@ -542,7 +547,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
 		m_beHit = true;
-		if (m_fStamina >= 0.f)
+		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
@@ -551,7 +556,7 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
-		if (m_fStamina >= 0.f)
+		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
@@ -604,10 +609,10 @@ _bool CMonsterTest::isAttackEnable()
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK4] <= 0.f) Result = true;
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK7] <= 0.f) Result = true;
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK10] <= 0.f) Result = true;
-	if(Result)
-	{
-		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
-	}
+	//if(Result)
+	//{
+	//	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	//}
 	return Result;
 }
 
@@ -621,7 +626,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != 0)
+	if (iIndex != ATK_PATTERN::ATTACK2)
 		return false;
 	//else
 	//	return false;
