@@ -21,7 +21,7 @@ public:
 		_uint iNumInstance;
 		_float4x4 WorldMatrix;
 		_uint iSaveIndex;
-		_float4 vDiffuseColor = _float4(0.f, 0.f, 0.f, 0.f);
+		_float4 vDiffuseColor = _float4(1.f, 1.f, 1.f, 1.f);
 		_bool IsLoaded;
 	}MAP_LOAD;
 

@@ -7,7 +7,7 @@ class CVIBuffer_Point;
 NS_END
 
 NS_BEGIN(Editor)
-class CEdit_Brush final: public CGameObject
+class CEdit_Brush final : public CGameObject
 {
 private:
 	explicit CEdit_Brush(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -36,7 +36,7 @@ private:
 	_float m_fRange = {};
 	_uint m_iNumInstance = {};
 	_float3 m_vMousePos = {};
-	_float4* m_pPoints= {nullptr};
+	_float4* m_pPoints = { nullptr };
 	_tchar m_ModelName[MAX_PATH] = {};
 
 	_uint m_iMinNum = {};
@@ -50,8 +50,9 @@ private:
 	map<_uint, vector<class CEdit_MapObject_Instance*>> m_SaveInstanceObjects;
 	vector<_uint> m_ShaderPasses;
 	union MyFloat4 {
+		_vector Vec = XMVectorSet(1.f,1.f,1.f,1.f);
 		_float4 float_4;
-		float arr[4];
+		_float arr[4];
 	};
 	MyFloat4 vDiffuseColor = {};
 public:

@@ -521,6 +521,7 @@ void CLevel_Map::Menu_Save_Load()
 							PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
 							CEdit_MapObject_Instance::MAP_LOAD Desc{};
+							_uint i = 0;
 
 							while (File.read(reinterpret_cast<char*>(&Desc.iSaveIndex), sizeof(_uint)))
 							{
@@ -553,7 +554,6 @@ void CLevel_Map::Menu_Save_Load()
 								MeshDesc.iNumInstance = Desc.iNumInstance;
 								MeshDesc.pTransformMatrix = InstanceMatrix;
 								//파일시스템으로 해당 모델 찾기.
-								_uint i = 0;
 								_string ModelPath = Desc.ModelName;
 								ModelPath.pop_back();
 								_bool IsLODZero = true;
