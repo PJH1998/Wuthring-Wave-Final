@@ -255,7 +255,6 @@ public:
 #pragma region CSM
 public:
 	HRESULT				SetUp_ShadowLight(const _wstring& strLightTag);
-	HRESULT				SetUp_ShadowNF();
 	HRESULT				Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName = nullptr);
 	HRESULT				Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName);
 	HRESULT				Bind_CSM_SRV(class CShader* pShader, const _char* pConstantName);
@@ -294,7 +293,6 @@ public:
 	const vector<BoundingBox*>& Get_ShadowMapSectors();
 	HRESULT						Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector);
 	HRESULT						Bind_ShadowMap_Resources_Renderer(CShader* pShader);
-	HRESULT						Bind_ShadowMap_Buffer(_uint iBufferIndex);
 	HRESULT						Begin_ShadowMap();
 	HRESULT						End_ShadowMap();
 #ifdef _DEBUG
@@ -303,12 +301,24 @@ public:
 #pragma endregion
 
 #pragma region DECAL_MANAGER
+public:
 	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
 	HRESULT						Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT						Render_Decal();
 #pragma endregion
 
+#pragma region HZB
+	ID3D11ShaderResourceView*	Get_HZB_Resource();
+#pragma endregion
+
+#pragma region VOLUMETRIC_FOG
 public:
+	void						Add_LightData_ToVF(const VF_LIGHT& LightData);
+	void						Compute_Fog();
+#pragma endregion
+
+public:
+	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
 	HRESULT					Clear_Memory();
 	void					Release_Engine();

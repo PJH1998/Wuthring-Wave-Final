@@ -21,7 +21,6 @@ public:
 	HRESULT						Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc);
 	HRESULT						Bind_ShadowMap_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector);	// STATIC_OBJECT
 	HRESULT						Bind_ShadowMap_Resources(CShader* pShader);																	// RENDERER
-	HRESULT						Bind_ShadowMap_Buffer(_uint iBufferIndex);
 
 	HRESULT						Begin_ShadowMap();
 	HRESULT						End_ShadowMap();

@@ -45,13 +45,6 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader, const _char* pVie
 	return S_OK;
 }
 
-HRESULT CShadowMap::Bind_ShadowMap_Buffer(_uint iBufferIndex)
-{
-//	m_pContext->PSSetConstantBuffers(iBufferIndex, 1, &m_pConstantBuffer);
-
-	return S_OK;
-}
-
 HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 {
 	_bool HasShadowMap = true;

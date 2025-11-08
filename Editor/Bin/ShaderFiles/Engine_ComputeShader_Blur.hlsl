@@ -21,6 +21,9 @@ cbuffer BLUR_DATA : register(b0)
 
 StructuredBuffer<float> g_Weights : register(t1);
 
+groupshared int2 vInSize;
+groupshared int2 vOutSize;
+
 groupshared float4 vSharedColorX[THREAD_Y][THREAD_X + (2 * MAX_RADIUS)];
 groupshared float4 vSharedColorY[THREAD_Y + (2 * MAX_RADIUS)][THREAD_X];
 
@@ -108,10 +111,12 @@ Texture2D<float4> DepthTexture : register(t1);
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void DOF_X(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
-    float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
+    if(GTID.x == 0 && GTID.y == 0)    
+        OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
     
-    int2 vOutSize = 0;
-    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    GroupMemoryBarrierWithGroupSync();
+    
+    float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
     
     vSharedColorX[GTID.y][GTID.x + MAX_RADIUS] = InputTexture.Load(int3(DTID.xy, 0));
     
@@ -166,8 +171,10 @@ void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
 {
     float4 vDofData = DepthTexture.Load(int3(DTID.xy, 0));
     
-    int2 vOutSize = 0;
-    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    if (GTID.x == 0 && GTID.y == 0)    
+        OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    
+    GroupMemoryBarrierWithGroupSync();
     
     vSharedColorY[GTID.y + MAX_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
 
@@ -329,11 +336,13 @@ groupshared float4 vSharedMotionColor[THREAD_Y + 1][THREAD_X + 1];
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
-    int2 vInSize;
-    InputTexture.GetDimensions(vInSize.x, vInSize.y);
+    if (GTID.x == 0 && GTID.y == 0)
+    {
+        InputTexture.GetDimensions(vInSize.x, vInSize.y);
+        OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    }
     
-    int2 vOutSize;
-    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    GroupMemoryBarrierWithGroupSync();
     
     vSharedMotionColor[GTID.y][GTID.x] = ComputeMotionBlur(DTID, vInSize, vOutSize);
 

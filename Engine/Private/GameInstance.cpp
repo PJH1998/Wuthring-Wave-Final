@@ -796,10 +796,6 @@ HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
 {
 	return m_pCSM->SetUp_ShadowLight(strLightTag);
 }
-HRESULT CGameInstance::SetUp_ShadowNF()
-{
-	return m_pCSM->SetUp_ShadowNF();
-}
 HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName)
 {
 	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
@@ -914,12 +910,6 @@ HRESULT CGameInstance::Bind_ShadowMap_Resources_Renderer(CShader* pShader)
 {
 	return m_pShadowMap->Bind_ShadowMap_Resources(pShader);
 }
-
-HRESULT CGameInstance::Bind_ShadowMap_Buffer(_uint iBufferIndex)
-{
-	return m_pShadowMap->Bind_ShadowMap_Buffer(iBufferIndex);
-}
-
 HRESULT CGameInstance::Begin_ShadowMap()
 {
 	return m_pShadowMap->Begin_ShadowMap();
@@ -952,6 +942,30 @@ HRESULT CGameInstance::Render_Decal()
 	return m_pDecal_Manager->Render();
 }
 #pragma endregion
+
+#pragma region HZB
+ID3D11ShaderResourceView* CGameInstance::Get_HZB_Resource()
+{
+	return m_pHZB->Get_Resource();
+}
+#pragma endregion
+
+#pragma region VOLUMETRIC_FOG
+void CGameInstance::Add_LightData_ToVF(const VF_LIGHT& LightData)
+{
+	m_pVF->Add_LightData(LightData);
+}
+void CGameInstance::Compute_Fog()
+{
+	m_pVF->Render();
+}
+#pragma endregion
+
+HRESULT CGameInstance::SetUp_CameraNF()
+{
+	m_pVF->SetUp_FogNF();
+	return m_pCSM->SetUp_ShadowNF();
+}
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {

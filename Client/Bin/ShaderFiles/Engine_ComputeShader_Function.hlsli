@@ -1,6 +1,6 @@
 #pragma pack_matrix(row_major)
 
-// Emissive ÃÖ¼ÒÄ¡
+static float PI = 3.1415926535f;
 
 float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
 {

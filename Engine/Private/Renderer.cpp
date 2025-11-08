@@ -732,6 +732,8 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Fog()
 {
+	m_pGameInstance->Compute_Fog();
+
 	m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false);
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))

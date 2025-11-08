@@ -1,5 +1,4 @@
 #include "Engine_ComputeShader_Function.hlsli"
-typedef row_major matrix matrix_rm;
 
 #define THREAD_X 16
 #define THREAD_Y 16
@@ -8,23 +7,30 @@ typedef row_major matrix matrix_rm;
 Texture2D<float4> InputTexture : register(t0);
 RWTexture2D<float4> OutputTexture : register(u0);
 
+groupshared int2 vInSize;
+groupshared int2 vOutSize;
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void DownSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
+    if (GTID.x == 0 && GTID.y == 0)
+        InputTexture.GetDimensions(vInSize.x, vInSize.y);
+    
+    GroupMemoryBarrierWithGroupSync();
+    
     int iIndexX = DTID.x * 2;
     int iIndexY = DTID.y * 2;
     
     float4 vColor = 0.f;
     
-    int2 InSize = 0;
-    InputTexture.GetDimensions(InSize.x, InSize.y);
+    //int2 InSize = 0;
+    //InputTexture.GetDimensions(InSize.x, InSize.y);
     
-    int iSampleX0 = min(iIndexX, InSize.x - 1);
-    int iSampleX1 = min(iIndexX + 1, InSize.x - 1);
+    int iSampleX0 = min(iIndexX, vInSize.x - 1);
+    int iSampleX1 = min(iIndexX + 1, vInSize.x - 1);
     
-    int iSampleY0 = min(iIndexY, InSize.y - 1);
-    int iSampleY1 = min(iIndexY + 1, InSize.y - 1);
+    int iSampleY0 = min(iIndexY, vInSize.y - 1);
+    int iSampleY1 = min(iIndexY + 1, vInSize.y - 1);
     
     vColor += InputTexture.Load(int3(iSampleX0, iSampleY0, 0));
     vColor += InputTexture.Load(int3(iSampleX1, iSampleY0, 0));
@@ -39,11 +45,18 @@ void DownSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void UpSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
-    int2 vInSize;
-    InputTexture.GetDimensions(vInSize.x, vInSize.y);
+    if (GTID.x == 0 && GTID.y == 0)
+    {
+        InputTexture.GetDimensions(vInSize.x, vInSize.y);
+        OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    }
     
-    int2 vOutSize;
-    OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
+    GroupMemoryBarrierWithGroupSync();
+    //int2 vInSize;
+    //InputTexture.GetDimensions(vInSize.x, vInSize.y);
+    
+    //int2 vOutSize;
+    //OutputTexture.GetDimensions(vOutSize.x, vOutSize.y);
     
     float2 vTexcoord = float2(DTID.xy);
     
