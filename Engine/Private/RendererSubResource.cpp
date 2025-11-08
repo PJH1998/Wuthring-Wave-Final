@@ -429,9 +429,12 @@ void CRendererSubResource::Free()
     Safe_Release(m_pContext);
 
     Safe_Release(m_pRampTexture);
+
     Safe_Release(m_pLUT_Texture);
     Safe_Release(m_pLUT_SRV);
-    Safe_Release(m_pNoiseTexture);
+    
+	Safe_Release(m_pNoiseTexture);
+
     Safe_Release(m_pFogNoiseTexture);
     Safe_Release(m_pHighCloudTexture);
 
