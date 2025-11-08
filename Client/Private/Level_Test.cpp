@@ -248,9 +248,10 @@ void CLevel_Test::Ready_MonsterTest()
 
 	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
 	DummyDesc.eLevel = m_eCurLevel;
-	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
-	DummyDesc.strInitAnimTag = "Stand1";
-	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");
+	DummyDesc.strInitAnimTag = "Stand";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))

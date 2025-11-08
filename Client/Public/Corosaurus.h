@@ -48,7 +48,9 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
+	CAttackVolume* m_pParryVolumes = {nullptr};
 
+#pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
 	_bool					m_isAggro{};
 	_bool					m_isDetecting{};
@@ -62,10 +64,16 @@ private:
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
 	_float3					m_vBeHit_Normal{};
+	_bool					m_isAnimationFinished{};
+#pragma endregion
 
 	_float					m_fHP{};
-	_bool					m_isAnimationFinished{};
+	_float					m_fStamina{};
+	_float					m_fMaxStamina{};
+	_bool					m_biHit{};
 	_bool					m_isBlocked{};
+	_bool					m_isDist_Interp_Enable{};
+	_bool					m_isTurnLerp{};
 
 	CALLBACK_CLIENT			m_tCallDesc{};
 
@@ -81,12 +89,13 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 #pragma region BT_CONDITIONS
 	_bool						isAnimationRunning() const { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
-	_bool						AttackArrange() const;
+	_bool						AttackArrange();
 	_bool						Attack(_uint iIndex, _float fInterval);
 	_bool						isChase();
 	_bool						isPatrol();

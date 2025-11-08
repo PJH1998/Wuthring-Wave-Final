@@ -9,6 +9,7 @@
 #include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
+#include "Corosaurus.h"
 #include "AttackVolume.h"
 #include "PatternDummy.h"
 
@@ -242,6 +243,28 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_ElectroPredator
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 		CElectroPredator::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+
+#pragma region CORROSAURUS
+	// Prototype_Component_BehaviorTree_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_BehaviorTree_CoroSaurus"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Corrosaurus/Corrosaurus_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_Component_AnimMachine_CoroSaurus"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Corrosaurus/Animation/Corrosaurus_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroSaurus"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Corrosaurus/Corrosaurus.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
+		CCorosaurus::Create(m_pDevice, m_pContext))))
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
