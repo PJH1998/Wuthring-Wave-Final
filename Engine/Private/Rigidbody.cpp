@@ -309,12 +309,14 @@ void CRigidbody::Free()
 	{
 		if (SHAPE::MESH == m_eShape)
 		{
-			for (_uint i = 0; i < m_iNumMesh; ++i)
-				m_pBodyInterface->RemoveBody(m_pMeshBodyIDs[i]);
+			if(true == m_isActive)
+				for (_uint i = 0; i < m_iNumMesh; ++i)
+					m_pBodyInterface->RemoveBody(m_pMeshBodyIDs[i]);
+
 			Safe_Delete_Array(m_pMeshBodyIDs);
 			Safe_Delete_Array(m_ppMeshBodies);
 		}
-		else
+		else if(true == m_isActive)
 			m_pBodyInterface->RemoveBody(m_BodyID);
 	}
 
