@@ -79,8 +79,6 @@ void CUI_Text::Render()
 	if (FAILED(m_pShaderCom->Bind_Value("g_CutoutAlphaDiscard", &m_tUIDesc.fCutout, sizeof(m_tUIDesc.fCutout))))
 		CRASH("Binding_Value_Failed");
 
-	//if (FAILED(m_pShaderCom->Bind_Value("g_ImageSize", &m_tUIDesc.vecSize[m_iCurTexIndex], sizeof(m_tUIDesc.vecSize[m_iCurTexIndex]))))
-	//	CRASH("Binding_Value_Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_SectorBorder", &m_tUIDesc.vSectorBorder, sizeof(m_tUIDesc.vSectorBorder))))
 		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_UIScale", &m_tUIDesc.fUIScale, sizeof(m_tUIDesc.fUIScale))))
@@ -92,7 +90,9 @@ void CUI_Text::Render()
 	if (FAILED(m_pShaderCom->Bind_Value("g_vTargetWorldPos", &m_tTextDesc.vTargetWorldPos, sizeof(m_tTextDesc.vTargetWorldPos))))
 		CRASH("Binding_Value_Failed");
 
-
+	const _float4* vCamPos = m_pGameInstance->Get_CamPos();
+	if (FAILED(m_pShaderCom->Bind_Value("g_vCamPosition", &vCamPos, sizeof(vCamPos))))
+		CRASH("Binding_Value_Failed");
 
 
 	m_pShaderCom->Begin(m_tUIDesc.iPassType);

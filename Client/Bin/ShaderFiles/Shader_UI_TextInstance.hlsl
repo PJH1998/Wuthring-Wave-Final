@@ -71,8 +71,7 @@ float4		g_FontGradColor;		// [16] RGBA Gradiant Color (->)
 	
 bool		g_isTargetExist;
 float4		g_vTargetWorldPos;
-
-
+float4		g_vCamPosition;
 #define FL_NONE         0
 #define FL_OUTLINE      1 << 0
 #define FL_GRAD         1 << 1
@@ -244,80 +243,71 @@ struct VS_OUT
 
 VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
 {
-	VS_OUT Out = (VS_OUT) 0;
-	
-	
-	float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
-    float2 quadLocal = In.vPosition.xy + float2(0.5f, -0.5f); // pivot 정렬
+    VS_OUT Out = (VS_OUT) 0;
 
+    // 각 인스턴스 별 크기 및 위치 계산
+    float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+	
+    float2 quadLocal = In.vPosition.xy + float2(0.5f, -0.5f);	// 피벗 보정. 폰트의 기준점에 따른 위치 보정 위함.
+    float2 quadLocalPx = float2(quadLocal.x * vInstSca.x,		// 크기 비례 위치 이동 (원본 글자 크기의 사각형을 만들기 위함)
+                                quadLocal.y * vInstSca.y);
+
+    // 타겟이 없는 경우
     float2 pixelPos;
-    pixelPos.x = In.vSInstTrans.x + quadLocal.x * vInstSca.x;
-    pixelPos.y = In.vSInstTrans.y - quadLocal.y * vInstSca.y;
-	
-	
+    pixelPos.x = In.vSInstTrans.x + quadLocalPx.x;
+    pixelPos.y = In.vSInstTrans.y - quadLocalPx.y;
 
-	
-	
+    float z_ndc = 0.1f; // 깊이 버퍼 대비?
+
+    // 타겟이 있는 경우
     if (g_isTargetExist)
     {
-        float3 test = g_vTargetWorldPos.xyz + (In.vPosition.xyz * 5.f);
-		
-        float4 targetWorld = float4(test.xyz, 1.0f);
-        float4 targetView = mul(targetWorld, g_ViewMatrix);
+        // 타겟 위치의 정점 변환 (월드 -> 뷰 -> 투영 -> NDC -> 스크린)
+        float3 worldCenter = g_vTargetWorldPos.xyz;
+        float4 targetView = mul(float4(worldCenter, 1.0f), g_ViewMatrix);
         float4 targetProj = mul(targetView, g_ProjMatrix);
-		
-        if (targetProj.w <= 0.0f)
-        {
-            Out.vPosition = float4(-2, -2, 0, 1); // 그냥 안 보이게 버림
-            return Out;
-        }
-	
+        if (targetProj.w <= 0.0f)   { Out.vPosition = float4(-2, -2, 0, 1);  return Out; } // 카메라 뒤면 버림
         float3 targetNDC = targetProj.xyz / targetProj.w;
-	
         float2 targetScreenPos;
         targetScreenPos.x = (targetNDC.x + 1.0f) * 0.5f * g_ScreenSize.x;
         targetScreenPos.y = (1.0f - targetNDC.y) * 0.5f * g_ScreenSize.y;
-	
-        pixelPos = targetScreenPos;
-		
-		// begin처럼 스크린좌표로 전환한 뒤에, UI용 투영행렬 받아와서 계산에 사용하면
-		// 지금처럼 진짜 3D상 좌표가 아닌 빌보드 형식 가능할수도
-		
-		
-		// 아니면 지오메트리셰이더 쓰거나, 회전 다 빼거나
+
+		// 변환 완료 이후 스크린 공간..
+		// 이 차례에 스크린 기준으로 제공된 Transform 행렬 반영. 이상한데서 계산하면 안됨.
+        float2 advancePx = In.vSInstTrans.xy;
+        pixelPos = targetScreenPos + float2(advancePx.x + quadLocalPx.x,
+                                            advancePx.y - quadLocalPx.y);
+
+        // 깊이 버퍼용? 잘 모르겠음
+        z_ndc = targetNDC.z;
     }
-	
-	
-    float2 ndcTarget = (pixelPos / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
-    Out.vPosition = float4(ndcTarget, 0.1f, 1.f);
-	
-	
-	
-    // Out.vPosition = float4(ndc, 0, 1);
+
+    // 스크린 -> NDC 변환.
+	// 타겟이 있는 경우에는 왜 이렇게 하느냐?..
+	// 
+	// 스크린까지 올렸던 건 스크린 기준으로 제공된 Transform 의 반영을 위함이었던 것.
+	// PS의 UV에서는 NDC를 기준으로 사용하므로 이를 전달함.
+    float2 ndc = (pixelPos / g_ScreenSize) * float2(2, -2) + float2(-1, 1);
+    Out.vPosition = float4(ndc.xy, z_ndc, 1.0f);
+
     Out.vTexcoord = In.vTexcoord;
-
-    Out.vWorldPos = float4(pixelPos, 0, 1);
+    Out.vWorldPos = float4(pixelPos, 0, 1); // 디버깅용(스크린 px)
     Out.vProjPos = Out.vPosition;
-	
-	// === for Pixel Shaders
-	
-	Out.vSInstCoordX = In.vSInstCoordX;
-	Out.vSInstCoordY = In.vSInstCoordY;
-	Out.vClipTexcoordX = In.vClipTexcoordX;
-	Out.vClipTexcoordY = In.vClipTexcoordY;
 
+    // for Pixel Shaders
+    Out.vSInstCoordX = In.vSInstCoordX;
+    Out.vSInstCoordY = In.vSInstCoordY;
+    Out.vClipTexcoordX = In.vClipTexcoordX;
+    Out.vClipTexcoordY = In.vClipTexcoordY;
     Out.vSInstPos = In.vSInstTrans.xy;
     Out.vSInstSca = vInstSca;
+    Out.mExtra0 = In.mExtra0;
+    Out.mExtra1 = In.mExtra1;
+    Out.mExtra2 = In.mExtra2;
+    Out.mExtra3 = In.mExtra3;
 
-	Out.mExtra0 = In.mExtra0;
-	Out.mExtra1 = In.mExtra1;
-	Out.mExtra2 = In.mExtra2;
-	Out.mExtra3 = In.mExtra3;
-    
-	return Out;
+    return Out;
 }
-
-
 
 
 
@@ -360,8 +350,8 @@ struct PS_OUT
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
-    Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
-    return Out;
+    //Out.vColor = float4(1.f, 0.f, 1.f, 1.f);
+    //return Out;
 	
 	
 	
