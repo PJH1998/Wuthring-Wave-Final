@@ -9,17 +9,6 @@ class CStaticObject;
 
 class CShadowMap final : public CBase
 {
-public:
-	typedef struct tagShadowMapData {
-		_int iNumSectorX;            
-		_int iNumSectorToLayer;
-		_float Padding0[2];
-		_float2 vSectorWorldSize;
-		_float Padding1[2];
-		_float2 vMin;  
-		_float Padding2[2];
-	}SHADOW_MAP_DATA;
-
 private:
 	explicit CShadowMap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CShadowMap() = default;
@@ -54,8 +43,6 @@ private:
 
 	ID3D11DepthStencilView*		m_pShadowMapDSV = { nullptr };
 	ID3D11ShaderResourceView*	m_pShadowMapSRV = { nullptr };
-
-	ID3D11Buffer*				m_pConstantBuffer = { nullptr };
 	
 	_uint						m_iNumSector = {};
 	_uint						m_iNumLayer = {};
@@ -78,7 +65,6 @@ private:
 	void						Setting_ShadowMapViewPort(_uint iSector);
 	
 	HRESULT						Ready_ShadowMap();
-	HRESULT						Ready_Buffers();
 	HRESULT						Ready_SectorUV();
 	HRESULT						Ready_Matrices();
 

@@ -9,8 +9,9 @@ class CAugusta final : public CCharacter
 public:
 	enum VOLUME
 	{
-		VOLUME_RISE = 0,
-		VOLUME_HACKDOWN = 1,
+		VOULME_RISE_ZERO = 0,
+		VOLUME_RISE = 1,
+		VOLUME_HACKDOWN = 2,
 		VOLUME_END
 	};
 #pragma region STATE

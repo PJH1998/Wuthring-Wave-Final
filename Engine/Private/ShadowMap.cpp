@@ -23,9 +23,6 @@ HRESULT CShadowMap::Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc)
 	if (FAILED(Ready_SectorUV()))
 		return E_FAIL;
 
-	if (FAILED(Ready_Buffers()))
-		return E_FAIL;
-
 	if (FAILED(Ready_Matrices()))
 		return E_FAIL;
 
@@ -138,7 +135,6 @@ void CShadowMap::Clear()
 
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
-	Safe_Release(m_pConstantBuffer);
 
 	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
 		m_Matrices[i].clear();
@@ -258,36 +254,6 @@ HRESULT CShadowMap::Ready_ShadowMap()
 	Safe_Release(pTexture2D);
 
     return S_OK;
-}
-
-HRESULT CShadowMap::Ready_Buffers()
-{
-	D3D11_BUFFER_DESC BufferDesc = {};
-	BufferDesc.ByteWidth = sizeof(SHADOW_MAP_DATA);
-	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pConstantBuffer)))
-		CRASH("ShadowMap Constant Buffer");
-
-	SHADOW_MAP_DATA Data = {};
-	ZeroMemory(&Data, sizeof(SHADOW_MAP_DATA));
-
-	_float fMinX = m_MapDesc.vCenterPos.x;
-	_float fMinZ = m_MapDesc.vCenterPos.z;
-
-	Data.iNumSectorX = m_MapDesc.iNumSectorX;
-	Data.iNumSectorToLayer = m_iNumSectorToLayer;
-	Data.vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
-	Data.vMin = _float2(fMinX, fMinZ);
-
-	D3D11_MAPPED_SUBRESOURCE SubResource;
-	m_pContext->Map(m_pConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
-	memcpy(SubResource.pData, reinterpret_cast<void*>(&Data), sizeof(SHADOW_MAP_DATA));
-	m_pContext->Unmap(m_pConstantBuffer, 0);
-
-	return S_OK;
 }
 
 HRESULT CShadowMap::Ready_SectorUV()
@@ -451,12 +417,4 @@ void CShadowMap::Free()
 	Safe_Release(m_pGameInstance);
 
 	Clear();
-
-	//for (auto& pBounding : m_Boundings)
-	//	Safe_Delete(pBounding);
-	//m_Boundings.clear();
-
-	//Safe_Release(m_pShadowMapDSV);
-	//Safe_Release(m_pShadowMapSRV);
-	//Safe_Release(m_pConstantBuffer);
 }

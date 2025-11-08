@@ -17,6 +17,37 @@ HRESULT CHZB::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
+	Ready_DefaultSetting();
+	Ready_OcclusionCulling();
+
+    return S_OK;
+}
+
+void CHZB::Update()
+{
+	_float4 vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
+	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+	{
+		m_pContext->ClearUnorderedAccessViewFloat(m_pUAV[i], reinterpret_cast<_float*>(&vClearColor));
+
+		ID3D11ShaderResourceView* pSRV = 0 == i ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")) : m_pSRV[i - 1];
+
+		0 == i ? m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_SRV("InputTexture", pSRV) : m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_SRV("InputMipTexture", pSRV);
+	
+		m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_UAV("OutputTexture", m_pUAV[i]);
+
+		_uint iSizeX = max(m_iWinSizeX >> (i + 1), 1);
+		_uint iSizeY = max(m_iWinSizeY >> (i + 1) , 1);
+
+		_uint iThreadGroupX = (iSizeX + 7) / 8;
+		_uint iThreadGroupY = (iSizeY + 7) / 8;
+
+		m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Dispatch(iThreadGroupX, iThreadGroupY, 1);
+	}
+}
+
+void CHZB::Ready_DefaultSetting()
+{
 	// Texture2D Desc
 	D3D11_TEXTURE2D_DESC TextureDesc = {};
 
@@ -81,48 +112,99 @@ HRESULT CHZB::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 		{ "THREAD_Z", "1" },
 		{ nullptr, nullptr }
 	};
-	m_pComputeShader = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_HZB.hlsl"),
+	m_pComputeShader[HZB_CS_TYPE::MIPMAP] = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_HZB.hlsl"),
 		ShaderMacro, "HZB");
-	ASSERT_CRASH(m_pComputeShader);
+	ASSERT_CRASH(m_pComputeShader[HZB_CS_TYPE::MIPMAP]);
 
-    return S_OK;
 }
 
-void CHZB::Update()
+void CHZB::Ready_OcclusionCulling()
 {
-	_float4 vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
-	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
-	{
-		m_pContext->ClearUnorderedAccessViewFloat(m_pUAV[i], reinterpret_cast<_float*>(&vClearColor));
+	_uint iMaxObject = 2000;
 
-		ID3D11ShaderResourceView* pSRV = 0 == i ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")) : m_pSRV[i - 1];
+	// Create BoxPoint Buffer
+	D3D11_BUFFER_DESC BoxPointsBufferDesc = {};
+	BoxPointsBufferDesc.ByteWidth = sizeof(_float4) * 8 * iMaxObject;
+	BoxPointsBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	BoxPointsBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	BoxPointsBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	BoxPointsBufferDesc.StructureByteStride = sizeof(_float4) * 8;
+	BoxPointsBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
-		0 == i ? m_pComputeShader->Set_SRV("InputTexture", pSRV) : m_pComputeShader->Set_SRV("InputMipTexture", pSRV);
-	
-		m_pComputeShader->Set_UAV("OutputTexture", m_pUAV[i]);
+	if (FAILED(m_pDevice->CreateBuffer(&BoxPointsBufferDesc, nullptr, &m_pBoxPointsBuffer)))
+		CRASH("BoxPoints Buffer");
 
-		_uint iSizeX = max(m_iWinSizeX >> (i + 1), 1);
-		_uint iSizeY = max(m_iWinSizeY >> (i + 1) , 1);
+	// Create OcclusionFlag Buffer
+	D3D11_BUFFER_DESC OcclusionFlagBufferDesc = {};
+	OcclusionFlagBufferDesc.ByteWidth = sizeof(_uint) * iMaxObject;
+	OcclusionFlagBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	OcclusionFlagBufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	OcclusionFlagBufferDesc.CPUAccessFlags = 0;
+	OcclusionFlagBufferDesc.StructureByteStride = sizeof(_uint);
+	OcclusionFlagBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
-		_uint iThreadGroupX = (iSizeX + 7) / 8;
-		_uint iThreadGroupY = (iSizeY + 7) / 8;
+	if (FAILED(m_pDevice->CreateBuffer(&OcclusionFlagBufferDesc, nullptr, &m_pOcclusionFlagBuffer)))
+		CRASH("OcclusionFlag Buffer");
 
-		m_pComputeShader->Dispatch(iThreadGroupX, iThreadGroupY, 1);
-	}
+	// Create OcclusionFlag UAV
+
+
+	// Create CS
+	SHADER_MACRO ShaderMacro = {
+		{ "THREAD_X", "16" },
+		{ "THREAD_Y", "16" },
+		{ "THREAD_Z", "1" },
+		{ nullptr, nullptr }
+	};
+	m_pComputeShader[HZB_CS_TYPE::OCCLUSION] = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_OcclusionCulling.hlsl"),
+		ShaderMacro, "Occlusion_Culling");
+	ASSERT_CRASH(m_pComputeShader[HZB_CS_TYPE::OCCLUSION]);
 }
+
 #ifdef _DEBUG
 void CHZB::Render()
 {
-	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+	ImGui::Begin("HZB_RENDER");
+
+	if (ImGui::BeginCombo("HZB", "List"))
 	{
-		_string strHZB = "HZB";
-		strHZB += to_string(i);
-		ImGui::Begin(strHZB.c_str());
-		ImGui::Image(reinterpret_cast<ImTextureID>(m_pSRV[i]), ImVec2(500.f, 500.f));
+		for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+		{
+			_string strHZB = "HZB";
+			strHZB += to_string(i);
+			
+			if (ImGui::Selectable(strHZB.c_str()))
+			{
+				AddRemoveHZB(strHZB, reinterpret_cast<ImTextureID>(m_pSRV[i]));
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+	ImGui::End();
+
+	for (auto& Pair : m_RenderTextures)
+	{
+		ImGui::Begin(Pair.first.c_str());
+		ImGui::Image(Pair.second, ImVec2(500.f, 500.f));
 		ImGui::End();
 	}
+	
+}
+void CHZB::AddRemoveHZB(const _string& strHZB, ImTextureID TextureID)
+{
+	auto iter = m_RenderTextures.find(strHZB);
+	if (iter != m_RenderTextures.end())
+	{
+		m_RenderTextures.erase(iter);
+		return;
+	}
+
+	m_RenderTextures.emplace(strHZB, TextureID);
+	
 }
 #endif
+
 CHZB* CHZB::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
 {
 	CHZB* pInstance = new CHZB(pDevice, pContext);
@@ -137,12 +219,19 @@ void CHZB::Free()
 {
 	__super::Free();
 
+	// Default Setting
 	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
 		Safe_Release(m_pUAV[i]);
-
+	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
+		Safe_Release(m_pSRV[i]);
 	Safe_Release(m_pMMSRV);
+	for(_uint i = 0; i < HZB_CS_TYPE::END; ++i)
+		Safe_Release(m_pComputeShader[i]);
 
-	Safe_Release(m_pComputeShader);
+	// Occlusion Culling
+	Safe_Release(m_pBoxPointsBuffer);
+	Safe_Release(m_pOcclusionFlagBuffer);
+	Safe_Release(m_pOcclusionFlagUAV);
 
 	Safe_Release(m_pContext);
 	Safe_Release(m_pDevice);

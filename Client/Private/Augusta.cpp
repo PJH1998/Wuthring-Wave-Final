@@ -736,15 +736,33 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(7.f, 7.f, 15.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 8.f); // 
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 1000.f;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
+
+
+
+
+	m_AttackVolumes[VOULME_RISE_ZERO] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOULME_RISE_ZERO]);
+	m_AttackVolumes[VOULME_RISE_ZERO]->TriggerActivate(false);
+
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 10.f); // 
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+
 
 	// Attack용 만들기.
 	m_AttackVolumes[VOLUME_RISE] = dynamic_cast<CAttackVolume*>(
