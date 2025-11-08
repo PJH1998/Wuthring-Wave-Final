@@ -143,7 +143,12 @@ _bool CRigidbody::IsLand(_float3* pNormalOut)
 
 void CRigidbody::IsActivate(_bool isActive)
 {
-	true == isActive ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID);
+	if (false == m_isActive && true == isActive)
+		m_pBodyInterface->AddBody(m_BodyID, EActivation::Activate);
+	else if (true == m_isActive && false == isActive)
+		m_pBodyInterface->RemoveBody(m_BodyID);
+	m_isActive = isActive;
+	//true == isActive ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID);
 }
 
 void CRigidbody::Change_MotionType(EMotionType eType)

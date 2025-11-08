@@ -44,6 +44,7 @@ private:
 	// Occlusion Culling
 	ID3D11Buffer*										m_pBoxPointsBuffer = { nullptr };
 	ID3D11Buffer*										m_pOcclusionFlagBuffer = { nullptr };
+	ID3D11UnorderedAccessView*					m_pOcclusionFlagUAV = { nullptr };
 
 private:
 	void						Ready_DefaultSetting();
