@@ -548,6 +548,15 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		m_beHit = true;
+		if (m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
+#ifdef _DEBUG
+		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
 }
 
 void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -612,7 +621,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != 3)
+	if (iIndex != 0)
 		return false;
 	//else
 	//	return false;
