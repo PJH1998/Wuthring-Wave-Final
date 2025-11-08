@@ -84,6 +84,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	if (nullptr != m_pTargetTransform)
 	{
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
+		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 
 		/*
@@ -484,6 +485,14 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	
+	
+	if (var1 == TEXT("CAMERA"))
+	{
+	//	_float fIntensity = stof(var2);
+	//	Camera_Shake(fIntensity); // Shaking 강도.
+		return;
+	}
+
 	_uint iVolumeIdx = stoul(var3);
 
 	/* BAYONET|ATTACK|0*/
