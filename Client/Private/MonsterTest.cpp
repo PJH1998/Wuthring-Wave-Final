@@ -602,10 +602,10 @@ _bool CMonsterTest::isAttackEnable()
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK4] <= 0.f) Result = true;
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK7] <= 0.f) Result = true;
 	if(m_fAttackAcc[ATK_PATTERN::ATTACK10] <= 0.f) Result = true;
-	if(Result)
-	{
-		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
-	}
+	//if(Result)
+	//{
+	//	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	//}
 	return Result;
 }
 
