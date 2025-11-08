@@ -86,12 +86,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
 		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
-
-		/*
-		_vector vVelocity = m_pTransformCom->Get_Velocity();
-		//m_fDistance : 플레이어와 몬스터 사이의 거리
-		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
-		*/
 	}
 	
 	// 4. MainAttackVolume 설정

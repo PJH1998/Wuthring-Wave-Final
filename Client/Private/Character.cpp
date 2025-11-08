@@ -183,6 +183,7 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 #pragma endregion
 
 #pragma region PHYSICS
+
 const _float CCharacter::Calculate_RootMotionScale()
 {
 	// 타겟이 없으면 원래 비율로
@@ -195,13 +196,13 @@ const _float CCharacter::Calculate_RootMotionScale()
 	else if (m_fTargetDistance < 3.f)
 		return 0.5f;  // 짧게: 과접근 방지
 	else if (m_fTargetDistance < 3.5f)
-		return 0.6f;  // 짧게: 과접근 방지
+		return 0.6f;  
 	else if (m_fTargetDistance < 4.f)
-		return 0.7f;  // 짧게: 과접근 방지
+		return 0.7f;  
 	else if (m_fTargetDistance >= 7.f)
 		return 1.4f;  // 길게: 빠른 접근
 	
-	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비율
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)

@@ -174,13 +174,21 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
 
-    // 1. 애니메이션 실행.
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	
+    
 
-    // 2.
+	// 1. 특정 애니메이션에서는 비율 조정
+	Handle_Animation_SpecialState();
+	
+
+	// 2. 애니메이션 실행.
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
+
+
+	EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
     _vector vLook = m_pAugusta->Get_LookVector();
 
-    EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
+   
     if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
     {
         m_pAugusta->Move_Direction(vLook, fTimeDelta, m_fSpeed); // 조금씩 앞으로 이동?
@@ -412,6 +420,23 @@ void CAugustaAirAttack::State_Reset()
     for (_uint i = 0; i < AIRATTACKSTATE::END; ++i)
         m_States[i] = false;
 }
+
+// 예외적인 애니메이션에 관련해서는 RootMotion Scale을 조절합니다. => 최소 수치를 보장한다?
+void CAugustaAirAttack::Handle_Animation_SpecialState()
+{
+	EAugustaAirAttackType eAirAttackType = static_cast<EAugustaAirAttackType>(m_iCurrentAnimIdx);
+	
+
+	// 최소한도의 이동량을 보장한다.
+	if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END ||
+		eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
+	{
+		if (m_fAnimationScale < 0.5f)
+			m_fAnimationScale = 0.5f;
+	}
+}
+
+
 
 CAugustaAirAttack* CAugustaAirAttack::Create(class CGameObject* pOwner)
 {

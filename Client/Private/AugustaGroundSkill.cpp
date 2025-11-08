@@ -189,6 +189,7 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
+	Handle_Animation_SpecialState();
 	if (eSkillType == EAugustaSkillType::ATTACK_PULL) // 1. 뒤로 이동은 온전하게 이동거리받기.
 		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
 
@@ -408,6 +409,10 @@ void CAugustaGroundSkill::State_Reset()
 {
     for (_uint i = 0; i < SKILLSTATE::END; ++i)
         m_States[i] = false;
+}
+
+void CAugustaGroundSkill::Handle_Animation_SpecialState()
+{
 }
 
 
