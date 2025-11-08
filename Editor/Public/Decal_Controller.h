@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Base.h"
-#include "Effect_Rect.h"
+#include "Effect_Decal.h"
 
 NS_BEGIN(Editor)
 
@@ -33,13 +33,13 @@ private:
 public:
 	void Decal_Tab();
 
-	void Decal_Base_Tab(DECAL_DESC& tDecalDesc, _bool& IsCreate);
+	void Decal_Base_Tab(CEffect_Decal::DECAL_DESC& tDecalDesc, _bool& IsCreate);
 
 public:
 	void UpdateSelected_DecalFormTag(_wstring DecalTag);
 	
-	DECAL_DESC* Get_DecalDesc(_wstring& DecalTag);
-	void	Set_DecalDesc(_wstring& DecalTag, DECAL_DESC& DecalDesc);
+	CEffect_Decal::DECAL_DESC* Get_DecalDesc(_wstring& DecalTag);
+	void	Set_DecalDesc(_wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc);
 
 	void Set_DecalTag(const _char* szDecalTag);
 
@@ -57,11 +57,11 @@ private:
 	_char														m_DecalTag[MAX_PATH] = {};
 	_bool														m_bTagFlag = false;
 
-	map<const _wstring, DECAL_DESC>								m_tDecalDesc = {};
+	map<const _wstring, CEffect_Decal::DECAL_DESC>				m_tDecalDesc = {};
 
 	_int														m_iSelectedDecal = 0;
 	_bool														m_bSelectedDecal = false;
-	DECAL_DESC*													m_pSelectedDecalDesc = { nullptr };
+	CEffect_Decal::DECAL_DESC*									m_pSelectedDecalDesc = { nullptr };
 
 	_float														m_fColor[4] = {1.f, 1.f, 1.f, 1.f};		
 

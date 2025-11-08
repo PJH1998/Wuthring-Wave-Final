@@ -1,22 +1,22 @@
 ﻿#include "Editorpch.h"
-#include "Decal.h"
+#include "Effect_Decal.h"
 
-CDecal::CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Decal::CEffect_Decal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CGameObject{ pDevice, pContext }
 {
 }
 
-CDecal::CDecal(const CDecal& Prototype)
+CEffect_Decal::CEffect_Decal(const CEffect_Decal& Prototype)
     : CGameObject{ Prototype }
 {
 }
 
-HRESULT CDecal::Initialize_Prototype()
+HRESULT CEffect_Decal::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CDecal::Initialize_Clone(void* pArg)
+HRESULT CEffect_Decal::Initialize_Clone(void* pArg)
 {
 	DECAL_DESC* pDesc = static_cast<DECAL_DESC*>(pArg);
 
@@ -36,11 +36,11 @@ HRESULT CDecal::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CDecal::Priority_Update(_float fTimeDelta)
+void CEffect_Decal::Priority_Update(_float fTimeDelta)
 {
 }
 
-void CDecal::Update(_float fTimeDelta)
+void CEffect_Decal::Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -56,14 +56,14 @@ void CDecal::Update(_float fTimeDelta)
 	m_isActivate = false;
 }
 
-void CDecal::Late_Update(_float fTimeDelta)
+void CEffect_Decal::Late_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
 
 }
 
-void CDecal::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
     if(_bool* IsActivate = static_cast<_bool*>(pArg))
         m_isActivate = *IsActivate;
@@ -71,7 +71,7 @@ void CDecal::Reset(const _fmatrix& WorldMatrix, void* pArg)
      Root_Transform(WorldMatrix);
 }
 
-void CDecal::Root_Transform(_fmatrix WorldMatrix)
+void CEffect_Decal::Root_Transform(_fmatrix WorldMatrix)
 {
     _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
 
@@ -79,33 +79,33 @@ void CDecal::Root_Transform(_fmatrix WorldMatrix)
 }
 
 
-CDecal* CDecal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CEffect_Decal* CEffect_Decal::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CDecal* pInstance = new CDecal(pDevice, pContext);
+    CEffect_Decal* pInstance = new CEffect_Decal(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Created : CDecal");
+        MSG_BOX("Failed to Created : CEffect_Decal");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CDecal::Clone(void* pArg)
+CGameObject* CEffect_Decal::Clone(void* pArg)
 {
-    CDecal* pInstance = new CDecal(*this);
+    CEffect_Decal* pInstance = new CEffect_Decal(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Failed to Created : CDecal");
+        MSG_BOX("Failed to Created : CEffect_Decal");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CDecal::Free()
+void CEffect_Decal::Free()
 {
     __super::Free();
 

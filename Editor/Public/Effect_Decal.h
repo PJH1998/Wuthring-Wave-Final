@@ -5,7 +5,7 @@
 
 NS_BEGIN(Editor)
 
-class CDecal final : public CGameObject
+class CEffect_Decal final : public CGameObject
 {
 public:
 	typedef struct tagDecalDesc : Engine::EFFECT_DESC
@@ -15,9 +15,9 @@ public:
 	}DECAL_DESC;
 
 private:
-	CDecal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	CDecal(const CDecal& Prototype);
-	virtual ~CDecal() = default;
+	CEffect_Decal(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	CEffect_Decal(const CEffect_Decal& Prototype);
+	virtual ~CEffect_Decal() = default;
 
 public:
 	virtual HRESULT Initialize_Prototype();
@@ -41,7 +41,7 @@ private:
 	_float						m_LifeTime = {};
 
 public:
-	static CDecal* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CEffect_Decal* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg) override;
 	virtual void Free() override;
 };

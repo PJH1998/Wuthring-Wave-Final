@@ -405,7 +405,7 @@
     <ClInclude Include="..\Public\Decal_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Decal_Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Decal.h">
+    <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>01. Level\Effect\Effect_Controller\Decal_Controller\Decal</Filter>
     </ClInclude>
   </ItemGroup>
@@ -599,7 +599,7 @@
     <ClCompile Include="..\Private\Decal_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Decal_Controller</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Decal.cpp">
+    <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Decal_Controller\Decal</Filter>
     </ClCompile>
   </ItemGroup>

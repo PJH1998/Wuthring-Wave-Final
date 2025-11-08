@@ -81,7 +81,7 @@ void CDecal_Controller::Decal_Tab()
 
                     ImGui::Text("LifeTime");
                     ImGui::PushItemWidth(60);
-                    ImGui::InputFloat("##DecalLifeTime", &(m_pSelectedDecalDesc->fLifeTime));
+                    ImGui::InputFloat("##DecalLifeTime", &(m_pSelectedDecalDesc->LifeTime));
                     ImGui::PopItemWidth();
 
                     if (ImGui::ColorEdit4("Color", m_fColor, 
@@ -127,7 +127,7 @@ void CDecal_Controller::Decal_Tab()
 
 }
 
-void CDecal_Controller::Decal_Base_Tab(DECAL_DESC& tDecalDesc, _bool& IsCreate)
+void CDecal_Controller::Decal_Base_Tab(CEffect_Decal::DECAL_DESC& tDecalDesc, _bool& IsCreate)
 {
  /*   if (ImGui::Begin("Decal Base"))
     {
@@ -203,7 +203,7 @@ void CDecal_Controller::UpdateSelected_DecalFormTag(_wstring DecalTag)
     }
 }
 
-DECAL_DESC* CDecal_Controller::Get_DecalDesc(_wstring& DecalTag)
+CEffect_Decal::DECAL_DESC* CDecal_Controller::Get_DecalDesc(_wstring& DecalTag)
 {
     auto iter = m_tDecalDesc.find(DecalTag);
     
@@ -213,9 +213,9 @@ DECAL_DESC* CDecal_Controller::Get_DecalDesc(_wstring& DecalTag)
     return &iter->second;
 }
 
-void CDecal_Controller::Set_DecalDesc(_wstring& DecalTag, DECAL_DESC& DecalDesc)
+void CDecal_Controller::Set_DecalDesc(_wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc)
 {
-    DECAL_DESC Desc = {};
+	CEffect_Decal::DECAL_DESC Desc = {};
     Desc = DecalDesc;
 
     m_tDecalDesc.emplace(DecalTag, Desc);
