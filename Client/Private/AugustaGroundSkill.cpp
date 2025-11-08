@@ -84,9 +84,9 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->PartActivate(m_iPartType, true);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
-			//m_pAugusta->Rotate_Target();
+			m_pAugusta->Rotate_Target();
 			break;
 		}
 		case EAugustaSkillType::ATTACK_PULL:
@@ -96,52 +96,28 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->PartActivate(m_iPartType, true);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
-			//m_pAugusta->Rotate_Target();
+			m_pAugusta->Rotate_Target();
 			break;
 		}
 
 		case EAugustaSkillType::ATTACK_SPSKILL:
 		{
-			_string strBoneName = "WeaponProp02";
-			m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON; // 추후 애니메이션에 따른. 분기문 필요.
+			_string strBoneName = "WeaponProp05"; 
+			m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON; 
 			m_pAugusta->PartActivate(m_iPartType, true);
 			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 			m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
-			//m_pAugusta->Rotate_Target();
+			m_pAugusta->Rotate_Target();
 			break;
 		}
         
     }
 
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName;
-
-	// 한번 실행.
-	//if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
-	//{
-	//	// 애니메이션 속도 서로 Sync 맞추기.
-	//	m_pAugusta->Play_PartAnimation(
-	//		m_iPartType,
-	//		m_Animations[m_iCurrentAnimIdx].strAnimName,
-	//		0.f, nullptr
-	//	);
-	//}
-
-	//// Griffon
-	//if (m_iSubPartType != CAugusta::PARTTYPE::TYPE_END)
-	//{
-	//	m_pAugusta->Play_PartAnimation(
-	//		m_iSubPartType,
-	//		m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-	//		0.f, nullptr, 1.f, true, true, true, false
-	//	);
-	//}
-
-
-	
 }
 
 void CAugustaGroundSkill::OnUpdate(_float fTimeDelta)
@@ -207,6 +183,10 @@ void CAugustaGroundSkill::Handle_Input()
 
 void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 {
+	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; 
+
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
@@ -294,7 +274,23 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 
 		if (m_States[SKILL_R])
 		{
-			m_States[ATTACK_SPEEDDRIVE] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive", m_strSkillName));
+			// 이전 이름에 현재 Skill 이름이 들어감.
+			m_States[ATTACK_PULL] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_Pull", m_strSkillName));
+			m_States[ATTACK_SP_SKILL] = SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpSkill", m_strSkillName);
+
+			if (m_States[ATTACK_PULL])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_PULL;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+				return;
+			}
+
+			if (m_States[ATTACK_SP_SKILL])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+				return;
+			}
 			// 1. Attack Pull (Unique R)
 			/*if (eSkillType == EAugustaSkillType::ATTACK_PULL)
 			{
@@ -303,12 +299,13 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}*/
 
-			if (m_States[ATTACK_SPEEDDRIVE])
-			{
-				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
-				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-				return;
-			}
+			//m_States[ATTACK_SPEEDDRIVE] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive", m_strSkillName));
+			//if (m_States[ATTACK_SPEEDDRIVE])
+			//{
+			//	m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
+			//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
+			//	return;
+			//}
 			
 		}
 
@@ -392,7 +389,7 @@ void CAugustaGroundSkill::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
 
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_PULL), "Attack_Pull", 1.f, 30.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_SPEEDDRIVE), "Attack_SpeedDrive", 1.f, 50.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_SPEEDDRIVE), "Attack_SpeedDrive", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_SPSKILL), "Attack_SpSkill", 1.f, 60.f);
 
     m_PartsAnimations.emplace("Skill_Strike", "SA1Shouwangjiu_Skill_Strike");

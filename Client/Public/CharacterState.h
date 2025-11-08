@@ -32,8 +32,8 @@ protected:
 	_string m_strPrevInfo = {};
 	_string m_strSkillName = {};
 
-
-	_float m_fRootMotionRate = { 1.f }; // 몬스터와 거리에 따라 보간해서 RootMotion Rate를 조절한다..
+	_float m_fRootMotionScale = { 1.f }; // 몬스터와 거리에 따라 보간해서 RootMotion Scale을 조절한다..
+	_float m_fAnimationScale = { 1.f }; // 거리에 따른 루트모션 비율. * (원본 애니메이션 루트모션 비율)
 
     class CTransform* m_pTargetTransform = { nullptr }; // LockOn 대상 Transform
 

@@ -101,6 +101,8 @@ void CAugustaSkillWeapon::Render()
 
 #ifdef _DEBUG
     m_pRigidbodyCom->Render();
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -111,10 +113,19 @@ void CAugustaSkillWeapon::Activate(_bool IsActive)
 
 void CAugustaSkillWeapon::Change_Volume(_uint iVolumeIdx)
 {
+	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
+		return;
+
+	// 교체.
+	m_pMainAttackVolume->TriggerActivate(false);
+	m_iVolumeIdx = iVolumeIdx;
+	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
 }
 
 void CAugustaSkillWeapon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
 {
+	if (m_AttackVolumes[iVolumeIdx] != nullptr)
+		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
 }
 
 void CAugustaSkillWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -125,14 +136,6 @@ void CAugustaSkillWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactMa
 
 	if (nullptr == pAbility)
 		return;
-
-	// 공명 게이지 다채우기?
-	switch (m_iVolumeIdx)
-	{
-	case VOLUME::VOLUME_ULTI:
-		pAbility->Add_Cost(COST_TYPE::COST2, 25.f); // 중앙 Point 게이지 채우기?
-		break;
-	}
 }
 
 void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)
@@ -191,9 +194,9 @@ void CAugustaSkillWeapon::Ready_AttackVolumes()
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.eShape = SHAPE::BOX;
-	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 5.f, 2.f);
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;
@@ -201,20 +204,21 @@ void CAugustaSkillWeapon::Ready_AttackVolumes()
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
-	// Attack용 만들기.
-	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
-		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
-			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	ASSERT_CRASH(m_AttackVolumes[VOLUME_ULTI])
-		m_AttackVolumes[VOLUME_ULTI]->TriggerActivate(false);
-
-	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
-	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
+	// Burst 궁 켰을때 평타.
 	m_AttackVolumes[VOLUME_SWORD_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f);
+
+	// 궁극기용도.
+	m_AttackVolumes[VOLUME::VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ULTI])
+		m_AttackVolumes[VOLUME_ULTI]->TriggerActivate(false);
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ATTACK])
 		m_AttackVolumes[VOLUME_SWORD_ATTACK]->TriggerActivate(false);

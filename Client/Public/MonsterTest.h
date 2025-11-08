@@ -78,7 +78,6 @@ private:
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
 	_bool					m_isAggro{};
-	_bool					m_isTurnLerp{};
 	_bool					m_isDist_Interp_Enable{};
 #pragma endregion
 	
@@ -87,6 +86,10 @@ private:
 	_float					m_fAttackDmg{};
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
+#pragma endregion
+
+#pragma region PHYSICS
+	_bool					m_isTurnLerp{};
 #pragma endregion
 
 private:

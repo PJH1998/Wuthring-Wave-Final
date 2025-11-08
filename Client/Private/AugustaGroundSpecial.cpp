@@ -88,7 +88,10 @@ void CAugustaGroundSpecial::Handle_Input()
 
 void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
-    
+	// 0. 몬스터와의 거리 계산 (최우선)
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target

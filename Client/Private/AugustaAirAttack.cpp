@@ -93,6 +93,14 @@ void CAugustaAirAttack::OnEnter(void* pArg)
             m_pAugusta->Set_Gravity(false);
             break;
         }
+		case EAugustaAirAttackType::AIRATTACK_LOOP:
+		{
+			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
+			strBoneName = "WeaponProp02";
+			m_pAugusta->Set_Gravity(true);
+			m_fSpeed = 2.f;
+			break;
+		}
         case EAugustaAirAttackType::AIRATTACK_END:
         {
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
@@ -162,6 +170,10 @@ void CAugustaAirAttack::Handle_Input()
 
 void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 {
+	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
+
     // 1. 애니메이션 실행.
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
@@ -288,6 +300,8 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
             return;
         }
 
+		
+
         if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_START)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP); // 떨어지게.
@@ -299,12 +313,22 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
         // 땅에 안닿으면? => AirAttack Loop가 아닌 경우에는 Fall로 변경.
         if (!m_States[LAND])
         {
+			// AirAttack_Loop가 아니면?
             if (eAirAttackType != EAugustaAirAttackType::AIRATTACK_LOOP)
             {
                 m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
                 return;
             }
+
+			// Loop면? 재진입.
+			if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
+			{
+				m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_LOOP;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK)); // 상위, 하위 상태
+				return;
+			}
+			
         }
 
         // 땅에 닿으면.
@@ -325,7 +349,6 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END)
             {
-
                 if (m_States[MOVE])
                 {
                     m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;

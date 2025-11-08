@@ -128,6 +128,8 @@ void CCamera::Shaking(_float fTimeDelta)
 	if (m_fShakeTimeAcc > m_fShakeDuration)
 	{
 		m_isShake = false;
+
+		m_vShakeOffset = { 0.f, 0.f, 0.f };
 		return;
 	}
 
