@@ -187,14 +187,19 @@ void CHZB::Free()
 {
 	__super::Free();
 
+	// Default Setting
 	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
 		Safe_Release(m_pUAV[i]);
 	for (_uint i = 0; i < MAX_MIPLEVEL; ++i)
 		Safe_Release(m_pSRV[i]);
-
 	Safe_Release(m_pMMSRV);
+	for(_uint i = 0; i < HZB_CS_TYPE::END; ++i)
+		Safe_Release(m_pComputeShader[i]);
 
-	Safe_Release(m_pComputeShader);
+	// Occlusion Culling
+	Safe_Release(m_pBoxPointsBuffer);
+	Safe_Release(m_pOcclusionFlagBuffer);
+	Safe_Release(m_pOcclusionFlagUAV);
 
 	Safe_Release(m_pContext);
 	Safe_Release(m_pDevice);
