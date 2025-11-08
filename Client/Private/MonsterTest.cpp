@@ -73,7 +73,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	//m_pBehaviorTreeCom->tick(this);
+	m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
 
@@ -619,8 +619,8 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != 1)
-		return false;
+	//if (iIndex != ATK_PATTERN::ATTACK1)
+	//	return false;
 	//else
 	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
