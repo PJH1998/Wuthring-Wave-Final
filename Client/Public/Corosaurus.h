@@ -16,10 +16,15 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float		fHP;
+		_float fAttackDmg;
+		_float fMaxStamina;
+		_float3 vDetectRange;
 	}CORROSAURUS_DESC;
 
 private:
 	enum ATK_SOCKET { HEAD, TAIL, END };
+	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, BURST, ATTACK8, ATK_END };
 private:
 	explicit CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CCorosaurus(const CCorosaurus& Prototype);
@@ -50,12 +55,13 @@ private:
 	_bool					m_isTrigger{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
-	_float					m_fAttackCoolTime[9]{};
-	_float					m_fAttackAcc[9]{};
+	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
+	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
+	_float3					m_vBeHit_Normal{};
 
 	_float					m_fHP{};
 	_bool					m_isAnimationFinished{};
@@ -75,6 +81,20 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+
+#pragma region BT_CONDITIONS
+	_bool						isAnimationRunning() const { return !m_isAnimationFinished; }
+	_bool						isKnockDown();
+	_bool						isAttackEnable();
+	_bool						AttackArrange() const;
+	_bool						Attack(_uint iIndex, _float fInterval);
+	_bool						isChase();
+	_bool						isPatrol();
+	_bool						Back();
+	_bool						Front();
+	_bool						Left();
+	_bool						Right();
+#pragma endregion
 
 public:
 	static		CCorosaurus*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
