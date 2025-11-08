@@ -16,13 +16,21 @@ HRESULT CUI_FontPreset::Initialize()
 	// Const
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
-	tDesc.fScale			= 5.f;	
-	tDesc.vLifeTime			= { 0.0f, 500.0f }; // ksta
-	tDesc.fFontOutlineWidth	= 3.f;
-	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE);//| ENUM_CLASS(FONT_FLAG::FL_FIXED);
-	tDesc.isTargetExist		= false;
+	tDesc.fScale			= 1.f;	
+	tDesc.vLifeTime			= { 0.0f, 3.0f }; // ksta
+	tDesc.fFontOutlineWidth	= 2.f;
+	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
+	tDesc.isTargetExist		= true;
+	tDesc.isInstance		= true;
+	tDesc.vScreenPos		= _float2{ 0.f, 0.f };
+	tDesc.strUIName			= L"DamageFont";
+	tDesc.iPassType			= 0;
 
 	// Const per Types..
+	// - None (쓰지마셈)
+	tDesc.vColor			= { 1.000f, 0.000f, 1.000f, 1.0f };
+	tDesc.vOutlineColor		= { 1.000f, 0.000f, 1.000f, 1.0f };
+	m_FontTypeDesc.push_back(tDesc);
 	// - Heal (회복)
 	tDesc.vColor			= { 0.427f, 0.898f, 0.412f, 1.0f };
 	tDesc.vOutlineColor		= { 0.141f, 0.455f, 0.302f, 1.0f };
@@ -55,13 +63,24 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 {
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
+	
+	tDesc.vecInstanceDescs.resize(to_wstring(iDamage).size());
+
 	tDesc.strText			= to_wstring(iDamage);
 	tDesc.vScreenPos		= { 500.f, 500.f }; 
 	tDesc.vTargetWorldPos	= vTargetPos;
-	//tDesc.vFontGradColor	= {};
 
-	//m_pGameInstance->Add_FloatingText(tDesc);
-	//m_pGameInstance->Spawn_PoolingObject(); // 데미지 생성?
+	tDesc.vColor			= m_FontTypeDesc[iDmgElemType].vColor;
+	tDesc.vOutlineColor		= m_FontTypeDesc[iDmgElemType].vOutlineColor;
+
+	tDesc.vTargetWorldPos = {
+		vTargetPos.x + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.y + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.z + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.w
+	};
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
 }
 
 CUI_FontPreset* CUI_FontPreset::Create()

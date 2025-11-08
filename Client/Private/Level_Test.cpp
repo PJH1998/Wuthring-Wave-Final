@@ -323,7 +323,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	tDesc.strFontTag = L"WW_SemiBold";
 	tDesc.strText = L"Test 테스트입니다.";
 	tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
-	tDesc.fScale = 1.f;
+	tDesc.fScale = 0.25f;
 	tDesc.vLifeTime = { 0.f, 10.f };
 	tDesc.strUIName = L"TestFont";
 
@@ -381,7 +381,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	{
 		fElapsedTime_TestSpawn = 0.f;
 
-		m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+		const _float fOffsetY = 5.f;
+		m_pGameSystem->Render_Damage(
+			_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
+			static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
+			static_cast<_uint>(m_pGameInstance->Rand(1.f, 4.999f)),
+			0,
+			3.f
+		);
+
+		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
 	}
 
 
