@@ -67,6 +67,7 @@ public:
 	HRESULT						Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex);
 	HRESULT						Add_MotionBlur_BufferData(const _wstring& strRCSTag);
 	HRESULT						Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot);
+
 private:
 	CGameInstance*				m_pGameInstance = { nullptr };
 	ID3D11Device*				m_pDevice = { nullptr };

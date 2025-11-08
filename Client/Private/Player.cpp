@@ -400,22 +400,37 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 {
 	// 공격과 스킬이 아니라면 호출하지 않습니다.
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
-		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer)
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::PARRY))
 		return;
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
 
+	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
-
-	CCharacter::HIT_DESC Desc{};
-	Desc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
-	Desc.fAttack = pClientDesc.fAttack;
-	Desc.iLayer = iLayer;
-
+	CCharacter::HIT_DESC HitDesc{};
+	CCharacter::PARRY_DESC ParryDesc{};
 	
-	// Hit 판정 전달.
-	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&Desc);
+
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
+	{
+		// 2. Parry 판정
+		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+		ParryDesc.fAttack = pClientDesc.fAttack;
+		ParryDesc.iLayer = iLayer;
+		m_Characters[m_iCurrentCharacterIdx]->Parry_Judge(&ParryDesc);
+	}
+	else
+	{
+		// 3. Hit 판정
+		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+		HitDesc.fAttack = pClientDesc.fAttack;
+		HitDesc.iLayer = iLayer;
+		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&HitDesc);
+	}
+	
+
 }
 
 void CPlayer::Sorting_Target()
@@ -598,9 +613,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = 700.f;
-	//m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	//m_pColliderCom->Set_Desc(m_pTransformCom);
 
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);

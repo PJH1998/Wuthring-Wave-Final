@@ -125,10 +125,10 @@ void CLevel_GamePlay::Ready_Dummy()
 void CLevel_GamePlay::Ready_MonsterTest()
 {
 	CMonsterTest::MONSTERTEST_DESC MobDesc{};
-	MobDesc.eCurLevel = LEVEL::GAMEPLAY;
+	MobDesc.eCurLevel = m_eCurLevel;
 	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
 	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	MobDesc.modelData = make_pair(LEVEL::GAMEPLAY, TEXT("Prototype_Component_Model_FalseSovereign"));
+	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
@@ -139,8 +139,8 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.fAttackDmg = 1.f;
 	MobDesc.fMaxStamina = 10.f;
 	MobDesc.vDetectRange = _float3(35.f, 16.f, 35.f);
-	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
+	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
 
 	//Ggobul

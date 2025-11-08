@@ -9,8 +9,9 @@ class CAugusta final : public CCharacter
 public:
 	enum VOLUME
 	{
-		VOLUME_RISE = 0,
-		VOLUME_HACKDOWN = 1,
+		VOULME_RISE_ZERO = 0,
+		VOLUME_RISE = 1,
+		VOLUME_HACKDOWN = 2,
 		VOLUME_END
 	};
 #pragma region STATE
@@ -77,7 +78,6 @@ private:
 			m_IsClimbSecondStep = false;
 
 			m_eHitType = EAugustaHitType::END;
-
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -137,6 +137,7 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
+	virtual void Parry_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
 	

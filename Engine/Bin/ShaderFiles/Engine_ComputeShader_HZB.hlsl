@@ -28,16 +28,16 @@ void HZB(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTI
     int iSampleY1 = min(iIndexY + 1, InSize.y - 1);
     
     if (InSize.x == 1920)
-        fFinalDepth = max(
-        max(
-        max(InputTexture.Load(int3(iSampleX0, iSampleY0, 0)).y, 
+        fFinalDepth = min(
+        min(
+        min(InputTexture.Load(int3(iSampleX0, iSampleY0, 0)).y, 
         InputTexture.Load(int3(iSampleX1, iSampleY0, 0)).y), 
         InputTexture.Load(int3(iSampleX1, iSampleY1, 0)).y), 
         InputTexture.Load(int3(iSampleX0, iSampleY1, 0)).y);
     else
-        fFinalDepth = max(
-        max(
-        max(InputMipTexture.Load(int3(iSampleX0, iSampleY0, 0)),
+        fFinalDepth = min(
+        min(
+        min(InputMipTexture.Load(int3(iSampleX0, iSampleY0, 0)),
         InputMipTexture.Load(int3(iSampleX1, iSampleY0, 0))),
         InputMipTexture.Load(int3(iSampleX1, iSampleY1, 0))),
         InputMipTexture.Load(int3(iSampleX0, iSampleY1, 0)));

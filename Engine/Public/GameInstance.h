@@ -341,6 +341,7 @@ private:
 	class CRCS_Manager*			m_pRCS_Manager = { nullptr };
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
+	class CVolumetricFog*		m_pVF = { nullptr };
 
 	_uint						m_iNumLevel = {};
 

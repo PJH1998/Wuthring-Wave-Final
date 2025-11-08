@@ -17,10 +17,16 @@ HRESULT CCharacterState::Initialize(class CGameObject* pOwner)
 void CCharacterState::OnEnter(void* pArg)
 {
     CState::OnEnter(pArg);
+
+	m_fRootMotionScale = 1.f; // 시작 시 초기화
+	m_fAnimationScale = 1.f;
 }
 
 void CCharacterState::OnUpdate(_float fTimeDelta)
 {
+	CState::OnUpdate(fTimeDelta);
+
+
 }
 
 void CCharacterState::OnExit()

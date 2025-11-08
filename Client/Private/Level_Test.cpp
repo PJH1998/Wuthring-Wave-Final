@@ -7,6 +7,7 @@
 #include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
+#include "PatternDummy.h"
 #include "GameSystem.h"
 #include "Player.h"
 #include"Trigger_Box.h"
@@ -169,7 +170,7 @@ void CLevel_Test::Ready_MonsterTest()
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = 10.f;
 	MobDesc.fAttackDmg = 1.f;
-	MobDesc.fMaxStamina = 5.f;
+	MobDesc.fMaxStamina = 10.f;
 	MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
@@ -221,6 +222,7 @@ void CLevel_Test::Ready_MonsterTest()
 	//tDesc.pAnimationTag = "Stand1";
 	//tDesc.fHp = 10.f;
 	//tDesc.fAttackDmg = 1.f;
+	//tDesc.fImpluseRate = 7.5f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
 	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
 	//	CRASH("Failed Ready Monster");
@@ -237,9 +239,22 @@ void CLevel_Test::Ready_MonsterTest()
 	//ADesc.fSpeedPerSec = 10.f;
 	//ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
 	//ADesc.pAnimationTag = "Stand2";
+	//ADesc.fHp = 10.f;
+	//ADesc.fAttackDmg = 1.f;
+	//ADesc.fImpluseRate = 9.f;
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
 	//	CRASH("Failed Ready Monster");
+
+	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
+	DummyDesc.eLevel = m_eCurLevel;
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
+	DummyDesc.strInitAnimTag = "Stand1";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))
+		CRASH("Failed Ready Monster");
 }
 
 void CLevel_Test::Ready_Effect()

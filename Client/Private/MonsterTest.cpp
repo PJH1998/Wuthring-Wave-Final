@@ -86,7 +86,10 @@ void CMonsterTest::Update(_float fTimeDelta)
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
-		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
+	{
+		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
+		m_isDist_Interp_Enable = false;
+	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -111,7 +114,7 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 #endif // _DEBUG
 	if(m_fStamina <= 0.f && m_fParalysisAcc >= 5.f)
 		m_isParalysis = true;
-	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
+	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -134,7 +137,7 @@ void CMonsterTest::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
 		m_pModelCom->Render(i);
 	}
@@ -161,7 +164,8 @@ void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactMan
 	{
 
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (false == m_isAggro)
 			m_isAggro = true;
@@ -190,6 +194,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 			m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(Isactive);
 		else if (wstrPartTag == TEXT("WL"))
 			m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(Isactive);
+	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pParryVolume->TriggerActivate(Isactive);
 	}
 	else if (wstrTypeTag == TEXT("Gravity"))
 	{
@@ -260,6 +268,18 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
 		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Scythe"), WorldMatrix, &Desc);
+	}
+	else if (wstrTypeTag == TEXT("Look"))
+	{
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	}
+	else if (wstrTypeTag == TEXT("LookRev"))
+	{
+		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
+	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = true;
 	}
 }
 
@@ -420,8 +440,8 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	vector<COLLISIONLAYER> Targets = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
 	TriggerDesc.eTargetLayers = Targets;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2); // Root
-	TriggerDesc.vExtent = _float3(1.f, 3.f, 1.f);
-	TriggerDesc.vOffsetPos = _float3(0.f, 1.8f, 0.f);
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, -2.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->ParryEnter(iLayer, pOther, Manifold);
@@ -493,7 +513,11 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 {
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
-
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
 	//그로기 특수상황
 	if (m_isParalysis)
 	{
@@ -507,12 +531,6 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
-
-	if (true == m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		m_beHit = false;
-	}
 }
 
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -520,10 +538,28 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
-		if(m_fStamina >= 0.f)
+		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_beHit = true;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		m_beHit = true;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
+#ifdef _DEBUG
+		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
 }
@@ -566,24 +602,17 @@ _bool CMonsterTest::isAttackEnable()
 	if(!m_isDetecting)
 		return false;
 	_bool Result{};
-	//for(_uint i = 0; i < 2; ++i)
+
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK1] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK2] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK3] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK4] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK7] <= 0.f) Result = true;
+	if(m_fAttackAcc[ATK_PATTERN::ATTACK10] <= 0.f) Result = true;
+	//if(Result)
 	//{
-	//	if(m_fAttackAcc[i] <= 0.f)
-	//	{
-	//		Result = true;
-	//		break;
-	//	}
+	//	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
 	//}
-	if(m_fAttackAcc[0] <= 0.f) Result = true;
-	if(m_fAttackAcc[1] <= 0.f) Result = true;
-	if(m_fAttackAcc[2] <= 0.f) Result = true;
-	if(m_fAttackAcc[3] <= 0.f) Result = true;
-	if(m_fAttackAcc[6] <= 0.f) Result = true;
-	if(m_fAttackAcc[9] <= 0.f) Result = true;
-	if(Result)
-	{
-		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
-	}
 	return Result;
 }
 
@@ -597,7 +626,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != 2)
+	if (iIndex != ATK_PATTERN::ATTACK2)
 		return false;
 	//else
 	//	return false;

@@ -22,6 +22,7 @@ public:
 	_bool				IsIn_WorldSpace(_fvector vWorldPosition, _float fRange);						// Volume ?쇰줈 蹂寃?
 	_bool				IsIn_LocalSpace(_fmatrix WorldMatrix, _fvector vLocalPosition, _float fRange);	// Volume ?쇰줈 蹂寃?
 	_bool				IsIn_WorldSpace( const BoundingBox* pBoundingBox );
+
 private:
 	CGameInstance*		m_pGameInstance = { nullptr };
 	_float4				m_vPoints[8] = {};

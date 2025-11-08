@@ -183,6 +183,25 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 #pragma endregion
 
 #pragma region PHYSICS
+const _float CCharacter::Calculate_RootMotionScale()
+{
+	// 타겟이 없으면 원래 비율로
+	if (m_pTargetTransform == nullptr)
+		return 1.f;
+
+	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
+	if (m_fTargetDistance < 3.f)
+		return 0.5f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance < 3.5f)
+		return 0.6f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance < 4.f)
+		return 0.7f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance >= 7.f)
+		return 1.4f;  // 길게: 빠른 접근
+	
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비
+}
+
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 {
 	ASSERT_CRASH(m_pTransformCom);
@@ -309,6 +328,15 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 
 #pragma region STATE
+
+// 내 Velocity 고정.
+void CCharacter::Camera_Shake(_float fIntensity)
+{
+
+	_float3 vDir = {0.5f, 0.1f, -0.1f};
+	
+	m_pGameInstance->OnShake(vDir);
+}
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {

@@ -140,8 +140,6 @@ HRESULT CRendererCS::Debug_Render(const _wstring& strRCS_Name)
 		
 		ImGui::End();
 	}
-
-	
 	return S_OK;
 }
 #endif
@@ -178,7 +176,7 @@ HRESULT CRendererCS::Ready_BindTexture(_uint iWidth, _uint iHeight, DXGI_FORMAT 
 		TextureDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 		TextureDesc.CPUAccessFlags = 0;
 		TextureDesc.MiscFlags = 0;
-		
+
 		if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &m_Texture2Ds[i])))
 			return E_FAIL;
 

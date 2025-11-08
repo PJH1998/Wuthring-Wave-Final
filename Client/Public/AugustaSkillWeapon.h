@@ -7,9 +7,9 @@ class CAugustaSkillWeapon final : public CProp
 public:
 	enum VOLUME
 	{
-		VOLUME_ULTI = 0,
-		VOLUME_SWORD_ATTACK = 1,
-		VOLUME_SWORD_ULTI = 2,
+		VOLUME_ULTI = 0,         // X, Z 길게, Y짧게
+		VOLUME_SWORD_ATTACK = 1, // 기본 Attack과 동일하게(Bayonet) 좀더 크게>
+		VOLUME_SWORD_ULTI = 2,   // 내가 보고 있는 범위 전체?(크게)
 		VOLUME_END
 	};
 
