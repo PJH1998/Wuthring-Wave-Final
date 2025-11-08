@@ -154,6 +154,32 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 
 void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 {
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	m_pAtkVolumes[ATK_SOCKET::HEAD] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD])
+		CRASH(m_pAtkVolume);
+	m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(false);
+
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
+	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
+		CRASH(m_pAtkVolume);
+	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(false);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
@@ -301,7 +327,7 @@ void CCorosaurus::Free()
 
 	for (_uint i = 0; i < ATK_SOCKET::END; i++)
 	{
-		Safe_Release(m_pAtkVolume[i]);
+		Safe_Release(m_pAtkVolumes[i]);
 	}
 
 	Safe_Release(m_pBehaviorTreeCom);
