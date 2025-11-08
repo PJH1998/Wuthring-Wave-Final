@@ -621,7 +621,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != 0)
+	if (iIndex != 1)
 		return false;
 	//else
 	//	return false;
