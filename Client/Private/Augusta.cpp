@@ -738,7 +738,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 15.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 1000.f;
