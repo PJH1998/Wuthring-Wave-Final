@@ -123,6 +123,7 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
 	}
+	m_pRigidBodyCom->IsActivate(isActivate);
 	m_isActivate = isActivate;
 }
 
