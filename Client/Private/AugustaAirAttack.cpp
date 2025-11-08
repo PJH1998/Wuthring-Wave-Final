@@ -170,6 +170,10 @@ void CAugustaAirAttack::Handle_Input()
 
 void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 {
+	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
+
     // 1. 애니메이션 실행.
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 

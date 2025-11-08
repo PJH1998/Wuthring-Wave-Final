@@ -91,6 +91,10 @@ public:
 
 #pragma region PHYSICS
 public:
+	// 거리 판단
+
+	const _float Calculate_RootMotionScale();
+
 	// Hit 판단.
 	virtual void Hit_Judge(void* pArg = nullptr) {};
 	virtual void Parry_Judge(void* pArg = nullptr) {};
@@ -129,8 +133,9 @@ public:
 
 #pragma region STATE
 public:
-	// Camera Action
-	void Play_Action(const _wstring& strActionTag);
+	// Caemra
+	void Camera_Shake(_float fIntensity);
+	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -237,17 +242,18 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+	
+	_float m_fTargetDistance = {}; // 타겟과의 거리
 
 	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+	
 
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
-
-	_float m_fTargetDistance = {}; // Target과의 Distance
 
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
@@ -260,6 +266,7 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};

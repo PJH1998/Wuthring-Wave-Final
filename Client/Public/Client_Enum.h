@@ -14,6 +14,9 @@ namespace Client
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
 	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 	
+	enum class ATTACKRANGE : unsigned int 
+	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
+
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
 		AUGUSTA,

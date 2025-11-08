@@ -84,6 +84,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	if (nullptr != m_pTargetTransform)
 	{
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
+		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 
 		/*
@@ -484,6 +485,14 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	
+	
+	if (var1 == TEXT("CAMERA"))
+	{
+	//	_float fIntensity = stof(var2);
+	//	Camera_Shake(fIntensity); // Shaking 강도.
+		return;
+	}
+
 	_uint iVolumeIdx = stoul(var3);
 
 	/* BAYONET|ATTACK|0*/
@@ -535,7 +544,7 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	else if (var1 == TEXT("AUGUSTA"))
 	{
 		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
-		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr != m_pMainAttackVolume)
+		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
 			return;
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
@@ -729,7 +738,7 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(7.f, 7.f, 7.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
+	TriggerDesc.vExtent = _float3(7.f, 7.f, 15.f); // 전체 다맞추기? => 이상하면 Rise Zero 볼륨 만들기
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 1000.f;
@@ -742,18 +751,21 @@ void CAugusta::Ready_AttackVolumes()
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
+
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_RISE]);
+	m_AttackVolumes[VOLUME_RISE]->TriggerActivate(false);
 
 
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f); // y작게? x, z 평면 크게.
+	TriggerDesc.vExtent = _float3(6.f, 6.f, 2.f); // y작게? x, z 평면 크게.
 
 	m_AttackVolumes[VOLUME_HACKDOWN] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_HACKDOWN]);
+	m_AttackVolumes[VOLUME_HACKDOWN]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_RISE]; // Main Attack Volume 설정.
 	m_pMainAttackVolume->TriggerActivate(false); // 꺼놓기.
