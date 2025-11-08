@@ -1,15 +1,15 @@
-#include "EnginePch.h"
+Ôªø#include "EnginePch.h"
 #include "Sequence_Manager.h"
 
 CSequence_Manager::CSequence_Manager()
 {
 }
 
-void CSequence_Manager::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CSequence_Manager::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	CSequence* pSequence = Find_Sequence(strSequenceTag);
 	if (nullptr != pSequence)
-		CRASH("Sequence ¿ÃπÃ ¿÷¿Ω");
+		CRASH("Sequence Ïù¥ÎØ∏ ÏûàÏùå");
 
 
 	pSequence = CSequence::Create(Items, ItemDatas, pDesc);

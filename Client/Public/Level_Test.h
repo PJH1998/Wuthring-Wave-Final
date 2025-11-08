@@ -24,10 +24,13 @@ private:
 	void			Ready_Effect();
 	void			Ready_Skybox();
 	//void Ready_Layer_Augusta();
+	void			Ready_UI();
 
 #ifdef _DEBUG
 	void			Shader_Gui();
 #endif
+	void			Toggle_HUD();
+
 
 private:
 	LEVEL m_eCurLevel = { LEVEL::TEST };

@@ -88,7 +88,10 @@ void CAugustaGroundSpecial::Handle_Input()
 
 void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
-    
+	// 0. 몬스터와의 거리 계산 (최우선)
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     // Target이 존재한다면? => Auto Target
@@ -118,7 +121,7 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSpecial::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Is_Land();
+    m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
@@ -280,7 +283,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.5f, 80.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);

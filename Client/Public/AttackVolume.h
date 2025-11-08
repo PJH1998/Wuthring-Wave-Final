@@ -16,10 +16,10 @@ public:
 		//Bone type : 뼈 매트릭스, Prop type : 장비 combined 매트릭스
 		const _float4x4*	pSocketMatrix;
 		CTransform*			pParenTransform;
-		
 		SHAPE				eShape;
 		COLLISIONLAYER		eLayer;
-		COLLISIONLAYER		eTargetLayer;
+		COLLISIONLAYER	eTargetLayer;
+		vector<COLLISIONLAYER>	eTargetLayers;
 		_float				fAttackDmg;
 		_float3				vExtent;
 		_float3				vOffsetPos;
@@ -48,6 +48,7 @@ public:
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
 	const _float4x4*	m_pSocketMatrix = { nullptr };
+	const _float4x4*	m_pCombinedMatrix = { nullptr };
 	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
@@ -59,7 +60,7 @@ private:
 	_float4x4		m_OffsetMatrix{};
 #endif
 
-	COLLISIONLAYER m_eTargetLayer{COLLISIONLAYER::NONE};
+	vector<COLLISIONLAYER> m_eTargetLayer;
 	COLLISIONLAYER m_eLayer{COLLISIONLAYER::NONE};
 	COLLISIONLAYER m_eCurrentLayer{COLLISIONLAYER::NONE};
 

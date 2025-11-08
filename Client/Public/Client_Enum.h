@@ -4,7 +4,7 @@ namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
-	enum class COLLISIONLAYER { NONE, MAP, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
+	enum class COLLISIONLAYER { NONE, MAP, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
@@ -14,6 +14,9 @@ namespace Client
 	enum class WEAPONTYPE { ANIM, NONANIM, END};
 	enum class CHARACTER_TRANSITIONTYPE { IDLE, RUN, ATTACK, QTE, END }; // Character 전환시
 	
+	enum class ATTACKRANGE : unsigned int 
+	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
+
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
 		AUGUSTA,
@@ -41,12 +44,12 @@ namespace Client
 	
 
 	enum class UI_AUGUSTA_CONDITION : unsigned int {
-		LB_SP_ATTACK = 1 << 0, // Special Attack (궁 쓸수 있는 상태)
-		LB_RESONANCE = 1 << 1, // 강공
-		E_GRIFFON = 1 << 2, // 그리폰.
-		E_RISE = 1 << 3, // 그리폰 Rise
-		R_SP_ATTACK = 1 << 4, // 최종 궁 이전 상태 사용 가능.
-		R_SP_ATTACKOMNI = 1 << 5, // Special Attack 최종 궁 사용 가능
+		LB_SP_ATTACK = 1 << 0, // Special Attack (궁 쓸수 있는 상태)	// 강화 궁 진입한 상태 (LB도 생김)
+		LB_RESONANCE = 1 << 1, // 강공									// -
+		E_GRIFFON = 1 << 2, // 그리폰.									// 그리폰 사용 가능 상태 (3 0)
+		E_RISE = 1 << 3, // 그리폰 Rise									// 그 다음 (옆에)
+		R_SP_ATTACK = 1 << 4, // 최종 궁 이전 상태 사용 가능.			// -
+		R_SP_ATTACKOMNI = 1 << 5, // Special Attack 최종 궁 사용 가능	// -
 
 		
 		END

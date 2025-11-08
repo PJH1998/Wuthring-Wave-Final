@@ -12,11 +12,6 @@ public:
 	};
 
 public:
-	typedef struct tagEventDesc
-	{
-		_uint iEventID = { EVENT_END };
-		function<void()> callBack;
-	}EVENT_DESC;
 
 
 public:
@@ -25,6 +20,13 @@ public:
 		_float fAttack;
 		CTransform* pTransform = { nullptr };
 	}HIT_DESC;
+
+	typedef struct tagParryDesc{
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+	}PARRY_DESC;
+
 
 
 public:
@@ -89,8 +91,13 @@ public:
 
 #pragma region PHYSICS
 public:
+	// 거리 판단
+
+	const _float Calculate_RootMotionScale();
+
 	// Hit 판단.
 	virtual void Hit_Judge(void* pArg = nullptr) {};
+	virtual void Parry_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -98,7 +105,7 @@ public:
 	// Land Check
 	_float Get_DistanceFromGround(_float fStartYOffset = 0.f);
 	_bool Is_LandCollider(_float3* pNormal = nullptr);
-	_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
+	//_bool Is_Land(_float fRayOffsetY = 0.2f, _float fLandDistance = 0.3f);
 
 	// Gravity
 	void Set_Gravity(_bool IsGravity);
@@ -126,8 +133,9 @@ public:
 
 #pragma region STATE
 public:
-	// Camera Action
-	void Play_Action(const _wstring& strActionTag);
+	// Caemra
+	void Camera_Shake(_float fIntensity);
+	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
@@ -138,6 +146,8 @@ public:
 
 	/* Parts */
 	virtual void PartActivate(_uint iPartType, _bool IsActive) {};
+	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) {};
+	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) {};
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false) {};
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) {}; 
 
@@ -216,6 +226,12 @@ public:
 	void Sync_UI(); // UI
 #pragma endregion
 
+#pragma region NOTIFY
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
+	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
+	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
+#pragma endregion
 
 	
 
@@ -226,19 +242,22 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+	
+	_float m_fTargetDistance = {}; // 타겟과의 거리
 
 	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+	
 
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
 
-
 	//CHARACTER_STAT m_Stats = {};
 	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	
 
 
 protected:
@@ -247,7 +266,13 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+
+
 	HIT_DESC m_PendingHitDesc = {};
+	PARRY_DESC m_PendingParryDesc = {};
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	
 	
 

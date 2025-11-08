@@ -25,7 +25,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	ShadowMapDesc.iSectorSizeX = 2048;
 	ShadowMapDesc.iSectorSizeZ = 2048;
 
-	ShadowMapDesc.vCenterPos = _float3(2200.f, 150.f, 1200.f);
+	ShadowMapDesc.vCenterPos = _float3(2200.f, 60.f, 1200.f);
 	ShadowMapDesc.vExtents = _float3(160.f, 300.f, 160.f);
 	ShadowMapDesc.vLightDir = _float3(0.f, -1.f, 0.5f);
 
@@ -46,22 +46,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_ShadowNF();
 
-	// UI
-	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
-	const _wstring strLayertag_UI = L"Layer_Custom_UI";
-	const _wstring strPrototypeTag_UI[] = {
-		 L"Prototype_GameObject_Custom_UI_Container_HUD"
-	};
-	for (auto& strPrototypeTag : strPrototypeTag_UI)
-	{
-		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
-			CRASH("Failed to Add RootUI to UI_Manager.");
-		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
-			CRASH("Failed to Add RootUI to Object_Manager.");
-	}
-	// _UI
 
+	Ready_UI();
 	Ready_Layer_Player();
 	Ready_MonsterTest();
 	// Test
@@ -89,7 +75,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 void CLevel_GamePlay::Render()
 {
 #ifdef _DEBUG
-//	Shader_Gui();
+	Shader_Gui();
 #endif
 }
 
@@ -139,10 +125,10 @@ void CLevel_GamePlay::Ready_Dummy()
 void CLevel_GamePlay::Ready_MonsterTest()
 {
 	CMonsterTest::MONSTERTEST_DESC MobDesc{};
-	MobDesc.eCurLevel = LEVEL::GAMEPLAY;
+	MobDesc.eCurLevel = m_eCurLevel;
 	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
 	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	MobDesc.modelData = make_pair(LEVEL::GAMEPLAY, TEXT("Prototype_Component_Model_FalseSovereign"));
+	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
@@ -151,8 +137,10 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = 100.f;
 	MobDesc.fAttackDmg = 1.f;
-	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_MonsterTest"),
-		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_MonsterTest"), &MobDesc)))
+	MobDesc.fMaxStamina = 10.f;
+	MobDesc.vDetectRange = _float3(35.f, 16.f, 35.f);
+	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
 
 	//Ggobul
@@ -206,6 +194,27 @@ void CLevel_GamePlay::Ready_Skybox()
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
 		CRASH("Skybox");
 }
+
+void CLevel_GamePlay::Ready_UI()
+{
+	// UI
+	const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	const _wstring strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_HUD"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+
+	// _UI
+}
+
 #ifdef _DEBUG
 void CLevel_GamePlay::Shader_Gui()
 {

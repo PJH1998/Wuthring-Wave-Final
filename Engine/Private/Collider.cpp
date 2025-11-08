@@ -34,9 +34,8 @@ _bool CCollider::IsLand(_float3* pNormalOut)
 	if (nullptr != pNormalOut)
 		*pNormalOut = StoreFloat3(m_pCharacterVirtual->GetGroundNormal());
 
-	
-
 	return m_pCharacterVirtual->IsSupported();
+	//return m_isLand;
 }
 
 void CCollider::Set_Offset(const _float3 vOffset)
@@ -72,21 +71,21 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	// Create Shape
 	using namespace JPH;
-	
+	m_fRayOffset = pDesc->fRayOffset;
 	m_pShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
 	ASSERT_CRASH(m_pShape);
 
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting = {};
-	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(120.f);			// 허용 경사 각도
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(100.f);
+	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);						// Shape Offset
-	VirtualSetting.mMaxStrength = 10.f;											// 다른 Body를 밀 수 있는 최대 힘
-	VirtualSetting.mCharacterPadding = 0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
-	VirtualSetting.mPenetrationRecoverySpeed = 0.f;							// 겹쳤을 때 복원 속도
-	VirtualSetting.mPredictiveContactDistance = 0.02f;							// 미리 충돌 감지하는 범위
+	VirtualSetting.mMaxStrength = 8.f;											// 다른 Body를 밀 수 있는 최대 힘
+	VirtualSetting.mCharacterPadding = 0.015f; //0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
+	VirtualSetting.mPenetrationRecoverySpeed = 6.0f; //0.f;							// 겹쳤을 때 복원 속도
+	VirtualSetting.mPredictiveContactDistance = 0.08f; //0.02f;							// 미리 충돌 감지하는 범위
 	VirtualSetting.mEnhancedInternalEdgeRemoval = true;					// 각진 부분 부드럽게
 	
 	VirtualSetting.mInnerBodyShape = m_pShape;
@@ -104,11 +103,23 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 void CCollider::Update(const _fvector& vVelocity)
 {
+	// Ray Cast Ground Check
+	_vector vPos = StoreVector3(m_pCharacterVirtual->GetPosition()) + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
+	_vector vEndPos = vPos + XMVectorSet(0.f, m_fRayOffset, 0.f, 0.f);
+
+	_float4 vOut = {};
+	m_isLand = m_pGameInstance->Ray_Cast(vPos, vEndPos, &vOut);
+
 	Vec3 Velocity = LoadVec3(vVelocity);
-	if (false == m_pCharacterVirtual->IsSupported() && true == m_isGravity)
+	if (false == m_isLand && true == m_isGravity)
 		Velocity += XMVectorSet(0.f, -9.81f, 0.f, 0.f) * 0.7f;
 	else
 		Slide(Velocity);
+
+	// Ground Check Error
+	CharacterVirtual::EGroundState GS = m_pCharacterVirtual->GetGroundState();
+	if (false == m_isLand && CharacterVirtual::EGroundState::OnGround == GS)
+		Velocity += XMVectorSet(0.f, -0.01f, 0.f, 0.f);
 
 	m_pCharacterVirtual->SetLinearVelocity(Velocity);
 	m_pGameInstance->Add_Virtual(m_pCharacterVirtual, m_iCollisionLayer);

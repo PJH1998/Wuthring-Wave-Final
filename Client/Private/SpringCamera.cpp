@@ -104,6 +104,13 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// 2. Ray Cast => 벽 충돌
 	if(CAMERA_STATE::TARGET == m_eCameraState)
 		Check_Ray();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
+		m_pGameInstance->OnShake(_float3(-0.5f, 0.1f, 0.f));
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
+		m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
+
+	Shaking(fTimeDelta);
 }
 
 void CSpringCamera::Late_Update(_float fTimeDelta)

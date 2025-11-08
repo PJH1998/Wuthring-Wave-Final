@@ -5,6 +5,15 @@ NS_BEGIN(Client)
 class CAugustaBayonet final : public CProp
 {
 public:
+	enum VOLUME
+	{
+		VOLUME_ATTACK = 0,
+		VOLUME_STRONG_ATTACK = 1,
+		VOLUME_ULTI = 2,
+		VOLUME_END
+	};
+
+public:
 	typedef struct tagAugustaBayonetDesc : public CProp::PROP_DESC {
 		
 	} AUGUSTA_BAYONET_DESC;
@@ -22,16 +31,17 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+public:
 	virtual void Activate(_bool IsActivate) override;
+	virtual void Change_Volume(_uint iVolumeIdx) override;
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
 
+	// Owner의 게이지 채우기?
 	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+
 
 private:
 	vector<_uint> m_ShaderPaths = {};
-
-
-private:
-	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 
 
 private:

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 #include "Sequence.h"
@@ -12,7 +12,7 @@ private:
 	virtual ~CSequence_Manager() = default;
 
 public:
-	void		Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void		Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
 	void		Play_Sequence(const _wstring& strSequenceTag);
 
 public:

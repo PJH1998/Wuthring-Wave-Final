@@ -17,6 +17,9 @@ public:
 	{
 		_float3 vInitPosition;
 		const _char* pAnimationTag;
+		_float fHp;
+		_float fAttackDmg;
+		_float fImpluseRate;
 	}ELECTROPREDATOR_DESC;
 
 private:
@@ -35,8 +38,9 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive);
-	virtual void Effect_Active(const _wstring& wStrEffectTag);
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
+	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
@@ -44,6 +48,7 @@ private:
 
 	queue<_float3>			m_PatrolPoints;
 
+#pragma region STATE_VARIABLE
 	_uint					m_iState{};
 	_bool					m_isAggro{};
 	_bool					m_isDetecting{};
@@ -56,22 +61,38 @@ private:
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 
-	_bool					m_isAnimationFinished{};
 	_bool					m_isBlocked{};
 	_bool					m_beHit{};
 	_float					m_fIdleDuration{};
 	_float					m_fIdleAcc{};
+	_bool					m_AirTrig{};
+	_float					m_fAirAcc{};
+	_bool					m_isPushed{};
+	_bool					m_isAnimationFinished{};
+#pragma endregion
 
+#pragma region STATUS
 	_int					m_iHP{};
 	_float					m_fAttackDmg{};
+	_float					m_fImpluseRate{};
+	_float2					m_vDistanceRange{};
+#pragma endregion
 
+#pragma region PHYSICS
+	_float3					m_vBeHit_Normal{};
+	_bool					m_isTurnLerp{};
+	CALLBACK_CLIENT			m_tCallDesc{};
+#pragma endregion
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(ELECTROPREDATOR_DESC* pDesc);
 	void						Ready_PartObjects(ELECTROPREDATOR_DESC* pDesc);
 
 	void						Reset_Condition(_float fTimeDelta);
+	void						After_Condition(_float fTimeDelta);
 	void						Calculate_PosAndDir();
+	void						TurnFix();
+	void						TurnLerp(_bool isActive);
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);

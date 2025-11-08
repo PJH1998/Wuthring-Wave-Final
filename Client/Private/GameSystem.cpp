@@ -145,10 +145,10 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
-HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
-{
-	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
-}
+//HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
+//{
+//	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
+//}
 #pragma region PLAYER STATUS
 
 #pragma endregion

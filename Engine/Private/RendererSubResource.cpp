@@ -20,7 +20,7 @@ HRESULT CRendererSubResource::Initialize()
     //SSAO
     m_iNumKernel = 16;
     m_fRadius = 1.f;
-    m_fMaxDistance = 1.f;
+    m_fMaxDistance = 0.5f;
     m_fOutDistance = 500.f;
     
     // SSAO_Blur
@@ -429,9 +429,12 @@ void CRendererSubResource::Free()
     Safe_Release(m_pContext);
 
     Safe_Release(m_pRampTexture);
+
     Safe_Release(m_pLUT_Texture);
     Safe_Release(m_pLUT_SRV);
-    Safe_Release(m_pNoiseTexture);
+    
+	Safe_Release(m_pNoiseTexture);
+
     Safe_Release(m_pFogNoiseTexture);
     Safe_Release(m_pHighCloudTexture);
 

@@ -16,12 +16,28 @@ public:
 	virtual		void				Priority_Update(_float fTimeDelta) override;
 	virtual		void				Update(_float fTimeDelta) override;
 	virtual		void				Late_Update(_float fTimeDelta) override;
-	virtual		void				Render() override;
-	virtual		void				Render_Shadow() override;
-	virtual		void				Render_OutLine() override;
 
 	// Pooling Spawn CallBack
 	virtual		void				Reset(const _fmatrix& WorldMatrix, void* pArg) override;
+
+private:
+	vector<SCENE_CAMERA_FRAME>		m_Frames;
+	_int											m_iFrameIndex = { 0 };
+	_float											m_fTrackPosition = {};
+	_float											m_fTrackPerSec = { 10.f };
+
+	_float											m_fStartFrame = {};
+	_float											m_fEndFrame = {};
+
+	_float											m_fVelocity = {};
+	_float											m_fSpeed = {};
+
+	_float											m_fRatio = {};
+
+private:
+	void							Default_SetUp();
+	void							Lerp_Quat();
+	void							Spline();
 
 public:
 	static CSQ_Camera_Edit*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

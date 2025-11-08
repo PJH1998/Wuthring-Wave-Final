@@ -2,6 +2,7 @@
 #include "AugustaGroundAttack.h"
 #include "Augusta.h"
 #include "StateMachine.h"
+#include "AugustaBayonet.h"
 
 HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
 {
@@ -14,38 +15,36 @@ HRESULT CAugustaGroundAttack::Initialize(class CGameObject* pOwner)
     // 애니메이션 리스트 셋업.
     SetUp_Animations();
 
-    
-
     return S_OK;
 }
 
 
 void CAugustaGroundAttack::OnEnter(void* pArg)
 {
-    CGroundState::OnEnter(pArg);
+	CGroundState::OnEnter(pArg);
 
-    // 1. 복사본 Context 받아오기
-    const auto context = m_pAugusta->TakeStateContext();
+	// 1. 복사본 Context 받아오기
+	const auto context = m_pAugusta->TakeStateContext();
 
-    // 2. 복사본에서 필요한 값 읽기
-    EAugustaAttackType eAttackType = context.m_eAttackType;
+	// 2. 복사본에서 필요한 값 읽기
+	EAugustaAttackType eAttackType = context.m_eAttackType;
 
-    // 3. 애니메이션 세팅.
-    m_iCurrentAnimIdx = ENUM_CLASS(eAttackType);
+	// 3. 애니메이션 세팅.
+	m_iCurrentAnimIdx = ENUM_CLASS(eAttackType);
 
-    // 4. Attack 상태 초기화
-    State_Reset();
+	// 4. Attack 상태 초기화
+	State_Reset();
 
 
-    // 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
-    m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+	// 5. 무기 상태 Activate => 현재 애니메이션 상태에 따라 Parts가 달라질 수 있음(Attack은)
+	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
-    _string strBoneName = "WeaponProp02";
-    m_pAugusta->PartActivate(m_iPartType, true);
-    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
-    m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	_string strBoneName = "WeaponProp02";
+	//m_pAugusta->Part_VolumeChange(m_iPartType, CAugustaBayonet::VOLUME::VOLUME_ATTACK); // 공격 판정 Volume 변경
+	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
-
 
 }
 
@@ -79,19 +78,33 @@ void CAugustaGroundAttack::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false); 
 }
 
+_bool CAugustaGroundAttack::Hit_Judge()
+{
+	_bool IsHit = false;
+	const CCharacter::HIT_DESC* pDesc = m_pAugusta->GetPendingHitDesc();
+
+	if (nullptr == pDesc)
+		return false;
+
+	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(m_pAugusta->GetPendingHitDesc()->iLayer);
+	if (eLayer == COLLISIONLAYER::ENEMY_SKILL)
+		IsHit = true;
+
+	return IsHit;
+}
+
 void CAugustaGroundAttack::Handle_Input()
 {
-    
+	
+
+
     EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
+
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
-
 	m_States[HEAVY_ATTACK_PENDING] = (eAttackType == EAugustaAttackType::ATTACK01)
 		&& (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS));
-		
-
-
 
     // 입력키 체크
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
@@ -111,13 +124,24 @@ void CAugustaGroundAttack::Handle_Input()
         if (m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB), KEYSTATE::PRESS))
             m_IsNextAttackInput = true;
     }
+
+	// 공격시에 Hit 받았을때는 좀더 판단을 빡빡하게
+	if (m_pAugusta->Is_Hit())
+	{
+		m_States[HIT] = Hit_Judge();
+	}
+	
     
 }
 
 void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
+	// 0. 몬스터와의 거리 계산 (최우선)
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+
     // 1. 현재 애니메이션 재생
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
     // Target이 존재한다면? => Auto Target
     m_pAugusta->Rotate_Target();
@@ -153,6 +177,11 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
+	if (m_States[HIT])
+	{
+
+	}
+
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
     {

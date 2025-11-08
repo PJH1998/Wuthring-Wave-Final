@@ -10,7 +10,6 @@ public:
 		_float3 vCenter;
 		_float3 vRange;
 		_float2 vSize;
-
 	}INSTANCE_DESC;
 
 protected:

@@ -86,7 +86,7 @@ void CAugustaHit::Enter_Hit()
 	m_pAugusta->Rotate_HitTarget(pDesc->pTransform);
 
 	// 4. 땅 판정.
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
 	// 5. 애니메이션 선정.
 	if (!m_States[LAND])
@@ -95,11 +95,19 @@ void CAugustaHit::Enter_Hit()
 	}
 	else
 	{
-		if (IsSkill)
+		switch (eLayer)
+		{
+		case COLLISIONLAYER::ENEMY_ATTACK:
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_S_L);
+			break;
+		case COLLISIONLAYER::ENEMY_HARDATTACK:
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_B_L);
+			break;
+		case COLLISIONLAYER::ENEMY_SKILL:
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL);
+			break;
+		}
 	}
-
-	
 }
 
 void CAugustaHit::Handle_Input()
@@ -117,7 +125,7 @@ void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
 {
-	m_States[LAND] = m_pAugusta->Is_Land(0.2f, 0.5f);
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 }

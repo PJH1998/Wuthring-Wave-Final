@@ -275,6 +275,49 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Prototype(const INSTANCE_DESC* pDes
 	return S_OK;
 }
 
+//HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
+//{
+//	if (FAILED(__super::Initialize_Clone(pArg)))
+//		return E_FAIL;
+//
+//	D3D11_BUFFER_DESC UAV_BufferDesc = {};
+//	UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+//	UAV_BufferDesc.ByteWidth = UAV_BufferDesc.StructureByteStride * m_iNumInstance;
+//	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						
+//	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			
+//	UAV_BufferDesc.CPUAccessFlags = 0;			
+//	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;	
+//
+//
+//	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
+//	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
+//
+//	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, &UAVInitialDesc, &m_pUABuffer)))
+//		return E_FAIL;
+//
+//	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
+//	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
+//	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+//	UAVDesc.Buffer.FirstElement = 0;
+//	UAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
+//	UAVDesc.Buffer.NumElements = UAV_BufferDesc.ByteWidth / UAV_BufferDesc.StructureByteStride;
+//
+//	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
+//		return E_FAIL;
+//
+//	// ==디버깅 //
+//	D3D11_BUFFER_DESC bufferDesc = {};
+//	bufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
+//	bufferDesc.ByteWidth = sizeof(VTXINSTANCE_PARTICLE) * m_iNumInstance;
+//	bufferDesc.Usage = D3D11_USAGE_STAGING;
+//	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+//
+//	if (FAILED(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_pDebugBuffer)))
+//		return E_FAIL;
+//
+//	return S_OK;
+//}
+
 HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
@@ -283,26 +326,16 @@ HRESULT CVIBuffer_Point_Instance::Initialize_Clone(void* pArg)
 	D3D11_BUFFER_DESC UAV_BufferDesc = {};
 	UAV_BufferDesc.StructureByteStride = sizeof(VTXINSTANCE_PARTICLE);
 	UAV_BufferDesc.ByteWidth = UAV_BufferDesc.StructureByteStride * m_iNumInstance;
-	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;						
-	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;			
-	UAV_BufferDesc.CPUAccessFlags = 0;			
-	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;	
-
+	UAV_BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	UAV_BufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	UAV_BufferDesc.CPUAccessFlags = 0;
+	UAV_BufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	D3D11_SUBRESOURCE_DATA UAVInitialDesc = {};
 	UAVInitialDesc.pSysMem = m_pVBInstanceVertices;
-
-	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, &UAVInitialDesc, &m_pUABuffer)))
+	if (FAILED(m_pDevice->CreateBuffer(&UAV_BufferDesc, nullptr, &m_pUABuffer)))
 		return E_FAIL;
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
-	UAVDesc.Format = DXGI_FORMAT_UNKNOWN;
-	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	UAVDesc.Buffer.FirstElement = 0;
-	UAVDesc.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_APPEND;
-	UAVDesc.Buffer.NumElements = UAV_BufferDesc.ByteWidth / UAV_BufferDesc.StructureByteStride;
-
-	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, &UAVDesc, &m_pUAV)))
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(m_pUABuffer, nullptr, &m_pUAV)))
 		return E_FAIL;
 
 	// ==디버깅 //

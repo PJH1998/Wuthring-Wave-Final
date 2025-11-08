@@ -5,6 +5,7 @@
 #include "GameSystem.h"
 #include "Collider.h"
 #include "Ability.h"
+#include "AttackVolume.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -168,20 +169,39 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 }
 
 // fDistanceGround (Ray 쏴서 땅에 닿은 거리가 매개변수로 받은 거리보다 크다면 => 땅이아니다)
-_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
-{
-	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
-
-	if (fDistanceToGround > fLandDistance)
-		return false;
-
-	return true;
-}
+//_bool CCharacter::Is_Land(_float fRayOffsetY, _float fLandDistance)
+//{
+//	_float fDistanceToGround = Get_DistanceFromGround(fRayOffsetY); // 중앙 기준 다섯방향 Ray 발사.
+//
+//	if (fDistanceToGround > fLandDistance)
+//		return false;
+//
+//	return true;
+//}
 
 
 #pragma endregion
 
 #pragma region PHYSICS
+const _float CCharacter::Calculate_RootMotionScale()
+{
+	// 타겟이 없으면 원래 비율로
+	if (m_pTargetTransform == nullptr)
+		return 1.f;
+
+	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
+	if (m_fTargetDistance < 3.f)
+		return 0.5f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance < 3.5f)
+		return 0.6f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance < 4.f)
+		return 0.7f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance >= 7.f)
+		return 1.4f;  // 길게: 빠른 접근
+	
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비
+}
+
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 {
 	ASSERT_CRASH(m_pTransformCom);
@@ -308,6 +328,15 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 
 #pragma region STATE
+
+// 내 Velocity 고정.
+void CCharacter::Camera_Shake(_float fIntensity)
+{
+
+	_float3 vDir = {0.5f, 0.1f, -0.1f};
+	
+	m_pGameInstance->OnShake(vDir);
+}
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
@@ -690,5 +719,14 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+		
+
+	m_AttackVolumes.clear();
 	
 }

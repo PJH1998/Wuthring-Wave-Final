@@ -219,6 +219,7 @@ void CPlayer::Player_KeyInput()
 		}
 	}
 
+
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost();
@@ -228,7 +229,6 @@ void CPlayer::Player_KeyInput()
 		m_Characters[m_iCurrentCharacterIdx]->Debug_FullCost(true);
 	}
 
-#ifdef _DEBUG
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D6), KEYSTATE::UP))
 	{
 		m_Characters[m_iCurrentCharacterIdx]->Print_Cost();
@@ -252,7 +252,7 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(-10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
@@ -261,7 +261,6 @@ void CPlayer::Player_KeyInput()
 	}
 
 	
-#endif // _DEBUGs
 }
 
 void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
@@ -275,6 +274,13 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
 
     switch (eCharacter)
     {
+	case CHARACTERTYPE::ROVER:
+		// Player Ensemble Skill
+		pCharacter->Change_State(
+			ENUM_CLASS(EStateCategory::GROUND),
+			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
+		break;
+
     case CHARACTERTYPE::AUGUSTA:
         pCharacter->Change_State(
             ENUM_CLASS(EStateCategory::GROUND),
@@ -285,12 +291,7 @@ void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
         // Galbrena Ensemble Skill
         break;
 
-    case CHARACTERTYPE::ROVER:
-        // Player Ensemble Skill
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
+
     }
 }
 
@@ -399,22 +400,37 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 {
 	// 공격과 스킬이 아니라면 호출하지 않습니다.
 	if (ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK) != iLayer && 
-		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer)
+		ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL) != iLayer && 
+		ENUM_CLASS(COLLISIONLAYER::PARRY))
 		return;
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
 
+	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
-
-	CCharacter::HIT_DESC Desc{};
-	Desc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
-	Desc.fAttack = pClientDesc.fAttack;
-	Desc.iLayer = iLayer;
-
+	CCharacter::HIT_DESC HitDesc{};
+	CCharacter::PARRY_DESC ParryDesc{};
 	
-	// Hit 판정 전달.
-	m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&Desc);
+
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PARRY))
+	{
+		// 2. Parry 판정
+		ParryDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+		ParryDesc.fAttack = pClientDesc.fAttack;
+		ParryDesc.iLayer = iLayer;
+		m_Characters[m_iCurrentCharacterIdx]->Parry_Judge(&ParryDesc);
+	}
+	else
+	{
+		// 3. Hit 판정
+		HitDesc.pTransform = static_cast<CTransform*>(pClientDesc.pTransform);
+		HitDesc.fAttack = pClientDesc.fAttack;
+		HitDesc.iLayer = iLayer;
+		m_Characters[m_iCurrentCharacterIdx]->Hit_Judge(&HitDesc);
+	}
+	
+
 }
 
 void CPlayer::Sorting_Target()
@@ -481,6 +497,10 @@ void CPlayer::GUI_Teleport()
 		m_pTransformCom->Set_State(STATE::POSITION, vChagePos);
 		m_pColliderCom->Set_Position(vChagePos);
 	}
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_char szPos[MAX_PATH] = {};
+	sprintf_s(szPos, "X : %.2f / Y : %.2f / Z : %.2f", vPos.m128_f32[0], vPos.m128_f32[1], vPos.m128_f32[2]);
+	ImGui::Text(szPos);
 
 	ImGui::End();
 }
@@ -500,35 +520,39 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
     {
         switch (i)
         {
-        case CHARACTERTYPE::AUGUSTA:
-        {
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
+		case CHARACTERTYPE::ROVER:
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+			break;
+		case CHARACTERTYPE::AUGUSTA:
+		{
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::AUGUSTA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
 
-        }
-            break;
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
+
+		}
+		break;
         case CHARACTERTYPE::GALBRENA:
+		{
+			
+		}
             break;
-        case CHARACTERTYPE::ROVER:
-            CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::ROVER].CharacterDesc;
-            CharacterDesc.pOwner = this;
-            pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
-                ENUM_CLASS(m_eCurLevel),
-                pDesc->PlayerSpecs[i].strActorTag,
-                PROTOTYPE::GAMEOBJECT,
-                &CharacterDesc));
-
-            ASSERT_CRASH(pPlayer);
-            m_Characters[i] = pPlayer;
-            break;
+	
         default:
             break;
         }
@@ -589,9 +613,9 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = 700.f;
-	//m_pColliderCom->Set_Desc(&m_CallBack);
+	m_pColliderCom->Set_Desc(&m_CallBack);
 
-	m_pColliderCom->Set_Desc(m_pTransformCom);
+	//m_pColliderCom->Set_Desc(m_pTransformCom);
 
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);

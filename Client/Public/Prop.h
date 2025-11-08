@@ -34,7 +34,9 @@ public:
 
 public:
 	virtual void Activate(_bool IsActive);
-
+	virtual void Change_Volume(_uint iVolumeIdx) {};
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) {};
+	virtual void Volume_Activate(_bool IsActive);
 public:
 	_bool Is_AnimationEnd() { return m_IsAnimationEnd; }
 	virtual void Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true, _bool IsLoop = false); 
@@ -56,8 +58,9 @@ protected:
 	class CModel* m_pModelCom = { nullptr };
 	class CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CTransform* m_pParentTransform = { nullptr };
-
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };
+	class CGameObject* m_pOwner = { nullptr };
+
 	WEAPONTYPE m_eWeaponType = { WEAPONTYPE::END };
 	
 	_float3 m_vRotationOffset = {};
@@ -66,6 +69,10 @@ protected:
 	_float m_fTrackPosition = {};
 	_bool m_IsAnimationEnd = { false };
 	_string m_strCurrentAnimName = {};
+
+	_uint m_iVolumeIdx = {};
+	vector<class CAttackVolume*> m_AttackVolumes;
+	
 
 protected:
 	void Bind_Resources();

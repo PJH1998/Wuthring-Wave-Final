@@ -41,6 +41,7 @@ protected:
     _float m_fTrackPosition = {};
     _bool m_IsAnimationEnd = { false };
     _uint m_iCurrentAnimIdx = {};
+	
     // 현재 재생 중인 애니메이션
     map<_uint, ANIM_DATA> m_Animations;  // 이 State가 사용하는 애니메이션들
 

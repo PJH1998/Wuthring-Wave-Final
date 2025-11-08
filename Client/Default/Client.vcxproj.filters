@@ -235,6 +235,9 @@
     <Filter Include="03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe">
       <UniqueIdentifier>{fb294f3f-0f7c-4162-8fcc-f57d572d10c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. GameSystem\PlayerStatus">
+      <UniqueIdentifier>{dc0998f1-d9ed-4465-91f2-b7faeceee93b}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Monster\Corrosaurus">
       <UniqueIdentifier>{c59da4dd-7fea-4db6-aa1b-7da52d69e092}</UniqueIdentifier>
     </Filter>
@@ -549,7 +552,9 @@
     <ClInclude Include="..\Public\FS_Scythe.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\PlayerStatus.h" />
+    <ClInclude Include="..\Public\PlayerStatus.h">
+      <Filter>01. GameSystem\PlayerStatus</Filter>
+    </ClInclude>
     <ClInclude Include="..\public\Corosaurus.h">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
     </ClInclude>
@@ -662,9 +667,6 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Text.cpp">
       <Filter>03. GameObject\UI\_Parents\_SubParents</Filter>
-    </ClCompile>
-    <ClCompile Include="..\private\Custom_UI.cpp">
-      <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp">
       <Filter>02. Level\Loader</Filter>
@@ -847,6 +849,9 @@
     <ClCompile Include="..\Private\FS_Scythe.cpp">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\PlayerStatus.cpp">
+      <Filter>01. GameSystem\PlayerStatus</Filter>
+    </ClCompile>
     <ClCompile Include="..\private\Corosaurus.cpp">
       <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
     </ClCompile>
@@ -869,6 +874,9 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />
+    <ClCompile Include="..\private\Custom_UI.cpp">
+      <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
