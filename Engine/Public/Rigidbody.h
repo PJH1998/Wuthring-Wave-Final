@@ -47,6 +47,7 @@ private:
 	virtual ~CRigidbody() = default;
 
 public:
+	_uint							Get_ID() { return static_cast<_uint>(m_BodyID.GetIndex()); }
 	void							Set_Position(const _fvector& vPos);
 	// Data (void*)
 	void							Set_Desc(void* pData) { m_tCollisionData.pDesc = pData; }

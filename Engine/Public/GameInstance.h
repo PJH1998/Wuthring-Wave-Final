@@ -266,6 +266,11 @@ public:
 #endif
 #pragma endregion
 
+#pragma region HZB
+	void					Occlusion_Culling(vector<class CStaticObject*>& Objects);
+#pragma endregion
+
+
 #pragma region UI_MANAGER
 public:
 	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);

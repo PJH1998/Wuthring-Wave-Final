@@ -399,6 +399,7 @@ void CRenderer::Render_Static()
 		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+		m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
 	}
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));

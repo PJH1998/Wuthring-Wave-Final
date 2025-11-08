@@ -828,6 +828,13 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 #endif
 #pragma endregion
 
+#pragma region HZB
+void CGameInstance::Occlusion_Culling(vector<class CStaticObject*>& Objects)
+{
+	m_pHZB->Occlusion_Culling(Objects);
+}
+#pragma endregion
+
 #pragma region UI_MANAGER
 HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI)
 {
