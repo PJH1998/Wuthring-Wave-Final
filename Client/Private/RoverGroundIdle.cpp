@@ -73,6 +73,10 @@ void CRoverGroundIdle::OnExit()
 
 void CRoverGroundIdle::Handle_Input()
 {
+	m_States[HIT] = m_pRover->Is_Hit();
+	if (m_States[HIT])
+		return;
+
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
@@ -137,6 +141,11 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     _uint iKeyInput = {};
 
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
 
 	if (!m_States[LAND])
 	{

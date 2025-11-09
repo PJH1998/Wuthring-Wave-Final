@@ -1,26 +1,23 @@
 ﻿#pragma once
-#include "AirState.h"
+#include "HitState.h"
 
 NS_BEGIN(Client)
 
-// Jump State - Jump 관련 모든 애니메이션 관리
-class CRoverAirJump final : public CAirState
+class CRoverHit final : public CHitState
 {
 private:
-    enum JUMPSTATE
+    enum HITSTATE
     {
-        JUMP = 0,
+        MOVE = 0,
+        JUMP,
+        FALL,
         LAND,
-        MOVE,
-        DOUBLE_JUMP,
-        AIR_ATTACK,
-		HIT,
         END
     };
 
 private:
-    explicit CRoverAirJump() = default;
-    virtual ~CRoverAirJump() = default;
+    explicit CRoverHit() = default;
+    virtual ~CRoverHit() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -30,20 +27,24 @@ public:
 
 private:
     class CRover* m_pRover = { nullptr };
+    _bool m_States[HITSTATE::END] = {};
 
-    _bool m_States[JUMPSTATE::END] = {};
+private:
+	// Enter 초기에 작업해야할 것들 정의하기.
+	void Enter_Hit();
 
 private:
     virtual void Handle_Input() override;
-    void Update_JumpAnimation(_float fTimeDelta);
-
+    void Update_HitAnimation(_float fTimeDelta);
     void Check_Physics(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
+
     void Setup_Animations();
+    void State_Reset();
 
 
 public:
-    static CRoverAirJump* Create(class CGameObject* pOwner);
+    static CRoverHit* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

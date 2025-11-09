@@ -17,6 +17,9 @@
 #include "RoverAirJump.h"
 #include "RoverAirAttack.h"
 
+// Hit 카테고리 State
+#include "RoverHit.h"
+
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
 {
@@ -45,5 +48,5 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::CLIMB), ENUM_CLASS(ERoverClimbState::CLIMB_EXIT), CRoverClimbExit::Create(pCharacter));
 	//
 	//// Hit 하위 State
-	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT), CRoverHit::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT), CRoverHit::Create(pCharacter));
 }

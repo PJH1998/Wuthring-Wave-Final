@@ -68,6 +68,10 @@ void CRoverAirFall::Handle_Input()
     m_eDir = m_pRover->Calculate_Direction(); // 방향 계산.
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
 	m_States[AIR_ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	m_States[HIT] = m_pRover->Is_Hit();
+	if (m_States[HIT])
+		return;
 }
 
 void CRoverAirFall::Update_FallAnimation(_float fTimeDelta)
@@ -87,6 +91,13 @@ void CRoverAirFall::Check_Physics(_float fTimeDelta)
 
 void CRoverAirFall::Check_StateTransition(_float fTimeDelta)
 {
+
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
+
 	if (m_States[AIR_ATTACK])
 	{
 		m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_START;

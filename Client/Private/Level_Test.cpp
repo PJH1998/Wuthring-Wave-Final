@@ -158,23 +158,23 @@ void CLevel_Test::Ready_MonsterTest()
 {
 	// False Sovereign
     CMonsterTest::MONSTERTEST_DESC MobDesc{};
-    MobDesc.eCurLevel = m_eCurLevel;
-    MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-    MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-    MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
-    MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-    MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
-    MobDesc.fSpeedPerSec = 10.f;
-    MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
-    MobDesc.pAnimationTag = "Born1";
-	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
-	MobDesc.fHP = 10.f;
-	MobDesc.fAttackDmg = 1.f;
-	MobDesc.fMaxStamina = 10.f;
-	MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
-    if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
-        ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
-        CRASH("Failed Ready MonsterTest");
+    //MobDesc.eCurLevel = m_eCurLevel;
+    //MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+    //MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+    //MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
+    //MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+    //MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
+    //MobDesc.fSpeedPerSec = 10.f;
+    //MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+    //MobDesc.pAnimationTag = "Born1";
+	//MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	//MobDesc.fHP = 10.f;
+	//MobDesc.fAttackDmg = 1.f;
+	//MobDesc.fMaxStamina = 10.f;
+	//MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
+    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
+    //    ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+    //    CRASH("Failed Ready MonsterTest");
 
 	//Ggobul
 	CGgobul::GGOBUL_DESC Ggobul{};
@@ -209,23 +209,23 @@ void CLevel_Test::Ready_MonsterTest()
 		CRASH("Failed Ready Scythe");
 
 	// Havoc Warrior
-	//CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
-	//tDesc.eCurLevel = m_eCurLevel;
-	//tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	//tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	//tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
-	//tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	//tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
-	//tDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	//tDesc.fSpeedPerSec = 10.f;
-	//tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
-	//tDesc.pAnimationTag = "Stand1";
-	//tDesc.fHp = 10.f;
-	//tDesc.fAttackDmg = 1.f;
-	//tDesc.fImpluseRate = 7.5f;
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
-	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
-	//	CRASH("Failed Ready Monster");
+	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	tDesc.fHp = 10.f;
+	tDesc.fAttackDmg = 1.f;
+	tDesc.fImpluseRate = 7.5f;
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+		CRASH("Failed Ready Monster");
 
 	// Electro Predator
 	//CElectroPredator::ELECTROPREDATOR_DESC ADesc{};

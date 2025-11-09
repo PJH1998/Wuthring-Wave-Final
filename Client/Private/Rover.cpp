@@ -126,7 +126,7 @@ void CRover::Update(_float fTimeDelta)
 	// 7. Land Check
 	m_IsLand = Is_LandCollider();
 
-	// 8. Hit 초기화.
+	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
 	m_IsHit = false;
 
 	// 9. MainAttackVolume 설정
@@ -349,7 +349,6 @@ void CRover::Hit_Judge(void* pArg)
 
 	// 3. 캐스팅 해서? => 들고 있기.
 	m_PendingHitDesc = *pDesc;
-
 
 	// 4. 현재 상태 변경.
 	m_IsHit = true;
