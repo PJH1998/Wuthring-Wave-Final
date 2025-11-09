@@ -253,7 +253,16 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
 	ASSERT_CRASH(m_pColliderCom);
-	m_pColliderCom->Set_Gravity(IsGravity);
+	
+
+	if (!m_IsQTE)
+		m_pColliderCom->Set_Gravity(IsGravity);
+	else
+	{
+		ASSERT_CRASH(m_pQTEColliderCom);
+		m_pQTEColliderCom->Set_Gravity(IsGravity);
+	}
+		
 }
 
 
@@ -674,12 +683,19 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 	ASSERT_CRASH(m_pTransformCom);
 	ASSERT_CRASH(m_pColliderCom);
 
+	if (m_IsQTE)
+		return;
+	
 	// 0. World Matrix
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);  // 위치 설정
 }
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 {
+
+	if (m_IsQTE)
+		return;
+
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	pTransformCom->Set_WorldMatrix(mat);
 
@@ -754,13 +770,14 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	Safe_Release(m_pQTEColliderCom);
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
 			Safe_Release(pAttackVolume);
 	}
-		
+	
 
 	m_AttackVolumes.clear();
 	

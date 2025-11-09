@@ -205,6 +205,7 @@ void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType
 	}
 
 	// 상태 변수 초기화
+	m_IsQTE = false;
 	m_StateContext.Clear();
 }
 
@@ -494,7 +495,7 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 	switch (m_iVolumeIdx)
 	{
 	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
-		pAbility->Add_Resonance(7.f); // 공명 게이지 채우기.
+		pAbility->Add_HarmonyGauge(7.f); // 공명 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
 		break;
 	}

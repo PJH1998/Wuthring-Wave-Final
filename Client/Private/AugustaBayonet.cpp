@@ -147,16 +147,16 @@ void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifo
 
 	switch (m_iVolumeIdx)
 	{
-	case VOLUME::VOLUME_ATTACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
+	case VOLUME::VOLUME_ATTACK: // 기본 공격시 협주 게이지와 궁게이지 채우기
 		pAbility->Add_Cost(COST_TYPE::COST1, 8.f);
 		pAbility->Add_Cost(COST_TYPE::COST2, 5.f);
 		pAbility->Add_Cost(COST_TYPE::COST5, 3.f);
-		pAbility->Add_Resonance(4.f);
+		pAbility->Add_HarmonyGauge(4.f);
 		break;
 	case VOLUME::VOLUME_STRONG_ATTACK: // 강공 시 POINT 게이지와 궁 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST2, 10.f);
 		pAbility->Add_Cost(COST_TYPE::COST5, 5.f);
-		pAbility->Add_Resonance(8.f);
+		pAbility->Add_HarmonyGauge(8.f);
 		break;
 	}
 

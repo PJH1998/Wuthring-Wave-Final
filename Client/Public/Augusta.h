@@ -29,6 +29,7 @@ private:
 		EAugustaUniqueType m_eUniqueType = EAugustaUniqueType::END;
 		EAugustaBurstType m_eBurstType = EAugustaBurstType::END;
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
+		EAugustaQTEType m_eQTEType = EAugustaQTEType::END;
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -140,6 +141,7 @@ public:
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
+	virtual void Bind_QTE(_bool IsQTE) override;
 	
 
 #pragma region 2. NOTIFY
@@ -162,6 +164,8 @@ private:
 	class CAugustaSkillWeapon* m_pSkillWeapon = { nullptr };
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
+
+	
 
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};

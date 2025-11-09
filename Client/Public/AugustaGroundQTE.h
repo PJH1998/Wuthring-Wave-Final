@@ -32,7 +32,7 @@ private:
 
 private:
     virtual void Handle_Input() override;
-    void Update_LandAnimation(_float fTimeDelta);
+    void Update_QTEAnimation(_float fTimeDelta);
     void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();
     void State_Reset();

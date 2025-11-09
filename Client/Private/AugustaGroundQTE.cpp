@@ -26,17 +26,26 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
     const auto context = m_pAugusta->TakeStateContext();
 
     // 2. 복사본에서 필요한 값 읽기
-    EAugustaLandType eLandType = context.m_eLandType;
+    EAugustaQTEType eQTEType = context.m_eQTEType;
 
     // 3. 값에 따른 상태 변경.
-    m_iCurrentAnimIdx = static_cast<_uint>(context.m_eLandType);
+    m_iCurrentAnimIdx = ENUM_CLASS(eQTEType);
+
+	
 
     // 4. 상태 초기화
     State_Reset();
 
 	// 5. 중력 켰다.
+	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
+
+	_string strBoneName = "WeaponProp02";
+	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
 
+	m_pAugusta->Rotate_Target();
 }
 
 void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)
@@ -48,7 +57,7 @@ void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 제어.
-    Update_LandAnimation(fTimeDelta);
+	Update_QTEAnimation(fTimeDelta);
 
     // 2. 상태 제어.
     Check_StateTransition(fTimeDelta);
@@ -60,7 +69,9 @@ void CAugustaGroundQTE::OnUpdate(_float fTimeDelta)
 void CAugustaGroundQTE::OnExit()
 {
     CGroundState::OnExit();
-	m_pAugusta->Set_Gravity(true);
+	m_pAugusta->Set_Gravity(false);
+	m_pAugusta->Set_QTEEnd(true);
+	
 }
 
 
@@ -70,10 +81,26 @@ void CAugustaGroundQTE::Handle_Input()
 	
 }
 
-void CAugustaGroundQTE::Update_LandAnimation(_float fTimeDelta)
+void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 {
-    // 0. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	// 0. 몬스터와의 거리 계산 (최우선)
+	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
+	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+
+	if (m_fAnimationScale > 1.f)
+		m_fAnimationScale = 1.f;
+
+    // 1. 애니메이션 실행부터
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
+
+
+	// 2. 파츠 애니메이션 실행.
+	m_pAugusta->Play_PartAnimation(
+		m_iPartType,
+		m_Animations[m_iCurrentAnimIdx].strAnimName,
+		fTimeDelta, nullptr
+	);
+
 }
 
 void CAugustaGroundQTE::Check_StateTransition(_float fTimeDelta)
@@ -83,7 +110,10 @@ void CAugustaGroundQTE::Check_StateTransition(_float fTimeDelta)
 	// 1. 끝나면 콜백을 호출시켜야함 => Player가 인지하게끔?
 	if (m_IsAnimationEnd)
 	{
-
+		OnExit();
+		/*m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));*/
+		return;
 	}
 	
 }
@@ -91,7 +121,7 @@ void CAugustaGroundQTE::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundQTE::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaLandType::LAND_LIGHT), "SkillQTE", 1.f, 10.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaQTEType::SkillQTE), "SkillQTE", 1.f, 60.f);
 }
 
 void CAugustaGroundQTE::State_Reset()
