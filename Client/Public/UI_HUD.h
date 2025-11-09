@@ -16,7 +16,7 @@ private:
 	enum HUD_PLAYER_HPBAR		{ PLHP_BACK, PLHP_NORMAL, PLHP_END };
 	enum HUD_BOSS_HPBAR			{ BOHP_BACK, BOHP_NORMAL, BOHP_END };
 	enum HUD_BOSS_SABAR			{ BOSA_BACK, BOSA_NORMAL, BOSA_END };
-
+	enum HUD_BTN_INDEX			{ BTN_E, BTN_R, BTN_LB /* 아우구스타, 갈브만 존재 */, BTN_END };
 
 private:
 	explicit				CUI_HUD(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -54,7 +54,9 @@ private:					// �ڽ� UI�� ���� ��� ������ ��
 
 private:
 	void					Update_UI_SkillSection_OnFeedback(_float fTimeDelta);		/* manunally calls on update.. onfeedback*/
-	void					Update_AugustaIcon(const vector<UISKILL_SLOT>& skillSlots);
+
+	void					Update_Icon_Rover(const vector<UISKILL_SLOT>& skillSlots);
+	void					Update_Icon_Augusta(const vector<UISKILL_SLOT>& skillSlots);
 	
 	void					Add_UI_SkillSection_OnFeedback(_uint iSectionIndex);
 

@@ -54,10 +54,10 @@ namespace Client
 
 
 	enum class UI_ROVER_STATE : unsigned int {
-		DEFAULT = 0,
-		E_BURST_READY = 1,
-		E_DEFAULT_READY = 2,
-		R_READY = 3,
+		DEFAULT = 0,			// 기본
+		E_BURST_READY = 1,		// 서지 E 사용가능
+		E_DEFAULT_READY = 2,	// 기본 E 사용가능
+		R_READY = 3,			// 궁 사용가능
 		END
 	};
 
