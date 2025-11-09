@@ -92,7 +92,6 @@ public:
 #pragma region PHYSICS
 public:
 	// 거리 판단
-
 	const _float Calculate_RootMotionScale();
 
 	// Hit 판단.
@@ -137,9 +136,13 @@ public:
 	void Camera_Shake(_float fIntensity);
 	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
 
+	// Ability에서 확인 받기 => 상태 판별?
+	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
+	void Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
@@ -223,6 +226,8 @@ public:
 	// Ability 업데이트는 플레이어의 Priority Update에서
 	void Ability_Update(_float fTimeDelta);
 	class CAbility* Get_AbilityCom();
+	_float Get_Cost(COST_TYPE eCostType);
+	_float Get_MaxCost();
 	void Sync_UI(); // UI
 #pragma endregion
 

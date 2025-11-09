@@ -42,6 +42,10 @@ HRESULT CAugustaSkillWeapon::Initialize_Clone(void* pArg)
 void CAugustaSkillWeapon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+
+	if (m_IsAnimationEnd)
+		m_isActivate = false;
+
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }

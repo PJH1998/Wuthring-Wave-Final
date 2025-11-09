@@ -142,11 +142,6 @@ public:
 
 	
 
-#ifdef _DEBUG
-public:
-	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-#endif // _DEBUG
-
 #pragma region 2. NOTIFY
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
@@ -155,7 +150,7 @@ public:
 
 #pragma endregion
 
-#pragma region 3. CALLBACK
+#pragma region 3. CALL BACK
 	public:
 		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 #pragma endregion

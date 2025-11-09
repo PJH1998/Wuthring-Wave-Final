@@ -3,9 +3,17 @@
 #include "Player.h"
 #include "SpringCamera.h"
 #include "RoverSword.h"
+#include "RoverDarkWing.h"
+#include "RoverDarkScythe.h"
+
 #include "Wing.h"
 #include "RoverFactory.h"
 #include "Collider.h"
+
+#include "AttackVolume.h"
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Ability.h"
 
 CRover::CRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -39,15 +47,22 @@ HRESULT CRover::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
     Ready_PartObjects(pDesc); // Parts 추가.
+	Ready_AttackVolumes();
     Register_AllNotifies(pDesc->strFolderPath);
 	//Register_AbilityFiles(pDesc->strAbilityFolderPath);
 
 	CRoverFactory::Register_States(m_pStateMachineCom, this);
 	
 	// 비활성화. 
-
 	PartActivate(PART_SWORD, false);
+	PartActivate(PART_DARKWING, false);
+	PartActivate(PART_DARKSCYTHE, false);
+	//PartActivate(PART_DARKSCYTHE, true);
+	
 	PartActivate(PART_WING, false);
+	
+	// 임시.
+	//m_pRoverDarkScythe->Play_Animation("Scythe_Ex_Attack03", 0.f, &m_fTrackPosition);
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
     return S_OK;
@@ -69,6 +84,17 @@ void CRover::Priority_Update(_float fTimeDelta)
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
 
+	// 3. 몬스터가 있다면?
+	if (nullptr != m_pTargetTransform)
+	{
+		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
+		vDistance = XMVectorSetY(vDistance, 0.f);
+		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
+	}
+
+	// 4. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
   
 }
 
@@ -78,26 +104,34 @@ void CRover::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 1. 파츠 갱신.?
+	// 2. 파츠 갱신.?
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Update(fTimeDelta);
 	}
 
-    // 2. 상태 머신 갱신
+    // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
 
-    // 3. 현재 위치 - 1Frame 이전 위치 값 계산
+    // 4. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-    // 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+    // 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
     m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Camera 갱신 => 위치 따라오게
+    // 6. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-  
+	// 7. Land Check
+	m_IsLand = Is_LandCollider();
+
+	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
+	m_IsHit = false;
+
+	// 9. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
 
 }
 void CRover::Late_Update(_float fTimeDelta)
@@ -109,14 +143,16 @@ void CRover::Late_Update(_float fTimeDelta)
             pPart.second->Late_Update(fTimeDelta);
     }
 
-	// 2. Collider 충돌 처리후 위치에 맞춘다.
+	// 2. MainAttackVolume 설정
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
+
+	// 3. Collider 충돌 처리후 위치에 맞춘다.
     m_pColliderCom->Sync_Position(m_pTransformCom);
 
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
-
-    
 }
 
 void CRover::Render()
@@ -143,6 +179,8 @@ void CRover::Render()
 
 #ifdef _DEBUG
     m_pColliderCom->Render();
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 
 }
@@ -152,7 +190,7 @@ void CRover::Render_Shadow()
 }
 
 
-
+// 캐릭터 전환시 Idle로 상태 전환..
 void CRover::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType)
 {
 	switch (eTransitionType)
@@ -180,6 +218,16 @@ void CRover::Play_PartAnimation(_uint iPartType, const _string& strAnimName, _fl
     case PART_SWORD:
 		m_pRoverSword->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
         break;
+	case PART_DARKWING:
+		m_pRoverDarkWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
+	case PART_WING:
+		m_pWing->Play_Animation(strAnimName, fTimeDelta, pTrackPosition, fRootMotionRate, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate);
+		break;
+	
     default:
         break;
     }
@@ -192,9 +240,44 @@ void CRover::PartActivate(_uint iPartType, _bool IsActive)
     case PART_SWORD:
 		m_pRoverSword->Activate(IsActive);
         break;
+	case PART_DARKWING:
+		m_pRoverDarkWing->Activate(IsActive);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Activate(IsActive);
+		break;
+	case PART_WING:
+		m_pWing->Activate(IsActive);
+		break;
     default:
         break;
     }
+}
+
+void CRover::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
+{
+	switch (iPartType)
+	{
+	case PART_SWORD:
+		m_pRoverSword->Change_Volume(iVolumeIdx);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
+		break;
+	}
+}
+
+void CRover::Part_VolumeActivate(_uint iPartType, _bool IsActive)
+{
+	switch (iPartType)
+	{
+	case PART_SWORD:
+		m_pRoverSword->Volume_Activate(IsActive);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Volume_Activate(IsActive);
+		break;
+	}
 }
 
 void CRover::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
@@ -204,6 +287,15 @@ void CRover::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
     case PART_SWORD:
 		m_pRoverSword->Clear_Animation(strAnimName);
         break;
+	case PART_DARKWING:
+		m_pRoverDarkWing->Clear_Animation(strAnimName);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Clear_Animation(strAnimName);
+		break;
+	case PART_WING:
+		m_pWing->Clear_Animation(strAnimName);
+		break;
     default:
         break;
     }
@@ -223,32 +315,43 @@ void CRover::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName
     case PART_SWORD:
 		m_pRoverSword->Set_SocketMatrix(pSocketMatrix);
         break;
+	case PART_DARKWING:
+		m_pRoverDarkWing->Set_SocketMatrix(pSocketMatrix);
+		break;
+	case PART_DARKSCYTHE:
+		m_pRoverDarkScythe->Set_SocketMatrix(pSocketMatrix);
+		break;
+	case PART_WING:
+		m_pWing->Set_SocketMatrix(pSocketMatrix);
+		break;
     }
 }
 
 // Hit 판정.
 void CRover::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg)
+	if (nullptr == pArg || m_IsHit)
 		return;
 
-	_uint iCategory = m_pStateMachineCom->Get_CurrentStateKey().iCategory;
-	_uint iSubState = m_pStateMachineCom->Get_CurrentStateKey().iSubState;
+	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+	_uint iCategory = eKey.iCategory;
+	_uint iSubState = eKey.iSubState;
 
-	// 1. 현재 State 카테고리가 Hit면 Hit 판정을 하지 않습니다. (맞는 도중에 또 맞을 순 없으니)
-	if (EStateCategory::HIT == static_cast<EStateCategory>(iCategory))
+	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
+
+	// 1. 맞는데 또맞진 말자..
+	if (EStateCategory::HIT == eCategory)
 		return;
 
-	HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	// 2. 데미지는 바로 감소시킵니다.
+	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 2. 현재 레이어
-	COLLISIONLAYER eLayer = static_cast<COLLISIONLAYER>(pDesc->iLayer);
+	// 3. 캐스팅 해서? => 들고 있기.
+	m_PendingHitDesc = *pDesc;
 
-	// 3. 스킬 판정?
-	_bool IsSkill = (eLayer == COLLISIONLAYER::ENEMY_SKILL);
-
-	// 4. 일단 맞은 곳으로 회전? 캐릭터를
-	Rotate_HitTarget(pDesc->pTransform);
+	// 4. 현재 상태 변경.
+	m_IsHit = true;
 }
 
 void CRover::Sync_Position()
@@ -256,12 +359,7 @@ void CRover::Sync_Position()
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
-#ifdef _DEBUG
-void CRover::PartRotation(_uint iPartType, _fvector vQuaternion)
-{
 
-}
-#endif // _DEBUG
 
 #pragma region NOTIFY
 void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
@@ -270,10 +368,26 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
     {
 		m_pColliderCom->IsActivate(IsActive);
     }
-    else if (wStrColliderTag == TEXT("Weapon"))
+    else if (wStrColliderTag == TEXT("Sword"))
     {
-        
+		if (nullptr != m_pRoverSword)
+			m_pRoverSword->Volume_Activate(IsActive);
     }
+	else if (wStrColliderTag == TEXT("Rover"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
+	else if (wStrColliderTag == TEXT("Scythe"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
+	else if (wStrColliderTag == TEXT("DarkWing"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
 
 }
 
@@ -284,6 +398,106 @@ void CRover::Effect_Active(const _wstring& wStrEffectTag)
 
     _matrix matWorld = m_pTransformCom->Get_WorldMatrix();
     m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+void CRover::Object_Func(const _wstring& wStrObjectTag)
+{
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+
+	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+
+	_uint iVolumeIdx = stoul(var3);
+
+	/* SWORD|ROVER|0*/
+	// 1. 어떤 무기인가?
+	if (var1 == TEXT("SWORD"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+		m_pRoverSword->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
+		else if (var2 == TEXT("SKILL"))
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	if (var1 == TEXT("SCYTHE"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+		m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
+		else if (var2 == TEXT("SKILL"))
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("DARKWING"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+		m_pRoverDarkWing->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
+		else if (var2 == TEXT("SKILL"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("ROVER"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
+		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
+			return;
+
+		m_pMainAttackVolume->TriggerActivate(false); // 교체.
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
+	}
+	
+
+}
+void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	// 1. 게이지 올리기?
+	CAbility* pAbility = CGameSystem::GetInstance()
+		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::ROVER));
+
+	if (nullptr == pAbility)
+		return;
+
+	switch (m_iVolumeIdx)
+	{
+	case VOLUME::VOLUME_KNOCKBACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
+		pAbility->Add_Resonance(7.f); // 공명 게이지 채우기.
+		pAbility->Add_Cost(COST_TYPE::COST1, 5.f); // 궁 ULTI
+		break;
+	}
 }
 #pragma endregion
 
@@ -320,9 +534,6 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
 
-	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
-	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
-	//	CRASH("Ability");
 }
 
 void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
@@ -339,11 +550,6 @@ void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    //_float3 vRadian = {
-    //    XMConvertToRadians(pDesc->vRotation.x),
-    //    XMConvertToRadians(pDesc->vRotation.y),
-    //    XMConvertToRadians(pDesc->vRotation.z) };
-    //m_pTransformCom->Rotation_Quaternion(vRadian);
 }
 
 
@@ -381,6 +587,43 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
             ASSERT_CRASH(m_pRoverSword);
             Safe_AddRef(m_pRoverSword);
             break;
+		case PARTTYPE::PART_DARKWING:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetRoverDarkWingCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("DarkWing");
+
+			m_pRoverDarkWing = dynamic_cast<CRoverDarkWing*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pRoverDarkWing);
+			Safe_AddRef(m_pRoverDarkWing);
+			break;
+		case PARTTYPE::PART_DARKSCYTHE:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetRoverDarkScytheCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("DarkScythe");
+
+			m_pRoverDarkScythe = dynamic_cast<CRoverDarkScythe*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pRoverDarkScythe);
+			Safe_AddRef(m_pRoverDarkScythe);
+			break;
+
 		case PARTTYPE::PART_WING:
 			vScale = { 1.f, 1.f, 1.f };
 			vPosition = { 0.f, 0.f, 0.f };
@@ -400,6 +643,50 @@ void CRover::Ready_PartObjects(const CHARACTER_DESC* pDesc)
 			break;
 		}
     }
+}
+
+void CRover::Ready_AttackVolumes()
+{
+	m_AttackVolumes.resize(VOLUME_END);
+
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::KNOCKBACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(1.f, 1.f, 1.f); // x, z 크게 y작게
+	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 400.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+
+	m_AttackVolumes[VOLUME_KNOCKBACK] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_KNOCKBACK]);
+	m_AttackVolumes[VOLUME_KNOCKBACK]->TriggerActivate(false);
+
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 크게 y작게
+	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
+	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
+	m_pMainAttackVolume->TriggerActivate(false);
 }
 
 CRover* CRover::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -431,6 +718,15 @@ CGameObject* CRover::Clone(void* pArg)
 void CRover::Free()
 {
     CCharacter::Free();
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+
+	m_AttackVolumes.clear();
     Safe_Release(m_pRoverSword);
+    Safe_Release(m_pRoverDarkWing);
+    Safe_Release(m_pRoverDarkScythe);
 	Safe_Release(m_pWing);
 }

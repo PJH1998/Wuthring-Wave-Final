@@ -65,8 +65,18 @@ void CRoverAirFall::OnExit()
 
 void CRoverAirFall::Handle_Input()
 {
-    m_eDir = m_pRover->Calculate_Direction(); // 방향 계산.
+    m_eDir = m_pRover->Calculate_Direction(); // 방향 계산
+
+	m_States[HIT] = m_pRover->Is_Hit();
+	if (m_States[HIT])
+		return;
+
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
+	m_States[AIR_ATTACK] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+	
 }
 
 void CRoverAirFall::Update_FallAnimation(_float fTimeDelta)
@@ -86,6 +96,29 @@ void CRoverAirFall::Check_Physics(_float fTimeDelta)
 
 void CRoverAirFall::Check_StateTransition(_float fTimeDelta)
 {
+
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
+
+	if (m_States[FLY])
+	{
+		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
+		return;
+	}
+
+
+	if (m_States[AIR_ATTACK])
+	{
+		m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK)); // 상위, 하위 상태
+		return;
+	}
+
+
     if (m_States[LAND])
     {
         m_pRover->GetStateContextForWrite().m_eLandType = ERoverLandType::LAND_LIGHT;
@@ -93,12 +126,6 @@ void CRoverAirFall::Check_StateTransition(_float fTimeDelta)
         return;
     }
 
-    /*if (m_States[LAND])
-    {
-        m_pRover->GetStateContextForWrite().m_eLandType = ERoverLandType::LAND_LIGHT;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND));
-        return;
-    }*/
 
 }
 

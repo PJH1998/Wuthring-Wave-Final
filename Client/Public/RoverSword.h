@@ -5,9 +5,11 @@ NS_BEGIN(Client)
 class CRoverSword final : public CProp
 {
 public:
-	typedef struct tagRoverWeaponDesc : public CProp::PROP_DESC {
-		
-	} ROVER_PROP_DESC;
+	enum VOLUME
+	{
+		VOLUME_ATTACK = 0,
+		VOLUME_END
+	};
 
 protected:
 	explicit CRoverSword(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -22,6 +24,15 @@ public:
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
 
+	
+public:
+	virtual void Activate(_bool IsActivate) override;
+	// Attack Volume
+	virtual void Change_Volume(_uint iVolumeIdx) override;
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
+
+	// Owner의 게이지 채우기?
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 private:
 	vector<_uint> m_ShaderPaths = {};
@@ -32,6 +43,7 @@ private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);
 	void Ready_Positions(const PROP_DESC* pDesc);
+	void Ready_AttackVolumes();
 	void Bind_Resources();
 
 public:

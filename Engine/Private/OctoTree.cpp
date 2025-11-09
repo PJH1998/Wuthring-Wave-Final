@@ -44,6 +44,8 @@ void COctoTree::Update()
 		return;
 
 	m_iLODCnt.store(0);
+
+	//if(true == m_pGameInstance->IsWorkFinish())
 	m_pRootCell->Update(XMLoadFloat4(m_pGameInstance->Get_CamPos()));
 }
 

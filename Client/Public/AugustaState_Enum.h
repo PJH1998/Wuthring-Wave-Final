@@ -19,6 +19,7 @@ enum class EAugustaGroundState : _uint
 	SPECIAL,		// Burst Special 상태.
 	UNIQUE,			// 캐릭터 고유 상태. (Griffon 등등)
 	LAND,			// 착지 (Land)
+	QTE,			// 협주 스킬(Augusta의 경우 변주)
 	GROUND_END
 };
 
@@ -169,6 +170,12 @@ enum class EAugustaBurstType : _uint
 {
 	BURST01 = 0,
 	BURST_STAND,
+	END
+};
+
+enum class EAugustaQTEType : _uint
+{
+	SkillQTE = 0,
 	END
 };
 
