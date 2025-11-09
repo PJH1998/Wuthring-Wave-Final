@@ -1,71 +1,90 @@
 ﻿#include "ClientPch.h"
-#include "Projectile.h"
+#include "AoEDoT.h"
 
-CProjectile::CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAoEDoT::CAoEDoT(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject { pDevice, pContext }
 {
 }
 
-CProjectile::CProjectile(const CProjectile& Prototype)
+CAoEDoT::CAoEDoT(const CAoEDoT& Prototype)
 	: CGameObject { Prototype }
 {
 }
 
-HRESULT CProjectile::Initialize_Prototype()
+HRESULT CAoEDoT::Initialize_Prototype()
 {
     return S_OK;
 }
 
-HRESULT CProjectile::Initialize_Clone(void* pArg)
+HRESULT CAoEDoT::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
+	AOEDOT_DESC* pDesc = static_cast<AOEDOT_DESC*>(pArg);
 	Ready_Component(pDesc);
+
+	m_iLayer = pDesc->iLayer;
+	m_fLifeTime = pDesc->fLifeTime;
+	m_fDelayTime = m_fLifeTime / (pDesc->iTickCount);
+
     return S_OK;
 }
 
-void CProjectile::Priority_Update(_float fTimeDelta)
+void CAoEDoT::Priority_Update(_float fTimeDelta)
 {
+	if(m_isAttack)
+	{
+		m_pRigidBodyCom->IsActivate(false);
+		m_isAttack = false;
+	}
 }
 
-void CProjectile::Update(_float fTimeDelta)
+void CAoEDoT::Update(_float fTimeDelta)
 {
-	m_pTransformCom->Go_Straight(fTimeDelta);
+	if (m_fDelayAcc >= m_fDelayTime)
+	{
+		m_fDelayAcc = 0.f;
+		m_pRigidBodyCom->IsActivate(true);
+		m_isAttack = true;
+	}
+	else
+		m_fDelayAcc += fTimeDelta;
+
+	if (m_fLifeTimeAcc >= m_fLifeTime)
+	{
+		m_fLifeTimeAcc = 0.f;
+		m_isActivate = false;
+	}
+	else
+		m_fLifeTimeAcc += fTimeDelta;
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
-void CProjectile::Late_Update(_float fTimeDelta)
+void CAoEDoT::Late_Update(_float fTimeDelta)
 {
-	if (m_isCollision)
-	{
-		m_isActivate = false;
-		m_pRigidBodyCom->IsActivate(false);
-		return;
-	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this)))
 		return;
 }
 
-void CProjectile::Render()
+void CAoEDoT::Render()
 {
 #ifdef _DEBUG
 	m_pRigidBodyCom->Render();
 #endif
 }
 
-void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
+void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	PROJECTILERESET* pDesc = static_cast<PROJECTILERESET*>(pArg);
+	AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
-	m_pRigidBodyCom->IsActivate(true);
-	m_isActivate = true;
+	m_fDelayAcc = 0.f;
+	m_fLifeTimeAcc = 0.f;
 }
 
-void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
+void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 {
 	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
@@ -88,15 +107,14 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 
-void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+void CAoEDoT::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
 	for( auto& iTarget : m_iTargetLayers)
 	{
 		if (iLayer == iTarget)
 		{
-			m_isCollision = true;
 #ifdef _DEBUG
-			cout << "On Hit! (Projectile)" << endl;
+			cout << "On Hit! (AoE Dot)" << endl;
 #endif // _DEBUG
 			return;
 		}
@@ -104,17 +122,17 @@ void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifo
 
 }
 
-CProjectile* CProjectile::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CAoEDoT* CAoEDoT::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     return nullptr;
 }
 
-CGameObject* CProjectile::Clone(void* pArg)
+CGameObject* CAoEDoT::Clone(void* pArg)
 {
     return nullptr;
 }
 
-void CProjectile::Free()
+void CAoEDoT::Free()
 {
 	__super::Free();
 

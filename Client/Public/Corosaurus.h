@@ -58,6 +58,7 @@ private:
 	_bool					m_isAggro{};
 	_bool					m_isDetecting{};
 	_bool					m_isTrigger{};
+	_bool					m_isAttack{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
 	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
