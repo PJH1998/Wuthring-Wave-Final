@@ -30,6 +30,8 @@ private:
 		DEFAULT_E,
 		BURST_E,
 
+		ULTI,
+
         END
     };
 

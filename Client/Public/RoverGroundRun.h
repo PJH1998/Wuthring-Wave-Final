@@ -24,6 +24,7 @@ private:
 		HIT,
 
 		BURST,
+		ULTI,
 		ATTACK,
 		SKILL_E,
 		SKILL_Q,

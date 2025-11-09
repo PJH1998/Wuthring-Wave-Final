@@ -34,6 +34,19 @@ void CRoverGroundBurst::OnEnter(void* pArg)
     // 4. 상태 초기화
     State_Reset();
 
+	// 5. 이전 정보 가져오기.
+	m_strPrevInfo = context.m_strPrevInfo;
+
+	// 6. 만약 궁이라면? => Cut Scene 실행.
+	if (m_strPrevInfo == "ULTI")
+	{
+
+	}
+
+	// 7. 흑 날개.
+	//m_iPartType = CRover::PART_DARKWING;
+	m_iPartType = CRover::TYPE_END;
+
 	m_pRover->Set_Gravity(true);
 }
 
@@ -56,6 +69,8 @@ void CRoverGroundBurst::OnUpdate(_float fTimeDelta)
     // 5. 상태 리셋.
     State_Reset();
     
+	
+
 }
 
 void CRoverGroundBurst::OnExit()
@@ -64,8 +79,13 @@ void CRoverGroundBurst::OnExit()
     m_pRover->PartActivate(m_iPartType, false);
     m_iPartType = CRover::PARTTYPE::TYPE_END;
 
-	m_pRover->Bind_Condition_ToAbillity(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
-	m_pRover->Bind_CostCondition_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	if (m_strPrevInfo.empty())
+	{
+		m_pRover->Bind_Condition_ToAbillity(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+		m_pRover->Bind_CostCondition_ToAbility(ENUM_CLASS(COST_TYPE::COST1), ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+	}
+
+	
 }
 
 void CRoverGroundBurst::Handle_Input()

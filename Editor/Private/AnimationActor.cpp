@@ -43,6 +43,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     // Model의 Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
+#ifdef _DEBUG
 	if (!(pDesc->strBoneName.empty()) && nullptr != pDesc->pParentTransform)
 	{
 
@@ -52,6 +53,9 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
 		m_pParentActor->Set_ChildActor(this);
 	}
+#endif // _DEBUG
+
+
 
     if (FAILED(Ready_Components(pDesc)))
     {

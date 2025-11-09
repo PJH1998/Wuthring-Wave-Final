@@ -58,13 +58,10 @@ void CAbility::Update(_float fTimeDelta)
 
 	Update_CostCondition(fTimeDelta);
 
-	
-
 	// 매프레임 Stamina 자동 회복. // 초당 10
 	Add_Cost(COST_TYPE::STAMINA, fTimeDelta * 10.f);
 
 	// UI 슬롯 업데이트
-	// UI 슬롯 업데이트 (더티 플래그 기반)
 	UISlotUpdate(fTimeDelta);
 }
 
@@ -507,6 +504,14 @@ UISKILL_SLOT CAbility::Determine_StateRover(_uint iCharacterIdx, const _string& 
 				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
 			}
 		}
+	}
+	else if (strKey == "R")
+	{
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01_Ulti");
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01_Ulti");
+		if (nullptr != pSkillInfo)
+			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+		skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::R_READY);
 	}
 
 

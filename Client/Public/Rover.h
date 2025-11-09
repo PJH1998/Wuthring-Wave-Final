@@ -42,7 +42,8 @@ private:
 		// Hit
 		ERoverHitType m_eHitType = ERoverHitType::END;
 
-		// �
+		// Prev Info
+		_string m_strPrevInfo = {};
 		void Clear()
 		{
 			// Land
@@ -70,6 +71,7 @@ private:
 			m_IsClimbSecondStep = false;
 
 			m_eHitType = ERoverHitType::END;
+			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
 

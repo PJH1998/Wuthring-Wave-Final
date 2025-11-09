@@ -57,6 +57,7 @@ namespace Client
 		DEFAULT = 0,
 		E_BURST_READY = 1,
 		E_DEFAULT_READY = 2,
+		R_READY = 3,
 		END
 	};
 

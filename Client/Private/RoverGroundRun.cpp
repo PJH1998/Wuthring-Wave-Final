@@ -107,6 +107,9 @@ void CRoverGroundRun::Handle_Input()
 		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
 	else
 		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
+
+	// 궁 상태 확인하기.
+	m_States[ULTI] = m_States[SKILL_R] && (m_pRover->Get_Cost(COST_TYPE::COST2) >= m_pRover->Get_MaxCost());
 }
 
 
@@ -181,6 +184,17 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+	if (m_States[ULTI])
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Burst01_Ulti"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eBurstType = ERoverBurstType::BURST01;
+		m_pRover->GetStateContextForWrite().m_strPrevInfo = "ULTI";
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST));
+		return;
+	}
 
 	if (m_States[BURST_E]) // Burst E
 	{
