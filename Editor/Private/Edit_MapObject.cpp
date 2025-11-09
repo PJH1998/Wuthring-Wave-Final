@@ -63,6 +63,15 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
+	m_pGameInstance->Subscribe<MAP_BOUND>(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), [this](const MAP_BOUND& event) {
+
+		_vector Center = XMLoadFloat3(&m_pModelComArray[0]->Get_BoundingBox()->Center);
+		_vector Extents = XMLoadFloat3(&m_pModelComArray[0]->Get_BoundingBox()->Extents);
+
+		*event.vMin = XMVectorMin(*event.vMin, Center - Extents);
+		*event.vMax = XMVectorMax(*event.vMax, Center + Extents);
+		});
+
 	m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
 		if (!m_isActivate)
 			return;

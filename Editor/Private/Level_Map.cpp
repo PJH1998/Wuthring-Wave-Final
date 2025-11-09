@@ -147,6 +147,16 @@ void CLevel_Map::Update(_float fTimeDelta)
         
     }
 
+	if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
+	{
+		_vector Min = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+		_vector Max = XMVectorSet(FLT_MIN, FLT_MIN, FLT_MIN, FLT_MIN);
+		MAP_BOUND event(&Min, &Max);
+		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), event);
+
+		int a = 0;
+	}
+
     Make_MousePos();
     pShaderInterface->Update_Shadow();
     if (m_pGameInstance->Get_DIKeyState(DIK_GRAVE) == KEYSTATE::PRESS && m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
@@ -521,7 +531,6 @@ void CLevel_Map::Menu_Save_Load()
 							PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
 							CEdit_MapObject_Instance::MAP_LOAD Desc{};
-							_uint i = 0;
 
 							while (File.read(reinterpret_cast<char*>(&Desc.iSaveIndex), sizeof(_uint)))
 							{
@@ -556,7 +565,6 @@ void CLevel_Map::Menu_Save_Load()
 								//파일시스템으로 해당 모델 찾기.
 								_string ModelPath = Desc.ModelName;
 								ModelPath.pop_back();
-								_bool IsLODZero = true;
 								for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
 									if (entry.is_regular_file()) {
 										if (entry.path().string().find("Foliage") == std::string::npos)
@@ -576,7 +584,7 @@ void CLevel_Map::Menu_Save_Load()
 
 
 										_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
-										_wstring ModelName = StringToWString(FileName) + to_wstring(i);
+										_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
 										PrototypeName += ModelName;
 
 										_string VersionPath = FileDir;
@@ -588,16 +596,10 @@ void CLevel_Map::Menu_Save_Load()
 
 										memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
 										strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
-
-										//가장 마지막 LOD를 받아서 나머지 LOD들 안에서 만들게.
-										if(IsLODZero)
-										IsLODZero = false;
-										//클라이언트에 연동해서 그대로 읽을 수 있게 할것.
 									}
 								}
 								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance")
 									, m_iLevel, TEXT("Layer_Instance"), &Desc);
-								i++;
 								Safe_Delete_Array(InstanceMatrix);
 							}
 						}
@@ -706,9 +708,9 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 

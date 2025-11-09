@@ -61,3 +61,13 @@ typedef struct tagMapInstanceSave : public CEvent
 		Objectmatrix(_Objectmatrix), iNumTotalInstance(_iNumTotalInstance) { };
 
 }INSTANCE_SAVE;
+
+typedef struct tagMapBound : public CEvent
+{
+	_vector* vMin;
+	_vector* vMax;
+	tagMapBound(_vector* _vMin, _vector* _vMax) : vMin(_vMin),
+		vMax(_vMax){
+	};
+
+}MAP_BOUND;

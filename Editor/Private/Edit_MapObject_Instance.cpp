@@ -185,29 +185,35 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 	m_vDiffuseColor = pDesc->vDiffuseColor;
 
 	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
-	ProtoName += StringToWString(pDesc->ModelName);
 
 	if (pDesc->IsLoaded)
 	{
+
+
 		_string NameTemp = pDesc->ModelName;
-		_uint T = pDesc->ModelName[strlen(pDesc->ModelName) - 1] - '0';
-		NameTemp.pop_back();
-		strcpy_s(m_ModelName, NameTemp.c_str());
+		_uint NumStartsPos = NameTemp.find_last_not_of("0123456789");
+		NumStartsPos == string::npos ? NumStartsPos = 0 : NumStartsPos += 1;
+
+		//이게 뒤에 다 뺀 LOD3까지 있는 이름.
+		_string ModelName = NameTemp.substr(0, NumStartsPos+1);
+
+		strcpy_s(m_ModelName, ModelName.c_str());
 
 		m_pRotation = new _float4[m_iNumInstance];
 
-
-		_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
+		_uint V = ModelName[ModelName.length() - 1] - '0' + 1;
 		m_pModelComArray.resize(V);
+	
+
+		ProtoName += StringToWString(ModelName);
 
 		//얘는 뒷숫자 말고 앞 숫자를 바꿔야함.
 		for (_uint i = 0; i < V; ++i)
 		{
 			_wstring ModelCom = ProtoName;
 			ModelCom.pop_back();
-			ModelCom.pop_back();
 			ModelCom += to_wstring(i);
-			ModelCom += to_wstring(T);
+			ModelCom += to_wstring(m_iSaveIndex);
 			_char ModelName[MAX_PATH] = {};
 			sprintf_s(ModelName, "Com_Model%d", i);
 
@@ -218,6 +224,7 @@ HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 	}
 	else
 	{
+		ProtoName += StringToWString(pDesc->ModelName);
 		strcpy_s(m_ModelName, pDesc->ModelName);
 
 		_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
