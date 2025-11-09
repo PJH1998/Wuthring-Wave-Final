@@ -72,7 +72,7 @@ void CRoverAirJump::Handle_Input()
         && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) && CState::Is_EscapePossible();
     
     // Jump Attack
-    m_States[AIR_ATTACK] = eJumpType == ERoverJumpType::JUMP_WALK_LF && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+    m_States[AIR_ATTACK] =  m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CRoverAirJump::Check_Physics(_float fTimeDelta)
@@ -107,6 +107,13 @@ void CRoverAirJump::Check_StateTransition(_float fTimeDelta)
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+	if (m_States[AIR_ATTACK] && IsEscapePossible)
+	{
+		m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK)); // 상위, 하위 상태
+		return;
+	}
 
     // 2. 점프 애니메이션이 끝났는데도 안닿았을경우?
     if (m_IsAnimationEnd && !m_States[LAND])

@@ -384,6 +384,11 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		if (nullptr != m_pMainAttackVolume)
 			m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
+	else if (wStrColliderTag == TEXT("DarkWing"))
+	{
+		if (nullptr != m_pMainAttackVolume)
+			m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
 
 }
 
@@ -441,6 +446,22 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("DARKWING"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+		m_pRoverDarkWing->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
+		else if (var2 == TEXT("SKILL"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
 	}
 	else if (var1 == TEXT("ROVER"))
 	{
@@ -652,6 +673,18 @@ void CRover::Ready_AttackVolumes()
 
 	ASSERT_CRASH(m_AttackVolumes[VOLUME_KNOCKBACK]);
 	m_AttackVolumes[VOLUME_KNOCKBACK]->TriggerActivate(false);
+
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f); // x, z 크게 y작게
+	m_AttackVolumes[VOLUME_SKILL] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_SKILL]);
+	m_AttackVolumes[VOLUME_SKILL]->TriggerActivate(false);
 
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_KNOCKBACK];
 	m_pMainAttackVolume->TriggerActivate(false);

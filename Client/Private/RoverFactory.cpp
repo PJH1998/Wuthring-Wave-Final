@@ -15,6 +15,7 @@
 // Air 카테고리 State들
 #include "RoverAirFall.h"
 #include "RoverAirJump.h"
+#include "RoverAirAttack.h"
 
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
@@ -36,7 +37,7 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	// Air 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP), CRoverAirJump::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL), CRoverAirFall::Create(pCharacter));
-	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK), CRoverAirAttack::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK), CRoverAirAttack::Create(pCharacter));
 	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_SKILL), CRoverAirSkill::Create(pCharacter));
 
 	// Climb 하위 State들

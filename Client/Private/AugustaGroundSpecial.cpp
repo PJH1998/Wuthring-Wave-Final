@@ -38,7 +38,7 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
     m_pAugusta->PartActivate(m_iPartType, true);
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
-    m_pAugusta->Set_Gravity(false);
+    m_pAugusta->Set_Gravity(true);
 
 	if(eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
 		m_pAugusta->Set_Gravity(true);

@@ -5,9 +5,11 @@ NS_BEGIN(Client)
 class CRoverDarkWing final : public CProp
 {
 public:
-	typedef struct tagRoverWingDesc : public CProp::PROP_DESC {
-		
-	} ROVER_PROP_DESC;
+	enum VOLUME
+	{
+		VOLUME_ATTACK = 0,
+		VOLUME_END
+	};
 
 protected:
 	explicit CRoverDarkWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -21,7 +23,7 @@ public:
 	virtual	void Update(_float fTimeDelta) override;
 	virtual	void Late_Update(_float fTimeDelta) override;
 	virtual	void Render() override;
-
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 private:
 	vector<_uint> m_ShaderPaths = {};
@@ -32,6 +34,7 @@ private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);
 	void Ready_Positions(const PROP_DESC* pDesc);
+	void Ready_AttackVolumes();
 	void Bind_Resources();
 
 public:

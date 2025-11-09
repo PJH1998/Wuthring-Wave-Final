@@ -11,6 +11,7 @@ private:
     {
         MOVE = 0,
         LAND = 1,
+		AIR_ATTACK,
         END
     };
 

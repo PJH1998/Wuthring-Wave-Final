@@ -9,6 +9,7 @@ public:
 	enum VOLUME
 	{
 		VOLUME_KNOCKBACK = 0,
+		VOLUME_SKILL = 1,
 		VOLUME_END
 	};
 
