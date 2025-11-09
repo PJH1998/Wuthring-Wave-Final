@@ -399,7 +399,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
 
-
+	m_isTrigger = false;
 }
 
 void CHavocWarrior::Calculate_PosAndDir()

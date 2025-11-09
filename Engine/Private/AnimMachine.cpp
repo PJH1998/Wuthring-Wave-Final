@@ -74,6 +74,7 @@ HRESULT CAnimMachine::Initialize_Clone(void* pArg)
 	m_fRootMotionRate = Desc.fRootMotionRate;
 	m_fTransitTrackPos = Desc.fTransitTrackPos;
 	m_fAnimationSpeed = Desc.fAnimationSpeed;
+	m_isLoop = Desc.isLoop;
 
     return S_OK;
 }
@@ -86,7 +87,7 @@ void CAnimMachine::Handle_Input(CModel* pModelCom, _uint* pState, _string& strAn
 	if(0 != m_strCurrentAnimTag.compare(strAnimTag))
 	{
 		m_AnimStates[m_strCurrentAnimTag]->Exit(pModelCom, pState);
-		pModelCom->Clear_Animation(m_strCurrentAnimTag);
+		//pModelCom->Clear_Animation(m_strCurrentAnimTag);
 		// Enter 새로운 상태
 		CAnimState::ANIMSTATE_DESC Desc{};
 		m_AnimStates[strAnimTag]->Enter(pModelCom, pState, &m_strCurrentAnimTag, Desc);

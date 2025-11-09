@@ -21,6 +21,9 @@ private:
 	void 			Ready_Layer_Player();
 	void			Ready_Dummy();
 	void			Ready_MonsterTest();
+	void			Ready_HavocWarrior();
+	void			Ready_ElectroPredator();
+	void			Ready_CoroSaurus();
 	void			Ready_Effect();
 	void			Ready_Skybox();
 	//void Ready_Layer_Augusta();
