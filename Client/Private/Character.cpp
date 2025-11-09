@@ -183,6 +183,7 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 #pragma endregion
 
 #pragma region PHYSICS
+
 const _float CCharacter::Calculate_RootMotionScale()
 {
 	// 타겟이 없으면 원래 비율로
@@ -190,16 +191,18 @@ const _float CCharacter::Calculate_RootMotionScale()
 		return 1.f;
 
 	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
-	if (m_fTargetDistance < 3.f)
+	if (m_fTargetDistance < 1.f)
+		return 0.05f; // 거의 이동량 없게.
+	else if (m_fTargetDistance < 3.f)
 		return 0.5f;  // 짧게: 과접근 방지
 	else if (m_fTargetDistance < 3.5f)
-		return 0.6f;  // 짧게: 과접근 방지
+		return 0.6f;  
 	else if (m_fTargetDistance < 4.f)
-		return 0.7f;  // 짧게: 과접근 방지
+		return 0.7f;  
 	else if (m_fTargetDistance >= 7.f)
 		return 1.4f;  // 길게: 빠른 접근
 	
-	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비율
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -340,8 +343,18 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
-	ASSERT_CRASH(m_pTransformCom);
+	if (nullptr == m_pTransformCom)
+		return;
+
 	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+}
+
+_bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return false;
+
+	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -358,6 +371,14 @@ void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
 		return;
 
 	m_pAbillityCom->Remove_Condition(iCondition);
+}
+
+void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
 }
 
 _vector CCharacter::Get_LookVector()
@@ -700,6 +721,20 @@ void CCharacter::Ability_Update(_float fTimeDelta)
 CAbility* CCharacter::Get_AbilityCom()
 {
     return m_pAbillityCom;
+}
+_float CCharacter::Get_Cost(COST_TYPE eCostType)
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return m_pAbillityCom->Get_Cost(eCostType);
+}
+_float CCharacter::Get_MaxCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return 100.f;
 }
 void CCharacter::Sync_UI()
 {

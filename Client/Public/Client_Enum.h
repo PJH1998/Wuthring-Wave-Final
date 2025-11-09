@@ -28,8 +28,8 @@ namespace Client
 		DEFAULT = 0,				// 기본?
 		LB_STRONG_READY = 1,		// 강공 실행 가능
 		LB_SWORD_READY = 2,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
-		T_INTERACTION_READY = 3,		// T 실행 가능.  => 활공, 기타등등
-		T_INTERACTION_FAILED = 4,		// T 실행 불가.  => 활공, 기타 등등
+		T_INTERACTION_READY = 3,	// T 실행 가능.  => 활공, 기타등등
+		T_INTERACTION_FAILED = 4,	// T 실행 불가.  => 활공, 기타 등등
 		E_GRIFFON_READY = 5,		// 그리폰 E 실행 가능 => GRIFFON_E_READY = 
 		E_RISE_READY = 6,			// Rise E 실행 가능.
 		E_DEFAULT_READY = 7,		// 기본 E 실행 가능.
@@ -40,7 +40,6 @@ namespace Client
 		R_SWORD_ULTI_READY = 12,	// SWORD R 궁극기 아이콘 출력 가능.
 		END
 	};
-
 	
 
 	enum class UI_AUGUSTA_CONDITION : unsigned int {
@@ -50,21 +49,21 @@ namespace Client
 		E_RISE = 1 << 3, // 그리폰 Rise									// 그 다음 (옆에)
 		R_SP_ATTACK = 1 << 4, // 최종 궁 이전 상태 사용 가능.			// -
 		R_SP_ATTACKOMNI = 1 << 5, // Special Attack 최종 궁 사용 가능	// -
-
-		
 		END
 	};
 
 
 	enum class UI_ROVER_STATE : unsigned int {
-		ROVER_READY = 0,
+		DEFAULT = 0,
+		E_BURST_READY = 1,
+		E_DEFAULT_READY = 2,
+		R_READY = 3,
 		END
 	};
 
 	// UI에서 사용하기 위해서 State Machine에서 전달.
 	enum class UI_ROVER_CONDITION : unsigned int {
-		BURST = 0,
-
+		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};
 
