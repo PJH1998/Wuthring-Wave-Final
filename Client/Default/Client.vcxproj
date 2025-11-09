@@ -251,6 +251,7 @@
     <ClInclude Include="..\Public\Rover.h" />
     <ClInclude Include="..\Public\RoverAirAttack.h" />
     <ClInclude Include="..\Public\RoverAirFall.h" />
+    <ClInclude Include="..\Public\RoverAirFly.h" />
     <ClInclude Include="..\Public\RoverAirJump.h" />
     <ClInclude Include="..\Public\RoverDarkScythe.h" />
     <ClInclude Include="..\Public\RoverDarkWing.h" />
@@ -392,6 +393,7 @@
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
     <ClCompile Include="..\private\Projectile.cpp" />
     <ClCompile Include="..\Private\RoverAirAttack.cpp" />
+    <ClCompile Include="..\Private\RoverAirFly.cpp" />
     <ClCompile Include="..\Private\RoverDarkScythe.cpp" />
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />

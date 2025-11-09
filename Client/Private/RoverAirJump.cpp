@@ -70,6 +70,8 @@ void CRoverAirJump::Handle_Input()
 	if (m_States[HIT])
 		return;
 
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
  
@@ -110,6 +112,14 @@ void CRoverAirJump::Check_StateTransition(_float fTimeDelta)
 	if (m_States[HIT])
 	{
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
+
+	// 2. 날 수 있다면?
+	if (m_States[FLY])
+	{
+		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
 		return;
 	}
 

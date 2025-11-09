@@ -33,6 +33,7 @@ private:
 		ERoverJumpType m_eJumpType = ERoverJumpType::END;
 		ERoverFallType m_eFallType = ERoverFallType::END;
 		ERoverAirAttackType m_eAirAttackType = ERoverAirAttackType::END;
+		ERoverAirFlyType m_eAirFlyType = ERoverAirFlyType::END;
 
 		// Climb
 		ERoverClimbIdleType m_eClimbIdleType = ERoverClimbIdleType::END;
@@ -64,6 +65,7 @@ private:
 			m_eJumpType = ERoverJumpType::END;
 			m_eFallType = ERoverFallType::END;
 			m_eAirAttackType = ERoverAirAttackType::END;
+			m_eAirFlyType = ERoverAirFlyType::END;
 
 			// Climb
 			m_eClimbIdleType = ERoverClimbIdleType::END;

@@ -75,7 +75,6 @@ void CAugustaGroundRun::Handle_Input()
 	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
 	if (m_States[HIT]) // 모든 조건 상위 조건
 		return;
-	// 우선순위 제일 높음.
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 
     // 키 입력.

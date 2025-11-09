@@ -11,6 +11,7 @@ private:
 	{
 		JUMP = 0,
 		DASH,
+		FLY,
 		MOVE,
 		FALL,
 		WALL,

@@ -609,6 +609,9 @@
     <ClInclude Include="..\Public\RoverHit.h">
       <Filter>03. GameObject\Actor\Player\State\Hit\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -937,6 +940,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverHit.cpp">
       <Filter>03. GameObject\Actor\Player\State\Hit\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
