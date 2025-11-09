@@ -180,6 +180,7 @@
     <ClInclude Include="..\Public\AugustaGroundBurst.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
+    <ClInclude Include="..\Public\AugustaGroundQTE.h" />
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
@@ -330,6 +331,7 @@
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />

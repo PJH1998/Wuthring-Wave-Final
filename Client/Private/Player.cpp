@@ -357,11 +357,11 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
-	// 6. 카메라/입력 컨트롤러 재설정 (캐릭터 변경 후 카메라가 새 위치 따라가도록)
+	// 6. 협주 확인. Ensemble
+	// 이전 캐릭터의 협주게이지 확인
+	
 
-	// 7. (옵션) 애니메이션 초기화: 등장 애니메이션 재생 
-
-	// 8. UI/게이지 동기화 (캐릭터 스탯 유지)
+	
 
 }
 

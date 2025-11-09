@@ -73,15 +73,15 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	m_pBehaviorTreeCom->tick(this);
+	//m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-	//_float temp{};
-	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	_float temp{};
+	m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
