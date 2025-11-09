@@ -3,6 +3,10 @@
 
 #include "Animator_UI.h"
 
+
+
+//#define KSTA_UI_ATLAS_DEBUG
+
 CUI_Text::CUI_Text(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCustom_UI(pDevice, pContext)
 {
@@ -71,7 +75,12 @@ void CUI_Text::Render()
 		CRASH("Binding_Matrix_Failed");
 
 	ID3D11ShaderResourceView* pFontSRV = m_pGameInstance->Get_AtlasSRV(m_tTextDesc.strFontTag);
+
+#ifdef KSTA_UI_ATLAS_DEBUG
 	ImGui::Image(pFontSRV, ImVec2(512, 512));
+#endif // KSTA_UI_ATLAS_DEBUG
+
+
 	if (FAILED(m_pShaderCom->Bind_Texture("g_Texture", pFontSRV)))
 		CRASH("Binding Font Atlas Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_InverseScreenDiscard", &m_tUIDesc.isInverseScreenDiscard, sizeof(m_tUIDesc.isInverseScreenDiscard))))
