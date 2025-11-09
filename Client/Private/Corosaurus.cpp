@@ -322,6 +322,17 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 {
 	if (m_isAnimationFinished)
 	{
+		_uint iRemainState{};
+		// burst
+		if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_7))
+		{
+			if (m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
+			{
+				iRemainState |= ENUM_CLASS(TEST_STATE::STRIKE);
+			}
+			else
+				iRemainState |= ENUM_CLASS(TEST_STATE::ATTACK_7);
+		}
 		if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2)))
 		{
 
@@ -340,6 +351,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 			}
 		}
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+		m_iState |= iRemainState;
 	}
 	if (m_isTrigger == true)
 	{
@@ -401,6 +413,10 @@ void CCorosaurus::OnCollide_During(_uint iLayer, void* pOther, const ContactMani
 
 void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_7))
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
+	}
 #ifdef _DEBUG
 	cout << "On Hit! (Corro)" << endl;
 #endif // _DEBUG

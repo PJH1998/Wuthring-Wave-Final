@@ -253,6 +253,9 @@
     <Filter Include="03. GameObject\MapObject\Spawner">
       <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\ElectroPredator\Effect">
+      <UniqueIdentifier>{89d75c0d-bb28-4915-b14d-ec5d4d40cfd3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -621,6 +624,9 @@
     <ClInclude Include="..\Public\AugustaGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AoEDoT.h">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -958,6 +964,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AoEDoT.cpp">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

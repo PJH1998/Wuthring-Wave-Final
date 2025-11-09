@@ -167,6 +167,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Actor.h" />
     <ClInclude Include="..\Public\AnimationDummy.h" />
+    <ClInclude Include="..\Public\AoEDoT.h" />
     <ClInclude Include="..\Public\AugustaAirFall.h" />
     <ClInclude Include="..\Public\AugustaAirFly.h" />
     <ClInclude Include="..\Public\AugustaAirJump.h" />
@@ -318,6 +319,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Actor.cpp" />
     <ClCompile Include="..\Private\AnimationDummy.cpp" />
+    <ClCompile Include="..\Private\AoEDoT.cpp" />
     <ClCompile Include="..\Private\AugustaAirAttack.cpp" />
     <ClCompile Include="..\Private\AugustaAirFall.cpp" />
     <ClCompile Include="..\Private\AugustaAirFly.cpp" />
