@@ -40,22 +40,26 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
 	{ 
 	case ERoverSpecialType::EX_ATTACK01:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
+		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 		break;
 	case ERoverSpecialType::EX_ATTACK02:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
+		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 		break;
 	case ERoverSpecialType::EX_ATTACK03:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 		break;
 	case ERoverSpecialType::EX_ATTACK04:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 		break;
 	}
     
 
 
     m_pRover->PartActivate(m_iPartType, true);
-    m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+    
 
 	if (eSpecialType == ERoverSpecialType::EX_ATTACK05)
 		m_pRover->PartActivate(m_iPartType, false);
@@ -222,11 +226,12 @@ void CRoverGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundSpecial::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK01), "Ex_Attack01", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK02), "Ex_Attack02", 1.f, 10.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK03), "Ex_Attack03", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK04), "Ex_Attack04", 1.f, 20.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK05), "Ex_Attack05", 1.f, 80.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK01), "Ex_Attack01", 1.4f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK02), "Ex_Attack02", 1.4f, 20.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK03), "Ex_Attack03", 1.4f, 26.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK05), "Ex_Attack05", 1.f, 80.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK04), "Ex_Attack04", 1.4f, 35.f);
+    
 
 
 	m_PartsAnimations.emplace("Ex_Attack03", "Scythe_Ex_Attack03");

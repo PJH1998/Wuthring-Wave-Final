@@ -44,8 +44,12 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	}
 
 	// 7. 흑 날개.
-	//m_iPartType = CRover::PART_DARKWING;
-	m_iPartType = CRover::TYPE_END;
+	_string strBoneName = "WingCase";
+	m_iPartType = CRover::PARTTYPE::PART_DARKWING;
+	m_pRover->PartActivate(m_iPartType, true);
+	m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	m_pRover->Rotate_Target(); // 진입 시 한번만
+	//m_iPartType = CRover::TYPE_END;
 
 	m_pRover->Set_Gravity(true);
 }
@@ -78,6 +82,9 @@ void CRoverGroundBurst::OnExit()
     CGroundState::OnExit();
     m_pRover->PartActivate(m_iPartType, false);
     m_iPartType = CRover::PARTTYPE::TYPE_END;
+
+
+	m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 
 	if (m_strPrevInfo.empty())
 	{
@@ -113,7 +120,7 @@ void CRoverGroundBurst::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
 
-	if (IsEscapePossible)
+	if (IsEscapePossible && m_strPrevInfo.empty())
 	{
 		if (m_States[LAND])
 		{
