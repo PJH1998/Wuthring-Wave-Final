@@ -461,6 +461,10 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
+HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+    return m_pRenderer->Add_Render_StaticObject(Container);
+}
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);

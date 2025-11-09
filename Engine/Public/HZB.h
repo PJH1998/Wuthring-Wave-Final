@@ -72,7 +72,7 @@ private:
 	_uint													m_iReadIndex = { 1 };
 
 	// Temporal Filter (Pre Visible Store)
-	map<_uint, _bool>								m_PreVisible;
+	map<size_t, _bool>								m_PreVisible;
 
 private:
 	void						Ready_DefaultSetting();

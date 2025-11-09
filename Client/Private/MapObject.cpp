@@ -38,9 +38,6 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;
 
-	if(nullptr != m_pRigidbodyCom)
-		m_iObjectID = m_pRigidbodyCom->Get_ID();
-
 	return S_OK;
 }
 

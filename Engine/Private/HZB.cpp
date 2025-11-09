@@ -83,20 +83,20 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	OC_DESC OCDesc = {};
 	OCDesc.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
 	OCDesc.iNumObjects = iNumObjects;
-	OCDesc.iHZBMipLevel = 3;
+	OCDesc.iHZBMipLevel = 5;
 	m_pContext->UpdateSubresource(m_pOCDescBuffer, 0, nullptr, &OCDesc, 0, 0);
 	
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_ConstantBuffer("OCDesc", m_pOCDescBuffer);
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_SRV("g_BoxPoints", m_pBoxPointsSRV);
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_SRV("InputTexture", m_pMMSRV);
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_UAV("OutputTexture", m_pOcclusionResultUAV);
-	_uint iGroupX = (iNumObjects + 63) / 64;
+	_uint iGroupX = (iNumObjects + 255) / 256;
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Dispatch(iGroupX, 1, 1);
 
 	// Flag Copy
 	m_pContext->CopyResource(m_pOcclusionStageBuffer[m_iWriteIndex], m_pOcclusionFlagBuffer);
 
-	m_pContext->Flush();
+	//m_pContext->Flush();
 	// Update NonCull Objects
 	vector<CStaticObject*> CullObjects;
 
@@ -107,24 +107,27 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	memcpy(pFlags, SubResource.pData, sizeof(_uint) * iNumObjects);
 	for (_uint i = 0; i < iNumObjects; ++i)
 	{
-		_uint iObjectID = Objects[i]->Get_ID();
-		auto iter = m_PreVisible.find(iObjectID);
+		size_t ObjectAddress = reinterpret_cast<size_t>(Objects[i]);
+		auto iter = m_PreVisible.find(ObjectAddress);
 		if (iter == m_PreVisible.end())
-			m_PreVisible.emplace(iObjectID, false);
+			m_PreVisible.emplace(ObjectAddress, false);
 
-		if (m_PreVisible[iObjectID] || pFlags[i] == 1) // Visible
+		if (m_PreVisible[ObjectAddress] || pFlags[i] == 1) // Visible
 		{
 			CullObjects.push_back(Objects[i]);
-			m_PreVisible[iObjectID] = true;
+			m_PreVisible[ObjectAddress] = true;
 		}
 		else
-			m_PreVisible[iObjectID] = false;
+			m_PreVisible[ObjectAddress] = false;
 	}
 	m_pContext->Unmap(m_pOcclusionStageBuffer[m_iReadIndex], 0);
 
 	Safe_Delete_Array(pFlags);
 
 	// Swap Vector
+	_uint iNumPre = Objects.size();
+	_uint iNumCur = CullObjects.size();
+	cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
 	Objects.clear();
 	Objects.reserve(CullObjects.size());
 	Objects.swap(CullObjects);

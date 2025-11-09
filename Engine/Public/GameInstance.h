@@ -125,6 +125,7 @@ public:
 public:
 	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void					Begin_ScreenEffect(SFX_TYPE eType);
 	void					End_ScreenEffect();
