@@ -218,7 +218,7 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSkill::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceFromGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)

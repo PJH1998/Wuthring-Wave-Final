@@ -343,8 +343,18 @@ void CCharacter::Camera_Shake(_float fIntensity)
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
-	ASSERT_CRASH(m_pTransformCom);
+	if (nullptr == m_pTransformCom)
+		return;
+
 	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+}
+
+_bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return false;
+
+	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -361,6 +371,14 @@ void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
 		return;
 
 	m_pAbillityCom->Remove_Condition(iCondition);
+}
+
+void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
 }
 
 _vector CCharacter::Get_LookVector()
@@ -703,6 +721,20 @@ void CCharacter::Ability_Update(_float fTimeDelta)
 CAbility* CCharacter::Get_AbilityCom()
 {
     return m_pAbillityCom;
+}
+_float CCharacter::Get_Cost(COST_TYPE eCostType)
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return m_pAbillityCom->Get_Cost(eCostType);
+}
+_float CCharacter::Get_MaxCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return 100.f;
 }
 void CCharacter::Sync_UI()
 {

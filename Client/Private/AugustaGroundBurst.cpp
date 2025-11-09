@@ -79,6 +79,7 @@ void CAugustaGroundBurst::OnExit()
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+
 }
 
 void CAugustaGroundBurst::Handle_Input()

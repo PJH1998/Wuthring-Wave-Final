@@ -91,9 +91,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	// 4. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
-
-	//// 3. Ability Update();
-	//m_pAbillityCom->Update(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -111,27 +108,24 @@ void CAugusta::Update(_float fTimeDelta)
 
     // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
-    // 5. 현재 위치 - 1Frame 이전 위치 값 계산
+    // 4. 현재 위치 - 1Frame 이전 위치 값 계산
     _vector vVelocity = m_pTransformCom->Get_Velocity();
 
-	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
-
-    // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+    // 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 7. Camera 갱신 => 위치 따라오게
+    // 6. Camera 갱신 => 위치 따라오게
     m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-	// 8. Land Check
+	// 7. Land Check
 	m_IsLand = Is_LandCollider();
 
-	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
+	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
 	m_IsHit = false;
 
-	// 10. MainAttackVolume 설정
+	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Update(fTimeDelta);
 }
@@ -421,13 +415,7 @@ void CAugusta::Sync_Position()
 }
 
 
-#ifdef _DEBUG
-void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
-{
 
-}
-
-#endif // _DEBUG
 
 #pragma region NOTIFY
 void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
@@ -482,6 +470,23 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 	
 	if (var1 == TEXT("CAMERA"))
 	{
+		return; // 안씀 일단.
+		_wstring duration;
+		_wstring type;
+		getline(wss, duration, L'|'); 
+		getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+
+		_float fYawShake = stof(var2);
+		_float fPitchShake = stof(var3);
+		_float fDuration = stof(duration);
+
+
+		if (type == TEXT("IMPULSE"))
+		{
+			//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
+		}
+
+		
 	//	_float fIntensity = stof(var2);
 	//	Camera_Shake(fIntensity); // Shaking 강도.
 		return;
@@ -553,14 +558,12 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
 }
+
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 
-
 }
 #pragma endregion
-
- 
 
 
 

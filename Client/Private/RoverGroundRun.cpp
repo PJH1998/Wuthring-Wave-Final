@@ -49,7 +49,7 @@ void CRoverGroundRun::OnUpdate(_float fTimeDelta)
     Update_RunAnimation(fTimeDelta);
 
     // 2. 물리 체크.
-    Check_Physics();
+    Check_Physics(fTimeDelta);
 
     // 3. 전환 제어
     Check_StateTransition(fTimeDelta);
@@ -63,12 +63,17 @@ void CRoverGroundRun::OnExit()
 {
     CGroundState::OnExit();
     m_pRover->Set_Gravity(true);
+	m_fFallTime = 0.f;
 }
 
 void CRoverGroundRun::Handle_Input()
 {
     // 1. 방향 계산
     m_eDir = m_pRover->Calculate_Direction();
+
+	m_States[HIT] = m_pRover->Is_Hit(); // HIT 상태인가?
+	//if (m_States[HIT]) // 모든 조건 상위 조건
+	//	return;
 
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -85,9 +90,6 @@ void CRoverGroundRun::Handle_Input()
     m_States[SKILL_Q] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
     m_States[SKILL_R] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
 
-   /* m_States[UNIQUE_E] = m_States[SKILL_E] && m_pRover->Is_UniqueGaugeFull();
-    m_States[UNIQUE_R] = m_States[SKILL_R] && m_pRover->Is_UniqueGaugeFull();
-    m_States[BURST_R] = m_States[SKILL_R] && m_pRover->Is_BurstGaugeFull();*/
 
     // DASH보다 우선순위 높음.
     m_States[SPRINT_F] = m_States[MOVE] && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
@@ -97,6 +99,14 @@ void CRoverGroundRun::Handle_Input()
 
     // 상태에 따라 속도 다르게.
     m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+
+	// Burst인지 체크
+	m_States[BURST] = m_pRover->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE));
+
+	if (m_States[BURST])
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Ex_Skill02"));
+	else
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pRover->Check_Skill("Skill02"));
 }
 
 
@@ -122,13 +132,25 @@ void CRoverGroundRun::Update_RunAnimation(_float fTimeDelta)
 
 }
 
-void CRoverGroundRun::Check_Physics()
+void CRoverGroundRun::Check_Physics(_float fTimeDelta)
 {
     // Wall인지?
     m_States[WALL] = m_pRover->Check_ClimbableWall(&m_vWallNormal);
-    // Land Check
+
+	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
-	//m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
+	
+	if (m_States[LAND])
+	{
+		m_fFallTime = 0.f;
+	}
+	else if (!m_States[LAND])
+	{
+		m_fFallTime += fTimeDelta;
+
+		if (m_fFallTime >= 0.2f)
+			m_States[FALL] = true;
+	}
 }
 
 
@@ -139,28 +161,66 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
 
-	if (!m_States[LAND])
+		// 상위, 하위 상태
+	if (m_States[HIT])
 	{
-		m_iNotLandFrames++;
-		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		{
-			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
-			return;
-		}
-	}
-	else
-	{
-		m_iNotLandFrames = 0;  // 리셋
+		/*m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;*/
 	}
 
-    // SPACE 누르면 바로 점프로 전환.
-    if (m_States[JUMP])
+	if (m_States[FALL])
+	{
+		m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
+
+    if (m_States[JUMP]) // SPACE 누르면 바로 점프로 전환.
     {
         m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+	if (m_States[BURST_E]) // Burst E
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Ex_Skill02"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::EX_SKILL02;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
+		return;
+	}
+
+	if (m_States[DEFAULT_E])
+	{
+		if (SKILL_STATE::READY != m_pRover->Use_Skill("Skill02"))
+			return;
+
+		m_pRover->GetStateContextForWrite().m_eSkillType = ERoverSkillType::SKILL02;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL));
+		return;
+	}
+
+	// Run => Attack
+	if (m_States[ATTACK])
+	{
+		// Burst 상태라면 Special 상태로?
+		if (m_States[BURST])
+		{
+			m_pRover->GetStateContextForWrite().m_eSpecialType = ERoverSpecialType::EX_ATTACK01;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPECIAL)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pRover->GetStateContextForWrite().m_eAttackType = ERoverAttackType::ATTACK01;
+			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK)); // 상위, 하위 상태
+			return;
+		}
+
+	}
+
 
 	// 뛰다가 Dash
 	if (m_States[DASH])

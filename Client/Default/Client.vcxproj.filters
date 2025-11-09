@@ -480,9 +480,6 @@
     <ClInclude Include="..\Public\RoverFactory.h">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\RoverSword.h">
-      <Filter>03. GameObject\Weapon\Augusta</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\AugustaState_Enum.h">
       <Filter>03. GameObject\Actor\Player\State\Define</Filter>
     </ClInclude>
@@ -575,6 +572,27 @@
     </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundAttack.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverSword.h">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverDarkWing.h">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundBurst.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundSpecial.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverDarkScythe.h">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundSkill.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -781,9 +799,6 @@
     <ClCompile Include="..\Private\RoverFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Rover</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\RoverSword.cpp">
-      <Filter>03. GameObject\Weapon\Augusta</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\AugustaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Augusta</Filter>
     </ClCompile>
@@ -874,6 +889,27 @@
     </ClCompile>
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundAttack.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverSword.cpp">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverDarkWing.cpp">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundBurst.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundSpecial.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverDarkScythe.cpp">
+      <Filter>03. GameObject\Weapon\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundSkill.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

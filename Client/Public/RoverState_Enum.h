@@ -122,48 +122,33 @@ enum class ERoverAttackType : _uint
 	ATTACK01 = 0,
 	ATTACK02,
 	ATTACK03,
+	ATTACK05,
 	ATTACK04,
-	ATTACK_HEAVYHACK,
-	ATTACK_PENDING, // NormalAttack�� HeavyAttack �����뵵.
-	ATTACK_PULL,
-	ATTACK_SPEEDDRIVE,
-	ATTACK_SPSKILL,
-	SPATTACK01,
-	SPATTACK02,
-	SPATTACK03,
-	SPATTACKOMNI,
+
 	END
 };
 
 enum class ERoverSkillType : _uint
 {
-	SKILL_HACK = 0,
-	SKILL_RISE,
-	SKILL_RISE_ZERO,
-	SKILL_STRIKE,
-	SKILLQTE,
+	SKILL02 = 0,
+	EX_SKILL02,
 	END
 };
 
 enum class ERoverSpecialType : _uint
 {
-	SPATTACK01 = 0,
-	SPATTACK02,
-	SPATTACK03,
-	SPATTACKOMNI,
-	SPWALK_DASH,
-	SPWALK_DASH_ROOT,
-	SPWALK_F,
-	SPWALK_STAND,
-	SPWALK_STOP_L,
-	SPWALK_STOP_R,
+	EX_ATTACK01 = 0,
+	EX_ATTACK02,
+	EX_ATTACK03,
+	EX_ATTACK04,
+	EX_ATTACK05,
+	EX_ATTACK05_UP,
 	END
 };
 
-enum class ERoverBurstType : _uint
+enum class ERoverBurstType : _uint // 강공.
 {
 	BURST01 = 0,
-	BURST_STAND,
 	END
 };
 
