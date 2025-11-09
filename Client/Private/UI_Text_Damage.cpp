@@ -44,11 +44,14 @@ void CUI_Text_Damage::Priority_Update(_float fTimeDelta)
 void CUI_Text_Damage::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
-		return;
+		return;		 
 
 	Update_LifeTime(fTimeDelta);
+	// __super::Update(fTimeDelta);
+	__super::Update_Description();
+
 	Update_Instances(fTimeDelta);
-	__super::Update(fTimeDelta);
+	CCustom_UI::Update(fTimeDelta);
 }
 
 void CUI_Text_Damage::Late_Update(_float fTimeDelta)
@@ -104,7 +107,7 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 {
 	auto& textUIDesc = Get_TextUIDesc();
 	auto& vecInstDescs = textUIDesc.vecInstanceDescs;
-	_float fStartScale = 2.f;
+	_float fStartScale = 2.5f;
 
 	// ksta : 각종 인스턴스 갱신용 정보들 (위치용 행렬, 커스텀 변수용 행렬 등등)
 	//		  꺼내와서 가공하고 다시 재할당해주는 식으로 사용하면 됨
@@ -118,7 +121,7 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 
 	// 이 내에서 인스턴스 변화
 
-	const _float	fStartAnimTime = 0.45f;
+	const _float	fStartAnimTime = 0.17f;
 	const _float	fFadeOutTime	= 0.1f;
 	const _float	fInstIntervalTime = 0.05f;
 	
@@ -135,15 +138,20 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 
 		if (curDesc.matExtraData.m[0][3] != 1.0f)
 		{
-			curDesc.matExtraData.m[0][1] = vScale.x;
-			curDesc.matExtraData.m[0][2] = vScale.y;
+			// 최초 1회, 원본 크기 및 '원본 위치'를 저장
+			curDesc.matExtraData.m[0][1] = curDesc.vSInstRight.x;  // s0x (원본 너비)
+			curDesc.matExtraData.m[0][2] = curDesc.vSInstUp.y;    // s0y (원본 높이)
+			curDesc.matExtraData.m[1][1] = curDesc.vSInstTrans.x; // p0x (원본 위치 X)
+			curDesc.matExtraData.m[1][2] = curDesc.vSInstTrans.y; // p0y (원본 위치 Y)
 			curDesc.matExtraData.m[0][3] = 1.0f;
 		}
+		// 매 프레임 '원본' 값들을 읽어옴
 		const _float s0x = curDesc.matExtraData.m[0][1];
 		const _float s0y = curDesc.matExtraData.m[0][2];
+		const _float p0x = curDesc.matExtraData.m[1][1]; // 원본 위치 X
+		const _float p0y = curDesc.matExtraData.m[1][2]; // 원본 위치 Y
 
 		const _float tLocal = fLifeElapsed - (fInstIntervalTime * (_float)i);
-
 		// 기본값
 		_float alpha = 1.0f; // (기본값 = 안 보임)
 		_float sx = s0x * fStartScale;
@@ -184,6 +192,15 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 				alpha = alpha * (1.0f - u_fade) + 1.0f * u_fade;
 			}
 		}
+
+		// 5-1) 변화된 scale에 맞춰 pos 적용
+		const _float deltaWidth = sx - s0x;
+		const _float deltaHeight = sy - s0y;
+
+		// 최종 위치 = 원본 위치 - (크기 변화량의 절반)
+		_float finalPosX = p0x - (deltaWidth / 2.0f);
+		_float finalPosY = p0y - (deltaHeight / 2.0f);
+
 		// 6) 적용
 		fAlpha = (alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha));
 		vScale.x = sx;
@@ -192,8 +209,8 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		curDesc.matExtraData.m[0][0] = fAlpha;
 		curDesc.vSInstRight.x = vScale.x;
 		curDesc.vSInstUp.y = vScale.y;
-		curDesc.vSInstTrans.x = vPos.x;
-		curDesc.vSInstTrans.y = vPos.y;
+		curDesc.vSInstTrans.x = finalPosX;
+		curDesc.vSInstTrans.y = finalPosY;
 
 		if (i == 0)
 			cout << vScale.x << ", " << vScale.y << endl;
