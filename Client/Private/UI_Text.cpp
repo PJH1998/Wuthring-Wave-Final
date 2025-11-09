@@ -248,14 +248,32 @@ void CUI_Text::Update_Description()
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
 
 		// 화면 좌표 (기준 위치 + bearing + 현재 pen 이동량)
-		inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
-			+ penX
-			+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
+		if (!m_tTextDesc.isTargetExist)
+		{
+			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
+				+ penX
+				+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
 
-		inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
-			- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
-			+ penY;
 
+			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
+				- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
+				+ penY;
+		}
+		else
+		{
+			inst.vSInstTrans.x =/* m_tTextDesc.vScreenPos.x*/
+				+ penX
+				+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
+
+
+			inst.vSInstTrans.y =/* m_tTextDesc.vScreenPos.y*/
+				- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
+				+ penY;
+
+
+
+
+		}
 
 		// 다음 글자 위치 커서 이동 (커닝 반영된 advanceX 사용)
 		penX += (_float)advanceX * m_tTextDesc.fScale;

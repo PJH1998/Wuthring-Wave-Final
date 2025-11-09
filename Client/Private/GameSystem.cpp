@@ -120,9 +120,9 @@ void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 
 #pragma endregion
 
-void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType,_float fSpawnRange)
+void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _float fSpawnRange)
 {
-	m_pUI_FontPreset->Render_Damage(vTargetPos, iDamage, iDmgElemType, iDmgAnimType, fSpawnRange);
+	m_pUI_FontPreset->Render_Damage(vTargetPos, iDamage, iDmgElemType, fSpawnRange);
 }
 
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)

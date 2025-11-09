@@ -18,7 +18,7 @@ public:
 	HRESULT Initialize();
 
 public:
-	void Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType, _float fSpawnRange);
+	void Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _float fSpawnRange);
 
 
 private:

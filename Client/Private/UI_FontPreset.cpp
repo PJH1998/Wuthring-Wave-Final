@@ -59,15 +59,15 @@ HRESULT CUI_FontPreset::Initialize()
 	return S_OK;
 }
 
-void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType, _float fSpawnRange)	// Heal, Dark, Etc..
+void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _float fSpawnRange)	// Heal, Dark, Etc..
 {
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
 	
 	tDesc.vecInstanceDescs.resize(to_wstring(iDamage).size());
 
-	tDesc.strText			= to_wstring(iDamage);
-	tDesc.vScreenPos		= { 500.f, 500.f }; 
+	tDesc.strText			= L"테스트입니다 " + to_wstring(iDamage);
+	tDesc.vScreenPos		= { 0.f, 0.f };		// ksta : 반드시. 이게 존재하면 해당 방향으로 드리프트 발생.
 	tDesc.vTargetWorldPos	= vTargetPos;
 
 	tDesc.vColor			= m_FontTypeDesc[iDmgElemType].vColor;

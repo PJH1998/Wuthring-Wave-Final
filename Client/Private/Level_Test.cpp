@@ -386,7 +386,6 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 			_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
 			static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
 			static_cast<_uint>(m_pGameInstance->Rand(1.f, 4.999f)),
-			0,
 			3.f
 		);
 
