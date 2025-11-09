@@ -130,14 +130,14 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		auto& curDesc = vecInstDescs[i];
 
 		_float fAlpha = 1.f;
-		_float2 vScale = _float2{ curDesc.vSInstRight.	x, curDesc.vSInstUp.y };
+		_float2 vScale = _float2{ curDesc.vSInstRight.x, curDesc.vSInstUp.y };
 		_float2 vPos = _float2{ curDesc.vSInstTrans.x, curDesc.vSInstTrans.y };
 
 		if (curDesc.matExtraData.m[0][3] != 1.0f)
 		{
-			curDesc.matExtraData.m[0][1] = vScale.x;   // s0x
-			curDesc.matExtraData.m[0][2] = vScale.y;   // s0y
-			curDesc.matExtraData.m[0][3] = 1.0f;       // inited flag
+			curDesc.matExtraData.m[0][1] = vScale.x;
+			curDesc.matExtraData.m[0][2] = vScale.y;
+			curDesc.matExtraData.m[0][3] = 1.0f;
 		}
 		const _float s0x = curDesc.matExtraData.m[0][1];
 		const _float s0y = curDesc.matExtraData.m[0][2];
@@ -145,43 +145,49 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		const _float tLocal = fLifeElapsed - (fInstIntervalTime * (_float)i);
 
 		// 기본값
-		_float alpha = 1.0f;
+		_float alpha = 1.0f; // (기본값 = 안 보임)
 		_float sx = s0x * fStartScale;
 		_float sy = s0y * fStartScale;
 
-		// 4) 시작 후 스타트 애니메이션: fStartAnimTime 동안 a: 1→0, 스케일: 2x→1x (선형)
+		// 4) 시작 후 스타트 애니메이션: fStartAnimTime 동안 a: 1→0 (페이드인), 스케일: fStartScale→1x (선형)
 		if (tLocal >= 0.0f)
 		{
 			if (tLocal < fStartAnimTime)
 			{
-				const _float u = tLocal / fStartAnimTime;   // 0..1
-				alpha = 1.0f - u;                           // 1 -> 0
-				const _float k = (fStartScale - u);                // 2x -> 1x
-				sx = s0x * k;
+				const _float u = tLocal / fStartAnimTime;
+				alpha = 1.0f - u;
+				
+                // [FIXED] 스케일 로직 수정
+                // k가 fStartScale에서 1.0으로 선형 보간(Lerp) 되도록 수정
+				const _float k = (fStartScale * (1.0f - u)) + (1.0f * u);
+				
+                sx = s0x * k;
 				sy = s0y * k;
 			}
 			else
-			{	// 스타트 이후
-				alpha = 0.0f;
+			{	// 스타트 이후 (머무르는 상태)
+				alpha = 0.0f; // (보임)
 				sx = s0x;
 				sy = s0y;
 			}
 		}
 
-		// 5) 객체 전체 페이드아웃: 남은 fFadeOutTime 동안 a: 0→1 (글로벌)
+		// 5) 객체 전체 페이드아웃: 남은 fFadeOutTime 동안 a: 0→1 (페이드아웃)
 		{
 			const _float fadeBegin = fLifeTime - fFadeOutTime;
 			if (fLifeElapsed >= fadeBegin)
 			{
-				_float u = (fLifeElapsed - fadeBegin) / fFadeOutTime; // 0..1
-				if (u < 0.f) u = 0.f; else if (u > 1.f) u = 1.f;
-				alpha = alpha * (1.0f - u) + 1.0f * u;
+				_float u_fade = (fLifeElapsed - fadeBegin) / fFadeOutTime; // 0..1
+				if (u_fade < 0.f) u_fade = 0.f; else if (u_fade > 1.f) u_fade = 1.f;
+
+                // (0.0 -> 1.0 으로 Lerp: 보임 -> 안 보임)
+				alpha = alpha * (1.0f - u_fade) + 1.0f * u_fade;
 			}
 		}
 		// 6) 적용
-		fAlpha     = (alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha));
-		vScale.x   = sx;
-		vScale.y   = sy;
+		fAlpha = (alpha < 0.f ? 0.f : (alpha > 1.f ? 1.f : alpha));
+		vScale.x = sx;
+		vScale.y = sy;
 
 		curDesc.matExtraData.m[0][0] = fAlpha;
 		curDesc.vSInstRight.x = vScale.x;
@@ -192,7 +198,6 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		if (i == 0)
 			cout << vScale.x << ", " << vScale.y << endl;
 	}
-
 	m_tUIDesc.vecInstanceDescs = vecInstDescs;		// 인스턴스 반영
 
 	// =======================================================================

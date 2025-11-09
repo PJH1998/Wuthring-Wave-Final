@@ -17,7 +17,7 @@ HRESULT CUI_FontPreset::Initialize()
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
 	tDesc.fScale			= 0.5f;	
-	tDesc.vLifeTime			= { 0.0f, 3.0f }; // ksta
+	tDesc.vLifeTime			= { 0.0f, 10.0f }; // ksta
 	tDesc.fFontOutlineWidth	= 2.f;
 	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
 	tDesc.isTargetExist		= true;
