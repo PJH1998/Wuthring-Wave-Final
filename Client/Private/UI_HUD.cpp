@@ -260,9 +260,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	CPlayerStatus* pStatus = m_pGameSystem->Get_PlayerStatus();
 
-
-
-
 	auto& UISlots = pStatus->Get_Ability(m_iSelectedCHIndex)->Get_UISkillSlots();
 
 	_float fBasicSkillCD[CH_END][SK_END] = {
@@ -297,8 +294,9 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	// ==============================
 
-	
-	auto& skillSlots = pStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+
+
 
     switch (m_iSelectedCHIndex)
     {
@@ -324,7 +322,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	{
 		auto targetUI = pSkillUI[i];
 
-
 		// 스킬 ui 인스턴스 갯수는 캐릭터마다 다름. 이에 따라 인스턴스 갯수만큼 리사이징 및 할당 
 		vector<_float4x4> vecVariantMat = {/* _float4x4() , _float4x4() */};	
 
@@ -345,9 +342,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 			vecVariantMat[2].m[0][1] = 0.5f;
 			vecVariantMat[2].m[0][2] = 0.95f;
 		}
-
-
-
 
         CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
             vecVariantMat,
@@ -427,12 +421,6 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 		}
 
-
-		
-		
-		
-
-
     }
 
 
@@ -461,12 +449,78 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 
 
+	// ==============================
+	// * [Skill Ready] Skill Ready Indicator
+	// ==============================
+	auto& skillSlots = m_pPlayerStatus->Get_Ability(CH_AUGUSTA)->Get_UISkillSlots();
+
+	_bool isReady_Augusta_StrongATK = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_LB].iStateType) == UI_AUGUSTA_STATE::LB_STRONG_READY;
+	_bool isIn_Galbrena_BurstMode = false; /* 나중에 버스트 모드 조건 삽입 */
+	_bool isIn_AdvUltMode = m_pAbility->Check_AnyCondition(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
+	UI_AUGUSTA_STATE eState_Augusta_R = static_cast<UI_AUGUSTA_STATE>(skillSlots[CAbility::KEY_R].iStateType);
+	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
+
+
+	_uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
+	_uint iIndex_RBtn = 0;		static _uint iIndex_PrevRBtn ;
+	_uint iIndex_LBBtn = 4;		static _uint iIndex_PrevLBBtn ;
+	//_uint iIndex_TBtn = ..
+
+	switch (m_pPlayerStatus->Get_CurrentCharIndex())
+	{
+	case CH_AUGUSTA:
+	{
+		if (isIn_Augusta_AdvUlt)
+		{
+			iIndex_EBtn = 2;
+			iIndex_RBtn = 0;
+			iIndex_LBBtn = 1;
+		}
+	}break;
+	case CH_GALBRENA:
+	{	// ksta : 버스트 모드 시에 5로 늘려야 함
+	}break;
+	default:
+		iIndex_EBtn = 2;
+		iIndex_RBtn = 0;
+		iIndex_LBBtn = 4;
+		break;
+	}
+
+	
+
+	CCustom_UI* pSkillReadyUI = Find_ChildObject(L"Skill_ReadyFrame");
+
+	auto readyInstDesc = pSkillReadyUI->Get_UIDesc().vecInstanceDescs;
+	
+	// E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
+	if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
+		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 1 };
+	else
+		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
+
+	// R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
+	if (pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) >= 1.f)
+		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 1 };
+	else
+		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 0 };
 
 
 
 
 
+	
 
+
+
+	// 만약 버튼 인덱스가 바뀐다면, 꼬임 방지를 위한 이전 버튼 인덱스의 비활성화.
+	if (iIndex_PrevEBtn != iIndex_EBtn)		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
+	if (iIndex_PrevRBtn != iIndex_RBtn)		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 0 };
+	if (iIndex_PrevLBBtn != iIndex_LBBtn)	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
+
+	iIndex_PrevEBtn = iIndex_EBtn;
+	iIndex_PrevRBtn = iIndex_EBtn;
+	iIndex_PrevLBBtn = iIndex_EBtn;
 
 
 
@@ -667,7 +721,7 @@ void CUI_HUD::Update_UI_SkillFeedback_Trigger(_float fTimeDelta)
 	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN &&
 		isChar_LBBtnFeedbackAble)
 		Add_UI_SkillSection_OnFeedback(iIndex_LBBtn);
-
+	
 }
 
 void CUI_HUD::Update_UI_SkillSection_OnFeedback(_float fTimeDelta)
