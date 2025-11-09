@@ -93,6 +93,8 @@ float4		g_vTargetWorldPos;
 float4		g_vCamPosition;
 float2      g_LifeTime;
 
+float       g_FontScale;
+
 
 
 
@@ -274,7 +276,8 @@ VS_OUT VS_INSTANCE(VS_IN_INSTANCE In)
     VS_OUT Out = (VS_OUT) 0;
 
     // 각 인스턴스 별 크기 및 위치 계산
-    float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+    //float2 vInstSca = float2(length(In.vSInstRight.xyz), length(In.vSInstUp.xyz));
+    float2 vInstSca = float2(In.vSInstRight.x, In.vSInstUp.y);
 	
     float2 quadLocal = In.vPosition.xy + float2(0.5f, -0.5f);	// 피벗 보정. 폰트의 기준점에 따른 위치 보정 위함.
     float2 quadLocalPx = float2(quadLocal.x * vInstSca.x,		// 크기 비례 위치 이동 (원본 글자 크기의 사각형을 만들기 위함)

@@ -16,7 +16,7 @@ HRESULT CUI_FontPreset::Initialize()
 	// Const
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
-	tDesc.fScale			= 1.f;	
+	tDesc.fScale			= 0.5f;	
 	tDesc.vLifeTime			= { 0.0f, 3.0f }; // ksta
 	tDesc.fFontOutlineWidth	= 2.f;
 	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
@@ -64,11 +64,15 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
 	
-	tDesc.vecInstanceDescs.resize(to_wstring(iDamage).size());
 
 	tDesc.strText			= L"테스트입니다 " + to_wstring(iDamage);
 	tDesc.vScreenPos		= { 0.f, 0.f };		// ksta : 반드시. 이게 존재하면 해당 방향으로 드리프트 발생.
 	tDesc.vTargetWorldPos	= vTargetPos;
+
+	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
+	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
+		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+
 
 	tDesc.vColor			= m_FontTypeDesc[iDmgElemType].vColor;
 	tDesc.vOutlineColor		= m_FontTypeDesc[iDmgElemType].vOutlineColor;

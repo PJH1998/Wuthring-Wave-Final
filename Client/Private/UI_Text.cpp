@@ -103,6 +103,8 @@ void CUI_Text::Render()
 		CRASH("Binding_Value_Failed");
 	if (FAILED(m_pShaderCom->Bind_Value("g_LifeTime", &m_tTextDesc.vLifeTime, sizeof(m_tTextDesc.vLifeTime))))
 		CRASH("Binding_Value_Failed");
+	if (FAILED(m_pShaderCom->Bind_Value("g_FontScale", &m_tTextDesc.fScale, sizeof(m_tTextDesc.fScale))))
+		CRASH("Binding_Value_Failed");
 	
 
 	FTCUSTOM_FONT* pFontInfo = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
@@ -202,7 +204,6 @@ void CUI_Text::Update_Description()
 	const _wstring& text = m_tTextDesc.strText;
 	if (text.empty())
 		return;
-
 	// 1. 폰트 매니저에서 폰트 정보 받아오기
 	auto* pFont = m_pGameInstance->Find_Font(m_tTextDesc.strFontTag);
 	if (!pFont) return;
@@ -252,22 +253,22 @@ void CUI_Text::Update_Description()
 		{
 			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
 				+ penX
-				+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
+				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
 
 
 			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
-				- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
+				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
 				+ penY;
 		}
 		else
 		{
 			inst.vSInstTrans.x =/* m_tTextDesc.vScreenPos.x*/
 				+ penX
-				+ (_float)pGlyph->sOffsetX - iPadding * m_tTextDesc.fScale;
+				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
 
 
 			inst.vSInstTrans.y =/* m_tTextDesc.vScreenPos.y*/
-				- (_float)pGlyph->sOffsetY + iPadding * m_tTextDesc.fScale
+				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
 				+ penY;
 
 
