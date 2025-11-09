@@ -461,6 +461,10 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
+HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+    return m_pRenderer->Add_Render_StaticObject(Container);
+}
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
@@ -826,6 +830,13 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	m_pCSM->Render(pShader, pVIBuffer);
 }
 #endif
+#pragma endregion
+
+#pragma region HZB
+void CGameInstance::Occlusion_Culling(vector<class CStaticObject*>& Objects)
+{
+	m_pHZB->Occlusion_Culling(Objects);
+}
 #pragma endregion
 
 #pragma region UI_MANAGER

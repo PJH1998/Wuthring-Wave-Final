@@ -17,6 +17,7 @@ public:
 	HRESULT				Initialize(_uint iNumThread);
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void					Render();
 	void					Begin_ScreenEffect(SFX_TYPE eType);
@@ -57,9 +58,12 @@ private:
 	mutex									m_RenderAddMutex;
 	condition_variable					m_CV;
 
+	// Culling
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	vector<class CStaticObject*>	m_StaticObjects[2];
 	atomic<_uint>						m_iDoubleBufferIndex = {};
+	atomic<_uint>						m_iCullStack = {};
+	atomic<_bool>						m_isCompleteFrustumCull = { false };
 	list<class CGameObject*>		m_ShadowMapObjects;
 
 

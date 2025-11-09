@@ -80,6 +80,8 @@ using namespace JPH;
 #include <list>
 #include <queue>
 #include <map>
+#include <set>
+#include <unordered_set>
 #include <algorithm>
 #include <functional>
 #include <mutex>

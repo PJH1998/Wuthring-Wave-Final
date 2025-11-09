@@ -5,6 +5,20 @@ NS_BEGIN(Engine)
 
 class CHZB final : public CBase
 {
+private:
+	typedef struct tagBoxInfo {
+		_float4	vCorner[8] = {};
+		_float3	vCenter = {};
+		_float		fRadius = {};
+	}BOXINFO;
+
+	typedef struct tagOcclusionDesc {
+		_float4x4		ProjMatrix = {};
+		_uint			iNumObjects = {};
+		_uint			iHZBMipLevel = {};
+		_float2		vPadding = {};
+	}OC_DESC;
+
 public:
 	enum HZB_CS_TYPE
 	{
@@ -23,6 +37,8 @@ public:
 public:
 	HRESULT					Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	void						Update();
+
+	void						Occlusion_Culling(vector<class CStaticObject*>& Objects);
 
 #ifdef _DEBUG
 public:
@@ -46,9 +62,17 @@ private:
 	ID3D11ShaderResourceView*					m_pMMSRV = { nullptr };
 
 	// Occlusion Culling
+	ID3D11Buffer*										m_pOCDescBuffer = { nullptr };
 	ID3D11Buffer*										m_pBoxPointsBuffer = { nullptr };
+	ID3D11ShaderResourceView*					m_pBoxPointsSRV = { nullptr };
 	ID3D11Buffer*										m_pOcclusionFlagBuffer = { nullptr };
-	ID3D11UnorderedAccessView*					m_pOcclusionFlagUAV = { nullptr };
+	ID3D11UnorderedAccessView*					m_pOcclusionResultUAV = { nullptr };
+	ID3D11Buffer*										m_pOcclusionStageBuffer[2] = {nullptr};
+	_uint													m_iWriteIndex = { 0 };
+	_uint													m_iReadIndex = { 1 };
+
+	// Temporal Filter (Pre Visible Store)
+	map<size_t, _bool>								m_PreVisible;
 
 private:
 	void						Ready_DefaultSetting();

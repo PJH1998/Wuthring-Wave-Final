@@ -125,6 +125,7 @@ public:
 public:
 	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void					Begin_ScreenEffect(SFX_TYPE eType);
 	void					End_ScreenEffect();
@@ -265,6 +266,11 @@ public:
 	void					Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
+
+#pragma region HZB
+	void					Occlusion_Culling(vector<class CStaticObject*>& Objects);
+#pragma endregion
+
 
 #pragma region UI_MANAGER
 public:
