@@ -247,6 +247,9 @@
     <Filter Include="03. GameObject\MapObject\Destruction">
       <UniqueIdentifier>{e3875d88-8833-4ff7-9c1b-25cbaa1bb20c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Projectile">
+      <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -573,6 +576,12 @@
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\PatternDummy.h">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Projectile.h">
+      <Filter>03. GameObject\Projectile</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\RoverGroundAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
@@ -889,6 +898,12 @@
     </ClCompile>
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\PatternDummy.cpp">
+      <Filter>03. GameObject\Dummy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Projectile.cpp">
+      <Filter>03. GameObject\Projectile</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>

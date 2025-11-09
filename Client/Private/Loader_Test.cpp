@@ -10,8 +10,7 @@
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "AttackVolume.h"
-
-#include "StateMachine.h"
+#include "PatternDummy.h"
 
 #include "Wing.h"
 
@@ -248,6 +247,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
+#pragma region DUMMY
+	// Prototype_GameObject_PatternDummy
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		CPatternDummy::Create(m_pDevice, m_pContext))))
+		CRASH("PatternDummy Prototype Create Failed");
+#pragma endregion
     return S_OK;
 }
 
