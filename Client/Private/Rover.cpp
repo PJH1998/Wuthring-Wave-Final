@@ -111,17 +111,24 @@ void CRover::Update(_float fTimeDelta)
 			pPart.second->Update(fTimeDelta);
 	}
 
-    // 3. 상태 머신 갱신
-    m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함..
+	// 3. 상태 머신 갱신
+	m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
-    // 4. 현재 위치 - 1Frame 이전 위치 값 계산
-    _vector vVelocity = m_pTransformCom->Get_Velocity();
+	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	if (!m_IsQTE)
+	{
+		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-    // 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-    m_pColliderCom->Update(vVelocity / fTimeDelta);
+		// 6. Camera 갱신 => 위치 따라오게
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 
-    // 6. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+	}
+	else
+	{
+		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+	}
 
 	// 7. Land Check
 	m_IsLand = Is_LandCollider();
@@ -147,8 +154,17 @@ void CRover::Late_Update(_float fTimeDelta)
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
-	// 3. Collider 충돌 처리후 위치에 맞춘다.
-    m_pColliderCom->Sync_Position(m_pTransformCom);
+	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+	if (!m_IsQTE)
+		m_pColliderCom->Sync_Position(m_pTransformCom);
+	else
+		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+
+	if (m_IsQTEend)
+	{
+		Notify_HarmonyEnd();
+		m_IsQTEend = false;
+	}
 
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -178,7 +194,11 @@ void CRover::Render()
     }
 
 #ifdef _DEBUG
-    m_pColliderCom->Render();
+	if (!m_IsQTE)
+		m_pColliderCom->Render();
+	else
+		m_pQTEColliderCom->Render();
+
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -360,6 +380,26 @@ void CRover::Sync_Position()
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
+void CRover::Bind_QTE(_bool IsQTE)
+{
+	m_IsQTE = IsQTE;
+
+	if (m_IsQTE)
+	{
+		// Activate
+		SetActivate(true);
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+		// 내 앞에서 생성. (안 곂치게)
+		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
+		vPos += vLook * 1.f;
+		m_pQTEColliderCom->Set_Position(vPos);
+		GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
+		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
+	}
+}
+
 
 
 #pragma region NOTIFY
@@ -534,6 +574,18 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+
+	CCollider::COLLIDER_DESC ColliderDesc{};
+	ColliderDesc.vPos = pDesc->vPosition;
+	ColliderDesc.vOffset = { 0.f, 0.67f, 0.f };
+	ColliderDesc.eType = EMotionType::Kinematic;
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::QTE);
+	ColliderDesc.fHeight = 0.4f;
+	ColliderDesc.fRadius = 0.5f;
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Collider"), TEXT("Com_QTECollider"), reinterpret_cast<CComponent**>(&m_pQTEColliderCom), &ColliderDesc)))
+		CRASH("Collider");
 
 }
 

@@ -271,9 +271,6 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 		break;
 	}
-	
-	
-
 	// 상태 변수 초기화
 	m_StateContext.Clear();
 
@@ -459,9 +456,10 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 		// 내 앞에서 생성. (안 곂치게)
 		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
 
-		vPos += vLook * 1.5f;
+		
+		vPos += vLook * 1.f;
 		m_pQTEColliderCom->Set_Position(vPos);
-		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SkillQTE;
+		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
 	}
 }
@@ -661,12 +659,6 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
 	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
 		, TEXT("Prototype_Component_Collider"), TEXT("Com_QTECollider"), reinterpret_cast<CComponent**>(&m_pQTEColliderCom), &ColliderDesc)))
 		CRASH("Collider");
-
-
-	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
-	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
-	//	CRASH("Ability");
-
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)

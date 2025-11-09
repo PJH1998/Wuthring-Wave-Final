@@ -615,6 +615,9 @@
     <ClInclude Include="..\Public\AugustaGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundQTE.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -949,6 +952,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundQTE.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
