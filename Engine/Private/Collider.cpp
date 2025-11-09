@@ -71,22 +71,21 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 
 	// Create Shape
 	using namespace JPH;
-	m_fHeight = pDesc->fHeight;
-	m_fRadius = pDesc->fRadius;
+	m_fRayOffset = pDesc->fRayOffset;
 	m_pShape = new CapsuleShape(pDesc->fHeight * 0.5f, pDesc->fRadius);
 	ASSERT_CRASH(m_pShape);
 
 	m_vOffset = pDesc->vOffset;
 	// Virtual Setting
 	CharacterVirtualSettings VirtualSetting = {};
-	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(89.9f);
-	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
+	VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(100.f);
+	//VirtualSetting.mMaxSlopeAngle = XMConvertToRadians(50.f);			// 허용 경사 각도
 	VirtualSetting.mShape = m_pShape;											// Character Virtual Shape
 	VirtualSetting.mShapeOffset = LoadVec3(m_vOffset);						// Shape Offset
-	VirtualSetting.mMaxStrength = 10.f;											// 다른 Body를 밀 수 있는 최대 힘
-	VirtualSetting.mCharacterPadding = 0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
-	VirtualSetting.mPenetrationRecoverySpeed = 0.f;							// 겹쳤을 때 복원 속도
-	VirtualSetting.mPredictiveContactDistance = 0.02f;							// 미리 충돌 감지하는 범위
+	VirtualSetting.mMaxStrength = 8.f;											// 다른 Body를 밀 수 있는 최대 힘
+	VirtualSetting.mCharacterPadding = 0.015f; //0.02f;									// (충돌 범위 Padding) => 여유 주는듯?
+	VirtualSetting.mPenetrationRecoverySpeed = 6.0f; //0.f;							// 겹쳤을 때 복원 속도
+	VirtualSetting.mPredictiveContactDistance = 0.08f; //0.02f;							// 미리 충돌 감지하는 범위
 	VirtualSetting.mEnhancedInternalEdgeRemoval = true;					// 각진 부분 부드럽게
 	
 	VirtualSetting.mInnerBodyShape = m_pShape;
@@ -105,10 +104,8 @@ HRESULT CCollider::Initialize_Clone(void* pArg)
 void CCollider::Update(const _fvector& vVelocity)
 {
 	// Ray Cast Ground Check
-	_float fRayOffset = m_fHeight * 0.5f + m_fRadius - 0.1f;
-	//_vector vPos = StoreVector3(m_pCharacterVirtual->GetPosition()) + StoreVector3(m_pCharacterVirtual->GetShapeOffset()) - XMVectorSet(0.f, fRayOffset, 0.f, 0.f);
 	_vector vPos = StoreVector3(m_pCharacterVirtual->GetPosition()) + XMVectorSet(0.f, 0.1f, 0.f, 0.f);
-	_vector vEndPos = vPos + XMVectorSet(0.f, -0.2f, 0.f, 0.f);
+	_vector vEndPos = vPos + XMVectorSet(0.f, m_fRayOffset, 0.f, 0.f);
 
 	_float4 vOut = {};
 	m_isLand = m_pGameInstance->Ray_Cast(vPos, vEndPos, &vOut);

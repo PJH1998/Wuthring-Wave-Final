@@ -25,8 +25,9 @@ public:
 	virtual HRESULT Initialize_Clone(void* pArg);
 	virtual void Update(_float fTimeDelta);
 	void Register_AllAbilityFiles(const _string& strFolderPath);
+	void Update_CostCondition(_float fTimeDelta);
 	void UISlotUpdate(_float fTimeDelta);
-
+	
 public:
 	void Set_UICharacterType(_uint eCharactertType);
 
@@ -47,7 +48,8 @@ public:
 	_float Get_CostRatio(COST_TYPE eType) const;    // 그냥 캐릭터들 특수 Cost로 사용할 거같고.
 	_float Get_Hp() { return m_CharacterInfo.fHp; } // 현재 Hp
 	_float Get_MaxHp() { return m_CharacterInfo.fMaxHp; } // Max Hp
-	_float Get_Resonance() { return m_CharacterInfo.fResonance; }
+	_float Get_Harmony() { return m_CharacterInfo.fHarmonyGauge; }
+	_float Get_MaxHarmony() { return m_CharacterInfo.fMaxHarmonyGauge; }
 	
 
 	const vector<UISKILL_SLOT>& Get_UISkillSlots() const { return m_UISlots; }
@@ -57,8 +59,8 @@ public:
 #ifdef _DEBUG
 public:
 	void Print_KeySlotinfo();
-
-
+#else
+	void Print_KeySlotinfo();
 #endif // _DEBUG
 
 
@@ -74,11 +76,14 @@ public:
 	void Add_Cost(COST_TYPE eType, _float fCost);
 	void Set_Hp(_float fHp);
 	void Add_Hp(_float fHp);
-	void Set_Resonance(_float fResonance);
-	void Add_Resonance(_float fResonance);
+	void Set_HarmonyGauge(_float fResonance);
+	void Add_HarmonyGauge(_float fResonance);
 
 	void Bind_Condition(_uint iCondition);
 	void Remove_Condition(_uint iCondition);
+
+	void Bind_CostCondition(_uint iCostType, _uint iConditionFlag);
+	
 
 	UISKILL_SLOT Determine_State(_uint iCharacterIdx, const _string& strKey); // CharacterIdx와 누른 키.
 	UISKILL_SLOT Determine_StateRover(_uint iCharacterIdx, const _string& strKey); // CharacterIdx와 누른 키.
@@ -94,6 +99,8 @@ public:
 	void Print_Cost();
 	void Print_CoolTime();
 #else
+	void Print_Cost();
+	void Print_CoolTime();
 public:
 	void Debug_FullCost(_bool IsAll = false);
 #endif // _DEBUG
@@ -109,32 +116,25 @@ private:
 	// 3. 현재 쿨타임이 돌고 있는 스킬 목록 (Key : 스킬 이름, Value: 남은 쿨타임)
 	unordered_map<_string, _float> m_mapSkillCooldowns;
 
-	//// 4. 체인 키 매핑 (동적) P1 (우선순위)
-	//unordered_map<_string, _string> m_mapKeyToChainSkill;
-
-	//// 5. 조건부 키 매핑 (동적) P2 (우선순위)
-	//unordered_map<_string, _string> m_mapConditionalChainSkills;
-
-	//// 6. 기본 키 → 스킬 매핑 P3 (우선순위)
-	//unordered_map<_string, _string> m_mapKeyToDefaultSkill;
-
-	// 7. UI에 전달할 SkillSLot
+	// 4. UI에 전달할 SkillSLot
 	vector<UISKILL_SLOT> m_UISlots; // 매프레임 업데이트
 	
-	// 8. Keys.
+	// 5. Keys.
 	vector<_string> m_Keys = {};
+
+	// 6. 특정 상황에 특정 Cost가 자연적으로 감소되는 경우 ex) 인멸자 공명 게이지 강공 실행시
+	unordered_map<_uint, _uint> m_mapCostConditions;
 
 	CHARACTER_INFO m_CharacterInfo = {};
 	_string m_strPrevSkillName = {};
 
 	
 
-	// 8. 자기가 어떤 캐릭터인지 알 수 있게. => 어디서 초기화하지?
+	// 7. 자기가 어떤 캐릭터인지 알 수 있게. => 어디서 초기화하지?
 	_uint m_iCharacter = {}; 
 	_uint m_iCondition = {}; // 캐릭터에 따라 컨디션 변경.
 
 
-	_bool m_IsUIDirty = { false };
 	/*
 	* 소모값 기본 0.f으로 소유
 	* 사용 예시.

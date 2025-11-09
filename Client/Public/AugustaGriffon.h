@@ -5,6 +5,12 @@ NS_BEGIN(Client)
 class CAugustaGriffon final : public CProp
 {
 public:
+	enum VOLUME
+	{
+		VOLUME_STRIKE = 0,
+		VOLUME_END
+	};
+public:
 	typedef struct tagAugustaGriffonDesc : public CProp::PROP_DESC {
 		
 	} AUGUSTA_GRIFFON_DESC;
@@ -24,7 +30,12 @@ public:
 
 
 public:
-	virtual void Activate(_bool IsActive) override;
+	virtual void Activate(_bool IsActivate) override;
+	virtual void Change_Volume(_uint iVolumeIdx) override;
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
+
+	// Owner의 게이지 채우기?
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 private:
 	vector<_uint> m_ShaderPaths = {};
@@ -35,6 +46,8 @@ private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);
 	void Ready_Positions(const PROP_DESC* pDesc);
+	void Ready_AttackVolumes();
+	
 	void Bind_Resources();
 
 public:

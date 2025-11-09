@@ -1069,6 +1069,7 @@ void CAnimationTool::Render_Animation_Detail()
     {
         IsChanged = true;
         m_IsPlayAnimation = !m_IsPlayAnimation;
+
     }
         
 
@@ -1087,8 +1088,11 @@ void CAnimationTool::Render_Animation_Detail()
     }
 
 #ifdef _DEBUG
-    if (IsChanged)
-        m_AnimationActors[m_wSelected_AnimActorTag]->Set_PlayAnimation(m_IsPlayAnimation);
+	if (IsChanged)
+	{
+		m_AnimationActors[m_wSelected_AnimActorTag]->Set_PlayAnimation(m_IsPlayAnimation);
+	}
+        
 #endif
 
     if (ImGui::Button("Notify Visible"))

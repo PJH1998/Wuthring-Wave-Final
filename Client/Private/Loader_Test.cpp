@@ -10,8 +10,7 @@
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
 #include "AttackVolume.h"
-
-#include "StateMachine.h"
+#include "PatternDummy.h"
 
 #include "Wing.h"
 
@@ -21,6 +20,8 @@
 #include "Augusta.h"
 
 #include "RoverSword.h"
+#include "RoverDarkWing.h"
+#include "RoverDarkScythe.h"
 #include "Rover.h"
 
 #include "Player.h"
@@ -247,6 +248,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 		CRASH("MonsterTest Prototype Create Failed");
 #pragma endregion
 
+#pragma region DUMMY
+	// Prototype_GameObject_PatternDummy
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		CPatternDummy::Create(m_pDevice, m_pContext))))
+		CRASH("PatternDummy Prototype Create Failed");
+#pragma endregion
     return S_OK;
 }
 
@@ -426,11 +433,47 @@ HRESULT CLoader_Test::Load_Rover()
         CRASH("Prototype Create Failed");
 
     // 2. 객체 초기화.
-    _wstring wstrBayonetTag = TEXT("Prototype_GameObject_Rover_Sword");
+    _wstring wstrSwordTag = TEXT("Prototype_GameObject_Rover_Sword");
     if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-        , wstrBayonetTag
+        , wstrSwordTag
         , CRoverSword::Create(m_pDevice, m_pContext))))
         CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Rover_DarkWing";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkWing/DarkRoverWing.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrDrakWingTag = TEXT("Prototype_GameObject_Rover_DarkWing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrDrakWingTag
+		, CRoverDarkWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Rover_DarkScythe";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkScythe/DarkScythe.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrDarkScytheTag = TEXT("Prototype_GameObject_Rover_DarkScythe");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrDarkScytheTag
+		, CRoverDarkScythe::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 
 #pragma endregion
 

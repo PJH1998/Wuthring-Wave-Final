@@ -21,7 +21,7 @@ public:
 	virtual		void				Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	vector<SCENE_CAMERA_FRAME>		Frames;
+	vector<SCENE_CAMERA_FRAME>		m_Frames;
 	_int											m_iFrameIndex = { 0 };
 	_float											m_fTrackPosition = {};
 	_float											m_fTrackPerSec = { 10.f };
@@ -37,7 +37,7 @@ private:
 private:
 	void							Default_SetUp();
 	void							Lerp_Quat();
-	void							Spline(_float fTimeDelta);
+	void							Spline();
 
 public:
 	static CSQ_Camera_Edit*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -1,4 +1,4 @@
-#include "EnginePch.h"
+﻿#include "EnginePch.h"
 #include "Sequence.h"
 
 #include "GameInstance.h"
@@ -9,7 +9,7 @@ CSequence::CSequence()
 	Safe_AddRef(m_pGameInstance);
 }
 
-HRESULT CSequence::Initialize(const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pArg)
+HRESULT CSequence::Initialize(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pArg)
 {
 	ASSERT_CRASH(Items.size() == ItemDatas.size());
 
@@ -48,7 +48,7 @@ _bool CSequence::Update(_float fTimeDelta)
 	return false;
 }
 
-CSequence* CSequence::Create(const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+CSequence* CSequence::Create(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	CSequence* pInstance = new CSequence();
 

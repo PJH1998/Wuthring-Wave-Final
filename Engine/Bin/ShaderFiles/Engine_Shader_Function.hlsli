@@ -117,6 +117,8 @@ float Compute_RimPower(float4 vNormal, float4 vLook, float NdotL)
     
     fRimPower *= smoothstep(0.5f, 1.f, NdotL);
     
+    fRimPower = max(0.2f, fRimPower);
+    
     fRimPower = pow(fRimPower, 5.f);
     
     return fRimPower;

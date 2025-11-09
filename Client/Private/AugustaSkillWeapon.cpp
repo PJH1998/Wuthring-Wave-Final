@@ -1,5 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "AugustaSkillWeapon.h"
+#include "AttackVolume.h"
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Ability.h"
 
 CAugustaSkillWeapon::CAugustaSkillWeapon(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
@@ -30,6 +34,7 @@ HRESULT CAugustaSkillWeapon::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+	Ready_AttackVolumes();
 
     return S_OK;
 }
@@ -37,6 +42,12 @@ HRESULT CAugustaSkillWeapon::Initialize_Clone(void* pArg)
 void CAugustaSkillWeapon::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+
+	if (m_IsAnimationEnd)
+		m_isActivate = false;
+
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CAugustaSkillWeapon::Update(_float fTimeDelta)
@@ -52,14 +63,17 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 		m_pParentTransform->Get_WorldMatrix());
 
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
     //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
 }
 
 void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 {
-
-
     CProp::Late_Update(fTimeDelta);
+
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
@@ -91,22 +105,41 @@ void CAugustaSkillWeapon::Render()
 
 #ifdef _DEBUG
     m_pRigidbodyCom->Render();
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
 void CAugustaSkillWeapon::Activate(_bool IsActive)
 {
     SetActivate(IsActive);
+}
 
-    // Griffon�� ��쿡�� ��ġ�� �ʱ�ȭ���ش�?
-    /*m_fTrackPosition = 0.f;
-    _matrix mat = XMMatrixIdentity();
-    m_pTransformCom->Set_WorldMatrix(mat);*/
+void CAugustaSkillWeapon::Change_Volume(_uint iVolumeIdx)
+{
+	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
+		return;
 
-    if (IsActive)
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-    else
-        m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::ATTACK));
+	// 교체.
+	m_pMainAttackVolume->TriggerActivate(false);
+	m_iVolumeIdx = iVolumeIdx;
+	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+}
+
+void CAugustaSkillWeapon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
+{
+	if (m_AttackVolumes[iVolumeIdx] != nullptr)
+		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
+}
+
+void CAugustaSkillWeapon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	// 게이지 올리기?
+	CAbility* pAbility = CGameSystem::GetInstance()
+		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::AUGUSTA));
+
+	if (nullptr == pAbility)
+		return;
 }
 
 void CAugustaSkillWeapon::Ready_Components(const PROP_DESC* pDesc)
@@ -153,6 +186,58 @@ void CAugustaSkillWeapon::Ready_Positions(const PROP_DESC* pDesc)
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
+}
+
+void CAugustaSkillWeapon::Ready_AttackVolumes()
+{
+	m_AttackVolumes.resize(VOLUME_END);
+
+
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
+	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(3.f, 3.f, 3.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	// Burst 궁 켰을때 평타.
+	m_AttackVolumes[VOLUME_SWORD_ATTACK] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(4.f, 4.f, 2.f);
+
+	// 궁극기용도.
+	m_AttackVolumes[VOLUME::VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ULTI])
+		m_AttackVolumes[VOLUME_ULTI]->TriggerActivate(false);
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ATTACK])
+		m_AttackVolumes[VOLUME_SWORD_ATTACK]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(10.f, 10.f, 10.f); // 3차원 크으게
+	m_AttackVolumes[VOLUME_SWORD_ULTI] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_SWORD_ULTI])
+		m_AttackVolumes[VOLUME_SWORD_ULTI]->TriggerActivate(false);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ULTI]; // 기본.
 }
 
 void CAugustaSkillWeapon::Bind_Resources()

@@ -183,6 +183,16 @@ void CModel::Render_Gizmo(_fmatrix TransformMatrix)
 	m_pGameInstance->Render_Gizmo(BoneLocalMatrix * TransformMatrix);
 }
 
+_bool CModel::Find_Animation(const _string& strAnimName)
+{
+	for (_uint i = 0; i < m_AnimationNames.size(); i++)
+	{
+		if (m_AnimationNames[i] == strAnimName)
+			return true;
+	}
+	return false;
+}
+
 
 #endif // _DEBUG
 
@@ -347,6 +357,61 @@ HRESULT CModel::Clear_Materials(CDeferredShader* pShader, const _char* pConstanc
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Clear_Resource(pShader, pConstanceName, eTextureType, pEffect);
 }
 
+//_bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
+//{
+//	// 다른 Animation 들어올 시, 이전 Animation 저장
+//	//if (m_strPreAnimation != strAnimationName)
+//	//{
+//	//	m_isChangeAnimation = true;
+//	//	m_strPreAnimation = strAnimationName;
+//	//}
+//
+//	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
+//	if (true == isBlend && true == m_isBlend)
+//	{
+//		*pTrackPosition = 0.f;
+//		if (true == m_Animations.find(strAnimationName)->second->Blend_TransformationMatrices(fTimeDelta, m_Bones, 1.f))
+//		{
+//			Clear_Animation(strAnimationName);
+//			m_isBlend = false;
+//		}
+//	}
+//	else
+//	{
+//		auto iter = m_Animations.find(strAnimationName);
+//		if (iter == m_Animations.end())
+//			return S_OK;
+//
+//		_float fTrackPosition = {};
+//
+//
+//		if (true == iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition))
+//		{
+//			if (m_strPreAnimation != strAnimationName)
+//			{
+//				if(m_strPreAnimation != "")
+//					m_isBlend = true;
+//				m_strPreAnimation = strAnimationName;
+//			}
+//			Clear_Animation(strAnimationName);
+//			return true;
+//		}
+//		if(nullptr != pTrackPosition)
+//			*pTrackPosition = fTrackPosition;
+//
+//		// Root Node Translation 조정
+//		if (true == isRootMotion)
+//			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+//	}
+//
+//
+//	for (auto& pBone : m_Bones)
+//		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);
+//
+//
+//	return false;
+//}
+
 _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend, _bool isRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, _float fRootMotionRate)
 {
 	// 다른 Animation 들어올 시, 이전 Animation 저장
@@ -357,42 +422,35 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	//}
 
 	// Animation 종료 시, 다음 Animation 처음 KeyFrame과 Blend => 사실상 안쓰고 있음.
-	if (true == isBlend && true == m_isBlend)
+
+	auto iter = m_Animations.find(strAnimationName);
+	if (iter == m_Animations.end())
+		return false;
+
+	_float fTrackPosition = {};
+
+	if (m_strPreAnimation != strAnimationName)
 	{
-		*pTrackPosition = 0.f;
-		if (true == m_Animations.find(strAnimationName)->second->Blend_TransformationMatrices(fTimeDelta, m_Bones, 1.f))
-		{
-			Clear_Animation(strAnimationName);
-			m_isBlend = false;
-		}
+		m_isChangeAnimation = true;
+		m_strPreAnimation = strAnimationName;
+		Clear_Animation(strAnimationName);
 	}
-	else
+	
+	_bool IsAnimationEnd = iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition);
+	if (nullptr != pTrackPosition)
+		*pTrackPosition = fTrackPosition;
+
+	// Root Node Translation 조정
+	if (true == isRootMotion)
+		Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+
+
+	// 4. 애니메이션이 끝났다면? Clear 작업을 진행하고 Animation을 클리어해줍니다.
+	if (IsAnimationEnd)
 	{
-		auto iter = m_Animations.find(strAnimationName);
-		if (iter == m_Animations.end())
-			return S_OK;
-
-		_float fTrackPosition = {};
-
-		if (true == iter->second->Update_TransformationMatrices_All(fTimeDelta, m_Bones, &fTrackPosition))
-		{
-			if (m_strPreAnimation != strAnimationName)
-			{
-				if(m_strPreAnimation != "")
-					m_isBlend = true;
-				m_strPreAnimation = strAnimationName;
-			}
-			Clear_Animation(strAnimationName);
-			return true;
-		}
-		if(nullptr != pTrackPosition)
-			*pTrackPosition = fTrackPosition;
-
-		// Root Node Translation 조정
-		if (true == isRootMotion)
-			Compute_RootAnimation(fRootMotionRate, IsRootMotionRotate, IsRootMotionTranslate);
+		Clear_Animation(strAnimationName);
+		return true; // 애니메이션 종료
 	}
-
 
 	for (auto& pBone : m_Bones)
 		pBone->Update_CombinedTransformationMatrix(XMLoadFloat4x4(&m_PreTransformMatrix), m_Bones);

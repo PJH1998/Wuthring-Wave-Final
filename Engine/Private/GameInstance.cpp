@@ -26,6 +26,9 @@
 #include "UI_Manager.h"
 #include "RCS_Manager.h"
 #include "ShadowMap.h"
+#include "Decal_Manager.h"
+#include "VolumetricFog.h"
+#include "HZB.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -105,6 +108,9 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pCSM = CCSM::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pCSM);
 
+	m_pHZB = CHZB::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pHZB);
+
 	m_pUI_Manager = CUI_Manager::Create();
 	ASSERT_CRASH(m_pUI_Manager);
 
@@ -117,11 +123,19 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 	m_pShadowMap = CShadowMap::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pShadowMap);
 
+	m_pDecal_Manager = CDecal_Manager::Create(*ppDevice, *ppContext);
+	ASSERT_CRASH(m_pDecal_Manager);
+
+	m_pVF = CVolumetricFog::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pVF);
+
 	return S_OK;
 }
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pHZB->Update();
+
 	m_pGUIManager->Update();
 
 	m_pPicking->Update();
@@ -147,6 +161,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	//m_pFont_Manager->Late_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
+	m_pDecal_Manager->Update(fTimeDelta);
 
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
@@ -198,6 +213,8 @@ HRESULT CGameInstance::Draw()
 #ifdef _DEBUG
 	ASSERT_CRASH(m_pPhysicsManager);
 	m_pPhysicsManager->Render();
+	ASSERT_CRASH(m_pHZB);
+	m_pHZB->Render();
 #endif
 	ASSERT_CRASH(m_pGUIManager);
 	m_pGUIManager->Render();
@@ -461,6 +478,10 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
+HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+    return m_pRenderer->Add_Render_StaticObject(Container);
+}
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
@@ -598,7 +619,7 @@ void CGameInstance::OnShake(const _float3& vDir)
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }
@@ -804,9 +825,9 @@ HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewNa
 {
 	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
 }
-HRESULT CGameInstance::Bind_ShadowDistance_Resource(_uint iDataBufferIndex)
+HRESULT CGameInstance::Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName)
 {
-	return m_pCSM->Bind_ShadowDistance_Resource(iDataBufferIndex);
+	return m_pCSM->Bind_ShadowDistance_Resource(pShader, pDistanceName, pLastDistanceName);
 }
 HRESULT CGameInstance::Bind_CSM_SRV(CShader* pShader, const _char* pConstantName)
 {
@@ -826,6 +847,13 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	m_pCSM->Render(pShader, pVIBuffer);
 }
 #endif
+#pragma endregion
+
+#pragma region HZB
+void CGameInstance::Occlusion_Culling(vector<class CStaticObject*>& Objects)
+{
+	m_pHZB->Occlusion_Culling(Objects);
+}
 #pragma endregion
 
 #pragma region UI_MANAGER
@@ -938,6 +966,21 @@ void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rec
 #endif
 #pragma endregion
 
+#pragma region DECAL_MANAGER
+HRESULT CGameInstance::Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)])
+{
+	return m_pDecal_Manager->Add_Decal(strDecalTag, pFilePath);
+}
+HRESULT CGameInstance::Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal)
+{
+	return m_pDecal_Manager->Add_DecalData(strDecalTag, Decal);
+}
+HRESULT CGameInstance::Render_Decal()
+{
+	return m_pDecal_Manager->Render();
+}
+#pragma endregion
+
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {
 	if (FAILED(m_pCamera_Manager->Clear_Resource(iLevelID)))
@@ -960,6 +1003,8 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pGUIManager->Clear_Func();
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
+	m_pShadowMap->Clear();
+	m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;
@@ -994,9 +1039,12 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pPipeLine);
 	Safe_Release(m_pPicking);
 	Safe_Release(m_pShadowMap);
+	Safe_Release(m_pDecal_Manager);
 	Safe_Release(m_pInput_Device);
 	Safe_Release(m_pFrustrum);
+	Safe_Release(m_pVF);
 	Safe_Release(m_pCSM);
+	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									

@@ -31,7 +31,7 @@ void CRoverAirJump::OnEnter(void* pArg)
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = ENUM_CLASS(eJumpType);
 
-    m_pRover->Set_Gravity(true);
+    m_pRover->Set_Gravity(false);
 
 }
 
@@ -64,6 +64,14 @@ void CRoverAirJump::Handle_Input()
     ERoverJumpType eJumpType = static_cast<ERoverJumpType>(m_iCurrentAnimIdx);
 
     m_eDir = m_pRover->Calculate_Direction(); 
+	m_States[HIT] = m_pRover->Is_Hit(); // HIT 상태인가?
+
+	// Hit면 모든 상태 제거
+	if (m_States[HIT])
+		return;
+
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
  
@@ -72,7 +80,7 @@ void CRoverAirJump::Handle_Input()
         && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT)) && CState::Is_EscapePossible();
     
     // Jump Attack
-    m_States[AIR_ATTACK] = eJumpType == ERoverJumpType::JUMP_WALK_LF && m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+    m_States[AIR_ATTACK] =  m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
 }
 
 void CRoverAirJump::Check_Physics(_float fTimeDelta)
@@ -100,13 +108,34 @@ void CRoverAirJump::Check_StateTransition(_float fTimeDelta)
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
-    // 1. 우선순위 제일 높음.
+	// 1. 우선순위 제일 높음.
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
+
+	// 2. 날 수 있다면?
+	if (m_States[FLY])
+	{
+		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
+		return;
+	}
+
     if (m_States[DOUBLE_JUMP])
     {
         m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_SECOND_F;
         m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP)); // 상위, 하위 상태
         return;
     }
+
+	if (m_States[AIR_ATTACK] && IsEscapePossible)
+	{
+		m_pRover->GetStateContextForWrite().m_eAirAttackType = ERoverAirAttackType::AIRATTACK_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::AIR_ATTACK)); // 상위, 하위 상태
+		return;
+	}
 
     // 2. 점프 애니메이션이 끝났는데도 안닿았을경우?
     if (m_IsAnimationEnd && !m_States[LAND])
@@ -131,10 +160,10 @@ void CRoverAirJump::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_LOOP), "Jump_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_RUN_LF), "Jump_Run_LF", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_RUN_RF), "Jump_Run_RF", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 5.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 5.f, 3.f); // 더블 점프
-    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f, 3.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f, 3.f); // 제자리 점프
+    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_SECOND_B), "Jump_Second_B", 1.f, 5.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_SECOND_F), "Jump_Second_F", 1.f, 5.f, 1.f); // 더블 점프
+    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_WALK_LF), "Jump_Walk_LF", 1.f, 10.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverJumpType::JUMP_WALK_RF), "Jump_Walk_RF", 1.f, 10.f, 1.f); // 제자리 점프
 }
 
 

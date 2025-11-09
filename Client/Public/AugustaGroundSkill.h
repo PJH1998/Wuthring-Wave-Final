@@ -24,7 +24,8 @@ private:
 	   SKILL_RISE,
 	   AIRATTACK_HACKDOWN_START,
 
-	   ATTACK_SPEEDDRIVE,
+	   ATTACK_PULL,
+	   ATTACK_SP_SKILL,
 
 	   POINT_E,
 	   SWORD_R,
@@ -57,6 +58,9 @@ private:
     void Check_StateTransition(_float fTimeDelta) ;
     void SetUp_Animations();
     void State_Reset();
+
+private:
+	void Handle_Animation_SpecialState(); // 특수한 애니메이션 상태를 처리한다.
 
 public:
     static CAugustaGroundSkill* Create(class CGameObject* pOwner);

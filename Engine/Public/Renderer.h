@@ -17,6 +17,7 @@ public:
 	HRESULT				Initialize(_uint iNumThread);
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void					Render();
 	void					Begin_ScreenEffect(SFX_TYPE eType);
@@ -57,9 +58,12 @@ private:
 	mutex									m_RenderAddMutex;
 	condition_variable					m_CV;
 
+	// Culling
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	vector<class CStaticObject*>	m_StaticObjects[2];
 	atomic<_uint>						m_iDoubleBufferIndex = {};
+	atomic<_uint>						m_iCullStack = {};
+	atomic<_bool>						m_isCompleteFrustumCull = { false };
 	list<class CGameObject*>		m_ShadowMapObjects;
 
 
@@ -93,7 +97,6 @@ private:
 	_float									m_fDebugRoughness = 0.2f;
 	_float									m_fDebugMetallic = 0.f;
 #endif
-
 private:
 	// Viewport Size 
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
@@ -109,20 +112,21 @@ private:
 	void						Render_Outline();
 	void						Render_NonBlend();	// 임시
 	void						Render_Static();
-	void						Render_SSAO();
 	void						Render_Decal();
+	void						Render_SSAO();
 	void						Render_Dynamic();
 	void						Render_Light();
 	void						Render_Combined();
 	void						Render_NonLight();
-	void						Render_Emissive();
-	void						Render_Bloom();
+	void						Render_Emissive();	// 단독 Emissive
+	void						Render_Effect();	// Backbuffer + Emissive + Distoriton
+	void						Render_Bloom();		// Emissvie 처리
 	void						Render_BloomCombined();
 	void						Render_DistortionObject();
 	void						Render_Blend();
-	void						Render_Distortion();
 	void						Render_LUT();
 	void						Render_Fog();
+	void						Render_Distortion();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();

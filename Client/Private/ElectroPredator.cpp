@@ -23,20 +23,22 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
 
-	m_pTransformCom->Scale({ 1.f, 1.f, 1.f });
+
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
-	m_fAttackCoolTime[1] = 30.f;
+	m_fAttackCoolTime[1] = 20.f;
 	m_fAttackCoolTime[2] = 30.f;
 #pragma endregion
 
 	Ready_Component(pDesc);
-	m_iHP = 1;
-
+	CActor::Register_AllNotifies(pDesc->strFolderPath);
+	m_iHP = pDesc->fHp;
+	m_fAttackDmg = pDesc->fAttackDmg;
+	m_vDistanceRange = _float2(7.f, 12.95f);
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
-
+	m_fImpluseRate = pDesc->fImpluseRate;
 	//임시 patrol 위치 데이터
 	m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
 	m_PatrolPoints.push(pDesc->vInitPosition);
@@ -55,13 +57,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	// 1. Update Current State
 	m_pBehaviorTreeCom->tick(this);
 
-	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2) | ENUM_CLASS(TEST_STATE::ATTACK_3)))
-		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta, 0.9f);
-	if (m_beHit)
-	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		m_beHit = false;
-	}
+	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
@@ -70,15 +66,44 @@ void CElectroPredator::Update(_float fTimeDelta)
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	// 3. Collider Update
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	if (m_isPushed)
+	{
+		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		m_isPushed = false;
+		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+	}
+	else if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && (m_iState & ENUM_CLASS(TEST_STATE::BEHIT)))
+	{
+		_vector vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+		m_iState &= ~ENUM_CLASS(TEST_STATE::PARALYSIS);
+	}
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CElectroPredator::Late_Update(_float fTimeDelta)
 {
-	m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
+	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
+	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
+	{
 
+		if (m_fAirAcc >= 0.15f)
+		{
+			if (m_pColliderCom->IsLand() && m_iState & ENUM_CLASS(TEST_STATE::AIR))
+			{
+				m_iState &= ~ENUM_CLASS(TEST_STATE::AIR);
+				//m_isAir = false;
+				m_fAirAcc = 0.f;
+			}
+		}
+		else
+			m_fAirAcc += fTimeDelta;
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
 }
@@ -98,7 +123,7 @@ void CElectroPredator::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+   		m_pShaderCom->Begin(0);
 
 		m_pModelCom->Render(i);
 	}
@@ -114,6 +139,10 @@ void CElectroPredator::Render()
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
+	if (wStrColliderTag == TEXT("Lerp"))
+	{
+		TurnLerp(Isactive);
+	}
 }
 
 void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
@@ -123,6 +152,14 @@ void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 	//
 	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
 	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+}
+
+void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
+{
+	if (wStrObjectTag == TEXT("Look"))
+	{
+		TurnFix();
+	}
 }
 
 HRESULT CElectroPredator::Bind_Resources()
@@ -156,11 +193,12 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 1.15f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 1.8f;
+	ColliderDesc.fHeight = 1.5f;
 	ColliderDesc.fRadius = 0.4f;
+	ColliderDesc.fRayOffset = -0.11f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -230,7 +268,11 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 {
 	if (m_isAnimationFinished)
 	{
+		_uint iRemainState{};
+		if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
+			iRemainState |= ENUM_CLASS(TEST_STATE::AIR);
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+		m_iState |= iRemainState;
 
 	}
 	if (m_isTrigger == true)
@@ -244,20 +286,7 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 	m_isTrigger = false;
 	if (m_isDetecting)
 	{
-		//_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
-		//_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		//_vector vDir = vTargetPos - vPosition;
-		//m_fDistance = XMVectorGetX(XMVector3Length(vDir));
-		//vDir = XMVector3Normalize(vDir);
-		//m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
-		//m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
-		//
-		//XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 		Calculate_PosAndDir();
-#ifdef _DEBUG
-		//cout << "x : " << m_vTargetPosition.x << " y : " << m_vTargetPosition.y << " z : " << m_vTargetPosition.z << endl;
-		//cout << "distance: " << m_fDistance << endl;
-#endif
 	}
 	for (_uint i = 0; i < 3; ++i)
 	{
@@ -273,6 +302,38 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 	}
 }
 
+void CElectroPredator::After_Condition(_float fTimeDelta)
+{
+	if (m_isTurnLerp)
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+
+	if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_3)))
+	{
+		if (m_fDistance < 4.f)
+		{
+			m_iState &= ~(ENUM_CLASS(TEST_STATE::ATTACK_3));
+		}
+	}
+	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
+	{
+		if (!m_AirTrig)
+		{
+			m_iState = ENUM_CLASS(TEST_STATE::AIR);
+			m_AirTrig = true;
+		}
+	}
+	else
+		m_AirTrig = false;
+
+	if (true == m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = false;
+	}
+	else
+		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
+}
+
 void CElectroPredator::Calculate_PosAndDir()
 {
 	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
@@ -286,12 +347,23 @@ void CElectroPredator::Calculate_PosAndDir()
 	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 }
 
+void CElectroPredator::TurnFix()
+{
+	m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+}
+
+void CElectroPredator::TurnLerp(_bool isActive)
+{
+	m_isTurnLerp = isActive;
+}
+
 void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
 		m_isTrigger = true;
-		CTransform* pTransform = static_cast<CTransform*>(pOther);
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
 		if (!m_isAggro)
 			m_isAggro = true;
@@ -305,7 +377,25 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+#endif // _DEBUG
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
+	{
+		m_beHit = true;
+#ifdef _DEBUG
+		cout << "Be Hit! SKILL (False Sovereign)" << endl;
+#endif // _DEBUG
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
+	{
+		m_beHit = true;
+		m_isPushed = true;
+		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+#ifdef _DEBUG
+		cout << "Knock Back! (Electro Predator)" << endl;
+		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 	}
 }
@@ -398,12 +488,12 @@ _bool CElectroPredator::isPatrol()
 
 _bool CElectroPredator::Back()
 {
-	return m_fFrontDot < 0.f && fabs(m_fFrontDot) > 0.525f;
+	return  m_fDistance < m_vDistanceRange.x;
 }
 
 _bool CElectroPredator::Front()
 {
-	return m_fFrontDot > 0.f && fabs(m_fFrontDot) > 0.525f;
+	return m_fDistance > m_vDistanceRange.y;
 }
 
 _bool CElectroPredator::Left()

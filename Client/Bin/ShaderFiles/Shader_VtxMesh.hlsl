@@ -114,7 +114,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     if (g_IsDynamicObject)
     {
         Out.vDepth.z = 1.f;
-        Out.vPBR.z = 1.f;
+ //       Out.vPBR.z = 1.f;
     }
      
     Out.vPBR.a = 1.f;
@@ -126,7 +126,7 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
         if (g_HasMask)
         {
             vector vDefaultNormal = g_NormalTexture[0].Sample(DefaultSampler, In.vTexcoord);
-        
+            
             float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));

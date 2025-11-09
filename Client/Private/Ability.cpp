@@ -34,9 +34,6 @@ HRESULT CAbility::Initialize_Clone(void* pArg)
 	if (FAILED(CComponent::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	
-
-
 	return S_OK;
 }
 
@@ -59,13 +56,12 @@ void CAbility::Update(_float fTimeDelta)
 			++iter;
 	}
 
+	Update_CostCondition(fTimeDelta);
+
 	// 매프레임 Stamina 자동 회복. // 초당 10
 	Add_Cost(COST_TYPE::STAMINA, fTimeDelta * 10.f);
 
 	// UI 슬롯 업데이트
-	// UI 슬롯 업데이트 (더티 플래그 기반)
-
-
 	UISlotUpdate(fTimeDelta);
 }
 
@@ -76,6 +72,30 @@ void CAbility::Register_AllAbilityFiles(const _string& strFolderPath)
 
 	Read_Skill(skillPath.c_str());
 	Read_Stat(statPath.c_str());
+}
+
+void CAbility::Update_CostCondition(_float fTimeDelta)
+{
+
+	// 감소시켜야할 Cost가 있다면?
+	for (auto iter = m_mapCostConditions.begin(); iter != m_mapCostConditions.end();)
+	{
+		COST_TYPE eCostType = static_cast<COST_TYPE>(iter->first);
+
+		// 초당 10.f 감소.
+		Add_Cost(eCostType, -fTimeDelta * 10.f);
+
+		// Cost가 0.f 라면? 제거.
+		if (m_Costs[iter->first] <= 0.f)
+		{
+			Remove_Condition(iter->second);
+			Set_Cost(eCostType, 0.f); // 0으로 초기화
+
+			iter = m_mapCostConditions.erase(iter);
+		}
+		else
+			++iter;
+	}
 }
 
 void CAbility::UISlotUpdate(_float fTimeDelta)
@@ -215,6 +235,86 @@ void CAbility::Print_KeySlotinfo()
 		///OutputDebugString(strDebug.c_str());
 	}
 }
+#else
+void CAbility::Print_KeySlotinfo()
+{
+	for (_uint i = 0; i < KEY_END; ++i)
+	{
+		stringstream ss;
+
+
+		_string stateType = {};
+		if (m_UISlots[i].iStateType == 0)
+		{
+			stateType = "LB_STRONG_READY";
+		}
+		else if (m_UISlots[i].iStateType == 1)
+		{
+			stateType = "LB_SWORD_READY";
+		}
+		else if (m_UISlots[i].iStateType == 2)
+		{
+			stateType = "T_INTERACTION_READY";
+		}
+		else if (m_UISlots[i].iStateType == 3)
+		{
+			stateType = "T_INTERACTION_FAILED";
+		}
+		else if (m_UISlots[i].iStateType == 4)
+		{
+			stateType = "E_GRIFFON_READY";
+		}
+		else if (m_UISlots[i].iStateType == 5)
+		{
+			stateType = "E_RISE_READY";
+		}
+		else if (m_UISlots[i].iStateType == 6)
+		{
+			stateType = "E_DEFAULT_READY";
+		}
+		else if (m_UISlots[i].iStateType == 7)
+		{
+			stateType = "Q_ECHO_READY";
+		}
+		else if (m_UISlots[i].iStateType == 7)
+		{
+			stateType = "Q_ECHO_FAILED";
+		}
+		else if (m_UISlots[i].iStateType == 8)
+		{
+			stateType = "Q_ECHO_FAILED";
+		}
+		else if (m_UISlots[i].iStateType == 9)
+		{
+			stateType = "R_ULTI_READY";
+		}
+		else if (m_UISlots[i].iStateType == 10)
+		{
+			stateType = "R_SWORD_READY";
+		}
+		else if (m_UISlots[i].iStateType == 11)
+		{
+			stateType = "R_SWORD_ULTI_READY";
+		}
+
+
+
+		ss << "====================================" << endl
+			<< "Key Input : " << m_UISlots[i].strKeyInput << endl
+			<< "CharacterType : " << m_UISlots[i].iCharacterType << endl
+			<< "iStateType : " << stateType << endl
+			<< "fCurrentCoolTime : " << m_UISlots[i].fCurrentCoolTime << endl
+			<< "fMaxCoolTime : " << m_UISlots[i].fMaxCoolTime << endl
+			<< "strSkillName : " << m_UISlots[i].strSkillName << endl
+			<< "====================================" << endl;
+
+		cout << ss.str();
+		//_wstring strDebug = StringToWString(ss.str());
+
+		///OutputDebugString(strDebug.c_str());
+	}
+}
+
 #endif // _DEBUG
 
 
@@ -317,20 +417,20 @@ void CAbility::Add_Hp(_float fHp)
 	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
 }
 
-void CAbility::Set_Resonance(_float fResonance)
+void CAbility::Set_HarmonyGauge(_float fResonance)
 {
-	m_CharacterInfo.fResonance = fResonance;
+	m_CharacterInfo.fHarmonyGauge = fResonance;
 }
 
-void CAbility::Add_Resonance(_float fResonance)
+void CAbility::Add_HarmonyGauge(_float fResonance)
 {
-	m_CharacterInfo.fResonance += fResonance;
+	m_CharacterInfo.fHarmonyGauge += fResonance;
 
 	// 0보다 아래로 안가도록.
-	m_CharacterInfo.fResonance = max(0.f, m_CharacterInfo.fResonance);
+	m_CharacterInfo.fHarmonyGauge = max(0.f, m_CharacterInfo.fHarmonyGauge);
 
 	// MaxHp보다 안커지도록.
-	m_CharacterInfo.fResonance = min(100.f, m_CharacterInfo.fResonance);
+	m_CharacterInfo.fHarmonyGauge = min(100.f, m_CharacterInfo.fHarmonyGauge);
 }
 
 void CAbility::Bind_Condition(_uint iCondition)
@@ -342,6 +442,16 @@ void CAbility::Remove_Condition(_uint iCondition)
 {
 	m_iCondition &= ~iCondition; // 반전 마스크 적용.
 }
+
+void CAbility::Bind_CostCondition(_uint iCostType, _uint iConditionFlag)
+{
+	// 시간에 따라 Cost 감소 시작.
+	m_mapCostConditions.emplace(iCostType, iConditionFlag);
+}
+
+
+
+
 
 UISKILL_SLOT CAbility::Determine_State(_uint iCharacterIdx, const _string& strKey)
 {
@@ -368,22 +478,43 @@ UISKILL_SLOT CAbility::Determine_StateRover(_uint iCharacterIdx, const _string& 
 
 	skillSlot.strKeyInput = strKey;
 	skillSlot.iCharacterType = iCharacterIdx;
-	
-	skillSlot.iStateType;
+	skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::DEFAULT);
+	skillSlot.fMaxCoolTime = 0.f;
 
-	skillSlot.fCurrentCoolTime;
-	skillSlot.fMaxCoolTime;
-	skillSlot.strSkillName;  // => 이거 부터 결정
-	
-	// 왼쪽 공격.
-	if (strKey == "LB")
+	// E 공격. => 말고 슬롯 안바뀜.
+	if (strKey == "E")
 	{
-		// 우선 순위
-		if (m_strPrevSkillName == "Burst01" || m_strPrevSkillName == "Sp")
+		if (m_iCondition & ENUM_CLASS(UI_ROVER_CONDITION::BURST_ACTIVE))
 		{
-
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Ex_Skill02");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Ex_Skill02");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_BURST_READY);
+			}
+		}
+		else
+		{
+			const SKILL_INFO* pSkillInfo = Get_SkillInfo("Skill02");
+			if (nullptr != pSkillInfo)
+			{
+				skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Skill02");
+				skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+				skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::E_DEFAULT_READY);
+			}
 		}
 	}
+	else if (strKey == "R")
+	{
+		skillSlot.fCurrentCoolTime = Get_RemainingCooldown("Burst01_Ulti");
+		const SKILL_INFO* pSkillInfo = Get_SkillInfo("Burst01_Ulti");
+		if (nullptr != pSkillInfo)
+			skillSlot.fMaxCoolTime = pSkillInfo->fCoolDown;
+		skillSlot.iStateType = ENUM_CLASS(UI_ROVER_STATE::R_READY);
+	}
+
+
 
 
 	return skillSlot;
@@ -500,89 +631,6 @@ UISKILL_SLOT CAbility::Determine_StateGalbrena(_uint iCharacterIdx, const _strin
 	return skillSlot;
 }
 
-// 함수 내에서 참조로 받은 SkillSlot의 strSkillName을 변경해줍니다.
-//_uint CAbility::Determine_State(_uint iCharacterIdx, const _string& strKey, const _string& strSkillName)
-//{
-//	UI_CHARACTERTYPE eType = static_cast<UI_CHARACTERTYPE>(iCharacterIdx);
-//
-//	_uint iStateType = {};
-//	switch (eType)
-//	{
-//	case UI_CHARACTERTYPE::ROVER:
-//		iStateType = Determine_StateRover(strKey, strSkillName);
-//		break;
-//	case UI_CHARACTERTYPE::AUGUSTA:
-//		iStateType = Determine_StateAugusta(strKey, strSkillName);
-//		break;
-//	case UI_CHARACTERTYPE::GALBRENA:
-//		iStateType = Determine_StateGalbrena(strKey, strSkillName);
-//		break;
-//	}
-//
-//
-//
-//	return iStateType;
-//}
-//
-//_uint CAbility::Determine_StateRover(const _string& strKey, const _string& strSkillName)
-//{
-//	UI_AUGUSTA_STATE eState = UI_AUGUSTA_STATE::DEFAULT; // END가 기본일듯.
-//	SKILL_STATE eSkillState = SKILL_STATE::END;
-//
-//	// Default면 스킬 이름을 빈값으로 채웁니다.
-//
-//	_uint iReseut = { ENUM_CLASS(eState) };
-//
-//	return iReseut;
-//}
-//
-//// 누군가의 코드는 더러워져야만 한다..
-//_uint CAbility::Determine_StateAugusta(const _string& strKey, const _string& strSkillName)
-//{
-//	UI_AUGUSTA_STATE eState = UI_AUGUSTA_STATE::DEFAULT; // END가 기본일듯.
-//	SKILL_STATE eSkillState = SKILL_STATE::END;
-//
-//	eSkillState = Check_SkillState(strSkillName); // 사용 가능하다면?
-//
-//	
-//
-//	if (strSkillName == "Skill_Strike")
-//	{
-//		eState = UI_AUGUSTA_STATE::GRIFFON_E_READY;
-//	}
-//	else if (strSkillName == "Skill_Rise_Zero")
-//	{
-//		eState = UI_AUGUSTA_STATE::RISE_E_READY;
-//	}
-//	else if (strSkillName == "Skill_Rise")
-//	{
-//		eState = UI_AUGUSTA_STATE::GRIFFON_E_READY;
-//	}
-//	else if (strSkillName == "AirAtta0                                                                                                                                                                                                                                                                                                                                                                                                                     ck_HackDown_Sp_End")
-//	{
-//		eState = UI_AUGUSTA_STATE::DEFAULT;
-//	}
-//	else if (strSkillName == "Attack_SpeedDrive")
-//	{
-//		if (m_Costs[])
-//	}
-//
-//
-//	_uint iReseut = { ENUM_CLASS(eState) };
-//
-//	return iReseut; // END
-//}
-//
-//_uint CAbility::Determine_StateGalbrena(const _string& strKey, const _string& strSkillName)
-//{
-//	UI_AUGUSTA_STATE eState = UI_AUGUSTA_STATE::DEFAULT; // END가 기본일듯.
-//	SKILL_STATE eSkillState = SKILL_STATE::END;
-//
-//
-//	_uint iReseut = { ENUM_CLASS(eState) };
-//
-//	return iReseut;
-//}
 #ifdef _DEBUG
 void CAbility::Debug_FullCost(_bool IsAll)
 {
@@ -605,6 +653,9 @@ void CAbility::Debug_FullCost(_bool IsAll)
 		{
 			m_Costs[i] = m_fCostMax;
 		}
+
+		// 풀로 채우기.
+		m_CharacterInfo.fHarmonyGauge = m_CharacterInfo.fMaxHarmonyGauge;
 	}
 }
 
@@ -653,6 +704,26 @@ void CAbility::Debug_FullCost(_bool IsAll)
 		}
 	}
 }
+
+void CAbility::Print_Cost()
+{
+	cout << "Cost 1 : " << m_Costs[ENUM_CLASS(COST_TYPE::COST1)] << endl;
+	cout << "Cost 2 : " << m_Costs[ENUM_CLASS(COST_TYPE::COST2)] << endl;
+	cout << "Cost 3 : " << m_Costs[ENUM_CLASS(COST_TYPE::COST3)] << endl;
+	cout << "Cost 4 : " << m_Costs[ENUM_CLASS(COST_TYPE::COST4)] << endl;
+	cout << "Cost 5 : " << m_Costs[ENUM_CLASS(COST_TYPE::COST5)] << endl;
+	cout << "Cost Stamina : " << m_Costs[ENUM_CLASS(COST_TYPE::STAMINA)] << endl;
+}
+
+void CAbility::Print_CoolTime()
+{
+	cout << "Cool Down " << endl;
+	for (auto& pair : m_mapSkillCooldowns)
+	{
+		cout << pair.first << " : " << pair.second << endl;
+	}
+	cout << "Cool Down End" << endl;
+}
 #endif // _DEBUG
 
 
@@ -688,7 +759,6 @@ void CAbility::Read_Skill(const _char* pFilePath)
 		// 3. 메인 스킬 맵에 저장
 		m_mapSkills.emplace(eSkill.strSkillName, eSkill);
 	}
-	m_IsUIDirty = true; // 데이터 로드 후 UI 업데이트
 }
 
 void CAbility::Read_Stat(const _char* pFilePath)
@@ -717,7 +787,7 @@ void CAbility::Read_Stat(const _char* pFilePath)
 	m_CharacterInfo.fAttack = stof(data[1][10]);
 	m_CharacterInfo.fAttackAddMin = stof(data[1][11]);
 	m_CharacterInfo.fAttackAddMax = stof(data[1][12]);
-	m_CharacterInfo.fMaxResonance = stof(data[1][13]);
+	m_CharacterInfo.fMaxHarmonyGauge = stof(data[1][13]);
 }
 
 

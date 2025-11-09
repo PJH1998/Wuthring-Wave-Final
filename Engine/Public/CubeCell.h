@@ -9,14 +9,14 @@ class CCubeCell final : public CBase
 {
 public:
 	enum class CORNER {
-		LBU,	// Left Backward Up
-		RBU,	// Right Backward Up
-		LFU,	// Left Forward Up
-		RFU,	// Right Forward Up
-		LBD,	// Left Backward Down
-		RBD,	// Right Backward Down
 		LFD,	// Left Forward Down
 		RFD,	// Right Forward Down
+		RFU,	// Right Forward Up
+		LFU,	// Left Forward Up
+		LBD,	// Left Backward Down
+		RBD,	// Right Backward Down
+		RBU,	// Right Backward Up
+		LBU,	// Left Backward Up
 		END
 	};
 
@@ -35,7 +35,7 @@ private:
 
 public:
 	HRESULT		Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth);
-	void			Update(const _fvector& vCamPos);
+	void			Update(const _fvector& vCamPos, vector<class CStaticObject*>* Container = nullptr);
 
 	void			Add_Object(class CStaticObject* pObject, const _float* pMinMax);
 

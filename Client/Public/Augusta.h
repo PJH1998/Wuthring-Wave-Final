@@ -6,6 +6,14 @@
 NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
+public:
+	enum VOLUME
+	{
+		VOULME_RISE_ZERO = 0,
+		VOLUME_RISE = 1,
+		VOLUME_HACKDOWN = 2,
+		VOLUME_END
+	};
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -21,6 +29,7 @@ private:
 		EAugustaUniqueType m_eUniqueType = EAugustaUniqueType::END;
 		EAugustaBurstType m_eBurstType = EAugustaBurstType::END;
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
+		EAugustaQTEType m_eQTEType = EAugustaQTEType::END;
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -70,7 +79,6 @@ private:
 			m_IsClimbSecondStep = false;
 
 			m_eHitType = EAugustaHitType::END;
-
 			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
@@ -130,24 +138,21 @@ public:
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
+	virtual void Parry_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
+	virtual void Bind_QTE(_bool IsQTE) override;
 	
 
-#ifdef _DEBUG
-public:
-	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-#endif // _DEBUG
-
 #pragma region 2. NOTIFY
-	public:
-		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
-		virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-		virtual void Object_Func(const _wstring& wStrObjectTag) override;
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
+	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 #pragma endregion
 
-#pragma region 3. CALLBACK
+#pragma region 3. CALL BACK
 	public:
 		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 #pragma endregion
@@ -160,10 +165,14 @@ private:
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
+	
+
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
+
+	vector<class CAttackVolume*> m_AttackVolumes;
 
 
 private:
@@ -173,6 +182,7 @@ private:
 	void Ready_Variables(const CHARACTER_DESC* pDesc);
 	void Ready_Positions(const CHARACTER_DESC* pDesc);
 	void Ready_PartObjects(const CHARACTER_DESC* pDesc);
+	void Ready_AttackVolumes();
 
 public:
 	static		CAugusta* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

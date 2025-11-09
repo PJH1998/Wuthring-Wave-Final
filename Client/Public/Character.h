@@ -12,11 +12,6 @@ public:
 	};
 
 public:
-	typedef struct tagEventDesc
-	{
-		_uint iEventID = { EVENT_END };
-		function<void()> callBack;
-	}EVENT_DESC;
 
 
 public:
@@ -26,21 +21,38 @@ public:
 		CTransform* pTransform = { nullptr };
 	}HIT_DESC;
 
+	typedef struct tagParryDesc{
+		_uint iLayer;
+		_float fAttack;
+		CTransform* pTransform = { nullptr };
+	}PARRY_DESC;
+
+
 
 public:
-	using EnsembleEndCallback = function<void()>;
+	using HarmonyEndCallback = function<void()>;
 
-	void Set_EnsembleEndCallback(EnsembleEndCallback callback)
+	void Set_HarmonyEndCallback(HarmonyEndCallback callback)
 	{
 		m_OnEnsembleEnd = callback;
 	}
 
-	void Notify_EnsembleEnd()
+
+	void Notify_HarmonyEnd()
 	{
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
+
+	void Bind_NotifyEnd()
+	{
+
+	}
+
+	void Clear_HarmonyEndCallback() { 
+		m_OnEnsembleEnd = nullptr; 
+
+	}
 
 public:
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -89,8 +101,12 @@ public:
 
 #pragma region PHYSICS
 public:
+	// 거리 판단
+	const _float Calculate_RootMotionScale();
+
 	// Hit 판단.
 	virtual void Hit_Judge(void* pArg = nullptr) {};
+	virtual void Parry_Judge(void* pArg = nullptr) {};
 	// Wall
 	_bool Check_ClimbableWall(_float3* pWallNormal = nullptr);
 	_bool Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWallNormal = nullptr);
@@ -121,17 +137,25 @@ public:
 
 
 #pragma region EVENT 
-
+public:
+	virtual void Bind_QTE(_bool IsQTE) {};
+	_bool IsQTEend() { return m_IsQTEend;  }
+	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 #pragma endregion
 
 #pragma region STATE
 public:
-	// Camera Action
-	void Play_Action(const _wstring& strActionTag);
+	// Caemra
+	void Camera_Shake(_float fIntensity);
+	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
+
+	// Ability에서 확인 받기 => 상태 판별?
+	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
 
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
+	void Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
@@ -215,9 +239,17 @@ public:
 	// Ability 업데이트는 플레이어의 Priority Update에서
 	void Ability_Update(_float fTimeDelta);
 	class CAbility* Get_AbilityCom();
+	_float Get_Cost(COST_TYPE eCostType);
+	_float Get_MaxCost();
 	void Sync_UI(); // UI
 #pragma endregion
 
+#pragma region NOTIFY
+public:
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) {};
+	virtual void Effect_Active(const _wstring& wStrEffectTag) {};
+	virtual void Object_Func(const _wstring& wStrObjectTag) {}; // 임시
+#pragma endregion
 
 	
 
@@ -229,19 +261,22 @@ protected:
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
 
+	class CCollider* m_pQTEColliderCom = { nullptr };
+	
+	_float m_fTargetDistance = {}; // 타겟과의 거리
+
 	_float4x4 m_MatrixIdentity = {};
 	_float m_fColliderRadius = {};
 	_float m_fColliderHeight = {};
 	_float3 m_vColliderOffSet = {};
+	
 
 	_string m_strColliderReferenceBone = {}; // strColliderRefBone
 	_float3 m_vAnimColliderOffset = {};
 	
 
-	_float m_fTargetDistance = {}; // Target과의 Distance
-
 	//CHARACTER_STAT m_Stats = {};
-	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	
 
 
@@ -251,7 +286,15 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+	_bool m_IsQTE = { false };
+	_bool m_IsQTEend = { false };
+	
+
 	HIT_DESC m_PendingHitDesc = {};
+	PARRY_DESC m_PendingParryDesc = {};
+
+	vector<class CAttackVolume*> m_AttackVolumes;
+	class CAttackVolume* m_pMainAttackVolume = { nullptr };
 	
 	
 

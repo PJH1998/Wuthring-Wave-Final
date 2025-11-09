@@ -7,9 +7,9 @@ class CAugustaSkillWeapon final : public CProp
 public:
 	enum VOLUME
 	{
-		VOLUME_ATTACK = 0,
-		VOLUME_STRONG_ATTACK = 1,
-		VOLUME_EFFECT_GRIFFON = 2,
+		VOLUME_ULTI = 0,         // X, Z 길게, Y짧게
+		VOLUME_SWORD_ATTACK = 1, // 기본 Attack과 동일하게(Bayonet) 좀더 크게>
+		VOLUME_SWORD_ULTI = 2,   // 내가 보고 있는 범위 전체?(크게)
 		VOLUME_END
 	};
 
@@ -32,8 +32,14 @@ public:
 	virtual	void Render() override;
 
 
+
 public:
-	virtual void Activate(_bool IsActive) override;
+	virtual void Activate(_bool IsActivate) override;
+	virtual void Change_Volume(_uint iVolumeIdx) override;
+	virtual void Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer) override;
+
+	// Owner의 게이지 채우기?
+	virtual void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 private:
 	vector<_uint> m_ShaderPaths = {};
@@ -44,6 +50,7 @@ private:
 	void Ready_Components(const PROP_DESC* pDesc);
 	void Ready_Variables(const PROP_DESC* pDesc);
 	void Ready_Positions(const PROP_DESC* pDesc);
+	void Ready_AttackVolumes();
 	void Bind_Resources();
 
 public:

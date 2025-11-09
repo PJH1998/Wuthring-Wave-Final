@@ -79,12 +79,38 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
+	if (8 == m_iCullStack.load(memory_order_acquire))
+	{
+		cout << "Cut!" << endl;
+		return S_OK;
+	}
+
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
 		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
 	}
 
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+	if (8 == m_iCullStack.load(memory_order_acquire))
+		return S_OK;
+
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
+		m_iCullStack.fetch_add(1, memory_order_release);
+	}
+
+	if (8 <= m_iCullStack.load(memory_order_acquire))
+	{
+		m_isCompleteFrustumCull.exchange(true, memory_order_release);
+	}
+	
 	return S_OK;
 }
 
@@ -108,7 +134,8 @@ void CRenderer::Render()
 	Render_Shadow();
 	Render_ShadowMap();
 	Render_NonBlend();
-	Render_Static();		
+	Render_Static();
+	Render_Decal();
 	Render_SSAO();			
 	Render_Dynamic();
 
@@ -118,14 +145,15 @@ void CRenderer::Render()
 	Render_Outline();
 	
 	Render_NonLight();
-	Render_Emissive();
-	Render_Bloom();
+	Render_Emissive();	
+	Render_Effect();	
+	Render_Bloom();		
 	Render_BloomCombined();
 	Render_DistortionObject();
 	Render_Blend();
-	Render_Distortion();
 	Render_LUT();
 	Render_Fog();
+	Render_Distortion();
 	Render_ScreenEffect();
 	Render_UI();
 	Render_Fade();
@@ -387,16 +415,15 @@ void CRenderer::Render_Static()
 			Safe_Release(pCL);
 		}
 	}
-	//m_CommandLists.clear();
 
-	//m_pContext->Flush();
-
-	// Swap Chain
-	if (m_pGameInstance->IsWorkFinish())
+	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+		m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
+		m_iCullStack.exchange(0, memory_order_release);
+		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
@@ -484,8 +511,12 @@ void CRenderer::Render_SSAO()
 
 void CRenderer::Render_Decal()
 {
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_DECAL"), nullptr, false)))
+		CRASH("Failed Begin MRT_Decal");
 
+	m_pGameInstance->Render_Decal();
 
+	m_pGameInstance->End_MRT();
 }
 
 void CRenderer::Render_Dynamic()
@@ -516,6 +547,21 @@ void CRenderer::Render_Light()
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_RampTexture", 0)))
 		return;
 
+	if (FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_Cascade")))
+		CRASH("Failed Bind_CSM_SRV");
+
+	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vShadowLightDirection")))
+		CRASH("Failed Bind CSM Resource");
+
+	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_ShadowMap_Resources_Renderer(m_pShader)))
+		return;
+
+	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(m_pShader, "g_vClipDistances", "g_fLastDistance")))
+		return;
+
 	m_pGameInstance->Render_Light(m_pShader, m_pVIBuffer);
 
 	m_pGameInstance->End_MRT();
@@ -532,20 +578,9 @@ void CRenderer::Render_Combined()
 	if(FAILED(m_pGameInstance->Bind_RendererCS(TEXT("RCS_SSAO_BLUR_Y"), m_pShader, "g_SsaoTexture")))
 		CRASH("Failed Bind_SsaoTexture");
 
-	if(FAILED(m_pGameInstance->Bind_CSM_SRV(m_pShader, "g_Cascade")))
-		CRASH("Failed Bind_CSM_SRV");
-	
-	if (FAILED(m_pGameInstance->Bind_CSM_Resources(m_pShader, "g_ShadowViewMatrix", "g_ShadowProjMatrix", "g_vLightDirection")))
-		CRASH("Failed Bind CSM Resource");
-
-	if (FAILED(m_pShader->Bind_Value("g_vCamPosition", m_pGameInstance->Get_CamPos(), sizeof(_float4))))
-		CRASH("Render Fail");
-	
 	if (FAILED(m_pSubResource->Bind_Ramp_Texture(m_pShader, "g_ColorRampTexture", 2)))
 		return;
 
-	if (FAILED(m_pGameInstance->Bind_ShadowMap_Resources_Renderer(m_pShader)))
-		return;
 
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
@@ -558,9 +593,6 @@ void CRenderer::Render_Combined()
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
 		CRASH("Render Fail")
-
-	if (FAILED(m_pGameInstance->Bind_ShadowDistance_Resource(1)))
-		CRASH("Render Fail");
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
@@ -584,6 +616,16 @@ void CRenderer::Render_Emissive()
 		CRASH("Render Fail");
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::EMISSIVE));
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_Effect()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_EFFECT"), nullptr, false)))
+		CRASH("Render Fail");
+
+	Render_ObjectList(ENUM_CLASS(RENDERGROUP::EFFECT));
 
 	m_pGameInstance->End_MRT();
 }
@@ -694,24 +736,6 @@ void CRenderer::Render_Blend()
 	m_pGameInstance->End_MRT();
 }
 
-void CRenderer::Render_Distortion()
-{
-//	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
-//		CRASH("Render Fail")
-
-	//if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
-	//	CRASH("Render Fail")
-	////if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BlurEnd"), m_pShader, "g_BlurEndTexture")))
-	////	CRASH("Render Fail")
-
-	//m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DISTORTION));
-
-	//m_pVIBuffer->Bind_Resources();
-	//m_pVIBuffer->Render();
-
-	//m_pGameInstance->End_MRT();
-}
-
 void CRenderer::Render_LUT()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Lut"))))
@@ -742,6 +766,25 @@ void CRenderer::Render_Fog()
 		return;
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
+
+	m_pVIBuffer->Bind_Resources();
+	m_pVIBuffer->Render();
+
+	m_pGameInstance->End_MRT();
+}
+
+void CRenderer::Render_Distortion()
+{
+	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Combine"))))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+		CRASH("Render Fail");
+
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Distortion"), m_pShader, "g_DistortionTexture")))
+		CRASH("Render Fail");
+
+	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DISTORTION));
 
 	m_pVIBuffer->Bind_Resources();
 	m_pVIBuffer->Render();
@@ -781,7 +824,7 @@ void CRenderer::Render_ScreenEffect()
 	}
 	else
 	{
-		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 			CRASH("Failed RT_BackBuffer");
 
 		m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DRAW));
@@ -824,13 +867,13 @@ void CRenderer::Render_Blur()
 {
 	for (_uint i = 0; i <= 2; i++)
 	{
-		ID3D11ShaderResourceView* pDown = i == 0 ? m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), i - 1);
+		ID3D11ShaderResourceView* pDown = i == 0 ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), i - 1);
 
 		_uint iDownSizeX = m_iWinSizeX >> (i + 1);
 		_uint iDownSizeY = m_iWinSizeY >> (i + 1);
 
 		// DOWNSAMPLE SECOND
-		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", pDown)))//m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), i))))
+		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", pDown)))
 			CRASH("Failed Add_SRVData");
 
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY, i)))
@@ -876,7 +919,7 @@ void CRenderer::Render_Blur()
 			CRASH("Failed RCS_UPSAMPLE");
 	}
 
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), m_pShader, "g_BackBufferTexture")))
 		CRASH("Failed Bind BackBuffer");
 
 	if (FAILED(m_pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE")))))
@@ -910,7 +953,7 @@ void CRenderer::Render_DOF()
 	_uint iDownSizeY = m_iWinSizeY >> 1;
 
 	//DOWNSAMPLE
-	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+	if(FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
@@ -950,7 +993,7 @@ void CRenderer::Render_DOF()
 		CRASH("Failed RCS_UPSAMPLE");
 
 	//Combined
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), m_pShader, "g_BackBufferTexture")))
 		CRASH("Failed Bind BackBuffer");
 
 	if (FAILED(m_pShader->Bind_Texture("g_DofTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Dof")))))
@@ -993,7 +1036,7 @@ void CRenderer::Render_MotionBlur()
 	_uint iDownSizeY = m_iWinSizeY >> 1;
 
 	//BackBuffer DownScale
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_BackBuffer")))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_DOWNSAMPLE"), "InputTexture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 		CRASH("Failed Add_SRVData");
 
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY)))
@@ -1026,7 +1069,7 @@ void CRenderer::Render_MotionBlur()
 		CRASH("Failed RCS_MotionBlur");
 
 
-	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_BackBuffer"), m_pShader, "g_BackBufferTexture")))
+	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Combine"), m_pShader, "g_BackBufferTexture")))
 		CRASH("Failed Bind BackBuffer");
 
 	if (FAILED(m_pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_MotionBlur")))))
@@ -1165,6 +1208,10 @@ HRESULT CRenderer::Ready_RT()
 	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_VelocityMap"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_FLOAT, _float4(0.f, 0.f, 0.f, 0.f))))
 		ASSERT_CRASH(false);
 
+	/* RenderTarget Combine */
+	if (FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Combine"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R16G16B16A16_UNORM, _float4(0.f, 0.f, 0.f, 0.f))))
+		ASSERT_CRASH(false);
+
 #ifdef _DEBUG
 	/* RenderTarget Debug */
 	if(FAILED(m_pGameInstance->Add_RenderTarget(TEXT("RT_Debug"), m_iWinSizeX, m_iWinSizeY, DXGI_FORMAT_R8G8B8A8_UNORM, _float4(1.f, 1.f, 1.f, 0.f))))
@@ -1201,19 +1248,35 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
+#pragma region MRT_DECAL
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Diffuse"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_DECAL"), TEXT("RT_Normal"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_EFFECT
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Emissive"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_EFFECT"), TEXT("RT_Distortion"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+
 #pragma region MRT_LUT
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Lut"), TEXT("RT_Lut"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 
-	// RENDERGROUP::SHADOW_MAP // 미구현
-#pragma region MRT_SHADOW_MAP
-	//if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Shadow_Map"), TEXT("RT_LightDepth_Map"))))
-	//	ASSERT_CRASH(false);
-#pragma endregion
-
 #pragma region MRT_BACKBUFFER
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_BackBuffer"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
+#pragma endregion
+
+#pragma region MRT_COMBINE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Combine"), TEXT("RT_Combine"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

@@ -5,6 +5,7 @@
 #include "GameSystem.h"
 #include "Collider.h"
 #include "Ability.h"
+#include "AttackVolume.h"
 
 CCharacter::CCharacter(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CActor{ pDevice, pContext }
@@ -182,6 +183,28 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 #pragma endregion
 
 #pragma region PHYSICS
+
+const _float CCharacter::Calculate_RootMotionScale()
+{
+	// 타겟이 없으면 원래 비율로
+	if (m_pTargetTransform == nullptr)
+		return 1.f;
+
+	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
+	if (m_fTargetDistance < 1.f)
+		return 0.05f; // 거의 이동량 없게.
+	else if (m_fTargetDistance < 3.f)
+		return 0.5f;  // 짧게: 과접근 방지
+	else if (m_fTargetDistance < 3.5f)
+		return 0.6f;  
+	else if (m_fTargetDistance < 4.f)
+		return 0.7f;  
+	else if (m_fTargetDistance >= 7.f)
+		return 1.4f;  // 길게: 빠른 접근
+	
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비율
+}
+
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
 {
 	ASSERT_CRASH(m_pTransformCom);
@@ -230,7 +253,16 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
 	ASSERT_CRASH(m_pColliderCom);
-	m_pColliderCom->Set_Gravity(IsGravity);
+	
+
+	if (!m_IsQTE)
+		m_pColliderCom->Set_Gravity(IsGravity);
+	else
+	{
+		ASSERT_CRASH(m_pQTEColliderCom);
+		m_pQTEColliderCom->Set_Gravity(IsGravity);
+	}
+		
 }
 
 
@@ -309,10 +341,29 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 
 #pragma region STATE
 
+// 내 Velocity 고정.
+void CCharacter::Camera_Shake(_float fIntensity)
+{
+
+	_float3 vDir = {0.5f, 0.1f, -0.1f};
+	
+	m_pGameInstance->OnShake(vDir);
+}
+
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
-	ASSERT_CRASH(m_pTransformCom);
+	if (nullptr == m_pTransformCom)
+		return;
+
 	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+}
+
+_bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return false;
+
+	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -329,6 +380,14 @@ void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
 		return;
 
 	m_pAbillityCom->Remove_Condition(iCondition);
+}
+
+void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
 }
 
 _vector CCharacter::Get_LookVector()
@@ -624,12 +683,19 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 	ASSERT_CRASH(m_pTransformCom);
 	ASSERT_CRASH(m_pColliderCom);
 
+	if (m_IsQTE)
+		return;
+	
 	// 0. World Matrix
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);  // 위치 설정
 }
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 {
+
+	if (m_IsQTE)
+		return;
+
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	pTransformCom->Set_WorldMatrix(mat);
 
@@ -672,6 +738,20 @@ CAbility* CCharacter::Get_AbilityCom()
 {
     return m_pAbillityCom;
 }
+_float CCharacter::Get_Cost(COST_TYPE eCostType)
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return m_pAbillityCom->Get_Cost(eCostType);
+}
+_float CCharacter::Get_MaxCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return 100.f;
+}
 void CCharacter::Sync_UI()
 {
     // Character Info Sync 
@@ -690,5 +770,15 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	Safe_Release(m_pQTEColliderCom);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			Safe_Release(pAttackVolume);
+	}
+	
+
+	m_AttackVolumes.clear();
 	
 }

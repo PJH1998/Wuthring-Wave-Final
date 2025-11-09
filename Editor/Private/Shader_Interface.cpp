@@ -93,7 +93,7 @@ void CShader_Interface::Setting_Shader()
 		if (m_iLUT_Index >= 5)
 			m_iLUT_Index = 4;
 
-		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.01f, 1.f);
+		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
 #ifdef _DEBUG
 		m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
 		m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
