@@ -320,7 +320,7 @@ void CLevel_Test::Ready_UI()
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
-		CRASH("Failed Ready Scythe");
+		CRASH("Failed Ready Text_Damage");
 
 	// _UI
 }
@@ -408,7 +408,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		m_pGameSystem->Render_Damage(
 			_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
 			static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
-			static_cast<TEXT_COLOR_DMGTYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
+			static_cast<TEXT_COLOR_TYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
 			3.f
 		);
 

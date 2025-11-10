@@ -48,7 +48,11 @@ public:
 
 #pragma region [UI] FONT_PRESET
 	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
-	void		Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType = TEXT_COLOR_DMGTYPE::NONE, _float fSpawnRange = 10.f);
+	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
+	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
+	void			Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
+	// 텍스트를 생성합니다.
+	class CUI_Text*	Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
@@ -58,7 +62,6 @@ public:
 	HRESULT		HUD_FadeOut();
 	HRESULT		HUD_FadeIn();
 #pragma endregion
-
 
 #pragma region [UI] STATUS_SYNCER
 	//HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
