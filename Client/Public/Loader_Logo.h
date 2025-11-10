@@ -23,6 +23,8 @@ private:
 private:
 	LEVEL m_eCurLevel = { LEVEL::LOGO };
 
+	HRESULT				Load_MonsterTable();
+
 public:
 	static		CLoader_Logo*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void					Free() override;

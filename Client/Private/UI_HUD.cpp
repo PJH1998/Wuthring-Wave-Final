@@ -497,7 +497,7 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 		instDesc.vClipTexcoordX = { 0.f, 0.f };
 	
 
-	// E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
+	// - E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
 	 
 	//if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
 	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 1 };
@@ -505,21 +505,46 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
 
 
-	// R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
+	// - R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
 	
 	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
 	//cout << fUltGuage << endl;
 	
-	const vector<_float4> matCustomColor = {
-		// Ready Color
-		{0.808f, 0.322f, 0.612f, 1.0f},			// Dark
-		{0.969f, 0.451f, 1.0f, 1.0f},			// Elec
-		{1.0f, 0.416f, 0.416f, 1.0f},			// Fusi
-	};
+	vector<_float4> matCustomColor = { }; matCustomColor.resize(CH_END);
+	
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_ROVER:		matCustomColor[CH_ROVER]	= _float4{ 0.808f, 0.322f, 0.612f, 1.0f };		break;
+	case CH_AUGUSTA:	matCustomColor[CH_AUGUSTA]	=
+					(	isIn_Augusta_AdvUlt ||
+						pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST3) == 1.f ) ?
+													  _float4{ 0.992f, 0.749f, 0.341f, 1.0f } :
+													  _float4{ 0.969f, 0.451f, 1.000f, 1.0f };		break;
+	case CH_GALBRENA:	matCustomColor[CH_GALBRENA] = _float4{ 1.000f, 0.416f, 0.416f, 1.0f };		break;
+	}
+
+
+
+	// - 활성화 여부 지정
+	// - R
+	_bool is_RBtn_Active = true;
+
+	switch (m_iSelectedCHIndex)
+	{
+	case CH_ROVER:		is_RBtn_Active				= true;		break;
+	case CH_AUGUSTA:	is_RBtn_Active				= 
+					(	isIn_Augusta_AdvUlt && pStatus->Get_CostRatio(CH_AUGUSTA, COST_TYPE::COST4) < 1.0f) ?
+													  false : true;
+																break;
+	case CH_GALBRENA:	is_RBtn_Active				= true;		break;
+	}
+
+
 
 
 	
-	readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0.f, 1.f }; // 항시 활성화
+	readyInstDesc[iIndex_RBtn].vClipTexcoordX = (is_RBtn_Active) ? _float2{ 0.f, 1.f } : _float2{ 0.f, 0.f };
+
 	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
 
 	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate

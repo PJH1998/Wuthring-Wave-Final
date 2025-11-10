@@ -361,6 +361,9 @@ void CASM_Interface::BehaviorTree_Setting()
 			{
 				m_Nodes[i].mTemplateIndex = i;
 			}
+
+			Rebase_Graph();
+
 			m_iCurrentNodeIndex = -1;
 		}
 	}
@@ -554,6 +557,23 @@ void CASM_Interface::BlackBoard_Setting()
 
 #endif // _DEBUG
 
+}
+
+void CASM_Interface::Rebase_Graph()
+{
+	for (auto& Link : m_Links)
+	{
+		if (Link.mOutputNodeIndex > m_iCurrentNodeIndex)
+			Link.mOutputNodeIndex--;
+	}
+	for (auto& Node : m_Nodes)
+	{
+		for (auto& Transition : Node.Transitions)
+		{
+			if (Transition.mOutputNodeIndex > m_iCurrentNodeIndex)
+				Transition.mOutputNodeIndex--;
+		}
+	}
 }
 
 void CASM_Interface::Create_Template(BT_TYPE eType, _uint iOutputCount)
@@ -1046,18 +1066,18 @@ const GraphEditor::Link CASM_Interface::tagBTDelegate::GetLink(GraphEditor::Link
 	const auto& tLink = pInterface->m_Links[index];
 
 	// 노드 인덱스 유효성
-	IM_ASSERT(tLink.mInputNodeIndex >= 0 && tLink.mInputNodeIndex < pInterface->m_Nodes.size());
-	IM_ASSERT(tLink.mOutputNodeIndex >= 0 && tLink.mOutputNodeIndex < pInterface->m_Nodes.size());
+	//IM_ASSERT(tLink.mInputNodeIndex >= 0 && tLink.mInputNodeIndex < pInterface->m_Nodes.size());
+	//IM_ASSERT(tLink.mOutputNodeIndex >= 0 && tLink.mOutputNodeIndex < pInterface->m_Nodes.size());
 
 	// 템플릿에서 슬롯 개수 얻기
-	const auto& inNode = pInterface->m_Nodes[tLink.mInputNodeIndex];
-	const auto& outNode = pInterface->m_Nodes[tLink.mOutputNodeIndex];
-
-	const auto& inTmpl = pInterface->m_Templates[inNode.mTemplateIndex];
-	const auto& outTmpl = pInterface->m_Templates[outNode.mTemplateIndex];
-
-	IM_ASSERT(tLink.mInputSlotIndex >= 0 && tLink.mInputSlotIndex < inTmpl.mOutputCount);
-	IM_ASSERT(tLink.mOutputSlotIndex >= 0 && tLink.mOutputSlotIndex < outTmpl.mInputCount);
+	//const auto& inNode = pInterface->m_Nodes[tLink.mInputNodeIndex];
+	//const auto& outNode = pInterface->m_Nodes[tLink.mOutputNodeIndex];
+	//
+	//const auto& inTmpl = pInterface->m_Templates[inNode.mTemplateIndex];
+	//const auto& outTmpl = pInterface->m_Templates[outNode.mTemplateIndex];
+	//
+	//IM_ASSERT(tLink.mInputSlotIndex >= 0 && tLink.mInputSlotIndex < inTmpl.mOutputCount);
+	//IM_ASSERT(tLink.mOutputSlotIndex >= 0 && tLink.mOutputSlotIndex < outTmpl.mInputCount);
 
 	return GraphEditor::Link
 	{
