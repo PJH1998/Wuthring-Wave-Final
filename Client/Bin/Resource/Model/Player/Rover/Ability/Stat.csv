@@ -1,4 +1,2 @@
-Name,Hp,MaxHp,MaxStamina,fStamina,fCost1Max,fCost2Max,fCost3Max,fCost4Max,fCost5Max,Attack,AddMin,AddMax,MaxResonance
-Augusta,1000,1000,100,100,100,100,100,100,100,700,100,300,100
-,,,,,,,,,,,,,
-,,,,,,,,,,,,,
+Name,Hp,MaxHp,MaxStamina,fStamina,fCost1Max,fCost2Max,fCost3Max,fCost4Max,fCost5Max,Attack,AddMin,AddMax,MaxHarmony
+Rover,1000,1000,100,100,100,100,100,100,100,700,100,300,100

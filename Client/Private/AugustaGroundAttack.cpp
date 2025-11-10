@@ -40,7 +40,6 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 	m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 
 	_string strBoneName = "WeaponProp02";
-	//m_pAugusta->Part_VolumeChange(m_iPartType, CAugustaBayonet::VOLUME::VOLUME_ATTACK); // 공격 판정 Volume 변경
 	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
 	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
@@ -95,11 +94,9 @@ _bool CAugustaGroundAttack::Hit_Judge()
 
 void CAugustaGroundAttack::Handle_Input()
 {
-	
-
-
     EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
 
+	m_States[HIT_PENDING] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT);
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
@@ -125,13 +122,7 @@ void CAugustaGroundAttack::Handle_Input()
             m_IsNextAttackInput = true;
     }
 
-	// 공격시에 Hit 받았을때는 좀더 판단을 빡빡하게
-	if (m_pAugusta->Is_Hit())
-	{
-		m_States[HIT] = Hit_Judge();
-	}
 	
-    
 }
 
 void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
@@ -177,6 +168,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
+
 	if (m_States[HIT])
 	{
 

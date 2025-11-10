@@ -1,17 +1,40 @@
 ﻿#include "ClientPch.h"
+#include "AnimationDummy.h"
+#include "ElectroPredator.h"
+#include "FS_Scythe.h"
+#include "GameSystem.h"
+#include "Ggobul.h"
+#include "HavocWarrior.h"
 #include "Level_Test.h"
 #include "MapObject.h"
-#include "AnimationDummy.h"
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
 #include "HavocWarrior.h"
 #include "ElectroPredator.h"
+#include "PatternDummy.h"
 #include "GameSystem.h"
 #include "Player.h"
-#include"Trigger_Box.h"
 #include "ShadowMap.h"
 #include "SkyBox.h"
+#include"Trigger_Box.h"
+#include "UI_Text_Damage.h"
+
+
+
+
+
+#define KSTA_UITEST_ONLEVEL
+
+
+
+#ifdef KSTA_UITEST_ONLEVEL
+#include "UI_Text.h"
+#endif // KSTA_UITEST_ONLEVEL
+
+
+
+
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -105,6 +128,9 @@ void CLevel_Test::Update(_float fTimeDelta)
 #endif
 
 	Toggle_HUD();
+
+
+	Testing_UI(fTimeDelta);
 }
 
 void CLevel_Test::Render()
@@ -208,23 +234,23 @@ void CLevel_Test::Ready_MonsterTest()
 		CRASH("Failed Ready Scythe");
 
 	// Havoc Warrior
-	//CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
-	//tDesc.eCurLevel = m_eCurLevel;
-	//tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	//tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
-	//tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
-	//tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-	//tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
-	//tDesc.fRotationPerSec = XMConvertToRadians(90.f);
-	//tDesc.fSpeedPerSec = 10.f;
-	//tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
-	//tDesc.pAnimationTag = "Stand1";
-	//tDesc.fHp = 10.f;
-	//tDesc.fAttackDmg = 1.f;
-	//tDesc.fImpluseRate = 7.5f;
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
-	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
-	//	CRASH("Failed Ready Monster");
+	/*CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	tDesc.fHp = 10.f;
+	tDesc.fAttackDmg = 1.f;
+	tDesc.fImpluseRate = 7.5f;
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+		CRASH("Failed Ready Monster");*/
 
 	// Electro Predator
 	//CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
@@ -244,6 +270,16 @@ void CLevel_Test::Ready_MonsterTest()
 	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
 	//	CRASH("Failed Ready Monster");
+
+	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
+	DummyDesc.eLevel = m_eCurLevel;
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
+	DummyDesc.strInitAnimTag = "Stand1";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))
+		CRASH("Failed Ready Monster");
 }
 
 void CLevel_Test::Ready_Effect()
@@ -281,7 +317,133 @@ void CLevel_Test::Ready_UI()
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		CRASH("Failed Ready Scythe");
+
 	// _UI
+}
+
+void CLevel_Test::Testing_UI(_float fTimeDelta)
+{
+#ifdef KSTA_UITEST_ONLEVEL
+
+	_uint iDestLevel = ENUM_CLASS(m_eCurLevel);
+	static _bool isInitialized = false;
+	
+	static CUI_Text* testText = nullptr;
+
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	tDesc.isInstance = true;
+	tDesc.vecInstanceDescs = {};
+
+	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
+	tDesc.vColor = _float4{ 0.0f, 0.0f, 1.0f, 1.0f };
+	tDesc.vOutlineColor = _float4{ 0.0f, 1.0f, 1.0f, 1.0f };
+	tDesc.fFontOutlineWidth = 2.f;
+
+	tDesc.strFontTag = L"WW_SemiBold";
+	tDesc.strText = L"Test 테스트입니다.";
+	tDesc.vScreenPos = _float2{ 0.f, 0.f }; // _float2{ 500.f, 500.f };
+	tDesc.fScale = 0.25f;
+	tDesc.vLifeTime = { 0.f, 10.f };
+	tDesc.strUIName = L"TestFont";
+
+	tDesc.iPassType = 0;
+
+	tDesc.isTargetExist = true;
+	tDesc.vTargetWorldPos = _float4{ 2.42f, -10.19f, -3.56f, 1.0f };
+
+
+	if (!isInitialized)
+	{
+		// Test Initializing
+		isInitialized = true;
+		
+		//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test",
+		//	CUI_Text::Create(m_pDevice, m_pContext))))
+		//	CRASH("프로토타입 못만들었대~~");
+
+
+
+		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+		// ===== test
+
+		// =====
+
+
+
+		//CUI_Text* pTextObj = dynamic_cast<CUI_Text*>w
+		//	(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_Text_Test", PROTOTYPE::GAMEOBJECT, &tDesc));
+		//if (!pTextObj)
+		//	CRASH("폰트오브젝트 못만들었대~~");
+		//
+		//
+		//m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Font", pTextObj);
+		//testText = pTextObj;
+	}
+
+
+	_float fRandX = m_pGameInstance->Rand(-5.f, 5.f);
+	_float fRandY = m_pGameInstance->Rand(-5.f, 5.f);
+	_float fRandZ = m_pGameInstance->Rand(-5.f, 5.f);
+
+	tDesc.vTargetWorldPos = {
+		tDesc.vTargetWorldPos.x + fRandX,
+		tDesc.vTargetWorldPos.y + fRandX,
+		tDesc.vTargetWorldPos.z + fRandZ,
+		tDesc.vTargetWorldPos.w
+	};
+
+	
+	static _float fElapsedTime_TestSpawn = 0.f;
+	fElapsedTime_TestSpawn += fTimeDelta;
+	const _float fTestSpawnSpace = 5.f;
+	if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
+	{
+		fElapsedTime_TestSpawn = 0.f;
+
+		const _float fOffsetY = 5.f;
+		m_pGameSystem->Render_Damage(
+			_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
+			static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
+			static_cast<TEXT_COLOR_DMGTYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
+			3.f
+		);
+
+		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+	}
+
+
+
+	//CUI_Text::TEXT_UI_DESC tDesc = testText->Get_TextUIDesc();
+		
+	//_float4x4 matPipelineView = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
+	//_float4x4 matPipelineProj = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
+	//
+	//_float4 world = { tDesc.vTargetWorldPos.x, tDesc.vTargetWorldPos.y, tDesc.vTargetWorldPos.z, 1.f };   // (x,y,z)
+	//_matrix view = XMLoadFloat4x4(&matPipelineView);
+	//_matrix proj = XMLoadFloat4x4(&matPipelineProj);
+	//_vector pos = XMVectorSet(world.x, world.y, world.z, 1.0f);
+	//
+	//pos = XMVector3Transform(pos, view);
+	//pos = XMVector3Transform(pos, proj);
+	//_vector ndc = pos / XMVectorSplatW(pos);
+	//
+	//_float3 ndc3;
+	//XMStoreFloat3(&ndc3, ndc);
+	//_float screenX = (ndc3.x * 0.5f + 0.5f) * 1920.f;     // 화면 해상도 X
+	//_float screenY = (1.0f - (ndc3.y * 0.5f + 0.5f)) * 1080.f; // Y 반전
+	//
+	//tDesc.vScreenPos = _float2(screenX, screenY);
+
+	//testText->Set_TextUIDesc(tDesc);
+
+
+
+#endif // KSTA_UITEST_ONLEVEL
+
 }
 
 #ifdef _DEBUG

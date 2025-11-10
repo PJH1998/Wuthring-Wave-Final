@@ -65,8 +65,9 @@ void CAugustaHit::OnExit()
     m_pAugusta->Set_Gravity(false);
 
 	// Hit 판정 끝났으므로 정보 초기화
-	m_pAugusta->Set_Hit(false);
 	m_pAugusta->ClearPendingHit();
+	//m_pAugusta->Set_Hit(false);
+	
 }
 
 
@@ -121,6 +122,13 @@ void CAugustaHit::Handle_Input()
 void CAugustaHit::Update_HitAnimation(_float fTimeDelta)
 {
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	EAugustaHitType eHitType = static_cast<EAugustaHitType>(m_iCurrentAnimIdx);
+
+	// Hit Type이 뒷점프면?
+	if (eHitType == EAugustaHitType::BEHIT_FLY_FALL)
+	{
+		m_pAugusta->Move_Fall(fTimeDelta, 0.1f); // 미세하게 떨어지게
+	}
 }
 
 void CAugustaHit::Check_Physics(_float fTimeDelta)
@@ -153,10 +161,7 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 				return;
 			}
-
-			m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
-			return;
+			
 		}
 
 		if (!m_States[LAND])
@@ -187,10 +192,21 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 				return;
 			}
-
-			m_pAugusta->GetStateContextForWrite().m_eLandType = EAugustaLandType::LAND_LIGHT;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND));
-			return;
+			else
+			{
+				if (eHitType == EAugustaHitType::BEHIT_FLY_FALL) 
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDUP; // Idle 전용 일어나는 모션.
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
+				else
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1; // Idle 전용 일어나는 모션.
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
+			}
 		}
 
 		if (!m_States[LAND])
@@ -201,10 +217,12 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP));
 				return;
 			}
-
-			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
-			return;
+			else
+			{
+				m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
+				return;
+			}
 		}
 	}
 

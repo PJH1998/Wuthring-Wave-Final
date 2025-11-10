@@ -9,41 +9,43 @@ NS_BEGIN(Client)
 // Rover Ground 
 enum class ERoverGroundState : _uint
 {
-	IDLE = 0,		//  (Stand1, Stand2, Stand1_Action01~03, StandChange)
-	WALK,			//  (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
-	RUN,			// (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	DASH,			// (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
-	ATTACK,			// ack01~04, Attack_*, SpAttack*)
-	SKILL,			// l)
-	BURST,			// 
-	SPECIAL,		// 
-	UNIQUE,			// 
-	LAND,			// 
+	IDLE = 0,		
+	WALK,			
+	RUN,			
+	DASH,			
+	ATTACK,			
+	SKILL,			
+	BURST,			
+	SPECIAL,		
+	UNIQUE,			
+	LAND,		
+	QTE,
 	GROUND_END
 };
 
-// Rover Air ���� ����
+// Rover Air 
 enum class ERoverAirState : _uint
 {
-	JUMP = 0,		// ���� (Jump_Loop, Jump_Run_*, Jump_Walk_*, Jump_Second_*)
-	FALL,			// ���� (Fall_Loop, Fall_Loop_Fast, Fall_LeanPose_*)
-	AIR_ATTACK,		// ���� ���� (AirAttack_Start/Loop/End, AirAttack_HackDown_*)
-	HOOK,			// ����� (Hook_Up)
-	AIR_SKILL,		// ���� ��ų (Air
+	JUMP = 0,		// 
+	FALL,			// 
+	AIR_ATTACK,		// 
+	HOOK,			// 
+	AIR_SKILL,		// 
+	FLY,
 	AIR_END
 };
 
-// Rover Climb ���� ����
+// Rover Climb 
 enum class ERoverClimbState : _uint
 {
-	CLIMB_IDLE = 0,		// ��� ��� (Climb_Stand, Climb_Move)
-	CLIMB_MOVE,			// ��� �̵� (Climb_U/D/L/R_1/2, Climb_UL/UR/DL/DR_1/2, Climb_*_Stop)
-	CLIMB_BOOST,		// ��� ���� (Climb_Boost_*, Climb_Dash_*)
-	CLIMB_EXIT,			// ��� Ż�� (Climb_OnTop, Climb_Vault, Climb_Start_Up/Down)
+	CLIMB_IDLE = 0,		
+	CLIMB_MOVE,			
+	CLIMB_BOOST,		
+	CLIMB_EXIT,			
 	CLIMB_END
 };
 
-// Rover Hit ���� ����
+// Rover Hit
 enum class ERoverHitState : _uint
 {
 	HIT = 0,
@@ -93,10 +95,10 @@ enum class ERoverRunType : _uint
 
 enum class ERoverLandType : _uint
 {
-	LAND_LIGHT = 0,     // ���� ����
-	LAND_HEAVY, // ���� ����
-	LAND_ROLL,      // ������ ������.
-	LANDSLIDE_F, // �Ŵ޸� �ִϸ��̼�.
+	LAND_LIGHT = 0,     
+	LAND_HEAVY,			
+	LAND_ROLL,			
+	LANDSLIDE_F,		
 	LAND_ROLL_ATTACK01_2,
 	LANDSLIDE_B,
 	LANDSLIDE_SPRINT_LOOP,
@@ -122,55 +124,46 @@ enum class ERoverAttackType : _uint
 	ATTACK01 = 0,
 	ATTACK02,
 	ATTACK03,
+	ATTACK05,
 	ATTACK04,
-	ATTACK_HEAVYHACK,
-	ATTACK_PENDING, // NormalAttack�� HeavyAttack �����뵵.
-	ATTACK_PULL,
-	ATTACK_SPEEDDRIVE,
-	ATTACK_SPSKILL,
-	SPATTACK01,
-	SPATTACK02,
-	SPATTACK03,
-	SPATTACKOMNI,
+
 	END
 };
 
 enum class ERoverSkillType : _uint
 {
-	SKILL_HACK = 0,
-	SKILL_RISE,
-	SKILL_RISE_ZERO,
-	SKILL_STRIKE,
-	SKILLQTE,
+	SKILL02 = 0,
+	EX_SKILL02,
 	END
 };
 
 enum class ERoverSpecialType : _uint
 {
-	SPATTACK01 = 0,
-	SPATTACK02,
-	SPATTACK03,
-	SPATTACKOMNI,
-	SPWALK_DASH,
-	SPWALK_DASH_ROOT,
-	SPWALK_F,
-	SPWALK_STAND,
-	SPWALK_STOP_L,
-	SPWALK_STOP_R,
+	EX_ATTACK01 = 0,
+	EX_ATTACK02,
+	EX_ATTACK03,
+	EX_ATTACK04,
+	EX_ATTACK05,
+	EX_ATTACK05_UP,
 	END
 };
 
-enum class ERoverBurstType : _uint
+enum class ERoverBurstType : _uint // 강공.
 {
 	BURST01 = 0,
-	BURST_STAND,
 	END
 };
 
-enum class ERoverUniqueType : _uint // �׸��� ���..
+enum class ERoverUniqueType : _uint // 
 {
 	SKILL_STRIKE = 0,
 	SKILL_RISE,
+	END
+};
+
+enum class ERoverQTEType : _uint // 
+{
+	SKILL_QTE = 0,
 	END
 };
 
@@ -197,17 +190,28 @@ enum class ERoverFallType : _uint
 
 };
 
+
 enum class ERoverAirAttackType : _uint
 {
-	AIRATTACK_END = 0,
-	AIRATTACK_HACKDOWN_LOOP,
-	AIRATTACK_HACKDOWN_SP_END,
-	AIRATTACK_HACKDOWN_START,
+	AIRATTACK_START = 0,
 	AIRATTACK_LOOP,
-	AIRATTACK_START,
+	AIRATTACK_END,
 	END
 };
 
+
+enum class ERoverAirFlyType : _uint
+{
+	XA_LOOP_U = 0,
+	XA_LOOP_D,
+	XA_LOOP_L,
+	XA_LOOP_R,
+	XA_LOOP_RL_MID,
+	XA_LOOP_STAND,
+	XA_SHAKE_LOOP,
+	XA_START,
+	END
+};
 #pragma endregion
 
 
@@ -284,8 +288,8 @@ enum class ERoverClimbExitType : _uint
 	CLIMB_UL2_STOP,
 	CLIMB_UR1_STOP,
 	CLIMB_UR2_STOP,
-	CLIMB_ONTOP, // �� �Ѵ� Ż��.(������)
-	CLIMB_MOVE, // �� ���� Ż��
+	CLIMB_ONTOP, 
+	CLIMB_MOVE,  
 	CLIMB_VAULT,
 	END
 };
@@ -295,14 +299,7 @@ enum class ERoverClimbExitType : _uint
 
 #pragma region HIT
 
-/*
-*   HIT_SMALL = 0,		// ���� �ǰ� (Behit_S_L/R, Behit_B_L/R)
-	HIT_FLY,			// ���ư��� �ǰ� (Behit_Fly_Start/Loop/Fall)
-	HIT_PUSH,			// �и��� �ǰ� (Behit_Push_Start/Loop/Fall)
-	HIT_HOVER,			// ���� �ǰ� (Behit_Hover, Behit_Press)
-	HIT_CAPTURED,		// ��ȹ (Captured)
-	HIT_DEATH,			// ��� (Death, StandUp)
-*/
+
 enum class ERoverHitType : _uint
 {
 	BEHIT_B_L = 0,

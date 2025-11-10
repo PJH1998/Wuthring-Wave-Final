@@ -100,9 +100,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
-			case LEVEL::TEST_UI:
-				pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
-				break;
+			//case LEVEL::TEST_UI:
+			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+			//	break;
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -148,6 +148,7 @@ void CMainApp::SetUp_CollisionLayer()
 	// Object To BroadPhase
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::NONE), ENUM_CLASS(BPLAYER::NONE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::MAP), ENUM_CLASS(BPLAYER::NON_MOVE));
+	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::QTE), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::MOVE));
 	m_pGameInstance->SetUp_ObjectToBP(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(BPLAYER::SENSOR));
@@ -160,6 +161,7 @@ void CMainApp::SetUp_CollisionLayer()
 
 
 	// Object VS Object
+	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::QTE), ENUM_CLASS(COLLISIONLAYER::MAP));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(COLLISIONLAYER::MAP));
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::ATTACK), ENUM_CLASS(COLLISIONLAYER::ENEMY)); // Player
@@ -178,8 +180,11 @@ void CMainApp::SetUp_CollisionLayer()
 	m_pGameInstance->SetUp_ObjectFilter(ENUM_CLASS(COLLISIONLAYER::DETECT), ENUM_CLASS(COLLISIONLAYER::ENEMY));
 
 	// Object VS BroadPhase
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::QTE), ENUM_CLASS(BPLAYER::MOVE));
+	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::QTE), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::NON_MOVE));
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::MOVE));
+	
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::PLAYER), ENUM_CLASS(BPLAYER::SENSOR));
 
 	m_pGameInstance->SetUp_ObjectVsBPFilter(ENUM_CLASS(COLLISIONLAYER::ENEMY), ENUM_CLASS(BPLAYER::NON_MOVE));

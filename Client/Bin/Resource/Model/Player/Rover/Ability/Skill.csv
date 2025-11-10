@@ -1,16 +1,5 @@
 Name,PrevName,KeyInput,KeyType,SkillType,CostStatType,Cost,CoolDown,Damage,Description
-Skill_Strike,None,E,CHAIN,AUGUSTA_POINT,2,-100,0,200,POINT 100 E키
-Skill_Rise_Zero,Skill_Strike,E,CHAIN,NONE,0,0,0,300,E연타
-Skill_Rise,Skill_Rise_Zero,E,CHAIN,AUGUSTA_SWORD,3,50,0,400,E연타
-AirAttack_HackDown_Start,Skill_Rise,E,CHAIN,NONE,0,0,0,500,E연타
-AirAttack_HackDown_Sp_End,AirAttack_HackDown_Start,E,CHAIN,NONE,0,0,0,400,E연타
-Attack_HeavyHack,None,LB,DEFAULT,RESONANCE,1,-100,0,300,강공 (공명 소모)
-Skill_Hack,None,E,DEFAULT,NONE,0,0,20,300,기본 E키
-Attack_SpeedDrive,None,R,DEFAULT,AUGUSTA_ULTI,5,-100,30,200,ULTI 100 R키
-Attack_SpSkill,Attack_SpeedDrive,R,NONE,NONE,0,0,0,200,R연타
-Burst01,None,R,CHAIN,AUGUSTA_SWORD,3,-100,0,0,SWORD 100 R키
-Burst_Stand,Burst01,NONE,NONE,NONE,0,0,0,0,자동 변환
-SpAttack01,SpWalk_Stand,LB,CHAIN,AUGUSTA_ULTI_SWORD,4,18,0,700,마우스 LB 연타
-SpAttack02,SpAttack01,LB,CHAIN,AUGUSTA_ULTI_SWORD,4,18,0,800,마우스 LB 연타
-SpAttack03,SpAttack02,LB,CHAIN,AUGUSTA_ULTI_SWORD,4,18,0,900,마우스 LB 연타
-SpAttackOmni,SpAttack03,R,CHAIN,AUGUSTA_ULTI_SWORD,4,-100,0,1200,마우스 LB 연타
+Burst01,None,LB,NONE,RESONANCE,1,-100,0,400,RESONANCE 강공
+Ex_Skill02,None,E,NONE,NONE,0,0,12,400,BURST E 공격
+Skill02,None,E,NONE,NONE,0,0,12,300,기본 E 공격
+Burst01_Ulti,None,R,NONE,ULTI,2,-100,0,700,R공격

@@ -26,6 +26,9 @@ private:
 	//void Ready_Layer_Augusta();
 	void			Ready_UI();
 
+	void			Testing_UI(_float fTimeDelta);
+
+
 #ifdef _DEBUG
 	void			Shader_Gui();
 #endif

@@ -72,8 +72,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    m_iCurrentCharacterIdx = AUGUSTA;
-    //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
+    //m_iCurrentCharacterIdx = AUGUSTA;
+    m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	Safe_AddRef(m_pPlayerStatus);
@@ -107,9 +107,10 @@ void CPlayer::Priority_Update(_float fTimeDelta)
 	if (m_iCurrentCharacterIdx != NONE)
 		m_Characters[m_iCurrentCharacterIdx]->Priority_Update(fTimeDelta);
 
-	if (m_iEnsembleCharacterIdx != NONE &&
-		m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
-		m_Characters[m_iEnsembleCharacterIdx]->Priority_Update(fTimeDelta);
+	// 2. Harmony
+	if (m_iHarmonyCharacterIdx != NONE &&
+		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
+		m_Characters[m_iHarmonyCharacterIdx]->Priority_Update(fTimeDelta);
 
 
 	// 4. 현재 비활성화되었든, 활성화되었든 업데이트는 플레이어에서 모두 실행 Update
@@ -130,10 +131,10 @@ void CPlayer::Update(_float fTimeDelta)
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
 
-    // 2. Ensemble 
-    if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iEnsembleCharacterIdx]->Update(fTimeDelta);
+    // 2. Harmony 
+    if (m_iHarmonyCharacterIdx != NONE &&
+		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
+        m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
 
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -153,9 +154,9 @@ void CPlayer::Late_Update(_float fTimeDelta)
     if (m_iCurrentCharacterIdx != NONE)
         m_Characters[m_iCurrentCharacterIdx]->Late_Update(fTimeDelta);
 
-    if (m_iEnsembleCharacterIdx != NONE &&
-        m_iEnsembleCharacterIdx != m_iCurrentCharacterIdx)
-        m_Characters[m_iEnsembleCharacterIdx]->Late_Update(fTimeDelta);
+    if (m_iHarmonyCharacterIdx != NONE &&
+		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
+        m_Characters[m_iHarmonyCharacterIdx]->Late_Update(fTimeDelta);
 
 	
 }
@@ -180,44 +181,95 @@ CAbility* CPlayer::Get_AbilityCom(CHARACTERTYPE eCharacterType)
 	if (NONE == eCharacterType)
 		return nullptr;
 
-	return m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom();
+	return m_Characters[eCharacterType]->Get_AbilityCom();
+}
+_bool CPlayer::IsQTEPossible(CHARACTERTYPE eCharacterType)
+{
+	if (NONE == eCharacterType)
+		return false;
+
+	CAbility* pAbility = Get_AbilityCom(eCharacterType);
+	if (nullptr == pAbility)
+		return false;
+
+	_float fHarmony = pAbility->Get_Harmony();
+
+	return fHarmony >= pAbility->Get_MaxHarmony();
+}
+void CPlayer::ExecuteQTE(CHARACTERTYPE eCharacterType)
+{
+	if (NONE == eCharacterType)
+		return;
+
+	CAbility* pAbility = Get_AbilityCom(eCharacterType);
+	if (nullptr == pAbility)
+		return;
+
+	// 해당 캐릭터의 Harmony Gauge 초기화
+	pAbility->Set_HarmonyGauge(0.f);
+
+	// 캐릭터 상태변경.
+	m_iHarmonyCharacterIdx = m_iPrevCharacterIdx;
+
+	// CallBack 제어
+	m_Characters[m_iHarmonyCharacterIdx]->Set_HarmonyEndCallback([this, eCharacterType]() {
+		this->On_HarmonyEnd(eCharacterType);
+		});
+
+	// 이전 캐릭터한테 QTE 정보 알림. => 별개의 Transform으로 움직여야함.
+	// Collider도 제어되면안됨.
+	m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(true);
+	m_Characters[m_iHarmonyCharacterIdx]->Set_QTEEnd(false);
+	
+	// 그 뭐냐 UI에 캐릭 변경 불가능 상태를 줘야함
+	m_IsQTE = true;
+	m_pPlayerStatus->Bind_QTE(m_IsQTE);
+
+
 }
 #pragma endregion
 
 void CPlayer::Player_KeyInput()
 {
 	// Character Change
-	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
-	{
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
-		{
-			m_IsChanage = true;
-			m_eNextCharacter = CHARACTERTYPE::ROVER;
-			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
-			return;
-		}
 
-	}
-	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
+	if (!m_IsQTE) // QTE 도중이면 플레이어 변경 불가능.
 	{
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA)
+		if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D1)))
 		{
-			m_IsChanage = true;
-			m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
-			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
-			return;
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::ROVER)
+			{
+				m_IsChanage = true;
+				m_eNextCharacter = CHARACTERTYPE::ROVER;
+				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::ROVER);
+				return;
+			}
+
+		}
+		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D2)))
+		{
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::AUGUSTA)
+			{
+				m_IsChanage = true;
+				m_eNextCharacter = CHARACTERTYPE::AUGUSTA;
+				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::AUGUSTA);
+				return;
+			}
+		}
+		else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
+		{
+			if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA)
+			{
+				m_IsChanage = true;
+				m_eNextCharacter = CHARACTERTYPE::GALBRENA;
+				m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
+				return;
+			}
 		}
 	}
-	else if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D3)))
-	{
-		if (m_iCurrentCharacterIdx != CHARACTERTYPE::GALBRENA)
-		{
-			m_IsChanage = true;
-			m_eNextCharacter = CHARACTERTYPE::GALBRENA;
-			m_pPlayerStatus->Set_CurrentCharIndex(CHARACTERTYPE::GALBRENA);
-			return;
-		}
-	}
+		
+
+	
 
 
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::D4), KEYSTATE::UP))
@@ -252,71 +304,40 @@ void CPlayer::Player_KeyInput()
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_0) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_MINUS) == KEYSTATE::UP)
 	{
-		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_Resonance(10.f);
+		m_Characters[m_iCurrentCharacterIdx]->Get_AbilityCom()->Add_HarmonyGauge(10.f);
 	}
 
 	
 }
 
-void CPlayer::Switch_Skill(CHARACTERTYPE eCharacter)
+void CPlayer::Notify_HarmonyEnd()
 {
-    CCharacter* pCharacter = m_Characters[eCharacter];
-
-    pCharacter->Set_EnsembleEndCallback([this, eCharacter]() {
-        this->On_EnsembleEnd(eCharacter);
-    });
-
-
-    switch (eCharacter)
+    if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
     {
-	case CHARACTERTYPE::ROVER:
-		// Player Ensemble Skill
-		pCharacter->Change_State(
-			ENUM_CLASS(EStateCategory::GROUND),
-			ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-		break;
-
-    case CHARACTERTYPE::AUGUSTA:
-        pCharacter->Change_State(
-            ENUM_CLASS(EStateCategory::GROUND),
-            ENUM_CLASS(EAugustaSkillType::SKILLQTE));
-        break;
-
-    case CHARACTERTYPE::GALBRENA:
-        // Galbrena Ensemble Skill
-        break;
-
-
+        m_Characters[m_iHarmonyCharacterIdx]->SetActivate(false);
+		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
     }
 }
 
-void CPlayer::Notify_EnsembleEnd()
-{
-    if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
-    {
-        m_Characters[m_iEnsembleCharacterIdx]->SetActivate(false);
-        m_iEnsembleCharacterIdx = CHARACTERTYPE::NONE;
-    }
-}
-
-void CPlayer::Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter)
-{
-
-}
 
 // Callback
-void CPlayer::On_EnsembleEnd(CHARACTERTYPE eCharacter)
+void CPlayer::On_HarmonyEnd(CHARACTERTYPE eCharacter)
 {
-    if (m_iEnsembleCharacterIdx != CHARACTERTYPE::NONE)
+    if (m_iHarmonyCharacterIdx != CHARACTERTYPE::NONE)
     {
-        m_Characters[m_iEnsembleCharacterIdx]->SetActivate(false);
-        m_Characters[m_iEnsembleCharacterIdx]->Clear_EnsembleEndCallback();
-        m_iEnsembleCharacterIdx = CHARACTERTYPE::NONE;
+        m_Characters[m_iHarmonyCharacterIdx]->SetActivate(false);
+        m_Characters[m_iHarmonyCharacterIdx]->Clear_HarmonyEndCallback();
+		m_Characters[m_iHarmonyCharacterIdx]->Bind_QTE(false); // 시점이 잘못됌. => PriorityUpdate에서 처리해주던가? => 적어도 OnExit에서는 처리하면 안됌
+
+		m_IsQTE = false; 
+		m_pPlayerStatus->Bind_QTE(m_IsQTE); // 캐릭 변경 가능.
+
+		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
     }
 }
 
@@ -351,17 +372,33 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	//    - 필요 시 Set_Gravity(true) 등으로 물리 상태 재설정.
 	m_Characters[m_iCurrentCharacterIdx]->Sync_Collider(XMVectorZero(), fTimeDelta);  // 속도 0으로 초기화
 
-	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작)
-	//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
+	// 5. 상태 머신 초기화 (IDLE 상태로 자연스럽게 시작) => 새 캐릭터.
+//    - 새 캐릭터의 StateContext 초기화 (e.g., IdleType 설정). => 모두 고정.
 	m_Characters[m_iCurrentCharacterIdx]->Set_Gravity(true);  // 중력 활성화 (필요 시)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
-	// 6. 카메라/입력 컨트롤러 재설정 (캐릭터 변경 후 카메라가 새 위치 따라가도록)
+	
 
-	// 7. (옵션) 애니메이션 초기화: 등장 애니메이션 재생 
+	// 6. 협주 확인. Ensemble
+	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
+	CHARACTERTYPE eCharacterType = static_cast<CHARACTERTYPE>(m_iPrevCharacterIdx);
 
-	// 8. UI/게이지 동기화 (캐릭터 스탯 유지)
+
+	// 7. QTE 실행. 가능하면 ㄴ
+	if (IsQTEPossible(eCharacterType))
+	{
+		// QTE 실행.
+		ExecuteQTE(eCharacterType);
+	}
+	else
+	{
+		m_iHarmonyCharacterIdx = CHARACTERTYPE::NONE;
+	}
+
+	/*m_pPlayerStatus->;*/
+
+	
 
 }
 

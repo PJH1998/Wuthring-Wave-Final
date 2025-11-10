@@ -37,6 +37,7 @@ private:
 	map<_string, _string> m_PartsAnimations = {}; // Parts의 애니메이션이 서로 달라서?
     
 
+
 private:
     virtual void Handle_Input() override;
     void Update_AttackAnimations(_float fTimeDelta);
@@ -45,6 +46,9 @@ private:
 
     void SetUp_Animations();
     void State_Reset();
+
+private:
+	void Handle_Animation_SpecialState(); // 특수한 애니메이션 상태를 처리한다.
 
 public:
     static CAugustaAirAttack* Create(class CGameObject* pOwner);

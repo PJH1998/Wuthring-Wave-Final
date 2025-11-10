@@ -73,20 +73,23 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	m_pBehaviorTreeCom->tick(this);
+	//m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-	//_float temp{};
-	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	_float temp{};
+	m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
-		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
+	{
+		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
+		m_isDist_Interp_Enable = false;
+	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -134,7 +137,7 @@ void CMonsterTest::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
 
 		m_pModelCom->Render(i);
 	}
@@ -273,6 +276,10 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("LookRev"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
+	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = true;
 	}
 }
 
@@ -619,8 +626,8 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex != ATK_PATTERN::ATTACK1)
-	//	return false;
+	if (iIndex != ATK_PATTERN::ATTACK2)
+		return false;
 	//else
 	//	return false;
 	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
