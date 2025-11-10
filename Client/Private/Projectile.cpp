@@ -23,6 +23,7 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 
 	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
 	Ready_Component(pDesc);
+	m_iTargetLayers = pDesc->iTargetLayers;
     return S_OK;
 }
 
@@ -61,7 +62,7 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	PROJECTILERESET* pDesc = static_cast<PROJECTILERESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-	m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
+	m_pTransformCom->LookAt(XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
 	m_isCollision = false;
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
