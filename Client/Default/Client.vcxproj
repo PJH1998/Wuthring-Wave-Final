@@ -463,6 +463,7 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>

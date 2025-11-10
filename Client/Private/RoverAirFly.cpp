@@ -57,12 +57,10 @@ void CRoverAirFly::OnEnter(void* pArg)
 	}
 
 	// 9. 물리 값 설정 
-	m_fSpeed = 5.f * 2.f;				// '추진 가속도' 
+	m_fSpeed = 20.f;				// '추진 가속도' 
 	m_fAccel = 3.f;					    // '상승/하강 가속도' 
 	m_vGravity = { 0.f, -9.8f, 0.f };   // '활공용 중력'
 	m_fDrag = 0.98f;					// '공기 저항' (속도 감쇄)
- 
-	
 }
 
 void CRoverAirFly::OnUpdate(_float fTimeDelta)
@@ -214,12 +212,27 @@ void CRoverAirFly::Update_FlyAnimations(_float fTimeDelta)
 #pragma endregion
 
 	// 애니메이션 실행
-	m_IsAnimationEnd = CCharacterState::Play_Animation(
+	m_IsAnimationEnd = CCharacterState::Play_AnimationFly(
 		m_pRover,
 		fTimeDelta,
 		1.f,
 		m_GpuBlendInfo
 	);
+
+
+	// Parts Wing은 항상 실행됨
+	if (m_iPartType != CRover::PARTTYPE::TYPE_END)
+	{
+		// 애니메이션 속도 서로 Sync 맞추기.
+		m_pRover->Play_PartAnimation(
+			m_iPartType,
+			m_Animations[m_iCurrentAnimIdx].strAnimName,
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+		);
+	}
+
+	if (eAirFlyType == ERoverAirFlyType::XA_START)
+		return;
 
 #pragma region 이동량 보정
 	// 이동량 보정 1. 캐릭터를 직접 회전.
@@ -265,7 +278,7 @@ void CRoverAirFly::Update_FlyAnimations(_float fTimeDelta)
 	{
 		vStrafeAccel += XMVectorSet(0.f, -1.f, 0.f, 0.f) * fStrafeSpeed;
 		if (m_States[INPUT_ACCEL])
-			vStrafeAccel *= 7.f;
+			vStrafeAccel *= 2.f;
 	}
 
 	if (m_States[INPUT_L])
@@ -291,25 +304,15 @@ void CRoverAirFly::Update_FlyAnimations(_float fTimeDelta)
 
 	// 최대/최소 속도 제한
 	_float fVerticalSpeed = XMVectorGetY(m_vForce);
-	if (fVerticalSpeed < -30.f)
-		m_vForce = XMVectorSetY(m_vForce, -30.f);
-	if (fVerticalSpeed > 30.f)
-		m_vForce = XMVectorSetY(m_vForce, 30.f);
+	if (fVerticalSpeed < -60.f)
+		m_vForce = XMVectorSetY(m_vForce, -60.f);
+	if (fVerticalSpeed > 60.f)
+		m_vForce = XMVectorSetY(m_vForce, 60.f);
 
 	// 5. 최종 이동 적용 (Transform.cpp의 Go_Force는 velocity * fTimeDelta를 적용)
 	m_pRover->Add_Force(m_vForce, fTimeDelta);
 #pragma endregion
 
-	// Parts Wing은 항상 실행됨
-	if (m_iPartType != CRover::PARTTYPE::TYPE_END)
-	{
-		// 애니메이션 속도 서로 Sync 맞추기.
-		m_pRover->Play_PartAnimation(
-			m_iPartType,
-			m_Animations[m_iCurrentAnimIdx].strAnimName,
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
-		);
-	}
 }
 
 
@@ -380,7 +383,7 @@ void CRoverAirFly::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(ERoverAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f, 1.f, true);
     CState::Add_Animations(ENUM_CLASS(ERoverAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f, 1.f, true);
     CState::Add_Animations(ENUM_CLASS(ERoverAirFlyType::XA_SHAKE_LOOP), "XA_Shake_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(ERoverAirFlyType::XA_START), "XA_Start", 1.f, 30.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverAirFlyType::XA_START), "XA_Start", 1.f, 30.f, 3.f);
 	
 }
 

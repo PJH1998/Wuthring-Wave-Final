@@ -58,6 +58,23 @@ cbuffer AnimationInfoCB : register(b0)
     uint g_AnimIndex;
     bool g_IsRibAnimUsed;
     uint g_RibbonAnimIndex;
+    
+    bool g_IsBlendEnabled; // Blending Usable.
+    float g_BlendParamLR; // 4 (LR -1(L) to 1(R))
+    float g_fBlendParamDU; // 4 (DU -1(D) to 1(U))
+    float g_Padding; // 4 (16바이트 정렬)
+
+	// LR Blend Clip
+    uint g_ClipIndexL;
+    uint g_ClipIndexMidLR;
+    uint g_ClipIndexR;
+    uint g_WeightClipLR;
+
+	// DU Blend Clip
+    uint g_ClipIndexD;
+    uint g_ClipIndexMidDU;
+    uint g_ClipIndexU;
+    uint g_WeightClipDU;
 }
 
 //cbuffer AnimationInfoCB : register(b0)
@@ -140,6 +157,7 @@ matrix_rm matrix_rmFromSQT(float4 s, float4 q, float4 t)
 	
     return m;
 }
+
 
 matrix Calculate_Matrix(uint boneIndex, uint animIndex, bool isRibbon, float fTrackPosition)
 {
@@ -404,113 +422,113 @@ SRTKeyFrame Apply_Additive(SRTKeyFrame baseSRT, SRTKeyFrame deltaSRT)
 }
 
 // 가산 블렌딩 방식
-[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
-{
-    // 현재 본 Index 가져오기.
-    uint boneIndex = dispatchThreadID.x;
-    
-      // 1. Action Animation의 SRT 가져오기
-    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
-   
-    matrix result_matrix;
-    
-    // Ribbon Animation을 사용한다면?
-    if (g_IsRibAnimUsed)
-    {
-        // 2. Ribbon Animation의 SRT 가져오기
-        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
-        
-        // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
-        float4 finalScale = ribbonSRT.scale * actionSRT.scale;
-        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
-        float4 finalTranslation = ribbonSRT.translation +
-                                 (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
-        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
-    }
-    else
-    {
-        result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
-    }
-    
-    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
-    g_OutLocalMatrices[boneIndex] = result_matrix;
-   
-}
-
 //[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
+//void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID) // SV_DispatchThreadID : 전체 작업에서의 스레드 ID
 //{
-//    // 0. Bone Index
+//    // 현재 본 Index 가져오기.
 //    uint boneIndex = dispatchThreadID.x;
     
-//    // --- 1. 기본(Action) 애니메이션 SRT 계산 ---
-//    // (예: XA_Loop_Stand)
-//    SRTKeyFrame finalSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
-    
-//    // --- 2. (신규) 2단계 가산(Additive) 블렌딩 ---
-//    if (g_IsBlendEnabled)
-//    {
-//        // --- 2-1. 좌/우 (LR) 블렌드 ---
-//        // 가산의 기준이 될 가중치(Weight) 포즈
-//        SRTKeyFrame weightLR_SRT = Calculate_SRT(boneIndex, g_WeightClipLR, false, g_TrackPosition);
-//        SRTKeyFrame targetLR_SRT = weightLR_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
-        
-//        float lr_t = g_BlendParamLR;
-//        if (lr_t > 0.0f) // Mid -> R
-//        {
-//            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexR, saturate(lr_t), boneIndex, g_TrackPosition);
-//        }
-//        else if (lr_t < 0.0f) // Mid -> L
-//        {
-//            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexL, saturate(-lr_t), boneIndex, g_TrackPosition);
-//        }
-        
-//        // (Target - Weight) 델타 계산 후 기본 포즈(finalSRT)에 가산
-//        SRTKeyFrame deltaLR = Calculate_Delta(targetLR_SRT, weightLR_SRT);
-//        finalSRT = Apply_Additive(finalSRT, deltaLR);
-
-//        // --- 2-2. 상/하 (DU) 블렌드 ---
-//        // 가산의 기준이 될 가중치(Weight) 포즈 (XA_Loop_Stand)
-//        SRTKeyFrame weightDU_SRT = Calculate_SRT(boneIndex, g_WeightClipDU, false, g_TrackPosition);
-//        SRTKeyFrame targetDU_SRT = weightDU_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
-        
-//        float du_t = g_fBlendParamDU;
-//        if (du_t > 0.0f) // Stand -> U
-//        {
-//            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexU, saturate(du_t), boneIndex, g_TrackPosition);
-//        }
-//        else if (du_t < 0.0f) // Stand -> D
-//        {
-//            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexD, saturate(-du_t), boneIndex, g_TrackPosition);
-//        }
-
-//        // (Target - Weight) 델타 계산 후 (LR이 이미 적용된) finalSRT에 추가 가산
-//        SRTKeyFrame deltaUD = Calculate_Delta(targetDU_SRT, weightDU_SRT);
-//        finalSRT = Apply_Additive(finalSRT, deltaUD);
-//    }
-    
-//    // --- 3. 리본(Ribbon) 애니메이션 가산 ---
+//      // 1. Action Animation의 SRT 가져오기
+//    SRTKeyFrame actionSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+   
 //    matrix result_matrix;
+    
+//    // Ribbon Animation을 사용한다면?
 //    if (g_IsRibAnimUsed)
 //    {
-//        // 리본 SRT 가져오기
+//        // 2. Ribbon Animation의 SRT 가져오기
 //        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
         
-//        // (기존 코드와 동일한 리본 가산 로직 사용, 대상만 actionSRT -> finalSRT로 변경)
-//        float4 finalScale = ribbonSRT.scale * finalSRT.scale;
-//        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, finalSRT.rotation);
+//        // 방법 A: Delta 방식 (Ribbon이 BindPose로부터의 변화량인 경우)
+//        float4 finalScale = ribbonSRT.scale * actionSRT.scale;
+//        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, actionSRT.rotation);
 //        float4 finalTranslation = ribbonSRT.translation +
-//                                 (finalSRT.translation - float4(0, 0, 0, 1));
+//                                 (actionSRT.translation - float4(0, 0, 0, 1)); // delta 적용
 //        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
 //    }
 //    else
 //    {
-//        // (블렌딩이 적용된) 최종 SRT를 행렬로 변환
-//        result_matrix = matrix_rmFromSQT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
+//        result_matrix = matrix_rmFromSQT(actionSRT.scale, actionSRT.rotation, actionSRT.translation);
 //    }
     
-//    // --- 4. 최종 로컬 행렬 출력 ---
+//    // 최종 행렬이 아닌 '로컬' 행렬을 출력 버퍼에 쓴다.
 //    g_OutLocalMatrices[boneIndex] = result_matrix;
+   
 //}
+
+[numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
+void CSMain(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+    // 0. Bone Index
+    uint boneIndex = dispatchThreadID.x;
+    
+    // --- 1. 기본(Action) 애니메이션 SRT 계산 ---
+    // (예: XA_Loop_Stand)
+    SRTKeyFrame finalSRT = Calculate_SRT(boneIndex, g_AnimIndex, false, g_TrackPosition);
+    
+    // --- 2. (신규) 2단계 가산(Additive) 블렌딩 ---
+    if (g_IsBlendEnabled)
+    {
+        // --- 2-1. 좌/우 (LR) 블렌드 ---
+        // 가산의 기준이 될 가중치(Weight) 포즈
+        SRTKeyFrame weightLR_SRT = Calculate_SRT(boneIndex, g_WeightClipLR, false, g_TrackPosition);
+        SRTKeyFrame targetLR_SRT = weightLR_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
+        
+        float lr_t = g_BlendParamLR;
+        if (lr_t > 0.0f) // Mid -> R
+        {
+            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexR, saturate(lr_t), boneIndex, g_TrackPosition);
+        }
+        else if (lr_t < 0.0f) // Mid -> L
+        {
+            targetLR_SRT = Blend1D_SRT(g_ClipIndexMidLR, g_ClipIndexL, saturate(-lr_t), boneIndex, g_TrackPosition);
+        }
+        
+        // (Target - Weight) 델타 계산 후 기본 포즈(finalSRT)에 가산
+        SRTKeyFrame deltaLR = Calculate_Delta(targetLR_SRT, weightLR_SRT);
+        finalSRT = Apply_Additive(finalSRT, deltaLR);
+
+        // --- 2-2. 상/하 (DU) 블렌드 ---
+        // 가산의 기준이 될 가중치(Weight) 포즈 (XA_Loop_Stand)
+        SRTKeyFrame weightDU_SRT = Calculate_SRT(boneIndex, g_WeightClipDU, false, g_TrackPosition);
+        SRTKeyFrame targetDU_SRT = weightDU_SRT; // 0.0일 경우를 대비해 중립 포즈로 초기화
+        
+        float du_t = g_fBlendParamDU;
+        if (du_t > 0.0f) // Stand -> U
+        {
+            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexU, saturate(du_t), boneIndex, g_TrackPosition);
+        }
+        else if (du_t < 0.0f) // Stand -> D
+        {
+            targetDU_SRT = Blend1D_SRT(g_ClipIndexMidDU, g_ClipIndexD, saturate(-du_t), boneIndex, g_TrackPosition);
+        }
+
+        // (Target - Weight) 델타 계산 후 (LR이 이미 적용된) finalSRT에 추가 가산
+        SRTKeyFrame deltaUD = Calculate_Delta(targetDU_SRT, weightDU_SRT);
+        finalSRT = Apply_Additive(finalSRT, deltaUD);
+    }
+    
+    // --- 3. 리본(Ribbon) 애니메이션 가산 ---
+    matrix result_matrix;
+    if (g_IsRibAnimUsed)
+    {
+        // 리본 SRT 가져오기
+        SRTKeyFrame ribbonSRT = Calculate_SRT(boneIndex, g_RibbonAnimIndex, true, g_TrackPosition);
+        
+        // (기존 코드와 동일한 리본 가산 로직 사용, 대상만 actionSRT -> finalSRT로 변경)
+        float4 finalScale = ribbonSRT.scale * finalSRT.scale;
+        float4 finalRotation = mul_quaternion(ribbonSRT.rotation, finalSRT.rotation);
+        float4 finalTranslation = ribbonSRT.translation +
+                                 (finalSRT.translation - float4(0, 0, 0, 1));
+        result_matrix = matrix_rmFromSQT(finalScale, finalRotation, finalTranslation);
+    }
+    else
+    {
+        // (블렌딩이 적용된) 최종 SRT를 행렬로 변환
+        result_matrix = matrix_rmFromSQT(finalSRT.scale, finalSRT.rotation, finalSRT.translation);
+    }
+    
+    // --- 4. 최종 로컬 행렬 출력 ---
+    g_OutLocalMatrices[boneIndex] = result_matrix;
+}
 

@@ -247,6 +247,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute AnimMesh Shader");
 
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshFly.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute FlyAnimMesh Shader");
+
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		CRigidbody::Create(m_pDevice, m_pContext))))

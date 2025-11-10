@@ -735,6 +735,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
         CRASH("Compute Shader");
 
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
+		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");

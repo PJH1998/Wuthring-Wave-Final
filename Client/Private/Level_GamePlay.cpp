@@ -34,7 +34,7 @@ HRESULT CLevel_GamePlay::Initialize()
 		CRASH("Test");
 	
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
-	//m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
