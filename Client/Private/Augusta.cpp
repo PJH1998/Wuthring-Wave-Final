@@ -213,6 +213,11 @@ void CAugusta::Render()
 	else
 		m_pQTEColliderCom->Render();
     
+	_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vEndPos = vStartPos + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * 3.f;
+	
+	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
+
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -544,99 +549,14 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 
 	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
 	getline(wss, var1, L'|');
-	getline(wss, var2, L'|');
-	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
-	
-	
-	if (var1 == TEXT("CAMERA"))
-	{
-		return; // 안씀 일단.
-		_wstring duration;
-		_wstring type;
-		getline(wss, duration, L'|'); 
-		getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	if (var1 == TEXT("HITSTOP"))
+		Process_HitStop(wStrObjectTag);
+	else if (var1 == TEXT("CAMERA"))
+		Process_CameraAction(wStrObjectTag);
+	else
+		Process_VolumeChange(wStrObjectTag);
 
-		_float fYawShake = stof(var2);
-		_float fPitchShake = stof(var3);
-		_float fDuration = stof(duration);
-
-
-		if (type == TEXT("IMPULSE"))
-		{
-			//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
-		}
-
-		
-	//	_float fIntensity = stof(var2);
-	//	Camera_Shake(fIntensity); // Shaking 강도.
-		return;
-	}
-
-	_uint iVolumeIdx = stoul(var3);
-
-	/* BAYONET|ATTACK|0*/
-	// 1. 어떤 무기인가?
-	if (var1 == TEXT("BAYONET"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (ATTACK (0), STRONG_ATTACK(1), ULTI(2) )
-		m_pBayonet->Change_Volume(iVolumeIdx);
-
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-		{
-			// 3. 볼륨 레이어 변경
-			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-		}
-		else if (var2 == TEXT("SKILL"))
-			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-		
-		
-	}
-	else if (var1 == TEXT("GRIFFON"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (STRIKE (0))
-		m_pGriffon->Change_Volume(iVolumeIdx);
-
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
-		else if (var2 == TEXT("SKILL"))
-			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	}
-	else if (var1 == TEXT("SKILLWEAPON"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ULTI (0) VOLUME_SWORD_ATTACK(1), VOLUME_SWORD_ULTI(2) )
-		m_pSkillWeapon->Change_Volume(iVolumeIdx);
-
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
-		else if (var2 == TEXT("SKILL"))
-			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	}
-	else if (var1 == TEXT("AUGUSTA"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
-		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
-			return;
-
-		m_pMainAttackVolume->TriggerActivate(false); // 교체.
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-		
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK); 
-		else if (var2 == TEXT("SKILL"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
-	}
+	return;
 }
 
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -679,6 +599,119 @@ void CAugusta::Process_DelayedActions()
 	}
 }
 #pragma endregion
+
+
+#pragma region HELPER 함수
+void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+
+}
+void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
+{
+	return; // 아직 미사용.
+	_wstring duration;
+	_wstring type;
+	wstringstream wss(wStrObjectTag);
+
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	getline(wss, duration, L'|');
+	getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+
+	_float fYawShake = stof(var2);
+	_float fPitchShake = stof(var3);
+	_float fDuration = stof(duration);
+
+
+	if (type == TEXT("IMPULSE"))
+	{
+		//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
+	}
+
+
+	//	_float fIntensity = stof(var2);
+	//	Camera_Shake(fIntensity); // Shaking 강도.
+	return;
+}
+void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+
+	_uint iVolumeIdx = stoul(var3);
+
+	/* BAYONET|ATTACK|0*/
+	// 1. 어떤 무기인가?
+	if (var1 == TEXT("BAYONET"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (ATTACK (0), STRONG_ATTACK(1), ULTI(2) )
+		m_pBayonet->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+		{
+			// 3. 볼륨 레이어 변경
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		}
+		else if (var2 == TEXT("SKILL"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+
+
+	}
+	else if (var1 == TEXT("GRIFFON"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (STRIKE (0))
+		m_pGriffon->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
+		else if (var2 == TEXT("SKILL"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("SKILLWEAPON"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ULTI (0) VOLUME_SWORD_ATTACK(1), VOLUME_SWORD_ULTI(2) )
+		m_pSkillWeapon->Change_Volume(iVolumeIdx);
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK); // 3. 볼륨 레이어 변경
+		else if (var2 == TEXT("SKILL"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	}
+	else if (var1 == TEXT("AUGUSTA"))
+	{
+		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
+		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
+			return;
+
+		m_pMainAttackVolume->TriggerActivate(false); // 교체.
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
+	}
+}
+#pragma endregion
+
 
 
 

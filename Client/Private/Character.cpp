@@ -449,6 +449,7 @@ _vector CCharacter::Get_RightVector_NoPitch()
 	return vRight;
 }
 
+
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
     if (nullptr == pTargetTransform)
