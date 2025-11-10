@@ -131,7 +131,7 @@ public:
 	_matrix Get_WorldMatrix();
 
 #ifdef _DEBUG
-	void RayDir(_vector vRayDir, _float3 vEndPos);
+	void Print_LookRay();
 #endif // _DEBUG
 
 #pragma endregion

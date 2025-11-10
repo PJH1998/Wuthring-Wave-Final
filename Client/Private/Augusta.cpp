@@ -213,11 +213,8 @@ void CAugusta::Render()
 	else
 		m_pQTEColliderCom->Render();
     
-	_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION);
-	_vector vEndPos = vStartPos + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * 3.f;
+	Print_LookRay();
 	
-	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
-
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG

@@ -322,22 +322,19 @@ _matrix CCharacter::Get_WorldMatrix()
 	return m_pTransformCom->Get_WorldMatrix();
 }
 
+#pragma endregion
+
 #ifdef _DEBUG
-void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
+void CCharacter::Print_LookRay()
 {
-	vRayDir = XMVector3Normalize(vRayDir);
-	_vector vEnd = XMLoadFloat3(&vEndPos);
-	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
+	_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION) + (XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 0.3f);
+	_vector vEndPos = vStartPos + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * 1.5f;
+	
+
+	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
 #endif // _DEBUG
-
-
-
-
-
-#pragma endregion
-
 
 #pragma region STATE
 
