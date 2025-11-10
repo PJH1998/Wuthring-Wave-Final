@@ -184,6 +184,7 @@ public:
 public:
 	_float			Get_TimeDelta(const _wstring& strTimerTag);
 	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate);
+	void			Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration);
 	HRESULT		Add_Timer(const _wstring& strTimerTag);
 #pragma endregion
 

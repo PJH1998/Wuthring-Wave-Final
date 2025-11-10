@@ -602,8 +602,22 @@ void CAugusta::Process_DelayedActions()
 void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)
 {
 	wstringstream wss(wStrObjectTag);
-	// 3개의 변수 준비
-	_wstring var1, var2, var3;
+	// 4개의 변수 준비
+	_wstring var1, var2, var3, var4;
+
+	getline(wss, var1, L'|'); // HITSTOP
+	getline(wss, var2, L'|'); // Layer Tag
+	getline(wss, var3, L'|'); // Rate
+	getline(wss, var4, L'|'); // Duration
+
+	_float fRate = stof(var3);
+	_float fDuration = stof(var4);
+
+	if (var2 == TEXT("ALL"))
+	{
+		// 캐릭터의 경우 전체 시간 감소.
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), fRate, fDuration);
+	}
 
 }
 void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)

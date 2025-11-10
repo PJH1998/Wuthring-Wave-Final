@@ -53,7 +53,7 @@ void CRoverAirFly::OnEnter(void* pArg)
 	{
 		m_pRover->Set_Gravity(false);
 		_vector vForward = m_pRover->Get_LookVector();
-		m_vForce = vForward * 8.f + XMVectorSet(0.f, 7.f, 0.f, 0.f);  // forward 8m/s, up 7m/s (테스트로 조정) => 초기 가속.
+		m_vForce = vForward * 8.f + XMVectorSet(0.f, 7.f, 0.f, 0.f);
 	}
 
 	// 9. 물리 값 설정 

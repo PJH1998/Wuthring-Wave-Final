@@ -134,6 +134,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pTimer_Manager->Update(fTimeDelta); // Timer Manager Update => Time Stop 관련.
+
 	m_pHZB->Update();
 
 	m_pGUIManager->Update();
@@ -641,6 +643,10 @@ _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {
 	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate);
+}
+void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 {
