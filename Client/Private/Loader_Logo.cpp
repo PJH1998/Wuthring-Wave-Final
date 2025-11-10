@@ -4,6 +4,7 @@
 #include "Dummy.h"
 #include "ShadowDummy.h"
 #include"Parser.h"
+#include "GameSystem.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -16,6 +17,7 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_MonsterTable(); Complete_Load(); });
 
 	//m_pGameInstance->Wait_Thread_End();
     return S_OK;
@@ -65,6 +67,16 @@ HRESULT CLoader_Logo::Load_Object()
 	cout << "Object" << endl;
 
     return S_OK;
+}
+
+HRESULT CLoader_Logo::Load_MonsterTable()
+{
+	if (FAILED(CGameSystem::GetInstance()->LoadMonsterTable("../Bin/Resource/Data/MonsterTable.csv")))
+		return E_FAIL;
+
+	cout << "Monster Table" << endl;
+
+	return S_OK;
 }
 
 CLoader_Logo* CLoader_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

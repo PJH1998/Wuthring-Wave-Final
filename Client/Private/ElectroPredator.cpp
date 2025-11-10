@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "ElectroPredator.h"
+#include "Projectile.h"
 
 CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -33,15 +34,19 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 	Ready_Component(pDesc);
 	CActor::Register_AllNotifies(pDesc->strFolderPath);
-	m_iHP = pDesc->fHp;
+	m_fHP = pDesc->fHp;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_vDistanceRange = _float2(7.f, 12.95f);
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = pDesc->fImpluseRate;
+	//m_pArrowMatrix = m_pModelCom->Get_BoneMatrixPtr((""));
 	//임시 patrol 위치 데이터
-	m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
-	m_PatrolPoints.push(pDesc->vInitPosition);
+	//m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
+	//m_PatrolPoints.push(pDesc->vInitPosition);
+	m_pRigidBodyCom->IsActivate(false);
+	m_pColliderCom->IsActivate(false);
+	m_isActivate = false;
 	return S_OK;
 }
 
@@ -137,6 +142,17 @@ void CElectroPredator::Render()
 #endif
 }
 
+void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
+	m_fHP = pDesc->fMaxHp;
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_isActivate = true;
+	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
+	m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
+}
+
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
 {
 	if (wStrColliderTag == TEXT("Lerp"))
@@ -156,7 +172,29 @@ void CElectroPredator::Effect_Active(const _wstring& wStrEffectTag)
 
 void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 {
-	if (wStrObjectTag == TEXT("Look"))
+	if (wStrObjectTag == TEXT("Shoot"))
+	{
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+		_vector vLook = m_pTransformCom->Get_State(STATE::LOOK);
+		_matrix WorldMat = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), 
+														XMVectorSet(0.f, 0.f, 0.f, 1.f), 
+														XMVectorSet(0.f, 0.f, 0.f, 1.f),
+														vPos + vLook + XMVectorSet(0.f, 2.f, 0.f, 0.f));
+		CProjectile::PROJECTILERESET ProiDesc{};
+		ProiDesc.vTargetPos = m_vTargetPosition;
+		ProiDesc.vTargetPos.y += 1.f; // 대상 높이 offset
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_Electro"), WorldMat, &ProiDesc);
+	}
+	else if (wStrObjectTag == TEXT("AoE"))
+	{
+		//CAoEDoT::AOEDOT_RESET AoEDesc{};
+		_vector vScale{}, vQuat{}, vTranslate{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
+		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, nullptr);
+	}
+	else if (wStrObjectTag == TEXT("Look"))
 	{
 		TurnFix();
 	}
