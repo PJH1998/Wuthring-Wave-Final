@@ -461,9 +461,9 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	_bool isIn_Augusta_AdvUlt = (eState_Augusta_R == UI_AUGUSTA_STATE::R_SWORD_ULTI_READY) || isIn_AdvUltMode;
 
 
-	_uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
-	_uint iIndex_RBtn = 0;		static _uint iIndex_PrevRBtn ;
-	_uint iIndex_LBBtn = 4;		static _uint iIndex_PrevLBBtn ;
+	static _uint iIndex_EBtn = 2;		static _uint iIndex_PrevEBtn;
+	static _uint iIndex_RBtn = 0;		static _uint iIndex_PrevRBtn ;
+	static _uint iIndex_LBBtn = 4;		static _uint iIndex_PrevLBBtn ;
 	//_uint iIndex_TBtn = ..
 
 	switch (m_pPlayerStatus->Get_CurrentCharIndex())
@@ -491,25 +491,52 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 
 	CCustom_UI* pSkillReadyUI = Find_ChildObject(L"Skill_ReadyFrame");
 
+	auto readyDesc = pSkillReadyUI->Get_UIDesc();
 	auto readyInstDesc = pSkillReadyUI->Get_UIDesc().vecInstanceDescs;
+	for (auto& instDesc : readyInstDesc)
+		instDesc.vClipTexcoordX = { 0.f, 0.f };
 	
+
 	// E Button Indicator : 특수 공격이 준비 될 시에 불만 들어옴.
-	if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
-		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 1 };
-	else
-		readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
+	 
+	//if ("특수 공격 준비 시 함수 따로 만들어야 할 듯. 플레이어 종류마다 조건 제각각이라")
+	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 1 };
+	//else
+	//	readyInstDesc[iIndex_EBtn].vClipTexcoordX = { 0, 0 };
+
 
 	// R Button Indicator : 원으로 게이지 차고 (COST5) , 다 차면 불 들어옴
-	if (pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5) >= 1.f)
-		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 1 };
-	else
-		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 0 };
-
-
-
+	
+	_float fUltGuage = pStatus->Get_CostRatio(m_iSelectedCHIndex, COST_TYPE::COST5);
+	//cout << fUltGuage << endl;
+	
+	const vector<_float4> matCustomColor = {
+		// Ready Color
+		{0.808f, 0.322f, 0.612f, 1.0f},			// Dark
+		{0.969f, 0.451f, 1.0f, 1.0f},			// Elec
+		{1.0f, 0.416f, 0.416f, 1.0f},			// Fusi
+	};
 
 
 	
+	readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0.f, 1.f }; // 항시 활성화
+	vector<_float4x4> vecVariantMat = { }; vecVariantMat.resize(readyInstDesc.size());
+
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._11) = (1.f - fUltGuage / 1.f);		// CD or Resource Rate
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._12) = 0.f;							// ColorMul1
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._13) = (fUltGuage >= 1.f) ? 1.f : 0.85f ;							// ColorMul2
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._14) = static_cast<_float>(true);	// Is Use CustomColor?
+	*reinterpret_cast<_float4*>(&vecVariantMat[iIndex_RBtn]._21) = matCustomColor[m_iSelectedCHIndex];	// CustomColor
+	*reinterpret_cast<_float*>(&vecVariantMat[iIndex_RBtn]._31) = 0.f;							// CD Start Degree
+
+	CCustom_UI::VARIANTREADY_UI_DESC tVariantDesc = {
+		vecVariantMat,
+		ENUM_CLASS(UI_VARIANT_FLAG::UIFLAG_COOLDOWN_CIRCLE),
+		true
+	};
+
+
+
 
 
 
@@ -518,10 +545,13 @@ void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 	if (iIndex_PrevRBtn != iIndex_RBtn)		readyInstDesc[iIndex_RBtn].vClipTexcoordX = { 0, 0 };
 	if (iIndex_PrevLBBtn != iIndex_LBBtn)	readyInstDesc[iIndex_LBBtn].vClipTexcoordX = { 0, 0 };
 
-	iIndex_PrevEBtn = iIndex_EBtn;
-	iIndex_PrevRBtn = iIndex_EBtn;
-	iIndex_PrevLBBtn = iIndex_EBtn;
+	readyDesc.vecInstanceDescs = readyInstDesc;
+	pSkillReadyUI->Set_UIDesc(readyDesc);
+	pSkillReadyUI->Set_VariantUIDesc(tVariantDesc);
 
+	iIndex_PrevEBtn = iIndex_EBtn;
+	iIndex_PrevRBtn = iIndex_RBtn;
+	iIndex_PrevLBBtn = iIndex_LBBtn;
 
 
 
@@ -1199,9 +1229,9 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     };
     CCustom_UI* pElementTargetUI = pElementIcons[m_iSelectedCHIndex];
     const vector<_float4> vecElemColors = {
-        {0.808f, 0.322f, 0.612f, 1.0f},         // Dark
-        {0.969f, 0.451f, 1.0f, 1.0f},         // Thunder
-        {1.0f, 0.416f, 0.416f, 1.0f}          // Fire
+        {0.808f, 0.322f, 0.612f, 1.0f},			// Dark
+        {0.969f, 0.451f, 1.0f, 1.0f},			// Elec
+        {1.0f, 0.416f, 0.416f, 1.0f}			// Fusi
     };
 
     vector<_float4x4> vecElementVariantMat = { _float4x4() };
@@ -1243,7 +1273,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._11) = (1.f - fElementAmounts[m_iSelectedCHIndex] / fMaxElementAmounts[m_iSelectedCHIndex]);
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._12) = 0.0f;
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._13) = 1.0f;
-    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_bool>(true);
+    *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._14) = static_cast<_float>(true);
     *reinterpret_cast<_float4*>(&vecElementGuageVariantMat[0]._21) = vecElemCircleColors[m_iSelectedCHIndex];
     *reinterpret_cast<_float*>(&vecElementGuageVariantMat[0]._31) = 90.f;
 

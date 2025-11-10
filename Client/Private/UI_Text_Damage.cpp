@@ -212,8 +212,8 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		curDesc.vSInstTrans.x = finalPosX;
 		curDesc.vSInstTrans.y = finalPosY;
 
-		if (i == 0)
-			cout << vScale.x << ", " << vScale.y << endl;
+		//if (i == 0)
+		//	cout << vScale.x << ", " << vScale.y << endl;
 	}
 	m_tUIDesc.vecInstanceDescs = vecInstDescs;		// 인스턴스 반영
 
