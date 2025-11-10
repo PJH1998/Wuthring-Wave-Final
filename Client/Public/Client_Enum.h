@@ -17,6 +17,13 @@ namespace Client
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
 
+	enum class CHARACTER_CONDITION : unsigned int {
+		HIT = 1 << 0,
+		DODGE = 1 << 1, // HIT 상태면 Dodge가 안되게?
+		PARRY = 1 << 2,
+		END
+	};
+
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
 		AUGUSTA,

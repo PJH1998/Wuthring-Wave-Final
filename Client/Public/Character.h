@@ -12,6 +12,7 @@ public:
 	};
 
 public:
+	
 
 
 public:
@@ -141,6 +142,8 @@ public:
 	virtual void Bind_QTE(_bool IsQTE) {};
 	_bool IsQTEend() { return m_IsQTEend;  }
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
+
+	virtual void Process_DelayedActions() {};
 #pragma endregion
 
 #pragma region STATE
@@ -252,6 +255,18 @@ public:
 #pragma endregion
 
 	
+#pragma region CONDITION
+public:
+	void Add_Condition(CHARACTER_CONDITION eConditionFlag);
+	_bool Check_AnyCondition(CHARACTER_CONDITION eConditionFlag);
+	_bool Check_AllCondition(CHARACTER_CONDITION eConditionFlag);
+
+	void Remove_Condition(CHARACTER_CONDITION eConditionFlag);
+	void Remove_AllCondition();
+
+
+#pragma endregion
+
 
 protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
@@ -288,6 +303,9 @@ protected:
 	_bool m_IsLand = { false };
 	_bool m_IsQTE = { false };
 	_bool m_IsQTEend = { false };
+
+	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
+	queue<DELAYED_ACTION> m_DelayedActions;
 	
 
 	HIT_DESC m_PendingHitDesc = {};

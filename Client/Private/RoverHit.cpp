@@ -121,6 +121,11 @@ void CRoverHit::Handle_Input()
 void CRoverHit::Update_HitAnimation(_float fTimeDelta)
 {
     CCharacterState::Play_Animation(m_pRover, fTimeDelta);
+	ERoverHitType eHitType = static_cast<ERoverHitType>(m_iCurrentAnimIdx);
+	if (eHitType == ERoverHitType::BEHIT_FLY_FALL)
+	{
+		m_pRover->Move_Fall(fTimeDelta, 0.1f); // 미세하게 떨어지게
+	}
 }
 
 void CRoverHit::Check_Physics(_float fTimeDelta)
@@ -153,10 +158,6 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 				return;
 			}
-
-			m_pRover->GetStateContextForWrite().m_eLandType = ERoverLandType::LAND_LIGHT;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND));
-			return;
 		}
 
 		if (!m_States[LAND])
@@ -187,10 +188,21 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 				return;
 			}
-
-			m_pRover->GetStateContextForWrite().m_eLandType = ERoverLandType::LAND_LIGHT;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND));
-			return;
+			else
+			{
+				if (eHitType == ERoverHitType::BEHIT_FLY_FALL)
+				{
+					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STANDUP; // Idle 전용 일어나는 모션.
+					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+					return;
+				}
+				else
+				{
+					m_pRover->GetStateContextForWrite().m_eIdleType = ERoverIdleType::STAND1; // Idle 전용 일어나는 모션.
+					m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE));
+					return;
+				}
+			}
 		}
 
 		if (!m_States[LAND])
@@ -201,10 +213,12 @@ void CRoverHit::Check_StateTransition(_float fTimeDelta)
 				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP));
 				return;
 			}
-
-			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
-			return;
+			else
+			{
+				m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+				m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL));
+				return;
+			}
 		}
 	}
 

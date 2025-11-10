@@ -66,7 +66,7 @@ void CAugustaAirFall::OnExit()
 void CAugustaAirFall::Handle_Input()
 {
     m_eDir = m_pAugusta->Calculate_Direction(); // 방향 계산.
-	m_States[HIT] = m_pAugusta->Is_Hit();
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
 	if (m_States[HIT])
 		return;
 

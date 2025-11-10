@@ -64,7 +64,7 @@ void CRoverAirJump::Handle_Input()
     ERoverJumpType eJumpType = static_cast<ERoverJumpType>(m_iCurrentAnimIdx);
 
     m_eDir = m_pRover->Calculate_Direction(); 
-	m_States[HIT] = m_pRover->Is_Hit(); // HIT 상태인가?
+	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
 
 	// Hit면 모든 상태 제거
 	if (m_States[HIT])

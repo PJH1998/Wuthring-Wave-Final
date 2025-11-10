@@ -7,6 +7,16 @@ NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
 public:
+	enum PENDING_CONDITION : _uint
+	{
+		HIT = 0,
+		DODGE,
+		PARRY,
+		QTE,
+		CONDITION_END
+	};
+
+public:
 	enum VOLUME
 	{
 		VOULME_RISE_ZERO = 0,
@@ -110,7 +120,7 @@ public:
 		TYPE_END
 	};
 
-#pragma region 0. 
+#pragma region 0. 기본 작업
 protected:
 	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugusta(const CAugusta& Prototype);
@@ -153,8 +163,13 @@ public:
 #pragma endregion
 
 #pragma region 3. CALL BACK
-	public:
-		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+public:
+	void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
+#pragma region 4. EVENT
+public:
+	virtual void Process_DelayedActions() override;
 #pragma endregion
 
 
@@ -165,14 +180,14 @@ private:
 	class CAugustaGriffon* m_pGriffon = { nullptr };
 	class CWing* m_pWing = { nullptr };
 
-	
-
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
 	_bool m_IsPlayAnimation = { true };
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
 
 	vector<class CAttackVolume*> m_AttackVolumes;
+
+	_bool m_PendingConditions[CONDITION_END] = {};
 
 
 private:

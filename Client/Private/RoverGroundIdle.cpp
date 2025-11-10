@@ -73,7 +73,7 @@ void CRoverGroundIdle::OnExit()
 
 void CRoverGroundIdle::Handle_Input()
 {
-	m_States[HIT] = m_pRover->Is_Hit();
+	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
 	if (m_States[HIT])
 		return;
 

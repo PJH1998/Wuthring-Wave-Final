@@ -757,6 +757,40 @@ void CCharacter::Sync_UI()
     // Character Info Sync 
     //m_pGameSystem->Sync_CharacterInfo(m_Stats);
 }
+
+#pragma endregion
+
+#pragma region CONDITION
+
+void CCharacter::Add_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition |= iFlag;
+}
+
+_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) != 0;
+}
+_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) == iFlag;
+}
+
+void CCharacter::Remove_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition &= ~iFlag;
+}
+
+void CCharacter::Remove_AllCondition()
+{
+	m_iCondition = 0;
+}
+
+
 #pragma endregion
 
 
