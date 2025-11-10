@@ -11,17 +11,18 @@ CSonoro_Manager::CSonoro_Manager()
 
 HRESULT CSonoro_Manager::Initialize()
 {
-	m_vUpSpeed = _float4(0.f, 0.4f, 0.f, 0.f);
+	m_vUpSpeed = _float4(0.f, 0.6f, 0.f, 0.f);
 	return S_OK;
 }
 
-_bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects)
+_bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
 	if (eType == OBJECTTYPE::SONORA)
 	{
 		{
 			lock_guard<mutex> lock(m_Mutex);
 			m_SonoroObjects.push_back(pObjects);
+			*SonoroMode = &m_SonoroRigidActive;
 			Safe_AddRef(pObjects);
 		}
 		return &m_SonoroRender;
@@ -31,14 +32,15 @@ _bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* p
 	return nullptr;
 }
 
-_bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects)
+_bool* CSonoro_Manager::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects, _bool** SonoroMode)
 {
 	if (eType == OBJECTTYPE::NONSONORA || eType == OBJECTTYPE::NONSONORA_FLOOR)
 	{
 		{
 			lock_guard<mutex> lock(m_Mutex);
 			m_NonSonoroObjects.push_back(pObjects);
-		Safe_AddRef(pObjects);
+			*SonoroMode = &m_SonoroRigidActive;
+			Safe_AddRef(pObjects);
 		}
 
 		return &m_SonoroRender;
@@ -73,6 +75,14 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 {
 	//버튼을 누르고 딜레이시간 이후에 슬금슬금 올라가게.
+	m_SonoroRigidActive = !m_SonoroRigidActive;
+
+
+	for (auto& pObject : m_NonSonoroObjects)
+		pObject-> Change_Collision_Layer(m_SonoroRigidActive);
+	for (auto& pObject : m_SonoroObjects)
+		pObject->Change_Collision_Layer(m_SonoroRigidActive);
+
 	if (m_LastSonoroMode != IsSonoro)
 	{
 		_float4 vCamPos = *m_pGameInstance->Get_CamPos();

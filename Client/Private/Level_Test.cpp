@@ -61,7 +61,7 @@ HRESULT CLevel_Test::Initialize()
 	//	CRASH("Test");
 
 	//로더에서 부른 것과 같은 거 부르기.
-	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
 	//Ready_Dummy();

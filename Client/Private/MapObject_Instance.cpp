@@ -24,7 +24,10 @@ HRESULT CMapObject_Instance::Initialize_Clone(void* pArg)
 
 	Ready_Component(pArg);
 
+	//나중에 풀때기 흔드는 거 하려면 업데이트가 필요해서 임시 조치.
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
+	Sync_Sectors();
+	AddRef();
     return S_OK;
 }
 
@@ -43,7 +46,6 @@ void CMapObject_Instance::Late_Update(_float fTimeDelta)
 
 void CMapObject_Instance::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
-
 	_uint iLODIndex = m_iLODIndex;
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
@@ -103,9 +105,9 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 	MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
 	//m_iSaveIndex = pDesc->iSaveIndex;
 
-	CMesh_Instance::MESH_INST_DESC Desc{};
+	/*CMesh_Instance::MESH_INST_DESC Desc{};
 	Desc.iNumInstance = pDesc->iNumInstance;
-	Desc.pTransformMatrix = pDesc->InstanceWorldMatrix;
+	Desc.pTransformMatrix = pDesc->InstanceWorldMatrix;*/
 
 	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
 	ProtoName += StringToWString(pDesc->ModelName);
@@ -126,7 +128,7 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 		_char ModelName[MAX_PATH] = {};
 		sprintf_s(ModelName, "Com_Model%d", i);
 		if (FAILED(Add_Component(ENUM_CLASS(pDesc->iLevel), ProtoName,
-			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), &Desc)))
+			StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), nullptr)))
 			CRASH("FAILED");
 
 
@@ -142,10 +144,8 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
 		CRASH("FAILED");
-	_float3 vExtents;
-	_float3 vScale = m_pTransformCom->Get_Scaled();
-	XMStoreFloat3(&vExtents, XMLoadFloat3(&pDesc->vBoundingExtends) * XMLoadFloat3(&vScale));
-	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, vExtents);
+
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
 	if (!m_pBoundingBox)
 		CRASH("Failed");
 

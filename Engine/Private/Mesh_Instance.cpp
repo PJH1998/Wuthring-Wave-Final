@@ -34,6 +34,11 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 	for (size_t i = 0; i < m_iNumVertices; ++i)
 	{
 		XMStoreFloat3(&pVertices[i].vPosition, XMVector3TransformCoord(XMLoadFloat3(&pVertices[i].vPosition), PreTransformMatrix));
+
+		XMStoreFloat3(&pVertices[i].vNormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vNormal), PreTransformMatrix));
+		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
+		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
+#ifdef _DEBUG
 		MaxPos[0] = max(pVertices[i].vPosition.x, MaxPos[0]);
 		MaxPos[1] = max(pVertices[i].vPosition.y, MaxPos[1]);
 		MaxPos[2] = max(pVertices[i].vPosition.z, MaxPos[2]);
@@ -41,11 +46,6 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 		MinPos[0] = min(pVertices[i].vPosition.x, MinPos[0]);
 		MinPos[1] = min(pVertices[i].vPosition.y, MinPos[1]);
 		MinPos[2] = min(pVertices[i].vPosition.z, MinPos[2]);
-
-		XMStoreFloat3(&pVertices[i].vNormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vNormal), PreTransformMatrix));
-		XMStoreFloat3(&pVertices[i].vTangent, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vTangent), PreTransformMatrix));
-		XMStoreFloat3(&pVertices[i].vBinormal, XMVector3TransformNormal(XMLoadFloat3(&pVertices[i].vBinormal), PreTransformMatrix));
-#ifdef _DEBUG
 		m_VertexPositions.push_back(pVertices[i].vPosition);
 #endif
 	}
@@ -96,12 +96,13 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 
 	if (!m_IsEdit)
 	{
-		MESH_INST_DESC* pDesc = static_cast<MESH_INST_DESC*>(pArg);
+		CMesh_Instance::MESH_INST_DESC* pDesc = static_cast<CMesh_Instance::MESH_INST_DESC*>(pArg);
+		//MESH_INST_DESC* pDesc = static_cast<MESH_INST_DESC*>(pArg);
 		if (!pDesc)
 			CRASH("Failed");
 
 		m_iNumInstance = pDesc->iNumInstance;
-		m_TransformMatrices = pDesc->pTransformMatrix;
+		//m_TransformMatrices = pDesc->pTransformMatrix;
 		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH);
 		m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 		m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -112,13 +113,13 @@ HRESULT CMesh_Instance::Initialize_Prototype(_fmatrix PreTransformMatrix, _bool 
 
 		m_pVBInstanceVertices = new VTXINSTANCE_MESH[m_iNumInstance];
 		VTXINSTANCE_MESH* pVBInstanceVertices = static_cast<VTXINSTANCE_MESH*>(m_pVBInstanceVertices);
-		for (_uint i = 0; i < m_iNumInstance; ++i)
-		{
-			memcpy(&pVBInstanceVertices[i].vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
-			memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
-			memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
-			memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
-		}
+		//for (_uint i = 0; i < m_iNumInstance; ++i)
+		//{
+		//	memcpy(&pVBInstanceVertices[i].vRight, &pDesc->pTransformMatrix[i].m[0], sizeof(_float4));
+		//	memcpy(&pVBInstanceVertices[i].vUp, &pDesc->pTransformMatrix[i].m[1], sizeof(_float4));
+		//	memcpy(&pVBInstanceVertices[i].vLook, &pDesc->pTransformMatrix[i].m[2], sizeof(_float4));
+		//	memcpy(&pVBInstanceVertices[i].vTranslation, &pDesc->pTransformMatrix[i].m[3], sizeof(_float4));
+		//}
 
 		memcpy(pVBInstanceVertices, pDesc->pTransformMatrix, sizeof(_float4x4) * m_iNumInstance);
 	}
@@ -135,7 +136,7 @@ HRESULT CMesh_Instance::Initialize_Clone(void* pArg)
 		MESH_INST_DESC* pDesc = static_cast<MESH_INST_DESC*>(pArg);
 
 		m_iNumInstance = pDesc->iNumInstance;
-		m_TransformMatrices = pDesc->pTransformMatrix;
+		//m_TransformMatrices = pDesc->pTransformMatrix;
 		m_iInstanceVertexStride = sizeof(VTXINSTANCE_MESH);
 		m_VBInstanceDesc.ByteWidth = m_iNumInstance * m_iInstanceVertexStride;
 		m_VBInstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -224,9 +225,7 @@ CMesh_Instance* CMesh_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 
 CMesh_Instance* CMesh_Instance::Clone(void* pArg)
 {
-    CMesh_Instance* pClone = new CMesh_Instance(*this);
-
-    return pClone;
+    return new CMesh_Instance(*this);
 }
 void CMesh_Instance::Free()
 {

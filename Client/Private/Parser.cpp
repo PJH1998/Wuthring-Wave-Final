@@ -89,9 +89,10 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
 				Desc.iLevel = ENUM_CLASS(eLevel);
-
-				_string ModelName = Desc.ModelName;
-				ModelName.pop_back();
+				if (MeshDesc.iNumInstance == 0)
+					int a = 0;
+				_string ModelOrigin = Desc.ModelName;
+				ModelOrigin.pop_back();
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 					if (entry2.path().string().find("Foliage") == std::string::npos)
 						continue;
@@ -100,7 +101,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 						continue;
 
 					//지금 LOD단계 다 만드는 게 아니라 하나만 만드는 거 같음.
-					if (entry2.path().string().find(ModelName) == std::string::npos)
+					if (entry2.path().string().find(ModelOrigin) == std::string::npos)
 						continue;
 					if (entry2.path().extension() != ".dat")
 						continue;
@@ -113,25 +114,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					//LOD단계별로 하고있어서 0, 1, 2  해야하는데 20,21,22, 이런 식으로 됨.
 					_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
 					_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
-					//auto iter = m_Names.find(ModelName);
-					//if (iter == m_Names.end())
-					//	m_Names.insert(ModelName);
-					//else
-					//{
-					//	ModelName.pop_back();
-					//	for (_uint i = 0; i < 30; ++i)
-					//	{
-					//		auto iter = m_Names.find(ModelName + to_wstring(i));
-					//		
-					//		if (iter == m_Names.end())
-					//		{
-					//			m_Names.insert(ModelName + to_wstring(i));
-					//			ModelName += to_wstring(i);
-					//			break;
-					//		}
 
-					//	}
-					//}
 					PrototypeName += ModelName;
 					strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
 					_string VersionPath = FileDir;
@@ -211,9 +194,9 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 	}
 }
 
-void CParser::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+void CParser::Clone_MapObjects(LEVEL eLevel)
 {
-	if (!m_LoadingMap[eLevel][iIndex])
+	if (m_LoadingMap[eLevel].empty())
 		MSG_BOX("Map Clone Failed");
 
 	_char FileDrive[MAX_PATH] = {};
@@ -221,23 +204,43 @@ void CParser::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
 	_char FileName[MAX_PATH] = {};
 	_char FileExt[MAX_PATH] = {};
 
-	_splitpath_s(m_LoadingMap[eLevel][iIndex], FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+	for (auto& FilePath : m_LoadingMap[eLevel])
+	{
+		_splitpath_s(FilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-	for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
-		if (!entry.is_regular_file())
-			continue;
+		for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
+			if (!entry.is_regular_file())
+				continue;
 
-		if (entry.path().extension() != ".dat")
-			continue;
+			if (entry.path().extension() != ".dat")
+				continue;
 
-		if (entry.path().string().find("Prototype") != std::string::npos)
-			continue;
+			if (entry.path().string().find("Prototype") != std::string::npos)
+				continue;
 
 
-		_string strFilePath = entry.path().string();
+			_string strFilePath = entry.path().string();
 
-		Read_Map_Dat(eLevel, strFilePath);
+			Read_Map_Dat(eLevel, strFilePath);
+		}
 	}
+	//_splitpath_s(m_LoadingMap[eLevel][iIndex], FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+	//for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
+	//	if (!entry.is_regular_file())
+	//		continue;
+
+	//	if (entry.path().extension() != ".dat")
+	//		continue;
+
+	//	if (entry.path().string().find("Prototype") != std::string::npos)
+	//		continue;
+
+
+	//	_string strFilePath = entry.path().string();
+
+	//	Read_Map_Dat(eLevel, strFilePath);
+	//}
 }
 
 void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
@@ -249,18 +252,20 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 		MSG_BOX("Load Failed");
 	}
 
-		_uint NameLength;
+	_uint NameLength;
 
-		_matrix PreTransformMatrix = XMMatrixIdentity();
-		_float fSize = 0.01f;
-		PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	_matrix PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
 	if (pFilePath.find("Instance") != std::string::npos)
 	{
-		for(_uint i=0; i< m_MapInstanceData.size();++i)
+		//return;
+		//for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
 		{
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
-				, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
+				//, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
+			, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[0]);
 		}
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)

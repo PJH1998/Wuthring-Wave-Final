@@ -252,37 +252,29 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 void CEdit_MapObject::Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
-    if (!ImGui::GetIO().WantCaptureMouse)
-    {
-        if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
-        {
-            if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
-            {
-            /*    _bool IsIn = { false };
-                for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
-                {
-                    IsIn = m_pGameInstance->IsIn_WorldSpace(m_pModelComArray[0]->Get_BoundingBox(i));
-                    if (IsIn)
-                        break;
-                }*/
-                //if (IsIn)
-                {
-                    //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
+	if (!ImGui::GetIO().WantCaptureMouse)
+	{
+		if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
+		{
+			if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+			{
+				if (!m_IsRender)
+					return;
 
-                    _float fDistance = {};
-                    //?붾뱶??諛붽퓭?쇳븿.
-                    _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
-                    _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
-                    if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
-                    {
-                        MAP_PICK event(this, fDistance);
+				{
+					_float fDistance = {};
+					_vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
+					_vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
+					if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+					{
+						MAP_PICK event(this, fDistance);
 
-                        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
-                    }
-                }
-            }
-        }
-    }
+						m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+					}
+				}
+			}
+		}
+	}
 #endif
     //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }

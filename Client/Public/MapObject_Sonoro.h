@@ -54,6 +54,7 @@ private:
 
 	_uint						m_iShaderPassIndex = {};
 	_bool*						m_IsRender = { nullptr };
+	_bool*					 m_SonoroMode = { nullptr };
 private:
 	void						Ready_Component(void* pArg);
 

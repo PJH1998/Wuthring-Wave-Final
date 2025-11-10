@@ -13,7 +13,7 @@ private:
 public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
-	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
+	void							Clone_MapObjects(LEVEL eLevel);
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
