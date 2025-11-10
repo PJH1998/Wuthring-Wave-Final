@@ -179,7 +179,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		_matrix WorldMat = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), 
 														XMVectorSet(0.f, 0.f, 0.f, 1.f), 
 														XMVectorSet(0.f, 0.f, 0.f, 1.f),
-														vPos + vLook + XMVectorSet(0.f, 2.f, 0.f, 1.f));
+														vPos + vLook + XMVectorSet(0.f, 2.f, 0.f, 0.f));
 		CProjectile::PROJECTILERESET ProiDesc{};
 		ProiDesc.vTargetPos = m_vTargetPosition;
 		ProiDesc.vTargetPos.y += 1.f; // 대상 높이 offset
