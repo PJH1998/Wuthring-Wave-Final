@@ -209,6 +209,7 @@
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
+    <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
@@ -386,6 +387,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\LogoFactory.cpp" />
+    <ClCompile Include="..\Private\LogoFemaleRover.cpp" />
     <ClCompile Include="..\Private\LogoMaleRover.cpp" />
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />

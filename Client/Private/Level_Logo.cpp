@@ -16,6 +16,7 @@ HRESULT CLevel_Logo::Initialize()
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 	Ready_Layer_LogoMaleRover();
+	Ready_Layer_LogoFemaleRover();
 
 	//// Rigidbody Sample
 	//CRigidbody::BOXBODY_DESC BoxBodyDesc = {};
@@ -124,6 +125,23 @@ void CLevel_Logo::Ready_Layer_LogoMaleRover()
 		CRASH("Prototype LogoMaleRover");
 
 	cout << "Level Male Rover" << endl;
+}
+
+void CLevel_Logo::Ready_Layer_LogoFemaleRover()
+{
+	_float3 vScale{}, vRotation{}, vPosition{};
+	vScale = { 1.f, 1.f, 1.f };
+	vRotation = { 0.f, 0.f, 0.f };
+	vPosition = { 0.f, 0.f, 0.f };
+
+	CCharacter::CHARACTER_DESC LogoFemaleRoverDesc;
+	LogoFemaleRoverDesc = PlayerData::GetLogoFemaleRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(
+		ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Actor_LogoFemaleRover")
+		, ENUM_CLASS(m_eCurLevel), TEXT("Layer_LogoRover"), &LogoFemaleRoverDesc)))
+		CRASH("Prototype LogoFemaleRover");
+
+	cout << "Level Female Rover" << endl;
 }
 
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

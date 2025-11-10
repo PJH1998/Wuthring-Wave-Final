@@ -16,6 +16,7 @@ public:
 
 private:
 	void Ready_Layer_LogoMaleRover();
+	void Ready_Layer_LogoFemaleRover();
 
 private:
 	// Test

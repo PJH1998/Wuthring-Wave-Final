@@ -552,9 +552,6 @@
     <ClInclude Include="..\Public\FS_Scythe.h">
       <Filter>03. GameObject\Actor\Monster\MonsterTest\Effect\Scythe</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Corosaurus.h">
-      <Filter>03. GameObject\Actor\Monster\Corrosaurus</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Trigger_Box.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
@@ -633,6 +630,10 @@
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\LogoFactory.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Corosaurus.h" />
+    <ClInclude Include="..\Public\LogoFemaleRover.h">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClInclude>
   </ItemGroup>
@@ -978,6 +979,9 @@
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClCompile>
     <ClCompile Include="..\private\LogoFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoFemaleRover.cpp">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClCompile>
   </ItemGroup>

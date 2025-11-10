@@ -427,6 +427,7 @@ _bool CModel::Play_Animation_CPU(const _string& strAnimationName, _float fTimeDe
 	if (iter == m_Animations.end())
 		return false;
 
+
 	_float fTrackPosition = {};
 
 	if (m_strPreAnimation != strAnimationName)

@@ -3,7 +3,7 @@
 #include "RoverState_Enum.h"
 
 NS_BEGIN(Client)
-class CLogoMaleRover final : public CCharacter
+class CLogoFemaleRover final : public CCharacter
 {
 public:
 	enum LOGO_STATE
@@ -16,9 +16,9 @@ public:
 
 #pragma region 0. LOGO
 protected:
-	explicit CLogoMaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CLogoMaleRover(const CLogoMaleRover& Prototype);
-	virtual ~CLogoMaleRover() = default;
+	explicit CLogoFemaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CLogoFemaleRover(const CLogoFemaleRover& Prototype);
+	virtual ~CLogoFemaleRover() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -51,7 +51,7 @@ private:
 	void Ready_Positions(const CHARACTER_DESC* pDesc);
 
 public:
-	static		CLogoMaleRover* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CLogoFemaleRover* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void Free() override;
 };

@@ -6,6 +6,7 @@
 #include"Parser.h"
 #include "GameSystem.h"
 #include "LogoMaleRover.h"
+#include "LogoFemaleRover.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -20,6 +21,7 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTable(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_LogoMaleRover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_LogoFeMaleRover(); Complete_Load(); });
 
 	//m_pGameInstance->Wait_Thread_End();
     return S_OK;
@@ -78,7 +80,7 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	_float fSize = 0.01f;
 	//_float fSize = 0.0001f;
-	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -87,7 +89,7 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 
 
 	// 2. StateMachine 초기화
-	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Rover";
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_MaleRover";
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
 		CStateMachine::Create(m_pDevice, m_pContext))))
 		CRASH("PlayerState Machine");
@@ -106,36 +108,35 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 
 HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 {
-	//_wstring wStrModelTag = L"Prototype_Component_Model_FeMaleRover";
-	//_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Male/LogoFeMaleRover.dat";
-	//_matrix	PreTransformMatrix = XMMatrixIdentity();
-	////_float fSize = 0.01f;
+	_wstring wStrModelTag = L"Prototype_Component_Model_FemaleRover";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Female/LogoFemaleRover.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.01f;
 	//_float fSize = 0.0001f;
-	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 
-	//// 1. 모델 초기화.
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
-	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
-	//	CRASH("Prototype Create Failed");
-
-
-	//// 2. StateMachine 초기화
-	//_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Rover";
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
-	//	CStateMachine::Create(m_pDevice, m_pContext))))
-	//	CRASH("PlayerState Machine");
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
 
 
-	//// 3. 객체 초기화
-	//_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_LogoFeMaleRover");
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_FemaleRover";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
 
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
-	//	, wStrActorTag
-	//	, CLogoMaleRover::Create(m_pDevice, m_pContext))))
-	//	CRASH("Prototype Create Failed");
 
-	//cout << "Logo FeMale Rover" << endl;
-	
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_LogoFemaleRover");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CLogoFemaleRover::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	cout << "Logo FeMale Rover" << endl;
+
 	return S_OK;
 }
 HRESULT CLoader_Logo::Load_MonsterTable()

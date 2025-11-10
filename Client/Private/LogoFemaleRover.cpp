@@ -1,21 +1,21 @@
 ﻿#include "ClientPch.h"
 #include "LogoFactory.h"
-#include "LogoMaleRover.h"
+#include "LogoFemaleRover.h"
 #include "SpringCamera.h"
 #include "Collider.h"
 #include "GameSystem.h"
 
-CLogoMaleRover::CLogoMaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLogoFemaleRover::CLogoFemaleRover(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
 {
 }
 
-CLogoMaleRover::CLogoMaleRover(const CLogoMaleRover& Prototype)
+CLogoFemaleRover::CLogoFemaleRover(const CLogoFemaleRover& Prototype)
     : CCharacter(Prototype)
 {
 }
 
-HRESULT CLogoMaleRover::Initialize_Prototype()
+HRESULT CLogoFemaleRover::Initialize_Prototype()
 {
     if (FAILED(CCharacter::Initialize_Prototype()))
         return E_FAIL;
@@ -23,7 +23,7 @@ HRESULT CLogoMaleRover::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
+HRESULT CLogoFemaleRover::Initialize_Clone(void* pArg)
 {
     CHARACTER_DESC* pDesc = static_cast<CHARACTER_DESC*>(pArg);
 
@@ -37,7 +37,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 15.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(-150.f, 10.f, 0.f, 1.f));
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
@@ -49,7 +49,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CLogoMaleRover::Priority_Update(_float fTimeDelta)
+void CLogoFemaleRover::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
@@ -60,7 +60,7 @@ void CLogoMaleRover::Priority_Update(_float fTimeDelta)
 	Logo_Input();
 }
 
-void CLogoMaleRover::Update(_float fTimeDelta)
+void CLogoFemaleRover::Update(_float fTimeDelta)
 {
     // 1. 위에서 Activate가 false인경우 업데이트하지 않음.
     if (!m_isActivate)
@@ -69,7 +69,7 @@ void CLogoMaleRover::Update(_float fTimeDelta)
 	m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 
 }
-void CLogoMaleRover::Late_Update(_float fTimeDelta)
+void CLogoFemaleRover::Late_Update(_float fTimeDelta)
 {
 	//m_pColliderCom->Sync_Position(m_pTransformCom);
 
@@ -77,7 +77,7 @@ void CLogoMaleRover::Late_Update(_float fTimeDelta)
         return;
 }
 
-void CLogoMaleRover::Render()
+void CLogoFemaleRover::Render()
 {
     Bind_Resources();
 
@@ -105,29 +105,30 @@ void CLogoMaleRover::Render()
 
 }
 
-void CLogoMaleRover::Render_Shadow()
+void CLogoFemaleRover::Render_Shadow()
 {
 
 }
 
-void CLogoMaleRover::Logo_Input()
+void CLogoFemaleRover::Logo_Input()
 {
 	// 1번 누르면 선택됨. 두번 누르면 해제됨.
 	if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::UP)
 	{
-		m_States[STATE_PICK] = true;
-		m_strCurrentAnimation = "AppearanceLogin";
-	}
-	else if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::UP)
-	{
 		m_States[STATE_PICK] = false;
 		m_strCurrentAnimation = "AppearanceIdle";
 	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::UP)
+	{
+		m_States[STATE_PICK] = true;
+		m_strCurrentAnimation = "AppearanceLogin";
+	}
+	
 		
 }
 
 
-void CLogoMaleRover::Bind_Resources()
+void CLogoFemaleRover::Bind_Resources()
 {
     if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
         CRASH("Failed Bind Matrix");
@@ -139,7 +140,7 @@ void CLogoMaleRover::Bind_Resources()
         CRASH("Failed Proj Matrix");
 }
 
-void CLogoMaleRover::Ready_Components(const CHARACTER_DESC* pDesc)
+void CLogoFemaleRover::Ready_Components(const CHARACTER_DESC* pDesc)
 {
     // 1. Components
     if(FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -175,7 +176,7 @@ void CLogoMaleRover::Ready_Components(const CHARACTER_DESC* pDesc)
 		CRASH("Collider");
 }
 
-void CLogoMaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
+void CLogoFemaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
@@ -183,7 +184,7 @@ void CLogoMaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CLogoMaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)
+void CLogoFemaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
@@ -192,33 +193,33 @@ void CLogoMaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)
 }
 
 
-CLogoMaleRover* CLogoMaleRover::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CLogoFemaleRover* CLogoFemaleRover::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CLogoMaleRover* pInstance = new CLogoMaleRover(pDevice, pContext);
+    CLogoFemaleRover* pInstance = new CLogoFemaleRover(pDevice, pContext);
 
     if (FAILED(pInstance->Initialize_Prototype()))
     {
-        MSG_BOX("Failed to Create : CLogoMaleRover");
+        MSG_BOX("Failed to Create : CLogoFemaleRover");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-CGameObject* CLogoMaleRover::Clone(void* pArg)
+CGameObject* CLogoFemaleRover::Clone(void* pArg)
 {
-    CLogoMaleRover* pInstance = new CLogoMaleRover(*this);
+    CLogoFemaleRover* pInstance = new CLogoFemaleRover(*this);
 
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
-        MSG_BOX("Clone Failed : CLogoMaleRover");
+        MSG_BOX("Clone Failed : CLogoFemaleRover");
         Safe_Release(pInstance);
     }
 
     return pInstance;
 }
 
-void CLogoMaleRover::Free()
+void CLogoFemaleRover::Free()
 {
     CCharacter::Free();
 }
