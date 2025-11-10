@@ -4,8 +4,6 @@
 #define THREAD_Y 8
 #define THREAD_Z 1
 
-#define MAX_DEPTH 10000
-
 Texture2D<float4> InputTexture : register(t0);
 Texture2D<float> InputMipTexture : register(t1);
 RWTexture2D<float> OutputTexture : register(u0);

@@ -143,13 +143,13 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Priority_Update(fTimeDelta);
+	//m_pFont_Manager->Priority_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 
 	m_pObject_Manager->Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Update(fTimeDelta);
+	//m_pFont_Manager->Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pCamera_Manager->Update(fTimeDelta);
@@ -158,7 +158,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Late_Update(fTimeDelta);
+	//m_pFont_Manager->Late_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pDecal_Manager->Update(fTimeDelta);
@@ -279,26 +279,43 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath, iPixelHeight);
 }
+FTCUSTOM_FONT* CGameInstance::Find_Font(const _wstring& strFontTag)
+{
+	return m_pFont_Manager->Find_Font(strFontTag);
+}
+const FTCUSTOM_FONT_GLYPH* CGameInstance::Get_Glyph(const _wstring& strFontTag, _uint code)
+{
+	return m_pFont_Manager->Get_Glyph(strFontTag, code);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_AtlasSRV(const _wstring& strFontTag)
+{
+	return m_pFont_Manager->Get_AtlasSRV(strFontTag);
+}
+const FTCUSTOM_FONT_GLYPH* CGameInstance::Get_GlyphAndAdvance(const _wstring& strFontTag, _uint iCodePoint, _uint prevCodePoint, _int& outAdvanceX)
+{
+	return m_pFont_Manager->Get_GlyphAndAdvance(strFontTag, iCodePoint, prevCodePoint, outAdvanceX);
+}
+
 //HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
 //{
 //	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
 //}
-_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
-{
-	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
-}
-_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
-{
-	return m_pFont_Manager->Draw_Font(pSingleDesc);
-}
-void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
-{
-	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
-}
-void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
-{
-	m_pFont_Manager->Add_FloatingText(tDesc);
-}
+//_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
+//{
+//	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
+//}
+//_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
+//{
+//	return m_pFont_Manager->Draw_Font(pSingleDesc);
+//}
+//void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
+//{
+//	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
+//}
+//void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
+//{
+//	m_pFont_Manager->Add_FloatingText(tDesc);
+//}
 
 #pragma endregion
 
@@ -345,9 +362,13 @@ CComponent* CGameInstance::Get_Component(_uint iLayerLevelID, const _wstring& st
 {
 	return m_pObject_Manager->Get_Component(iLayerLevelID, strLayerTag, iGameObjectIndex, strComponentTag);
 }
-HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio)
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
 {
-	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio);
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+}
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+{
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
 }
 #pragma endregion
 

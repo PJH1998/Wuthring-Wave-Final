@@ -4,7 +4,7 @@
 #include "GameObject.h"
 
 CLayer::CLayer()
-	: m_fTimeRatio { 1.f }
+	: m_fTimeRate { 1.f }
 {
 }
 
@@ -30,21 +30,26 @@ void CLayer::Priority_Update(_float fTimeDelta)
 {
 	for (auto& pObject : m_Objects)
 		if(true == pObject->IsActivate())
-			pObject->Priority_Update(fTimeDelta * m_fTimeRatio);
+			pObject->Priority_Update(fTimeDelta * m_fTimeRate);
 }
 
 void CLayer::Update(_float fTimeDelta)
 {
+	if (0.f < m_fDuration)
+		m_fDuration -= fTimeDelta;
+	else if(false == m_isTimeStop)
+		m_fTimeRate = 1.f;
+
 	for (auto& pObject : m_Objects)
 		if (true == pObject->IsActivate())
-			pObject->Update(fTimeDelta * m_fTimeRatio);
+			pObject->Update(fTimeDelta * m_fTimeRate);
 }
 
 void CLayer::Late_Update(_float fTimeDelta)
 {
 	for (auto& pObject : m_Objects)
 		if (true == pObject->IsActivate())
-			pObject->Late_Update(fTimeDelta * m_fTimeRatio);
+			pObject->Late_Update(fTimeDelta * m_fTimeRate);
 }
 
 CLayer* CLayer::Create()

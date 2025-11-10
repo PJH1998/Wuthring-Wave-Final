@@ -2,7 +2,7 @@
 
 namespace Client
 {
-	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
+	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, /*TEST_UI,*/ END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
 	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
@@ -175,20 +175,10 @@ namespace Client
 		FL_NONE				= 0,
 		FL_OUTLINE			= 1 << 0,
 		FL_GRAD				= 1 << 1,
+		FL_ALPHA_EDITABLE	= 1 << 2,	// matExtra 11.
 
-		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
 
 		FL_END				= 1 << 3
-	};
-
-	enum class FONT_DMG_PRESET
-	{
-		HEAL,
-		DARK,
-		ELECTRO,
-		FUSION,
-
-		END
 	};
 	
 	enum class  TEST_STATE : unsigned int
@@ -236,4 +226,13 @@ namespace Client
 		, OUNTLINE
 		, END };
 
+	enum class TEXT_COLOR_DMGTYPE {
+		NONE,	// 기본값. 지정 안했다고 가정, 마젠타 출력
+		HEAL,	// 회복
+		DARK,	// 인멸
+		ELEC,	// 전도
+		FUSI,	// 용융
+
+		END
+	};
 }

@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Base.h"
 
+#include "UI_Text_Damage.h"
+
 NS_BEGIN(Client)
 
 class CUI_FontPreset final : public CBase
@@ -16,13 +18,13 @@ public:
 	HRESULT Initialize();
 
 public:
-	void Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType);
+	void Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType, _float fSpawnRange);
 
 
 private:
 	class CGameInstance* m_pGameInstance = { nullptr };
 
-	vector<FONT_SINGLEDESC> m_FontTypeDesc = {};
+	vector<CUI_Text_Damage::TEXT_UI_TIMED_DESC> m_FontTypeDesc = {};
 
 public:
 	static CUI_FontPreset* Create();

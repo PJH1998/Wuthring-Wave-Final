@@ -47,7 +47,8 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
-	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0);
+	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
+	void		Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType = TEXT_COLOR_DMGTYPE::NONE, _float fSpawnRange = 10.f);
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
