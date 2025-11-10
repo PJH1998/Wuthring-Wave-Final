@@ -357,7 +357,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     
     float3 vOutDir = normalize(vViewPos.xyz * -1.f);
     
-    float fVisible = max(Compute_ShadowMap(fViewZ, vWorldPos, g_ShadowMapTexture), 0.3f);
+    float fVisible = max(Compute_ShadowMap(fViewZ, vWorldPos, g_ShadowMapTexture), 0.5f);
         
     for (int i = 0; i < iLightCount; ++i)
     {
@@ -385,7 +385,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         vLighting += vFinalColor * fAtt * PhaseFunction;
     }
    
-    float fFinalDensity = fDensity * fDistanceWeight * fSkyWeight * fGroundWeight;
+    float fFinalDensity = fDensity * fDistanceWeight * fHeightWeight;
    
     OutputTexture[DTID.xyz] = float4(vLighting * fLightIntensity * fFinalDensity, fFinalDensity);
 }
