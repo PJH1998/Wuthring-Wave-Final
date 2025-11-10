@@ -187,6 +187,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 }

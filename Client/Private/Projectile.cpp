@@ -33,12 +33,6 @@ void CProjectile::Priority_Update(_float fTimeDelta)
 
 void CProjectile::Update(_float fTimeDelta)
 {
-	if (m_isCollision)
-	{
-		m_isActivate = false;
-		m_pRigidBodyCom->IsActivate(false);
-		return;
-	}
 	m_pTransformCom->Go_Straight(fTimeDelta);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -46,7 +40,12 @@ void CProjectile::Update(_float fTimeDelta)
 
 void CProjectile::Late_Update(_float fTimeDelta)
 {
-
+	if (m_isCollision)
+	{
+		m_isActivate = false;
+		m_pRigidBodyCom->IsActivate(false);
+		return;
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this)))
 		return;
 }

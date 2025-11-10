@@ -304,7 +304,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
-	ADesc.fRotationPerSec = XMConvertToRadians(90.f);
+	ADesc.fRotationPerSec = XMConvertToRadians(100.f);
 	ADesc.fSpeedPerSec = 10.f;
 	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
 	ADesc.pAnimationTag = "Stand2";
