@@ -115,4 +115,11 @@ namespace Client
 		void* pTransform = { nullptr };  // Transform;
 		_float fAttack = {};			 // 공격력
 	}CALLBACK_CLIENT;
+
+	typedef struct tagDelayedAction {
+		enum class TYPE { HIT, PARRY, DODGE }; // 이벤트 타입.
+		TYPE type;
+		void* pData;  // HIT_DESC 등 데이터 (nullptr 가능)
+		tagDelayedAction(TYPE t, void* data = nullptr) : type(t), pData(data) {}
+	}DELAYED_ACTION;
 }

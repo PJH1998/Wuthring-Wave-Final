@@ -90,7 +90,6 @@ _bool CInputController::Check_AllInput(_uint eKeyInput, KEYSTATE eState)
 
 
 /*
-* ����
 * Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::W), DIK_W));
 */
 void CInputController::Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValue)
@@ -99,7 +98,6 @@ void CInputController::Register_KeyBoardKeyInput(_uint iKey, _ubyte keyboardValu
 }
 
 /*
-* ����
 * Register_KeyBoardKeyInput(ENUM_CLASS(KEYINPUT::LB), MOUSEKEYSTATE::LB));
 */
 void CInputController::Register_MouseKeyInput(_uint iKey, MOUSEKEYSTATE mouseValue)

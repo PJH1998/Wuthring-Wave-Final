@@ -85,7 +85,7 @@ void CAugustaGroundIdle::OnExit()
 
 void CAugustaGroundIdle::Handle_Input()
 {
-	m_States[HIT] = m_pAugusta->Is_Hit();
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT);
 	if (m_States[HIT])
 		return;
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위

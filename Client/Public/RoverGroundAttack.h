@@ -21,6 +21,7 @@ private:
         SKILL_R,
         MOVE,
 		HIT,
+		HIT_PENDING,
         JUMP,
 		BURST,
         END

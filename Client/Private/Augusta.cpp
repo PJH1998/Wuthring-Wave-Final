@@ -40,7 +40,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-	
+	m_DelayedActions = queue<DELAYED_ACTION>();
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
@@ -70,6 +70,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
+	// 0. Delayed Action 수행.
+	Process_DelayedActions();
 
 	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
@@ -120,8 +123,6 @@ void CAugusta::Update(_float fTimeDelta)
 
 		// 6. Camera 갱신 => 위치 따라오게
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-		
-		
 	}
 	else
 	{
@@ -131,7 +132,9 @@ void CAugusta::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
    
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	m_IsHit = false;
+	Remove_Condition(CHARACTER_CONDITION::HIT);
+
+	//m_IsHit = false;
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -162,9 +165,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		Notify_HarmonyEnd();
 		m_IsQTEend = false;
 	}
-		
-	
-		
 	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -395,10 +395,39 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     }
 }
 
+//// Hit 판정. => QTE 상태면 안맞음.
+//void CAugusta::Hit_Judge(void* pArg)
+//{
+//	if (nullptr == pArg || m_IsHit || m_IsQTE)
+//		return;
+//
+//	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+//	_uint iCategory = eKey.iCategory;
+//	_uint iSubState = eKey.iSubState;
+//
+//	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
+//	
+//	// 1. 맞는데 또맞진 말자..
+//	if (EStateCategory::HIT == eCategory)
+//		return;
+//
+//	// 2. 데미지는 바로 감소시킵니다.
+//	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+//	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+//
+//	// 3. 캐스팅 해서? => 들고 있기.
+//	m_PendingHitDesc = *pDesc;
+//
+//	
+//
+//	// 4. 현재 상태 변경.
+//	m_IsHit = true;
+//}
+
 // Hit 판정. => QTE 상태면 안맞음.
 void CAugusta::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit || m_IsQTE)
+	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
 		return;
 
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
@@ -406,29 +435,30 @@ void CAugusta::Hit_Judge(void* pArg)
 	_uint iSubState = eKey.iSubState;
 
 	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
-	
-	// 1. 맞는데 또맞진 말자..
+
+	// 1. 맞는데 또맞지 않기
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 데미지는 바로 감소시킵니다.
+	// 2. 즉시 중복 방지 플래그 세팅
+	m_PendingConditions[HIT] = true;
+
+	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 3. 캐스팅 해서? => 들고 있기.
-	m_PendingHitDesc = *pDesc;
-
+	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
+	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
 	
-
-	// 4. 현재 상태 변경.
-	m_IsHit = true;
+	m_PendingHitDesc = *pDesc;
 }
+
 
 // 패링 판단.
 void CAugusta::Parry_Judge(void* pArg)
 {
 
-	if (m_IsQTE)
+	if (m_PendingConditions[HIT] || m_PendingConditions[QTE] || m_PendingConditions[PARRY])
 		return;
 
 	// 1. 패링 시 ? Layer 변경? => 잠시 무적
@@ -612,6 +642,41 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 
+}
+
+
+#pragma endregion
+
+#pragma region 4. EVENT
+
+// 지연 처리 작업
+void CAugusta::Process_DelayedActions()
+{
+	while (!m_DelayedActions.empty())
+	{
+		DELAYED_ACTION eAction = m_DelayedActions.front();
+
+		void* pData = eAction.pData;
+		switch (eAction.type)
+		{
+			case DELAYED_ACTION::TYPE::HIT:
+			{
+				//m_IsHit = true;
+				Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				break;
+			}
+			case DELAYED_ACTION::TYPE::PARRY:
+			{
+				break;
+			}
+			
+		default:
+			break;
+		}
+
+		m_DelayedActions.pop();
+	}
 }
 #pragma endregion
 

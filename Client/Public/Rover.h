@@ -6,6 +6,15 @@ NS_BEGIN(Client)
 class CRover final : public CCharacter
 {
 public:
+	enum PENDING_CONDITION : _uint
+	{
+		HIT = 0,
+		DODGE,
+		PARRY,
+		QTE,
+		CONDITION_END
+	};
+
 	enum VOLUME
 	{
 		VOLUME_KNOCKBACK = 0,
@@ -149,6 +158,11 @@ public:
 		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 #pragma endregion
 
+#pragma region 4. EVENT
+public:
+	virtual void Process_DelayedActions() override;
+#pragma endregion
+
 #pragma endregion
 private:
 	class CRoverSword* m_pRoverSword = { nullptr };
@@ -164,6 +178,8 @@ private:
 	// Attack Volume
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
+
+	_bool m_PendingConditions[CONDITION_END] = {};
 
 private:
 	void Bind_Resources();
