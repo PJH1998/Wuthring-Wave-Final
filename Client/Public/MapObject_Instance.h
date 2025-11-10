@@ -22,6 +22,7 @@ public:
 		_float4x4 WorldMatrix;
 		_uint iSaveIndex;
 		_uint iLevel;
+		_float4 vDiffuseColor;
 		_float3 vBoundingPos;
 		_float3 vBoundingExtends;
 	}MAP_LOAD;
@@ -52,7 +53,7 @@ private:
 	vector<CModel_Instance*>		m_pModelComArray;
 	CModel_Instance* m_pModelCom = { nullptr };
 	_uint						m_iShaderPassIndex = {};
-
+	_float4						m_vDiffuseColor = {};
 private:
 	void						Ready_Component(void* pArg);
 

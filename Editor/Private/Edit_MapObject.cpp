@@ -94,10 +94,27 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
 		event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
 
+		//이거를 로컬로 보내거나 회전이랑 스케일까지 전부 변환된 걸 보내야함.
+		
 		_float3 vBoundingBoxPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
 		_float3 vBoundingBoxExtends = m_pModelComArray[0]->Get_BoundingBox()->Extents;
-		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxPos), sizeof(_float3));
-		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxExtends), sizeof(_float3));
+		_float3 vLocalCorners[BoundingBox::CORNER_COUNT];
+		
+		m_pModelComArray[0]->Get_BoundingBox()->GetCorners(vLocalCorners);
+
+		_float3 vTransformedCorners[BoundingBox::CORNER_COUNT];
+
+		for (_uint i = 0; i < BoundingBox::CORNER_COUNT; ++i)
+		{
+			XMStoreFloat3(&vTransformedCorners[i],
+				XMVector3TransformCoord(XMLoadFloat3(&vLocalCorners[i]), XMLoadFloat4x4(&WorldMatrix)));
+		}
+
+		BoundingBox RealBox;
+		BoundingBox::CreateFromPoints(RealBox, BoundingBox::CORNER_COUNT, vTransformedCorners, sizeof(_float3));
+
+		event.File.write(reinterpret_cast<const _char*>(&RealBox.Center), sizeof(_float3));
+		event.File.write(reinterpret_cast<const _char*>(&RealBox.Extents), sizeof(_float3));
 
 		});
 #endif
@@ -444,10 +461,11 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
 
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
 	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 	{
+		/*Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());*/
+
 		//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
 		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
@@ -456,6 +474,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		//RigidbodyDesc.eType = EMotionType::Static;
 		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		//RigidbodyDesc.pModel = m_pModelComArray[0];
+
 
 		CRigidbody::BOXBODY_DESC RigidbodyDesc{};
 		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();

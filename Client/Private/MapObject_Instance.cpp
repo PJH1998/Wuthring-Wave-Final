@@ -82,8 +82,9 @@ void CMapObject_Instance::Render(ID3D11DeviceContext* pDeferredContext, _uint iI
 
 		//m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
 		//m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
+		m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4), pEffect);
 		m_pShaderCom->Begin(0, pDeferredContext, pEffect);
-
+		
 		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);
 
 		// Clear Pre Resource
@@ -113,7 +114,7 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 	_uint V = 1;
 
 	m_iShaderPassIndex = pDesc->iShaderPassIndex;
-
+	m_vDiffuseColor = pDesc->vDiffuseColor;
 	m_pModelComArray.resize(V);
 
 	for (_uint i = 0; i < V; ++i)
@@ -130,6 +131,8 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 
 
 	}
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
+
 	// DeferredShader
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map_Instance"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
@@ -139,8 +142,10 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 	if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
 		TEXT("Com_ShadowShader"), reinterpret_cast<CComponent**>(&m_pShadowShaderCom), nullptr)))
 		CRASH("FAILED");
-
-	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, pDesc->vBoundingExtends);
+	_float3 vExtents;
+	_float3 vScale = m_pTransformCom->Get_Scaled();
+	XMStoreFloat3(&vExtents, XMLoadFloat3(&pDesc->vBoundingExtends) * XMLoadFloat3(&vScale));
+	m_pBoundingBox = new BoundingBox(pDesc->vBoundingPos, vExtents);
 	if (!m_pBoundingBox)
 		CRASH("Failed");
 
@@ -162,7 +167,6 @@ void CMapObject_Instance::Ready_Component(void* pArg)
 	//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 	//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 
-	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
 }
 
 CMapObject_Instance* CMapObject_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

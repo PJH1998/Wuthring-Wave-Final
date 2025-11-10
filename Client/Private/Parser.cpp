@@ -75,9 +75,10 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				File.read(Desc.ModelName, NameLength);
 
 				File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+				if (Desc.iShaderPassIndex == 2)
+					File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
 				File.read(reinterpret_cast<char*>(&MeshDesc.iNumInstance), sizeof(_uint));
-
 				MeshDesc.pTransformMatrix = new _float4x4[MeshDesc.iNumInstance];
 
 				File.read(reinterpret_cast<char*>(MeshDesc.pTransformMatrix), sizeof(_float4x4) * MeshDesc.iNumInstance);
@@ -88,8 +89,9 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
 				Desc.iLevel = ENUM_CLASS(eLevel);
-				_uint i = 0;
-				
+
+				_string ModelName = Desc.ModelName;
+				ModelName.pop_back();
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
 					if (entry2.path().string().find("Foliage") == std::string::npos)
 						continue;
@@ -98,7 +100,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 						continue;
 
 					//지금 LOD단계 다 만드는 게 아니라 하나만 만드는 거 같음.
-					if (entry2.path().string().find(Desc.ModelName) == std::string::npos)
+					if (entry2.path().string().find(ModelName) == std::string::npos)
 						continue;
 					if (entry2.path().extension() != ".dat")
 						continue;
@@ -110,39 +112,39 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 					_splitpath_s(entry2.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 					//LOD단계별로 하고있어서 0, 1, 2  해야하는데 20,21,22, 이런 식으로 됨.
 					_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
-					_wstring ModelName = StringToWString(FileName) + to_wstring(i++);
-					auto iter = m_Names.find(ModelName);
-					if (iter == m_Names.end())
-						m_Names.insert(ModelName);
-					else
-					{
-						ModelName.pop_back();
-						for (_uint i = 0; i < 30; ++i)
-						{
-							auto iter = m_Names.find(ModelName + to_wstring(i));
-							
-							if (iter == m_Names.end())
-							{
-								m_Names.insert(ModelName + to_wstring(i));
-								ModelName += to_wstring(i);
-								break;
-							}
+					_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
+					//auto iter = m_Names.find(ModelName);
+					//if (iter == m_Names.end())
+					//	m_Names.insert(ModelName);
+					//else
+					//{
+					//	ModelName.pop_back();
+					//	for (_uint i = 0; i < 30; ++i)
+					//	{
+					//		auto iter = m_Names.find(ModelName + to_wstring(i));
+					//		
+					//		if (iter == m_Names.end())
+					//		{
+					//			m_Names.insert(ModelName + to_wstring(i));
+					//			ModelName += to_wstring(i);
+					//			break;
+					//		}
 
-						}
-					}
+					//	}
+					//}
 					PrototypeName += ModelName;
 					strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
 					_string VersionPath = FileDir;
 					VersionPath += FileName;
 					VersionPath += ".dat";
-					//똑같은 풀떼기가 들어오면 터진다. -> 
+
 					if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName,
 						CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, VersionPath.c_str(), false, &MeshDesc))))
 						CRASH("Prototype Create Failed");
 
-					m_MapInstanceData.push_back(Desc);
 				}
-					Safe_Delete_Array(MeshDesc.pTransformMatrix);
+				m_MapInstanceData.push_back(Desc);
+				Safe_Delete_Array(MeshDesc.pTransformMatrix);
 			}
 		}
 		else if(entry.path().string().find("Prototype") != std::string::npos)
@@ -258,10 +260,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 		for(_uint i=0; i< m_MapInstanceData.size();++i)
 		{
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
-				, ENUM_CLASS(eLevel), TEXT("Layer_Test"), &m_MapInstanceData[i]);
+				, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
 		}
-
-
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{
