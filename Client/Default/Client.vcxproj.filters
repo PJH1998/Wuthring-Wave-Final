@@ -244,6 +244,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Logo">
+      <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -602,6 +605,12 @@
     <ClInclude Include="..\Public\RoverGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\LogoMaleRover.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoFactory.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -931,6 +940,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoMaleRover.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\LogoFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -222,4 +222,30 @@ namespace PlayerData
 		return Desc;
 	}
 #pragma endregion
+
+#pragma region LOGO
+	static CCharacter::CHARACTER_DESC GetLogoMaleRoverCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CCharacter::CHARACTER_DESC Desc;
+		Desc.eCurLevel = eLevel;
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover"));
+		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Rover"));
+		Desc.flyComputeShaderData = {};
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.strFolderPath = "../Bin/Resource/Model/Player/Logo/Male/Notify/";
+		Desc.fSpeedPerSec = 10.f;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+		Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
+
+		Desc.PartPrototypes = {};
+
+		return Desc;
+	}
+#pragma endregion
+
 }
