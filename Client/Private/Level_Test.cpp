@@ -329,6 +329,19 @@ void CLevel_Test::Ready_ElectroPredator()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_Electro"), 15, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
+
+	CAoEDoT::AOEDOT_DESC AoEDesc{};
+	AoEDesc.fAttackDamage = ADesc.fAttackDmg * 0.25f;
+	AoEDesc.fLifeTime = 3.f;
+	AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
+	AoEDesc.iTickCount = 8;
+	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
+	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
+	//AoEDesc.wstrEffectTag
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_AOEDOT"), TEXT("Pool_AOEDOT_Electro"), 7, &AoEDesc)))
+		CRASH("Failed Ready AoEDot (Electro Predatror)");
 }
 
 void CLevel_Test::Ready_CoroSaurus()

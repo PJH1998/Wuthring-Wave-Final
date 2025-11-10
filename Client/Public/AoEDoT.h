@@ -10,12 +10,13 @@ NS_BEGIN(Client)
 class CAoEDoT final : public CGameObject
 {
 public:
-	typedef struct tagAoEDoTDesc
+	typedef struct tagAoEDoTDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_wstring			wstrEffectTag;
 		_uint				iLayer;
 		vector<_uint>		iTargetLayers;
-		_float				fRadius;
+		_float3				vExtent;
+		_float3				vOffset;
 		_float				fAttackDamage;
 		_float				fLifeTime;
 		_uint				iTickCount;
@@ -44,6 +45,7 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
+	_float3				m_vOffset{};
 	_float				m_fLifeTime{};
 	_float				m_fLifeTimeAcc{};
 	_float				m_fDelayTime{};

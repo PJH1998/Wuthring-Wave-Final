@@ -27,7 +27,8 @@ HRESULT CAoEDoT::Initialize_Clone(void* pArg)
 	m_iLayer = pDesc->iLayer;
 	m_fLifeTime = pDesc->fLifeTime;
 	m_fDelayTime = m_fLifeTime / (pDesc->iTickCount);
-
+	m_vOffset = pDesc->vOffset;
+	m_iTargetLayers = pDesc->iTargetLayers;
     return S_OK;
 }
 
@@ -86,12 +87,12 @@ void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 {
-	CRigidbody::SPHEREBODY_DESC RigidbodyDesc = {};
+	CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
 	RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	RigidbodyDesc.eShape = SHAPE::SPHERE;
+	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = pDesc->iLayer;
-	RigidbodyDesc.fRadius = pDesc->fRadius;
+	RigidbodyDesc.vExtent = pDesc->vExtent;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
