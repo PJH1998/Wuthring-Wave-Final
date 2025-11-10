@@ -7,26 +7,28 @@ class CRigidbody;
 NS_END
 
 NS_BEGIN(Client)
-class CProjectile final : public CGameObject
+class CAoEDoT final : public CGameObject
 {
 public:
-	typedef struct tagProjectileDesc : public CGameObject::GAMEOBJECT_DESC
+	typedef struct tagAoEDoTDesc
 	{
 		_wstring			wstrEffectTag;
 		_uint				iLayer;
 		vector<_uint>		iTargetLayers;
 		_float				fRadius;
 		_float				fAttackDamage;
-	}PROJECTILEDESC;
+		_float				fLifeTime;
+		_uint				iTickCount;
+	}AOEDOT_DESC;
 
-	typedef struct tagProjectileReset
+	typedef struct tagAoEDoTReset
 	{
 		_float3				vTargetPos;
-	}PROJECTILERESET;
+	}AOEDOT_RESET;
 private:
-	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CProjectile(const CProjectile& Prototype);
-	virtual ~CProjectile() = default;
+	explicit CAoEDoT(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CAoEDoT(const CAoEDoT& Prototype);
+	virtual ~CAoEDoT() = default;
 
 public:
 	virtual		HRESULT					Initialize_Prototype() override;
@@ -42,17 +44,21 @@ private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
-	_bool				m_isCollision{};
+	_float				m_fLifeTime{};
+	_float				m_fLifeTimeAcc{};
+	_float				m_fDelayTime{};
+	_float				m_fDelayAcc{};
+	_bool				m_isAttack{};
 	// Effect?
 
 	CALLBACK_CLIENT m_CallBack{};
 
 private:
-	void Ready_Component(PROJECTILEDESC* pDesc);
+	void Ready_Component(AOEDOT_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
-	static		CProjectile* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static		CAoEDoT* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 };

@@ -41,6 +41,9 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = pDesc->fImpluseRate;
+	m_pRigidBodyCom->IsActivate(false);
+	m_pColliderCom->IsActivate(false);
+	m_isActivate = false;
 	return S_OK;
 }
 
@@ -175,6 +178,17 @@ void CHavocWarrior::Render()
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif
+}
+
+void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
+	m_fHP = pDesc->fMaxHp;
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_isActivate = true;
+	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
@@ -399,7 +413,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
 
-
+	m_isTrigger = false;
 }
 
 void CHavocWarrior::Calculate_PosAndDir()
