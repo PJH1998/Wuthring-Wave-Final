@@ -14,8 +14,8 @@ private:
 
 public:
 	HRESULT Initialize();
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects,_bool** SonoroMode);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects,_bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
 
@@ -29,6 +29,7 @@ private:
 
 	_bool m_SonoroRender = { false };
 	_bool m_IsUpdate = { false };
+	_bool m_SonoroRigidActive = { false };
 	mutex m_Mutex;
 
 public:

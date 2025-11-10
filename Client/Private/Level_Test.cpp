@@ -61,7 +61,7 @@ HRESULT CLevel_Test::Initialize()
 	//	CRASH("Test");
 
 	//로더에서 부른 것과 같은 거 부르기.
-	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
 	//Ready_Dummy();
@@ -94,7 +94,7 @@ HRESULT CLevel_Test::Initialize()
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-    m_pGameInstance->SetUp_ShadowNF();
+    m_pGameInstance->SetUp_CameraNF();
 
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();

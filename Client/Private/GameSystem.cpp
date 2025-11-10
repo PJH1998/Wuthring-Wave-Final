@@ -63,9 +63,9 @@ void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
 }
 
-void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 {
-	m_pParser->Clone_MapObjects(eLevel, iIndex);
+	m_pParser->Clone_MapObjects(eLevel);
 }
 #pragma endregion
 
@@ -182,14 +182,14 @@ void CGameSystem::Clear_TriggerCallBack()
 
 
 #pragma region SONORO_MANAGER
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
 void CGameSystem::Update(_float fTimeDelta)

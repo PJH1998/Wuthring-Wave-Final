@@ -2,6 +2,7 @@
 #include "ShadowMap.h"
 #include "GameInstance.h"
 #include "StaticObject.h"
+#include "ComputeShader.h"
 
 CShadowMap::CShadowMap(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -26,6 +27,12 @@ HRESULT CShadowMap::Setting_ShadowMap(const SHADOW_MAP_DESC& MapDesc)
 	if (FAILED(Ready_Matrices()))
 		return E_FAIL;
 
+	if (FAILED(Ready_ShadowMapDownSample()))
+		return E_FAIL;
+
+	if (FAILED(Ready_Buffer()))
+		return E_FAIL;
+
     return S_OK;
 }
 
@@ -41,13 +48,6 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader, const _char* pVie
 
 	if (FAILED(pShader->Bind_Matrix(pProjName, &m_Matrices[ENUM_CLASS(D3DTS::PROJ)][iSector])))
 		CRASH("Failed PROJ Matrix");
-
-	return S_OK;
-}
-
-HRESULT CShadowMap::Bind_ShadowMap_Buffer(_uint iBufferIndex)
-{
-//	m_pContext->PSSetConstantBuffers(iBufferIndex, 1, &m_pConstantBuffer);
 
 	return S_OK;
 }
@@ -108,6 +108,9 @@ HRESULT CShadowMap::Bind_ShadowMap_Resources(CShader* pShader)
 
 HRESULT CShadowMap::Begin_ShadowMap()
 {
+	_uint iNumViewPort = 1;
+	m_pContext->RSGetViewports(&iNumViewPort, &m_PrevViewPort);
+	
 	m_pContext->OMGetRenderTargets(1, &m_pBackBuffer, &m_pOriginalDSV);
 
 	ID3D11RenderTargetView* pRTV = { nullptr };
@@ -119,11 +122,33 @@ HRESULT CShadowMap::Begin_ShadowMap()
 
 HRESULT CShadowMap::End_ShadowMap()
 {
+	m_pContext->RSSetViewports(1, &m_PrevViewPort);
 	m_pContext->OMSetRenderTargets(1, &m_pBackBuffer, m_pOriginalDSV);
 
 	Safe_Release(m_pBackBuffer);
 	Safe_Release(m_pOriginalDSV);
 
+	return S_OK;
+}
+
+HRESULT CShadowMap::DownSampleShadowMap()
+{
+	_float4 vClearColor = _float4(0.f, 0.f, 0.f, 0.f);
+	
+	m_pContext->ClearUnorderedAccessViewFloat(m_pDS_UAV, reinterpret_cast<_float*>(&vClearColor));
+
+	m_pCS->Set_SRV("InputTexture", m_pShadowMapSRV);
+
+	m_pCS->Set_UAV("OutputTexture", m_pDS_UAV);
+
+	_uint iSizeX = m_iShadowMapSizeX;
+	_uint iSizeY = m_iShadowMapSizeY;
+
+	_uint iThreadGroupX = (iSizeX + 7) / 8;
+	_uint iThreadGroupY = (iSizeY + 7) / 8;
+
+	m_pCS->Dispatch(iThreadGroupX, iThreadGroupY, 1);
+	
 	return S_OK;
 }
 
@@ -135,6 +160,10 @@ void CShadowMap::Clear()
 
 	Safe_Release(m_pShadowMapDSV);
 	Safe_Release(m_pShadowMapSRV);
+	Safe_Release(m_pDS_UAV);
+	Safe_Release(m_pDS_SRV);
+	Safe_Release(m_pCS);
+	Safe_Release(m_pShadowMapBuffer);
 
 	for (_uint i = 0; i < ENUM_CLASS(D3DTS::END); ++i)
 		m_Matrices[i].clear();
@@ -155,7 +184,7 @@ void CShadowMap::Render(CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 		XMStoreFloat4x4(&DebugWorld, World);
 
 		pShader->Bind_Value("g_DebugCSMIndex", &i, sizeof(_uint));
-		pShader->Bind_Texture("g_ShadowMap", m_pShadowMapSRV);
+		pShader->Bind_Texture("g_ShadowMap", m_pDS_SRV);
 		pShader->Bind_Matrix("g_WorldMatrix", &DebugWorld);
 
 		pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::RD_DEBUG_SHAODW_MAP));
@@ -183,8 +212,13 @@ void CShadowMap::Setting_ShadowMapViewPort(_uint iSector)
 	Viewport.Height = fSectorSizeY;
 	Viewport.MinDepth = 0.f;
 	Viewport.MaxDepth = 1.f;
-
+	
 	m_pContext->RSSetViewports(1, &Viewport);
+}
+
+void CShadowMap::Setting_PrevViewPort()
+{
+	m_pContext->RSSetViewports(1, &m_PrevViewPort);
 }
 
 HRESULT CShadowMap::Ready_ShadowMap()
@@ -256,6 +290,62 @@ HRESULT CShadowMap::Ready_ShadowMap()
     return S_OK;
 }
 
+HRESULT CShadowMap::Ready_ShadowMapDownSample()
+{
+	/////TEXTURE/////
+	D3D11_TEXTURE2D_DESC TextureDesc = {};
+	TextureDesc.Width = m_iShadowMapSizeX >> 1;
+	TextureDesc.Height = m_iShadowMapSizeY >> 1;
+	TextureDesc.MipLevels = 1;
+	TextureDesc.ArraySize = m_iNumLayer;
+
+	TextureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	TextureDesc.SampleDesc.Quality = 0;
+	TextureDesc.SampleDesc.Count = 1;
+
+	TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+	TextureDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;			// UAV, SRV
+	TextureDesc.CPUAccessFlags = 0;
+	TextureDesc.MiscFlags = 0;
+
+	ID3D11Texture2D* pTexture2D = { nullptr };
+	if (FAILED(m_pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D)))
+		CRASH("Failed Created ShadowMap Texture");
+
+	/////UAV/////
+	D3D11_UNORDERED_ACCESS_VIEW_DESC UAVDesc = {};
+	UAVDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	UAVDesc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	UAVDesc.Texture2DArray.MipSlice = 0;
+	UAVDesc.Texture2DArray.FirstArraySlice = 0;
+	UAVDesc.Texture2DArray.ArraySize = m_iNumLayer;
+
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(pTexture2D, &UAVDesc, &m_pDS_UAV)))
+		CRASH("Failed Created ShadowMap UAV");
+
+	/////SRV/////
+	D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = {};
+	SrvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	SrvDesc.Texture2DArray.MostDetailedMip = 0;
+	SrvDesc.Texture2DArray.MipLevels = 1;
+	SrvDesc.Texture2DArray.FirstArraySlice = 0;
+	SrvDesc.Texture2DArray.ArraySize = m_iNumLayer;
+
+	if (FAILED(m_pDevice->CreateShaderResourceView(pTexture2D, &SrvDesc, &m_pDS_SRV)))
+		CRASH("Failed Created ShadowMap SRV");
+
+	Safe_Release(pTexture2D);
+
+	/////CS/////
+	SHADER_MACRO Macro = { { "THREAD_X", "8" }, { "THREAD_Y", "8" }, { "THREAD_Z", "4" }, { NULL, NULL } };
+
+	m_pCS = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_ShadowMap.hlsl"), Macro, "SHADOWMAP_DS");
+	ASSERT_CRASH(m_pCS);
+
+	return S_OK;
+}
+
 HRESULT CShadowMap::Ready_SectorUV()
 {
 	for (_uint i = 0; i < m_iNumSectorZ_ToLayer; ++i)
@@ -302,6 +392,40 @@ HRESULT CShadowMap::Ready_Matrices()
 			m_Boundings.push_back(Bounding);
 		}
 	}
+
+	return S_OK;
+}
+
+HRESULT CShadowMap::Ready_Buffer()
+{
+	D3D11_BUFFER_DESC BufferDesc = {};
+	BufferDesc.ByteWidth = sizeof(ShadowMap_Data);
+	BufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	BufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	if (FAILED(m_pDevice->CreateBuffer(&BufferDesc, nullptr, &m_pShadowMapBuffer)))
+		CRASH("Failed to Created ShadowMap_Buffer");
+
+	//CONSTANT BUFFER SETTING
+	SHADOWMAP_DATA Data = {};
+	ZeroMemory(&Data, sizeof(SHADOWMAP_DATA));
+
+	Data.iNumSector = m_iNumSector;
+	Data.iNumSectorX = m_MapDesc.iNumSectorX;
+	Data.iNumSectorToLayer = m_iNumSectorToLayer;
+	Data.vSectorWorldSize = _float2(m_MapDesc.vExtents.x * 2.f, m_MapDesc.vExtents.z * 2.f);
+	Data.vMin = _float2(m_MapDesc.vCenterPos.x, m_MapDesc.vCenterPos.z);
+	Data.vShadowMapSize = _float2(static_cast<_float>(m_iShadowMapSizeX >> 1), static_cast<_float>(m_iShadowMapSizeY >> 1));
+
+	memcpy(Data.SectorViewMatrix, m_Matrices[ENUM_CLASS(D3DTS::VIEW)].data(), sizeof(_float4x4) * m_iNumSector);
+	memcpy(Data.SectorProjMatrix, m_Matrices[ENUM_CLASS(D3DTS::PROJ)].data(), sizeof(_float4x4) * m_iNumSector);
+	memcpy(Data.vSectorUV, m_SectorUV.data(), sizeof(_float4) * m_iNumSectorToLayer);
+
+	D3D11_MAPPED_SUBRESOURCE SubResource;
+	m_pContext->Map(m_pShadowMapBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &SubResource);
+	memcpy(SubResource.pData, reinterpret_cast<void*>(&Data), sizeof(SHADOWMAP_DATA));
+	m_pContext->Unmap(m_pShadowMapBuffer, 0);
 
 	return S_OK;
 }

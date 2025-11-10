@@ -54,7 +54,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
-	m_pGameInstance->SetUp_ShadowNF();
+	m_pGameInstance->SetUp_CameraNF();
 
     for (auto& pCharacter : m_Characters)
     {

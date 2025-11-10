@@ -63,19 +63,19 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
     m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
 
+	m_pGameInstance->Subscribe<MAP_BOUND>(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), [this](const MAP_BOUND& event) {
+
+		_vector Center = XMLoadFloat3(&m_pModelComArray[0]->Get_BoundingBox()->Center);
+		_vector Extents = XMLoadFloat3(&m_pModelComArray[0]->Get_BoundingBox()->Extents);
+
+		*event.vMin = XMVectorMin(*event.vMin, Center - Extents);
+		*event.vMax = XMVectorMax(*event.vMax, Center + Extents);
+		});
+
 	m_pGameInstance->Subscribe<MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), [this](const MAP_SAVE& event) {
 		if (!m_isActivate)
 			return;
 
-		//寃쎈줈 吏?뺥븷 ???곸쐞 ?대뜑???ㅼ뿉 LOD 鍮쇨퀬. ?대뜑瑜?吏?? 洹몃━怨?洹??덉뿉 ?덈뒗 ?대뜑 ?섏쐞 1媛??뚮㈃??.dat???쎄퀬 媛앹껜 ?덉뿉 ?ｊ린?
-
-		/*OBJECT_SAVE Save{};
-		Save.m_iNameLength = strlen(m_ModelName);
-		strcpy_s(Save.ModelName, m_ModelName);
-		Save.iShaderPassIndex = m_iShaderPassIndex;
-		XMStoreFloat4x4(&Save.WorldMatrix, m_pTransformCom->Get_WorldMatrix());
-
-		event.File.write(reinterpret_cast<const char*>(&Save), sizeof(OBJECT_SAVE));*/
 		auto iter = event.ModelName.find(m_ModelName);
 
 		if (iter == event.ModelName.end())
@@ -87,16 +87,34 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
 
 		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
 			m_iShaderPassIndex = 0;
+
 		event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
 		event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
 		_float4x4 WorldMatrix;
 		XMStoreFloat4x4(&WorldMatrix, m_pTransformCom->Get_WorldMatrix());
 		event.File.write(reinterpret_cast<const _char*>(&WorldMatrix), sizeof(_float4x4));
 
+		//이거를 로컬로 보내거나 회전이랑 스케일까지 전부 변환된 걸 보내야함.
+		
 		_float3 vBoundingBoxPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
 		_float3 vBoundingBoxExtends = m_pModelComArray[0]->Get_BoundingBox()->Extents;
-		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxPos), sizeof(_float3));
-		event.File.write(reinterpret_cast<const _char*>(&vBoundingBoxExtends), sizeof(_float3));
+		_float3 vLocalCorners[BoundingBox::CORNER_COUNT];
+		
+		m_pModelComArray[0]->Get_BoundingBox()->GetCorners(vLocalCorners);
+
+		_float3 vTransformedCorners[BoundingBox::CORNER_COUNT];
+
+		for (_uint i = 0; i < BoundingBox::CORNER_COUNT; ++i)
+		{
+			XMStoreFloat3(&vTransformedCorners[i],
+				XMVector3TransformCoord(XMLoadFloat3(&vLocalCorners[i]), XMLoadFloat4x4(&WorldMatrix)));
+		}
+
+		BoundingBox RealBox;
+		BoundingBox::CreateFromPoints(RealBox, BoundingBox::CORNER_COUNT, vTransformedCorners, sizeof(_float3));
+
+		event.File.write(reinterpret_cast<const _char*>(&RealBox.Center), sizeof(_float3));
+		event.File.write(reinterpret_cast<const _char*>(&RealBox.Extents), sizeof(_float3));
 
 		});
 #endif
@@ -234,37 +252,29 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 void CEdit_MapObject::Update(_float fTimeDelta)
 {
 #ifdef _DEBUG
-    if (!ImGui::GetIO().WantCaptureMouse)
-    {
-        if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
-        {
-            if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
-            {
-            /*    _bool IsIn = { false };
-                for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
-                {
-                    IsIn = m_pGameInstance->IsIn_WorldSpace(m_pModelComArray[0]->Get_BoundingBox(i));
-                    if (IsIn)
-                        break;
-                }*/
-                //if (IsIn)
-                {
-                    //?ш린???대┃ 理쒖쟻???섎젮硫??꾨윭?ㅽ? 而щ쭅源뚯?.
+	if (!ImGui::GetIO().WantCaptureMouse)
+	{
+		if (m_iLevel == ENUM_CLASS(LEVEL::MAP))
+		{
+			if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+			{
+				if (!m_IsRender)
+					return;
 
-                    _float fDistance = {};
-                    //?붾뱶??諛붽퓭?쇳븿.
-                    _vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
-                    _vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
-                    if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
-                    {
-                        MAP_PICK event(this, fDistance);
+				{
+					_float fDistance = {};
+					_vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
+					_vector RayDir = XMVector3Normalize(XMVector3TransformNormal(XMLoadFloat3(&CLevel_Map::m_vWorldDir), m_pTransformCom->Get_WorldMatrix_Inv()));
+					if (m_pModelCom->Is_Picked(RayPos, RayDir, &fDistance))
+					{
+						MAP_PICK event(this, fDistance);
 
-                        m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
-                    }
-                }
-            }
-        }
-    }
+						m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
+					}
+				}
+			}
+		}
+	}
 #endif
     //m_pModelCom = m_pModelComArray[m_iLODIndex];
 }
@@ -443,10 +453,11 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		return E_FAIL;
 
-	Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 
 	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 	{
+		/*Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());*/
+
 		//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
 		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
 		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
@@ -455,6 +466,7 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 		//RigidbodyDesc.eType = EMotionType::Static;
 		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
 		//RigidbodyDesc.pModel = m_pModelComArray[0];
+
 
 		CRigidbody::BOXBODY_DESC RigidbodyDesc{};
 		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();

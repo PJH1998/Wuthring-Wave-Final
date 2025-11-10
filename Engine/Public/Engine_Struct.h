@@ -29,6 +29,15 @@ namespace Engine
 		_float fRange;
 	}LIGHT_DESC;
 
+	typedef struct tagVF_Light {
+		_uint iType;		// 0 = Directional, 1 = Point
+		_float fRange;
+		_float Padding[2];
+		_float4 vDiffuse;
+		_float4 vDirection;
+		_float4 vPosition;
+	}VF_LIGHT;
+
 	typedef struct tagShadowLightDesc
 	{
 		XMFLOAT4	vDirection;
