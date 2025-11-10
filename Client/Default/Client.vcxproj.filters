@@ -253,6 +253,9 @@
     <Filter Include="01. GameSystem\MonsterTable">
       <UniqueIdentifier>{65685f77-3762-4b91-8120-e17fa1c7be6b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\CoroSaurus">
+      <UniqueIdentifier>{b0997a62-f021-4157-a9bb-f4e1cb219fb9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
     </Filter>
@@ -558,13 +561,7 @@
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\MapObject_Instance.h" />
     <ClInclude Include="..\public\Corosaurus.h" />
-    <ClInclude Include="..\Public\MapObject_Destruction.h" />
-    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
-    <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
-    <ClInclude Include="..\Public\MapObject_Sonoro.h" />
-    <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <Filter>03. GameObject\UI\Text</Filter>
@@ -632,9 +629,29 @@
     <ClInclude Include="..\Public\LogoFactory.h">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\Corosaurus.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Corosaurus.h">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -908,16 +925,9 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\MapObject_Instance.cpp" />
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Corosaurus.cpp" />
-    <ClCompile Include="..\Private\Factory.cpp" />
-    <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
-    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
-    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
-    <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <Filter>03. GameObject\UI\Text</Filter>
     </ClCompile>
@@ -983,6 +993,27 @@
     </ClCompile>
     <ClCompile Include="..\Private\LogoFemaleRover.cpp">
       <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Corosaurus.cpp">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

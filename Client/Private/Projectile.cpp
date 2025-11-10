@@ -23,6 +23,7 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 
 	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
 	Ready_Component(pDesc);
+	m_iTargetLayers = pDesc->iTargetLayers;
     return S_OK;
 }
 
@@ -32,12 +33,6 @@ void CProjectile::Priority_Update(_float fTimeDelta)
 
 void CProjectile::Update(_float fTimeDelta)
 {
-	if (m_isCollision)
-	{
-		m_isActivate = false;
-		m_pRigidBodyCom->IsActivate(false);
-		return;
-	}
 	m_pTransformCom->Go_Straight(fTimeDelta);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
@@ -45,7 +40,12 @@ void CProjectile::Update(_float fTimeDelta)
 
 void CProjectile::Late_Update(_float fTimeDelta)
 {
-
+	if (m_isCollision)
+	{
+		m_isActivate = false;
+		m_pRigidBodyCom->IsActivate(false);
+		return;
+	}
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this)))
 		return;
 }
@@ -61,7 +61,7 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	PROJECTILERESET* pDesc = static_cast<PROJECTILERESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-	m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
+	m_pTransformCom->LookAt(XMVectorSetW(XMLoadFloat3(&pDesc->vTargetPos), 1.f));
 	m_isCollision = false;
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;

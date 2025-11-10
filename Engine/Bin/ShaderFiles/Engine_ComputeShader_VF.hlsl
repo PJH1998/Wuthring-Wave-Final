@@ -30,6 +30,8 @@ Texture2D<float> g_MipDepthTexture : register(t1);
 Texture2DArray<float> g_ShadowMapTexture : register(t2);
 
 Texture3D<float4> VFLightTexture : register(t3);
+Texture3D<float> g_NoiseTexture : register(t4);
+
 
 RWTexture3D<float4> OutputTexture : register(u0);
 
@@ -61,7 +63,9 @@ cbuffer VF_Data : register(b0)
     float fHegihtFallOff;
     float fDistanceFallOff; 
     float fGroundFallOff; 
-    float3 Padding1;
+    float fNoiseScale;
+    float fNoiseTimeDelta;
+    float Padding1;
     float3 vFogColor;
 };
 
@@ -347,9 +351,9 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     //}
     
     float fSkyWeight = saturate(exp(-fHegihtFallOff * (vWorldPos.y - fFogMaxHeight)));
-    float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPos.y)) - 1.f);
+   // float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPos.y)) - 1.f);
     
-    float fHeightWeight = max(fSkyWeight, fGroundWeight);
+    float fHeightWeight = fSkyWeight; //max(fSkyWeight, fGroundWeight);
     
     float fDistance = length(vViewPos.xyz);
     
@@ -384,8 +388,12 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         
         vLighting += vFinalColor * fAtt * PhaseFunction;
     }
-   
-    float fFinalDensity = fDensity * fDistanceWeight * fHeightWeight;
+    
+    float3 vNoiseUV = (vWorldPos.xyz) * fNoiseScale;
+    vNoiseUV.z += fNoiseTimeDelta;
+    float fNoise = g_NoiseTexture.SampleLevel(DefaultSampler, vNoiseUV, 0);
+    
+    float fFinalDensity = fDensity * fDistanceWeight * fHeightWeight * fNoise;
    
     OutputTexture[DTID.xyz] = float4(vLighting * fLightIntensity * fFinalDensity, fFinalDensity);
 }

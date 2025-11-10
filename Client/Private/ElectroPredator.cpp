@@ -149,6 +149,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 }
@@ -179,7 +180,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		_matrix WorldMat = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), 
 														XMVectorSet(0.f, 0.f, 0.f, 1.f), 
 														XMVectorSet(0.f, 0.f, 0.f, 1.f),
-														vPos + vLook + XMVectorSet(0.f, 2.f, 0.f, 1.f));
+														vPos + vLook + XMVectorSet(0.f, 2.f, 0.f, 0.f));
 		CProjectile::PROJECTILERESET ProiDesc{};
 		ProiDesc.vTargetPos = m_vTargetPosition;
 		ProiDesc.vTargetPos.y += 1.f; // 대상 높이 offset
