@@ -97,6 +97,8 @@ private:
 	_bool									m_IsStylized = { true };
 	_float									m_fDebugRoughness = 0.2f;
 	_float									m_fDebugMetallic = 0.f;
+
+	_bool									m_IsFog = { true };
 #endif
 private:
 	// Viewport Size 

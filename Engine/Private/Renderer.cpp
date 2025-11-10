@@ -754,6 +754,11 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Fog()
 {
+#ifdef _DEBUG
+	if (false == m_IsFog)
+		return;
+#endif
+
 	m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false);
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))
@@ -1096,7 +1101,11 @@ void CRenderer::Render_Debug()
 		m_isRenderDebug = !m_isRenderDebug;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
+	{
 		m_IsSSAO = !m_IsSSAO;
+		m_IsFog = !m_IsFog;
+	}
+
 
 	for (auto& pComponent : m_DebugComponents)
 	{
