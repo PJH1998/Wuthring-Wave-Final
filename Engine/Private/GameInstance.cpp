@@ -345,9 +345,13 @@ CComponent* CGameInstance::Get_Component(_uint iLayerLevelID, const _wstring& st
 {
 	return m_pObject_Manager->Get_Component(iLayerLevelID, strLayerTag, iGameObjectIndex, strComponentTag);
 }
-HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio)
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
 {
-	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio);
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+}
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+{
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
 }
 #pragma endregion
 

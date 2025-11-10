@@ -25,7 +25,6 @@ HRESULT CShader::Initialize_Prototype(const _tchar* pFilePath, const D3D11_INPUT
 #else
     iHlslFlag = D3DCOMPILE_OPTIMIZATION_LEVEL1;
 #endif
-
 	// 1. 임시 변수가 필요 없습니다. ComPtr이 & 연산자를 오버로딩합니다.
 	// m_pEffect.GetAddressOf()는 &pRawEffect와 동일한 역할을 합니다.
 	if (FAILED(D3DX11CompileEffectFromFile(pFilePath, nullptr,

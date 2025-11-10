@@ -61,13 +61,24 @@ CComponent* CObject_Manager::Get_Component(_uint iLayerLevelID, const _wstring& 
 	return pLayer->Get_Component(iGameObjectIndex, strComponentTag);
 }
 
-HRESULT CObject_Manager::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio)
+HRESULT CObject_Manager::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
 {
 	CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
 	if (nullptr == pLayer)
 		return E_FAIL;
 
-	pLayer->Change_TimeRatio(fTimeRatio);
+	pLayer->Change_TimeRate(fTimeRatio, isTimeStop);
+
+	return S_OK;
+}
+
+HRESULT CObject_Manager::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+{
+	CLayer* pLayer = Find_Layer(iLayerLevelID, strLayerTag);
+	if (nullptr == pLayer)
+		return E_FAIL;
+
+	pLayer->Change_TimeRate(fTimeRatio, fDuration);
 
 	return S_OK;
 }
