@@ -38,7 +38,7 @@ void CHZB::Update()
 		m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_UAV("OutputTexture", m_pUAV[i]);
 
 		_uint iSizeX = max(m_iWinSizeX >> (i + 1), 1);
-		_uint iSizeY = max(m_iWinSizeY >> (i + 1) , 1);
+		_uint iSizeY = max(m_iWinSizeY >> (i + 1), 1);
 
 		_uint iThreadGroupX = (iSizeX + 7) / 8;
 		_uint iThreadGroupY = (iSizeY + 7) / 8;
@@ -83,7 +83,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	OC_DESC OCDesc = {};
 	OCDesc.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
 	OCDesc.iNumObjects = iNumObjects;
-	OCDesc.iHZBMipLevel = 5;
+	OCDesc.iHZBMipLevel = 3;
 	m_pContext->UpdateSubresource(m_pOCDescBuffer, 0, nullptr, &OCDesc, 0, 0);
 	
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_ConstantBuffer("OCDesc", m_pOCDescBuffer);
@@ -110,15 +110,16 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 		size_t ObjectAddress = reinterpret_cast<size_t>(Objects[i]);
 		auto iter = m_PreVisible.find(ObjectAddress);
 		if (iter == m_PreVisible.end())
-			m_PreVisible.emplace(ObjectAddress, false);
+			m_PreVisible.emplace(ObjectAddress, VISIBLE_COUNT());
 
-		if (m_PreVisible[ObjectAddress] || pFlags[i] == 1) // Visible
-		{
+		if (m_PreVisible[ObjectAddress].isVisible || pFlags[i] == 1 || m_PreVisible[ObjectAddress].iCount < 20) // Visible
 			CullObjects.push_back(Objects[i]);
-			m_PreVisible[ObjectAddress] = true;
-		}
+		
+		m_PreVisible[ObjectAddress].isVisible = static_cast<_bool>(pFlags[i]);
+		if (false == m_PreVisible[ObjectAddress].isVisible)
+			++m_PreVisible[ObjectAddress].iCount;
 		else
-			m_PreVisible[ObjectAddress] = false;
+			m_PreVisible[ObjectAddress].iCount = 0;
 	}
 	m_pContext->Unmap(m_pOcclusionStageBuffer[m_iReadIndex], 0);
 

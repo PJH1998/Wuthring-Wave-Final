@@ -17,7 +17,7 @@ HRESULT CUI_FontPreset::Initialize()
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
 	tDesc.fScale			= 0.5f;	
-	tDesc.vLifeTime			= { 0.0f, /*10.0f*/ 0.75f }; // ksta
+	tDesc.vLifeTime			= { 0.0f, /*10.0f*/ 1.f };			// lifetime. 다른 시간관련 변수(사라지기까지 걸리는 시간 등)는 CUI_Text_Damage::Update_Instances 에서 상수로 제어 가능.
 	tDesc.fFontOutlineWidth	= 2.f;
 	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
 	tDesc.isTargetExist		= true;
@@ -26,27 +26,35 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.strUIName			= L"DamageFont";
 	tDesc.iPassType			= 0;
 
+	m_FontTypeDesc.resize(ENUM_CLASS(TEXT_COLOR_DMGTYPE::END));
+
+
 	// Const per Types..
 	// - None (쓰지마셈)
 	tDesc.vColor			= { 1.000f, 0.000f, 1.000f, 1.0f };
 	tDesc.vOutlineColor		= { 1.000f, 0.000f, 1.000f, 1.0f };
-	m_FontTypeDesc.push_back(tDesc);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_DMGTYPE::NONE)] = tDesc;
 	// - Heal (회복)
 	tDesc.vColor			= { 0.427f, 0.898f, 0.412f, 1.0f };
 	tDesc.vOutlineColor		= { 0.141f, 0.455f, 0.302f, 1.0f };
-	m_FontTypeDesc.push_back(tDesc);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_DMGTYPE::HEAL)] = tDesc;
 	// - Dark (인멸)
 	tDesc.vColor			= { 0.831f, 0.310f, 0.682f, 1.0f };
 	tDesc.vOutlineColor		= { 0.607f, 0.267f, 0.533f, 1.0f };
-	m_FontTypeDesc.push_back(tDesc);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_DMGTYPE::DARK)] = tDesc;
 	// - Electro (전도)
 	tDesc.vColor			= { 0.749f, 0.592f, 0.949f, 1.0f };
 	tDesc.vOutlineColor		= { 0.667f, 0.498f, 0.776f, 1.0f };
-	m_FontTypeDesc.push_back(tDesc);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_DMGTYPE::ELEC)] = tDesc;
 	// - Fusion (용융)
 	tDesc.vColor			= { 0.984f, 0.592f, 0.443f, 1.0f };
 	tDesc.vOutlineColor		= { 0.620f, 0.306f, 0.212f, 1.0f };
-	m_FontTypeDesc.push_back(tDesc);
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_DMGTYPE::FUSI)] = tDesc;
+
+
+	// 필요한 색상이 있다면 ENUM 및 여기에 프리셋 추가..
+
+
 
 	// Variables
 	//tDesc.strText			= {};
@@ -59,9 +67,9 @@ HRESULT CUI_FontPreset::Initialize()
 	return S_OK;
 }
 
-void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _float fSpawnRange)	// Heal, Dark, Etc..
+void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType, _float fSpawnRange)	// Heal, Dark, Etc..
 {
-	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[ENUM_CLASS(eDmgElemType)];
 	
 	
 
@@ -74,8 +82,8 @@ void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgE
 		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
 
 
-	tDesc.vColor			= m_FontTypeDesc[iDmgElemType].vColor;
-	tDesc.vOutlineColor		= m_FontTypeDesc[iDmgElemType].vOutlineColor;
+	//tDesc.vColor			= m_FontTypeDesc[ENUM_CLASS(eDmgElemType)].vColor;
+	//tDesc.vOutlineColor		= m_FontTypeDesc[ENUM_CLASS(eDmgElemType)].vOutlineColor;
 
 	tDesc.vTargetWorldPos = {
 		vTargetPos.x + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),

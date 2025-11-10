@@ -19,6 +19,14 @@ private:
 		_float2		vPadding = {};
 	}OC_DESC;
 
+	typedef struct tagVisibleCount {
+		_bool			isVisible = { false };
+		_int			iCount = {};
+		tagVisibleCount()
+			: isVisible{ false }, iCount{ 0 }
+		{}
+	}VISIBLE_COUNT;
+
 public:
 	enum HZB_CS_TYPE
 	{
@@ -72,7 +80,7 @@ private:
 	_uint													m_iReadIndex = { 1 };
 
 	// Temporal Filter (Pre Visible Store)
-	map<size_t, _bool>								m_PreVisible;
+	map<size_t, VISIBLE_COUNT>					m_PreVisible;
 
 private:
 	void						Ready_DefaultSetting();
