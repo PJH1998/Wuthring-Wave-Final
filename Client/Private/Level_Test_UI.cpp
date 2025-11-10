@@ -80,7 +80,7 @@ void CLevel_Test_UI::Update(_float fTimeDelta)
 #endif // old
 
 
-		CGameSystem::GetInstance()->Render_Damage(_float4(0.f, 0.f, 0.f, 1.f), 153, ENUM_CLASS(FONT_DMG_PRESET::HEAL));
+		//CGameSystem::GetInstance()->Render_Damage(_float4(0.f, 0.f, 0.f, 1.f), 153, ENUM_CLASS(FONT_DMG_PRESET::HEAL));
 	}
 #endif // KSTA_FONTTEXTTEST
 
