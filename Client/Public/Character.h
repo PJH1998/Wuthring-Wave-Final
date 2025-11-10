@@ -30,19 +30,29 @@ public:
 
 
 public:
-	using EnsembleEndCallback = function<void()>;
+	using HarmonyEndCallback = function<void()>;
 
-	void Set_EnsembleEndCallback(EnsembleEndCallback callback)
+	void Set_HarmonyEndCallback(HarmonyEndCallback callback)
 	{
 		m_OnEnsembleEnd = callback;
 	}
 
-	void Notify_EnsembleEnd()
+
+	void Notify_HarmonyEnd()
 	{
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
+
+	void Bind_NotifyEnd()
+	{
+
+	}
+
+	void Clear_HarmonyEndCallback() { 
+		m_OnEnsembleEnd = nullptr; 
+
+	}
 
 public:
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -127,7 +137,10 @@ public:
 
 
 #pragma region EVENT 
-
+public:
+	virtual void Bind_QTE(_bool IsQTE) {};
+	_bool IsQTEend() { return m_IsQTEend;  }
+	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 #pragma endregion
 
 #pragma region STATE
@@ -247,6 +260,8 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+
+	class CCollider* m_pQTEColliderCom = { nullptr };
 	
 	_float m_fTargetDistance = {}; // 타겟과의 거리
 
@@ -261,7 +276,7 @@ protected:
 	
 
 	//CHARACTER_STAT m_Stats = {};
-	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	
 
 
@@ -271,7 +286,9 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
-
+	_bool m_IsQTE = { false };
+	_bool m_IsQTEend = { false };
+	
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};

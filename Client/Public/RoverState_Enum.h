@@ -18,7 +18,8 @@ enum class ERoverGroundState : _uint
 	BURST,			
 	SPECIAL,		
 	UNIQUE,			
-	LAND,			
+	LAND,		
+	QTE,
 	GROUND_END
 };
 
@@ -157,6 +158,12 @@ enum class ERoverUniqueType : _uint //
 {
 	SKILL_STRIKE = 0,
 	SKILL_RISE,
+	END
+};
+
+enum class ERoverQTEType : _uint // 
+{
+	SKILL_QTE = 0,
 	END
 };
 

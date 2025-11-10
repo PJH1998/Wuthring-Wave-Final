@@ -4,7 +4,7 @@
 NS_BEGIN(Client)
 
 // Run State - Run 관련 모든 애니메이션 관리
-class CAugustaGroundQTE final : public CGroundState
+class CRoverGroundQTE final : public CGroundState
 {
 private:
     enum QTESTATE
@@ -14,8 +14,8 @@ private:
     };
 
 private:
-    explicit CAugustaGroundQTE() = default;
-    virtual ~CAugustaGroundQTE() = default;
+    explicit CRoverGroundQTE() = default;
+    virtual ~CRoverGroundQTE() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -24,7 +24,7 @@ public:
     virtual void OnExit() override;
 
 private:
-    class CAugusta* m_pAugusta = { nullptr };
+    class CRover* m_pRover = { nullptr };
 
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
@@ -38,7 +38,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundQTE* Create(class CGameObject* pOwner);
+    static CRoverGroundQTE* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

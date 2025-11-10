@@ -1229,7 +1229,7 @@ void CUI_HUD::Update_UI_PlayerEnergyFrame(_float fTimeDelta)
 
     // ksta : test 
 
-	fElementAmounts[m_iSelectedCHIndex] = m_pAbility->Get_Resonance();
+	fElementAmounts[m_iSelectedCHIndex] = m_pAbility->Get_Harmony();
     //fElementAmounts[0] = (fElementAmounts[0] >= 100)? 0 : fElementAmounts[0] + 2.f  * 30.f * fTimeDelta;
     //fElementAmounts[1] = (fElementAmounts[1] >= 100)? 0 : fElementAmounts[1] + 1.5f * 30.f * fTimeDelta;
     //fElementAmounts[2] = (fElementAmounts[2] >= 100)? 0 : fElementAmounts[2] + 1.f  * 30.f * fTimeDelta;

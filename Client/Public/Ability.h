@@ -48,7 +48,8 @@ public:
 	_float Get_CostRatio(COST_TYPE eType) const;    // 그냥 캐릭터들 특수 Cost로 사용할 거같고.
 	_float Get_Hp() { return m_CharacterInfo.fHp; } // 현재 Hp
 	_float Get_MaxHp() { return m_CharacterInfo.fMaxHp; } // Max Hp
-	_float Get_Resonance() { return m_CharacterInfo.fResonance; }
+	_float Get_Harmony() { return m_CharacterInfo.fHarmonyGauge; }
+	_float Get_MaxHarmony() { return m_CharacterInfo.fMaxHarmonyGauge; }
 	
 
 	const vector<UISKILL_SLOT>& Get_UISkillSlots() const { return m_UISlots; }
@@ -75,8 +76,8 @@ public:
 	void Add_Cost(COST_TYPE eType, _float fCost);
 	void Set_Hp(_float fHp);
 	void Add_Hp(_float fHp);
-	void Set_Resonance(_float fResonance);
-	void Add_Resonance(_float fResonance);
+	void Set_HarmonyGauge(_float fResonance);
+	void Add_HarmonyGauge(_float fResonance);
 
 	void Bind_Condition(_uint iCondition);
 	void Remove_Condition(_uint iCondition);

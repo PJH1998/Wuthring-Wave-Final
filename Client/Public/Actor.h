@@ -65,6 +65,7 @@ protected:
 	class CShader* m_pShaderCom = { nullptr };
 	class CComputeShader* m_pComputeShaderCom = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
+	
 	class CRigidbody* m_pRigidBodyCom = { nullptr };
 	class CAbility* m_pAbillityCom = { nullptr };
 	vector<_uint> m_ShaderPaths = {}; 

@@ -28,6 +28,7 @@ private:
 		ERoverUniqueType m_eUniqueType = ERoverUniqueType::END;
 		ERoverBurstType m_eBurstType = ERoverBurstType::END;
 		ERoverSpecialType m_eSpecialType = ERoverSpecialType::END;
+		ERoverQTEType m_eQTEType = ERoverQTEType::END;
 
 		// Air
 		ERoverJumpType m_eJumpType = ERoverJumpType::END;
@@ -133,6 +134,8 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
+
+	virtual void Bind_QTE(_bool IsQTE) override;
 
 #pragma region 2. NOTIFY
 	public:
