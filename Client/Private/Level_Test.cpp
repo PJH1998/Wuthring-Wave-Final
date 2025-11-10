@@ -14,6 +14,9 @@
 #include"Trigger_Box.h"
 #include "ShadowMap.h"
 #include "SkyBox.h"
+#include "Projectile.h"
+#include "AoEDoT.h"
+#include "Spawner.h"
 
 CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :	CLevel(pDevice,pContext), m_pGameSystem { CGameSystem::GetInstance() }
@@ -45,9 +48,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
+	//Ready_CoroSaurus();
+	Ready_Spawner();
 
     Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
@@ -173,6 +177,7 @@ void CLevel_Test::Ready_Dummy()
 
 void CLevel_Test::Ready_MonsterTest()
 {
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("FalseSovereign");
 	// False Sovereign
     CMonsterTest::MONSTERTEST_DESC MobDesc{};
     MobDesc.eCurLevel = m_eCurLevel;
@@ -185,9 +190,9 @@ void CLevel_Test::Ready_MonsterTest()
     MobDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
     MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
-	MobDesc.fHP = 10.f;
-	MobDesc.fAttackDmg = 1.f;
-	MobDesc.fMaxStamina = 10.f;
+	MobDesc.fHP = pInfo->fMaxHp;
+	MobDesc.fAttackDmg = pInfo->fAttack;
+	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
     if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
         ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
@@ -225,10 +230,21 @@ void CLevel_Test::Ready_MonsterTest()
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
 		CRASH("Failed Ready Scythe");
 
+	CProjectile::PROJECTILEDESC Projectile{};
+	Projectile.fAttackDamage = MobDesc.fAttackDmg;
+	Projectile.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
+	Projectile.fRadius = 0.7f;
+	Projectile.fSpeedPerSec = 15.f;
+	//Projectile.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_ShinWang"), 15, &Projectile)))
+		CRASH("Failed Ready Projectile (False Sovereign)");
 }
 
 void CLevel_Test::Ready_HavocWarrior()
 {
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("HavocWarrior");
 	// Havoc Warrior
 	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
 	tDesc.eCurLevel = m_eCurLevel;
@@ -241,16 +257,20 @@ void CLevel_Test::Ready_HavocWarrior()
 	tDesc.fSpeedPerSec = 10.f;
 	tDesc.vInitPosition = _float3(3.f, -8.f, 0.f);
 	tDesc.pAnimationTag = "Stand1";
-	tDesc.fHp = 10.f;
-	tDesc.fAttackDmg = 1.f;
-	tDesc.fImpluseRate = 7.5f;
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
-		CRASH("Failed Ready Monster");
+	tDesc.fHp = pInfo->fMaxHp;
+	tDesc.fAttackDmg = pInfo->fAttack;
+	tDesc.fImpluseRate = pInfo->fImpluseRate;
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &tDesc)))
+	//	CRASH("Failed Ready Monster");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), pInfo->wstrPoolTag, 4, &tDesc)))
+		CRASH("Failed Ready Monster (Havoc Warrior)");
 }
 
 void CLevel_Test::Ready_ElectroPredator()
 {
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("ElectroPredator");
 	// Electro Predator
 	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
 	ADesc.eCurLevel = m_eCurLevel;
@@ -263,16 +283,33 @@ void CLevel_Test::Ready_ElectroPredator()
 	ADesc.fSpeedPerSec = 10.f;
 	ADesc.vInitPosition = _float3(3.f, -8.f, 3.f);
 	ADesc.pAnimationTag = "Stand2";
-	ADesc.fHp = 10.f;
-	ADesc.fAttackDmg = 1.f;
-	ADesc.fImpluseRate = 9.f;
-	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
-		CRASH("Failed Ready Monster");
+	ADesc.fHp = pInfo->fMaxHp;
+	ADesc.fAttackDmg = pInfo->fAttack;
+	ADesc.fImpluseRate = pInfo->fImpluseRate;
+	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &ADesc)))
+	//	CRASH("Failed Ready Monster");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), pInfo->wstrPoolTag, 2, &ADesc)))
+		CRASH("Failed Ready Monster (Electro Predatror)");
+
+	CProjectile::PROJECTILEDESC Projectile{};
+	Projectile.fAttackDamage = ADesc.fAttackDmg;
+	Projectile.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
+	Projectile.fRadius = 0.7f;
+	Projectile.fSpeedPerSec = 15.f;
+	//Projectile.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_Electro"), 15, &Projectile)))
+		CRASH("Failed Ready Projectile (Electro Predatror)");
 }
 
 void CLevel_Test::Ready_CoroSaurus()
 {
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("CoroSaurus");
+	// Corosaurus
 	CCorosaurus::CORROSAURUS_DESC CoroDesc{};
 	CoroDesc.eCurLevel = m_eCurLevel;
 	CoroDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
@@ -284,9 +321,9 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
 	CoroDesc.pAnimationTag = "Idle1";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
-	CoroDesc.fHP = 10.f;
-	CoroDesc.fAttackDmg = 1.f;
-	CoroDesc.fMaxStamina = 10.f;
+	CoroDesc.fHP = pInfo->fMaxHp;
+	CoroDesc.fAttackDmg = pInfo->fAttack;
+	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
 	CoroDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &CoroDesc)))
@@ -309,6 +346,28 @@ void CLevel_Test::Ready_Skybox()
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Skybox"), ENUM_CLASS(m_eCurLevel),
 		TEXT("Layer_BackGround"), &SkyboxDesc)))
 		CRASH("Skybox");
+}
+
+void CLevel_Test::Ready_Spawner()
+{
+	_string test[3] = {"ElectroPredator","HavocWarrior", "HavocWarrior"};
+	//const MONSTER_INFO* pMobInfo = m_pGameSystem->Get_MonsterInfo("HavocWarrior");
+	CSpawner::SPAWNERDESC Spawner{};
+	Spawner.vPosition = _float3(0.f, -6.f, -20.f);
+	Spawner.vExtent = _float3(20.f, 20.f, 20.f);
+	//Spawner.vSpawnPosition = _float3(1.f, 0.f, 1.f);
+	Spawner.vSpawnPositions = { _float3(0.f, -6.f, -20.f), _float3(1.f, -6.f, -21.f), _float3(-1.f, -6.f, -21.f) };
+	//Spawner.vSpawnRotateDegree = _float3(0.f, 60.f, 0.f);
+	Spawner.fSpawnTime = 10.f;
+	for (size_t i = 0; i < 3; i++)
+	{
+		const MONSTER_INFO* pMobInfo = m_pGameSystem->Get_MonsterInfo(test[i].c_str());
+		Spawner.strMonsterKey.push_back(pMobInfo->strName);
+	}
+
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"), ENUM_CLASS(m_eCurLevel),
+		TEXT("Layer_BackGround"), &Spawner)))
+		CRASH("Spawner");
 }
 
 void CLevel_Test::Ready_UI()

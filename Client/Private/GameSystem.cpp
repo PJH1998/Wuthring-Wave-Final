@@ -13,6 +13,8 @@
 
 #include"Sonoro_Manager.h"
 
+#include "MonsterTable.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -42,6 +44,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 	m_pSonoro_Manager = CSonoro_Manager::Create();
 	ASSERT_CRASH(m_pSonoro_Manager);
+
+	m_pMonsterTable = CMonsterTable::Create();
+	ASSERT_CRASH(m_pMonsterTable);
 
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
@@ -203,6 +208,17 @@ void CGameSystem::Change_Sonoro(_bool IsSonoro)
 }
 #pragma endregion
 
+#pragma region MONSTER_TABLE
+HRESULT CGameSystem::LoadMonsterTable(const _char* pFilePath)
+{
+	return m_pMonsterTable->LoadDataTable(pFilePath);
+}
+MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
+{
+	return m_pMonsterTable->Get_MonsterInfo(pMonsterKey);
+}
+#pragma endregion
+
 void CGameSystem::Free()
 {
 	__super::Free();
@@ -216,5 +232,5 @@ void CGameSystem::Free()
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
-
+	Safe_Release(m_pMonsterTable);
 }

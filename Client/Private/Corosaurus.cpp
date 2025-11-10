@@ -103,12 +103,13 @@ void CCorosaurus::Render()
 
 #ifdef _DEBUG
 	m_pColliderCom->Render();
+	m_pRigidBodyCom->Render();
 	for (_uint i = 0; i < ATK_SOCKET::END; i++)
 	{
 		if (nullptr != m_pAtkVolumes[i])
 			m_pAtkVolumes[i]->Render();
 	}
-	m_pParryVolume->Render();
+	//m_pParryVolume->Render();
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif // DEBUG

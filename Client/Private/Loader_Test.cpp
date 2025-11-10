@@ -11,6 +11,8 @@
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
 #include "AttackVolume.h"
+#include "Projectile.h"
+#include "Spawner.h"
 #include "PatternDummy.h"
 
 #include "Wing.h"
@@ -148,6 +150,16 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	if(FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_AttackVolume"),
 		CAttackVolume::Create(m_pDevice, m_pContext))))
 		CRASH("AttackVolume Create Failed");
+
+	// Prototype_GameObject_Projectile
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Projectile"),
+		CProjectile::Create(m_pDevice, m_pContext))))
+		CRASH("Projectile Create Failed");
+
+	// Prototype_GameObject_Spawner
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Spawner"),
+		CSpawner::Create(m_pDevice, m_pContext))))
+		CRASH("Projectile Create Failed");
 
 #pragma region FALSE_SOVEREIGN
     // Prototype_Component_BehaviorTree_Test

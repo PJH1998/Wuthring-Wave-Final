@@ -9,11 +9,12 @@ NS_BEGIN(Client)
 class CSpawner final : public CGameObject
 {
 public:
-	typedef struct tagSpanwerDesc
+	typedef struct tagSpanwerDesc : public CGameObject::GAMEOBJECT_DESC
 	{
-		vector<_wstring> wstrPoolTags;
+		vector<_string> strMonsterKey;
 		vector<_float3>	vSpawnPositions;
-		vector<_float3>	vSpawnRotateDegrees;
+		//vector<_float3>	vSpawnRotateDegrees;
+		_float3	vSpawnPosition;
 		_float3 vExtent;
 		_float3 vPosition;
 		_float	fSpawnTime;
@@ -35,11 +36,14 @@ public:
 
 private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
-	vector<_wstring>	m_wstrPoolTags;
+	vector<_string>		m_strMonsterKey;
 	vector<_float4x4>	m_SpawnMatrix;
 	_uint				m_iNumSpawnObjects{};
 	_float				m_fTimeAcc{};
 	_float				m_fSpawnTime{};
+	_bool				m_SpawnTrigger{};
+	_bool				m_isMonsterExist{};
+	_float4				m_vPlayerPos{};
 
 private:
 	void Ready_Component(SPAWNERDESC* pDesc);

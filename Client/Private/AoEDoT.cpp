@@ -77,9 +77,9 @@ void CAoEDoT::Render()
 
 void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
+	//AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-	m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
+	//m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
 	m_fDelayAcc = 0.f;
 	m_fLifeTimeAcc = 0.f;
 }

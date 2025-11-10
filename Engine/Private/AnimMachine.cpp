@@ -168,7 +168,7 @@ void CAnimMachine::Update(CModel* pModelCom, CComputeShader* pComputeShaderCom, 
 	m_AnimStates[m_strCurrentAnimTag]->Feedback(isAnimFinished, pState, this, pModelCom);
 }
 
-void CAnimMachine::Reset(CModel* pModelCom, _string& strAnimTag)
+void CAnimMachine::Reset(CModel* pModelCom, const _string& strAnimTag)
 {
 	if (m_AnimStates.end() == m_AnimStates.find(strAnimTag))
 		return;

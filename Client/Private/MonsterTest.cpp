@@ -3,6 +3,7 @@
 #include "Ggobul.h"
 #include "FS_Scythe.h"
 #include "AttackVolume.h"
+#include "Projectile.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -151,7 +152,7 @@ void CMonsterTest::Render()
 	}
 	m_pParryVolume->Render();
 #pragma endregion
-	//m_pRigidBodyCom->Render();
+	m_pRigidBodyCom->Render();
 	m_pColliderCom->Render();
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -9,7 +10,7 @@ NS_BEGIN(Client)
 class CProjectile final : public CGameObject
 {
 public:
-	typedef struct tagProjectileDesc
+	typedef struct tagProjectileDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_wstring			wstrEffectTag;
 		_uint				iLayer;
@@ -39,7 +40,7 @@ public:
 
 private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
-	_uint				m_iLayer;
+	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
 	// Effect?

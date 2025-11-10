@@ -86,7 +86,10 @@ public:
 
 #pragma endregion
 
-
+#pragma region MONSTER_TABLE
+	HRESULT LoadMonsterTable(const _char* pFilePath);
+	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+#pragma endregion
 
 private:
 	class	CParser*			m_pParser						= { nullptr };
@@ -100,6 +103,8 @@ private:
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
 	
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+
+	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

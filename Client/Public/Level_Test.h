@@ -26,6 +26,7 @@ private:
 	void			Ready_CoroSaurus();
 	void			Ready_Effect();
 	void			Ready_Skybox();
+	void			Ready_Spawner();
 	//void Ready_Layer_Augusta();
 	void			Ready_UI();
 

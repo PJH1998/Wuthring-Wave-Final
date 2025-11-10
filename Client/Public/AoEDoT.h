@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)

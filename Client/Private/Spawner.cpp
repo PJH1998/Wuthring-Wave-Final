@@ -1,5 +1,6 @@
 ﻿#include "ClientPch.h"
 #include "Spawner.h"
+#include "GameSystem.h"
 
 CSpawner::CSpawner(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CGameObject{ pDevice, pContext }
@@ -25,19 +26,33 @@ HRESULT CSpawner::Initialize_Clone(void* pArg)
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f));
 
 	Ready_Component(pDesc);
-	
+	m_strMonsterKey = pDesc->strMonsterKey;
 	m_fSpawnTime = pDesc->fSpawnTime;
-	m_wstrPoolTags = pDesc->wstrPoolTags;
-	m_iNumSpawnObjects = m_wstrPoolTags.size();
+	m_iNumSpawnObjects = m_strMonsterKey.size();
+#pragma region Information_Seperate
 	for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
 	{
-		_vector vTransition = XMVectorSetW(XMLoadFloat3(&pDesc->vSpawnPositions[i]), 1.f);
-		_vector vQuaternion = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(
-			pDesc->vSpawnPositions[i].x), XMConvertToRadians(pDesc->vSpawnPositions[i].y), XMConvertToRadians(pDesc->vSpawnPositions[i].z));
+		//_vector vTransition = XMVectorSetW(XMLoadFloat3(&pDesc->vSpawnPositions[i]), 1.f);
 		_float4x4 InitMatrix{};
-		XMStoreFloat4x4(&InitMatrix, XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuaternion, vTransition));
+		XMStoreFloat4x4(&InitMatrix, XMMatrixTranslation(pDesc->vSpawnPositions[i].x, pDesc->vSpawnPositions[i].y, pDesc->vSpawnPositions[i].z));
 		m_SpawnMatrix.push_back(InitMatrix);
 	}
+#pragma endregion
+
+#pragma region Information_OnePoint
+	//_float3 vPositionOffsets[3] = {_float3(0.f,0.f,0.f),_float3(1.f,0.f,-1.f), _float3(-1.f,0.f,-1.f) };
+	//for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
+	//{
+	//	_vector vTransition = XMVectorSetW(XMLoadFloat3(&pDesc->vSpawnPosition), 1.f) + XMLoadFloat3(&vPositionOffsets[i]);
+	//	_matrix WorldMatrix = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), XMVectorSet(0.f, 0.f, 0.f, 1.f), vTransition);
+	//	WorldMatrix = WorldMatrix * XMMatrixRotationQuaternion(vQuaternion) * XMMatrixTranslation(pDesc->vPosition.x, pDesc->vPosition.y, pDesc->vPosition.z);
+	//	
+	//	_float4x4 InitMatrix{};
+	//	XMStoreFloat4x4(&InitMatrix, WorldMatrix);
+	//
+	//	m_SpawnMatrix.push_back(InitMatrix);
+	//}
+#pragma endregion
 
     return S_OK;
 }
@@ -46,16 +61,41 @@ void CSpawner::Priority_Update(_float fTimeDelta)
 {
 	if (m_fTimeAcc <= m_fSpawnTime)
 		m_fTimeAcc += fTimeDelta;
+	m_isMonsterExist = false;
 }
 
 void CSpawner::Update(_float fTimeDelta)
 {
+	if (m_SpawnTrigger && !m_isMonsterExist)
+	{
+		_vector vLook = XMVector3Normalize(XMVectorSetY(XMLoadFloat4(&m_vPlayerPos) - m_pTransformCom->Get_State(STATE::POSITION), 0.f));
+
+		CGameSystem* pSystem = CGameSystem::GetInstance();
+		for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
+		{
+			MONSTER_INFO* const pDesc = pSystem->Get_MonsterInfo(m_strMonsterKey[i].c_str());
+			_matrix WorldMatrix = XMLoadFloat4x4(&m_SpawnMatrix[i]);
+			_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
+			_vector vUp = XMVector3Cross(vLook, vRight);
+			WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
+			WorldMatrix.r[ENUM_CLASS(STATE::UP)] = vUp;
+			WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
+
+			m_pGameInstance->Spawn_PoolingObject(pDesc->wstrPoolTag, WorldMatrix, pDesc);
+		}
+		m_fTimeAcc = 0.f;
+		m_SpawnTrigger = false;
+		m_pRigidBodyCom->IsActivate(false);
+	}
+
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
 void CSpawner::Late_Update(_float fTimeDelta)
 {
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::STATIC, this)))
+
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this)))
 		return;
 }
 
@@ -89,14 +129,22 @@ void CSpawner::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
+		CALLBACK_CLIENT* pCallBack = static_cast<CALLBACK_CLIENT*>(pDesc);
+		CTransform* pTransform = static_cast<CTransform*>(pCallBack->pTransform);
+		XMStoreFloat4(&m_vPlayerPos, pTransform->Get_State(STATE::POSITION));
 		if (m_fTimeAcc >= m_fSpawnTime)
 		{
-			for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
-			{
-				m_pGameInstance->Spawn_PoolingObject(m_wstrPoolTags[i], XMLoadFloat4x4(&m_SpawnMatrix[i]), nullptr);
-			}
-			m_fTimeAcc = 0.f;
+			//for (_uint i = 0; i < m_iNumSpawnObjects; ++i)
+			//{
+			//	m_pGameInstance->Spawn_PoolingObject(m_wstrPoolTags[i], XMLoadFloat4x4(&m_SpawnMatrix[i]), nullptr);
+			//}
+			
+			m_SpawnTrigger = true;
 		}
+	}
+	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::ENEMY))
+	{
+		m_isMonsterExist = true;
 	}
 }
 
