@@ -37,6 +37,8 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(m_pGameInstance->Rand(-20.f, 20.f), 0.f, 0.f, 1.f));
+
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
     return S_OK;
@@ -47,14 +49,7 @@ void CLogoMaleRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 1. Parts 갱신
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Priority_Update(fTimeDelta);
-	}
-
-    // 2. 이전 위치 저장
+    // 1. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
   
 }
@@ -65,40 +60,18 @@ void CLogoMaleRover::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 2. 파츠 갱신.?
-	for (auto& pPart : m_PartObjects)
+	// 2. 상태 머신 갱신
+	if (m_IsPicked)
 	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
+		CCharacter::Play_Animation("Ui_Chip_Loop", fTimeDelta, &m_fTrackPosition);
 	}
+	
 
-	// 3. 상태 머신 갱신
-	m_pStateMachineCom->Update(fTimeDelta);
-
-	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
-	_vector vVelocity = m_pTransformCom->Get_Velocity();
-	// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-	m_pColliderCom->Update(vVelocity / fTimeDelta);
-
-	// 6. Camera 갱신 => 위치 따라오게
-	//m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
-	// 7. Land Check
-	m_IsLand = Is_LandCollider();
 
 }
 void CLogoMaleRover::Late_Update(_float fTimeDelta)
 {
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
-
-	m_pColliderCom->Sync_Position(m_pTransformCom);
-
-
+	//m_pColliderCom->Sync_Position(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -127,7 +100,7 @@ void CLogoMaleRover::Render()
     }
 
 #ifdef _DEBUG
-	m_pColliderCom->Render();
+	//m_pColliderCom->Render();
 #endif // _DEBUG
 
 }
@@ -137,20 +110,14 @@ void CLogoMaleRover::Render_Shadow()
 
 }
 
-
-
-
-
-
-void CLogoMaleRover::Sync_Position()
+void CLogoMaleRover::Logo_Input()
 {
-    m_pColliderCom->Sync_Position(m_pTransformCom);
+	// 1번 누르면 선택됨. 두번 누르면 해제됨.
+	if (m_pGameInstance->Get_DIKeyState(DIK_1) == KEYSTATE::UP)
+		m_IsPicked != m_IsPicked;
+	else if (m_pGameInstance->Get_DIKeyState(DIK_2) == KEYSTATE::UP)
+		m_IsPicked = false;
 }
-
-
-
-
-
 
 
 void CLogoMaleRover::Bind_Resources()
@@ -163,7 +130,6 @@ void CLogoMaleRover::Bind_Resources()
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ))))
         CRASH("Failed Proj Matrix");
-
 }
 
 void CLogoMaleRover::Ready_Components(const CHARACTER_DESC* pDesc)
@@ -184,6 +150,22 @@ void CLogoMaleRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->stateMachineData.first)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
+
+	m_vColliderOffSet = { 0.f, 0.67f, 0.f };
+	m_fColliderRadius = 0.4f;
+	m_fColliderHeight = 0.5f;
+
+	// Collider를 Player가 소유하고 Character들은 AddRef로 참조
+	CCollider::COLLIDER_DESC ColliderDesc{};
+	ColliderDesc.vPos = pDesc->vPosition;
+	ColliderDesc.vOffset = m_vColliderOffSet;
+	ColliderDesc.eType = EMotionType::Kinematic;
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::PLAYER);
+	ColliderDesc.fHeight = m_fColliderHeight;
+	ColliderDesc.fRadius = m_fColliderRadius;
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Collider"), TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc)))
+		CRASH("Collider");
 }
 
 void CLogoMaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)

@@ -5,8 +5,6 @@
 NS_BEGIN(Client)
 class CLogoMaleRover final : public CCharacter
 {
-public:
-
 
 #pragma region 0. LOGO
 protected:
@@ -25,23 +23,16 @@ public:
 #pragma endregion
 
 
-#pragma region 1. STATE
+#pragma region STATE
 public:
-	void Sync_Position();
-
-
-
-#pragma region 3. CALL BACK
-	public:
-		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void Logo_Input();
 #pragma endregion
 
-#pragma endregion
 private:
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
-	_bool m_IsPlayAnimation = { true };
 
+	_bool m_IsPicked = { false };
 
 
 private:

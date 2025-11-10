@@ -231,7 +231,7 @@ namespace PlayerData
 		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
 		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
 		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
-		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Rover"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_MaleRover"));
 		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Rover"));
 		Desc.flyComputeShaderData = {};
 		Desc.fRotationPerSec = XMConvertToRadians(90.f);

@@ -11,9 +11,6 @@ public:
 		EVENT_END
 	};
 
-public:
-	
-
 
 public:
 	typedef struct tagHitDesc{
