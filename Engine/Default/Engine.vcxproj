@@ -251,6 +251,7 @@
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_HZB.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Noise.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_OcclusionCulling.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Sampling.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_ShadowMap.hlsl" />
