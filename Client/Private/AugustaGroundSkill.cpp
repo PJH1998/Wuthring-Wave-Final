@@ -295,21 +295,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
 			}
-			// 1. Attack Pull (Unique R)
-			/*if (eSkillType == EAugustaSkillType::ATTACK_PULL)
-			{
-				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
-				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-				return;
-			}*/
-
-			//m_States[ATTACK_SPEEDDRIVE] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive", m_strSkillName));
-			//if (m_States[ATTACK_SPEEDDRIVE])
-			//{
-			//	m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
-			//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-			//	return;
-			//}
 			
 		}
 
@@ -321,12 +306,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			{
 				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
-				return;
-			}
-			else
-			{
-				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 				return;
 			}
 		}
@@ -366,6 +345,22 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 
+		if (eSkillType == EAugustaSkillType::ATTACK_SPSKILL)
+		{
+			if (m_States[MOVE])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+				return;
+			}
+			else
+			{
+				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+				return;
+			}
+		}
+
         if (m_States[LAND])
         {
             m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
@@ -379,6 +374,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL));
             return;
         }
+
+		
 
 		
     }
