@@ -186,7 +186,7 @@ void CAnimationDummy::Set_TrackPosition(_float fTrackPosition)
             m_strCurrentAnimation,
             0.f, // TimeDelta를 0으로 주어 시간이 흐르지 않게 함
             &m_fTrackPosition,
-            true, 0.1f);
+            true);
 
        // 5. 루트 모션도 멈춘 위치에서 동기화합니다.
        // m_pModelCom->Sync_RootNode(m_pTransformCom, 0.f);

@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "UI_FontPreset.h"
 #include "GameInstance.h"
+#include "UI_Text_Damage.h"
 
 CUI_FontPreset::CUI_FontPreset()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -13,15 +14,23 @@ HRESULT CUI_FontPreset::Initialize()
 	// for Damage..
 
 	// Const
-	FONT_SINGLEDESC tDesc = {};
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	tDesc.strFontTag		= L"WW_Bold";
-	tDesc.fScale			= 5.f;	
-	tDesc.vLifeTime			= { 0.0f, 500.0f }; // ksta
-	tDesc.fFontOutlineWidth	= 3.f;
-	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE);//| ENUM_CLASS(FONT_FLAG::FL_FIXED);
-	tDesc.isTargetExist		= false;
+	tDesc.fScale			= 0.5f;	
+	tDesc.vLifeTime			= { 0.0f, /*10.0f*/ 0.75f }; // ksta
+	tDesc.fFontOutlineWidth	= 2.f;
+	tDesc.iShaderFlag		= ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
+	tDesc.isTargetExist		= true;
+	tDesc.isInstance		= true;
+	tDesc.vScreenPos		= _float2{ 0.f, 0.f };
+	tDesc.strUIName			= L"DamageFont";
+	tDesc.iPassType			= 0;
 
 	// Const per Types..
+	// - None (쓰지마셈)
+	tDesc.vColor			= { 1.000f, 0.000f, 1.000f, 1.0f };
+	tDesc.vOutlineColor		= { 1.000f, 0.000f, 1.000f, 1.0f };
+	m_FontTypeDesc.push_back(tDesc);
 	// - Heal (회복)
 	tDesc.vColor			= { 0.427f, 0.898f, 0.412f, 1.0f };
 	tDesc.vOutlineColor		= { 0.141f, 0.455f, 0.302f, 1.0f };
@@ -50,16 +59,32 @@ HRESULT CUI_FontPreset::Initialize()
 	return S_OK;
 }
 
-void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType)	// Heal, Dark, Etc..
+void CUI_FontPreset::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _float fSpawnRange)	// Heal, Dark, Etc..
 {
-	FONT_SINGLEDESC tDesc = m_FontTypeDesc[iDmgElemType];
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[iDmgElemType];
 	
-	tDesc.strText			= to_wstring(iDamage);
-	tDesc.vScreenPos		= { 500.f, 500.f }; 
-	tDesc.vTargetWorldPos	= vTargetPos;
-	//tDesc.vFontGradColor	= {};
+	
 
-	m_pGameInstance->Add_FloatingText(tDesc);
+	tDesc.strText			= L"" + to_wstring(iDamage);
+	tDesc.vScreenPos		= { 0.f, 0.f };		// ksta : 반드시. 이게 존재하면 해당 방향으로 드리프트 발생.
+	tDesc.vTargetWorldPos	= vTargetPos;
+
+	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
+	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
+		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+
+
+	tDesc.vColor			= m_FontTypeDesc[iDmgElemType].vColor;
+	tDesc.vOutlineColor		= m_FontTypeDesc[iDmgElemType].vOutlineColor;
+
+	tDesc.vTargetWorldPos = {
+		vTargetPos.x + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.y + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.z + m_pGameInstance->Rand(-fSpawnRange, +fSpawnRange),
+		vTargetPos.w
+	};
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
 }
 
 CUI_FontPreset* CUI_FontPreset::Create()

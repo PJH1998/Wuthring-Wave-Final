@@ -73,6 +73,12 @@ void CRoverGroundIdle::OnExit()
 
 void CRoverGroundIdle::Handle_Input()
 {
+	m_States[HIT] = m_pRover->Is_Hit();
+	if (m_States[HIT])
+		return;
+
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
+
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
@@ -132,11 +138,16 @@ void CRoverGroundIdle::Check_Physics(_float fTimeDelta)
 // Idles 조건이 아닌 것들.
 void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 {
-
+	// 우선순위 순으로 전환조건 진행.
     ERoverIdleType eIdleType = static_cast<ERoverIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
 
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
 
 	if (!m_States[LAND])
 	{
@@ -148,15 +159,14 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 			return;
 		}
 	}
-
-	if (m_States[HIT])
+	
+	if (m_States[FLY])
 	{
-		/*m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
-		return;*/
+		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
+		return;
 	}
 
-    // 우선순위 순으로 전환조건 진행.
-    // 점프
     if (m_States[JUMP])
     {
         m_pRover->GetStateContextForWrite().m_eJumpType = ERoverJumpType::JUMP_WALK_LF;

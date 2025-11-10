@@ -12,6 +12,7 @@ private:
         JUMP = 0,
         DASH,
 		LAND,
+		FLY,
         SPRINT,
         MOVE,
 		MOVE_U,

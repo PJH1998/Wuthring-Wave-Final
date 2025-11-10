@@ -159,7 +159,7 @@ void CRoverGroundBurst::Check_StateTransition(_float fTimeDelta)
 
 void CRoverGroundBurst::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(ERoverBurstType::BURST01), "Burst01", 1.4f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(ERoverBurstType::BURST01), "Burst01", 1.4f, 50.f);
 }
 
 void CRoverGroundBurst::State_Reset()

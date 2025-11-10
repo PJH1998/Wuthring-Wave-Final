@@ -72,8 +72,9 @@ void CRoverGroundRun::Handle_Input()
     m_eDir = m_pRover->Calculate_Direction();
 
 	m_States[HIT] = m_pRover->Is_Hit(); // HIT 상태인가?
-	//if (m_States[HIT]) // 모든 조건 상위 조건
-	//	return;
+	if (m_States[HIT]) // 모든 조건 상위 조건
+		return;
+	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 
     // 키 입력.
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
@@ -167,14 +168,21 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
 		// 상위, 하위 상태
 	if (m_States[HIT])
 	{
-		/*m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
-		return;*/
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
 	}
 
 	if (m_States[FALL])
 	{
 		m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
 		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[FLY])
+	{
+		m_pRover->GetStateContextForWrite().m_eAirFlyType = ERoverAirFlyType::XA_START;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FLY));
 		return;
 	}
 

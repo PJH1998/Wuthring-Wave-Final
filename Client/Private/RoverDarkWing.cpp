@@ -1,5 +1,9 @@
 ﻿#include "ClientPch.h"
 #include "RoverDarkWing.h"
+#include "AttackVolume.h"
+#include "GameSystem.h"
+#include "PlayerStatus.h"
+#include "Ability.h"
 
 CRoverDarkWing::CRoverDarkWing(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
@@ -30,6 +34,7 @@ HRESULT CRoverDarkWing::Initialize_Clone(void* pArg)
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
+	Ready_AttackVolumes();
 
     return S_OK;
 }
@@ -40,6 +45,10 @@ void CRoverDarkWing::Priority_Update(_float fTimeDelta)
 
 	if (m_IsAnimationEnd) // 애니메이션 끝나면 자동으로 비활성화
 		m_isActivate = false;
+
+	// 1. Attack Volume 갱신
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CRoverDarkWing::Update(_float fTimeDelta)
@@ -53,6 +62,10 @@ void CRoverDarkWing::Update(_float fTimeDelta)
         XMLoadFloat4x4(m_pSocketMatrix) *
         m_pParentTransform->Get_WorldMatrix());
 
+	// 1. Attack Volume 갱신
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);
+
 }
 
 void CRoverDarkWing::Late_Update(_float fTimeDelta)
@@ -62,6 +75,10 @@ void CRoverDarkWing::Late_Update(_float fTimeDelta)
 
 	m_pModelCom->Play_Animation_CPU("G_Ex_Attack01", fTimeDelta, &m_fTrackPosition, false, true);
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
+
+	// Attack Volume 갱신.
+	if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -89,7 +106,15 @@ void CRoverDarkWing::Render()
             CRASH("Ready Render Failed");
     }
 
+#ifdef _DEBUG
+	if (m_pMainAttackVolume->IsActivate())
+		m_pMainAttackVolume->Render();
+#endif // _DEBUG
 
+}
+
+void CRoverDarkWing::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
 }
 
 void CRoverDarkWing::Ready_Components(const PROP_DESC* pDesc)
@@ -123,6 +148,36 @@ void CRoverDarkWing::Ready_Positions(const PROP_DESC* pDesc)
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
+}
+
+void CRoverDarkWing::Ready_AttackVolumes()
+{
+	// size 설정
+	m_AttackVolumes.resize(VOLUME_END);
+
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
+	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
+	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.eShape = SHAPE::BOX;
+	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
+	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.fAttackDmg = 250.f;
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->OnHitEnter(iLayer, pOther, Manifold);
+		};
+
+	m_AttackVolumes[VOLUME_ATTACK] = dynamic_cast<CAttackVolume*>(
+		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
+			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+
+	ASSERT_CRASH(m_AttackVolumes[VOLUME_ATTACK])
+		m_AttackVolumes[VOLUME_ATTACK]->TriggerActivate(false);
+
+	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ATTACK]; // 기본.
 }
 
 void CRoverDarkWing::Bind_Resources()

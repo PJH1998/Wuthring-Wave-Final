@@ -54,6 +54,10 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
 		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 		break;
+	case ERoverSpecialType::EX_ATTACK05:
+		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+		break;
 	}
     
 
@@ -61,8 +65,8 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
     m_pRover->PartActivate(m_iPartType, true);
     
 
-	if (eSpecialType == ERoverSpecialType::EX_ATTACK05)
-		m_pRover->PartActivate(m_iPartType, false);
+	//if (eSpecialType == ERoverSpecialType::EX_ATTACK05)
+	//	m_pRover->PartActivate(m_iPartType, false);
     m_pRover->Set_Gravity(true);
 	
 
@@ -131,7 +135,7 @@ void CRoverGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 		m_pRover->Play_PartAnimation(
 			m_iPartType,
 			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+			(m_Animations[m_iCurrentAnimIdx].fSpeed)* fTimeDelta, nullptr
 		);
 	}
 	else
@@ -229,13 +233,14 @@ void CRoverGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK01), "Ex_Attack01", 1.4f, 20.f);
     CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK02), "Ex_Attack02", 1.4f, 20.f);
     CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK03), "Ex_Attack03", 1.4f, 26.f);
-	CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK05), "Ex_Attack05", 1.f, 80.f);
     CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK04), "Ex_Attack04", 1.4f, 35.f);
+	CState::Add_Animations(ENUM_CLASS(ERoverSpecialType::EX_ATTACK05), "Ex_Attack05", 1.4f, 80.f);
     
 
 
 	m_PartsAnimations.emplace("Ex_Attack03", "Scythe_Ex_Attack03");
 	m_PartsAnimations.emplace("Ex_Attack04", "Scythe_Ex_Attack04");
+	m_PartsAnimations.emplace("Ex_Attack05", "Scythe_Ex_Attack04");
 }
 
 void CRoverGroundSpecial::State_Reset()

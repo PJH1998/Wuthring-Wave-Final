@@ -102,7 +102,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
         {
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
-
+			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
             break;
@@ -111,6 +111,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 		{
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			strBoneName = "WeaponProp02";
+			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
 			m_pAugusta->Set_Gravity(true);
 			m_fSpeed = 2.f;
 			break;
@@ -119,7 +120,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
         {
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
-
+			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
             break;
@@ -231,7 +232,7 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 		m_pAugusta->Play_PartAnimation(
 			m_iSubPartType,
 			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true, false
+			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr, 1.f, true, true, true,false
 		);
 	}
     
@@ -293,19 +294,21 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 					return;
 				}
 
-				if (!m_States[MOVE])
+				/*if (!m_States[MOVE])
 				{
 					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 					return;
-				}
+				}*/
 			}
 
 
 			// 기본 공중 공격 
             if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
             {
-                m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
+				m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_END;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+                //m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
                 return;
             }
 
@@ -421,7 +424,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 			// Loop 상태일때 땅에 닿으면 END 애니메이션 실행.
 			if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_LOOP)
 			{
-				m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
+				m_pAugusta->GetStateContextForWrite().m_eAirAttackType = EAugustaAirAttackType::AIRATTACK_END;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::AIR_ATTACK));
+				//m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END);
 				return;
 			}
 

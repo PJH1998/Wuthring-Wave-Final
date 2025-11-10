@@ -130,7 +130,7 @@ HRESULT CVIBuffer_Rect_Instance_UI::Initialize_Clone(void* pArg)
 
 void CVIBuffer_Rect_Instance_UI::Update_Instances(_float fTimeDelta, vector<SINGLE_INST_DESC>& vecDescs)
 {
-	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+ 	D3D11_MAPPED_SUBRESOURCE	SubResource{};
 
 	SINGLE_INST_DESC* pInstanceVertices = static_cast<SINGLE_INST_DESC*>(m_pVBInstanceVertices);
 

@@ -9,6 +9,7 @@ public:
 	enum VOLUME
 	{
 		VOLUME_KNOCKBACK = 0,
+		VOLUME_SKILL = 1,
 		VOLUME_END
 	};
 
@@ -27,11 +28,13 @@ private:
 		ERoverUniqueType m_eUniqueType = ERoverUniqueType::END;
 		ERoverBurstType m_eBurstType = ERoverBurstType::END;
 		ERoverSpecialType m_eSpecialType = ERoverSpecialType::END;
+		ERoverQTEType m_eQTEType = ERoverQTEType::END;
 
 		// Air
 		ERoverJumpType m_eJumpType = ERoverJumpType::END;
 		ERoverFallType m_eFallType = ERoverFallType::END;
 		ERoverAirAttackType m_eAirAttackType = ERoverAirAttackType::END;
+		ERoverAirFlyType m_eAirFlyType = ERoverAirFlyType::END;
 
 		// Climb
 		ERoverClimbIdleType m_eClimbIdleType = ERoverClimbIdleType::END;
@@ -63,6 +66,7 @@ private:
 			m_eJumpType = ERoverJumpType::END;
 			m_eFallType = ERoverFallType::END;
 			m_eAirAttackType = ERoverAirAttackType::END;
+			m_eAirFlyType = ERoverAirFlyType::END;
 
 			// Climb
 			m_eClimbIdleType = ERoverClimbIdleType::END;
@@ -130,6 +134,8 @@ public:
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
+
+	virtual void Bind_QTE(_bool IsQTE) override;
 
 #pragma region 2. NOTIFY
 	public:
