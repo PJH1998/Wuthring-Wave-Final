@@ -163,7 +163,7 @@ void CVolumetricFog::Update_Buffer(_float fTimeDelta)
 	m_VF_Data.InvViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW);
 	m_VF_Data.InvProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ);
 	m_VF_Data.iLightCount = iLightCount;
-	m_VF_Data.fNoiseTimeDelta = fmodf((m_VF_Data.fNoiseTimeDelta + (fTimeDelta * 0.1f)), 1.f);
+	m_VF_Data.fNoiseTimeDelta = fmodf((m_VF_Data.fNoiseTimeDelta + (fTimeDelta * 0.05f)), 1.f);
 	
 	//VF_DATA UPDATE
 	D3D11_MAPPED_SUBRESOURCE VF_SubResource = {};
