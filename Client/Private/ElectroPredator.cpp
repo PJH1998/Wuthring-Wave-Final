@@ -66,7 +66,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	//_float temp;
 	//m_pModelCom->Play_Animation_CPU("Stand2", fTimeDelta, &temp, false, true, false, true, 1.f);
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
