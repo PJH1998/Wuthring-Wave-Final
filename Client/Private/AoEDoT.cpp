@@ -125,12 +125,28 @@ void CAoEDoT::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& 
 
 CAoEDoT* CAoEDoT::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    return nullptr;
+	CAoEDoT* pInstance = new CAoEDoT(pDevice, pContext);
+
+	if (FAILED(pInstance->Initialize_Prototype()))
+	{
+		MSG_BOX("Failed to Create : CAoEDoT");
+		Safe_Release(pInstance);
+	}
+
+	return pInstance;
 }
 
 CGameObject* CAoEDoT::Clone(void* pArg)
 {
-    return nullptr;
+	CAoEDoT* pClone = new CAoEDoT(*this);
+
+	if (FAILED(pClone->Initialize_Clone(pArg)))
+	{
+		MSG_BOX("Failed to Create : CAoEDoT (Clone)");
+		Safe_Release(pClone);
+	}
+
+	return pClone;
 }
 
 void CAoEDoT::Free()

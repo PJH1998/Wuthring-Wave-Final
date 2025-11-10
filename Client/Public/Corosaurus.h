@@ -75,6 +75,9 @@ private:
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
 	_float					m_fAttackDmg{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
+
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
 	_bool					m_isBlocked{};

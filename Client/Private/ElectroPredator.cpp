@@ -47,6 +47,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	m_pRigidBodyCom->IsActivate(false);
 	m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 

@@ -54,6 +54,7 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_fMaxStamina = pDesc->fMaxStamina;
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 
@@ -80,9 +81,9 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
 	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
-	_float temp{};
-	m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	//_float temp{};
+	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BLOCK);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();

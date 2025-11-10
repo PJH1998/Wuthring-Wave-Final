@@ -40,7 +40,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
-	
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 
@@ -55,7 +55,7 @@ void CCorosaurus::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 
 	if(m_isDist_Interp_Enable)
