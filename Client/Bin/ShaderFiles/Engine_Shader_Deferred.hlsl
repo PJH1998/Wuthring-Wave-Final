@@ -43,6 +43,8 @@ float2 g_vFogDepthDistance;
 float2 g_vFogHeightDistance;
 float4 g_vFogColor;
 float g_fFogTime;
+Texture3D g_VoulmetricTexture;
+float2 g_vFogRange;
 
 //SSAO
 Texture2D g_NoiseTexture;
@@ -360,27 +362,49 @@ PS_OUT_BACKBUFFER PS_FOG(PS_IN In)
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
-    float fViewDepth = vViewPos.z;
-    
-    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
-    
-    float2 vTexScale = float2(1.f / g_fWidth, 1.f / g_fHeight);
-    
-    float2 vTexcoord = fmod(vWorldPos.xy, float2(g_fWidth, g_fHeight)) * vTexScale;
-    
-    float2 vNoseTexcoord = float2(vTexcoord.x + (g_fFogTime * vTexScale.x), vTexcoord.y); //vTexcoord + (g_fFogTime * vTexScale);
-    
-    float fNoise = g_FogNoiseTexture.Sample(DefaultSampler, vNoseTexcoord).r;
-    
-    float fFogDepthWeight = clamp((smoothstep(g_vFogDepthDistance.x, g_vFogDepthDistance.y, fViewDepth)), 0.f, 1.f);
+    float fViewZ = vViewPos.z == 0.f ? g_vFogRange.y : clamp(vViewPos.z, 0.1f, g_vFogRange.y);;
     
     vector vOriginColor = g_LutResultTexture.Sample(DefaultSampler, In.vTexcoord);
-    vOriginColor.xyz *= (1.f - min(fFogDepthWeight, 0.8f));
     
-    float fFogWeight = fFogDepthWeight;// * lerp(0.2f, 1.f, fFogHeightWeight);
-    fFogWeight *= fNoise;
+    if (fViewZ < g_vFogRange.x)
+    {
+        Out.vColor = vOriginColor;
+        return Out;
+    }
+        
+    float fZ = log(fViewZ / g_vFogRange.x) / log(g_vFogRange.y / g_vFogRange.x);
     
-    Out.vColor = lerp(vOriginColor, g_vFogColor, fFogWeight);
+    float3 vUV = float3(In.vTexcoord, fZ);
+    
+    float4 VF = g_VoulmetricTexture.Sample(DefaultSampler, vUV);
+    
+    float3 vFogColor = saturate(VF.xyz);
+    float fAlpha = saturate(1.f - VF.a);
+    
+  //  fAlpha = lerp(0.8f, 0.f, saturate(VF.a));
+    
+    Out.vColor.xyz = lerp(vOriginColor.xyz, vFogColor, fAlpha);
+    Out.vColor.a = 1.f;
+    
+    //float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+    
+    //float2 vTexScale = float2(1.f / g_fWidth, 1.f / g_fHeight);
+    
+    //float2 vTexcoord = fmod(vWorldPos.xy, float2(g_fWidth, g_fHeight)) * vTexScale;
+    
+    //float2 vNoseTexcoord = float2(vTexcoord.x + (g_fFogTime * vTexScale.x), vTexcoord.y); //vTexcoord + (g_fFogTime * vTexScale);
+    
+    //float fNoise = g_FogNoiseTexture.Sample(DefaultSampler, vNoseTexcoord).r;
+    
+    //float fFogDepthWeight = clamp((smoothstep(g_vFogDepthDistance.x, g_vFogDepthDistance.y, fViewDepth)), 0.f, 1.f);
+    
+    //vector vOriginColor = g_LutResultTexture.Sample(DefaultSampler, In.vTexcoord);
+    //vOriginColor.xyz *= (1.f - min(fFogDepthWeight, 0.8f));
+    
+    //float fFogWeight = fFogDepthWeight;// * lerp(0.2f, 1.f, fFogHeightWeight);
+    //fFogWeight *= fNoise;
+    
+    //Out.vColor = lerp(vOriginColor, g_vFogColor, fFogWeight);
     
     return Out;
 }

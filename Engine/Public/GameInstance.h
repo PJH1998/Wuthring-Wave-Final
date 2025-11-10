@@ -131,6 +131,7 @@ public:
 	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void					Set_LUT_Index(_uint iIndex);
+	void				Render_ShadowMap();
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
@@ -295,6 +296,9 @@ public:
 	HRESULT						Bind_ShadowMap_Resources_Renderer(CShader* pShader);
 	HRESULT						Begin_ShadowMap();
 	HRESULT						End_ShadowMap();
+	void						Begin_DownSampleShadowMap();
+	ID3D11ShaderResourceView*	Get_ShadowMapDownSampleSRV();
+	ID3D11Buffer*				Get_ShadowMapDownSampleBuffer();
 #ifdef _DEBUG
 	void						Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
@@ -314,7 +318,7 @@ public:
 #pragma region VOLUMETRIC_FOG
 public:
 	void						Add_LightData_ToVF(const VF_LIGHT& LightData);
-	void						Compute_Fog();
+	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 
 public:

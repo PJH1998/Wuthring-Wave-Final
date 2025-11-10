@@ -23,9 +23,6 @@ void DownSample(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
     
     float4 vColor = 0.f;
     
-    //int2 InSize = 0;
-    //InputTexture.GetDimensions(InSize.x, InSize.y);
-    
     int iSampleX0 = min(iIndexX, vInSize.x - 1);
     int iSampleX1 = min(iIndexX + 1, vInSize.x - 1);
     

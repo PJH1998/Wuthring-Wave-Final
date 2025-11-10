@@ -1038,5 +1038,8 @@
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_VF.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_ShadowMap.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

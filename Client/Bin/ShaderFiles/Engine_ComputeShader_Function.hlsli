@@ -12,6 +12,16 @@ float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
     return vTexcoord;
 }
 
+float2 Compute_Texcoord(float2 vProjXY)
+{
+    float2 vTexcoord = 0.f;
+    
+    vTexcoord.x = vProjXY.x * 0.5f + 0.5f;
+    vTexcoord.y = vProjXY.y * -0.5f + 0.5f;
+        
+    return vTexcoord;
+}
+
 float2 Compute_Texcoord_Proj(float2 vProjXY)
 {
     float2 vTexcoord = 0.f;

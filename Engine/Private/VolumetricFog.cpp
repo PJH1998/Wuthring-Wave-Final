@@ -21,21 +21,35 @@ HRESULT CVolumetricFog::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_vDefinition.x = 8;
 	m_vDefinition.y = 8;
-	m_vDefinition.z = 4;
+	m_vDefinition.z = 8;
 
 	m_iMaxLight = 32;
-
 
 	m_VF_Data.fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_VF_Data.fWinSizeY = static_cast<_float>(iWinSizeY);
 
 	m_VF_Data.vFroxelSize = m_vFroxelSize;
 	m_VF_Data.iSliceCount = 128;
+	m_VF_Data.fLightIntensity = 1.f;
+	m_VF_Data.fDensity = 1.f;
+	m_VF_Data.fPhaseFunctionG = 0.5f;
+	m_VF_Data.fDensityScale = 0.01f;
 
+	m_VF_Data.fFogMinHeight = 0.f;
+	m_VF_Data.fFogMaxHeight = 200.f;
+
+	m_VF_Data.vFogColor = _float3(1.f, 1.f, 1.f);
+	m_VF_Data.fHegihtFallOff = 0.01f;
+	m_VF_Data.fGroundFallOff = 0.02f;
+	m_VF_Data.fDistanceFallOff = 0.02f;
+	 
 	if (FAILED(Ready_FroxelVolume()))
 		return E_FAIL;
 
 	if (FAILED(Ready_ComputeShader()))
+		return E_FAIL;
+
+	if (FAILED(Ready_Sampler()))
 		return E_FAIL;
 
     return S_OK;
@@ -45,8 +59,8 @@ HRESULT CVolumetricFog::SetUp_FogNF()
 {
 	_float fFar = m_pGameInstance->Get_CurrentCamera_Far();
 
-	m_vFogRange.x = fFar * 0.3f;
-	m_vFogRange.y = fFar;
+	m_vFogRange.x = 1.f; // m_pGameInstance->Get_CurrentCamera_Near(); //fFar * 0.3f; //
+	m_vFogRange.y = 2000.f;
 
 	m_VF_Data.fNear = m_vFogRange.x;
 	m_VF_Data.fFar = m_vFogRange.y;
@@ -65,34 +79,85 @@ void CVolumetricFog::Add_LightData(const VF_LIGHT& LightData)
 	m_LightDatas.push_back(LightData);
 }
 
-void CVolumetricFog::Render()
+void CVolumetricFog::Update_VF()
 {
 	Update_Buffer();
 
-	m_pCS->Set_ConstantBuffer("VF_Data", m_pBuffers[ENUM_CLASS(BUFFER::DATA)]);
-	m_pCS->Set_SRV("g_LightDatas", m_pSRVs[ENUM_CLASS(SRV::LIGHT)]);
-	m_pCS->Set_SRV("g_DepthTexture", m_pGameInstance->Get_HZB_Resource());
-	m_pCS->Set_UAV("OutputTexture", m_pUAV);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_ConstantBuffer("VF_Data", m_pBuffers[ENUM_CLASS(BUFFER::DATA)]);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_ConstantBuffer("ShadowMap_Data", m_pGameInstance->Get_ShadowMapDownSampleBuffer());
 
-	_uint iThreadGroupCountX = static_cast<_uint>((m_vFroxelSize.x + m_vDefinition.x) / m_vFroxelSize.x);
-	_uint iThreadGroupCountY = static_cast<_uint>((m_vFroxelSize.y + m_vDefinition.y) / m_vFroxelSize.y);
-	_uint iThreadGroupCountZ = static_cast<_uint>((m_vFroxelSize.z + m_vDefinition.z) / m_vFroxelSize.z);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_LightDatas", m_pSRVs[ENUM_CLASS(SRV::LIGHT)]);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_MipDepthTexture", m_pGameInstance->Get_HZB_Resource());
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_SRV("g_ShadowMapTexture", m_pGameInstance->Get_ShadowMapDownSampleSRV());
+	
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_UAV("OutputTexture", m_pUAVs[ENUM_CLASS(UAV::VF_LIGHT)]);
 
-	m_pCS->Dispatch(iThreadGroupCountX, iThreadGroupCountY, iThreadGroupCountZ);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_Sampler(0, m_pDefaultSampler);
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Set_Sampler(1, m_pShadowSampler);
 
+	_uint iThreadGroupCountX = static_cast<_uint>((m_vFroxelSize.x + m_vDefinition.x - 1) / m_vDefinition.x);
+	_uint iThreadGroupCountY = static_cast<_uint>((m_vFroxelSize.y + m_vDefinition.y - 1) / m_vDefinition.y);
+	_uint iThreadGroupCountZ = static_cast<_uint>((m_vFroxelSize.z + m_vDefinition.z - 1) / m_vDefinition.z);
+
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]->Dispatch(iThreadGroupCountX, iThreadGroupCountY, iThreadGroupCountZ);
+
+	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_ConstantBuffer("VF_Data", m_pBuffers[ENUM_CLASS(BUFFER::DATA)]);
+	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_SRV("VFLightTexture", m_pSRVs[ENUM_CLASS(SRV::VF_LIGHT)]);
+	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Set_UAV("OutputTexture", m_pUAVs[ENUM_CLASS(UAV::VF_BEER)]);
+
+	m_pCS[ENUM_CLASS(CS::VF_BEER)]->Dispatch(iThreadGroupCountX, iThreadGroupCountY, 1);
 
 	m_LightDatas.clear();
 }
 
+HRESULT CVolumetricFog::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
+{
+	ASSERT_CRASH(pShader);
+	if (FAILED(pShader->Bind_Texture(pTextureName, m_pSRVs[ENUM_CLASS(SRV::VF_BEER)])))
+		CRASH("Failed to Bind Texture Beer");
+
+	if (FAILED(pShader->Bind_Value(pFogRangeName, &m_vFogRange, sizeof(_float2))))
+		CRASH("Failed to Bind Value FogFar");
+
+	return S_OK;
+}
+
+#ifdef _DEBUG
+void CVolumetricFog::Setting_VF()
+{
+	ImGui::Begin("VolumetricFog");
+
+	ImGui::InputFloat("Fog_Near", &m_VF_Data.fNear, 1.f, 10.f);
+	ImGui::InputFloat("Fog_Far", &m_VF_Data.fFar, 1.f, 10.f);
+	ImGui::InputFloat("LightIntensity", &m_VF_Data.fLightIntensity, 1.f, 10.f);
+	ImGui::DragFloat("Density", &m_VF_Data.fDensity, 0.01f, 0.f, 1.f, "%.2f");
+	ImGui::DragFloat("DENSITY_SCALE", &m_VF_Data.fDensityScale, 0.01f, 0.01f, 1.f, "%.2f");
+	ImGui::DragFloat("PHASE_FUNCTION", &m_VF_Data.fPhaseFunctionG, 0.01f, -0.5f, 0.5f, "%.2f");
+
+	ImGui::DragFloat("DISTANCE_FALLOFF", &m_VF_Data.fDistanceFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	ImGui::DragFloat("HEIGHT_FALLOFF", &m_VF_Data.fHegihtFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+	ImGui::DragFloat("GROUND_FALLOFF", &m_VF_Data.fGroundFallOff, 0.01f, 0.01f, 1.f, "%.2f");
+
+	
+	ImGui::End();
+}
+#endif
+
 void CVolumetricFog::Update_Buffer()
 {
+#ifdef _DEBUG
+	Setting_VF();
+#endif
+
 	_uint iLightCount = static_cast<_uint>(m_LightDatas.size());
 
 	m_VF_Data.ViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW);
 	m_VF_Data.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
 	m_VF_Data.InvViewMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW);
-	m_VF_Data.InvProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::VIEW);
+	m_VF_Data.InvProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4_Inv(D3DTS::PROJ);
 	m_VF_Data.iLightCount = iLightCount;
+
+	
 
 	//VF_DATA UPDATE
 	D3D11_MAPPED_SUBRESOURCE VF_SubResource = {};
@@ -110,7 +175,10 @@ void CVolumetricFog::Update_Buffer()
 
 HRESULT CVolumetricFog::Ready_FroxelVolume()
 {
-	if (FAILED(Ready_Texture()))
+	if (FAILED(Ready_Texture(ENUM_CLASS(UAV::VF_LIGHT))))
+		return E_FAIL;
+
+	if (FAILED(Ready_Texture(ENUM_CLASS(UAV::VF_BEER))))
 		return E_FAIL;
 
 	if (FAILED(Ready_Buffer()))
@@ -119,8 +187,11 @@ HRESULT CVolumetricFog::Ready_FroxelVolume()
     return S_OK;
 }
 
-HRESULT CVolumetricFog::Ready_Texture()
+HRESULT CVolumetricFog::Ready_Texture(_uint iTextureIndex)
 {
+	if (iTextureIndex >= ENUM_CLASS(UAV::END))
+		return E_FAIL;
+
 	//Texture
 	D3D11_TEXTURE3D_DESC TextureDesc = {};
 	TextureDesc.Width = m_vFroxelSize.x;
@@ -145,7 +216,7 @@ HRESULT CVolumetricFog::Ready_Texture()
 	UAVDesc.Texture3D.MipSlice = 0;
 	UAVDesc.Texture3D.WSize = TextureDesc.Depth;
 
-	if (FAILED(m_pDevice->CreateUnorderedAccessView(pTexture, &UAVDesc, &m_pUAV)))
+	if (FAILED(m_pDevice->CreateUnorderedAccessView(pTexture, &UAVDesc, &m_pUAVs[iTextureIndex])))
 		CRASH("Failed to Created FV_UAV");
 
 	//SRV
@@ -155,7 +226,7 @@ HRESULT CVolumetricFog::Ready_Texture()
 	SRVDesc.Texture3D.MostDetailedMip = 0;
 	SRVDesc.Texture3D.MipLevels = 1;
 
-	if (FAILED(m_pDevice->CreateShaderResourceView(pTexture, &SRVDesc, &m_pSRVs[ENUM_CLASS(SRV::VF)])))
+	if (FAILED(m_pDevice->CreateShaderResourceView(pTexture, &SRVDesc, &m_pSRVs[iTextureIndex])))
 		CRASH("Failed to Created FV_SRV");
 
 	Safe_Release(pTexture);
@@ -211,10 +282,44 @@ HRESULT CVolumetricFog::Ready_Buffer()
 
 HRESULT CVolumetricFog::Ready_ComputeShader()
 {
-	SHADER_MACRO Macro = { { "THREAD_X", "8" }, { "THREAD_Y", "8" }, { "THREAD_Z", "8" }, { NULL, NULL } };
+	SHADER_MACRO Macro = { { "THREAD_X", "8" }, { "THREAD_Y", "8" }, { "LIGHT_THREAD_Z", "8" }, { NULL, NULL } };
 
-	m_pCS = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_VF.hlsl"), Macro, "VolumetricFog");
+	m_pCS[ENUM_CLASS(CS::VF_LIGHT)]= CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_VF.hlsl"), Macro, "ComputeLight");
 	ASSERT_CRASH(m_pCS);
+
+	Macro = { { "THREAD_X", "8" }, { "THREAD_Y", "8" }, { "BEER_THREAD_Z", "1" }, { NULL, NULL } };
+
+	m_pCS[ENUM_CLASS(CS::VF_BEER)] = CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_VF.hlsl"), Macro, "VolumetricFog");
+	ASSERT_CRASH(m_pCS);
+
+	return S_OK;
+}
+
+HRESULT CVolumetricFog::Ready_Sampler()
+{
+	D3D11_SAMPLER_DESC DefaultSamplerDesc = {};
+	DefaultSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	DefaultSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	DefaultSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	DefaultSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	DefaultSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	DefaultSamplerDesc.MinLOD = 0;
+	DefaultSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	m_pDevice->CreateSamplerState(&DefaultSamplerDesc, &m_pDefaultSampler);
+	ASSERT_CRASH(m_pDefaultSampler);
+
+	D3D11_SAMPLER_DESC ShadowSamplerDesc = {};
+	ShadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	ShadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ShadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ShadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ShadowSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	ShadowSamplerDesc.MinLOD = 0;
+	ShadowSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	m_pDevice->CreateSamplerState(&ShadowSamplerDesc, &m_pShadowSampler);
+	ASSERT_CRASH(m_pShadowSampler);
 
 	return S_OK;
 }
@@ -238,13 +343,17 @@ void CVolumetricFog::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 
-	Safe_Release(m_pCS);
+	for (_uint i = 0; i < ENUM_CLASS(CS::END); ++i)
+		Safe_Release(m_pCS[i]);
 
-	Safe_Release(m_pUAV);
+	for (_uint i = 0; i < ENUM_CLASS(UAV::END); ++i)
+		Safe_Release(m_pUAVs[i]);
 	
 	for(_uint i=0; i< ENUM_CLASS(SRV::END); ++i)
 		Safe_Release(m_pSRVs[i]);
 
 	for (_uint j = 0; j < ENUM_CLASS(BUFFER::END); ++j)
 		Safe_Release(m_pBuffers[j]);
+
+	Safe_Release(m_pShadowSampler);
 }

@@ -18,11 +18,12 @@ public:
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
-	void					Render();
-	void					Begin_ScreenEffect(SFX_TYPE eType);
-	void					End_ScreenEffect();
-	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	void				Render();
+	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				End_ScreenEffect();
+	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void				Render_ShadowMap();
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -101,7 +102,6 @@ private:
 	void						Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex);
 
 private:
-	void						Render_ShadowMap();
 
 	void						Render_Priority();
 	void						Render_Shadow();
@@ -121,8 +121,8 @@ private:
 	void						Render_DistortionObject();
 	void						Render_Blend();
 	void						Render_LUT();
-	void						Render_Fog();
 	void						Render_Distortion();
+	void						Render_Fog();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();

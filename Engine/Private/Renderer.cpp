@@ -106,7 +106,6 @@ void CRenderer::Render()
 
 	Render_Priority();
 	Render_Shadow();
-	Render_ShadowMap();
 	Render_NonBlend();
 	Render_Static();
 	Render_Decal();
@@ -253,12 +252,10 @@ void CRenderer::Render_ShadowMap()
 			pRenderObject->Render_Shadow();
 	}
 
-	if (m_pGameInstance->IsWorkFinish())
+//	if (m_pGameInstance->IsWorkFinish())
 	{
 		m_ShadowMapObjects.clear();
 	}
-
-	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 
 	m_pGameInstance->End_ShadowMap();
 }
@@ -732,15 +729,15 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Fog()
 {
-	m_pGameInstance->Compute_Fog();
-
 	m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false);
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))
 		CRASH("Failed Bind RT_Lut");
+	
+	m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
 
-	if (FAILED(m_pSubResource->Bind_Fog_Resources(m_pShader)))
-		return;
+	/*if (FAILED(m_pSubResource->Bind_Fog_Resources(m_pShader)))
+		return;*/
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
 

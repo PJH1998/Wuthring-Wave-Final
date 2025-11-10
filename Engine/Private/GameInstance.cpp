@@ -175,6 +175,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
+
+	m_pVF->Update_VF();
 }
 
 _float CGameInstance::Rand_Normal()
@@ -485,6 +487,10 @@ ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _u
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
+}
+void CGameInstance::Render_ShadowMap()
+{
+	m_pRenderer->Render_ShadowMap();
 }
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
@@ -920,6 +926,21 @@ HRESULT CGameInstance::End_ShadowMap()
 	return m_pShadowMap->End_ShadowMap();
 }
 
+void CGameInstance::Begin_DownSampleShadowMap()
+{
+	m_pShadowMap->DownSampleShadowMap();
+}
+
+ID3D11ShaderResourceView* CGameInstance::Get_ShadowMapDownSampleSRV()
+{
+	return m_pShadowMap->Get_DownSampleSRV();
+}
+
+ID3D11Buffer* CGameInstance::Get_ShadowMapDownSampleBuffer()
+{
+	return m_pShadowMap->Get_DownSampleBuffer();
+}
+
 #ifdef _DEBUG
 void CGameInstance::Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer)
 {
@@ -955,9 +976,10 @@ void CGameInstance::Add_LightData_ToVF(const VF_LIGHT& LightData)
 {
 	m_pVF->Add_LightData(LightData);
 }
-void CGameInstance::Compute_Fog()
+
+HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
 {
-	m_pVF->Render();
+	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
 }
 #pragma endregion
 
