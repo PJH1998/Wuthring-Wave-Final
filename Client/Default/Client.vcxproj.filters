@@ -244,6 +244,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\Loading">
+      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -601,6 +604,9 @@
     <ClInclude Include="..\Public\RoverGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Loading.h">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -929,6 +935,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Loading.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
