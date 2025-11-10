@@ -13,9 +13,7 @@ void HZB(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTI
 {
     int iIndexX = DTID.x * 2;
     int iIndexY = DTID.y * 2;
-    
-    float fFinalDepth = 0.f;
-    
+
     int2 InSize = 0;
     InputTexture.GetDimensions(InSize.x, InSize.y);
     if(0 == InSize.x)
@@ -27,20 +25,25 @@ void HZB(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTI
     int iSampleY0 = min(iIndexY, InSize.y - 1);
     int iSampleY1 = min(iIndexY + 1, InSize.y - 1);
     
-    if (InSize.x == 1920)
-        fFinalDepth = max(
-        max(
-        max(InputTexture.Load(int3(iSampleX0, iSampleY0, 0)).y, 
-        InputTexture.Load(int3(iSampleX1, iSampleY0, 0)).y), 
-        InputTexture.Load(int3(iSampleX1, iSampleY1, 0)).y), 
-        InputTexture.Load(int3(iSampleX0, iSampleY1, 0)).y);
-    else
-        fFinalDepth = max(
-        max(
-        max(InputMipTexture.Load(int3(iSampleX0, iSampleY0, 0)),
-        InputMipTexture.Load(int3(iSampleX1, iSampleY0, 0))),
-        InputMipTexture.Load(int3(iSampleX1, iSampleY1, 0))),
-        InputMipTexture.Load(int3(iSampleX0, iSampleY1, 0)));
+    float fPixel0 = 0.f;
+    float fPixel1 = 0.f;
+    float fPixel2 = 0.f;
+    float fPixel3 = 0.f;
     
-    OutputTexture[DTID.xy] = fFinalDepth;
+    if (InSize.x == 1920)
+    {
+        fPixel0 = InputTexture.Load(int3(iSampleX0, iSampleY0, 0)).y;
+        fPixel1 = InputTexture.Load(int3(iSampleX1, iSampleY0, 0)).y;
+        fPixel2 = InputTexture.Load(int3(iSampleX1, iSampleY1, 0)).y;
+        fPixel3 = InputTexture.Load(int3(iSampleX0, iSampleY1, 0)).y;
+    }
+    else
+    {
+        fPixel0 = InputMipTexture.Load(int3(iSampleX0, iSampleY0, 0));
+        fPixel1 = InputMipTexture.Load(int3(iSampleX1, iSampleY0, 0));
+        fPixel2 = InputMipTexture.Load(int3(iSampleX1, iSampleY1, 0));
+        fPixel3 = InputMipTexture.Load(int3(iSampleX0, iSampleY1, 0));
+    }
+    
+    OutputTexture[DTID.xy] = max(fPixel0, max(fPixel1, max(fPixel2, fPixel3)));
 }

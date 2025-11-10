@@ -43,6 +43,7 @@ public:
 
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 	virtual		BoundingBox* Get_BoundingBox()override;
+	void Change_Collision_Layer(_bool SonoroMode);
 
 private:
 	CDeferredShader* m_pShaderCom = { nullptr };
@@ -53,6 +54,7 @@ private:
 
 	_uint						m_iShaderPassIndex = {};
 	_bool*						m_IsRender = { nullptr };
+	_bool*					 m_SonoroMode = { nullptr };
 private:
 	void						Ready_Component(void* pArg);
 

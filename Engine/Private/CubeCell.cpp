@@ -39,9 +39,9 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
 	for (_uint i = 0; i < ENUM_CLASS(CORNER::END); ++i)
 	{
 		_float3 vOffset = {};
-		vOffset.x = (i & 1) ? 0.25f : -0.25f;
-		vOffset.y = (i & 4) ? -0.25f : 0.25f;
-		vOffset.z = (i & 2) ? 0.25f : -0.25f;
+		vOffset.x = (i & 1) ? 0.5f : -0.5f;
+		vOffset.y = (i & 4) ? -0.5f : 0.5f;
+		vOffset.z = (i & 2) ? 0.5f : -0.5f;
 
 		_float3 vChildCenter = _float3(
 			vCenter.x + vOffset.x * vExtent.x,
@@ -63,7 +63,7 @@ HRESULT CCubeCell::Initialize(_float3 vCenter, _float3 vExtent, _uint iDepth)
     return S_OK;
 }
 
-void CCubeCell::Update(const _fvector& vCamPos)
+void CCubeCell::Update(const _fvector& vCamPos, vector<class CStaticObject*>* Container)
 {
 	// Frustrum, BoundingBox Intersect Check
 	if (true == m_pGameInstance->IsIn_WorldSpace(m_pBoundingBox))
@@ -82,7 +82,14 @@ void CCubeCell::Update(const _fvector& vCamPos)
 				if (m_iDepth <= 3)
 					m_iLODIndex = Compute_Object_LOD(pObject, vCamPos);
 				pObject->Set_LOD(0);
-				m_pGameInstance->Add_Render_StaticObject(pObject);
+				// Root는 각 객체 Push
+				if (0 == m_iDepth)
+				{
+					m_pGameInstance->Add_Render_StaticObject(pObject);
+				}
+				// Leaf는 Local Container에 담은 후 병합
+				else
+					Container->push_back(pObject);
 			}
 		}
 
@@ -95,11 +102,13 @@ void CCubeCell::Update(const _fvector& vCamPos)
 				{
 					// Thread
 					m_pGameInstance->Add_Work([&, vCamPos]() {
-							pCell->Update(vCamPos);
+							vector<CStaticObject*> Container;
+							pCell->Update(vCamPos, &Container);
+							m_pGameInstance->Add_Render_StaticObject(Container);
 						});
 				}
 				else
-					pCell->Update(vCamPos);
+					pCell->Update(vCamPos, Container);
 			}
 		}
 	}

@@ -79,12 +79,38 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
+	if (8 == m_iCullStack.load(memory_order_acquire))
+	{
+		cout << "Cut!" << endl;
+		return S_OK;
+	}
+
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
 		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
 	}
 
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+	if (8 == m_iCullStack.load(memory_order_acquire))
+		return S_OK;
+
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
+		m_iCullStack.fetch_add(1, memory_order_release);
+	}
+
+	if (8 <= m_iCullStack.load(memory_order_acquire))
+	{
+		m_isCompleteFrustumCull.exchange(true, memory_order_release);
+	}
+	
 	return S_OK;
 }
 
@@ -386,16 +412,15 @@ void CRenderer::Render_Static()
 			Safe_Release(pCL);
 		}
 	}
-	//m_CommandLists.clear();
 
-	//m_pContext->Flush();
-
-	// Swap Chain
-	if (m_pGameInstance->IsWorkFinish())
+	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+		m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
+		m_iCullStack.exchange(0, memory_order_release);
+		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));

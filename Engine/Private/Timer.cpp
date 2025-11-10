@@ -23,6 +23,14 @@ HRESULT CTimer::Initialize()
 	return S_OK;
 }
 
+void CTimer::Update(_float fTimeDelta)
+{
+	if (0.f < m_fDuration)
+		m_fDuration -= fTimeDelta;
+	else
+		m_fTimeRate = 1.f;
+}
+
 void CTimer::Update_Timer()
 {
 	QueryPerformanceCounter(&m_FrameTime);			// 1500

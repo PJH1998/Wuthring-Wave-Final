@@ -4,7 +4,7 @@ namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
-	enum class COLLISIONLAYER { NONE, MAP, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
+	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
@@ -17,6 +17,13 @@ namespace Client
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
 
+	enum class CHARACTER_CONDITION : unsigned int {
+		HIT = 1 << 0,
+		DODGE = 1 << 1, // HIT 상태면 Dodge가 안되게?
+		PARRY = 1 << 2,
+		END
+	};
+
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
 		AUGUSTA,
@@ -28,8 +35,8 @@ namespace Client
 		DEFAULT = 0,				// 기본?
 		LB_STRONG_READY = 1,		// 강공 실행 가능
 		LB_SWORD_READY = 2,         // SWORD LB 아이콘 준비됨.(SpAttack 상태? => 나궁썼어)
-		T_INTERACTION_READY = 3,		// T 실행 가능.  => 활공, 기타등등
-		T_INTERACTION_FAILED = 4,		// T 실행 불가.  => 활공, 기타 등등
+		T_INTERACTION_READY = 3,	// T 실행 가능.  => 활공, 기타등등
+		T_INTERACTION_FAILED = 4,	// T 실행 불가.  => 활공, 기타 등등
 		E_GRIFFON_READY = 5,		// 그리폰 E 실행 가능 => GRIFFON_E_READY = 
 		E_RISE_READY = 6,			// Rise E 실행 가능.
 		E_DEFAULT_READY = 7,		// 기본 E 실행 가능.
@@ -40,7 +47,6 @@ namespace Client
 		R_SWORD_ULTI_READY = 12,	// SWORD R 궁극기 아이콘 출력 가능.
 		END
 	};
-
 	
 
 	enum class UI_AUGUSTA_CONDITION : unsigned int {
@@ -50,21 +56,21 @@ namespace Client
 		E_RISE = 1 << 3, // 그리폰 Rise									// 그 다음 (옆에)
 		R_SP_ATTACK = 1 << 4, // 최종 궁 이전 상태 사용 가능.			// -
 		R_SP_ATTACKOMNI = 1 << 5, // Special Attack 최종 궁 사용 가능	// -
-
-		
 		END
 	};
 
 
 	enum class UI_ROVER_STATE : unsigned int {
-		ROVER_READY = 0,
+		DEFAULT = 0,			// 기본
+		E_BURST_READY = 1,		// 서지 E 사용가능
+		E_DEFAULT_READY = 2,	// 기본 E 사용가능
+		R_READY = 3,			// 궁 사용가능
 		END
 	};
 
 	// UI에서 사용하기 위해서 State Machine에서 전달.
 	enum class UI_ROVER_CONDITION : unsigned int {
-		BURST = 0,
-
+		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};
 
@@ -169,20 +175,10 @@ namespace Client
 		FL_NONE				= 0,
 		FL_OUTLINE			= 1 << 0,
 		FL_GRAD				= 1 << 1,
+		FL_ALPHA_EDITABLE	= 1 << 2,	// matExtra 11.
 
-		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
 
 		FL_END				= 1 << 3
-	};
-
-	enum class FONT_DMG_PRESET
-	{
-		HEAL,
-		DARK,
-		ELECTRO,
-		FUSION,
-
-		END
 	};
 	
 	enum class  TEST_STATE : unsigned int
@@ -230,4 +226,13 @@ namespace Client
 		, OUNTLINE
 		, END };
 
+	enum class TEXT_COLOR_DMGTYPE {
+		NONE,	// 기본값. 지정 안했다고 가정, 마젠타 출력
+		HEAL,	// 회복
+		DARK,	// 인멸
+		ELEC,	// 전도
+		FUSI,	// 용융
+
+		END
+	};
 }

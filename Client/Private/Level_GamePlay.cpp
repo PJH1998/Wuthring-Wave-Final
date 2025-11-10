@@ -16,8 +16,9 @@ CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 HRESULT CLevel_GamePlay::Initialize()
 {
-	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
-	
+	m_pGameInstance->SetUp_OctoTree(_float3(3164.29f, 159.2f, 2618.3f), _float3(4096.f, 4096.f, 4096.f));
+	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096.f, 4096.f, 4096.f));
+
 	//TEST
 	SHADOW_MAP_DESC ShadowMapDesc = {};
 	ShadowMapDesc.iNumSectorX = 8;
@@ -32,8 +33,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
 	
-	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
-	//m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
 	m_pGameInstance->Render_ShadowMap();
 	m_pGameInstance->Begin_DownSampleShadowMap();

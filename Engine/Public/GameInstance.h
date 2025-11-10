@@ -55,10 +55,14 @@ public:
 	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
 	//HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 	//void		Add_FloatingText(const _wstring& strFontTag, const _tchar* pText, FONT_SINGLEDESC tSingleFontDesc);
-	_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
-	_bool		Draw_Font(FONT_SINGLEDESC* pSingleDesc);
-	void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
-	void		Add_FloatingText(FONT_SINGLEDESC pDesc);
+	//_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
+	//_bool		Draw_Font(FONT_SINGLEDESC* pSingleDesc);
+	//void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
+	//void		Add_FloatingText(FONT_SINGLEDESC pDesc);
+	FTCUSTOM_FONT*	Find_Font(const _wstring& strFontTag);
+	const FTCUSTOM_FONT_GLYPH* Get_Glyph(const _wstring& strFontTag, _uint code);
+	ID3D11ShaderResourceView* Get_AtlasSRV(const _wstring& strFontTag);
+	const FTCUSTOM_FONT_GLYPH* Get_GlyphAndAdvance(const _wstring& strFontTag, _uint iCodePoint, _uint prevCodePoint, _int& outAdvanceX);
 #pragma endregion
 
 
@@ -79,7 +83,8 @@ public:
 	HRESULT		Add_GameObject_ToLayer(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, void* pArg = nullptr);
 	HRESULT		Add_GameObject_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, class CGameObject* pObject);
 	class CComponent* Get_Component(_uint iLayerLevelID, const _wstring& strLayerTag, _uint iGameObjectIndex, const _wstring& strComponentTag);
-	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio);
+	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop);
+	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration);
 #pragma endregion
 
 #pragma region POOLING_MANAGER
@@ -125,6 +130,7 @@ public:
 public:
 	HRESULT				Add_Render_Object(RENDERGROUP eGroup, class CGameObject* pObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
 	void					Begin_ScreenEffect(SFX_TYPE eType);
 	void					End_ScreenEffect();
@@ -265,6 +271,11 @@ public:
 	void					Render_CSM(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
+
+#pragma region HZB
+	void					Occlusion_Culling(vector<class CStaticObject*>& Objects);
+#pragma endregion
+
 
 #pragma region UI_MANAGER
 public:

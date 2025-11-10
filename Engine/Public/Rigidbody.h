@@ -72,6 +72,7 @@ public:
 	void							Change_MotionType(EMotionType eType);
 
 private:
+	_bool							m_isActive = { true };
 	SHAPE						m_eShape = {};
 	COLLISION_DATA			m_tCollisionData = {};
 	Body*							m_pBody = {nullptr};

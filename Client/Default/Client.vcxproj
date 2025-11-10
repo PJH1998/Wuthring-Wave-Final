@@ -180,6 +180,7 @@
     <ClInclude Include="..\Public\AugustaGroundBurst.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
+    <ClInclude Include="..\Public\AugustaGroundQTE.h" />
     <ClInclude Include="..\Public\AugustaGroundRun.h" />
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
@@ -208,9 +209,11 @@
     <ClInclude Include="..\Public\HitState.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
+    <ClInclude Include="..\Public\MapObject_Instance.h" />
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\Public\Particle.h" />
+    <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
     <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\MonsterDummy.h" />
@@ -231,29 +234,38 @@
     <ClInclude Include="..\Public\Level_Logo.h" />
     <ClInclude Include="..\Public\Level_Test.h" />
     <ClInclude Include="..\public\Level_Test_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\Loader.h" />
     <ClInclude Include="..\Public\Loader_GamePlay.h" />
     <ClInclude Include="..\Public\Loader_Logo.h" />
     <ClInclude Include="..\Public\Loader_Test.h" />
     <ClInclude Include="..\public\Loader_Test_UI.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\Public\MainApp.h" />
     <ClInclude Include="..\Public\MapObject.h" />
     <ClInclude Include="..\Public\MonsterTest.h" />
     <ClInclude Include="..\Public\Parser.h" />
+    <ClInclude Include="..\public\Projectile.h" />
     <ClInclude Include="..\Public\Rover.h" />
+    <ClInclude Include="..\Public\RoverAirAttack.h" />
     <ClInclude Include="..\Public\RoverAirFall.h" />
+    <ClInclude Include="..\Public\RoverAirFly.h" />
     <ClInclude Include="..\Public\RoverAirJump.h" />
+    <ClInclude Include="..\Public\RoverDarkScythe.h" />
+    <ClInclude Include="..\Public\RoverDarkWing.h" />
     <ClInclude Include="..\Public\RoverFactory.h" />
+    <ClInclude Include="..\Public\RoverGroundAttack.h" />
+    <ClInclude Include="..\Public\RoverGroundBurst.h" />
     <ClInclude Include="..\Public\RoverGroundDash.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
     <ClInclude Include="..\Public\RoverGroundLand.h" />
+    <ClInclude Include="..\Public\RoverGroundQTE.h" />
     <ClInclude Include="..\Public\RoverGroundRun.h" />
+    <ClInclude Include="..\Public\RoverGroundSkill.h" />
+    <ClInclude Include="..\Public\RoverGroundSpecial.h" />
+    <ClInclude Include="..\Public\RoverHit.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
@@ -288,6 +300,7 @@
     <ClInclude Include="..\Public\Augusta.h" />
     <ClInclude Include="..\public\ShadowDummy.h" />
     <ClInclude Include="..\Public\SpringCamera.h" />
+    <ClInclude Include="..\public\UI_Text_Damage.h" />
     <ClInclude Include="..\Public\VIBuffer_Rect_Instance_UI.h" />
     <ClInclude Include="..\Public\Prop.h" />
     <ClInclude Include="..\Public\Wing.h" />
@@ -319,6 +332,7 @@
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
     <ClCompile Include="..\Private\AugustaGroundRun.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
@@ -356,29 +370,40 @@
     <ClCompile Include="..\Private\Level_Logo.cpp" />
     <ClCompile Include="..\Private\Level_Test.cpp" />
     <ClCompile Include="..\private\Level_Test_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\Loader.cpp" />
     <ClCompile Include="..\Private\Loader_GamePlay.cpp" />
     <ClCompile Include="..\Private\Loader_Logo.cpp" />
     <ClCompile Include="..\Private\Loader_Test.cpp" />
     <ClCompile Include="..\private\Loader_Test_UI.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\Private\MainApp.cpp" />
     <ClCompile Include="..\Private\MapObject.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
+    <ClCompile Include="..\Private\MapObject_Instance.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
+    <ClCompile Include="..\Private\PatternDummy.cpp" />
     <ClCompile Include="..\Private\PlayerFactory.cpp" />
     <ClCompile Include="..\Private\PlayerStatus.cpp" />
+    <ClCompile Include="..\private\Projectile.cpp" />
+    <ClCompile Include="..\Private\RoverAirAttack.cpp" />
+    <ClCompile Include="..\Private\RoverAirFly.cpp" />
+    <ClCompile Include="..\Private\RoverDarkScythe.cpp" />
+    <ClCompile Include="..\Private\RoverDarkWing.cpp" />
+    <ClCompile Include="..\Private\RoverGroundAttack.cpp" />
+    <ClCompile Include="..\Private\RoverGroundBurst.cpp" />
+    <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
+    <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
+    <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
+    <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
@@ -419,6 +444,7 @@
     <ClCompile Include="..\Private\Augusta.cpp" />
     <ClCompile Include="..\private\ShadowDummy.cpp" />
     <ClCompile Include="..\Private\SpringCamera.cpp" />
+    <ClCompile Include="..\private\UI_Text_Damage.cpp" />
     <ClCompile Include="..\Private\VIBuffer_Rect_Instance_UI.cpp" />
     <ClCompile Include="..\Private\Prop.cpp" />
     <ClCompile Include="..\Private\Wing.cpp" />
@@ -446,7 +472,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_TextInstance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UI_VtxInstance.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>

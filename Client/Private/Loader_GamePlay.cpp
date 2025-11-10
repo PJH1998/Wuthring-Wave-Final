@@ -1,12 +1,16 @@
 ﻿#include "ClientPch.h"
 #include "Loader_GamePlay.h"
 #include"GameSystem.h"
+
+#pragma region MAP
 #include"MapObject.h"
 #include"Trigger_Box.h"
 #include"MapObject_Destruction.h"
 #include"MapObject_Destruction_Debris.h"
 #include"MapObject_NonSonoro.h"
 #include"MapObject_Sonoro.h"
+#include"MapObject_Instance.h"
+#pragma endregion
 
 #pragma region FALSE_SOVEREIGN
 #include "MonsterTest.h"
@@ -37,6 +41,8 @@
 
 // Rover
 #include "RoverSword.h"
+#include "RoverDarkWing.h"
+#include "RoverDarkScythe.h"
 #include "Rover.h"
 
 // Player
@@ -67,7 +73,6 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
-
     return S_OK;
 }
 
@@ -80,9 +85,8 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1105/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1105/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1106_SonoroPatch/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1110/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1110_Bounding/", m_eCurLevel);
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -128,6 +132,10 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_NonSonoro"),
 		CMapObject_NonSonoro::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Instance"),
+		CMapObject_Instance::Create(m_pDevice, m_pContext));
+	
 #pragma endregion
 	return S_OK;
 }
@@ -301,6 +309,41 @@ HRESULT CLoader_GamePlay::Load_Rover()
 		, CRoverSword::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
 
+	wStrModelTag = L"Prototype_Component_Model_Rover_DarkWing";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkWing/DarkRoverWing.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrDrakWingTag = TEXT("Prototype_GameObject_Rover_DarkWing");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrDrakWingTag
+		, CRoverDarkWing::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	wStrModelTag = L"Prototype_Component_Model_Rover_DarkScythe";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkScythe/DarkScythe.dat";
+	fSize = 0.01f;
+	//fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrDarkScytheTag = TEXT("Prototype_GameObject_Rover_DarkScythe");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrDarkScytheTag
+		, CRoverDarkScythe::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
 
 	return S_OK;

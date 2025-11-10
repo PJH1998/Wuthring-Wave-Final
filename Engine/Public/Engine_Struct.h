@@ -321,6 +321,8 @@ namespace Engine
 		//  iRowH               : 현재 줄(row)에서 가장 높은 글리프의 높이(줄바꿈 간격 계산용).
 		_int                                        iAtlasW, iAtlasH, iPenX, iPenY, iRowH;
 		_bool                                       isHasKerning;
+
+		_uint										iPadding;
 	}FTCUSTOM_FONT;
 
 
@@ -333,7 +335,7 @@ namespace Engine
 		_float  fScale;
 
 		_float2 vLifeTime;
-		_int	iShaderFlag;
+		_uint	iShaderFlag;
 
 		// for shader
 		_float4 vColor;				// Font Color

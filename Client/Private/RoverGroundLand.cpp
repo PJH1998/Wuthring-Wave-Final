@@ -63,6 +63,11 @@ void CRoverGroundLand::OnExit()
 
 void CRoverGroundLand::Handle_Input()
 {
+	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+	// Hit면 모든 상태 제거
+	if (m_States[HIT])
+		return;
+
     m_States[RUN] = m_pRover->Check_AnyInput(m_iMoveKey);
 }
 
@@ -75,6 +80,13 @@ void CRoverGroundLand::Update_LandAnimation(_float fTimeDelta)
 void CRoverGroundLand::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
+	// Hit는 무조건 전환
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
+
     if (IsEscapePossible && m_States[RUN])
     {
         m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::RUN_F;

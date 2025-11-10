@@ -12,6 +12,7 @@ public:
 	};
 
 public:
+	
 
 
 public:
@@ -30,19 +31,29 @@ public:
 
 
 public:
-	using EnsembleEndCallback = function<void()>;
+	using HarmonyEndCallback = function<void()>;
 
-	void Set_EnsembleEndCallback(EnsembleEndCallback callback)
+	void Set_HarmonyEndCallback(HarmonyEndCallback callback)
 	{
 		m_OnEnsembleEnd = callback;
 	}
 
-	void Notify_EnsembleEnd()
+
+	void Notify_HarmonyEnd()
 	{
 		if (m_OnEnsembleEnd)
 			m_OnEnsembleEnd();
 	}
-	void Clear_EnsembleEndCallback() { m_OnEnsembleEnd = nullptr; }
+
+	void Bind_NotifyEnd()
+	{
+
+	}
+
+	void Clear_HarmonyEndCallback() { 
+		m_OnEnsembleEnd = nullptr; 
+
+	}
 
 public:
 	typedef struct tagCharacterDesc : public CActor::ACTOR_DESC
@@ -92,7 +103,6 @@ public:
 #pragma region PHYSICS
 public:
 	// 거리 판단
-
 	const _float Calculate_RootMotionScale();
 
 	// Hit 판단.
@@ -128,7 +138,12 @@ public:
 
 
 #pragma region EVENT 
+public:
+	virtual void Bind_QTE(_bool IsQTE) {};
+	_bool IsQTEend() { return m_IsQTEend;  }
+	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
+	virtual void Process_DelayedActions() {};
 #pragma endregion
 
 #pragma region STATE
@@ -137,9 +152,13 @@ public:
 	void Camera_Shake(_float fIntensity);
 	void Play_Action(const _wstring& strActionTag); // Action Camera (Cut Scene)
 
+	// Ability에서 확인 받기 => 상태 판별?
+	_bool Check_AnyConidtion_FromAbility(_uint iCondition);
+
 	// Ability에 제공. => 상태 판별할때 사용.
 	void Bind_Condition_ToAbillity(_uint iCondition);
 	void Remove_Condition_ToAbillity(_uint iCondition);
+	void Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag);
 
 	// Transition Character From Player
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) {}; // 전환 시 실행할 함수.
@@ -223,6 +242,8 @@ public:
 	// Ability 업데이트는 플레이어의 Priority Update에서
 	void Ability_Update(_float fTimeDelta);
 	class CAbility* Get_AbilityCom();
+	_float Get_Cost(COST_TYPE eCostType);
+	_float Get_MaxCost();
 	void Sync_UI(); // UI
 #pragma endregion
 
@@ -234,6 +255,18 @@ public:
 #pragma endregion
 
 	
+#pragma region CONDITION
+public:
+	void Add_Condition(CHARACTER_CONDITION eConditionFlag);
+	_bool Check_AnyCondition(CHARACTER_CONDITION eConditionFlag);
+	_bool Check_AllCondition(CHARACTER_CONDITION eConditionFlag);
+
+	void Remove_Condition(CHARACTER_CONDITION eConditionFlag);
+	void Remove_AllCondition();
+
+
+#pragma endregion
+
 
 protected:
 	class CGameSystem* m_pGameSystem = { nullptr };
@@ -242,6 +275,8 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+
+	class CCollider* m_pQTEColliderCom = { nullptr };
 	
 	_float m_fTargetDistance = {}; // 타겟과의 거리
 
@@ -256,7 +291,7 @@ protected:
 	
 
 	//CHARACTER_STAT m_Stats = {};
-	EnsembleEndCallback m_OnEnsembleEnd = { nullptr };
+	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	
 
 
@@ -266,7 +301,12 @@ protected:
 	_bool m_IsHit = { false };
 	_bool m_IsLockOn = { false };
 	_bool m_IsLand = { false };
+	_bool m_IsQTE = { false };
+	_bool m_IsQTEend = { false };
 
+	_uint m_iCondition = {}; // Client_Enum.h에 정의된 CharacterCondition 관리.
+	queue<DELAYED_ACTION> m_DelayedActions;
+	
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};

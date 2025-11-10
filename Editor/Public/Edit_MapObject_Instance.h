@@ -17,9 +17,12 @@ public:
 	{
 		_char ModelName[MAX_PATH] = {};
 		_uint iShaderPassIndex;
-		_float4x4* WorldMatrix = { nullptr };
+		_float4x4* InstanceWorldMatrix = { nullptr };
 		_uint iNumInstance;
-		_float4 m_WolrdPos;
+		_float4x4 WorldMatrix;
+		_uint iSaveIndex;
+		_float4 vDiffuseColor = _float4(1.f, 1.f, 1.f, 1.f);
+		_bool IsLoaded;
 	}MAP_LOAD;
 
 private:
@@ -41,15 +44,21 @@ public:
 	HRESULT Ready_Component(void* pArg = nullptr);
 
 	void Bind_Resources();
-
+	_uint Get_Num() { return m_iSaveIndex; }
+	void Change_ShaderIndex(_uint iNumShader) { m_iShaderPassIndex = iNumShader; }
+	_char* GetName() { return m_ModelName; }
+	_uint Get_ShaderPass() { return m_iShaderPassIndex; }
+	_uint ShaderPassWindow();
+	void Set_Color(_float4 vColor) { m_vDiffuseColor = vColor; }
+	_float4* Get_Color(){ return &m_vDiffuseColor; }
 private:
 	void Ready_Events();
-
+	
 private:
 	vector<CModel_Instance*> m_pModelComArray;
 	CModel_Instance* m_pModelCom = { nullptr };
 	class CShader* m_pShaderCom = { nullptr };
-
+	class CMap_Interface* m_pMapInterface = { nullptr };
 
 private:
 	_char m_ModelName[MAX_PATH];
@@ -63,6 +72,8 @@ private:
 	_float4* m_pTranslation = { nullptr };
 
 	MAP_LOAD InstanceDesc = {};
+	_uint m_iSaveIndex = {};
+	_float4 m_vDiffuseColor = {};
 public:
 	static CEdit_MapObject_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

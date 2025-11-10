@@ -37,6 +37,7 @@ void CProp::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
     CPartObject::Priority_Update(fTimeDelta);
+
 }
 
 void CProp::Update(_float fTimeDelta)
