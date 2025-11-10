@@ -4,7 +4,7 @@ namespace Client
 {
 	enum class LEVEL { STATIC, LOGO, GAMEPLAY, LOADING, TEST, TEST_UI, END };
 	enum class CHANNEL { BGM, PLAYER_ACTION, PLAYER_VOICE, ENEMY_ACTION, ENEMY_VOICE, EFFECT, END };
-	enum class COLLISIONLAYER { NONE, MAP, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, SPAWN, END };
+	enum class COLLISIONLAYER { NONE, MAP, QTE, PLAYER, ATTACK, SKILL, KNOCKBACK, ENEMY, ENEMY_ATTACK, ENEMY_HARDATTACK, ENEMY_SKILL, INTERACTION, DETECT, PARRY, GRAB, END };
 
 	enum class SKILLBTN { LBTN, T, E, R, END };
 	enum class SKILLICONID { DEFAULT, ZANNI, KAMOLA, LUPA, END };
@@ -16,6 +16,13 @@ namespace Client
 	
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
+
+	enum class CHARACTER_CONDITION : unsigned int {
+		HIT = 1 << 0,
+		DODGE = 1 << 1, // HIT 상태면 Dodge가 안되게?
+		PARRY = 1 << 2,
+		END
+	};
 
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
@@ -54,10 +61,10 @@ namespace Client
 
 
 	enum class UI_ROVER_STATE : unsigned int {
-		DEFAULT = 0,
-		E_BURST_READY = 1,
-		E_DEFAULT_READY = 2,
-		R_READY = 3,
+		DEFAULT = 0,			// 기본
+		E_BURST_READY = 1,		// 서지 E 사용가능
+		E_DEFAULT_READY = 2,	// 기본 E 사용가능
+		R_READY = 3,			// 궁 사용가능
 		END
 	};
 
@@ -168,20 +175,10 @@ namespace Client
 		FL_NONE				= 0,
 		FL_OUTLINE			= 1 << 0,
 		FL_GRAD				= 1 << 1,
+		FL_ALPHA_EDITABLE	= 1 << 2,	// matExtra 11.
 
-		FL_FIXED			= 1 << 2,	// world fixed. uses world pos
 
 		FL_END				= 1 << 3
-	};
-
-	enum class FONT_DMG_PRESET
-	{
-		HEAL,
-		DARK,
-		ELECTRO,
-		FUSION,
-
-		END
 	};
 	
 	enum class  TEST_STATE : unsigned int
@@ -229,4 +226,13 @@ namespace Client
 		, OUNTLINE
 		, END };
 
+	enum class TEXT_COLOR_DMGTYPE {
+		NONE,	// 기본값. 지정 안했다고 가정, 마젠타 출력
+		HEAL,	// 회복
+		DARK,	// 인멸
+		ELEC,	// 전도
+		FUSI,	// 용융
+
+		END
+	};
 }

@@ -6,7 +6,7 @@
 #define THREAD_Y 1
 #define THREAD_Z 1
 
-#define RADIUS_THRESHOLD 50
+#define RADIUS_THRESHOLD 20
 #define MAX_DEPTH 10
 
 struct BoxPoint
@@ -70,27 +70,42 @@ bool CheckOC(BoxPoint Box)
         if (0.f == fHZBDepth)
             return true;
         
-        float eps = max(0.05f, fBoxDepth * 0.001f);
+        float eps = max(10.f, fBoxDepth * 0.01f);
         if (fBoxDepth < fHZBDepth + Box.fRadius + eps)
             return true;
         return false;
     }
+    // Big >> Corner + Center
     else
     {
         int iMipLevel = clamp(g_iHZBMipLevel, 0, MAX_DEPTH);
         int2 vSize = max(int2(1920, 1080) >> (iMipLevel + 1), int2(1, 1));
+        
+        // Center
+        float2 vTexcoord = WorldToScreen_Center(Box.vCenter);
+        float fBoxDepth = Box.vCenter.z;
+        
+        int2 px = int2(saturate(vTexcoord) * (vSize - 1));
+        float fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+        if (0.f == fHZBDepth)
+            return true;
+        
+        float eps = max(10.f, fBoxDepth * 0.01f);
+        if (fBoxDepth < fHZBDepth + Box.fRadius + eps)
+            return true;
 
+        // Corner
         for (int i = 0; i < 8; ++i)
         {
-            float2 vTexcoord = WorldToScreen_Corner(Box.vCorners[i]);
+            vTexcoord = WorldToScreen_Corner(Box.vCorners[i]);
             float fCornerDepth = Box.vCorners[i].z;
         
-            int2 px = int2(saturate(vTexcoord) * (vSize - 1));
-            float fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+            px = int2(saturate(vTexcoord) * (vSize - 1));
+            fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
             if (0.f == fHZBDepth)
                 return true;
         
-            float eps = max(0.05f, fCornerDepth * 0.001f);
+            eps = max(10.f, fCornerDepth * 0.01f);
             if (fCornerDepth < fHZBDepth + eps)
                 return true;
         }
@@ -109,7 +124,5 @@ void Occlusion_Culling(uint3 DTID : SV_DispatchThreadID)
    BoxPoint box = g_BoxPoints[iIndex];
    bool isVisible = CheckOC(box);
 
-   // bool isVisible = true;
-    
-    OutputTexture[iIndex] = isVisible ? 1 : 0;
+   OutputTexture[iIndex] = isVisible ? 1 : 0;
 }

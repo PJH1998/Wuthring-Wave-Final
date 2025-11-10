@@ -52,9 +52,6 @@ void CCustom_UI::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	if (m_tUIDesc.strUIName == L"Skill_Augusta")
-		int i = 10;
-
     if (m_tUIDesc.isInstance)
         dynamic_cast<CVIBuffer_Rect_Instance_UI*>(m_pVIBufferCom)->Update_Instances(fTimeDelta, m_tUIDesc.vecInstanceDescs);
 
@@ -342,7 +339,6 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
             TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
             return E_FAIL;
     }
-    
     CAnimator_UI::ANIMATOR_UI_DESC tAnimatorUIDesc = { this };
     if (FAILED(CGameObject::Add_Component(iDestLevel, TEXT("Prototype_Component_Animator_UI"),
         TEXT("Com_Animator_UI"), reinterpret_cast<CComponent**>(&m_pAnimator_UICom), &tAnimatorUIDesc)))

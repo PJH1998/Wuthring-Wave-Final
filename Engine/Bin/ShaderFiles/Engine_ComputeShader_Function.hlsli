@@ -1,6 +1,6 @@
 #pragma pack_matrix(row_major)
 
-// Emissive ÃÖ¼ÒÄ¡
+static float PI = 3.1415926535f;
 
 float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
 {
@@ -9,6 +9,16 @@ float2 Compute_Texcoord(int3 DTID, float fWidth, float fHeight)
     vTexcoord.x = (float) DTID.x / fWidth;
     vTexcoord.y = (float) DTID.y / fHeight;
 
+    return vTexcoord;
+}
+
+float2 Compute_Texcoord(float2 vProjXY)
+{
+    float2 vTexcoord = 0.f;
+    
+    vTexcoord.x = vProjXY.x * 0.5f + 0.5f;
+    vTexcoord.y = vProjXY.y * -0.5f + 0.5f;
+        
     return vTexcoord;
 }
 

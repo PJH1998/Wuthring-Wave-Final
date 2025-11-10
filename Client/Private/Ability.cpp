@@ -417,20 +417,20 @@ void CAbility::Add_Hp(_float fHp)
 	m_CharacterInfo.fHp = min(m_CharacterInfo.fMaxHp, m_CharacterInfo.fHp);
 }
 
-void CAbility::Set_Resonance(_float fResonance)
+void CAbility::Set_HarmonyGauge(_float fResonance)
 {
-	m_CharacterInfo.fResonance = fResonance;
+	m_CharacterInfo.fHarmonyGauge = fResonance;
 }
 
-void CAbility::Add_Resonance(_float fResonance)
+void CAbility::Add_HarmonyGauge(_float fResonance)
 {
-	m_CharacterInfo.fResonance += fResonance;
+	m_CharacterInfo.fHarmonyGauge += fResonance;
 
 	// 0보다 아래로 안가도록.
-	m_CharacterInfo.fResonance = max(0.f, m_CharacterInfo.fResonance);
+	m_CharacterInfo.fHarmonyGauge = max(0.f, m_CharacterInfo.fHarmonyGauge);
 
 	// MaxHp보다 안커지도록.
-	m_CharacterInfo.fResonance = min(100.f, m_CharacterInfo.fResonance);
+	m_CharacterInfo.fHarmonyGauge = min(100.f, m_CharacterInfo.fHarmonyGauge);
 }
 
 void CAbility::Bind_Condition(_uint iCondition)
@@ -653,6 +653,9 @@ void CAbility::Debug_FullCost(_bool IsAll)
 		{
 			m_Costs[i] = m_fCostMax;
 		}
+
+		// 풀로 채우기.
+		m_CharacterInfo.fHarmonyGauge = m_CharacterInfo.fMaxHarmonyGauge;
 	}
 }
 
@@ -784,7 +787,7 @@ void CAbility::Read_Stat(const _char* pFilePath)
 	m_CharacterInfo.fAttack = stof(data[1][10]);
 	m_CharacterInfo.fAttackAddMin = stof(data[1][11]);
 	m_CharacterInfo.fAttackAddMax = stof(data[1][12]);
-	m_CharacterInfo.fMaxResonance = stof(data[1][13]);
+	m_CharacterInfo.fMaxHarmonyGauge = stof(data[1][13]);
 }
 
 

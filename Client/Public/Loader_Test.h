@@ -28,6 +28,7 @@ private:
 	HRESULT				Load_Action();
 
 	HRESULT				Load_UI();
+	HRESULT				Load_Font();
 
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);

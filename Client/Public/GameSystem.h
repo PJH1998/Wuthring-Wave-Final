@@ -28,7 +28,7 @@ public:
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
-	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
+	void							Clone_MapObjects(LEVEL eLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -47,7 +47,8 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
-	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0);
+	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
+	void		Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType = TEXT_COLOR_DMGTYPE::NONE, _float fSpawnRange = 10.f);
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
@@ -78,8 +79,8 @@ public:
 #pragma endregion
 
 #pragma region SONORO_MANAGER
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
 

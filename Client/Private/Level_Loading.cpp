@@ -86,9 +86,9 @@ HRESULT CLevel_Loading::Ready_LoadingThread()
 	case LEVEL::TEST:
 		m_pLoader = CLoader_Test::Create(m_pDevice, m_pContext);
 		break;
-	case LEVEL::TEST_UI:
-		m_pLoader = CLoader_Test_UI::Create(m_pDevice, m_pContext);
-		break;
+	//case LEVEL::TEST_UI:
+	//	m_pLoader = CLoader_Test_UI::Create(m_pDevice, m_pContext);
+	//	break;
     }
 
 	ASSERT_CRASH(m_pLoader);

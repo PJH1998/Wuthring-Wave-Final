@@ -20,7 +20,8 @@ private:
         SKILL_E,
         SKILL_R,
         MOVE,
-		HIT,
+		HIT_PENDING, // 맞고 있는지 알려줌
+		HIT, // 실제 전환되는 경우
         JUMP,
         END
     };

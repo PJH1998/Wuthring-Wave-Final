@@ -57,17 +57,20 @@ public:
 #pragma region UI Interface
 	class CAbility* Get_AbilityCom(CHARACTERTYPE eCharacterType);
 	CHARACTERTYPE Get_CurrentChar() const { return static_cast<CHARACTERTYPE>(m_iCurrentCharacterIdx); }
+
+	_bool IsQTEPossible(CHARACTERTYPE eCharacterType);
+	void ExecuteQTE(CHARACTERTYPE eCharacterType);
+
 #pragma endregion
 
 
 	
 
 public:
-	void Switch_Skill(CHARACTERTYPE eCharacter);
+	//void Switch_Skill(CHARACTERTYPE eCharacter);
 	// State에서 호출: Ensemble Skill이 끝났음을 알림
-	void Notify_EnsembleEnd();
-	void Perform_CharacterSwitch(CHARACTERTYPE eNextCharacter);
-	void On_EnsembleEnd(CHARACTERTYPE eCharacter);
+	void Notify_HarmonyEnd();
+	void On_HarmonyEnd(CHARACTERTYPE eCharacter);
 
 public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
@@ -84,7 +87,7 @@ private:
 	LEVEL m_eCurLevel = { LEVEL::END };
 	_int m_iCurrentCharacterIdx = { CHARACTERTYPE::NONE };
 	_int m_iPrevCharacterIdx = { CHARACTERTYPE::NONE };
-	_int m_iEnsembleCharacterIdx = { CHARACTERTYPE::NONE };
+	_int m_iHarmonyCharacterIdx = { CHARACTERTYPE::NONE };
 
 
 private:
@@ -97,8 +100,9 @@ private:
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
-
 	_bool m_IsChanage = { false };
+	_bool m_IsQTE = { false };
+
 	CHARACTERTYPE m_eNextCharacter = {};
 	CALLBACK_CLIENT m_CallBack = {};
 

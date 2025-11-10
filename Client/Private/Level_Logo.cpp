@@ -66,7 +66,7 @@ HRESULT CLevel_Logo::Initialize()
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-	m_pGameInstance->SetUp_ShadowNF();
+	m_pGameInstance->SetUp_CameraNF();
 
     return S_OK;
 }
@@ -94,11 +94,11 @@ void CLevel_Logo::Update(_float fTimeDelta)
 		CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	}
-	if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
-	{
-		CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
-		m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
-	}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_F3) == KEYSTATE::DOWN)
+	//{
+	//	CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
+	//	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
+	//}
 }
 
 void CLevel_Logo::Render()

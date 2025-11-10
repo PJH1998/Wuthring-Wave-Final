@@ -6,6 +6,15 @@ NS_BEGIN(Client)
 class CRover final : public CCharacter
 {
 public:
+	enum PENDING_CONDITION : _uint
+	{
+		HIT = 0,
+		DODGE,
+		PARRY,
+		QTE,
+		CONDITION_END
+	};
+
 	enum VOLUME
 	{
 		VOLUME_KNOCKBACK = 0,
@@ -28,6 +37,7 @@ private:
 		ERoverUniqueType m_eUniqueType = ERoverUniqueType::END;
 		ERoverBurstType m_eBurstType = ERoverBurstType::END;
 		ERoverSpecialType m_eSpecialType = ERoverSpecialType::END;
+		ERoverQTEType m_eQTEType = ERoverQTEType::END;
 
 		// Air
 		ERoverJumpType m_eJumpType = ERoverJumpType::END;
@@ -134,6 +144,8 @@ public:
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
+	virtual void Bind_QTE(_bool IsQTE) override;
+
 #pragma region 2. NOTIFY
 	public:
 		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
@@ -144,6 +156,11 @@ public:
 #pragma region 3. CALL BACK
 	public:
 		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
+#pragma region 4. EVENT
+public:
+	virtual void Process_DelayedActions() override;
 #pragma endregion
 
 #pragma endregion
@@ -161,6 +178,8 @@ private:
 	// Attack Volume
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;
+
+	_bool m_PendingConditions[CONDITION_END] = {};
 
 private:
 	void Bind_Resources();

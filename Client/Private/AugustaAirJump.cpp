@@ -63,7 +63,7 @@ void CAugustaAirJump::Handle_Input()
     EAugustaJumpType eJumpType = static_cast<EAugustaJumpType>(m_iCurrentAnimIdx);
 
     m_eDir = m_pAugusta->Calculate_Direction(); 
-	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
 
 	// Hit면 모든 상태 제거
 	if (m_States[HIT])

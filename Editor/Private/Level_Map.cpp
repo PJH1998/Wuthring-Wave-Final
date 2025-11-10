@@ -12,6 +12,7 @@
 #include"Edit_MapObject_Destruction.h"
 #include"Edit_MapObject_Destruction_Piece.h"
 #include"Edit_TriggerBox.h"
+#include"Mesh_Instance.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -145,6 +146,16 @@ void CLevel_Map::Update(_float fTimeDelta)
         break;
         
     }
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_U) == KEYSTATE::DOWN)
+	{
+		_vector Min = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+		_vector Max = XMVectorSet(FLT_MIN, FLT_MIN, FLT_MIN, FLT_MIN);
+		MAP_BOUND event(&Min, &Max);
+		m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Calc_Size"), event);
+
+		int a = 0;
+	}
 
     Make_MousePos();
     pShaderInterface->Update_Shadow();
@@ -410,12 +421,12 @@ void CLevel_Map::Menu_Save_Load()
                 ofstream File(MapName, ios::binary);
 
                 MAP_SAVE event(File, Test);
-                if (Pair.first.find("Instance") != std::string::npos)
-                    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
+                //if (Pair.first.find("Instance") != std::string::npos)
+                //    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), event);
                 //else if(Pair.first.find("Destruction") != std::string::npos)
                 //    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Destruction"), event);
-				else
-					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
+				//else
+				//	m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 
                 File.close();
             }
@@ -478,7 +489,7 @@ void CLevel_Map::Menu_Save_Load()
 			}
 			File2.flush();
 			File2.close();
-			File3.write(reinterpret_cast<const _char*>(&i), sizeof(_uint));
+			File3 << i << endl;
 			File3.close();
 		}
 		ImGui::EndMenu();
@@ -512,39 +523,86 @@ void CLevel_Map::Menu_Save_Load()
                             MSG_BOX("Load Failed");
                         }
 
-                        if (strFilePath.find("Instance") != std::string::npos)
-                        {
+						if (strFilePath.find("Instance") != std::string::npos)
+						{
 
-                            _matrix PreTransformMatrix = XMMatrixIdentity();
-                            _float fSize = 0.01f;
-                            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+							_matrix PreTransformMatrix = XMMatrixIdentity();
+							_float fSize = 0.01f;
+							PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
-                            CEdit_MapObject_Instance::MAP_LOAD Desc{};
-                            Desc.iNumInstance;
-                            Desc.ModelName;
-                            Desc.m_WolrdPos;
-                            Desc.WorldMatrix;
+							CEdit_MapObject_Instance::MAP_LOAD Desc{};
 
-                            while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
-                            {
-                                memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
-                                File.read(Desc.ModelName, NameLength);
+							while (File.read(reinterpret_cast<char*>(&Desc.iSaveIndex), sizeof(_uint)))
+							{
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+								File.read(Desc.ModelName, NameLength);
 
-                                File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
-                                File.read(reinterpret_cast<char*>(&Desc.m_WolrdPos), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								if(Desc.iShaderPassIndex == 2)
+									File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
-                                File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
-                                _float4x4* pMatrix = new _float4x4[Desc.iNumInstance];
-                                File.read(reinterpret_cast<char*>(pMatrix), sizeof(_float4x4) * Desc.iNumInstance);
-                                Desc.WorldMatrix = pMatrix;
-                                m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance")
-                                    , m_iLevel, TEXT("Layer_Instance"), &Desc);
+								File.read(reinterpret_cast<char*>(&Desc.iNumInstance), sizeof(_uint));
 
-                                Safe_Delete_Array(pMatrix);
+								_float4x4* InstanceMatrix = new _float4x4[Desc.iNumInstance];
 
-                            }
+								File.read(reinterpret_cast<char*>(InstanceMatrix), sizeof(_float4x4) * Desc.iNumInstance);
+								Desc.InstanceWorldMatrix = InstanceMatrix;
 
-                        }
+								File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
+								_float3 vBoundingPos;
+								_float3 vBoundingExtends;
+								File.read(reinterpret_cast<char*>(&vBoundingPos), sizeof(_float3));
+								File.read(reinterpret_cast<char*>(&vBoundingExtends), sizeof(_float3));
+								Desc.IsLoaded = true;
+
+								//이거를 프로토타입으로 만든 이후 바로 클론하기.
+
+								CMesh_Instance::MESH_INST_DESC MeshDesc{};
+								MeshDesc.iNumInstance = Desc.iNumInstance;
+								MeshDesc.pTransformMatrix = InstanceMatrix;
+								//파일시스템으로 해당 모델 찾기.
+								_string ModelPath = Desc.ModelName;
+								ModelPath.pop_back();
+								for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
+									if (entry.is_regular_file()) {
+										if (entry.path().string().find("Foliage") == std::string::npos)
+											continue;
+
+										if (entry.path().string().find(ModelPath) == std::string::npos)
+											continue;
+
+										if (entry.path().extension() != ".dat")
+											continue;
+
+										_char FileDrive[MAX_PATH] = {};
+										_char FileDir[MAX_PATH] = {};
+										_char FileName[MAX_PATH] = {};
+										_char FileExt[MAX_PATH] = {};
+										_splitpath_s(entry.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+
+										_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
+										_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
+										PrototypeName += ModelName;
+
+										_string VersionPath = FileDir;
+										VersionPath += FileName;
+										VersionPath += ".dat";
+										if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, PrototypeName,
+											CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, VersionPath.c_str(), false, &MeshDesc))))
+											CRASH("Prototype Create Failed");
+
+										memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+										strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
+									}
+								}
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance")
+									, m_iLevel, TEXT("Layer_Instance"), &Desc);
+								Safe_Delete_Array(InstanceMatrix);
+							}
+						}
 						else if (strFilePath.find("Destruction") != std::string::npos)
 						{
 							//continue;
@@ -650,11 +708,11 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-    //string FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-    //string FolderPath = "../../Client/Bin/Resource/Map/Test/";
-	string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
-	//string FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
-    //string FolderPath = "../../Client/Bin/Resource/Map/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath= "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
+	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
     vector<_wstring> m_FoliageNames;
@@ -670,7 +728,7 @@ void CLevel_Map::Load_Objects()
     _string LastVersionPath;
 
     //마지막 폴더 못읽음. 프로토타입 안생김.
-	for (const auto& entry : filesystem::recursive_directory_iterator(FolderPath)) {
+	for (const auto& entry : filesystem::recursive_directory_iterator(m_FolderPath)) {
 		if (entry.is_regular_file()) {
 			if (entry.path().string().find("MapData") != std::string::npos)
 				continue;
@@ -730,21 +788,22 @@ void CLevel_Map::Load_Objects()
 
 					m_pGameInstance->Add_Work([&, ProtoName = ProtoName, Path = VersionPath]() {
 						if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, ProtoName,
-							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str()))))
+							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, Path.c_str(),true))))
 							CRASH("Prototype Create Failed");
 						});
 				}
 				if (lstrcmp(LastVersionName.c_str(), key.c_str()) && !LastVersionName.empty())
 				{
-					if (entry.path().string().find("Foliage") != std::string::npos)
+					// ✅ (수정됨) '이전' 경로를 검사합니다.
+					if (LastVersionPath.find("Foliage") != std::string::npos)
 					{
-						m_FoliageNames.push_back(LastVersionName + to_wstring(version));
+						// ✅ (수정됨) '이전' 버전을 사용합니다.
+						m_FoliageNames.push_back(LastVersionName + to_wstring(Lastversion));
 						m_FoliagePaths.push_back(LastVersionPath);
 					}
 					else
 					{
-
-						m_PrototypeNames.push_back(LastVersionName + to_wstring(version));
+						m_PrototypeNames.push_back(LastVersionName + to_wstring(Lastversion));
 						m_ModelPaths.push_back(LastVersionPath);
 					}
 				}
@@ -755,19 +814,21 @@ void CLevel_Map::Load_Objects()
 		}
 	}
 
-    if (!LastVersionName.empty())
-    {
-        if (LastVersionName.find(TEXT("Foliage")) != std::string::npos)
-        {
-            m_FoliageNames.push_back(LastVersionName + to_wstring(0));
-            m_FoliagePaths.push_back(LastVersionPath);
-        }
-        else
-        {
-            m_PrototypeNames.push_back(LastVersionName + to_wstring(0));
-            m_ModelPaths.push_back(LastVersionPath);
-        }
-    }
+	if (!LastVersionName.empty())
+	{
+		// ✅ (수정됨) '이전' 경로를 검사합니다.
+		if (LastVersionPath.find("Foliage") != std::string::npos)
+		{
+			// ✅ (수정됨) '이전' 버전을 사용합니다.
+			m_FoliageNames.push_back(LastVersionName + to_wstring(Lastversion));
+			m_FoliagePaths.push_back(LastVersionPath);
+		}
+		else
+		{
+			m_PrototypeNames.push_back(LastVersionName + to_wstring(Lastversion));
+			m_ModelPaths.push_back(LastVersionPath);
+		}
+	}
 
     m_pGameInstance->Wait_Thread_End();
     
@@ -824,17 +885,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_Work([&]() {
 
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf_Instance"),
-            CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
-        });
-    m_pGameInstance->Add_Work([&]() {
-
-        m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_Component_Model_Wolf"),
-            CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, "../../Client/Bin/Resource/Dummy/Wolf/Wolf.dat"));
-        });
-
-    m_pGameInstance->Add_Work([&]() {
-
         m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Instance"),
             CEdit_MapObject_Instance::Create(m_pDevice, m_pContext));
         });
@@ -865,9 +915,6 @@ HRESULT CLevel_Map::Ready_Static_Component()
 
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
-
-    m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Brush"),
-        CEdit_Brush::Create(m_pDevice, m_pContext));
 
     Load_Objects();
     m_pBrush = CEdit_Brush::Create(m_pDevice, m_pContext);
@@ -957,8 +1004,8 @@ void CLevel_Map::Ready_Event()
 			}
 			else if (m_pPickedInstanceObject = dynamic_cast<CEdit_MapObject_Instance*>(pObject))
 			{
-				m_SaveObjects["Map_Object_Instance"].push_back(m_pPickedInstanceObject);
-				Safe_AddRef(m_pPickedInstanceObject);
+				//m_SaveInstanceObjects[m_pPickedInstanceObject->Get_Num()].push_back(m_pPickedInstanceObject);
+				//Safe_AddRef(m_pPickedInstanceObject);
 			}
 			else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 			{
@@ -1035,8 +1082,9 @@ void CLevel_Map::Load_Foliage()
             //m_szPreViewModelName = StringToWString(FileName);
             _wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
             ProtoName += StringToWString(FileName);
-            m_pBrush->Set_ModelName(ProtoName);
+			m_pBrush->Set_ModelName(StringToWString(FileName));
         }
+
         if (ImGui::IsItemHovered())
         {
             ImGui::Begin("PreView", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize);

@@ -175,7 +175,7 @@ enum class EAugustaBurstType : _uint
 
 enum class EAugustaQTEType : _uint
 {
-	SkillQTE = 0,
+	SKILLQTE = 0,
 	END
 };
 

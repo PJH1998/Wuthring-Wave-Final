@@ -55,10 +55,14 @@ public:
 	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
 	//HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 	//void		Add_FloatingText(const _wstring& strFontTag, const _tchar* pText, FONT_SINGLEDESC tSingleFontDesc);
-	_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
-	_bool		Draw_Font(FONT_SINGLEDESC* pSingleDesc);
-	void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
-	void		Add_FloatingText(FONT_SINGLEDESC pDesc);
+	//_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
+	//_bool		Draw_Font(FONT_SINGLEDESC* pSingleDesc);
+	//void		Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iPassIndex, _float4 vColor);
+	//void		Add_FloatingText(FONT_SINGLEDESC pDesc);
+	FTCUSTOM_FONT*	Find_Font(const _wstring& strFontTag);
+	const FTCUSTOM_FONT_GLYPH* Get_Glyph(const _wstring& strFontTag, _uint code);
+	ID3D11ShaderResourceView* Get_AtlasSRV(const _wstring& strFontTag);
+	const FTCUSTOM_FONT_GLYPH* Get_GlyphAndAdvance(const _wstring& strFontTag, _uint iCodePoint, _uint prevCodePoint, _int& outAdvanceX);
 #pragma endregion
 
 
@@ -79,7 +83,8 @@ public:
 	HRESULT		Add_GameObject_ToLayer(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, void* pArg = nullptr);
 	HRESULT		Add_GameObject_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, class CGameObject* pObject);
 	class CComponent* Get_Component(_uint iLayerLevelID, const _wstring& strLayerTag, _uint iGameObjectIndex, const _wstring& strComponentTag);
-	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio);
+	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop);
+	HRESULT		Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration);
 #pragma endregion
 
 #pragma region POOLING_MANAGER
@@ -132,6 +137,7 @@ public:
 	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void					Set_LUT_Index(_uint iIndex);
+	void				Render_ShadowMap();
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
@@ -256,7 +262,6 @@ public:
 #pragma region CSM
 public:
 	HRESULT				SetUp_ShadowLight(const _wstring& strLightTag);
-	HRESULT				SetUp_ShadowNF();
 	HRESULT				Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName = nullptr);
 	HRESULT				Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName);
 	HRESULT				Bind_CSM_SRV(class CShader* pShader, const _char* pConstantName);
@@ -300,21 +305,35 @@ public:
 	const vector<BoundingBox*>& Get_ShadowMapSectors();
 	HRESULT						Bind_ShadowMap_Resources_StaticObject(CShader* pShader, const _char* pViewName, const _char* pProjName, _uint iSector);
 	HRESULT						Bind_ShadowMap_Resources_Renderer(CShader* pShader);
-	HRESULT						Bind_ShadowMap_Buffer(_uint iBufferIndex);
 	HRESULT						Begin_ShadowMap();
 	HRESULT						End_ShadowMap();
+	void						Begin_DownSampleShadowMap();
+	ID3D11ShaderResourceView*	Get_ShadowMapDownSampleSRV();
+	ID3D11Buffer*				Get_ShadowMapDownSampleBuffer();
 #ifdef _DEBUG
 	void						Render_ShadowMap(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 #endif
 #pragma endregion
 
 #pragma region DECAL_MANAGER
+public:
 	HRESULT						Add_Decal(const _wstring& strDecalTag, const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE::END)]);
 	HRESULT						Add_DecalData(const _wstring& strDecalTag, const DECAL_DATA& Decal);
 	HRESULT						Render_Decal();
 #pragma endregion
 
+#pragma region HZB
+	ID3D11ShaderResourceView*	Get_HZB_Resource();
+#pragma endregion
+
+#pragma region VOLUMETRIC_FOG
 public:
+	void						Add_LightData_ToVF(const VF_LIGHT& LightData);
+	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
+#pragma endregion
+
+public:
+	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
 	HRESULT					Clear_Memory();
 	void					Release_Engine();

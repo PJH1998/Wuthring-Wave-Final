@@ -53,7 +53,7 @@ void CCustomFont::Late_Update(_float fTimeDelta)
 
 void CCustomFont::Render()
 {
-	m_pGameInstance->Draw_Font(&m_tSingleDesc);
+	//m_pGameInstance->Draw_Font(&m_tSingleDesc);
 }
 
 CCustomFont* CCustomFont::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

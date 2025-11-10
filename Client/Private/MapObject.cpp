@@ -35,6 +35,10 @@ HRESULT CMapObject::Initialize_Clone(void* pArg)
 
 	Sync_Sectors();
 
+	//m_pGameInstance->Begin_ShadowMap();
+	//Render_Shadow();
+	//m_pGameInstance->End_ShadowMap();
+
 	if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;
 
@@ -108,8 +112,6 @@ void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 
 void CMapObject::Render_Shadow()
 {
-
-
 	m_pTransformCom->Bind_Matrix(m_pShadowShaderCom, "g_WorldMatrix");
 
 	for (auto& iSector : m_Sectors)
