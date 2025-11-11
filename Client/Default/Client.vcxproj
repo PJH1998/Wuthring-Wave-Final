@@ -297,6 +297,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Loading.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -447,6 +448,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\UI_Loading.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

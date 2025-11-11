@@ -295,6 +295,9 @@ void CUI_Text::Update_Description()
 
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
 
+	if (m_tTextDesc.vecInstanceDescs.size() != m_vecCachedUITransform.size())
+		m_vecCachedUITransform.resize(m_tTextDesc.vecInstanceDescs.size());
+
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

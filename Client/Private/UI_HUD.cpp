@@ -117,7 +117,6 @@ void CUI_HUD::Render()
 HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
 {
     const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
-    //const   _uint       iDestLevel = ENUM_CLASS(LEVEL::TEST_UI);
 
     // parse json
     ifstream file(strFilePath);
