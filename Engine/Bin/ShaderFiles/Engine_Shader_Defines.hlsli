@@ -11,8 +11,12 @@ float g_fEmissiveThreshold = 0.7f;
 float g_fLuminence[3] = { 0.2126f, 0.7152f, 0.0722f };
 
 //PBR
-float g_fGlobalMetallic = 0.f;  // PBR.x
-float g_fGlobalRoughness = 0.25f; // PBR.y
+float g_fGlobalDynamicMetallic = 0.f;  // PBR.x
+float g_fGlobalDynamicRoughness = 0.35; // PBR.y
+
+float g_fGlobalStaticMetallic = 0.4f;
+float g_fGlobalStaticRoughness = 0.3f;
+
 
 float Luminance(float3 vColor)
 {

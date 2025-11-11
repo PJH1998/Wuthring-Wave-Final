@@ -514,6 +514,10 @@ void CGameInstance::Render_ShadowMap()
 {
 	m_pRenderer->Render_ShadowMap();
 }
+void CGameInstance::SettingFog(_bool IsOn)
+{
+	m_pRenderer->SettingFog(IsOn);
+}
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
@@ -547,10 +551,6 @@ void CGameInstance::SetBloomWeight(_int iWeight)
 {
 	m_pRenderer->SetBloomWeight(iWeight);
 }
-void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
-}
 void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pRenderer->SetDof(fDepth, fRange, fScale);
@@ -563,13 +563,13 @@ void CGameInstance::SetPBR(_bool IsStylized)
 {
 	m_pRenderer->SetPBR(IsStylized);
 }
-void CGameInstance::Set_Metallic(_float fMetallic)
+void CGameInstance::Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic)
 {
-	m_pRenderer->Set_Metallic(fMetallic);
+	m_pRenderer->Set_Metallic(fDynamicMetallic, fStaticMetallic);
 }
-void CGameInstance::Set_Roughness(_float fRoughness)
+void CGameInstance::Set_Roughness(_float fRoughness, _float fStaticRoughness)
 {
-	m_pRenderer->Set_Roughness(fRoughness);
+	m_pRenderer->Set_Roughness(fRoughness, fStaticRoughness);
 }
 void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
 {

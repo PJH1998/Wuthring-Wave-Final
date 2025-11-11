@@ -4,7 +4,7 @@
 Texture2DArray<float4> g_LUT_Texture : register(t1);
 
 const int  g_iLutIndex = 0;
-float g_fLutLerpIntensity = 0.f;
+float g_fLutLerpIntensity = 0.25f;
 
 float g_fLightFar;
 
@@ -66,11 +66,13 @@ float g_fLimitVelocity;
 vector  g_vLightDirection = 0.f;
 vector  g_vLightDiffuse = 1.f;
 vector  g_vLightAmbient = 1.f;
-vector  g_vMtrlAmbient = 0.4f;
 vector  g_vLightPosition;
 float   g_fLightRange; 
 vector  g_vLightSpecular = 1.f;
 vector  g_vMtrlSpecular = 1.f;
+
+vector  g_vDynamicMtrlAmbient = 0.5f;
+vector  g_vStaticMtrlAmbient = 0.3f;
 
 int g_DebugCSMIndex;
 
@@ -195,16 +197,19 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     float NdotL = dot(normalize(vLightDir), vNormal.xyz);
     float fRimPower = Compute_RimPower(vNormal, vLook, NdotL);
     
+    float4 vAmbient = 0.f;
+    
     if (vPBRDesc.z)
     {
         float fToonShade = smoothstep(-0.3f, -0.1f, NdotL);
         
         float3 vPBR = Compute_Stylized_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, vPBRDesc.x, vPBRDesc.y);
         Out.vLightAcc.xyz = g_vLightDiffuse.xyz * ((vPBR * fToonShade) + fRimPower);
+        vAmbient = g_vDynamicMtrlAmbient;
     }
     else
     {
-        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         
         vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
         float fViewZ = vViewPos.z;
@@ -229,11 +234,13 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
 //        fFinalShadow = lerp(0.7f, 1.f, fFinalShadow);
         
         Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR * fFinalShadow);
+        
+        vAmbient = g_vStaticMtrlAmbient;
     }
     
     float4 vAmbientColor = lerp(vDiffuse, g_vLightDiffuse, g_vLightAmbient);
    
-    Out.vLightAcc.xyz += (vAmbientColor * g_vMtrlAmbient).xyz;
+    Out.vLightAcc.xyz += (vAmbientColor * vAmbient).xyz;
     
     Out.vLightAcc.a = 1.f;
     
@@ -276,7 +283,7 @@ PS_OUT_LIGHT PS_LIGHT_POINT(PS_IN In)
     }
     else
     {
-        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalMetallic, g_fGlobalRoughness);
+        float3 vPBR = Compute_BRDF_PBR(vNormal.xyz, vLook.xyz, vLightDir, vDiffuse.xyz, g_fGlobalStaticMetallic, g_fGlobalStaticRoughness);
         Out.vLightAcc.xyz = g_vLightDiffuse.xyz * (vPBR + fRimPower);
         Out.vLightAcc.xyz *= fAtt;
     }
@@ -333,6 +340,14 @@ PS_OUT_BACKBUFFER PS_LUT(PS_IN In)
     PS_OUT_BACKBUFFER Out = (PS_OUT_BACKBUFFER) 0;
     
     vector vOriginColor = g_BackBufferTexture.Sample(DefaultSampler, In.vTexcoord);
+    
+    bool IsDynamic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;
+    if(IsDynamic)
+    {
+        Out.vColor = vOriginColor;
+
+        return Out;
+    }
     
     float2 vUV;
     
