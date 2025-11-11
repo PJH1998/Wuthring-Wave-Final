@@ -55,7 +55,7 @@ public:
 		m_iNumObjectLayer = iNumObjectLayer;
 		m_ObjectLayerFilter = new _bool*[m_iNumObjectLayer];
 		for(_uint i = 0; i < m_iNumObjectLayer; ++i)
-			m_ObjectLayerFilter[i] = new _bool[m_iNumObjectLayer];
+			m_ObjectLayerFilter[i] = new _bool[m_iNumObjectLayer]{ false };
 	}
 	virtual ~ObjectLayerPairFilterImpl() {
 		for (_uint i = 0; i < m_iNumObjectLayer; ++i)
@@ -89,7 +89,7 @@ public:
 		m_iNumObjectLayer = iNumObjectLayer;
 		m_ObjectVsBPLayerFilter = new _bool * [m_iNumObjectLayer];
 		for (_uint i = 0; i < m_iNumObjectLayer; ++i)
-			m_ObjectVsBPLayerFilter[i] = new _bool[ENUM_CLASS(BPLAYER::END)];
+			m_ObjectVsBPLayerFilter[i] = new _bool[ENUM_CLASS(BPLAYER::END)]{ false };
 	}
 	virtual ~ObjectVsBroadPhaseLayerFilterImpl() {
 		for (_uint i = 0; i < m_iNumObjectLayer; ++i)

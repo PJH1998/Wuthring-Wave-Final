@@ -43,6 +43,7 @@ public:
 	void								Set_Offset(const _float3 vOffset);
 
 	void								IsActivate(_bool isActive);
+	void								Change_Layer(_uint iLayer);
 
 public:
 	virtual		HRESULT				Initialize_Prototype() override;

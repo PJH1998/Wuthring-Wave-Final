@@ -12,6 +12,11 @@ CShader::CShader(const CShader& Prototype)
     m_InputLayouts { Prototype.m_InputLayouts },
     m_iNumPasses { Prototype.m_iNumPasses }
 {
+	//{
+	//	lock_guard<mutex> lock(m_Mutex);
+	//	m_pEffect = Prototype.m_pEffect;
+	//}
+
     for (auto& pInputLayOut : m_InputLayouts)
         Safe_AddRef(pInputLayOut);
 }
