@@ -224,6 +224,7 @@ namespace Client
 		, AUGUSTA
 		, SHADOW
 		, OUNTLINE
+		, NORMAL_YELLOW
 		, END };
 
 	enum class TEXT_COLOR_DMGTYPE {
