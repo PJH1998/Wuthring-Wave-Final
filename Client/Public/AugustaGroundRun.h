@@ -24,6 +24,8 @@ private:
         SPRINT_F,
 		MOVE,
 
+		LOCKON,
+
         SKILL_E,
         SKILL_Q,
         SKILL_R,
@@ -56,6 +58,7 @@ private:
     // Run State가 관리하는 애니메이션 리스트
     _float3 m_vMoveDirection = {};
     _bool m_States[RUNSTATE::END] = {};
+	_bool m_IsPrevLockOn = {};
     _float m_fSpeed = {};
 
 	_float m_fFallTime = {};

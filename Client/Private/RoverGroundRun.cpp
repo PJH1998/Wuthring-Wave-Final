@@ -306,6 +306,11 @@ void CRoverGroundRun::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
             return;
         }
+		else
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(ERoverRunType::RUN_F);
+			return;
+		}
     }
 
     // 이동 입력 값이 안들어왔다면?

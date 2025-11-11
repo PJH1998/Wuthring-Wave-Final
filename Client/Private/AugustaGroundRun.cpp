@@ -116,6 +116,10 @@ void CAugustaGroundRun::Handle_Input()
 
     // 상태에 따라 속도 다르게.
     m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+
+	m_States[LOCKON] = m_pAugusta->Is_LockOn();
+
+
 }
 
 
@@ -130,7 +134,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
 
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     // 1. 회전 및 이동.
-    if (m_pAugusta->Is_LockOn())
+    if (m_States[LOCKON])
     {
         if (eRunType == EAugustaRunType::SPRINT_F || eRunType == EAugustaRunType::STOP_SPRINT_L)
             m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
@@ -141,6 +145,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
     else 
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 
+	
 }
 
 void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
@@ -329,12 +334,18 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 
             return;
         }
+		
         // 이동 값이 들어왔는데 Stop Run 상태라면?
         if (eRunType == EAugustaRunType::STOP_RUN_L || eRunType == EAugustaRunType::SPRINT_F)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRunType::RUN_F);
             return;
         }
+		else
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRunType::RUN_F);
+			return;
+		}
     }
 
     // 이동 입력 값이 안들어왔다면?
