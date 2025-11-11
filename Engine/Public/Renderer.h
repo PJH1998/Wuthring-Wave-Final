@@ -24,6 +24,8 @@ public:
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
+	
 	void				Render_ShadowMap();
 
 #ifdef _DEBUG
@@ -35,7 +37,6 @@ public:
 	void			Setting_SSAO(_float fRadius, _float fMaxDistance);
 	void			SetBloomWeight(_int iWeight) { m_iBloomWeight = iWeight; }
 	void			SetBloomIntensity(_float fIntensity);
-	void			Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void			SetDof(_float fDepth, _float fRange, _float fScale);
 	void			SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
 	void			SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }

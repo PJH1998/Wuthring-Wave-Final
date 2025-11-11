@@ -508,14 +508,18 @@ ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _u
 {
     return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
+void CGameInstance::Render_ShadowMap()
+{
+	m_pRenderer->Render_ShadowMap();
+}
+void CGameInstance::SettingFog(_bool IsOn)
+{
+	m_pRenderer->SettingFog(IsOn);
+}
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
-}
-void CGameInstance::Render_ShadowMap()
-{
-	m_pRenderer->Render_ShadowMap();
 }
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
@@ -544,10 +548,6 @@ void CGameInstance::SetBloomIntensity(_float fIntensity)
 void CGameInstance::SetBloomWeight(_int iWeight)
 {
 	m_pRenderer->SetBloomWeight(iWeight);
-}
-void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
 }
 void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
 {

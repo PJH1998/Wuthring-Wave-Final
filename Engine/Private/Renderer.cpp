@@ -219,10 +219,6 @@ void CRenderer::SetBloomIntensity(_float fIntensity)
 {
 	m_pSubResource->SetBloomIntensity(fIntensity);
 }
-void CRenderer::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pSubResource->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
-}
 void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pSubResource->SetDof(fDepth, fRange, fScale);
