@@ -578,10 +578,14 @@ void CRenderer::Render_Combined()
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
 		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalRoughness", &m_fDebugRoughness, sizeof(_float))))
-		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalMetallic", &m_fDebugMetallic, sizeof(_float))))
-		CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicRoughness", &m_fDebugRoughness[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicMetallic", &m_fDebugMetallic[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticRoughness", &m_fDebugRoughness[1], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticMetallic", &m_fDebugMetallic[1], sizeof(_float))))
+	//	CRASH("Render Fail");
 #endif
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))

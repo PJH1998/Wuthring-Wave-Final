@@ -162,14 +162,17 @@ PS_OUT PS_AUGUSTA(PS_IN In)
         WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
         vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
         
+        //Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        //Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
+        
         Out.vPBR.x = vNormalDesc.b; // PBR.X = 노말 텍스처 Blue, Z 값
         Out.vPBR.y = vNormalDesc.a; // PBR.y = 노말 텍스처 Alpha 값
     }
     else
     {
         vNormal = In.vNormal;
-        Out.vPBR.x = g_fGlobalMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
-        Out.vPBR.y = g_fGlobalRoughness; // PBR.y = 노말 텍스처 Alpha 값
+        Out.vPBR.x = g_fGlobalDynamicMetallic; // PBR.X = 노말 텍스처 Blue, Z 값
+        Out.vPBR.y = g_fGlobalDynamicRoughness; // PBR.y = 노말 텍스처 Alpha 값
     }
     
     Out.vPBR.z = 1.f; // PBR.z = STATIC = 0.f , DYNAMIC = 1.f

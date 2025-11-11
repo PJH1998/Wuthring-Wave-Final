@@ -221,21 +221,51 @@ void CLevel_GamePlay::Ready_UI()
 #ifdef _DEBUG
 void CLevel_GamePlay::Shader_Gui()
 {
-	ImGui::Begin("Test");
-	
-	
-	if (ImGui::CollapsingHeader("SSAO"))
-	{
-				ImGui::InputFloat("RADIUS", &m_fRadius);
-		
-				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
-		
-		#ifdef _DEBUG
-				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
-		#endif // _DEBUG
-	}
-	ImGui::End();
-
+//	ImGui::Begin("Test");
+//	
+//	
+//	if (ImGui::CollapsingHeader("SSAO"))
+//	{
+//				ImGui::InputFloat("RADIUS", &m_fRadius);
+//		
+//				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+//		
+//		#ifdef _DEBUG
+//				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
+//		#endif // _DEBUG
+//	}
+//
+////	if (ImGui::CollapsingHeader("LUT"))
+////	{
+////		ImGui::InputInt("INDEX", &m_iLUT_Index, 1, 1);
+////		if (m_iLUT_Index < 0)
+////			m_iLUT_Index = 0;
+////		if (m_iLUT_Index >= 5)
+////			m_iLUT_Index = 4;
+////
+////		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+////#ifdef _DEBUG
+////		m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
+////		m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
+////#endif // _DEBUG
+////	}
+//
+//		if (ImGui::CollapsingHeader("PBR"))
+//	{
+//
+//		ImGui::DragFloat("DYNAMIC_ROUGHNESS", &m_fDebugRoughness[0], 0.01f, 0.f, 1.f);
+//		ImGui::DragFloat("STATIC_ROUGHNESS", &m_fDebugRoughness[1], 0.01f, 0.f, 1.f);
+//
+//		ImGui::DragFloat("DYNAMIC_METALLIC", &m_fDebugMetallic[0], 0.01f, 0.f, 1.f);
+//		ImGui::DragFloat("STATIC_METALLIC", &m_fDebugMetallic[1], 0.01f, 0.f, 1.f);
+//#ifdef _DEBUG
+//		m_pGameInstance->Set_Metallic(m_fDebugMetallic[0], m_fDebugMetallic[1]);
+//		m_pGameInstance->Set_Roughness(m_fDebugRoughness[0], m_fDebugRoughness[1]);
+//#endif // _DEBUG		 
+//	}
+//
+//	ImGui::End();
+	/*
 	if (ImGui::CollapsingHeader("CASCADE"))
 	{
 		if (ImGui::CollapsingHeader("Base Bias"))
@@ -270,7 +300,7 @@ void CLevel_GamePlay::Shader_Gui()
 		m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
 		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
 	}
-
+	*/
 }
 #endif
 

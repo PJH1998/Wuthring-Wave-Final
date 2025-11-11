@@ -561,13 +561,13 @@ void CGameInstance::SetPBR(_bool IsStylized)
 {
 	m_pRenderer->SetPBR(IsStylized);
 }
-void CGameInstance::Set_Metallic(_float fMetallic)
+void CGameInstance::Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic)
 {
-	m_pRenderer->Set_Metallic(fMetallic);
+	m_pRenderer->Set_Metallic(fDynamicMetallic, fStaticMetallic);
 }
-void CGameInstance::Set_Roughness(_float fRoughness)
+void CGameInstance::Set_Roughness(_float fRoughness, _float fStaticRoughness)
 {
-	m_pRenderer->Set_Roughness(fRoughness);
+	m_pRenderer->Set_Roughness(fRoughness, fStaticRoughness);
 }
 void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
 {

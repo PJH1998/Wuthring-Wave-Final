@@ -150,8 +150,8 @@ public:
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity);
 	void		SetPBR(_bool IsStylized);
-	void		Set_Metallic(_float fMetallic);
-	void		Set_Roughness(_float fRoughness);
+	void		Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic);
+	void		Set_Roughness(_float fRoughness, _float fStaticRoughness);
 	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 #pragma endregion

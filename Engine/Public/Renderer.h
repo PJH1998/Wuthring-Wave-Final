@@ -40,8 +40,8 @@ public:
 	void			SetDof(_float fDepth, _float fRange, _float fScale);
 	void			SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
 	void			SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
-	void			Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
-	void			Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
+	void			Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic) { m_fDebugMetallic[0] = fDynamicMetallic, m_fDebugMetallic[1] = fStaticMetallic; }
+	void			Set_Roughness(_float fRoughness, _float fStaticRoughness) { m_fDebugRoughness[0] = fRoughness, m_fDebugRoughness[1] = fStaticRoughness; }
 	void			SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
@@ -96,8 +96,8 @@ private:
 	_bool									m_IsSSAO = { true };
 	_bool									m_IsSSAO_Blur = { true };
 	_bool									m_IsStylized = { true };
-	_float									m_fDebugRoughness = 0.2f;
-	_float									m_fDebugMetallic = 0.f;
+	_float									m_fDebugRoughness[2] = {0.f, 0.4f};
+	_float									m_fDebugMetallic[2] = {0.8f, 0.3f};
 
 	_bool									m_IsFog = { true };
 #endif
