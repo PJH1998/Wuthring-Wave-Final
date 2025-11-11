@@ -52,7 +52,8 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
 		if (!entry.is_regular_file())
 			continue;
-		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos)
+		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos
+			 && entry.path().string().find("MonsterSpawnor") == std::string::npos)
 			continue;
 
 		_string strFilePath = entry.path().string();
@@ -89,8 +90,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
 
 				Desc.iLevel = ENUM_CLASS(eLevel);
-				if (MeshDesc.iNumInstance == 0)
-					int a = 0;
+
 				_string ModelOrigin = Desc.ModelName;
 				ModelOrigin.pop_back();
 				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
@@ -128,6 +128,31 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 				}
 				m_MapInstanceData.push_back(Desc);
 				Safe_Delete_Array(MeshDesc.pTransformMatrix);
+			}
+		}
+		else if (entry.path().string().find("MonsterSpawnor") != std::string::npos)
+		{
+			SPAWN_DESC Desc;
+			while (File.read(reinterpret_cast<char*>(&Desc.vMonsterSpawnorPos), sizeof(_float4)))
+			{
+				memset(Desc.szMonsterName1, 0, sizeof(Desc.szMonsterName1));
+				memset(Desc.szMonsterName2, 0, sizeof(Desc.szMonsterName2));
+				memset(Desc.szMonsterName3, 0, sizeof(Desc.szMonsterName3));
+
+				File.read(reinterpret_cast<char*>(&Desc.vMonsterPos1), sizeof(_float4));
+
+				File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+				File.read(Desc.szMonsterName1, NameLength);
+
+				File.read(reinterpret_cast<char*>(&Desc.vMonsterPos2), sizeof(_float4));
+				File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+				File.read(Desc.szMonsterName2, NameLength);
+
+				File.read(reinterpret_cast<char*>(&Desc.vMonsterPos3), sizeof(_float4));
+				File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+				File.read(Desc.szMonsterName3, NameLength);
+				//m_MonsterDesc[pFilePath.c_str()].push_back(Desc);
+				m_MonsterDesc[eLevel].push_back(Desc);
 			}
 		}
 		else if(entry.path().string().find("Prototype") != std::string::npos)
@@ -245,6 +270,9 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 
 void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 {
+	if (pFilePath.find("Spawn") != _string::npos)
+		return;
+	
 	ifstream File(pFilePath, ios::binary);
 
 	if (!File.is_open())
@@ -260,12 +288,10 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 
 	if (pFilePath.find("Instance") != std::string::npos)
 	{
-		//return;
-		//for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
+		for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
 		{
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
-				//, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
-			, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[0]);
+				, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
 		}
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
@@ -297,8 +323,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			//m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
-			//	Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
+			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,
