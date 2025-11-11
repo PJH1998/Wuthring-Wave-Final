@@ -57,6 +57,7 @@ CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLoader_GamePlay::Initialize()
 {
+	m_iNumLoadingThread = 10;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });

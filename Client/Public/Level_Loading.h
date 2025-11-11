@@ -36,6 +36,7 @@ private:
 	class CGameSystem*		m_pGameSystem = { nullptr };
 
 	_float					m_fElapsedTime = 0.f;
+	_bool					m_isLoadFadeOut = { false };
 
 public:
 	static		CLevel_Loading*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eNextLevel);
