@@ -310,8 +310,10 @@ void CAnimator_UI::Update_Animation()
     }
 
     _float fRawLerpRatio = static_cast<_float>((fCurFrame - iFrame_LerpStart) / (iFrame_LerpEnd - iFrame_LerpStart));
+	if ((iFrame_LerpEnd - iFrame_LerpStart) == 0) fRawLerpRatio = 0.f;
     _float fFixedLerpRatio = Fix_LerpRatio(fRawLerpRatio, m_pCurAnimDesc->vecKeyFrames[iFrame_StartIndex].iLerpType); // 이전 키프레임와 현재 키프레임 간의 최종 보간 비율
-
+	if (fFixedLerpRatio < 0) fFixedLerpRatio = 0;
+	if (fFixedLerpRatio > 1) fFixedLerpRatio = 1;
 
     // ==============================
     // * Calculate Results..

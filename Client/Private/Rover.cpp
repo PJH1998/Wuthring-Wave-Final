@@ -64,6 +64,10 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
+
     return S_OK;
 }
 
@@ -164,6 +168,7 @@ void CRover::Late_Update(_float fTimeDelta)
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
 
@@ -389,7 +394,6 @@ void CRover::Bind_QTE(_bool IsQTE)
 	if (m_IsQTE)
 	{
 		// Activate
-		SetActivate(true);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
@@ -397,6 +401,9 @@ void CRover::Bind_QTE(_bool IsQTE)
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
 		vPos += vLook * 1.f;
 		m_pQTEColliderCom->Set_Position(vPos);
+		m_pQTEColliderCom->IsActivate(true);
+
+		SetActivate(true);
 		GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 	}
@@ -601,6 +608,10 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
         , pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
         CRASH("Compute Shader");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
+		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))

@@ -11,9 +11,6 @@ public:
 		EVENT_END
 	};
 
-public:
-	
-
 
 public:
 	typedef struct tagHitDesc{
@@ -60,6 +57,7 @@ public:
 	{
 		class CPlayer* pOwner = { nullptr };
 		pair<LEVEL, _wstring> stateMachineData = {};
+		pair<LEVEL, _wstring> flyComputeShaderData = {};
 		//pair<LEVEL, _wstring> controllerData = {};
 		vector<pair<_wstring, _wstring>> PartPrototypes;
 		_float3 vScale = { 1.f, 1.f, 1.f};
@@ -131,7 +129,7 @@ public:
 	_matrix Get_WorldMatrix();
 
 #ifdef _DEBUG
-	void RayDir(_vector vRayDir, _float3 vEndPos);
+	void Print_LookRay();
 #endif // _DEBUG
 
 #pragma endregion
@@ -196,9 +194,11 @@ public:
 	// Animation
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) {};
 	virtual _bool Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
+		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
+
+	virtual _bool Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition
 		, _float fRootMotionRate = 0.1f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true,
-		const GPU_BLEND_INFO& blendInfo = G_DefaultBlendInfo);
-	void Start_FlyBlending(_float fDuration);
+		const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
 	// Change State
 	void Change_State(_uint iCategory, _uint iSubState, void* pArg = nullptr);
@@ -275,6 +275,7 @@ protected:
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
+	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 
 	class CCollider* m_pQTEColliderCom = { nullptr };
 	
@@ -290,6 +291,7 @@ protected:
 	_float3 m_vAnimColliderOffset = {};
 	
 
+	_float4 m_vQTEPos = {};
 	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	

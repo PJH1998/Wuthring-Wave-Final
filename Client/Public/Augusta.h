@@ -160,6 +160,8 @@ public:
 	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
+	
+
 #pragma endregion
 
 #pragma region 3. CALL BACK
@@ -188,6 +190,16 @@ private:
 	vector<class CAttackVolume*> m_AttackVolumes;
 
 	_bool m_PendingConditions[CONDITION_END] = {};
+
+#pragma region HELPER 함수 => Augusta만 사용
+private:
+	void Process_HitStop(const _wstring& wStrObjectTag);
+	void Process_CameraAction(const _wstring& wStrObjectTag);
+	void Process_VolumeChange(const _wstring& wStrObjectTag);
+	
+#pragma endregion
+
+
 
 
 private:

@@ -134,6 +134,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pTimer_Manager->Update(fTimeDelta); // Timer Manager Update => Time Stop 관련.
+
 	m_pHZB->Update();
 
 	m_pGUIManager->Update();
@@ -508,14 +510,14 @@ ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _u
 {
     return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
+void CGameInstance::Render_ShadowMap()
+{
+	m_pRenderer->Render_ShadowMap();
+}
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
-}
-void CGameInstance::Render_ShadowMap()
-{
-	m_pRenderer->Render_ShadowMap();
 }
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
@@ -622,9 +624,9 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
-void CGameInstance::OnShake(const _float3& vDir)
+void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
-	m_pCamera_Manager->OnShake(vDir);
+	m_pCamera_Manager->OnShake(tData);
 }
 #pragma endregion
 
@@ -647,6 +649,10 @@ _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {
 	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate);
+}
+void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 {

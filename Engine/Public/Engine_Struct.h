@@ -98,6 +98,16 @@ namespace Engine
 		bool				isLerp = { true };
 	}CAMERA_FRAME;
 
+	typedef struct tagCameraShake
+	{
+		_float		fDuration = {};		// Shake 지속시간
+		_float		fFrequency = {};	// 주파수 (초당 흔들림 빈도)
+		_float		fAmplitude = {};	// 흔들림 세기
+		_float3	vTranslation = {};	// Pos 흔들기위한 강도
+		_float3	vRotation = {};		// Rotation 강도
+		_float		fFovKick = {};		// Fovy 변동
+	}CAMERA_SHAKE;
+
 	typedef struct tagMapObject
 	{
 		_float3 vScale;
@@ -217,9 +227,16 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// 
-	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
+		// 1. Default Animation CB info
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibbonAnimIndex; // 4
+	}ANIMATION_CBINFO;
+
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
+	typedef struct tagAnimationFlyCBInfo {
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
@@ -243,7 +260,7 @@ namespace Engine
 		_uint iClipIndexMidDU;      // 4 
 		_uint iClipIndexU;          // 4 
 		_uint iWeightClipDU;       // 4 
-	}ANIMATION_CBINFO;
+	}ANIMATIONFLY_CBINFO;
 
 	typedef struct tagGpuBlendInfo {
 		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.

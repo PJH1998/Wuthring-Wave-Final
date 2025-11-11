@@ -227,12 +227,19 @@ namespace Client
 		, NORMAL_YELLOW
 		, END };
 
-	enum class TEXT_COLOR_DMGTYPE {
+	enum class TEXT_COLOR_TYPE {
 		NONE,	// 기본값. 지정 안했다고 가정, 마젠타 출력
+
+		// 데미지용 색상
 		HEAL,	// 회복
 		DARK,	// 인멸
 		ELEC,	// 전도
 		FUSI,	// 용융
+
+		// 텍스트용 색상
+		TT_TITLE,
+		TT_NORMAL,
+		TT_PROGRESS,
 
 		END
 	};

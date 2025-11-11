@@ -244,6 +244,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\Loading">
+      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\MapObject\Spawner">
       <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
     </Filter>
@@ -255,6 +258,9 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\CoroSaurus">
       <UniqueIdentifier>{b0997a62-f021-4157-a9bb-f4e1cb219fb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Logo">
+      <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -611,6 +617,9 @@
     <ClInclude Include="..\Public\RoverGroundQTE.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Loading.h">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\AoEDoT.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
     </ClInclude>
@@ -619,6 +628,15 @@
     </ClInclude>
     <ClInclude Include="..\Public\PlayerStatus.h">
       <Filter>01. GameSystem\PlayerStatus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoMaleRover.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoFactory.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoFemaleRover.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Corosaurus.h">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
@@ -967,11 +985,23 @@
     <ClCompile Include="..\Private\RoverGroundQTE.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_Loading.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\AoEDoT.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\private\MonsterTable.cpp">
       <Filter>01. GameSystem\MonsterTable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoMaleRover.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\LogoFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoFemaleRover.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
     </ClCompile>
     <ClCompile Include="..\private\Corosaurus.cpp">
       <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
@@ -1039,6 +1069,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl">
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

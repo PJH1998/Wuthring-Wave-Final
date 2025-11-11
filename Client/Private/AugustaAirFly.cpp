@@ -53,17 +53,14 @@ void CAugustaAirFly::OnEnter(void* pArg)
 	{
 		m_pAugusta->Set_Gravity(false);
 		_vector vForward = m_pAugusta->Get_LookVector();
-		m_vForce = vForward * 8.f + XMVectorSet(0.f, 7.f, 0.f, 0.f);  // forward 8m/s, up 7m/s (테스트로 조정) => 초기 가속.
+		m_vForce = vForward * 8.f + XMVectorSet(0.f, 7.f, 0.f, 0.f); 
 	}
 
-	// 9. 부여 값
-	// 9. 물리 값 설정 (조정이 필요합니다)
-	m_fSpeed = 5.f * 2.f;     // '추진 가속도' (조정 필요)
-	m_fAccel = 3.f;     // '상승/하강 가속도' (조정 필요)
-	m_vGravity = { 0.f, -4.9f, 0.f }; // '활공용 중력' (조정 필요)
-	m_fLift = 4.7f;     // '양력' (중력보다 약간 작게 설정)
-	m_fDrag = 0.98f;    // '공기 저항' (속도 감쇄)
- 
+	// 9. 물리 값 설정 
+	m_fSpeed = 20.f;				// '추진 가속도' 
+	m_fAccel = 3.f;					    // '상승/하강 가속도' 
+	m_vGravity = { 0.f, -9.8f, 0.f };   // '활공용 중력'
+	m_fDrag = 0.98f;					// '공기 저항' (속도 감쇄)
 	
 }
 
@@ -151,7 +148,7 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 	{
 		m_GpuBlendInfo.IsBlendEnabled = true;
 
-		const _float fBlendInterpSpeed = 2.0f;
+		const _float fBlendInterpSpeed = 1.0f;
 		_float fInterpStep = fTimeDelta * fBlendInterpSpeed; // 이번 프레임에 보간할 스텝
 
 		// L / R (좌 / 우)
@@ -216,102 +213,12 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 #pragma endregion
 
 	// 애니메이션 실행
-	m_IsAnimationEnd = CCharacterState::Play_Animation(
+	m_IsAnimationEnd = CCharacterState::Play_AnimationFly(
 		m_pAugusta,
 		fTimeDelta,
 		1.f,
 		m_GpuBlendInfo
 	);
-
-#pragma region 이동량 보정
-	// 이동량 보정 1. 캐릭터를 직접 회전.
-	_vector vLook = m_pAugusta->Get_LookVector();
-	_vector vRight = m_pAugusta->Get_RightVector();
-	_vector vTargetDir = vLook; // 기본값: 현재 방향
-
-
-	// 2. 입력에 따라 목표 방향(TargetDir)을 설정
-	if (m_States[INPUT_L])
-		vTargetDir = XMVector3Normalize(vTargetDir - vRight * 0.5f); // 회전 민감도 (0.5f)
-	if (m_States[INPUT_R])
-		vTargetDir = XMVector3Normalize(vTargetDir + vRight * 0.5f);
-
-	// 캐릭터를 목표 방향으로 부드럽게 회전 (Character.h/cpp에 있는 함수 활용)
-	if (!XMVector3Equal(vTargetDir, vLook))
-	{
-		m_pAugusta->Rotate_DirectionLerp(vTargetDir, fTimeDelta, 4.f);
-	}
-
-	// 3. 물리 계산 (가속도 -> 속도 -> 위치)
-
-	// --- 3-1. 기본 가속도 (항상 적용) ---
-	_vector vGravityAccel = XMLoadFloat3(&m_vGravity);
-	//_vector vLiftAccel = XMVectorSet(0.f, m_fLift, 0.f, 0.f);
-
-	// --- 3-2. 입력 기반 가속도 ---
-	_vector vMoveAccel = XMVectorZero();   // W(Shift)/S/A/D에 의한 스트레이핑 가속도
-	_vector vThrustAccel = XMVectorZero(); // W에 의한 전진 추진 가속도
-
-	_float fCurrentSpeed = m_fSpeed; // OnEnter에서 설정한 기본 이동 속도 (10.f)
-	_float fStrafeSpeed = m_fSpeed * 0.75f; // 좌/우/상/하 이동 속도 (기본 속도의 75%)
-
-	// (요구사항 3) ACCEL(LShift) 누르면 3배 가속
-	if (m_States[INPUT_ACCEL])
-	{
-		fCurrentSpeed *= 3.0f;
-		fStrafeSpeed *= 3.0f;
-	}
-
-	// (요구사항 2) W = 기본 전진 (카메라 Look 벡터 방향)
-	if (m_States[INPUT_U])
-	{
-		_vector vCameraLook = m_pAugusta->Get_CameraLookVector(); // Pitch 포함
-		vThrustAccel = vCameraLook * fCurrentSpeed * 2.f;
-	}
-
-	// (요구사항 3) 스트레이핑(Strafe) 이동
-	
-	// W+Shift(상승) / S(하강)
-	if (m_States[INPUT_ACCEL] && m_States[INPUT_U]) // W + SHIFT = Up (요청 사항)
-	{
-		vMoveAccel += XMVectorSet(0.f, 1.f, 0.f, 0.f) * fStrafeSpeed * 3.f;
-	}
-	else if (m_States[INPUT_D]) // S = Down (요청 사항)
-	{
-		vMoveAccel += XMVectorSet(0.f, -1.f, 0.f, 0.f) * fStrafeSpeed;
-	}
-
-	// A(좌) / D(우)
-	if (m_States[INPUT_L]) // A = Left (요청 사항)
-	{
-		vMoveAccel += -m_pAugusta->Get_RightVector_NoPitch() * fStrafeSpeed;
-	}
-	if (m_States[INPUT_R]) // D = Right (요청 사항)
-	{
-		vMoveAccel += m_pAugusta->Get_RightVector_NoPitch() * fStrafeSpeed;
-	}
-
-	// 모든 가속도를 합산
-	//_vector vTotalAccel = vThrustAccel + vMoveAccel + vGravityAccel + vLiftAccel;
-	_vector vTotalAccel = vThrustAccel + vMoveAccel + vGravityAccel;
-
-	// 속도 (Velocity) 계산
-	m_vForce *= m_fDrag; // (요구사항 1) 항력(Drag)으로 매 프레임 감속
-	// 가속도를 속도에 적용
-	m_vForce += vTotalAccel * fTimeDelta;
-
-	
-
-	// 최대/최소 속도 제한
-	_float fVerticalSpeed = XMVectorGetY(m_vForce);
-	if (fVerticalSpeed < -15.f)
-		m_vForce = XMVectorSetY(m_vForce, -15.f);
-	if (fVerticalSpeed > 8.f)
-		m_vForce = XMVectorSetY(m_vForce, 8.f);
-
-	// 5. 최종 이동 적용 (Transform.cpp의 Go_Force는 velocity * fTimeDelta를 적용)
-	m_pAugusta->Add_Force(m_vForce, fTimeDelta);
-#pragma endregion
 
 	// Parts Wing은 항상 실행됨
 	if (m_iPartType != CAugusta::PARTTYPE::TYPE_END)
@@ -323,6 +230,90 @@ void CAugustaAirFly::Update_FlyAnimations(_float fTimeDelta)
 			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
 		);
 	}
+
+	if (eAirFlyType == EAugustaAirFlyType::XA_START)
+		return;
+
+#pragma region 이동량 보정
+	// 이동량 보정 1. 캐릭터를 직접 회전.
+	_vector vLook = m_pAugusta->Get_LookVector();
+	_vector vRight = m_pAugusta->Get_RightVector();
+	_vector vTargetDir = vLook; // 기본값: 현재 방향
+
+
+	// 2. 입력에 따라 목표 방향(TargetDir)을 설정
+	if (m_States[INPUT_L])
+		vTargetDir = XMVector3Normalize(vTargetDir - vRight * 0.5f); 
+	if (m_States[INPUT_R])
+		vTargetDir = XMVector3Normalize(vTargetDir + vRight * 0.5f);
+
+	// 캐릭터를 목표 방향으로 부드럽게 회전
+	if (!XMVector3Equal(vTargetDir, vLook))
+		m_pAugusta->Rotate_DirectionLerp(vTargetDir, fTimeDelta, 3.f);
+
+	// 3. 물리 계산 (가속도 -> 속도 -> 위치)
+
+	// 기본 가속도
+	_vector vGravityAccel = XMLoadFloat3(&m_vGravity);
+	
+	// 입력 기반 가속도
+	_vector vStrafeAccel = XMVectorZero();	// 스트레이핑 가속도
+	_vector vForwardAccel = XMVectorZero();	// 전진 가속도.
+
+	_float fCurrentSpeed = m_fSpeed;		// OnEnter에서 설정한 기본 이동 속도 (10.f)
+	_float fStrafeSpeed = m_fSpeed * 10.f;
+	if (m_States[INPUT_ACCEL]) // ACCEL(LShift) 누르면 3배 가속
+		fStrafeSpeed *= 3.0f;
+
+	_float fMulForward = m_States[INPUT_ACCEL] ? 6.0f : 2.0f;
+	vForwardAccel = vLook * m_fSpeed * fMulForward;
+
+	_float fDURatio = 1.0f - fabs(m_GpuBlendInfo.fBlendParamDU);  
+	vForwardAccel *= fDURatio; // 정면 방향 이동 값이 W S 키에 따라서 줄어들거나 늘어납니다..
+	
+
+	if (m_States[INPUT_ACCEL] && m_States[INPUT_U])
+		vStrafeAccel += XMVectorSet(0.f, 1.f, 0.f, 0.f) * fStrafeSpeed;
+	else if (m_States[INPUT_D])
+	{
+		vStrafeAccel += XMVectorSet(0.f, -1.f, 0.f, 0.f) * fStrafeSpeed;
+		if (m_States[INPUT_ACCEL])
+			vStrafeAccel *= 2.f;
+	}
+
+	if (m_States[INPUT_L])
+		vStrafeAccel += -m_pAugusta->Get_RightVector_NoPitch() * fStrafeSpeed * 0.1f;
+	if (m_States[INPUT_R])
+		vStrafeAccel += m_pAugusta->Get_RightVector_NoPitch() * fStrafeSpeed * 0.1f;
+
+
+	_float fUpMod = max(0.f, m_GpuBlendInfo.fBlendParamDU);		// up: 0~1
+	_float fDownMod = -min(0.f, m_GpuBlendInfo.fBlendParamDU);  // down: 0~1 => 양수로 변경.
+	if (XMVectorGetY(vStrafeAccel) > 0.f)		// up 가속 시
+		vStrafeAccel *= fUpMod;					// DU=0:0, DU=1:full (모션 완결 시 max)
+	else if (XMVectorGetY(vStrafeAccel) < 0.f)  // down 가속 시
+		vStrafeAccel *= fDownMod;				// DU=0:0, DU=-1:full
+
+	// 모든 가속도를 합산
+	_vector vTotalAccel = vStrafeAccel + vForwardAccel + vGravityAccel;
+
+	m_vForce *= m_fDrag; // 속도 (Velocity) 계산
+	m_vForce += vTotalAccel * fTimeDelta; // 가속도를 속도에 적용
+
+	
+
+	// 최대/최소 속도 제한
+	_float fVerticalSpeed = XMVectorGetY(m_vForce);
+	if (fVerticalSpeed < -60.f)
+		m_vForce = XMVectorSetY(m_vForce, -60.f);
+	if (fVerticalSpeed > 60.f)
+		m_vForce = XMVectorSetY(m_vForce, 60.f);
+
+	// 5. 최종 이동 적용 (Transform.cpp의 Go_Force는 velocity * fTimeDelta를 적용)
+	m_pAugusta->Add_Force(m_vForce, fTimeDelta);
+#pragma endregion
+
+	
 }
 
 
@@ -393,7 +384,7 @@ void CAugustaAirFly::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_RL_MID), "XA_Loop_RL_Mid", 1.f, 0.f, 1.f, true);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_LOOP_STAND), "XA_Loop_Stand", 1.f, 0.f, 1.f, true);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_SHAKE_LOOP), "XA_Shake_Loop", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_START), "XA_Start", 1.f, 30.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirFlyType::XA_START), "XA_Start", 1.f, 30.f, 3.f);
 	
 }
 
