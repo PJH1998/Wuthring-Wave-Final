@@ -29,6 +29,7 @@ public:
 
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel);
+	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
 
 #pragma region FACTORY

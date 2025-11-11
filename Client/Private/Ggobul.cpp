@@ -47,6 +47,10 @@ void CGgobul::Priority_Update(_float fTimeDelta)
 void CGgobul::Update(_float fTimeDelta)
 {
 	_bool isAnimFinished{};
+	if (nullptr != m_pRootMatrix)
+	{
+		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(m_pRootMatrix));
+	}
 	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, isAnimFinished, fTimeDelta);
 	if (isAnimFinished)
 	{
@@ -54,6 +58,7 @@ void CGgobul::Update(_float fTimeDelta)
 		m_isActivate = false;
 		if (nullptr != m_pAttackVolumes[m_eType])
 			m_pAttackVolumes[m_eType]->TriggerActivate(false);
+		m_pRootMatrix = nullptr;
 		return;
 	}
 
@@ -120,7 +125,10 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	else if (m_strAnimKey == "SAttack01_1")
 		m_MeshEnables = { true, true, false, true, false, false };
 	else if (m_strAnimKey == "SAttack02_2")
+	{
+		m_pRootMatrix = pDesc->pRootMatrix;
 		m_MeshEnables = { true, false, false, true, false, true };
+	}
 	else
 		m_MeshEnables = { true, false, false, true, false, false };
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);

@@ -5,6 +5,7 @@
 #include "Trigger_Box.h"
 #include "MapObject_Destruction.h"
 #include"MapObject_Instance.h"
+#include "Spawner.h"
 
 #include "Effect_Prefab.h"
 #include "Trail_Mesh.h"
@@ -267,6 +268,25 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 	//	Read_Map_Dat(eLevel, strFilePath);
 	//}
 }
+
+#pragma region SPAWNER
+void CParser::Clone_Spawners(LEVEL eLevel)
+{
+	for (auto& tSpawnerData : m_MonsterDesc[eLevel])
+	{
+		CSpawner::SPAWNERDESC Spawner{};
+		Spawner.vPosition = tSpawnerData.vMonsterSpawnorPos;
+		Spawner.vExtent = _float3(100.f, 20.f, 100.f);
+		Spawner.strMonsterKey = { tSpawnerData.szMonsterName1, tSpawnerData.szMonsterName2 , tSpawnerData.szMonsterName3 };
+		Spawner.vSpawnPositions = { tSpawnerData.vMonsterPos1, tSpawnerData.vMonsterPos2 ,tSpawnerData.vMonsterPos3 };
+		Spawner.fSpawnTime = 5.f;
+
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_Spawner"), ENUM_CLASS(eLevel),
+			TEXT("Layer_Interaction"), &Spawner)))
+			CRASH("Spawner");
+	}
+}
+#pragma endregion
 
 void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 {

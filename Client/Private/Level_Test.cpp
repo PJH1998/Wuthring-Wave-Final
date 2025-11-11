@@ -69,11 +69,11 @@ HRESULT CLevel_Test::Initialize()
 
     Ready_Layer_Player();
 	//Ready_Dummy();
-	//Ready_MonsterTest();
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
+	Ready_MonsterTest();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
 	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_Spawner();
 
     Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
@@ -391,10 +391,10 @@ void CLevel_Test::Ready_Spawner()
 	_string test[3] = {"ElectroPredator","HavocWarrior", "HavocWarrior"};
 	//const MONSTER_INFO* pMobInfo = m_pGameSystem->Get_MonsterInfo("HavocWarrior");
 	CSpawner::SPAWNERDESC Spawner{};
-	Spawner.vPosition = _float3(0.f, -6.f, -20.f);
+	Spawner.vPosition = _float4(0.f, -6.f, -20.f, 1.f);
 	Spawner.vExtent = _float3(20.f, 20.f, 20.f);
 	//Spawner.vSpawnPosition = _float3(1.f, 0.f, 1.f);
-	Spawner.vSpawnPositions = { _float3(0.f, -6.f, -20.f), _float3(1.f, -6.f, -21.f), _float3(-1.f, -6.f, -21.f) };
+	Spawner.vSpawnPositions = { _float4(0.f, -6.f, -20.f, 1.f), _float4(1.f, -6.f, -21.f, 1.f), _float4(-1.f, -6.f, -21.f, 1.f) };
 	//Spawner.vSpawnRotateDegree = _float3(0.f, 60.f, 0.f);
 	Spawner.fSpawnTime = 10.f;
 	for (size_t i = 0; i < 3; i++)

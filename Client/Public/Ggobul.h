@@ -31,6 +31,7 @@ public:
 		GGOBULTYPE eType;
 		_float fChangeTrackPos;
 		_string strPatternKey;
+		const _float4x4* pRootMatrix;
 
 	}GGOBUL_RESET;
 
@@ -58,6 +59,7 @@ private:
 
 	GGOBULTYPE				m_eType{ GGOBULTYPE::END};
 	const _float4x4*		m_pAttackTransform = { nullptr };
+	const _float4x4*		m_pRootMatrix = { nullptr };
 	_float4x4				m_BoneCombindMatrix{};
 	vector<_bool>			m_MeshEnables;
 	vector<_uint>			m_ShaderIndices;

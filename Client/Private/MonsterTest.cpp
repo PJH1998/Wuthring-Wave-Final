@@ -94,8 +94,9 @@ void CMonsterTest::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
-		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
-		m_isDist_Interp_Enable = false;
+		_float temp = clamp(m_fDistance, 0.f,1.f);
+		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
+		//m_isDist_Interp_Enable = false;
 	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -216,6 +217,10 @@ void CMonsterTest::Collider_Active(const _wstring& wStrColliderTag, _bool Isacti
 	{
 		m_isTurnLerp = Isactive;
 	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = Isactive;
+	}
 }
 
 void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
@@ -248,6 +253,13 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 			Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
 			vLook = XMLoadFloat3(&m_vTargetDir);
 			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		}
+		else if (wstrAnimTag == TEXT("SAttack02_2"))
+		{
+			Desc.eType = CGgobul::GGOBULTYPE::HEAD;
+			vLook = m_pTransformCom->Get_State(STATE::LOOK);
+			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
+			Desc.pRootMatrix = m_pTransformCom->Get_WorldMatrixPtr();
 		}
 		else
 		{
@@ -298,10 +310,6 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 	else if (wstrTypeTag == TEXT("LookRev"))
 	{
 		m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
-	}
-	else if (wstrTypeTag == TEXT("Distance"))
-	{
-		m_isDist_Interp_Enable = true;
 	}
 }
 
@@ -649,7 +657,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK1)
+	if (iIndex != ATK_PATTERN::ATTACK2)
 		return false;
 	//else
 	//	return false;
