@@ -125,9 +125,19 @@ void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 
 #pragma endregion
 
-void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType, _float fSpawnRange)
+void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType, _float fSpawnRange)
 {
-	m_pUI_FontPreset->Render_Damage(vTargetPos, iDamage, eDmgElemType, fSpawnRange);
+	m_pUI_FontPreset->Render_Damage(vTargetPos, to_wstring(iDamage), eColorType, fSpawnRange);
+}
+
+void CGameSystem::Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fSpawnRange)
+{
+	m_pUI_FontPreset->Render_Damage(vTargetPos, strText, eColorType, fSpawnRange);
+}
+
+CUI_Text* CGameSystem::Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	return m_pUI_FontPreset->Create_FontToScreen(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
