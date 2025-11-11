@@ -60,6 +60,10 @@ void CLevel_Loading::Update(_float fTimeDelta)
 	{
 		cout << "Finish" << endl;
 		m_isFinished =  true;
+
+		//// ui test
+		//CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"));
+		//static_cast<CAnimator_UI*>(pLoadRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
 	}
 
     if (	true == m_isFinished)
@@ -273,6 +277,16 @@ void CLevel_Loading::Update_LoadingScreen(_float fTimeDelta)
 
 	loadingTextUIDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * loadingTextUIDesc.fScale;
 	pLoadingTextUI->Set_TextUIDesc(loadingTextUIDesc);
+
+
+
+	static _bool isLoadComplete = false;
+	if (!isLoadComplete && m_fElapsedTime >= 1.0f)
+	{
+		isLoadComplete = true;
+		CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"))->Find_ChildObject(L"SubRoot_Loading");
+		static_cast<CAnimator_UI*>(pLoadRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	}
 }
 
 CCustom_UI::CUSTOM_UITREE_DESC CLevel_Loading::Load_UITree(_string strFilePath)

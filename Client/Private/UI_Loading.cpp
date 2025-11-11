@@ -31,6 +31,12 @@ HRESULT CUI_Loading::Initialize_Clone(void* pArg)
 	Load_ChildObjects(strFilePath);
 
 
+	vector<_wstring> vecAnimFilePaths = {
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/LoadingTestFadeOut.json",
+	};
+	Load_Animations(vecAnimFilePaths);
+
+
 	// 랜덤하게 로딩 이미지 적용
 	_uint iNumBG = Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames.size();
 	m_iRandomBGIndex = static_cast<_uint>(m_pGameInstance->Rand(0.f, iNumBG - 0.001f));
