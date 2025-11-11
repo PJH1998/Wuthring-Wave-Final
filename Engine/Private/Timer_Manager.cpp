@@ -30,6 +30,8 @@ void CTimer_Manager::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRa
 	CTimer* pTimer = Find_Timer(strTimerTag);
 	if (nullptr == pTimer)
 		return;
+
+	pTimer->Change_TimeRate(fTimeRate, fDuration);
 }
 
 void CTimer_Manager::Update(_float fTimeDelta)

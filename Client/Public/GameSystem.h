@@ -28,7 +28,7 @@ public:
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
-	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
+	void							Clone_MapObjects(LEVEL eLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -82,15 +82,18 @@ public:
 #pragma endregion
 
 #pragma region SONORO_MANAGER
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
 
 
 #pragma endregion
 
-
+#pragma region MONSTER_TABLE
+	HRESULT LoadMonsterTable(const _char* pFilePath);
+	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+#pragma endregion
 
 private:
 	class	CParser*			m_pParser						= { nullptr };
@@ -104,6 +107,8 @@ private:
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
 	
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+
+	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

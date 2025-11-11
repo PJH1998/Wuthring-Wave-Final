@@ -4,12 +4,14 @@
 
 #include "Trigger_Box.h"
 #include "MapObject_Destruction.h"
+#include"MapObject_Instance.h"
 
 #include "Effect_Prefab.h"
 #include "Trail_Mesh.h"
 #include "Particle.h"
 
 #include "Effect_Rect.h"
+#include<unordered_set>
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
@@ -50,7 +52,7 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 	for (const auto& entry : filesystem::directory_iterator(pFilePath)) {
 		if (!entry.is_regular_file())
 			continue;
-		if (entry.path().string().find("Prototype") == std::string::npos)
+		if (entry.path().string().find("Prototype") == std::string::npos && entry.path().string().find("Instance") == std::string::npos)
 			continue;
 
 		_string strFilePath = entry.path().string();
@@ -59,70 +61,142 @@ void CParser::Read_Map_Prototype(const _string pFilePath, LEVEL eLevel)
 		_uint NameLength = {};
 
 		_char Name[MAX_PATH] = {};
-		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+
+		if (entry.path().string().find("Instance") != std::string::npos)
 		{
-			memset(Name, 0, sizeof(Name));
-			File.read(reinterpret_cast<_char*>(&Name), NameLength);
-			//여기서 프로토타입 생성.
-			_uint ProtoMax = Name[strlen(Name) - 1] - '0' + 1;
-			_string ModelName = Name;
-			ModelName.pop_back();
+			CMapObject_Instance::MAP_LOAD Desc{};
+			unordered_set<_wstring> m_Names;
+			while (File.read(reinterpret_cast<char*>(&Desc.iSaveIndex), sizeof(_uint)))
+			{
+				CMesh_Instance::MESH_INST_DESC MeshDesc{};
 
-			for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
-				if (entry2.path().string().find("MapData") != std::string::npos)
-					continue;
+				File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+				memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+				File.read(Desc.ModelName, NameLength);
 
-				if (entry2.path().string().find("Test") != std::string::npos)
-					continue;
+				File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+				if (Desc.iShaderPassIndex == 2)
+					File.read(reinterpret_cast<char*>(&Desc.vDiffuseColor), sizeof(_float4));
 
-				if (entry2.path().string().find(ModelName) == std::string::npos)
-					continue;
+				File.read(reinterpret_cast<char*>(&MeshDesc.iNumInstance), sizeof(_uint));
+				MeshDesc.pTransformMatrix = new _float4x4[MeshDesc.iNumInstance];
 
-				if (entry2.path().extension() != ".dat")
-					continue;
+				File.read(reinterpret_cast<char*>(MeshDesc.pTransformMatrix), sizeof(_float4x4) * MeshDesc.iNumInstance);
 
-				if (entry2.path().string().find("Anim") != std::string::npos)
-					continue;
+				File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
 
-				_string Path = entry2.path().string();
-				_string Prototype = entry2.path().stem().string();
-				//파서 수정중
-				if (entry2.path().string().find("_Bone") != std::string::npos)
-				{
-					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, ModelPath.c_str()))))
-							CRASH("Prototype Create Failed");
-						});
+				File.read(reinterpret_cast<char*>(&Desc.vBoundingPos), sizeof(_float3));
+				File.read(reinterpret_cast<char*>(&Desc.vBoundingExtends), sizeof(_float3));
+
+				Desc.iLevel = ENUM_CLASS(eLevel);
+				if (MeshDesc.iNumInstance == 0)
+					int a = 0;
+				_string ModelOrigin = Desc.ModelName;
+				ModelOrigin.pop_back();
+				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
+					if (entry2.path().string().find("Foliage") == std::string::npos)
+						continue;
+
+					if (entry2.path().string().find("Test") != std::string::npos)
+						continue;
+
+					//지금 LOD단계 다 만드는 게 아니라 하나만 만드는 거 같음.
+					if (entry2.path().string().find(ModelOrigin) == std::string::npos)
+						continue;
+					if (entry2.path().extension() != ".dat")
+						continue;
+
+					_char FileDrive[MAX_PATH] = {};
+					_char FileDir[MAX_PATH] = {};
+					_char FileName[MAX_PATH] = {};
+					_char FileExt[MAX_PATH] = {};
+					_splitpath_s(entry2.path().string().c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+					//LOD단계별로 하고있어서 0, 1, 2  해야하는데 20,21,22, 이런 식으로 됨.
+					_wstring PrototypeName = L"Prototype_Component_Model_Instance_";
+					_wstring ModelName = StringToWString(FileName) + to_wstring(Desc.iSaveIndex);
+
+					PrototypeName += ModelName;
+					strcpy_s(Desc.ModelName, WStringToString(ModelName).c_str());
+					_string VersionPath = FileDir;
+					VersionPath += FileName;
+					VersionPath += ".dat";
+
+					if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName,
+						CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, VersionPath.c_str(), false, &MeshDesc))))
+						CRASH("Prototype Create Failed");
+
 				}
-				else if (entry2.path().string().find("Instance") != std::string::npos)
-				{
-					m_pGameInstance->Add_Work([=, Model = InstancePrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), Model,
-							CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, ModelPath.c_str()))))
-							CRASH("Prototype Create Failed");
-						});
+				m_MapInstanceData.push_back(Desc);
+				Safe_Delete_Array(MeshDesc.pTransformMatrix);
+			}
+		}
+		else if(entry.path().string().find("Prototype") != std::string::npos)
+		{
+			while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+			{
+				memset(Name, 0, sizeof(Name));
+				File.read(reinterpret_cast<_char*>(&Name), NameLength);
+				//여기서 프로토타입 생성.
+				_uint ProtoMax = Name[strlen(Name) - 1] - '0' + 1;
+				_string ModelName = Name;
+				ModelName.pop_back();
+
+				for (const auto& entry2 : filesystem::recursive_directory_iterator(ProjectPath)) {
+					if (entry2.path().string().find("MapData") != std::string::npos)
+						continue;
+
+					if (entry2.path().string().find("Test") != std::string::npos)
+						continue;
+
+					if (entry2.path().string().find(ModelName) == std::string::npos)
+						continue;
+
+					if (entry2.path().extension() != ".dat")
+						continue;
+
+					if (entry2.path().string().find("Anim") != std::string::npos)
+						continue;
+
+					_string Path = entry2.path().string();
+					_string Prototype = entry2.path().stem().string();
+					//파서 수정중
+					if (entry2.path().string().find("_Bone") != std::string::npos)
+					{
+						m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
+								CModel::Create(m_pDevice, m_pContext, MODELTYPE::ECO, PreTransformMatrix, ModelPath.c_str()))))
+								CRASH("Prototype Create Failed");
+							});
+					}
+					else if (entry2.path().string().find("Instance") != std::string::npos)
+					{
+						m_pGameInstance->Add_Work([=, Model = InstancePrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), Model,
+								CModel_Instance::Create(m_pDevice, m_pContext, PreTransformMatrix, ModelPath.c_str()))))
+								CRASH("Prototype Create Failed");
+							});
+					}
+					else
+						//if (entry2.path().string().find("Instance") == std::string::npos)
+					{
+						m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
+							if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
+								CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
+								CRASH("Prototype Create Failed");
+							});
+						break;
+					}
+					//프로토타입 생성
 				}
-				else
-					//if (entry2.path().string().find("Instance") == std::string::npos)
-				{
-					m_pGameInstance->Add_Work([=, Model = PrototypeName + StringToWString(Prototype), ModelPath = Path]() {
-						if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), PrototypeName + StringToWString(Prototype),
-							CModel::Create(m_pDevice, m_pContext, MODELTYPE::MAP, PreTransformMatrix, ModelPath.c_str()))))
-							CRASH("Prototype Create Failed");
-						});
-					break;
-				}
-				//프로토타입 생성
 			}
 		}
 		File.close();
 	}
 }
 
-void CParser::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+void CParser::Clone_MapObjects(LEVEL eLevel)
 {
-	if (!m_LoadingMap[eLevel][iIndex])
+	if (m_LoadingMap[eLevel].empty())
 		MSG_BOX("Map Clone Failed");
 
 	_char FileDrive[MAX_PATH] = {};
@@ -130,23 +204,43 @@ void CParser::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
 	_char FileName[MAX_PATH] = {};
 	_char FileExt[MAX_PATH] = {};
 
-	_splitpath_s(m_LoadingMap[eLevel][iIndex], FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+	for (auto& FilePath : m_LoadingMap[eLevel])
+	{
+		_splitpath_s(FilePath, FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
 
-	for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
-		if (!entry.is_regular_file())
-			continue;
+		for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
+			if (!entry.is_regular_file())
+				continue;
 
-		if (entry.path().extension() != ".dat")
-			continue;
+			if (entry.path().extension() != ".dat")
+				continue;
 
-		if (entry.path().string().find("Prototype") != std::string::npos)
-			continue;
+			if (entry.path().string().find("Prototype") != std::string::npos)
+				continue;
 
 
-		_string strFilePath = entry.path().string();
+			_string strFilePath = entry.path().string();
 
-		Read_Map_Dat(eLevel, strFilePath);
+			Read_Map_Dat(eLevel, strFilePath);
+		}
 	}
+	//_splitpath_s(m_LoadingMap[eLevel][iIndex], FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
+
+	//for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
+	//	if (!entry.is_regular_file())
+	//		continue;
+
+	//	if (entry.path().extension() != ".dat")
+	//		continue;
+
+	//	if (entry.path().string().find("Prototype") != std::string::npos)
+	//		continue;
+
+
+	//	_string strFilePath = entry.path().string();
+
+	//	Read_Map_Dat(eLevel, strFilePath);
+	//}
 }
 
 void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
@@ -158,15 +252,21 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 		MSG_BOX("Load Failed");
 	}
 
-		_uint NameLength;
+	_uint NameLength;
 
-		_matrix PreTransformMatrix = XMMatrixIdentity();
-		_float fSize = 0.01f;
-		PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+	_matrix PreTransformMatrix = XMMatrixIdentity();
+	_float fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
 
 	if (pFilePath.find("Instance") != std::string::npos)
 	{
-		return;
+		//return;
+		//for (_uint i = 0; i < m_MapInstanceData.size(); ++i)
+		{
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Instance")
+				//, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[i]);
+			, ENUM_CLASS(eLevel), TEXT("Layer_Instance"), &m_MapInstanceData[0]);
+		}
 	}
 	else if (pFilePath.find("Destruction") != std::string::npos)
 	{

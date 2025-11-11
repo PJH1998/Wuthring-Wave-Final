@@ -15,6 +15,7 @@ public:
 	typedef struct tagCorrosaurusDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
+		_float fAxisY;
 		const _char* pAnimationTag;
 		_float		fHP;
 		_float fAttackDmg;
@@ -41,18 +42,23 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
 
 public:
-	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive);
-	virtual void Effect_Active(const _wstring& wStrEffectTag);
+	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive) override;
+	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
+	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
+	CAttackVolume* m_pParryVolume = {nullptr};
 
+#pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
+	_uint					m_iCurrentAtkIndex{};
 	_bool					m_isAggro{};
 	_bool					m_isDetecting{};
 	_bool					m_isTrigger{};
+	_bool					m_isAttack{};
 	_float3					m_vTargetPosition{};
 	_float3					m_vTargetDir{};
 	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
@@ -62,10 +68,19 @@ private:
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
 	_float3					m_vBeHit_Normal{};
+	_bool					m_isAnimationFinished{};
+#pragma endregion
 
 	_float					m_fHP{};
-	_bool					m_isAnimationFinished{};
+	_float					m_fStamina{};
+	_float					m_fMaxStamina{};
+	_float					m_fAttackDmg{};
+	_float					m_fParalysisAcc{};
+	_bool					m_beHit{};
 	_bool					m_isBlocked{};
+	_bool					m_isKnockDown{};
+	_bool					m_isDist_Interp_Enable{};
+	_bool					m_isTurnLerp{};
 
 	CALLBACK_CLIENT			m_tCallDesc{};
 
@@ -81,13 +96,15 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 #pragma region BT_CONDITIONS
 	_bool						isAnimationRunning() const { return !m_isAnimationFinished; }
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
-	_bool						AttackArrange() const;
+	_bool						AttackArrange();
 	_bool						Attack(_uint iIndex, _float fInterval);
+	_bool						CheckHit();
 	_bool						isChase();
 	_bool						isPatrol();
 	_bool						Back();

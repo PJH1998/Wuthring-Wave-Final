@@ -13,6 +13,8 @@
 
 #include"Sonoro_Manager.h"
 
+#include "MonsterTable.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -43,6 +45,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pSonoro_Manager = CSonoro_Manager::Create();
 	ASSERT_CRASH(m_pSonoro_Manager);
 
+	m_pMonsterTable = CMonsterTable::Create();
+	ASSERT_CRASH(m_pMonsterTable);
+
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
 	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
@@ -63,9 +68,9 @@ void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
 }
 
-void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 {
-	m_pParser->Clone_MapObjects(eLevel, iIndex);
+	m_pParser->Clone_MapObjects(eLevel);
 }
 #pragma endregion
 
@@ -192,14 +197,14 @@ void CGameSystem::Clear_TriggerCallBack()
 
 
 #pragma region SONORO_MANAGER
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
 void CGameSystem::Update(_float fTimeDelta)
@@ -210,6 +215,17 @@ void CGameSystem::Update(_float fTimeDelta)
 void CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
 	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+}
+#pragma endregion
+
+#pragma region MONSTER_TABLE
+HRESULT CGameSystem::LoadMonsterTable(const _char* pFilePath)
+{
+	return m_pMonsterTable->LoadDataTable(pFilePath);
+}
+MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
+{
+	return m_pMonsterTable->Get_MonsterInfo(pMonsterKey);
 }
 #pragma endregion
 
@@ -226,5 +242,5 @@ void CGameSystem::Free()
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
-
+	Safe_Release(m_pMonsterTable);
 }

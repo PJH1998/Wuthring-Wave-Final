@@ -247,6 +247,21 @@
     <Filter Include="03. GameObject\UI\Child_Containers\Loading">
       <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\MapObject\Spawner">
+      <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\ElectroPredator\Effect">
+      <UniqueIdentifier>{89d75c0d-bb28-4915-b14d-ec5d4d40cfd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. GameSystem\MonsterTable">
+      <UniqueIdentifier>{65685f77-3762-4b91-8120-e17fa1c7be6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Monster\CoroSaurus">
+      <UniqueIdentifier>{b0997a62-f021-4157-a9bb-f4e1cb219fb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Logo">
+      <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -550,11 +565,6 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\public\Corosaurus.h" />
-    <ClInclude Include="..\Public\MapObject_Destruction.h" />
-    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
-    <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
-    <ClInclude Include="..\Public\MapObject_Sonoro.h" />
-    <ClInclude Include="..\Public\Factory.h" />
     <ClInclude Include="..\Public\PlayerStatus.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <Filter>03. GameObject\UI\Text</Filter>
@@ -567,6 +577,9 @@
     </ClInclude>
     <ClInclude Include="..\public\Projectile.h">
       <Filter>03. GameObject\Projectile</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Spawner.h">
+      <Filter>03. GameObject\MapObject\Spawner</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\RoverGroundAttack.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
@@ -606,6 +619,45 @@
     </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AoEDoT.h">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MonsterTable.h">
+      <Filter>01. GameSystem\MonsterTable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\PlayerStatus.h">
+      <Filter>01. GameSystem\PlayerStatus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoMaleRover.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoFactory.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\LogoFemaleRover.h">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Corosaurus.h">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Factory.h">
+      <Filter>94. Factory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Destruction_Debris.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Instance.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_NonSonoro.h">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Sonoro.h">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -882,12 +934,6 @@
     <ClCompile Include="..\private\Custom_UI.cpp">
       <Filter>03. GameObject\UI\_Parents</Filter>
     </ClCompile>
-    <ClCompile Include="..\private\Corosaurus.cpp" />
-    <ClCompile Include="..\Private\Factory.cpp" />
-    <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
-    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
-    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
-    <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <Filter>03. GameObject\UI\Text</Filter>
     </ClCompile>
@@ -899,6 +945,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Projectile.cpp">
       <Filter>03. GameObject\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Spawner.cpp">
+      <Filter>03. GameObject\MapObject\Spawner</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundAttack.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
@@ -938,6 +987,42 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AoEDoT.cpp">
+      <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MonsterTable.cpp">
+      <Filter>01. GameSystem\MonsterTable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoMaleRover.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\LogoFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\LogoFemaleRover.cpp">
+      <Filter>03. GameObject\Actor\Player\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Corosaurus.cpp">
+      <Filter>03. GameObject\Actor\Monster\CoroSaurus</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Factory.cpp">
+      <Filter>94. Factory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Instance.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_NonSonoro.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
+      <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -984,6 +1069,9 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <Filter>03. GameObject\UI\_Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl">
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
