@@ -55,6 +55,7 @@ public:
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	const _float4x4*		m_pToeMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 	CAttackVolume*			m_pParryVolume = {nullptr,};

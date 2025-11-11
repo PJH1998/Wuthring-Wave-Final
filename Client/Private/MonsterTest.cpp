@@ -49,6 +49,9 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	/////////////////////
 	_float temp{};
 	m_pModelCom->Play_Animation_CPU(pDesc->pAnimationTag, 0.f, &temp);
+
+	m_pToeMatrix = m_pModelCom->Get_BoneMatrixPtr("Bip001RToe0");
+
 	m_fHP = pDesc->fHP;
 	m_fAttackDmg = pDesc->fAttackDmg;
 	m_fMaxStamina = pDesc->fMaxStamina;
@@ -75,7 +78,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 
 	Reset_Condition(fTimeDelta);
 	// 1. 행동트리로 상태 갱신
-	//m_pBehaviorTreeCom->tick(this);
+	m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
 
@@ -270,6 +273,19 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		WorldMatrix.r[ENUM_CLASS(STATE::LOOK)] = vLook;
 		WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Scythe"), WorldMatrix, &Desc);
+	}
+	else if (wstrTypeTag == TEXT("Shoot"))
+	{
+		_vector vScale{}, vQuat{}, vTrans{};
+		_matrix SocketMatrix = XMLoadFloat4x4(m_pToeMatrix);
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, SocketMatrix);
+		_float4 vSocketPos{};
+		XMStoreFloat4(&vSocketPos, vTrans);
+		_matrix WorldMatrix = XMMatrixTranslation(vSocketPos.x, vSocketPos.y, vSocketPos.z) * m_pTransformCom->Get_WorldMatrix();
+		CProjectile::PROJECTILERESET ProiDesc{};
+		ProiDesc.vTargetPos = m_vTargetPosition;
+		//ProiDesc.vTargetPos.y += 0.5f; // 대상 높이 offset
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_ShinWang"), WorldMatrix, &ProiDesc);
 	}
 	else if (wstrTypeTag == TEXT("Look"))
 	{
@@ -628,7 +644,8 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK2)
+	if (iIndex != ATK_PATTERN::ATTACK1
+		)
 		return false;
 	//else
 	//	return false;
