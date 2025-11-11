@@ -146,8 +146,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
     
     Out.vDiffuse.w = 1.f;
     
-    Out.vPBR.y = g_fGlobalRoughness;
-    Out.vPBR.x = g_fGlobalMetallic;
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
     
     if (g_IsDynamicObject)
     {
@@ -287,8 +287,8 @@ PS_OUT_LIGHT PS_MAIN_COLOR(PS_IN In)
     Out.vDiffuse.xyz *= g_vDiffuseColor.xyz;
     Out.vDiffuse.w = 1.f;
     
-    Out.vPBR.y = g_fGlobalRoughness;
-    Out.vPBR.x = g_fGlobalMetallic;
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
     
     if (g_IsDynamicObject)
     {

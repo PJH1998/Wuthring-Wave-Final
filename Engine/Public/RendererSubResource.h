@@ -46,7 +46,6 @@ private:
 #ifdef _DEBUG
 public:
 	void Setting_SSAO(_float fRadius, _float fMaxDistance) { m_fRadius = fRadius, m_fMaxDistance = fMaxDistance; }
-	void Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor) { m_vFogDepthDistance = vDepthDistance, m_vFogHeightDistance = vHeightDistance, m_vFogColor = vColor; }
 	void SetBloomIntensity(_float fIntensity) { m_fIntensity = fIntensity; }
 	void SetDof(_float fDepth, _float fRange, _float fScale) { m_fDofDepth = fDepth, m_fDofRange = fRange, m_fDofScale = fScale; }
 	void SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance) { m_fLimitVelocity = fLimitVelocity, m_fLimitDepth = fLimitDepth, m_fLengthScale = fDistance; }
@@ -59,7 +58,6 @@ public:
 	HRESULT						Bind_SSAO_Resources(CShader* pShader);
 	HRESULT						Bind_LimitVelocity(CShader* pShader);
 
-	HRESULT						Bind_Fog_Resources(CShader* pShader);
 	HRESULT						Bind_Dof_Resource(CShader* pShader);
 
 	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
@@ -98,15 +96,6 @@ private:
 	ID3D11SamplerState*			m_pDefaultSampler = { nullptr };
 	ID3D11SamplerState*			m_pPointClampSampler = { nullptr };
 	ID3D11SamplerState*			m_pNoiseSampler = { nullptr };
-#pragma endregion
-
-#pragma region POG
-	CTexture*					m_pFogNoiseTexture = { nullptr };
-	_float2						m_vFogDepthDistance = {};
-	_float2						m_vFogHeightDistance = {};
-	_float						m_fFogTime = {};
-	_float4						m_vFogColor = {};
-	CTexture*					m_pHighCloudTexture = { nullptr };
 #pragma endregion
 
 #pragma region BLUR

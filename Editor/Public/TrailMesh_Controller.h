@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "Base.h"
 #include "Trail_Mesh.h"
 
@@ -13,6 +13,18 @@ public:
 		class CTexture* pTexture;
 	}MESH_TEXTURE;
 
+	typedef struct MeshDissolveTextureTag {
+		_char szName[MAX_PATH] = {};
+		_tchar strTextureTag[MAX_PATH] = {};
+		class CTexture* pTexture;
+	}DISSOLVE_TEXTURE;
+
+	typedef struct MeshDistortionTextureTag {
+		_char szName[MAX_PATH] = {};
+		_tchar strTextureTag[MAX_PATH] = {};
+		class CTexture* pTexture;
+	}DISTORTION_TEXTURE;
+
 	typedef struct ColorTextureTag {
 		_char szName[MAX_PATH] = {};
 		_tchar strTextureTag[MAX_PATH] = {};
@@ -23,14 +35,14 @@ public:
 		_char szName[MAX_PATH] = {};
 		_tchar strMeshTag[MAX_PATH] = {};
 		_char szDatPath[MAX_PATH] = {};
-		//¸Å½¬´Â ¹Ì¸®º¸±â ¾î¶»°Ô ¸øÇÏ³ª ?
+		//ë§¤ì‰¬ëŠ” ë¯¸ë¦¬ë³´ê¸° ì–´ë–»ê²Œ ëª»í•˜ë‚˜ ?
 	}MESH_TAG;
 
 private:
 	explicit CTrailMesh_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CTrailMesh_Controller() = default;
 
-#pragma region ±âº»
+#pragma region ê¸°ë³¸
 public:
 	HRESULT Initialize();
 	void Update();
@@ -43,6 +55,8 @@ private:
 	void Load_AllTextureFromFolder(const _string& strFolderPath);
 	void Load_AllMeshDatFromFolder(const _string& strFolderPath);
 	void Load_AllColorTextureFormFolder(const _string& strFolderPath);
+	void Load_AllDissolveTextureFromFolder(const _string& strFolderPath);
+	void Load_AllDistortionTextureFromFolder(const _string& strFolderPath);
 
 public:
 	void TrailMesh_Tab();
@@ -66,6 +80,14 @@ private:
 	vector<MESH_TEXTURE>										m_Textures = {};
 	_int														m_iSelectedTexture = -1;
 	_bool														m_TexturPopOpend = false;
+
+	vector<DISSOLVE_TEXTURE>									m_DissolveTextures = {};
+	_int														m_iSelectedDissovle = -1;
+	_bool														m_DissolveTexturPopOpend = false;
+
+	vector<DISTORTION_TEXTURE>									m_DistortionTextures = {};
+	_int														m_iSelectedDistortion = -1;
+	_bool														m_DistortionTexturPopOpend = false;
 
 	vector<COLOR_TEXTURE>										m_ColorTextures = {};
 	_int														m_iSelectedColor = -1;

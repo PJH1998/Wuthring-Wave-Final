@@ -28,6 +28,10 @@ public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel);
+
+#pragma region SPAWNER
+	void							Clone_Spawners(LEVEL eLevel);
+#pragma endregion
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
@@ -48,6 +52,7 @@ public:
 	//텍스처랑 Dat 먼저 읽어놔야 위에 이펙트 문제없이 클론가능.
 	void						Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void						Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void						Load_FXDecal_Data_FromFolder(const string& strFolderPath);
 private:
 	//원형 있어야 클론가능.
 	void						Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel);
@@ -57,6 +62,8 @@ private:
 	void						Load_Particle_OB_FromJson(const _string& strFilePath, const _string& ParticleTag, LEVEL eLevel);
 	void						Load_TrailMesh_FromJson(const _string& strFilePath, const _string& TrailMeshTag, LEVEL eLevel);
 	void						Load_FXRect_FromJson(const _string& strFilePath, const _string& RectTag, LEVEL eLevel);
+	void						Load_FXDecal_FromJson(const _string& strFilePath, const _string& DecalTag, LEVEL eLevel);
+	void						Load_FXDecal_Data_FromJson(const _string& strFilePath);
 #pragma endregion
 public:
 	HRESULT						Initialize();

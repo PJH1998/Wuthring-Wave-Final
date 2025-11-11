@@ -72,6 +72,10 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 {
 	m_pParser->Clone_MapObjects(eLevel);
 }
+void CGameSystem::Clone_Spawners(LEVEL eLevel)
+{
+	m_pParser->Clone_Spawners(eLevel);
+}
 #pragma endregion
 
 void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
@@ -92,6 +96,11 @@ void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEV
 void CGameSystem::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel)
 {
 	return m_pParser->Load_EffectMeshDat_FromFolder(strFolderPath, eLevel);
+}
+
+void CGameSystem::Load_EffectDecalData_FromFolder(const string& strFolderPath)
+{
+	return m_pParser->Load_FXDecal_Data_FromFolder(strFolderPath);
 }
 
 #pragma region FACTORY

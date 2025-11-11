@@ -44,6 +44,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_pRigidBodyCom->IsActivate(false);
 	//m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 
@@ -63,7 +64,7 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 
 	//공격이 성공했을 때 상태 유지 시간 정의
 	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
@@ -164,7 +165,7 @@ void CHavocWarrior::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_YELLOW));
 
 		m_pModelCom->Render(i);
 	}

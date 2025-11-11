@@ -8,6 +8,8 @@
 
 #include "Rect_Controller.h"
 
+#include "Decal_Controller.h"
+
 NS_BEGIN(Editor)
 class CEffect_Controller :public CBase
 {
@@ -59,6 +61,8 @@ public:
 
 	void Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRectDesc);
 
+	void Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* pDecalDesc);
+
 public:
 	void Load_Prefab();
 
@@ -70,6 +74,8 @@ public:
 
 	void Load_FXRect(const _wstring& RectTag);
 
+	void Load_FXDecal(const _wstring& DecalTag);
+
 public:
 	void Save_SelectedChildren_To_Json();
 	void Load_Children_To_Json();
@@ -78,6 +84,10 @@ public:
 public:
 	void Import_AnimationData(const EFFECTACTOR_DESC& effectActorDesc);
 	void PrefabBinding_Tab();
+
+
+public:
+	void Decal_Tab();
 
 private:
 	ID3D11Device*												m_pDevice = { nullptr };
@@ -88,6 +98,7 @@ private:
 	class CTrailMesh_Controller*								m_pTrailMesh_Controller = { nullptr };
 	class CLoad_Controller*										m_pLoad_Controller = { nullptr };
 	class CRect_Controller*										m_pRect_Controller = { nullptr };
+	class CDecal_Controller*									m_pDecal_Controller = { nullptr };
 
 	_char														m_PrefabTag[MAX_PATH];
 	_bool														m_bTagFlag = false;
@@ -110,6 +121,7 @@ private:
 	_bool														m_IsMeshEffect = false;
 	_bool														m_IsTrailMesh = false;
 	_bool														m_IsRectEffect = false;
+	_bool														m_IsDecalEffect = false;
 
 	map<const _wstring, class CEffect_Prefab*>					m_Prefabs = {};
 	map<const _wstring, CEffect_Prefab::PREFAB_DESC>			m_PrefabDesc = {};
