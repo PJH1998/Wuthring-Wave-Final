@@ -12,11 +12,11 @@ public:
 	typedef struct tagSpanwerDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		vector<_string> strMonsterKey;
-		vector<_float3>	vSpawnPositions;
+		vector<_float4>	vSpawnPositions;
 		//vector<_float3>	vSpawnRotateDegrees;
-		_float3	vSpawnPosition;
+		//_float3	vSpawnPosition;
 		_float3 vExtent;
-		_float3 vPosition;
+		_float4 vPosition;
 		_float	fSpawnTime;
 
 	}SPAWNERDESC;

@@ -28,6 +28,10 @@ public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel);
+
+#pragma region SPAWNER
+	void							Clone_Spawners(LEVEL eLevel);
+#pragma endregion
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 

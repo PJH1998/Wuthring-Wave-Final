@@ -12,6 +12,7 @@
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
 #include "AttackVolume.h"
+#include "AoEDoT.h"
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
@@ -257,7 +258,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_ElectroPredator
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 		CElectroPredator::Create(m_pDevice, m_pContext))))
-		CRASH("MonsterTest Prototype Create Failed");
+		CRASH("Electro Predator Prototype Create Failed");
+
+	// Prototype_GameObject_AOEDOT
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+		CAoEDoT::Create(m_pDevice, m_pContext))))
+		CRASH("AoEDoT Prototype Create Failed");
 #pragma endregion
 
 #pragma region CORROSAURUS

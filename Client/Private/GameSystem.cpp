@@ -72,6 +72,10 @@ void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 {
 	m_pParser->Clone_MapObjects(eLevel);
 }
+void CGameSystem::Clone_Spawners(LEVEL eLevel)
+{
+	m_pParser->Clone_Spawners(eLevel);
+}
 #pragma endregion
 
 void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)

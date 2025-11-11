@@ -23,7 +23,7 @@ HRESULT CSpawner::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	SPAWNERDESC* pDesc = static_cast<SPAWNERDESC*>(pArg);
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat4(&pDesc->vPosition), 1.f));
 
 	Ready_Component(pDesc);
 	m_strMonsterKey = pDesc->strMonsterKey;
