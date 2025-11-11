@@ -381,42 +381,67 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
 			_wstring ModelName = StringToWString(Desc.ModelName);
 
-			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
-				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
-					CMapObject::MAP_LOAD pDesc{};
-					strcpy_s(pDesc.ModelName, ModelName.c_str());
-					pDesc.iShaderPassIndex = ShaderPass;
-					pDesc.eObjectType = eObjectType;
-					pDesc.WorldMatrix = &Matrix;
-					pDesc.iLevel = ENUM_CLASS(eLevel);
-					pDesc.vBoundingPos = BoundingPos;
-					pDesc.vBoundingExtends = BoundingExtends;
+			Desc.iLevel = ENUM_CLASS(eLevel);
 
-					switch (pDesc.eObjectType)
-					{
-					case OBJECTTYPE::SONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
-						break;
+			switch (Desc.eObjectType)
+			{
+			case OBJECTTYPE::SONORA:
+				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+					, Desc.iLevel, TEXT("Layer_Sonoro"), &Desc);
+				break;
 
-					case OBJECTTYPE::NONSONORA:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
-						break;
+			case OBJECTTYPE::NONSONORA:
+				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+					, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
+				break;
 
-					case OBJECTTYPE::NONSONORA_FLOOR:
-						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
-						break;
+			case OBJECTTYPE::NONSONORA_FLOOR:
+				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+					, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
+				break;
 
-					default:
-						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
-							, PROTOTYPE::GAMEOBJECT, &pDesc);
-						break;
-					}
-				});
+			default:
+				m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject")
+					, PROTOTYPE::GAMEOBJECT, &Desc);
+				break;
+			}
+
+			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
+			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
+			//		CMapObject::MAP_LOAD pDesc{};
+			//		strcpy_s(pDesc.ModelName, ModelName.c_str());
+			//		pDesc.iShaderPassIndex = ShaderPass;
+			//		pDesc.eObjectType = eObjectType;
+			//		pDesc.WorldMatrix = &Matrix;
+			//		pDesc.iLevel = ENUM_CLASS(eLevel);
+			//		pDesc.vBoundingPos = BoundingPos;
+			//		pDesc.vBoundingExtends = BoundingExtends;
+			//
+			//		switch (pDesc.eObjectType)
+			//		{
+			//		case OBJECTTYPE::SONORA:
+			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+			//				, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+			//			break;
+			//
+			//		case OBJECTTYPE::NONSONORA:
+			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+			//				, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+			//			break;
+			//
+			//		case OBJECTTYPE::NONSONORA_FLOOR:
+			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+			//				, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+			//			break;
+			//
+			//		default:
+			//			m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+			//				, PROTOTYPE::GAMEOBJECT, &pDesc);
+			//			break;
+			//		}
+			//	});
 		}
-		m_pGameInstance->Wait_Thread_End();
+		//m_pGameInstance->Wait_Thread_End();
 	}
 	File.close();
 }
