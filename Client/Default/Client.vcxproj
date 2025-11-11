@@ -196,6 +196,7 @@
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\public\Corosaurus.h" />
+    <ClInclude Include="..\Public\Effect_Decal.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
@@ -343,6 +344,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Director.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
+    <ClCompile Include="..\Private\Effect_Decal.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp" />
     <ClCompile Include="..\Private\ElectroPredator.cpp" />

@@ -25,7 +25,7 @@ HRESULT CEffect_Decal::Initialize_Clone(void* pArg)
 
     m_vColor = pDesc->vColor;
     m_LifeTime = pDesc->LifeTime;
-	m_wstrMyTag = pDesc->strMyTag;
+	m_wstrMyTag = pDesc->wstrDecalTag;
 
 
    // m_pTransformCom->Scale(_float3(pDesc->vSize.x, pDesc->vSize.y, pDesc->vSize.z));
@@ -46,10 +46,10 @@ void CEffect_Decal::Update(_float fTimeDelta)
         return;
 
 	DECAL_DATA Desc{};
-	Desc.eType = DECAL_DATA::STATIC;
+	Desc.eType = DECAL_DATA::NONSTATIC;
 	Desc.fLifeTime = m_LifeTime;
 	Desc.vColor = m_vColor;
-	Desc.WorldMatrix = m_pTransformCom->Get_WorldMatrix();
+	Desc.WorldMatrix = m_ComBindMatrix; /*m_pTransformCom->Get_WorldMatrix();*/
 
 	m_pGameInstance->Add_DecalData(m_wstrMyTag, Desc);
 
@@ -73,9 +73,18 @@ void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CEffect_Decal::Root_Transform(_fmatrix WorldMatrix)
 {
-    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+	//_vector vScale = {};
+	//_vector vPos = {};
+	//_vector vRot = {};
+	//XMMatrixDecompose(&vScale, &vRot, &vPos, WorldMatrix);
 
-    m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	//_float3 vfScale = {};
+	//XMStoreFloat3(&vfScale, vScale);
+
+	//m_pTransformCom->Scale(vfScale);
+ //   m_pTransformCom->Set_State(STATE::POSITION, vPos);
+
+	m_ComBindMatrix = WorldMatrix;
 }
 
 

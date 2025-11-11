@@ -274,6 +274,17 @@ void CLoad_Controller::Load_Prefab_FromJson(const _string& strFilePath, const _s
 
 				Load_FXRect_FromJson(RectPath, FrameDesc.strChildrenTag);
 			}
+
+			if (FrameDesc.eChildrenType == EFFECT_TYPE::DECAL)
+			{
+				_string DecalPath = strFolderPath;
+				DecalPath += "/FXDecal/";
+				DecalPath += WStringToString(FrameDesc.strChildrenTag);
+				DecalPath += ".json";
+
+
+				Load_FXDecal_FromJson(DecalPath, FrameDesc.strChildrenTag);
+			}
         }
     }
 
@@ -694,6 +705,12 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("ColorTextureTag"))
         Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
 
+	if (TrailMeshJson.contains("DissolveTextureTag"))
+		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DissolveTextureTag"].get<_string>());
+
+	if (TrailMeshJson.contains("DistortionTextureTag"))
+		Desc.strDistortionTextureTag = StringToWString(TrailMeshJson["DistortionTextureTag"].get<_string>());
+
     if (TrailMeshJson.contains("VIBufferTag"))
         Desc.strVIBufferTag = StringToWString(TrailMeshJson["VIBufferTag"].get<_string>());
 
@@ -714,6 +731,15 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
 
 	if (TrailMeshJson.contains("MaskFloag"))		//오타있음
 		Desc.iMaskFlag = TrailMeshJson["MaskFloag"].get<_int>();
+
+	if (TrailMeshJson.contains("DissolveFlag"))
+		Desc.IsDissolve = TrailMeshJson["DissolveFlag"].get<_bool>();
+
+	if (TrailMeshJson.contains("DistortionFlag"))
+		Desc.IsDistortion = TrailMeshJson["DistortionFlag"].get<_bool>();
+
+	if (TrailMeshJson.contains("DistortionWeight"))
+		Desc.fDistortionWeight = TrailMeshJson["DistortionWeight"].get<_float>();
 
 	if (TrailMeshJson.contains("ColorSpeed"))
 		Desc.fColorSpeed = TrailMeshJson["ColorSpeed"].get<_float>();
@@ -827,6 +853,44 @@ void CLoad_Controller::Load_FXRect_FromJson(const _string& strFilePath, const _w
 	m_tRectDesc.emplace(RectTag, Desc);
 }
 
+void CLoad_Controller::Load_FXDecal_FromJson(const _string& strFilePath, const _wstring& DecalTag)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json DecalJson;
+	JsonStream >> DecalJson;
+	JsonStream.close();
+
+	CEffect_Decal::DECAL_DESC Desc = {};
+
+	if (DecalJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(DecalJson["MyTag"].get<_string>());
+
+	if (DecalJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(DecalJson["MyType"].get<double>());
+
+	if (DecalJson.contains("DecalTag"))
+		Desc.wstrDecalTag = StringToWString(DecalJson["DecalTag"].get<_string>());
+
+	if (DecalJson.contains("LifeTime"))
+		Desc.LifeTime = DecalJson["LifeTime"].get<_float>();
+
+	if (DecalJson.contains("Color") && DecalJson["Color"].is_array())
+	{
+		json ColorJson = DecalJson["Color"];
+		Desc.vColor.x = ColorJson[0].get<_float>();
+		Desc.vColor.y = ColorJson[1].get<_float>();
+		Desc.vColor.z = ColorJson[2].get<_float>();
+		Desc.vColor.w = ColorJson[3].get<_float>();
+	}
+
+	m_tDecalDesc.emplace(DecalTag, Desc);
+
+}
+
 void CLoad_Controller::Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc)
 {
     PrefabDesc = m_tPrefabDesc;
@@ -880,6 +944,14 @@ void CLoad_Controller::Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FX
 		RectDesc = iter->second;
 }
 
+void CLoad_Controller::Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc)
+{
+	auto iter = m_tDecalDesc.find(DecalTag);
+
+	if (iter != m_tDecalDesc.end())
+		DecalDesc = iter->second;
+}
+
 void CLoad_Controller::Reset_Load()
 {
     m_tEffectMeshDesc.clear();
@@ -888,6 +960,7 @@ void CLoad_Controller::Reset_Load()
     m_tParticleVBDesc.clear();
     m_tTrailMeshDesc.clear();
 	m_tRectDesc.clear();
+	m_tDecalDesc.clear();
 
     CEffect_Prefab::PREFAB_DESC Desc = {};
     m_tPrefabDesc = Desc;

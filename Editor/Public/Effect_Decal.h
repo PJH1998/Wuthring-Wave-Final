@@ -10,6 +10,7 @@ class CEffect_Decal final : public CGameObject
 public:
 	typedef struct tagDecalDesc : Engine::EFFECT_DESC
 	{
+		_wstring wstrDecalTag = {};
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float LifeTime = {};
 	}DECAL_DESC;
@@ -39,6 +40,8 @@ private:
 	_wstring					m_wstrMyTag = {};
 	_float4						m_vColor = {};
 	_float						m_LifeTime = {};
+
+	_matrix						m_ComBindMatrix = {};
 
 public:
 	static CEffect_Decal* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

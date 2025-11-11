@@ -250,6 +250,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Decal">
+      <UniqueIdentifier>{d050ecdf-02ed-49e6-921c-5906b20ec564}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -585,6 +588,9 @@
     <ClInclude Include="..\public\Projectile.h">
       <Filter>03. GameObject\Projectile</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Effect_Decal.h">
+      <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -889,6 +895,9 @@
     </ClCompile>
     <ClCompile Include="..\private\Projectile.cpp">
       <Filter>03. GameObject\Projectile</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Decal.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

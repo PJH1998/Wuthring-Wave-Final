@@ -89,6 +89,11 @@ void CGameSystem::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEV
 	return m_pParser->Load_EffectMeshDat_FromFolder(strFolderPath, eLevel);
 }
 
+void CGameSystem::Load_EffectDecalData_FromFolder(const string& strFolderPath)
+{
+	return m_pParser->Load_FXDecal_Data_FromFolder(strFolderPath);
+}
+
 #pragma region FACTORY
 
 void CGameSystem::Create_MonsterDummy(LEVEL eLayerLevel, _float3 vPos, const _fmatrix& PreTransformationMatrix)

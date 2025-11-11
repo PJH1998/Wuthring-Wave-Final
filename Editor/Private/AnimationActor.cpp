@@ -212,7 +212,7 @@ void CAnimationActor::Late_Update(_float fTimeDelta)
     }
 #endif
 
-    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
+    if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
 }
 

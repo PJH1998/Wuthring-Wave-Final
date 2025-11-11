@@ -104,14 +104,14 @@ PS_OUT PS_MAIN(PS_IN In)
     
     if(g_MaskFlag == 0)
     {
-        if (Out.vDiffuse.r < 0.2f)
-            discard;
-        
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+        
+        if(Out.vDiffuse.a < 0.3f)
+            discard;
     }
     else
     {
-        if (Out.vDiffuse.a < 0.2f)
+        if (Out.vDiffuse.a < 0.3f)
             discard;
     }
     
@@ -137,12 +137,12 @@ PS_OUT PS_TEST(PS_IN In)
    
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-       if (Out.vDiffuse.a < 0.2f)
+       if (Out.vDiffuse.a < 0.3f)
            discard;
     }
     else
     {
-        if (Out.vDiffuse.a < 0.2f)
+        if (Out.vDiffuse.a < 0.3f)
             discard;
     }
     
@@ -154,7 +154,7 @@ PS_OUT PS_TEST(PS_IN In)
     
     Out.vDiffuse *= fVisible;
     
-    if (Out.vDiffuse.a < 0.2f)
+    if (Out.vDiffuse.a < 0.3f)
         discard;
     
     Out.vDiffuse *= g_vColor;
@@ -177,12 +177,12 @@ PS_OUT PS_TESTA(PS_IN In)
     {
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-        if (Out.vDiffuse.a < 0.2f)
+        if (Out.vDiffuse.a < 0.3f)
             discard;
     }
     else
     {
-        if (Out.vDiffuse.a < 0.2f)
+        if (Out.vDiffuse.a < 0.3f)
             discard;
     }
     
@@ -194,7 +194,7 @@ PS_OUT PS_TESTA(PS_IN In)
     
     Out.vDiffuse *= fVisible;
     
-    if (Out.vDiffuse.a < 0.2f)
+    if (Out.vDiffuse.a < 0.3f)
     discard;
     
     Out.vDiffuse *= g_vColor;
@@ -214,7 +214,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -225,7 +225,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -236,7 +236,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -247,7 +247,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
@@ -258,7 +258,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
