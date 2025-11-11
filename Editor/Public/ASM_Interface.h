@@ -149,6 +149,7 @@ private:
 	void				Delete_Transitions(const GraphEditor::Link& tLink);
 	void				BehaviorTree_Setting();
 	void				BlackBoard_Setting();
+	void				Rebase_Graph();
 
 	void				Create_Template(BT_TYPE eType, _uint iOutputCount = 1);
 

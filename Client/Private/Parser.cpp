@@ -323,8 +323,8 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.m_vImpulsePower), sizeof(_float3));
 			File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint));
 
-			//m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
-			//	Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
+			m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Destruction"),
+				Desc.iLevel, TEXT("Layer_Destruction"), &Desc);
 
 			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex,
 			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends,

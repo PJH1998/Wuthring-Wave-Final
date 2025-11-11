@@ -50,8 +50,8 @@ protected:
 	_float							m_fShakeTimeAcc = {};		// Shake 진행시간
 	_float							m_fShakeStiffness = {};		// Shake 복원력
 	_float							m_fShakeDamp = {};			// Shake 감쇠
-	_float3						m_vShakeVelocity = {};		// Shake 힘
-	_float3						m_vShakeOffset = {};			// Shake로 인한 카메라 이동량
+	_float3							m_vShakeVelocity = {};		// Shake 힘
+	_float3							m_vShakeOffset = {};			// Shake로 인한 카메라 이동량
 
 protected:
 	void							Lerp_Distance(_float fTimeDelta);

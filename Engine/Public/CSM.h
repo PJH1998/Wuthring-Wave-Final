@@ -23,7 +23,6 @@ public:
 	HRESULT					Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName);
 	HRESULT					Bind_ShadowDistance_Resource(CShader* pShader, const _char* pDistanceName, const _char* pLastDistanceName);
 
-	HRESULT					Bind_ShadowDistance_Resource(_uint iDataBufferIndex);
 	HRESULT					Bind_CSM_SRV(CShader* pShader, const _char* pConstantName);
 	HRESULT					Begin_CSM();
 	HRESULT					End_CSM();

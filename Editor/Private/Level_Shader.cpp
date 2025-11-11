@@ -55,7 +55,7 @@ HRESULT CLevel_Shader::Ready_Light()
 
     m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-    m_pGameInstance->SetUp_ShadowNF();
+    m_pGameInstance->SetUp_CameraNF();
 
 	LIGHT_DESC PointLight = {};
 	PointLight.eType = LIGHT_DESC::POINT;

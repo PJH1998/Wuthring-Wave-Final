@@ -25,11 +25,22 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	CORROSAURUS_DESC* pDesc = static_cast<CORROSAURUS_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
-	m_vDistanceRange = _float2(4.f, 5.f);
+	//m_vDistanceRange = _float2(4.f, 5.f);
 	Ready_Component(pDesc);
-	//Ready_PartObjects(pDesc);
-	//CActor::Register_AllNotifies(pDesc->strFolderPath);
+	Ready_PartObjects(pDesc);
+	CActor::Register_AllNotifies(pDesc->strFolderPath);
+#pragma region ATTACK_STATE
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 45.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 40.f;
+	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = 50.f;
+#pragma endregion
 
+	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
+	m_fHP = pDesc->fHP;
+	
 	return S_OK;
 }
 
@@ -40,27 +51,136 @@ void CCorosaurus::Priority_Update(_float fTimeDelta)
 
 void CCorosaurus::Update(_float fTimeDelta)
 {
+	Reset_Condition(fTimeDelta);
+	m_pBehaviorTreeCom->tick(this);
+
+	After_Condition(fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+
+	if(m_isDist_Interp_Enable)
+	{
+		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
+		m_isDist_Interp_Enable = false;
+	}
+	else
+		m_pColliderCom->Update(vVelocity / fTimeDelta);
+	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	for (_uint i = 0; i < ATK_SOCKET::END; i++)
+	{
+		if (nullptr != m_pAtkVolumes[i])
+			m_pAtkVolumes[i]->Update(fTimeDelta);
+	}
+	m_pParryVolume->Update(fTimeDelta);
 }
 
 void CCorosaurus::Late_Update(_float fTimeDelta)
 {
+	m_pColliderCom->Sync_Position(m_pTransformCom);
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
+		return;
 }
 
 void CCorosaurus::Render()
 {
+	if (FAILED(Bind_Resources()))
+		CRASH("Falied to Bind Resources");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+
+		m_pModelCom->Render(i);
+	}
+
+#ifdef _DEBUG
+	m_pColliderCom->Render();
+	m_pRigidBodyCom->Render();
+	for (_uint i = 0; i < ATK_SOCKET::END; i++)
+	{
+		if (nullptr != m_pAtkVolumes[i])
+			m_pAtkVolumes[i]->Render();
+	}
+	//m_pParryVolume->Render();
+	_float4 temp{};
+	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
+#endif // DEBUG
+
 }
 
 void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
 {
+	size_t Index = wStrColliderTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
+	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Attack"))
+	{
+		if (wstrPartTag == TEXT("Head"))
+		{
+			m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(isActive);
+		}
+		else
+		{
+			m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(isActive);
+		}
+	}
+	else if (wstrTypeTag == TEXT("Parry"))
+	{
+		m_pParryVolume->TriggerActivate(isActive);
+	}
+	else if (wstrTypeTag == TEXT("Gravity"))
+	{
+		m_pColliderCom->Set_Gravity(isActive);
+	}
+	else if (wstrTypeTag == TEXT("Lerp"))
+	{
+		m_isTurnLerp = isActive;
+	}
 }
 
 void CCorosaurus::Effect_Active(const _wstring& wStrEffectTag)
 {
+	/*if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);*/
+}
+
+void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
+{
+	size_t Index = wStrObjectTag.find(TEXT("|"));
+	_wstring wstrTypeTag = wStrObjectTag.substr(0, Index);
+	_wstring wstrAnimTag = wStrObjectTag.substr(Index + 1);
+	if (wstrTypeTag == TEXT("Look"))
+	{
+			m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir));
+	}
+	else if (wstrTypeTag == TEXT("LookRev"))
+	{
+			m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
+	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+			m_isDist_Interp_Enable = true;
+	}
 }
 
 HRESULT CCorosaurus::Bind_Resources()
 {
-	return E_NOTIMPL;
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+	return S_OK;
 }
 
 void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
@@ -71,7 +191,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(13.f, 9.f, 13.f);
+	RigidbodyDesc.vExtent = pDesc->vDetectRange;
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -85,12 +205,13 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
 	XMStoreFloat3(&ColliderDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	ColliderDesc.vOffset = _float3(0.f, 1.35f, 0.f);
+	ColliderDesc.vOffset = _float3(0.f, 1.8f, 0.f);
 	ColliderDesc.eType = EMotionType::Kinematic;
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
-	ColliderDesc.fHeight = 1.8f;
-	ColliderDesc.fRadius = 0.4f;
-	XMStoreFloat4(&ColliderDesc.vQuat, XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f)));
+	ColliderDesc.fHeight = 1.7f;
+	ColliderDesc.fRadius = 1.f;
+	ColliderDesc.fRayOffset = -0.3f;
+	//XMStoreFloat4(&ColliderDesc.vQuat, XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f)));
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -120,7 +241,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
 	//Com_AnimMachine
-	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_AnimMachine_Corrosaurus"),
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_AnimMachine_CoroSaurus"),
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
 		CRASH("Corrosaurus/Com_AnimMachine");
 
@@ -131,13 +252,15 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	pBlackBoard->Add_Condition("isKnockDown", [this]() ->_bool { return isKnockDown(); });
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("ATKArrange", [this]() ->_bool { return AttackArrange(); });
-	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 3.f); });
+	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 4.f); });
 	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 4.f); });
 	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 15.f); });
 	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 15.f); });
 	pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 50.f); });
 	pBlackBoard->Add_Condition("Attack8", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK8, 15.f); });
+	pBlackBoard->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
 	pBlackBoard->Add_Condition("isChase", [this]() ->_bool { return isChase(); });
+	pBlackBoard->Add_Condition("isPatrol", [this]() ->_bool { return isPatrol(); });
 	pBlackBoard->Add_Condition("Front", [this]() ->_bool { return Front(); });
 	pBlackBoard->Add_Condition("Back", [this]() ->_bool { return Back(); });
 	pBlackBoard->Add_Condition("Left", [this]() ->_bool { return Left(); });
@@ -146,7 +269,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	CBehavior_Tree::BEHAVIOR_TREE_DESC BTDesc{};
 	BTDesc.pBlackBoard = pBlackBoard;
 	//Com_BehaviorTree
-	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_Corrosaurus"),
+	if (FAILED(Add_Component(ENUM_CLASS(pDesc->eCurLevel), TEXT("Prototype_Component_BehaviorTree_CoroSaurus"),
 		TEXT("Com_BehaviorTree"), reinterpret_cast<CComponent**>(&m_pBehaviorTreeCom), &BTDesc)))
 		CRASH(m_pBehaviorTreeCom);
 #pragma endregion
@@ -180,33 +303,131 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
 		CRASH(m_pAtkVolume);
 	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(false);
+
+	TriggerDesc.eLayer = COLLISIONLAYER::PARRY;
+	TriggerDesc.eTargetLayers = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2); // Root
+	TriggerDesc.vExtent = _float3(2.f, 4.f, 4.f);
+	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, -4.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
+		this->ParryEnter(iLayer, pOther, Manifold);
+		};
+	m_pParryVolume = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pParryVolume)
+		CRASH(m_pParryVolume);
+	m_pParryVolume->TriggerActivate(true);
 }
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
 {
+	if (m_isAnimationFinished)
+	{
+		_uint iRemainState{};
+		// burst
+		if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_7))
+		{
+			if (m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
+			{
+				iRemainState |= ENUM_CLASS(TEST_STATE::STRIKE);
+			}
+			else
+				iRemainState |= ENUM_CLASS(TEST_STATE::ATTACK_7);
+		}
+		if (m_iState & (ENUM_CLASS(TEST_STATE::ATTACK_1) | ENUM_CLASS(TEST_STATE::ATTACK_2)))
+		{
+
+		}
+		else
+		{
+			if (m_iState & ENUM_CLASS(TEST_STATE::MOVE_LEFT))
+			{
+				_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, -1.f * XM_PIDIV2, 0.f);
+				m_pTransformCom->Turn_Quaternion(vQuat);
+			}
+			else if (m_iState & ENUM_CLASS(TEST_STATE::MOVE_RIGHT))
+			{
+				_vector vQuat = XMQuaternionRotationRollPitchYaw(0.f, XM_PIDIV2, 0.f);
+				m_pTransformCom->Turn_Quaternion(vQuat);
+			}
+		}
+		m_iState = ENUM_CLASS(TEST_STATE::NONE);
+		m_iState |= iRemainState;
+	}
+	if (m_isTrigger == true)
+	{
+		m_isDetecting = true;
+	}
+	else
+		m_isDetecting = false;
+	if (m_isDetecting)
+	{
+		Calculate_PosAndDir();
+	}
+	for (_uint i = 0; i < ATK_PATTERN::ATK_END; ++i)
+	{
+		if (m_fAttackAcc[i] > 0.f)
+			m_fAttackAcc[i] -= fTimeDelta;
+	}
 }
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
 {
+	if (m_isTurnLerp)
+		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
+	if (m_beHit)
+		m_beHit = false;
+	if (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS))
+	{
+		if (m_fParalysisAcc >= 0.f)
+		{
+			//그로기 유지시간 정의하기
+			m_fParalysisAcc -= fTimeDelta;
+			
+		}
+	}
 }
 
 void CCorosaurus::Calculate_PosAndDir()
 {
+	_vector vPosition = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+	_vector vDir = vTargetPos - vPosition;
+	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	vDir = XMVector3Normalize(vDir);
+	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
+	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
+
+	XMStoreFloat3(&m_vTargetDir, XMVector3Normalize(XMVectorSetY(vDir, 0.f)));
 }
 
 void CCorosaurus::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		m_isTrigger = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
+		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+	}
 }
 
 void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_7))
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
+	}
+#ifdef _DEBUG
+	cout << "On Hit! (Corro)" << endl;
+#endif // _DEBUG
 }
 
 void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -215,17 +436,14 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
 #endif // _DEBUG
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
-		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
-		//m_isPushed = true;
-		//m_isAir = true;
-		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+		m_beHit = true;
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG
 		cout << "Knock Back! (Corro)" << endl;
@@ -234,65 +452,198 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	}
 }
 
+void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	m_isBlocked = true;
+}
+
 _bool CCorosaurus::isKnockDown()
 {
-	return _bool();
+	_bool isKnockDown{};
+	if (m_fStamina <= 0.f)
+	{
+		if (m_fParalysisAcc <= 0.f)
+		{
+			m_fStamina = m_fMaxStamina;
+			m_fParalysisAcc = 5.f;
+			isKnockDown = false;
+		}
+		else
+		{
+			if (m_isKnockDown)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::PARALYSIS);
+				isKnockDown = true;
+			}
+			else
+			{
+				m_iState |= (ENUM_CLASS(TEST_STATE::PARALYSIS) | ENUM_CLASS(TEST_STATE::MOVE_FORWARD));
+				m_isKnockDown = true;
+				isKnockDown = true;
+			}
+		}
+	}
+	else if (m_isBlocked)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+		isKnockDown = true;
+		m_isBlocked = false;
+	}
+
+	return isKnockDown;
 }
 
 _bool CCorosaurus::isAttackEnable()
 {
-	if (!m_isDetecting)
+	if (!m_isDetecting && !m_isAggro)
+		return false;
+	if (m_fDistance > 20.f)
 		return false;
 
-	return _bool();
+	m_isAttack = true;
+	return true;
 }
 
-_bool CCorosaurus::AttackArrange() const
+_bool CCorosaurus::AttackArrange()
 {
 	if (m_iState == 0)
 	{
-
+		if (!m_isAggro && m_isDetecting)
+		{
+			m_isAggro = true;
+			m_iState |= ENUM_CLASS(TEST_STATE::SPAWN);
+		}
+		return false;
 	}
 	else
 	{
-
+		_float fRand = m_pGameInstance->Rand_Normal();
+		switch (m_iCurrentAtkIndex)
+		{
+		case ATK_PATTERN::ATTACK1:
+		{
+			if (fRand < 0.5f)
+			{
+				if (m_fRightDot > 0.f)
+					m_iState |= ENUM_CLASS(TEST_STATE::MOVE_RIGHT);
+				else
+					m_iState |= ENUM_CLASS(TEST_STATE::MOVE_LEFT);
+			}
+			break;
+		}
+		case ATK_PATTERN::ATTACK2:
+		{
+			if (m_fRightDot > 0.f)
+				m_iState |= ENUM_CLASS(TEST_STATE::MOVE_RIGHT);
+			else
+				m_iState |= ENUM_CLASS(TEST_STATE::MOVE_LEFT);
+			if (fRand < 0.5f)
+			{
+				m_iState |= ENUM_CLASS(TEST_STATE::MOVE_BACKWARD);
+			}
+				break;
+		}
+		case ATK_PATTERN::ATTACK3:
+		{
+			if(m_fDistance < 2.f)
+				m_iState |= ENUM_CLASS(TEST_STATE::MOVE_BACKWARD);
+			else if(m_fDistance > 11.f)
+				m_iState |= ENUM_CLASS(TEST_STATE::MOVE_FORWARD);
+			break;
+		}
+		default:
+			break;
+		}
 	}
 	return true;
 }
 
 _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
-	return _bool();
+	if (iIndex == ATK_PATTERN::BURST)
+		return false;
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	if (bResult)
+	{
+		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
+		m_iCurrentAtkIndex = iIndex;
+	}
+	else
+		m_iCurrentAtkIndex = ATK_PATTERN::ATK_END;
+	return bResult;
+}
+
+_bool CCorosaurus::CheckHit()
+{
+	m_isAttack = false;
+	if (m_beHit)
+	{
+		m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
+		
+		m_beHit = false;
+		return true;
+	}
+	return false;
 }
 
 _bool CCorosaurus::isChase()
 {
-	return _bool();
+	if (!m_isAggro || m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+		return false;
+
+	_bool bResult{};
+	if (m_isDetecting)
+	{
+		bResult = true;
+		if (m_fDistance > 20.f)
+			m_iState |= ENUM_CLASS(TEST_STATE::LAND);
+		else if (m_fDistance < 3.f)
+			return false;
+	}
+	else
+	{
+		if (m_fDistance < 0.1f)
+		{
+			m_isAggro = false;
+		}
+	}
+	return bResult;
 }
 
 _bool CCorosaurus::isPatrol()
 {
-	return _bool();
+	return false;
+	_bool bResult = !m_isAggro;
+	if (bResult)
+	{
+		//Patrol();
+	}
+	return bResult;
 }
 
 _bool CCorosaurus::Back()
 {
-	return _bool();
+	if(m_isAttack)
+		return m_fFrontDot < 0.f;
+
+	if (m_fDistance < 2.f && m_fFrontDot > 0.f)
+		return true;
+	return false;
 }
 
 _bool CCorosaurus::Front()
 {
-	return _bool();
+	return m_fFrontDot > 0.f;
 }
 
 _bool CCorosaurus::Left()
 {
-	return _bool();
+	return m_fRightDot < 0.f && fabs(m_fRightDot) > 0.725f;
 }
 
 _bool CCorosaurus::Right()
 {
-	return _bool();
+	return m_fRightDot > 0.f && fabs(m_fRightDot) > 0.725f;
 }
 
 CCorosaurus* CCorosaurus::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -329,7 +680,8 @@ void CCorosaurus::Free()
 	{
 		Safe_Release(m_pAtkVolumes[i]);
 	}
-
+	
+	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
 }

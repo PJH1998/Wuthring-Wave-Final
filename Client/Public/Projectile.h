@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Client_Define.h"
 #include "GameObject.h"
 
 NS_BEGIN(Engine)
@@ -9,15 +10,19 @@ NS_BEGIN(Client)
 class CProjectile final : public CGameObject
 {
 public:
-	typedef struct tagProjectileDesc
+	typedef struct tagProjectileDesc : public CGameObject::GAMEOBJECT_DESC
 	{
-		_wstring	wstrEffectTag;
-		_uint		iLayer;
-		_uint		iTargetLayer;
-		_float		fRadius;
-		_float3		vExtents;
-		_float3		vTargetPos;
+		_wstring			wstrEffectTag;
+		_uint				iLayer;
+		vector<_uint>		iTargetLayers;
+		_float				fRadius;
+		_float				fAttackDamage;
 	}PROJECTILEDESC;
+
+	typedef struct tagProjectileReset
+	{
+		_float3				vTargetPos;
+	}PROJECTILERESET;
 private:
 	explicit CProjectile(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CProjectile(const CProjectile& Prototype);
@@ -34,8 +39,13 @@ public:
 	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	CRigidbody* m_pRigidBodyCom = { nullptr };
+	CRigidbody*			m_pRigidBodyCom = { nullptr };
+	_uint				m_iLayer{};
+	vector<_uint>		m_iTargetLayers;
+	_bool				m_isCollision{};
 	// Effect?
+
+	CALLBACK_CLIENT m_CallBack{};
 
 private:
 	void Ready_Component(PROJECTILEDESC* pDesc);
