@@ -151,6 +151,9 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_Enter(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnCollide_During(iLayer, pDesc, Manifold);
+		});
 
 	m_CallBack.pTransform = m_pParenTransform;
 	m_CallBack.fAttack = pDesc->fAttackDmg;
@@ -160,8 +163,8 @@ void CAttackVolume::Ready_Component(ATKVOLUME_DESC* pDesc)
 
 void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
 {
-	if (m_eCurrentLayer == COLLISIONLAYER::NONE)
-		return;
+	//f (m_eCurrentLayer == COLLISIONLAYER::NONE)
+	//	return;
 	for(auto& eLayer : m_eTargetLayer)
 	{
 		if (ENUM_CLASS(eLayer) == iLayer)
@@ -172,6 +175,14 @@ void CAttackVolume::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactMani
 		}
 	}
 }
+
+#ifdef _DEBUG
+void CAttackVolume::OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
+{
+	cout << "Collision test" << endl;
+
+}
+#endif // _DEBUG
 
 CAttackVolume* CAttackVolume::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
