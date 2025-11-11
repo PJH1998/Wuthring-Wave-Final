@@ -70,7 +70,7 @@ bool CheckOC(BoxPoint Box)
         if (0.f == fHZBDepth)
             return true;
         
-        float eps = max(1.f, fBoxDepth * 0.01f);
+        float eps = max(10.f, fBoxDepth * 0.01f);
         if (fBoxDepth < fHZBDepth + Box.fRadius + eps)
             return true;
         return false;
@@ -90,7 +90,7 @@ bool CheckOC(BoxPoint Box)
         if (0.f == fHZBDepth)
             return true;
         
-        float eps = max(1.f, fBoxDepth * 0.01f);
+        float eps = max(10.f, fBoxDepth * 0.01f);
         if (fBoxDepth < fHZBDepth + Box.fRadius + eps)
             return true;
 
@@ -108,7 +108,7 @@ bool CheckOC(BoxPoint Box)
             if (0.f == fHZBDepth)
                 return true;
         
-            eps = max(1.f, fCornerDepth * 0.01f);
+            eps = max(10.f, fCornerDepth * 0.01f);
             if (fCornerDepth < fHZBDepth + eps)
                 return true;
         }

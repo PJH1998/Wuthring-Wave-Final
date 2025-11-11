@@ -21,6 +21,7 @@ public:
 	_float							Get_Distance() { return m_fDistance; }
 	_float							Get_Near() { return m_fNear; }
 	_float							Get_Far() { return m_fFar; }
+	void							Set_Far(_float fFar);
 	void							OnShake(const CAMERA_SHAKE& tData);
 
 

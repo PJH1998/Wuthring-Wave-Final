@@ -71,7 +71,8 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 			XMStoreFloat4(&BoxInfo.vCorner[j], XMVector4Transform(XMLoadFloat4(&BoxInfo.vCorner[j]), ViewMatrix));
 		}
 		XMStoreFloat3(&BoxInfo.vCenter, XMVector3TransformCoord(XMLoadFloat3(&Objects[i]->Get_BoundingBox()->Center), ViewMatrix));
-		BoxInfo.fRadius = max(Objects[i]->Get_BoundingBox()->Extents.x, max(Objects[i]->Get_BoundingBox()->Extents.y, Objects[i]->Get_BoundingBox()->Extents.z));
+		//BoxInfo.fRadius = max(Objects[i]->Get_BoundingBox()->Extents.x, max(Objects[i]->Get_BoundingBox()->Extents.y, Objects[i]->Get_BoundingBox()->Extents.z));
+		BoxInfo.fRadius = Objects[i]->Get_BoundingBox()->Extents.z;
 		pBoxInfos[i] = BoxInfo;
 	}
 	//m_pContext->Unmap(m_pBoxPointsBuffer, 0);
@@ -128,7 +129,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	// Swap Vector
 	_uint iNumPre = Objects.size();
 	_uint iNumCur = CullObjects.size();
-	//cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
+	cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
 	Objects.clear();
 	Objects.reserve(CullObjects.size());
 	Objects.swap(CullObjects);

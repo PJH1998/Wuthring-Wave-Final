@@ -66,6 +66,7 @@ private:
 	atomic<_uint>						m_iCullStack = {};
 	atomic<_bool>						m_isCompleteFrustumCull = { false };
 	list<class CGameObject*>		m_ShadowMapObjects;
+	_uint									m_iNumPreRenderObject = {};
 
 
 	class CShader*						m_pShader = { nullptr };

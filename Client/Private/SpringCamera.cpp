@@ -135,8 +135,8 @@ void CSpringCamera::Update(_float fTimeDelta)
 		Shake.vRotation = _float3(0.1f, 0.f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
 		m_pGameInstance->OnShake(Shake);
 	}
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	//	m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Set_CurrentCamera_Far(300.f);
 
 	Shaking(fTimeDelta);
 }
