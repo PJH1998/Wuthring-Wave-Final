@@ -47,6 +47,7 @@ public:
 	Ref<CharacterVirtual>	Register_CharacterVirtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	void					Register_Virtual(CharacterVirtual* pVirtual);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 
 public:

@@ -978,7 +978,4 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
-
-	
-
 }
