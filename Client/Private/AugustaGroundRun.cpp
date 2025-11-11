@@ -64,7 +64,6 @@ void CAugustaGroundRun::OnExit()
     CGroundState::OnExit();
     m_pAugusta->Set_Gravity(true);
 
-	m_iNotLandFrames = 0;
 	m_fFallTime = 0.f;
 }
 
@@ -73,10 +72,9 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
-	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
 	if (m_States[HIT]) // 모든 조건 상위 조건
 		return;
-	// 우선순위 제일 높음.
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 
     // 키 입력.
@@ -155,8 +153,6 @@ void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 
-	_float fLandDistance = 0.5f;
-
 
 	if (m_States[LAND])
 	{
@@ -166,30 +162,9 @@ void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 	{
 		m_fFallTime += fTimeDelta;
 
-		cout << "FallTime : " << m_fFallTime << endl;
 		if (m_fFallTime >= 0.2f)
 			m_States[FALL] = true;
-
-		//m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
 	}
-	
-
-	//// 2. 기본 LandDistance 설정
-	//_float fLandDistance = 0.5f;
-
-	//// 3. 땅의 경사도(m_vLandNormal.y)를 확인합니다.
-	//// m_vLandNormal.y가 1.0(평지)보다 작고 0.3(약 72도)보다 크다면 경사로로 판단.
-
-	//if (m_vLandNormal.y < 0.98f && m_vLandNormal.y > 0.3f)
-	//{
-	//	// 경사로에서는 Ray 판정 거리를 1.0f (혹은 1.2f) 정도로 늘려서
-	//	// 빠르게 내려가도 땅으로 인식되도록 합니다.
-	//	fLandDistance = 1.3f;
-	//}
-
-	//// 4. 동적으로 조절된 fLandDistance 값으로 RayCast Land 체크를 수행합니다.
-	//m_States[LAND] = m_pAugusta->Is_Land(0.2f, fLandDistance);
-
 
 }
 
@@ -212,16 +187,16 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
     // Land 판정이 아니면서 Ray 반사 길이가 0.2f 이상이면?
     //if (!m_States[LAND] && fDistanceToGround > 0.3f)
 
-    if (!m_States[LAND])
-    {
-		m_iNotLandFrames++;
-		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		{
-			m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
-			m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
-			return;
-		}
-    }
+  //  if (!m_States[LAND])
+  //  {
+		//m_iNotLandFrames++;
+		//if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
+		//{
+		//	m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
+		//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
+		//	return;
+		//}
+  //  }
 
 	// 상위, 하위 상태
 	if (m_States[HIT])
@@ -293,9 +268,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY != m_pAugusta->Use_Skill("Skill_Hack"))
 			return;
 
-#ifdef _DEBUG
-		m_pAugusta->Print_CoolTime();
-#endif // _DEBUG
 
         m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::SKILL_HACK;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));

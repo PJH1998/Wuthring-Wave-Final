@@ -32,11 +32,11 @@ HRESULT CMapObject_Sonoro::Initialize_Clone(void* pArg)
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
 	Sync_Sectors();
-	
+
 	/*if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
 		return E_FAIL;*/
+	m_IsRender = m_pGameSystem->Add_To_Management(pDesc->eObjectType, this, &m_SonoroMode);
 
-	m_IsRender = m_pGameSystem->Add_To_Management(pDesc->eObjectType, this);
 	return S_OK;
 }
 
@@ -131,6 +131,15 @@ void CMapObject_Sonoro::Render_Shadow()
 BoundingBox* CMapObject_Sonoro::Get_BoundingBox()
 {
 	return m_pBoundingBox;
+}
+
+void CMapObject_Sonoro::Change_Collision_Layer(_bool SonoroMode)
+{
+	m_pRigidbodyCom->IsActivate(*m_SonoroMode);
+
+	//SonoroMode ?
+	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE)) :
+	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
 }
 
 void CMapObject_Sonoro::Ready_Component(void* pArg)

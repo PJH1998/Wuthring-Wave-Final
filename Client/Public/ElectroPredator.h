@@ -35,7 +35,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 
-	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool Isactive) override;
@@ -43,8 +43,9 @@ public:
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
 private:
-	CAnimMachine* m_pAnimMachineCom = { nullptr };
-	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
+	CAnimMachine*			m_pAnimMachineCom = { nullptr };
+	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	//const _float4x4*		m_pArrowMatrix = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
 
@@ -72,10 +73,12 @@ private:
 #pragma endregion
 
 #pragma region STATUS
-	_int					m_iHP{};
+	_float					m_fHP{};
 	_float					m_fAttackDmg{};
 	_float					m_fImpluseRate{};
 	_float2					m_vDistanceRange{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
 #pragma endregion
 
 #pragma region PHYSICS

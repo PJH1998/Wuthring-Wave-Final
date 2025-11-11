@@ -126,7 +126,7 @@ HRESULT CLevel_Effect::Initialize()
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-	m_pGameInstance->SetUp_ShadowNF();
+	m_pGameInstance->SetUp_CameraNF();
 
     return S_OK;
 }

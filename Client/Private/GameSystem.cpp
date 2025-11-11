@@ -13,6 +13,8 @@
 
 #include"Sonoro_Manager.h"
 
+#include "MonsterTable.h"
+
 IMPLEMENT_SINGLETON(CGameSystem)
 
 CGameSystem::CGameSystem()
@@ -43,6 +45,9 @@ void CGameSystem::Ready_GameSystem(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	m_pSonoro_Manager = CSonoro_Manager::Create();
 	ASSERT_CRASH(m_pSonoro_Manager);
 
+	m_pMonsterTable = CMonsterTable::Create();
+	ASSERT_CRASH(m_pMonsterTable);
+
 	// 파일 목록 만들기.
 	vector<_string> AbilityFolders = {};
 	AbilityFolders.resize(CPlayer::CHARACTERTYPE::TYPE_END);
@@ -63,9 +68,13 @@ void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
 }
 
-void CGameSystem::Clone_MapObjects(LEVEL eLevel, _uint iIndex)
+void CGameSystem::Clone_MapObjects(LEVEL eLevel)
 {
-	m_pParser->Clone_MapObjects(eLevel, iIndex);
+	m_pParser->Clone_MapObjects(eLevel);
+}
+void CGameSystem::Clone_Spawners(LEVEL eLevel)
+{
+	m_pParser->Clone_Spawners(eLevel);
 }
 #pragma endregion
 
@@ -125,9 +134,19 @@ void CGameSystem::Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat)
 
 #pragma endregion
 
-void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType, _uint iDmgAnimType)
+void CGameSystem::Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType, _float fSpawnRange)
 {
-	m_pUI_FontPreset->Render_Damage(vTargetPos, iDamage, iDmgElemType, iDmgAnimType);
+	m_pUI_FontPreset->Render_Damage(vTargetPos, to_wstring(iDamage), eColorType, fSpawnRange);
+}
+
+void CGameSystem::Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fSpawnRange)
+{
+	m_pUI_FontPreset->Render_Damage(vTargetPos, strText, eColorType, fSpawnRange);
+}
+
+CUI_Text* CGameSystem::Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	return m_pUI_FontPreset->Create_FontToScreen(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
@@ -187,14 +206,14 @@ void CGameSystem::Clear_TriggerCallBack()
 
 
 #pragma region SONORO_MANAGER
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_Sonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
-_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects)
+_bool* CGameSystem::Add_To_Management(OBJECTTYPE eType, CMapObject_NonSonoro* pObjects, _bool** SonoroMode)
 {
-	return m_pSonoro_Manager->Add_To_Management(eType, pObjects);
+	return m_pSonoro_Manager->Add_To_Management(eType, pObjects, SonoroMode);
 }
 
 void CGameSystem::Update(_float fTimeDelta)
@@ -205,6 +224,17 @@ void CGameSystem::Update(_float fTimeDelta)
 void CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
 	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+}
+#pragma endregion
+
+#pragma region MONSTER_TABLE
+HRESULT CGameSystem::LoadMonsterTable(const _char* pFilePath)
+{
+	return m_pMonsterTable->LoadDataTable(pFilePath);
+}
+MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
+{
+	return m_pMonsterTable->Get_MonsterInfo(pMonsterKey);
 }
 #pragma endregion
 
@@ -221,5 +251,5 @@ void CGameSystem::Free()
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
-
+	Safe_Release(m_pMonsterTable);
 }

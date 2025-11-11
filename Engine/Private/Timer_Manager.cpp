@@ -25,6 +25,21 @@ void CTimer_Manager::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRa
 	pTimer->Change_TimeRate(fTimeRate);
 }
 
+void CTimer_Manager::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	CTimer* pTimer = Find_Timer(strTimerTag);
+	if (nullptr == pTimer)
+		return;
+
+	pTimer->Change_TimeRate(fTimeRate, fDuration);
+}
+
+void CTimer_Manager::Update(_float fTimeDelta)
+{
+	for (auto& Pair : m_Timers)
+		Pair.second->Update(fTimeDelta);
+}
+
 HRESULT CTimer_Manager::Add_Timer(const _wstring& strTimerTag)
 {
 	CTimer* pTimer = Find_Timer(strTimerTag);

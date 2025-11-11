@@ -47,7 +47,7 @@ public:
 
 	void Turn_Sonoro(_fvector vUpSpeed, _float fTriggerdTime);
 	void ReturnPos();
-
+	void Change_Collision_Layer(_bool SonoroMode);
 private:
 	CDeferredShader* m_pShaderCom = { nullptr };
 	CShader* m_pShadowShaderCom = { nullptr };
@@ -59,6 +59,8 @@ private:
 	_float						m_fDlayTime = {};
 	_float4x4					m_DefaultMatrix = {};
 	_bool*						m_IsRender = { nullptr };
+	_bool*						m_SonoroMode = { nullptr };
+
 	OBJECTTYPE					m_eObjectType = { OBJECTTYPE::END };
 private:
 	void						Ready_Component(void* pArg);

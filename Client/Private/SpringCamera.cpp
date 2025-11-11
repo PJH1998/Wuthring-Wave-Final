@@ -106,9 +106,37 @@ void CSpringCamera::Update(_float fTimeDelta)
 		Check_Ray();
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD7) == KEYSTATE::DOWN)
-		m_pGameInstance->OnShake(_float3(-0.5f, 0.1f, 0.f));
+	{
+		CAMERA_SHAKE Shake = {};
+		Shake.fDuration = 0.25f;
+		Shake.fFrequency = 12.f;
+		Shake.fAmplitude = 1.f;
+		Shake.fFovKick = XMConvertToRadians(0.7f);
+		Shake.vRotation = _float3(0.1f, 0.1f, 0.1f);
+		m_pGameInstance->OnShake(Shake);
+	}
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-		m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
+	{
+		CAMERA_SHAKE Shake = {};
+		Shake.fDuration = 0.12f;
+		Shake.fFrequency = 12.f;
+		Shake.fAmplitude = 1.f;
+		Shake.fFovKick  = XMConvertToRadians(0.f);
+		Shake.vRotation = _float3(0.1f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+		m_pGameInstance->OnShake(Shake);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		CAMERA_SHAKE Shake = {};
+		Shake.fDuration = 0.12f;
+		Shake.fFrequency = 12.f;
+		Shake.fAmplitude = 1.f;
+		Shake.fFovKick = XMConvertToRadians(0.f);
+		Shake.vRotation = _float3(0.1f, 0.f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+		m_pGameInstance->OnShake(Shake);
+	}
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
+	//	m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
 
 	Shaking(fTimeDelta);
 }

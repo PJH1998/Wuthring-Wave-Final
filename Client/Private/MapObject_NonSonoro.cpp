@@ -34,7 +34,6 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 	//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
 	//m_pGameInstance->Add_To_OctoTree(this, m_pModelComArray[0]->Get_BoundingBox());
 	m_pGameInstance->Add_To_OctoTree(this, m_pBoundingBox);
-
 	Sync_Sectors();
 
 	/*if (FAILED(m_pGameInstance->Add_Render_ShadowMapObject(this)))
@@ -42,12 +41,13 @@ HRESULT CMapObject_NonSonoro::Initialize_Clone(void* pArg)
 	XMStoreFloat4x4(&m_DefaultMatrix, m_pTransformCom->Get_WorldMatrix());
 
 	m_eObjectType = pDesc->eObjectType;
-	m_IsRender = m_pGameSystem->Add_To_Management(m_eObjectType, this);
+	m_IsRender = m_pGameSystem->Add_To_Management(m_eObjectType, this, &m_SonoroMode);
 	return S_OK;
 }
 
 void CMapObject_NonSonoro::Priority_Update(_float fTimeDelta)
 {
+	//m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
 }
 
 void CMapObject_NonSonoro::Update(_float fTimeDelta)
@@ -163,11 +163,20 @@ void CMapObject_NonSonoro::Turn_Sonoro(_fvector vUpSpeed,_float fTriggerdTime)
 		return;
 	if (m_fDlayTime <= fTriggerdTime)
 		m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + vUpSpeed);
+	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+	m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
 }
 
 void CMapObject_NonSonoro::ReturnPos()
 {
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMatrix));
+	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+	m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
+}
+
+void CMapObject_NonSonoro::Change_Collision_Layer(_bool SonoroMode)
+{
+	//m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
 }
 
 void CMapObject_NonSonoro::Ready_Component(void* pArg)

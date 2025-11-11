@@ -134,6 +134,8 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 void CGameInstance::Update_Engine(_float fTimeDelta)
 {
+	m_pTimer_Manager->Update(fTimeDelta); // Timer Manager Update => Time Stop 관련.
+
 	m_pHZB->Update();
 
 	m_pGUIManager->Update();
@@ -143,13 +145,13 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Priority_Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Priority_Update(fTimeDelta);
+	//m_pFont_Manager->Priority_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 
 	m_pObject_Manager->Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Update(fTimeDelta);
+	//m_pFont_Manager->Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pCamera_Manager->Update(fTimeDelta);
@@ -158,7 +160,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 
 	m_pObject_Manager->Late_Update(fTimeDelta);
 #ifdef KSTA_DEBUG_ENABLEFONTMGR
-	m_pFont_Manager->Late_Update(fTimeDelta);
+	//m_pFont_Manager->Late_Update(fTimeDelta);
 #endif // KSTA_DEBUG_ENABLEFONTMGR
 	
 	m_pDecal_Manager->Update(fTimeDelta);
@@ -175,6 +177,8 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pPooling_Manager->Update_Pooling();
 
 	m_pLevel_Manager->Update_Level(fTimeDelta);
+
+	m_pVF->Update_VF(fTimeDelta);
 }
 
 _float CGameInstance::Rand_Normal()
@@ -279,26 +283,43 @@ HRESULT CGameInstance::Add_Font(const _wstring& strFontTag, const _char* pFilePa
 {
 	return m_pFont_Manager->Add_Font(strFontTag, pFilePath, iPixelHeight);
 }
+FTCUSTOM_FONT* CGameInstance::Find_Font(const _wstring& strFontTag)
+{
+	return m_pFont_Manager->Find_Font(strFontTag);
+}
+const FTCUSTOM_FONT_GLYPH* CGameInstance::Get_Glyph(const _wstring& strFontTag, _uint code)
+{
+	return m_pFont_Manager->Get_Glyph(strFontTag, code);
+}
+ID3D11ShaderResourceView* CGameInstance::Get_AtlasSRV(const _wstring& strFontTag)
+{
+	return m_pFont_Manager->Get_AtlasSRV(strFontTag);
+}
+const FTCUSTOM_FONT_GLYPH* CGameInstance::Get_GlyphAndAdvance(const _wstring& strFontTag, _uint iCodePoint, _uint prevCodePoint, _int& outAdvanceX)
+{
+	return m_pFont_Manager->Get_GlyphAndAdvance(strFontTag, iCodePoint, prevCodePoint, outAdvanceX);
+}
+
 //HRESULT CGameInstance::Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor, _float fRadian, const _float2& vOrigin, const _float2& vScale)
 //{
 //	return m_pFont_Manager->Draw_Text(strFontTag, pText, vPosition, vColor, fRadian, vOrigin, vScale);
 //}
-_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
-{
-	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
-}
-_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
-{
-	return m_pFont_Manager->Draw_Font(pSingleDesc);
-}
-void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
-{
-	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
-}
-void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
-{
-	m_pFont_Manager->Add_FloatingText(tDesc);
-}
+//_bool CGameInstance::Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag)
+//{
+//	return m_pFont_Manager->Draw_Font(strFontTag, pText, vPos, fScale, vColor, iShaderFlag);
+//}
+//_bool CGameInstance::Draw_Font(FONT_SINGLEDESC* pSingleDesc)
+//{
+//	return m_pFont_Manager->Draw_Font(pSingleDesc);
+//}
+//void CGameInstance::Add_FloatingText(const _wstring& strFontTag, const _wstring& strText, _float2 vScreenPos, _float fScale, _float fLifeTime, _uint iShaderFlag, _float4 vColor)
+//{
+//	m_pFont_Manager->Add_FloatingText(strFontTag, strText, vScreenPos, fScale, fLifeTime, iShaderFlag, vColor);
+//}
+//void CGameInstance::Add_FloatingText(FONT_SINGLEDESC tDesc)
+//{
+//	m_pFont_Manager->Add_FloatingText(tDesc);
+//}
 
 #pragma endregion
 
@@ -345,9 +366,13 @@ CComponent* CGameInstance::Get_Component(_uint iLayerLevelID, const _wstring& st
 {
 	return m_pObject_Manager->Get_Component(iLayerLevelID, strLayerTag, iGameObjectIndex, strComponentTag);
 }
-HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio)
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _bool isTimeStop)
 {
-	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio);
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, isTimeStop);
+}
+HRESULT CGameInstance::Change_TimeRatio_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, _float fTimeRatio, _float fDuration)
+{
+	return m_pObject_Manager->Change_TimeRatio_ToLayer(iLayerLevelID, strLayerTag, fTimeRatio, fDuration);
 }
 #pragma endregion
 
@@ -461,6 +486,10 @@ HRESULT CGameInstance::Add_Render_StaticObject(CStaticObject* pObject)
 {
 	return m_pRenderer->Add_Render_StaticObject(pObject);
 }
+HRESULT CGameInstance::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+    return m_pRenderer->Add_Render_StaticObject(Container);
+}
 HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
@@ -480,6 +509,14 @@ void CGameInstance::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX
 ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex)
 {
     return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
+}
+void CGameInstance::Render_ShadowMap()
+{
+	m_pRenderer->Render_ShadowMap();
+}
+void CGameInstance::SettingFog(_bool IsOn)
+{
+	m_pRenderer->SettingFog(IsOn);
 }
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
@@ -514,10 +551,6 @@ void CGameInstance::SetBloomWeight(_int iWeight)
 {
 	m_pRenderer->SetBloomWeight(iWeight);
 }
-void CGameInstance::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pRenderer->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
-}
 void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pRenderer->SetDof(fDepth, fRange, fScale);
@@ -530,13 +563,13 @@ void CGameInstance::SetPBR(_bool IsStylized)
 {
 	m_pRenderer->SetPBR(IsStylized);
 }
-void CGameInstance::Set_Metallic(_float fMetallic)
+void CGameInstance::Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic)
 {
-	m_pRenderer->Set_Metallic(fMetallic);
+	m_pRenderer->Set_Metallic(fDynamicMetallic, fStaticMetallic);
 }
-void CGameInstance::Set_Roughness(_float fRoughness)
+void CGameInstance::Set_Roughness(_float fRoughness, _float fStaticRoughness)
 {
-	m_pRenderer->Set_Roughness(fRoughness);
+	m_pRenderer->Set_Roughness(fRoughness, fStaticRoughness);
 }
 void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
 {
@@ -591,9 +624,9 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
-void CGameInstance::OnShake(const _float3& vDir)
+void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
-	m_pCamera_Manager->OnShake(vDir);
+	m_pCamera_Manager->OnShake(tData);
 }
 #pragma endregion
 
@@ -616,6 +649,10 @@ _float CGameInstance::Get_TimeDelta(const _wstring& strTimerTag)
 void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate)
 {
 	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate);
+}
+void CGameInstance::Change_TimeRate(const _wstring& strTimerTag, _float fTimeRate, _float fDuration)
+{
+	m_pTimer_Manager->Change_TimeRate(strTimerTag, fTimeRate, fDuration);
 }
 HRESULT CGameInstance::Add_Timer(const _wstring& strTimerTag)
 {
@@ -655,6 +692,10 @@ Ref<CharacterVirtual> CGameInstance::Register_Virtual(const CharacterVirtualSett
 void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
+}
+void CGameInstance::Register_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pPhysicsManager->Register_Virtual(pVirtual);
 }
 void CGameInstance::Remove_Virtual(CharacterVirtual* pVirtual)
 {
@@ -796,10 +837,6 @@ HRESULT CGameInstance::SetUp_ShadowLight(const _wstring& strLightTag)
 {
 	return m_pCSM->SetUp_ShadowLight(strLightTag);
 }
-HRESULT CGameInstance::SetUp_ShadowNF()
-{
-	return m_pCSM->SetUp_ShadowNF();
-}
 HRESULT CGameInstance::Bind_CSM_Resources(CShader* pShader, const _char* pViewName, const _char* pProjName, const _char* pLightDirName)
 {
 	return m_pCSM->Bind_CSM_Resources(pShader, pViewName, pProjName, pLightDirName);
@@ -826,6 +863,13 @@ void CGameInstance::Render_CSM(CShader* pShader, CVIBuffer_Rect* pVIBuffer)
 	m_pCSM->Render(pShader, pVIBuffer);
 }
 #endif
+#pragma endregion
+
+#pragma region HZB
+void CGameInstance::Occlusion_Culling(vector<class CStaticObject*>& Objects)
+{
+	m_pHZB->Occlusion_Culling(Objects);
+}
 #pragma endregion
 
 #pragma region UI_MANAGER
@@ -914,12 +958,6 @@ HRESULT CGameInstance::Bind_ShadowMap_Resources_Renderer(CShader* pShader)
 {
 	return m_pShadowMap->Bind_ShadowMap_Resources(pShader);
 }
-
-HRESULT CGameInstance::Bind_ShadowMap_Buffer(_uint iBufferIndex)
-{
-	return m_pShadowMap->Bind_ShadowMap_Buffer(iBufferIndex);
-}
-
 HRESULT CGameInstance::Begin_ShadowMap()
 {
 	return m_pShadowMap->Begin_ShadowMap();
@@ -928,6 +966,21 @@ HRESULT CGameInstance::Begin_ShadowMap()
 HRESULT CGameInstance::End_ShadowMap()
 {
 	return m_pShadowMap->End_ShadowMap();
+}
+
+void CGameInstance::Begin_DownSampleShadowMap()
+{
+	m_pShadowMap->DownSampleShadowMap();
+}
+
+ID3D11ShaderResourceView* CGameInstance::Get_ShadowMapDownSampleSRV()
+{
+	return m_pShadowMap->Get_DownSampleSRV();
+}
+
+ID3D11Buffer* CGameInstance::Get_ShadowMapDownSampleBuffer()
+{
+	return m_pShadowMap->Get_DownSampleBuffer();
 }
 
 #ifdef _DEBUG
@@ -952,6 +1005,31 @@ HRESULT CGameInstance::Render_Decal()
 	return m_pDecal_Manager->Render();
 }
 #pragma endregion
+
+#pragma region HZB
+ID3D11ShaderResourceView* CGameInstance::Get_HZB_Resource()
+{
+	return m_pHZB->Get_Resource();
+}
+#pragma endregion
+
+#pragma region VOLUMETRIC_FOG
+void CGameInstance::Add_LightData_ToVF(const VF_LIGHT& LightData)
+{
+	m_pVF->Add_LightData(LightData);
+}
+
+HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName)
+{
+	return m_pVF->Bind_VF_Resource(pShader, pTextureName, pFogRangeName);
+}
+#pragma endregion
+
+HRESULT CGameInstance::SetUp_CameraNF()
+{
+	m_pVF->SetUp_FogNF();
+	return m_pCSM->SetUp_ShadowNF();
+}
 
 HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 {

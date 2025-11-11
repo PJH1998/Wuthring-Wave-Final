@@ -29,7 +29,8 @@ public:
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
-	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
+	void							Clone_MapObjects(LEVEL eLevel);
+	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
 
 #pragma region FACTORY
@@ -48,7 +49,12 @@ public:
 #pragma endregion
 
 #pragma region [UI] FONT_PRESET
-	void		Render_Damage(_float4 vTargetPos, _int iDamage, _uint iDmgElemType = 0, _uint iDmgAnimType = 0);
+	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
+	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
+	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
+	void			Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
+	// 텍스트를 생성합니다.
+	class CUI_Text*	Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
@@ -58,7 +64,6 @@ public:
 	HRESULT		HUD_FadeOut();
 	HRESULT		HUD_FadeIn();
 #pragma endregion
-
 
 #pragma region [UI] STATUS_SYNCER
 	//HRESULT		Sync_Status_toHUD(CHARACTER_STAT& eStat);
@@ -79,15 +84,18 @@ public:
 #pragma endregion
 
 #pragma region SONORO_MANAGER
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects);
-	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
+	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
 
 
 #pragma endregion
 
-
+#pragma region MONSTER_TABLE
+	HRESULT LoadMonsterTable(const _char* pFilePath);
+	MONSTER_INFO* Get_MonsterInfo(const _char* pMonsterKey) const;
+#pragma endregion
 
 private:
 	class	CParser*			m_pParser						= { nullptr };
@@ -101,6 +109,8 @@ private:
 	class	CPlayerStatus* 		m_pPlayerStatus 				= { nullptr };
 	
 	class	CSonoro_Manager*	m_pSonoro_Manager				= { nullptr };
+
+	class	CMonsterTable*		m_pMonsterTable					= { nullptr };
 
 	CHARACTER_STAT m_Stats = {};
 	unordered_map<_uint, vector<TriggerCallback>> m_TriggerEvents;

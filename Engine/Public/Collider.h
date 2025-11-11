@@ -43,6 +43,7 @@ public:
 	void								Set_Offset(const _float3 vOffset);
 
 	void								IsActivate(_bool isActive);
+	void								Change_Layer(_uint iLayer);
 
 public:
 	virtual		HRESULT				Initialize_Prototype() override;
@@ -55,6 +56,8 @@ private:
 	COLLISION_DATA				m_tCollisionData = {};
 	BodyInterface*					m_pBodyInterface = { nullptr };
 	BodyID							m_BodyID = {};
+
+	_bool								m_isActivate = { true };
 
 	_uint								m_iCollisionLayer = {};
 

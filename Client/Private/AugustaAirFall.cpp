@@ -66,7 +66,7 @@ void CAugustaAirFall::OnExit()
 void CAugustaAirFall::Handle_Input()
 {
     m_eDir = m_pAugusta->Calculate_Direction(); // 방향 계산.
-	m_States[HIT] = m_pAugusta->Is_Hit();
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
 	if (m_States[HIT])
 		return;
 
@@ -98,8 +98,6 @@ void CAugustaAirFall::Check_Physics(_float fTimeDelta)
 
 void CAugustaAirFall::Check_StateTransition(_float fTimeDelta)
 {
-    _float fDistanceToGround = m_pAugusta->Get_DistanceFromGround(0.2f);
-
 	if (m_States[HIT])
 	{
  		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));

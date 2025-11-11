@@ -15,11 +15,16 @@ public:
 	virtual void			Render() override;
 
 private:
+	void Ready_Layer_LogoMaleRover();
+	void Ready_Layer_LogoFemaleRover();
+
+private:
 	// Test
 	Engine::CRigidbody* m_pRigidbody1 = { nullptr };
 	Engine::CRigidbody* m_pRigidbody2 = { nullptr };
 	Engine::CRigidbody* m_pRigidbody3 = { nullptr };
 
+	LEVEL m_eCurLevel = { LEVEL::LOGO };
 public:
 	static		CLevel_Logo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

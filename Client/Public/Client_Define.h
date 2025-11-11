@@ -13,7 +13,7 @@ namespace Client
 	// Window SIze
 	const unsigned int		g_iWinSizeX = 1920;
 	const unsigned int		g_iWinSizeY = 1080;
-	const unsigned int		g_iFrame = 250;
+	const unsigned int		g_iFrame = 60;
 }
 
 extern HWND			g_hWnd;

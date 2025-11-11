@@ -3,7 +3,7 @@
 #include"Model_Instance.h"
 #include"Mesh_Instance.h"
 #include"Event_Level.h"
-#include "AnimationActor.h"
+#include"Map_Interface.h"
 
 CEdit_MapObject_Instance::CEdit_MapObject_Instance(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CGameObject(pDevice,pContext)
@@ -33,93 +33,115 @@ HRESULT CEdit_MapObject_Instance::Initialize_Clone(void* pArg)
         return E_FAIL;
 
     Ready_Events();
+	INSTANCE_CREATE event(m_ModelName, m_iSaveIndex, this);
+	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
+    //MAP_CREATE event(m_ModelName, this);
+    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Instance_Create"), event);
 
-    MAP_CREATE event(m_ModelName, this);
-    m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Create_Object"), event);
+	m_pGameInstance->Subscribe<INSTANCE_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Instance") + to_wstring(m_iSaveIndex), [this](const INSTANCE_SAVE& event) {
 
-    m_pGameInstance->Subscribe< MAP_SAVE>(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Instance"), [this](const MAP_SAVE& event) {
+		if (!m_isActivate)
+			return;
+		/*auto iter = event.ModelName.find(m_ModelName);
+		if (iter == event.ModelName.end())
+			event.ModelName.insert(m_ModelName);*/
 
-        //event.File.write(reinterpret_cast<const char*>(&InstanceDesc), sizeof(MAP_LOAD));
+		for (_uint i = 0; i < m_iNumInstance; ++i)
+		{
+			if (m_pInstanceMatrix[i].m[3][3] != 1.f)
+				return;
+		}
+		*event.iNumTotalInstance += m_iNumInstance;
 
-        _uint Length = strlen(m_ModelName);
-        event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
-        event.File.write(m_ModelName, Length);
+		for (_uint i = 0; i < m_iNumInstance; ++i)
+		{
+			if (m_pInstanceMatrix[i].m[3][3] == 1.f)
+				event.Totalmatrix.push_back(m_pInstanceMatrix[i]);
+			else
+				int a = 0;
+		}
 
-        m_iShaderPassIndex = 0;
-        event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
+		event.Objectmatrix.push_back(m_pTransformCom->Get_State(STATE::POSITION));
+		});
 
-
-        _vector Pos = m_pTransformCom->Get_State(STATE::POSITION);
-        event.File.write(reinterpret_cast<const _char*>(&Pos), sizeof(_float4));
-
-        //_float4x4* pInstances = new _float4x4[m_iNumInstance];
-        event.File.write(reinterpret_cast<const char*>(&m_iNumInstance), sizeof(_uint));
-
-        event.File.write(reinterpret_cast<const char*>(InstanceDesc.WorldMatrix), sizeof(_float4x4) * m_iNumInstance);
-
-        });
-    
-    m_iShaderPassIndex = 0;
-    m_iShaderPassIndex = 0;
-    MODELTYPE::MAP;
+    m_iShaderPassIndex = 2;
+	
     return S_OK;
 }
 
 void CEdit_MapObject_Instance::Priority_Update(_float fTimeDelta)
 {
-
+	if (!m_isActivate)
+		return;
 }
 
 void CEdit_MapObject_Instance::Update(_float fTimeDelta)
 {
-    if (m_pGameInstance->Get_DIKeyState(DIK_G) == KEYSTATE::DOWN)
-    {
-        _float fDistance = {};
-
-        //if (m_pModelCom->Is_Picked(XMLoadFloat4(m_pGameInstance->Get_CamPos()), m_pGameInstance->Get_MouseDir(), &fDistance))
-        {
-            MAP_PICK event(this, fDistance);
-            m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("ObjectPick"), event);
-        }
-    }
+	if (!m_isActivate)
+		return;
 }
 
 void CEdit_MapObject_Instance::Late_Update(_float fTimeDelta)
 {
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this);
+	if (m_isActivate)
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::NONLIGHT, this);
 }
 
 void CEdit_MapObject_Instance::Render()
 {
+	if (!m_isActivate)
+		return;
     Bind_Resources();
 
-    for (_uint i = 0; i < m_pModelCom->Get_NumMesh(); ++i)
-    {
-        m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+	for (_uint i = 0; i < m_pModelComArray[0]->Get_NumMesh(); ++i)
+	{
+		m_pShaderCom->Bind_Texture("g_DiffuseTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_NormalTexture", nullptr);
+		m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+		_bool HasNormal = { true };
+		_bool HasMask = { true };
+		{
+			if (FAILED(m_pModelComArray[0]->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
+			{
+				m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
+				HasMask = false;
+			}
 
-        _bool HasNormal = { true };
 
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
-            HasNormal = false;
+			if (HasMask)
+			{
+				m_pModelComArray[0]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 
-        m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+				if (FAILED(m_pModelComArray[0]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL)))
+					HasNormal = false;
+			}
+			else
+			{
+				m_pModelComArray[0]->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0);
 
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_MaskTexture", i, TEXTURETYPE::MASK)))
-            m_pShaderCom->Bind_Texture("g_MaskTexture", nullptr);
-        m_pShaderCom->Begin(m_iShaderPassIndex);
+				if (FAILED(m_pModelComArray[0]->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL, 0)))
+					HasNormal = false;
+			}
 
-        m_pModelCom->Render(i);
-    }
+		}
+		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+
+		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "ChangeColor"))
+			m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4));
+
+		m_pShaderCom->Begin(m_iShaderPassIndex);
+
+		m_pModelComArray[0]->Render(i);
+	}
 }
 
 void CEdit_MapObject_Instance::Render_Shadow()
 {
-
 }
 
 void CEdit_MapObject_Instance::Set_ImGuiOption()
 {
-    return;
     ImGuiID PickID = ImGui::GetID("MapPick");
     char Pick_buffer[30];
     sprintf_s(Pick_buffer, "%d", m_iPickedInstance);
@@ -135,103 +157,104 @@ void CEdit_MapObject_Instance::Set_ImGuiOption()
         if (ImGui::Button(buffer))
             m_iPickedInstance = i;
     }
-
     ImGui::EndChildFrame();
-
-    _matrix PickedMatrix = XMLoadFloat4x4(&m_pInstanceMatrix[m_iPickedInstance]);
-    _vector vScale, vRotation, vTranslation;
-    _matrix Scale, Rotation, Translation;
-    XMMatrixDecompose(&vScale, &vRotation, &vTranslation, PickedMatrix);
-
-    //?ъ씠利덇? ?먯젏 ?묒븘吏? ?섏쨷???섏젙?좉쾬.
-    //m_pScale?먮떎媛 ??ν븳 ??踰꾪듉 ?꾨Ⅴ硫??곸슜?섍쾶 ?섎㈃ ?덈컮?붾벏.
-    ImGui::Text("Size");
-    {
-        ImGui::PushItemWidth(90.0f);
-        ImGui::InputFloat("R", &vScale.m128_f32[0], 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("U", &vScale.m128_f32[1], 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("L", &vScale.m128_f32[2], 0.1f, 0.1f);
-
-        Scale = XMMatrixScalingFromVector(vScale);
-    }
-
-
-    ImGui::Text("Turn_Quaternion");
-    {
-        //濡쒗뀒?댁뀡??怨꾩냽 ?낅뜲?댄듃 ?섏뼱??媛믪씠 珥덇린?붾맖.
-        ImGui::PushItemWidth(90.0f);
-        //_float3 DegreeRotation = _float3(XMConvertToDegrees(m_pRotation[m_iPickedInstance].x), XMConvertToDegrees(m_pRotation[m_iPickedInstance].y), XMConvertToDegrees(m_pRotation[m_iPickedInstance].z));
-        _float4 DegreeRotation = m_pRotation[m_iPickedInstance];
-        
-        //?붽렇由?媛곷룄濡?0?꾩뿉??360?꾧퉴吏.
-
-        ImGui::InputFloat("Yaw",    &DegreeRotation.x, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Picth",  &DegreeRotation.y, 0.1f, 0.1f); ImGui::SameLine();
-        ImGui::InputFloat("Roll",   &DegreeRotation.z, 0.1f, 0.1f);
-
-        m_pRotation[m_iPickedInstance] = DegreeRotation;
-        DegreeRotation = _float4(XMConvertToRadians(DegreeRotation.x), XMConvertToRadians(DegreeRotation.y), XMConvertToRadians(DegreeRotation.z), 0.f);
-        Rotation = XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat4(&DegreeRotation)));
-    }
-
-    ImGui::Text("Position");
-    _vector vPos = PickedMatrix.r[3];
-    {
-        ImGui::PushItemWidth(90.0f);
-        ImGui::InputFloat("X", &vTranslation.m128_f32[0], 1.f, 1.f); ImGui::SameLine();
-        ImGui::InputFloat("Y", &vTranslation.m128_f32[1], 1.f, 1.f); ImGui::SameLine();
-        ImGui::InputFloat("Z", &vTranslation.m128_f32[2], 1.f, 1.f);
-
-        Translation = XMMatrixTranslationFromVector(vTranslation);
-    }
-    ImGui::PopItemWidth();
-
-    PickedMatrix = Scale * Rotation * Translation;
-    
-    XMStoreFloat4x4(&m_pInstanceMatrix[m_iPickedInstance], PickedMatrix);
-
-#ifdef _DEBUG
-    if (ImGui::Button("OK"))
-        m_pModelCom->Change_InstanceInfo(m_iPickedInstance, PickedMatrix);
-
-    ImGuiID ShaderId = ImGui::GetID("ShaderPass");
-    ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
-    for (_uint i = 0; i<m_pShaderCom->Get_PassCount(); ++i)
-    {
-        if (ImGui::Button(m_pShaderCom->Get_PassName(i))) {
-            m_iShaderPassIndex = i;
-        }
-    }
-    ImGui::EndChildFrame();
-#endif
-    //LOD媛 珥?4?④퀎濡??섎돇?댁졇?덈뒗???닿굅 ?대뼸寃???嫄댁? ?앷컖.
-    //?쒖씪 媛꾨떒??諛⑸쾿 => 荑쇰뱶?몃━?먯꽌 ?ш린??鍮꾨??댁꽌 ?뚮뜑????紐⑤뜽 媛덉븘?쇨린.
-    //=> ?몄뒪?댁떛??硫붿돩?ㅼ? 媛?留ㅽ듃由?뒪留덈떎 鍮꾧탳?댁꽌 硫붿돩 萸??몄? 寃곗젙?댁빞?좊벏?
-
+	
+	_float vScale[3] = {};
+	_float vRotation[3] = {};
+	_float vTransfrom[3] = {};
+	ImGuizmo::DecomposeMatrixToComponents(reinterpret_cast<_float*>(&m_pInstanceMatrix[m_iPickedInstance]), vTransfrom, vRotation, vScale);
+	m_pGameInstance->Use_Gizmo_Offset(reinterpret_cast<_float3*>(&vScale), reinterpret_cast<_float3*>(&vRotation), reinterpret_cast<_float3*>(&vTransfrom));
 }
 
 HRESULT CEdit_MapObject_Instance::Ready_Component(void* pArg)
 {
     MAP_LOAD* pDesc = static_cast<MAP_LOAD*>(pArg);
-    InstanceDesc = *pDesc;
-
     CMesh_Instance::MESH_INST_DESC Desc{};
-    Desc.iNumInstance= m_iNumInstance = pDesc->iNumInstance;
-    Desc.pTransformMatrix = pDesc->WorldMatrix;
-    
-    strcpy_s(m_ModelName, pDesc->ModelName);
+	m_iSaveIndex = pDesc->iSaveIndex;
 
-    m_pRotation = new _float4[m_iNumInstance];
+	//있던 거 로드할 때 안 터지게 처리할것. 저장하는 Instance 숫자 돌려놓는 거랑 깊은복사. 풀 색 셰이더에서 곱할 수도 있게.ㅇㅇ
+	m_iNumInstance = pDesc->iNumInstance;
+	if (pDesc->IsLoaded)
+		Desc.iNumInstance = 1;
+	else
+		Desc.iNumInstance = m_iNumInstance;
+	Desc.pTransformMatrix = pDesc->InstanceWorldMatrix;
+	m_pInstanceMatrix = new _float4x4[pDesc->iNumInstance];
+	memcpy(m_pInstanceMatrix, pDesc->InstanceWorldMatrix, sizeof(_float4x4) * pDesc->iNumInstance);
+	m_iShaderPassIndex = pDesc->iShaderPassIndex;
+	m_vDiffuseColor = pDesc->vDiffuseColor;
 
-    if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), StringToWString(pDesc->ModelName),
+	_wstring ProtoName = TEXT("Prototype_Component_Model_Instance_");
+
+	if (pDesc->IsLoaded)
+	{
+
+
+		_string NameTemp = pDesc->ModelName;
+		_uint NumStartsPos = NameTemp.find_last_not_of("0123456789");
+		NumStartsPos == string::npos ? NumStartsPos = 0 : NumStartsPos += 1;
+
+		//이게 뒤에 다 뺀 LOD3까지 있는 이름.
+		_string ModelName = NameTemp.substr(0, NumStartsPos+1);
+
+		strcpy_s(m_ModelName, ModelName.c_str());
+
+		m_pRotation = new _float4[m_iNumInstance];
+
+		_uint V = ModelName[ModelName.length() - 1] - '0' + 1;
+		m_pModelComArray.resize(V);
+	
+
+		ProtoName += StringToWString(ModelName);
+
+		//얘는 뒷숫자 말고 앞 숫자를 바꿔야함.
+		for (_uint i = 0; i < V; ++i)
+		{
+			_wstring ModelCom = ProtoName;
+			ModelCom.pop_back();
+			ModelCom += to_wstring(i);
+			ModelCom += to_wstring(m_iSaveIndex);
+			_char ModelName[MAX_PATH] = {};
+			sprintf_s(ModelName, "Com_Model%d", i);
+
+			if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+				StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), &Desc)))
+				return E_FAIL;
+		}
+	}
+	else
+	{
+		ProtoName += StringToWString(pDesc->ModelName);
+		strcpy_s(m_ModelName, pDesc->ModelName);
+
+		_uint V = m_ModelName[strlen(m_ModelName) - 1] - '0' + 1;
+		m_pModelComArray.resize(V);
+
+		//얘는 뒷숫자
+		for (_uint i = 0; i < V; ++i)
+		{
+			_wstring ModelCom = ProtoName;
+			ModelCom.pop_back();
+			ModelCom += to_wstring(i);
+			_char ModelName[MAX_PATH] = {};
+			sprintf_s(ModelName, "Com_Model%d", i);
+
+			if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ModelCom,
+				StringToWString(ModelName), reinterpret_cast<CComponent**>(&m_pModelComArray[i]), &Desc)))
+				return E_FAIL;
+		}
+	}
+
+
+    /*if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), ProtoName,
         TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), &Desc)))
-        return E_FAIL;
+        return E_FAIL;*/
 
     if (FAILED(__super::Add_Component(ENUM_CLASS(LEVEL::MAP), TEXT("Prototype_Component_Shader_NonAnimMesh_Instance"),
         TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
         return E_FAIL;
 
-    m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat4(&pDesc->m_WolrdPos), 1.f));
+	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&pDesc->WorldMatrix));
     return S_OK;
 }
 
@@ -239,6 +262,12 @@ void CEdit_MapObject_Instance::Bind_Resources()
 {
     m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
     m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+}
+
+_uint CEdit_MapObject_Instance::ShaderPassWindow()
+{
+	m_pMapInterface->Set_ShaderPass(m_pShaderCom, &m_iShaderPassIndex);
+	return m_iShaderPassIndex;
 }
 
 void CEdit_MapObject_Instance::Ready_Events()
@@ -275,8 +304,12 @@ CGameObject* CEdit_MapObject_Instance::Clone(void* pArg)
 void CEdit_MapObject_Instance::Free()
 {
     __super::Free();
-    Safe_Release(m_pModelCom);
+	for (auto& pModel : m_pModelComArray)
+		Safe_Release(pModel);
     Safe_Release(m_pShaderCom);
     //마지막으로 깐 놈들 지우려면 이터레이터 이용해서 second 지우고 erase. 뒤에서부터 쭉~ 되게. 맵으로 추출할 때는 IsActive활성화 된 놈만.
-    Safe_Delete_Array(m_pRotation);
+	Safe_Delete_Array(m_pRotation);
+	Safe_Delete_Array(m_pInstanceMatrix);
+
+	Safe_Release(m_pMapInterface);
 }

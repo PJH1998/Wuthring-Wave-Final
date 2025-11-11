@@ -36,7 +36,7 @@ public:
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
 
-	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) {}
+	virtual		void			Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
 	virtual void Collider_Active(const _wstring& wStrColliderTag, _bool isActive) override;
@@ -77,6 +77,8 @@ private:
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
 	_float					m_fImpluseRate{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
 #pragma endregion
 
 #pragma region PHYSICS

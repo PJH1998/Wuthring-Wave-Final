@@ -134,7 +134,7 @@ public:
 		m_tUIDesc = tUIDesc; 
 	}
 	void					Set_VariantUIDesc(VARIANTREADY_UI_DESC tVarUIDesc)	{ 
-		m_cachedVariantUIDesc = tVarUIDesc;  
+		m_cachedVariantUIDesc = tVarUIDesc;  // 나중에 m_tUIDesc 에 커스텀 변수를 합치긴 하나, 일관된 타이밍에 합치기를 위해 임시저장
 	}
 	void					Set_CurTexIndex(_uint iIndex)		{ m_iCurTexIndex = iIndex; };
 

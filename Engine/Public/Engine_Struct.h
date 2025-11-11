@@ -29,6 +29,15 @@ namespace Engine
 		_float fRange;
 	}LIGHT_DESC;
 
+	typedef struct tagVF_Light {
+		_uint iType;		// 0 = Directional, 1 = Point
+		_float fRange;
+		_float Padding[2];
+		_float4 vDiffuse;
+		_float4 vDirection;
+		_float4 vPosition;
+	}VF_LIGHT;
+
 	typedef struct tagShadowLightDesc
 	{
 		XMFLOAT4	vDirection;
@@ -88,6 +97,16 @@ namespace Engine
 		float				fFovy = {};
 		bool				isLerp = { true };
 	}CAMERA_FRAME;
+
+	typedef struct tagCameraShake
+	{
+		_float		fDuration = {};		// Shake 지속시간
+		_float		fFrequency = {};	// 주파수 (초당 흔들림 빈도)
+		_float		fAmplitude = {};	// 흔들림 세기
+		_float3	vTranslation = {};	// Pos 흔들기위한 강도
+		_float3	vRotation = {};		// Rotation 강도
+		_float		fFovKick = {};		// Fovy 변동
+	}CAMERA_SHAKE;
 
 	typedef struct tagMapObject
 	{
@@ -208,9 +227,16 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// 
-	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
+		// 1. Default Animation CB info
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibbonAnimIndex; // 4
+	}ANIMATION_CBINFO;
+
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
+	typedef struct tagAnimationFlyCBInfo {
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
@@ -234,7 +260,7 @@ namespace Engine
 		_uint iClipIndexMidDU;      // 4 
 		_uint iClipIndexU;          // 4 
 		_uint iWeightClipDU;       // 4 
-	}ANIMATION_CBINFO;
+	}ANIMATIONFLY_CBINFO;
 
 	typedef struct tagGpuBlendInfo {
 		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.
@@ -312,6 +338,8 @@ namespace Engine
 		//  iRowH               : 현재 줄(row)에서 가장 높은 글리프의 높이(줄바꿈 간격 계산용).
 		_int                                        iAtlasW, iAtlasH, iPenX, iPenY, iRowH;
 		_bool                                       isHasKerning;
+
+		_uint										iPadding;
 	}FTCUSTOM_FONT;
 
 
@@ -324,7 +352,7 @@ namespace Engine
 		_float  fScale;
 
 		_float2 vLifeTime;
-		_int	iShaderFlag;
+		_uint	iShaderFlag;
 
 		// for shader
 		_float4 vColor;				// Font Color

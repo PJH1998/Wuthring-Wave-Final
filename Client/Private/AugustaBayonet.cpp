@@ -43,6 +43,9 @@ HRESULT CAugustaBayonet::Initialize_Clone(void* pArg)
 void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
+	
+	//if (m_IsAnimationEnd)
+	//	m_isActivate = false;
 
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
@@ -134,7 +137,8 @@ void CAugustaBayonet::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 
 void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-	// 게이지 올리기?
+
+	// 1. 게이지 올리기?
 	CAbility* pAbility = CGameSystem::GetInstance()
 		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::AUGUSTA));
 
@@ -144,16 +148,21 @@ void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifo
 
 	switch (m_iVolumeIdx)
 	{
-	case VOLUME::VOLUME_ATTACK: // 기본 공격시 공명 게이지와 궁게이지 채우기
+	case VOLUME::VOLUME_ATTACK: // 기본 공격시 협주 게이지와 궁게이지 채우기
 		pAbility->Add_Cost(COST_TYPE::COST1, 8.f);
 		pAbility->Add_Cost(COST_TYPE::COST2, 5.f);
 		pAbility->Add_Cost(COST_TYPE::COST5, 3.f);
+		pAbility->Add_HarmonyGauge(4.f);
 		break;
 	case VOLUME::VOLUME_STRONG_ATTACK: // 강공 시 POINT 게이지와 궁 게이지 채우기.
 		pAbility->Add_Cost(COST_TYPE::COST2, 10.f);
 		pAbility->Add_Cost(COST_TYPE::COST5, 5.f);
+		pAbility->Add_HarmonyGauge(8.f);
 		break;
 	}
+
+	// 2. 타격감을 위한. 감속 시간 제한 준다. =>
+	//m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.8f);
 	
 }
 

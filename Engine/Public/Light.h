@@ -3,6 +3,8 @@
 
 NS_BEGIN(Engine)
 
+class CGameInstance;
+
 class CLight final : public CBase
 {
 private:
@@ -21,9 +23,13 @@ public:
 	HRESULT			Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 
 private:
+	CGameInstance*	m_pGameInstance = { nullptr };
 	LIGHT_DESC		m_LightDesc = {};
 
-	_bool				m_isActive = { true };
+	_bool			m_isActive = { true };
+
+private:
+	void			Add_VF_Light();
 
 public:
 	static		CLight*	Create(const LIGHT_DESC& LightDesc);

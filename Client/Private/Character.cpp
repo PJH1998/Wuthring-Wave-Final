@@ -183,6 +183,7 @@ _bool CCharacter::Is_LandCollider(_float3* pNormal)
 #pragma endregion
 
 #pragma region PHYSICS
+
 const _float CCharacter::Calculate_RootMotionScale()
 {
 	// 타겟이 없으면 원래 비율로
@@ -190,16 +191,18 @@ const _float CCharacter::Calculate_RootMotionScale()
 		return 1.f;
 
 	// 타겟이 있는 경우 거리 계산 후 RootMotionScale 조절.
-	if (m_fTargetDistance < 3.f)
+	if (m_fTargetDistance < 1.f)
+		return 0.05f; // 거의 이동량 없게.
+	else if (m_fTargetDistance < 3.f)
 		return 0.5f;  // 짧게: 과접근 방지
 	else if (m_fTargetDistance < 3.5f)
-		return 0.6f;  // 짧게: 과접근 방지
+		return 0.6f;  
 	else if (m_fTargetDistance < 4.f)
-		return 0.7f;  // 짧게: 과접근 방지
+		return 0.7f;  
 	else if (m_fTargetDistance >= 7.f)
 		return 1.4f;  // 길게: 빠른 접근
 	
-	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비
+	return 1.f; // 3.f ~ 7.f 사이면? 똑같은 비율
 }
 
 _bool CCharacter::Check_ClimbableWall(_float3* pWallNormal)
@@ -250,7 +253,16 @@ _bool CCharacter::Check_ClimbableWall_Above(_float fEndRayOffset, _float3* pWall
 void CCharacter::Set_Gravity(_bool IsGravity)
 {
 	ASSERT_CRASH(m_pColliderCom);
-	m_pColliderCom->Set_Gravity(IsGravity);
+	
+
+	if (!m_IsQTE)
+		m_pColliderCom->Set_Gravity(IsGravity);
+	else
+	{
+		ASSERT_CRASH(m_pQTEColliderCom);
+		m_pQTEColliderCom->Set_Gravity(IsGravity);
+	}
+		
 }
 
 
@@ -310,22 +322,19 @@ _matrix CCharacter::Get_WorldMatrix()
 	return m_pTransformCom->Get_WorldMatrix();
 }
 
+#pragma endregion
+
 #ifdef _DEBUG
-void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
+void CCharacter::Print_LookRay()
 {
-	vRayDir = XMVector3Normalize(vRayDir);
-	_vector vEnd = XMLoadFloat3(&vEndPos);
-	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
+	_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION) + (XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 0.3f);
+	_vector vEndPos = vStartPos + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * 1.5f;
+	
+
+	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
 #endif // _DEBUG
-
-
-
-
-
-#pragma endregion
-
 
 #pragma region STATE
 
@@ -333,15 +342,25 @@ void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
 void CCharacter::Camera_Shake(_float fIntensity)
 {
 
-	_float3 vDir = {0.5f, 0.1f, -0.1f};
-	
-	m_pGameInstance->OnShake(vDir);
+	//_float3 vDir = {0.5f, 0.1f, -0.1f};
+	//
+	//m_pGameInstance->OnShake(vDir);
 }
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
 {
-	ASSERT_CRASH(m_pTransformCom);
+	if (nullptr == m_pTransformCom)
+		return;
+
 	m_pGameSystem->Play_Action(strActionTag, m_pTransformCom->Get_WorldMatrix(), false);
+}
+
+_bool CCharacter::Check_AnyConidtion_FromAbility(_uint iCondition)
+{
+	if (nullptr == m_pAbillityCom)
+		return false;
+
+	return m_pAbillityCom->Check_AnyCondition(iCondition);
 }
 
 void CCharacter::Bind_Condition_ToAbillity(_uint iCondition)
@@ -358,6 +377,14 @@ void CCharacter::Remove_Condition_ToAbillity(_uint iCondition)
 		return;
 
 	m_pAbillityCom->Remove_Condition(iCondition);
+}
+
+void CCharacter::Bind_CostCondition_ToAbility(_uint iCondition, _uint iConditionFlag)
+{
+	if (nullptr == m_pAbillityCom)
+		return;
+
+	m_pAbillityCom->Bind_CostCondition(iCondition, iConditionFlag);
 }
 
 _vector CCharacter::Get_LookVector()
@@ -419,6 +446,7 @@ _vector CCharacter::Get_RightVector_NoPitch()
 	return vRight;
 }
 
+
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
     if (nullptr == pTargetTransform)
@@ -457,19 +485,35 @@ _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 }
 
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	
     return IsPlayAnimationEnd;
 }
 
-void CCharacter::Start_FlyBlending(_float fDuration)
+//_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
+//{
+//	ASSERT_CRASH(m_pModelCom);
+//	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+//	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+//
+//	return IsPlayAnimationEnd;
+//}
+
+// Fly Animation 전용.
+_bool CCharacter::Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
-	
+	ASSERT_CRASH(m_pModelCom);
+	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+
+	return IsPlayAnimationEnd;
 }
+
+
 
 
 void CCharacter::Change_State(_uint iCategory, _uint iSubState, void* pArg)
@@ -653,12 +697,19 @@ void CCharacter::Sync_Transform_FromPlayer(_fmatrix WorldMatrix, _fvector vPrevV
 	ASSERT_CRASH(m_pTransformCom);
 	ASSERT_CRASH(m_pColliderCom);
 
+	if (m_IsQTE)
+		return;
+	
 	// 0. World Matrix
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);  // 위치 설정
 }
 
 void CCharacter::Sync_Transform_ToPlayer(CTransform* pTransformCom)
 {
+
+	if (m_IsQTE)
+		return;
+
 	_matrix mat = m_pTransformCom->Get_WorldMatrix();
 	pTransformCom->Set_WorldMatrix(mat);
 
@@ -701,11 +752,59 @@ CAbility* CCharacter::Get_AbilityCom()
 {
     return m_pAbillityCom;
 }
+_float CCharacter::Get_Cost(COST_TYPE eCostType)
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return m_pAbillityCom->Get_Cost(eCostType);
+}
+_float CCharacter::Get_MaxCost()
+{
+	if (nullptr == m_pAbillityCom)
+		return 0.f;
+
+	return 100.f;
+}
 void CCharacter::Sync_UI()
 {
     // Character Info Sync 
     //m_pGameSystem->Sync_CharacterInfo(m_Stats);
 }
+
+#pragma endregion
+
+#pragma region CONDITION
+
+void CCharacter::Add_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition |= iFlag;
+}
+
+_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) != 0;
+}
+_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) == iFlag;
+}
+
+void CCharacter::Remove_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition &= ~iFlag;
+}
+
+void CCharacter::Remove_AllCondition()
+{
+	m_iCondition = 0;
+}
+
+
 #pragma endregion
 
 
@@ -719,13 +818,15 @@ void CCharacter::Free()
     Safe_Release(m_pInputControllerCom);
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
+	Safe_Release(m_pQTEColliderCom);
+	Safe_Release(m_pFlyComputeShaderCom);
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
 			Safe_Release(pAttackVolume);
 	}
-		
+	
 
 	m_AttackVolumes.clear();
 	

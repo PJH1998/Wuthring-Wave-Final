@@ -40,7 +40,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-	
+	m_DelayedActions = queue<DELAYED_ACTION>();
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
@@ -59,8 +59,14 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_pWing->SetActivate(false);
     
 	
+	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
+
+	
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 	
     return S_OK;
 }
@@ -70,6 +76,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	// 0. Delayed Action 수행.
+	Process_DelayedActions();
+
 	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
@@ -78,7 +87,7 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	}
 
     // 2. 이전 위치 저장
-    m_pTransformCom->Save_PreviousPosition();
+	m_pTransformCom->Save_PreviousPosition();
 
 	// 3. 몬스터가 있다면?
 	if (nullptr != m_pTargetTransform)
@@ -86,20 +95,11 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
 		vDistance = XMVectorSetY(vDistance, 0.f);
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
-
-		/*
-		_vector vVelocity = m_pTransformCom->Get_Velocity();
-		//m_fDistance : 플레이어와 몬스터 사이의 거리
-		m_pColliderCom->Update(vVelocity / fTimeDelta * (m_fDistance * fTimeDelta));
-		*/
 	}
 	
 	// 4. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
-
-	//// 3. Ability Update();
-	//m_pAbillityCom->Update(fTimeDelta);
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -117,27 +117,31 @@ void CAugusta::Update(_float fTimeDelta)
 
     // 3. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
-	// 여기서 PlayAnimation 도중에 Notify가 실행됨 => 그럼 이시점에서 WorldMatrix를 줌.
 
 
-    // 5. 현재 위치 - 1Frame 이전 위치 값 계산
-    _vector vVelocity = m_pTransformCom->Get_Velocity();
+	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
+	_vector vVelocity = m_pTransformCom->Get_Velocity();
+	if (!m_IsQTE)
+	{
+		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-	//vVelocity += XMVectorSet(0.f, -9.8f, 0.f, 0.f) * fTimeDelta * 0.1f;
-
-    // 6. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
-	m_pColliderCom->Update(vVelocity / fTimeDelta);
-
-    // 7. Camera 갱신 => 위치 따라오게
-    m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-
-	// 8. Land Check
+		// 6. Camera 갱신 => 위치 따라오게
+		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
+	}
+	else
+	{
+		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
+	}
+	// 7. Land Check
 	m_IsLand = Is_LandCollider();
+   
+	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
+	Remove_Condition(CHARACTER_CONDITION::HIT);
 
-	// 9. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	m_IsHit = false;
+	//m_IsHit = false;
 
-	// 10. MainAttackVolume 설정
+	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Update(fTimeDelta);
 }
@@ -154,7 +158,19 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Late_Update(fTimeDelta);
 
-    m_pColliderCom->Sync_Position(m_pTransformCom);
+	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+	if (!m_IsQTE)
+		m_pColliderCom->Sync_Position(m_pTransformCom);
+	else
+		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
+	
+
+	if (m_IsQTEend)
+	{
+		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
+		m_IsQTEend = false;
+	}
 	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -198,7 +214,15 @@ void CAugusta::Render()
     }
 
 #ifdef _DEBUG
-    m_pColliderCom->Render();
+	/*if (!m_IsQTE)
+		m_pColliderCom->Render();
+	else
+		m_pQTEColliderCom->Render();*/
+	m_pColliderCom->Render();
+	m_pQTEColliderCom->Render();
+    
+	Print_LookRay();
+	
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -256,13 +280,12 @@ void CAugusta::TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionTy
 		GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
 		m_pStateMachineCom->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 		break;
-	case CHARACTER_TRANSITIONTYPE::RUN:
-		break;
 	}
-	
-
 	// 상태 변수 초기화
 	m_StateContext.Clear();
+
+	// QTE 플래그 강제 리셋.
+	m_IsQTE = false;
 }
 
 // AnimName이 같은걸로 매핑되어있음.
@@ -382,10 +405,11 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     }
 }
 
-// Hit 판정.
+
+// Hit 판정. => QTE 상태면 안맞음.
 void CAugusta::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit)
+	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
 		return;
 
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
@@ -393,27 +417,32 @@ void CAugusta::Hit_Judge(void* pArg)
 	_uint iSubState = eKey.iSubState;
 
 	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
-	
-	// 1. 맞는데 또맞진 말자..
+
+	// 1. 맞는데 또맞지 않기
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 데미지는 바로 감소시킵니다.
+	// 2. 즉시 중복 방지 플래그 세팅
+	m_PendingConditions[HIT] = true;
+
+	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 3. 캐스팅 해서? => 들고 있기.
-	m_PendingHitDesc = *pDesc;
-
+	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
+	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
 	
-
-	// 4. 현재 상태 변경.
-	m_IsHit = true;
+	m_PendingHitDesc = *pDesc;
 }
+
 
 // 패링 판단.
 void CAugusta::Parry_Judge(void* pArg)
 {
+
+	if (m_PendingConditions[HIT] || m_PendingConditions[QTE] || m_PendingConditions[PARRY])
+		return;
+
 	// 1. 패링 시 ? Layer 변경? => 잠시 무적
 	CCharacter::PARRY_DESC* pDesc = static_cast<PARRY_DESC*>(pArg);
 	
@@ -426,14 +455,30 @@ void CAugusta::Sync_Position()
     m_pColliderCom->Sync_Position(m_pTransformCom);
 }
 
-
-#ifdef _DEBUG
-void CAugusta::PartRotation(_uint iPartType, _fvector vQuaternion)
+void CAugusta::Bind_QTE(_bool IsQTE)
 {
+	m_IsQTE = IsQTE;
 
+	if (m_IsQTE)
+	{
+		// Activate
+		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
+
+		// 내 앞에서 생성. (안 곂치게)
+		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
+		vPos += vLook * 1.5f;
+		vPos += XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 1.5f;
+		m_pQTEColliderCom->Set_Position(vPos);
+		m_pQTEColliderCom->IsActivate(true);
+
+		SetActivate(true);
+		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
+		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
+	}
 }
 
-#endif // _DEBUG
+
+
 
 #pragma region NOTIFY
 void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
@@ -482,16 +527,126 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 
 	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
 	getline(wss, var1, L'|');
+	if (var1 == TEXT("HITSTOP"))
+		Process_HitStop(wStrObjectTag);
+	else if (var1 == TEXT("CAMERA"))
+		Process_CameraAction(wStrObjectTag);
+	else
+		Process_VolumeChange(wStrObjectTag);
+
+	return;
+}
+
+void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+
+}
+
+
+#pragma endregion
+
+#pragma region 4. EVENT
+
+// 지연 처리 작업
+void CAugusta::Process_DelayedActions()
+{
+	while (!m_DelayedActions.empty())
+	{
+		DELAYED_ACTION eAction = m_DelayedActions.front();
+
+		void* pData = eAction.pData;
+		switch (eAction.type)
+		{
+			case DELAYED_ACTION::TYPE::HIT:
+			{
+				//m_IsHit = true;
+				Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				break;
+			}
+			case DELAYED_ACTION::TYPE::PARRY:
+			{
+				break;
+			}
+			
+		default:
+			break;
+		}
+
+		m_DelayedActions.pop();
+	}
+}
+#pragma endregion
+
+
+#pragma region HELPER 함수
+void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	// 4개의 변수 준비
+	_wstring var1, var2, var3, var4;
+
+	getline(wss, var1, L'|'); // HITSTOP
+	getline(wss, var2, L'|'); // Layer Tag
+	getline(wss, var3, L'|'); // Rate
+	getline(wss, var4, L'|'); // Duration
+
+	_float fRate = stof(var3);
+	_float fDuration = stof(var4);
+
+	if (var2 == TEXT("ALL"))
+	{
+		// 캐릭터의 경우 전체 시간 감소.
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), fRate, fDuration);
+	}
+
+}
+void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
+{
+	_wstring Tag;
+	_wstring Duration;
+	_wstring Frequency; 
+	_wstring Amplitude;
+	_wstring FovKick;
+	_wstring Intensity; // 강도
+	_wstring Dir; // UD, LR
+
+	/* CAMERA | Duration | Frequency | Amplitude | Intensity | FovKick | Dir*/
+	wstringstream wss(wStrObjectTag);
+	getline(wss, Tag, L'|');
+	getline(wss, Duration, L'|'); 
+	getline(wss, Frequency, L'|');
+	getline(wss, Amplitude, L'|');
+	getline(wss, Intensity, L'|');
+	getline(wss, FovKick, L'|');
+	getline(wss, Dir, L'|');
+
+	CAMERA_SHAKE ShakeDesc = {};
+	ShakeDesc.fDuration = stof(Duration);
+	ShakeDesc.fFrequency = stof(Frequency);
+	ShakeDesc.fAmplitude = stof(Amplitude);
+	_float fIntensity = stof(Intensity);
+	if (Dir == TEXT("UD"))
+		ShakeDesc.vRotation = { fIntensity, 0.f, 0.f};
+	else if (Dir == TEXT("LR"))
+		ShakeDesc.vRotation = { 0.f, fIntensity ,0.f };
+	else if (Dir == TEXT("UDLR"))
+		ShakeDesc.vRotation = { fIntensity, fIntensity ,0.f };
+
+	ShakeDesc.fFovKick = stof(FovKick);
+
+
+	// 흔든다.
+	m_pGameInstance->OnShake(ShakeDesc);
+	return;
+}
+void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
-	
-	
-	if (var1 == TEXT("CAMERA"))
-	{
-	//	_float fIntensity = stof(var2);
-	//	Camera_Shake(fIntensity); // Shaking 강도.
-		return;
-	}
 
 	_uint iVolumeIdx = stoul(var3);
 
@@ -512,8 +667,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-		
-		
+
+
 	}
 	else if (var1 == TEXT("GRIFFON"))
 	{
@@ -549,24 +704,18 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-		
+
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var2 == TEXT("ATTACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK); 
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
 		else if (var2 == TEXT("SKILL"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
 }
-void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
-{
-
-
-}
 #pragma endregion
 
- 
 
 
 
@@ -593,6 +742,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
         CRASH("Compute Shader");
 
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
+		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
+
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
         CRASH("Model");
@@ -601,10 +754,17 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
         , pDesc->stateMachineData.second, TEXT("Com_StateMachine"), reinterpret_cast<CComponent**>(&m_pStateMachineCom), nullptr)))
         CRASH("StateMachine");
 
-	//if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->abilityData.first)
-	//	, pDesc->abilityData.second, TEXT("Com_Ability"), reinterpret_cast<CComponent**>(&m_pAbillityCom), nullptr)))
-	//	CRASH("Ability");
 
+	CCollider::COLLIDER_DESC ColliderDesc{};
+	ColliderDesc.vPos = pDesc->vPosition;
+	ColliderDesc.vOffset = { 0.f, 0.67f, 0.f };
+	ColliderDesc.eType = EMotionType::Kinematic;
+	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::QTE);
+	ColliderDesc.fHeight = 0.4f;
+	ColliderDesc.fRadius = 0.5f;
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::STATIC)
+		, TEXT("Prototype_Component_Collider"), TEXT("Com_QTECollider"), reinterpret_cast<CComponent**>(&m_pQTEColliderCom), &ColliderDesc)))
+		CRASH("Collider");
 }
 
 void CAugusta::Ready_Variables(const CHARACTER_DESC* pDesc)
@@ -830,7 +990,4 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
-
-	
-
 }

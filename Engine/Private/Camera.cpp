@@ -13,11 +13,22 @@ CCamera::CCamera(const CCamera& Prototype)
 {
 }
 
-void CCamera::OnShake(const _float3& vDir)
+void CCamera::OnShake(const CAMERA_SHAKE& tData)
 {
+	if (m_isShake == true)
+		return;
 	m_isShake = true;
 	m_fShakeTimeAcc = 0.f;
-	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) + XMLoadFloat3(&vDir) * 10.f);
+	m_fRandTimeAcc = 0.f;
+
+	memcpy(&m_tShakeData, &tData, sizeof(CAMERA_SHAKE));
+
+	m_fADSRStart = min(0.04f, m_tShakeData.fDuration * 0.2f);
+	m_fADSREnd = max(0.12f, m_tShakeData.fDuration * 0.6f);
+
+	// Origin Store
+	XMStoreFloat4(&m_vOriginQuaternion, m_pTransformCom->Get_Quaternion());
+	m_fOriginFov = m_fFovy;
 }
 
 HRESULT CCamera::Initialize_Prototype()
@@ -43,10 +54,6 @@ HRESULT CCamera::Initialize_Clone(void* pArg)
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&(pDesc->vEye)));
 	m_pTransformCom->LookAt(XMLoadFloat4(&(pDesc->vAt)));
-
-	m_fShakeDuration = 0.3f;
-	m_fShakeStiffness = 70.f;
-	m_fShakeDamp = 0.8f;
 
 	return S_OK;
 }
@@ -124,22 +131,51 @@ void CCamera::Shaking(_float fTimeDelta)
 		return;
 
 	m_fShakeTimeAcc += fTimeDelta;
+	m_fRandTimeAcc += fTimeDelta;
 
-	if (m_fShakeTimeAcc > m_fShakeDuration)
+	if (m_fShakeTimeAcc > m_tShakeData.fDuration)
 	{
 		m_isShake = false;
-
-		m_vShakeOffset = { 0.f, 0.f, 0.f };
+		m_fFovy = m_fOriginFov;
 		return;
 	}
 
-	_vector vVelocity = XMVector3TransformNormal(XMLoadFloat3(&m_vShakeVelocity), XMMatrixRotationQuaternion(m_pTransformCom->Get_Quaternion()));
+	if (m_fRandTimeAcc >= 1.f / m_tShakeData.fFrequency)
+	{
+		m_vRand = _float3(m_pGameInstance->Rand(-1.f, 1.f), m_pGameInstance->Rand(-1.f, 1.f), m_pGameInstance->Rand(-1.f, 1.f));
+		m_fRandTimeAcc = 0.f;
+	}
 
-	XMStoreFloat3(&m_vShakeOffset, XMLoadFloat3(&m_vShakeOffset) +  vVelocity * fTimeDelta);
-	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) - (XMLoadFloat3(&m_vShakeOffset) * m_fShakeStiffness * fTimeDelta));
-	XMStoreFloat3(&m_vShakeVelocity, XMLoadFloat3(&m_vShakeVelocity) * m_fShakeDamp);
+	_float fWeight = ADSR();
 
-	m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + XMLoadFloat3(&m_vShakeOffset));
+	// Rotation
+	_float fPitch = m_tShakeData.vRotation.x * m_vRand.x * fWeight * m_fDecay * m_tShakeData.fAmplitude;
+	_float fYaw = m_tShakeData.vRotation.y * m_vRand.y * fWeight * m_fDecay * m_tShakeData.fAmplitude;
+	_float fRoll = m_tShakeData.vRotation.z * m_vRand.z * fWeight * m_fDecay * m_tShakeData.fAmplitude;
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(fPitch, fYaw, fRoll);
+	m_pTransformCom->Rotation_Quaternion(XMQuaternionMultiply(XMLoadFloat4(&m_vOriginQuaternion), vQuat));
+
+	m_tShakeData.fAmplitude *= 0.5f;
+	//m_tShakeData.fAmplitude *= 0.98f;
+
+	// Fov
+	m_fFovy = m_fOriginFov + m_tShakeData.fFovKick * fWeight * m_fDecay;
+
+	// 감쇠
+	m_fDecay = 1.f - (m_fShakeTimeAcc / m_tShakeData.fDuration);
+	m_fDecay *= m_fDecay;
+}
+
+_float CCamera::ADSR()
+{
+	if (m_fShakeTimeAcc <= m_fADSRStart) return m_fShakeTimeAcc / m_fADSRStart;
+	_float fTail = m_tShakeData.fDuration - m_fShakeTimeAcc;
+	if (fTail <= m_fADSREnd) return max(0.f, fTail / m_fADSREnd);
+	return 1.0f;
+}
+
+void CCamera::Perlin_Noise(_float fTimeDelta)
+{
 }
 
 void CCamera::Free()

@@ -7,6 +7,16 @@ NS_BEGIN(Client)
 class CAugusta final : public CCharacter
 {
 public:
+	enum PENDING_CONDITION : _uint
+	{
+		HIT = 0,
+		DODGE,
+		PARRY,
+		QTE,
+		CONDITION_END
+	};
+
+public:
 	enum VOLUME
 	{
 		VOULME_RISE_ZERO = 0,
@@ -29,6 +39,7 @@ private:
 		EAugustaUniqueType m_eUniqueType = EAugustaUniqueType::END;
 		EAugustaBurstType m_eBurstType = EAugustaBurstType::END;
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
+		EAugustaQTEType m_eQTEType = EAugustaQTEType::END;
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -109,7 +120,7 @@ public:
 		TYPE_END
 	};
 
-#pragma region 0. 
+#pragma region 0. 기본 작업
 protected:
 	explicit CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAugusta(const CAugusta& Prototype);
@@ -140,12 +151,7 @@ public:
 	virtual void Parry_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
 
-	
-
-#ifdef _DEBUG
-public:
-	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-#endif // _DEBUG
+	virtual void Bind_QTE(_bool IsQTE) override;
 
 #pragma region 2. NOTIFY
 public:
@@ -153,11 +159,18 @@ public:
 	virtual void Effect_Active(const _wstring& wStrEffectTag) override;
 	virtual void Object_Func(const _wstring& wStrObjectTag) override;
 
+	
+
 #pragma endregion
 
-#pragma region 3. CALLBACK
-	public:
-		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma region 3. CALL BACK
+public:
+	void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
+#pragma region 4. EVENT
+public:
+	virtual void Process_DelayedActions() override;
 #pragma endregion
 
 
@@ -174,6 +187,18 @@ private:
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
 
 	vector<class CAttackVolume*> m_AttackVolumes;
+
+	_bool m_PendingConditions[CONDITION_END] = {};
+
+#pragma region HELPER 함수 => Augusta만 사용
+private:
+	void Process_HitStop(const _wstring& wStrObjectTag);
+	void Process_CameraAction(const _wstring& wStrObjectTag);
+	void Process_VolumeChange(const _wstring& wStrObjectTag);
+	
+#pragma endregion
+
+
 
 
 private:

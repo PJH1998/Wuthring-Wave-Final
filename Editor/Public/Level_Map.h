@@ -29,7 +29,6 @@ public:
 	void Load_Objects();
 
 	void Create_TriggerBox();
-	//?대씪?댁뼵?몄뿉 由ъ냼?ㅼ뿉 Map ?대뜑???덈뒗 .dat???쎌뼱???ㅻ툕?앺듃?ㅻ쭔) ?꾨Ⅴ硫??앹꽦?????덇쾶 ?섍린. ?앹꽦 ?꾩튂??萸?. ?뚯븘??
 
 private:
 	HRESULT Ready_Static_Component();
@@ -52,6 +51,7 @@ private:
 	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
 	class CEdit_MapObject_Destruction* m_pPickedDestructObject = {nullptr};
 	class CEdit_TriggerBox* m_pPickedTriggerBox = { nullptr };
+	class CEdit_MonsterSpawnor* m_pPickedSpawnor = { nullptr };
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };
@@ -62,6 +62,7 @@ private:
 	class CAnimationTool* m_pAnimationTool = { nullptr };
 
 	unordered_map<string, vector<CGameObject*>> m_SaveObjects;
+	unordered_map<_uint , vector<CGameObject*>> m_SaveInstanceObjects;
 	unordered_map<string, class CEdit_MapObject*> m_ContainerObjects;
 	_float m_fNearDistance= { FLT_MAX };
 	_float m_fNearDistance_Instance = {FLT_MAX};
@@ -75,6 +76,7 @@ private:
 	_uint m_eObjectType = {};
 	mutex m_Mutex;
 	_float m_TriggerBoxExtends[3] = { 10.f,10.f,10.f };
+	string m_FolderPath;
 public:
 	static		CLevel_Map*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

@@ -41,6 +41,10 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	m_fIdleDuration = 30.f;
 	m_fIdleAcc = 10.f;
 	m_fImpluseRate = pDesc->fImpluseRate;
+	m_pRigidBodyCom->IsActivate(false);
+	//m_pColliderCom->IsActivate(false);
+	m_isActivate = false;
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 
@@ -60,7 +64,7 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 	After_Condition(fTimeDelta);
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 
 	//공격이 성공했을 때 상태 유지 시간 정의
 	if(m_iState & ENUM_CLASS(TEST_STATE::STRIKE))
@@ -161,7 +165,7 @@ void CHavocWarrior::Render()
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(0);
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::NORMAL_YELLOW));
 
 		m_pModelCom->Render(i);
 	}
@@ -175,6 +179,18 @@ void CHavocWarrior::Render()
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif
+}
+
+void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	MONSTER_INFO* pDesc = static_cast<MONSTER_INFO*>(pArg);
+	m_fHP = pDesc->fMaxHp;
+	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
+	m_isActivate = true;
+	m_pAnimMachineCom->Reset(m_pModelCom, "Stand1");
+	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+	//m_pColliderCom->IsActivate(true);
+	m_pRigidBodyCom->IsActivate(true);
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
@@ -399,7 +415,7 @@ void CHavocWarrior::After_Condition(_float fTimeDelta)
 	else
 		m_iState &= ~ENUM_CLASS(TEST_STATE::BEHIT);
 
-
+	m_isTrigger = false;
 }
 
 void CHavocWarrior::Calculate_PosAndDir()

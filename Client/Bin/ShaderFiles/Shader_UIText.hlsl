@@ -215,7 +215,7 @@ PS_OUT PS_Font(PS_IN In)
 // 하나의 Pass에 모든 상태 + 셰이더 묶음
 technique11 FontTech
 {
-    pass P0
+    pass DefaultPass
     {
         SetRasterizerState(RS_CullOff);
         SetBlendState(BS_FontAlpha, float4(0, 0, 0, 0), 0xFFFFFFFF);

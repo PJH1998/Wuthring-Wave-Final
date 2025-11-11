@@ -32,7 +32,7 @@ void CModel_Instance::Register_Notify(const _string& strFilePath, const vector<f
 {
 }
 
-HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath)
+HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
 {
     m_eType = eType;
 	
@@ -45,7 +45,7 @@ HRESULT CModel_Instance::Initialize_Prototype(MODELTYPE eType, _fmatrix PreTrans
 		return E_FAIL;
 	}
 
-	if (FAILED(Ready_Mesh(InputFile)))
+	if (FAILED(Ready_Mesh(InputFile, IsEdit, pArg)))
 		return E_FAIL;
 
 	if (FAILED(Ready_Material(pFilePath)))
@@ -73,6 +73,16 @@ HRESULT CModel_Instance::Render(_uint iMeshIndex)
 	m_Meshes[iMeshIndex]->Render();
 	return S_OK;
 }
+
+HRESULT CModel_Instance::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+{
+	if (FAILED(m_Meshes[iMeshIndex]->Bind_Resources(pDC)))
+		return E_FAIL;
+	m_Meshes[iMeshIndex]->Render(pDC);
+
+	return S_OK;
+}
+
 #ifdef _DEBUG
 _bool CModel_Instance::Is_Picked(const _fvector& vRayPos, const _fvector& vRayDir, _float* pDistance)
 {
@@ -113,16 +123,30 @@ HRESULT CModel_Instance::Bind_Materials(CShader* pShader, const _char* pConstant
 		return S_OK;
 
 	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType);
-
 }
 
-HRESULT CModel_Instance::Ready_Mesh(ifstream& InputFile)
+HRESULT CModel_Instance::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return E_FAIL;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, iTextureIndex, pEffect);
+}
+
+HRESULT CModel_Instance::Bind_Materials(CDeferredShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, ID3DX11Effect* pEffect)
+{
+	if (iMeshIndex >= m_Meshes.size())
+		return S_OK;
+
+	return m_Materials[m_Meshes[iMeshIndex]->Get_MaterialIndex()]->Bind_Resource(pShader, pConstantName, eTextureType, pEffect);
+}
+HRESULT CModel_Instance::Ready_Mesh(ifstream& InputFile, _bool IsEdit, void* pArg)
 {
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumMeshes), sizeof(_uint));
 
 	for (size_t i = 0; i < m_iNumMeshes; ++i)
 	{
-		CMesh_Instance* pMesh = CMesh_Instance::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), InputFile, m_MinPos, m_MaxPos);
+		CMesh_Instance* pMesh = CMesh_Instance::Create(m_pDevice, m_pContext, XMLoadFloat4x4(&m_PreTransformMatrix), IsEdit, pArg, InputFile, m_MinPos, m_MaxPos);
 
 		if (nullptr == pMesh)
 			return E_FAIL;
@@ -172,14 +196,14 @@ HRESULT CModel_Instance::Ready_Material(const _char* pFilePath)
 	return S_OK;
 }
 
-CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, const _char* pFilePath)
+CModel_Instance* CModel_Instance::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _fmatrix PreTransformMatrix, const _char* pFilePath, _bool IsEdit, void* pArg)
 {
 	CModel_Instance* pInstance = new CModel_Instance(pDevice, pContext);
 
 	//?꾩떆. ?섏쨷???좊떂 紐⑤뜽??硫붿돩 ?몄뒪?댁떛???꾩슂??寃쎌슦 ?鍮??놁븷吏??딆쓬.
 	MODELTYPE eType = MODELTYPE::MAP;
 
-	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath)))
+	if (FAILED(pInstance->Initialize_Prototype(eType, PreTransformMatrix, pFilePath, IsEdit, pArg)))
 	{
 		MSG_BOX("Failed to Create : Model_Instance");
 		Safe_Release(pInstance);

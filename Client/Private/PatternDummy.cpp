@@ -28,6 +28,7 @@ HRESULT CPatternDummy::Initialize_Clone(void* pArg)
 
 	m_strInitAnimTag = pDesc->strInitAnimTag;
 	m_strAnimTag = m_strInitAnimTag;
+
 	Register_AllNotifies(pDesc->strFolderPath);
 	return S_OK;
 }
@@ -210,6 +211,9 @@ void CPatternDummy::Ready_Component(PAT_DUMMYDESC* pDesc)
 
 void CPatternDummy::Register_AllNotifies(const _string& strFolderPath)
 {
+	if (strFolderPath == "")
+		return;
+
 	ASSERT_CRASH(m_pModelCom);
 	auto colliderCallback = [this](const _wstring& tag, bool active) {
 		this->Collider_Active(tag, active);

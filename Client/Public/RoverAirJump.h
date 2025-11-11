@@ -12,8 +12,10 @@ private:
         JUMP = 0,
         LAND,
         MOVE,
+		FLY,
         DOUBLE_JUMP,
         AIR_ATTACK,
+		HIT,
         END
     };
 

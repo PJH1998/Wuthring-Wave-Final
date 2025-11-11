@@ -26,11 +26,6 @@ HRESULT CRendererSubResource::Initialize()
     // SSAO_Blur
     m_fSSAO_MinDepthDistance = 5.f; 
 
-    m_vFogDepthDistance = _float2(1000.f, 5000.f);
-    m_vFogHeightDistance = _float2(0.f, 100.f);
-
-    m_vFogColor = _float4(1.f, 1.f, 1.f, 1.f);
-
 	//BLUR
     m_iNumWeights = 5;
     m_fIntensity = 0.25f;
@@ -40,6 +35,7 @@ HRESULT CRendererSubResource::Initialize()
     m_fDofRange = 100.f;
     m_fDofScale = 0.3f;
 
+	//MOTION_BLUR
 	m_fLimitVelocity = 15.f;
 	m_fLimitDepth = 150.f;
 	m_fLengthScale = 5.f;
@@ -117,28 +113,6 @@ HRESULT CRendererSubResource::Bind_LimitVelocity(CShader* pShader)
 		CRASH("Failed Bind g_fLimitVelocity");
 
 	return S_OK;
-}
-
-HRESULT CRendererSubResource::Bind_Fog_Resources(CShader* pShader)
-{
-    if (FAILED(m_pFogNoiseTexture->Bind_Shader_Resource(pShader, "g_FogNoiseTexture")))
-        CRASH("Failed Bind FogNoiseTexture");
-
-    if (FAILED(pShader->Bind_Value("g_vFogDepthDistance", &m_vFogDepthDistance, sizeof(_float2))))
-        CRASH("Failed Bind Fog Distance");
-
-    if (FAILED(pShader->Bind_Value("g_vFogHeightDistance", &m_vFogHeightDistance, sizeof(_float2))))
-        CRASH("Failed Bind Fog Distance");
-
-    if (FAILED(pShader->Bind_Value("g_vFogColor", &m_vFogColor, sizeof(_float4))))
-        CRASH("Failed Bind Fog Color");
-
-    m_fFogTime = fmodf(m_fFogTime + 1.f, 1920.f); // ������ ������ 128 x 128
-
-    if (FAILED(pShader->Bind_Value("g_fFogTime", &m_fFogTime, sizeof(_float))))
-        CRASH("Failed Bind Fog Time");
-
-    return S_OK;
 }
 
 HRESULT CRendererSubResource::Bind_Dof_Resource(CShader* pShader)
@@ -228,8 +202,6 @@ HRESULT CRendererSubResource::Ready_Shader_Filters()
     m_pNoiseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/SSAO_Noise.png"), 1);
     ASSERT_CRASH(m_pNoiseTexture);
     
-    m_pFogNoiseTexture = CTexture::Create(m_pDevice, m_pContext, TEXT("../../Engine/Bin/Resource/T_PerlinNoise.png"), 1);
-
     return S_OK;
 }
 
@@ -434,9 +406,6 @@ void CRendererSubResource::Free()
     Safe_Release(m_pLUT_SRV);
     
 	Safe_Release(m_pNoiseTexture);
-
-    Safe_Release(m_pFogNoiseTexture);
-    Safe_Release(m_pHighCloudTexture);
 
     Safe_Release(m_pDefaultSampler);
     Safe_Release(m_pPointClampSampler);

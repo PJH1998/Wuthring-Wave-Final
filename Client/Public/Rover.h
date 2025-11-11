@@ -5,6 +5,23 @@
 NS_BEGIN(Client)
 class CRover final : public CCharacter
 {
+public:
+	enum PENDING_CONDITION : _uint
+	{
+		HIT = 0,
+		DODGE,
+		PARRY,
+		QTE,
+		CONDITION_END
+	};
+
+	enum VOLUME
+	{
+		VOLUME_KNOCKBACK = 0,
+		VOLUME_SKILL = 1,
+		VOLUME_END
+	};
+
 #pragma region STATE
 private:
 	struct StateTransitionContext
@@ -20,11 +37,13 @@ private:
 		ERoverUniqueType m_eUniqueType = ERoverUniqueType::END;
 		ERoverBurstType m_eBurstType = ERoverBurstType::END;
 		ERoverSpecialType m_eSpecialType = ERoverSpecialType::END;
+		ERoverQTEType m_eQTEType = ERoverQTEType::END;
 
 		// Air
 		ERoverJumpType m_eJumpType = ERoverJumpType::END;
 		ERoverFallType m_eFallType = ERoverFallType::END;
 		ERoverAirAttackType m_eAirAttackType = ERoverAirAttackType::END;
+		ERoverAirFlyType m_eAirFlyType = ERoverAirFlyType::END;
 
 		// Climb
 		ERoverClimbIdleType m_eClimbIdleType = ERoverClimbIdleType::END;
@@ -35,7 +54,8 @@ private:
 		// Hit
 		ERoverHitType m_eHitType = ERoverHitType::END;
 
-		// �
+		// Prev Info
+		_string m_strPrevInfo = {};
 		void Clear()
 		{
 			// Land
@@ -55,6 +75,7 @@ private:
 			m_eJumpType = ERoverJumpType::END;
 			m_eFallType = ERoverFallType::END;
 			m_eAirAttackType = ERoverAirAttackType::END;
+			m_eAirFlyType = ERoverAirFlyType::END;
 
 			// Climb
 			m_eClimbIdleType = ERoverClimbIdleType::END;
@@ -63,6 +84,7 @@ private:
 			m_IsClimbSecondStep = false;
 
 			m_eHitType = ERoverHitType::END;
+			m_strPrevInfo.clear(); // String 비우기.
 		};
 	};
 
@@ -87,7 +109,9 @@ public:
 	enum PARTTYPE : _uint
 	{
 		PART_SWORD = 0,
-		PART_WING = 1,
+		PART_DARKWING = 1,
+		PART_DARKSCYTHE = 2,
+		PART_WING = 3,
 		TYPE_END
 	};
 
@@ -104,6 +128,7 @@ public:
 	virtual	void	Update(_float fTimeDelta) override;
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
+	virtual	void	Render_OutLine() override;
 	virtual void	Render_Shadow() override;
 #pragma endregion
 
@@ -113,27 +138,37 @@ public:
 	virtual void TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE eTransitionType) override;
 	virtual void Play_PartAnimation(_uint iPartType, const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate = 1.f, _bool IsRootMotion = true, _bool IsRootMotionRotate = true, _bool IsRootMotionTranslate = true);
 	virtual void PartActivate(_uint iPartType, _bool IsActive) override;
+	virtual void Part_VolumeChange(_uint iPartType, _uint iVolumeIdx) override;
+	virtual void Part_VolumeActivate(_uint iPartType, _bool IsActive) override;
 	virtual void Clear_PartAnimation(_uint iPartType, const _string& strAnimName) override;
 	virtual void Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneName) override;
 	virtual void Hit_Judge(void* pArg = nullptr) override;
 	void Sync_Position();
-	
-#ifdef _DEBUG
-public:
-	virtual void PartRotation(_uint iPartType, _fvector vQuaternion);
-#endif // _DEBUG
+
+	virtual void Bind_QTE(_bool IsQTE) override;
 
 #pragma region 2. NOTIFY
 	public:
 		virtual void Collider_Active(const _wstring& wStrColliderTag, _bool IsActive) override;
 		virtual void Effect_Active(const _wstring& wStrEffectTag) override;
-
+		virtual void Object_Func(const _wstring& wStrObjectTag) override;
 #pragma endregion
 
+#pragma region 3. CALL BACK
+	public:
+		void OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+#pragma endregion
+
+#pragma region 4. EVENT
+public:
+	virtual void Process_DelayedActions() override;
+#pragma endregion
 
 #pragma endregion
 private:
 	class CRoverSword* m_pRoverSword = { nullptr };
+	class CRoverDarkWing* m_pRoverDarkWing = { nullptr };
+	class CRoverDarkScythe* m_pRoverDarkScythe = { nullptr };
 	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
@@ -141,22 +176,20 @@ private:
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State���� Ȱ��ȭ?
 
 	
-#ifdef _DEBUG
-	// RayCast
-	vector<pair<_float, _float>> m_RayCasts = {};
-#endif // _DEBUG
+	// Attack Volume
+	_uint m_iVolumeIdx = {};
+	vector<class CAttackVolume*> m_AttackVolumes;
 
-
+	_bool m_PendingConditions[CONDITION_END] = {};
 
 private:
-	// Runtime ���� �ʿ��� ���� ���� �غ�.
 	void Bind_Resources();
 
-	// �ʱ� ���� ���� �غ�.
 	void Ready_Components(const CHARACTER_DESC* pDesc);
 	void Ready_Variables(const CHARACTER_DESC* pDesc);
 	void Ready_Positions(const CHARACTER_DESC* pDesc);
 	void Ready_PartObjects(const CHARACTER_DESC* pDesc);
+	void Ready_AttackVolumes();
 
 public:
 	static		CRover* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

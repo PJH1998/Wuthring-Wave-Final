@@ -43,6 +43,7 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
     // Model의 Dat Folder Path
     m_strModelDatPath = pDesc->strModelDatPath;
 
+#ifdef _DEBUG
 	if (!(pDesc->strBoneName.empty()) && nullptr != pDesc->pParentTransform)
 	{
 
@@ -52,6 +53,9 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 
 		m_pParentActor->Set_ChildActor(this);
 	}
+#endif // _DEBUG
+
+
 
     if (FAILED(Ready_Components(pDesc)))
     {
@@ -144,7 +148,7 @@ void CAnimationActor::Update(_float fTimeDelta)
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
 
 
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, true, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
 
         //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
@@ -223,8 +227,9 @@ void CAnimationActor::Render()
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
     {
-        if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
-            CRASH("Ready Diffuse Texture Failed");
+		if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE, 0)))
+			return;
+            //CRASH("Ready Diffuse Texture Failed");
 
         //if (FAILED(m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, aiTextureType_NORMALS, 0)))
         //    return E_FAIL;
@@ -569,7 +574,6 @@ void CAnimationActor::Free()
     Safe_Release(m_pModelCom);
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pComputeShaderCom);
-
 	Safe_Release(m_pSpringCamera);
 
 }

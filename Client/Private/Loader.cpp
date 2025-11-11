@@ -14,10 +14,15 @@ CLoader::CLoader(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	Safe_AddRef(m_pContext);
 }
 
+void CLoader::Update(_float fTimeDelta)
+{
+	m_fLerpProgress += min(10.f, max(1.f, (m_fProgress - m_fLerpProgress + 1.f))) * fTimeDelta;
+}
+
 void CLoader::Complete_Load()
 {
 	lock_guard<mutex> lock(m_Mutex);
-	m_fProgress += 25.f;
+	m_fProgress += 100.f / static_cast<_float>(m_iNumLoadingThread);
 }
 
 void CLoader::Free()

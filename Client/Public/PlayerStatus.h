@@ -22,8 +22,10 @@ public:
 	_float Get_Cost(_uint iCharIndex, COST_TYPE eType) const;
 	_float Get_RemainingCooldown(_uint iCharIndex, const _string& strSkillName) const;
 	_float Get_MaxCooldown(_uint iCharIndex, const _string& strSkillName) const;
-	
 	_uint Get_CurrentCharIndex() const { return m_iCurrentCharIndex; }
+
+	_bool Is_QTE() const { return m_IsQTE; }
+	void Bind_QTE(_bool IsQTE) { m_IsQTE = IsQTE; }
 
 	// Player/Character가 참조할 Getter (내부용)
 	class CAbility* Get_Ability(_uint iCharIndex) const;
@@ -44,6 +46,8 @@ private:
 
 	vector<class CAbility*> m_Abilities;  // 캐릭별 Ability (소유)
 	_uint m_iCurrentCharIndex = {};     // 기본 Augusta (스위칭 동기)
+
+	_bool m_IsQTE = { false };
 };
 NS_END
 

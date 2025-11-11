@@ -189,7 +189,11 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	Handle_Animation_SpecialState();
+	if (eSkillType == EAugustaSkillType::ATTACK_PULL) // 1. 뒤로 이동은 온전하게 이동거리받기.
+		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
+
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
     // Target이 존재한다면? => Auto Target
     if (m_iPartType == CAugusta::PARTTYPE::PART_GRIFFON)
@@ -214,7 +218,7 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 
 void CAugustaGroundSkill::Check_Physcis(_float fTimeDelta)
 {
-    m_States[LAND] = m_pAugusta->Get_DistanceFromGround(0.1f) <= 0.2f;
+	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
 }
 
 void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
@@ -275,8 +279,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 		if (m_States[SKILL_R])
 		{
 			// 이전 이름에 현재 Skill 이름이 들어감.
-			m_States[ATTACK_PULL] = (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_Pull", m_strSkillName));
-			m_States[ATTACK_SP_SKILL] = SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpSkill", m_strSkillName);
+			m_States[ATTACK_PULL] = eSkillType == EAugustaSkillType::ATTACK_SPEEDDRIVE;
+			m_States[ATTACK_SP_SKILL] = eSkillType == EAugustaSkillType::ATTACK_PULL;
 
 			if (m_States[ATTACK_PULL])
 			{
@@ -291,21 +295,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
 				return;
 			}
-			// 1. Attack Pull (Unique R)
-			/*if (eSkillType == EAugustaSkillType::ATTACK_PULL)
-			{
-				m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
-				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-				return;
-			}*/
-
-			//m_States[ATTACK_SPEEDDRIVE] = m_States[SKILL_R] && (SKILL_STATE::READY == m_pAugusta->Check_Skill("Attack_SpeedDrive", m_strSkillName));
-			//if (m_States[ATTACK_SPEEDDRIVE])
-			//{
-			//	m_pAugusta->GetStateContextForWrite().m_eSkillType = EAugustaSkillType::ATTACK_SPSKILL;
-			//	m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SKILL));
-			//	return;
-			//}
 			
 		}
 
@@ -317,12 +306,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 			{
 				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
 				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
-				return;
-			}
-			else
-			{
-				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
-				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 				return;
 			}
 		}
@@ -362,6 +345,22 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
 		m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 
+		if (eSkillType == EAugustaSkillType::ATTACK_SPSKILL)
+		{
+			if (m_States[MOVE])
+			{
+				m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::RUN_F;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN));
+				return;
+			}
+			else
+			{
+				m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+				m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+				return;
+			}
+		}
+
         if (m_States[LAND])
         {
             m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
@@ -377,6 +376,8 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
         }
 
 		
+
+		
     }
     
 }
@@ -384,7 +385,7 @@ void CAugustaGroundSkill::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 65.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 15.f, 3.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 15.f, 1.5f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.f, 25.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
 
@@ -405,6 +406,10 @@ void CAugustaGroundSkill::State_Reset()
 {
     for (_uint i = 0; i < SKILLSTATE::END; ++i)
         m_States[i] = false;
+}
+
+void CAugustaGroundSkill::Handle_Animation_SpecialState()
+{
 }
 
 

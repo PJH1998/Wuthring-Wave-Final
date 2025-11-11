@@ -12,22 +12,27 @@ private:
         JUMP = 0,
         DASH,
 		LAND,
+		FLY,
         SPRINT,
         MOVE,
-        ATTACK,
-        MOVE_U,
-        MOVE_D,
-        MOVE_L,
-        MOVE_R,
-        AIR_ATTACK_E,
-        SKILL_E,
-        SKILL_Q,
-        SKILL_R,
+		MOVE_U,
+		MOVE_D,
+		MOVE_L,
+		MOVE_R,
+		FALL,
 
-		// 소모값 필요한 얘들
-        UNIQUE_E, // Unique E상태. => 그리폰 타서 공격.
-        UNIQUE_R,
-        BURST_R, // Burst R 상태 => Skill 검으로 바뀜.
+		HIT,
+
+		BURST,
+		ATTACK,
+		SKILL_E,
+		SKILL_Q,
+		SKILL_R,
+		DEFAULT_E,
+		BURST_E,
+
+		ULTI,
+
         END
     };
 
@@ -46,6 +51,7 @@ private:
     vector<ANIM_DATA> m_IdleStates = {};
 
     _bool m_States[IDLESTATE::END] = {};
+	_float m_fFallTime = {};
 
 private:
     virtual void Handle_Input() override;

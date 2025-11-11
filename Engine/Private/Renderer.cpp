@@ -79,12 +79,38 @@ HRESULT CRenderer::Add_Render_Object(RENDERGROUP eRenderGroup, CGameObject* pRen
 
 HRESULT CRenderer::Add_Render_StaticObject(CStaticObject* pRenderObject)
 {
+	if (8 == m_iCullStack.load(memory_order_acquire))
+	{
+		cout << "Cut!" << endl;
+		return S_OK;
+	}
+
 	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
 	{
 		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
 		m_StaticObjects[iWriteIndex].push_back(pRenderObject);
 	}
 
+	return S_OK;
+}
+
+HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& Container)
+{
+	if (8 == m_iCullStack.load(memory_order_acquire))
+		return S_OK;
+
+	_int iWriteIndex = m_iDoubleBufferIndex.load(memory_order_acquire);
+	{
+		lock_guard<recursive_mutex> lock(m_RecursiveMutex);
+		m_StaticObjects[iWriteIndex].insert(m_StaticObjects[iWriteIndex].end(), Container.begin(), Container.end());
+		m_iCullStack.fetch_add(1, memory_order_release);
+	}
+
+	if (8 <= m_iCullStack.load(memory_order_acquire))
+	{
+		m_isCompleteFrustumCull.exchange(true, memory_order_release);
+	}
+	
 	return S_OK;
 }
 
@@ -106,7 +132,6 @@ void CRenderer::Render()
 
 	Render_Priority();
 	Render_Shadow();
-	Render_ShadowMap();
 	Render_NonBlend();
 	Render_Static();
 	Render_Decal();
@@ -194,10 +219,6 @@ void CRenderer::SetBloomIntensity(_float fIntensity)
 {
 	m_pSubResource->SetBloomIntensity(fIntensity);
 }
-void CRenderer::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pSubResource->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
-}
 void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
 {
 	m_pSubResource->SetDof(fDepth, fRange, fScale);
@@ -253,12 +274,10 @@ void CRenderer::Render_ShadowMap()
 			pRenderObject->Render_Shadow();
 	}
 
-	if (m_pGameInstance->IsWorkFinish())
+//	if (m_pGameInstance->IsWorkFinish())
 	{
 		m_ShadowMapObjects.clear();
 	}
-
-	Setting_Viewport(m_iWinSizeX, m_iWinSizeY);
 
 	m_pGameInstance->End_ShadowMap();
 }
@@ -389,16 +408,15 @@ void CRenderer::Render_Static()
 			Safe_Release(pCL);
 		}
 	}
-	//m_CommandLists.clear();
 
-	//m_pContext->Flush();
-
-	// Swap Chain
-	if (m_pGameInstance->IsWorkFinish())
+	if (true == m_isCompleteFrustumCull.load(memory_order_acquire))
 	{
 		atomic_thread_fence(memory_order_acquire);
 		m_StaticObjects[iReadIndex].clear();
 		m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
+		m_pGameInstance->Occlusion_Culling(m_StaticObjects[(m_iDoubleBufferIndex + 1) % 2]);
+		m_iCullStack.exchange(0, memory_order_release);
+		m_isCompleteFrustumCull.exchange(false, memory_order_release);
 	}
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::STATIC));
@@ -560,10 +578,14 @@ void CRenderer::Render_Combined()
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
 		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalRoughness", &m_fDebugRoughness, sizeof(_float))))
-		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalMetallic", &m_fDebugMetallic, sizeof(_float))))
-		CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicRoughness", &m_fDebugRoughness[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicMetallic", &m_fDebugMetallic[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticRoughness", &m_fDebugRoughness[1], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticMetallic", &m_fDebugMetallic[1], sizeof(_float))))
+	//	CRASH("Render Fail");
 #endif
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))
@@ -732,13 +754,20 @@ void CRenderer::Render_LUT()
 
 void CRenderer::Render_Fog()
 {
+#ifdef _DEBUG
+	if (false == m_IsFog)
+		return;
+#endif
+
 	m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false);
 
 	if (FAILED(m_pGameInstance->Bind_RenderTarget(TEXT("RT_Lut"), m_pShader, "g_LutResultTexture")))
 		CRASH("Failed Bind RT_Lut");
+	
+	m_pGameInstance->Bind_VF_Resource(m_pShader, "g_VoulmetricTexture", "g_vFogRange");
 
-	if (FAILED(m_pSubResource->Bind_Fog_Resources(m_pShader)))
-		return;
+	/*if (FAILED(m_pSubResource->Bind_Fog_Resources(m_pShader)))
+		return;*/
 
 	m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::FOG));
 
@@ -1072,7 +1101,11 @@ void CRenderer::Render_Debug()
 		m_isRenderDebug = !m_isRenderDebug;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_HOME) == KEYSTATE::DOWN)
+	{
 		m_IsSSAO = !m_IsSSAO;
+		m_IsFog = !m_IsFog;
+	}
+
 
 	for (auto& pComponent : m_DebugComponents)
 	{

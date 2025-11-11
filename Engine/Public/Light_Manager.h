@@ -13,7 +13,7 @@ private:
 
 public:
 	const LIGHT_DESC*	Get_LightDesc(const _wstring& strLightTag);
-	void						Set_Active(const _wstring& strLightTag, _bool isActive);
+	void				Set_Active(const _wstring& strLightTag, _bool isActive);
 #ifdef _DEBUG
 	LIGHT_DESC*			Get_LightDesc_For_Map(const _wstring& strLightTag);
 #endif
@@ -24,7 +24,6 @@ public:
 	HRESULT					Render(class CShader* pShader, class CVIBuffer_Rect* pVIBuffer);
 
 private:
-
 	map<_wstring, CLight*>		m_Lights;
 	LIGHT_DESC*					m_pShadowLight;
 

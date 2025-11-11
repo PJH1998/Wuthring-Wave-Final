@@ -17,12 +17,16 @@ public:
 	HRESULT				Initialize(_uint iNumThread);
 	HRESULT				Add_Render_Object(RENDERGROUP eRenderGroup, class CGameObject* pRenderObject);
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pRenderObject);
+	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
-	void					Render();
-	void					Begin_ScreenEffect(SFX_TYPE eType);
-	void					End_ScreenEffect();
-	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	void				Render();
+	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				End_ScreenEffect();
+	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
+	
+	void				Render_ShadowMap();
 
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
@@ -33,12 +37,11 @@ public:
 	void			Setting_SSAO(_float fRadius, _float fMaxDistance);
 	void			SetBloomWeight(_int iWeight) { m_iBloomWeight = iWeight; }
 	void			SetBloomIntensity(_float fIntensity);
-	void			Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void			SetDof(_float fDepth, _float fRange, _float fScale);
 	void			SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
 	void			SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
-	void			Set_Metallic(_float fMetallic) { m_fDebugMetallic = fMetallic; }
-	void			Set_Roughness(_float fRoughness) { m_fDebugRoughness = fRoughness; }
+	void			Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic) { m_fDebugMetallic[0] = fDynamicMetallic, m_fDebugMetallic[1] = fStaticMetallic; }
+	void			Set_Roughness(_float fRoughness, _float fStaticRoughness) { m_fDebugRoughness[0] = fRoughness, m_fDebugRoughness[1] = fStaticRoughness; }
 	void			SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
@@ -57,9 +60,12 @@ private:
 	mutex									m_RenderAddMutex;
 	condition_variable					m_CV;
 
+	// Culling
 	list<class CGameObject*>		m_RenderObjects[ENUM_CLASS(RENDERGROUP::END)];
 	vector<class CStaticObject*>	m_StaticObjects[2];
 	atomic<_uint>						m_iDoubleBufferIndex = {};
+	atomic<_uint>						m_iCullStack = {};
+	atomic<_bool>						m_isCompleteFrustumCull = { false };
 	list<class CGameObject*>		m_ShadowMapObjects;
 
 
@@ -90,8 +96,10 @@ private:
 	_bool									m_IsSSAO = { true };
 	_bool									m_IsSSAO_Blur = { true };
 	_bool									m_IsStylized = { true };
-	_float									m_fDebugRoughness = 0.2f;
-	_float									m_fDebugMetallic = 0.f;
+	_float									m_fDebugRoughness[2] = {0.f, 0.4f};
+	_float									m_fDebugMetallic[2] = {0.8f, 0.3f};
+
+	_bool									m_IsFog = { true };
 #endif
 private:
 	// Viewport Size 
@@ -101,7 +109,6 @@ private:
 	void						Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex);
 
 private:
-	void						Render_ShadowMap();
 
 	void						Render_Priority();
 	void						Render_Shadow();
@@ -121,8 +128,8 @@ private:
 	void						Render_DistortionObject();
 	void						Render_Blend();
 	void						Render_LUT();
-	void						Render_Fog();
 	void						Render_Distortion();
+	void						Render_Fog();
 	void						Render_ScreenEffect();
 	void						Render_UI();
 	void						Render_Fade();
