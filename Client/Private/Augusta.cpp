@@ -521,20 +521,18 @@ void CAugusta::Effect_Active(const _wstring& wStrEffectTag)
 void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 {
 
-	return;
-
 	// 3개의 변수 준비
 	_wstring var1, var2, var3;
 	wstringstream wss(wStrObjectTag);
 
 	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
 	getline(wss, var1, L'|');
-	/*if (var1 == TEXT("HITSTOP"))
+	if (var1 == TEXT("HITSTOP"))
 		Process_HitStop(wStrObjectTag);
 	else if (var1 == TEXT("CAMERA"))
 		Process_CameraAction(wStrObjectTag);
 	else
-		Process_VolumeChange(wStrObjectTag);*/
+		Process_VolumeChange(wStrObjectTag);
 
 	return;
 }
@@ -613,7 +611,7 @@ void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
 	_wstring Intensity; // 강도
 	_wstring Dir; // UD, LR
 
-
+	/* CAMERA | Duration | Frequency | Amplitude | Intensity | FovKick | Dir*/
 	wstringstream wss(wStrObjectTag);
 	getline(wss, Tag, L'|');
 	getline(wss, Duration, L'|'); 
@@ -629,9 +627,11 @@ void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
 	ShakeDesc.fAmplitude = stof(Amplitude);
 	_float fIntensity = stof(Intensity);
 	if (Dir == TEXT("UD"))
-		ShakeDesc.vRotation = { fIntensity, 0.f ,0.f};
+		ShakeDesc.vRotation = { fIntensity, 0.f, 0.f};
 	else if (Dir == TEXT("LR"))
 		ShakeDesc.vRotation = { 0.f, fIntensity ,0.f };
+	else if (Dir == TEXT("UDLR"))
+		ShakeDesc.vRotation = { fIntensity, fIntensity ,0.f };
 
 	ShakeDesc.fFovKick = stof(FovKick);
 

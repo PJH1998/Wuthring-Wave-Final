@@ -45,7 +45,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	//m_PatrolPoints.push(_float3(0.f, -8.f, 3.f));
 	//m_PatrolPoints.push(pDesc->vInitPosition);
 	m_pRigidBodyCom->IsActivate(false);
-	m_pColliderCom->IsActivate(false);
+	//m_pColliderCom->IsActivate(false);
 	m_isActivate = false;
 	return S_OK;
 }
@@ -150,7 +150,7 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_pAnimMachineCom->Reset(m_pModelCom, "Born02");
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
-	m_pColliderCom->IsActivate(true);
+	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
 }
 
