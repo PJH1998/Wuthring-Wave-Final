@@ -198,6 +198,7 @@ public:
 	Character*				Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	void					Register_Virtual(CharacterVirtual* pVirtual);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG

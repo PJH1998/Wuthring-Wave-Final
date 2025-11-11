@@ -693,6 +693,10 @@ void CGameInstance::Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer)
 {
 	m_pPhysicsManager->Add_Virtual(pVirtual, iObjectLayer);
 }
+void CGameInstance::Register_Virtual(CharacterVirtual* pVirtual)
+{
+	m_pPhysicsManager->Register_Virtual(pVirtual);
+}
 void CGameInstance::Remove_Virtual(CharacterVirtual* pVirtual)
 {
 	m_pPhysicsManager->Remove_Virtual(pVirtual);
