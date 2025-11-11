@@ -291,6 +291,7 @@ protected:
 	_float3 m_vAnimColliderOffset = {};
 	
 
+	_float4 m_vQTEPos = {};
 	//CHARACTER_STAT m_Stats = {};
 	HarmonyEndCallback m_OnEnsembleEnd = { nullptr };
 	

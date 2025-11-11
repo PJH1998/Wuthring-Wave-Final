@@ -64,6 +64,11 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
+	m_pQTEColliderCom->IsActivate(false);
+	//_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	//XMStoreFloat4(&m_vQTEPos, vPos);
+	//m_pQTEColliderCom->Set_Position(vPos);
+
     return S_OK;
 }
 
@@ -164,6 +169,7 @@ void CRover::Late_Update(_float fTimeDelta)
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
+		m_pQTEColliderCom->IsActivate(false);
 		m_IsQTEend = false;
 	}
 
@@ -389,7 +395,6 @@ void CRover::Bind_QTE(_bool IsQTE)
 	if (m_IsQTE)
 	{
 		// Activate
-		SetActivate(true);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
@@ -397,6 +402,9 @@ void CRover::Bind_QTE(_bool IsQTE)
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
 		vPos += vLook * 1.f;
 		m_pQTEColliderCom->Set_Position(vPos);
+		m_pQTEColliderCom->IsActivate(true);
+
+		SetActivate(true);
 		GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 	}
