@@ -510,15 +510,18 @@ ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _u
 {
     return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
+
+void CGameInstance::Render_ShadowMap()
+{
+	m_pRenderer->Render_ShadowMap();
+}
+
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
 }
-void CGameInstance::Render_ShadowMap()
-{
-	m_pRenderer->Render_ShadowMap();
-}
+
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
