@@ -120,10 +120,13 @@ private:
 
 	_float m_fTargetDistance = {}; // 몬스터와의 거리
 
+	_uint m_iCondition = {};
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
+	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
 	void Sorting_Target();
 	void Toggle_LockOn();
 

@@ -57,17 +57,18 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	PartActivate(PART_SWORD, false);
 	PartActivate(PART_DARKWING, false);
 	PartActivate(PART_DARKSCYTHE, false);
-	//PartActivate(PART_DARKSCYTHE, true);
 	
 	PartActivate(PART_WING, false);
 	
-	m_IsQTE = false;
+
+	m_IsQTE = false; // QTE
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
 	XMStoreFloat4(&m_vQTEPos, vPos);
 	m_pQTEColliderCom->Set_Position(vPos);
 
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
     return S_OK;
 }
 
@@ -76,6 +77,9 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	// 0. Delayed Action 수행.
+	Process_DelayedActions(fTimeDelta);
+
 	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
@@ -83,8 +87,7 @@ void CRover::Priority_Update(_float fTimeDelta)
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
-	// 0. Delayed Action 수행.
-	Process_DelayedActions();
+
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -405,6 +408,16 @@ void CRover::Hit_Judge(void* pArg)
 	if (nullptr == pArg || m_IsHit)
 		return;
 
+	_uint iFlag = {};
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::HIT);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
+
+	// 컨디션 체크
+	if (Check_AnyCondition(iFlag))
+		return;
+
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
 	_uint iCategory = eKey.iCategory;
 	_uint iSubState = eKey.iSubState;
@@ -415,16 +428,25 @@ void CRover::Hit_Judge(void* pArg)
 		return;
 
 	// 2. 즉시 중복 방지 플래그 세팅
-	m_PendingConditions[HIT] = true;
+	//m_PendingConditions[HIT] = true;
 
 	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
-
-	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
-	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
-
 	m_PendingHitDesc = *pDesc;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
+	m_fDodgeableHitTimer = m_fDodgeableDuration;
+
+
+	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(ERoverGroundState::ATTACK);
+	if (!IsAttack)
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+
+	
+	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
+
+
 }
 
 void CRover::Sync_Position()
@@ -598,8 +620,27 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 #pragma endregion
 
 #pragma region 4. EVENT
-void CRover::Process_DelayedActions()
+void CRover::Process_DelayedActions(_float fTimeDelta)
 {
+	_uint iDodgeableFlag = ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+
+	// 0. 회피 가능창 활성화 되어 있다면?
+	if (Check_AnyCondition(iDodgeableFlag))
+	{
+		m_fDodgeableHitTimer -= fTimeDelta;
+		if (m_fDodgeableHitTimer <= 0.f)
+		{
+			Remove_Condition(iDodgeableFlag); // 회피 가능 상태 제거
+
+			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
+
+			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
+			m_PendingConditions[HIT] = true;
+			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
+		}
+	}
+
+
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();

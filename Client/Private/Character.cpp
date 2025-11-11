@@ -896,6 +896,14 @@ void CCharacter::Remove_AllCondition()
 	m_iCondition = 0;
 }
 
+void CCharacter::Sync_Condition_ToPlayer(_uint* pCondition)
+{
+	if (nullptr == pCondition)
+		return;
+
+	*pCondition = m_iCondition; // 값 넣어주기.
+}
+
 
 #pragma endregion
 

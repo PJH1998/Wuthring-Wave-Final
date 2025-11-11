@@ -73,8 +73,14 @@ void CRoverGroundIdle::OnExit()
 
 void CRoverGroundIdle::Handle_Input()
 {
-	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
-	if (m_States[HIT])
+	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+
+	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
+	m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	if (m_States[HIT] || m_States[DODGE])
 		return;
 
 	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
@@ -142,6 +148,14 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
     ERoverIdleType eIdleType = static_cast<ERoverIdleType>(m_iCurrentAnimIdx);
 
     _uint iKeyInput = {};
+
+	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
 
 	if (m_States[HIT])
 	{

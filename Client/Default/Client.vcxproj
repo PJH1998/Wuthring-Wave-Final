@@ -266,6 +266,7 @@
     <ClInclude Include="..\Public\RoverGroundAttack.h" />
     <ClInclude Include="..\Public\RoverGroundBurst.h" />
     <ClInclude Include="..\Public\RoverGroundDash.h" />
+    <ClInclude Include="..\Public\RoverGroundDodge.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
     <ClInclude Include="..\Public\RoverGroundLand.h" />
     <ClInclude Include="..\Public\RoverGroundQTE.h" />
@@ -416,6 +417,7 @@
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />
     <ClCompile Include="..\Private\RoverGroundBurst.cpp" />
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp" />
     <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />

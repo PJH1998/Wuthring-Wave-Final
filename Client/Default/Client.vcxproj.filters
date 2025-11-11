@@ -694,6 +694,9 @@
     <ClInclude Include="..\Public\AugustaGroundDodge.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1087,6 +1090,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundDodge.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

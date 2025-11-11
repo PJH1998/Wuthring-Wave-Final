@@ -60,6 +60,16 @@ void CRoverGroundDash::OnExit()
 
 void CRoverGroundDash::Handle_Input()
 {
+
+	// Dash 키입력 체크.
+	m_States[DASH] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
+	m_States[DODGEABLE] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
+		return;
+
     m_States[JUMP] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pRover->Check_AnyInput(m_iMoveKey);
 	m_States[LAND] = m_pRover->Is_LandCollider(&m_vLandNormal);
@@ -88,6 +98,21 @@ void CRoverGroundDash::Check_StateTransition(_float fTimeDelta)
 {
     ERoverDashType eDashType = static_cast<ERoverDashType>(m_iCurrentAnimIdx);
 	_bool IsEscapePossible = CState::Is_EscapePossible();
+
+	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pRover->GetStateContextForWrite().m_eDodgeType = ERoverDodgeType::MOVE_LIMIT_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
+
+	// 2.
+	if (m_States[HIT])
+	{
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(ERoverHitState::HIT));
+		return;
+	}
 
 	if (!m_States[LAND])
 	{

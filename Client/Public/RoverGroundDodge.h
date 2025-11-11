@@ -3,25 +3,26 @@
 
 NS_BEGIN(Client)
 
-// Augusta Sprint State - Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R 처리
-class CAugustaGroundDash final : public CGroundState
+// Rover Dodge State - Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R 처리
+class CRoverGroundDodge final : public CGroundState
 {
 private:
     enum DASHSTATE
     {
         JUMP = 0,
         MOVE,
+		LOCKON_W,
+		LOCKON_S,
+		LOCKON_A,
+		LOCKON_D,
 		LAND,
-		DASH,
-		DODGE,
-		HIT,
-		DODGEABLE,
+		LOCKON,
         END
     };
 
 private:
-    explicit CAugustaGroundDash() = default;
-    virtual ~CAugustaGroundDash() = default;
+    explicit CRoverGroundDodge() = default;
+    virtual ~CRoverGroundDodge() = default;
 
 public:
     virtual HRESULT Initialize(class CGameObject* pOwner) override;
@@ -30,7 +31,7 @@ public:
     virtual void OnExit() override;
 
 private:
-    class CAugusta* m_pAugusta = { nullptr };
+    class CRover* m_pRover = { nullptr };
     _bool m_States[END] = {};
 
 private:
@@ -41,7 +42,7 @@ private:
     void State_Reset();
 
 public:
-    static CAugustaGroundDash* Create(class CGameObject* pOwner);
+    static CRoverGroundDodge* Create(class CGameObject* pOwner);
     virtual void Free() override;
 };
 

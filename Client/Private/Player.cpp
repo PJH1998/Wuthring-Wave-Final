@@ -128,6 +128,7 @@ void CPlayer::Update(_float fTimeDelta)
 	if (m_iCurrentCharacterIdx != NONE)
 	{
 		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
+		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
 
@@ -136,16 +137,14 @@ void CPlayer::Update(_float fTimeDelta)
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
 
-	// 3. Jolt 업데이트 이전에 비워줍니다.
-	
 
-	// 4. Rigidbody Update => Camera 
+	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
-	// 5. Target Sorting
+	// 4. Target Sorting
 	Sorting_Target();
     
-	// 6. Lock On
+	// 5. Lock On
     Toggle_LockOn();
 
 	m_TargetTransforms.clear();
@@ -414,6 +413,14 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 	if (nullptr == pCharacter)
 		return;
 	pCharacter->Sync_Transform_ToPlayer(m_pTransformCom); // 현재 캐릭터의 Transform을 Player와 동기화
+}
+
+void CPlayer::Sync_Condition_FromCharacter(CCharacter* pCharacter)
+{
+	if (nullptr == pCharacter)
+		return;
+
+	pCharacter->Sync_Condition_ToPlayer(&m_iCondition);
 }
 
 
@@ -724,6 +731,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = 700.f;
+	m_CallBack.pCondition = &m_iCondition;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 
 	//m_pColliderCom->Set_Desc(m_pTransformCom);
@@ -731,6 +739,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);
 		});
+
     return S_OK;
 }
 

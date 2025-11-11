@@ -67,6 +67,8 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
 	XMStoreFloat4(&m_vQTEPos, vPos);
 	m_pQTEColliderCom->Set_Position(vPos);
+
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
 	
     return S_OK;
 }
@@ -418,7 +420,7 @@ void CAugusta::Hit_Judge(void* pArg)
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::HIT);
 	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
 
-	// 닷지 상태면 안맞아요.
+	// 컨디션 체크
 	if (Check_AnyCondition(iFlag))
 		return;
 

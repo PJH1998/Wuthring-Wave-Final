@@ -115,6 +115,7 @@ namespace Client
 	{
 		void* pTransform = { nullptr };  // Transform;
 		_float fAttack = { 0.f };			 // 공격력
+		_uint* pCondition = {};			// 컨디션 Value
 		_string strEffectTag = {};		// 호출할 이펙트 태그
 		// Shaking이나, HitStop? 이런 거.
 	}CALLBACK_CLIENT;
