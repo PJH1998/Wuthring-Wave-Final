@@ -18,7 +18,7 @@ public:
 	_float			Get_CurrentCamera_Near();
 	_float			Get_CurrentCamera_Far();
 
-	void				OnShake(const _float3& vDir);
+	void				OnShake(const CAMERA_SHAKE& tData);
 
 public:
 	HRESULT			Initialize(_uint iNumLevel);

@@ -21,7 +21,7 @@ public:
 	_float							Get_Distance() { return m_fDistance; }
 	_float							Get_Near() { return m_fNear; }
 	_float							Get_Far() { return m_fFar; }
-	void							OnShake(const _float3& vDir);
+	void							OnShake(const CAMERA_SHAKE& tData);
 
 
 public:
@@ -46,12 +46,19 @@ protected:
 
 	// Shaking
 	_bool							m_isShake = { false };
-	_float							m_fShakeDuration = {};		// Shake 지속시간
 	_float							m_fShakeTimeAcc = {};		// Shake 진행시간
-	_float							m_fShakeStiffness = {};		// Shake 복원력
-	_float							m_fShakeDamp = {};			// Shake 감쇠
-	_float3						m_vShakeVelocity = {};		// Shake 힘
-	_float3						m_vShakeOffset = {};			// Shake로 인한 카메라 이동량
+	CAMERA_SHAKE			m_tShakeData = {};
+	_float							m_fDecay = {};
+	_float							m_fRandTimeAcc = {};		// Frequency에 맞게 Rand 생성하기위한 TimeAcc
+
+	_float4						m_vOriginQuaternion = {};
+	_float							m_fOriginFov = {};
+
+	_float3						m_vRand = {};
+
+	// ADSR
+	_float							m_fADSRStart = {};
+	_float							m_fADSREnd = {};
 
 protected:
 	void							Lerp_Distance(_float fTimeDelta);
@@ -60,6 +67,8 @@ protected:
 	void							Mouse_Move_Up();
 
 	void							Shaking(_float fTimeDelta);
+	_float							ADSR();
+	void							Perlin_Noise(_float fTimeDelta);
 
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;

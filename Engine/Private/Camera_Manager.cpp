@@ -67,12 +67,12 @@ _float CCamera_Manager::Get_CurrentCamera_Far()
         return m_pMainCamera->Get_Far();
 }
 
-void CCamera_Manager::OnShake(const _float3& vDir)
+void CCamera_Manager::OnShake(const CAMERA_SHAKE& tData)
 {
 	if (nullptr == m_pMainCamera)
 		return;
 
-	m_pMainCamera->OnShake(vDir);
+	m_pMainCamera->OnShake(tData);
 }
 
 HRESULT CCamera_Manager::Initialize(_uint iNumLevel)

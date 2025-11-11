@@ -616,9 +616,9 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
-void CGameInstance::OnShake(const _float3& vDir)
+void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
-	m_pCamera_Manager->OnShake(vDir);
+	m_pCamera_Manager->OnShake(tData);
 }
 #pragma endregion
 
