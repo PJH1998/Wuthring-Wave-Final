@@ -93,10 +93,10 @@ void CSpawner::Update(_float fTimeDelta)
 
 void CSpawner::Late_Update(_float fTimeDelta)
 {
-
-
+#ifdef _DEBUG
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::RD_DEBUG, this)))
 		return;
+#endif
 }
 
 void CSpawner::Render()

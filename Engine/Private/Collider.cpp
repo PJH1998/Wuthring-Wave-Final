@@ -51,9 +51,12 @@ void CCollider::Set_Offset(const _float3 vOffset)
 
 void CCollider::IsActivate(_bool isActive)
 {
-	if(false == isActive)
-		m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(0));
-	true == isActive ? m_pBodyInterface->ActivateBody(m_BodyID) : m_pBodyInterface->DeactivateBody(m_BodyID);
+	if (false == m_isActivate && true == isActive)
+		m_pBodyInterface->AddBody(m_BodyID, EActivation::Activate);
+	else if(true == m_isActivate && false == isActive)
+		m_pBodyInterface->RemoveBody(m_BodyID);
+
+	m_isActivate = isActive;
 }
 
 HRESULT CCollider::Initialize_Prototype()

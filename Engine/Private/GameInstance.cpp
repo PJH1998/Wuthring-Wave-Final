@@ -510,18 +510,15 @@ ID3DX11Effect* CGameInstance::Get_Shader_Effect(const _wstring& strEffectTag, _u
 {
     return m_pRenderer->Get_Shader_Effect(strEffectTag, iIndex);
 }
-
 void CGameInstance::Render_ShadowMap()
 {
 	m_pRenderer->Render_ShadowMap();
 }
-
 #ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
 }
-
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
@@ -627,9 +624,9 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
-void CGameInstance::OnShake(const _float3& vDir)
+void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
-	m_pCamera_Manager->OnShake(vDir);
+	m_pCamera_Manager->OnShake(tData);
 }
 #pragma endregion
 

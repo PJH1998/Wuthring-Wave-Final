@@ -342,9 +342,9 @@ void CCharacter::Print_LookRay()
 void CCharacter::Camera_Shake(_float fIntensity)
 {
 
-	_float3 vDir = {0.5f, 0.1f, -0.1f};
-	
-	m_pGameInstance->OnShake(vDir);
+	//_float3 vDir = {0.5f, 0.1f, -0.1f};
+	//
+	//m_pGameInstance->OnShake(vDir);
 }
 
 void CCharacter::Play_Action(const _wstring& strActionTag)
