@@ -152,7 +152,6 @@ public:
 	void Sync_Position();
 
 	virtual void Bind_QTE(_bool IsQTE) override;
-	
 
 #pragma region 2. NOTIFY
 public:

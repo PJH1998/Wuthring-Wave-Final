@@ -119,21 +119,6 @@ void CShader_Interface::Setting_Shader()
 #endif // _DEBUG
 	}
 #pragma endregion
-
-#pragma region FOG
-	if (ImGui::CollapsingHeader("FOG"))
-	{
-		ImGui::InputFloat2("DEPTH", reinterpret_cast<_float*>( &m_vFogDepthDistance ));
-		ImGui::InputFloat2("HEIGHT", reinterpret_cast<_float*>( &m_vFogHeightDistance ));
-		ImGui::InputFloat4("COLOR", reinterpret_cast<_float*>( &m_vFogColor ));
-	}
-
-#ifdef _DEBUG
-	m_pGameInstance->Setting_Fog(m_vFogDepthDistance, m_vFogHeightDistance, m_vFogColor);
-
-#endif
-
-#pragma endregion
 	
 #pragma region BLUR
 
