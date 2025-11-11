@@ -35,7 +35,9 @@ HRESULT CLevel_GamePlay::Initialize()
 	
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
-	//m_pGameInstance->Render_ShadowMap();
+	m_pGameInstance->Render_ShadowMap();
+
+	
 	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};

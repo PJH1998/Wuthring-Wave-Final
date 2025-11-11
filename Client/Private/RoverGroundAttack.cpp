@@ -46,6 +46,7 @@ void CRoverGroundAttack::OnEnter(void* pArg)
 	m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pRover->Set_Gravity(true);
 
+	m_pRover->Rotate_Target();
 }
 
 void CRoverGroundAttack::OnUpdate(_float fTimeDelta)
@@ -218,6 +219,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 			
 			m_IsNextAttackInput = false;
 			m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
+			m_pRover->Rotate_Target();
 			return;
 		}
 

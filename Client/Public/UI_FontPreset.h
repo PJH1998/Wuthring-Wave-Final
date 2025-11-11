@@ -18,7 +18,8 @@ public:
 	HRESULT Initialize();
 
 public:
-	void Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_DMGTYPE eDmgElemType, _float fSpawnRange);
+	void Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fSpawnRange);
+	CUI_Text* Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag);
 
 
 private:

@@ -62,6 +62,11 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
+
+	
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 	
     return S_OK;
 }
@@ -163,6 +168,7 @@ void CAugusta::Late_Update(_float fTimeDelta)
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
 	
@@ -208,10 +214,12 @@ void CAugusta::Render()
     }
 
 #ifdef _DEBUG
-	if (!m_IsQTE)
+	/*if (!m_IsQTE)
 		m_pColliderCom->Render();
 	else
-		m_pQTEColliderCom->Render();
+		m_pQTEColliderCom->Render();*/
+	m_pColliderCom->Render();
+	m_pQTEColliderCom->Render();
     
 	Print_LookRay();
 	
@@ -397,34 +405,6 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     }
 }
 
-//// Hit 판정. => QTE 상태면 안맞음.
-//void CAugusta::Hit_Judge(void* pArg)
-//{
-//	if (nullptr == pArg || m_IsHit || m_IsQTE)
-//		return;
-//
-//	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
-//	_uint iCategory = eKey.iCategory;
-//	_uint iSubState = eKey.iSubState;
-//
-//	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
-//	
-//	// 1. 맞는데 또맞진 말자..
-//	if (EStateCategory::HIT == eCategory)
-//		return;
-//
-//	// 2. 데미지는 바로 감소시킵니다.
-//	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-//	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
-//
-//	// 3. 캐스팅 해서? => 들고 있기.
-//	m_PendingHitDesc = *pDesc;
-//
-//	
-//
-//	// 4. 현재 상태 변경.
-//	m_IsHit = true;
-//}
 
 // Hit 판정. => QTE 상태면 안맞음.
 void CAugusta::Hit_Judge(void* pArg)
@@ -482,15 +462,16 @@ void CAugusta::Bind_QTE(_bool IsQTE)
 	if (m_IsQTE)
 	{
 		// Activate
-		SetActivate(true);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
-		
+
 		// 내 앞에서 생성. (안 곂치게)
 		_vector vLook = XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK));
-
-		
-		vPos += vLook * 1.f;
+		vPos += vLook * 1.5f;
+		vPos += XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 1.5f;
 		m_pQTEColliderCom->Set_Position(vPos);
+		m_pQTEColliderCom->IsActivate(true);
+
+		SetActivate(true);
 		GetStateContextForWrite().m_eQTEType = EAugustaQTEType::SKILLQTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE));
 	}

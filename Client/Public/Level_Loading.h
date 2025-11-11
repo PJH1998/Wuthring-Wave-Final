@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Level.h"
+#include "Custom_UI.h"
 
 NS_BEGIN(Client)
 class CLoader;
@@ -13,18 +14,28 @@ private:
 public:
 	virtual HRESULT		Initialize(LEVEL eNextLevel);
 	virtual void			Update(_float fTimeDelta) override;
-	virtual void			Render() override;
-
-private:
-	CLoader*				m_pLoader = { nullptr };
-	LEVEL					m_eNextLevel = { LEVEL::END };
-	_bool					m_isFinished = { false };
+	virtual void			Render() override;  
 
 private:
 	HRESULT				Ready_Prototype();
 	HRESULT				Ready_Event();
 	HRESULT				Ready_LoadingThread();
 	HRESULT				Ready_GameObject();
+
+private:
+	void				Ready_LoadingScreen();
+	void				Update_LoadingScreen(_float fTimeDelta);
+
+	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);
+
+private:
+	CLoader*				m_pLoader = { nullptr };
+	LEVEL					m_eNextLevel = { LEVEL::END };
+	_bool					m_isFinished = { false };
+
+	class CGameSystem*		m_pGameSystem = { nullptr };
+
+	_float					m_fElapsedTime = 0.f;
 
 public:
 	static		CLevel_Loading*	Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eNextLevel);

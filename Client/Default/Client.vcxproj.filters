@@ -250,7 +250,10 @@
     <Filter Include="03. GameObject\MapObject\Sonoro">
       <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
 	</Filter>
-	<Filter Include="03. GameObject\MapObject\Spawner">
+    <Filter Include="03. GameObject\UI\Child_Containers\Loading">
+      <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Spawner">
       <UniqueIdentifier>{b83887f9-c6e3-4dc5-9f53-58cee967fdc0}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\Actor\Monster\ElectroPredator\Effect">
@@ -640,7 +643,10 @@
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
 	</ClInclude>
-	<ClInclude Include="..\Public\AoEDoT.h">
+    <ClInclude Include="..\public\UI_Loading.h">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AoEDoT.h">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
     </ClInclude>
     <ClInclude Include="..\public\MonsterTable.h">
@@ -1028,7 +1034,10 @@
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
 	</ClCompile>
-	<ClCompile Include="..\Private\AoEDoT.cpp">
+    <ClCompile Include="..\private\UI_Loading.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AoEDoT.cpp">
       <Filter>03. GameObject\Actor\Monster\ElectroPredator\Effect</Filter>
     </ClCompile>
     <ClCompile Include="..\private\MonsterTable.cpp">

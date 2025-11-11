@@ -349,32 +349,32 @@ HRESULT CCustom_UI::Ready_Components(void* pArg)
 
 HRESULT CCustom_UI::Ready_Events()
 {
-    m_pGameInstance->Subscribe<ONCLICKENTER_UI_EVENT>   (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickEnterUI",
+    m_pGameInstance->Subscribe<ONCLICKENTER_UI_EVENT>   (ENUM_CLASS(STATIC::NONE), L"Event_OnClickEnterUI",
         [this](const ONCLICKENTER_UI_EVENT event)
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), event.iInstanceIndex))  
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER)); });
 
-    m_pGameInstance->Subscribe<ONCLICKING_UI_EVENT>     (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickingUI",
+    m_pGameInstance->Subscribe<ONCLICKING_UI_EVENT>     (ENUM_CLASS(STATIC::NONE), L"Event_OnClickingUI",
         [this](const ONCLICKING_UI_EVENT event)
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICKING), event.iInstanceIndex))     
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICKING)); });
 
-    m_pGameInstance->Subscribe<ONCLICKEXIT_UI_EVENT>    (ENUM_CLASS(LEVEL::STATIC), L"Event_OnClickExitUI",
+    m_pGameInstance->Subscribe<ONCLICKEXIT_UI_EVENT>    (ENUM_CLASS(STATIC::NONE), L"Event_OnClickExitUI",
         [this](const ONCLICKEXIT_UI_EVENT event)        
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT), event.iInstanceIndex))   
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::CLICK_EXIT)); });
 
-    m_pGameInstance->Subscribe<ONHOVERENTER_UI_EVENT>   (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverEnterUI",
+    m_pGameInstance->Subscribe<ONHOVERENTER_UI_EVENT>   (ENUM_CLASS(STATIC::NONE), L"Event_OnHoverEnterUI",
         [this](const ONHOVERENTER_UI_EVENT event)       
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER), event.iInstanceIndex))  
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER));});
 
-    m_pGameInstance->Subscribe<ONHOVERING_UI_EVENT>     (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoveringUI",
+    m_pGameInstance->Subscribe<ONHOVERING_UI_EVENT>     (ENUM_CLASS(STATIC::NONE), L"Event_OnHoveringUI",
         [this](const ONHOVERING_UI_EVENT event)         
         {if (Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVERING), event.iInstanceIndex))     
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVERING));});
 
-    m_pGameInstance->Subscribe<ONHOVEREXIT_UI_EVENT>    (ENUM_CLASS(LEVEL::STATIC), L"Event_OnHoverExitUI",
+    m_pGameInstance->Subscribe<ONHOVEREXIT_UI_EVENT>    (ENUM_CLASS(STATIC::NONE), L"Event_OnHoverExitUI",
         [this](const ONHOVEREXIT_UI_EVENT event)        
         {if ( (m_iInputState == ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT)))   // 나갈때는 Check_IsInSpace 체크를 하면 안됨. 나갔으니까 당연히 false 떨어짐;
         OnEvent(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT));});

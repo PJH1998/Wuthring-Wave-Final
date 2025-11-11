@@ -56,6 +56,8 @@ private:
 	BodyInterface*					m_pBodyInterface = { nullptr };
 	BodyID							m_BodyID = {};
 
+	_bool								m_isActivate = { true };
+
 	_uint								m_iCollisionLayer = {};
 
 	_bool								m_isGravity = { true };

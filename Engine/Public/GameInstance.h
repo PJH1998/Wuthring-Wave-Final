@@ -52,7 +52,7 @@ public:
 #pragma endregion
 
 #pragma region FONT_MANAGER
-	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight);
+	HRESULT		Add_Font(const _wstring& strFontTag, const _char* pFilePath, const _int iPixelHeight = 64U);
 	//HRESULT		Draw_Text(const _wstring& strFontTag, const _tchar* pText, const _float2& vPosition, _fvector vColor = XMVectorSet(1.f, 1.f, 1.f, 1.f), _float fRadian = 0.f, const _float2& vOrigin = _float2(0.f, 0.f), const _float2& vScale = _float2(1.f, 1.f));
 	//void		Add_FloatingText(const _wstring& strFontTag, const _tchar* pText, FONT_SINGLEDESC tSingleFontDesc);
 	//_bool		Draw_Font(_wstring strFontTag, const _tchar* pText, _float2 vPos, _float fScale, _float4 vColor, _uint iShaderFlag);
@@ -78,7 +78,7 @@ public:
 	void		Remove_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag);
 	CBase*		Clone_Prototype(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, PROTOTYPE eType, void* pArg = nullptr);
 #pragma endregion
-
+	 
 #pragma region OBJECT_MANAGER
 	HRESULT		Add_GameObject_ToLayer(_uint iPrototypeLevelID, const _wstring& strPrototypeTag, _uint iLayerLevelID, const _wstring& strLayerTag, void* pArg = nullptr);
 	HRESULT		Add_GameObject_ToLayer(_uint iLayerLevelID, const _wstring& strLayerTag, class CGameObject* pObject);
@@ -137,7 +137,7 @@ public:
 	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 	void					Set_LUT_Index(_uint iIndex);
-	void				Render_ShadowMap();
+	void					Render_ShadowMap();
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
@@ -172,7 +172,7 @@ public:
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
-	void				OnShake(const _float3& vDir);
+	void				OnShake(const CAMERA_SHAKE& tData);
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
