@@ -12,6 +12,7 @@
 #include "Particle.h"
 
 #include "Effect_Rect.h"
+#include "Effect_Decal.h"
 #include<unordered_set>
 
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -562,6 +563,28 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 		}
 	}
 
+	//strEffectPath = strDefaultPath;
+	//strEffectPath += "/FXDecal/";
+	//for (const auto& entry : filesystem::directory_iterator(strEffectPath))
+	//{
+	//	if (entry.is_regular_file())
+	//	{
+	//		//파일 경로
+	//		_string filePath = entry.path().string();
+	//		//파일 이름
+	//		_string fileName = entry.path().filename().string();
+	//		//파일 정보
+	//		_string extension = entry.path().extension().string();
+
+	//		if (extension == ".json")
+	//		{
+	//			_string strRectTag = entry.path().stem().string();
+
+	//			Load_FXDecal_FromJson(filePath, strRectTag, eLevel);
+	//		}
+	//	}
+	//}
+
 
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
 }
@@ -675,7 +698,7 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
     //아니면 json으로 저장할 때 이름으로 할지 == strPrefabTag ex)Dash_Test
 
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
-        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 3, &PrefabDesc)))
+        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 10, &PrefabDesc)))
     {
         MSG_BOX("Prefab Load Fail");
         return;
@@ -933,30 +956,33 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
     CTrail_Mesh::TRAILMESH_DESC Desc = {};
 
-    if (TrailMeshJson.contains("MyTag"))
-        Desc.strMyTag = StringToWString(TrailMeshJson["MyTag"].get<_string>());
+	if (TrailMeshJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(TrailMeshJson["MyTag"].get<_string>());
 
-    if (TrailMeshJson.contains("MyType"))
-        Desc.eMyType = static_cast<EFFECT_TYPE>(TrailMeshJson["MyType"].get<double>());
+	if (TrailMeshJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(TrailMeshJson["MyType"].get<double>());
 
-    if (TrailMeshJson.contains("Root"))
-        Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
+	if (TrailMeshJson.contains("Root"))
+		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
 
 
-    if (TrailMeshJson.contains("TextureTag"))
-        Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
+	if (TrailMeshJson.contains("TextureTag"))
+		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
 
-    if (TrailMeshJson.contains("ColorTextureTag"))
-        Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
+	if (TrailMeshJson.contains("ColorTextureTag"))
+		Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
 
-    if (TrailMeshJson.contains("VIBufferTag"))
-        Desc.strVIBufferTag = StringToWString(TrailMeshJson["VIBufferTag"].get<_string>());
+	if (TrailMeshJson.contains("DissolveTextureTag"))
+		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DissolveTextureTag"].get<_string>());
 
-    if (TrailMeshJson.contains("ShaderPass"))
-        Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
+	if (TrailMeshJson.contains("DistortionTextureTag"))
+		Desc.strDistortionTextureTag = StringToWString(TrailMeshJson["DistortionTextureTag"].get<_string>());
 
-	if (TrailMeshJson.contains("MaskFlag"))
-		Desc.iMaskFlag = TrailMeshJson["MaskFlag"].get<_int>();
+	if (TrailMeshJson.contains("VIBufferTag"))
+		Desc.strVIBufferTag = StringToWString(TrailMeshJson["VIBufferTag"].get<_string>());
+
+	if (TrailMeshJson.contains("ShaderPass"))
+		Desc.iShaderPass = TrailMeshJson["ShaderPass"].get<_int>();
 
 	if (TrailMeshJson.contains("SweepSpeed"))
 		Desc.fSweep = TrailMeshJson["SweepSpeed"].get<_float>();
@@ -969,6 +995,18 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 
 	if (TrailMeshJson.contains("DirFlag"))
 		Desc.iDirFlag = TrailMeshJson["DirFlag"].get<_int>();
+
+	if (TrailMeshJson.contains("MaskFloag"))		//오타있음
+		Desc.iMaskFlag = TrailMeshJson["MaskFloag"].get<_int>();
+
+	if (TrailMeshJson.contains("DissolveFlag"))
+		Desc.IsDissolve = TrailMeshJson["DissolveFlag"].get<_bool>();
+
+	if (TrailMeshJson.contains("DistortionFlag"))
+		Desc.IsDistortion = TrailMeshJson["DistortionFlag"].get<_bool>();
+
+	if (TrailMeshJson.contains("DistortionWeight"))
+		Desc.fDistortionWeight = TrailMeshJson["DistortionWeight"].get<_float>();
 
 	if (TrailMeshJson.contains("ColorSpeed"))
 		Desc.fColorSpeed = TrailMeshJson["ColorSpeed"].get<_float>();
@@ -985,28 +1023,29 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 	if (TrailMeshJson.contains("ColorGamma"))
 		Desc.fColorGamma = TrailMeshJson["ColorGamma"].get<_float>();
 
-    if (TrailMeshJson.contains("Size") && TrailMeshJson["Size"].is_array())
-    {
-        json SizeJson = TrailMeshJson["Size"];
-        Desc.vSize.x = SizeJson[0].get<_float>();
-        Desc.vSize.y = SizeJson[1].get<_float>();
-        Desc.vSize.z = SizeJson[2].get<_float>();
-    }
 
-    if (TrailMeshJson.contains("Position") && TrailMeshJson["Position"].is_array())
-    {
-        json PosJson = TrailMeshJson["Position"];
-        Desc.vPos.x = PosJson[0].get<_float>();
-        Desc.vPos.y = PosJson[1].get<_float>();
-        Desc.vPos.z = PosJson[2].get<_float>();
-    }
+	if (TrailMeshJson.contains("Size") && TrailMeshJson["Size"].is_array())
+	{
+		json SizeJson = TrailMeshJson["Size"];
+		Desc.vSize.x = SizeJson[0].get<_float>();
+		Desc.vSize.y = SizeJson[1].get<_float>();
+		Desc.vSize.z = SizeJson[2].get<_float>();
+	}
 
-    if (TrailMeshJson.contains("LifeTime") && TrailMeshJson["LifeTime"].is_array())
-    {
-        json LifeTimeJson = TrailMeshJson["LifeTime"];
-        Desc.vLifeTime.x = LifeTimeJson[0].get<_float>();
-        Desc.vLifeTime.y = LifeTimeJson[1].get<_float>();
-    }
+	if (TrailMeshJson.contains("Position") && TrailMeshJson["Position"].is_array())
+	{
+		json PosJson = TrailMeshJson["Position"];
+		Desc.vPos.x = PosJson[0].get<_float>();
+		Desc.vPos.y = PosJson[1].get<_float>();
+		Desc.vPos.z = PosJson[2].get<_float>();
+	}
+
+	if (TrailMeshJson.contains("LifeTime") && TrailMeshJson["LifeTime"].is_array())
+	{
+		json LifeTimeJson = TrailMeshJson["LifeTime"];
+		Desc.vLifeTime.x = LifeTimeJson[0].get<_float>();
+		Desc.vLifeTime.y = LifeTimeJson[1].get<_float>();
+	}
 
     Desc.CurrentLevel = ENUM_CLASS(eLevel);
 
@@ -1100,6 +1139,104 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 	}
 }
 
+void CParser::Load_FXDecal_FromJson(const _string& strFilePath, const _string& DecalTag, LEVEL eLevel)
+{
+	_string strProtoTag = "Prototype_GameObject_FXDecal_";
+	strProtoTag += DecalTag;
+
+	_wstring wstrPrototTag = StringToWString(strProtoTag);
+	
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json DecalJson;
+	JsonStream >> DecalJson;
+	JsonStream.close();
+
+	CEffect_Decal::DECAL_DESC Desc = {};
+
+	if (DecalJson.contains("MyTag"))
+		Desc.strMyTag = StringToWString(DecalJson["MyTag"].get<_string>());
+
+	if (DecalJson.contains("MyType"))
+		Desc.eMyType = static_cast<EFFECT_TYPE>(DecalJson["MyType"].get<double>());
+
+	if (DecalJson.contains("DecalTag"))
+		Desc.wstrDecalTag = StringToWString(DecalJson["DecalTag"].get<_string>());
+
+	if (DecalJson.contains("LifeTime"))
+		Desc.LifeTime = DecalJson["LifeTime"].get<_float>();
+
+	if (DecalJson.contains("Color") && DecalJson["Color"].is_array())
+	{
+		json ColorJson = DecalJson["Color"];
+		Desc.vColor.x = ColorJson[0].get<_float>();
+		Desc.vColor.y = ColorJson[1].get<_float>();
+		Desc.vColor.z = ColorJson[2].get<_float>();
+		Desc.vColor.w = ColorJson[3].get<_float>();
+	}
+
+	Desc.CurrentLevel = ENUM_CLASS(eLevel);
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(eLevel), wstrPrototTag,
+		CEffect_Decal::Create(m_pDevice, m_pContext, &Desc))))
+	{
+		MSG_BOX("Effect_Rect Load Fail");
+		return;
+	}
+}
+
+void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
+{
+	ifstream JsonStream(strFilePath.c_str());
+
+	if (!JsonStream.is_open())
+		return;
+
+	json DecalDataJson;
+	JsonStream >> DecalDataJson;
+	JsonStream.close();
+
+	_wstring DecalDataTag = {};
+	_int iTextureCount = {};
+
+	if (DecalDataJson.contains("DecalTag"))
+		DecalDataTag = StringToWString(DecalDataJson["DecalTag"].get<_string>());
+
+	if (DecalDataJson.contains("TextureCount"))
+		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
+
+	const _tchar* DecalTexturePath[3] = {};
+
+	if (DecalDataJson.contains("Textures") && DecalDataJson["Textures"].is_array())
+	{
+		for (size_t i = 0; i < iTextureCount; i++)
+		{
+			_wstring strTexturePath = {};
+			_int iType = {};
+			_tchar TextPath[MAX_PATH] = {};
+
+			json Texture = DecalDataJson["Textures"][i];
+
+			if (Texture.contains("Texture_Type"))
+				iType = Texture["Texture_Type"].get<_int>();
+
+			if (Texture.contains("Texture_Path"))
+				strTexturePath = StringToWString(Texture["Texture_Path"].get<_string>());
+			// JSON 읽어서, 미리 데칼 매니저에 바인딩 
+
+			wcscpy_s(TextPath, strTexturePath.c_str());
+
+			DecalTexturePath[iType] = TextPath;
+
+		}
+	}
+
+	m_pGameInstance->Add_Decal(DecalDataTag, DecalTexturePath);
+}
+
 void CParser::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
 {
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -1162,6 +1299,25 @@ void CParser::Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL e
             }
         }
     }
+}
+
+void CParser::Load_FXDecal_Data_FromFolder(const string& strFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".json")
+			{
+
+				Load_FXDecal_Data_FromJson(filePath);
+			}
+		}
+	}
 }
 
 

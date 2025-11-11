@@ -54,6 +54,11 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_iDirFalg = m_tDesc.iDirFlag;
 	m_iMaskFlag = m_tDesc.iMaskFlag;
 
+	m_IsDissolve = m_tDesc.IsDissolve;
+
+	m_IsDistortion = m_tDesc.IsDistortion;
+	m_fDistortionWeight = m_tDesc.fDistortionWeight;
+
     //임시처리
     m_isActivate = false;
 	
@@ -103,7 +108,7 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::EMISSIVE, this);
+    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CTrail_Mesh::Render()
@@ -147,7 +152,6 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
     if (FAILED(CGameObject::Add_Component(Desc.CurrentLevel, Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -155,6 +159,19 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
     if (FAILED(CGameObject::Add_Component(Desc.CurrentLevel, Desc.strColorTextureTag,
         TEXT("Com_ColorTexture"), reinterpret_cast<CComponent**>(&m_pColorTextureCom), nullptr)))
         return E_FAIL;
+
+	if (Desc.IsDissolve)
+	{
+		if (FAILED(CGameObject::Add_Component(ENUM_CLASS(Desc.CurrentLevel), Desc.strDissolveTextureTag,
+			TEXT("Com_DissolveTexture"), reinterpret_cast<CComponent**>(&m_pDissolveTextureCom), nullptr)))
+			return E_FAIL;
+	}
+	if (Desc.IsDistortion)
+	{
+		if (FAILED(CGameObject::Add_Component(ENUM_CLASS(Desc.CurrentLevel), Desc.strDistortionTextureTag,
+			TEXT("Com_DistortionTexture"), reinterpret_cast<CComponent**>(&m_pDistortionTextureCom), nullptr)))
+			return E_FAIL;
+	}
 
     return S_OK;
 }
@@ -175,6 +192,22 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 
     if (FAILED(m_pTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_MaskTexture", 0)))
         return E_FAIL;
+
+	if (m_IsDissolve)
+	{
+		if (FAILED(m_pDissolveTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DissolveTexture", 0)))
+			return E_FAIL;
+	}
+
+	if (m_IsDistortion)
+	{
+		if (FAILED(m_pDistortionTextureCom->Bind_Shader_Resource(m_pShaderCom, "g_DistortionTexture", 0)))
+			return E_FAIL;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_DistortionWeight", &m_fDistortionWeight, sizeof(_float))))
+			return E_FAIL;
+
+	}
 
 	//셰이더에 바인딩 해주자.
 	if (FAILED(m_pShaderCom->Bind_Value("g_Sweep", &m_fSweep, sizeof(_float))))
@@ -201,7 +234,7 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 	if (FAILED(m_pShaderCom->Bind_Value("g_ColorSpeed", &m_fColorSweep, sizeof(_float))))
 		return E_FAIL;
 
-    if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_fTime, sizeof(_float))))
+    if (FAILED(m_pShaderCom->Bind_Value("g_Time", &m_vLifeTime.x, sizeof(_float))))
         return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_Dir", &m_iDirFalg, sizeof(_int))))
@@ -247,4 +280,6 @@ void CTrail_Mesh::Free()
     Safe_Release(m_pTextureCom);
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pColorTextureCom);
+	Safe_Release(m_pDissolveTextureCom);
+	Safe_Release(m_pDistortionTextureCom);
 }

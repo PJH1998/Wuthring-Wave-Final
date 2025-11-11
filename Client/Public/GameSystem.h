@@ -25,6 +25,7 @@ public:
 	void							Create_Prefab(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
 	void							Load_EffectMeshDat_FromFolder(const string& strFolderPath, LEVEL eLevel);
+	void							Load_EffectDecalData_FromFolder(const string& strFolderPath);
 	//============================Effect
 
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
