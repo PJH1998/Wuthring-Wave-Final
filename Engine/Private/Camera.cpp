@@ -136,6 +136,7 @@ void CCamera::Shaking(_float fTimeDelta)
 	if (m_fShakeTimeAcc > m_tShakeData.fDuration)
 	{
 		m_isShake = false;
+		m_fFovy = m_fOriginFov;
 		return;
 	}
 
@@ -155,6 +156,7 @@ void CCamera::Shaking(_float fTimeDelta)
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionMultiply(XMLoadFloat4(&m_vOriginQuaternion), vQuat));
 
 	m_tShakeData.fAmplitude *= 0.5f;
+	//m_tShakeData.fAmplitude *= 0.98f;
 
 	// Fov
 	m_fFovy = m_fOriginFov + m_tShakeData.fFovKick * fWeight * m_fDecay;

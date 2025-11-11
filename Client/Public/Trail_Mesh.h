@@ -18,16 +18,23 @@ public:
 	{
 		_wstring strTextureTag;
 		_wstring strColorTextureTag;
+		_wstring strDissolveTextureTag = {};
+		_wstring strDistortionTextureTag = {};
 		_wstring strVIBufferTag;
 
 		_int	iShaderPass = 0;
-		
+
 		_float	fSweep = 0.f;
 		_float	fSweepWitdh = 0.f;
 		_float	fSoft = 0.3f;
 
 		_int	iDirFlag = 0;
 		_int	iMaskFlag = 0;
+
+		_bool	IsDissolve = false;
+
+		_bool	IsDistortion = false;
+		_float	fDistortionWeight = 0.1f;
 
 		_float	fColorSpeed = 1.f;
 		_float	fMaskSpeed = 1.f;
@@ -40,7 +47,7 @@ public:
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float3 vColor = { 0.f, 0.f, 0.f };
-		_float2	vLifeTime = { 0.f, 10.f};
+		_float2	vLifeTime = { 0.f, 10.f };
 	}TRAILMESH_DESC;
 
 private:
@@ -63,10 +70,12 @@ private:
 	void Root_Transform(_fmatrix WorldMatrix);
 
 private:
-	CShader*					m_pShaderCom = { nullptr };
-	CTexture*					m_pTextureCom = { nullptr };
-	CTexture*					m_pColorTextureCom = { nullptr };
-	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
+	CShader*							m_pShaderCom = { nullptr };
+	CTexture*							m_pTextureCom = { nullptr };
+	CTexture*							m_pColorTextureCom = { nullptr };
+	CTexture*							m_pDissolveTextureCom = { nullptr };
+	CTexture*							m_pDistortionTextureCom = { nullptr };
+	CVIBuffer_Mesh*						m_pVIBufferCom = { nullptr };
 
 	//원형이 들고있을 정보
 	TRAILMESH_DESC				m_tDesc = {};
@@ -92,6 +101,11 @@ private:
 
 	_int						m_iDirFalg = {};
 	_int						m_iMaskFlag = {};
+
+	_bool						m_IsDissolve = false;
+
+	_bool						m_IsDistortion = false;
+	_float						m_fDistortionWeight = {};
 
 	_float3						m_vPos = {};
 	_float3						m_vColor = {};

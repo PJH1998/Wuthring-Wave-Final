@@ -4,6 +4,8 @@ matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
 texture2D g_DiffuseTexture;
 texture2D g_MaskTexture;
+texture2D g_DissolveTexture;
+texture2D g_DistortionTexture;
 
 //색상
 float   g_Sweep;
@@ -15,6 +17,8 @@ int     g_Dir;          //안쓰는중
 float   g_Time;
 float   g_Alpha;
 int   g_MaskFlag;     // 0이면 R로, 1이면 알파로
+
+float g_DistortionWeight;
 
 //밝기 죽이기?
 float g_ColorGain;      // 밝기 스케일 0~1
@@ -82,6 +86,7 @@ struct PS_OUT
 {
     float4 vDiffuse : SV_TARGET0;
     float4 vEmissive : SV_TARGET1;
+    float4 vDistortion : SV_TARGET2;
 };
 
 PS_OUT PS_MAIN(PS_IN In)
@@ -139,10 +144,7 @@ PS_OUT PS_TrailDefault(PS_IN In)
     //float fWeight = Luminance(Out.vDiffuse.xyz);
     
     //if (fWeight >= g_fEmissiveThreshold)
-    //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    
-    
- 
+    //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);l
     
     float2 MaskUV = In.vTexcoord;
     
@@ -456,6 +458,62 @@ PS_OUT PS_TraillTestA(PS_IN In)
     return Out;
 }
 
+PS_OUT PS_TraillDissolve(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    float2 UV = In.vTexcoord;
+    
+    float4 Mask = g_MaskTexture.Sample(DefaultSampler, UV);
+    
+    float MaskR = max(max(Mask.r, Mask.g), Mask.b);
+    
+    if (MaskR < 0.3f)
+        discard;
+    
+    float Dissolve = g_DissolveTexture.Sample(DefaultSampler, UV).r;
+    
+    if (Dissolve < 0.5f || Dissolve - g_Time < 0.f)
+        discard;
+    
+    //float fY = 1.f - g_MaskSweep;
+    //float fVisibleY;
+    
+    //fVisibleY = 1.f - step(fY, UV.y);
+    
+    //float fVisibleX;
+    
+    //float fTailFad = smoothstep(g_Sweep - g_SweepWitdh, g_Sweep - g_SweepWitdh + g_Soft, 1 - In.vTexcoord.x);
+    
+    //float fHeadFad = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, 1 - In.vTexcoord.x);
+    
+    //fVisibleX = fTailFad * fHeadFad;
+    
+    float4 vColor = g_DiffuseTexture.Sample(DefaultSampler, float2(0.5f, saturate(In.vTexcoord.y)));
+    
+    vColor.rgb = saturate(vColor.rgb);
+    vColor.rgb = pow(vColor.rgb, g_ColorGamma);
+    vColor.rgb *= g_ColorGain;
+    
+    //float fAlpha = fVisibleY * fVisibleX * MaskR;
+    
+    //if (fAlpha < 0.2f)
+    //    discard;
+    
+    //Out.vDiffuse = float4(vColor.rgb, fAlpha);
+    
+    Out.vDiffuse = vColor;
+    
+    //float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+    //if (fWeight >= g_fEmissiveThreshold)
+    //    Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vDiffuse *= g_Alpha;
+    
+    return Out;
+}
+
 // ==Test==
 PS_OUT PS_TraillDesh(PS_IN In)
 {
@@ -516,6 +574,71 @@ PS_OUT PS_TraillDeshB(PS_IN In)
     
     return Out;
 }
+
+PS_OUT PS_DistortionWave(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    float2 UV = In.vTexcoord;
+    
+    float waveFreq = 6.0f; // 줄무늬 얼마나 촘촘한지
+    float waveAmp = 0.01f; // 얼마나 흔들릴지
+    float waveSpeed = 1.5f; // 얼마나 빨리 움직일지
+
+    float wave = sin(UV.y * waveFreq + g_Time * waveSpeed);
+
+    float2 duv;
+    duv.x = wave * waveAmp;
+    duv.y = 0.0f;
+
+    float4 vDist = g_DistortionTexture.Sample(DefaultSampler, UV + duv);
+
+    Out.vDistortion = vDist;
+    Out.vDistortion.a = g_DistortionWeight;
+    
+    
+    //speed , freq, time 
+    // wave , x y 기준, 
+    
+    return Out;
+}
+
+PS_OUT PS_DistortionPotal(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+   
+    float2 UV = In.vTexcoord ;
+
+    float2 Center = float2(0.5f, 0.5f);
+    
+    float2 Dir = Center - UV;
+    
+    float Dist = length(Dir);       //거리에 따라 강도 쎄게
+    
+    float Weight = saturate(1 - Dist);
+   
+    float2 DirN = normalize(Dir);
+    
+    float SpinSpeed = 0.3f;     //임시값
+    
+    float SpinFreq = 1.f;
+    
+    float AngleWave = sin(g_Time * SpinSpeed + Dist * SpinFreq);
+    
+    float2 OffsetDir = float2(-DirN.y, DirN.x);
+    
+    float2 Offset = OffsetDir * (g_DistortionWeight * Weight * AngleWave);
+   
+    float4 vDist = g_DistortionTexture.Sample(DefaultSampler, UV + Offset);
+    
+    Out.vDistortion = vDist;
+    
+    Out.vDistortion.a = g_DistortionWeight;
+    
+    return Out;
+}
+
+
 // ==Test==
 technique11 DefaultTechnique
 {
@@ -523,7 +646,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -534,7 +657,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -545,7 +668,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -556,7 +679,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -567,7 +690,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -578,7 +701,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -589,18 +712,51 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_Y_IN();
     }
 
-    pass PS_Debug //7
+    pass TestDissolve // 7
     {
         SetRasterizerState(RS_Cull_None);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_TraillDissolve();
+    }
+
+    pass TestDistortionWave // 8
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DistortionWave();
+    }
+
+    pass TestDistortionPotal // 9
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_DistortionPotal();
+    }
+
+    pass PS_Debug //10
+    {
+        SetRasterizerState(RS_Cull_None);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = NULL;
@@ -608,3 +764,7 @@ technique11 DefaultTechnique
     }
 
 }
+
+
+//BS_AlphaBlend -> 찐하게 나옴. 알파를 죽이고 설정하는게 아닌거 같음. 내가 설정한 값으로 알파처리 하는 구조
+//BS_FXBlend -> 연하게 나옴. 설정값 자체가 알파를 죽이고 거기에 내 코드 처리하는거라. 애초부터 색상이 조금 죽어서 나오는거 같음.

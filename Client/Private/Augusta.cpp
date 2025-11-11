@@ -603,29 +603,41 @@ void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)
 }
 void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
 {
-	return; // 아직 미사용.
-	_wstring duration;
-	_wstring type;
+	_wstring Tag;
+	_wstring Duration;
+	_wstring Frequency; 
+	_wstring Amplitude;
+	_wstring FovKick;
+	_wstring Intensity; // 강도
+	_wstring Dir; // UD, LR
+
+	/* CAMERA | Duration | Frequency | Amplitude | Intensity | FovKick | Dir*/
 	wstringstream wss(wStrObjectTag);
+	getline(wss, Tag, L'|');
+	getline(wss, Duration, L'|'); 
+	getline(wss, Frequency, L'|');
+	getline(wss, Amplitude, L'|');
+	getline(wss, Intensity, L'|');
+	getline(wss, FovKick, L'|');
+	getline(wss, Dir, L'|');
 
-	// 3개의 변수 준비
-	_wstring var1, var2, var3;
-	getline(wss, duration, L'|');
-	getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	CAMERA_SHAKE ShakeDesc = {};
+	ShakeDesc.fDuration = stof(Duration);
+	ShakeDesc.fFrequency = stof(Frequency);
+	ShakeDesc.fAmplitude = stof(Amplitude);
+	_float fIntensity = stof(Intensity);
+	if (Dir == TEXT("UD"))
+		ShakeDesc.vRotation = { fIntensity, 0.f, 0.f};
+	else if (Dir == TEXT("LR"))
+		ShakeDesc.vRotation = { 0.f, fIntensity ,0.f };
+	else if (Dir == TEXT("UDLR"))
+		ShakeDesc.vRotation = { fIntensity, fIntensity ,0.f };
 
-	_float fYawShake = stof(var2);
-	_float fPitchShake = stof(var3);
-	_float fDuration = stof(duration);
+	ShakeDesc.fFovKick = stof(FovKick);
 
 
-	if (type == TEXT("IMPULSE"))
-	{
-		//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
-	}
-
-
-	//	_float fIntensity = stof(var2);
-	//	Camera_Shake(fIntensity); // Shaking 강도.
+	// 흔든다.
+	m_pGameInstance->OnShake(ShakeDesc);
 	return;
 }
 void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
@@ -978,7 +990,4 @@ void CAugusta::Free()
     Safe_Release(m_pSkillWeapon);
     Safe_Release(m_pGriffon);
 	Safe_Release(m_pWing);
-
-	
-
 }

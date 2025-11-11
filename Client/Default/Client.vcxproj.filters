@@ -244,6 +244,9 @@
     <Filter Include="03. GameObject\Projectile">
       <UniqueIdentifier>{e1fd1022-be80-4cf0-833e-ac5794ebdab6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Effect\Prefab\Decal">
+      <UniqueIdentifier>{d050ecdf-02ed-49e6-921c-5906b20ec564}</UniqueIdentifier>
+	</Filter>
     <Filter Include="03. GameObject\MapObject\Destruction">
       <UniqueIdentifier>{9a535f9d-e44c-4a68-b31a-05b1d01b84df}</UniqueIdentifier>
     </Filter>
@@ -686,6 +689,9 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\MapObject_Meteo.h" />
+    <ClInclude Include="..\Public\Effect_Decal.h">
+      <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1075,6 +1081,9 @@
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
+    <ClCompile Include="..\Private\Effect_Decal.cpp">
+      <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

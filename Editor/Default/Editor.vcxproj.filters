@@ -181,6 +181,12 @@
     <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect">
       <UniqueIdentifier>{78b70b79-18c1-4b75-b8a8-2322db63397f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Decal_Controller">
+      <UniqueIdentifier>{0bd9ea5f-ea07-449d-8822-ba7f58e8277c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Level\Effect\Effect_Controller\Decal_Controller\Decal">
+      <UniqueIdentifier>{aed8a9b4-29ba-402f-8bad-85ea69775db6}</UniqueIdentifier>
+	</Filter>
     <Filter Include="03. GameObject\MapObject\Spawn">
       <UniqueIdentifier>{f219fc04-ee62-4e2b-b86e-216ec6af55d8}</UniqueIdentifier>
     </Filter>
@@ -398,6 +404,12 @@
     <ClInclude Include="..\Public\EditorPropWeapon.h">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Decal_Controller.h">
+      <Filter>01. Level\Effect\Effect_Controller\Decal_Controller</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Effect_Decal.h">
+      <Filter>01. Level\Effect\Effect_Controller\Decal_Controller\Decal</Filter>
+	</ClInclude>
     <ClInclude Include="..\Public\Edit_TriggerBox.h">
       <Filter>03. GameObject\MapObject\Trigger</Filter>
     </ClInclude>
@@ -589,6 +601,12 @@
     <ClCompile Include="..\Private\EditorPropWeapon.cpp">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Decal_Controller.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Decal_Controller</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Effect_Decal.cpp">
+      <Filter>01. Level\Effect\Effect_Controller\Decal_Controller\Decal</Filter>
+	</ClCompile>
     <ClCompile Include="..\Private\Edit_TriggerBox.cpp">
       <Filter>03. GameObject\MapObject\Trigger</Filter>
     </ClCompile>

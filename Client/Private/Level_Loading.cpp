@@ -52,14 +52,20 @@ HRESULT CLevel_Loading::Initialize(LEVEL eNextLevel)
 
 void CLevel_Loading::Update(_float fTimeDelta)
 {
+	Update_LoadingScreen(fTimeDelta);
 	if (false == m_isFinished)
-		Update_LoadingScreen(fTimeDelta);
+	{
+		m_pLoader->Update(fTimeDelta);
+	}
 
 	//this_thread::sleep_for(chrono::milliseconds(1));
 	if (false == m_isFinished && true == m_pGameInstance->IsWorkFinish())
 	{
 		cout << "Finish" << endl;
-		m_isFinished =  true;
+
+		_float fProgress = m_pLoader->Get_Progress();
+		if(1.01f < fProgress)
+			m_isFinished =  true;
 
 		//// ui test
 		//CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"));
@@ -256,17 +262,14 @@ void CLevel_Loading::Update_LoadingScreen(_float fTimeDelta)
 	// 임시 테스트. 나중에 값 받아올 수 있으면 받아오긴
 	const _float fTestLoadingTime = 3.f;
 
-	m_fElapsedTime += fTimeDelta * (1.f / fTestLoadingTime);
+	//m_fElapsedTime += fTimeDelta * (1.f / fTestLoadingTime);
+	m_fElapsedTime = m_pLoader->Get_Progress();
 	if (m_fElapsedTime > 1.0f) m_fElapsedTime = 1.0f;
 
 	loadBarUIDesc.vecInstanceDescs[0].vClipTexcoordX.y = m_fElapsedTime;
 	pLoadBarUI->Set_UIDesc(loadBarUIDesc);
 
-
 	loadingTextUIDesc.strText = to_wstring((int)(m_fElapsedTime * 100.f));
-
-
-
 
 	_uint iAlignmentPixel = 0;	// 오른정렬을 위함
 	static _uint iOriginPosX = UINT_MAX;
@@ -278,15 +281,12 @@ void CLevel_Loading::Update_LoadingScreen(_float fTimeDelta)
 	loadingTextUIDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * loadingTextUIDesc.fScale;
 	pLoadingTextUI->Set_TextUIDesc(loadingTextUIDesc);
 
-
-
-	static _bool isLoadComplete = false;
-	if (!isLoadComplete && m_fElapsedTime >= 1.0f)
-	{
-		isLoadComplete = true;
-		CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"))->Find_ChildObject(L"SubRoot_Loading");
-		static_cast<CAnimator_UI*>(pLoadRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
-	}
+	//if (!m_isLoadFadeOut && m_fElapsedTime >= 1.0f)
+	//{
+	//	m_isLoadFadeOut = true;
+	//	CCustom_UI* pLoadRootUI = dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_Loading"))->Find_ChildObject(L"SubRoot_Loading");
+	//	static_cast<CAnimator_UI*>(pLoadRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(0);
+	//}
 }
 
 CCustom_UI::CUSTOM_UITREE_DESC CLevel_Loading::Load_UITree(_string strFilePath)

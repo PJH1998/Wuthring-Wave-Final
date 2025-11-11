@@ -12,7 +12,7 @@ matrix g_ShadowProjMatrix[4];
 float4 g_fShadowBais = 0.0001f;//float4(0.0001f, 0.02f, 0.03f, 0.05f);
 float4 g_fMinShadowBias = 0.0001f;
 
-float g_fShadowMapBais = 0.01f;
+float g_fShadowMapBais = 0.001f;
 
 float g_DebugSlopeScale = 2.f;
 

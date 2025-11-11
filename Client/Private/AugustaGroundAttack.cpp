@@ -141,6 +141,7 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     if (m_States[HEAVY_ATTACK_PENDING])
         m_fAttackPressTime += fTimeDelta;
 
+
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pAugusta->Play_PartAnimation(
         m_iPartType,
@@ -154,9 +155,6 @@ void CAugustaGroundAttack::Check_Physics(_float fTimeDelta)
 
 }
 
-void CAugustaGroundAttack::LockOn_StateTransition(_float fTimeDelta)
-{
-}
 
 void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 {

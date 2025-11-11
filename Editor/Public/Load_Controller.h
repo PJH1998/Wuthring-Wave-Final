@@ -5,6 +5,7 @@
 #include "Effect_Mesh.h"
 #include "Trail_Mesh.h"
 #include "Effect_Rect.h"
+#include "Effect_Decal.h"
 NS_BEGIN(Editor)
 
 //다른 곳에서 이펙트 불러오는 연동성을 위해 추가한 것.?
@@ -46,6 +47,8 @@ public:
 
 	void Load_FXRect_FromJson(const _string& strFilePath, const _wstring& RectTag);
 
+	void Load_FXDecal_FromJson(const _string& strFilePath, const _wstring& DecalTag);
+
 public:
 	void Get_Prefab_Desc(CEffect_Prefab::PREFAB_DESC& PrefabDesc);
 
@@ -58,6 +61,8 @@ public:
 	void Get_TrailMesh_Desc(const _wstring& TrailMeshTag, CTrail_Mesh::TRAILMESH_DESC& TrailMesh);
 
 	void Get_FXRect_Desc(const _wstring& RectTag, CEffect_Rect::FXRECT_DESC& RectDesc);
+
+	void Get_FXDecal_Desc(const _wstring& DecalTag, CEffect_Decal::DECAL_DESC& DecalDesc);
 
 public:
 	void Reset_Load();
@@ -87,6 +92,9 @@ private:
 
 	//Rect 저장
 	map<const _wstring, CEffect_Rect::FXRECT_DESC>							m_tRectDesc = {};
+
+	//Decal 저장
+	map<const _wstring, CEffect_Decal::DECAL_DESC>							m_tDecalDesc = {};
 public:
 	static CLoad_Controller* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, LEVEL eCurrentLevel);
 	virtual	void Free() override;

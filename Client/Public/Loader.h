@@ -15,10 +15,11 @@ protected:
 
 public:
 	//_bool		IsFinished() { return m_fProgress >= 100.f; }
-	_float		Get_Progress() { return m_fProgress; }
+	_float		Get_Progress() { return m_fLerpProgress / 100.f; }
 
 public:
 	virtual			HRESULT		Initialize() { return S_OK; };
+	virtual			void			Update(_float fTimeDelta);
 
 protected:
 	ID3D11Device*				m_pDevice = { nullptr };
@@ -27,6 +28,8 @@ protected:
 	class CGameSystem*		m_pGameSystem = { nullptr };
 
 	_float							m_fProgress = {};
+	_float							m_fLerpProgress = {};
+	_uint							m_iNumLoadingThread = {};
 
 	mutex							m_Mutex;
 
