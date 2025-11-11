@@ -138,6 +138,8 @@ void CAugustaBayonet::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 
+	
+
 	// 1. 게이지 올리기?
 	CAbility* pAbility = CGameSystem::GetInstance()
 		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::AUGUSTA));

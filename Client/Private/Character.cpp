@@ -453,7 +453,16 @@ void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
     {
         m_IsLockOn = false;
         m_pTargetTransform = nullptr;
-        return;
+
+		// LockOn 해제 시: 카메라 Look_NoPitch으로 즉시 회전 (반대 방향 착시 완전 해결)
+		if (m_pSpringCamera)
+		{
+			_vector vCamLook = m_pSpringCamera->Get_LookVector();
+			vCamLook = XMVectorSetY(vCamLook, 0.f);
+			vCamLook = XMVector3Normalize(vCamLook);
+			m_pTransformCom->LookDir(vCamLook);
+		}
+		return;
     }
     else
     {
@@ -462,6 +471,9 @@ void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
         // 2. LockOn은 상황따라
         m_IsLockOn = IsLockOn;
     }
+
+
+	return;
 }
 
 _bool CCharacter::Is_LockOn()
@@ -574,6 +586,33 @@ _vector CCharacter::Calculate_Move_Direction(ACTORDIR eDir)
     return XMVectorZero();
 }
 
+_vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
+{
+	if (nullptr == m_pTargetTransform)
+		return XMVectorZero();
+
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	_vector vToTarget = XMVector3Normalize(vTargetPos - vMyPos);
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	_vector vTargetRight = XMVector3Normalize(XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vToTarget));
+
+	switch (eDir)
+	{
+	case ACTORDIR::U:   return -vToTarget;  
+	case ACTORDIR::D:   return vToTarget;   
+	case ACTORDIR::L:   return -vTargetRight; 
+	case ACTORDIR::R:   return vTargetRight;  
+	case ACTORDIR::LU:  return XMVector3Normalize(-vToTarget - vTargetRight);
+	case ACTORDIR::LD:  return XMVector3Normalize(vToTarget - vTargetRight);
+	case ACTORDIR::RU:  return XMVector3Normalize(-vToTarget + vTargetRight);
+	case ACTORDIR::RD:  return XMVector3Normalize(vToTarget + vTargetRight);
+	default: return XMVectorZero();
+	}
+}
+
 // LockOn 시 이동
 void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
 {
@@ -583,14 +622,26 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
     ASSERT_CRASH(m_pSpringCamera);
     ASSERT_CRASH(m_pTransformCom);
 
+	/*_vector vMoveDir = Calculate_LockOn_Move_Direction(eDir);
+	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);*/
+
     // 1. 회전.
-    Rotate_Target();
+	Rotate_Target_Lerp(fTimeDelta);
 
 	// 2. 이동 방향.
     _vector vMoveDir = Calculate_Move_Direction(eDir);
 
-    // 3. 이동 적용
+    // 3. 이동 적용  
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
+
+	// 4. 해제하면 Look 벡터를 카메라 Look으로 다시 돌리기?
+#ifdef _DEBUG
+	_float4 vLook = {};
+	XMStoreFloat4(&vLook, m_pTransformCom->Get_State(STATE::LOOK));
+
+	OutPutDebugFloat4(TEXT("Player Look"), vLook);
+#endif // _DEBUG
+
 }
 
 void CCharacter::Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
@@ -651,8 +702,6 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-
-
 void CCharacter::Rotate_Target()
 {
     // 1. 타겟이 없는 경우 Return
@@ -669,6 +718,20 @@ void CCharacter::Rotate_Target()
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_Target_Lerp(_float fTimeDelta)
+{
+	
+	if (nullptr == m_pTargetTransform || nullptr == m_pTransformCom)
+		return;
+
+	_vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	m_pTransformCom->LookLerp(vToTarget, fTimeDelta, 15.f);
 }
 
 

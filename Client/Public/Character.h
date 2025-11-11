@@ -209,6 +209,9 @@ public:
 	_vector Get_CameraRightVector();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
+	_vector Calculate_LockOn_Move_Direction(ACTORDIR eDir);
+
+
 	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
@@ -219,6 +222,7 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
 
 	// Turn
