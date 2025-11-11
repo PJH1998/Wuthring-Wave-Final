@@ -126,6 +126,7 @@ void CLevel_Loading::Ready_LoadingScreen()
 {
 	// UI.. Load
 	_uint iDestLevel = ENUM_CLASS(LEVEL::LOADING);
+	
 
 	
 	_string strFilePath_UI_Loading = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Loading.json";
@@ -139,59 +140,59 @@ void CLevel_Loading::Ready_LoadingScreen()
 		infoDesc.tUIDesc.strFilePath;
 		if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Texture_Custom_") + strFileName,
 			CTexture::Create(m_pDevice, m_pContext, strFilePath.c_str(), iNumFiles))))
-			OutputDebugString(L"[Loader_Test::Ready_Prototypes] Texture Load Failed. The texture may have already been loaded.\n");
+			OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Texture Load Failed. The texture may have already been loaded.\n");
 	}
 
 	// VIBuffer_Rect
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect"),
 		CVIBuffer_Rect::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] VIBuffer_Rect Load Failed. The VIBuffer_Rect may have already been loaded.\n");
 
 	// VIBuffer_Rect_Instance_UI
 	CVIBuffer_Rect_Instance_UI::RECT_INSTANCE_UI_DESC tRectInstDesc = {};
 	tRectInstDesc.iNumInstance = 500U;
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_VIBuffer_Rect_Instance_UI"),
 		CVIBuffer_Rect_Instance_UI::Create(m_pDevice, m_pContext, &tRectInstDesc))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Model] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] VIBuffer_Rect_Instance_UI Load Failed. The VIBuffer_Rect_Instance_UI may have already been loaded.\n");
 
 	// Shader
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader Load Failed. The Shader may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Shader Load Failed. The Shader may have already been loaded.\n");
 
 	// Shader_Instance
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_VtxPosTex_Instance"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
 	// Text Shader Instance
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_TextInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader Load Failed. The Shader may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Shader Load Failed. The Shader may have already been loaded.\n");
 
 	// Animator_UI
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
 		CAnimator_UI::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
 
 	// Custom UI
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button",
 		CUI_Button::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI:Load_Object] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] UI_Button Load Failed. The CUI_Button may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image",
 		CUI_Image::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] UI_Image Load Failed. The UI_Image may have already been loaded.\n");
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text",
 		CUI_Text::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_Loading",
 		CUI_Loading::Create(m_pDevice, m_pContext))))
-		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
 	// Font
 	if (FAILED(m_pGameInstance->Add_Font(L"WW_Bold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Bold.ttf")))
-		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+		OutputDebugString(L"[Level_Loading::Ready_LoadingScreen] Font Load Failed. The Font may have already been loaded.\n");
 
 
 	const _wstring strLayertag_UI = L"Layer_Custom_UI";
@@ -210,11 +211,11 @@ void CLevel_Loading::Ready_LoadingScreen()
 
 
 	// Create Text..
-	_wstring strTitleText = L"이건테스트용제목글자에요잘보이는거같아요";
+	_wstring strTitleText = L"이건테스트용제목글자에요";
 	CUI_Text* pTitleText = m_pGameSystem->Create_FontToScreen(_float2{150.f, 880.f}, strTitleText, TEXT_COLOR_TYPE::TT_TITLE, 0.5f, L"UI_Text_TitleTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pTitleText);
 
-	_wstring strDescriptionText = L"이건테스트용설명글자에요\n줄바꿈도가능해요 English도돼요 123도돼요 한자는안되나봐요\n배고파요집가고싶어요졸려요피곤해요아파요밥먹고싶어요눕고싶어요자고싶어요쉬고싶어요놀고싶어요집가게해주세요쉬게해주새요놀게햊ㅅ요돉";
+	_wstring strDescriptionText = L"이건테스트용설명글자에요\n줄바꿈도가능해요\n하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷";
 	CUI_Text* pDescriptionText = m_pGameSystem->Create_FontToScreen(_float2{150.f, 920.f}, strDescriptionText, TEXT_COLOR_TYPE::TT_NORMAL, 0.3f, L"UI_Text_DescriptionTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
 

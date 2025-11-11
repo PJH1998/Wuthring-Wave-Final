@@ -29,6 +29,9 @@ private:
 	HRESULT					Load_ChildObjects(_wstring strFilePath);
 	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
 
+private:
+	_uint					m_iRandomBGIndex = 0;
+
 public:
 	static CUI_Loading*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject*	Clone(void* pArg);

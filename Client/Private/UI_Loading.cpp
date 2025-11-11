@@ -30,6 +30,17 @@ HRESULT CUI_Loading::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UITree/Root_Loading.json";
 	Load_ChildObjects(strFilePath);
 
+
+	// 랜덤하게 로딩 이미지 적용
+	_uint iNumBG = Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames.size();
+	m_iRandomBGIndex = static_cast<_uint>(m_pGameInstance->Rand(0.f, iNumBG - 0.001f));
+
+	_wstring strRandBGName = Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames[m_iRandomBGIndex];
+	
+	for (auto& strBGName : Find_ChildObject(L"SectorA_BG")->Get_UIDesc().vecChildNames)
+		Find_ChildObject(strBGName)->SetActivate(false);
+	Find_ChildObject(strRandBGName)->SetActivate(true);
+
 	return S_OK;
 }
 
