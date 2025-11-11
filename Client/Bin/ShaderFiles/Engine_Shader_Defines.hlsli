@@ -12,7 +12,7 @@ float g_fLuminence[3] = { 0.2126f, 0.7152f, 0.0722f };
 
 //PBR
 float g_fGlobalDynamicMetallic = 0.f;  // PBR.x
-float g_fGlobalDynamicRoughness = 0.8f; // PBR.y
+float g_fGlobalDynamicRoughness = 0.35; // PBR.y
 
 float g_fGlobalStaticMetallic = 0.4f;
 float g_fGlobalStaticRoughness = 0.3f;
