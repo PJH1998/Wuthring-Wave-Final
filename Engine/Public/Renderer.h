@@ -99,8 +99,8 @@ private:
 	_float									m_fDebugRoughness[2] = {0.f, 0.4f};
 	_float									m_fDebugMetallic[2] = {0.8f, 0.3f};
 
-	_bool									m_IsFog = { true };
 #endif
+	_bool									m_IsFog = { true };
 private:
 	// Viewport Size 
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
