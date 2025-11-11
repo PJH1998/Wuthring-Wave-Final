@@ -71,7 +71,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 			XMStoreFloat4(&BoxInfo.vCorner[j], XMVector4Transform(XMLoadFloat4(&BoxInfo.vCorner[j]), ViewMatrix));
 		}
 		XMStoreFloat3(&BoxInfo.vCenter, XMVector3TransformCoord(XMLoadFloat3(&Objects[i]->Get_BoundingBox()->Center), ViewMatrix));
-		BoxInfo.fRadius = Objects[i]->Get_BoundingBox()->Extents.z;
+		BoxInfo.fRadius = max(Objects[i]->Get_BoundingBox()->Extents.x, max(Objects[i]->Get_BoundingBox()->Extents.y, Objects[i]->Get_BoundingBox()->Extents.z));
 		pBoxInfos[i] = BoxInfo;
 	}
 	//m_pContext->Unmap(m_pBoxPointsBuffer, 0);
