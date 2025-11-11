@@ -51,6 +51,7 @@ private:
 	class CEdit_MapObject_Instance* m_pPickedInstanceObject = { nullptr };
 	class CEdit_MapObject_Destruction* m_pPickedDestructObject = {nullptr};
 	class CEdit_TriggerBox* m_pPickedTriggerBox = { nullptr };
+	class CEdit_MonsterSpawnor* m_pPickedSpawnor = { nullptr };
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };

@@ -174,12 +174,18 @@
     </Filter>
     <Filter Include="03. GameObject\Sequence\Effect">
       <UniqueIdentifier>{c46f0d49-ab5a-47fb-b030-3debd47973e2}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller">
       <UniqueIdentifier>{246c0645-080c-48f3-994e-e9ce1033609b}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller\Effect_Rect">
       <UniqueIdentifier>{78b70b79-18c1-4b75-b8a8-2322db63397f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Spawn">
+      <UniqueIdentifier>{f219fc04-ee62-4e2b-b86e-216ec6af55d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\MapObject\Trigger">
+      <UniqueIdentifier>{5912a73b-0563-44d9-874f-2b25f496dd7b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -328,9 +334,6 @@
     <ClInclude Include="..\Public\EditDummy_Target.h">
       <Filter>03. GameObject\Dummy\Target</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_MapObject_Sonora.h">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClInclude>
     <ClInclude Include="..\Public\Particle_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Particle_Controller</Filter>
     </ClInclude>
@@ -364,7 +367,6 @@
     <ClInclude Include="..\Public\Rect_Controller.h">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\Edit_TriggerBox.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Destruction_Piece.h">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClInclude>
@@ -395,6 +397,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\EditorPropWeapon.h">
       <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_TriggerBox.h">
+      <Filter>03. GameObject\MapObject\Trigger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\Edit_MonsterSpawnor.h">
+      <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -540,9 +548,6 @@
     <ClCompile Include="..\Private\EditDummy_Target.cpp">
       <Filter>03. GameObject\Dummy\Target</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp">
-      <Filter>03. GameObject\MapObject</Filter>
-    </ClCompile>
     <ClCompile Include="..\Private\Sequencer.cpp">
       <Filter>01. Level\Camera\Sequencer</Filter>
     </ClCompile>
@@ -552,7 +557,6 @@
     <ClCompile Include="..\Private\Rect_Controller.cpp">
       <Filter>01. Level\Effect\Effect_Controller\Rect_Controller</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Destruction_Piece.cpp">
       <Filter>03. GameObject\MapObject\Destruction</Filter>
     </ClCompile>
@@ -583,6 +587,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\EditorPropWeapon.cpp">
       <Filter>03. GameObject\Actor\Anim</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_TriggerBox.cpp">
+      <Filter>03. GameObject\MapObject\Trigger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Edit_MonsterSpawnor.cpp">
+      <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

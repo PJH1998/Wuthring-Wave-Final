@@ -3,8 +3,8 @@ setlocal enabledelayedexpansion
 
 :: --- (Configuration) ---
 :: Set the strings you want to find and replace.
-set "target=SM_Tab_Com2_Bri"
-set "replacement=SM_Com2_Bri"
+set "target=SM_Tab_Pro"
+set "replacement=SM_Tab_APB_Pro"
 
 :: --- (Execution) ---
 
