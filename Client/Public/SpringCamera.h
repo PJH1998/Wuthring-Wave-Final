@@ -71,6 +71,7 @@ private:
 	_float							m_fFixedDistance = {};
 	_float							m_fLerpSpeed = {};
 	_float							m_fMinDistance = {};
+	_float							m_fLockOnMinDistance = {};
 	_float							m_fMaxDistance = {};
 
 	// Spring
