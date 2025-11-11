@@ -21,7 +21,7 @@ CUI_ControlHelper::CUI_ControlHelper()
 HRESULT CUI_ControlHelper::Initialize()
 {
 	// 컨트롤 할 UI 목록 추가..
-	//m_pRootUI_HUD = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_UHD"));
+	//m_pRootUI_HUD = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_HUD"));
 	//ASSERT_CRASH(m_pRootUI_HUD);
 
 	return S_OK;
@@ -41,11 +41,11 @@ HRESULT CUI_ControlHelper::HUD_FadeOut()
 {
 	vector<HRESULT> vecHr;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
 
 	for (auto hr : vecHr)
 		if (hr == E_FAIL) return E_FAIL;
@@ -57,11 +57,11 @@ HRESULT CUI_ControlHelper::HUD_FadeIn()
 {
 	vector<HRESULT> vecHr;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_UHD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
 
 	for (auto hr : vecHr)
 		if (hr == E_FAIL) return E_FAIL;

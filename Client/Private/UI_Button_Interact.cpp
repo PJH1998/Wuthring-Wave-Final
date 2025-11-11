@@ -92,15 +92,19 @@ void CUI_Button_Interact::Render()
 void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");
-	//auto combinedKFDesc_Root = static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
-	//combinedKFDesc_Root->fAlpha = 1.f;
-	//static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Root);
+	//pRootUI->SetActivate(false);
+	auto combinedKFDesc_Root = static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
+	combinedKFDesc_Root->fAlpha = 1.f;
+	static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Root);
+
 
 	CCustom_UI* pFocusedUI = Find_ChildObject(L"Interact_Focused");
 	pFocusedUI->SetActivate(false);
 	auto combinedKFDesc_Focused = static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
 	combinedKFDesc_Focused->fAlpha = 1.f;
 	static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Focused);
+
+
 
 	CCustom_UI* pPressedUI = Find_ChildObject(L"Interact_Pressed");
 	pPressedUI->SetActivate(false);
@@ -125,11 +129,13 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		CRASH("");
 }
 
+// 애니메이션이 한프레임 먼저 도는 것 같은데, 아예 early 단에서 호출도 고려?
 void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 {
 	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");
-	CCustom_UI* pFocusedUI = Find_ChildObject(L"Interact_Focused");
-	CCustom_UI* pPressedUI = Find_ChildObject(L"Interact_Pressed");
+
+	CCustom_UI* pFocusedUI	= Find_ChildObject(L"Interact_Focused");
+	CCustom_UI* pPressedUI	= Find_ChildObject(L"Interact_Pressed");
 
 	CCustom_UI* pEventTargetUI = Find_ChildObject(L"Interact_Normal");		// 이벤트 판별용으로 쓸 UI.
 
@@ -137,7 +143,6 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 	_bool isHoverEnter	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_ENTER));
 	_bool isHoverExit	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::HOVER_EXIT));
 	_bool isClickEnter	= pEventTargetUI->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER));
-
 
 	if (isClickEnter && !m_IsGoindDisabled)
 	{

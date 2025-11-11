@@ -102,6 +102,9 @@ void CCustom_UI::Render()
     if (!m_isActivate)
         return;
 
+	if (Get_UIDesc().strUIName == L"Interact_Normal")	// Button Interact 의 경우 변수와 한번 비교. 그래도 이상하면 render 직전도
+		int i = 10;
+
     if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)            // 짬통 UI용. 필요한 값을 행렬에 임의로 담아 인스턴스별로 던진다. 던져지는 건 vibuffer에서.
         for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
             m_tUIDesc.vecInstanceDescs[i].matExtraData = m_cachedVariantUIDesc.matVariantValues[i];
@@ -471,6 +474,11 @@ void CCustom_UI::Update_CombinedMatrix(_matrix* pParentMatrix)
 
 void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 {
+
+	if (Get_UIDesc().strUIName == L"Interact_Normal")	// Button Interact 의 경우 변수와 한번 비교. 그래도 이상하면 render 직전도
+		int i = 10;
+
+
 	if (m_pAnimator_UICom)
 	{
 		if (!pParentAnimatorCom)
