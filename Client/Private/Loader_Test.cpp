@@ -81,7 +81,7 @@ HRESULT CLoader_Test::Load_Model()
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1102_first/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Total_Map_1102/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1102_final/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/INSTANCE_TEST/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/SPAWN_TEST/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/PLAYER_TEST/", m_eCurLevel);
 
     // Prototype_Component_Model_FalseSoverign

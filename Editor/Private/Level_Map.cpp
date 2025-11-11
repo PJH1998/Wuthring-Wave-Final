@@ -13,6 +13,7 @@
 #include"Edit_MapObject_Destruction_Piece.h"
 #include"Edit_TriggerBox.h"
 #include"Mesh_Instance.h"
+#include"Edit_MonsterSpawnor.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -99,6 +100,11 @@ HRESULT CLevel_Map::Initialize()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"),
 		CEdit_TriggerBox::Create(m_pDevice, m_pContext));
+
+	m_pPickedSpawnor = CEdit_MonsterSpawnor::Create(m_pDevice, m_pContext);
+
+	m_SaveObjects["MonsterSpawnor"].push_back(m_pPickedSpawnor);
+	Safe_AddRef(m_pPickedSpawnor);
 
 	//CEdit_TriggerBox::TRIGGER Tri;
 	//Tri.iLevel = m_iLevel;
@@ -208,41 +214,43 @@ void CLevel_Map::Menu_Select()
 
 void CLevel_Map::Menu_Object()
 {
-    ImGui::Begin("Menu_Object");
+	ImGui::Begin("Menu_Object");
 
-	if (m_eObjectType != static_cast<_uint>(OBJECTTYPE::TRIGGERBOX))
+	switch (m_eObjectType)
 	{
-		if (m_pPickedObject)
-			m_pPickedObject->Set_ImGuiOption();
-		else if (m_pPickedDestructObject)
-			m_pPickedDestructObject->Set_ImGuiOption();
-	}
-	else
+	case static_cast<_uint>(OBJECTTYPE::TRIGGERBOX):
+
 	{
-		
 		ImGui::Text("Current Triggers");
 
 		ImGuiID ShaderId = ImGui::GetID("TriggerBox");
 		ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
 
-		for (auto& pContainer : m_ContainerObjects)
-			if (ImGui::Button(pContainer.second->Get_ModelName())) {
-				int a = 0;
-			}
-		for (_uint i=0; i< m_SaveObjects["Map_Object_TriggerBox"].size();++i)
+		for (_uint i = 0; i < m_SaveObjects["Map_Object_TriggerBox"].size(); ++i)
 		{
 			if (ImGui::Button(to_string(i).c_str())) {
 				m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(m_SaveObjects["Map_Object_TriggerBox"][i]);
 			}
 		}
 		ImGui::EndChildFrame();
-		
+
 		if (m_pPickedTriggerBox)
 			m_pPickedTriggerBox->Set_ImGuiOption();
 
 		Create_TriggerBox();
 	}
-
+		break;
+	case static_cast<_uint>(OBJECTTYPE::SPAWNOR):
+		if (m_pPickedSpawnor)
+			m_pPickedSpawnor->Set_ImGuiOption();
+		break;
+	default:
+		if (m_pPickedObject)
+			m_pPickedObject->Set_ImGuiOption();
+		else if (m_pPickedDestructObject)
+			m_pPickedDestructObject->Set_ImGuiOption();
+		break;
+	}
     ImGui::End();
 }
 
@@ -459,6 +467,8 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Destruction"), event);
 				else if (Pair.first.find("Trigger") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Trigger"), event);
+				else if (Pair.first.find("Spawnor") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Spawn"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -603,6 +613,32 @@ void CLevel_Map::Menu_Save_Load()
 								Safe_Delete_Array(InstanceMatrix);
 							}
 						}
+						else if (entry.path().string().find("Spawn") != std::string::npos)
+						{
+							vector< CEdit_MonsterSpawnor::SPAWN_DESC> Test;
+							CEdit_MonsterSpawnor::SPAWN_DESC Desc;
+							while (File.read(reinterpret_cast<char*>(&Desc.vMonsterSpawnorPos), sizeof(_float4)))
+							{
+								memset(Desc.szMonsterName1, 0, sizeof(Desc.szMonsterName1));
+								memset(Desc.szMonsterName2, 0, sizeof(Desc.szMonsterName2));
+								memset(Desc.szMonsterName3, 0, sizeof(Desc.szMonsterName3));
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos1), sizeof(_float4));
+
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName1, NameLength);
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos2), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName2, NameLength);
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos3), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName3, NameLength);
+
+								m_pPickedSpawnor->Map_Load(Desc);
+							}
+						}
 						else if (strFilePath.find("Destruction") != std::string::npos)
 						{
 							//continue;
@@ -708,10 +744,9 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
-	//m_FolderPath= "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
@@ -1122,8 +1157,9 @@ void CLevel_Map::Free()
 	m_pPickedTriggerBox = nullptr;
 
     Safe_Release(m_pPreViewObject);
-    Safe_Release(m_pBrush);
-
+	Safe_Release(m_pBrush);
+	Safe_Release(m_pPickedSpawnor);
+	
     for (auto& Pair : m_SaveObjects)
     {
         for (auto& pGameObject : Pair.second)

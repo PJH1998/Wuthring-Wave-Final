@@ -174,7 +174,7 @@
     </Filter>
     <Filter Include="03. GameObject\Sequence\Effect">
       <UniqueIdentifier>{c46f0d49-ab5a-47fb-b030-3debd47973e2}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="01. Level\Effect\Effect_Controller\Rect_Controller">
       <UniqueIdentifier>{246c0645-080c-48f3-994e-e9ce1033609b}</UniqueIdentifier>
     </Filter>
@@ -396,6 +396,7 @@
     <ClInclude Include="..\Public\EditorPropWeapon.h">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_MonsterSpawnor.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -584,6 +585,7 @@
     <ClCompile Include="..\Private\EditorPropWeapon.cpp">
       <Filter>03. GameObject\Actor\Anim</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_MonsterSpawnor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">
