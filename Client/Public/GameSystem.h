@@ -61,6 +61,10 @@ public:
 
 	HRESULT		HUD_FadeOut();
 	HRESULT		HUD_FadeIn();
+
+	void		Render_IntersectUI(_wstring strText);
+
+	
 #pragma endregion
 
 #pragma region [UI] STATUS_SYNCER

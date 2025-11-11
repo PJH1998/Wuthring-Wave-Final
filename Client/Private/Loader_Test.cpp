@@ -38,6 +38,7 @@
 #include "UI_Text_Damage.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
+#include "UI_Button_Interact.h"
 #pragma endregion
 
 
@@ -538,6 +539,10 @@ HRESULT CLoader_Test::Load_UI()
 	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
+	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
+
+
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)
@@ -618,6 +623,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
 		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
+		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
 	
 
 	// ==============================
@@ -627,6 +635,9 @@ HRESULT CLoader_Test::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+	//if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_Interact",
+	//	CUI_Button_Interact::Create(m_pDevice, m_pContext))))
+	//	OutputDebugString(L"[Loader_Test::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
 	return S_OK;
 }

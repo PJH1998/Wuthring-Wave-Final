@@ -6,6 +6,11 @@
 
 #include "UI_HUD.h"
 
+#include "UI_Button.h"
+#include "UI_Image.h"
+#include "UI_Button_Interact.h"
+//#include "UI_Interact.h"
+
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
@@ -62,6 +67,16 @@ HRESULT CUI_ControlHelper::HUD_FadeIn()
 		if (hr == E_FAIL) return E_FAIL;
 
 	return S_OK;
+}
+
+void CUI_ControlHelper::Render_IntersectUI(_wstring strText)
+{
+	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	CUI_Button_Interact* pInteractBtn = nullptr;
+
+	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
+
+	// 글자도 넣어야 함
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

@@ -19,10 +19,12 @@ public:
 	HRESULT				HUD_FadeOut();
 	HRESULT				HUD_FadeIn();
 
+	void				Render_IntersectUI(_wstring strText);
+
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
 
-	//class CUI_HUD*			m_pRootUI_HUD = { nullptr };
+	vector<CCustom_UI*>		m_vecInteractions = {};
 
 public:
 	static CUI_ControlHelper* Create();

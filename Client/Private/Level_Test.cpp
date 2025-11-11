@@ -417,6 +417,10 @@ void CLevel_Test::Ready_UI()
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 3, &tDesc)))
+		CRASH("Failed Ready Button_Interact");
+
 	// _UI
 }
 
@@ -534,6 +538,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//tDesc.vScreenPos = _float2(screenX, screenY);
 
 	//testText->Set_TextUIDesc(tDesc);
+
+
+
+
+	// interact
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
+		m_pGameSystem->Render_IntersectUI(L"Test");
+
+
+
 
 
 
