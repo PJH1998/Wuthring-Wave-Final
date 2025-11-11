@@ -49,7 +49,7 @@ void CRoverGroundBurst::OnEnter(void* pArg)
 	m_pRover->PartActivate(m_iPartType, true);
 	m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pRover->Rotate_Target(); // 진입 시 한번만
-	//m_iPartType = CRover::TYPE_END;
+	//m_iPartType = CLogoMaleRover::TYPE_END;
 
 	m_pRover->Set_Gravity(true);
 }

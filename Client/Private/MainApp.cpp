@@ -100,9 +100,9 @@ void CMainApp::Post_Update()
 			case LEVEL::TEST:
 				pLevel = CLevel_Test::Create(m_pDevice, m_pContext);
 				break;
-			case LEVEL::TEST_UI:
-				pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
-				break;
+			//case LEVEL::TEST_UI:
+			//	pLevel = CLevel_Test_UI::Create(m_pDevice, m_pContext);
+			//	break;
 			}
 			ASSERT_CRASH(pLevel);
 
@@ -219,6 +219,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements, TEXT("Shader_Map")))))
 		CRASH("DeferredShader_Map");
 
+	// DeferredShader_Map
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_DeferredShader_Map_Instance"),
+		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements, TEXT("Shader_Map_Instance")))))
+		CRASH("DeferredShader_Map");
+
+
 	// Shader_VtxAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
@@ -246,6 +252,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMesh.hlsl")
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute AnimMesh Shader");
+
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshFly.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute FlyAnimMesh Shader");
 
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -318,6 +330,7 @@ void CMainApp::Ready_Prototype_ForStatic()
 void CMainApp::Start_Level()
 {
 	CHANGE_LEVEL_EVENT event{ LEVEL::LOGO, true };
+	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST, true };
 	//CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 }

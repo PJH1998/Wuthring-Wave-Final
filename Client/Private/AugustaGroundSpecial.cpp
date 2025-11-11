@@ -40,10 +40,15 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
     m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
     m_pAugusta->Set_Gravity(true);
 
-	if(eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
+	if (eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
+	{
 		m_pAugusta->Set_Gravity(true);
+		
+	}
+		
 
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+
 }
 
 void CAugustaGroundSpecial::OnUpdate(_float fTimeDelta)
@@ -224,6 +229,8 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 				if (SKILL_STATE::READY != m_pAugusta->Use_Skill("SpAttackOmni"))
 					return;
 
+				
+
 				// Remove Condition 마지막 Burst 궁
 				m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
 				
@@ -288,9 +295,10 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
         {
             if (m_States[LAND])
             {
-                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
                 m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                 return;
+             
             }
             else if (!m_States[LAND])
             {
@@ -308,7 +316,7 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 20.f, 0.5f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 20.f, 0.5f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 20.f, 0.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 0.5f, true, false);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 0.5f, true, false );
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_F), "SpWalk_F", 1.f, 0.f);

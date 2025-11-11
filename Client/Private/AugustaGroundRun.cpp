@@ -72,7 +72,7 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
-	m_States[HIT] = m_pAugusta->Is_Hit(); // HIT 상태인가?
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
 	if (m_States[HIT]) // 모든 조건 상위 조건
 		return;
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));

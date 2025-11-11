@@ -322,22 +322,19 @@ _matrix CCharacter::Get_WorldMatrix()
 	return m_pTransformCom->Get_WorldMatrix();
 }
 
+#pragma endregion
+
 #ifdef _DEBUG
-void CCharacter::RayDir(_vector vRayDir, _float3 vEndPos)
+void CCharacter::Print_LookRay()
 {
-	vRayDir = XMVector3Normalize(vRayDir);
-	_vector vEnd = XMLoadFloat3(&vEndPos);
-	m_pGameInstance->Ray_Cast(vRayDir, vEnd, nullptr);
+	_vector vStartPos = m_pTransformCom->Get_State(STATE::POSITION) + (XMVector3Normalize(m_pTransformCom->Get_State(STATE::UP)) * 0.3f);
+	_vector vEndPos = vStartPos + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)) * 1.5f;
+	
+
+	m_pGameInstance->Ray_Cast(vStartPos, vEndPos, nullptr);
 }
 
 #endif // _DEBUG
-
-
-
-
-
-#pragma endregion
-
 
 #pragma region STATE
 
@@ -449,6 +446,7 @@ _vector CCharacter::Get_RightVector_NoPitch()
 	return vRight;
 }
 
+
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
     if (nullptr == pTargetTransform)
@@ -487,19 +485,35 @@ _bool CCharacter::Check_AllInput(_uint iKeyFlag, KEYSTATE eKeyState)
 }
 
 
-_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
+_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate)
 {
     ASSERT_CRASH(m_pModelCom);
-    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+    _bool IsPlayAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate);
     m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
 	
     return IsPlayAnimationEnd;
 }
 
-void CCharacter::Start_FlyBlending(_float fDuration)
+//_bool CCharacter::Play_Animation(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
+//{
+//	ASSERT_CRASH(m_pModelCom);
+//	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+//	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+//
+//	return IsPlayAnimationEnd;
+//}
+
+// Fly Animation 전용.
+_bool CCharacter::Play_AnimationFly(const _string& strAnimName, _float fTimeDelta, _float* pTrackPosition, _float fRootMotionRate, _bool IsRootMotion, _bool IsRootMotionRotate, _bool IsRootMotionTranslate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
-	
+	ASSERT_CRASH(m_pModelCom);
+	_bool IsPlayAnimationEnd = m_pModelCom->Play_FlyAnimation_GPU(m_pFlyComputeShaderCom, strAnimName, fTimeDelta, pTrackPosition, IsRootMotion, IsRootMotionRotate, IsRootMotionTranslate, fRootMotionRate, gpuBlendInfo);
+	m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
+
+	return IsPlayAnimationEnd;
 }
+
+
 
 
 void CCharacter::Change_State(_uint iCategory, _uint iSubState, void* pArg)
@@ -757,6 +771,40 @@ void CCharacter::Sync_UI()
     // Character Info Sync 
     //m_pGameSystem->Sync_CharacterInfo(m_Stats);
 }
+
+#pragma endregion
+
+#pragma region CONDITION
+
+void CCharacter::Add_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition |= iFlag;
+}
+
+_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) != 0;
+}
+_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	return (m_iCondition & iFlag) == iFlag;
+}
+
+void CCharacter::Remove_Condition(CHARACTER_CONDITION eConditionFlag)
+{
+	_uint iFlag = static_cast<_uint>(eConditionFlag);
+	m_iCondition &= ~iFlag;
+}
+
+void CCharacter::Remove_AllCondition()
+{
+	m_iCondition = 0;
+}
+
+
 #pragma endregion
 
 
@@ -771,6 +819,7 @@ void CCharacter::Free()
     Safe_Release(m_pSpringCamera);
     Safe_Release(m_pStateMachineCom);
 	Safe_Release(m_pQTEColliderCom);
+	Safe_Release(m_pFlyComputeShaderCom);
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{

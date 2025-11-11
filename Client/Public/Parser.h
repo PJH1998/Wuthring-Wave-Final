@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Base.h"
+#include"MapObject_Instance.h"
 
 NS_BEGIN(Client)
 
@@ -12,7 +13,7 @@ private:
 public:
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
-	void							Clone_MapObjects(LEVEL eLevel, _uint iIndex);
+	void							Clone_MapObjects(LEVEL eLevel);
 	// Load CSV File (Excel)
 	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
 
@@ -53,7 +54,7 @@ private:
 
 	vector<vector<_string>> m_Data;
 	unordered_map<LEVEL, vector<const _char*>> m_LoadingMap;
-
+	vector<CMapObject_Instance::MAP_LOAD> m_MapInstanceData;
 public:
 	static		CParser*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

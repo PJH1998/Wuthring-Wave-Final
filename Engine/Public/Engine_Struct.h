@@ -29,6 +29,15 @@ namespace Engine
 		_float fRange;
 	}LIGHT_DESC;
 
+	typedef struct tagVF_Light {
+		_uint iType;		// 0 = Directional, 1 = Point
+		_float fRange;
+		_float Padding[2];
+		_float4 vDiffuse;
+		_float4 vDirection;
+		_float4 vPosition;
+	}VF_LIGHT;
+
 	typedef struct tagShadowLightDesc
 	{
 		XMFLOAT4	vDirection;
@@ -218,9 +227,16 @@ namespace Engine
 		_float3 vPadding;  // 16바이트 정렬을 위한 패딩
 	}GPU_KEYFRAME;
 
-	// 
-	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
 	typedef struct tagAnimationCBInfo {
+		// 1. Default Animation CB info
+		_float fTrackPosition; // 4 
+		_uint  iAnimindex;  // 4
+		_bool  IsRibAnimUsed = false; // 4 => HLSL 에서 BOOL도 4Byte 인식.
+		_uint  iRibbonAnimIndex; // 4
+	}ANIMATION_CBINFO;
+
+	// Constant Buffer? => 16 Byte 단위를 유지해야함 => 16이 안되면 Padding 필수.
+	typedef struct tagAnimationFlyCBInfo {
 		// 1. Default Animation CB info
 		_float fTrackPosition; // 4 
 		_uint  iAnimindex;  // 4
@@ -244,7 +260,7 @@ namespace Engine
 		_uint iClipIndexMidDU;      // 4 
 		_uint iClipIndexU;          // 4 
 		_uint iWeightClipDU;       // 4 
-	}ANIMATION_CBINFO;
+	}ANIMATIONFLY_CBINFO;
 
 	typedef struct tagGpuBlendInfo {
 		_bool  IsBlendEnabled = { false };     // 4  Default 값 으로 전달할지 말지 판단.

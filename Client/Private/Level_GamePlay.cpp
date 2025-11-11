@@ -33,8 +33,10 @@ HRESULT CLevel_GamePlay::Initialize()
 	if (FAILED(m_pGameInstance->Setting_ShadowMap(ShadowMapDesc)))
 		CRASH("Test");
 	
-	m_pGameSystem->Clone_MapObjects(m_eCurLevel, 0);
-	//m_pGameSystem->Clone_MapObjects(m_eCurLevel, 1);
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
+
+	m_pGameInstance->Render_ShadowMap();
+	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -45,7 +47,7 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
-	m_pGameInstance->SetUp_ShadowNF();
+	m_pGameInstance->SetUp_CameraNF();
 
 
 	Ready_UI();

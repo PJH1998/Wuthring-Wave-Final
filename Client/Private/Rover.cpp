@@ -61,10 +61,9 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	
 	PartActivate(PART_WING, false);
 	
-	// 임시.
-	//m_pRoverDarkScythe->Play_Animation("Scythe_Ex_Attack03", 0.f, &m_fTrackPosition);
-
+	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
+
     return S_OK;
 }
 
@@ -80,6 +79,8 @@ void CRover::Priority_Update(_float fTimeDelta)
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
+	// 0. Delayed Action 수행.
+	Process_DelayedActions();
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -134,7 +135,7 @@ void CRover::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
 
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	m_IsHit = false;
+	Remove_Condition(CHARACTER_CONDITION::HIT);
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -360,19 +361,20 @@ void CRover::Hit_Judge(void* pArg)
 
 	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
 
-	// 1. 맞는데 또맞진 말자..
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 데미지는 바로 감소시킵니다.
+	// 2. 즉시 중복 방지 플래그 세팅
+	m_PendingConditions[HIT] = true;
+
+	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 3. 캐스팅 해서? => 들고 있기.
+	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
+	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
+
 	m_PendingHitDesc = *pDesc;
-
-	// 4. 현재 상태 변경.
-	m_IsHit = true;
 }
 
 void CRover::Sync_Position()
@@ -540,7 +542,40 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 		break;
 	}
 }
+
 #pragma endregion
+
+#pragma region 4. EVENT
+void CRover::Process_DelayedActions()
+{
+	while (!m_DelayedActions.empty())
+	{
+		DELAYED_ACTION eAction = m_DelayedActions.front();
+
+		void* pData = eAction.pData;
+		switch (eAction.type)
+		{
+		case DELAYED_ACTION::TYPE::HIT:
+		{
+			//m_IsHit = true;
+			Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+			break;
+		}
+		case DELAYED_ACTION::TYPE::PARRY:
+		{
+			break;
+		}
+
+		default:
+			break;
+		}
+
+		m_DelayedActions.pop();
+	}
+}
+#pragma endregion
+
 
 
 void CRover::Bind_Resources()
@@ -566,6 +601,10 @@ void CRover::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
         , pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
         CRASH("Compute Shader");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
+		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))

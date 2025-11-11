@@ -40,7 +40,7 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
     if (FAILED(CCharacter::Initialize_Clone(pDesc)))
         return E_FAIL;
 
-	
+	m_DelayedActions = queue<DELAYED_ACTION>();
     m_eCurLevel = pDesc->eCurLevel;
 
     Ready_Components(pDesc);
@@ -70,6 +70,9 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 {
     if (!m_isActivate)
         return;
+
+	// 0. Delayed Action 수행.
+	Process_DelayedActions();
 
 	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
@@ -120,8 +123,6 @@ void CAugusta::Update(_float fTimeDelta)
 
 		// 6. Camera 갱신 => 위치 따라오게
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
-		
-		
 	}
 	else
 	{
@@ -131,7 +132,9 @@ void CAugusta::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
    
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	m_IsHit = false;
+	Remove_Condition(CHARACTER_CONDITION::HIT);
+
+	//m_IsHit = false;
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -162,9 +165,6 @@ void CAugusta::Late_Update(_float fTimeDelta)
 		Notify_HarmonyEnd();
 		m_IsQTEend = false;
 	}
-		
-	
-		
 	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -213,6 +213,8 @@ void CAugusta::Render()
 	else
 		m_pQTEColliderCom->Render();
     
+	Print_LookRay();
+	
 	if (m_pMainAttackVolume->IsActivate())
 		m_pMainAttackVolume->Render();
 #endif // _DEBUG
@@ -395,10 +397,39 @@ void CAugusta::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneNa
     }
 }
 
+//// Hit 판정. => QTE 상태면 안맞음.
+//void CAugusta::Hit_Judge(void* pArg)
+//{
+//	if (nullptr == pArg || m_IsHit || m_IsQTE)
+//		return;
+//
+//	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
+//	_uint iCategory = eKey.iCategory;
+//	_uint iSubState = eKey.iSubState;
+//
+//	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
+//	
+//	// 1. 맞는데 또맞진 말자..
+//	if (EStateCategory::HIT == eCategory)
+//		return;
+//
+//	// 2. 데미지는 바로 감소시킵니다.
+//	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
+//	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+//
+//	// 3. 캐스팅 해서? => 들고 있기.
+//	m_PendingHitDesc = *pDesc;
+//
+//	
+//
+//	// 4. 현재 상태 변경.
+//	m_IsHit = true;
+//}
+
 // Hit 판정. => QTE 상태면 안맞음.
 void CAugusta::Hit_Judge(void* pArg)
 {
-	if (nullptr == pArg || m_IsHit || m_IsQTE)
+	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
 		return;
 
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
@@ -406,29 +437,30 @@ void CAugusta::Hit_Judge(void* pArg)
 	_uint iSubState = eKey.iSubState;
 
 	EStateCategory eCategory = static_cast<EStateCategory>(iCategory);
-	
-	// 1. 맞는데 또맞진 말자..
+
+	// 1. 맞는데 또맞지 않기
 	if (EStateCategory::HIT == eCategory)
 		return;
 
-	// 2. 데미지는 바로 감소시킵니다.
+	// 2. 즉시 중복 방지 플래그 세팅
+	m_PendingConditions[HIT] = true;
+
+	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	m_pAbillityCom->Add_Hp(-pDesc->fAttack);
+	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
 
-	// 3. 캐스팅 해서? => 들고 있기.
-	m_PendingHitDesc = *pDesc;
-
+	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
+	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
 	
-
-	// 4. 현재 상태 변경.
-	m_IsHit = true;
+	m_PendingHitDesc = *pDesc;
 }
+
 
 // 패링 판단.
 void CAugusta::Parry_Judge(void* pArg)
 {
 
-	if (m_IsQTE)
+	if (m_PendingConditions[HIT] || m_PendingConditions[QTE] || m_PendingConditions[PARRY])
 		return;
 
 	// 1. 패링 시 ? Layer 변경? => 잠시 무적
@@ -514,33 +546,114 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 
 	// std::getline을 사용하여 L'|' 구분자를 만날 때까지 읽어 변수에 저장합니다.
 	getline(wss, var1, L'|');
-	getline(wss, var2, L'|');
-	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
-	
-	
-	if (var1 == TEXT("CAMERA"))
+	if (var1 == TEXT("HITSTOP"))
+		Process_HitStop(wStrObjectTag);
+	else if (var1 == TEXT("CAMERA"))
+		Process_CameraAction(wStrObjectTag);
+	else
+		Process_VolumeChange(wStrObjectTag);
+
+	return;
+}
+
+void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+
+}
+
+
+#pragma endregion
+
+#pragma region 4. EVENT
+
+// 지연 처리 작업
+void CAugusta::Process_DelayedActions()
+{
+	while (!m_DelayedActions.empty())
 	{
-		return; // 안씀 일단.
-		_wstring duration;
-		_wstring type;
-		getline(wss, duration, L'|'); 
-		getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+		DELAYED_ACTION eAction = m_DelayedActions.front();
 
-		_float fYawShake = stof(var2);
-		_float fPitchShake = stof(var3);
-		_float fDuration = stof(duration);
-
-
-		if (type == TEXT("IMPULSE"))
+		void* pData = eAction.pData;
+		switch (eAction.type)
 		{
-			//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
+			case DELAYED_ACTION::TYPE::HIT:
+			{
+				//m_IsHit = true;
+				Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				break;
+			}
+			case DELAYED_ACTION::TYPE::PARRY:
+			{
+				break;
+			}
+			
+		default:
+			break;
 		}
 
-		
+		m_DelayedActions.pop();
+	}
+}
+#pragma endregion
+
+
+#pragma region HELPER 함수
+void CAugusta::Process_HitStop(const _wstring& wStrObjectTag)
+{
+	wstringstream wss(wStrObjectTag);
+	// 4개의 변수 준비
+	_wstring var1, var2, var3, var4;
+
+	getline(wss, var1, L'|'); // HITSTOP
+	getline(wss, var2, L'|'); // Layer Tag
+	getline(wss, var3, L'|'); // Rate
+	getline(wss, var4, L'|'); // Duration
+
+	_float fRate = stof(var3);
+	_float fDuration = stof(var4);
+
+	if (var2 == TEXT("ALL"))
+	{
+		// 캐릭터의 경우 전체 시간 감소.
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), fRate, fDuration);
+	}
+
+}
+void CAugusta::Process_CameraAction(const _wstring& wStrObjectTag)
+{
+	return; // 아직 미사용.
+	_wstring duration;
+	_wstring type;
+	wstringstream wss(wStrObjectTag);
+
+	// 3개의 변수 준비
+	_wstring var1, var2, var3;
+	getline(wss, duration, L'|');
+	getline(wss, type, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+
+	_float fYawShake = stof(var2);
+	_float fPitchShake = stof(var3);
+	_float fDuration = stof(duration);
+
+
+	if (type == TEXT("IMPULSE"))
+	{
+		//m_pSpringCamera->Add_Sequential_Shake(fYawShake, fPitchShake, fDuration);
+	}
+
+
 	//	_float fIntensity = stof(var2);
 	//	Camera_Shake(fIntensity); // Shaking 강도.
-		return;
-	}
+	return;
+}
+void CAugusta::Process_VolumeChange(const _wstring& wStrObjectTag)
+{
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrObjectTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 
 	_uint iVolumeIdx = stoul(var3);
 
@@ -561,8 +674,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-		
-		
+
+
 	}
 	else if (var1 == TEXT("GRIFFON"))
 	{
@@ -598,22 +711,18 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 
 		m_pMainAttackVolume->TriggerActivate(false); // 교체.
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
-		
+
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
 		if (var2 == TEXT("ATTACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK); 
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
 		else if (var2 == TEXT("SKILL"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
 		else if (var2 == TEXT("KNOCKBACK"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 	}
 }
-
-void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
-{
-
-}
 #pragma endregion
+
 
 
 
@@ -639,6 +748,10 @@ void CAugusta::Ready_Components(const CHARACTER_DESC* pDesc)
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->computeShaderData.first)
         , pDesc->computeShaderData.second, TEXT("Com_ComputeShader"), reinterpret_cast<CComponent**>(&m_pComputeShaderCom), nullptr)))
         CRASH("Compute Shader");
+
+	if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->flyComputeShaderData.first)
+		, pDesc->flyComputeShaderData.second, TEXT("Com_ComputeShaderFly"), reinterpret_cast<CComponent**>(&m_pFlyComputeShaderCom), nullptr)))
+		CRASH("Com_ComputeShaderFly");
 
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->modelData.first)
         , pDesc->modelData.second, TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))

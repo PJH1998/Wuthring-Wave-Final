@@ -17,6 +17,13 @@ private:
 	HRESULT				Load_Model();
 	HRESULT				Load_Shader();
 	HRESULT				Load_Object();
+	HRESULT				Load_LogoMaleRover();
+	HRESULT				Load_LogoFeMaleRover();
+
+private:
+	LEVEL m_eCurLevel = { LEVEL::LOGO };
+
+	HRESULT				Load_MonsterTable();
 
 public:
 	static		CLoader_Logo*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -46,6 +46,21 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
         m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
     }
 
+	if (eIdleType == EAugustaIdleType::STANDCHANGE)
+	{
+		// 한바퀴 돌려준다.
+		/*_vector vLook = m_pAugusta->Get_LookVector_NoPitch();
+		m_pAugusta->Rotate_Direction(vLook * -1.f);*/
+
+		//_vector vLook = m_pAugusta->Get_LookVector() * -1.f;
+		//m_pAugusta->Set_LookVector(vLook);
+
+		_string strBoneName = "WeaponProp05";
+		m_pAugusta->PartActivate(m_iPartType, true);
+		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	}
+
     // 3. Idle 상태 초기화
     State_Reset();
 
@@ -85,7 +100,7 @@ void CAugustaGroundIdle::OnExit()
 
 void CAugustaGroundIdle::Handle_Input()
 {
-	m_States[HIT] = m_pAugusta->Is_Hit();
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT);
 	if (m_States[HIT])
 		return;
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T)); // 최우선 순위
@@ -124,13 +139,15 @@ void CAugustaGroundIdle::Handle_Input()
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
+
+		
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
 
     // 2. 파츠도 재생.
     if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
-        || eIdleType == EAugustaIdleType::STAND2)
+        || eIdleType == EAugustaIdleType::STAND2 || eIdleType == EAugustaIdleType::STANDCHANGE)
     {
 		m_pAugusta->Play_PartAnimation(
 			m_iPartType,
@@ -371,6 +388,8 @@ void CAugustaGroundIdle::Setup_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND_CONTROL), "Stand_Control", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STANDCHANGE), "StandChange", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STANDUP), "StandUp", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1_TURN_L90D), "Stand1_Turn_L90D", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaIdleType::STAND1_TURN_L90D), "Stand1_Turn_R90D", 1.f, 0.f);
 }
 
 

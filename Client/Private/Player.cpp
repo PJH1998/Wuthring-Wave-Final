@@ -54,7 +54,7 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     CPlayerFactory::Register_Camera(LEVEL::STATIC, m_eCurLevel, this, m_pGameInstance, &m_pSpringCamera);
     CPlayerFactory::Register_KeyInputs(m_pInputControllerCom, this);
 
-	m_pGameInstance->SetUp_ShadowNF();
+	m_pGameInstance->SetUp_CameraNF();
 
     for (auto& pCharacter : m_Characters)
     {
@@ -72,8 +72,8 @@ HRESULT CPlayer::Initialize_Clone(void* pArg)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 
-    m_iCurrentCharacterIdx = AUGUSTA;
-    //m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
+    //m_iCurrentCharacterIdx = AUGUSTA;
+    m_iCurrentCharacterIdx = ROVER; // 방랑자로 테스트
 
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	Safe_AddRef(m_pPlayerStatus);

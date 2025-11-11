@@ -17,6 +17,13 @@ namespace Client
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
 
+	enum class CHARACTER_CONDITION : unsigned int {
+		HIT = 1 << 0,
+		DODGE = 1 << 1, // HIT 상태면 Dodge가 안되게?
+		PARRY = 1 << 2,
+		END
+	};
+
 	enum class UI_CHARACTERTYPE : unsigned int {
 		ROVER = 0,
 		AUGUSTA,
@@ -54,10 +61,10 @@ namespace Client
 
 
 	enum class UI_ROVER_STATE : unsigned int {
-		DEFAULT = 0,
-		E_BURST_READY = 1,
-		E_DEFAULT_READY = 2,
-		R_READY = 3,
+		DEFAULT = 0,			// 기본
+		E_BURST_READY = 1,		// 서지 E 사용가능
+		E_DEFAULT_READY = 2,	// 기본 E 사용가능
+		R_READY = 3,			// 궁 사용가능
 		END
 	};
 
@@ -172,16 +179,6 @@ namespace Client
 
 
 		FL_END				= 1 << 3
-	};
-
-	enum class FONT_DMG_PRESET
-	{
-		HEAL,
-		DARK,
-		ELECTRO,
-		FUSION,
-
-		END
 	};
 	
 	enum class  TEST_STATE : unsigned int

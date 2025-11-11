@@ -121,9 +121,9 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 
 	// 이 내에서 인스턴스 변화
 
-	const _float	fStartAnimTime = 0.17f;
-	const _float	fFadeOutTime	= 0.1f;
-	const _float	fInstIntervalTime = 0.05f;
+	const _float	fStartAnimTime = 0.17f;				// 인스턴스 별 페이드인에 소요되는 시간
+	const _float	fFadeOutTime	= 0.1f;				// 사라지기 n초 전부터 페이드아웃
+	const _float	fInstIntervalTime = 0.05f;			// 인스턴스 별 페이드인 간격
 	
 	_float			fLifeTime		= m_fLifeTime; 
 	_float			fLifeElapsed	= m_fLifeElapsed;
@@ -212,8 +212,8 @@ void CUI_Text_Damage::Update_Instances(_float fTimeDelta)
 		curDesc.vSInstTrans.x = finalPosX;
 		curDesc.vSInstTrans.y = finalPosY;
 
-		if (i == 0)
-			cout << vScale.x << ", " << vScale.y << endl;
+		//if (i == 0)
+		//	cout << vScale.x << ", " << vScale.y << endl;
 	}
 	m_tUIDesc.vecInstanceDescs = vecInstDescs;		// 인스턴스 반영
 

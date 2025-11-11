@@ -12,8 +12,9 @@ public:
 		BUFFER_INVERSEBIND_POSE = 2,
 		BUFFER_FINAL_BONEMATRIX = 3,
 		BUFFER_ANIM_INFOCB = 4, // constant
-		BUFFER_STAGING = 5,
-		BUFFER_BONE_CHANNEL = 6,
+		BUFFER_ANIM_INFOFLYCB = 5, // constant
+		BUFFER_STAGING = 6,
+		BUFFER_BONE_CHANNEL = 7,
 		BUFFER_END
 	};
 
@@ -86,6 +87,10 @@ public:
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
 										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
 
+	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+
 	_bool								Play_Animation(const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isBlend = true, _bool isRootMotion = true, _float fRootMotionRate = 0.1f);
 
 	//void								Play_RibAnimation(const _string& strRibAnimationName, _float fTimeDelta);
@@ -144,7 +149,8 @@ private:
 #pragma region Compute Shader
 private:
 	void ApplyComputeResults_ToBones();
-	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo);
+	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
+	void FetchLocalMatrices_FromComputeFly(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo);
 
 private:
 	vector<ID3D11Buffer*> m_Buffers = {};

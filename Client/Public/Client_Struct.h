@@ -87,8 +87,9 @@ namespace Client
 
 	typedef struct tagMonsterInfo
 	{
-		_uint	iMonsterID;			//참조용 몬스터ID
+		_wstring wstrPoolTag;
 		_string strName;
+		_uint	iMonsterID;			//참조용 몬스터ID
 		_float	fMaxHp;
 		_float	fMaxStamina;		// 거랑급 이상 무력화 게이지
 		_float	fAttack;			// 기본 공격 값.
@@ -114,5 +115,14 @@ namespace Client
 	{
 		void* pTransform = { nullptr };  // Transform;
 		_float fAttack = {};			 // 공격력
+		_string strEffectTag = {};		// 호출할 이펙트 태그
+		// Shaking이나, HitStop? 이런 거.
 	}CALLBACK_CLIENT;
+
+	typedef struct tagDelayedAction {
+		enum class TYPE { HIT, PARRY, DODGE }; // 이벤트 타입.
+		TYPE type;
+		void* pData;  // HIT_DESC 등 데이터 (nullptr 가능)
+		tagDelayedAction(TYPE t, void* data = nullptr) : type(t), pData(data) {}
+	}DELAYED_ACTION;
 }
