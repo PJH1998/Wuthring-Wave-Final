@@ -220,10 +220,11 @@ namespace Client
 	
 	enum class SHADER_ANIMMESH { 
 		DEFAULT_NORMAL = 0
-		, NORMAL_TEX
-		, AUGUSTA
-		, SHADOW
-		, OUNTLINE
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, ROVER // 5
 		, END };
 
 	enum class TEXT_COLOR_TYPE {
