@@ -63,7 +63,7 @@ void CRoverGroundLand::OnExit()
 
 void CRoverGroundLand::Handle_Input()
 {
-	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	// Hit면 모든 상태 제거
 	if (m_States[HIT])
 		return;

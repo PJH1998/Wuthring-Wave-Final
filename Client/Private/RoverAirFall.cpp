@@ -67,7 +67,7 @@ void CRoverAirFall::Handle_Input()
 {
     m_eDir = m_pRover->Calculate_Direction(); // 방향 계산
 
-	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	if (m_States[HIT])
 		return;
 

@@ -139,7 +139,7 @@ void CRover::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
 
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	Remove_Condition(CHARACTER_CONDITION::HIT);
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -610,7 +610,7 @@ void CRover::Process_DelayedActions()
 		case DELAYED_ACTION::TYPE::HIT:
 		{
 			//m_IsHit = true;
-			Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
 			break;
 		}
@@ -793,7 +793,7 @@ void CRover::Ready_AttackVolumes()
 {
 	m_AttackVolumes.resize(VOLUME_END);
 
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	TriggerDesc.pParenTransform = m_pTransformCom;

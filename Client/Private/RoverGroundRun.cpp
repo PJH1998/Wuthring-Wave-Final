@@ -71,7 +71,7 @@ void CRoverGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pRover->Calculate_Direction();
 
-	m_States[HIT] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+	m_States[HIT] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	if (m_States[HIT]) // 모든 조건 상위 조건
 		return;
 	m_States[FLY] = m_pRover->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));

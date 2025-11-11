@@ -32,9 +32,13 @@ void CAugustaGroundDash::OnEnter(void* pArg)
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eDashType);
 
+	// 4. State 초기화.
     State_Reset();
 
 	m_pAugusta->Set_Gravity(true);
+
+	// 5. 무적
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
@@ -48,10 +52,6 @@ void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
     Update_SprintAnimation(fTimeDelta);
     
     // 2. 상태 제어.
-    /*if (m_pAugusta->Is_LockOn())
-        LockOnCheck_StateTransition(fTimeDelta);
-    else       
-        Check_StateTransition(fTimeDelta);*/
     Check_StateTransition(fTimeDelta);
 
     // 3. 상태 초기화.
@@ -61,6 +61,8 @@ void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
 void CAugustaGroundDash::OnExit()
 {
     CGroundState::OnExit();
+	// 무적 제거.
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDash::Handle_Input()
@@ -81,8 +83,8 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
     if (m_pAugusta->Is_LockOn())
     {
         _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-        //m_pAugusta->Rotate_Direction(vMoveDir);
     }
+
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
     
 }
@@ -97,9 +99,6 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
 		return;
 	}
-
- 
-  
 
     switch (eDashType)
     {

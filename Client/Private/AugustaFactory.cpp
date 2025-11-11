@@ -19,6 +19,7 @@
 #include "AugustaGroundBurst.h"
 #include "AugustaGroundSpecial.h"
 #include "AugustaGroundQTE.h"
+#include "AugustaGroundDodge.h"
 
 
 // Air 카테고리 State들
@@ -52,6 +53,7 @@ void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta*
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::BURST), CAugustaGroundBurst::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPECIAL), CAugustaGroundSpecial::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::QTE), CAugustaGroundQTE::Create(pCharacter));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE), CAugustaGroundDodge::Create(pCharacter));
 
     // Air 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::JUMP), CAugustaAirJump::Create(pCharacter));

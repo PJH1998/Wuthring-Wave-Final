@@ -96,7 +96,7 @@ void CRoverGroundAttack::Handle_Input()
 {
     ERoverAttackType eAttackType = static_cast<ERoverAttackType>(m_iCurrentAnimIdx);
 
-	m_States[HIT_PENDING] = m_pRover->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+	m_States[HIT_PENDING] = m_pRover->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?

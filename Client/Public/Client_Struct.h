@@ -114,7 +114,7 @@ namespace Client
 	typedef struct tagCallBackClientDesc
 	{
 		void* pTransform = { nullptr };  // Transform;
-		_float fAttack = {};			 // 공격력
+		_float fAttack = { 0.f };			 // 공격력
 		_string strEffectTag = {};		// 호출할 이펙트 태그
 		// Shaking이나, HitStop? 이런 거.
 	}CALLBACK_CLIENT;

@@ -76,6 +76,10 @@ public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
+
+public:
+	_bool Is_TargetValid(class CTransform* pTarget); // 타겟이 유효한가?
+
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
@@ -97,6 +101,7 @@ private:
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };
+	class CTransform* m_pLockOnTargetTransform = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };

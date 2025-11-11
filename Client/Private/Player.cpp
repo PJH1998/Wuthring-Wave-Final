@@ -136,12 +136,19 @@ void CPlayer::Update(_float fTimeDelta)
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
 
-	// 3. Rigidbody Update => Camera 
+	// 3. Jolt 업데이트 이전에 비워줍니다.
+	
+
+	// 4. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
-    Sorting_Target(); // Update => 
+	// 5. Target Sorting
+	Sorting_Target();
+    
+	// 6. Lock On
     Toggle_LockOn();
 
+	m_TargetTransforms.clear();
 #ifdef _DEBUG
 	GUI_Teleport();
 #endif
@@ -470,6 +477,28 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 }
 
+_bool CPlayer::Is_TargetValid(CTransform* pTarget)
+{
+	if (nullptr == pTarget)
+		return false;
+
+
+	auto iter = find(m_TargetTransforms.begin(), m_TargetTransforms.end(), pTarget);
+	if (iter == m_TargetTransforms.end())
+		return false;
+
+	const _float fMaxLockOnDistance = 30.f;
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = pTarget->Get_State(STATE::POSITION);
+	_float fDistance = XMVectorGetX(XMVector3Length(vMyPos - vTargetPos));
+
+	// 타겟이 너무 멀어짐
+	if (fDistance > fMaxLockOnDistance)
+		return false; 
+
+	return true;
+}
+
 void CPlayer::Sorting_Target()
 {
     sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
@@ -483,42 +512,87 @@ void CPlayer::Sorting_Target()
         m_pTargetTransform = m_TargetTransforms[0];
     }
 
-    m_TargetTransforms.clear();
+    //m_TargetTransforms.clear();
 }
 
 void CPlayer::Toggle_LockOn()
 {
-    if (nullptr == m_pTargetTransform)
-    {
-        if (m_IsLockOn)
-        {
-            m_IsLockOn = false;
-            m_pSpringCamera->Lock_On(nullptr, false);
-            if (m_iCurrentCharacterIdx !=NONE)
-                m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+	// 1. 락온 키 입력 (상태 전환)
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
+	{
+		m_IsLockOn = !m_IsLockOn;
 
-        }
-        return;
-    }
+		if (m_IsLockOn)
+		{
+			// 현재 타겟을 고정 락온 타겟으로 설정.
+			m_pLockOnTargetTransform = m_pTargetTransform;
+		}
+		else
+		{
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
 
-    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
-    {
-        m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(m_pTargetTransform, m_IsLockOn);
-    }
+	// 2. 매프레임 검증
+	if (m_IsLockOn)
+	{
+		if (nullptr == m_pLockOnTargetTransform || !Is_TargetValid(m_pLockOnTargetTransform))
+		{
+			m_IsLockOn = false;
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
+
+	// 3. 캐릭터와 카메라에 최종 타겟 정보 전송.
+	CTransform* pFinalTarget = nullptr;
+	CCharacter* pCurrentCharacter = (m_iCurrentCharacterIdx != NONE) ?
+		m_Characters[m_iCurrentCharacterIdx] : nullptr;
 
 
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
-    {
-        m_IsLockOn = !m_IsLockOn;
-    }
+	// 4. 락온상태라면?
+	if (m_IsLockOn)
+	{
+		// 하드 락온
+		pFinalTarget = m_pLockOnTargetTransform;
+		if (pCurrentCharacter)
+			pCurrentCharacter->Set_LockOn(pFinalTarget, m_IsLockOn);
+	}
+	else
+	{
+		// 소프트 락온.
+		pFinalTarget = m_pTargetTransform;
+		if (pCurrentCharacter)
+			pCurrentCharacter->Set_AutoLockOn(pFinalTarget, m_IsLockOn); // Character의 Set_AutoLockOn 호출
+	}
 
-   // if (m_IsLockOn)
-   // {
-        m_pSpringCamera->Lock_On(m_pTargetTransform, m_IsLockOn);
-      //  return;
-    //}
 
-    m_pTargetTransform = nullptr;
+
+
+	// 6. 카메라 업데이트.
+	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+
+	/* if (nullptr == m_pTargetTransform)
+	 {
+		 if (m_IsLockOn)
+		 {
+			 m_IsLockOn = false;
+			 m_pSpringCamera->Lock_On(nullptr, false);
+			 if (m_iCurrentCharacterIdx !=NONE)
+				 m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+
+		 }
+		 return;
+	 }
+
+	 if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+	 {
+		 m_Characters[m_iCurrentCharacterIdx]->Set_AutoLockOn(m_pTargetTransform, m_IsLockOn);
+	 }
+	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+	 */
+
+
+    //m_pTargetTransform = nullptr;
 }
 #ifdef _DEBUG
 void CPlayer::GUI_Teleport()

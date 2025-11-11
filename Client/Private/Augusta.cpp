@@ -76,20 +76,20 @@ void CAugusta::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 0. Delayed Action 수행.
-	Process_DelayedActions();
+	// 1. Delayed Action 수행.
+	Process_DelayedActions(fTimeDelta);
 
-	// 1. Parts 갱신
+	// 2. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
 		if (pPart.second->IsActivate())
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
-    // 2. 이전 위치 저장
+    // 3. 이전 위치 저장
 	m_pTransformCom->Save_PreviousPosition();
 
-	// 3. 몬스터가 있다면?
+	// 4. 몬스터가 있다면?
 	if (nullptr != m_pTargetTransform)
 	{
 		_vector vDistance = (m_pTransformCom->Get_State(STATE::POSITION) - m_pTargetTransform->Get_State(STATE::POSITION));
@@ -137,7 +137,7 @@ void CAugusta::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
    
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	Remove_Condition(CHARACTER_CONDITION::HIT);
+	//Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	//m_IsHit = false;
 
@@ -412,6 +412,16 @@ void CAugusta::Hit_Judge(void* pArg)
 	if (nullptr == pArg || m_IsHit || m_PendingConditions[QTE])
 		return;
 
+	_uint iFlag = {};
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::HIT);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
+
+	// 닷지 상태면 안맞아요.
+	if (Check_AnyCondition(iFlag))
+		return;
+
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
 	_uint iCategory = eKey.iCategory;
 	_uint iSubState = eKey.iSubState;
@@ -423,16 +433,30 @@ void CAugusta::Hit_Judge(void* pArg)
 		return;
 
 	// 2. 즉시 중복 방지 플래그 세팅
-	m_PendingConditions[HIT] = true;
+	// m_PendingConditions[HIT] = true;
 
-	// 3. 데이터 저장.
+
+	// 3. 피격 정보 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
 	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
-
-	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
-	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
-	
 	m_PendingHitDesc = *pDesc;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
+	m_fDodgeableHitTimer = m_fDodgeableDuration;
+
+
+	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
+	if (!IsAttack)
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+
+
+	// 4. Player 상태 바인딩
+	
+	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
+	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
+	
+	
 }
 
 
@@ -548,8 +572,26 @@ void CAugusta::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Man
 #pragma region 4. EVENT
 
 // 지연 처리 작업
-void CAugusta::Process_DelayedActions()
+void CAugusta::Process_DelayedActions(_float fTimeDelta)
 {
+	_uint iDodgeableFlag = ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+
+	// 0. 회피 가능창 활성화 되어 있다면?
+	if (Check_AnyCondition(iDodgeableFlag))
+	{
+		m_fDodgeableHitTimer -= fTimeDelta;
+		if (m_fDodgeableHitTimer <= 0.f)
+		{
+			Remove_Condition(iDodgeableFlag); // 회피 가능 상태 제거
+
+			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
+			
+			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
+			m_PendingConditions[HIT] = true;
+			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
+		}
+	}
+
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
@@ -557,11 +599,13 @@ void CAugusta::Process_DelayedActions()
 		void* pData = eAction.pData;
 		switch (eAction.type)
 		{
+			// 여기서 깎으면 된다. => Skill 도중엔 Dodge가 안되니까?
 			case DELAYED_ACTION::TYPE::HIT:
 			{
 				//m_IsHit = true;
-				Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				m_pAbillityCom->Add_Hp(-100.f);
 				break;
 			}
 			case DELAYED_ACTION::TYPE::PARRY:
@@ -891,7 +935,7 @@ void CAugusta::Ready_AttackVolumes()
 	// size 설정
 	m_AttackVolumes.resize(VOLUME_END);
 
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Root");
 	TriggerDesc.pParenTransform = m_pTransformCom;

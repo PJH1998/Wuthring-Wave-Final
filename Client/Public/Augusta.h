@@ -13,6 +13,7 @@ public:
 		DODGE,
 		PARRY,
 		QTE,
+		DODGEABLE,
 		CONDITION_END
 	};
 
@@ -39,7 +40,8 @@ private:
 		EAugustaUniqueType m_eUniqueType = EAugustaUniqueType::END;
 		EAugustaBurstType m_eBurstType = EAugustaBurstType::END;
 		EAugustaSpecialType m_eSpecialType = EAugustaSpecialType::END;
-		EAugustaQTEType m_eQTEType = EAugustaQTEType::END;
+		EAugustaQTEType   m_eQTEType = EAugustaQTEType::END;
+		EAugustaDodgeType m_eDodgeType = EAugustaDodgeType::END;
 
 		// Air
 		EAugustaJumpType m_eJumpType = EAugustaJumpType::END;
@@ -67,6 +69,8 @@ private:
 			m_eRunType = EAugustaRunType::END;
 			m_eDashType = EAugustaDashType::END;
 			m_eLandType = EAugustaLandType::END;
+			m_eDodgeType = EAugustaDodgeType::END;
+
 
 			// Attack
 			m_eAttackType = EAugustaAttackType::END;
@@ -74,6 +78,7 @@ private:
 			m_eUniqueType = EAugustaUniqueType::END;
 			m_eBurstType = EAugustaBurstType::END;
 			m_eSpecialType = EAugustaSpecialType::END;
+			m_eQTEType = EAugustaQTEType::END;
 			
 			// Air
 			m_eJumpType = EAugustaJumpType::END;
@@ -81,6 +86,9 @@ private:
 			m_eAirAttackType = EAugustaAirAttackType::END;
 			m_eAirSkillType = EAugustaAirSkillType::END;
 			m_eAirFlyType = EAugustaAirFlyType::END;
+
+			
+
 
 			// Climb
 			m_eClimbIdleType = EAugustaClimbIdleType::END;
@@ -170,7 +178,7 @@ public:
 
 #pragma region 4. EVENT
 public:
-	virtual void Process_DelayedActions() override;
+	virtual void Process_DelayedActions(_float fTimeDelta);
 #pragma endregion
 
 
@@ -187,8 +195,9 @@ private:
 	_uint m_iCurrentPartType = { PARTTYPE::TYPE_END }; // State
 
 	vector<class CAttackVolume*> m_AttackVolumes;
-
 	_bool m_PendingConditions[CONDITION_END] = {};
+
+	
 
 #pragma region HELPER 함수 => Augusta만 사용
 private:
@@ -197,6 +206,7 @@ private:
 	void Process_VolumeChange(const _wstring& wStrObjectTag);
 	
 #pragma endregion
+
 
 
 

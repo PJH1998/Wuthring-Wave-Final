@@ -54,11 +54,15 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			// 진입했을 때 Condition E_RISE로 변환? => E_GRIFFON도 활성화.
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+
+			// 무적.
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
         case EAugustaSkillType::SKILL_RISE:
         {
             m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
 
@@ -73,6 +77,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(false);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+
 			break;
 		}
 
@@ -87,6 +92,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 		case EAugustaSkillType::ATTACK_PULL:
@@ -99,6 +105,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 
@@ -112,11 +119,14 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
         
     }
 
+
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName;
 }
 
@@ -162,8 +172,7 @@ void CAugustaGroundSkill::OnExit()
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 
 	/* 컨디션 제거*/
-	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
-	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundSkill::Handle_Input()

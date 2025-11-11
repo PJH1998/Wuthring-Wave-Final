@@ -179,6 +179,7 @@
     <ClInclude Include="..\Public\AugustaAirAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundBurst.h" />
+    <ClInclude Include="..\Public\AugustaGroundDodge.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundQTE.h" />
@@ -339,6 +340,7 @@
     <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundDodge.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
