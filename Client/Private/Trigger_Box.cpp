@@ -1,4 +1,7 @@
-﻿#include"ClientPch.h"
+﻿#include "Edit_MonsterSpawnor.h"
+#include "Edit_MonsterSpawnor.h"
+#include "Edit_MonsterSpawnor.h"
+#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

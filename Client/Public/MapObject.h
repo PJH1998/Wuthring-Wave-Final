@@ -52,7 +52,8 @@ private:
 	vector<CModel*>		m_pModelComArray;
 
 	_uint						m_iShaderPassIndex = {};
-
+	class CGameSystem* m_pGameSystem = { nullptr };
+	_bool				m_IsRender = { true };
 private:
 	void						Ready_Component(void* pArg);
 

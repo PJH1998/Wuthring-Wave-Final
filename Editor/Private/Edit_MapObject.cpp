@@ -260,7 +260,6 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 			{
 				if (!m_IsRender)
 					return;
-
 				{
 					_float fDistance = {};
 					_vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
