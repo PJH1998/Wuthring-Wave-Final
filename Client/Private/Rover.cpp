@@ -414,11 +414,11 @@ void CRover::Bind_QTE(_bool IsQTE)
 #pragma region NOTIFY
 void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Body"))
+  /*  if (wStrColliderTag == TEXT("Body"))
     {
 		m_pColliderCom->IsActivate(IsActive);
-    }
-    else if (wStrColliderTag == TEXT("Sword"))
+    }*/
+    if (wStrColliderTag == TEXT("Sword"))
     {
 		if (nullptr != m_pRoverSword)
 			m_pRoverSword->Volume_Activate(IsActive);

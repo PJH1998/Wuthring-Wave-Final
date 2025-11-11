@@ -232,6 +232,20 @@ void CSequencer::Selectable_Item()
 
 		ImGui::Text("==================================");
 
+		if (ITEM_TYPE::ACTION == item.eType)
+		{
+			if (ImGui::Button("Save"))
+				m_isSave = !m_isSave;
+			if (m_isSave)
+				Save_CameraAction();
+
+			ImGui::SameLine();
+			if (ImGui::Button("Load"))
+				m_isLoad = !m_isLoad;
+			if (m_isLoad)
+				Load_CameraAction();
+		}
+
 		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
 		{
 			if (ITEM_TYPE::ACTION == item.eType)
@@ -326,17 +340,6 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 	}
 
 	ImGui::Text("======================");
-
-	if (ImGui::Button("Save"))
-		m_isSave = !m_isSave;
-	if (m_isSave)
-		Save_CameraAction();
-	
-	ImGui::SameLine();
-	if (ImGui::Button("Load"))
-		m_isLoad = !m_isLoad;
-	if(m_isLoad)
-		Load_CameraAction();
 }
 
 void CSequencer::SetUp_Scene(SEQUENCE_ITEM& item)

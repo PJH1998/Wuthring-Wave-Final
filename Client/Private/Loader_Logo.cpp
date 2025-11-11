@@ -15,6 +15,7 @@ CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Logo::Initialize()
 {
+	m_iNumLoadingThread = 7;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -23,7 +24,6 @@ HRESULT CLoader_Logo::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_LogoMaleRover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_LogoFeMaleRover(); Complete_Load(); });
 
-	//m_pGameInstance->Wait_Thread_End();
     return S_OK;
 }
 

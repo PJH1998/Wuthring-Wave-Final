@@ -136,6 +136,7 @@ void CCamera::Shaking(_float fTimeDelta)
 	if (m_fShakeTimeAcc > m_tShakeData.fDuration)
 	{
 		m_isShake = false;
+		m_fFovy = m_fOriginFov;
 		return;
 	}
 
