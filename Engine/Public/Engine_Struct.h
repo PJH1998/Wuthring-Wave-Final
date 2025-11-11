@@ -98,6 +98,16 @@ namespace Engine
 		bool				isLerp = { true };
 	}CAMERA_FRAME;
 
+	typedef struct tagCameraShake
+	{
+		_float		fDuration = {};		// Shake 지속시간
+		_float		fFrequency = {};	// 주파수 (초당 흔들림 빈도)
+		_float		fAmplitude = {};	// 흔들림 세기
+		_float3	vTranslation = {};	// Pos 흔들기위한 강도
+		_float3	vRotation = {};		// Rotation 강도
+		_float		fFovKick = {};		// Fovy 변동
+	}CAMERA_SHAKE;
+
 	typedef struct tagMapObject
 	{
 		_float3 vScale;
