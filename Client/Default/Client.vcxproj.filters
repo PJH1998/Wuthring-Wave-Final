@@ -688,6 +688,7 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClInclude>
@@ -1085,6 +1086,7 @@
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClCompile>

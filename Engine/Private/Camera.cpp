@@ -13,6 +13,12 @@ CCamera::CCamera(const CCamera& Prototype)
 {
 }
 
+void CCamera::Set_Far(_float fFar)
+{
+	m_fFar = fFar;
+	m_pGameInstance->SetUp_CameraNF();
+}
+
 void CCamera::OnShake(const CAMERA_SHAKE& tData)
 {
 	if (m_isShake == true)

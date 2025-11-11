@@ -216,6 +216,7 @@
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
@@ -400,6 +401,7 @@
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
