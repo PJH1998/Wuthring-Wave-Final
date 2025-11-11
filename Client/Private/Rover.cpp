@@ -64,10 +64,9 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
-	m_pQTEColliderCom->IsActivate(false);
-	//_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
-	//XMStoreFloat4(&m_vQTEPos, vPos);
-	//m_pQTEColliderCom->Set_Position(vPos);
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
 
     return S_OK;
 }
@@ -169,7 +168,7 @@ void CRover::Late_Update(_float fTimeDelta)
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
-		m_pQTEColliderCom->IsActivate(false);
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
 
