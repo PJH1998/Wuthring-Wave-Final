@@ -67,6 +67,7 @@ private:
 	atomic<_uint>						m_iCullStack = {};
 	atomic<_bool>						m_isCompleteFrustumCull = { false };
 	list<class CGameObject*>		m_ShadowMapObjects;
+	_uint									m_iNumPreRenderObject = {};
 
 
 	class CShader*						m_pShader = { nullptr };
@@ -89,7 +90,7 @@ private:
 
 	_uint									m_iCurTime = {};
 	_uint									m_iInterval = {};
-
+	_bool									m_IsFog = { true };
 #ifdef _DEBUG
 	list<class CComponent*>		m_DebugComponents;
 	_bool									m_isRenderDebug = { true };

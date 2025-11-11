@@ -624,6 +624,10 @@ _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
 }
+void CGameInstance::Set_CurrentCamera_Far(_float fFar)
+{
+	m_pCamera_Manager->Set_CurrentCamera_Far(fFar);
+}
 void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
 	m_pCamera_Manager->OnShake(tData);
