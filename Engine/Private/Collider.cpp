@@ -34,8 +34,8 @@ _bool CCollider::IsLand(_float3* pNormalOut)
 	if (nullptr != pNormalOut)
 		*pNormalOut = StoreFloat3(m_pCharacterVirtual->GetGroundNormal());
 
-	return m_pCharacterVirtual->IsSupported();
-	//return m_isLand;
+	//return m_pCharacterVirtual->IsSupported();
+	return m_isLand;
 }
 
 void CCollider::Set_Offset(const _float3 vOffset)
@@ -189,8 +189,11 @@ void CCollider::Free()
 {
 	if (true == m_isClone)
 	{
-		m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
-		m_pCharacterVirtual = nullptr;
+		if (true == m_isActivate)
+		{
+			m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+			m_pCharacterVirtual = nullptr;
+		}
 		m_pShape = nullptr;
 	}
 
