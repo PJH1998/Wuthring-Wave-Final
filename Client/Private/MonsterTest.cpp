@@ -94,7 +94,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
-		_float temp = clamp(m_fDistance, 0.f,1.f);
+		_float temp = clamp(m_fDistance - 2.f, 0.f,1.f);
 		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 		//m_isDist_Interp_Enable = false;
 	}
@@ -245,28 +245,27 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		//Desc.vInitPosition = m_vTargetPosition;
 		//XMStoreFloat3(&Desc.vInitDirection,m_pTransformCom->Get_State(STATE::LOOK));
 		Desc.strPatternKey = WStringToString(wstrAnimTag);
+		Desc.eType = CGgobul::GGOBULTYPE::HEAD;
 		_matrix WorldMatrix;
 
 		_vector vLook;
 		if (wstrAnimTag == TEXT("SAttack03"))
 		{
-			Desc.eType = CGgobul::GGOBULTYPE::KNIFE;
 			vLook = XMLoadFloat3(&m_vTargetDir);
 			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		}
 		else if (wstrAnimTag == TEXT("SAttack02_2"))
 		{
-			Desc.eType = CGgobul::GGOBULTYPE::HEAD;
 			vLook = m_pTransformCom->Get_State(STATE::LOOK);
 			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
 			Desc.pRootMatrix = m_pTransformCom->Get_WorldMatrixPtr();
 		}
 		else
 		{
-			Desc.eType = CGgobul::GGOBULTYPE::HEAD;
 			vLook = m_pTransformCom->Get_State(STATE::LOOK);
 			WorldMatrix.r[ENUM_CLASS(STATE::POSITION)] = m_pTransformCom->Get_State(STATE::POSITION);
 		}
+
 		_vector vRight = XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vLook);
 		_vector vUp = XMVector3Cross(vLook, vRight);
 		WorldMatrix.r[ENUM_CLASS(STATE::RIGHT)] = vRight;
@@ -302,6 +301,19 @@ void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
 		ProiDesc.vTargetPos = m_vTargetPosition;
 		//ProiDesc.vTargetPos.y += 0.5f; // 대상 높이 offset
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_Projectile_ShinWang"), WorldMatrix, &ProiDesc);
+	}
+	else if (wstrTypeTag == TEXT("Type"))
+	{
+		if (wstrAnimTag == TEXT("ATK"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+		}
+		else if (wstrAnimTag == TEXT("HARD"))
+		{
+			for (auto& pATKVolume : m_pAtkVolumes)
+				pATKVolume->Change_Layer(COLLISIONLAYER::ENEMY_HARDATTACK);
+		}
 	}
 	else if (wstrTypeTag == TEXT("Look"))
 	{
@@ -426,8 +438,8 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
-	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
-		this->OnHitEnter(iLayer, pOther, Manifold); 
+	TriggerDesc.test = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer) {
+		this->OnHitEnter(iLayer, pOther, Manifold, eLayer); 
 		};
 
 	//CContainerObject::Add_PartObject(TEXT("Part_ATKVolume"), m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), &TriggerDesc);
@@ -451,21 +463,21 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
-		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
-		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
-	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
-	
-	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
-	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
-	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::WHIP_R] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
 		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_R])
 		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_R]);
 	m_pAtkVolumes[ATK_SOCKET::WHIP_R]->TriggerActivate(false);
+	
+	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("SkinBone007");
+	TriggerDesc.vExtent = _float3(1.5f, 0.4f, 0.4f);
+	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
+		TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::WHIP_L])
+		CRASH(m_pAtkVolumes[ATK_SOCKET::WHIP_L]);
+	m_pAtkVolumes[ATK_SOCKET::WHIP_L]->TriggerActivate(false);
 
 	TriggerDesc.eLayer = COLLISIONLAYER::PARRY;
 	vector<COLLISIONLAYER> Targets = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
@@ -571,10 +583,11 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
-		if(!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
+		//if(!m_isParalysis && m_fStamina >= 0.f)
+		//	m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		//m_fHP -= pDesc->fAttack;
+
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -582,10 +595,20 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
 		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		//if (!m_isParalysis && m_fStamina >= 0.f)
+		//	m_fStamina -= 1.f;
+		//CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		////m_fHP -= pDesc->fAttack;
+		//
+		//CAMERA_SHAKE ShakeDesc{};
+		//ShakeDesc.fAmplitude = 0.1f;
+		//ShakeDesc.fDuration = 0.1f;
+		//ShakeDesc.fFovKick;
+		//ShakeDesc.fFrequency = 60.f;
+		//ShakeDesc.vRotation = _float3(0.1f, 0.1f, 0.f);
+		//ShakeDesc.vTranslation ;
+		//
+		//m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -593,18 +616,83 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
-		if (!m_isParalysis && m_fStamina >= 0.f)
-			m_fStamina -= 1.f;
-		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-		m_fHP -= pDesc->fAttack;
+		//if (!m_isParalysis && m_fStamina >= 0.f)
+		//	m_fStamina -= 1.f;
+		//CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		////m_fHP -= pDesc->fAttack;
+		//
+		//CAMERA_SHAKE ShakeDesc{};
+		//ShakeDesc.fAmplitude = 0.1f;
+		//ShakeDesc.fDuration = 0.1f;
+		//ShakeDesc.fFovKick = 0.5f;
+		//ShakeDesc.fFrequency = 60.f;
+		//ShakeDesc.vRotation = _float3(0.1f, 0.1f, 0.f);
+		//ShakeDesc.vTranslation;
+		//
+		//m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG
 	}
 }
 
-void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer)
 {
+	CAMERA_SHAKE ShakeDesc{};
+	
+	if(eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
+	{
+		ShakeDesc.fAmplitude = 1.f;
+		ShakeDesc.fDuration = 0.8f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 2.f;
+		ShakeDesc.vRotation = _float3(0.005f, 0.075f, 0.f);
+		ShakeDesc.vTranslation;
+#ifdef _DEBUG
+		cout << "Common" << endl;
+#endif // _DEBUG
+	}
+	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
+	{
+		ShakeDesc.fAmplitude = 2.f;
+		ShakeDesc.fDuration = 0.15f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 60.f;
+		ShakeDesc.vRotation = _float3(0.13f, 0.0f, 0.f);
+		ShakeDesc.vTranslation;
+#ifdef _DEBUG
+		cout << "Hard" << endl;
+#endif // _DEBUG
+	}
+	else if (eVolumeLayer == COLLISIONLAYER::ENEMY_SKILL)
+	{
+		ShakeDesc.fAmplitude = 1.f;
+		ShakeDesc.fDuration = 0.15f;
+		ShakeDesc.fFovKick = 0.f;
+		ShakeDesc.fFrequency = 45.f;
+		ShakeDesc.vRotation = _float3(0.05f, 0.075f, 0.05f);
+		ShakeDesc.vTranslation;
+
+	}
+
+	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_1))
+	{
+		ShakeDesc.vRotation.y *= 1.2f;
+	}
+	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_3))
+	{
+		ShakeDesc.vRotation.x *= 0.75f;
+		ShakeDesc.vRotation.y *= 0.75f;
+	}
+	else if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_4))
+	{
+		ShakeDesc.vRotation.x *= 1.2f;
+	}
+
+	m_pGameInstance->OnShake(ShakeDesc);
+#ifdef _DEBUG
+	cout << "On Hit! Shim Wang)" << endl;
+#endif // _DEBUG
 }
 
 void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -665,7 +753,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK2)
+	if (iIndex != ATK_PATTERN::ATTACK1)
 		return false;
 	//else
 	//	return false;

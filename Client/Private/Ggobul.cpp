@@ -113,13 +113,12 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	//{
 	//	m_pAttackVolume[i]->TriggerActivate(false);
 	//}
-	if (m_strAnimKey == "SAttack03")
+
 		//				  body, down,  hammer, head, knife, fx
-		m_MeshEnables = { true, false, false, false, true, false };
-	else if (m_strAnimKey == "SAttack03_1")
-		m_MeshEnables = { true, true, true, false, false, false };
+	if (m_strAnimKey == "SAttack03_1")
+		m_MeshEnables = { true, true, false, false, false, false };
 	else if (m_strAnimKey == "SAttack03_2")
-		m_MeshEnables = { true, true, true, false, false, false };
+		m_MeshEnables = { true, true, false, false, false, false };
 	else if (m_strAnimKey == "SBehit_Block")
 		m_MeshEnables = { true, true, true, false, false, false };
 	else if (m_strAnimKey == "SAttack01_1")
@@ -167,53 +166,6 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 		TEXT("Com_AnimMachine"), reinterpret_cast<CComponent**>(&m_pAnimMachineCom), &AnimMachineDesc)))
 		CRASH("Ggobul/Com_AnimMachine");
 
-	// Com_Rigidbody(Head)
-	//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-	//RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	//RigidbodyDesc.eShape = SHAPE::BOX;
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
-	//RigidbodyDesc.vExtent = _float3(2.f, 2.f, 2.f);
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-	//	TEXT("Com_Rigidbody_Head"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HEAD]), &RigidbodyDesc)))
-	//	CRASH("Rigidbody");
-	//m_pAttackVolume[GGOBULTYPE::HEAD]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollide_Enter(iLayer, pDesc, Manifold);
-	//	});
-
-	//m_pAttackVolume[GGOBULTYPE::HEAD]->Set_Desc(&m_CallBack);
-
-	//// Com_Rigidbody(Hammer)
-	//RigidbodyDesc = {};
-	//RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	//RigidbodyDesc.eShape = SHAPE::BOX;
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
-	//RigidbodyDesc.vExtent = _float3(4.f, 4.f, 4.f);
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-	//	TEXT("Com_Rigidbody_Hammer"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::HAMMER]), &RigidbodyDesc)))
-	//	CRASH("Rigidbody");
-	//m_pAttackVolume[GGOBULTYPE::HAMMER]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollide_Enter(iLayer, pDesc, Manifold);
-	//	});
-	//m_pAttackVolume[GGOBULTYPE::HAMMER]->Set_Desc(&m_CallBack);
-	//// Com_Rigidbody(Knife)
-	//RigidbodyDesc = {};
-	//RigidbodyDesc.eBodyType = CRigidbody::BODY;
-	//RigidbodyDesc.eShape = SHAPE::BOX;
-	//RigidbodyDesc.eType = EMotionType::Kinematic;
-	//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
-	//RigidbodyDesc.vExtent = _float3(10.f, 4.f, 4.f);
-	//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
-	//if (FAILED(Add_Component(ENUM_CLASS(pDesc->rigidBodyData.first), pDesc->rigidBodyData.second,
-	//	TEXT("Com_Rigidbody_Knife"), reinterpret_cast<CComponent**>(&m_pAttackVolume[GGOBULTYPE::KNIFE]), &RigidbodyDesc)))
-	//	CRASH("Rigidbody");
-	//m_pAttackVolume[GGOBULTYPE::KNIFE]->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-	//	OnCollide_Enter(iLayer, pDesc, Manifold);
-	//	});
-	//m_pAttackVolume[GGOBULTYPE::KNIFE]->Set_Desc(&m_CallBack);
 }
 
 void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
@@ -240,6 +192,7 @@ void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
 	m_pAttackVolumes[GGOBULTYPE::HEAD]->TriggerActivate(false);
 
 	//Hammer
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_HARDATTACK;
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 4.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
@@ -252,6 +205,7 @@ void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
 	m_pAttackVolumes[GGOBULTYPE::HAMMER]->TriggerActivate(false);
 
 	//Knife
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_HARDATTACK;
 	TriggerDesc.vExtent = _float3(10.f, 4.f, 4.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
@@ -282,6 +236,31 @@ void CGgobul::Effect_Active(const _wstring& wStrEffectTag)
 
 void CGgobul::Object_Func(const _wstring& wStrObjectTag)
 {
+	if (wStrObjectTag == TEXT("Knife"))
+	{
+		m_MeshEnables[GGOBUL_SHADER::HEAD0] = false;
+		m_MeshEnables[GGOBUL_SHADER::KNIFE0] = true;
+		m_pAttackVolumes[m_eType]->TriggerActivate(false);
+		m_eType = GGOBULTYPE::KNIFE;
+		m_pAttackVolumes[m_eType]->TriggerActivate(true);
+	}
+	else if (wStrObjectTag == TEXT("Hammer"))
+	{
+		m_MeshEnables[GGOBUL_SHADER::HEAD0] = false;
+		m_MeshEnables[GGOBUL_SHADER::HAMMER0] = true;
+		m_pAttackVolumes[m_eType]->TriggerActivate(false);
+		m_eType = GGOBULTYPE::HAMMER;
+		m_pAttackVolumes[m_eType]->TriggerActivate(true);
+	}
+	else if (wStrObjectTag == TEXT("Head"))
+	{
+		m_MeshEnables[GGOBUL_SHADER::HEAD0] = true;
+		m_MeshEnables[GGOBUL_SHADER::KNIFE0] = false;
+		m_MeshEnables[GGOBUL_SHADER::HAMMER0] = false;
+		m_pAttackVolumes[m_eType]->TriggerActivate(false);
+		m_eType = GGOBULTYPE::HEAD;
+		m_pAttackVolumes[m_eType]->TriggerActivate(true);
+	}
 }
 
 CGgobul* CGgobul::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
