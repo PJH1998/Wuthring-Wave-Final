@@ -101,7 +101,6 @@ private:
 	_float									m_fDebugMetallic[2] = {0.8f, 0.3f};
 
 #endif
-	_bool									m_IsFog = { true };
 private:
 	// Viewport Size 
 	void						Setting_Viewport(_uint iWinSizeX, _uint iWinSizeY);
