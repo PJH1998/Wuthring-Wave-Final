@@ -507,7 +507,9 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 		m_iState = ENUM_CLASS(TEST_STATE::NONE);
 
 		m_iState |= iRemainState;
-		
+
+		if(m_fHP <= 0.f)
+			m_iState = ENUM_CLASS(TEST_STATE::DEAD);
 	}
 	if(m_isDetecting)
 	{
@@ -571,6 +573,8 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		m_beHit = true;
 		if(!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -580,6 +584,8 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		m_beHit = true;
 		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -589,6 +595,8 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		m_beHit = true;
 		if (!m_isParalysis && m_fStamina >= 0.f)
 			m_fStamina -= 1.f;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG

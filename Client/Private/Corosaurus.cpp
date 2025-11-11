@@ -202,7 +202,6 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
-	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -286,8 +285,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 2.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vOffsetPos = _float3(-0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
@@ -299,8 +298,8 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(true);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 2.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
@@ -430,15 +429,19 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+		//cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
@@ -446,6 +449,8 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG
