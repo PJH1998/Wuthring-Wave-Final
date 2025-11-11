@@ -58,6 +58,8 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 	m_fStamina = m_fMaxStamina;
 	m_fParalysisAcc = 5.f;
 	m_fHitStopRatio = 1.f;
+	m_ShaderIndices[SHINWANG_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
+	m_ShaderIndices[SHINWANG_SHADER::FX2] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
 	return S_OK;
 }
 
@@ -141,8 +143,10 @@ void CMonsterTest::Render()
 	for(_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -365,6 +369,7 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	if(FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("MonsterTest/Com_Model");
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
@@ -644,8 +649,7 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	if (iIndex != ATK_PATTERN::ATTACK1
-		)
+	if (iIndex != ATK_PATTERN::ATTACK1)
 		return false;
 	//else
 	//	return false;

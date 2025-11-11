@@ -36,6 +36,7 @@ HRESULT CGgobul::Initialize_Clone(void* pArg)
 	m_MeshEnables.resize(m_pModelCom->Get_NumMesh(), true);
 	//풀링 오브젝트 자체적으로 activate 끄기
 	m_isActivate = false;
+	m_ShaderIndices[GGOBUL_SHADER::FX] = ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL);
     return S_OK;
 }
 
@@ -118,6 +119,8 @@ void CGgobul::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_MeshEnables = { true, true, true, false, false, false };
 	else if (m_strAnimKey == "SAttack01_1")
 		m_MeshEnables = { true, true, false, true, false, false };
+	else if (m_strAnimKey == "SAttack02_2")
+		m_MeshEnables = { true, false, false, true, false, true };
 	else
 		m_MeshEnables = { true, false, false, true, false, false };
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
@@ -147,6 +150,7 @@ void CGgobul::Ready_Component(GGOBUL_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Model");
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = "SAttack01_2";

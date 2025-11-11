@@ -37,7 +37,6 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = 50.f;
 #pragma endregion
-
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
 	m_fHitStopRatio = 1.f;
@@ -95,8 +94,10 @@ void CCorosaurus::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -125,7 +126,7 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		if (wstrPartTag == TEXT("Head"))
 		{
-			m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(isActive);
+			m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(isActive);
 		}
 		else
 		{
@@ -237,6 +238,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Corrosaurus/Com_Model");
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
@@ -290,10 +292,10 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
-	m_pAtkVolumes[ATK_SOCKET::HEAD] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD])
+	m_pAtkVolumes[ATK_SOCKET::HEAD0] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD0])
 		CRASH(m_pAtkVolume);
-	m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
 	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);

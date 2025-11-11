@@ -17,6 +17,7 @@ class CGgobul final : public CActor
 {
 public:
 	enum GGOBULTYPE { HEAD, HAMMER, KNIFE, END};
+	enum GGOBUL_SHADER { BODY, DOWN, HAMMER, HEAD, KNIFE, FX };
 	typedef struct tagGgobulDesc : public CActor::ACTOR_DESC
 	{
 		_float fAttackDmg;
@@ -59,6 +60,7 @@ private:
 	const _float4x4*		m_pAttackTransform = { nullptr };
 	_float4x4				m_BoneCombindMatrix{};
 	vector<_bool>			m_MeshEnables;
+	vector<_uint>			m_ShaderIndices;
 
 	_string		m_strAnimKey;
 	_uint		m_iState{};
