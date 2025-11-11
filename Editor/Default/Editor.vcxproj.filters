@@ -404,6 +404,7 @@
     <ClInclude Include="..\Public\Edit_MonsterSpawnor.h">
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Edit_Meteo.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -594,6 +595,7 @@
     <ClCompile Include="..\Private\Edit_MonsterSpawnor.cpp">
       <Filter>03. GameObject\MapObject\Spawn</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Edit_Meteo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

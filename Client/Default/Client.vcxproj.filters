@@ -249,7 +249,7 @@
     </Filter>
     <Filter Include="03. GameObject\MapObject\Sonoro">
       <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="03. GameObject\UI\Child_Containers\Loading">
       <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
     </Filter>
@@ -642,7 +642,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
     </ClInclude>
@@ -685,6 +685,7 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1033,7 +1034,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
     </ClCompile>
@@ -1073,6 +1074,7 @@
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

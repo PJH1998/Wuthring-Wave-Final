@@ -57,7 +57,9 @@ void CEdit_MapObject_Destruction_Piece::Priority_Update(_float fTimeDelta)
 {
 	if (m_IsTriggered)
 	{
+		m_pRigidbodyCom->IsActivate(true);
 		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
 		m_pRigidbodyCom->Impulse(m_vImpulse);
 		m_IsTriggered = false;
 	}
