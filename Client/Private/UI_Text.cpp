@@ -191,7 +191,7 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_tUIDesc.isInstance	= pDesc->isInstance;
 
 
-	m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
+	//m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
@@ -200,7 +200,7 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	_uint iCacheTransformAmount = (m_tUIDesc.isInstance) ? pDesc->strText.size() : 1;
 	m_vecCachedUITransform.resize(iCacheTransformAmount);
 
-	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
+	//m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
 	return S_OK;
 }
