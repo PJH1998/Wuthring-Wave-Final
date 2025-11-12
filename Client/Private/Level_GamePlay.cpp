@@ -51,6 +51,9 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
+	m_pGameInstance->SettingFog(true);
+	m_pGameInstance->Set_LUT_Index(0);
+
 
 	Ready_UI();
 	Ready_Layer_Player();
