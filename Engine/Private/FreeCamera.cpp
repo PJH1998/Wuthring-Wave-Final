@@ -37,6 +37,11 @@ void CFreeCamera::Update(_float fTimeDelta)
 		__super::Mouse_Move_Up();
 
 #ifdef _DEBUG
+	_float4x4 mat = {};
+	XMStoreFloat4x4(&mat, m_pTransformCom->Get_WorldMatrix());
+	OutPutDebugMatrix(TEXT("Free Mat"), mat);
+
+
 	ImGui::Begin("Camera Speed");
 
 	ImGui::InputFloat("##", &m_fSpeed);
@@ -55,6 +60,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 	ImGui::PopID();
 
 	ImGui::End();
+
 #endif
 }
 

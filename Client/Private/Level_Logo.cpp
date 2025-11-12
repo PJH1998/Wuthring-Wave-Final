@@ -29,6 +29,9 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
+
+
+
     return S_OK;
 }
 

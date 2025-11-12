@@ -155,7 +155,7 @@ void CCamera_Manager::Ready_FreeCamera()
 	CameraDesc.fFar = 5000.f;
 	/*CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
 	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);*/
-	CameraDesc.vEye = _float4(-1.019107, 5.458634, -15.936163, 1.f);
+	CameraDesc.vEye = _float4(-0.69f, 3.4748f, -11.3f, 1.f);
 	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
 	//CameraDesc.fSpeedPerSec = 1000.f;
 	CameraDesc.fSpeedPerSec = 100.f;
