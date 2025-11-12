@@ -48,13 +48,14 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
-#pragma region ㅣ[UI] FONT_PRESET
+#pragma region [UI] FONT_PRESET
 	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
-	// 텍스트를 생성합니다.
+	// 텍스트를 생성합니다. (화면상에 스크린좌표로 글자를 띄우는 UI를 생성합니다. 알파 미적용.)
 	class CUI_Text*	Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
+	// 텍스트를 생성합니다. (화면상에 스크린좌표로 글자를 띄우는 UI를 생성합니다. Instance Desc 수정을 통한 알파 적용.)
 	class CUI_Text*	Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
 #pragma endregion
 
@@ -65,8 +66,10 @@ public:
 	HRESULT		HUD_FadeOut();
 	HRESULT		HUD_FadeIn();
 
+	// 상호작용 UI를 생성합니다. 인자는 들어갈 글자.
 	void		Render_InteractUI(_wstring strText);
-
+	// 상호작용 UI가 상호작용되었는지를 반환합니다. 상호작용 UI 비활성 시 기본 false.
+	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 	
 #pragma endregion
 

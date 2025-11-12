@@ -90,6 +90,17 @@ void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
 }
 
+_bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
+{
+	// UI_Interact 가 Root UI, 내부적으로 Interact_Normal 커스텀UI를 통해 엔터/호버 등 이벤트를 처리함
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Interact"); //->Find_ChildObject(L"Interact_Normal");
+
+	if (pRootUI == nullptr || pRootUI->IsActivate() == false)
+		return false; // 없는데!
+
+	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
+}
+
 CUI_ControlHelper* CUI_ControlHelper::Create()
 {
 	CUI_ControlHelper* pInstance = new CUI_ControlHelper();

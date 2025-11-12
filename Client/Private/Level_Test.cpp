@@ -606,9 +606,36 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 
 	// interact
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
-		m_pGameSystem->Render_InteractUI(L"좌표기준 연결 필요");
 
+	static _uint iInteractIndex = 0;
+	enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND};
+
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+		(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
+	{
+		switch (iInteractIndex)
+		{
+		case TEST_INTERACT0:
+			m_pGameSystem->Render_InteractUI(L"테스트하나");
+			iInteractIndex++;
+			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+			break;
+		case TEST_INTERACT1:
+			m_pGameSystem->Render_InteractUI(L"테스트둘");
+			iInteractIndex++;
+			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+			break;
+		}
+	}
+
+
+	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+		cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+		cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
+	if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+		cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
 
 
 
