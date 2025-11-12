@@ -27,7 +27,7 @@ public:
 	}MONSTERTEST_DESC;
 
 private:
-	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
+	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, WEAPON_GR, WEAPON_GL, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
 	enum SHINWANG_SHADER { UP, BODY, DOWN, ARM, PARTS, WEAPON, FX, FX2 };
 private:
@@ -76,6 +76,7 @@ private:
 	_float					m_fFrontDot{};
 
 	_bool					m_isAnimationFinished{};
+	_bool					m_isDeadTrigger{};
 	_bool					m_isBlocked{};
 	_bool					m_isParalysis{};
 	_bool					m_isKnockDownTrig{};
@@ -107,7 +108,7 @@ private:
 	void						Reset_Condition(_float fTimeDelta);
 	void						After_Condition(_float fTimeDelta);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
-	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 
 	void						TurnFix();

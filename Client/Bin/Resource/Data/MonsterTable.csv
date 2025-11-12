@@ -1,5 +1,5 @@
 name,ID,maxHP,maxStamina,Attack,MinDamage,MaxDamage,ImpluseRate
-HavocWarrior,1,200,0,15.00001,5.00001,5.00001,4.5
-ElectroPredator,2,200,0,15.00001,5.00001,5.00001,9.00001
-CoroSaurus,3,800,10,40,10,10,0
-FalseSovereign,4,1000,10,50,15,15,0
+HavocWarrior,1,2000,0,150,5.00001,5.00001,4.5
+ElectroPredator,2,2000,0,150,5.00001,5.00001,7.5
+CoroSaurus,3,10000,10,500,10,10,0
+FalseSovereign,4,20000,10,800,15,15,0

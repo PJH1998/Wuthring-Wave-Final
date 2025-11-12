@@ -88,7 +88,6 @@ private:
 	_float						m_fRadius = {};
 	_float						m_fMaxDistance = {};
 	_float						m_fOutDistance = {};
-
 	_float						m_fSSAO_MinDepthDistance = {};
 #pragma endregion
 

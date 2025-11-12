@@ -667,6 +667,10 @@ void CRover::Process_DelayedActions(_float fTimeDelta)
 		m_DelayedActions.pop();
 	}
 }
+void CRover::Bind_ChangeEffect()
+{
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
+}
 #pragma endregion
 
 

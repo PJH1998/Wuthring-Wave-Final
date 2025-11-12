@@ -277,6 +277,9 @@
     <Filter Include="03. GameObject\UI\Child_Containers\Logo">
       <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Camera\Scene">
+      <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -710,6 +713,9 @@
     <ClInclude Include="..\public\UI_Logo.h">
       <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\SceneCamera.h">
+      <Filter>03. GameObject\Camera\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1113,6 +1119,9 @@
     </ClCompile>
     <ClCompile Include="..\private\UI_Logo.cpp">
       <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SceneCamera.cpp">
+      <Filter>03. GameObject\Camera\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

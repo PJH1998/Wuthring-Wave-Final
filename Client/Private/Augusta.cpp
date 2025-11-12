@@ -97,9 +97,14 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 	}
 	
-	// 4. MainAttackVolume 설정
+	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
+	// 6. Change Timer 계산. => Dissolve에 사용
+	Calc_ChangeTimer(fTimeDelta);
+
+	
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -186,6 +191,11 @@ void CAugusta::Render()
 {
 
     Bind_Resources();
+
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)))
+	{
+		// Shader에 값 바인딩.. => 나중에 Shader Path 생성 필요,
+	}
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -448,7 +458,13 @@ void CAugusta::Hit_Judge(void* pArg)
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+	{
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.1f); // Dodge 시간 동안 느리게하기?
+		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
+		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
+	}
+		//m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+		
 
 
 	// 4. Player 상태 바인딩
@@ -592,6 +608,7 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 		}
 	}
 
+	
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
@@ -621,6 +638,22 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 
 		m_DelayedActions.pop();
 	}
+}
+void CAugusta::Calc_ChangeTimer(_float fTimeDelta)
+{
+	if (m_fChangeTimer > 0.f)
+		m_fChangeTimer -= fTimeDelta; // Dissolve 변수 값.
+	else
+	{
+		m_fChangeTimer = 0.f;
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	}
+		
+}
+
+void CAugusta::Bind_ChangeEffect()
+{
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
 }
 #pragma endregion
 

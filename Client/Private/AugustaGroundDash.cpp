@@ -95,6 +95,7 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
     if (m_pAugusta->Is_LockOn())
     {
         _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
     }
 
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);

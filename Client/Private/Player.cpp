@@ -359,14 +359,22 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	{
 		// 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
-		m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
+		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
 	}
 
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
 	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
-	m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), true); // 콜라이더 활성화
+	
+	// Change Time 부여를 위한 Condition 추가
+	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
+
+	//m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
+	
+
 
 	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
 	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).
@@ -524,6 +532,8 @@ void CPlayer::Sorting_Target()
 
 void CPlayer::Toggle_LockOn()
 {
+	
+
 	// 1. 락온 키 입력 (상태 전환)
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
 	{
@@ -556,7 +566,18 @@ void CPlayer::Toggle_LockOn()
 		m_Characters[m_iCurrentCharacterIdx] : nullptr;
 
 
-	// 4. 락온상태라면?
+	// 4. 락온 해제.
+	if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+	{
+		if (m_Characters[m_iCurrentCharacterIdx]->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE)))
+		{
+			// 락온을 해제해라.
+			m_IsLockOn = false;
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
+
+	// 5. 락온상태라면?
 	if (m_IsLockOn)
 	{
 		// 하드 락온
@@ -571,8 +592,6 @@ void CPlayer::Toggle_LockOn()
 		if (pCurrentCharacter)
 			pCurrentCharacter->Set_AutoLockOn(pFinalTarget, m_IsLockOn); // Character의 Set_AutoLockOn 호출
 	}
-
-
 
 
 	// 6. 카메라 업데이트.

@@ -84,7 +84,10 @@ void CEdit_TriggerBox::Set_ImGuiOption()
 	m_pMapInterface->Set_Transform(m_pTransformCom);
 	
 	if (ImGui::Button("Destroy"))
+	{
 		m_isActivate = false;
+		m_pRigidbodyCom->IsActivate(false);
+	}
 
 }
 

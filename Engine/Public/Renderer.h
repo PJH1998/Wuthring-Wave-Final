@@ -6,6 +6,7 @@ NS_BEGIN(Engine)
 
 class CRendererSubResource;
 class CTexture;
+class CSFX_Hub;
 
 class CRenderer final : public CBase
 {
@@ -24,14 +25,17 @@ public:
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
+	void				Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
 	
 	void				Render_ShadowMap();
 
+	void					Clear_Resource();
+
 #ifdef _DEBUG
-	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
-	void			Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }
-	HRESULT		Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
+	HRESULT			Add_Render_Debug(class CComponent* pDebugComponent);
+	HRESULT			Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 	void			IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 	void			IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
 	void			Setting_SSAO(_float fRadius, _float fMaxDistance);
@@ -81,6 +85,8 @@ private:
 	_uint									m_iLUT_Index = {};
 	_int									m_iBloomWeight = { 1 };
 
+	CSFX_Hub*						m_pSFX_Hub = { nullptr };
+
 	SFX_TYPE							m_eEffectType = { SFX_TYPE::END };
 	_bool									m_IsEffectEnd = {};
 	_float									m_fEffectIntensity = {};
@@ -109,7 +115,6 @@ private:
 	void						Merge_CommandList(ID3D11CommandList* pCL, _uint iIndex);
 
 private:
-
 	void						Render_Priority();
 	void						Render_Shadow();
 	void						Render_Outline();
@@ -134,12 +139,8 @@ private:
 	void						Render_UI();
 	void						Render_Fade();
 
-
 	//EFFECT
 	void						Update_EffectIntensity();
-	void						Render_Blur();
-	void						Render_DOF();
-	void						Render_MotionBlur();
 
 #ifdef _DEBUG
 	void						Render_Debug();

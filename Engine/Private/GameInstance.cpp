@@ -518,11 +518,11 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-#ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
 }
+#ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
@@ -1056,6 +1056,7 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 HRESULT CGameInstance::Clear_Memory()
 {
+	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
 	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();
@@ -1063,7 +1064,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
-	m_pDecal_Manager->Clear();
+	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

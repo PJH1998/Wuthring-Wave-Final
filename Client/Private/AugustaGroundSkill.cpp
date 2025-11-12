@@ -399,8 +399,8 @@ void CAugustaGroundSkill::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 65.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 15.f, 2.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.f, 25.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.2f, 15.f, 1.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.2f, 25.f, 1.5f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
 
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_PULL), "Attack_Pull", 1.f, 30.f);
@@ -429,7 +429,9 @@ void CAugustaGroundSkill::Handle_Animation_SpecialState()
 	//if (eSkillType == EAugustaSkillType::SKILL_RISE_ZERO)
 	//	m_fAnimationScale = 1.f;
 
-	if (eSkillType == EAugustaSkillType::ATTACK_PULL || eSkillType == EAugustaSkillType::SKILL_RISE_ZERO) // 1. 뒤로 이동은 온전하게 이동거리받기.
+	if (eSkillType == EAugustaSkillType::ATTACK_PULL || 
+		eSkillType == EAugustaSkillType::SKILL_RISE_ZERO || 
+		eSkillType == EAugustaSkillType::SKILL_RISE) // 1. 뒤로 이동은 온전하게 이동거리받기.
 		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
 
 	

@@ -54,7 +54,9 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 
 	// 7. Hit Stop
 	CGameInstance* pGameInstance = CGameInstance::GetInstance();
-	pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f);
+	//pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f);
+	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
+	pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.7f, 0.2f); // Dodge 시간 동안 느리게하기?
 
 	CAMERA_SHAKE Desc{};
 	Desc.fDuration = 0.15f;
