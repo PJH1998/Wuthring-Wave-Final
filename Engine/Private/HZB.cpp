@@ -33,6 +33,11 @@ void CHZB::Update()
 
 		ID3D11ShaderResourceView* pSRV = 0 == i ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Depth")) : m_pSRV[i - 1];
 
+		CAMERA_FAR CameraFar = {};
+		CameraFar.fFar = m_pGameInstance->Get_CurrentCamera_Far();
+		m_pContext->UpdateSubresource(m_pCameraFarBuffer, 0, nullptr, &CameraFar, 0, 0);
+		m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_ConstantBuffer("CameraFar", m_pCameraFarBuffer);
+
 		0 == i ? m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_SRV("InputTexture", pSRV) : m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_SRV("InputMipTexture", pSRV);
 	
 		m_pComputeShader[HZB_CS_TYPE::MIPMAP]->Set_UAV("OutputTexture", m_pUAV[i]);
@@ -85,6 +90,8 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	OCDesc.ProjMatrix = *m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ);
 	OCDesc.iNumObjects = iNumObjects;
 	OCDesc.iHZBMipLevel = 3;
+	OCDesc.fMip0SizeX = static_cast<_float>(m_iWinSizeX >> 1);
+	OCDesc.fMip0SizeY = static_cast<_float>(m_iWinSizeY >> 1);
 	m_pContext->UpdateSubresource(m_pOCDescBuffer, 0, nullptr, &OCDesc, 0, 0);
 	
 	m_pComputeShader[HZB_CS_TYPE::OCCLUSION]->Set_ConstantBuffer("OCDesc", m_pOCDescBuffer);
@@ -129,7 +136,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	// Swap Vector
 	_uint iNumPre = Objects.size();
 	_uint iNumCur = CullObjects.size();
-	//cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
+	cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
 	Objects.clear();
 	Objects.reserve(CullObjects.size());
 	Objects.swap(CullObjects);
@@ -139,6 +146,18 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 
 void CHZB::Ready_DefaultSetting()
 {
+	// Create Constant Buffer
+	D3D11_BUFFER_DESC CameraFarBufferDesc = {};
+	CameraFarBufferDesc.ByteWidth = sizeof(CAMERA_FAR);
+	CameraFarBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	CameraFarBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	CameraFarBufferDesc.CPUAccessFlags = 0;
+	CameraFarBufferDesc.StructureByteStride = sizeof(CAMERA_FAR);
+	CameraFarBufferDesc.MiscFlags = 0;
+
+	if (FAILED(m_pDevice->CreateBuffer(&CameraFarBufferDesc, nullptr, &m_pCameraFarBuffer)))
+		CRASH("CameraFar Buffer");
+
 	// Texture2D Desc
 	D3D11_TEXTURE2D_DESC TextureDesc = {};
 
@@ -362,6 +381,7 @@ void CHZB::Free()
 	Safe_Release(m_pMMSRV);
 	for(_uint i = 0; i < HZB_CS_TYPE::END; ++i)
 		Safe_Release(m_pComputeShader[i]);
+	Safe_Release(m_pCameraFarBuffer);
 
 	// Occlusion Culling
 	Safe_Release(m_pOCDescBuffer);

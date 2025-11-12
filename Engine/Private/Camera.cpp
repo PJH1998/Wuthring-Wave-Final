@@ -21,20 +21,14 @@ void CCamera::Set_Far(_float fFar)
 
 void CCamera::OnShake(const CAMERA_SHAKE& tData)
 {
-	if (m_isShake == true)
-		return;
-	m_isShake = true;
-	m_fShakeTimeAcc = 0.f;
-	m_fRandTimeAcc = 0.f;
+	if (0 == m_tShakeDatas.size())
+	{
+		// Origin Store
+		XMStoreFloat4(&m_vOriginQuaternion, m_pTransformCom->Get_Quaternion());
+		m_fOriginFov = m_fFovy;
+	}
 
-	memcpy(&m_tShakeData, &tData, sizeof(CAMERA_SHAKE));
-
-	m_fADSRStart = min(0.04f, m_tShakeData.fDuration * 0.2f);
-	m_fADSREnd = max(0.12f, m_tShakeData.fDuration * 0.6f);
-
-	// Origin Store
-	XMStoreFloat4(&m_vOriginQuaternion, m_pTransformCom->Get_Quaternion());
-	m_fOriginFov = m_fFovy;
+	m_tShakeDatas.push(tData);
 }
 
 HRESULT CCamera::Initialize_Prototype()
@@ -137,10 +131,26 @@ void CCamera::Mouse_Move_Up()
 		m_pTransformCom->LookDir(XMVector4Normalize(vPreLook));
 }
 
+void CCamera::SetUp_Shake()
+{
+	m_isShake = true;
+	m_fShakeTimeAcc = 0.f;
+	m_fRandTimeAcc = 0.f;
+
+	m_tShakeData = m_tShakeDatas.front();
+
+	m_fADSRStart = min(0.04f, m_tShakeData.fDuration * 0.2f);
+	m_fADSREnd = max(0.12f, m_tShakeData.fDuration * 0.6f);
+}
+
 void CCamera::Shaking(_float fTimeDelta)
 {
-	if (false == m_isShake)
+	if (0 == m_tShakeDatas.size())
 		return;
+	// Shake Data 들어왔을 때, Shake 아닌 경우
+	else if (false == m_isShake)
+		SetUp_Shake();
+	
 
 	m_fShakeTimeAcc += fTimeDelta;
 	m_fRandTimeAcc += fTimeDelta;
@@ -148,6 +158,7 @@ void CCamera::Shaking(_float fTimeDelta)
 	if (m_fShakeTimeAcc > m_tShakeData.fDuration)
 	{
 		m_isShake = false;
+		m_tShakeDatas.pop();
 		m_fFovy = m_fOriginFov;
 		return;
 	}
@@ -184,10 +195,6 @@ _float CCamera::ADSR()
 	_float fTail = m_tShakeData.fDuration - m_fShakeTimeAcc;
 	if (fTail <= m_fADSREnd) return max(0.f, fTail / m_fADSREnd);
 	return 1.0f;
-}
-
-void CCamera::Perlin_Noise(_float fTimeDelta)
-{
 }
 
 void CCamera::Free()
