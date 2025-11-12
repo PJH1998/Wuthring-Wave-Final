@@ -793,8 +793,8 @@ void CLevel_Map::Load_Objects()
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
-	//m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
@@ -948,6 +948,65 @@ void CLevel_Map::Create_TriggerBox()
 		m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
 	}
 }
+
+//void CLevel_Map::Logo_Test()
+//{
+//	_wstring wStrModelTag = L"Prototype_Component_Model_MaleRover";
+//	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Male/LogoMaleRover.dat";
+//	_matrix	PreTransformMatrix = XMMatrixIdentity();
+//	_float fSize = 0.01f;
+//	//_float fSize = 0.0001f;
+//	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
+//
+//	// 1. 모델 초기화.
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, wStrModelTag,
+//		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+//		CRASH("Prototype Create Failed");
+//
+//
+//	// 2. StateMachine 초기화
+//	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_MaleRover";
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, wStrStateMachineTag,
+//		CStateMachine::Create(m_pDevice, m_pContext))))
+//		CRASH("PlayerState Machine");
+//
+//
+//	// 3. 객체 초기화
+//	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_LogoMaleRover");
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel
+//		, wStrActorTag
+//		, CLogoMaleRover::Create(m_pDevice, m_pContext))))
+//		CRASH("Prototype Create Failed");
+//
+//	_wstring wStrModelTag = L"Prototype_Component_Model_FemaleRover";
+//	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Female/LogoFemaleRover.dat";
+//	_matrix	PreTransformMatrix = XMMatrixIdentity();
+//	_float fSize = 0.01f;
+//	//_float fSize = 0.0001f;
+//	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
+//
+//	// 1. 모델 초기화.
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, wStrModelTag,
+//		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+//		CRASH("Prototype Create Failed");
+//
+//
+//	// 2. StateMachine 초기화
+//	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_FemaleRover";
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel, wStrStateMachineTag,
+//		CStateMachine::Create(m_pDevice, m_pContext))))
+//		CRASH("PlayerState Machine");
+//
+//
+//	// 3. 객체 초기화
+//	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_LogoFemaleRover");
+//	if (FAILED(m_pGameInstance->Add_Prototype(m_iLevel
+//		, wStrActorTag
+//		, CLogoFemaleRover::Create(m_pDevice, m_pContext))))
+//		CRASH("Prototype Create Failed");
+//
+//	cout << "Logo FeMale Rover" << endl;
+//}
 
 HRESULT CLevel_Map::Ready_Static_Component()
 {

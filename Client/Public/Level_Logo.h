@@ -25,6 +25,7 @@ private:
 	Engine::CRigidbody* m_pRigidbody3 = { nullptr };
 
 	LEVEL m_eCurLevel = { LEVEL::LOGO };
+	class CGameSystem* m_pGameSystem = { nullptr };
 public:
 	static		CLevel_Logo* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		void				Free() override;

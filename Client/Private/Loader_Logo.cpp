@@ -7,6 +7,7 @@
 #include "GameSystem.h"
 #include "LogoMaleRover.h"
 #include "LogoFemaleRover.h"
+#include"MapObject.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -36,7 +37,7 @@ HRESULT CLoader_Logo::Load_Texture()
 
 HRESULT CLoader_Logo::Load_Model()
 {
-	//m_pParser->Ready_Prototype_Map(m_pDevice, m_pContext, "../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", LEVEL::LOGO);
+	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel);
 
 	cout << "Model" << endl;
 
@@ -53,6 +54,9 @@ HRESULT CLoader_Logo::Load_Shader()
 HRESULT CLoader_Logo::Load_Object()
 {
 	cout << "Object" << endl;
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
+		CMapObject::Create(m_pDevice, m_pContext));
 
     return S_OK;
 }

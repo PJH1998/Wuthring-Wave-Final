@@ -30,6 +30,8 @@ public:
 
 	void Create_TriggerBox();
 
+
+	void Logo_Test();
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
