@@ -137,12 +137,8 @@ private:
 	void						Render_UI();
 	void						Render_Fade();
 
-
 	//EFFECT
 	void						Update_EffectIntensity();
-	void						Render_Blur();
-	void						Render_DOF();
-	void						Render_MotionBlur();
 
 #ifdef _DEBUG
 	void						Render_Debug();
