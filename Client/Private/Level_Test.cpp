@@ -574,7 +574,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 			3.f
 		);
 
-		//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+		m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
 	}
 
 
