@@ -20,6 +20,7 @@ private:
 	void							Ready_Layer_LogoFemaleRover();
 
 private:
+	class CGameSystem*		m_pGameSystem = { nullptr };
 	LEVEL							m_eCurLevel = { LEVEL::LOGO };
 
 public:

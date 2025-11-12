@@ -20,6 +20,7 @@ enum class EAugustaGroundState : _uint
 	UNIQUE,			// 캐릭터 고유 상태. (Griffon 등등)
 	LAND,			// 착지 (Land)
 	QTE,			// 협주 스킬(Augusta의 경우 변주)
+	DODGE,			// 회피 스킬.
 	GROUND_END
 };
 
@@ -118,6 +119,13 @@ enum class EAugustaDashType : _uint
 	END
 
 
+};
+
+enum class EAugustaDodgeType : _uint
+{
+	MOVE_LIMIT_F = 0,
+	MOVE_LIMIT_B,
+	END
 };
 
 enum class EAugustaAttackType : _uint

@@ -285,6 +285,7 @@ void CRenderer::Render_ShadowMap()
 
 void CRenderer::Clear_Resource()
 {
+	m_ShadowMapObjects.clear();
 	m_StaticObjects[0].clear();
 	m_StaticObjects[1].clear();
 }

@@ -176,6 +176,7 @@ public:
 	_vector Get_RightVector_NoPitch();
 
 	// LockOn
+	void Set_AutoLockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 	
@@ -261,12 +262,13 @@ public:
 	
 #pragma region CONDITION
 public:
-	void Add_Condition(CHARACTER_CONDITION eConditionFlag);
-	_bool Check_AnyCondition(CHARACTER_CONDITION eConditionFlag);
-	_bool Check_AllCondition(CHARACTER_CONDITION eConditionFlag);
-
-	void Remove_Condition(CHARACTER_CONDITION eConditionFlag);
+	void Add_Condition(_uint iConditionFlag);
+	_bool Check_AnyCondition(_uint iConditionFlag);
+	_bool Check_AllCondition(_uint iConditionFlag);
+	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
+
+	void Sync_Condition_ToPlayer(_uint* pCondition);
 
 
 #pragma endregion
@@ -278,6 +280,7 @@ protected:
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
+	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 
@@ -316,6 +319,9 @@ protected:
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
+
+	_float m_fDodgeableDuration = 0.2f;
+	_float m_fDodgeableHitTimer = {};
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

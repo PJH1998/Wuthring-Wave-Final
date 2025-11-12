@@ -17,7 +17,7 @@ public:
 		_float3 vExtends;
 		_uint iLevel = ENUM_CLASS(LEVEL::MAP);
 		OBJECTTYPE eObjectType;
-		_uint iTriggerIndex = {};
+		_int iTriggerIndex = {-1};
 	}TRIGGER;
 
 private:

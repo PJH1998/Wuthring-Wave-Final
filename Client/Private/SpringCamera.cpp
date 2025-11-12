@@ -56,11 +56,11 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 	m_fMinDistance = 1.f;
 	m_fMaxDistance = 6.f;
 
-	m_fLockOnMinDistance = 4.f;
+	m_fLockOnMinDistance = 6.f;
 
 	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 1.5f;
+	m_fLockOnOffsetY = 2.0f;
 	Ready_Event();
     return S_OK;
 }

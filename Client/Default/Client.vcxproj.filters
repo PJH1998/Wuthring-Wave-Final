@@ -271,8 +271,8 @@
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="03. GameObject\Camera\Logo">
-      <UniqueIdentifier>{de583f96-15d2-46d7-9543-834c2bb12cfc}</UniqueIdentifier>
+    <Filter Include="03. GameObject\Camera\Scene">
+      <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -691,11 +691,18 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\LogoCamera.h">
-      <Filter>03. GameObject\Camera\Logo</Filter>
+    <ClInclude Include="..\Public\AugustaGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SceneCamera.h">
+      <Filter>03. GameObject\Camera\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1085,11 +1092,18 @@
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\LogoCamera.cpp">
-      <Filter>03. GameObject\Camera\Logo</Filter>
+    <ClCompile Include="..\Private\AugustaGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SceneCamera.cpp">
+      <Filter>03. GameObject\Camera\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

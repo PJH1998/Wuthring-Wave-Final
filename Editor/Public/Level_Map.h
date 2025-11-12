@@ -30,6 +30,8 @@ public:
 
 	void Create_TriggerBox();
 
+
+	void Logo_Test();
 private:
 	HRESULT Ready_Static_Component();
 	void Ready_Event();
@@ -52,6 +54,8 @@ private:
 	class CEdit_MapObject_Destruction* m_pPickedDestructObject = {nullptr};
 	class CEdit_TriggerBox* m_pPickedTriggerBox = { nullptr };
 	class CEdit_MonsterSpawnor* m_pPickedSpawnor = { nullptr };
+	class CEdit_Meteo* m_pPickedMeteo = { nullptr };
+
 
 	class CEdit_LightObject* m_pPickedLightObject = { nullptr };
 	class CEdit_PreViewModel* m_pPreViewObject = { nullptr };

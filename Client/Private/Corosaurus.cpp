@@ -279,7 +279,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 
 void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 {
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;

@@ -179,6 +179,7 @@
     <ClInclude Include="..\Public\AugustaAirAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundBurst.h" />
+    <ClInclude Include="..\Public\AugustaGroundDodge.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundQTE.h" />
@@ -209,13 +210,13 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
-    <ClInclude Include="..\Public\LogoCamera.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
@@ -266,6 +267,7 @@
     <ClInclude Include="..\Public\RoverGroundAttack.h" />
     <ClInclude Include="..\Public\RoverGroundBurst.h" />
     <ClInclude Include="..\Public\RoverGroundDash.h" />
+    <ClInclude Include="..\Public\RoverGroundDodge.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
     <ClInclude Include="..\Public\RoverGroundLand.h" />
     <ClInclude Include="..\Public\RoverGroundQTE.h" />
@@ -275,6 +277,7 @@
     <ClInclude Include="..\Public\RoverHit.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
@@ -340,6 +343,7 @@
     <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundDodge.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
@@ -390,7 +394,6 @@
     <ClCompile Include="..\private\Loader_Test_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\Private\LogoCamera.cpp" />
     <ClCompile Include="..\private\LogoFactory.cpp" />
     <ClCompile Include="..\Private\LogoFemaleRover.cpp" />
     <ClCompile Include="..\Private\LogoMaleRover.cpp" />
@@ -399,6 +402,7 @@
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
@@ -416,10 +420,12 @@
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />
     <ClCompile Include="..\Private\RoverGroundBurst.cpp" />
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp" />
     <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
+    <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />

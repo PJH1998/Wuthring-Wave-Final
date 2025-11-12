@@ -13,6 +13,8 @@ private:
         JUMP,
 		FLY,
         DASH,
+		DODGE,
+		DODGEABLE,
         ATTACK,
         WALL,
         LAND,

@@ -3,11 +3,12 @@
 
 #include "Dummy.h"
 #include "ShadowDummy.h"
-#include"Parser.h"
+#include "Parser.h"
 #include "GameSystem.h"
 #include "LogoMaleRover.h"
 #include "LogoFemaleRover.h"
 #include "SceneCamera.h"
+#include "MapObject.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -37,7 +38,7 @@ HRESULT CLoader_Logo::Load_Texture()
 
 HRESULT CLoader_Logo::Load_Model()
 {
-	//m_pParser->Ready_Prototype_Map(m_pDevice, m_pContext, "../Bin/Resource/Map/MapData/Client_Test3_NonInteraction.dat", LEVEL::LOGO);
+	m_pGameSystem->Ready_Prototype_Map("../../Client/Bin/Resource/Map/MapData/Logo/", m_eCurLevel);
 
 	cout << "Model" << endl;
 
@@ -57,7 +58,11 @@ HRESULT CLoader_Logo::Load_Object()
 		CSceneCamera::Create(m_pDevice, m_pContext))))
 		CRASH("SceneCamera Prototype");
 
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
+		CMapObject::Create(m_pDevice, m_pContext));
+
 	cout << "Object" << endl;
+
     return S_OK;
 }
 
@@ -68,7 +73,9 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;
-	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -101,7 +108,9 @@ HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;
-	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
