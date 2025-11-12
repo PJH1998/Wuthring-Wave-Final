@@ -8,6 +8,12 @@ Texture2D<float4> InputTexture : register(t0);
 Texture2D<float> InputMipTexture : register(t1);
 RWTexture2D<float> OutputTexture : register(u0);
 
+cbuffer CameraFar : register(b0)
+{
+    float fFar;
+    float3 padding;
+};
+
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void HZB(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTID : SV_GroupThreadID, uint GroupIndex : SV_GroupIndex)
 {
@@ -36,6 +42,10 @@ void HZB(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 GTI
         fPixel1 = InputTexture.Load(int3(iSampleX1, iSampleY0, 0)).y;
         fPixel2 = InputTexture.Load(int3(iSampleX1, iSampleY1, 0)).y;
         fPixel3 = InputTexture.Load(int3(iSampleX0, iSampleY1, 0)).y;
+        fPixel0 = 0 == fPixel0 ? fFar : fPixel0;
+        fPixel1 = 0 == fPixel1 ? fFar : fPixel1;
+        fPixel2 = 0 == fPixel2 ? fFar : fPixel2;
+        fPixel3 = 0 == fPixel3 ? fFar : fPixel3;
     }
     else
     {
