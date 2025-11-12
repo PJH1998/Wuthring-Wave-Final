@@ -71,6 +71,7 @@ private:
 	_float2					m_vDistanceRange{};
 	_float3					m_vBeHit_Normal{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isDeadTrigger{};
 #pragma endregion
 
 	_float					m_fHP{};

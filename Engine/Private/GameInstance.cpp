@@ -514,11 +514,11 @@ void CGameInstance::Render_ShadowMap()
 {
 	m_pRenderer->Render_ShadowMap();
 }
+#ifdef _DEBUG
 void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-#ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);

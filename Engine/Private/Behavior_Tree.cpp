@@ -3,6 +3,7 @@
 #include "BT_Action.h"
 #include "BT_Selector.h"
 #include "BT_Sequence.h"
+#include "GameObject.h"
 
 CBehavior_Tree::CBehavior_Tree(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	:CComponent { pDevice , pContext }
@@ -150,9 +151,10 @@ CBT_Node* CBehavior_Tree:: Create_Node(_uint iIndex)
 					_uint* pState = static_cast<_uint*>(pBlackBoard->Get_Data("iState"));
 					if(*pState & tData.iTargetState)
 					{
+						pGameObject->SetActivate(false);
 #ifdef _DEBUG
 						cout << "State: " << *pState << ", Condition: " << tData.Conditions.ConditionName.c_str() << endl;
-#endif // _DEBUG
+#endif // _DEBUG		
 						return CBT_Node::BT_STATE::SUCCESS;
 					}
 					return CBT_Node::BT_STATE::FAILURE;

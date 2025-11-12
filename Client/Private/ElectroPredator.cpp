@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "ElectroPredator.h"
 #include "Projectile.h"
+#include "AoEDoT.h"
 
 CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -189,12 +190,16 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wStrObjectTag == TEXT("AoE"))
 	{
-		//CAoEDoT::AOEDOT_RESET AoEDesc{};
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, nullptr);
+
+		CAoEDoT::AOEDOT_RESET AoEDesc{};
+		AoEDesc.fLifeTime = 3.f;
+		AoEDesc.iTickCount = 8;
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, &AoEDesc);
 	}
 	else if (wStrObjectTag == TEXT("Look"))
 	{
@@ -306,6 +311,11 @@ void CElectroPredator::Ready_PartObjects(ELECTROPREDATOR_DESC* pDesc)
 
 void CElectroPredator::Reset_Condition(_float fTimeDelta)
 {
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		return;
+	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -344,6 +354,16 @@ void CElectroPredator::Reset_Condition(_float fTimeDelta)
 
 void CElectroPredator::After_Condition(_float fTimeDelta)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+	{
+		if (!m_isDeadTrigger)
+		{
+			m_isDeadTrigger = true;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		return;
+	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
 
@@ -412,9 +432,13 @@ void CElectroPredator::OnCollide_During(_uint iLayer, void* pOther, const Contac
 
 void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
 		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
@@ -423,6 +447,8 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -430,6 +456,8 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_isPushed = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
