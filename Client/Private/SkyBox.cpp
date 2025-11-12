@@ -50,7 +50,7 @@ void CSkyBox::Late_Update(_float fTimeDelta)
 
 void CSkyBox::Render()
 {
-	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(m_pGameInstance->Get_CamPos()) + XMVectorSet(0.f, -100.f, 0.f, 0.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(m_pGameInstance->Get_CamPos()) + XMVectorSet(0.f, -10.f, 0.f, 0.f));
 
 	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
 	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));

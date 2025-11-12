@@ -88,10 +88,10 @@ void CSpringCamera::Update(_float fTimeDelta)
 	// Action
 	if (CAMERA_STATE::ACTION == m_eCameraState)
 	{
+		if(false == m_isRecovery)
+			Action(fTimeDelta);
 		if (true == m_isRecovery)
 			Recovery(fTimeDelta);
-		else
-			Action(fTimeDelta);
 	}
 	else
 	{
@@ -353,7 +353,7 @@ void CSpringCamera::Recovery(_float fTimeDelta)
 {
 	m_fTrackPosition += fTimeDelta;
 
-	if (m_fTrackPosition >= 1.5f)
+	if (m_fTrackPosition > 1.5f)
 	{
 		m_isRecovery = false;
 		m_eCameraState = CAMERA_STATE::TARGET;
