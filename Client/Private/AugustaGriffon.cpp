@@ -138,6 +138,14 @@ void CAugustaGriffon::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 
 void CAugustaGriffon::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	// 2. 타격감을 위한. Shake
+	CAMERA_SHAKE ShakeDesc{};
+	ShakeDesc.fDuration = 0.12f;
+	ShakeDesc.fFrequency = 12.f;
+	ShakeDesc.fAmplitude = 1.f;
+	ShakeDesc.fFovKick = XMConvertToRadians(0.5f);
+	ShakeDesc.vRotation = _float3(0.0f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+	m_pGameInstance->OnShake(ShakeDesc);
 }
 
 void CAugustaGriffon::Ready_Components(const PROP_DESC* pDesc)
