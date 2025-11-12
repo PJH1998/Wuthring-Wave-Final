@@ -97,9 +97,14 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 		m_fTargetDistance = XMVectorGetX(XMVector3Length(vDistance));
 	}
 	
-	// 4. MainAttackVolume 설정
+	// 5. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+
+	// 6. Change Timer 계산. => Dissolve에 사용
+	Calc_ChangeTimer(fTimeDelta);
+
+	
 }
 
 void CAugusta::Update(_float fTimeDelta)
@@ -186,6 +191,11 @@ void CAugusta::Render()
 {
 
     Bind_Resources();
+
+	if (Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)))
+	{
+		// Shader에 값 바인딩.. => 나중에 Shader Path 생성 필요,
+	}
 
     _uint iNumMeshes = m_pModelCom->Get_NumMesh();
     for (_uint i = 0; i < iNumMeshes; i++)
@@ -598,6 +608,7 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 		}
 	}
 
+	
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
@@ -627,6 +638,22 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 
 		m_DelayedActions.pop();
 	}
+}
+void CAugusta::Calc_ChangeTimer(_float fTimeDelta)
+{
+	if (m_fChangeTimer > 0.f)
+		m_fChangeTimer -= fTimeDelta; // Dissolve 변수 값.
+	else
+	{
+		m_fChangeTimer = 0.f;
+		Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	}
+		
+}
+
+void CAugusta::Bind_ChangeEffect()
+{
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
 }
 #pragma endregion
 

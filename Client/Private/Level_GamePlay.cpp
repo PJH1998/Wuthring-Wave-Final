@@ -104,7 +104,7 @@ void CLevel_GamePlay::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
-	vPosition = { 2787.4f, 320.f, 1647.f };
+	vPosition = { 2375.42f, 317.92f, 1645.60f };
 	
 
 	CPlayer::PLAYER_DESC Desc{};
