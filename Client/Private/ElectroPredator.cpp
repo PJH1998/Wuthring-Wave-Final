@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "ElectroPredator.h"
 #include "Projectile.h"
+#include "AoEDoT.h"
 
 CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -189,12 +190,16 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	}
 	else if (wStrObjectTag == TEXT("AoE"))
 	{
-		//CAoEDoT::AOEDOT_RESET AoEDesc{};
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, nullptr);
+
+		CAoEDoT::AOEDOT_RESET AoEDesc{};
+		AoEDesc.fLifeTime = 3.f;
+		AoEDesc.iTickCount = 8;
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, &AoEDesc);
 	}
 	else if (wStrObjectTag == TEXT("Look"))
 	{
