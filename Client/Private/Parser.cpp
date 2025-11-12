@@ -985,8 +985,8 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 	if (TrailMeshJson.contains("ColorTextureTag"))
 		Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
 
-	if (TrailMeshJson.contains("DissolveTextureTag"))
-		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DissolveTextureTag"].get<_string>());
+	if (TrailMeshJson.contains("DlssolveTextureTag"))
+		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DlssolveTextureTag"].get<_string>());
 
 	if (TrailMeshJson.contains("DistortionTextureTag"))
 		Desc.strDistortionTextureTag = StringToWString(TrailMeshJson["DistortionTextureTag"].get<_string>());

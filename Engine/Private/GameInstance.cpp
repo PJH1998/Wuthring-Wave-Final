@@ -882,6 +882,11 @@ HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* p
 	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
 }
 
+HRESULT	CGameInstance::Remove_RootUI(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Remove_RootUI(strName_UI);
+}
+
 CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
 {
 	return m_pUI_Manager->Find_UIObject(strName_UI);

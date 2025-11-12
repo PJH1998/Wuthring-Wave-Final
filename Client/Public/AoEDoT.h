@@ -18,6 +18,7 @@ public:
 		_float3				vExtent;
 		_float3				vOffset;
 		_float				fAttackDamage;
+		TEXT_COLOR_TYPE		eType;
 	}AOEDOT_DESC;
 
 	typedef struct tagAoEDoTReset

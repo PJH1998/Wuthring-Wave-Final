@@ -139,8 +139,10 @@ void CAugustaGroundRun::Handle_Input()
 void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
 {
     // 0. 애니메이션 실행부터
-    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	m_eDir = m_pAugusta->Calculate_Direction();
 
+    CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
+	
 
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     // 1. 회전 및 이동.

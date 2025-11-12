@@ -35,33 +35,15 @@ HRESULT CUI_Manager::SetActive_UI(const _wstring& strName_UI, _bool isActive)
 	return S_OK;
 }
 
-//_bool CUI_Manager::Check_UIEvent_Triggered(const _wstring& strName_UI, _uint iCheckEventType)
-//{
-//	// �̰� �����ܰ迡�� �ȵ� ��.
-//	// 
-//	// ���� Find_UIObject �� ������ ��, CCustom_UI* �� ĳ�����ؼ�,
-//	// Check_OnInteract �Լ� �ҷ����� �ϴ� ����?
+ 
+// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
+// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Check_OnInteract(L"SectorB_Status", ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
 //
-//	// �׷� �Ʒ��� ���� ��..
-//	// 
-//	// 
-//	// 
-//	// - �ܺο��� UI�� ���¸� Ȯ���ϱ� (�� Ŭ���ƴ���, ȣ�� ���������� ��)
-//	// 
-//	// UI_UHD : rootUI�� �±� (���� ���� �� ����)
-//	// SectorB_Status : �ڽ��� �ش� ���ڿ��� m_tUIDesc.strUIName ���� ������ ���� �ִ����� ã��
-//	// Check_OnInteract(A, B) : A �� �̺�Ʈ Ÿ��, B(����) �� �ν��Ͻ� UI��� ���° �ε����� �ν��Ͻ��� ����Ű����.
-//	// 
-//	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->Check_OnInteract(ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
-//	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Check_OnInteract(L"SectorB_Status", ENUM_CLASS(UI_EVENT_TYPE::CLICK_ENTER), 0);
-//	//
-//	//
-//	// - �ܺο��� UI���� ���� ������
-//	// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->OnEvent(UI_EVENT_TYPE::CLICK_ENTER);
-//	// 
 //
-//	return _bool();
-//}
+// - �ܺο��� UI���� ���� ������
+// dynamic_cast<CCustom_UI*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Find_ChildObject(L"SectorB_Status")->OnEvent(UI_EVENT_TYPE::CLICK_ENTER);
+
+
 
 CUIObject* CUI_Manager::Find_UIObject(const _wstring& strName_UI)
 {
@@ -81,6 +63,18 @@ HRESULT CUI_Manager::Add_RootUI(const _wstring& strName_UI, CUIObject* pRootUI)
 		return E_FAIL;
 
 	m_RootUIs.emplace(strName_UI, pRootUI);
+	return S_OK;
+}
+
+HRESULT CUI_Manager::Remove_RootUI(const _wstring& strName_UI)
+{
+	auto iter = m_RootUIs.find(strName_UI);
+
+	if (iter == m_RootUIs.end())
+		return E_FAIL;
+
+	m_RootUIs.erase(iter);
+
 	return S_OK;
 }
 

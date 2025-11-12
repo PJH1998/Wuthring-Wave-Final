@@ -26,10 +26,6 @@ private:
 	HRESULT					Ready_Components(void* pArg);
 
 private:
-	HRESULT					Load_ChildObjects(_wstring strFilePath);
-	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
-
-private:
 	_uint					m_iRandomBGIndex = 0;
 
 public:

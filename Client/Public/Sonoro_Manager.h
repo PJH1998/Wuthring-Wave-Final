@@ -18,7 +18,7 @@ public:
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects,_bool** SonoroMode);
 	void Update(_float fTimeDelta);
 	void Change_Sonoro(_bool IsSonoro);
-
+	_bool IsSonoro() { return m_SonoroRender; }
 private:
 	vector<class CMapObject_Sonoro*> m_SonoroObjects;
 	vector<class CMapObject_NonSonoro*> m_NonSonoroObjects;

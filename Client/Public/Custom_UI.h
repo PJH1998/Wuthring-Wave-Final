@@ -128,6 +128,10 @@ private:
 	void					Update_CacheTransform(_float fTimeDelta);
 	void					Update_InputState()						override;
 
+protected:
+	HRESULT					Load_ChildObjects(_wstring strFilePath);
+	HRESULT					Load_Animations(vector<_wstring> vecAnimFilePath);
+
 public:
 	CUSTOM_UI_DESC			Get_UIDesc()						{ return m_tUIDesc; }
 	void					Set_UIDesc(CUSTOM_UI_DESC tUIDesc)	{ 

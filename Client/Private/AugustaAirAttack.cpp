@@ -43,6 +43,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";
 
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
     // 7. 다른 애니메이션당 필요한 상태 재정의
     switch (eAirAttackType)
@@ -64,7 +65,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
 
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
 		case EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP:
@@ -80,7 +80,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 
@@ -99,7 +98,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			//m_pAugusta->Rotate_Target();
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_START:
@@ -127,6 +125,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
+
             break;
         }
     }

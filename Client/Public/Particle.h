@@ -65,6 +65,8 @@ private:
 	_float4						m_vColor = {};
 	_float2						m_vLifeTime = {};
 
+	_float						m_fCurrentTime = 0.f;
+
 	_bool						m_IsSprite = false;
 	_int						m_iRow = {};
 	_int						m_iCol = {};

@@ -201,10 +201,15 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    
     if (Out.vDiffuse.a < 0.3f)
-        discard;
+     discard;
 
+    float2 LifeTime = In.vLifeTime;
+    
+    float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
+    
+    Out.vDiffuse.a *= Alpha;
+    
     Out.vDiffuse *= g_vColor;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
@@ -240,16 +245,24 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
 
-    if(Out.vDiffuse.a < 0.4f)
+    if(Out.vDiffuse.a < 0.3f)
         discard;
     
     Out.vDiffuse = g_vColor * Out.vDiffuse;
     
+    float2 LifeTime = In.vLifeTime;
     
-    Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
-    if (Out.vDiffuse.a < 0.4f)
-        discard;
+    Out.vDiffuse.a *= Alpha;
+    
+    //if (Out.vDiffuse.a < 0.3f)
+    //    discard;
+    
+   // Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    
+    //if (Out.vDiffuse.a < 0.4f)
+    //    discard;
     
     //Out.vDiffuse.a = Out.vDiffuse.r; //?
     

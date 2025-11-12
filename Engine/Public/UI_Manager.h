@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Base.h"
 
 NS_BEGIN(Engine)
@@ -19,6 +19,7 @@ public:
 	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
 
 	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* rootUI);
+	HRESULT				Remove_RootUI(const _wstring& strName_UI);
 	void				Clear_RootUI();
 
 private:
