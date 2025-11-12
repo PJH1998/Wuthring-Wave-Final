@@ -95,15 +95,16 @@ void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 	{	// 없다 -> 폰트 새로 만들고 넣음.
 
 		CCustom_UI* pFont = m_pGameSystem->Create_FontToScreen(
-			_float2{ 300.f, 0.f },
+			_float2{ g_iWinSizeX / 2.f + 200.f, g_iWinSizeY / 2.f - 50.f },
 			strText,	// 상호작용 글씨
 			TEXT_COLOR_TYPE::TT_NORMAL,
-			0.5f,
+			0.4f,
 			L"UI_Text_Interact"
 		);
 
 		auto fontDesc = pFont->Get_UIDesc();
 		attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+		attacher->Add_Child(pFont);
 		fontDesc.pParentObject = Find_RootUI(L"UI_Interact");
 		pFont->Set_UIDesc(fontDesc);
 	}

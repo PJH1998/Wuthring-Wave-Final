@@ -33,6 +33,8 @@
 #include "UI_Text.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
+#include "UI_Text_Damage.h"
+#include "UI_Button_Interact.h"
 #pragma endregion
 
 
@@ -64,7 +66,7 @@ CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLoader_GamePlay::Initialize()
 {
-	m_iNumLoadingThread = 10;
+	m_iNumLoadingThread = 12;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -80,6 +82,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
     return S_OK;
@@ -429,6 +432,12 @@ HRESULT CLoader_GamePlay::Load_UI()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
+	// Shader_Font
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_TextInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_TextInstance Load Failed. The Shader_TextInstance may have already been loaded.\n");
+
+
 	// ==============================
 	cout << "[CLoader_Test_UI] Object" << endl;
 	// ==============================
@@ -438,8 +447,6 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
 		CAnimator_UI::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
-
-
 
 	// * Objects Load
 	// Custom UI
@@ -453,6 +460,15 @@ HRESULT CLoader_GamePlay::Load_UI()
 		CUI_Text::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
+	// Custom Text
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
+		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
+		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
+
+
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
@@ -461,6 +477,27 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Font()
+{
+	// ==============================
+	cout << "[Loader_Test] Font " << endl;
+	// ==============================
+	_uint iPixelHeight = 64U;
+
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_SemiBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-SemiBold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Bold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Bold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_ExtraBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-ExtraBold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
 	return S_OK;
 }

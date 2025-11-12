@@ -12,6 +12,7 @@
 
 #include "Player.h"
 #include "SkyBox.h"
+#include "UI_Text_Damage.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -85,6 +86,27 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 		m_pGameSystem->Update(fTimeDelta);
 	}
+
+
+	// UI Test. Delete it.
+	//static _float fElapsedTime_TestSpawn = 0.f;
+	//fElapsedTime_TestSpawn += fTimeDelta;
+	//const _float fTestSpawnSpace = 5.f;
+	//if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
+	//{
+	//	fElapsedTime_TestSpawn = 0.f;
+	//
+	//	const _float fOffsetY = 5.f;
+	//	m_pGameSystem->Render_Damage(
+	//		_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
+	//		static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
+	//		static_cast<TEXT_COLOR_TYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
+	//		3.f
+	//	);
+	//
+	//	//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+	//}
+
 }
 
 void CLevel_GamePlay::Render()
@@ -332,6 +354,15 @@ void CLevel_GamePlay::Ready_UI()
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
+
+	//CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+	//	CRASH("Failed Ready Text_Damage");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+	//	CRASH("Failed Ready Button_Interact");
 
 	// _UI
 }
