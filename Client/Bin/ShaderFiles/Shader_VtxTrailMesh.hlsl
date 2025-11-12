@@ -89,6 +89,11 @@ struct PS_OUT
     float4 vDistortion : SV_TARGET2;
 };
 
+struct PS_DISTORTION_OUT
+{
+    float4 vDistortion : SV_TARGET0;
+};
+
 PS_OUT PS_MAIN(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
@@ -102,6 +107,8 @@ PS_OUT PS_MAIN(PS_IN In)
     
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    
+    Out.vDistortion.a = 0;
     
     return Out;
 }
@@ -575,9 +582,9 @@ PS_OUT PS_TraillDeshB(PS_IN In)
     return Out;
 }
 
-PS_OUT PS_DistortionWave(PS_IN In)
+PS_DISTORTION_OUT PS_DistortionWave(PS_IN In)
 {
-    PS_OUT Out = (PS_OUT) 0;
+    PS_DISTORTION_OUT Out = (PS_DISTORTION_OUT) 0;
    
     float2 UV = In.vTexcoord;
     
@@ -603,9 +610,9 @@ PS_OUT PS_DistortionWave(PS_IN In)
     return Out;
 }
 
-PS_OUT PS_DistortionPotal(PS_IN In)
+PS_DISTORTION_OUT PS_DistortionPotal(PS_IN In)
 {
-    PS_OUT Out = (PS_OUT) 0;
+    PS_DISTORTION_OUT Out = (PS_DISTORTION_OUT) 0;
    
     float2 UV = In.vTexcoord ;
 
@@ -733,7 +740,7 @@ technique11 DefaultTechnique
     pass TestDistortionWave // 8
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();
@@ -744,7 +751,7 @@ technique11 DefaultTechnique
     pass TestDistortionPotal // 9
     {
         SetRasterizerState(RS_Cull_None);
-        SetDepthStencilState(DSS_NoneCompare, 0);
+        SetDepthStencilState(DSS_Default, 0);
         SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
 
         VertexShader = compile vs_5_0 VS_MAIN();

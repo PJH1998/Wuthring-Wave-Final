@@ -52,6 +52,7 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f); // Dodge 시간 동안 느리게하기?
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
 }
 
@@ -82,7 +83,7 @@ void CAugustaGroundBurst::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false);
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 }
 
 void CAugustaGroundBurst::Handle_Input()

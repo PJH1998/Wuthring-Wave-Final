@@ -169,6 +169,11 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
+void CGameSystem::Render_InteractUI(_wstring strText)
+{
+	m_pUI_ControlHelper->Render_InteractUI(strText);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
@@ -224,6 +229,10 @@ void CGameSystem::Update(_float fTimeDelta)
 void CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
 	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+}
+_bool CGameSystem::IsSonoro()
+{
+	return m_pSonoro_Manager->IsSonoro();
 }
 #pragma endregion
 

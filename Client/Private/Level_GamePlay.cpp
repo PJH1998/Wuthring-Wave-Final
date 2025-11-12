@@ -12,6 +12,7 @@
 
 #include "Player.h"
 #include "SkyBox.h"
+#include "UI_Text_Damage.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -65,7 +66,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_MonsterTest();
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -88,6 +89,27 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 		m_pGameSystem->Update(fTimeDelta);
 	}
+
+
+	// UI Test. Delete it.
+	//static _float fElapsedTime_TestSpawn = 0.f;
+	//fElapsedTime_TestSpawn += fTimeDelta;
+	//const _float fTestSpawnSpace = 5.f;
+	//if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
+	//{
+	//	fElapsedTime_TestSpawn = 0.f;
+	//
+	//	const _float fOffsetY = 5.f;
+	//	m_pGameSystem->Render_Damage(
+	//		_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
+	//		static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
+	//		static_cast<TEXT_COLOR_TYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
+	//		3.f
+	//	);
+	//
+	//	//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+	//}
+
 }
 
 void CLevel_GamePlay::Render()
@@ -104,7 +126,7 @@ void CLevel_GamePlay::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
-	vPosition = { 2787.4f, 320.f, 1647.f };
+	vPosition = { 2375.42f, 317.92f, 1645.60f };
 	
 
 	CPlayer::PLAYER_DESC Desc{};
@@ -152,6 +174,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
 	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
+	MobDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
@@ -286,7 +309,8 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CoroDesc.fSpeedPerSec = 10.f;
-	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
+	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	CoroDesc.pAnimationTag = "Idle1";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
@@ -328,11 +352,20 @@ void CLevel_GamePlay::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
 			CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
+
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		CRASH("Failed Ready Text_Damage");
+
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+	//	CRASH("Failed Ready Button_Interact");
 
 	// _UI
 }
