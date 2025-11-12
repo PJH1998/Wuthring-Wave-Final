@@ -323,6 +323,11 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 
 void CCorosaurus::Reset_Condition(_float fTimeDelta)
 {
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		return;
+	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -375,6 +380,16 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+	{
+		if (!m_isDeadTrigger)
+		{
+			m_isDeadTrigger = true;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		return;
+	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
 	if (m_beHit)
@@ -427,6 +442,8 @@ void CCorosaurus::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& 
 
 void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
