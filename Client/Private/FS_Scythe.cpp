@@ -129,9 +129,15 @@ void CFS_Scythe::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		m_isVolumeActive[i] = true;
 	}
 	if (m_strAnimKey == "SAttack04_1_Start")
+	{
 		m_iState = 1;
+		for (_uint i = 0; i < 5; ++i)
+			m_pAttackVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_ATTACK);
+	}
 	else
 	{
+		for (_uint i = 0; i < 5; ++i)
+			m_pAttackVolumes[i]->Change_Layer(COLLISIONLAYER::ENEMY_HARDATTACK);
 		m_iState = 0;
 		m_isVolumeActive[4] = false;
 	}
@@ -184,8 +190,8 @@ void CFS_Scythe::Ready_PartObjects(SCYTHE_DESC* pDesc)
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDamage;
-	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
-		this->OnHit_Enter(iLayer, pOther, Manifold);
+	TriggerDesc.test = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer) {
+		this->OnHit_Enter(iLayer, pOther, Manifold, eVolumeLayer);
 		};
 
 	m_pAttackVolumes[0] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(),
@@ -243,12 +249,39 @@ void CFS_Scythe::Object_Func(const _wstring& wStrObjectTag)
 {
 }
 
-void CFS_Scythe::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+void CFS_Scythe::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer)
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::NONE))
 		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
 	{
+		CAMERA_SHAKE ShakeDesc{};
+		if (eVolumeLayer == COLLISIONLAYER::ENEMY_HARDATTACK)
+		{
+			ShakeDesc.fAmplitude = 2.f;
+			ShakeDesc.fDuration = 0.15f;
+			ShakeDesc.fFovKick = 0.f;
+			ShakeDesc.fFrequency = 60.f;
+			ShakeDesc.vRotation = _float3(0.05f, 0.13f, 0.f);
+			ShakeDesc.vTranslation;
+			ShakeDesc.vTranslation;
+#ifdef _DEBUG
+			cout << "Hard" << endl;
+#endif // _DEBUG
+		}
+		else if (eVolumeLayer == COLLISIONLAYER::ENEMY_ATTACK)
+		{
+			ShakeDesc.fAmplitude = 1.f;
+			ShakeDesc.fDuration = 0.1f;
+			ShakeDesc.fFovKick = 0.f;
+			ShakeDesc.fFrequency = 60.f;
+			ShakeDesc.vRotation = _float3(0.075f, 0.075f, 0.f);
+			ShakeDesc.vTranslation;
+#ifdef _DEBUG
+			cout << "Common" << endl;
+#endif // _DEBUG
+		}
+		m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 		cout << "On Hit! scythe)" << endl;
 #endif // _DEBUG

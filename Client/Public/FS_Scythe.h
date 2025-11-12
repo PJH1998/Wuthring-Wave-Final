@@ -61,7 +61,7 @@ private:
 	void			Bind_Resources();
 	void			Ready_Component(SCYTHE_DESC* pDesc);
 	void			Ready_PartObjects(SCYTHE_DESC* pDesc);
-	void			OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void			OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 public:
 	static CFS_Scythe* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual	CGameObject* Clone(void* pArg) override;

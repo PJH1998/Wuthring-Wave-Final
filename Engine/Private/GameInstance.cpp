@@ -514,11 +514,11 @@ void CGameInstance::Render_ShadowMap()
 {
 	m_pRenderer->Render_ShadowMap();
 }
+#ifdef _DEBUG
 void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-#ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
@@ -1059,7 +1059,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
-	m_pDecal_Manager->Clear();
+	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;
