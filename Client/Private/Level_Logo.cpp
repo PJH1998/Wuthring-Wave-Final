@@ -69,9 +69,9 @@ void CLevel_Logo::Ready_Camera()
 	CCamera::CAMERA_DESC CameraDesc = {};
 	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
-	CameraDesc.fFar = 500.f;
-	CameraDesc.vEye = _float4(0.f, 20.f, -5.f, 1.f);
-	CameraDesc.vAt = _float4(0.f, 15.f, 1.f, 1.f);
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(2.81f, 0.70f, -3.53f, 1.f);
+	CameraDesc.vAt = _float4(0.96f, 0.30f, -1.74f, 1.f);
 	CameraDesc.fSpeedPerSec = 10.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
