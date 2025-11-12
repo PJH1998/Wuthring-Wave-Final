@@ -448,7 +448,13 @@ void CAugusta::Hit_Judge(void* pArg)
 	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
 	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(EAugustaGroundState::ATTACK);
 	if (!IsAttack)
-		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+	{
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.1f, 0.1f); // Dodge 시간 동안 느리게하기?
+		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Players"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
+		//m_pGameInstance->Change_TimeRatio_ToLayer(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), TEXT("Layer_Enemy"), 0.1f, 1.f); // Dodge 시간 동안 느리게하기?
+	}
+		//m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+		
 
 
 	// 4. Player 상태 바인딩

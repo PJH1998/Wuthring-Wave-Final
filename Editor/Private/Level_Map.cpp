@@ -794,8 +794,8 @@ void CLevel_Map::Load_Objects()
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
-	m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
