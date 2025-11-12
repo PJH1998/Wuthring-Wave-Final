@@ -2,6 +2,7 @@
 #include "ElectroPredator.h"
 #include "Projectile.h"
 #include "AoEDoT.h"
+#include "GameSystem.h"
 
 CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -23,8 +24,8 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_pGameSystem = CGameSystem::GetInstance();
 	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
-
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
@@ -254,6 +255,9 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
@@ -439,6 +443,9 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
 		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
@@ -449,6 +456,9 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -458,6 +468,9 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_isPushed = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));

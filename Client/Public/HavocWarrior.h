@@ -89,7 +89,6 @@ private:
 	_float3					m_vBeHit_Normal{};
 	_float					m_fTimeDelta{};
 	_bool					m_isTurnLerp{};
-	CALLBACK_CLIENT			m_tCallDesc{};
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();

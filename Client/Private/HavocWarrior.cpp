@@ -23,8 +23,8 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
-	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
 	m_pGameSystem = CGameSystem::GetInstance();
+	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
@@ -264,9 +264,12 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		BeHit(iLayer, pDesc, Manifold);
 		});
-	m_tCallDesc.pTransform = m_pTransformCom;
-	m_tCallDesc.fAttack = m_fAttackDmg;
-	m_pColliderCom->Set_Desc(&m_tCallDesc);
+	m_CallBack.pTransform = m_pTransformCom;
+	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::DARK;
+	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
 	// Com_Shader
@@ -327,6 +330,7 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::DARK;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold); 
 		};
@@ -475,11 +479,11 @@ void CHavocWarrior::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold
 	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_2))
 		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
 
-	CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
-	CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
-	_float4 vPosition{};
-	XMStoreFloat4(&vPosition, pTransform->Get_State(STATE::POSITION));
-	m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::ELEC);
+	//CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+	//CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
+	//_float4 vPosition{};
+	//XMStoreFloat4(&vPosition, pTransform->Get_State(STATE::POSITION));
+	//m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(m_fAttackDmg), TEXT_COLOR_TYPE::ELEC, 0.4f);
 
 #ifdef _DEBUG
 	cout << "On Hit! (Havoc Warrior)" << endl;
@@ -495,10 +499,11 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 
 	}
@@ -507,6 +512,9 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -516,6 +524,9 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.5f));
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_isPushed = true;
 		//m_isAir = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);

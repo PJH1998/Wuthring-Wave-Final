@@ -26,6 +26,9 @@ public:
 		_float3				vOffsetRadian;
 		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
 		function<void(_uint, void*, const ContactManifold&, COLLISIONLAYER)> test;
+		TEXT_COLOR_TYPE		eDamageType;
+		_uint*				pCondition { nullptr };
+		_string				strEffectTag{};
 	}ATKVOLUME_DESC;
 
 private:

@@ -7,6 +7,7 @@ class CBehavior_Tree;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
 class CAttackVolume;
 
 class CCorosaurus final : public CActor
@@ -50,6 +51,7 @@ public:
 private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
+	CGameSystem*		m_pGameSystem = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
 	CAttackVolume* m_pParryVolume = {nullptr};
 	vector<_uint>			m_ShaderIndices;
@@ -87,8 +89,6 @@ private:
 	_bool					m_isKnockDown{};
 	_bool					m_isDist_Interp_Enable{};
 	_bool					m_isTurnLerp{};
-
-	CALLBACK_CLIENT			m_tCallDesc{};
 
 private:
 	HRESULT						Bind_Resources();
