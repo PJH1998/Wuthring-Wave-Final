@@ -37,10 +37,10 @@ void CCharacterState::OnExit()
 
 _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate)
 {
-	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations[m_iCurrentAnimIdx].strAnimName, fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, &m_fTrackPosition
-		, fStateRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion
-		, m_Animations[m_iCurrentAnimIdx].IsRootMotionRotate, m_Animations[m_iCurrentAnimIdx].IsRootMotionTranslate
+	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
+	m_IsAnimationEnd = pCharacter->Play_Animation(m_Animations.at(m_iCurrentAnimIdx).strAnimName, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
+		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
+		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate
 	);
 
 	return m_IsAnimationEnd;
@@ -49,9 +49,9 @@ _bool CCharacterState::Play_Animation(CCharacter* pCharacter, _float fTimeDelta,
 _bool CCharacterState::Play_AnimationFly(CCharacter* pCharacter, _float fTimeDelta, _float fRootMotionRate, const GPU_BLEND_INFO& gpuBlendInfo)
 {
 	_float fStateRootMotionRate = fRootMotionRate != 1.f ? fRootMotionRate : m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
-	m_IsAnimationEnd = pCharacter->Play_AnimationFly(m_Animations[m_iCurrentAnimIdx].strAnimName, fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, &m_fTrackPosition
-		, fStateRootMotionRate, m_Animations[m_iCurrentAnimIdx].IsRootMotion
-		, m_Animations[m_iCurrentAnimIdx].IsRootMotionRotate, m_Animations[m_iCurrentAnimIdx].IsRootMotionTranslate, gpuBlendInfo
+	m_IsAnimationEnd = pCharacter->Play_AnimationFly(m_Animations.at(m_iCurrentAnimIdx).strAnimName, fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, &m_fTrackPosition
+		, fStateRootMotionRate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotion
+		, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionRotate, m_Animations.at(m_iCurrentAnimIdx).IsRootMotionTranslate, gpuBlendInfo
 	);
 
 	return m_IsAnimationEnd;

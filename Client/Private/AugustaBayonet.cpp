@@ -47,8 +47,12 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 	//if (m_IsAnimationEnd)
 	//	m_isActivate = false;
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Priority_Update(fTimeDelta);
+	}
+		//m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CAugustaBayonet::Update(_float fTimeDelta)
@@ -58,8 +62,13 @@ void CAugustaBayonet::Update(_float fTimeDelta)
     CProp::Update(fTimeDelta);
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
@@ -73,8 +82,14 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
     CProp::Late_Update(fTimeDelta);
 
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Late_Update(fTimeDelta);
+	}
 
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
@@ -253,6 +268,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(3.f, 3.f, 2.f);
+	TriggerDesc.fAttackDmg = 400.f;
 	m_AttackVolumes[VOLUME_STRONG_ATTACK] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -263,6 +279,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eLayer = COLLISIONLAYER::SKILL;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 1.5f); // 평면으로 크게
+	TriggerDesc.fAttackDmg = 600.f;
 	m_AttackVolumes[VOLUME_ULTI] = dynamic_cast<CAttackVolume*>(
 		m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume")
 			, PROTOTYPE::GAMEOBJECT, &TriggerDesc));

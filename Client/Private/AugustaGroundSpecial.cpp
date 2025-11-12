@@ -37,7 +37,7 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
     // 5. 애니메이션 타입에 맞는 파츠 설정.
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
     m_pAugusta->PartActivate(m_iPartType, true);
-    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
     m_pAugusta->Set_Gravity(true);
 
 	if (eSpecialType == EAugustaSpecialType::SPATTACKOMNI)
@@ -50,7 +50,7 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f);
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
-	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName; // 진입할때 한번 현재 스킬이름 저장.
 
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
@@ -104,11 +104,11 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
 	// 1. 막타는 이동거리 온전하게 다받기.
 	if (m_iComboCount == COMBO::COMBO_ATTACKOMNI)
-		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
+		m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate;
 
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
@@ -132,8 +132,8 @@ void CAugustaGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
     
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
-		m_Animations[m_iCurrentAnimIdx].strAnimName,
-		m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+		m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 	);
 }
 
