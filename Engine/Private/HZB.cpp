@@ -113,7 +113,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 		if (iter == m_PreVisible.end())
 			m_PreVisible.emplace(ObjectAddress, VISIBLE_COUNT());
 
-		if (m_PreVisible[ObjectAddress].isVisible || pFlags[i] == 1 || m_PreVisible[ObjectAddress].iCount < 3) // Visible
+		if (m_PreVisible[ObjectAddress].isVisible || pFlags[i] == 1 || m_PreVisible[ObjectAddress].iCount < 10) // Visible
 			CullObjects.push_back(Objects[i]);
 		
 		m_PreVisible[ObjectAddress].isVisible = static_cast<_bool>(pFlags[i]);
