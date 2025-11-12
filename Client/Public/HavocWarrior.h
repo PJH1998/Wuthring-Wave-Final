@@ -10,6 +10,7 @@ NS_END
 
 NS_BEGIN(Client)
 class CAttackVolume;
+class CGameSystem;
 
 class CHavocWarrior final : public CActor
 {
@@ -47,6 +48,8 @@ private:
 	CAnimMachine* m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CAttackVolume* m_pAtkVolume = { nullptr };
+
+	CGameSystem*			m_pGameSystem = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
 

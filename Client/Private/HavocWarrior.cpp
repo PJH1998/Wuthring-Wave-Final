@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "HavocWarrior.h"
 #include "AttackVolume.h"
+#include "GameSystem.h"
 
 CHavocWarrior::CHavocWarrior(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -23,7 +24,7 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 		return E_FAIL;
 
 	HAVOCWARRIOR_DESC* pDesc = static_cast<HAVOCWARRIOR_DESC*>(pArg);
-
+	m_pGameSystem = CGameSystem::GetInstance();
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
@@ -473,6 +474,13 @@ void CHavocWarrior::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::ATTACK_2))
 		m_iState |= ENUM_CLASS(TEST_STATE::STRIKE);
+
+	CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+	CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
+	_float4 vPosition{};
+	XMStoreFloat4(&vPosition, pTransform->Get_State(STATE::POSITION));
+	m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::ELEC);
+
 #ifdef _DEBUG
 	cout << "On Hit! (Havoc Warrior)" << endl;
 #endif // _DEBUG
@@ -487,6 +495,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
