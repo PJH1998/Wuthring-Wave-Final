@@ -33,8 +33,14 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	return S_OK;
 }
 
-HRESULT CSFX_Hub::Begin_SFX(SFX_TYPE eType)
+HRESULT CSFX_Hub::Begin_SFX(SFX_TOGGLE eType)
 {
+	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
+	if (nullptr == pSFX)
+		return E_FAIL;
+
+	m_pCurrentSFX = pSFX;
+
 	return S_OK;
 }
 
@@ -43,7 +49,19 @@ HRESULT CSFX_Hub::End_SFX()
 	if (nullptr == m_pCurrentSFX)
 		return S_OK;
 
-	return E_NOTIMPL;
+	m_pCurrentSFX = nullptr;
+
+	return S_OK;
+}
+
+HRESULT CSFX_Hub::Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
+{
+	if (nullptr == m_pCurrentSFX)
+		return E_FAIL;
+
+	m_pCurrentSFX->Render(pVIBuffer, pShader);
+
+	return S_OK;
 }
 
 HRESULT CSFX_Hub::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader)

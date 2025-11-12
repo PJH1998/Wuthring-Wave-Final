@@ -125,20 +125,32 @@ void CShader_Interface::Setting_Shader()
 	if (ImGui::CollapsingHeader("SCREEN_EFFECT"))
 	{
 		if (ImGui::Button("DOF ON"))
+		{
+
+		}
 #ifdef _DEBUG
-			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::DOF);
+	//		m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::DOF);
 #endif
-		if(ImGui::Button("BLUR ON"))
+		if (ImGui::Button("BLUR ON"))
+		{
+
+		}
 #ifdef _DEBUG
-			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::BLUR);
+		//	m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::BLUR);
 #endif
 		if (ImGui::Button("MOTION ON"))
+		{
+
+		}
 #ifdef _DEBUG
-			m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::MOTION);
+	//		m_pGameInstance->Begin_ScreenEffect(SFX_TYPE::MOTION);
 #endif
-		if(ImGui::Button("OFF"))
+			if (ImGui::Button("OFF"))
+			{
+
+		}
 #ifdef _DEBUG
-			m_pGameInstance->End_ScreenEffect();
+	//		m_pGameInstance->End_ScreenEffect();
 #endif
 
 		ImGui::InputFloat("EFFECT_SPEED", &m_fEffectIntensity);

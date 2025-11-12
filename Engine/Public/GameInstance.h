@@ -132,7 +132,7 @@ public:
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
 	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
-	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				Begin_ScreenEffect(SFX_TOGGLE eType);
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);

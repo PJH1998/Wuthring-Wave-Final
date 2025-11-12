@@ -20,9 +20,10 @@ private:
 public:
 	HRESULT					Initialize(_uint iWinSizeX, _uint iWinSizeY);
 
-	HRESULT					Begin_SFX(SFX_TYPE eType);
+	HRESULT					Begin_SFX(SFX_TOGGLE eType);
 	HRESULT					End_SFX();
 
+	HRESULT					Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 	HRESULT					Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 
 private:

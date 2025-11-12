@@ -21,7 +21,7 @@ public:
 	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void				Render();
-	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				Begin_ScreenEffect(SFX_TOGGLE eType);
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
@@ -85,7 +85,7 @@ private:
 
 	CSFX_Hub*						m_pSFX_Hub = { nullptr };
 
-	SFX_TYPE							m_eEffectType = { SFX_TYPE::END };
+	SFX_TOGGLE							m_eEffectType = { SFX_TOGGLE::END };
 	_bool									m_IsEffectEnd = {};
 	_float									m_fEffectIntensity = {};
 	_float									m_fMaxEffectIntensity = {};

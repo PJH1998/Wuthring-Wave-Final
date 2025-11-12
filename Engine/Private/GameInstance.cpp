@@ -494,7 +494,7 @@ HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
 }
-void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
+void CGameInstance::Begin_ScreenEffect(SFX_TOGGLE eType)
 {
 	m_pRenderer->Begin_ScreenEffect(eType);
 }
@@ -518,11 +518,11 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-#ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
 }
+#ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);

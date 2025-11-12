@@ -164,7 +164,7 @@ void CRenderer::Render()
 #endif
 }
 
-void CRenderer::Begin_ScreenEffect(SFX_TYPE eType)
+void CRenderer::Begin_ScreenEffect(SFX_TOGGLE eType)
 {
 	m_eEffectType = eType;
 	m_IsEffectEnd = false;
@@ -681,39 +681,50 @@ void CRenderer::Render_Distortion()
 void CRenderer::Render_ScreenEffect()
 {
 #ifdef _DEBUG
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+	//	m_eEffectType = SFX_TOGGLE::MOTION;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+	//	m_eEffectType = SFX_TOGGLE::DOF;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+	//	m_eEffectType = SFX_TOGGLE::BLUR;
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+	//	m_eEffectType = SFX_TOGGLE::END;
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::MOTION;
+		m_pSFX_Hub->End_SFX();
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::DOF;
+		m_pSFX_Hub->Begin_SFX(SFX_TOGGLE::BLUR);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::BLUR;
+		m_pSFX_Hub->Begin_SFX(SFX_TOGGLE::DOF);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::END;
+		m_pSFX_Hub->Begin_SFX(SFX_TOGGLE::MOTION);
 #endif
 
-	if (m_eEffectType != SFX_TYPE::END)
-	{
-		Update_EffectIntensity();
+	//if (m_eEffectType != SFX_TOGGLE::END)
+	//{
+	//	Update_EffectIntensity();
 
-		switch(m_eEffectType)
-		{
-		case SFX_TYPE::BLUR:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::BLUR, m_pVIBuffer, m_pShader)))
-				return;
-			break;
+	//	switch(m_eEffectType)
+	//	{
+	//	case SFX_TOGGLE::BLUR:
+	//		if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::BLUR, m_pVIBuffer, m_pShader)))
+	//			return;
+	//		break;
 
-		case SFX_TYPE::DOF:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::DOF, m_pVIBuffer, m_pShader)))
-				return;
-			break;
+	//	case SFX_TOGGLE::DOF:
+	//		if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::DOF, m_pVIBuffer, m_pShader)))
+	//			return;
+	//		break;
 
-		case SFX_TYPE::MOTION:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::MOTION, m_pVIBuffer, m_pShader)))
-				return;
-			break;
-		}
-	}
-	else
+	//	case SFX_TOGGLE::MOTION:
+	//		if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::MOTION, m_pVIBuffer, m_pShader)))
+	//			return;
+	//		break;
+	//	}
+	//}
+
+	Update_EffectIntensity();
+	
+	if(FAILED(m_pSFX_Hub->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 	{
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 			CRASH("Failed RT_BackBuffer");
@@ -743,7 +754,7 @@ void CRenderer::Update_EffectIntensity()
 	{
 		fFluctuate *= -1.f;
 		if (m_fEffectIntensity <= 0.f)
-			m_eEffectType = SFX_TYPE::END;
+			m_eEffectType = SFX_TOGGLE::END;
 	}
 
 	m_fEffectIntensity = clamp(m_fEffectIntensity + fFluctuate, 0.f, 1.f);
