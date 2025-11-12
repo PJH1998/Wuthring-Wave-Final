@@ -92,26 +92,27 @@ void CUI_Button_Interact::Render()
 void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");
+
 	//pRootUI->SetActivate(false);
-	auto combinedKFDesc_Root = static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
-	combinedKFDesc_Root->fAlpha = 1.f;
-	static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Root);
+	//auto combinedKFDesc_Root = static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
+	//combinedKFDesc_Root->fAlpha = 1.f;
+	//static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Root);
 
 
 	CCustom_UI* pFocusedUI = Find_ChildObject(L"Interact_Focused");
 	pFocusedUI->SetActivate(false);
-	auto combinedKFDesc_Focused = static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
-	combinedKFDesc_Focused->fAlpha = 1.f;
-	static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Focused);
+	//auto combinedKFDesc_Focused = static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
+	//combinedKFDesc_Focused->fAlpha = 1.f;
+	//static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Focused);
 
 
 
 	CCustom_UI* pPressedUI = Find_ChildObject(L"Interact_Pressed");
 	pPressedUI->SetActivate(false);
 
-	auto combinedKFDesc_Pressed = static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
-	combinedKFDesc_Pressed->fAlpha = 1.f;
-	static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Pressed);
+	//auto combinedKFDesc_Pressed = static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc();
+	//combinedKFDesc_Pressed->fAlpha = 1.f;
+	//static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Set_CurCombinedAnimKeyframeDesc(*combinedKFDesc_Pressed);
 
 
 	static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_FadeIn");
