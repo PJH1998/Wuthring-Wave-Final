@@ -28,6 +28,7 @@ public:
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
 	virtual void	Render_Shadow() override;
+	virtual void	Render_OutLine() override;
 #pragma endregion
 
 

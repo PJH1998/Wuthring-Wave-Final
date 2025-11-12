@@ -113,16 +113,35 @@ void CLogoMaleRover::Render()
 
 void CLogoMaleRover::Render_Shadow()
 {
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CLogoMaleRover::Render_OutLine()
+{
 	Bind_Resources();
+
+	_float4 vColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &vColor, sizeof(_float4))))
+		return;
 
 	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
 	for (_uint i = 0; i < iNumMeshes; i++)
 	{
-		if (i == 5)	//Cloths
-			continue;
-
-		_bool HasNormal = { false };
-
 		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
 			CRASH("Ready Bone Matrices Failed");
 
