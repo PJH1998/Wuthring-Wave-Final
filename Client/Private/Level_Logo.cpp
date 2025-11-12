@@ -5,7 +5,8 @@
 
 #include "Dummy.h"
 #include "LogoMaleRover.h"
-#include"GameSystem.h"
+#include "SceneCamera.h"
+#include "GameSystem.h"
 
 CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLevel { pDevice, pContext }, m_pGameSystem(CGameSystem::GetInstance())
@@ -20,6 +21,7 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
+	Ready_Camera();
 
 	LIGHT_DESC LightDesc{};
 	LightDesc.eType = LIGHT_DESC::DIRECTION;
@@ -59,6 +61,26 @@ void CLevel_Logo::Update(_float fTimeDelta)
 
 void CLevel_Logo::Render()
 {
+}
+
+void CLevel_Logo::Ready_Camera()
+{
+	// Camera
+	CCamera::CAMERA_DESC CameraDesc = {};
+	CameraDesc.fFovy = XMConvertToRadians(60.f);
+	CameraDesc.fNear = 0.1f;
+	CameraDesc.fFar = 1000.f;
+	CameraDesc.vEye = _float4(2.81f, 0.70f, -3.53f, 1.f);
+	CameraDesc.vAt = _float4(0.96f, 0.30f, -1.74f, 1.f);
+	CameraDesc.fSpeedPerSec = 10.f;
+	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CameraDesc.fMouseSensor = 0.004f;
+	
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"), ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+		CRASH("Add Camera");
+
+	if (FAILED(m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"))))
+		CRASH("Change Camera");
 }
 
 void CLevel_Logo::Ready_Layer_LogoMaleRover()
@@ -112,8 +134,5 @@ void CLevel_Logo::Free()
 {
     __super::Free();
 
-	Safe_Release(m_pRigidbody1);
-	Safe_Release(m_pRigidbody2);
-	//Safe_Release(m_pRigidbody3);
 	Safe_Release(m_pGameSystem);
 }
