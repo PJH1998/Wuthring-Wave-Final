@@ -16,7 +16,8 @@ private:
 		_float4x4		ProjMatrix = {};
 		_uint			iNumObjects = {};
 		_uint			iHZBMipLevel = {};
-		_float2		vPadding = {};
+		_float			fMip0SizeX = {};
+		_float			fMip0SizeY = {};
 	}OC_DESC;
 
 	typedef struct tagVisibleCount {
@@ -26,6 +27,11 @@ private:
 			: isVisible{ false }, iCount{ 0 }
 		{}
 	}VISIBLE_COUNT;
+
+	typedef struct tagCameraFar {
+		_float			fFar = {};
+		_float3		vPadding = {};
+	}CAMERA_FAR;
 
 public:
 	enum HZB_CS_TYPE
@@ -68,6 +74,7 @@ private:
 	ID3D11UnorderedAccessView*					m_pUAV[MAX_MIPLEVEL] = { nullptr };
 	ID3D11ShaderResourceView*					m_pSRV[MAX_MIPLEVEL] = { nullptr };
 	ID3D11ShaderResourceView*					m_pMMSRV = { nullptr };
+	ID3D11Buffer*										m_pCameraFarBuffer = { nullptr };
 
 	// Occlusion Culling
 	ID3D11Buffer*										m_pOCDescBuffer = { nullptr };

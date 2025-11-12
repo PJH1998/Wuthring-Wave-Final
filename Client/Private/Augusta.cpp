@@ -113,6 +113,12 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
+
     // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
@@ -133,11 +139,7 @@ void CAugusta::Update(_float fTimeDelta)
 	// 6. Land Check
 	m_IsLand = Is_LandCollider();
 
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
+	
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
@@ -147,25 +149,26 @@ void CAugusta::Update(_float fTimeDelta)
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
-    // 1. 파츠 갱신
-    for (auto& pPart : m_PartObjects)
-    {
-        if (pPart.second->IsActivate())
-            pPart.second->Late_Update(fTimeDelta);
-    }
 
 	// 2. QTE인 경우 Collider 갱신하지 않습니다.?
 	if (!m_IsQTE)
 		m_pColliderCom->Sync_Position(m_pTransformCom);
 	else
 		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
-	
+
 	// 3. 
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
 		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
+	}
+
+	// 1. 파츠 갱신
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Late_Update(fTimeDelta);
 	}
 	
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -591,11 +594,11 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
 
 		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
+		if (var3 == TEXT("ATTACK"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
-		else if (var2 == TEXT("SKILL"))
+		else if (var3 == TEXT("SKILL"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
+		else if (var3 == TEXT("KNOCKBACK"))
 			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
 
 		m_pMainAttackVolume->TriggerActivate(IsActive);
@@ -1032,13 +1035,11 @@ void CAugusta::Ready_AttackVolumes()
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 8.f); // 
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
-	TriggerDesc.fAttackDmg = 1000.f;
+	TriggerDesc.fAttackDmg = 700.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
-
-
 
 
 	m_AttackVolumes[VOULME_RISE_ZERO] = dynamic_cast<CAttackVolume*>(
