@@ -66,7 +66,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_MonsterTest();
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -174,6 +174,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
 	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
+	MobDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
@@ -308,7 +309,8 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CoroDesc.fSpeedPerSec = 10.f;
-	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
+	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	CoroDesc.pAnimationTag = "Idle1";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;

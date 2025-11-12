@@ -106,6 +106,9 @@ void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = pDesc->fAttackDamage;
+	//m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType =pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

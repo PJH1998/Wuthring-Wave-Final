@@ -9,7 +9,7 @@ class CBehavior_Tree;
 NS_END
 
 NS_BEGIN(Client)
-
+class CGameSystem;
 class CAttackVolume;
 
 class CMonsterTest final : public CActor
@@ -18,6 +18,7 @@ public:
 	typedef struct tagMonsterTestDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
+		_float3 vInitRotate;
 		_float	fAxisY;
 		const _char* pAnimationTag;
 		_float		fHP;
@@ -56,6 +57,7 @@ public:
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 	const _float4x4*		m_pToeMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
