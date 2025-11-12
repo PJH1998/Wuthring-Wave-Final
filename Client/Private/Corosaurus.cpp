@@ -39,7 +39,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 45.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = 50.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 50.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -63,8 +63,8 @@ void CCorosaurus::Update(_float fTimeDelta)
 
 	if(m_isDist_Interp_Enable)
 	{
-		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
-		m_isDist_Interp_Enable = false;
+		_float temp = clamp(m_fDistance - 1.5f, 0.f, 1.f);
+		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -149,6 +149,10 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		m_isTurnLerp = isActive;
 	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = isActive;
+	}
 }
 
 void CCorosaurus::Effect_Active(const _wstring& wStrEffectTag)
@@ -173,10 +177,7 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	{
 			m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 	}
-	else if (wstrTypeTag == TEXT("Distance"))
-	{
-			m_isDist_Interp_Enable = true;
-	}
+
 }
 
 HRESULT CCorosaurus::Bind_Resources()
@@ -309,7 +310,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vExtent = _float3(3.f, 0.55f, 0.55f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
