@@ -66,9 +66,10 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 	_wstring wStrModelTag = L"Prototype_Component_Model_MaleRover";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Male/LogoMaleRover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	_float fSize = 0.01f;
-	//_float fSize = 0.0001f;
-	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
@@ -99,9 +100,10 @@ HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 	_wstring wStrModelTag = L"Prototype_Component_Model_FemaleRover";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Female/LogoFemaleRover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	_float fSize = 0.01f;
-	//_float fSize = 0.0001f;
-	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,

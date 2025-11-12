@@ -37,7 +37,7 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 15.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
@@ -68,6 +68,7 @@ void CLogoMaleRover::Update(_float fTimeDelta)
 
 	m_IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true);
 
+	//m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
 }
 void CLogoMaleRover::Late_Update(_float fTimeDelta)
 {
