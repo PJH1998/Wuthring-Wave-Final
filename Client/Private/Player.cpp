@@ -371,8 +371,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	// Change Time 부여를 위한 Condition 추가
 	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
 	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
-
-	//m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
 	
 
 
