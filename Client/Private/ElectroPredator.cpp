@@ -55,11 +55,19 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 void CElectroPredator::Priority_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
 	m_pTransformCom->Save_PreviousPosition();
 }
 
 void CElectroPredator::Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
 	Reset_Condition(fTimeDelta);
 
 	// 1. Update Current State
@@ -95,6 +103,27 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 void CElectroPredator::Late_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		if (!m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+			m_isSonoro = true;
+		}
+		return;
+	}
+	else
+	{
+		if (m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(true);
+			m_pRigidBodyCom->IsActivate(true);
+			m_isSonoro = false;
+			return;
+		}
+	}
+
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))

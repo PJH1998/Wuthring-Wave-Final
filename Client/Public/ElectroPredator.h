@@ -82,6 +82,7 @@ private:
 	_float2					m_vDistanceRange{};
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
+	_bool					m_isSonoro{};
 #pragma endregion
 
 #pragma region PHYSICS

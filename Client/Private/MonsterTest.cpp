@@ -30,6 +30,8 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 
 	//m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
+	m_pTransformCom->Rotation_Quaternion(vQuat);
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 3.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;

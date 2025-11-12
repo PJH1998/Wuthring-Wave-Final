@@ -18,6 +18,7 @@ public:
 	typedef struct tagMonsterTestDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
+		_float3 vInitRotate;
 		_float	fAxisY;
 		const _char* pAnimationTag;
 		_float		fHP;

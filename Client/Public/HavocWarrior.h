@@ -83,6 +83,7 @@ private:
 	_float					m_fImpluseRate{};
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
+	_bool					m_isSonoro{};
 #pragma endregion
 
 #pragma region PHYSICS

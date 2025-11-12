@@ -27,6 +27,8 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	CORROSAURUS_DESC* pDesc = static_cast<CORROSAURUS_DESC*>(pArg);
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
+	m_pTransformCom->Rotation_Quaternion(vQuat);
 	//m_vDistanceRange = _float2(4.f, 5.f);
 	Ready_Component(pDesc);
 	Ready_PartObjects(pDesc);
@@ -204,6 +206,8 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
+	// 숙면하는 짱룡
+	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -302,7 +306,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD0])
 		CRASH(m_pAtkVolume);
-	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
 	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
@@ -311,7 +315,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
 		CRASH(m_pAtkVolume);
-	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(true);
+	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(false);
 
 	TriggerDesc.eLayer = COLLISIONLAYER::PARRY;
 	TriggerDesc.eTargetLayers = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };

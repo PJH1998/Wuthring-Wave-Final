@@ -51,14 +51,20 @@ HRESULT CHavocWarrior::Initialize_Clone(void* pArg)
 
 void CHavocWarrior::Priority_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
 	m_pTransformCom->Save_PreviousPosition();
-	if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && m_fImpluseRate >= m_fTimeDelta)
-		m_fTimeDelta += fTimeDelta * m_fImpluseRate;
-
 }
 
 void CHavocWarrior::Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
+
 	Reset_Condition(fTimeDelta);
 
 	// 1. Update Current State
@@ -128,6 +134,27 @@ void CHavocWarrior::Update(_float fTimeDelta)
 
 void CHavocWarrior::Late_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		if (!m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+			m_pAtkVolume->TriggerActivate(false);
+			m_isSonoro = true;
+		}
+		return;
+	}
+	else
+	{
+		if (m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(true);
+			m_pRigidBodyCom->IsActivate(true);
+			m_isSonoro = false;
+			return;
+		}
+	}
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
@@ -138,8 +165,6 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 			if (m_pColliderCom->IsLand() && m_iState & ENUM_CLASS(TEST_STATE::AIR))
 			{
 				m_iState &= ~ENUM_CLASS(TEST_STATE::AIR);
-				//m_isAir = false;
-				m_fTimeDelta = 0.f;
 				m_fAirAcc = 0.f;
 			}
 		}
