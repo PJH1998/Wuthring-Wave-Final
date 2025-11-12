@@ -77,9 +77,9 @@ void CUI_Loading::Render()
 	//__super::Render();
 	//for (auto& child : m_vecChildObjects)
 	//	child->Render();
-	static _uint i = 0;
-	i++;
-	cout << "[CUI_Loading::Render] Render Called! : " << i << endl;
+	//static _uint i = 0;
+	//i++;
+	//cout << "[CUI_Loading::Render] Render Called! : " << i << endl;
 }
 
 HRESULT CUI_Loading::Ready_Components(void* pArg)

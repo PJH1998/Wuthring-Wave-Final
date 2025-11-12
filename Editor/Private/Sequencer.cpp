@@ -232,29 +232,29 @@ void CSequencer::Selectable_Item()
 
 		ImGui::Text("==================================");
 
-		if (ITEM_TYPE::ACTION == item.eType)
+		// Item SetUp
+		switch (item.eType)
 		{
-			if (ImGui::Button("Save"))
-				m_isSave = !m_isSave;
-			if (m_isSave)
-				Save_CameraAction();
-
-			ImGui::SameLine();
-			if (ImGui::Button("Load"))
-				m_isLoad = !m_isLoad;
-			if (m_isLoad)
-				Load_CameraAction();
+		case ITEM_TYPE::ACTION:
+			SetUp_Camera(item);
+			break;
+		case ITEM_TYPE::SCENE:
+			SetUp_Scene(item);
+			break;
 		}
 
+		// Point SetUp
 		if (item.mRampEdit.miSelectCurve > -1 && item.mRampEdit.miSelectPoint > -1)
 		{
-			if (ITEM_TYPE::ACTION == item.eType)
+			switch (item.eType)
 			{
+			case ITEM_TYPE::ACTION:
 				SetUp_Camera_Point(item);
-				SetUp_Camera(item);
+				break;
+			case ITEM_TYPE::SCENE:
+				SetUp_Camera_Point(item);
+				break;
 			}
-			if (ITEM_TYPE::SCENE == item.eType)
-				SetUp_Scene(item);
 		}
 
 		ImGui::End();
@@ -340,6 +340,17 @@ void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)
 	}
 
 	ImGui::Text("======================");
+
+	if (ImGui::Button("Save"))
+		m_isSave = !m_isSave;
+	if (m_isSave)
+		Save_CameraAction();
+
+	ImGui::SameLine();
+	if (ImGui::Button("Load"))
+		m_isLoad = !m_isLoad;
+	if (m_isLoad)
+		Load_CameraAction();
 }
 
 void CSequencer::SetUp_Scene(SEQUENCE_ITEM& item)

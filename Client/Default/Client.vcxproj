@@ -277,6 +277,7 @@
     <ClInclude Include="..\Public\RoverHit.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
+    <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
@@ -424,6 +425,7 @@
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
+    <ClCompile Include="..\Private\SceneCamera.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />

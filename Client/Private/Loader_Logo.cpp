@@ -3,11 +3,12 @@
 
 #include "Dummy.h"
 #include "ShadowDummy.h"
-#include"Parser.h"
+#include "Parser.h"
 #include "GameSystem.h"
 #include "LogoMaleRover.h"
 #include "LogoFemaleRover.h"
-#include"MapObject.h"
+#include "SceneCamera.h"
+#include "MapObject.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -53,10 +54,14 @@ HRESULT CLoader_Logo::Load_Shader()
 
 HRESULT CLoader_Logo::Load_Object()
 {
-	cout << "Object" << endl;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		CRASH("SceneCamera Prototype");
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject"),
 		CMapObject::Create(m_pDevice, m_pContext));
+
+	cout << "Object" << endl;
 
     return S_OK;
 }
@@ -68,6 +73,7 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;
+
 	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 
@@ -102,6 +108,7 @@ HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
 	//_float fSize = 0.01f;
 	_float fSize = 0.0001f;
+
 	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(45.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 
