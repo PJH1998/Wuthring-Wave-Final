@@ -27,6 +27,7 @@ private:
 	HRESULT				Load_Rover();
 
 	HRESULT				Load_UI();
+	HRESULT				Load_Font();
 	HRESULT				Load_Effect();
 
 

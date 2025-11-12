@@ -164,6 +164,7 @@ public:
 #pragma region 4. EVENT
 public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
+	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
 #pragma endregion
 
 #pragma endregion

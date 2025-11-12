@@ -23,6 +23,8 @@ namespace Client
 		DODGEABLE = 1 << 2, // Dodge 가능 상태.
 		PARRY = 1 << 3,
 		INVINCIBLE = 1 << 4,
+		CHANGE = 1 << 5,
+		CUTSCENE = 1 << 6,
 		END
 	};
 

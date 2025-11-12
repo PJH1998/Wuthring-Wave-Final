@@ -431,7 +431,7 @@ void CLevel_Test::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
 			CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
@@ -441,6 +441,10 @@ void CLevel_Test::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+		CRASH("Failed Ready Button_Interact");
 
 	// _UI
 }
@@ -559,6 +563,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//tDesc.vScreenPos = _float2(screenX, screenY);
 
 	//testText->Set_TextUIDesc(tDesc);
+
+
+
+
+	// interact
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
+		m_pGameSystem->Render_InteractUI(L"좌표기준 연결 필요");
+
+
+
 
 
 

@@ -21,6 +21,7 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
+	Ready_UI();
 	Ready_Camera();
 
 	LIGHT_DESC LightDesc{};
@@ -117,6 +118,28 @@ void CLevel_Logo::Ready_Layer_LogoFemaleRover()
 	cout << "Level Female Rover" << endl;
 }
 
+void CLevel_Logo::Ready_UI()
+{
+	// UI
+	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
+	const _wstring		strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring		strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_Logo"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_Logo", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+
+	cout << "[Level_Logo::Ready_UI] Logo UI Loaded!" << endl;
+	// _UI
+}
+
+
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CLevel_Logo* pInstance = new CLevel_Logo(pDevice, pContext);
@@ -132,6 +155,8 @@ CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 void CLevel_Logo::Free()
 {
+	//m_pGameInstance->Clear_RootUI();
+
     __super::Free();
 
 	Safe_Release(m_pGameSystem);

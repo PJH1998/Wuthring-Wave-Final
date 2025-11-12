@@ -142,6 +142,8 @@ public:
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
 	virtual void Process_DelayedActions() {};
+	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
+	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
 #pragma endregion
 
 #pragma region STATE
@@ -267,10 +269,10 @@ public:
 	_bool Check_AllCondition(_uint iConditionFlag);
 	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
-
 	void Sync_Condition_ToPlayer(_uint* pCondition);
 
 
+	void Bind_ChangeTimer() { m_fChangeTimer = m_fChangeDuration; } // Dissolve에 바인딩할 변수값.
 #pragma endregion
 
 
@@ -322,6 +324,9 @@ protected:
 
 	_float m_fDodgeableDuration = 0.2f;
 	_float m_fDodgeableHitTimer = {};
+
+	_float m_fChangeDuration = { 1.f }; // 변환시간.
+	_float m_fChangeTimer = { };
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

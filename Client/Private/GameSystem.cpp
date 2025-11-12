@@ -169,6 +169,11 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
+void CGameSystem::Render_InteractUI(_wstring strText)
+{
+	m_pUI_ControlHelper->Render_InteractUI(strText);
+}
+
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 //{
 //	return m_pUI_StatusSyncer->Sync_Status_toHUD(eStat);
