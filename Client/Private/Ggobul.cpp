@@ -192,7 +192,7 @@ void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
 	m_pAttackVolumes[GGOBULTYPE::HEAD]->TriggerActivate(false);
 
 	//Hammer
-	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_HARDATTACK;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_SKILL;
 	TriggerDesc.vExtent = _float3(4.f, 4.f, 4.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
@@ -205,7 +205,7 @@ void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
 	m_pAttackVolumes[GGOBULTYPE::HAMMER]->TriggerActivate(false);
 
 	//Knife
-	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_HARDATTACK;
+	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_SKILL;
 	TriggerDesc.vExtent = _float3(10.f, 4.f, 4.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
@@ -220,7 +220,9 @@ void CGgobul::Ready_Volumes(GGOBUL_DESC* pDesc)
 
 void CGgobul::OnHit_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-
+#ifdef _DEBUG
+	cout << "On Hit! GGOBUL)" << endl;
+#endif // _DEBUG
 }
 
 void CGgobul::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
