@@ -45,7 +45,7 @@ VS_OUT VS_MAIN(VS_IN In)
     Out.vVelTail = In.vVelTail;
     Out.fPhase = In.fPhase;
     Out.fDelay = In.fDelay;
-    
+   
     return Out;
 }
 
@@ -72,6 +72,9 @@ struct GS_OUT
 void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 {
     GS_OUT Out[4] = (GS_OUT[4]) 0;
+    
+    if(In[0].fDelay.y > 0.5f)
+        return;
     
     vector vRight, vUp, vLook;
     
@@ -123,6 +126,9 @@ void GS_MAIN(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 void GS_Stretch(point GS_IN In[1], inout TriangleStream<GS_OUT> Vertices)
 {
     GS_OUT Out[4] = (GS_OUT[4]) 0;
+    
+    if (In[0].fDelay.y > 0.5f)
+        return;
  
     vector vRight, vUp, vLook, vViewDir;
     
@@ -208,9 +214,12 @@ PS_OUT PS_MAIN(PS_IN In)
     
     float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
+    Out.vDiffuse *= g_vColor;
+       
     Out.vDiffuse.a *= Alpha;
     
-    Out.vDiffuse *= g_vColor;
+    if (Out.vDiffuse.a < 0.2f)
+        discard;
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -224,7 +233,7 @@ PS_OUT PS_SPRITE(PS_IN In)
 {
     PS_OUT Out = (PS_OUT) 0;
     
-    if (In.fDelay.y == 1.f)      //¾È±×·Áµµ µÊ
+    if (In.fDelay.y > 0.5f)      //¾È±×·Áµµ µÊ
         discard;
     
     float fPhase = In.fPhase;
@@ -245,7 +254,7 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
 
-    if(Out.vDiffuse.a < 0.3f)
+    if(Out.vDiffuse.a < 0.2f)
         discard;
     
     Out.vDiffuse = g_vColor * Out.vDiffuse;
@@ -256,8 +265,8 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse.a *= Alpha;
     
-    //if (Out.vDiffuse.a < 0.3f)
-    //    discard;
+    if (Out.vDiffuse.a < 0.2f)
+        discard;
     
    // Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     

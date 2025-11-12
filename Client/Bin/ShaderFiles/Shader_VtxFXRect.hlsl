@@ -106,27 +106,27 @@ PS_OUT PS_MAIN(PS_IN In)
     {
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-        if(Out.vDiffuse.a < 0.3f)
-            discard;
-    }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
+    //    if(Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
     }
     
 
     Out.vDiffuse *= g_vColor;
     
-    if (Out.vDiffuse.a < 0.5f)
-        discard;
+   if (Out.vDiffuse.a <= 0.f)
+       discard;
     
+ 
     float fWeight = Luminance(Out.vDiffuse.xyz);
-    
+ 
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    
-    Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
+ 
     
     return Out;
 }
@@ -142,14 +142,14 @@ PS_OUT PS_TEST(PS_IN In)
    
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-       if (Out.vDiffuse.a < 0.3f)
-           discard;
+       //if (Out.vDiffuse.a < 0.3f)
+       //    discard;
     }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
-    }
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
@@ -157,23 +157,21 @@ PS_OUT PS_TEST(PS_IN In)
     
     float fVisible = smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
     
-    Out.vDiffuse *= fVisible;
+    Out.vDiffuse.a *= fVisible;
     
-    if (Out.vDiffuse.a < 0.3f)
-        discard;
+    //if (Out.vDiffuse.a < 0.3f)
+    //    discard;
     
     Out.vDiffuse *= g_vColor;
-    
-    if (Out.vDiffuse.a < 0.5f)
+   
+   if (Out.vDiffuse.a <= 0.0f)
         discard;
-    
-    float fWeight = Luminance(Out.vDiffuse.xyz);
-    
-    if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    
-    Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
-    
+   
+   float fWeight = Luminance(Out.vDiffuse.xyz);
+   
+   if (fWeight >= g_fEmissiveThreshold)
+       Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+   
     return Out;
 }
 
@@ -187,13 +185,13 @@ PS_OUT PS_TESTA(PS_IN In)
     {
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
-    }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
     }
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
@@ -202,7 +200,7 @@ PS_OUT PS_TESTA(PS_IN In)
     
     float fVisible = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
     
-    Out.vDiffuse *= fVisible;
+    Out.vDiffuse.a *= fVisible;
     
     //Å×½ºÆ®
     
@@ -210,15 +208,17 @@ PS_OUT PS_TESTA(PS_IN In)
     
     //Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
     
-    if (Out.vDiffuse.a < 0.5f)
+   //if (Out.vDiffuse.a < 0.1f)
+   //    discard;
+    if (Out.vDiffuse.a <= 0.0f)
         discard;
     
-    float fWeight = Luminance(Out.vDiffuse.xyz);
+        float fWeight = Luminance(Out.vDiffuse.xyz);
     
-    if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    
-    Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
+        if (fWeight >= g_fEmissiveThreshold)
+            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+   
+    //Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
     
     return Out;
 }

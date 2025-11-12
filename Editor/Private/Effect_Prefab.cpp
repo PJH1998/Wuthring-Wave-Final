@@ -49,20 +49,32 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 
     m_fCurrentTime += fTimeDelta;
 
-    for (auto& Frame : m_vFrames)
-    {
-        if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
-        {
-            _bool IsActivated = true;
-            //자식 활성화하기전에 오프셋 처리
-            _matrix OffsetMatrix = {};
 
-            Children_Offset(Frame, OffsetMatrix);
-            Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
 
-            Frame.bActivated = true;
-        }
-    }
+	for (auto& Frame : m_vFrames)
+	{
+		if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
+		{
+			_bool IsActivated = true;
+			//자식 활성화하기전에 오프셋 처리
+			_matrix OffsetMatrix = {};
+
+			if (!Frame.IsRoot)
+			{
+				Children_Offset(Frame, OffsetMatrix);
+				Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
+			}
+			else
+			{
+				//
+
+				//
+			}
+
+			Frame.bActivated = true;
+		}
+	}
+
 
     for (auto& Children : m_EffectChildren)
     {

@@ -11,6 +11,7 @@ public:
 		EFFECT_TYPE eChildrenType;
 		_float	fActivateTime;
 		_bool   bActivated = false;
+		_bool	IsRoot = false;
 
 		_float3 vOffsetSize = { 1.f, 1.f, 1.f };
 		_float3 vOffsetPos = { 0.f, 0.f, 0.f };
@@ -24,6 +25,7 @@ public:
 
 		_float2	vLifeTime = { 0.f, 0.f };
 		_string strBoneTag;
+		_bool	IsRoot = false;
 	}PREFAB_DESC;
 
 private:
@@ -77,6 +79,8 @@ private:
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
+
+	_bool								m_IsRoot = false;
 
 
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
