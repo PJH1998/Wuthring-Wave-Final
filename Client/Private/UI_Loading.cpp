@@ -1,6 +1,5 @@
 ﻿#include "ClientPch.h"
 #include "Animator_UI.h"
-#include "PlayerStatus.h"
 
 #include "UI_Loading.h"
 
@@ -73,13 +72,13 @@ void CUI_Loading::Late_Update(_float fTimeDelta)
 
 void CUI_Loading::Render()
 {
-
 	//__super::Render();
-	//for (auto& child : m_vecChildObjects)
+	//for (auto& child : m_vecChildObjects)s
 	//	child->Render();
-	static _uint i = 0;
-	i++;
-	cout << "[CUI_Loading::Render] Render Called! : " << i << endl;
+	
+	//static _uint i = 0;
+	//i++;
+	//cout << "[CUI_Loading::Render] Render Called! : " << i << endl;
 }
 
 HRESULT CUI_Loading::Ready_Components(void* pArg)

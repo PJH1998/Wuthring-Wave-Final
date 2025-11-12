@@ -18,6 +18,8 @@ private:
 	void Ready_Layer_LogoMaleRover();
 	void Ready_Layer_LogoFemaleRover();
 
+	void Ready_UI();
+
 private:
 	// Test
 	Engine::CRigidbody* m_pRigidbody1 = { nullptr };

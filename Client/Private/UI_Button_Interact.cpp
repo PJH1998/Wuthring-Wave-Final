@@ -64,6 +64,12 @@ void CUI_Button_Interact::Priority_Update(_float fTimeDelta)
 
 void CUI_Button_Interact::Update(_float fTimeDelta)
 {
+	// 1. 이벤트 판별에 따른 애니메이션 전환
+	// - animation change via mouse/etc event
+	// 2. Update!
+	// 3. Update_CombinedMatrix
+	// 4. Update_CombinedDesc
+
 	Update_MouseFeedback(fTimeDelta);
 
 	__super::Update(fTimeDelta);            // Update Animator_UI Component
@@ -131,7 +137,6 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	//	CRASH("");
 }
 
-// 애니메이션이 한프레임 먼저 도는 것 같은데, 아예 early 단에서 호출도 고려?
 void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 {
 	CCustom_UI* pRootUI = Find_ChildObject(L"Root_Interact_Multiplier");

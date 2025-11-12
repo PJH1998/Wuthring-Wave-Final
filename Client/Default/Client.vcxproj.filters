@@ -274,6 +274,9 @@
     <Filter Include="03. GameObject\UI\_Parents\_SubParents\Button">
       <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\Logo">
+      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -704,6 +707,9 @@
     <ClInclude Include="..\Public\RoverGroundDodge.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Logo.h">
+      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1104,6 +1110,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\RoverGroundDodge.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Logo.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
