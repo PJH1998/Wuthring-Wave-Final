@@ -246,13 +246,13 @@
     </Filter>
     <Filter Include="03. GameObject\Effect\Prefab\Decal">
       <UniqueIdentifier>{d050ecdf-02ed-49e6-921c-5906b20ec564}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="03. GameObject\MapObject\Destruction">
       <UniqueIdentifier>{9a535f9d-e44c-4a68-b31a-05b1d01b84df}</UniqueIdentifier>
     </Filter>
     <Filter Include="03. GameObject\MapObject\Sonoro">
       <UniqueIdentifier>{ace489a6-c16b-4d19-92ba-1cc74e81f0b5}</UniqueIdentifier>
-	</Filter>
+    </Filter>
     <Filter Include="03. GameObject\UI\Child_Containers\Loading">
       <UniqueIdentifier>{a0986d96-f3ea-4a84-bedb-0db0f426799f}</UniqueIdentifier>
     </Filter>
@@ -270,6 +270,15 @@
     </Filter>
     <Filter Include="03. GameObject\Actor\Player\Logo">
       <UniqueIdentifier>{54c556c8-102e-4c9f-8dbb-3c04069179d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\_Parents\_SubParents\Button">
+      <UniqueIdentifier>{66b39c43-b630-4f11-9327-28cb98f675b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Child_Containers\Logo">
+      <UniqueIdentifier>{c1b07944-aa40-4c02-b71e-a698c63be724}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Camera\Scene">
+      <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -645,7 +654,7 @@
     </ClInclude>
     <ClInclude Include="..\Public\Sonoro_Manager.h">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
-	</ClInclude>
+    </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
     </ClInclude>
@@ -688,8 +697,24 @@
     <ClInclude Include="..\Public\MapObject_Sonoro.h">
       <Filter>03. GameObject\MapObject</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Button_Interact.h">
+      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\Effect_Decal.h">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\RoverGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\UI_Logo.h">
+      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\SceneCamera.h">
+      <Filter>03. GameObject\Camera\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1039,7 +1064,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Sonoro_Manager.cpp">
       <Filter>03. GameObject\MapObject\Sonoro</Filter>
-	</ClCompile>
+    </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp">
       <Filter>03. GameObject\UI\Child_Containers\Loading</Filter>
     </ClCompile>
@@ -1079,8 +1104,24 @@
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp">
       <Filter>03. GameObject\MapObject</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\UI_Button_Interact.cpp">
+      <Filter>03. GameObject\UI\_Parents\_SubParents\Button</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\Effect_Decal.cpp">
       <Filter>03. GameObject\Effect\Prefab\Decal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Rover</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_Logo.cpp">
+      <Filter>03. GameObject\UI\Child_Containers\Logo</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\SceneCamera.cpp">
+      <Filter>03. GameObject\Camera\Scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

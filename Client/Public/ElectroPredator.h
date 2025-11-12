@@ -9,6 +9,7 @@ class CBehavior_Tree;
 NS_END
 
 NS_BEGIN(Client)
+class CGameSystem;
 
 class CElectroPredator final : public CActor
 {
@@ -45,6 +46,7 @@ public:
 private:
 	CAnimMachine*			m_pAnimMachineCom = { nullptr };
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 	//const _float4x4*		m_pArrowMatrix = { nullptr };
 
 	queue<_float3>			m_PatrolPoints;
@@ -70,6 +72,7 @@ private:
 	_float					m_fAirAcc{};
 	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isDeadTrigger{};
 #pragma endregion
 
 #pragma region STATUS
@@ -79,12 +82,12 @@ private:
 	_float2					m_vDistanceRange{};
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
+	_bool					m_isSonoro{};
 #pragma endregion
 
 #pragma region PHYSICS
 	_float3					m_vBeHit_Normal{};
 	_bool					m_isTurnLerp{};
-	CALLBACK_CLIENT			m_tCallDesc{};
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();

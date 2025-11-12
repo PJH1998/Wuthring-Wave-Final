@@ -25,8 +25,6 @@ HRESULT CAoEDoT::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 
 	m_iLayer = pDesc->iLayer;
-	m_fLifeTime = pDesc->fLifeTime;
-	m_fDelayTime = m_fLifeTime / (pDesc->iTickCount);
 	m_vOffset = pDesc->vOffset;
 	m_iTargetLayers = pDesc->iTargetLayers;
     return S_OK;
@@ -78,11 +76,14 @@ void CAoEDoT::Render()
 
 void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-	//AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
+	AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
 	//m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
-	m_fDelayAcc = 0.f;
+	m_fLifeTime = pDesc->fLifeTime;
+	m_fDelayTime = m_fLifeTime / (pDesc->iTickCount);
+	m_fDelayAcc = m_fDelayTime;
 	m_fLifeTimeAcc = 0.f;
+	m_isActivate = true;
 }
 
 void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
@@ -105,6 +106,9 @@ void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = pDesc->fAttackDamage;
+	//m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType =pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

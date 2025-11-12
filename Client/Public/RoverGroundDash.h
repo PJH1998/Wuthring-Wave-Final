@@ -12,6 +12,10 @@ private:
         JUMP = 0,
         MOVE,
 		LAND,
+		DASH,
+		DODGE,
+		DODGEABLE,
+		HIT,
         END
     };
 
@@ -32,7 +36,6 @@ private:
 private:
     virtual void Handle_Input() override;
     void Update_SprintAnimation(_float fTimeDelta);
-    void LockOnCheck_StateTransition(_float fTimeDelta);  
     void Check_StateTransition(_float fTimeDelta);
     void Setup_Animations();
     void State_Reset();

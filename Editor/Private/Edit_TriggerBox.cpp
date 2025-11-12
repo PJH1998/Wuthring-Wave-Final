@@ -54,7 +54,10 @@ HRESULT CEdit_TriggerBox::Initialize_Clone(void* pArg)
 
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 
- 	m_iTriggerIndex = iTriggerIndex++;
+	if (pDesc->iTriggerIndex == -1)
+		m_iTriggerIndex = iTriggerIndex++;
+	else
+		m_iTriggerIndex = pDesc->iTriggerIndex;
 	return S_OK;
 }
 
@@ -79,6 +82,13 @@ void CEdit_TriggerBox::Set_ImGuiOption()
 	ImGui::InputScalar("TriggerIndex : ", ImGuiDataType_U32, &m_iTriggerIndex);
 
 	m_pMapInterface->Set_Transform(m_pTransformCom);
+	
+	if (ImGui::Button("Destroy"))
+	{
+		m_isActivate = false;
+		m_pRigidbodyCom->IsActivate(false);
+	}
+
 }
 
 void CEdit_TriggerBox::Ready_Components(void* pArg)

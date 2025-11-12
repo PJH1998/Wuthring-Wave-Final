@@ -18,13 +18,13 @@ public:
 		_float3				vExtent;
 		_float3				vOffset;
 		_float				fAttackDamage;
-		_float				fLifeTime;
-		_uint				iTickCount;
+		TEXT_COLOR_TYPE		eType;
 	}AOEDOT_DESC;
 
 	typedef struct tagAoEDoTReset
 	{
-		_float3				vTargetPos;
+		_float				fLifeTime;
+		_uint				iTickCount;
 	}AOEDOT_RESET;
 private:
 	explicit CAoEDoT(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

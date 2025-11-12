@@ -67,6 +67,14 @@ _float CCamera_Manager::Get_CurrentCamera_Far()
         return m_pMainCamera->Get_Far();
 }
 
+void CCamera_Manager::Set_CurrentCamera_Far(_float fFar)
+{
+	if (nullptr == m_pMainCamera || true == m_isFree)
+		m_pFreeCamera->Set_Far(fFar);
+	else
+		m_pMainCamera->Set_Far(fFar);
+}
+
 void CCamera_Manager::OnShake(const CAMERA_SHAKE& tData)
 {
 	if (nullptr == m_pMainCamera)
@@ -145,9 +153,12 @@ void CCamera_Manager::Ready_FreeCamera()
 	CameraDesc.fFovy = XMConvertToRadians(60.f);
 	CameraDesc.fNear = 0.1f;
 	CameraDesc.fFar = 5000.f;
-	CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
-	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);
-	CameraDesc.fSpeedPerSec = 1000.f;
+	/*CameraDesc.vEye = _float4(0.f, 200.f, -150.f, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 200.f, 1.f);*/
+	CameraDesc.vEye = _float4(-1.019107, 5.458634, -15.936163, 1.f);
+	CameraDesc.vAt = _float4(0.f, 0.f, 0.f, 1.f);
+	//CameraDesc.fSpeedPerSec = 1000.f;
+	CameraDesc.fSpeedPerSec = 10.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
 	

@@ -17,6 +17,7 @@ public:
 		vector<_uint>		iTargetLayers;
 		_float				fRadius;
 		_float				fAttackDamage;
+		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
 
 	typedef struct tagProjectileReset

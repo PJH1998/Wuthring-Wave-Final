@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Loader.h"
+#include "Custom_UI.h"
 
 NS_BEGIN(Client)
 
@@ -20,10 +21,14 @@ private:
 	HRESULT				Load_LogoMaleRover();
 	HRESULT				Load_LogoFeMaleRover();
 
+	HRESULT				Load_UI();
 private:
 	LEVEL m_eCurLevel = { LEVEL::LOGO };
 
 	HRESULT				Load_MonsterTable();
+
+private:
+	CCustom_UI::CUSTOM_UITREE_DESC	Load_UITree(_string strFilePath);
 
 public:
 	static		CLoader_Logo*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

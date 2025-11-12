@@ -11,6 +11,8 @@ private:
 	{
 		JUMP = 0,
 		DASH,
+		DODGE,
+		DODGEABLE,
 		FLY,
 		MOVE,
 		FALL,

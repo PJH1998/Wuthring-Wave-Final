@@ -37,7 +37,7 @@ HRESULT CLogoFemaleRover::Initialize_Clone(void* pArg)
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
 	
-	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(-150.f, 10.f, 0.f, 1.f));
+	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(0.f, 0.f, -2.5f, 1.f));
 
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
@@ -75,6 +75,12 @@ void CLogoFemaleRover::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CLogoFemaleRover::Render()
@@ -107,7 +113,44 @@ void CLogoFemaleRover::Render()
 
 void CLogoFemaleRover::Render_Shadow()
 {
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
 
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
+}
+
+void CLogoFemaleRover::Render_OutLine()
+{
+	Bind_Resources();
+
+	_float4 vColor = _float4(0.2f, 0.2f, 0.2f, 1.f);
+	if (FAILED(m_pShaderCom->Bind_Value("g_vOutLineColor", &vColor, sizeof(_float4))))
+		return;
+
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
 }
 
 void CLogoFemaleRover::Logo_Input()
@@ -181,7 +224,7 @@ void CLogoFemaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::LOGOROVER);
 }
 
 void CLogoFemaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)

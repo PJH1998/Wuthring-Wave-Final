@@ -518,11 +518,11 @@ void CGameInstance::SettingFog(_bool IsOn)
 {
 	m_pRenderer->SettingFog(IsOn);
 }
-#ifdef _DEBUG
 void CGameInstance::Set_LUT_Index(_uint iIndex)
 {
 	m_pRenderer->Set_LUT_Index(iIndex);
 }
+#ifdef _DEBUG
 HRESULT CGameInstance::Add_Render_Debug(CComponent* pDebugComponent)
 {
 	return m_pRenderer->Add_Render_Debug(pDebugComponent);
@@ -623,6 +623,10 @@ _float CGameInstance::Get_CurrentCamera_Near()
 _float CGameInstance::Get_CurrentCamera_Far()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Far();
+}
+void CGameInstance::Set_CurrentCamera_Far(_float fFar)
+{
+	m_pCamera_Manager->Set_CurrentCamera_Far(fFar);
 }
 void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 {
@@ -878,6 +882,11 @@ HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* p
 	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
 }
 
+HRESULT	CGameInstance::Remove_RootUI(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Remove_RootUI(strName_UI);
+}
+
 CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
 {
 	return m_pUI_Manager->Find_UIObject(strName_UI);
@@ -1047,6 +1056,7 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 HRESULT CGameInstance::Clear_Memory()
 {
+	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
 	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();
@@ -1054,7 +1064,7 @@ HRESULT CGameInstance::Clear_Memory()
 	m_pLight_Manager->Clear_Light();
 	m_pCSM->Clear();
 	m_pShadowMap->Clear();
-	m_pDecal_Manager->Clear();
+	//m_pDecal_Manager->Clear();
 
 	if (FAILED(m_pPooling_Manager->Clear_Resource()))
 		return E_FAIL;

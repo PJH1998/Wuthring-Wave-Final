@@ -22,6 +22,10 @@ private:
         MOVE,
 		HIT_PENDING, // 맞고 있는지 알려줌
 		HIT, // 실제 전환되는 경우
+
+		DODGE,
+		DODGEABLE,
+		DASH,
         JUMP,
         END
     };

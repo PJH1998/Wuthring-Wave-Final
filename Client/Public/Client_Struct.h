@@ -114,8 +114,10 @@ namespace Client
 	typedef struct tagCallBackClientDesc
 	{
 		void* pTransform = { nullptr };  // Transform;
-		_float fAttack = {};			 // 공격력
+		_float fAttack = { 0.f };			 // 공격력
+		_uint* pCondition = {};			// 컨디션 Value
 		_string strEffectTag = {};		// 호출할 이펙트 태그
+		TEXT_COLOR_TYPE eType{};		// 공격자 속성
 		// Shaking이나, HitStop? 이런 거.
 	}CALLBACK_CLIENT;
 
@@ -125,4 +127,48 @@ namespace Client
 		void* pData;  // HIT_DESC 등 데이터 (nullptr 가능)
 		tagDelayedAction(TYPE t, void* data = nullptr) : type(t), pData(data) {}
 	}DELAYED_ACTION;
+
+#pragma region SEQUENCE
+	typedef struct tagAnimData {
+		_float3			vScale{};
+		_float4			vQuat{};
+		_float3			vTranslation{};
+		_string			strAnimation;
+	}ANIM_DATA;
+	typedef struct tagSQActorData : public SEQUENCE_ITEM_DATA {
+		_wstring						strActorTag;
+		vector<ANIM_DATA>		strAnimDatas;
+	}SQ_ACTOR_DATA;
+
+	typedef struct tagSceneCameraFrame {
+		_float				fSpeedRate{};
+		_float4			vQuaternion{};
+		_float3			vPosition{};
+		_float				fStartFrame{};
+		_float				fFovy{};
+		_bool				isLerp = { true };
+	}SCENE_CAMERA_FRAME;
+
+	typedef struct tagSQCameraData : public SEQUENCE_ITEM_DATA {
+		vector<SCENE_CAMERA_FRAME> Frames;
+	}SQ_CAMERA_DATA;
+
+	typedef struct tagSQAudioData : public SEQUENCE_ITEM_DATA {
+		_wstring				strSoundTag;
+		_float					fVolume;
+		_bool					isBGM;
+	}SQ_AUDIO_DATA;
+
+	typedef struct tagSQEffectData : public SEQUENCE_ITEM_DATA {
+		_wstring				strEffectTag;
+		_float3				vScale{};
+		_float4				vQuat{};
+		_float3				vTranslation{};
+		// TODO
+	}SQ_EFFECT_DATA;
+
+	typedef struct tagSQSFXData : public SEQUENCE_ITEM_DATA {
+		SFX_TYPE			eSFXType;
+	}SQ_SFX_DATA;
+#pragma endregion
 }

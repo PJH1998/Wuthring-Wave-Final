@@ -37,6 +37,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 		__super::Mouse_Move_Up();
 
 #ifdef _DEBUG
+
 	ImGui::Begin("Camera Speed");
 
 	ImGui::InputFloat("##", &m_fSpeed);
@@ -55,6 +56,7 @@ void CFreeCamera::Update(_float fTimeDelta)
 	ImGui::PopID();
 
 	ImGui::End();
+
 #endif
 }
 

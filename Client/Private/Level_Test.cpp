@@ -70,10 +70,12 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	Ready_Dummy();
 	//Ready_MonsterTest();
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
+
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
 	//Ready_CoroSaurus();
-	//Ready_Spawner();
+	Ready_Spawner();
+
 
     Ready_Effect();
 	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
@@ -301,6 +303,17 @@ void CLevel_Test::Ready_MonsterTest()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_ShinWang"), 15, &Projectile)))
 		CRASH("Failed Ready Projectile (False Sovereign)");
+
+	//CAoEDoT::AOEDOT_DESC AoEDesc{};
+	//AoEDesc.fAttackDamage = MobDesc.fAttackDmg * 2.f;
+	//AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_SKILL);
+	//AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
+	//AoEDesc.vExtent = _float3(1.f, 1.f, 3.f);
+	//AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
+	////AoEDesc.wstrEffectTag
+	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_ShinWang"), 2, &AoEDesc)))
+	//	CRASH("Failed Ready AoEDot (False Sovereign)");
 }
 
 void CLevel_Test::Ready_HavocWarrior()
@@ -368,10 +381,8 @@ void CLevel_Test::Ready_ElectroPredator()
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
 	AoEDesc.fAttackDamage = ADesc.fAttackDmg * 0.25f;
-	AoEDesc.fLifeTime = 3.f;
 	AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
-	AoEDesc.iTickCount = 8;
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
 	//AoEDesc.wstrEffectTag
@@ -458,7 +469,7 @@ void CLevel_Test::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
 			CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
@@ -468,6 +479,10 @@ void CLevel_Test::Ready_UI()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+		CRASH("Failed Ready Button_Interact");
 
 	// _UI
 }
@@ -586,6 +601,16 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 	//tDesc.vScreenPos = _float2(screenX, screenY);
 
 	//testText->Set_TextUIDesc(tDesc);
+
+
+
+
+	// interact
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
+		m_pGameSystem->Render_InteractUI(L"좌표기준 연결 필요");
+
+
+
 
 
 

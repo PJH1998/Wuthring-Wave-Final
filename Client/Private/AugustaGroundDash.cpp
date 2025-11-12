@@ -32,9 +32,13 @@ void CAugustaGroundDash::OnEnter(void* pArg)
     // 3. 값에 따른 상태 변경.
     m_iCurrentAnimIdx = static_cast<_uint>(context.m_eDashType);
 
+	// 4. State 초기화.
     State_Reset();
 
 	m_pAugusta->Set_Gravity(true);
+
+	// 5. 무적
+	//m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
@@ -48,10 +52,6 @@ void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
     Update_SprintAnimation(fTimeDelta);
     
     // 2. 상태 제어.
-    /*if (m_pAugusta->Is_LockOn())
-        LockOnCheck_StateTransition(fTimeDelta);
-    else       
-        Check_StateTransition(fTimeDelta);*/
     Check_StateTransition(fTimeDelta);
 
     // 3. 상태 초기화.
@@ -61,13 +61,27 @@ void CAugustaGroundDash::OnUpdate(_float fTimeDelta)
 void CAugustaGroundDash::OnExit()
 {
     CGroundState::OnExit();
+	// 무적 제거.
+	//m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundDash::Handle_Input()
 {
+
+	// Dash 키입력 체크.
+	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
+	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
+		return;
+
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey);
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+
+	
 }
 
 
@@ -81,8 +95,9 @@ void CAugustaGroundDash::Update_SprintAnimation(_float fTimeDelta)
     if (m_pAugusta->Is_LockOn())
     {
         _vector vMoveDir = m_pAugusta->Calculate_Move_Direction(m_eDir);
-        //m_pAugusta->Rotate_Direction(vMoveDir);
+		m_pAugusta->Rotate_Direction(vMoveDir);
     }
+
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
     
 }
@@ -91,15 +106,27 @@ void CAugustaGroundDash::Check_StateTransition(_float fTimeDelta)
 {
     EAugustaDashType eDashType = static_cast<EAugustaDashType>(m_iCurrentAnimIdx);
 
+	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
+
+	// 2.
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
 	if (!m_States[LAND])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
 		return;
 	}
-
- 
-  
 
     switch (eDashType)
     {

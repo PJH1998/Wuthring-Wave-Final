@@ -46,8 +46,13 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 		
 	}
 		
+	// 6. 컨디션 추가.
+	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f);
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
 }
 
@@ -81,6 +86,10 @@ void CAugustaGroundSpecial::OnExit()
 
 	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::LB_SP_ATTACK));
 	m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::R_SP_ATTACKOMNI));
+
+	// 무적 제거.
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 
 }
 
@@ -313,9 +322,9 @@ void CAugustaGroundSpecial::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaGroundSpecial::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.2f, 10.f, 0.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.2f, 10.f, 0.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.2f, 10.f, 0.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK01), "SpAttack01", 1.f, 10.f, 0.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK02), "SpAttack02", 1.f, 10.f, 0.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACK03), "SpAttack03", 1.f, 10.f, 0.5f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPATTACKOMNI), "SpAttackOmni", 1.f, 80.f, 0.5f, true, false );
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH), "SpWalk_Dash", 1.f, 12.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_DASH_ROOT), "SpWalk_Dash_Root", 0.5f, 30.f, 1.f); // 너무 빠름.

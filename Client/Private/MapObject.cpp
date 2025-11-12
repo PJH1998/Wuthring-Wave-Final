@@ -206,7 +206,7 @@ void CMapObject::Ready_Component(void* pArg)
 	}
 	else
 	{
-		m_pGameSystem->TriggerRegister(2, [this](void* pArg) {
+		m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
 			m_isActivate = false;
 			m_IsRender = false;
 			});

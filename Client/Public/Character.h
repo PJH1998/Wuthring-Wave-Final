@@ -142,6 +142,8 @@ public:
 	void Set_QTEEnd(_bool IsQTEend) { m_IsQTEend = IsQTEend; }
 
 	virtual void Process_DelayedActions() {};
+	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
+	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
 #pragma endregion
 
 #pragma region STATE
@@ -176,6 +178,7 @@ public:
 	_vector Get_RightVector_NoPitch();
 
 	// LockOn
+	void Set_AutoLockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	void Set_LockOn(class CTransform* pTargetTransform, _bool IsLockOn);
 	_bool Is_LockOn();
 	
@@ -209,6 +212,9 @@ public:
 	_vector Get_CameraRightVector();
 
 	_vector Calculate_Move_Direction(ACTORDIR eDir);
+	_vector Calculate_LockOn_Move_Direction(ACTORDIR eDir);
+
+
 	void Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_By_Camera_Direction_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed);
 	void Move_Fall(_float fTimeDelta, _float fSpeed);
@@ -219,6 +225,7 @@ public:
 	void Rotate_DirectionNoPitchLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float fSpeed);
 	void Rotate_Target();
+	void Rotate_Target_Lerp(_float fTimeDelta);
 	void Rotate_HitTarget(class CTransform* pTransform);
 
 	// Turn
@@ -257,14 +264,15 @@ public:
 	
 #pragma region CONDITION
 public:
-	void Add_Condition(CHARACTER_CONDITION eConditionFlag);
-	_bool Check_AnyCondition(CHARACTER_CONDITION eConditionFlag);
-	_bool Check_AllCondition(CHARACTER_CONDITION eConditionFlag);
-
-	void Remove_Condition(CHARACTER_CONDITION eConditionFlag);
+	void Add_Condition(_uint iConditionFlag);
+	_bool Check_AnyCondition(_uint iConditionFlag);
+	_bool Check_AllCondition(_uint iConditionFlag);
+	void Remove_Condition(_uint iConditionFlag);
 	void Remove_AllCondition();
+	void Sync_Condition_ToPlayer(_uint* pCondition);
 
 
+	void Bind_ChangeTimer() { m_fChangeTimer = m_fChangeDuration; } // Dissolve에 바인딩할 변수값.
 #pragma endregion
 
 
@@ -274,6 +282,7 @@ protected:
 	class CStateMachine* m_pStateMachineCom = { nullptr };
 	class CSpringCamera* m_pSpringCamera = { nullptr };
 	class CTransform* m_pTargetTransform = { nullptr }; // Auto Target 용도
+	class CTransform* m_pLockOnTargetTransform = { nullptr }; // Auto Target 용도
 	class CTransform* m_pHitTargetTransform = { nullptr }; // Hit Target 용도 (맞은 방향을 알기 위한)
 	class CComputeShader* m_pFlyComputeShaderCom = { nullptr }; // 활공 용도
 
@@ -312,6 +321,12 @@ protected:
 
 	HIT_DESC m_PendingHitDesc = {};
 	PARRY_DESC m_PendingParryDesc = {};
+
+	_float m_fDodgeableDuration = 0.2f;
+	_float m_fDodgeableHitTimer = {};
+
+	_float m_fChangeDuration = { 1.f }; // 변환시간.
+	_float m_fChangeTimer = { };
 
 	vector<class CAttackVolume*> m_AttackVolumes;
 	class CAttackVolume* m_pMainAttackVolume = { nullptr };

@@ -1,7 +1,4 @@
-﻿#include "Edit_MonsterSpawnor.h"
-#include "Edit_MonsterSpawnor.h"
-#include "Edit_MonsterSpawnor.h"
-#include"ClientPch.h"
+﻿#include"ClientPch.h"
 #include "Trigger_Box.h"
 #include"GameSystem.h"
 CTrigger_Box::CTrigger_Box(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -34,7 +31,6 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	m_iTriggerIndex = pDesc->iTriggerIndex;
 	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-
 			Collision();
 		});
 
@@ -85,8 +81,12 @@ void CTrigger_Box::Collision()
 	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
 	if (m_iTriggerIndex == 0)
 		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
-	else if(m_iTriggerIndex == 4)
+	else if (m_iTriggerIndex == 4)
 		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
+	else if (m_iTriggerIndex == 7)
+		m_pGameSystem->Stop_Action();
+	else if (m_iTriggerIndex == 20)
+		m_pGameInstance->Set_CurrentCamera_Far(500.f);
 }
 
 void CTrigger_Box::CallBack(_uint iFuncIndex, void* pArg)

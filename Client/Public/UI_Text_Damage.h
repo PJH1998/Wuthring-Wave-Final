@@ -37,6 +37,6 @@ private:
 
 public:
 	static CUI_Text_Damage* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	virtual CGameObject* Clone(void* pArg) override;
+	virtual CGameObject*	Clone(void* pArg) override;
 	virtual void            Free() override;
 };

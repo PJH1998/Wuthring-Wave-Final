@@ -161,22 +161,22 @@ void CMapObject_NonSonoro::Turn_Sonoro(_fvector vUpSpeed,_float fTriggerdTime)
 {
 	if (m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
 		return;
+
 	if (m_fDlayTime <= fTriggerdTime)
 		m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + vUpSpeed);
-	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
-	m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
 }
 
 void CMapObject_NonSonoro::ReturnPos()
 {
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMatrix));
-	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
-	m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
+	
 }
 
 void CMapObject_NonSonoro::Change_Collision_Layer(_bool SonoroMode)
 {
-	//m_pRigidbodyCom->IsActivate(!*m_SonoroMode);
+	!*m_SonoroMode ?
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP)) :
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 }
 
 void CMapObject_NonSonoro::Ready_Component(void* pArg)

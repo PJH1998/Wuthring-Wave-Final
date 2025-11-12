@@ -10,6 +10,7 @@ NS_END
 
 NS_BEGIN(Client)
 class CAttackVolume;
+class CGameSystem;
 
 class CHavocWarrior final : public CActor
 {
@@ -48,6 +49,8 @@ private:
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CAttackVolume* m_pAtkVolume = { nullptr };
 
+	CGameSystem*			m_pGameSystem = { nullptr };
+
 	queue<_float3>			m_PatrolPoints;
 
 #pragma region STATE_VARIABLE
@@ -71,6 +74,7 @@ private:
 	_bool					m_beHit{};
 	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isDeadTrigger{};
 #pragma endregion
 
 #pragma region STATUS
@@ -79,13 +83,13 @@ private:
 	_float					m_fImpluseRate{};
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
+	_bool					m_isSonoro{};
 #pragma endregion
 
 #pragma region PHYSICS
 	_float3					m_vBeHit_Normal{};
 	_float					m_fTimeDelta{};
 	_bool					m_isTurnLerp{};
-	CALLBACK_CLIENT			m_tCallDesc{};
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();

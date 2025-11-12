@@ -12,6 +12,8 @@ private:
         JUMP = 0,
         DASH,
 		LAND,
+		DODGE,
+		DODGEABLE,
 		FLY,
         SPRINT,
         MOVE,

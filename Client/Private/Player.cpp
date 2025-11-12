@@ -128,6 +128,7 @@ void CPlayer::Update(_float fTimeDelta)
 	if (m_iCurrentCharacterIdx != NONE)
 	{
 		Sync_Transform_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 변경 후에도 동기화 유지.
+		Sync_Condition_FromCharacter(m_Characters[m_iCurrentCharacterIdx]); // 컨디션 동기화
 		m_Characters[m_iCurrentCharacterIdx]->Update(fTimeDelta);
 	}
 
@@ -136,12 +137,17 @@ void CPlayer::Update(_float fTimeDelta)
 		m_iHarmonyCharacterIdx != m_iCurrentCharacterIdx)
         m_Characters[m_iHarmonyCharacterIdx]->Update(fTimeDelta);
 
+
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
-    Sorting_Target(); // Update => 
+	// 4. Target Sorting
+	Sorting_Target();
+    
+	// 5. Lock On
     Toggle_LockOn();
 
+	m_TargetTransforms.clear();
 #ifdef _DEBUG
 	GUI_Teleport();
 #endif
@@ -353,14 +359,22 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	{
 		// 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
-		m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
+		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
 	}
 
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
 	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
-	m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), true); // 콜라이더 활성화
+	
+	// Change Time 부여를 위한 Condition 추가
+	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
+
+	//m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
+	
+
 
 	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
 	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).
@@ -407,6 +421,14 @@ void CPlayer::Sync_Transform_FromCharacter(CCharacter* pCharacter)
 	if (nullptr == pCharacter)
 		return;
 	pCharacter->Sync_Transform_ToPlayer(m_pTransformCom); // 현재 캐릭터의 Transform을 Player와 동기화
+}
+
+void CPlayer::Sync_Condition_FromCharacter(CCharacter* pCharacter)
+{
+	if (nullptr == pCharacter)
+		return;
+
+	pCharacter->Sync_Condition_ToPlayer(&m_iCondition);
 }
 
 
@@ -470,6 +492,28 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 }
 
+_bool CPlayer::Is_TargetValid(CTransform* pTarget)
+{
+	if (nullptr == pTarget)
+		return false;
+
+
+	auto iter = find(m_TargetTransforms.begin(), m_TargetTransforms.end(), pTarget);
+	if (iter == m_TargetTransforms.end())
+		return false;
+
+	const _float fMaxLockOnDistance = 30.f;
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = pTarget->Get_State(STATE::POSITION);
+	_float fDistance = XMVectorGetX(XMVector3Length(vMyPos - vTargetPos));
+
+	// 타겟이 너무 멀어짐
+	if (fDistance > fMaxLockOnDistance)
+		return false; 
+
+	return true;
+}
+
 void CPlayer::Sorting_Target()
 {
     sort(m_TargetTransforms.begin(), m_TargetTransforms.end(), [this](CTransform* pSrcTransform, CTransform* pDstTransform)->_bool {
@@ -483,42 +527,98 @@ void CPlayer::Sorting_Target()
         m_pTargetTransform = m_TargetTransforms[0];
     }
 
-    m_TargetTransforms.clear();
+    //m_TargetTransforms.clear();
 }
 
 void CPlayer::Toggle_LockOn()
 {
-    if (nullptr == m_pTargetTransform)
-    {
-        if (m_IsLockOn)
-        {
-            m_IsLockOn = false;
-            m_pSpringCamera->Lock_On(nullptr, false);
-            if (m_iCurrentCharacterIdx !=NONE)
-                m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+	
 
-        }
-        return;
-    }
+	// 1. 락온 키 입력 (상태 전환)
+	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
+	{
+		m_IsLockOn = !m_IsLockOn;
 
-    if (nullptr != m_Characters[m_iCurrentCharacterIdx])
-    {
-        m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(m_pTargetTransform, m_IsLockOn);
-    }
+		if (m_IsLockOn)
+		{
+			// 현재 타겟을 고정 락온 타겟으로 설정.
+			m_pLockOnTargetTransform = m_pTargetTransform;
+		}
+		else
+		{
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
+
+	// 2. 매프레임 검증
+	if (m_IsLockOn)
+	{
+		if (nullptr == m_pLockOnTargetTransform || !Is_TargetValid(m_pLockOnTargetTransform))
+		{
+			m_IsLockOn = false;
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
+
+	// 3. 캐릭터와 카메라에 최종 타겟 정보 전송.
+	CTransform* pFinalTarget = nullptr;
+	CCharacter* pCurrentCharacter = (m_iCurrentCharacterIdx != NONE) ?
+		m_Characters[m_iCurrentCharacterIdx] : nullptr;
 
 
-    if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
-    {
-        m_IsLockOn = !m_IsLockOn;
-    }
+	// 4. 락온 해제.
+	if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+	{
+		if (m_Characters[m_iCurrentCharacterIdx]->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE)))
+		{
+			// 락온을 해제해라.
+			m_IsLockOn = false;
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
 
-   // if (m_IsLockOn)
-   // {
-        m_pSpringCamera->Lock_On(m_pTargetTransform, m_IsLockOn);
-      //  return;
-    //}
+	// 5. 락온상태라면?
+	if (m_IsLockOn)
+	{
+		// 하드 락온
+		pFinalTarget = m_pLockOnTargetTransform;
+		if (pCurrentCharacter)
+			pCurrentCharacter->Set_LockOn(pFinalTarget, m_IsLockOn);
+	}
+	else
+	{
+		// 소프트 락온.
+		pFinalTarget = m_pTargetTransform;
+		if (pCurrentCharacter)
+			pCurrentCharacter->Set_AutoLockOn(pFinalTarget, m_IsLockOn); // Character의 Set_AutoLockOn 호출
+	}
 
-    m_pTargetTransform = nullptr;
+
+	// 6. 카메라 업데이트.
+	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+
+	/* if (nullptr == m_pTargetTransform)
+	 {
+		 if (m_IsLockOn)
+		 {
+			 m_IsLockOn = false;
+			 m_pSpringCamera->Lock_On(nullptr, false);
+			 if (m_iCurrentCharacterIdx !=NONE)
+				 m_Characters[m_iCurrentCharacterIdx]->Set_LockOn(nullptr, false);
+
+		 }
+		 return;
+	 }
+
+	 if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+	 {
+		 m_Characters[m_iCurrentCharacterIdx]->Set_AutoLockOn(m_pTargetTransform, m_IsLockOn);
+	 }
+	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
+	 */
+
+
+    //m_pTargetTransform = nullptr;
 }
 #ifdef _DEBUG
 void CPlayer::GUI_Teleport()
@@ -650,6 +750,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	// 몬스터 탐지용 콜백으로 받을 Desc - LJH => 탐지는 하나의 Transform만 설정.
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = 700.f;
+	m_CallBack.pCondition = &m_iCondition;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 
 	//m_pColliderCom->Set_Desc(m_pTransformCom);
@@ -657,6 +758,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
 	m_pColliderCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollider_Enter(iLayer, pDesc, Manifold);
 		});
+
     return S_OK;
 }
 

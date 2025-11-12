@@ -45,7 +45,7 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
-		if (m_IsDestroy)
+		if (!m_IsDestroy)
 			Spawn_Particles();
 		});
 	m_IsDestroy = false;

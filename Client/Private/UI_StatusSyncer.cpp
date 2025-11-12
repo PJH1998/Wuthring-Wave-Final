@@ -15,7 +15,7 @@ CUI_StatusSyncer::CUI_StatusSyncer()
 
 HRESULT CUI_StatusSyncer::Initialize()
 {
-	//m_pRootUI_HUD = dynamic_cast<CUI_HUD*>(m_pGameInstance->Find_UIObject(L"UI_UHD"));
+	//m_pRootUI_HUD = dynamic_cast<CUI_HUD*>(m_pGameInstance->Find_UIObject(L"UI_HUD"));
 	//ASSERT_CRASH(m_pRootUI_HUD);
 		
 	return S_OK;
@@ -23,7 +23,7 @@ HRESULT CUI_StatusSyncer::Initialize()
 
 HRESULT CUI_StatusSyncer::Sync_Status_toHUD(CHARACTER_STAT& eStat)
 {
-	//return dynamic_cast<CUI_HUD*>(m_pGameInstance->Find_UIObject(L"UI_UHD"))->Sync_StatusValue(eStat);
+	//return dynamic_cast<CUI_HUD*>(m_pGameInstance->Find_UIObject(L"UI_HUD"))->Sync_StatusValue(eStat);
 	return S_OK;
 }
 

@@ -322,7 +322,13 @@ void CLevel_Loading::Free()
 {
     __super::Free();
 
-	m_pGameInstance->Clear_RootUI();
+	//m_pGameInstance->Clear_RootUI();	// 이러니까 비동기 로드로 인하여 "다음 레벨에서 추가된 RootUI"도 로딩 중 컨테이너 내부에서 제거되어 문제 발생함. 개별로 직접 컨테이너로부터 제거.
+	m_pGameInstance->Remove_RootUI(L"UI_Loading");
+	m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
+	m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
+	m_pGameInstance->Remove_RootUI(L"UI_Text_LoadingTest");
+	m_pGameInstance->Remove_RootUI(L"UI_Text_PercentTest");
+
     Safe_Release(m_pLoader);
 	Safe_Release(m_pGameSystem);
 }

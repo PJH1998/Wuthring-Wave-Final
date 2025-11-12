@@ -172,6 +172,7 @@ public:
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
+	void				Set_CurrentCamera_Far(_float fFar);
 	void				OnShake(const CAMERA_SHAKE& tData);
 #pragma endregion
 
@@ -282,6 +283,7 @@ public:
 #pragma region UI_MANAGER
 public:
 	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);
+	HRESULT				Remove_RootUI(const _wstring& strName_UI);
 	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
 	void				Clear_RootUI();
 #pragma endregion
