@@ -54,7 +54,7 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 
 	// 7. Hit Stop
 	CGameInstance* pGameInstance = CGameInstance::GetInstance();
-	pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.5f);
+	pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.7f, 0.1f);
 
 	CAMERA_SHAKE Desc{};
 	Desc.fDuration = 0.15f;
