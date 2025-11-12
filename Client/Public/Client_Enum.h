@@ -228,6 +228,7 @@ namespace Client
 		, OUNTLINE // 4
 		, ROVER // 5
 		, NORMAL_YELLOW // 6
+		, LOGOROVER // 7
 		, END };
 
 	enum class TEXT_COLOR_TYPE {

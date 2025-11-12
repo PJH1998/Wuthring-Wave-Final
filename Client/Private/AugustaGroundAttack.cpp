@@ -83,6 +83,7 @@ void CAugustaGroundAttack::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false); 
 
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능 상태 제거
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()
@@ -224,6 +225,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK01) + m_iComboCount;
             m_IsNextAttackInput = false;
             m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
+			m_pAugusta->Rotate_Target();
             return;
         }
         

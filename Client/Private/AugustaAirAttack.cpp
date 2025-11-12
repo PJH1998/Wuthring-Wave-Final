@@ -494,9 +494,11 @@ void CAugustaAirAttack::Handle_Animation_SpecialState()
 	if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END ||
 		eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
 	{
-		if (m_fAnimationScale < 0.5f)
-			m_fAnimationScale = 0.7f;
+		m_fAnimationScale = 1.f;
+		//if (m_fAnimationScale < 0.5f)
+		//	m_fAnimationScale = 0.7f;
 	}
+
 }
 
 

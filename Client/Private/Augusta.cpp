@@ -61,8 +61,6 @@ HRESULT CAugusta::Initialize_Clone(void* pArg)
 	
 	m_IsQTE = false;
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
-
-
 	
 	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
 	XMStoreFloat4(&m_vQTEPos, vPos);
@@ -606,8 +604,10 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			{
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-				m_pAbillityCom->Add_Hp(-100.f);
+				//m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				m_pAbillityCom->Add_Hp(-10.f);
+
+				cout << "Hp Decrease Augusta " << endl; // 공격 도중에 맞는지?
 				break;
 			}
 			case DELAYED_ACTION::TYPE::PARRY:
