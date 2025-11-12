@@ -98,8 +98,8 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	}
 	
 	// 5. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
 
 	// 6. Change Timer 계산. => Dissolve에 사용
 	Calc_ChangeTimer(fTimeDelta);
@@ -113,42 +113,37 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 2. 파츠 갱신.?
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
-
-    // 3. 상태 머신 갱신
+    // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
-
-	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
+	// 3. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (!m_IsQTE)
 	{
-		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+		// 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-		// 6. Camera 갱신 => 위치 따라오게
+		// 5. Camera 갱신 => 위치 따라오게
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
 	else
 	{
 		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
 	}
-	// 7. Land Check
+	// 6. Land Check
 	m_IsLand = Is_LandCollider();
-   
-	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	//Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
-	//m_IsHit = false;
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
 
-	// 9. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 void CAugusta::Late_Update(_float fTimeDelta)
 {
@@ -159,17 +154,13 @@ void CAugusta::Late_Update(_float fTimeDelta)
             pPart.second->Late_Update(fTimeDelta);
     }
 
-	// 2. MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
-
-	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+	// 2. QTE인 경우 Collider 갱신하지 않습니다.?
 	if (!m_IsQTE)
 		m_pColliderCom->Sync_Position(m_pTransformCom);
 	else
 		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	
-
+	// 3. 
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
@@ -527,26 +518,87 @@ void CAugusta::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	_wstring wstrTypeTag = wStrColliderTag.substr(0, Index);
 	_wstring wstrPartTag = wStrColliderTag.substr(Index + 1);
 
+
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrColliderTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	_uint iVolumeIdx = {  };
+
 	// Main Attack Volume의 TriggerActivate
-	if (wstrTypeTag == TEXT("Bayonet"))
+	if (var1 == TEXT("Bayonet"))
 	{
-		if (nullptr != m_pBayonet)
-			m_pBayonet->Volume_Activate(IsActive);
+		
+		if (var2 == TEXT("ATK"))
+			iVolumeIdx = CAugustaBayonet::VOLUME::VOLUME_ATTACK;
+		if (var2 == TEXT("STRATK"))
+			iVolumeIdx = CAugustaBayonet::VOLUME::VOLUME_STRONG_ATTACK;
+
+		m_pBayonet->Change_Volume(iVolumeIdx);
+		if (var3 == TEXT("ATTACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if(var3 == TEXT("KNOCKBACK"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pBayonet->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pBayonet->Volume_Activate(IsActive);
 	}
-	else if (wstrTypeTag == TEXT("SkillWeapon"))
+	else if (var1 == TEXT("SkillWeapon"))
 	{
-		if (nullptr != m_pSkillWeapon)
-			m_pSkillWeapon->Volume_Activate(IsActive);
+		if (var2 == TEXT("ULTI"))
+			iVolumeIdx = CAugustaSkillWeapon::VOLUME::VOLUME_ULTI;
+		else if (var2 == TEXT("SWORD_ATTACK"))
+			iVolumeIdx = CAugustaSkillWeapon::VOLUME::VOLUME_SWORD_ATTACK;
+		else if (var2 == TEXT("SWORD_ULTI"))
+			iVolumeIdx = CAugustaSkillWeapon::VOLUME::VOLUME_SWORD_ULTI;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pSkillWeapon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pSkillWeapon->Volume_Activate(IsActive);
 	}
-	else if (wstrTypeTag == TEXT("Griffon"))
+	else if (var1 == TEXT("Griffon"))
 	{
-		if (nullptr != m_pGriffon)
-			m_pGriffon->Volume_Activate(IsActive);
+		if (var2 == TEXT("STRIKE"))
+			iVolumeIdx = CAugustaGriffon::VOLUME::VOLUME_STRIKE;
+
+		m_pGriffon->Change_Volume(iVolumeIdx);
+		if (var3 == TEXT("ATTACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pGriffon->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pGriffon->Volume_Activate(IsActive);
 	}
-	else if (wstrTypeTag == TEXT("Augusta"))
+	else if (var1 == TEXT("Augusta"))
 	{
-		if (nullptr != m_pMainAttackVolume)
-			m_pMainAttackVolume->TriggerActivate(IsActive);
+		if (var2 == TEXT("RISE_ZERO"))
+			iVolumeIdx = VOLUME::VOULME_RISE_ZERO;
+		else if (var2 == TEXT("RISE"))
+			iVolumeIdx = VOLUME::VOLUME_RISE;
+		else if (var2 == TEXT("HACKDOWN"))
+			iVolumeIdx = VOLUME::VOLUME_HACKDOWN;
+
+		m_pMainAttackVolume->TriggerActivate(false); // 교체.
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+
+		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+		if (var2 == TEXT("ATTACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
+		else if (var2 == TEXT("SKILL"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+		else if (var2 == TEXT("KNOCKBACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
+
+		m_pMainAttackVolume->TriggerActivate(IsActive);
 	}
 
 }
@@ -571,8 +623,8 @@ void CAugusta::Object_Func(const _wstring& wStrObjectTag)
 		Process_HitStop(wStrObjectTag);
 	else if (var1 == TEXT("CAMERA"))
 		Process_CameraAction(wStrObjectTag);
-	else
-		Process_VolumeChange(wStrObjectTag);
+	//else
+	//	Process_VolumeChange(wStrObjectTag);
 
 	return;
 }

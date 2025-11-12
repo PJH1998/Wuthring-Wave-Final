@@ -108,7 +108,7 @@ void CAugustaGroundDodge::Update_SprintAnimation(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
     // 1. 누른키에 따른 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
