@@ -184,11 +184,11 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
-    //vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    //
-    //vector vLook = normalize(g_vCamPosition - vWorldPos);
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    vector vLook = normalize(vViewPos * -1.f);
+    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    
+    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    //vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
