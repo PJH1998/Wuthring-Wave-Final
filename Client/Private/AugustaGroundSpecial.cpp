@@ -47,6 +47,7 @@ void CAugustaGroundSpecial::OnEnter(void* pArg)
 	}
 		
 	// 6. 컨디션 추가.
+	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f);
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.

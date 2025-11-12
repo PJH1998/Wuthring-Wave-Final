@@ -83,7 +83,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
 	{
-		if (m_pGameInstance->Get_DIKeyState(DIK_J) == KEYSTATE::DOWN)
+		if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
 			m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
 
 		m_pGameSystem->Update(fTimeDelta);
@@ -159,7 +159,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.fMaxStamina = pInfo->fMaxStamina;
 	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
 
 	//Ggobul
@@ -264,10 +264,8 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
 	AoEDesc.fAttackDamage = ADesc.fAttackDmg * 0.25f;
-	AoEDesc.fLifeTime = 3.f;
 	AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
-	AoEDesc.iTickCount = 8;
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
 	//AoEDesc.wstrEffectTag
@@ -296,7 +294,7 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
 	CoroDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &CoroDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &CoroDesc)))
 		CRASH("Failed Ready Monster");
 }
 

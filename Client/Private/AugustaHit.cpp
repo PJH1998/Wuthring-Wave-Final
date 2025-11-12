@@ -237,9 +237,9 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaHit::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.5f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.5f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 2.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.5f, 40.f, 1.2f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.5f, 40.f, 1.2f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f, 2.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);

@@ -71,6 +71,7 @@ private:
 	_bool					m_beHit{};
 	_bool					m_isPushed{};
 	_bool					m_isAnimationFinished{};
+	_bool					m_isDeadTrigger{};
 #pragma endregion
 
 #pragma region STATUS

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "StaticObject.h"
-
 NS_BEGIN(Engine)
 
 NS_END

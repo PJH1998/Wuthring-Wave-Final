@@ -47,9 +47,11 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	//m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
 	// 끝나고 유지 시킬것인지, 돌아올것인지
 
+
 	///ASSERT_CRASH(m_pTransformCom);
+	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f); // Dodge 시간 동안 느리게하기?
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
-	//CGameSystem::GetInstance()->Play_Action(TEXT("Action_Augusta_Burst01"), m_pAugusta->Get_WorldMatrix(), false);
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	
 }
 
@@ -79,6 +81,7 @@ void CAugustaGroundBurst::OnExit()
     CGroundState::OnExit();
     m_pAugusta->PartActivate(m_iPartType, false);
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
 }
 

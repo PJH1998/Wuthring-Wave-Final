@@ -102,6 +102,14 @@ void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifo
 		if (iLayer == iTarget)
 		{
 			m_isCollision = true;
+			CAMERA_SHAKE ShakeDesc{};
+			ShakeDesc.fAmplitude = 1.f;
+			ShakeDesc.fDuration = 0.1f;
+			ShakeDesc.fFovKick = 0.f;
+			ShakeDesc.fFrequency = 60.f;
+			ShakeDesc.vRotation = _float3(0.05f, 0.05f, 0.f);
+			ShakeDesc.vTranslation;
+			m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 			cout << "On Hit! (Projectile)" << endl;
 #endif // _DEBUG

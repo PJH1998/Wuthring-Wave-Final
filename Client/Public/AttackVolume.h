@@ -25,12 +25,16 @@ public:
 		_float3				vOffsetPos;
 		_float3				vOffsetRadian;
 		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
+		function<void(_uint, void*, const ContactManifold&, COLLISIONLAYER)> test;
 	}ATKVOLUME_DESC;
 
 private:
 	explicit CAttackVolume(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CAttackVolume(const CAttackVolume& Prototype);
 	virtual ~CAttackVolume() = default;
+
+public:
+	COLLISIONLAYER Get_Layer() const { return m_eCurrentLayer; }
 
 public:
 	virtual		HRESULT					Initialize_Prototype() override;
@@ -66,10 +70,13 @@ private:
 
 	CALLBACK_CLIENT			m_CallBack{};
 	function<void(_uint, void*, const ContactManifold&)> m_CollisionCallback;
+	function<void(_uint, void*, const ContactManifold&, COLLISIONLAYER)> m_test;
 private:
 	void Ready_Component(ATKVOLUME_DESC* pDesc);
 	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
-
+//#ifdef _DEBUG
+//	void OnCollide_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+//#endif
 public:
 	static		CAttackVolume*			Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject*			Clone(void* pArg) override;
