@@ -46,8 +46,13 @@ void CAugustaSkillWeapon::Priority_Update(_float fTimeDelta)
 	if (m_IsAnimationEnd)
 		m_isActivate = false;
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);*/
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Priority_Update(fTimeDelta);
+	}
 }
 
 void CAugustaSkillWeapon::Update(_float fTimeDelta)
@@ -63,18 +68,30 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 		m_pParentTransform->Get_WorldMatrix());
 
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
     //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 
 void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 {
     CProp::Late_Update(fTimeDelta);
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Late_Update(fTimeDelta);
 
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Late_Update(fTimeDelta);
+	}
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))

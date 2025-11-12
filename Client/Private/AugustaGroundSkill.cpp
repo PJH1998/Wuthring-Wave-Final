@@ -46,7 +46,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
             m_pAugusta->PartActivate(m_iPartType, true);
             m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
             m_pAugusta->Set_Gravity(false);
-            m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+            m_pAugusta->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
             
 			// 진입할때 한번만 회전 => Griffon
 			m_pAugusta->Rotate_Target();
