@@ -23,6 +23,7 @@ public:
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
+	class CGameSystem*		m_pGameSystem	= { nullptr };
 
 	vector<CCustom_UI*>		m_vecInteractions = {};
 

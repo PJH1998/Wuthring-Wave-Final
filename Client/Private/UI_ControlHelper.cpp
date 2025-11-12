@@ -1,6 +1,7 @@
 ﻿#include "ClientPch.h"
 #include "UI_ControlHelper.h"
 #include "GameInstance.h"
+#include "GameSystem.h"
 
 #include "Animator_UI.h"
 
@@ -14,8 +15,10 @@
 
 CUI_ControlHelper::CUI_ControlHelper()
 	: m_pGameInstance{ CGameInstance::GetInstance() }
+	, m_pGameSystem(CGameSystem::GetInstance())
 {
 	Safe_AddRef(m_pGameInstance);
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CUI_ControlHelper::Initialize()
@@ -69,7 +72,7 @@ HRESULT CUI_ControlHelper::HUD_FadeIn()
 	return S_OK;
 }
 
-void CUI_ControlHelper::Render_IntersectUI(_wstring strText)
+void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 {
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
 	CUI_Button_Interact* pInteractBtn = nullptr;
@@ -77,6 +80,13 @@ void CUI_ControlHelper::Render_IntersectUI(_wstring strText)
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
 
 	// 글자도 넣어야 함
+	// 그냥 만들어만 두고, 커스텀UI로써 이거 하위로 집어넣으면 될 것 같은데? 아닌가?
+
+	// ksta : 마저 제작 필요
+
+	//auto pFont = m_pGameSystem->Create_FontToScreen(
+	//	_float2{}
+	//);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()
@@ -95,5 +105,6 @@ CUI_ControlHelper* CUI_ControlHelper::Create()
 void CUI_ControlHelper::Free()
 {
 	Safe_Release(m_pGameInstance);
+	Safe_Release(m_pGameSystem);
 	__super::Free();
 }

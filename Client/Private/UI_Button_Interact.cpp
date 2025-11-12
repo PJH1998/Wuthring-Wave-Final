@@ -41,7 +41,7 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Interact_Focused_Off.json",		// 호버 Off	[Interact_Focused]
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Interact_Pressed_Trigger.json",	// 클릭		[Interact_Pressed]
 
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Interact_Focused_Default.json",	// 호버 def	[Interact_Pressed]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Interact_Focused_Default.json",	// 호버 def	[Interact_Focused]
 		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Interact_Pressed_Default.json"	// 클릭 def [Interact_Pressed]
 	};
 	Load_Animations(vecAnimFilePaths);
@@ -64,11 +64,12 @@ void CUI_Button_Interact::Priority_Update(_float fTimeDelta)
 
 void CUI_Button_Interact::Update(_float fTimeDelta)
 {
-	__super::Update(fTimeDelta);            // Update Animator_UI Component
 	Update_MouseFeedback(fTimeDelta);
+
+	__super::Update(fTimeDelta);            // Update Animator_UI Component
+
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
-
 }
 
 
@@ -124,10 +125,10 @@ void CUI_Button_Interact::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isActivate = true;
 	m_pGameInstance->Add_RootUI(L"UI_Interact", this);
 
-	if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))
-		CRASH("");
-	if ( FAILED (static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Pressed_Default")))
-		CRASH("");
+	//if ( FAILED (static_cast<CAnimator_UI*>(pFocusedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Focused_Default")))
+	//	CRASH("");
+	//if ( FAILED (static_cast<CAnimator_UI*>(pPressedUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_Pressed_Default")))
+	//	CRASH("");
 }
 
 // 애니메이션이 한프레임 먼저 도는 것 같은데, 아예 early 단에서 호출도 고려?

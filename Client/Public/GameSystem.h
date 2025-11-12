@@ -48,7 +48,7 @@ public:
 	void Sync_CharacterInfo(const CHARACTER_STAT& eCharacterStat);
 #pragma endregion
 
-#pragma region [UI] FONT_PRESET
+#pragma region ㅣ[UI] FONT_PRESET
 	// 데미지를 생성합니다. (타겟의 위치벡터, 데미지 수치, 색상용 데미지 타입, 생성 랜덤 범위)
 	void			Render_Damage(_float4 vTargetPos, _int iDamage, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 데미지를 생성합니다. (타겟의 위치벡터, 출력할 텍스트, 색상용 데미지 타입, 생성 랜덤 범위)
@@ -64,7 +64,7 @@ public:
 	HRESULT		HUD_FadeOut();
 	HRESULT		HUD_FadeIn();
 
-	void		Render_IntersectUI(_wstring strText);
+	void		Render_InteractUI(_wstring strText);
 
 	
 #pragma endregion

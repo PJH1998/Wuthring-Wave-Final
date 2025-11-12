@@ -434,7 +434,7 @@ void CLevel_Test::Ready_UI()
 		CRASH("Failed Ready Text_Damage");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 3, &tDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
 		CRASH("Failed Ready Button_Interact");
 
 	// _UI

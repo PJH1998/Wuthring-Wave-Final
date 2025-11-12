@@ -169,9 +169,9 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
-void CGameSystem::Render_IntersectUI(_wstring strText)
+void CGameSystem::Render_InteractUI(_wstring strText)
 {
-	m_pUI_ControlHelper->Render_IntersectUI(strText);
+	m_pUI_ControlHelper->Render_InteractUI(strText);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
