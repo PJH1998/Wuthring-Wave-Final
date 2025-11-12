@@ -43,6 +43,7 @@ private:
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
+	_float				m_fLifeTime{};
 	// Effect?
 
 	CALLBACK_CLIENT m_CallBack{};

@@ -109,6 +109,7 @@ HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& C
 
 	if (8 <= m_iCullStack.load(memory_order_acquire))
 	{
+		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
 		m_isCompleteFrustumCull.exchange(true, memory_order_release);
 	}
 	
@@ -394,7 +395,7 @@ void CRenderer::Render_Static()
 	{
 		unique_lock<mutex> lock(m_RenderAddMutex);
 		m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
-		m_iNumEndThread.store(0);
+		m_iNumEndThread.store(0, memory_order_release);
 	}
 
 	// CommandLists Execute

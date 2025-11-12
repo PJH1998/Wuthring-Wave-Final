@@ -29,6 +29,7 @@ public:
 private:
 	enum ATK_SOCKET { WEAPON_L, WEAPON_R, WHIP_L, WHIP_R, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, ATTACK5, ATTACK6, ATTACK7, ATTACK9, ATTACK10, ATTACK11, ATK_END };
+	enum SHINWANG_SHADER { UP, BODY, DOWN, ARM, PARTS, WEAPON, FX, FX2 };
 private:
 	explicit CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CMonsterTest(const CMonsterTest& Prototype);
@@ -55,9 +56,11 @@ public:
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	const _float4x4*		m_pToeMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
 	CAttackVolume*			m_pParryVolume = {nullptr,};
+	vector<_uint>			m_ShaderIndices;
 
 #pragma region STATE_VARIABLE
 	_uint					m_iState{};
@@ -87,6 +90,8 @@ private:
 	_float					m_fAttackDmg{};
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
 #pragma endregion
 
 #pragma region PHYSICS

@@ -37,10 +37,9 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = 50.f;
 #pragma endregion
-
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
-	
+	m_fHitStopRatio = 1.f;
 	return S_OK;
 }
 
@@ -55,7 +54,7 @@ void CCorosaurus::Update(_float fTimeDelta)
 	m_pBehaviorTreeCom->tick(this);
 
 	After_Condition(fTimeDelta);
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta);
+	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio);
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 
 	if(m_isDist_Interp_Enable)
@@ -95,8 +94,10 @@ void CCorosaurus::Render()
 	for (_uint i = 0; i < iNumMesh; ++i)
 	{
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
-		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
 	}
@@ -125,7 +126,7 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		if (wstrPartTag == TEXT("Head"))
 		{
-			m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(isActive);
+			m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(isActive);
 		}
 		else
 		{
@@ -219,7 +220,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		BeHit(iLayer, pDesc, Manifold);
 		});
 	m_tCallDesc.pTransform = m_pTransformCom;
-	m_tCallDesc.fAttack = 10.f;
+	m_tCallDesc.fAttack = pDesc->fAttackDmg;
 	m_pColliderCom->Set_Desc(&m_tCallDesc);
 
 
@@ -237,6 +238,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	if (FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("Corrosaurus/Com_Model");
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag = pDesc->pAnimationTag;
@@ -277,32 +279,32 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 
 void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 {
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eLayer = COLLISIONLAYER::ENEMY_ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::PLAYER;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.pParenTransform = m_pTransformCom;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Prop003_M");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vOffsetPos = _float3(-0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};
 
-	m_pAtkVolumes[ATK_SOCKET::HEAD] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
-	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD])
+	m_pAtkVolumes[ATK_SOCKET::HEAD0] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
+	if (nullptr == m_pAtkVolumes[ATK_SOCKET::HEAD0])
 		CRASH(m_pAtkVolume);
-	m_pAtkVolumes[ATK_SOCKET::HEAD]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(true);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(0.5f, 0.5f, 1.f);
-	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
+	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
 	if (nullptr == m_pAtkVolumes[ATK_SOCKET::TAIL])
 		CRASH(m_pAtkVolume);
-	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(false);
+	m_pAtkVolumes[ATK_SOCKET::TAIL]->TriggerActivate(true);
 
 	TriggerDesc.eLayer = COLLISIONLAYER::PARRY;
 	TriggerDesc.eTargetLayers = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
@@ -427,15 +429,19 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 {
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
-		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+		//cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
 #endif // _DEBUG
 
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
@@ -443,6 +449,8 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	}
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_beHit = true;
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 #ifdef _DEBUG

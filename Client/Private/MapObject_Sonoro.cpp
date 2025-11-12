@@ -135,11 +135,11 @@ BoundingBox* CMapObject_Sonoro::Get_BoundingBox()
 
 void CMapObject_Sonoro::Change_Collision_Layer(_bool SonoroMode)
 {
-	m_pRigidbodyCom->IsActivate(*m_SonoroMode);
+	//m_pRigidbodyCom->IsActivate(*m_SonoroMode);
 
-	//SonoroMode ?
-	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE)) :
-	//	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
+	*m_SonoroMode ?
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP)) :
+		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 }
 
 void CMapObject_Sonoro::Ready_Component(void* pArg)
@@ -189,7 +189,7 @@ void CMapObject_Sonoro::Ready_Component(void* pArg)
 		RigidbodyDesc.eShape = SHAPE::MESH;
 		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 		RigidbodyDesc.eType = EMotionType::Static;
-		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::NONE);
 		RigidbodyDesc.pModel = m_pModelComArray[0];
 
 		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};

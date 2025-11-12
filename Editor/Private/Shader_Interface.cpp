@@ -179,9 +179,6 @@ void CShader_Interface::Setting_Shader()
 
 		ImGui::DragFloat("METALLIC", &m_fMetallic, 0.01f, 0.f, 1.f);
 
-#ifdef _DEBUG
-
-#endif
 	}
 #pragma endregion
 	

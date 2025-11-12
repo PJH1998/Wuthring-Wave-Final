@@ -24,8 +24,9 @@ public:
 	}CORROSAURUS_DESC;
 
 private:
-	enum ATK_SOCKET { HEAD, TAIL, END };
+	enum ATK_SOCKET { HEAD0, TAIL, END };
 	enum ATK_PATTERN { ATTACK1, ATTACK2, ATTACK3, ATTACK4, BURST, ATTACK8, ATK_END };
+	enum CORO_SHADER {TAIL2, TAIL1, LEG, HEAD, BODY};
 private:
 	explicit CCorosaurus(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit CCorosaurus(const CCorosaurus& Prototype);
@@ -51,6 +52,7 @@ private:
 	CBehavior_Tree* m_pBehaviorTreeCom = { nullptr };
 	CAttackVolume* m_pAtkVolumes[ATK_SOCKET::END] = {nullptr};
 	CAttackVolume* m_pParryVolume = {nullptr};
+	vector<_uint>			m_ShaderIndices;
 
 #pragma region CONDITION_VARIABLE
 	_uint					m_iState{};
@@ -75,6 +77,9 @@ private:
 	_float					m_fStamina{};
 	_float					m_fMaxStamina{};
 	_float					m_fAttackDmg{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
+
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
 	_bool					m_isBlocked{};

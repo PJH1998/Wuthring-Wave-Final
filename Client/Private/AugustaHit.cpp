@@ -37,6 +37,10 @@ void CAugustaHit::OnEnter(void* pArg)
 	
 	// 6. 중력 적용
     m_pAugusta->Set_Gravity(true);
+
+	// 7. Hit State에 진입했을때만? 피를 깎아야하나?
+
+	
 }
 
 void CAugustaHit::OnUpdate(_float fTimeDelta)
@@ -66,6 +70,7 @@ void CAugustaHit::OnExit()
 
 	// Hit 판정 끝났으므로 정보 초기화
 	m_pAugusta->ClearPendingHit();
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 	//m_pAugusta->Set_Hit(false);
 	
 }
@@ -232,9 +237,9 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 
 void CAugustaHit::Setup_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.f, 40.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 1.f, 30.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_L), "Behit_B_L", 1.5f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_B_R), "Behit_B_R", 1.5f, 40.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_FALL), "Behit_Fly_Fall", 2.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_LOOP), "Behit_Fly_Loop", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_FLY_START), "Behit_Fly_Start", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaHitType::BEHIT_HOVER), "Behit_Hover", 1.f, 0.f);

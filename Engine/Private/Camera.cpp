@@ -13,6 +13,12 @@ CCamera::CCamera(const CCamera& Prototype)
 {
 }
 
+void CCamera::Set_Far(_float fFar)
+{
+	m_fFar = fFar;
+	m_pGameInstance->SetUp_CameraNF();
+}
+
 void CCamera::OnShake(const CAMERA_SHAKE& tData)
 {
 	if (m_isShake == true)
@@ -156,6 +162,7 @@ void CCamera::Shaking(_float fTimeDelta)
 	m_pTransformCom->Rotation_Quaternion(XMQuaternionMultiply(XMLoadFloat4(&m_vOriginQuaternion), vQuat));
 
 	m_tShakeData.fAmplitude *= 0.5f;
+	//m_tShakeData.fAmplitude *= 0.98f;
 
 	// Fov
 	m_fFovy = m_fOriginFov + m_tShakeData.fFovKick * fWeight * m_fDecay;

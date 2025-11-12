@@ -5,6 +5,7 @@
 #include "Mesh_Controller.h"
 #include "AnimationActor.h"
 #include "Rect_Controller.h"
+#include "Decal_Controller.h"
 
 CEffect_Controller::CEffect_Controller(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : m_pDevice{ pDevice }
@@ -23,6 +24,7 @@ HRESULT CEffect_Controller::Initialize()
     m_pTrailMesh_Controller = CTrailMesh_Controller::Create(m_pDevice, m_pContext);
     m_pLoad_Controller = CLoad_Controller::Create(m_pDevice, m_pContext, LEVEL::EFFECT);
 	m_pRect_Controller = CRect_Controller::Create(m_pDevice, m_pContext);
+	m_pDecal_Controller = CDecal_Controller::Create(m_pDevice, m_pContext);
 
     return S_OK;
 }
@@ -164,6 +166,13 @@ void CEffect_Controller::Prefab_Tab()
 						m_eChildrenType = EFFECT_TYPE::RECT;
 					}
 
+					if (ImGui::Button("Decal"))
+					{
+						m_pDecal_Controller->Set_DecalTag(m_ChildrenTag);
+
+						m_eChildrenType = EFFECT_TYPE::DECAL;
+					}
+
                     //위에서 정해진 타입에 따라 컨트롤러 활성화
                     if (m_eChildrenType == EFFECT_TYPE::PARTICLE)
                     {
@@ -263,6 +272,29 @@ void CEffect_Controller::Prefab_Tab()
 						}
 					}
 
+					if (m_eChildrenType == EFFECT_TYPE::DECAL)
+					{
+						CEffect_Decal::DECAL_DESC pDesc = {};
+
+						m_pDecal_Controller->Decal_Base_Tab(pDesc, m_bChildrenCreatFlag);
+
+						if (m_bChildrenCreatFlag)
+						{
+							m_pSelectedPrefab->Add_Children(&pDesc, m_eChildrenType);
+
+							CEffect_Prefab::FRAME_DESC Prefab_FrameDesc = {};
+							Prefab_FrameDesc.strChildrenTag = pDesc.strMyTag;
+							Prefab_FrameDesc.eChildrenType = EFFECT_TYPE::DECAL;
+
+							m_pSelectedPrefabDesc->ChildrenCount += 1;
+							m_pSelectedPrefabDesc->FrameDesc.push_back(Prefab_FrameDesc);
+
+							m_ChildrenTag[0] = _T('\0');
+							m_bChildrenCreatFlag = false;
+							m_bChildrenTagFlag = false;
+							m_eChildrenType == EFFECT_TYPE::END;
+						}
+					}
                 }
 
                 if (ImGui::Button("Load Children"))
@@ -307,6 +339,9 @@ void CEffect_Controller::Prefab_Tab()
 
 					if (m_IsRectEffect)
 						m_pRect_Controller->Update();
+
+					if (m_IsDecalEffect)
+						m_pDecal_Controller->Update();
                     
                     if (ImGui::Button("Apply"))
                     {
@@ -364,6 +399,16 @@ void CEffect_Controller::Prefab_Tab()
 
 						   m_pSelectedPrefab->Add_Children(pRectDesc, EFFECT_TYPE::RECT);
 					   }
+
+					   if (m_IsDecalEffect)
+					   {
+						   CEffect_Decal::DECAL_DESC* pDecalDesc = m_pDecal_Controller->Get_DecalDesc(m_strChildrenTag);
+
+						   m_pSelectedPrefab->Remove_Children(pDecalDesc->strMyTag);
+
+						   m_pSelectedPrefab->Add_Children(pDecalDesc, EFFECT_TYPE::DECAL);
+					   }
+
                     }
 
                     if (m_IsParticle || m_IsMeshEffect || m_IsTrailMesh)
@@ -402,6 +447,15 @@ void CEffect_Controller::Prefab_Tab()
 								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
 
 								m_pRect_Controller->Remove_Desc(m_strChildrenTag);
+
+								Reset_ChildrenInfo();
+							}
+
+							if (m_IsDecalEffect)
+							{
+								m_pSelectedPrefab->Remove_Children(m_strChildrenTag);
+
+								m_pDecal_Controller->Remove_Desc(m_strChildrenTag);
 
 								Reset_ChildrenInfo();
 							}
@@ -464,6 +518,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsMeshEffect = false;
         m_IsTrailMesh = false;
 		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
 
         m_pParticle_Controller->UpdateSelected_ParticleFormTag(m_strChildrenTag);
     }
@@ -473,6 +528,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsMeshEffect = true;
         m_IsTrailMesh = false;
 		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
 
         m_pMesh_Controller->UpdateSelected_FXMeshFormTag(m_strChildrenTag);
     }
@@ -482,6 +538,7 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
         m_IsMeshEffect = false;
         m_IsTrailMesh = true;
 		m_IsRectEffect = false;
+		m_IsDecalEffect = false;
 
         m_pTrailMesh_Controller->UpdateSelected_TrailMeshFormTag(m_strChildrenTag);
     }
@@ -491,8 +548,20 @@ void CEffect_Controller::UpdateSelected_ChildrenFromIndex()
 		m_IsMeshEffect = false;
 		m_IsTrailMesh = false;
 		m_IsRectEffect = true;
+		m_IsDecalEffect = false;
 
 		m_pRect_Controller->UpdateSelected_RectFormTag(m_strChildrenTag);
+	}
+	else if (dynamic_cast<CEffect_Decal*>(m_pSelectedPrefab->Get_Children(m_strChildrenTag)))
+	{
+		m_IsParticle = false;
+		m_IsMeshEffect = false;
+		m_IsTrailMesh = false;
+		m_IsRectEffect = false;
+		m_IsDecalEffect = true;
+
+	
+		m_pDecal_Controller->UpdateSelected_DecalFormTag(m_strChildrenTag);
 	}
 
     //프리팹이 들고 있는 구조체에서 자식과 동일한 프레임 찾기
@@ -608,6 +677,7 @@ void CEffect_Controller::Reset_ChildrenInfo()
     m_IsMeshEffect = false;
     m_IsTrailMesh = false;
 	m_IsRectEffect = false;
+	m_IsDecalEffect = false;
 }
 
 void CEffect_Controller::Reset_PrefabInfo()
@@ -847,6 +917,27 @@ void CEffect_Controller::Prefab_To_Json(const _string& strFilePath)
 			Rect_To_Json(RectJson, pRectDesc);
 
 			jsonStream << RectJson.dump(2);
+			jsonStream.close();
+		}
+		if (Prefab->second.FrameDesc[i].eChildrenType == EFFECT_TYPE::DECAL)
+		{
+			_string DecalPath = {};
+			CEffect_Decal::DECAL_DESC* pDecalDesc = {};
+
+			pDecalDesc = m_pDecal_Controller->Get_DecalDesc(Prefab->second.FrameDesc[i].strChildrenTag);
+
+			DecalPath = DefaultPath;
+			DecalPath += "/FXDecal/";
+			DecalPath += WStringToString(Prefab->second.FrameDesc[i].strChildrenTag);
+			DecalPath += ".json";
+
+			ofstream jsonStream(DecalPath);
+
+			json DecalJson;
+
+			Decal_To_Json(DecalJson, pDecalDesc);
+
+			jsonStream << DecalJson.dump(2);
 			jsonStream.close();
 		}
     }
@@ -1104,6 +1195,8 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
 
     TrailMesh["TextureTag"] = WStringToString(pTrailDesc->strTextureTag);
     TrailMesh["ColorTextureTag"] = WStringToString(pTrailDesc->strColorTextureTag);
+	TrailMesh["DlssolveTextureTag"] = WStringToString(pTrailDesc->strDissolveTextureTag);
+	TrailMesh["DistortionTextureTag"] = WStringToString(pTrailDesc->strDistortionTextureTag);
     TrailMesh["VIBufferTag"] = WStringToString(pTrailDesc->strVIBufferTag);
 
     TrailMesh["ShaderPass"] = pTrailDesc->iShaderPass;
@@ -1114,6 +1207,11 @@ void CEffect_Controller::TrailMesh_To_Json(json& TrailMesh, CTrail_Mesh::TRAILME
 
     TrailMesh["DirFlag"] = pTrailDesc->iDirFlag;
 	TrailMesh["MaskFloag"] = pTrailDesc->iMaskFlag;
+
+	TrailMesh["DissolveFlag"] = pTrailDesc->IsDissolve;
+
+	TrailMesh["DistortionFlag"] = pTrailDesc->IsDistortion;
+	TrailMesh["DistortionWeight"] = pTrailDesc->fDistortionWeight;
 
 	TrailMesh["ColorSpeed"] = pTrailDesc->fColorSpeed;
 	TrailMesh["MaskSpeed"] = pTrailDesc->fMaskSpeed;
@@ -1177,6 +1275,22 @@ void CEffect_Controller::Rect_To_Json(json& Rect, CEffect_Rect::FXRECT_DESC* pRe
 	Rect["Color"] = ColorJson;
 }
 
+void CEffect_Controller::Decal_To_Json(json& Decal, CEffect_Decal::DECAL_DESC* pDecalDesc)
+{
+	Decal["MyTag"] = WStringToString(pDecalDesc->strMyTag);
+	Decal["MyType"] = pDecalDesc->eMyType;
+
+	Decal["DecalTag"] = WStringToString(pDecalDesc->wstrDecalTag);
+	Decal["LifeTime"] = pDecalDesc->LifeTime;
+	
+	json ColorJson = json::array();
+	ColorJson.push_back(pDecalDesc->vColor.x);
+	ColorJson.push_back(pDecalDesc->vColor.y);
+	ColorJson.push_back(pDecalDesc->vColor.z);
+	ColorJson.push_back(pDecalDesc->vColor.w);
+	Decal["Color"] = ColorJson;
+}
+
 void CEffect_Controller::Load_Prefab()
 {
     CEffect_Prefab::PREFAB_DESC PrefabDesc = {};
@@ -1212,19 +1326,24 @@ void CEffect_Controller::Load_Prefab()
             Load_Particle(FrameDesc.strChildrenTag);
         }
 
-        if (FrameDesc.eChildrenType == EFFECT_TYPE::MESH)
+        else if (FrameDesc.eChildrenType == EFFECT_TYPE::MESH)
         {
             Load_FXMesh(FrameDesc.strChildrenTag);
         }
 
-        if (FrameDesc.eChildrenType == EFFECT_TYPE::TRAIL)
+        else if (FrameDesc.eChildrenType == EFFECT_TYPE::TRAIL)
         {
             Load_TrailMesh(FrameDesc.strChildrenTag);
         }
 
-		if (FrameDesc.eChildrenType == EFFECT_TYPE::RECT)
+		else if (FrameDesc.eChildrenType == EFFECT_TYPE::RECT)
 		{
 			Load_FXRect(FrameDesc.strChildrenTag);
+		}
+
+		else if (FrameDesc.eChildrenType == EFFECT_TYPE::DECAL)
+		{
+			Load_FXDecal(FrameDesc.strChildrenTag);
 		}
     }
 }
@@ -1294,6 +1413,18 @@ void CEffect_Controller::Load_FXRect(const _wstring& RectTag)
 	m_pSelectedPrefab->Add_Children(&RectDesc, EFFECT_TYPE::RECT);
 
 	m_pRect_Controller->Set_RectDesc(Tag, RectDesc);
+}
+
+void CEffect_Controller::Load_FXDecal(const _wstring& DecalTag)
+{
+	CEffect_Decal::DECAL_DESC DecalDesc = {};
+	_wstring Tag = DecalTag;
+
+	m_pLoad_Controller->Get_FXDecal_Desc(Tag, DecalDesc);
+
+	m_pSelectedPrefab->Add_Children(&DecalDesc, EFFECT_TYPE::DECAL);
+
+	m_pDecal_Controller->Set_DecalDesc(Tag, DecalDesc);
 }
 
 void CEffect_Controller::Save_SelectedChildren_To_Json()

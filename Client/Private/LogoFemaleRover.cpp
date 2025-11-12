@@ -75,6 +75,12 @@ void CLogoFemaleRover::Late_Update(_float fTimeDelta)
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CLogoFemaleRover::Render()
@@ -107,7 +113,25 @@ void CLogoFemaleRover::Render()
 
 void CLogoFemaleRover::Render_Shadow()
 {
+	Bind_Resources();
 
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (i == 5)	//Cloths
+			continue;
+
+		_bool HasNormal = { false };
+
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
 }
 
 void CLogoFemaleRover::Logo_Input()
@@ -181,7 +205,7 @@ void CLogoFemaleRover::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::LOGOROVER);
 }
 
 void CLogoFemaleRover::Ready_Positions(const CHARACTER_DESC* pDesc)

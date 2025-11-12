@@ -10,13 +10,20 @@
 #include"MapObject_NonSonoro.h"
 #include"MapObject_Sonoro.h"
 #include"MapObject_Instance.h"
+#include"MapObject_Meteo.h"
 #pragma endregion
 
-#pragma region FALSE_SOVEREIGN
+#pragma region MONSTER
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
 #include "AttackVolume.h"
+#include "Spawner.h"
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
+#include "AoEDoT.h"
+#include "Projectile.h"
+#include "Corosaurus.h"
 #pragma endregion
 
 #pragma region UI
@@ -68,6 +75,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
 	
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
@@ -86,8 +94,8 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1110_third/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Sovereign_1111_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soevereign_1111_Fix2/", m_eCurLevel);
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
@@ -136,7 +144,12 @@ HRESULT CLoader_GamePlay::Load_Object()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Instance"),
 		CMapObject_Instance::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MapObject_Meteo"),
+		CMapObject_Meteo::Create(m_pDevice, m_pContext));
 	
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Spawner"),
+		CSpawner::Create(m_pDevice, m_pContext));
 #pragma endregion
 	return S_OK;
 }
@@ -530,11 +543,84 @@ HRESULT CLoader_GamePlay::Load_MonsterTest()
 	return S_OK;
 }
 
+#pragma region MONSTER
+HRESULT CLoader_GamePlay::Load_Monster()
+{
+	// Prototype_Component_BehaviorTree_Ordinary
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_Ordinary"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/MonsterOrdinary_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
 
+#pragma region HAVOC_WARRIOR
+	// Prototype_Component_AnimMachine_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_HavocWarrior"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/HavocWarrior/Animation/HavocWarrior_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
 
+	// Prototype_Component_Model_HavocWarrior
+	_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_HavocWarrior"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/HavocWarrior/HavocWarrior.dat"))))
+		CRASH("Prototype Create Failed");
 
+	// Prototype_GameObject_HavocWarrior
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		CHavocWarrior::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
 
+#pragma region ELECTRO_PREDATOR
+	// Prototype_Component_AnimMachine_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_ElectroPredator"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/ElectroPredator/Animation/ElectroPredator_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
 
+	// Prototype_Component_Model_ElectroPredator
+	//_fmatrix PreTransformMatrix = XMMatrixScaling(0.0001f, 0.0001f, 0.0001f) * XMMatrixRotationY(XMConvertToRadians(180.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_ElectroPredator"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/ElectroPredator/ElectroPredator.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_ElectroPredator
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		CElectroPredator::Create(m_pDevice, m_pContext))))
+		CRASH("Electro Predator Prototype Create Failed");
+
+	// Prototype_GameObject_Projectile
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		CProjectile::Create(m_pDevice, m_pContext))))
+		CRASH("Projectile Create Failed");
+
+	// Prototype_GameObject_AOEDOT
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+		CAoEDoT::Create(m_pDevice, m_pContext))))
+		CRASH("AoEDoT Prototype Create Failed");
+#pragma endregion
+
+#pragma region CORROSAURUS
+	// Prototype_Component_BehaviorTree_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_BehaviorTree_CoroSaurus"),
+		CBehavior_Tree::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Corrosaurus/Corrosaurus_BT.json"))))
+		CRASH("BehaviorTree Create Failed");
+
+	// Prototype_Component_AnimMachine_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_AnimMachine_CoroSaurus"),
+		CAnimMachine::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Model/Corrosaurus/Animation/Corrosaurus_StateMachine.json"))))
+		CRASH("Monster AnimMachine Create Failed");
+
+	// Prototype_Component_Model_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_CoroSaurus"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, "../../Client/Bin/Resource/Model/Corrosaurus/Corrosaurus.dat"))))
+		CRASH("Prototype Create Failed");
+
+	// Prototype_GameObject_CoroSaurus
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
+		CCorosaurus::Create(m_pDevice, m_pContext))))
+		CRASH("MonsterTest Prototype Create Failed");
+#pragma endregion
+	return S_OK;
+}
+#pragma endregion
 
 CCustom_UI::CUSTOM_UITREE_DESC CLoader_GamePlay::Load_UITree(_string strFilePath)
 {
