@@ -43,14 +43,14 @@ void CUI_Text::Priority_Update(_float fTimeDelta)
 
 void CUI_Text::Update(_float fTimeDelta)
 {
-	Update_Description();
-
     __super::Update(fTimeDelta);            // Update Animator_UI Component
+	// Update_Description(fTimeDelta);
 }
 
 void CUI_Text::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
+	Update_Description(0.f); // ㅋㅋ
 }
 
 void CUI_Text::Render()
@@ -58,7 +58,6 @@ void CUI_Text::Render()
     //__super::Render();                      // Binding Shader Variables Continuously.
 	if (!m_isActivate || !m_pShaderCom)
 		return;
-
 
 	if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)        // 짬통 UI용. 어떤 유형의 UI에 쓸 건지의 Flag를 전역으로 던진다.
 		if (FAILED(m_pShaderCom->Bind_Value("g_iVariantFlag", &m_cachedVariantUIDesc.iShaderFlag, sizeof(m_cachedVariantUIDesc.iShaderFlag))))
@@ -208,7 +207,7 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	return S_OK;
 }
 
-void CUI_Text::Update_Description()
+void CUI_Text::Update_Description(_float fTimeDelta)
 {
 
 	// m_tTextDesc 갱신
@@ -260,15 +259,20 @@ void CUI_Text::Update_Description()
 		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
 
+		inst.matExtraData._11 = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;			// << 기존 UI와 Text UI Alpha 호환
+			//static_cast<CAnimator_UI*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
+
+
+
 		// 화면 좌표 (기준 위치 + bearing + 현재 pen 이동량)
 		if (!m_tTextDesc.isTargetExist)
 		{
-			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
+			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x										+ m_CombinedWorldMatrix._41 // << 기존 UI와 Text UI Pos 호환
 				+ penX
 				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
 
 
-			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
+			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y										+ m_CombinedWorldMatrix._42
 				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
 				+ penY;
 		}

@@ -552,7 +552,8 @@ void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 
 void CCustom_UI::Update_InputState()
 {
-    if (!m_isActivate)
+    if (!m_isActivate ||
+		m_tUIDesc.iUIType != ENUM_CLASS(UI_TYPE::BUTTON))
     {
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
         return;

@@ -80,43 +80,14 @@ void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
 
-	// 글자도 넣어야 함
-	// 그냥 만들어만 두고, 커스텀UI로써 이거 하위로 집어넣으면 될 것 같은데? 아닌가?
 
-	// ksta : 마저 제작 필요
+	auto attacher = Find_RootUI(L"UI_Interact")->Find_ChildObject(L"Root_Interact_Multiplier");
 
-	auto attacher = Find_RootUI(L"UI_Interact");
-	auto attacherDesc = attacher->Get_UIDesc();
-	
-	// 이미 텍스트 가지고있음?
-	_bool isTextExist = attacher->Find_ChildObject(L"UI_Text_Interact") != nullptr;
+	CCustom_UI* pFont = attacher->Find_ChildObject(L"UI_Text_Interact");
 
-	if (!isTextExist)
-	{	// 없다 -> 폰트 새로 만들고 넣음.
-
-		CCustom_UI* pFont = m_pGameSystem->Create_FontToScreen(
-			_float2{ g_iWinSizeX / 2.f + 200.f, g_iWinSizeY / 2.f - 50.f },
-			strText,	// 상호작용 글씨
-			TEXT_COLOR_TYPE::TT_NORMAL,
-			0.4f,
-			L"UI_Text_Interact"
-		);
-
-		auto fontDesc = pFont->Get_UIDesc();
-		attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
-		attacher->Add_Child(pFont);
-		fontDesc.pParentObject = Find_RootUI(L"UI_Interact");
-		pFont->Set_UIDesc(fontDesc);
-	}
-	else
-	{	// 있다 -> 기존 폰트의 텍스트만 변경
-
-		CCustom_UI* pFont = attacher->Find_ChildObject(L"UI_Text_Interact");
-
-		auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
-		textDesc.strText = strText;
-		static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
-	}
+	auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
+	textDesc.strText = strText;
+	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

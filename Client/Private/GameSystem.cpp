@@ -149,6 +149,11 @@ CUI_Text* CGameSystem::Create_FontToScreen(_float2 vScreenPos, _wstring strText,
 	return m_pUI_FontPreset->Create_FontToScreen(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
+CUI_Text* CGameSystem::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	return m_pUI_FontPreset->Create_FontToScreen_Alpha(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
+}
+
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
 {
 	return m_pUI_ControlHelper->Find_RootUI(strName);

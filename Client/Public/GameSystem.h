@@ -55,6 +55,7 @@ public:
 	void			Render_Damage(_float4 vTargetPos, _wstring strText, TEXT_COLOR_TYPE eColorType = TEXT_COLOR_TYPE::NONE, _float fSpawnRange = 10.f);
 	// 텍스트를 생성합니다.
 	class CUI_Text*	Create_FontToScreen(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
+	class CUI_Text*	Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName,_wstring strFontTag = L"WW_Bold");
 #pragma endregion
 
 #pragma region [UI] CONTROL_HELPER
