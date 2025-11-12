@@ -332,6 +332,30 @@
     <Filter Include="01. Utility\17. HZB">
       <UniqueIdentifier>{f24b0013-be1c-4a83-b7ea-f83034e68158}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX">
+      <UniqueIdentifier>{94d5595b-76e7-4090-851b-ed40679aa40b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Manager">
+      <UniqueIdentifier>{93caa249-df0a-45be-a18f-35f1675bffc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur">
+      <UniqueIdentifier>{8e4ddbd1-f16d-4171-bb88-3229e8cd2993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\Motion">
+      <UniqueIdentifier>{89186dd5-c5ee-4285-b20a-60474c39e37a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\DOF">
+      <UniqueIdentifier>{d9c55ab9-ce59-4a99-8be0-dbfa1acdced2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\SSAO">
+      <UniqueIdentifier>{756189f4-b09f-4d3b-9757-dad2521037bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\Bloom">
+      <UniqueIdentifier>{110a8cf2-2059-46c4-afaf-849626c1ee16}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\ScreenBlur">
+      <UniqueIdentifier>{fceb8e8c-796c-4eb7-a6f3-cd5c76e4a2e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">
@@ -674,6 +698,30 @@
     <ClInclude Include="..\public\VolumetricFog.h">
       <Filter>01. Utility\18.VolumetricFog</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\SFX_Hub.h">
+      <Filter>01. Utility\99. Renderer\SFX\Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SFX.h">
+      <Filter>01. Utility\99. Renderer\SFX</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SSAO.h">
+      <Filter>01. Utility\99. Renderer\SFX\SSAO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Bloom.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Bloom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\Blur.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\DOF.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\DOF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\MotionBlur.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\ScreenBlur.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -991,6 +1039,30 @@
     </ClCompile>
     <ClCompile Include="..\Private\HZB.cpp">
       <Filter>01. Utility\17. HZB</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX_Hub.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX.cpp">
+      <Filter>01. Utility\99. Renderer\SFX</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SSAO.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\SSAO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Bloom.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Bloom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\Blur.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\DOF.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\DOF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\MotionBlur.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\ScreenBlur.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

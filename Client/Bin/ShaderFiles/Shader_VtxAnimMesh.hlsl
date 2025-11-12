@@ -12,6 +12,7 @@ matrix g_ShadowViewMatrix[4];
 matrix g_ShadowProjMatrix[4];
 
 float g_fOutLineRadius = 0.001f;
+float4 g_vOutLineColor = float4(0.3f, 0.15f, 0.f, 1.f);
 
 float g_fDissolveRate = 0.f;
 float g_fFlowRate = 0.f;
@@ -428,7 +429,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
     PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
 
     if (In.IsDraw)
-        Out.vColor = float4(0.3f, 0.15f, 0.f, 1.f);
+        Out.vColor = g_vOutLineColor;
     else
         discard;
         
