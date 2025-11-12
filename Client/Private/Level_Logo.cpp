@@ -5,16 +5,19 @@
 
 #include "Dummy.h"
 #include "LogoMaleRover.h"
+#include"GameSystem.h"
 
 CLevel_Logo::CLevel_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-    : CLevel { pDevice, pContext }
+    : CLevel { pDevice, pContext }, m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CLevel_Logo::Initialize()
 {
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
+	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
 
@@ -24,7 +27,6 @@ HRESULT CLevel_Logo::Initialize()
 	LightDesc.vDiffuse = _float4(0.6f, 0.6f, 0.8f, 1.f);
 	LightDesc.vDirection = _float4(0.f, -1.f, 0.5f, 0.f);
 	LightDesc.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
-
 	m_pGameInstance->Add_Light(TEXT("Test"), LightDesc);
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
@@ -113,4 +115,5 @@ void CLevel_Logo::Free()
 	Safe_Release(m_pRigidbody1);
 	Safe_Release(m_pRigidbody2);
 	//Safe_Release(m_pRigidbody3);
+	Safe_Release(m_pGameSystem);
 }

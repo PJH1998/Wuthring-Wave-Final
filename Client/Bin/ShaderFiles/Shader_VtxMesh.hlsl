@@ -131,21 +131,21 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
             if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
                 vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
 
-            //vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
+            vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
         
-            //float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
-            //if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
-            //    vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
+            float4 vNormal2 = normalize(vMaskNormal * 2.f - 1.f);
+            if (vMaskNormal.x > vMaskNormal.z && vMaskNormal.y > vMaskNormal.z)
+                vNormal2.z = sqrt(1.f - saturate(dot(vMaskNormal.xy, vMaskNormal.xy)));
 
-            //if (vMask.r == 0.f && vMask.g == 0.f)
-            //    vNormal = vNormal1;
-            //else
-            //{
-            //vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
-            //vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
-            //}
+            if (vMask.r == 0.f && vMask.g == 0.f)
+                vNormal = vNormal1;
+            else
+            {
+                vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+                vNormal = vNormal * vMask.g + vNormal2 * (1.f - vMask.g);
+            }
             
-            vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
+            //vNormal = vNormal1 * (vMask.r) + vNormal1 * (1.f - vMask.r);
         }
         else
         {

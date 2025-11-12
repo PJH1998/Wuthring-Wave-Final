@@ -98,7 +98,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			}
 
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
-			m_pAugusta->Rotate_Target();
+			//m_pAugusta->Rotate_Target();
 			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
