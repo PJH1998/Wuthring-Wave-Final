@@ -80,6 +80,7 @@ void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 
 	for (auto& pObject : m_NonSonoroObjects)
 		pObject-> Change_Collision_Layer(m_SonoroRigidActive);
+
 	for (auto& pObject : m_SonoroObjects)
 		pObject->Change_Collision_Layer(m_SonoroRigidActive);
 
