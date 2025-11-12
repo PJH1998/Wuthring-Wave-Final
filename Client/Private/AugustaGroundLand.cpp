@@ -67,7 +67,7 @@ void CAugustaGroundLand::OnExit()
 
 void CAugustaGroundLand::Handle_Input()
 {
-	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
 	// Hit면 모든 상태 제거
 	if (m_States[HIT])
 		return;

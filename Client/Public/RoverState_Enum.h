@@ -13,6 +13,7 @@ enum class ERoverGroundState : _uint
 	WALK,			
 	RUN,			
 	DASH,			
+	DODGE,
 	ATTACK,			
 	SKILL,			
 	BURST,			
@@ -119,6 +120,13 @@ enum class ERoverDashType : _uint
 
 };
 
+enum class ERoverDodgeType : _uint
+{
+	MOVE_LIMIT_F = 0,
+	MOVE_LIMIT_B,
+	END
+};
+
 enum class ERoverAttackType : _uint
 {
 	ATTACK01 = 0,
@@ -126,7 +134,6 @@ enum class ERoverAttackType : _uint
 	ATTACK03,
 	ATTACK05,
 	ATTACK04,
-
 	END
 };
 

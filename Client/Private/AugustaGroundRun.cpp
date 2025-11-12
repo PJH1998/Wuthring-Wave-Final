@@ -46,7 +46,11 @@ void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
     Handle_Input();
 
     // 1. 애니메이션 갱신.
-    Update_RunAnimation(fTimeDelta);
+	//if (!m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)))
+	//	Update_RunAnimation(fTimeDelta); // 애니메이션 갱신 (및 이동/회전).
+	//else
+	//	CCharacterState::Play_Animation(m_pAugusta, fTimeDelta); // 애니메이션 갱신만하고 이동 멈춤.
+	Update_RunAnimation(fTimeDelta); // 애니메이션 갱신 (및 이동/회전).
 
     // 2. 물리 체크.
     Check_Physics(fTimeDelta);
@@ -72,15 +76,23 @@ void CAugustaGroundRun::Handle_Input()
     // 1. 방향 계산
     m_eDir = m_pAugusta->Calculate_Direction();
 
-	m_States[HIT] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT); // HIT 상태인가?
-	if (m_States[HIT]) // 모든 조건 상위 조건
+	// Dash 키입력 체크.
+	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+
+	m_States[HIT] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
+	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
 		return;
 	m_States[FLY] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
 
     // 키 입력.
     m_States[JUMP] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
     m_States[MOVE] = m_pAugusta->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
-    m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+    
+    
 
     m_States[RUN_U] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
     m_States[RUN_D] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
@@ -116,6 +128,8 @@ void CAugustaGroundRun::Handle_Input()
 
     // 상태에 따라 속도 다르게.
     m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+
+	m_States[LOCKON] = m_pAugusta->Is_LockOn();
 }
 
 
@@ -130,7 +144,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
 
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
     // 1. 회전 및 이동.
-    if (m_pAugusta->Is_LockOn())
+    if (m_States[LOCKON])
     {
         if (eRunType == EAugustaRunType::SPRINT_F || eRunType == EAugustaRunType::STOP_SPRINT_L)
             m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
@@ -141,6 +155,7 @@ void CAugustaGroundRun::Update_RunAnimation(_float fTimeDelta)
     else 
         m_pAugusta->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
 
+	
 }
 
 void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
@@ -148,7 +163,6 @@ void CAugustaGroundRun::Check_Physics(_float fTimeDelta)
 	
     m_States[WALL] = m_pAugusta->Check_ClimbableWall(&m_vWallNormal); // Wall인지?
     // Land Check
-
 
 	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
@@ -173,7 +187,23 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 {
  
     EAugustaRunType eRunType = static_cast<EAugustaRunType>(m_iCurrentAnimIdx);
-    _float3 vNormal = {}; // 벽타기 전환 용도 Normal
+    
+
+	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
+
+	// 2.
+	if (m_States[HIT])
+	{
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT));
+		return;
+	}
+
     // 이 조건은 추후 디테일 잡아보기.
 
     //// 전방 벽감지.
@@ -198,12 +228,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		//}
   //  }
 
-	// 상위, 하위 상태
-	if (m_States[HIT])
-	{
-		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EAugustaHitState::HIT)); 
-		return;
-	}
 
 	if (m_States[FALL])
     {
@@ -329,12 +353,18 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 
             return;
         }
+		
         // 이동 값이 들어왔는데 Stop Run 상태라면?
         if (eRunType == EAugustaRunType::STOP_RUN_L || eRunType == EAugustaRunType::SPRINT_F)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRunType::RUN_F);
             return;
         }
+		else
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaRunType::RUN_F);
+			return;
+		}
     }
 
     // 이동 입력 값이 안들어왔다면?

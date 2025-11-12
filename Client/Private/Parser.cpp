@@ -5,6 +5,7 @@
 #include "Trigger_Box.h"
 #include "MapObject_Destruction.h"
 #include"MapObject_Instance.h"
+#include"MapObject_Meteo.h"
 #include "Spawner.h"
 
 #include "Effect_Prefab.h"
@@ -251,23 +252,6 @@ void CParser::Clone_MapObjects(LEVEL eLevel)
 			Read_Map_Dat(eLevel, strFilePath);
 		}
 	}
-	//_splitpath_s(m_LoadingMap[eLevel][iIndex], FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
-
-	//for (const auto& entry : filesystem::recursive_directory_iterator(FileDir)) {
-	//	if (!entry.is_regular_file())
-	//		continue;
-
-	//	if (entry.path().extension() != ".dat")
-	//		continue;
-
-	//	if (entry.path().string().find("Prototype") != std::string::npos)
-	//		continue;
-
-
-	//	_string strFilePath = entry.path().string();
-
-	//	Read_Map_Dat(eLevel, strFilePath);
-	//}
 }
 
 #pragma region SPAWNER
@@ -366,6 +350,35 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			//	});
 		}
 	}
+	else if (pFilePath.find("Meteo") != std::string::npos) 
+	{
+		CMapObject_Meteo::MAP_LOAD Desc{};
+		
+		while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+		{
+			memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+			File.read(Desc.ModelName, NameLength);
+			_string Name = Desc.ModelName;
+
+			OBJECTTYPE Type;
+			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+
+			File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
+			File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
+
+			File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+			File.read(reinterpret_cast<char*>(&Desc.fArchY), sizeof(_float));
+
+
+			File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+
+			File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+			XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
+			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Meteo")
+				, ENUM_CLASS(eLevel), TEXT("Layer_Meteo"), &Desc);
+		}
+	}
 	else if (pFilePath.find("TriggerBox") != std::string::npos)
 	{
 		//_uint iTriggerIndex;
@@ -377,7 +390,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Matrix), sizeof(_float4x4));
 			Desc.WorldMatrix = &Matrix;
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_TriggerBox")
-				, ENUM_CLASS(eLevel), TEXT("Layer_Test"), &Desc);
+				, ENUM_CLASS(eLevel), TEXT("Layer_Trigger"), &Desc);
 		}
 	}
 	else

@@ -12,6 +12,8 @@ private:
         HIT = 0,
 		JUMP,
 		LAND,
+		DODGE,
+		DODGEABLE,
         DASH,
         SPRINT,
         MOVE,

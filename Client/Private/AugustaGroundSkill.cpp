@@ -54,11 +54,21 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			// 진입했을 때 Condition E_RISE로 변환? => E_GRIFFON도 활성화.
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
 			m_pAugusta->Bind_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+
+			// 무적.
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
+		case EAugustaSkillType::SKILL_RISE_ZERO:
+		{
+			m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+			break;
+		}
         case EAugustaSkillType::SKILL_RISE:
         {
             m_pAugusta->Set_Gravity(false);
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
 
@@ -73,6 +83,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(false);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+
 			break;
 		}
 
@@ -87,6 +98,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 		case EAugustaSkillType::ATTACK_PULL:
@@ -99,6 +111,7 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 
@@ -112,11 +125,14 @@ void CAugustaGroundSkill::OnEnter(void* pArg)
 			m_pAugusta->Set_Gravity(true);
 			// 진입할때 한번만.
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
         
     }
 
+
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName;
 }
 
@@ -162,8 +178,7 @@ void CAugustaGroundSkill::OnExit()
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 
 	/* 컨디션 제거*/
-	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_GRIFFON));
-	//m_pAugusta->Remove_Condition_ToAbillity(ENUM_CLASS(UI_AUGUSTA_CONDITION::E_RISE));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaGroundSkill::Handle_Input()
@@ -190,8 +205,7 @@ void CAugustaGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
 
 	Handle_Animation_SpecialState();
-	if (eSkillType == EAugustaSkillType::ATTACK_PULL) // 1. 뒤로 이동은 온전하게 이동거리받기.
-		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate;
+
 
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
@@ -385,7 +399,7 @@ void CAugustaGroundSkill::SetUp_Animations()
 {
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 65.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
-	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 15.f, 1.5f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.f, 15.f, 2.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.f, 25.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
 
@@ -410,6 +424,15 @@ void CAugustaGroundSkill::State_Reset()
 
 void CAugustaGroundSkill::Handle_Animation_SpecialState()
 {
+	EAugustaSkillType eSkillType = static_cast<EAugustaSkillType>(m_iCurrentAnimIdx);
+
+	//if (eSkillType == EAugustaSkillType::SKILL_RISE_ZERO)
+	//	m_fAnimationScale = 1.f;
+
+	if (eSkillType == EAugustaSkillType::ATTACK_PULL || eSkillType == EAugustaSkillType::SKILL_RISE_ZERO) // 1. 뒤로 이동은 온전하게 이동거리받기.
+		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
+
+	
 }
 
 

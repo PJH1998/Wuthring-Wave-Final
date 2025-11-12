@@ -76,6 +76,10 @@ public:
 	void OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 	void OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
+
+public:
+	_bool Is_TargetValid(class CTransform* pTarget); // 타겟이 유효한가?
+
 private:
 	vector<class CCharacter*> m_Characters; 
 	class CInputController* m_pInputControllerCom = { nullptr };
@@ -97,6 +101,7 @@ private:
 	// LockOn
 	vector<class CTransform*> m_TargetTransforms;
 	class CTransform* m_pTargetTransform = { nullptr };
+	class CTransform* m_pLockOnTargetTransform = { nullptr };
 	class CCollider* m_pColliderCom = { nullptr };
 
 	_bool m_IsLockOn = { false };
@@ -115,10 +120,13 @@ private:
 
 	_float m_fTargetDistance = {}; // 몬스터와의 거리
 
+	_uint m_iCondition = {};
+
 private:
 	void Player_KeyInput();
 	void Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDetla);
 	void Sync_Transform_FromCharacter(class CCharacter* pCharacter);
+	void Sync_Condition_FromCharacter(class CCharacter* pCharacter);
 	void Sorting_Target();
 	void Toggle_LockOn();
 
