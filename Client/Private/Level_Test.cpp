@@ -68,11 +68,11 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	//Ready_Dummy();
+	Ready_Dummy();
 	//Ready_MonsterTest();
 	//Ready_HavocWarrior();
 	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
+	//Ready_CoroSaurus();
 	//Ready_Spawner();
 
     Ready_Effect();
@@ -189,15 +189,51 @@ void CLevel_Test::Ready_Dummy()
 	
 	CPatternDummy::PAT_DUMMYDESC DummyDesc{};
 	DummyDesc.eLevel = m_eCurLevel;
-	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
+	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_FalseSovereign");
+	DummyDesc.strInitAnimTag = "Stand1";
+	DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");					//코로사우로스?
+	//DummyDesc.strInitAnimTag = "Stand";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Ggobul");						//꼬불이
+	//DummyDesc.strInitAnimTag = "SAttack01_1";
+	//DummyDesc.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	//DummyDesc.strModelTag = TEXT("Prototype_Component_Model_Scythe");						//촉수
 	//DummyDesc.strInitAnimTag = "Stand1";
-	//DummyDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
-	DummyDesc.strModelTag = TEXT("Prototype_Component_Model_CoroSaurus");
-	DummyDesc.strInitAnimTag = "Stand";
 	DummyDesc.vInitPosition = _float3(0.f, -7.f, -6.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_PatternDummy"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &DummyDesc)))
 		CRASH("Failed Ready Monster");
+
+	CGgobul::GGOBUL_DESC Ggobul{};
+	Ggobul.eCurLevel = m_eCurLevel;
+	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
+	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Ggobul.strFolderPath = "../Bin/Resource/Model/Ggobul/Notify";
+	Ggobul.fRotationPerSec = XMConvertToRadians(90.f);
+	Ggobul.fSpeedPerSec = 10.f;
+	Ggobul.fAttackDmg =0.f;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Ggobul"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Ggobul"), 3, &Ggobul)))
+		CRASH("Failed Ready Ggobul");
+
+	//Scythe
+	CFS_Scythe::SCYTHE_DESC Tantacle{};
+	Tantacle.eCurLevel = m_eCurLevel;
+	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
+	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
+	Tantacle.strFolderPath = "../Bin/Resource/Model/FS_Scythe/Notify";
+	Tantacle.fRotationPerSec = XMConvertToRadians(90.f);
+	Tantacle.fSpeedPerSec = 10.f;
+	Tantacle.fAttackDamage = 0.f;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
+		CRASH("Failed Ready Scythe");
 }
 
 void CLevel_Test::Ready_MonsterTest()

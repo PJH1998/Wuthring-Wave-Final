@@ -21,6 +21,9 @@ HRESULT CTrail_Mesh::Initialize_Prototype()
 HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 {
     TRAILMESH_DESC* pDesc = static_cast<TRAILMESH_DESC*>(pArg);
+	
+	m_IsDissolve = pDesc->IsDissolve;
+	m_IsDistortion = pDesc->IsDistortion;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -52,9 +55,6 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_iDirFalg = pDesc->iDirFlag;
 	m_iMaskFlag = pDesc->iMaskFlag;
 
-	m_IsDissolve = pDesc->IsDissolve;
-
-	m_IsDistortion = pDesc->IsDistortion;
 	m_fDistortionWeight = pDesc->fDistortionWeight;
 
     //임시처리
@@ -106,7 +106,10 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
+	if(m_IsDistortion)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+	else
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CTrail_Mesh::Render()
