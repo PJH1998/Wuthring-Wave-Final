@@ -358,10 +358,10 @@ void CLevel_GamePlay::Ready_UI()
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
-	//CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
-	//	CRASH("Failed Ready Text_Damage");
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		CRASH("Failed Ready Text_Damage");
 
 	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
 	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
