@@ -12,6 +12,10 @@ private:
         JUMP = 0,
         MOVE,
 		LAND,
+		DASH,
+		DODGE,
+		HIT,
+		DODGEABLE,
         END
     };
 

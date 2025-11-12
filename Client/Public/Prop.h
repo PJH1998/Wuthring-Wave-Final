@@ -67,8 +67,11 @@ protected:
 
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	_float m_fTrackPosition = {};
-	_bool m_IsAnimationEnd = { false };
 	_string m_strCurrentAnimName = {};
+	_bool m_IsAnimationEnd = { false };
+	
+
+	_bool m_IsShaking = { false };
 
 	_uint m_iVolumeIdx = {};
 	vector<class CAttackVolume*> m_AttackVolumes;

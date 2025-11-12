@@ -179,6 +179,7 @@
     <ClInclude Include="..\Public\AugustaAirAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundAttack.h" />
     <ClInclude Include="..\Public\AugustaGroundBurst.h" />
+    <ClInclude Include="..\Public\AugustaGroundDodge.h" />
     <ClInclude Include="..\Public\AugustaGroundIdle.h" />
     <ClInclude Include="..\Public\AugustaGroundLand.h" />
     <ClInclude Include="..\Public\AugustaGroundQTE.h" />
@@ -198,6 +199,7 @@
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
     <ClInclude Include="..\public\Corosaurus.h" />
+    <ClInclude Include="..\Public\Effect_Decal.h" />
     <ClInclude Include="..\Public\Effect_Prefab.h" />
     <ClInclude Include="..\Public\Director.h" />
     <ClInclude Include="..\Public\Effect_Rect.h" />
@@ -214,6 +216,7 @@
     <ClInclude Include="..\Public\MapObject_Destruction.h" />
     <ClInclude Include="..\Public\MapObject_Destruction_Debris.h" />
     <ClInclude Include="..\Public\MapObject_Instance.h" />
+    <ClInclude Include="..\Public\MapObject_Meteo.h" />
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
@@ -264,6 +267,7 @@
     <ClInclude Include="..\Public\RoverGroundAttack.h" />
     <ClInclude Include="..\Public\RoverGroundBurst.h" />
     <ClInclude Include="..\Public\RoverGroundDash.h" />
+    <ClInclude Include="..\Public\RoverGroundDodge.h" />
     <ClInclude Include="..\Public\RoverGroundIdle.h" />
     <ClInclude Include="..\Public\RoverGroundLand.h" />
     <ClInclude Include="..\Public\RoverGroundQTE.h" />
@@ -339,6 +343,7 @@
     <ClCompile Include="..\Private\AugustaGriffon.cpp" />
     <ClCompile Include="..\Private\AugustaGroundAttack.cpp" />
     <ClCompile Include="..\Private\AugustaGroundBurst.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundDodge.cpp" />
     <ClCompile Include="..\Private\AugustaGroundIdle.cpp" />
     <ClCompile Include="..\Private\AugustaGroundLand.cpp" />
     <ClCompile Include="..\Private\AugustaGroundQTE.cpp" />
@@ -364,6 +369,7 @@
     </ClCompile>
     <ClCompile Include="..\Private\Director.cpp" />
     <ClCompile Include="..\Private\Dummy.cpp" />
+    <ClCompile Include="..\Private\Effect_Decal.cpp" />
     <ClCompile Include="..\Private\Effect_Prefab.cpp" />
     <ClCompile Include="..\Private\Effect_Rect.cpp" />
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
@@ -396,6 +402,7 @@
     <ClCompile Include="..\Private\MapObject_Destruction.cpp" />
     <ClCompile Include="..\Private\MapObject_Destruction_Debris.cpp" />
     <ClCompile Include="..\Private\MapObject_Instance.cpp" />
+    <ClCompile Include="..\Private\MapObject_Meteo.cpp" />
     <ClCompile Include="..\Private\MapObject_NonSonoro.cpp" />
     <ClCompile Include="..\Private\MapObject_Sonoro.cpp" />
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
@@ -413,6 +420,7 @@
     <ClCompile Include="..\Private\RoverDarkWing.cpp" />
     <ClCompile Include="..\Private\RoverGroundAttack.cpp" />
     <ClCompile Include="..\Private\RoverGroundBurst.cpp" />
+    <ClCompile Include="..\Private\RoverGroundDodge.cpp" />
     <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />

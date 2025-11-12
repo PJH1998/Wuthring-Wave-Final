@@ -42,6 +42,7 @@ void CMapObject_Destruction_Debris::Priority_Update(_float fTimeDelta)
 	if (m_IsTriggered)
 	{
 		//위치가 다시 안돌아옴. ->SetPosition 안먹음.
+		m_pRigidbodyCom->IsActivate(true);
 		m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_FixedPos));
 		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
@@ -57,6 +58,7 @@ void CMapObject_Destruction_Debris::Update(_float fTimeDelta)
 
 	if (m_fTimeDelta >= 4.f)
 	{
+		m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION) - XMVectorSet(0.f, 1000.f, 0.f, 0.f));
 		m_pRigidbodyCom->IsActivate(false);
 		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_isActivate = false;

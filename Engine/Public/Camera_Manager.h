@@ -15,8 +15,9 @@ public:
 
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 
-	_float			Get_CurrentCamera_Near();
-	_float			Get_CurrentCamera_Far();
+	_float				Get_CurrentCamera_Near();
+	_float				Get_CurrentCamera_Far();
+	void				Set_CurrentCamera_Far(_float fFar);
 
 	void				OnShake(const CAMERA_SHAKE& tData);
 

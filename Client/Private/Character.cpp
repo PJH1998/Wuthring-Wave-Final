@@ -447,21 +447,62 @@ _vector CCharacter::Get_RightVector_NoPitch()
 }
 
 
+void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
+{
+	if (nullptr == pTargetTransform)
+	{
+		m_IsLockOn = false;
+		m_pTargetTransform = nullptr;
+
+		// LockOn 해제 시: 카메라 Look_NoPitch으로 즉시 회전 (반대 방향 착시 완전 해결)
+		if (m_pSpringCamera)
+		{
+			_vector vCamLook = m_pSpringCamera->Get_LookVector();
+			vCamLook = XMVectorSetY(vCamLook, 0.f);
+			vCamLook = XMVector3Normalize(vCamLook);
+			m_pTransformCom->LookDir(vCamLook);
+		}
+		return;
+	}
+	else
+	{
+		
+		// 1. TargetTransform은 항상 가져옵니다.
+		m_pTargetTransform = pTargetTransform;
+		// 2. LockOn은 상황따라
+		m_IsLockOn = IsLockOn;
+	}
+
+
+	return;
+}
+
 void CCharacter::Set_LockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
-    if (nullptr == pTargetTransform)
-    {
-        m_IsLockOn = false;
-        m_pTargetTransform = nullptr;
-        return;
-    }
-    else
-    {
-        // 1. TargetTransform은 항상 가져옵니다.
-        m_pTargetTransform = pTargetTransform;
-        // 2. LockOn은 상황따라
-        m_IsLockOn = IsLockOn;
-    }
+	if (nullptr == pTargetTransform)
+	{
+		m_IsLockOn = false;
+		m_pTargetTransform = nullptr;
+
+		// LockOn 해제 시: 카메라 Look_NoPitch으로 즉시 회전 (반대 방향 착시 완전 해결)
+		if (m_pSpringCamera)
+		{
+			_vector vCamLook = m_pSpringCamera->Get_LookVector();
+			vCamLook = XMVectorSetY(vCamLook, 0.f);
+			vCamLook = XMVector3Normalize(vCamLook);
+			m_pTransformCom->LookDir(vCamLook);
+		}
+		return;
+	}
+	else
+	{
+		// LockOn을 받아옵니다.
+		m_IsLockOn = IsLockOn;
+
+		// LockOn용 타겟을 받습니다.
+		m_pLockOnTargetTransform = pTargetTransform;
+		m_pTargetTransform = pTargetTransform;
+	}
 }
 
 _bool CCharacter::Is_LockOn()
@@ -574,6 +615,33 @@ _vector CCharacter::Calculate_Move_Direction(ACTORDIR eDir)
     return XMVectorZero();
 }
 
+_vector CCharacter::Calculate_LockOn_Move_Direction(ACTORDIR eDir)
+{
+	if (nullptr == m_pTargetTransform)
+		return XMVectorZero();
+
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vTargetPos = m_pTargetTransform->Get_State(STATE::POSITION);
+
+	_vector vToTarget = XMVector3Normalize(vTargetPos - vMyPos);
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	_vector vTargetRight = XMVector3Normalize(XMVector3Cross(XMVectorSet(0.f, 1.f, 0.f, 0.f), vToTarget));
+
+	switch (eDir)
+	{
+	case ACTORDIR::U:   return -vToTarget;  
+	case ACTORDIR::D:   return vToTarget;   
+	case ACTORDIR::L:   return -vTargetRight; 
+	case ACTORDIR::R:   return vTargetRight;  
+	case ACTORDIR::LU:  return XMVector3Normalize(-vToTarget - vTargetRight);
+	case ACTORDIR::LD:  return XMVector3Normalize(vToTarget - vTargetRight);
+	case ACTORDIR::RU:  return XMVector3Normalize(-vToTarget + vTargetRight);
+	case ACTORDIR::RD:  return XMVector3Normalize(vToTarget + vTargetRight);
+	default: return XMVectorZero();
+	}
+}
+
 // LockOn 시 이동
 void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpeed)
 {
@@ -583,13 +651,16 @@ void CCharacter::Move_LockOn_8Way(ACTORDIR eDir, _float fTimeDelta, _float fSpee
     ASSERT_CRASH(m_pSpringCamera);
     ASSERT_CRASH(m_pTransformCom);
 
+	/*_vector vMoveDir = Calculate_LockOn_Move_Direction(eDir);
+	m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);*/
+
     // 1. 회전.
-    Rotate_Target();
+	Rotate_Target_Lerp(fTimeDelta);
 
 	// 2. 이동 방향.
     _vector vMoveDir = Calculate_Move_Direction(eDir);
 
-    // 3. 이동 적용
+    // 3. 이동 적용  
     m_pTransformCom->Go_Dir(vMoveDir * fSpeed, fTimeDelta);
 }
 
@@ -651,8 +722,6 @@ void CCharacter::Rotate_DirectionLerp(_fvector vDir, _float fTimeDelta, _float f
 
 
 
-
-
 void CCharacter::Rotate_Target()
 {
     // 1. 타겟이 없는 경우 Return
@@ -669,6 +738,20 @@ void CCharacter::Rotate_Target()
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
+}
+
+void CCharacter::Rotate_Target_Lerp(_float fTimeDelta)
+{
+	
+	if (nullptr == m_pTargetTransform || nullptr == m_pTransformCom)
+		return;
+
+	_vector vTarget = m_pTargetTransform->Get_State(STATE::POSITION);
+	_vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
+	_vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
+	vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	m_pTransformCom->LookLerp(vToTarget, fTimeDelta, 15.f);
 }
 
 
@@ -776,32 +859,49 @@ void CCharacter::Sync_UI()
 
 #pragma region CONDITION
 
-void CCharacter::Add_Condition(CHARACTER_CONDITION eConditionFlag)
+void CCharacter::Add_Condition(_uint iConditionFlag)
 {
-	_uint iFlag = static_cast<_uint>(eConditionFlag);
-	m_iCondition |= iFlag;
+	m_iCondition |= iConditionFlag;
 }
 
-_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
+_bool CCharacter::Check_AnyCondition(_uint iConditionFlag)
 {
-	_uint iFlag = static_cast<_uint>(eConditionFlag);
-	return (m_iCondition & iFlag) != 0;
-}
-_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
-{
-	_uint iFlag = static_cast<_uint>(eConditionFlag);
-	return (m_iCondition & iFlag) == iFlag;
+	return (m_iCondition & iConditionFlag) != 0;
 }
 
-void CCharacter::Remove_Condition(CHARACTER_CONDITION eConditionFlag)
+_bool CCharacter::Check_AllCondition(_uint iConditionFlag)
 {
-	_uint iFlag = static_cast<_uint>(eConditionFlag);
-	m_iCondition &= ~iFlag;
+	return (m_iCondition & iConditionFlag) == iConditionFlag;
+}
+
+//_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
+//{
+//	_uint iFlag = static_cast<_uint>(eConditionFlag);
+//	return (m_iCondition & iFlag) != 0;
+//}
+//_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
+//{
+//	_uint iFlag = static_cast<_uint>(eConditionFlag);
+//	return (m_iCondition & iFlag) == iFlag;
+//}
+
+
+void CCharacter::Remove_Condition(_uint iConditionFlag)
+{
+	m_iCondition &= ~iConditionFlag;
 }
 
 void CCharacter::Remove_AllCondition()
 {
 	m_iCondition = 0;
+}
+
+void CCharacter::Sync_Condition_ToPlayer(_uint* pCondition)
+{
+	if (nullptr == pCondition)
+		return;
+
+	*pCondition = m_iCondition; // 값 넣어주기.
 }
 
 

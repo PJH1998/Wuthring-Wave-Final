@@ -57,13 +57,18 @@ HRESULT CRover::Initialize_Clone(void* pArg)
 	PartActivate(PART_SWORD, false);
 	PartActivate(PART_DARKWING, false);
 	PartActivate(PART_DARKSCYTHE, false);
-	//PartActivate(PART_DARKSCYTHE, true);
 	
 	PartActivate(PART_WING, false);
 	
-	m_IsQTE = false;
+
+	m_IsQTE = false; // QTE
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
+	_vector vPos = m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f);
+	XMStoreFloat4(&m_vQTEPos, vPos);
+	m_pQTEColliderCom->Set_Position(vPos);
+
+	m_fDodgeableDuration = 0.1f; // Dodge 가능 시간.
     return S_OK;
 }
 
@@ -72,6 +77,9 @@ void CRover::Priority_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
+	// 0. Delayed Action 수행.
+	Process_DelayedActions(fTimeDelta);
+
 	// 1. Parts 갱신
 	for (auto& pPart : m_PartObjects)
 	{
@@ -79,8 +87,7 @@ void CRover::Priority_Update(_float fTimeDelta)
 			pPart.second->Priority_Update(fTimeDelta);
 	}
 
-	// 0. Delayed Action 수행.
-	Process_DelayedActions();
+
 
     // 2. 이전 위치 저장
     m_pTransformCom->Save_PreviousPosition();
@@ -135,7 +142,7 @@ void CRover::Update(_float fTimeDelta)
 	m_IsLand = Is_LandCollider();
 
 	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	Remove_Condition(CHARACTER_CONDITION::HIT);
+	Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
 	// 9. MainAttackVolume 설정
 	if (nullptr != m_pMainAttackVolume)
@@ -164,12 +171,19 @@ void CRover::Late_Update(_float fTimeDelta)
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
+		m_pQTEColliderCom->Set_Position(XMLoadFloat4(&m_vQTEPos));
 		m_IsQTEend = false;
 	}
 
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::OUTLINE, this)))
+		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CRover::Render()
@@ -206,8 +220,47 @@ void CRover::Render()
 
 }
 
+void CRover::Render_OutLine()
+{
+	Bind_Resources();
+
+	_uint iNumMeshes = m_pModelCom->Get_NumMesh();
+	for (_uint i = 0; i < iNumMeshes; i++)
+	{
+		if (i == 5)	//Cloths
+			continue;
+
+		_bool HasNormal = { false };
+
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		if (FAILED(m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::OUNTLINE))))
+			CRASH("Ready Shader Begin Failed");
+
+		if (FAILED(m_pModelCom->Render(i)))
+			CRASH("Ready Render Failed");
+	}
+}
+
 void CRover::Render_Shadow()
 {
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 
@@ -355,6 +408,16 @@ void CRover::Hit_Judge(void* pArg)
 	if (nullptr == pArg || m_IsHit)
 		return;
 
+	_uint iFlag = {};
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::HIT);
+	iFlag |= ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE);
+
+	// 컨디션 체크
+	if (Check_AnyCondition(iFlag))
+		return;
+
 	StateKey eKey = m_pStateMachineCom->Get_CurrentStateKey();
 	_uint iCategory = eKey.iCategory;
 	_uint iSubState = eKey.iSubState;
@@ -365,16 +428,25 @@ void CRover::Hit_Judge(void* pArg)
 		return;
 
 	// 2. 즉시 중복 방지 플래그 세팅
-	m_PendingConditions[HIT] = true;
+	//m_PendingConditions[HIT] = true;
 
 	// 3. 데이터 저장.
 	CCharacter::HIT_DESC* pDesc = static_cast<HIT_DESC*>(pArg);
-	//m_pAbillityCom->Add_Hp(-pDesc->fAttack);
-
-	// 4. 큐에 Hit 이벤트 push (실제 로직은 처리 시 실행)
-	m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
-
 	m_PendingHitDesc = *pDesc;
+
+	Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능
+	m_fDodgeableHitTimer = m_fDodgeableDuration;
+
+
+	// 4. 맞았을떄 시간 느리게 하기? => 이때 Attack이라면? 무시. => 다른 스킬 조건들은 Invincible 상태라 예외처리할 필요성 X
+	_bool IsAttack = eKey.iCategory == ENUM_CLASS(EStateCategory::GROUND) && eKey.iSubState == ENUM_CLASS(ERoverGroundState::ATTACK);
+	if (!IsAttack)
+		m_pGameInstance->Change_TimeRate(TEXT("Timer_60"), 0.2f, m_fDodgeableDuration); // Dodge 시간 동안 느리게하기?
+
+	
+	//m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, pDesc));
+
+
 }
 
 void CRover::Sync_Position()
@@ -389,7 +461,6 @@ void CRover::Bind_QTE(_bool IsQTE)
 	if (m_IsQTE)
 	{
 		// Activate
-		SetActivate(true);
 		_vector vPos = m_pTransformCom->Get_State(STATE::POSITION);
 
 		// 내 앞에서 생성. (안 곂치게)
@@ -397,6 +468,9 @@ void CRover::Bind_QTE(_bool IsQTE)
 		_vector vUp = XMVectorSet(0.f, 2.f, 0.f, 0.f);
 		vPos += vLook * 1.f;
 		m_pQTEColliderCom->Set_Position(vPos);
+		m_pQTEColliderCom->IsActivate(true);
+
+		SetActivate(true);
 		GetStateContextForWrite().m_eQTEType = ERoverQTEType::SKILL_QTE;
 		Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE));
 	}
@@ -407,11 +481,11 @@ void CRover::Bind_QTE(_bool IsQTE)
 #pragma region NOTIFY
 void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 {
-    if (wStrColliderTag == TEXT("Body"))
+  /*  if (wStrColliderTag == TEXT("Body"))
     {
 		m_pColliderCom->IsActivate(IsActive);
-    }
-    else if (wStrColliderTag == TEXT("Sword"))
+    }*/
+    if (wStrColliderTag == TEXT("Sword"))
     {
 		if (nullptr != m_pRoverSword)
 			m_pRoverSword->Volume_Activate(IsActive);
@@ -546,8 +620,27 @@ void CRover::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manif
 #pragma endregion
 
 #pragma region 4. EVENT
-void CRover::Process_DelayedActions()
+void CRover::Process_DelayedActions(_float fTimeDelta)
 {
+	_uint iDodgeableFlag = ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE);
+
+	// 0. 회피 가능창 활성화 되어 있다면?
+	if (Check_AnyCondition(iDodgeableFlag))
+	{
+		m_fDodgeableHitTimer -= fTimeDelta;
+		if (m_fDodgeableHitTimer <= 0.f)
+		{
+			Remove_Condition(iDodgeableFlag); // 회피 가능 상태 제거
+
+			// 저장해뒀던 피격 정보를 사용해 실제 HIT 처리
+
+			// Hit가 되고 있다는 사실은 알고 있어야됨. 그래야 Hit
+			m_PendingConditions[HIT] = true;
+			m_DelayedActions.push(DELAYED_ACTION(DELAYED_ACTION::TYPE::HIT, &m_PendingHitDesc));
+		}
+	}
+
+
 	while (!m_DelayedActions.empty())
 	{
 		DELAYED_ACTION eAction = m_DelayedActions.front();
@@ -558,7 +651,7 @@ void CRover::Process_DelayedActions()
 		case DELAYED_ACTION::TYPE::HIT:
 		{
 			//m_IsHit = true;
-			Add_Condition(CHARACTER_CONDITION::HIT); // Condition 추가.
+			Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
 			m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
 			break;
 		}
@@ -633,7 +726,7 @@ void CRover::Ready_Variables(const CHARACTER_DESC* pDesc)
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
 
     for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::ROVER);
 }
 
 void CRover::Ready_Positions(const CHARACTER_DESC* pDesc)
@@ -741,7 +834,7 @@ void CRover::Ready_AttackVolumes()
 {
 	m_AttackVolumes.resize(VOLUME_END);
 
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::BONE; // 뼈
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("WeaponProp01");
 	TriggerDesc.pParenTransform = m_pTransformCom;

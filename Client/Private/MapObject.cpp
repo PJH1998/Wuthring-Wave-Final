@@ -1,6 +1,7 @@
 ﻿#include"ClientPch.h"
 #include "MapObject.h"
 #include "MapObject_Destruction.h"
+#include"GameSystem.h"
 
 CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CStaticObject{ pDevice, pContext }
@@ -8,8 +9,9 @@ CMapObject::CMapObject(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 }
 
 CMapObject::CMapObject(const CMapObject& Prototype)
-	: CStaticObject{ Prototype }
+	: CStaticObject{ Prototype },m_pGameSystem(CGameSystem::GetInstance())
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMapObject::Initialize_Prototype()
@@ -61,6 +63,9 @@ void CMapObject::Late_Update(_float fTimeDelta)
 
 void CMapObject::Render(ID3D11DeviceContext* pDeferredContext, _uint iIndex)
 {
+	if (!m_IsRender)
+		return;
+
 	_uint iLODIndex = m_iLODIndex;
 	if (m_iNumLOD <= iLODIndex)
 		iLODIndex = m_iNumLOD;
@@ -189,18 +194,23 @@ void CMapObject::Ready_Component(void* pArg)
 		RigidbodyDesc.pModel = m_pModelComArray[0];
 
 		//CRigidbody::BOXBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.vPos = m_pBoundingBox->Center;
+		//RigidbodyDesc.vPos = pDesc->vBoundingPos;
 		//RigidbodyDesc.eShape = SHAPE::BOX;
 		//RigidbodyDesc.eType = EMotionType::Static;
 		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-		//RigidbodyDesc.vExtent = m_pBoundingBox->Extents;
-
+		//RigidbodyDesc.vExtent = pDesc->vBoundingExtends;
+		
 		Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 			TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
+
 	}
 	else
-		int a = 0;
-
+	{
+		m_pGameSystem->TriggerRegister(11, [this](void* pArg) {
+			m_isActivate = false;
+			m_IsRender = false;
+			});
+	}
 }
 
 CMapObject* CMapObject::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
@@ -232,7 +242,7 @@ CGameObject* CMapObject::Clone(void* pArg)
 void CMapObject::Free()
 {
 	__super::Free();
-
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pShaderCom);
 	Safe_Release(m_pShadowShaderCom);
 	Safe_Release(m_pRigidbodyCom);
@@ -241,4 +251,5 @@ void CMapObject::Free()
 		Safe_Release(pModel);
 
 	m_pModelComArray.clear();
+
 }

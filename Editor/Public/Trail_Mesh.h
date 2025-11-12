@@ -18,6 +18,8 @@ public:
 	{
 		_wstring strTextureTag;
 		_wstring strColorTextureTag;
+		_wstring strDissolveTextureTag = {};
+		_wstring strDistortionTextureTag = {};
 		_wstring strVIBufferTag;
 
 		_int	iShaderPass = 0;
@@ -28,6 +30,11 @@ public:
 
 		_int	iDirFlag = 0;
 		_int	iMaskFlag = 0;
+
+		_bool	IsDissolve = false;
+
+		_bool	IsDistortion = false;
+		_float	fDistortionWeight = 0.1f;
 		
 		_float	fColorSpeed = 1.f;
 		_float	fMaskSpeed = 1.f;
@@ -66,6 +73,8 @@ private:
 	CShader*					m_pShaderCom = { nullptr };
 	CTexture*					m_pTextureCom = { nullptr };
 	CTexture*					m_pColorTextureCom = { nullptr };
+	CTexture*					m_pDissolveTextureCom = { nullptr };
+	CTexture*					m_pDistortionTextureCom = { nullptr };
 	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
 	//CComputeShader*				m_pComputeShaderCom = { nullptr };
 
@@ -91,6 +100,10 @@ private:
 	_int						m_iDirFalg = {};
 	_int						m_iMaskFlag = {};
 
+	_bool						m_IsDissolve = false;
+
+	_bool						m_IsDistortion = false;
+	_float						m_fDistortionWeight = {};
 
 	_float3						m_vPos = {};
 	_float3						m_vColor = {};

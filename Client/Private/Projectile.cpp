@@ -29,6 +29,10 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 
 void CProjectile::Priority_Update(_float fTimeDelta)
 {
+	if (m_fLifeTime < 10.f)
+		m_fLifeTime += fTimeDelta;
+	else
+		m_isCollision = true;
 }
 
 void CProjectile::Update(_float fTimeDelta)
@@ -65,6 +69,7 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_isCollision = false;
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
+	m_fLifeTime = 0.f;
 }
 
 void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)

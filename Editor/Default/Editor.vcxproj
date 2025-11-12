@@ -169,6 +169,8 @@
     <ClInclude Include="..\Public\AnimationActor.h" />
     <ClInclude Include="..\Public\AnimationTool.h" />
     <ClInclude Include="..\Public\AnimNotifyTool.h" />
+    <ClInclude Include="..\Public\Effect_Decal.h" />
+    <ClInclude Include="..\Public\Decal_Controller.h" />
     <ClInclude Include="..\public\EditDummy.h" />
     <ClInclude Include="..\public\EditDummy_Augusta.h" />
     <ClInclude Include="..\Public\EditDummy_Map.h" />
@@ -182,7 +184,8 @@
     <ClInclude Include="..\Public\Editor_Struct.h" />
     <ClInclude Include="..\Public\Edit_Brush.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Destruction.h" />
-    <ClInclude Include="..\Public\Edit_MapObject_Sonora.h" />
+    <ClInclude Include="..\Public\Edit_Meteo.h" />
+    <ClInclude Include="..\Public\Edit_MonsterSpawnor.h" />
     <ClInclude Include="..\Public\Edit_TriggerBox.h" />
     <ClInclude Include="..\Public\Effect_Controller.h" />
     <ClInclude Include="..\Public\Edit_PreViewModel.h" />
@@ -241,6 +244,8 @@
     <ClCompile Include="..\Private\AnimationActor.cpp" />
     <ClCompile Include="..\Private\AnimationTool.cpp" />
     <ClCompile Include="..\Private\AnimNotifyTool.cpp" />
+    <ClCompile Include="..\Private\Effect_Decal.cpp" />
+    <ClCompile Include="..\Private\Decal_Controller.cpp" />
     <ClCompile Include="..\private\EditDummy.cpp" />
     <ClCompile Include="..\private\EditDummy_Augusta.cpp" />
     <ClCompile Include="..\Private\EditDummy_Map.cpp" />
@@ -254,7 +259,8 @@
     <ClCompile Include="..\Private\EditorPropWeapon.cpp" />
     <ClCompile Include="..\Private\Edit_Brush.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Destruction.cpp" />
-    <ClCompile Include="..\Private\Edit_MapObject_Sonora.cpp" />
+    <ClCompile Include="..\Private\Edit_Meteo.cpp" />
+    <ClCompile Include="..\Private\Edit_MonsterSpawnor.cpp" />
     <ClCompile Include="..\Private\Edit_TriggerBox.cpp" />
     <ClCompile Include="..\Private\Effect_Controller.cpp" />
     <ClCompile Include="..\Private\Edit_PreViewModel.cpp" />

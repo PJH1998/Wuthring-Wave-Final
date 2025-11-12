@@ -4,6 +4,11 @@
 #include "MonsterTest.h"
 #include "Ggobul.h"
 #include "FS_Scythe.h"
+#include "HavocWarrior.h"
+#include "ElectroPredator.h"
+#include "Corosaurus.h"
+#include "Projectile.h"
+#include "AoEDoT.h"
 
 #include "Player.h"
 #include "SkyBox.h"
@@ -36,6 +41,8 @@ HRESULT CLevel_GamePlay::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
 	m_pGameInstance->Render_ShadowMap();
+
+	
 	m_pGameInstance->Begin_DownSampleShadowMap();
 
 	LIGHT_DESC LightDesc{};
@@ -53,6 +60,11 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_UI();
 	Ready_Layer_Player();
 	Ready_MonsterTest();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
+	//Ready_CoroSaurus();
+
+	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
 	_uint iLevel = m_pGameInstance->Get_CurrentLevel();
 
@@ -127,6 +139,7 @@ void CLevel_GamePlay::Ready_Dummy()
 
 void CLevel_GamePlay::Ready_MonsterTest()
 {
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("FalseSovereign");
 	CMonsterTest::MONSTERTEST_DESC MobDesc{};
 	MobDesc.eCurLevel = m_eCurLevel;
 	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
@@ -138,10 +151,10 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
-	MobDesc.fHP = 100.f;
-	MobDesc.fAttackDmg = 1.f;
-	MobDesc.fMaxStamina = 10.f;
-	MobDesc.vDetectRange = _float3(35.f, 16.f, 35.f);
+	MobDesc.fHP = pInfo->fMaxHp;
+	MobDesc.fAttackDmg = pInfo->fAttack;
+	MobDesc.fMaxStamina = pInfo->fMaxStamina;
+	MobDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
 	if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_MonsterTest"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterTest"), &MobDesc)))
 		CRASH("Failed Ready MonsterTest");
@@ -177,6 +190,111 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Scythe"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_MonsterEffect"), TEXT("Pool_Scythe"), 2, &Tantacle)))
 		CRASH("Failed Ready Scythe");
+
+	CProjectile::PROJECTILEDESC Projectile{};
+	Projectile.fAttackDamage = MobDesc.fAttackDmg;
+	Projectile.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
+	Projectile.fRadius = 0.7f;
+	Projectile.fSpeedPerSec = 15.f;
+	//Projectile.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_ShinWang"), 9, &Projectile)))
+		CRASH("Failed Ready Projectile (False Sovereign)");
+}
+
+void CLevel_GamePlay::Ready_HavocWarrior()
+{
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("HavocWarrior");
+	// Havoc Warrior
+	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
+	tDesc.eCurLevel = m_eCurLevel;
+	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
+	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
+	tDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	tDesc.fSpeedPerSec = 10.f;
+	tDesc.vInitPosition = _float3(0.f, 40.f, 0.f);
+	tDesc.pAnimationTag = "Stand1";
+	tDesc.fHp = pInfo->fMaxHp;
+	tDesc.fAttackDmg = pInfo->fAttack;
+	tDesc.fImpluseRate = pInfo->fImpluseRate;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_HavocWarrior"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), pInfo->wstrPoolTag, 8, &tDesc)))
+		CRASH("Failed Ready Monster (Havoc Warrior)");
+}
+
+void CLevel_GamePlay::Ready_ElectroPredator()
+{
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("ElectroPredator");
+	// Electro Predator
+	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
+	ADesc.eCurLevel = m_eCurLevel;
+	ADesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
+	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
+	ADesc.fRotationPerSec = XMConvertToRadians(100.f);
+	ADesc.fSpeedPerSec = 10.f;
+	ADesc.vInitPosition = _float3(3.f, 40.f, 3.f);
+	ADesc.pAnimationTag = "Stand2";
+	ADesc.fHp = pInfo->fMaxHp;
+	ADesc.fAttackDmg = pInfo->fAttack;
+	ADesc.fImpluseRate = pInfo->fImpluseRate;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), pInfo->wstrPoolTag, 8, &ADesc)))
+		CRASH("Failed Ready Monster (Electro Predatror)");
+
+	CProjectile::PROJECTILEDESC Projectile{};
+	Projectile.fAttackDamage = ADesc.fAttackDmg;
+	Projectile.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
+	Projectile.fRadius = 0.7f;
+	Projectile.fSpeedPerSec = 15.f;
+	//Projectile.wstrEffectTag = ;
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
+		CRASH("Failed Ready Projectile (Electro Predatror)");
+
+	CAoEDoT::AOEDOT_DESC AoEDesc{};
+	AoEDesc.fAttackDamage = ADesc.fAttackDmg * 0.25f;
+	AoEDesc.fLifeTime = 3.f;
+	AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
+	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
+	AoEDesc.iTickCount = 8;
+	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
+	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
+	//AoEDesc.wstrEffectTag
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 5, &AoEDesc)))
+		CRASH("Failed Ready AoEDot (Electro Predatror)");
+}
+
+void CLevel_GamePlay::Ready_CoroSaurus()
+{
+	MONSTER_INFO* const pInfo = m_pGameSystem->Get_MonsterInfo("CoroSaurus");
+	// Corosaurus
+	CCorosaurus::CORROSAURUS_DESC CoroDesc{};
+	CoroDesc.eCurLevel = m_eCurLevel;
+	CoroDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+	CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	CoroDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_CoroSaurus"));
+	CoroDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
+	CoroDesc.fSpeedPerSec = 10.f;
+	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	CoroDesc.pAnimationTag = "Idle1";
+	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
+	CoroDesc.fHP = pInfo->fMaxHp;
+	CoroDesc.fAttackDmg = pInfo->fAttack;
+	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
+	CoroDesc.vDetectRange = _float3(55.f, 15.f, 55.f);
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &CoroDesc)))
+		CRASH("Failed Ready Monster");
 }
 
 void CLevel_GamePlay::Ready_Effect()
@@ -221,21 +339,51 @@ void CLevel_GamePlay::Ready_UI()
 #ifdef _DEBUG
 void CLevel_GamePlay::Shader_Gui()
 {
-	ImGui::Begin("Test");
-	
-	
-	if (ImGui::CollapsingHeader("SSAO"))
-	{
-				ImGui::InputFloat("RADIUS", &m_fRadius);
-		
-				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
-		
-		#ifdef _DEBUG
-				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
-		#endif // _DEBUG
-	}
-	ImGui::End();
-
+//	ImGui::Begin("Test");
+//	
+//	
+//	if (ImGui::CollapsingHeader("SSAO"))
+//	{
+//				ImGui::InputFloat("RADIUS", &m_fRadius);
+//		
+//				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
+//		
+//		#ifdef _DEBUG
+//				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
+//		#endif // _DEBUG
+//	}
+//
+////	if (ImGui::CollapsingHeader("LUT"))
+////	{
+////		ImGui::InputInt("INDEX", &m_iLUT_Index, 1, 1);
+////		if (m_iLUT_Index < 0)
+////			m_iLUT_Index = 0;
+////		if (m_iLUT_Index >= 5)
+////			m_iLUT_Index = 4;
+////
+////		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
+////#ifdef _DEBUG
+////		m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
+////		m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
+////#endif // _DEBUG
+////	}
+//
+//		if (ImGui::CollapsingHeader("PBR"))
+//	{
+//
+//		ImGui::DragFloat("DYNAMIC_ROUGHNESS", &m_fDebugRoughness[0], 0.01f, 0.f, 1.f);
+//		ImGui::DragFloat("STATIC_ROUGHNESS", &m_fDebugRoughness[1], 0.01f, 0.f, 1.f);
+//
+//		ImGui::DragFloat("DYNAMIC_METALLIC", &m_fDebugMetallic[0], 0.01f, 0.f, 1.f);
+//		ImGui::DragFloat("STATIC_METALLIC", &m_fDebugMetallic[1], 0.01f, 0.f, 1.f);
+//#ifdef _DEBUG
+//		m_pGameInstance->Set_Metallic(m_fDebugMetallic[0], m_fDebugMetallic[1]);
+//		m_pGameInstance->Set_Roughness(m_fDebugRoughness[0], m_fDebugRoughness[1]);
+//#endif // _DEBUG		 
+//	}
+//
+//	ImGui::End();
+	/*
 	if (ImGui::CollapsingHeader("CASCADE"))
 	{
 		if (ImGui::CollapsingHeader("Base Bias"))
@@ -270,7 +418,7 @@ void CLevel_GamePlay::Shader_Gui()
 		m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
 		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
 	}
-
+	*/
 }
 #endif
 

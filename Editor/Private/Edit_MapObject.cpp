@@ -160,7 +160,7 @@ HRESULT CEdit_MapObject::Initialize_Clone(void* pArg)
     }*/
 
 	XMStoreFloat4x4(&m_DefaultMat, m_pTransformCom->Get_WorldMatrix());
-	if (m_eObjectType == OBJECTTYPE::NONSONORA)
+	if (m_eObjectType == OBJECTTYPE::SONORA)
 		m_IsRender = false;
 
     return S_OK;
@@ -174,10 +174,10 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 
 		m_fMode = true;
 		m_IsFlying = true;
-		if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
-		m_fFlyingTime += fTimeDelta;
-		else if (m_eObjectType == OBJECTTYPE::SONORA)
+		if (m_eObjectType == OBJECTTYPE::SONORA)
+		{
 			m_IsRender = false;
+		}
 
 		_float fDistance = XMVectorGetX(XMVector3Length(XMVectorSetY(m_pTransformCom->Get_State(STATE::POSITION), 0.f) - XMVectorSetY(XMLoadFloat4(m_pGameInstance->Get_CamPos()), 0.f)));
 
@@ -201,9 +201,13 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 		{
 			m_IsRender = true;
 			m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMat));
+			//m_pRigidbodyCom->IsActivate(true);
 		}
 		else if (m_eObjectType == OBJECTTYPE::SONORA)
+		{
 			m_IsRender = false;
+			//m_pRigidbodyCom->IsActivate(false);
+		}
 	}
 
 	if (m_fMode)
@@ -224,9 +228,14 @@ void CEdit_MapObject::Priority_Update(_float fTimeDelta)
 					m_IsFlying = false;
 					m_fFlyingTime = 0.f;
 					if (m_eObjectType == OBJECTTYPE::NONSONORA || m_eObjectType == OBJECTTYPE::NONSONORA_FLOOR)
+					{
 						m_IsRender = false;
+						//m_pRigidbodyCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION) + XMVectorSet(0.f, 1000.f, 0.f, 0.f));
+					}
 					else if (m_eObjectType == OBJECTTYPE::SONORA)
+					{
 						m_IsRender = true;
+					}
 				}
 			}
 		}
@@ -260,7 +269,6 @@ void CEdit_MapObject::Update(_float fTimeDelta)
 			{
 				if (!m_IsRender)
 					return;
-
 				{
 					_float fDistance = {};
 					_vector RayPos = XMVector3TransformCoord(XMLoadFloat3(&CLevel_Map::m_vWorldPos), m_pTransformCom->Get_WorldMatrix_Inv());
@@ -374,7 +382,7 @@ void CEdit_MapObject::Set_ImGuiOption()
 
     //현재 자기 타입 볼 수 있게, 타입 변경할 수 있게 하기.
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor"};
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid" ,"TriggerBox","NonSonoro","Sonoro_Floor" ,"Meteo"};
 	if (ImGui::BeginCombo("Object_Type", pObejceTType[ENUM_CLASS(m_eObjectType)]))
     {
 		for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -456,26 +464,27 @@ HRESULT CEdit_MapObject::Ready_Component(void* pArg)
 
 	if (pDesc->eObjectType != OBJECTTYPE::NONRIGID)
 	{
-		/*Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());*/
 
-		//CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
-		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-		//RigidbodyDesc.eShape = SHAPE::MESH;
-		//XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		/*CRigidbody::MESHBODY_DESC RigidbodyDesc = {};
+		RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		RigidbodyDesc.eShape = SHAPE::MESH;
+		XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
+		RigidbodyDesc.eType = EMotionType::Static;
+		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
+		RigidbodyDesc.pModel = m_pModelComArray[0];*/
+
+
+		//Sync_BoundingBox(m_pModelComArray[0]->Get_BoundingBox(), m_pTransformCom->Get_WorldMatrix());
+		//CRigidbody::BOXBODY_DESC RigidbodyDesc{};
+		////RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
+		////XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
+		//RigidbodyDesc.eShape = SHAPE::BOX;
+		//RigidbodyDesc.vPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
 		//RigidbodyDesc.eType = EMotionType::Static;
 		//RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::MAP);
-		//RigidbodyDesc.pModel = m_pModelComArray[0];
+		//RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
 
-
-		CRigidbody::BOXBODY_DESC RigidbodyDesc{};
-		//RigidbodyDesc.vScale = m_pTransformCom->Get_Scaled();
-		//XMStoreFloat4(&RigidbodyDesc.vQuat, m_pTransformCom->Get_Quaternion());
-		RigidbodyDesc.eShape = SHAPE::BOX;
-		RigidbodyDesc.vPos = m_pModelComArray[0]->Get_BoundingBox()->Center;
-		RigidbodyDesc.eType = EMotionType::Kinematic;
-		RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-		RigidbodyDesc.vExtent = m_pModelComArray[0]->Get_BoundingBox()->Extents;
 		//Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
 		//	TEXT("Com_Rigidbody"), reinterpret_cast<CComponent**>(&m_pRigidbodyCom), &RigidbodyDesc);
 	}

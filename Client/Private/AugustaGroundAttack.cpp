@@ -45,6 +45,9 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
 
+	// 6. Target이 존재한다면? => Auto Target
+	m_pAugusta->Rotate_Target();
+
 }
 
 void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
@@ -65,6 +68,9 @@ void CAugustaGroundAttack::OnUpdate(_float fTimeDelta)
     Check_StateTransition(fTimeDelta);
 
     State_Reset();
+
+	
+
 }
 
 void CAugustaGroundAttack::OnExit()
@@ -75,6 +81,9 @@ void CAugustaGroundAttack::OnExit()
     m_iComboCount = 0;
     m_fAttackPressTime = 0.f; // 시간 초기화
     m_pAugusta->PartActivate(m_iPartType, false); 
+
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE)); // 회피 가능 상태 제거
 }
 
 _bool CAugustaGroundAttack::Hit_Judge()
@@ -96,7 +105,13 @@ void CAugustaGroundAttack::Handle_Input()
 {
     EAugustaAttackType eAttackType = static_cast<EAugustaAttackType>(m_iCurrentAnimIdx);
 
-	m_States[HIT_PENDING] = m_pAugusta->Check_AnyCondition(CHARACTER_CONDITION::HIT);
+
+	// Dash 키입력 체크.
+	m_States[DASH] = m_pAugusta->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+	m_States[DODGEABLE] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	m_States[HIT_PENDING] = m_pAugusta->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
     // HEAVY_ATTACK_PENDING(강공 발생 조건)
     // Attack이 01이고 키를 애니메이션 탈출 가능 상태까지 계속 누르고 있다면?
@@ -134,12 +149,13 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
 
-    // Target이 존재한다면? => Auto Target
-    m_pAugusta->Rotate_Target();
 
     // 1타 모션일때 누르고 있다면?
     if (m_States[HEAVY_ATTACK_PENDING])
         m_fAttackPressTime += fTimeDelta;
+	
+	// 5. Target이 존재한다면? => Auto Target
+	//m_pAugusta->Rotate_Target();
 
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pAugusta->Play_PartAnimation(
@@ -154,9 +170,6 @@ void CAugustaGroundAttack::Check_Physics(_float fTimeDelta)
 
 }
 
-void CAugustaGroundAttack::LockOn_StateTransition(_float fTimeDelta)
-{
-}
 
 void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 {
@@ -168,11 +181,14 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     _bool IsEscapePossible = CState::Is_EscapePossible();
     // 우선순위 순서대로
     
-
-	if (m_States[HIT])
+	// 1. 우선순위
+	if (m_States[DODGE])
 	{
-
+		m_pAugusta->GetStateContextForWrite().m_eDodgeType = EAugustaDodgeType::MOVE_LIMIT_F;
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DODGE)); // 상위, 하위 상태
+		return;
 	}
+
 
     // 0. 1타모션에서 계속 누르고 임계시간을 넘으면?
     if (m_States[HEAVY_ATTACK_PENDING] && (m_fAttackPressTime >= m_fAttackPressMaxTime) && IsEscapePossible)
@@ -209,6 +225,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK01) + m_iComboCount;
             m_IsNextAttackInput = false;
             m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
+			m_pAugusta->Rotate_Target();
             return;
         }
         

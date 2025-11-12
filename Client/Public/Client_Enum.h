@@ -19,8 +19,10 @@ namespace Client
 
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
-		DODGE = 1 << 1, // HIT 상태면 Dodge가 안되게?
-		PARRY = 1 << 2,
+		DODGE =     1 << 1, // Dodge 상태면 Hit 안되게.
+		DODGEABLE = 1 << 2, // Dodge 가능 상태.
+		PARRY = 1 << 3,
+		INVINCIBLE = 1 << 4,
 		END
 	};
 
@@ -220,10 +222,13 @@ namespace Client
 	
 	enum class SHADER_ANIMMESH { 
 		DEFAULT_NORMAL = 0
-		, NORMAL_TEX
-		, AUGUSTA
-		, SHADOW
-		, OUNTLINE
+		, NORMAL_TEX // 1
+		, AUGUSTA // 2
+		, SHADOW // 3
+		, OUNTLINE // 4
+		, ROVER // 5
+		, NORMAL_YELLOW // 6
+		, LOGOROVER // 7
 		, END };
 
 	enum class TEXT_COLOR_TYPE {

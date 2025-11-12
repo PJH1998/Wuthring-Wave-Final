@@ -201,6 +201,7 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
+    
     if (Out.vDiffuse.a < 0.3f)
         discard;
 
@@ -237,13 +238,20 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
+    Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
 
+    if(Out.vDiffuse.a < 0.4f)
+        discard;
+    
     Out.vDiffuse = g_vColor * Out.vDiffuse;
     
-    //Out.vDiffuse.a = Out.vDiffuse.r; //?
     
-    if (Out.vDiffuse.a < 0.3)
+    Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    
+    if (Out.vDiffuse.a < 0.4f)
         discard;
+    
+    //Out.vDiffuse.a = Out.vDiffuse.r; //?
     
     float fWeight = Luminance(Out.vDiffuse.xyz);
     
@@ -283,7 +291,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_SPRITE();
@@ -294,7 +302,7 @@ technique11 DefaultTechnique
     {
         SetRasterizerState(RS_Default); 
         SetDepthStencilState(DSS_Default, 0);
-        SetBlendState(BS_FXBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xffffffff);
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_Stretch();
         PixelShader = compile ps_5_0 PS_SPRITE();

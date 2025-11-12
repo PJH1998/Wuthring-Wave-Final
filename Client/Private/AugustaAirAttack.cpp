@@ -64,6 +64,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
 
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
 		case EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP:
@@ -78,6 +79,8 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 				m_pAugusta->Clear_PartAnimation(m_iSubPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
+
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 
@@ -96,6 +99,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
+			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_START:
@@ -165,12 +169,13 @@ void CAugustaAirAttack::OnExit()
 	{
 		m_pAugusta->PartActivate(m_iSubPartType, false);
 	}
-
     m_pAugusta->Set_Gravity(true);
     m_fSpeed = 0.f;
     
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_iSubPartType = CAugusta::PARTTYPE::TYPE_END;
+
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 }
 
 void CAugustaAirAttack::Handle_Input()
@@ -188,8 +193,6 @@ void CAugustaAirAttack::Update_AttackAnimations(_float fTimeDelta)
 	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
 	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
-
-	
     
 
 	// 1. 특정 애니메이션에서는 비율 조정
@@ -462,9 +465,9 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.5f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.5f, 0.f, 3.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 3.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);
@@ -491,9 +494,10 @@ void CAugustaAirAttack::Handle_Animation_SpecialState()
 	if (eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END ||
 		eAirAttackType == EAugustaAirAttackType::AIRATTACK_HACKDOWN_START)
 	{
-		if (m_fAnimationScale < 0.5f)
-			m_fAnimationScale = 0.5f;
+		m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale;
 	}
+		
+
 }
 
 

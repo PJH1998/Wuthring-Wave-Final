@@ -56,9 +56,11 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 	m_fMinDistance = 1.f;
 	m_fMaxDistance = 6.f;
 
+	m_fLockOnMinDistance = 4.f;
+
 	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 3.5f;
+	m_fLockOnOffsetY = 1.5f;
 	Ready_Event();
     return S_OK;
 }
@@ -111,12 +113,32 @@ void CSpringCamera::Update(_float fTimeDelta)
 		Shake.fDuration = 0.25f;
 		Shake.fFrequency = 12.f;
 		Shake.fAmplitude = 1.f;
-		Shake.fFovKick = XMConvertToRadians(1.8f);
+		Shake.fFovKick = XMConvertToRadians(0.7f);
 		Shake.vRotation = _float3(0.1f, 0.1f, 0.1f);
 		m_pGameInstance->OnShake(Shake);
 	}
-	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
-	//	m_pGameInstance->OnShake(_float3(0.5f, 0.f, 0.f));
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD8) == KEYSTATE::DOWN)
+	{
+		CAMERA_SHAKE Shake = {};
+		Shake.fDuration = 0.12f;
+		Shake.fFrequency = 12.f;
+		Shake.fAmplitude = 1.f;
+		Shake.fFovKick  = XMConvertToRadians(0.f);
+		Shake.vRotation = _float3(0.1f, 0.1f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+		m_pGameInstance->OnShake(Shake);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		CAMERA_SHAKE Shake = {};
+		Shake.fDuration = 0.12f;
+		Shake.fFrequency = 12.f;
+		Shake.fAmplitude = 1.f;
+		Shake.fFovKick = XMConvertToRadians(0.f);
+		Shake.vRotation = _float3(0.1f, 0.f, 0.f);  // Pitch(x: 위아래), Yaw(y: 좌우), Roll(z: 0)
+		m_pGameInstance->OnShake(Shake);
+	}
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Set_CurrentCamera_Far(300.f);
 
 	Shaking(fTimeDelta);
 }
@@ -215,7 +237,7 @@ void CSpringCamera::Dual_Targeting(_float fTimeDelta)
 	if (nullptr == m_pTargetTransform)
 		return;
 
-	_float fRatio = 0.1f;
+	_float fRatio = 0.4f;
 	XMStoreFloat4(&m_vLookPosition, XMLoadFloat4(&m_vTargetPosition) * (1.f - fRatio) + m_pTargetTransform->Get_State(STATE::POSITION) * fRatio);
 	// Dynamic Distance
 	Dynamic_Distance();
@@ -230,7 +252,7 @@ void CSpringCamera::Dynamic_Distance()
 	//_float fDistance = XMVectorGetX(XMVector3Length(XMLoadFloat4(&m_vLookPosition) - XMLoadFloat4(&m_vTargetPosition)));
 	_float fDistance = XMVectorGetX(XMVector3Length(m_pTargetTransform->Get_State(STATE::POSITION) - XMLoadFloat4(&m_vTargetPosition)));
 
-	m_fFixedDistance = max(m_fMinDistance, sqrt(fDistance * fDistance + m_fLockOnOffsetY * m_fLockOnOffsetY));
+	m_fFixedDistance = max(m_fLockOnMinDistance, sqrt(fDistance * fDistance + m_fLockOnOffsetY * m_fLockOnOffsetY));
 }
 
 void CSpringCamera::Adjust_LockOn_Distance()

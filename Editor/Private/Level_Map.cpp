@@ -13,6 +13,8 @@
 #include"Edit_MapObject_Destruction_Piece.h"
 #include"Edit_TriggerBox.h"
 #include"Mesh_Instance.h"
+#include"Edit_MonsterSpawnor.h"
+#include"Edit_Meteo.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -99,6 +101,11 @@ HRESULT CLevel_Map::Initialize()
 
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"),
 		CEdit_TriggerBox::Create(m_pDevice, m_pContext));
+
+	m_pPickedSpawnor = CEdit_MonsterSpawnor::Create(m_pDevice, m_pContext);
+
+	m_SaveObjects["MonsterSpawnor"].push_back(m_pPickedSpawnor);
+	Safe_AddRef(m_pPickedSpawnor);
 
 	//CEdit_TriggerBox::TRIGGER Tri;
 	//Tri.iLevel = m_iLevel;
@@ -208,41 +215,47 @@ void CLevel_Map::Menu_Select()
 
 void CLevel_Map::Menu_Object()
 {
-    ImGui::Begin("Menu_Object");
+	ImGui::Begin("Menu_Object");
 
-	if (m_eObjectType != static_cast<_uint>(OBJECTTYPE::TRIGGERBOX))
+	switch (m_eObjectType)
 	{
-		if (m_pPickedObject)
-			m_pPickedObject->Set_ImGuiOption();
-		else if (m_pPickedDestructObject)
-			m_pPickedDestructObject->Set_ImGuiOption();
-	}
-	else
+	case static_cast<_uint>(OBJECTTYPE::TRIGGERBOX):
+
 	{
-		
 		ImGui::Text("Current Triggers");
 
 		ImGuiID ShaderId = ImGui::GetID("TriggerBox");
 		ImGui::BeginChildFrame(ShaderId, ImVec2(100, 200));
 
-		for (auto& pContainer : m_ContainerObjects)
-			if (ImGui::Button(pContainer.second->Get_ModelName())) {
-				int a = 0;
-			}
-		for (_uint i=0; i< m_SaveObjects["Map_Object_TriggerBox"].size();++i)
+		for (_uint i = 0; i < m_SaveObjects["Map_Object_TriggerBox"].size(); ++i)
 		{
 			if (ImGui::Button(to_string(i).c_str())) {
 				m_pPickedTriggerBox = dynamic_cast<CEdit_TriggerBox*>(m_SaveObjects["Map_Object_TriggerBox"][i]);
 			}
 		}
 		ImGui::EndChildFrame();
-		
+
 		if (m_pPickedTriggerBox)
 			m_pPickedTriggerBox->Set_ImGuiOption();
 
 		Create_TriggerBox();
 	}
-
+		break;
+	case static_cast<_uint>(OBJECTTYPE::SPAWNOR):
+		if (m_pPickedSpawnor)
+			m_pPickedSpawnor->Set_ImGuiOption();
+		break;
+	case static_cast<_uint>(OBJECTTYPE::METEO):
+		if(m_pPickedMeteo)
+			m_pPickedMeteo->Set_ImGuiOption();
+		break;
+	default:
+		if (m_pPickedObject)
+			m_pPickedObject->Set_ImGuiOption();
+		else if (m_pPickedDestructObject)
+			m_pPickedDestructObject->Set_ImGuiOption();
+		break;
+	}
     ImGui::End();
 }
 
@@ -319,6 +332,7 @@ void CLevel_Map::Menu_Model_Load()
         {
             _char FileDrive[MAX_PATH] = {};
             _char FileDir[MAX_PATH] = {};
+
             _char FileName[MAX_PATH] = {};
             _char FileExt[MAX_PATH] = {};
             _splitpath_s(m_ModelPaths[i].c_str(), FileDrive, MAX_PATH, FileDir, MAX_PATH, FileName, MAX_PATH, FileExt, MAX_PATH);
@@ -326,7 +340,20 @@ void CLevel_Map::Menu_Model_Load()
 
 			if (ImGui::Selectable(FileName))
 			{
-				if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::DESTRUCTION)
+				if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::METEO)
+				{
+					CEdit_Meteo::MAP_LOAD Desc{};
+					_float4x4 DefaultMatrix{};
+					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					Desc.WorldMatrix = DefaultMatrix;
+					strcpy_s(Desc.ModelName, FileName);
+					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					Desc.iLevel = m_iLevel;
+
+					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo")
+						, m_iLevel, TEXT("Layer_Meteo"), &Desc);
+				}
+				else if (static_cast<OBJECTTYPE>(m_eObjectType) == OBJECTTYPE::DESTRUCTION)
 				{
 					_string Name = FileName;
 					if ((Name.find("Roc_24BS") == string::npos) && (Name.find("Roc_28BS") == string::npos))
@@ -378,7 +405,7 @@ void CLevel_Map::Menu_Object_Type()
 {
     ImGui::Begin("Type");
 
-	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","Sonoro_Floor" };
+	const _char* pObejceTType[] = { "Default","Sonoro","InterAction","MonsterSpawn","Destruction","NonRigid","TriggerBox" ,"NonSonoro","Sonoro_Floor","Meteo"};
     if (ImGui::BeginCombo("Object_Type", pObejceTType[m_eObjectType]))
     {
         for (_uint i = 0; i < ENUM_CLASS(OBJECTTYPE::END); ++i)
@@ -459,6 +486,10 @@ void CLevel_Map::Menu_Save_Load()
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Destruction"), event);
 				else if (Pair.first.find("Trigger") != std::string::npos)
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Trigger"), event);
+				else if (Pair.first.find("Spawnor") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Spawn"), event);
+				else if (Pair.first.find("Meteo") != std::string::npos)
+					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map_Meteo"), event);
 				else
 					m_pGameInstance->Publish(ENUM_CLASS(LEVEL::STATIC), TEXT("Save_Map"), event);
 				File.flush();
@@ -522,8 +553,35 @@ void CLevel_Map::Menu_Save_Load()
                         {
                             MSG_BOX("Load Failed");
                         }
+						if (strFilePath.find("Meteo") != std::string::npos)
+						{
+							CEdit_Meteo::MAP_LOAD Desc{};
 
-						if (strFilePath.find("Instance") != std::string::npos)
+							while (File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint)))
+							{
+								memset(Desc.ModelName, 0, sizeof(Desc.ModelName));
+								File.read(Desc.ModelName, NameLength);
+								_string Name = Desc.ModelName;
+
+
+								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
+								_float4x4 Matrix = {};
+								File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
+
+								File.read(reinterpret_cast<char*>(&Desc.fDuration), sizeof(_float));
+								File.read(reinterpret_cast<char*>(&Desc.fArchY), sizeof(_float));
+								File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
+								File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
+								_vector Pos = XMLoadFloat4(&Desc.vSourPos);
+								//_matrix Mat = XMMatrixTranslationFromVector();
+								XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(Pos));
+								m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo")
+									, m_iLevel, TEXT("Layer_Meteo"), &Desc);
+							}
+						}
+						else if (strFilePath.find("Instance") != std::string::npos)
 						{
 
 							_matrix PreTransformMatrix = XMMatrixIdentity();
@@ -603,6 +661,32 @@ void CLevel_Map::Menu_Save_Load()
 								Safe_Delete_Array(InstanceMatrix);
 							}
 						}
+						else if (entry.path().string().find("Spawn") != std::string::npos)
+						{
+							vector< CEdit_MonsterSpawnor::SPAWN_DESC> Test;
+							CEdit_MonsterSpawnor::SPAWN_DESC Desc;
+							while (File.read(reinterpret_cast<char*>(&Desc.vMonsterSpawnorPos), sizeof(_float4)))
+							{
+								memset(Desc.szMonsterName1, 0, sizeof(Desc.szMonsterName1));
+								memset(Desc.szMonsterName2, 0, sizeof(Desc.szMonsterName2));
+								memset(Desc.szMonsterName3, 0, sizeof(Desc.szMonsterName3));
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos1), sizeof(_float4));
+
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName1, NameLength);
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos2), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName2, NameLength);
+
+								File.read(reinterpret_cast<char*>(&Desc.vMonsterPos3), sizeof(_float4));
+								File.read(reinterpret_cast<char*>(&NameLength), sizeof(_uint));
+								File.read(Desc.szMonsterName3, NameLength);
+
+								m_pPickedSpawnor->Map_Load(Desc);
+							}
+						}
 						else if (strFilePath.find("Destruction") != std::string::npos)
 						{
 							//continue;
@@ -641,7 +725,7 @@ void CLevel_Map::Menu_Save_Load()
 						{
 							_uint iTriggerIndex;
 							CEdit_TriggerBox::TRIGGER Desc{};
-							while (File.read(reinterpret_cast<char*>(&iTriggerIndex), sizeof(_uint)))
+							while (File.read(reinterpret_cast<char*>(&Desc.iTriggerIndex), sizeof(_uint)))
 							{
 								File.read(reinterpret_cast<char*>(&Desc.vExtends), sizeof(_float3));
 								_float4x4 Matrix = {};
@@ -708,10 +792,9 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Test/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
-	//m_FolderPath= "../../Client/Bin/Resource/Map/The_False_Sovereign/Sonoro/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
@@ -913,6 +996,9 @@ HRESULT CLevel_Map::Ready_Static_Component()
 	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_Destruction_Peice"),
 		CEdit_MapObject_Destruction_Piece::Create(m_pDevice, m_pContext));
 
+	m_pGameInstance->Add_Prototype(m_iLevel, TEXT("Prototype_GameObject_MapObject_Meteo"),
+		CEdit_Meteo::Create(m_pDevice, m_pContext));
+	
     m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_LightObject")
         , m_iLevel, TEXT("Layer_Light"));
 
@@ -945,7 +1031,8 @@ void CLevel_Map::Ready_Event()
 					m_pPickedObject->Set_ShaderPass(0);
 				if (m_pPickedDestructObject)
 					m_pPickedDestructObject->Set_ShaderPass(0);
-				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(reinterpret_cast<CGameObject*>(event.pObject)))
+				CGameObject* pObject = reinterpret_cast<CGameObject*>(event.pObject);
+				if (m_pPickedObject = dynamic_cast<CEdit_MapObject*>(pObject))
 				{
 
 
@@ -963,15 +1050,25 @@ void CLevel_Map::Ready_Event()
 						m_pChildObject = nullptr;
 					}
 				}
-				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(reinterpret_cast<CGameObject*>(event.pObject)))
+				else if (m_pPickedDestructObject = dynamic_cast<CEdit_MapObject_Destruction*>(pObject))
 				{
 
 					m_pPickedDestructObject->Set_ShaderPass(3);
-
-					if (m_pPickedObject)
+					//m_ppicked
+					if (m_pPickedDestructObject)
 					{
-						m_pPickedObject->Set_ShaderPass(0);
-						m_pPickedObject = nullptr;
+						m_pPickedDestructObject->Set_ShaderPass(0);
+						//m_pPickedDestructObject = nullptr;
+					}
+				}
+				else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
+				{
+					m_pPickedMeteo->Set_ShaderPass(3);
+
+					if (m_pPickedMeteo)
+					{
+						m_pPickedMeteo->Set_ShaderPass(0);
+						//m_pPickedMeteo = nullptr;
 					}
 				}
 			}
@@ -1016,6 +1113,11 @@ void CLevel_Map::Ready_Event()
 			{
 				m_SaveObjects["Map_Object_TriggerBox"].push_back(m_pPickedTriggerBox);
 				Safe_AddRef(m_pPickedTriggerBox);
+			}
+			else if (m_pPickedMeteo = dynamic_cast<CEdit_Meteo*>(pObject))
+			{
+				m_SaveObjects["Map_Object_Meteo"].push_back(m_pPickedMeteo);
+				Safe_AddRef(m_pPickedMeteo);
 			}
 		}
 
@@ -1122,8 +1224,9 @@ void CLevel_Map::Free()
 	m_pPickedTriggerBox = nullptr;
 
     Safe_Release(m_pPreViewObject);
-    Safe_Release(m_pBrush);
-
+	Safe_Release(m_pBrush);
+	Safe_Release(m_pPickedSpawnor);
+	
     for (auto& Pair : m_SaveObjects)
     {
         for (auto& pGameObject : Pair.second)

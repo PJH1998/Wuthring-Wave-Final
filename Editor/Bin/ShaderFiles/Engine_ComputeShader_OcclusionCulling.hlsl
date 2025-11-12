@@ -6,7 +6,7 @@
 #define THREAD_Y 1
 #define THREAD_Z 1
 
-#define RADIUS_THRESHOLD 20
+#define RADIUS_THRESHOLD 5
 #define MAX_DEPTH 10
 
 struct BoxPoint
@@ -97,7 +97,10 @@ bool CheckOC(BoxPoint Box)
         // Corner
         for (int i = 0; i < 8; ++i)
         {
+            float fOffsetX = i & 1 ? 0.01f : -0.01f;
+            float fOffsetY = i & 2 ? 0.01f : -0.01f;
             vTexcoord = WorldToScreen_Corner(Box.vCorners[i]);
+            vTexcoord += float2(fOffsetX, fOffsetY);
             float fCornerDepth = Box.vCorners[i].z;
         
             px = int2(saturate(vTexcoord) * (vSize - 1));

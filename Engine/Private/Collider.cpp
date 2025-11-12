@@ -52,11 +52,25 @@ void CCollider::Set_Offset(const _float3 vOffset)
 void CCollider::IsActivate(_bool isActive)
 {
 	if (false == m_isActivate && true == isActive)
+	{
 		m_pBodyInterface->AddBody(m_BodyID, EActivation::Activate);
-	else if(true == m_isActivate && false == isActive)
+		m_pGameInstance->Register_Virtual(m_pCharacterVirtual);
+		m_isActivate = true;
+	}
+	else if (true == m_isActivate && false == isActive)
+	{
 		m_pBodyInterface->RemoveBody(m_BodyID);
+		m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+		m_isActivate = false;
+	}
 
-	m_isActivate = isActive;
+	//m_isActivate = isActive;
+}
+
+void CCollider::Change_Layer(_uint iLayer)
+{
+	if (true == m_isActivate)
+		m_pBodyInterface->SetObjectLayer(m_BodyID, ObjectLayer(iLayer));
 }
 
 HRESULT CCollider::Initialize_Prototype()
@@ -189,7 +203,11 @@ void CCollider::Free()
 {
 	if (true == m_isClone)
 	{
-		m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+		if (true == m_isActivate)
+			m_pGameInstance->Remove_Virtual(m_pCharacterVirtual);
+		
+		if (false == m_isActivate)
+			m_pBodyInterface->AddBody(m_BodyID, EActivation::DontActivate);
 		m_pCharacterVirtual = nullptr;
 		m_pShape = nullptr;
 	}

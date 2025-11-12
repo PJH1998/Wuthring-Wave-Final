@@ -16,6 +16,8 @@ HRESULT CTrailMesh_Controller::Initialize()
     Load_AllTextureFromFolder("../../Client/Bin/Resource/Effect/TrailMesh/Texture");
     Load_AllMeshDatFromFolder("../../Client/Bin/Resource/Effect/TrailMesh/Dat");
     Load_AllColorTextureFormFolder("../../Client/Bin/Resource/Effect/TrailMesh/Color");
+	Load_AllDissolveTextureFromFolder("../../Client/Bin/Resource/Effect/TrailMesh/Dissolve");
+	Load_AllDistortionTextureFromFolder("../../Client/Bin/Resource/Effect/TrailMesh/Distortion");
 
     return S_OK;
 }
@@ -168,6 +170,94 @@ void CTrailMesh_Controller::Load_AllColorTextureFormFolder(const _string& strFol
     }
 }
 
+void CTrailMesh_Controller::Load_AllDissolveTextureFromFolder(const _string& strFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".png" || extension == ".Png")
+			{
+				DISSOLVE_TEXTURE Desc{};
+				CTexture* pTexture = {};
+
+				// 확장자 제외한 파일명
+				_string strTextureTag = entry.path().stem().string();
+
+				//파일명으로 텍스처 이름 지정
+				strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
+
+				//파일명으로 텍스처 컴포넌트 이름 지정
+				_char szDefault[MAX_PATH];
+				strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
+				strcat_s(szDefault, Desc.szName);
+				MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
+
+				//파일경로 wstring 변환
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				//텍스처 컴포넌트 생성
+				m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
+					pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
+
+				//생성한 텍스처 주소 등록, 미리보기 띄울려면 주소로 SRV가져와야해서 저장해줘야함.
+				Desc.pTexture = pTexture;
+				//Safe_AddRef(pTexture);
+
+				m_DissolveTextures.push_back(Desc);
+			}
+		}
+	}
+}
+
+void CTrailMesh_Controller::Load_AllDistortionTextureFromFolder(const _string& strFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(strFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+			_string extension = entry.path().extension().string();
+
+			if (extension == ".png" || extension == ".Png")
+			{
+				DISTORTION_TEXTURE Desc{};
+				CTexture* pTexture = {};
+
+				// 확장자 제외한 파일명
+				_string strTextureTag = entry.path().stem().string();
+
+				//파일명으로 텍스처 이름 지정
+				strcpy_s(Desc.szName, sizeof(Desc.szName), strTextureTag.c_str());
+
+				//파일명으로 텍스처 컴포넌트 이름 지정
+				_char szDefault[MAX_PATH];
+				strcpy_s(szDefault, sizeof(szDefault), "Prototype_Component_Texture_");
+				strcat_s(szDefault, Desc.szName);
+				MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, szDefault, strlen(szDefault), Desc.strTextureTag, MAX_PATH);
+
+				//파일경로 wstring 변환
+				_wstring wstrFilePath = StringToWString(filePath);
+
+				//텍스처 컴포넌트 생성
+				m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
+					pTexture = CTexture::Create(m_pDevice, m_pContext, wstrFilePath.c_str(), 1));
+
+				//생성한 텍스처 주소 등록, 미리보기 띄울려면 주소로 SRV가져와야해서 저장해줘야함.
+				Desc.pTexture = pTexture;
+				//Safe_AddRef(pTexture);
+
+				m_DistortionTextures.push_back(Desc);
+			}
+		}
+	}
+}
+
 void CTrailMesh_Controller::TrailMesh_Tab()
 {
     if (m_bSelectedMesh)
@@ -182,6 +272,21 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                 ImGui::PushItemWidth(100);
                 ImGui::DragInt("##ShaderPass", &(m_pSelectedTrailMeshDesc->iShaderPass), 1.f, 0, 6);
                 ImGui::PopItemWidth();
+
+				ImGui::Separator();
+
+				ImGui::Checkbox("Dissolve", &(m_pSelectedTrailMeshDesc->IsDissolve));
+
+				ImGui::Checkbox("Distortion", &(m_pSelectedTrailMeshDesc->IsDistortion));
+
+				if (m_pSelectedTrailMeshDesc->IsDistortion)
+				{
+					ImGui::Text("DistortionWeight");
+					ImGui::PushItemWidth(100);
+					ImGui::InputFloat("##DistortionWeight", &(m_pSelectedTrailMeshDesc->fDistortionWeight));
+					ImGui::PopItemWidth();
+				}
+				ImGui::Separator();
 
                 ImGui::Text("Sweep");
                 ImGui::PushItemWidth(100);
@@ -338,6 +443,64 @@ void CTrailMesh_Controller::TrailMesh_Tab()
                 if (m_iSelectedColor >= 0) {
                     ImGui::Image((ImTextureID)m_ColorTextures[m_iSelectedColor].pTexture->Get_SRV(0), ImVec2(256, 256));
                 }
+
+
+				ImGui::Separator();
+				if (m_pSelectedTrailMeshDesc->IsDissolve)
+				{
+					//디졸브 텍스처
+					if (ImGui::BeginCombo("Dissolves", "")) {
+						for (size_t i = 0; i < m_DissolveTextures.size(); i++)
+						{
+							bool IsSelected = (m_iSelectedDissovle == i);
+							if (ImGui::Selectable(m_DissolveTextures[i].szName, IsSelected))
+							{
+								m_iSelectedDissovle = i;
+								m_pSelectedTrailMeshDesc->strDissolveTextureTag = m_DissolveTextures[i].strTextureTag;
+
+							}
+
+							if (IsSelected)
+								ImGui::SetItemDefaultFocus();
+						}
+
+						ImGui::EndCombo();
+					}
+
+					ImGui::Separator();
+					if (m_iSelectedDissovle >= 0) {
+						ImGui::Image((ImTextureID)m_DissolveTextures[m_iSelectedDissovle].pTexture->Get_SRV(0), ImVec2(256, 256));
+					}
+				}
+
+				ImGui::Separator();
+				if (m_pSelectedTrailMeshDesc->IsDistortion)
+				{
+					//디토 텍스처
+					if (ImGui::BeginCombo("Distortions", "")) {
+						for (size_t i = 0; i < m_DistortionTextures.size(); i++)
+						{
+							bool IsSelected = (m_iSelectedDistortion == i);
+							if (ImGui::Selectable(m_DistortionTextures[i].szName, IsSelected))
+							{
+								m_iSelectedDistortion = i;
+								m_pSelectedTrailMeshDesc->strDistortionTextureTag = m_DistortionTextures[i].strTextureTag;
+
+							}
+
+							if (IsSelected)
+								ImGui::SetItemDefaultFocus();
+						}
+
+						ImGui::EndCombo();
+					}
+
+					ImGui::Separator();
+					if (m_iSelectedDistortion >= 0) {
+						ImGui::Image((ImTextureID)m_DistortionTextures[m_iSelectedDistortion].pTexture->Get_SRV(0), ImVec2(256, 256));
+					}
+
+				}
             }
             ImGui::End();
         }
@@ -363,7 +526,7 @@ void CTrailMesh_Controller::TrailMesh_Base_Tab(CTrail_Mesh::TRAILMESH_DESC& tTra
             m_bMeshVBTag = true;
         }
 
-        //매쉬 기본 색상 텍스처 설정
+        //매쉬 기본 텍스처 설정
         if (ImGui::BeginCombo("Texture", "")) {
             for (size_t i = 0; i < m_Textures.size(); i++)
             {

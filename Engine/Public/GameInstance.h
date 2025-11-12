@@ -132,12 +132,13 @@ public:
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
 	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
-	void					Begin_ScreenEffect(SFX_TYPE eType);
-	void					End_ScreenEffect();
-	void					Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
+	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				End_ScreenEffect();
+	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
-	void					Set_LUT_Index(_uint iIndex);
-	void					Render_ShadowMap();
+	void				Set_LUT_Index(_uint iIndex);
+	void				Render_ShadowMap();
+	void				SettingFog(_bool IsOn);
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
@@ -146,12 +147,11 @@ public:
 	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
 	void		SetBloomIntensity(_float fIntensity);
 	void		SetBloomWeight(_int iWeight);
-	void		Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor);
 	void		SetDof(_float fDepth, _float fRange, _float fScale);
 	void		SetMaxEffectIntensity(_float fMaxIntensity);
 	void		SetPBR(_bool IsStylized);
-	void		Set_Metallic(_float fMetallic);
-	void		Set_Roughness(_float fRoughness);
+	void		Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic);
+	void		Set_Roughness(_float fRoughness, _float fStaticRoughness);
 	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 #pragma endregion
@@ -172,6 +172,7 @@ public:
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
+	void				Set_CurrentCamera_Far(_float fFar);
 	void				OnShake(const CAMERA_SHAKE& tData);
 #pragma endregion
 
@@ -198,6 +199,7 @@ public:
 	Character*				Register_Character(const CharacterSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData);
 	Ref<CharacterVirtual>	Register_Virtual(const CharacterVirtualSettings& CharacterSetting, const Vec3& vPos, const Quat& vQuat, void* pUserData, BodyInterface** pOut);
 	void					Add_Virtual(CharacterVirtual* pVirtual, _uint iObjectLayer);
+	void					Register_Virtual(CharacterVirtual* pVirtual);
 	void					Remove_Virtual(CharacterVirtual* pVirtual);
 	_bool					Ray_Cast(const _fvector& vStartPos, const _fvector& vEndPos, _float4* pOut);
 #ifdef _DEBUG

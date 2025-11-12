@@ -12,6 +12,7 @@
 #include "ElectroPredator.h"
 #include "Corosaurus.h"
 #include "AttackVolume.h"
+#include "AoEDoT.h"
 #include "Projectile.h"
 #include "Spawner.h"
 #include "PatternDummy.h"
@@ -258,7 +259,12 @@ HRESULT CLoader_Test::Load_MonsterTest()
 	// Prototype_GameObject_ElectroPredator
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_ElectroPredator"),
 		CElectroPredator::Create(m_pDevice, m_pContext))))
-		CRASH("MonsterTest Prototype Create Failed");
+		CRASH("Electro Predator Prototype Create Failed");
+
+	// Prototype_GameObject_AOEDOT
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
+		CAoEDoT::Create(m_pDevice, m_pContext))))
+		CRASH("AoEDoT Prototype Create Failed");
 #pragma endregion
 
 #pragma region CORROSAURUS
@@ -294,9 +300,11 @@ HRESULT CLoader_Test::Load_MonsterTest()
 
 HRESULT CLoader_Test::Load_Effect()
 {
-    m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
-    m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
-    m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
+	m_pGameSystem->Load_EffectTexture_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Texture", m_eCurLevel);
+	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
+
+	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
 
     return S_OK;
 }

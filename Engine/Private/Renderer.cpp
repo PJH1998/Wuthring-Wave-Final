@@ -108,6 +108,7 @@ HRESULT CRenderer::Add_Render_StaticObject(const vector<class CStaticObject*>& C
 
 	if (8 <= m_iCullStack.load(memory_order_acquire))
 	{
+		m_iNumPreRenderObject = m_StaticObjects[iWriteIndex].size();
 		m_isCompleteFrustumCull.exchange(true, memory_order_release);
 	}
 	
@@ -218,10 +219,6 @@ void CRenderer::Setting_SSAO(_float fRadius, _float fMaxDistance)
 void CRenderer::SetBloomIntensity(_float fIntensity)
 {
 	m_pSubResource->SetBloomIntensity(fIntensity);
-}
-void CRenderer::Setting_Fog(_float2 vDepthDistance, _float2 vHeightDistance, _float4 vColor)
-{
-	m_pSubResource->Setting_Fog(vDepthDistance, vHeightDistance, vColor);
 }
 void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
 {
@@ -400,7 +397,7 @@ void CRenderer::Render_Static()
 	{
 		unique_lock<mutex> lock(m_RenderAddMutex);
 		m_CV.wait(lock, [&]() { return m_iNumEndThread == m_iNumThread; });
-		m_iNumEndThread.store(0);
+		m_iNumEndThread.store(0, memory_order_release);
 	}
 
 	// CommandLists Execute
@@ -582,10 +579,14 @@ void CRenderer::Render_Combined()
 #ifdef _DEBUG
 	if (FAILED(m_pShader->Bind_Value("g_IsStylized", &m_IsStylized, sizeof(_bool))))
 		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalRoughness", &m_fDebugRoughness, sizeof(_float))))
-		CRASH("Render Fail");
-	if (FAILED(m_pShader->Bind_Value("g_fGlobalMetallic", &m_fDebugMetallic, sizeof(_float))))
-		CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicRoughness", &m_fDebugRoughness[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalDynamicMetallic", &m_fDebugMetallic[0], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticRoughness", &m_fDebugRoughness[1], sizeof(_float))))
+	//	CRASH("Render Fail");
+	//if (FAILED(m_pShader->Bind_Value("g_fGlobalStaticMetallic", &m_fDebugMetallic[1], sizeof(_float))))
+	//	CRASH("Render Fail");
 #endif
 
 	if (FAILED(m_pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::COMBINED))))

@@ -45,7 +45,8 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 	m_iTriggerIndex = pDesc->iTriggerIndex;
 
 	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
-		Spawn_Particles();
+		if (!m_IsDestroy)
+			Spawn_Particles();
 		});
 	m_IsDestroy = false;
 	return S_OK;
@@ -53,6 +54,8 @@ HRESULT CMapObject_Destruction::Initialize_Clone(void* pArg)
 
 void CMapObject_Destruction::Priority_Update(_float fTimeDelta)
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_K) == KEYSTATE::DOWN)
+		m_IsDestroy = false;
 }
 
 void CMapObject_Destruction::Update(_float fTimeDelta)

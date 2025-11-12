@@ -351,7 +351,7 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
     //}
     
     float fSkyWeight = saturate(exp(-fHegihtFallOff * (vWorldPos.y - fFogMaxHeight)));
-   // float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPos.y)) - 1.f);
+    float fGroundWeight = saturate(exp(fGroundFallOff * (fFogMinHeight - vWorldPos.y)));
     
     float fHeightWeight = fSkyWeight; //max(fSkyWeight, fGroundWeight);
     
@@ -384,14 +384,16 @@ void ComputeLight(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, 
         
         float PhaseFunction = HenyeyGreensteinPhasefunction(LightDirection, vOutDir, fPhaseFunctionG);
         
-        float3 vFinalColor = lerp(vFogColor, (Light.vDiffuse.xyz), 0.4f);
+        float3 vFinalColor = lerp(vFogColor, (Light.vDiffuse.xyz), 0.3f);
         
         vLighting += vFinalColor * fAtt * PhaseFunction;
     }
     
     float3 vNoiseUV = (vWorldPos.xyz) * fNoiseScale;
-    vNoiseUV.z += fNoiseTimeDelta;
+    vNoiseUV.x += fNoiseTimeDelta;
     float fNoise = g_NoiseTexture.SampleLevel(DefaultSampler, vNoiseUV, 0);
+    
+    fNoise += fGroundWeight;
     
     float fFinalDensity = fDensity * fDistanceWeight * fHeightWeight * fNoise;
    

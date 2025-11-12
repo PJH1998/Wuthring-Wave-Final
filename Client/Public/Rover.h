@@ -31,6 +31,7 @@ private:
 		ERoverIdleType  m_eIdleType = ERoverIdleType::END;
 		ERoverRunType m_eRunType = ERoverRunType::END;
 		ERoverLandType m_eLandType = ERoverLandType::END;
+		ERoverDodgeType m_eDodgeType = ERoverDodgeType::END;
 
 		ERoverAttackType m_eAttackType = ERoverAttackType::END;
 		ERoverSkillType m_eSkillType = ERoverSkillType::END;
@@ -63,6 +64,7 @@ private:
 			m_eRunType = ERoverRunType::END;
 			m_eDashType = ERoverDashType::END;
 			m_eLandType = ERoverLandType::END;
+			m_eDodgeType = ERoverDodgeType::END;
 
 			// Attack
 			m_eAttackType = ERoverAttackType::END;
@@ -128,6 +130,7 @@ public:
 	virtual	void	Update(_float fTimeDelta) override;
 	virtual	void	Late_Update(_float fTimeDelta) override;
 	virtual	void	Render() override;
+	virtual	void	Render_OutLine() override;
 	virtual void	Render_Shadow() override;
 #pragma endregion
 
@@ -160,7 +163,7 @@ public:
 
 #pragma region 4. EVENT
 public:
-	virtual void Process_DelayedActions() override;
+	virtual void Process_DelayedActions(_float fTimeDelta);
 #pragma endregion
 
 #pragma endregion

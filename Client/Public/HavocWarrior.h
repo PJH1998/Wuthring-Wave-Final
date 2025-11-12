@@ -77,6 +77,8 @@ private:
 	_float					m_fHP{};
 	_float					m_fAttackDmg{};
 	_float					m_fImpluseRate{};
+	_float					m_fHitStopRatio{};
+	_bool					m_fHitAcc{};
 #pragma endregion
 
 #pragma region PHYSICS

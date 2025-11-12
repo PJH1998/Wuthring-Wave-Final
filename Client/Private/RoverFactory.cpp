@@ -12,6 +12,7 @@
 #include "RoverGroundSpecial.h"
 #include "RoverGroundSkill.h"
 #include "RoverGroundQTE.h"
+#include "RoverGroundDodge.h"
 
 // Air 카테고리 State들
 #include "RoverAirFall.h"
@@ -35,11 +36,13 @@ void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCh
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN), CRoverGroundRun::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND), CRoverGroundLand::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH), CRoverGroundDash::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DODGE), CRoverGroundDodge::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::ATTACK), CRoverGroundAttack::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::BURST), CRoverGroundBurst::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SKILL), CRoverGroundSkill::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPECIAL), CRoverGroundSpecial::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::QTE), CRoverGroundQTE::Create(pCharacter));
+	
 
 	// Air 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::JUMP), CRoverAirJump::Create(pCharacter));
