@@ -16,6 +16,9 @@ struct BoxPoint
     float fRadius;
 };
 
+static const float INF = 3.402823e38f;
+static const float NINF = -3.402823e38f;
+
 StructuredBuffer<BoxPoint> g_BoxPoints : register(t0);
 Texture2D<float> InputTexture : register(t1);
 RWStructuredBuffer<uint> OutputTexture : register(u0);
@@ -25,7 +28,8 @@ cbuffer OCDesc : register(b0)
     float4x4 g_ProjMatrix;
     uint g_iNumObjects;
     uint g_iHZBMipLevel;
-    float2 padding;
+    float g_fMip0SizeX;
+    float g_fMip0SizeY;
 };
 
 float2 WorldToScreen_Center(float3 vCenter)
@@ -116,6 +120,61 @@ bool CheckOC(BoxPoint Box)
     }
 }
 
+bool CheckOC2(BoxPoint Box)
+{
+    float2 vUVMin = float2(1.f, 1.f);
+    float2 vUVMax = float2(0.f, 0.f);
+    float fMinDepth = INF;
+    // Corner
+    for (int i = 0; i < 8; ++i)
+    {
+        float2 vTexcoord = WorldToScreen_Corner(Box.vCorners[i]);
+        vUVMin = min(vUVMin, vTexcoord);
+        vUVMax = max(vUVMax, vTexcoord);
+        fMinDepth = min(fMinDepth, Box.vCorners[i].z);
+    }
+    
+    float2 vExtent = (vUVMax - vUVMin) * float2(g_fMip0SizeX, g_fMip0SizeY);
+    
+    int iMipLevel = clamp(floor(log2(max(vExtent.x, vExtent.y))) - 2, 0, MAX_DEPTH - 1);
+    
+    int iSizeX = 0;
+    int iSizeY = 0;
+    int iNumOfLevel = 0;
+    InputTexture.GetDimensions(iMipLevel, iSizeX, iSizeY, iNumOfLevel);
+    
+    float2 vUV[4];
+    vUV[0] = vUVMin;
+    vUV[1] = float2(vUVMax.x, vUVMin.y);
+    vUV[2] = vUVMax;
+    vUV[3] = float2(vUVMin.x, vUVMax.y);
+    
+    for (int i = 0; i < 4; ++i)
+    {
+        float fOffsetX = i & 1 ? 0.5f / iSizeX : -0.5f / iSizeX;
+        float fOffsetY = i & 2 ? 0.5f / iSizeY : -0.5f / iSizeY;
+        float2 vTex = vUV[i] + float2(fOffsetX, fOffsetY);
+        
+        int2 px = int2(saturate(vTex) * int2(iSizeX - 1, iSizeY - 1));
+        float fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+        
+        float eps = max(10.f, fMinDepth * 0.03f);
+        if (fMinDepth < fHZBDepth + eps)
+            return true;
+    }
+    
+    // Center
+    float2 vCenterTexcoord = WorldToScreen_Center(Box.vCenter);
+    int2 px = int2(saturate(vCenterTexcoord) * int2(iSizeX - 1, iSizeY - 1));
+    float fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+    float fCenterDepth = Box.vCenter.z;
+    float eps = max(10.f, fCenterDepth * 0.03f);
+    if (fCenterDepth < fHZBDepth + Box.fRadius + eps)
+        return true;
+    
+    return false;
+}
+
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
 void Occlusion_Culling(uint3 DTID : SV_DispatchThreadID)
 {
@@ -125,7 +184,7 @@ void Occlusion_Culling(uint3 DTID : SV_DispatchThreadID)
         return;
     
    BoxPoint box = g_BoxPoints[iIndex];
-   bool isVisible = CheckOC(box);
+   bool isVisible = CheckOC2(box);
 
    OutputTexture[iIndex] = isVisible ? 1 : 0;
 }

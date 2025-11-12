@@ -189,7 +189,7 @@ void CRoverDarkScythe::Ready_AttackVolumes()
 	// size 설정
 	m_AttackVolumes.resize(VOLUME_END);
 
-	CAttackVolume::ATKVOLUME_DESC TriggerDesc;
+	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
 	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
 	TriggerDesc.pParenTransform = m_pTransformCom;
@@ -200,6 +200,7 @@ void CRoverDarkScythe::Ready_AttackVolumes()
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 150.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::DARK;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

@@ -42,7 +42,7 @@ void CRoverGroundAttack::OnEnter(void* pArg)
 
 	_string strBoneName = "WeaponProp02";
 	m_pRover->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
-	m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pRover->Set_Gravity(true);
 
@@ -137,7 +137,7 @@ void CRoverGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale);
@@ -152,7 +152,7 @@ void CRoverGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pRover->Play_PartAnimation(
         m_iPartType,
-        m_Animations[m_iCurrentAnimIdx].strAnimName,
+        m_Animations.at(m_iCurrentAnimIdx).strAnimName,
         fTimeDelta, nullptr
     );
 }
@@ -213,7 +213,7 @@ void CRoverGroundAttack::Check_StateTransition(_float fTimeDelta)
 		if (m_IsNextAttackInput && IsEscapePossible)
 		{
 			m_iComboCount++;
-			m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName); // 애니메이션 초기화
+			m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName); // 애니메이션 초기화
 			m_iCurrentAnimIdx = ENUM_CLASS(ERoverAttackType::ATTACK01) + m_iComboCount;
 
 			

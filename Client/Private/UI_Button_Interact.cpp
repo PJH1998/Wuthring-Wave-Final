@@ -24,7 +24,10 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 	//__super::Initialize_Clone(pArg);
 
 	CGameObject::Initialize_Clone(pArg);
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(1);
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 	Ready_Components(pArg);
 	__super::Ready_Events();
 

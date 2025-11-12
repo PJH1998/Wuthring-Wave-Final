@@ -451,22 +451,24 @@ void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
 	if (nullptr == pTargetTransform)
 	{
-		m_IsLockOn = false;
-		m_pTargetTransform = nullptr;
+		if (m_IsLockOn) {
+			m_IsLockOn = false;
+			m_pTargetTransform = nullptr;
 
-		// LockOn 해제 시: 카메라 Look_NoPitch으로 즉시 회전 (반대 방향 착시 완전 해결)
-		if (m_pSpringCamera)
-		{
-			_vector vCamLook = m_pSpringCamera->Get_LookVector();
-			vCamLook = XMVectorSetY(vCamLook, 0.f);
-			vCamLook = XMVector3Normalize(vCamLook);
-			m_pTransformCom->LookDir(vCamLook);
+			// LockOn 해제 시 한 번만
+			if (m_pSpringCamera)
+			{
+				_vector vCamLook = m_pSpringCamera->Get_LookVector();
+				vCamLook = XMVectorSetY(vCamLook, 0.f);
+				vCamLook = XMVector3Normalize(vCamLook);
+				m_pTransformCom->LookLerp(vCamLook, 0.1f, 30.f);
+			}
 		}
 		return;
 	}
 	else
 	{
-		
+
 		// 1. TargetTransform은 항상 가져옵니다.
 		m_pTargetTransform = pTargetTransform;
 		// 2. LockOn은 상황따라

@@ -485,27 +485,76 @@ void CRover::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
     {
 		m_pColliderCom->IsActivate(IsActive);
     }*/
-    if (wStrColliderTag == TEXT("Sword"))
-    {
-		if (nullptr != m_pRoverSword)
-			m_pRoverSword->Volume_Activate(IsActive);
-    }
-	else if (wStrColliderTag == TEXT("Rover"))
-	{
-		if (nullptr != m_pMainAttackVolume)
-			m_pMainAttackVolume->TriggerActivate(IsActive);
-	}
-	else if (wStrColliderTag == TEXT("Scythe"))
-	{
-		if (nullptr != m_pMainAttackVolume)
-			m_pMainAttackVolume->TriggerActivate(IsActive);
-	}
-	else if (wStrColliderTag == TEXT("DarkWing"))
-	{
-		if (nullptr != m_pMainAttackVolume)
-			m_pMainAttackVolume->TriggerActivate(IsActive);
-	}
 
+	_wstring var1, var2, var3;
+	wstringstream wss(wStrColliderTag);
+	getline(wss, var1, L'|');
+	getline(wss, var2, L'|');
+	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
+	_uint iVolumeIdx = {  };
+
+    if (var1 == TEXT("Sword"))
+    {
+		if (var2 == TEXT("ATK"))
+			iVolumeIdx = CRoverSword::VOLUME::VOLUME_ATTACK;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pRoverSword->Volume_Activate(IsActive);
+    }
+	else if (var1 == TEXT("Scythe"))
+	{
+		if (var2 == TEXT("ATK"))
+			iVolumeIdx = CRoverDarkScythe::VOLUME::VOLUME_ATTACK;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pRoverDarkScythe->Volume_Activate(IsActive);
+	}
+	else if (var1 == TEXT("DarkWing"))
+	{
+
+		if (var2 == TEXT("ATK"))
+			iVolumeIdx = CRoverDarkScythe::VOLUME::VOLUME_ATTACK;
+
+		if (var3 == TEXT("ATTACK"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+
+		m_pRoverDarkWing->Volume_Activate(IsActive);
+	}
+	else if (var1 == TEXT("Rover"))
+	{
+		if (var2 == TEXT("KNOCKBACK"))
+			iVolumeIdx = VOLUME::VOLUME_KNOCKBACK;
+		else if (var2 == TEXT("SKILL"))
+			iVolumeIdx = VOLUME::VOLUME_SKILL;
+
+		m_pMainAttackVolume->TriggerActivate(false); // 교체.
+		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+
+		if (var3 == TEXT("ATTACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
+		else if (var3 == TEXT("KNOCKBACK"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
+		else if (var3 == TEXT("SKILL"))
+			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+
+		m_pMainAttackVolume->TriggerActivate(IsActive);
+	}
 }
 
 void CRover::Effect_Active(const _wstring& wStrEffectTag)
@@ -527,75 +576,78 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 
+	// GalbrenaWing|Bone
+	// 자르는거야.
+
 	_uint iVolumeIdx = stoul(var3);
 
 	/* SWORD|ROVER|0*/
 	// 1. 어떤 무기인가?
-	if (var1 == TEXT("SWORD"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-		m_pRoverSword->Change_Volume(iVolumeIdx);
+	//if (var1 == TEXT("SWORD"))
+	//{
+	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+	//	m_pRoverSword->Change_Volume(iVolumeIdx);
 
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-		{
-			// 3. 볼륨 레이어 변경
-			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-		}
-		else if (var2 == TEXT("SKILL"))
-			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	}
-	if (var1 == TEXT("SCYTHE"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-		m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
+	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+	//	if (var2 == TEXT("ATTACK"))
+	//	{
+	//		// 3. 볼륨 레이어 변경
+	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+	//	}
+	//	else if (var2 == TEXT("SKILL"))
+	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	//	else if (var2 == TEXT("KNOCKBACK"))
+	//		m_pRoverSword->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	//}
+	//if (var1 == TEXT("SCYTHE"))
+	//{
+	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+	//	m_pRoverDarkScythe->Change_Volume(iVolumeIdx);
 
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-		{
-			// 3. 볼륨 레이어 변경
-			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-		}
-		else if (var2 == TEXT("SKILL"))
-			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	}
-	else if (var1 == TEXT("DARKWING"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
-		m_pRoverDarkWing->Change_Volume(iVolumeIdx);
+	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+	//	if (var2 == TEXT("ATTACK"))
+	//	{
+	//		// 3. 볼륨 레이어 변경
+	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+	//	}
+	//	else if (var2 == TEXT("SKILL"))
+	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	//	else if (var2 == TEXT("KNOCKBACK"))
+	//		m_pRoverDarkScythe->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	//}
+	//else if (var1 == TEXT("DARKWING"))
+	//{
+	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_ATTACK (0))
+	//	m_pRoverDarkWing->Change_Volume(iVolumeIdx);
 
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-		{
-			// 3. 볼륨 레이어 변경
-			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
-		}
-		else if (var2 == TEXT("SKILL"))
-			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
-	}
-	else if (var1 == TEXT("ROVER"))
-	{
-		// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
-		if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
-			return;
+	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+	//	if (var2 == TEXT("ATTACK"))
+	//	{
+	//		// 3. 볼륨 레이어 변경
+	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::ATTACK);
+	//	}
+	//	else if (var2 == TEXT("SKILL"))
+	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::SKILL);
+	//	else if (var2 == TEXT("KNOCKBACK"))
+	//		m_pRoverDarkWing->Change_VolumeLayer(iVolumeIdx, COLLISIONLAYER::KNOCKBACK);
+	//}
+	//else if (var1 == TEXT("ROVER"))
+	//{
+	//	// 볼륨 인덱스로 볼륨 변경. (VOLUME_RISE (0), VOLUME_HACKDOWN(1))
+	//	if (nullptr == m_AttackVolumes[iVolumeIdx] || nullptr == m_pMainAttackVolume)
+	//		return;
 
-		m_pMainAttackVolume->TriggerActivate(false); // 교체.
-		m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
+	//	m_pMainAttackVolume->TriggerActivate(false); // 교체.
+	//	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
 
-		// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
-		if (var2 == TEXT("ATTACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
-		else if (var2 == TEXT("SKILL"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
-		else if (var2 == TEXT("KNOCKBACK"))
-			m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
-	}
+	//	// 2. 어떤 레이어인가? , 3. 어떤 볼륨인덱스를 사용할건가 ?.
+	//	if (var2 == TEXT("ATTACK"))
+	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::ATTACK);
+	//	else if (var2 == TEXT("SKILL"))
+	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::SKILL);
+	//	else if (var2 == TEXT("KNOCKBACK"))
+	//		m_pMainAttackVolume->Change_Layer(COLLISIONLAYER::KNOCKBACK);
+	//}
 	
 
 }
@@ -849,6 +901,7 @@ void CRover::Ready_AttackVolumes()
 	TriggerDesc.vOffsetPos = _float3(0.0f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 400.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::DARK;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

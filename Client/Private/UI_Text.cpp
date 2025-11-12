@@ -190,10 +190,11 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_tUIDesc.fUIScale		= pDesc->fUIScale;
 	m_tUIDesc.isInstance	= pDesc->isInstance;
 
+	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
 
-	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
 
 
@@ -201,6 +202,8 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_vecCachedUITransform.resize(iCacheTransformAmount);
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 
 	return S_OK;
 }
@@ -290,13 +293,14 @@ void CUI_Text::Update_Description()
 		prevCode = ch;
 	}
 
-
-	// m_tUIDesc 갱신 (부모에서 사용)
-
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
+
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	// m_tUIDesc 갱신 (부모에서 사용)
 
 	if (m_tTextDesc.vecInstanceDescs.size() != m_vecCachedUITransform.size())
 		m_vecCachedUITransform.resize(m_tTextDesc.vecInstanceDescs.size());
+#endif // KSTA_ON_TRANSFORM_CACHING
 
 }
 

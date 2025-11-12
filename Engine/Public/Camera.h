@@ -48,6 +48,7 @@ protected:
 	// Shaking
 	_bool							m_isShake = { false };
 	_float							m_fShakeTimeAcc = {};		// Shake 진행시간
+	queue<CAMERA_SHAKE>	m_tShakeDatas = {};
 	CAMERA_SHAKE			m_tShakeData = {};
 	_float							m_fDecay = {};
 	_float							m_fRandTimeAcc = {};		// Frequency에 맞게 Rand 생성하기위한 TimeAcc
@@ -67,9 +68,9 @@ protected:
 	void							Mouse_Move();
 	void							Mouse_Move_Up();
 
+	void							SetUp_Shake();
 	void							Shaking(_float fTimeDelta);
 	_float							ADSR();
-	void							Perlin_Noise(_float fTimeDelta);
 
 public:
 	virtual CGameObject*		Clone(void* pArg) = 0;
