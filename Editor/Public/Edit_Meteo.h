@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "C:\Users\dnheu\source\repos\Wuthering_Wave_Final\EngineSDK\Inc\StaticObject.h"
+#include "StaticObject.h"
 NS_BEGIN(Engine)
 
 NS_END
