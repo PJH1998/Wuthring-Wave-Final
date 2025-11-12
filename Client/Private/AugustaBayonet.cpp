@@ -44,15 +44,7 @@ void CAugustaBayonet::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 	
-	//if (m_IsAnimationEnd)
-	//	m_isActivate = false;
 
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Priority_Update(fTimeDelta);
-	}
-		//m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
 void CAugustaBayonet::Update(_float fTimeDelta)
@@ -60,6 +52,13 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 	// 호출 순서. Character Update -> Activate 상태라면-> WingUpdate(행렬 및 RigidBody 갱신) -> StateMachine Update 
 	// -> m_pSocketMatrix에 뼈 행렬 포인터 전달. -> Animation 실행. -> 캐릭터 Update  종료
     CProp::Update(fTimeDelta);
+
+	// Combined Matrix 
+	XMStoreFloat4x4(&m_CombinedMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		XMLoadFloat4x4(m_pSocketMatrix) *
+		m_pParentTransform->Get_WorldMatrix());
+
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
 
 	/*if (nullptr != m_pMainAttackVolume)
@@ -73,25 +72,10 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
 void CAugustaBayonet::Late_Update(_float fTimeDelta)
 {
-	// Combined Matrix 
-	XMStoreFloat4x4(&m_CombinedMatrix,
-		m_pTransformCom->Get_WorldMatrix() *
-		XMLoadFloat4x4(m_pSocketMatrix) *
-		m_pParentTransform->Get_WorldMatrix());
+	
 
     CProp::Late_Update(fTimeDelta);
 
-
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
-
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Late_Update(fTimeDelta);
-	}
-
-    //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
         return;
@@ -249,7 +233,7 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 1.f);
+	TriggerDesc.vExtent = _float3(1.5f, 1.5f, 1.f);
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;

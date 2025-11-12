@@ -101,12 +101,6 @@ void CAugusta::Priority_Update(_float fTimeDelta)
 	//if (nullptr != m_pMainAttackVolume)
 	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
 
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Priority_Update(fTimeDelta);
-	}
-
 	// 6. Change Timer 계산. => Dissolve에 사용
 	Calc_ChangeTimer(fTimeDelta);
 
@@ -119,42 +113,31 @@ void CAugusta::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-	// 2. 파츠 갱신.?
-	for (auto& pPart : m_PartObjects)
-	{
-		if (pPart.second->IsActivate())
-			pPart.second->Update(fTimeDelta);
-	}
-
-    // 3. 상태 머신 갱신
+    // 2. 상태 머신 갱신
     m_pStateMachineCom->Update(fTimeDelta); // 여기서 Weapon이나 Parts의 갱신을 해야함.. => 여기서 Play_Animation 실행됨.
 
-
-	// 4. 현재 위치 - 1Frame 이전 위치 값 계산
+	// 3. 현재 위치 - 1Frame 이전 위치 값 계산
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (!m_IsQTE)
 	{
-		// 5. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
+		// 4. Collider 갱신 => Jolt 자체에서도 fTimeDelta 값을 적용하고 있기 때문에 
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
 
-		// 6. Camera 갱신 => 위치 따라오게
+		// 5. Camera 갱신 => 위치 따라오게
 		m_pSpringCamera->Update_Target(m_pTransformCom->Get_State(STATE::POSITION), 1.2f);
 	}
 	else
 	{
 		m_pQTEColliderCom->Update(vVelocity / fTimeDelta);
 	}
-	// 7. Land Check
+	// 6. Land Check
 	m_IsLand = Is_LandCollider();
-   
-	// 8. Hit 초기화 => ObjectUpdate -> Font -> Camera -> Physics Update(Hit Judge 판단) -> Late_Update
-	//Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT));
 
-	//m_IsHit = false;
-
-	// 9. MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pPart : m_PartObjects)
+	{
+		if (pPart.second->IsActivate())
+			pPart.second->Update(fTimeDelta);
+	}
 
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
@@ -171,22 +154,13 @@ void CAugusta::Late_Update(_float fTimeDelta)
             pPart.second->Late_Update(fTimeDelta);
     }
 
-	// 2. MainAttackVolume 설정
-	//if (nullptr != m_pMainAttackVolume)
-	//	m_pMainAttackVolume->Late_Update(fTimeDelta);
-	for (auto& pAttackVolume : m_AttackVolumes)
-	{
-		if (nullptr != pAttackVolume)
-			pAttackVolume->Late_Update(fTimeDelta);
-	}
-
-	// 3. QTE인 경우 Collider 갱신하지 않습니다.?
+	// 2. QTE인 경우 Collider 갱신하지 않습니다.?
 	if (!m_IsQTE)
 		m_pColliderCom->Sync_Position(m_pTransformCom);
 	else
 		m_pQTEColliderCom->Sync_Position(m_pTransformCom);
 	
-
+	// 3. 
 	if (m_IsQTEend)
 	{
 		Notify_HarmonyEnd();
