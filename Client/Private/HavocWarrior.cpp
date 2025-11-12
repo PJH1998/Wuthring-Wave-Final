@@ -339,6 +339,11 @@ void CHavocWarrior::Ready_PartObjects(HAVOCWARRIOR_DESC* pDesc)
 
 void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 {
+	if (m_fHP <= 0.f)
+	{
+		m_iState = ENUM_CLASS(TEST_STATE::DEAD);
+		return;
+	}
 	if (m_isAnimationFinished)
 	{
 		_uint iRemainState{};
@@ -383,6 +388,16 @@ void CHavocWarrior::Reset_Condition(_float fTimeDelta)
 
 void CHavocWarrior::After_Condition(_float fTimeDelta)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+	{
+		if (!m_isDeadTrigger)
+		{
+			m_isDeadTrigger = true;
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+		}
+		return;
+	}
 	if (m_isTurnLerp)
 		m_pTransformCom->LookLerp(XMLoadFloat3(&m_vTargetDir), fTimeDelta);
 	//else if (m_iState & (ENUM_CLASS(TEST_STATE::MOVE_FORWARD) | ENUM_CLASS(TEST_STATE::MOVE_BACKWARD) | ENUM_CLASS(TEST_STATE::MOVE_LEFT) | ENUM_CLASS(TEST_STATE::MOVE_RIGHT)))
@@ -465,9 +480,13 @@ void CHavocWarrior::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold
 
 void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return;
 	if (iLayer == ENUM_CLASS(COLLISIONLAYER::ATTACK))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! (Havoc Warrior)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x <<", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -477,6 +496,8 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::SKILL))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -484,6 +505,8 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 	else if (iLayer == ENUM_CLASS(COLLISIONLAYER::KNOCKBACK))
 	{
 		m_beHit = true;
+		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
+		m_fHP -= pDesc->fAttack;
 		m_isPushed = true;
 		//m_isAir = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);

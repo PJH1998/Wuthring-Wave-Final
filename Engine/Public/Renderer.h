@@ -24,8 +24,9 @@ public:
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
+#ifdef _DEBUG
 	void				SettingFog(_bool IsOn) { m_IsFog = IsOn; }
-	
+#endif
 	void				Render_ShadowMap();
 
 #ifdef _DEBUG

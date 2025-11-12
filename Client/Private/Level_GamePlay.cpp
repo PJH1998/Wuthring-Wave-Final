@@ -261,10 +261,8 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
 	AoEDesc.fAttackDamage = ADesc.fAttackDmg * 0.25f;
-	AoEDesc.fLifeTime = 3.f;
 	AoEDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY_ATTACK);
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
-	AoEDesc.iTickCount = 8;
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
 	//AoEDesc.wstrEffectTag
