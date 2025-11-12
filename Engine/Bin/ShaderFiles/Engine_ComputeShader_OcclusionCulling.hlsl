@@ -97,18 +97,18 @@ bool CheckOC(BoxPoint Box)
         // Corner
         for (int i = 0; i < 8; ++i)
         {
-            float fOffsetX = i & 1 ? 0.01f : -0.01f;
-            float fOffsetY = i & 2 ? 0.01f : -0.01f;
+            int iOffsetX = i & 1 ? 1 : -1;
+            int iOffsetY = i & 2 ? 1 : -1;
             vTexcoord = WorldToScreen_Corner(Box.vCorners[i]);
-            vTexcoord += float2(fOffsetX, fOffsetY);
             float fCornerDepth = Box.vCorners[i].z;
         
             px = int2(saturate(vTexcoord) * (vSize - 1));
+            px += int2(iOffsetX, iOffsetY);
             fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
             if (0.f == fHZBDepth)
                 return true;
         
-            eps = max(10.f, fCornerDepth * 0.01f);
+            eps = max(10.f, fCornerDepth * 0.03f);
             if (fCornerDepth < fHZBDepth + eps)
                 return true;
         }
