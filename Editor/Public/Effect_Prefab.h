@@ -80,9 +80,6 @@ private:
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};
 
-	_bool								m_IsRoot = false;
-
-
 	map<const _wstring, CGameObject*>	 m_EffectChildren; 
 	vector<FRAME_DESC>					 m_vFrames;
 	//map<const _wstring, float>				m_ChildrenDesc; 
