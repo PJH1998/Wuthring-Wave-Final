@@ -209,6 +209,7 @@
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
     <ClInclude Include="..\Public\HitState.h" />
+    <ClInclude Include="..\Public\LogoCamera.h" />
     <ClInclude Include="..\Public\LogoFactory.h" />
     <ClInclude Include="..\Public\LogoFemaleRover.h" />
     <ClInclude Include="..\Public\LogoMaleRover.h" />
@@ -389,6 +390,7 @@
     <ClCompile Include="..\private\Loader_Test_UI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Private\LogoCamera.cpp" />
     <ClCompile Include="..\private\LogoFactory.cpp" />
     <ClCompile Include="..\Private\LogoFemaleRover.cpp" />
     <ClCompile Include="..\Private\LogoMaleRover.cpp" />

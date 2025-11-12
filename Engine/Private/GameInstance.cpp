@@ -1051,6 +1051,7 @@ HRESULT CGameInstance::Clear_Resource(_uint iLevelID)
 
 HRESULT CGameInstance::Clear_Memory()
 {
+	m_pRenderer->Clear_Resource();
 	m_pOctoTree->Clear_OctoTree();
 	m_pSound_Manager->Stop_All();
 	m_pEventBus->Unscribe();

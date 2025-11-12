@@ -28,6 +28,8 @@ public:
 	
 	void				Render_ShadowMap();
 
+	void					Clear_Resource();
+
 #ifdef _DEBUG
 	HRESULT		Add_Render_Debug(class CComponent* pDebugComponent);
 	void			Set_LUT_Index(_uint iIndex) { m_iLUT_Index = iIndex; }

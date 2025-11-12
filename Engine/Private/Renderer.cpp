@@ -283,6 +283,12 @@ void CRenderer::Render_ShadowMap()
 	m_pGameInstance->End_ShadowMap();
 }
 
+void CRenderer::Clear_Resource()
+{
+	m_StaticObjects[0].clear();
+	m_StaticObjects[1].clear();
+}
+
 void CRenderer::Render_Priority()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"))))

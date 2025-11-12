@@ -7,6 +7,7 @@
 #include "GameSystem.h"
 #include "LogoMaleRover.h"
 #include "LogoFemaleRover.h"
+#include "SceneCamera.h"
 
 CLoader_Logo::CLoader_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -52,8 +53,11 @@ HRESULT CLoader_Logo::Load_Shader()
 
 HRESULT CLoader_Logo::Load_Object()
 {
-	cout << "Object" << endl;
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		CRASH("SceneCamera Prototype");
 
+	cout << "Object" << endl;
     return S_OK;
 }
 
@@ -62,8 +66,8 @@ HRESULT CLoader_Logo::Load_LogoMaleRover()
 	_wstring wStrModelTag = L"Prototype_Component_Model_MaleRover";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Male/LogoMaleRover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	_float fSize = 0.01f;
-	//_float fSize = 0.0001f;
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
@@ -95,8 +99,8 @@ HRESULT CLoader_Logo::Load_LogoFeMaleRover()
 	_wstring wStrModelTag = L"Prototype_Component_Model_FemaleRover";
 	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Logo/Female/LogoFemaleRover.dat";
 	_matrix	PreTransformMatrix = XMMatrixIdentity();
-	_float fSize = 0.01f;
-	//_float fSize = 0.0001f;
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
 	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(90.f));// * XMMatrixRotationZ(XMConvertToRadians(90.f));// *  XMMatrixRotationY(XMConvertToRadians(180.f));
 
 	// 1. 모델 초기화.
