@@ -560,7 +560,7 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	// interact
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN)
-		m_pGameSystem->Render_IntersectUI(L"Test");
+		m_pGameSystem->Render_InteractUI(L"Test");
 
 
 

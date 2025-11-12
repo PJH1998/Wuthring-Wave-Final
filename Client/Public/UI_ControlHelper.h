@@ -19,7 +19,7 @@ public:
 	HRESULT				HUD_FadeOut();
 	HRESULT				HUD_FadeIn();
 
-	void				Render_IntersectUI(_wstring strText);
+	void				Render_InteractUI(_wstring strText);
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };
