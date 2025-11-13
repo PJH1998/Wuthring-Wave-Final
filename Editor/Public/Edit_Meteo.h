@@ -9,6 +9,7 @@ class CEdit_Meteo final: public CStaticObject
 {
 public:
 	union MyFloat4 {
+		_vector Vec;
 		_float4 float4;
 		_float arr[4];
 	};	
