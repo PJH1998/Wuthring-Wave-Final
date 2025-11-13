@@ -57,6 +57,8 @@ HRESULT CUI_ControlHelper::HUD_FadeOut()
 
 	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
 	//	return E_FAIL;
+
+	return S_OK;
 }
 
 HRESULT CUI_ControlHelper::HUD_FadeIn()
