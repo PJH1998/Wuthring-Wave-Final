@@ -675,6 +675,7 @@ void CLevel_Test::Toggle_HUD()
 		}
 	}
 
+
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
 	{
 		isToggled_BOSSHP = !isToggled_BOSSHP;
