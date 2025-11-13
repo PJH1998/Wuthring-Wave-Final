@@ -84,8 +84,7 @@ namespace Client
 	};
 
 	enum class UI_GALBRENA_CONDITION : unsigned int {
-		BURST = 0,
-
+		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};
 
@@ -231,6 +230,7 @@ namespace Client
 		, ROVER // 5
 		, NORMAL_YELLOW // 6
 		, LOGOROVER // 7
+		, GALBRENA // 8
 		, END };
 
 	enum class TEXT_COLOR_TYPE {

@@ -222,6 +222,35 @@ namespace PlayerData
 	}
 #pragma endregion
 
+#pragma region GALBRENA
+	static CCharacter::CHARACTER_DESC GetGalbrenaCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
+	{
+		CCharacter::CHARACTER_DESC Desc;
+		Desc.eCurLevel = eLevel;
+		Desc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
+		Desc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+		Desc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
+		Desc.modelData = make_pair(eLevel, TEXT("Prototype_Component_Model_Galbrena"));
+		Desc.stateMachineData = make_pair(eLevel, TEXT("Prototype_Component_StateMachine_Galbrena"));
+		Desc.flyComputeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshFly"));
+		Desc.fRotationPerSec = XMConvertToRadians(90.f);
+		Desc.strFolderPath = "../Bin/Resource/Model/Player/Galbrena/Notify/";
+		Desc.fSpeedPerSec = 10.f;
+		Desc.vScale = vScale;
+		Desc.vRotation = vRotation;
+		Desc.vPosition = vPosition;
+
+		// Parts
+		Desc.PartPrototypes = {
+			make_pair(L"Gun", L"Prototype_GameObject_Galbrena_Gun"),
+			make_pair(L"Lion", L"Prototype_GameObject_Galbrena_Lion"),
+			make_pair(L"Wing", L"Prototype_GameObject_Wing")
+		};
+
+		return Desc;
+	}
+#pragma endregion
+
 #pragma region LOGO
 	static CCharacter::CHARACTER_DESC GetLogoMaleRoverCloneData(_float3 vScale, _float3 vRotation, _float3 vPosition, LEVEL eLevel)
 	{
@@ -269,5 +298,8 @@ namespace PlayerData
 		return Desc;
 	}
 #pragma endregion
+
+
+
 
 }
