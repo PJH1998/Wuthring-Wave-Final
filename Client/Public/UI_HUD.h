@@ -31,6 +31,11 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
+public:
+	void					Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
+	void					Toggle_BossStatusUI(_bool isOn) { m_isOn_BossStatus = isOn; }
+
+
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Presets();
@@ -79,6 +84,23 @@ private:
 	// Update_UI_SkillSection
 	unordered_map<_wstring, array<_float2, 2>>		m_mapSkillTexIndices = {};
 	_uint m_iSelectedCHIndex = 0;
+
+
+	// ========== for Boss ==========
+	_bool					m_isOn_BossStatus = false;
+
+	_float*					m_pCurBossHP = { nullptr };
+	_float					m_fBackBossHP = 0.f;
+
+	_float*					m_pCurBossSA = { nullptr };
+	_float					m_fBackBossSA = 0.f;
+	;
+	_float*					m_pGroggyLeftRatio = { nullptr };
+	_bool*					m_pIsGroggy = { nullptr };
+
+	_string					m_strMonsterKey = {};
+	// ==============================
+
 
 public:
 	static CUI_HUD* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -668,6 +668,7 @@ void CLevel_Test::Shader_Gui()
 void CLevel_Test::Toggle_HUD()
 {
 	static _bool isToggled_HUD = false;
+	static _bool isToggled_BOSSHP = false;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
@@ -681,6 +682,12 @@ void CLevel_Test::Toggle_HUD()
 		{
 			CGameSystem::GetInstance()->HUD_FadeIn();
 		}
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
+	{
+		isToggled_BOSSHP = !isToggled_BOSSHP;
+		CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
 	}
 }
 
