@@ -1,21 +1,21 @@
 ﻿#include "ClientPch.h"
-#include "GalbrenaGun.h"
+#include "GalbrenaShotGun.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
 #include "PlayerStatus.h"
 #include "Ability.h"
 
-CGalbrenaGun::CGalbrenaGun(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CGalbrenaShotGun::CGalbrenaShotGun(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CProp{ pDevice, pContext }
 {
 }
 
-CGalbrenaGun::CGalbrenaGun(const CPartObject& Prototype)
+CGalbrenaShotGun::CGalbrenaShotGun(const CPartObject& Prototype)
     : CProp(Prototype )
 {
 }
 
-HRESULT CGalbrenaGun::Initialize_Prototype()
+HRESULT CGalbrenaShotGun::Initialize_Prototype()
 {
     if (FAILED(CProp::Initialize_Prototype()))
         return E_FAIL;
@@ -23,7 +23,7 @@ HRESULT CGalbrenaGun::Initialize_Prototype()
     return S_OK;
 }
 
-HRESULT CGalbrenaGun::Initialize_Clone(void* pArg)
+HRESULT CGalbrenaShotGun::Initialize_Clone(void* pArg)
 {
     PROP_DESC* pDesc = static_cast<PROP_DESC*>(pArg);
     ASSERT_CRASH(pDesc);
@@ -39,7 +39,7 @@ HRESULT CGalbrenaGun::Initialize_Clone(void* pArg)
     return S_OK;
 }
 
-void CGalbrenaGun::Priority_Update(_float fTimeDelta)
+void CGalbrenaShotGun::Priority_Update(_float fTimeDelta)
 {
     CProp::Priority_Update(fTimeDelta);
 
@@ -48,7 +48,7 @@ void CGalbrenaGun::Priority_Update(_float fTimeDelta)
 		m_pMainAttackVolume->Priority_Update(fTimeDelta);
 }
 
-void CGalbrenaGun::Update(_float fTimeDelta)
+void CGalbrenaShotGun::Update(_float fTimeDelta)
 {
     CProp::Update(fTimeDelta);
 
@@ -64,7 +64,7 @@ void CGalbrenaGun::Update(_float fTimeDelta)
     
 }
 
-void CGalbrenaGun::Late_Update(_float fTimeDelta)
+void CGalbrenaShotGun::Late_Update(_float fTimeDelta)
 {
 
     CProp::Late_Update(fTimeDelta);
@@ -78,7 +78,7 @@ void CGalbrenaGun::Late_Update(_float fTimeDelta)
         return;
 }
 
-void CGalbrenaGun::Render()
+void CGalbrenaShotGun::Render()
 {
     Bind_Resources();
 
@@ -105,12 +105,12 @@ void CGalbrenaGun::Render()
 #endif // _DEBUG
 }
 
-void CGalbrenaGun::Activate(_bool IsActivate)
+void CGalbrenaShotGun::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
 }
 
-void CGalbrenaGun::Change_Volume(_uint iVolumeIdx)
+void CGalbrenaShotGun::Change_Volume(_uint iVolumeIdx)
 {
 	if ((m_AttackVolumes[iVolumeIdx] == nullptr) || (m_pMainAttackVolume == nullptr))
 		return;
@@ -121,13 +121,13 @@ void CGalbrenaGun::Change_Volume(_uint iVolumeIdx)
 	m_pMainAttackVolume = m_AttackVolumes[iVolumeIdx];
 }
 
-void CGalbrenaGun::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
+void CGalbrenaShotGun::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer)
 {
 	if (m_AttackVolumes[iVolumeIdx] != nullptr)
 		m_AttackVolumes[iVolumeIdx]->Change_Layer(eLayer);
 }
 
-void CGalbrenaGun::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+void CGalbrenaShotGun::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	// 1. 게이지 올리기?
 	CAbility* pAbility = CGameSystem::GetInstance()
@@ -145,7 +145,7 @@ void CGalbrenaGun::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold&
 	}
 }
 
-void CGalbrenaGun::Ready_Components(const PROP_DESC* pDesc)
+void CGalbrenaShotGun::Ready_Components(const PROP_DESC* pDesc)
 {
     // 1. Components
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(pDesc->shaderData.first)
@@ -161,7 +161,7 @@ void CGalbrenaGun::Ready_Components(const PROP_DESC* pDesc)
         CRASH("Model");
 }
 
-void CGalbrenaGun::Ready_Variables(const PROP_DESC* pDesc)
+void CGalbrenaShotGun::Ready_Variables(const PROP_DESC* pDesc)
 {
     m_ShaderPaths.resize(m_pModelCom->Get_NumMesh());
     m_pSocketMatrix = pDesc->pSocketMatrix;
@@ -171,14 +171,14 @@ void CGalbrenaGun::Ready_Variables(const PROP_DESC* pDesc)
         m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
 }
 
-void CGalbrenaGun::Ready_Positions(const PROP_DESC* pDesc)
+void CGalbrenaShotGun::Ready_Positions(const PROP_DESC* pDesc)
 {
     _fvector vPos = XMVectorSetW(XMLoadFloat3(&pDesc->vPosition), 1.f);
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
     m_pTransformCom->Scale(pDesc->vScale);
 }
 
-void CGalbrenaGun::Ready_AttackVolumes()
+void CGalbrenaShotGun::Ready_AttackVolumes()
 {
 	// size 설정
 	m_AttackVolumes.resize(VOLUME_END);
@@ -209,7 +209,7 @@ void CGalbrenaGun::Ready_AttackVolumes()
 	m_pMainAttackVolume = m_AttackVolumes[VOLUME_ATTACK]; // 기본.
 }
 
-void CGalbrenaGun::Bind_Resources()
+void CGalbrenaShotGun::Bind_Resources()
 {
     if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_CombinedMatrix)))
         CRASH("Failed Bind Matrix");
@@ -221,29 +221,29 @@ void CGalbrenaGun::Bind_Resources()
         CRASH("Failed Proj Matrix");
 }
 
-CGalbrenaGun* CGalbrenaGun::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
+CGalbrenaShotGun* CGalbrenaShotGun::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
-    CGalbrenaGun* pInstance = new CGalbrenaGun(pDevice, pContext);
+    CGalbrenaShotGun* pInstance = new CGalbrenaShotGun(pDevice, pContext);
     if (FAILED(pInstance->Initialize_Prototype()))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Create Failed CGalbrenaGun");
+        MSG_BOX("Create Failed CGalbrenaShotGun");
     }
     return pInstance;
 }
 
-CGameObject* CGalbrenaGun::Clone(void* pArg)
+CGameObject* CGalbrenaShotGun::Clone(void* pArg)
 {
-    CGalbrenaGun* pInstance = new CGalbrenaGun(*this);
+    CGalbrenaShotGun* pInstance = new CGalbrenaShotGun(*this);
     if (FAILED(pInstance->Initialize_Clone(pArg)))
     {
         Safe_Release(pInstance);
-        MSG_BOX("Clone Failed CGalbrenaGun");
+        MSG_BOX("Clone Failed CGalbrenaShotGun");
     }
     return pInstance;
 }
 
-void CGalbrenaGun::Free()
+void CGalbrenaShotGun::Free()
 {
     CProp::Free();
 }

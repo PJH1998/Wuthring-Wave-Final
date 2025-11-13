@@ -2,7 +2,7 @@
 #include "Prop.h"
 
 NS_BEGIN(Client)
-class CGalbrenaGun final : public CProp
+class CGalbrenaShotGun final : public CProp
 {
 public:
 	enum VOLUME
@@ -12,9 +12,9 @@ public:
 	};
 
 protected:
-	explicit CGalbrenaGun(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
-	explicit CGalbrenaGun(const CPartObject& Prototype);
-	virtual ~CGalbrenaGun() = default;
+	explicit CGalbrenaShotGun(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	explicit CGalbrenaShotGun(const CPartObject& Prototype);
+	virtual ~CGalbrenaShotGun() = default;
 
 public:
 	virtual	HRESULT	Initialize_Prototype() override;
@@ -47,7 +47,7 @@ private:
 	void Bind_Resources();
 
 public:
-	static CGalbrenaGun* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
+	static CGalbrenaShotGun* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual		CGameObject* Clone(void* pArg) override;
 	virtual		void					Free() override;
 

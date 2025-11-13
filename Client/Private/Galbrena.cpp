@@ -4,6 +4,7 @@
 #include "GalbrenaFactory.h"
 #include "SpringCamera.h"
 #include "Wing.h"
+#include "GalbrenaShotGun.h"
 #include "Collider.h"
 #include "AttackVolume.h"
 #include "GameSystem.h"
@@ -48,7 +49,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	CGalbrenaFactory::Register_States(m_pStateMachineCom, this);
 	
 	// 비활성화. 
-	PartActivate(PART_GUN, false);
+	//PartActivate(PART_FIRSTGUN, false);
+	PartActivate(PART_FIRSTGUN, true);
+	PartActivate(PART_SECONDGUN, false);
 	PartActivate(PART_LION, false);
 	PartActivate(PART_WING, false);
 	
@@ -280,8 +283,10 @@ void CGalbrena::Play_PartAnimation(_uint iPartType, const _string& strAnimName, 
 {
     switch (iPartType)
     {
-    case PART_GUN:
-        break;
+	case PART_FIRSTGUN:
+		break;
+	case PART_SECONDGUN:
+		break;
 	case PART_LION:
 		break;
 	case PART_WING:
@@ -297,7 +302,10 @@ void CGalbrena::PartActivate(_uint iPartType, _bool IsActive)
 {
     switch (iPartType)
     {
-	case PART_GUN:
+	case PART_FIRSTGUN:
+		m_pGalbrenaFirstShotGun->Activate(IsActive);
+		break;
+	case PART_SECONDGUN:
 		break;
 	case PART_LION:
 		break;
@@ -313,7 +321,9 @@ void CGalbrena::Part_VolumeChange(_uint iPartType, _uint iVolumeIdx)
 {
 	switch (iPartType)
 	{
-	case PART_GUN:
+	case PART_FIRSTGUN:
+		break;
+	case PART_SECONDGUN:
 		break;
 	case PART_LION:
 		break;
@@ -324,7 +334,9 @@ void CGalbrena::Part_VolumeActivate(_uint iPartType, _bool IsActive)
 {
 	switch (iPartType)
 	{
-	case PART_GUN:
+	case PART_FIRSTGUN:
+		break;
+	case PART_SECONDGUN:
 		break;
 	case PART_LION:
 		break;
@@ -335,7 +347,9 @@ void CGalbrena::Clear_PartAnimation(_uint iPartType, const _string& strAnimName)
 {
     switch (iPartType)
     {
-	case PART_GUN:
+	case PART_FIRSTGUN:
+		break;
+	case PART_SECONDGUN:
 		break;
 	case PART_LION:
 		break;
@@ -358,7 +372,9 @@ void CGalbrena::Set_SocketMatrixToParts(_uint iPartType, const _string& strBoneN
     
     switch (iPartType)
     {
-	case PART_GUN:
+	case PART_FIRSTGUN:
+		break;
+	case PART_SECONDGUN:
 		break;
 	case PART_LION:
 		break;
@@ -459,7 +475,7 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 	_uint iVolumeIdx = {  };
 
-    if (var1 == TEXT("Gun"))
+    if (var1 == TEXT("FirstGun"))
     {
 		/*if (var2 == TEXT("ATK"))
 			iVolumeIdx = CGalbrenaSword::VOLUME::VOLUME_ATTACK;
@@ -473,6 +489,10 @@ void CGalbrena::Collider_Active(const _wstring& wStrColliderTag, _bool IsActive)
 
 		m_pGalbrenaSword->Volume_Activate(IsActive);*/
     }
+	else if (var1 == TEXT("SecondGun"))
+	{
+
+	}
 	else if (var1 == TEXT("Lion"))
 	{
 		/*if (var2 == TEXT("ATK"))
@@ -688,7 +708,24 @@ void CGalbrena::Ready_PartObjects(const CHARACTER_DESC* pDesc)
         CProp::PROP_DESC Desc{};
         switch (i)
         {
-        case PARTTYPE::PART_GUN:
+        case PARTTYPE::PART_FIRSTGUN:
+			vScale = { 1.f, 1.f, 1.f };
+			vPosition = { 0.f, 0.f, 0.f };
+			Desc = PlayerData::GetGalbrenaFirstShotGunCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+			Desc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(Desc.strBoneName.c_str());
+			Desc.pParentTransform = m_pTransformCom;
+			ASSERT_CRASH(Desc.pSocketMatrix);
+
+			// PropDesc
+			if (FAILED(CContainerObject::Add_PartObject(strPartName, ENUM_CLASS(m_eCurLevel)
+				, strPrototypeName, &Desc)))
+				CRASH("PART_FIRSTGUN");
+
+			m_pGalbrenaFirstShotGun = dynamic_cast<CGalbrenaShotGun*>(Find_PartObject(strPartName));
+			ASSERT_CRASH(m_pGalbrenaFirstShotGun);
+			Safe_AddRef(m_pGalbrenaFirstShotGun);
+			break;
+		case PARTTYPE::PART_SECONDGUN:
 			break;
 
 		case PARTTYPE::PART_LION:
@@ -796,4 +833,6 @@ void CGalbrena::Free()
 	}
 	m_AttackVolumes.clear();
 	Safe_Release(m_pWing);
+	Safe_Release(m_pGalbrenaFirstShotGun);
+	Safe_Release(m_pGalbrenaSecondShotGun);
 }

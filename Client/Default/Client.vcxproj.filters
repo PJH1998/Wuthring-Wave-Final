@@ -746,7 +746,7 @@
     <ClInclude Include="..\public\GalbrenaFactory.h">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\GalbrenaGun.h">
+    <ClInclude Include="..\Public\GalbrenaShotGun.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundRun.h">
@@ -1192,7 +1192,7 @@
     <ClCompile Include="..\Private\GalbrenaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\GalbrenaGun.cpp">
+    <ClCompile Include="..\Private\GalbrenaShotGun.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp">

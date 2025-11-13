@@ -110,7 +110,8 @@ public:
 public:
 	enum PARTTYPE : _uint
 	{
-		PART_GUN = 0,		// 기본 무기.?
+		PART_FIRSTGUN = 0,		// 기본 무기.?
+		PART_SECONDGUN,		// 기본 무기.?
 		PART_LION,
 		PART_WING,
 		TYPE_END
@@ -168,7 +169,8 @@ public:
 
 #pragma endregion
 private:
-	class CGalbrenaGun* m_pGalbrenaGun = { nullptr };
+	class CGalbrenaShotGun* m_pGalbrenaFirstShotGun = { nullptr };
+	class CGalbrenaShotGun* m_pGalbrenaSecondShotGun = { nullptr };
 	class CWing* m_pWing = { nullptr };
 	_string m_strPreAnimation = {};
 	_string m_strCurrentAnimation = {};
