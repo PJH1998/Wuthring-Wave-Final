@@ -338,6 +338,10 @@ void CCharacter::Print_LookRay()
 
 #pragma region STATE
 
+void CCharacter::Render_Damage(const HIT_DESC* pDesc)
+{
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {
