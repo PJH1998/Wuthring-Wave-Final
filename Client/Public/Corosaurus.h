@@ -73,7 +73,6 @@ private:
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
-	_float3					m_vBeHit_Normal{};
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
 #pragma endregion
@@ -92,6 +91,7 @@ private:
 	_bool					m_isKnockDown{};
 	_bool					m_isDist_Interp_Enable{};
 	_bool					m_isTurnLerp{};
+	_float3					m_vBeHit_Normal{};
 
 //그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
 #pragma region UI_BIND

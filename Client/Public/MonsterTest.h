@@ -73,6 +73,7 @@ private:
 	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
 	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
+	_float					m_fDistanceNonY{};
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
@@ -98,6 +99,7 @@ private:
 
 #pragma region PHYSICS
 	_bool					m_isTurnLerp{};
+	_float3					m_vBeHit_Normal{};
 #pragma endregion
 
 	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율

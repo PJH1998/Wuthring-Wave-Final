@@ -37,7 +37,7 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 25.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 3.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 50.f;
 #pragma endregion
@@ -392,6 +392,7 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
 #pragma region UI_BIND
+
 	m_isParalysis = (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS));
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
 #pragma endregion
@@ -456,7 +457,8 @@ void CCorosaurus::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifo
 		if (m_isAggro)
 			return;
 		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
-		
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("코로사우로스"), "CoroSaurus", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 	}
 }
 
@@ -479,11 +481,17 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
 		//cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -494,11 +502,17 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
 #endif // _DEBUG
@@ -507,12 +521,18 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Knock Back! (Corro)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -522,7 +542,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 
 void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	m_isBlocked = true;
+#ifdef _DEBUG
+	cout << "Parry! (Corro)" << endl;
+	cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+#endif // _DEBUG
 }
 
 _bool CCorosaurus::isKnockDown()

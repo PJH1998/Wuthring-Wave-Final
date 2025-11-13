@@ -912,37 +912,37 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
 	if (m_isOn_BossStatus)
 	{
-		//fBossHP		= *m_pCurBossHP;
-		//fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
-		//fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
-		//
-		//isSABreak	= *m_pIsGroggy;
-		//
-		//if (!isSABreak)
-		//{
-		//	fBossSA = *m_pCurBossSA;
-		//	fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
-		//	fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
-		//}
-		//else
-		//{
-		//	fBossSA = *m_pGroggyLeftRatio;
-		//	fBossMaxSA = 1.f;
-		//	fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
-		//}
-		//
-		//fBossSA		= *m_pCurBossSA;
-		//fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
-
-
-		 fBossHP = { 10000.f };            // boss hitpoint
-		 fBossBackHP = fBossBackHP;
-		fBossMaxHP = { 10000.f };
+		fBossHP		= *m_pCurBossHP;
+		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
+		fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
 		
-		 fBossSA = { 4000.f };             // boss superarmor
-		 fBossBackSA = fBossSA;
-		fBossMaxSA = { 4000.f };
-		isSABreak = false;
+		isSABreak	= *m_pIsGroggy;
+		
+		if (!isSABreak)
+		{
+			fBossSA = *m_pCurBossSA;
+			fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
+			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		}
+		else
+		{
+			fBossSA = *m_pGroggyLeftRatio;
+			fBossMaxSA = 1.f;
+			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		}
+		
+		fBossSA		= *m_pCurBossSA;
+		fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
+
+
+		// fBossHP = { 10000.f };            // boss hitpoint
+		// fBossBackHP = fBossBackHP;
+		//fBossMaxHP = { 10000.f };
+		//
+		// fBossSA = { 4000.f };             // boss superarmor
+		// fBossBackSA = fBossSA;
+		//fBossMaxSA = { 4000.f };
+		//isSABreak = false;
 
 	}
 

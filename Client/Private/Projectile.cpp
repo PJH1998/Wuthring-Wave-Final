@@ -125,7 +125,7 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 
 	// Com_Shader 
-	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxMesh"),
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxArrow"),
 		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
 		CRASH("Arrow/Com_Shader");
 
