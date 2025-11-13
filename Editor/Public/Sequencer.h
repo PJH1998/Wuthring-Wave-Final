@@ -300,14 +300,16 @@ private:
 	_bool								m_isSave = { false };
 	_bool								m_isLoad = { false };
 
+	// Sequence System Variable
+	_char								m_szSequenceTag[MAX_PATH] = {};
 	_bool								m_isPlay = { false };
 	_float								m_fTrackPerSec = {};
 	_float								m_fTrackAcc = {};
 
 private:
-	// Play
+	// Sequence
 	void								Play(_float fTimeDelta);
-
+	void								Sequence_System(_float fTimeDelta);
 	// Selectable Item
 	void								Selectable_Item();
 	void								Sorting_Item();
