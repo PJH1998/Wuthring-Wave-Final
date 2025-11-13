@@ -18,21 +18,21 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_fWinSizeY = static_cast<_float>(iWinSizeY);
 
-	m_fLimitVelocity = 15.f;
+	m_fLimitVelocity = 1.f;
 	m_fLimitDepth = 150.f;
-	m_fLengthScale = 12.f;
+	m_fLengthScale = 45.f;
 
 	D3D11_SAMPLER_DESC DefaultSamplerDesc = {};
 	DefaultSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	DefaultSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	DefaultSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	DefaultSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	DefaultSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	DefaultSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	DefaultSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
 	DefaultSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	DefaultSamplerDesc.MinLOD = 0;
 	DefaultSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	m_pDevice->CreateSamplerState(&DefaultSamplerDesc, &m_pDefaultSampler);
-	ASSERT_CRASH(m_pDefaultSampler);
+	m_pDevice->CreateSamplerState(&DefaultSamplerDesc, &m_pClampSampler);
+	ASSERT_CRASH(m_pClampSampler);
 
 	return S_OK;
 }
@@ -100,7 +100,7 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(m_pGameInstance->Add_BufferData(TEXT("RCS_MotionBlur"), "MOTION_DATA", reinterpret_cast<void*>(&Data), sizeof(MOTION_BLUR_DATA))))
 		return E_FAIL;
 
-	if (FAILED(m_pGameInstance->Add_SamplerState(TEXT("RCS_MotionBlur"), 0, m_pDefaultSampler)))
+	if (FAILED(m_pGameInstance->Add_SamplerState(TEXT("RCS_MotionBlur"), 0, m_pClampSampler)))
 		return E_FAIL;
 
 	//if (FAILED(m_pSubResource->Set_DefalutSampler(TEXT("RCS_MotionBlur"), 0)))
@@ -147,5 +147,5 @@ void CMotionBlur::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pDefaultSampler);
+	Safe_Release(m_pClampSampler);
 }

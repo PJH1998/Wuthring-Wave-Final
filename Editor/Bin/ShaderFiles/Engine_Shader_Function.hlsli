@@ -19,7 +19,7 @@ vector g_vCamPosition;
 float g_fWidth = 1920.f;
 float g_fHeight = 1080.f;
 
-float g_fFocusDepth;
+float3 g_vFocusPos;
 float g_fFocusMinCoc;
 float g_fFocusRange;
 
@@ -319,14 +319,16 @@ float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
 {
     float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
     
-    float3 vCamDir = float3(0.f, 0.f, g_fFocusDepth);
+    float4 vViewCenter = mul(float4(g_vFocusPos, 1.f), g_CamViewMatrix);
+    
+    float3 vCamDir = vViewCenter.xyz; //float3(0.f, 0.f, g_fFocusDepth);
     float3 vViewDir = vViewPos.xyz - vCamDir;
     
     float fDepth = length(vViewDir);
     
     float fCoc = 0.f;
     
-    fCoc = vViewPos.z == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
+    fCoc = vViewPos.z == 0.f ? 1.f : saturate(fDepth / g_fFocusRange); //abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
     
     return fCoc;
 }
