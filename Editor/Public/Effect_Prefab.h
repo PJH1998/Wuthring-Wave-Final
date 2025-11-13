@@ -11,7 +11,6 @@ public:
 		EFFECT_TYPE eChildrenType;
 		_float	fActivateTime;
 		_bool   bActivated = false;
-		_bool	IsRoot = false;
 
 		_float3 vOffsetSize = { 1.f, 1.f, 1.f };
 		_float3 vOffsetPos = { 0.f, 0.f, 0.f };
@@ -25,7 +24,6 @@ public:
 
 		_float2	vLifeTime = { 0.f, 0.f };
 		_string strBoneTag;
-		_bool	IsRoot = false;
 	}PREFAB_DESC;
 
 private:
@@ -40,13 +38,11 @@ public:
 	virtual void Update(_float fTimeDelta) override;
 	virtual void Late_Update(_float fTimeDelta) override;
 	virtual void Render() override;
+	virtual	void Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 public:
 	void Add_Children(void* pArg, EFFECT_TYPE eType);
 	void Remove_Children(_wstring& ChildrenTag);
-
-public:
-	//void Root_Test();
 
 public:
 	_int Get_Children_Count();
@@ -57,25 +53,34 @@ public:
 		return m_strMyTag;
 	};
 
+	void Set_BoneTag(_string BoneTag) {
+		m_strBoneTag = BoneTag;
+	}
+
 public:
 	void Bind_FrameDesc(PREFAB_DESC& PrefabDesc);
 	void Set_FrameDesc(FRAME_DESC* pFrameDesc);
-	void Set_SpawnMatrix(_float4x4 SpawnMatrix);
+	void Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix);
 	void Reset_SpawnMatrix();
 
 public:
 	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
 
 private:
-	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix);
+	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);
 	void FrameDesc_Check(_wstring& ChildrenTag, _bool* bCheck);
 
 private:
 
 	_wstring							 m_strMyTag;	 
+	_string								 m_strBoneTag;
 	
 	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해주기. Reset
 	_float4x4							 m_SpawnMatrix = {};
+
+	//이펙트 소환했을 때 뼈에 붙여주기
+	const _float4x4*							 m_pBoneMatrixPtr = nullptr;
+	const _float4x4*							 m_pObjectMatrixPtr = nullptr;
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};

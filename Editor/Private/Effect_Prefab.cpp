@@ -55,21 +55,16 @@ void CEffect_Prefab::Priority_Update(_float fTimeDelta)
 	{
 		if (Frame.fActivateTime <= m_fCurrentTime && !Frame.bActivated)
 		{
-			_bool IsActivated = true;
-			//자식 활성화하기전에 오프셋 처리
+			EFFECT_INFO InfoDesc = {};
+
+			InfoDesc.pBoneMatrixPtr = m_pBoneMatrixPtr;
+			InfoDesc.pObjectMatrixPtr = m_pObjectMatrixPtr;
+			InfoDesc.IsActive = true;
+
 			_matrix OffsetMatrix = {};
 
-			if (!Frame.IsRoot)
-			{
-				Children_Offset(Frame, OffsetMatrix);
-				Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
-			}
-			else
-			{
-				//
-
-				//
-			}
+			Children_Offset(Frame, OffsetMatrix, InfoDesc);
+			Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &InfoDesc);
 
 			Frame.bActivated = true;
 		}
@@ -118,6 +113,48 @@ void CEffect_Prefab::Late_Update(_float fTimeDelta)
 void CEffect_Prefab::Render()
 {
 
+}
+
+void CEffect_Prefab::Reset(const _fmatrix& WorldMatrix, void* pArg)
+{
+	PREFAB_INFO* pDesc = static_cast<PREFAB_INFO*>(pArg);
+
+	if (pDesc->pMatrixPtr == nullptr && pDesc->pModelPtr != nullptr)
+	{
+		//null이라는건 뼈에 완전히 붙일 얘가 아니라는 것.
+		//기존 처리방식과 동일하게 세팅해주면 될거 같음.
+		Reset_SpawnMatrix();
+		Reset_Prefab_Info();
+
+		_float4x4 PlayerMatrix = {};
+		XMStoreFloat4x4(&PlayerMatrix, WorldMatrix);
+
+		//프리팹이 뼈에 붙을 이름을 알고 있게 해줘야함.
+		_float4x4 BoneMatrix;
+
+		if (m_strBoneTag == "")
+			XMStoreFloat4x4(&BoneMatrix, XMMatrixIdentity());
+		else
+			BoneMatrix = *pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+
+		//위에서 꺼낸 본 매트릭스 그때 위치 갱신정보와 모델의 월드매트릭스 전달.
+		Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+
+		m_isActivate = true;
+	}
+	else if (pDesc->pModelPtr != nullptr && pDesc->pMatrixPtr != nullptr)
+	{
+		//null이 아니라는건 뼈에 완전히 붙여야한다는 것.
+		m_pBoneMatrixPtr = pDesc->pModelPtr->Get_BoneMatrixPtr(m_strBoneTag.c_str());
+		m_pObjectMatrixPtr = pDesc->pMatrixPtr;
+
+		m_isActivate = true;
+	}
+	else
+	{
+		//툴용 초기화?
+
+	}
 }
 
 void CEffect_Prefab::Add_Children(void* pArg, EFFECT_TYPE eType)
@@ -270,10 +307,15 @@ void CEffect_Prefab::Set_FrameDesc(FRAME_DESC* pFrameDesc)
         if (pFrameDesc->strChildrenTag == Frame.strChildrenTag)
         {
             Frame = *pFrameDesc;
-			_bool IsActivated = true;
 			_matrix OffsetMatrix = {};
-			Children_Offset(Frame, OffsetMatrix);
-			Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &IsActivated);
+			EFFECT_INFO Info = {};
+
+			Info.IsActive = true;
+			Info.pBoneMatrixPtr = m_pBoneMatrixPtr;
+			Info.pObjectMatrixPtr = m_pObjectMatrixPtr;
+
+			Children_Offset(Frame, OffsetMatrix, Info);
+			Get_Children(Frame.strChildrenTag)->Reset(OffsetMatrix, &Info);
 
 			m_vLifeTime.x = 0.f;
             return;
@@ -282,9 +324,10 @@ void CEffect_Prefab::Set_FrameDesc(FRAME_DESC* pFrameDesc)
 }
 
 
-void CEffect_Prefab::Set_SpawnMatrix(_float4x4 SpawnMatrix)
+void CEffect_Prefab::Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix)
 {
-    m_SpawnMatrix = SpawnMatrix;
+	XMStoreFloat4x4(&m_SpawnMatrix,
+		XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&PlayerMatrix));
 }
 
 void CEffect_Prefab::Reset_SpawnMatrix()
@@ -318,7 +361,7 @@ void CEffect_Prefab::Reset_Prefab_Info()
         Children.second->Reset(DefaultMat, &Activate);
 }
 
-void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
+void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info)
 {
     _matrix PositionMat = XMMatrixTranslationFromVector(XMVectorSet(Desc.vOffsetPos.x, Desc.vOffsetPos.y, Desc.vOffsetPos.z, 1.f));
 
@@ -330,6 +373,8 @@ void CEffect_Prefab::Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix)
         XMConvertToRadians(Desc.vOffsetRot.z));
 
     _matrix OffsetMatrix = ScaleMat * RotMat * PositionMat;
+
+	Info.OffsetMatrix = OffsetMatrix;
 
 	//m_SpawnMatrix 크기 영향 죽이기
 	_vector vScale = {};

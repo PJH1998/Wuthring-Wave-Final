@@ -42,7 +42,10 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
 
-
+	m_IsSprite = pDesc->IsSprite;
+	m_iRow = pDesc->iRows;
+	m_iCol = pDesc->iCols;
+	m_fSpriteSpeed = pDesc->fSweepSpeed;
 
     //if (m_IsSprite = pDesc->IsSprite)
     //{
@@ -69,11 +72,15 @@ void CEffect_Rect::Update(_float fTimeDelta)
    m_vLifeTime.x += fTimeDelta;
    m_fSweep += fTimeDelta * m_fSweepSpeed;
 
+   if (m_IsSprite)
+	   Sprite_Update(fTimeDelta);
+
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
        m_isActivate = false;
        m_vLifeTime.x = 0.f;
 	   m_fSweep = 0.f;
+	   m_fPhase = 0.f;
    }
 }
 
@@ -99,8 +106,9 @@ void CEffect_Rect::Render()
 
 void CEffect_Rect::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	m_isActivate = pDesc->IsActive;
 
      m_vLifeTime.x = 0.f;
 	 m_fSweep = 0.f;
@@ -114,9 +122,12 @@ void CEffect_Rect::Root_Transform(_fmatrix WorldMatrix)
     m_pTransformCom->Set_State(STATE::POSITION, vPos);
 }
 
-void CEffect_Rect::Bind_CS_SpriteInfo()
+void CEffect_Rect::Sprite_Update(_float fTimeDelta)
 {
+	m_fPhase += fTimeDelta * m_fSweepSpeed;
+
 }
+
 
 HRESULT CEffect_Rect::Ready_Components(FXRECT_DESC& Desc)
 {
@@ -170,6 +181,21 @@ HRESULT CEffect_Rect::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_vLifeTime", &m_vLifeTime, sizeof(_float2))))
+		return E_FAIL;
+
+	if (m_IsSprite)
+	{
+		if (FAILED(m_pShaderCom->Bind_Value("g_iRow", &m_iRow, sizeof(_int))))
+			return E_FAIL;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_iCol", &m_iCol, sizeof(_int))))
+			return E_FAIL;
+
+		if (FAILED(m_pShaderCom->Bind_Value("g_fPhase", &m_fPhase, sizeof(_float))))
+			return E_FAIL;
+	}
 
     return S_OK;
 }

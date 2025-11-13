@@ -10,6 +10,8 @@ vector g_vColor;
 int g_iRow;
 int g_iCol;
 
+int g_MaskFlag;
+
 struct VS_IN
 {
     float3 vPosition : POSITION;   
@@ -207,7 +209,12 @@ PS_OUT PS_MAIN(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, In.vTexcoord);
     
-    if (Out.vDiffuse.a < 0.3f)
+    if(g_MaskFlag == 1)
+    {
+        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    }
+    
+    if (Out.vDiffuse.a < 0.2f)
      discard;
 
     float2 LifeTime = In.vLifeTime;
@@ -252,7 +259,10 @@ PS_OUT PS_SPRITE(PS_IN In)
     
     Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
     
-    Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    if (g_MaskFlag == 0)
+    {
+        Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    }
 
     if(Out.vDiffuse.a < 0.2f)
         discard;
