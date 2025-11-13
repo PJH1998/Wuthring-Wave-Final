@@ -342,10 +342,10 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
-	if (nullptr != m_pChildActor)
+	for (auto& pChildActor : m_ChildActors)
 	{
-		/*m_pChildActor->Set_A*/
-		m_pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
+		if (nullptr != pChildActor)
+			pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
 	}
 		
 }
