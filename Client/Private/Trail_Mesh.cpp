@@ -86,7 +86,7 @@ void CTrail_Mesh::Update(_float fTimeDelta)
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
-         m_fSweep = 0.f;
+        m_fSweep = 0.f;
         m_isActivate = false;
         m_fColorSweep = 0.f;
         m_vLifeTime.x = 0.f;

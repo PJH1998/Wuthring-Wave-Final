@@ -1041,7 +1041,7 @@ void CEffect_Controller::Particle_OB_To_Json(json& ParticleJson, CParticle::PART
     ParticleJson["VIBufferTag"] = WStringToString(pParticleDesc->strVIBufferTag);
 
     ParticleJson["ShaderPass"] = pParticleDesc->fShaderPass;
-
+	ParticleJson["MaskFlag"] = pParticleDesc->iMaskFlag;
 
     json OBSizeJson = json::array();
 
@@ -1775,6 +1775,7 @@ void CEffect_Controller::PrefabBinding_Tab()
  
         if(ImGui::DragFloat("TrackPosition", &m_fTrackPosition, 0.1f, 0.f, m_AnimActorDesc.fDuration));
 
+		if (ImGui::Checkbox("Basic", &m_IsBone));
 
         if (m_bBoneFlag)
         {
@@ -1783,6 +1784,7 @@ void CEffect_Controller::PrefabBinding_Tab()
                 _string BoneName = m_BoneName;
                 m_pSelectedPrefabDesc->strBoneTag = m_BoneName;
                 m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
+				m_pSelectedPrefab->Set_BoneTag(m_BoneName);
 
                 m_bBoneFlag = false;
                 m_BoneName[0] = _T('\0');
@@ -1817,23 +1819,42 @@ void CEffect_Controller::PrefabBinding_Tab()
 
                 if (m_fTrackPosition <= fCurrentTrackPos)
                 {
-                    _float4x4 SpawnMatrix = {};
-
-					if (m_AnimActorDesc.pBoneMatrix == nullptr)
+					_float4x4 SpawnMatrix = {};
+					PREFAB_INFO Info = {};
+					_float4x4 Defualt = {};
+					if (!m_IsBone)
 					{
-						SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+
+						if (m_AnimActorDesc.pBoneMatrix == nullptr)
+						{
+							SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+	
+							XMStoreFloat4x4(&Defualt, XMMatrixIdentity());
+
+							m_pSelectedPrefab->Set_SpawnMatrix(SpawnMatrix, Defualt);
+				
+						}
+						else
+						{
+							_float4x4 BoneMatrix = *m_AnimActorDesc.pBoneMatrix;
+							_float4x4 PlayerMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
+
+
+							m_pSelectedPrefab->Set_SpawnMatrix(PlayerMatrix, BoneMatrix);
+						}
+
+						m_pSelectedPrefab->Reset_Prefab_Info();
+						m_pSelectedPrefab->SetActivate(true);
 					}
-                     else
-                     {
-                         _matrix BoneMatrix = XMLoadFloat4x4(m_AnimActorDesc.pBoneMatrix);
-                         _matrix PlayerMatrix = XMLoadFloat4x4(m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr());
+					else
+					{
+						Info.pModelPtr = m_AnimActorDesc.pModelCom;
+						Info.pMatrixPtr = m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
 
-                         XMStoreFloat4x4(&SpawnMatrix,  BoneMatrix * PlayerMatrix);
-                     }
+						m_pSelectedPrefab->Reset_Prefab_Info();
+						m_pSelectedPrefab->Reset(XMLoadFloat4x4(&Defualt), &Info);
+					}
 
-                    m_pSelectedPrefab->Set_SpawnMatrix(SpawnMatrix);
-                    m_pSelectedPrefab->Reset_Prefab_Info();
-                    m_pSelectedPrefab->SetActivate(true);
                     m_bTest = false;
                 }
             }
