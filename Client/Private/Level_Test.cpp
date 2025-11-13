@@ -68,13 +68,13 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	Ready_Dummy();
+	//Ready_Dummy();
 	//Ready_MonsterTest();
 
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
+	Ready_CoroSaurus();
+	//Ready_Spawner();
 
 
     Ready_Effect();
@@ -299,6 +299,8 @@ void CLevel_Test::Ready_MonsterTest()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::DARK;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_ShinWang"), 15, &Projectile)))
@@ -374,6 +376,8 @@ void CLevel_Test::Ready_ElectroPredator()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_Electro"), 15, &Projectile)))
