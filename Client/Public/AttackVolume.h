@@ -51,6 +51,7 @@ public:
 	// 절대 콜백 안에서 선언하지마.
 	void TriggerActivate(_bool isActivate);
 	void Change_Layer(COLLISIONLAYER eLayer);
+	void Change_DIR(ATTACKVOULME_DIR eType);
 
 private:
 	COMBINED_TYPE		m_eType{ COMBINED_TYPE::BONE };
@@ -59,7 +60,7 @@ private:
 	CTransform*			m_pParenTransform = { nullptr };
 	_float4x4			m_CombinedMatrix{};
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
-
+	ATTACKVOULME_DIR	m_eDirType = {};
 #ifdef _DEBUG
 	_float3			m_vOffsetPos{};
 	_float3			m_vOffsetRot{};

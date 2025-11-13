@@ -38,6 +38,7 @@ HRESULT CAttackVolume::Initialize_Clone(void* pArg)
 		m_eTargetLayer = pDesc->eTargetLayers;
 	m_eLayer = pDesc->eLayer;
 	m_eCurrentLayer = m_eLayer;
+	m_eDirType = pDesc->eDir;
 	m_CollisionCallback = pDesc->CollisionCallback;
 	m_test = pDesc->test;
 #ifdef _DEBUG
@@ -152,6 +153,11 @@ void CAttackVolume::TriggerActivate(_bool isActivate)
 void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)
 {
 	m_eLayer = eLayer;
+}
+
+void CAttackVolume::Change_DIR(ATTACKVOULME_DIR eType)
+{
+	m_eDirType = eType;
 }
 
 
