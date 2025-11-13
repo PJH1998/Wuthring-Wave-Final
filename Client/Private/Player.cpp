@@ -371,7 +371,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	// Change Time 부여를 위한 Condition 추가
 	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
 	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
-	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
+	
 	
 
 
@@ -391,7 +391,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
-	
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
 
 	// 6. 협주 확인. Ensemble
 	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
