@@ -635,6 +635,12 @@ HRESULT CLoader_GamePlay::Load_Monster()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		CAoEDoT::Create(m_pDevice, m_pContext))))
 		CRASH("AoEDoT Prototype Create Failed");
+
+	// Prototype_Component_Model_Arrow
+	_fmatrix PreArrowMatrix = XMMatrixScaling(0.00008f, 0.00008f, 0.00008f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Arrow"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreArrowMatrix, "../../Client/Bin/Resource/Model/Arrow/Arrow.dat"))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
 
 #pragma region CORROSAURUS

@@ -223,6 +223,8 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_ShinWang"), 9, &Projectile)))
@@ -280,6 +282,8 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
