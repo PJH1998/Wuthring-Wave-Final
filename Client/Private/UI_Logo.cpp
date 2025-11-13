@@ -2,6 +2,9 @@
 #include "Animator_UI.h"
 
 #include "UI_Logo.h"
+#include "UI_Text.h"
+
+#include "GameSystem.h"
 
 CUI_Logo::CUI_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CCustom_UI(pDevice, pContext)
@@ -10,6 +13,7 @@ CUI_Logo::CUI_Logo(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 CUI_Logo::CUI_Logo(const CUI_Logo& Prototype)
 	:CCustom_UI(Prototype)
+	, m_pGameSystem( CGameSystem::GetInstance() )
 {
 }
 
@@ -45,7 +49,7 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 	//	Find_ChildObject(strBGName)->SetActivate(false);
 	//Find_ChildObject(strRandBGName)->SetActivate(true);
 
-
+	Create_ChildText();
 
 	CCustom_UI* pMainLogoUI = Find_ChildObject(L"SectorA_Main");
 	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(pMainLogoUI->Get_Component(L"Com_Animator_UI"));
@@ -111,6 +115,39 @@ void CUI_Logo::Update_AnimControl(_float fTimeDelta)
 HRESULT CUI_Logo::Ready_Components(void* pArg)
 {
 	return S_OK;
+}
+
+void CUI_Logo::Create_ChildText()
+{
+	_wstring strText = L"솔라리스 연결";
+
+
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f- 200.f, g_iWinSizeY / 2.f + 450.f },
+		strText,	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.33f,
+		L"UI_Text_Interact"
+	);
+
+	CCustom_UI* pAttacher = this->Find_ChildObject(L"SectorB_Button");
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::LEFT);
 }
 
 CUI_Logo* CUI_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

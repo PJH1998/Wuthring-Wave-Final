@@ -31,6 +31,10 @@ HRESULT CUI_Text::Initialize_Clone(void* pArg)
 	Ready_Events();
 	Bind_Description(pArg);
 
+	TEXT_UI_DESC* tDesc = static_cast<TEXT_UI_DESC*>(pArg);
+	m_eTextAlignmentType = tDesc->eTextAlignmentType;
+	Update_Alignment();
+
 	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
 
     return S_OK;
@@ -50,7 +54,7 @@ void CUI_Text::Update(_float fTimeDelta)
 void CUI_Text::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
-	Update_Description(0.f); // ㅋㅋ
+	Update_Description(0.f);
 }
 
 void CUI_Text::Render()
@@ -306,6 +310,32 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 		m_vecCachedUITransform.resize(m_tTextDesc.vecInstanceDescs.size());
 #endif // KSTA_ON_TRANSFORM_CACHING
 
+}
+
+void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
+{
+	// 인자가 기본값이라면 현재 타입으로,
+	// 임의값이라면 해당 타입으로 정렬합니다.
+
+	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
+		m_eTextAlignmentType = eAlignmentType;
+
+	_float fAlignmentPixel = 0;
+	_float fOriginPosX = m_tTextDesc.vScreenPos.x;
+
+	for (auto& textInstDesc : m_tTextDesc.vecInstanceDescs)
+		fAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
+
+	_float fOffsetX = fAlignmentPixel * m_tTextDesc.fScale;
+
+	switch (m_eTextAlignmentType)
+	{
+	case Client::TEXT_ALIGN_TYPE::LEFT:		fOffsetX *= 0.f;		break;
+	case Client::TEXT_ALIGN_TYPE::CENTER:	fOffsetX *= 0.5f;		break;
+	case Client::TEXT_ALIGN_TYPE::RIGHT:	fOffsetX *= 1.f;		break;
+	}
+
+	m_tTextDesc.vScreenPos.x = fOriginPosX - fOffsetX;
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

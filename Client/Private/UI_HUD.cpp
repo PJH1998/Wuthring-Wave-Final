@@ -227,14 +227,14 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 	// 중앙 정렬
 
 	auto& bossNameDesc = pFont->Get_TextUIDesc();
-	_uint iAlignmentPixel = 0;
+	_float fAlignmentPixel = 0;
 
-	_uint iOriginPosX = bossNameDesc.vScreenPos.x;
+	_float fOriginPosX = bossNameDesc.vScreenPos.x;
 
 	for (auto& textInstDesc : bossNameDesc.vecInstanceDescs)
-		iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
+		fAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
 
-	bossNameDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * bossNameDesc.fScale / 2.f;
+	bossNameDesc.vScreenPos.x = fOriginPosX - fAlignmentPixel * bossNameDesc.fScale / 2.f;
 	pFont->Set_TextUIDesc(bossNameDesc);
 
 	return S_OK;
