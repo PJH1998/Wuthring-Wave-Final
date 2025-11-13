@@ -6,6 +6,7 @@
 #include "GameSystem.h"
 #include "Player.h"
 #include "PlayerStatus.h"
+#include "UI_Text.h"
 
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
@@ -64,9 +65,12 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     };
     Load_Animations(vecAnimFilePaths);
 
+	// 보스 UI는, 최초에 투명하게.
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
 	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_Initialize");
 
+	// 보스 UI용 텍스트 객체 생성 및 부모연결
+	Ready_BossUINameText();
 	
     return S_OK;
 }
@@ -127,6 +131,30 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 	m_pGroggyLeftRatio	= pGroggyLeftRatio;
 	m_pIsGroggy			= pIsGroggy;
 	m_strMonsterKey		= pMonsterKey;
+
+	// 텍스트 객체에, 출력될 텍스트를 변경
+	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
+	if (nullptr != pTargetText)
+	{
+		auto& bossNameDesc = pTargetText->Get_TextUIDesc();
+
+		bossNameDesc.strText = strUIBosssName;
+		pTargetText->Set_TextUIDesc(bossNameDesc);
+
+
+
+
+		_uint iAlignmentPixel = 0;
+
+		_uint iOriginPosX = bossNameDesc.vScreenPos.x;
+
+		for (auto& textInstDesc : bossNameDesc.vecInstanceDescs)
+			iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstUp.x);
+
+		bossNameDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * bossNameDesc.fScale;
+		pTargetText->Set_TextUIDesc(bossNameDesc);
+
+	}
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -166,8 +194,57 @@ HRESULT CUI_HUD::Ready_Presets()
 	return S_OK;
 }
 
+HRESULT CUI_HUD::Ready_BossUINameText()
+{
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f - 475.f},
+		L"테스트용 이름입니다.",	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.33f,
+		L"UI_Text_HUD_BossName"
+	);
+
+	CCustom_UI* pAttacher = this->Find_ChildObject(L"SectorT_BossStatus");
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+
+
+
+	// 중앙 정렬
+
+	auto& bossNameDesc = pFont->Get_TextUIDesc();
+	_uint iAlignmentPixel = 0;
+
+	_uint iOriginPosX = bossNameDesc.vScreenPos.x;
+
+	for (auto& textInstDesc : bossNameDesc.vecInstanceDescs)
+		iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
+
+	bossNameDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * bossNameDesc.fScale;
+	pFont->Set_TextUIDesc(bossNameDesc);
+
+	return S_OK;
+}
+
 void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
+	auto test = this->Find_ChildObject(L"SectorT_BossStatus");
+
+
 	// Temp assumed Value
 	_float fMaxChangeCD[3] = { 2.f, 2.f, 2.f};
 
@@ -947,7 +1024,6 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	}
 
 #pragma region old 
-
 
 	//if (pBoss == nullptr)
 	//    return;

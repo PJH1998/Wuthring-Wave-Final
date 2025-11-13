@@ -39,6 +39,7 @@ public:
 private:
 	HRESULT					Ready_Components(void* pArg);
 	HRESULT					Ready_Presets();
+	HRESULT					Ready_BossUINameText();
 
 private:					// �ڽ� UI�� ���� ��� ������ �ش� �����̳� UI�� ����.
 	void					Update_UI_SkillSection(_float fTimeDelta);
