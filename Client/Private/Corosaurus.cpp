@@ -391,11 +391,8 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 		if (m_fAttackAcc[i] > 0.f)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
-#pragma region UI_BIND
 
-	m_isParalysis = (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS));
 	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
-#pragma endregion
 }
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
@@ -423,6 +420,10 @@ void CCorosaurus::After_Condition(_float fTimeDelta)
 			
 		}
 	}
+#pragma region UI_BIND
+
+	m_isParalysis = (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS));
+#pragma endregion
 }
 
 void CCorosaurus::Calculate_PosAndDir()
