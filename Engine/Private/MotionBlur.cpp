@@ -20,7 +20,7 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_fLimitVelocity = 15.f;
 	m_fLimitDepth = 150.f;
-	m_fLengthScale = 10.f;
+	m_fLengthScale = 12.f;
 
 	D3D11_SAMPLER_DESC DefaultSamplerDesc = {};
 	DefaultSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;

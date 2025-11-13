@@ -545,10 +545,11 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
         vPrevProjPos /= vPrevProjPos.w;
     
         float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
+        vPrevTexcoord = clamp(vPrevTexcoord, 0.f, 1.f);
     
         float2 vCurTexcoord = float2(In.vTexcoord.x * 1920.f, In.vTexcoord.y * 1080.f); // �ȼ� �Ÿ��� ����
         vPrevTexcoord = float2(vPrevTexcoord.x * 1920.f, vPrevTexcoord.y * 1080.f);
-    
+        
         float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
     
         Out.vColor.xy = vMotionVector;
