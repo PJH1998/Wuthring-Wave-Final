@@ -32,11 +32,13 @@ public:
 	virtual		void			Update(_float fTimeDelta)override;
 	virtual		void			Late_Update(_float fTimeDelta)override;
 
+
 private:
 	void Ready_Components(void* pArg);
-	void Collision();
-	void CallBack(_uint iFuncIndex, void* pArg);
-
+	void Collision_Enter();
+	void Collision_During();
+	void Collision_End();
+	void Register_Trigger();
 private:
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };
@@ -44,6 +46,7 @@ private:
 private:
 	vector< TriggerCallback> m_Functions;
 	_uint m_iTriggerIndex = {};
+	_bool m_Temp = { false };
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
