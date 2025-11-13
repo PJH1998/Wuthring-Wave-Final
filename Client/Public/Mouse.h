@@ -19,6 +19,7 @@ public:
 	virtual		void			Render() override;
 
 private:
+	_bool						m_isMouseOn = { false };
 	_int						m_iCursorPosX{}, m_iCursorPosY{};
 
 public:
