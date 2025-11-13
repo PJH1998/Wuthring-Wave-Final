@@ -5,6 +5,8 @@
 
 #include "Sequence.h"
 
+#include "SQ_Camera_Edit.h"
+
 CSequencer::CSequencer()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -159,6 +161,8 @@ HRESULT CSequencer::Initialize()
 	m_iFrameMax = 100;
 
 	m_iSequenceOption = ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME;
+
+	//m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"), TEXT("Layer_Camera"))
 
 	return S_OK;
 }

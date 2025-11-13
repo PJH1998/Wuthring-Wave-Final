@@ -39,5 +39,8 @@ namespace Engine
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
 	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, END };
+
+	// Sequence
+	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SFX, ACTOR, EFFECT, END };
 }
 #endif // Engine_Enum_h__
