@@ -61,8 +61,8 @@ void CAttackVolume::Priority_Update(_float fTimeDelta)
 
 void CAttackVolume::Update(_float fTimeDelta)
 {
-	if (!m_isActivate)
-		return;
+	/*if (!m_isActivate)
+		return;*/
 #ifdef _DEBUG
 	_matrix matOffset = XMMatrixAffineTransformation(XMVectorSet(1.f, 1.f, 1.f, 0.f), XMVectorSet(0.f, 0.f, 0.f, 1.f),
 		XMQuaternionRotationRollPitchYaw(m_vOffsetRot.x, m_vOffsetRot.y, m_vOffsetRot.z), XMVectorSetW(XMLoadFloat3(&m_vOffsetPos), 1.f));
@@ -103,8 +103,8 @@ void CAttackVolume::Late_Update(_float fTimeDelta)
 
 void CAttackVolume::Render()
 {
-	if (!m_isActivate)
-		return;
+	//if (!m_isActivate)
+	//	return;
 #ifdef _DEBUG
 	m_pRigidBodyCom->Render();
 #endif // _DEBUG
@@ -114,18 +114,39 @@ void CAttackVolume::Render()
 void CAttackVolume::TriggerActivate(_bool isActivate)
 {
 	//m_pRigidBodyCom->IsActivate(isActivate);
+
+	m_isActivate = isActivate;
+	m_pRigidBodyCom->IsActivate(isActivate);
 	if (isActivate)
 	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		_vector vPos = mat.r[3];
+		m_pRigidBodyCom->Set_Position(vPos);
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(m_eLayer));
 		m_eCurrentLayer = m_eLayer;
 	}
-	else
+	//else
+	//{
+	//	 // 껐을때 <= 얘는 뭔짓거릴해도 갱신이안됨. (제자리에 고정됨)
+	//	m_isActivate = isActivate;
+	//	// 한번 내 위치로 갱신해준다.
+	//}
+
+	
+	/*else
 	{
 		m_pRigidBodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 		m_eCurrentLayer = COLLISIONLAYER::NONE;
+	}*/
+
+	
+
+	if (!isActivate)
+	{
+
 	}
-	m_pRigidBodyCom->IsActivate(isActivate);
-	m_isActivate = isActivate;
+
+	
 }
 
 void CAttackVolume::Change_Layer(COLLISIONLAYER eLayer)

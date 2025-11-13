@@ -576,6 +576,9 @@ void CRover::Object_Func(const _wstring& wStrObjectTag)
 	getline(wss, var2, L'|');
 	getline(wss, var3, L'|'); // 마지막 부분 (구분자가 없어도 끝까지 읽음)
 
+	// GalbrenaWing|Bone
+	// 자르는거야.
+
 	_uint iVolumeIdx = stoul(var3);
 
 	/* SWORD|ROVER|0*/

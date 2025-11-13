@@ -61,8 +61,6 @@ void CAugustaBayonet::Update(_float fTimeDelta)
 
     _matrix matWorld = XMLoadFloat4x4(&m_CombinedMatrix);
 
-	/*if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);*/
 	for (auto& pAttackVolume : m_AttackVolumes)
 	{
 		if (nullptr != pAttackVolume)
@@ -75,6 +73,11 @@ void CAugustaBayonet::Late_Update(_float fTimeDelta)
 	
 
     CProp::Late_Update(fTimeDelta);
+
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
+	
+		
 
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -105,8 +108,8 @@ void CAugustaBayonet::Render()
 
 #ifdef _DEBUG
     //m_pRigidbodyCom->Render();
-	if (m_pMainAttackVolume->IsActivate())
-		m_pMainAttackVolume->Render();
+	//if (m_pMainAttackVolume->IsActivate())
+	m_pMainAttackVolume->Render();
 #endif // _DEBUG
 }
 
@@ -136,9 +139,6 @@ void CAugustaBayonet::Change_VolumeLayer(_uint iVolumeIdx, COLLISIONLAYER eLayer
 
 void CAugustaBayonet::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
-
-	
-
 	// 1. 게이지 올리기?
 	CAbility* pAbility = CGameSystem::GetInstance()
 		->Get_PlayerStatus()->Get_Ability(ENUM_CLASS(UI_CHARACTERTYPE::AUGUSTA));
@@ -227,9 +227,9 @@ void CAugustaBayonet::Ready_AttackVolumes()
 	m_AttackVolumes.resize(VOLUME_END);
 
 	CAttackVolume::ATKVOLUME_DESC TriggerDesc{};
-	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장비
+	TriggerDesc.eType = CAttackVolume::COMBINED_TYPE::PROP; // 장
 	TriggerDesc.pSocketMatrix = &m_CombinedMatrix;
-	TriggerDesc.pParenTransform = m_pTransformCom;
+	TriggerDesc.pParenTransform = m_pParentTransform;
 	TriggerDesc.eShape = SHAPE::BOX;
 	TriggerDesc.eLayer = COLLISIONLAYER::ATTACK;
 	TriggerDesc.eTargetLayer = COLLISIONLAYER::ENEMY;
