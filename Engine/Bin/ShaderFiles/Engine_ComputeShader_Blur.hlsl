@@ -297,6 +297,8 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     float2 vMotionScale = vDir * fVelocityLength * vTexelSize;
     int iSampleCount = 15;
     
+    
+    
     float4 vColor = 0.f;
     float fTotalWeight = 0.f;
     
@@ -305,12 +307,17 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
         float2 vDistance = (float) i * vTexelSize;
         float2 vOffset = vMotionScale * vDistance;
         
-        float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0).y;
+        float2 vOffsetTex = clamp(vTexcoord + vOffset, 0.f, 1.f);
+        
+        if (all(vOffsetTex == vTexcoord))
+            continue;
+        
+        float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vOffsetTex, 0).y;
 
         if (fSampleDepth < vVelocity.z)
             continue;
-            
-        float4 vSampleColor = InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord + vOffset, 0);
+       
+        float4 vSampleColor = InputTexture.SampleLevel(CS_DefaultSampler, vOffsetTex, 0);
         
         float fWeight = exp2(-(float) i / (float) iSampleCount * 3.f);
         //float fWeight = 1.f - (float) i / 15.f;
