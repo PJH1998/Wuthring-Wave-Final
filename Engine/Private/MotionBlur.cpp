@@ -20,7 +20,7 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_fLimitVelocity = 15.f;
 	m_fLimitDepth = 150.f;
-	m_fLengthScale = 5.f;
+	m_fLengthScale = 10.f;
 
 	D3D11_SAMPLER_DESC DefaultSamplerDesc = {};
 	DefaultSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -43,15 +43,19 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_VELOCITY_MAP"))))
 		CRASH("Failed Begin MRT_VELOCITY_MAP");
 
-	if (FAILED(pShader->Bind_Value("g_fWidth", reinterpret_cast<void*>(&m_fWinSizeX), sizeof(_float))))
+	if (FAILED(pShader->Bind_Value("g_fWidth", (&m_fWinSizeX), sizeof(_float))))
 		CRASH("Failed Bind g_fWidth");
-	if (FAILED(pShader->Bind_Value("g_fHeight", reinterpret_cast<void*>(&m_fWinSizeY), sizeof(_float))))
+	if (FAILED(pShader->Bind_Value("g_fHeight", (&m_fWinSizeY), sizeof(_float))))
 		CRASH("Failed Bind g_fHeight");
 
 	if (FAILED(pShader->Bind_Matrix("g_PrevCamViewMatrix", m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::VIEW))))
 		CRASH("Failed Bind ViewMatrixInv");
 	if (FAILED(pShader->Bind_Matrix("g_PrevCamProjMatrix", m_pGameInstance->Get_PrevTransformState_Float4x4(D3DTS::PROJ))))
 		CRASH("Failed Bind ProjMatrixInv");
+
+
+	if (FAILED(pShader->Bind_Value("g_fLimitDepth", &m_fLimitDepth, sizeof(_float))))
+		CRASH("Failed Bind g_fLimitVelocity");
 
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::VELOCITY_MAP));
 

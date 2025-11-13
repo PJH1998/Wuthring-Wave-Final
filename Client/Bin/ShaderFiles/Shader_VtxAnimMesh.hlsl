@@ -425,6 +425,7 @@ struct PS_OUT_OUTLINE
 {
     float4 vColor : SV_TARGET0;
     float4 vDepth : SV_TARGET1;
+    float4 vPBR : SV_TARGET2;
 };
 
 PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
@@ -436,6 +437,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vColor = g_vOutLineColor;
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
+        Out.vPBR.z = 1.f;
     }
     else
         discard;

@@ -29,7 +29,7 @@ private:
 
 #ifdef _DEBUG
 private:
-	void Shader_Gui();
+	void DEBUG_FUNCTION();
 	_float m_fRadius = {1.f};
 	_float m_fMaxDistance = { 5.f };
 	_float m_fBias[4] = {0.01f, 0.01f , 0.01f , 0.01f };
@@ -38,6 +38,10 @@ private:
 	_float m_fMapBias = {0.01f};
 	_int m_iLUT_Index = { 0 };
 	_float m_fLUT_Intensity = {};
+
+	_float  m_fLimitVelocity = {15.f};
+	_float	m_fLimitDepth = {150.f};
+	_float	m_fLengthScale = {5.f};
 #endif
 
 private:

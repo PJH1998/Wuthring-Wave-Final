@@ -21,12 +21,15 @@ public:
 	HRESULT					Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	void					Update_SFX(_float fTimeDelta);
 
-	HRESULT					Begin_SFX_Toggle(SFX_TOGGLE eType);
-	HRESULT					Begin_SFX_Time(SFX_TOGGLE eType, _float fTime);
+	HRESULT					Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration);
 	HRESULT					End_SFX();
 
 	HRESULT					Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 	HRESULT					Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader);
+
+#ifdef _DEBUG
+	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+#endif
 
 private:
 	CGameInstance*			m_pGameInstance = { nullptr };
@@ -40,8 +43,14 @@ private:
 
 
 	_bool					m_IsToggleOff = { false };
+	
+	_float					m_fCurrentToggleDuration = {};
+	_float					m_fToggleDuration = {};
 	_float					m_fToggleIntensity = {};
+	_float					m_fDefaultIntensityBoost = {};
 	_float					m_fIntensityBoost = {};
+	_float					m_fIntensityBoostToTime = {};
+	
 	CSFX*					m_pCurrentSFX = { nullptr };
 
 private:
@@ -49,6 +58,7 @@ private:
 
 	HRESULT					Ready_SFX();
 	HRESULT					Ready_SFX_CS();
+	void					Update_Toggle(_float fTimeDelta);
 	void					Update_ToggleIntensity(_float fTimeDleta);
 
 public:
