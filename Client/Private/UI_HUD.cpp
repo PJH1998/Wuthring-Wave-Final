@@ -987,11 +987,14 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     _float	fBossMaxSA	= 1.f;
     _bool	isSABreak	= false;
 
+	static _float	fTmpBossHP = 0.f;
+	static _float	fTmpBossSA = 0.f;
+
 	if (m_isOn_BossStatus)
 	{
 		fBossHP		= *m_pCurBossHP;
-		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
 		fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
+		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
 		
 		isSABreak	= *m_pIsGroggy;
 		
@@ -1101,7 +1104,15 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     }
 
 
+	if (fTmpBossHP != fBossHP || fTmpBossSA != fBossSA)
+	{
+		//isHit = true;
+		fHPReduceLeftTime = fHPReduceTime;
+		cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
+	}
 
+	if (!(fHPReduceLeftTime <= 0.01f))
+		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : "<< fHPReduceLeftTime << endl;
 
 
     //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
@@ -1160,7 +1171,8 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     targetSAUI->Set_VariantUIDesc(tVariantDescSA);
 
     //isHit = false;
-
+	fTmpBossHP = fBossHP;
+	fTmpBossSA = fBossSA;
 
 
 #ifdef KSTA_UI_HPBARBOSSTEST

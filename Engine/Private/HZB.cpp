@@ -136,7 +136,7 @@ void CHZB::Occlusion_Culling(vector<class CStaticObject*>& Objects)
 	// Swap Vector
 	_uint iNumPre = Objects.size();
 	_uint iNumCur = CullObjects.size();
-	cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
+	//cout << "Pre : " << iNumPre << " / Cur : " << iNumCur << endl;
 	Objects.clear();
 	Objects.reserve(CullObjects.size());
 	Objects.swap(CullObjects);
