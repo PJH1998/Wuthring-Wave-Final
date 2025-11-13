@@ -54,6 +54,7 @@ private:
 	CModel_Instance* m_pModelCom = { nullptr };
 	_uint						m_iShaderPassIndex = {};
 	_float4						m_vDiffuseColor = {};
+	_float						m_fTotalTime = {};
 private:
 	void						Ready_Component(void* pArg);
 

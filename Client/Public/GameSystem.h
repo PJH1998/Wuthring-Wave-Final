@@ -104,7 +104,7 @@ public:
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_Sonoro* pObjects, _bool** SonoroMode);
 	_bool* Add_To_Management(OBJECTTYPE eType, class CMapObject_NonSonoro* pObjects, _bool** SonoroMode);
 	void Update(_float fTimeDelta);
-	void Change_Sonoro(_bool IsSonoro);
+	_bool  Change_Sonoro(_bool IsSonoro);
 	_bool IsSonoro();
 
 #pragma endregion

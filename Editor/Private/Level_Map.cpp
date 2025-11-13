@@ -567,6 +567,8 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
 								_float4x4 Matrix = {};
+								File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
 								File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
 								File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
 
@@ -792,10 +794,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;
