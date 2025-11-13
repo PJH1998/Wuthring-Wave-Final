@@ -22,7 +22,7 @@ cbuffer SSAO_BLUR_DATA : register(b1)
     float fSSAO_MinDepthDistance;
     float fWidth_Blur;
     float fHeight_Blur;
-    float Paddingblur;
+    float Paddingblur;         
 }
 
 #define SSAO_BLUR_RADIUS 4
@@ -41,7 +41,7 @@ void SSAO_BLUR_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
     vSharedNormalX[GTID.y][GTID.x + SSAO_BLUR_RADIUS] = Compute_Normal_DTID(g_NormalTexture, int3(DTID.xy, 0));
     
     if (GTID.x < SSAO_BLUR_RADIUS)
-    {
+    {                   
         int3 LeftID = int3(DTID.x - SSAO_BLUR_RADIUS, DTID.y, 0);
         int3 RightID = int3(DTID.x + THREAD_X, DTID.y, 0);
         
@@ -56,7 +56,7 @@ void SSAO_BLUR_X(uint3 GruopID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
         vSharedNormalX[GTID.y][GTID.x] = Compute_Normal_DTID(g_NormalTexture, LeftID);
         
         vSharedColorX[GTID.y][GTID.x + THREAD_X + SSAO_BLUR_RADIUS] = InputTexture.Load(RightID);
-        vSharedDepthX[GTID.y][GTID.x + THREAD_X + SSAO_BLUR_RADIUS] = g_DepthTexture.Load(RightID).y;
+        vSharedDepthX[GTID.y][GTID.x + THREAD_X + SSAO_BLUR_RADIUS] =  g_DepthTexture.Load(RightID).y;
         vSharedNormalX[GTID.y][GTID.x + THREAD_X + SSAO_BLUR_RADIUS] = Compute_Normal_DTID(g_NormalTexture, RightID);
     }
     

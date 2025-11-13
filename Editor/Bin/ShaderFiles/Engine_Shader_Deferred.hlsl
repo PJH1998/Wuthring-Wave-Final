@@ -184,11 +184,11 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
-    //vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    //
-    //vector vLook = normalize(g_vCamPosition - vWorldPos);
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    vector vLook = normalize(vViewPos * -1.f);
+    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    
+    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    //vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
@@ -456,9 +456,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     float AO = (Occlusion / g_iSampleSize);
     
     if(AO >= 0.8f)
-        AO = 1.f;
+        AO = 1.f;                            
     
-    AO = pow(AO, 2.f);
+ //   AO = pow(AO, 2.f);
     
     Out.vColor.xyz = AO;
     Out.vColor.w = 1.f;

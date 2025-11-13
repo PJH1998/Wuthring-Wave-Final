@@ -318,7 +318,7 @@ float SSAO_Factor(vector vSampleNormal, vector vNoiseVector, vector vViewNormal,
 float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
 {
     float4 vViewPos = Compute_ViewPos(vTexcoord, DepthTexture);
-
+    
     float3 vCamDir = float3(0.f, 0.f, g_fFocusDepth);
     float3 vViewDir = vViewPos.xyz - vCamDir;
     
@@ -326,7 +326,7 @@ float Compute_COC(float2 vTexcoord, Texture2D DepthTexture)
     
     float fCoc = 0.f;
     
-    fCoc = fDepth == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
+    fCoc = vViewPos.z == 0.f ? 1.f : saturate(abs(fDepth - g_fFocusDepth) / (g_fFocusRange));
     
     return fCoc;
 }

@@ -338,6 +338,9 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Manager">
       <UniqueIdentifier>{93caa249-df0a-45be-a18f-35f1675bffc1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\SSAO">
+      <UniqueIdentifier>{756189f4-b09f-4d3b-9757-dad2521037bc}</UniqueIdentifier>
+    </Filter>
     <Filter Include="01. Utility\99. Renderer\SFX\Blur">
       <UniqueIdentifier>{8e4ddbd1-f16d-4171-bb88-3229e8cd2993}</UniqueIdentifier>
     </Filter>
@@ -347,14 +350,11 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\DOF">
       <UniqueIdentifier>{d9c55ab9-ce59-4a99-8be0-dbfa1acdced2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="01. Utility\99. Renderer\SFX\SSAO">
-      <UniqueIdentifier>{756189f4-b09f-4d3b-9757-dad2521037bc}</UniqueIdentifier>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\ScreenBlur">
+      <UniqueIdentifier>{fceb8e8c-796c-4eb7-a6f3-cd5c76e4a2e6}</UniqueIdentifier>
     </Filter>
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\Bloom">
       <UniqueIdentifier>{110a8cf2-2059-46c4-afaf-849626c1ee16}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="01. Utility\99. Renderer\SFX\Blur\ScreenBlur">
-      <UniqueIdentifier>{fceb8e8c-796c-4eb7-a6f3-cd5c76e4a2e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

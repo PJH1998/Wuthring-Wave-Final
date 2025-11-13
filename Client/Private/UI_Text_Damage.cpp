@@ -48,7 +48,7 @@ void CUI_Text_Damage::Update(_float fTimeDelta)
 
 	Update_LifeTime(fTimeDelta);
 	// __super::Update(fTimeDelta);
-	__super::Update_Description();
+	__super::Update_Description(fTimeDelta);
 
 	Update_Instances(fTimeDelta);
 	CCustom_UI::Update(fTimeDelta);

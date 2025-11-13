@@ -9,7 +9,10 @@ void CSequence_Manager::Register_Sequence(const _wstring& strSequenceTag, const 
 {
 	CSequence* pSequence = Find_Sequence(strSequenceTag);
 	if (nullptr != pSequence)
-		CRASH("Sequence 이미 있음");
+	{
+		MSG_BOX("Sequence 이미 있음");
+		return;
+	}
 
 
 	pSequence = CSequence::Create(Items, ItemDatas, pDesc);
