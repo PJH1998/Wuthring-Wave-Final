@@ -453,11 +453,16 @@ _vector CCharacter::Get_RightVector_NoPitch()
 
 void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
+	// 1. TargetTransform은 항상 가져옵니다.
+	m_pTargetTransform = pTargetTransform;
+
 	if (nullptr == pTargetTransform)
 	{
+		//m_pTargetTransform = pTargetTransform; // 매프레임 TargetTransform 제거.
+
 		if (m_IsLockOn) {
 			m_IsLockOn = false;
-			m_pTargetTransform = nullptr;
+			/*m_pTargetTransform = nullptr;*/
 
 			// LockOn 해제 시 한 번만
 			if (m_pSpringCamera)
@@ -472,9 +477,6 @@ void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 	}
 	else
 	{
-
-		// 1. TargetTransform은 항상 가져옵니다.
-		m_pTargetTransform = pTargetTransform;
 		// 2. LockOn은 상황따라
 		m_IsLockOn = IsLockOn;
 	}
