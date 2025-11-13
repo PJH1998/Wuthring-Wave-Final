@@ -27,6 +27,7 @@ private:
 	_uint				m_iWinSizeX = {};
 	_uint				m_iWinSizeY = {};
 	_uint				m_iBloomWeight = {};
+	_float				m_fBoolIntensity = {};
 
 public:
 	static CBloom*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY);

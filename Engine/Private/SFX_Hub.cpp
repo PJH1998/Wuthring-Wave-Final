@@ -24,6 +24,8 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
+	m_fIntensityBoost = 2.f;
+
 	if (FAILED(Ready_SFX()))
 		return E_FAIL;
 
@@ -33,15 +35,29 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	return S_OK;
 }
 
-HRESULT CSFX_Hub::Begin_SFX(SFX_TOGGLE eType)
+void CSFX_Hub::Update_SFX(_float fTimeDelta)
+{
+	Update_ToggleIntensity(fTimeDelta);
+}
+
+HRESULT CSFX_Hub::Begin_SFX_Toggle(SFX_TOGGLE eType)
 {
 	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
 	if (nullptr == pSFX)
 		return E_FAIL;
 
+	m_IsToggleOff = false;
+	
+	m_fToggleIntensity = 0.f;
+
 	m_pCurrentSFX = pSFX;
 
 	return S_OK;
+}
+
+HRESULT CSFX_Hub::Begin_SFX_Time(SFX_TOGGLE eType, _float fTime)
+{
+	return E_NOTIMPL;
 }
 
 HRESULT CSFX_Hub::End_SFX()
@@ -49,7 +65,7 @@ HRESULT CSFX_Hub::End_SFX()
 	if (nullptr == m_pCurrentSFX)
 		return S_OK;
 
-	m_pCurrentSFX = nullptr;
+	m_IsToggleOff = true;
 
 	return S_OK;
 }
@@ -58,6 +74,8 @@ HRESULT CSFX_Hub::Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 {
 	if (nullptr == m_pCurrentSFX)
 		return E_FAIL;
+
+	m_pCurrentSFX->Set_Intensity(m_fToggleIntensity);
 
 	m_pCurrentSFX->Render(pVIBuffer, pShader);
 
@@ -216,6 +234,20 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 #pragma endregion
 
 	return S_OK;
+}
+
+void CSFX_Hub::Update_ToggleIntensity(_float fTimeDleta)
+{
+	_float fFluctuate = fTimeDleta * m_fIntensityBoost;
+
+	if (m_IsToggleOff)
+	{
+		fFluctuate *= -1.f;
+		if (m_fToggleIntensity <= 0.f)
+			m_pCurrentSFX = nullptr;
+	}
+
+	m_fToggleIntensity = clamp(m_fToggleIntensity + fFluctuate, 0.f, 1.f);
 }
 
 CSFX_Hub* CSFX_Hub::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)

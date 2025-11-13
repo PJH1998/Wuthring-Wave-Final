@@ -91,6 +91,9 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE")))))
 		CRASH("Failed Bind Blur Texture");
 
+	if (FAILED(pShader->Bind_Value("g_fEffectIntensity", &m_fIntensity, sizeof(_float))))
+		CRASH("Failed Bind g_fEffectIntensity");
+
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DOF));
 
 	pVIBuffer->Bind_Resources();

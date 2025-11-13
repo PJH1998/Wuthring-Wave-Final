@@ -117,7 +117,8 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_fLimitVelocity, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
 
-	//Update_EffectIntensity();
+	if (FAILED(pShader->Bind_Value("g_fEffectIntensity", &m_fIntensity, sizeof(_float))))
+		CRASH("Failed Bind g_fEffectIntensity");
 
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::MOTION_BLUR));
 

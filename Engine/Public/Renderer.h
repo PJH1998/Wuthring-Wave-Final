@@ -6,7 +6,6 @@ NS_BEGIN(Engine)
 
 class CRendererSubResource;
 class CTexture;
-class CSFX_Hub;
 
 class CRenderer final : public CBase
 {
@@ -21,8 +20,6 @@ public:
 	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(class CGameObject* pRenderObject);
 	void				Render();
-	void				Begin_ScreenEffect(SFX_TOGGLE eType);
-	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
 
@@ -31,22 +28,13 @@ public:
 	
 	void				Render_ShadowMap();
 
-	void					Clear_Resource();
+	void				Clear_Resource();
 
 #ifdef _DEBUG
 	HRESULT			Add_Render_Debug(class CComponent* pDebugComponent);
 	HRESULT			Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength);
 	void			IsSSAO(_bool IsSSao) { m_IsSSAO = IsSSao; }
 	void			IsSSAO_Blur(_bool IsBlur) { m_IsSSAO_Blur = IsBlur; }
-	void			Setting_SSAO(_float fRadius, _float fMaxDistance);
-	void			SetBloomWeight(_int iWeight) { m_iBloomWeight = iWeight; }
-	void			SetBloomIntensity(_float fIntensity);
-	void			SetDof(_float fDepth, _float fRange, _float fScale);
-	void			SetMaxEffectIntensity(_float fMaxIntensity) { m_fMaxEffectIntensity = fMaxIntensity; }
-	void			SetPBR(_bool IsStylized) { m_IsStylized = IsStylized; }
-	void			Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic) { m_fDebugMetallic[0] = fDynamicMetallic, m_fDebugMetallic[1] = fStaticMetallic; }
-	void			Set_Roughness(_float fRoughness, _float fStaticRoughness) { m_fDebugRoughness[0] = fRoughness, m_fDebugRoughness[1] = fStaticRoughness; }
-	void			SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 
 private:
@@ -83,14 +71,6 @@ private:
 	
 	CRendererSubResource*			m_pSubResource = { nullptr };
 	_uint									m_iLUT_Index = {};
-	_int									m_iBloomWeight = { 1 };
-
-	CSFX_Hub*						m_pSFX_Hub = { nullptr };
-
-	SFX_TOGGLE							m_eEffectType = { SFX_TOGGLE::END };
-	_bool									m_IsEffectEnd = {};
-	_float									m_fEffectIntensity = {};
-	_float									m_fMaxEffectIntensity = {};
 
 	recursive_mutex					m_RecursiveMutex;
 
@@ -98,7 +78,7 @@ private:
 	_uint									m_iInterval = {};
 	_bool									m_IsFog = { true };
 #ifdef _DEBUG
-	list<class CComponent*>		m_DebugComponents;
+	list<class CComponent*>					m_DebugComponents;
 	_bool									m_isRenderDebug = { true };
 	_bool									m_IsSSAO = { true };
 	_bool									m_IsSSAO_Blur = { true };
@@ -139,9 +119,6 @@ private:
 	void						Render_UI();
 	void						Render_Fade();
 
-	//EFFECT
-	void						Update_EffectIntensity();
-
 #ifdef _DEBUG
 	void						Render_Debug();
 #endif
@@ -155,8 +132,6 @@ private:
 	HRESULT						Ready_RCS();
 	HRESULT						Ready_Shadow_DSV();
 	HRESULT						Ready_DC();
-
-
 
 public:
 	static		CRenderer*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iNumThread);
