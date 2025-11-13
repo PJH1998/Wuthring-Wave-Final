@@ -37,7 +37,7 @@ void CRoverGroundRun::OnEnter(void* pArg)
     m_pRover->Set_Gravity(true);
 
 	// 5. SFX Motion 시작.
-	m_pRover->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	//m_pRover->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CRoverGroundRun::OnUpdate(_float fTimeDelta)
@@ -68,7 +68,7 @@ void CRoverGroundRun::OnExit()
     m_pRover->Set_Gravity(true);
 	m_fFallTime = 0.f;
 
-	m_pRover->End_SFX();
+	//m_pRover->End_SFX();
 }
 
 void CRoverGroundRun::Handle_Input()

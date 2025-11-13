@@ -211,7 +211,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		OnDetect_Enter(iLayer, pDesc, Manifold);
 		});
 	// 숙면하는 짱룡
-	//m_pRigidBodyCom->IsActivate(false);
+	m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
