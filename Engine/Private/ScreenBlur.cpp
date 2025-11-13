@@ -20,7 +20,7 @@ HRESULT CScreenBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 HRESULT CScreenBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 {
-	for (_uint i = 0; i <= 2; i++)
+	for (_uint i = 0; i <= 1; i++)
 	{
 		ID3D11ShaderResourceView* pDown = i == 0 ? m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), i - 1);
 
@@ -35,37 +35,37 @@ HRESULT CScreenBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 			CRASH("Failed RCS_DOWNSAMPLE");
 	}
 
-	_uint iBlurSizeX = m_iWinSizeX >> 3;
-	_uint iBlurSizeY = m_iWinSizeY >> 3;
+	_uint iBlurSizeX = m_iWinSizeX >> 2;
+	_uint iBlurSizeY = m_iWinSizeY >> 2;
 
 	_uint iBlurWeight = 0;
 
 	if (FAILED(__super::Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_X"), iBlurSizeX, iBlurSizeY, iBlurWeight)))
 		CRASH("Failed Add_SizeData_BufferData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), 2))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_X"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_DOWNSAMPLE"), 1))))
 		CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), iBlurSizeX, iBlurSizeY, 2)))
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), iBlurSizeX, iBlurSizeY, 1)))
 		CRASH("Failed RCS_GAUSSIAN_BLUR_X");
 
 	// BLUR_Y
 	if (FAILED(__super::Add_Blur_BufferData(TEXT("RCS_GAUSSIAN_BLUR_Y"), iBlurSizeX, iBlurSizeY, iBlurWeight)))
 		CRASH("Failed Add_SizeData_BufferData");
 
-	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_X"), 2))))
+	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_GAUSSIAN_BLUR_Y"), "InputTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_X"), 1))))
 		CRASH("Failed Add_SRVData");
 
-	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), iBlurSizeX, iBlurSizeY, 2)))
+	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), iBlurSizeX, iBlurSizeY, 1)))
 		CRASH("Failed RCS_GAUSSIAN_BLUR_Y");
 
-	for (_int j = 2; j >= 0; --j)
+	for (_int j = 1; j >= 0; --j)
 	{
 		// UPSAMPLE
 		_uint iUpWinSizeX = (m_iWinSizeX) >> j;
 		_uint iUpWinSizeY = (m_iWinSizeY) >> j;
 
-		ID3D11ShaderResourceView* pUp = j == 2 ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_Y"), j) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE"), j + 1);
+		ID3D11ShaderResourceView* pUp = j == 1 ? m_pGameInstance->Get_RCS_SRV(TEXT("RCS_GAUSSIAN_BLUR_Y"), j) : m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE"), j + 1);
 
 		if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_UPSAMPLE"), "InputTexture", pUp)))
 			CRASH("Failed Add_SRVData");
@@ -80,7 +80,9 @@ HRESULT CScreenBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE")))))
 		CRASH("Failed Bind Blur Texture");
 
-	//Update_EffectIntensity();
+	
+	if (FAILED(pShader->Bind_Value("g_fEffectIntensity", &m_fIntensity, sizeof(_float))))
+		CRASH("Failed Bind g_fEffectIntensity");
 
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::BLUR));
 

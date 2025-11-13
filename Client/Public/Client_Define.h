@@ -8,6 +8,8 @@
 
 #define GRAVITY 98.f
 
+//#define KSTA_ON_TRANSFORM_CACHING
+
 namespace Client
 {
 	// Window SIze

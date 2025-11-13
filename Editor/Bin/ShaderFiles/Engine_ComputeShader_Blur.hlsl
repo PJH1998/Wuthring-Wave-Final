@@ -7,6 +7,7 @@
 #define THREAD_Z 1
 
 #define MAX_RADIUS 15
+#define DOF_MAX_RADIUS 3
 #define BLUR_RADIUS 6
 
 Texture2D<float4> InputTexture : register(t0);
@@ -176,11 +177,11 @@ void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
     
     GroupMemoryBarrierWithGroupSync();
     
-    vSharedColorY[GTID.y + MAX_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
+    vSharedColorY[GTID.y + DOF_MAX_RADIUS][GTID.x] = InputTexture.Load(int3(DTID.xy, 0));
 
-    if (GTID.y < MAX_RADIUS)
+    if (GTID.y < DOF_MAX_RADIUS)
     {
-        int3 LeftID = int3(DTID.x, DTID.y - MAX_RADIUS, 0);
+        int3 LeftID = int3(DTID.x, DTID.y - DOF_MAX_RADIUS, 0);
         int3 RightID = int3(DTID.x, DTID.y + THREAD_Y, 0);
         
         if (LeftID.y < 0)
@@ -190,18 +191,18 @@ void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
             RightID.y = (int) vOutSize.y - 1;
             
         vSharedColorY[GTID.y][GTID.x] = InputTexture.Load(LeftID);
-        vSharedColorY[GTID.y + THREAD_Y + MAX_RADIUS][GTID.x] = InputTexture.Load(RightID);
+        vSharedColorY[GTID.y + THREAD_Y + DOF_MAX_RADIUS][GTID.x] = InputTexture.Load(RightID);
     }
     
     GroupMemoryBarrierWithGroupSync();
 
     float fCoc = vDofData.x;
     
-    int iDofRadius = fCoc * (float) MAX_RADIUS;
+    int iDofRadius = fCoc * (float) DOF_MAX_RADIUS;
     
     if (fCoc <= vDofData.z)
     {
-        OutputTexture[DTID.xy] = vSharedColorY[GTID.y + MAX_RADIUS][GTID.x];
+        OutputTexture[DTID.xy] = vSharedColorY[GTID.y + DOF_MAX_RADIUS][GTID.x];
         return;
     }
     
@@ -211,7 +212,7 @@ void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
     float fTotalWeight = 0.f;
     for (int i = -iDofRadius; i <= iDofRadius; ++i)
     {
-        int iIndexY = GTID.y + MAX_RADIUS + i;
+        int iIndexY = GTID.y + DOF_MAX_RADIUS + i;
         
         float4 vSampleColor = vSharedColorY[iIndexY][GTID.x];
 

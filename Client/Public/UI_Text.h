@@ -34,11 +34,12 @@ public:
 	void					Set_TextUIDesc(TEXT_UI_DESC& tDesc) { m_tTextDesc = tDesc; }
 	TEXT_UI_DESC&			Get_TextUIDesc() { return m_tTextDesc; }
 
+	void					Update_Description(_float fTimeDelta);
+
 protected:
 	HRESULT					Bind_Description(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
 
-	void					Update_Description();
 
 
 protected:

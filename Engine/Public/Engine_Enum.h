@@ -31,6 +31,8 @@ namespace Engine
 
 	enum class SFX_TYPE { SSAO, BLOOM, BLUR, DOF, RADIAL, MOTION, END};
 
+	enum class SFX_TOGGLE { BLUR = SFX_TYPE::BLUR, DOF = SFX_TYPE::DOF, RADIAL = SFX_TYPE::RADIAL, MOTION = SFX_TYPE::MOTION, END };
+
 	// BroadPhase Layer
 	enum class BPLAYER { NONE, NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
