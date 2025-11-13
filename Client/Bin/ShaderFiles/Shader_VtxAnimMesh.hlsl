@@ -186,7 +186,7 @@ PS_OUT PS_AUGUSTA(PS_IN In)
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
-    
+    Out.vDepth.z = 1.f;
     
     return Out;
 }
@@ -236,6 +236,7 @@ PS_OUT PS_ROVER(PS_IN In)
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
     
     
     return Out;
@@ -286,6 +287,7 @@ PS_OUT PS_LOGO_ROVER(PS_IN In)
     Out.vNormal = vNormal;
     Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
     Out.vDepth.y = In.vProjPos.w;
+    Out.vDepth.z = 1.f;
     
     
     return Out;
@@ -437,6 +439,7 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
         Out.vColor = g_vOutLineColor;
         Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
         Out.vDepth.y = In.vProjPos.w;
+        Out.vDepth.z = 1.f;
         Out.vPBR.z = 1.f;
     }
     else

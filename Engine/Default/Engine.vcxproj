@@ -91,6 +91,7 @@
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
+    <ClInclude Include="..\public\RadialBlur.h" />
     <ClInclude Include="..\public\RCS_Manager.h" />
     <ClInclude Include="..\public\RendererCS.h" />
     <ClInclude Include="..\public\RendererSubResource.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
+    <ClCompile Include="..\private\RadialBlur.cpp" />
     <ClCompile Include="..\private\RCS_Manager.cpp" />
     <ClCompile Include="..\private\RendererCS.cpp" />
     <ClCompile Include="..\private\RendererSubResource.cpp" />
@@ -267,6 +269,7 @@
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Blur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_HZB.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_MotionBlur.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Noise.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_OcclusionCulling.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Sampling.hlsl" />

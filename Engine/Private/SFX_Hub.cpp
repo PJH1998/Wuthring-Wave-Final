@@ -204,6 +204,7 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_Y"), &BlurRCS)))
 		CRASH("Failed Add DOF_Y");
 
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_MotionBlur.hlsl");
 	BlurRCS.strEntryPoint = "Motion_Blur";
 	BlurRCS.iWidth = m_iWinSizeX;
 	BlurRCS.iHeight = m_iWinSizeY;
