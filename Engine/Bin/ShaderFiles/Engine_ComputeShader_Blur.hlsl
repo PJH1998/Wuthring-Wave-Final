@@ -229,7 +229,7 @@ void DOF_Y(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, uint3 G
 
 Texture2D<float4> VelocityMap : register(t2);
 
-SamplerState CS_DefaultSampler : register(s0);
+SamplerState ClampSampler : register(s0);
 
 
 cbuffer MOTION_DATA : register(b1)
@@ -291,13 +291,11 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     float2 vTexcoord = (float2) DTID.xy / (float2) vInSize;
     
     if (fVelocityLength == 0.f || vVelocity.w != 0.f)
-        return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+        return InputTexture.SampleLevel(ClampSampler, vTexcoord, 0);
     
     float2 vTexelSize = 1.f / (float2) vInSize;
     float2 vMotionScale = vDir * fVelocityLength * vTexelSize;
     int iSampleCount = 15;
-    
-    
     
     float4 vColor = 0.f;
     float fTotalWeight = 0.f;
@@ -307,21 +305,20 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
         float2 vDistance = (float) i * vTexelSize;
         float2 vOffset = vMotionScale * vDistance;
         
-        float2 vOffsetTex = clamp(vTexcoord + vOffset, 0.f, 1.f);
+        float2 vOffsetTex = vTexcoord + vOffset;
         
         if (all(vOffsetTex == vTexcoord))
             continue;
         
-        float fSampleDepth = DepthTexture.SampleLevel(CS_DefaultSampler, vOffsetTex, 0).y;
+        float fSampleDepth = DepthTexture.SampleLevel(ClampSampler, vOffsetTex, 0).y;
 
         if (fSampleDepth < vVelocity.z)
             continue;
        
-        float4 vSampleColor = InputTexture.SampleLevel(CS_DefaultSampler, vOffsetTex, 0);
+        float4 vSampleColor = InputTexture.SampleLevel(ClampSampler, vOffsetTex, 0);
         
         float fWeight = exp2(-(float) i / (float) iSampleCount * 3.f);
-        //float fWeight = 1.f - (float) i / 15.f;
-
+        
         vColor += vSampleColor * fWeight;
         fTotalWeight += fWeight;
     }
@@ -331,7 +328,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     if(fTotalWeight > 0.f)
         vFinalColor = vColor / fTotalWeight; 
     else
-        vFinalColor = InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+        vFinalColor = InputTexture.SampleLevel(ClampSampler, vTexcoord, 0);
    
    vFinalColor.a = 1.f;
     

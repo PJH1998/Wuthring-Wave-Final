@@ -333,6 +333,7 @@ public:
 #pragma region SFX_HUB
 	HRESULT						Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	HRESULT						End_SFX();
+	HRESULT						Setting_DOF(_float3 vCenterPos, _float fRange);
 
 	HRESULT						Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 	HRESULT						Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader);

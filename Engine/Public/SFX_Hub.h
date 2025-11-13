@@ -27,6 +27,8 @@ public:
 	HRESULT					Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 	HRESULT					Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader);
 
+	HRESULT					Setting_DOF(_float3 vCenterPos, _float fRange);
+
 #ifdef _DEBUG
 	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
 #endif

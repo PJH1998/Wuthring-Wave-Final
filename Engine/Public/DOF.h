@@ -15,12 +15,13 @@ private:
 public:
 	virtual HRESULT		Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	virtual HRESULT		Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) override;
+	void				Setting_DOF(_float3 vCenterPos, _float fRange);
 
 private:
 	_uint				m_iWinSizeX = {};
 	_uint				m_iWinSizeY = {};
 	
-	_float				m_fDofDepth = {};
+	_float3				m_vCenterPos = {};
 	_float				m_fDofRange = {};
 	_float				m_fDofScale = {};
 

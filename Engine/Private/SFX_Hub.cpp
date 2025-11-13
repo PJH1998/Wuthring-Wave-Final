@@ -47,6 +47,9 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 	if (nullptr == pSFX)
 		return E_FAIL;
 
+	if (nullptr != m_pCurrentSFX)
+		Safe_Release(m_pCurrentSFX);
+
 	m_IsToggleOff = false;
 	
 	m_fToggleDuration = fDuration;
@@ -56,6 +59,7 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 	m_fToggleIntensity = 0.f;
 
 	m_pCurrentSFX = pSFX;
+	Safe_AddRef(m_pCurrentSFX);
 
 	return S_OK;
 }
@@ -91,6 +95,17 @@ HRESULT CSFX_Hub::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader*
 		return E_FAIL;
 
 	return pSFX->Render(pVIBuffer, pShader);
+}
+
+HRESULT CSFX_Hub::Setting_DOF(_float3 vCenterPos, _float fRange)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::DOF);
+	ASSERT_CRASH(pSFX);
+
+	CDOF* pDOF = static_cast<CDOF*>(pSFX);
+	pDOF->Setting_DOF(vCenterPos, fRange);
+
+	return S_OK;
 }
 
 #ifdef _DEBUG
@@ -264,7 +279,11 @@ void CSFX_Hub::Update_ToggleIntensity(_float fTimeDleta)
 	{
 		fFluctuate *= -1.f;
 		if (m_fToggleIntensity <= 0.f)
+		{
+			Safe_Release(m_pCurrentSFX);
 			m_pCurrentSFX = nullptr;
+		}
+
 	}
 
 	m_fToggleIntensity = clamp(m_fToggleIntensity + fFluctuate, 0.f, 1.f);
@@ -289,9 +308,10 @@ void CSFX_Hub::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 	
+	Safe_Release(m_pCurrentSFX);
+
 	for (auto& Pair : m_SFXs)
 		Safe_Release(Pair.second);
 	m_SFXs.clear();
 
-	Safe_Release(m_pCurrentSFX);
 }

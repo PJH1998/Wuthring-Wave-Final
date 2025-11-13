@@ -1004,6 +1004,10 @@ HRESULT CGameInstance::End_SFX()
 {
 	return m_pSFX_Hub->End_SFX();
 }
+HRESULT CGameInstance::Setting_DOF(_float3 vCenterPos, _float fRange)
+{
+	return m_pSFX_Hub->Setting_DOF(vCenterPos, fRange);
+}
 HRESULT CGameInstance::Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 {
 	return m_pSFX_Hub->Render_SFX_Toggle(pVIBuffer, pShader);
