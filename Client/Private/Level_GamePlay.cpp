@@ -74,6 +74,7 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
+	Ready_Mouse();
 
 	return S_OK;
 }
@@ -90,6 +91,8 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 		m_pGameSystem->Update(fTimeDelta);
 	}
 
+	// 임시 Mouse 고정
+	
 
 	// UI Test. Delete it.
 	//static _float fElapsedTime_TestSpawn = 0.f;
@@ -368,6 +371,13 @@ void CLevel_GamePlay::Ready_UI()
 	//	CRASH("Failed Ready Button_Interact");
 
 	// _UI
+}
+
+void CLevel_GamePlay::Ready_Mouse()
+{
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"), ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_Mouse"))))
+		CRASH("Mosue");
 }
 
 #ifdef _DEBUG

@@ -220,6 +220,7 @@
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
+    <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -410,6 +411,7 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
+    <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PatternDummy.cpp" />
