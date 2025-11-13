@@ -456,9 +456,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     float AO = (Occlusion / g_iSampleSize);
     
     if(AO >= 0.8f)
-        AO = 1.f;
+        AO = 1.f;                            
     
-    AO = pow(AO, 2.f);
+ //   AO = pow(AO, 2.f);
     
     Out.vColor.xyz = AO;
     Out.vColor.w = 1.f;
