@@ -38,9 +38,6 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
-
-	return S_OK;
-
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);

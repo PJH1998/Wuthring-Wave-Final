@@ -68,7 +68,6 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CLoader_Test::Initialize()
 {
 
-	
 
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
@@ -77,8 +76,8 @@ HRESULT CLoader_Test::Initialize()
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
-	return S_OK;
 	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
+	
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	
 	
