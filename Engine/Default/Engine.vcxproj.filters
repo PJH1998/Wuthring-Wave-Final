@@ -722,6 +722,11 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\BufferPool.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1064,6 +1069,11 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\BufferPool.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">

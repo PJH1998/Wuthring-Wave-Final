@@ -31,6 +31,7 @@
     <ClInclude Include="..\public\Bloom.h" />
     <ClInclude Include="..\public\Blur.h" />
     <ClInclude Include="..\Public\Bone.h" />
+    <ClInclude Include="..\Public\BufferPool.h" />
     <ClInclude Include="..\Public\CollideComponent.h" />
     <ClInclude Include="..\public\CSM.h" />
     <ClInclude Include="..\Public\BT_Action.h" />
@@ -71,6 +72,7 @@
     <ClInclude Include="..\Public\EventBus.h" />
     <ClInclude Include="..\Public\Font_Manager.h" />
     <ClInclude Include="..\Public\FreeCamera.h" />
+    <ClInclude Include="..\Public\FreeList.h" />
     <ClInclude Include="..\Public\Frustrum.h" />
     <ClInclude Include="..\Public\GameInstance.h" />
     <ClInclude Include="..\Public\GameObject.h" />
@@ -87,7 +89,10 @@
     <ClInclude Include="..\Public\Mesh.h" />
     <ClInclude Include="..\Public\MeshMaterial.h" />
     <ClInclude Include="..\Public\Mesh_Instance.h" />
+    <ClInclude Include="..\Public\Mesh_Streaming.h" />
     <ClInclude Include="..\Public\Model_Instance.h" />
+    <ClInclude Include="..\Public\Model_Manager.h" />
+    <ClInclude Include="..\Public\Model_Streaming.h" />
     <ClInclude Include="..\public\MotionBlur.h" />
     <ClInclude Include="..\public\ObjectFuncNotify.h" />
     <ClInclude Include="..\Public\OctoTree.h" />
@@ -151,6 +156,7 @@
     <ClCompile Include="..\private\Bloom.cpp" />
     <ClCompile Include="..\private\Blur.cpp" />
     <ClCompile Include="..\Private\Bone.cpp" />
+    <ClCompile Include="..\Private\BufferPool.cpp" />
     <ClCompile Include="..\Private\CollideComponent.cpp" />
     <ClCompile Include="..\private\CSM.cpp" />
     <ClCompile Include="..\Private\BT_Action.cpp" />
@@ -188,6 +194,7 @@
     <ClCompile Include="..\Private\EventBus.cpp" />
     <ClCompile Include="..\Private\Font_Manager.cpp" />
     <ClCompile Include="..\Private\FreeCamera.cpp" />
+    <ClCompile Include="..\Private\FreeList.cpp" />
     <ClCompile Include="..\Private\Frustrum.cpp" />
     <ClCompile Include="..\Private\GameInstance.cpp" />
     <ClCompile Include="..\Private\GameObject.cpp" />
@@ -204,7 +211,10 @@
     <ClCompile Include="..\Private\Mesh.cpp" />
     <ClCompile Include="..\Private\MeshMaterial.cpp" />
     <ClCompile Include="..\Private\Mesh_Instance.cpp" />
+    <ClCompile Include="..\Private\Mesh_Streaming.cpp" />
     <ClCompile Include="..\Private\Model_Instance.cpp" />
+    <ClCompile Include="..\Private\Model_Manager.cpp" />
+    <ClCompile Include="..\Private\Model_Streaming.cpp" />
     <ClCompile Include="..\private\MotionBlur.cpp" />
     <ClCompile Include="..\private\ObjectFuncNotify.cpp" />
     <ClCompile Include="..\Private\OctoTree.cpp" />
