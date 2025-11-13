@@ -107,12 +107,12 @@ void CGalbrenaAirJump::Check_StateTransition(_float fTimeDelta)
 
     _bool IsEscapePossible = CState::Is_EscapePossible();
 
-	//// 1. 우선순위 제일 높음.
-	//if (m_States[HIT])
-	//{
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
-	//	return;
-	//}
+	// 1. 우선순위 제일 높음.
+	if (m_States[HIT])
+	{
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
+		return;
+	}
 
 	//// 2. 날 수 있다면?
 	//if (m_States[FLY])

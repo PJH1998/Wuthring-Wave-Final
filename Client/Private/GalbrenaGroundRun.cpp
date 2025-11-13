@@ -177,23 +177,21 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
     _float3 vNormal = {}; // 벽타기 전환 용도 Normal
     // 이 조건은 추후 디테일 잡아보기.
 
+	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
 
-	// 뛰다가 Dash
-	//if (m_States[DASH])
-	//{
-	//	if (m_States[RUN_D])
-	//	{
-	//		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
-	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
-	//		return;
-	//	}
-	//	else
-	//	{
-	//		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
-	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
-	//		return;
-	//	}
-	//}
+	// 2. Hit 우선순위
+	if (m_States[HIT])
+	{
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
+		return;
+	}
+	
 
 	if (m_States[FALL])
 	{
@@ -207,6 +205,23 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 		m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_WALK_LF;
 		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP)); // 상위, 하위 상태
 		return;
+	}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[RUN_D])
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
 	}
 
     if (m_States[SPRINT_F])

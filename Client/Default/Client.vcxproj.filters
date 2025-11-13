@@ -295,6 +295,9 @@
     <Filter Include="03. GameObject\Weapon\Galbrena">
       <UniqueIdentifier>{726ea30f-46d1-4dac-b968-f1537c56aad6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
+      <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -761,6 +764,15 @@
     <ClInclude Include="..\Public\GalbrenaGroundLand.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaHit.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1193,6 +1205,15 @@
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaHit.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>

@@ -149,16 +149,62 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
     _uint iKeyInput = {};
 
+
 	// 1. 우선순위
+	if (m_States[DODGE])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eDodgeType = EGalbrenaDodgeType::MOVE_LIMIT_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DODGE)); // 상위, 하위 상태
+		return;
+	}
 
-    // Sprint => 빠르게 달리기.
-    if (m_States[SPRINT])
-    {
-        m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::SPRINT_F;
-        m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN)); // 상위, 하위 상태
-        return;
-    }
+	// 2. 
+	if (m_States[HIT])
+	{
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
+		return;
+	}
 
+
+	// 우선순위
+	if (m_States[FALL])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eFallType = EGalbrenaFallType::FALL_LOOP;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[JUMP]) // SPACE 누르면 바로 점프로 전환.
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_WALK_LF;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP)); // 상위, 하위 상태
+		return;
+	}
+
+	// 뛰다가 Dash
+	if (m_States[DASH])
+	{
+		if (m_States[MOVE_D])
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+		else
+		{
+			m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+			m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+			return;
+		}
+	}
+
+	// Sprint => 빠르게 달리기.
+	if (m_States[SPRINT])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eRunType = EGalbrenaRunType::SPRINT_F;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::RUN)); // 상위, 하위 상태
+		return;
+	}
 
     
     // 이동은 Run State에서 조절.

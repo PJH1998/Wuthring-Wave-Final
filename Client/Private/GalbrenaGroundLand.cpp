@@ -80,6 +80,7 @@ void CGalbrenaGroundLand::Update_LandAnimation(_float fTimeDelta)
 void CGalbrenaGroundLand::Check_StateTransition(_float fTimeDelta)
 {
     _bool IsEscapePossible = CState::Is_EscapePossible();
+
 	// Hit는 무조건 전환
 	if (m_States[HIT])
 	{

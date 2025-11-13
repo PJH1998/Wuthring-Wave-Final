@@ -210,10 +210,13 @@
     <ClInclude Include="..\Public\GalbrenaAirFall.h" />
     <ClInclude Include="..\Public\GalbrenaAirJump.h" />
     <ClInclude Include="..\public\GalbrenaFactory.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h" />
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
     <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
     <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
     <ClInclude Include="..\Public\GalbrenaGun.h" />
+    <ClInclude Include="..\Public\GalbrenaHit.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
     <ClInclude Include="..\public\Ggobul.h" />
     <ClInclude Include="..\Public\GroundState.h" />
@@ -391,10 +394,13 @@
     <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
     <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
     <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
     <ClCompile Include="..\Private\GalbrenaGun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\private\Ggobul.cpp" />
     <ClCompile Include="..\Private\GroundState.cpp" />

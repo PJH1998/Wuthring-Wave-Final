@@ -97,11 +97,11 @@ void CGalbrenaAirFall::Check_Physics(_float fTimeDelta)
 void CGalbrenaAirFall::Check_StateTransition(_float fTimeDelta)
 {
 
-	//if (m_States[HIT])
-	//{
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
-	//	return;
-	//}
+	if (m_States[HIT])
+	{
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT));
+		return;
+	}
 
 	//if (m_States[FLY])
 	//{

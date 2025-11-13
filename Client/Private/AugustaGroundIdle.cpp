@@ -144,8 +144,6 @@ void CAugustaGroundIdle::Handle_Input()
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
-
-		
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
