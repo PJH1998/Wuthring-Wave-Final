@@ -114,13 +114,13 @@ void CGalbrenaAirJump::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	//// 2. 날 수 있다면?
-	//if (m_States[FLY])
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
-	//	return;
-	//}
+	// 2. 날 수 있다면?
+	if (m_States[FLY])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
+		return;
+	}
 
     if (m_States[DOUBLE_JUMP])
     {

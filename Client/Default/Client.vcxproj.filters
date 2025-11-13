@@ -773,6 +773,9 @@
     <ClInclude Include="..\Public\GalbrenaGroundDodge.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1215,6 +1218,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

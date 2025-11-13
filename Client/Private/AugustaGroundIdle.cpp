@@ -94,8 +94,8 @@ void CAugustaGroundIdle::OnUpdate(_float fTimeDelta)
 void CAugustaGroundIdle::OnExit()
 {
     CGroundState::OnExit();
-
     m_pAugusta->PartActivate(m_iPartType, false);
+	m_fFallTime = 0.f;
 }
 
 void CAugustaGroundIdle::Handle_Input()
@@ -164,6 +164,17 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 {
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+	if (m_States[LAND])
+	{
+		m_fFallTime = 0.f;
+	}
+	else if (!m_States[LAND])
+	{
+		m_fFallTime += fTimeDelta;
+
+		if (m_fFallTime >= 0.2f)
+			m_States[FALL] = true;
+	}
 }
 
 // Idles 조건이 아닌 것들.
@@ -191,7 +202,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
 
     // 우선순위 순으로 전환조건 진행.
-	if (!m_States[LAND])
+	if (m_States[FALL])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태

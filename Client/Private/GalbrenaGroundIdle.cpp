@@ -174,6 +174,13 @@ void CGalbrenaGroundIdle::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
+	if (m_States[FLY])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
+		return;
+	}
+
 	if (m_States[JUMP]) // SPACE 누르면 바로 점프로 전환.
 	{
 		m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_WALK_LF;

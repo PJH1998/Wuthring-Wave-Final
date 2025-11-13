@@ -103,12 +103,12 @@ void CGalbrenaAirFall::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	//if (m_States[FLY])
-	//{
-	//	m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
-	//	m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
-	//	return;
-	//}
+	if (m_States[FLY])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eAirFlyType = EGalbrenaAirFlyType::XA_START;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY));
+		return;
+	}
 
 
 	//if (m_States[AIR_ATTACK])

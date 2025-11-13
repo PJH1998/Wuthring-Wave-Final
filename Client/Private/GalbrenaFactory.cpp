@@ -18,7 +18,7 @@
 #include "GalbrenaAirFall.h"
 #include "GalbrenaAirJump.h"
 //#include "GalbrenaAirAttack.h"
-//#include "GalbrenaAirFly.h"
+#include "GalbrenaAirFly.h"
 
 // Hit 카테고리 State
 #include "GalbrenaHit.h"
@@ -39,6 +39,7 @@ void CGalbrenaFactory::Register_States(CStateMachine* pStateMachineCom, CGalbren
 	// Air 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP), CGalbrenaAirJump::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL), CGalbrenaAirFall::Create(pCharacter));
+	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FLY), CGalbrenaAirFly::Create(pCharacter));
 
 	// Hit 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::HIT), ENUM_CLASS(EGalbrenaHitState::HIT), CGalbrenaHit::Create(pCharacter));
