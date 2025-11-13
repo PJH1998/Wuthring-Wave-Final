@@ -388,6 +388,7 @@ namespace Engine
 		const _float4x4* pBoneMatrixPtr = nullptr;
 		const _float4x4* pObjectMatrixPtr = nullptr;
 		_bool			 IsActive = false;
+		_matrix			OffsetMatrix = {};
 	}EFFECT_INFO;
 }
 
