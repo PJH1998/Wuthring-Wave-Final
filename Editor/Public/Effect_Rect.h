@@ -83,7 +83,6 @@ private:
 	_bool						m_IsSprite = false;
 	_int						m_iRow = {};
 	_int						m_iCol = {};
-	_float						m_fSpriteSpeed = {};
 	_float						m_fPhase = 0.f;
 
 

@@ -45,7 +45,6 @@ HRESULT CEffect_Rect::Initialize_Clone(void* pArg)
 	m_IsSprite = pDesc->IsSprite;
 	m_iRow = pDesc->iRows;
 	m_iCol = pDesc->iCols;
-	m_fSpriteSpeed = pDesc->fSweepSpeed;
 
     //if (m_IsSprite = pDesc->IsSprite)
     //{
@@ -112,6 +111,7 @@ void CEffect_Rect::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
      m_vLifeTime.x = 0.f;
 	 m_fSweep = 0.f;
+	 m_fPhase = 0.f;
      Root_Transform(WorldMatrix);
 }
 
@@ -125,7 +125,6 @@ void CEffect_Rect::Root_Transform(_fmatrix WorldMatrix)
 void CEffect_Rect::Sprite_Update(_float fTimeDelta)
 {
 	m_fPhase += fTimeDelta * m_fSweepSpeed;
-
 }
 
 

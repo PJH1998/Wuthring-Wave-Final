@@ -26,6 +26,10 @@ public:
 		_int	iShaderPass = 0;
 		_int	iMaskFlag = 0;
 
+		_bool	IsSprite = false;
+		_int    iRows = 0;
+		_int	iCols = 0;
+
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f };
@@ -50,7 +54,7 @@ public:
 
 private:
 	void Root_Transform(_fmatrix WorldMatrix);
-	void Bind_CS_SpriteInfo();
+	void Sprite_Update(_float fTimeDelta);
 
 
 private:
@@ -73,6 +77,11 @@ private:
 	_float						m_fSoft = {};
 
 	_int						m_iMaskFlag = 0;
+
+	_bool						m_IsSprite = false;
+	_int						m_iRow = {};
+	_int						m_iCol = {};
+	_float						m_fPhase = 0.f;
 
 private:
 	HRESULT Ready_Components(FXRECT_DESC& Desc);
