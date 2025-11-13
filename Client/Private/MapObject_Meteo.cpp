@@ -101,6 +101,7 @@ void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 	m_pTransformCom->Set_State(STATE::POSITION, CurrentPos);
 	if (Time >= 1.f)
 	{
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Explosion"), m_pTransformCom->Get_WorldMatrix());
 		//이펙트들 터트리기.
 		m_IsTriggerd = false;
 		m_pTransformCom->Set_State(STATE::POSITION, XMLoadFloat4(&m_vSourPos));
