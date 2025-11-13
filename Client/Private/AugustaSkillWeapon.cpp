@@ -222,6 +222,7 @@ void CAugustaSkillWeapon::Ready_AttackVolumes()
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
+	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

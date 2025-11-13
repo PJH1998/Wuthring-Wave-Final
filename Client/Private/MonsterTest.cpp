@@ -459,7 +459,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
-	TriggerDesc.pCondition = &m_iState;
+	//TriggerDesc.pCondition = &m_iState;
 	TriggerDesc.test = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer) {
 		this->OnHitEnter(iLayer, pOther, Manifold, eLayer); 
 		};

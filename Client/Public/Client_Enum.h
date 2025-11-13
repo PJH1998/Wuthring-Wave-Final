@@ -17,6 +17,14 @@ namespace Client
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
 
+	enum class ATTACKVOULME_DIR : unsigned int
+	{
+		DEFAULT = 0, // 기본 값.
+		UPPER,
+
+		END
+	};
+
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
 		DODGE =     1 << 1, // Dodge 상태면 Hit 안되게.
@@ -84,8 +92,7 @@ namespace Client
 	};
 
 	enum class UI_GALBRENA_CONDITION : unsigned int {
-		BURST = 0,
-
+		BURST_ACTIVE = 1 << 0, // Burst ACTIVE
 		END
 	};
 
@@ -231,6 +238,7 @@ namespace Client
 		, ROVER // 5
 		, NORMAL_YELLOW // 6
 		, LOGOROVER // 7
+		, GALBRENA // 8
 		, END };
 
 	enum class TEXT_COLOR_TYPE {

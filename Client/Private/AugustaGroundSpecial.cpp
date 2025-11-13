@@ -332,7 +332,6 @@ void CAugustaGroundSpecial::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STAND), "SpWalk_Stand", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_L), "SpWalk_Stop_L", 1.f, 0.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSpecialType::SPWALK_STOP_R), "SpWalk_Stop_R", 1.f, 0.f);
-
 }
 
 void CAugustaGroundSpecial::State_Reset()

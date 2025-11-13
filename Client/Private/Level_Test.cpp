@@ -48,6 +48,7 @@ CLevel_Test::CLevel_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLevel_Test::Initialize()
 {
+	return S_OK;
 	// SetUp OctoTree
 	m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
@@ -70,31 +71,12 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
 	//Ready_CoroSaurus();
 	Ready_Spawner();
 
-
     Ready_Effect();
-	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
-	//DummyDesc.fSpeedPerSec = 10.f;
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
-	//	CRASH("Dummy");
-
-	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
-	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
-    //MobDesc.fSpeedPerSec = 5.f;
-    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
-	//	CRASH("FalseSoverign");
-	//
-	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
-	//	CRASH("Dummy");
-
-    /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
-        CRASH("Dummy");*/
-
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
     LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
@@ -166,17 +148,21 @@ void CLevel_Test::Ready_Layer_Player()
     // 0. vector 크기 정의
     Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
 
-    // 1. Augusta 정의.
+	// 1. Rover(주인공) 캐릭터 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
+
+    // 2. Augusta 정의.
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
-    //Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+
+	// 3. Galbrena 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].CharacterDesc = PlayerData::GetGalbrenaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].strActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+
+
+
     
-
-    // 2. Galbrena 정의
-
-    // 3. Rover(주인공) 캐릭터 정의
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
     // 4. Player(Character 모음) 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),

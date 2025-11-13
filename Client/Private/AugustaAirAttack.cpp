@@ -469,7 +469,7 @@ void CAugustaAirAttack::SetUp_Animations()
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 40.f, 1.f);
 
 	// Griffon 전용 애니메이션 맵 등록.
 	m_PartsAnimations.emplace("AirAttack_HackDown_Start", "SA1Shouwangjiu_AirAttack_Start");

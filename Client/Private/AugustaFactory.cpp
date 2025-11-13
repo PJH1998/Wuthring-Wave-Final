@@ -39,7 +39,7 @@
 
 void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pCharacter)
 {
-    // === HSM enum 기반 State 등록 ===
+    // HSM enum 기반 State 등록
     // enum 값을 index로 사용하여 타입 안정성 확보
 
     // Ground 카테고리 하위 State들
