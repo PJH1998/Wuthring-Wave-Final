@@ -383,6 +383,18 @@ HRESULT CVIBuffer_Point_Instance::Render()
 
 void CVIBuffer_Point_Instance::Bind_CS_Option(PARTICLE_DefaultCB* OptionCBDesc)
 {
+	D3D11_MAPPED_SUBRESOURCE	SubResource{};
+
+	m_pContext->Map(m_pOptionCBBuffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &SubResource);
+
+	PARTICLE_DefaultCB* pCB = static_cast<PARTICLE_DefaultCB*>(SubResource.pData);
+
+	if (OptionCBDesc != nullptr)
+	{
+		pCB->vPivot = OptionCBDesc->vPivot;
+	}
+
+	m_pContext->Unmap(m_pOptionCBBuffer, 0);
 }
 
 void CVIBuffer_Point_Instance::Bind_CS_Speed(_float fTimeDelta, PARTICLE_SPEEDCB* SpeedDesc)

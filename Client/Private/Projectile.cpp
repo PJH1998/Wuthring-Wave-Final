@@ -25,7 +25,6 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
 	m_wstrEffectTag = pDesc->wstrEffectTag;
-	m_fDelay = 0.1f;
     return S_OK;
 }
 
@@ -45,7 +44,7 @@ void CProjectile::Update(_float fTimeDelta)
 	if (m_fDelay <= 0.f)
 	{
 		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
-		m_fDelay = 2.f;
+		m_fDelay = 1.f;
 	}
 	else
 		m_fDelay -= fTimeDelta;
@@ -97,6 +96,7 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
+	m_fDelay = 0.2f;
 }
 
 HRESULT CProjectile::Bind_Resources()

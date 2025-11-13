@@ -34,6 +34,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_vLifeTime = m_tDesc.vLifeTime;
 
 	m_iMaskFlag = m_tDesc.iMaskFlag;
+	m_IsRoot = m_tDesc.IsRootOn;
 
     _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
@@ -104,9 +105,23 @@ void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 
 void CParticle::Root_Transform(_fmatrix WorldMatrix)
 {
-    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+	if (!m_IsRoot)
+	{
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
 
-    m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	}
+	else
+	{
+		_vector vLook = XMVectorSetW(WorldMatrix.r[2], 0.f);
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+
+		PARTICLE_DefaultCB Desc = {};
+		XMStoreFloat3(&Desc.vPivot, vLook);
+		m_pVIBufferCom->Bind_CS_Option(&Desc);
+	}
 }
 
 void CParticle::Bind_CS_SpriteInfo()

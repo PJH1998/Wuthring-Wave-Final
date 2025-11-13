@@ -75,6 +75,8 @@ private:
 	_int						m_iRow = {};
 	_int						m_iCol = {};
 
+	_bool						m_IsRoot = false;
+
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);
 	HRESULT Bind_ShaderResources();
