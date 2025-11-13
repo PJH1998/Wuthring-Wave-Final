@@ -195,7 +195,20 @@ void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
 	//	}
 	//}
 
-    // Dash 보다 우선순위 높음.
+	if (m_States[FALL])
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eFallType = EGalbrenaFallType::FALL_LOOP;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::FALL)); // 상위, 하위 상태
+		return;
+	}
+
+	if (m_States[JUMP]) // SPACE 누르면 바로 점프로 전환.
+	{
+		m_pGalbrena->GetStateContextForWrite().m_eJumpType = EGalbrenaJumpType::JUMP_WALK_LF;
+		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EGalbrenaAirState::JUMP)); // 상위, 하위 상태
+		return;
+	}
+
     if (m_States[SPRINT_F])
     {
         m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::SPRINT_F);

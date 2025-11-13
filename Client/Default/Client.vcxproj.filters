@@ -752,6 +752,15 @@
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1175,6 +1184,15 @@
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>

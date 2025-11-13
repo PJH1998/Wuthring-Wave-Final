@@ -207,8 +207,11 @@
     <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\FS_Scythe.h" />
     <ClInclude Include="..\Public\Galbrena.h" />
+    <ClInclude Include="..\Public\GalbrenaAirFall.h" />
+    <ClInclude Include="..\Public\GalbrenaAirJump.h" />
     <ClInclude Include="..\public\GalbrenaFactory.h" />
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
     <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
     <ClInclude Include="..\Public\GalbrenaGun.h" />
     <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
@@ -385,8 +388,11 @@
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp" />
     <ClCompile Include="..\Private\Galbrena.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
     <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
     <ClCompile Include="..\Private\GalbrenaGun.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
