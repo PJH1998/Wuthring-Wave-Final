@@ -3,6 +3,7 @@
 #include "Augusta.h"
 #include "StateMachine.h"
 #include "AugustaState_Enum.h"
+#include "GameInstance.h"
 
 HRESULT CAugustaGroundRun::Initialize(class CGameObject* pOwner)
 {
@@ -36,6 +37,9 @@ void CAugustaGroundRun::OnEnter(void* pArg)
 
 	// 5. 중력 켰다.
     m_pAugusta->Set_Gravity(true);
+
+	// 6. SFX Motion 시작.
+	m_pAugusta->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CAugustaGroundRun::OnUpdate(_float fTimeDelta)
@@ -69,6 +73,7 @@ void CAugustaGroundRun::OnExit()
     m_pAugusta->Set_Gravity(true);
 
 	m_fFallTime = 0.f;
+	m_pAugusta->End_SFX();
 }
 
 void CAugustaGroundRun::Handle_Input()

@@ -342,6 +342,16 @@ void CCharacter::Render_Damage(const HIT_DESC* pDesc)
 {
 }
 
+void CCharacter::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
+{
+	m_pGameInstance->Begin_Toggle_SFX(eType, fDuration);
+}
+
+void CCharacter::End_SFX()
+{
+	m_pGameInstance->End_SFX();
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {

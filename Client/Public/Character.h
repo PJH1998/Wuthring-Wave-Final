@@ -146,6 +146,8 @@ public:
 	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
 
 	virtual void Render_Damage(const HIT_DESC* pDesc);
+	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
+	virtual void End_SFX();
 #pragma endregion
 
 #pragma region STATE

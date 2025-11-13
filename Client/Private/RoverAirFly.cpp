@@ -61,6 +61,9 @@ void CRoverAirFly::OnEnter(void* pArg)
 	m_fAccel = 3.f;					    // '상승/하강 가속도' 
 	m_vGravity = { 0.f, -9.8f, 0.f };   // '활공용 중력'
 	m_fDrag = 0.98f;					// '공기 저항' (속도 감쇄)
+
+	// 10. SFX Motion 시작.
+	m_pRover->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CRoverAirFly::OnUpdate(_float fTimeDelta)
@@ -100,6 +103,8 @@ void CRoverAirFly::OnExit()
 
 	// Blending 정보 초기화
 	m_GpuBlendInfo = {};
+
+	m_pRover->End_SFX();
 }
 
 void CRoverAirFly::Handle_Input()

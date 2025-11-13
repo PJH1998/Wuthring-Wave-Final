@@ -224,8 +224,8 @@ void CAugusta::Render()
 		m_pColliderCom->Render();
 	else
 		m_pQTEColliderCom->Render();*/
-	m_pColliderCom->Render();
-	m_pQTEColliderCom->Render();
+	//m_pColliderCom->Render();
+	//m_pQTEColliderCom->Render();
     
 	Print_LookRay();
 	
