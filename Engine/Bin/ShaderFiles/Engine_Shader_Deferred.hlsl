@@ -547,15 +547,13 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
         float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
         vPrevTexcoord = clamp(vPrevTexcoord, 0.f, 1.f);
     
-        float2 vCurTexcoord = float2(In.vTexcoord.x * 1920.f, In.vTexcoord.y * 1080.f); // �ȼ� �Ÿ��� ����
-        vPrevTexcoord = float2(vPrevTexcoord.x * 1920.f, vPrevTexcoord.y * 1080.f);
+        float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight); // 버퍼 안먹음 임시
+        vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
         
         float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
     
         Out.vColor.xy = vMotionVector;
     }
-    
-//    Out.vColor.a = 1.f;
     
     return Out;
 }

@@ -356,6 +356,9 @@
     <Filter Include="01. Utility\99. Renderer\SFX\Blur\Bloom">
       <UniqueIdentifier>{110a8cf2-2059-46c4-afaf-849626c1ee16}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Utility\99. Renderer\SFX\Blur\Radial">
+      <UniqueIdentifier>{1e87911a-3589-47d7-a32e-c21a8abffee6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Public\Engine_Define.h">

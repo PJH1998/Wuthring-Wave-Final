@@ -367,6 +367,9 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnDetect_Enter(iLayer, pDesc, Manifold);
+		});
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
