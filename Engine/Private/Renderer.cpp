@@ -6,7 +6,6 @@
 #include "StaticObject.h"
 #include "RendererSubResource.h"
 #include "RendererCS.h"
-#include "SFX_Hub.h"
 
 CRenderer::CRenderer(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice },
@@ -55,8 +54,7 @@ HRESULT CRenderer::Initialize(_uint iNumThread)
 	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixScaling(static_cast<_float>(m_iWinSizeX), static_cast<_float>(m_iWinSizeY), 1.f));
 	XMStoreFloat4x4(&m_ViewMatrix, XMMatrixIdentity());
 	XMStoreFloat4x4(&m_ProjMatrix, XMMatrixOrthographicLH(static_cast<_float>( m_iWinSizeX ), static_cast<_float>( m_iWinSizeY ), 0.f, 1.f));
-
-	m_fMaxEffectIntensity = 10.f;
+;
 	m_iInterval = 2;
 
 #ifdef _DEBUG
@@ -164,17 +162,6 @@ void CRenderer::Render()
 #endif
 }
 
-void CRenderer::Begin_ScreenEffect(SFX_TYPE eType)
-{
-	m_eEffectType = eType;
-	m_IsEffectEnd = false;
-}
-
-void CRenderer::End_ScreenEffect()
-{
-	m_IsEffectEnd = true;
-}
-
 void CRenderer::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
 {
 	auto iter = m_Effects.find(strEffectTag);
@@ -212,22 +199,6 @@ HRESULT CRenderer::Add_Render_Debug(CComponent* pDebugComponent)
 HRESULT CRenderer::Bind_RawValue(const _char* pConstantName, void* pValue, _uint iLength)
 {
 	return m_pShader->Bind_Value(pConstantName, pValue, iLength);
-}
-void CRenderer::Setting_SSAO(_float fRadius, _float fMaxDistance)
-{
-	m_pSubResource->Setting_SSAO(fRadius, fMaxDistance);
-}
-void CRenderer::SetBloomIntensity(_float fIntensity)
-{
-	m_pSubResource->SetBloomIntensity(fIntensity);
-}
-void CRenderer::SetDof(_float fDepth, _float fRange, _float fScale)
-{
-	m_pSubResource->SetDof(fDepth, fRange, fScale);
-}
-void CRenderer::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
-{
-	m_pSubResource->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
 }
 #endif
 
@@ -321,7 +292,7 @@ void CRenderer::Render_Shadow()
 
 void CRenderer::Render_Outline()
 {
-	if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_BackBuffer"), nullptr, false)))
+	if(FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_OUTLINE"), nullptr, false)))
 	   CRASH("Failed Begin MRT");
 
 	for (auto& pRenderObject : m_RenderObjects[ENUM_CLASS(RENDERGROUP::OUTLINE)])
@@ -341,20 +312,6 @@ void CRenderer::Render_NonBlend()
 {
 	if (FAILED(m_pGameInstance->Begin_MRT(TEXT("MRT_Object"))))
 		CRASH("Render Fail");
-
-	//// Buffer Index
-	//_int iReadIndex = (m_iDoubleBufferIndex + 1) % 2;
-	//// Static Object Render
-	//for (auto& pStaticObject : m_StaticObjects[iReadIndex])
-	//{
-	//	if (nullptr != pStaticObject)
-	//		pStaticObject->Render();
-	//}
-	//if (m_pGameInstance->IsWorkFinish())
-	//{
-	//	m_StaticObjects[iReadIndex].clear();
-	//	m_iDoubleBufferIndex.exchange(iReadIndex, memory_order_release);
-	//}
 
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::NONBLEND));
 
@@ -457,7 +414,7 @@ void CRenderer::Render_SSAO()
 	if (!m_iCurTime)
 		return;
 
-	if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::SSAO, m_pVIBuffer, m_pShader)))
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::SSAO, m_pVIBuffer, m_pShader)))
 		return;
 
 }
@@ -579,7 +536,7 @@ void CRenderer::Render_Bloom()
 	if (!m_iCurTime)
 		return;
 
-	if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::BLOOM, m_pVIBuffer, m_pShader)))
+	if (FAILED(m_pGameInstance->Render_SFX(SFX_TYPE::BLOOM, m_pVIBuffer, m_pShader)))
 		return;
 }
 
@@ -689,38 +646,16 @@ void CRenderer::Render_ScreenEffect()
 {
 #ifdef _DEBUG
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::MOTION;
+		m_pGameInstance->End_SFX();
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::DOF;
+		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::BLUR);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::BLUR;
+		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::DOF);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_eEffectType = SFX_TYPE::END;
+		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::MOTION);
 #endif
-
-	if (m_eEffectType != SFX_TYPE::END)
-	{
-		Update_EffectIntensity();
-
-		switch(m_eEffectType)
-		{
-		case SFX_TYPE::BLUR:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::BLUR, m_pVIBuffer, m_pShader)))
-				return;
-			break;
-
-		case SFX_TYPE::DOF:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::DOF, m_pVIBuffer, m_pShader)))
-				return;
-			break;
-
-		case SFX_TYPE::MOTION:
-			if (FAILED(m_pSFX_Hub->Render_SFX(SFX_TYPE::MOTION, m_pVIBuffer, m_pShader)))
-				return;
-			break;
-		}
-	}
-	else
+	
+	if(FAILED(m_pGameInstance->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 	{
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
 			CRASH("Failed RT_BackBuffer");
@@ -740,23 +675,6 @@ void CRenderer::Render_UI()
 void CRenderer::Render_Fade()
 {
 	Render_ObjectList(ENUM_CLASS(RENDERGROUP::FADE));
-}
-
-void CRenderer::Update_EffectIntensity()
-{
-	_float fFluctuate = 1.f / m_fMaxEffectIntensity;
-
-	if (m_IsEffectEnd)
-	{
-		fFluctuate *= -1.f;
-		if (m_fEffectIntensity <= 0.f)
-			m_eEffectType = SFX_TYPE::END;
-	}
-
-	m_fEffectIntensity = clamp(m_fEffectIntensity + fFluctuate, 0.f, 1.f);
-
-	if (FAILED(m_pShader->Bind_Value("g_fEffectIntensity", &m_fEffectIntensity, sizeof(_float))))
-		CRASH("Failed Bind g_fEffectIntensity");
 }
 
 #ifdef _DEBUG
@@ -937,6 +855,12 @@ HRESULT CRenderer::Ready_MRT()
 		ASSERT_CRASH(false);
 #pragma endregion
 
+#pragma region MRT_OUTLINE
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_BackBuffer"))))
+		ASSERT_CRASH(false);
+	if(FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+#pragma endregion
 
 #pragma region MRT_LUT
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_Lut"), TEXT("RT_Lut"))))
@@ -1037,9 +961,6 @@ HRESULT CRenderer::Ready_SubResource()
 	m_pSubResource = CRendererSubResource::Create(m_pDevice, m_pContext);
 	ASSERT_CRASH(m_pSubResource);
 
-	m_pSFX_Hub = CSFX_Hub::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
-	ASSERT_CRASH(m_pSFX_Hub);
-
 	return S_OK;
 }
 
@@ -1091,8 +1012,7 @@ void CRenderer::Free()
 	Safe_Release(m_pShader);
 	Safe_Release(m_pVIBuffer);
 	Safe_Release(m_pSubResource);
-	Safe_Release(m_pSFX_Hub);
-
+	
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);

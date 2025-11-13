@@ -58,14 +58,16 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeOut.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeIn.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeOut.json",
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeIn.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeIn.json",
+
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_Initialize.json",
     };
     Load_Animations(vecAnimFilePaths);
 
-
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
-	
+	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_Initialize");
 
+	
     return S_OK;
 }
 
@@ -115,6 +117,16 @@ void CUI_HUD::Late_Update(_float fTimeDelta)
 void CUI_HUD::Render()
 {
     //__super::Render();                      // Nothing. �����׷� �߰��� �� ���� ���������� �˾Ƽ� �ڽĵ���� Render ����
+}
+
+void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	// 단순히, 보스 정보를 1회성으로 할당함.
+	m_pCurBossHP		= pCurBossHP;
+	m_pCurBossSA		= pCurBossSA;
+	m_pGroggyLeftRatio	= pGroggyLeftRatio;
+	m_pIsGroggy			= pIsGroggy;
+	m_strMonsterKey		= pMonsterKey;
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -888,25 +900,73 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 {
-    //if (pBoss == nullptr)
-    //    return;
-    
+	// boss hitpoint & superarmor
+	_float	fBossHP		= 0.f;
+	_float	fBossBackHP = 0.f;
+	_float	fBossMaxHP	= 1.f;
+	
+	_float	fBossSA		= 0.f;
+    _float	fBossBackSA = 0.f;
+    _float	fBossMaxSA	= 1.f;
+    _bool	isSABreak	= false;
+
+	if (m_isOn_BossStatus)
+	{
+		//fBossHP		= *m_pCurBossHP;
+		//fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
+		//fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
+		//
+		//isSABreak	= *m_pIsGroggy;
+		//
+		//if (!isSABreak)
+		//{
+		//	fBossSA = *m_pCurBossSA;
+		//	fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
+		//	fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		//}
+		//else
+		//{
+		//	fBossSA = *m_pGroggyLeftRatio;
+		//	fBossMaxSA = 1.f;
+		//	fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		//}
+		//
+		//fBossSA		= *m_pCurBossSA;
+		//fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
 
 
-    // ksta : ���߿� ���� ���� ���յǸ� �ű��κ��� �޾ƿ� ����
-    static _float fBossHP = { 10000.f };            // boss hitpoint
-    static _float fBossBackHP = fBossBackHP;
-    const _float fBossMaxHP = { 10000.f };
-    
-    static _float fBossSA = { 4000.f };             // boss superarmor
-    static _float fBossBackSA = fBossSA;
-    const _float fBossMaxSA = { 4000.f };
-    static _bool isSABreak = false;
+		 fBossHP = { 10000.f };            // boss hitpoint
+		 fBossBackHP = fBossBackHP;
+		fBossMaxHP = { 10000.f };
+		
+		 fBossSA = { 4000.f };             // boss superarmor
+		 fBossBackSA = fBossSA;
+		fBossMaxSA = { 4000.f };
+		isSABreak = false;
+
+	}
+
+#pragma region old 
 
 
+	//if (pBoss == nullptr)
+	//    return;
 
 
-    static _bool isHit = false;
+	//static _float fBossHP = { 10000.f };            // boss hitpoint
+	//static _float fBossBackHP = fBossBackHP;
+	//const _float fBossMaxHP = { 10000.f };
+	//
+	//static _float fBossSA = { 4000.f };             // boss superarmor
+	//static _float fBossBackSA = fBossSA;
+	//const _float fBossMaxSA = { 4000.f };
+	//static _bool isSABreak = false;
+
+#pragma endregion
+
+	
+	
+	//static _bool isHit = false;
     static _float fHPReduceLeftTime = 0.f;
 
     _float fBossHPRatio = fBossHP / fBossMaxHP;
@@ -914,6 +974,8 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     static _float fBossHPBackRatio = fBossHPRatio;
     static _float fBossSABackRatio = fBossSARatio;
 
+
+	// Colors
     const _float4 vHPColor1         = { 1.f, .7f, .1f, 1.f };
     const _float4 vHPColor2         = { 1.f, .2f, .0f, 1.f };
     const _float4 vHPBackColor1     = { .8f, .8f, .8f, 1.f };
@@ -925,10 +987,11 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
     const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
 
-    const auto targetUI = Find_ChildObject(L"Inst_BossHPBar");
-    const auto targetSAUI = Find_ChildObject(L"Inst_BossSABar");
+    const auto targetUI		= Find_ChildObject(L"Inst_BossHPBar");
+    const auto targetSAUI	= Find_ChildObject(L"Inst_BossSABar");
 
 
+	// Back Guage
     if (fHPReduceLeftTime > 0)
     {
         _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // ü�� ���� ����
@@ -962,27 +1025,30 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     }
 
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
-    {
-        if (fBossHP == 0) fBossHP = fBossMaxHP;
-        if (fBossSA == 0) fBossSA = fBossMaxSA;
-        isHit = true;
-    }
 
-    if (isHit == true)
-    {
-        _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
-        _float fRandSADamage = fRandDamage * 0.8f;
 
-        // HP�� ��� ����
-        fBossHP -= fRandDamage;
-        fBossSA -= fRandSADamage;
 
-        if (fBossHP < 0) fBossHP = 0;
-        if (fBossSA < 0) fBossSA = 0;
-
-        fHPReduceLeftTime = fHPReduceTime;
-    }
+    //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
+    //{
+    //    if (fBossHP == 0) fBossHP = fBossMaxHP;
+    //    if (fBossSA == 0) fBossSA = fBossMaxSA;
+    //    isHit = true;
+    //}
+	//
+    //if (isHit == true)
+    //{
+    //    _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
+    //    _float fRandSADamage = fRandDamage * 0.8f;
+	//
+    //    // HP�� ��� ����
+    //    fBossHP -= fRandDamage;
+    //    fBossSA -= fRandSADamage;
+	//
+    //    if (fBossHP < 0) fBossHP = 0;
+    //    if (fBossSA < 0) fBossSA = 0;
+	//
+    //    fHPReduceLeftTime = fHPReduceTime;
+    //}
 
     // change
     vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
@@ -1017,7 +1083,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     targetUI->Set_VariantUIDesc(tVariantDesc);
     targetSAUI->Set_VariantUIDesc(tVariantDescSA);
 
-    isHit = false;
+    //isHit = false;
 
 
 

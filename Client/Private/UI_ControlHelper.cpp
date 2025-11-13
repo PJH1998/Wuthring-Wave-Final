@@ -43,34 +43,71 @@ CCustom_UI* CUI_ControlHelper::Find_ChildUI(_wstring strRootUIName, _wstring str
 
 HRESULT CUI_ControlHelper::HUD_FadeOut()
 {
-	vector<HRESULT> vecHr;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
 
-	for (auto hr : vecHr)
-		if (hr == E_FAIL) return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
 
-	return S_OK;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
+
+	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+	//	return E_FAIL;
 }
 
 HRESULT CUI_ControlHelper::HUD_FadeIn()
 {
-	vector<HRESULT> vecHr;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
 
-	for (auto hr : vecHr)
-		if (hr == E_FAIL) return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
+
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
+
+	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+	//	return E_FAIL;
 
 	return S_OK;
+}
+
+HRESULT CUI_ControlHelper::HUD_FadeOut_BossHPBar()
+{
+	if (FAILED(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeOut")))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CUI_ControlHelper::HUD_FadeIn_BossHPBar()
+{
+	if (FAILED(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeIn")))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+void CUI_ControlHelper::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	CUI_HUD* pTargetUI = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_HUD"));
+	pTargetUI->Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
+}
+
+void CUI_ControlHelper::HUD_Toggle_BossStatusUI(_bool isOn)
+{
+	if (isOn)	HUD_FadeIn_BossHPBar();
+	else		HUD_FadeOut_BossHPBar();
+
+	CUI_HUD* pTargetUI = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_HUD"));
+	pTargetUI->Toggle_BossStatusUI(isOn);
 }
 
 void CUI_ControlHelper::Render_InteractUI(_wstring strText)
@@ -80,43 +117,25 @@ void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
 
-	// 글자도 넣어야 함
-	// 그냥 만들어만 두고, 커스텀UI로써 이거 하위로 집어넣으면 될 것 같은데? 아닌가?
 
-	// ksta : 마저 제작 필요
+	auto attacher = Find_RootUI(L"UI_Interact")->Find_ChildObject(L"Root_Interact_Multiplier");
 
-	auto attacher = Find_RootUI(L"UI_Interact");
-	auto attacherDesc = attacher->Get_UIDesc();
-	
-	// 이미 텍스트 가지고있음?
-	_bool isTextExist = attacher->Find_ChildObject(L"UI_Text_Interact") != nullptr;
+	CCustom_UI* pFont = attacher->Find_ChildObject(L"UI_Text_Interact");
 
-	if (!isTextExist)
-	{	// 없다 -> 폰트 새로 만들고 넣음.
+	auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
+	textDesc.strText = strText;
+	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
+}
 
-		CCustom_UI* pFont = m_pGameSystem->Create_FontToScreen(
-			_float2{ g_iWinSizeX / 2.f + 200.f, g_iWinSizeY / 2.f - 50.f },
-			strText,	// 상호작용 글씨
-			TEXT_COLOR_TYPE::TT_NORMAL,
-			0.4f,
-			L"UI_Text_Interact"
-		);
+_bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
+{
+	// UI_Interact 가 Root UI, 내부적으로 Interact_Normal 커스텀UI를 통해 엔터/호버 등 이벤트를 처리함
+	CCustom_UI* pRootUI = Find_RootUI(L"UI_Interact"); //->Find_ChildObject(L"Interact_Normal");
 
-		auto fontDesc = pFont->Get_UIDesc();
-		attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
-		attacher->Add_Child(pFont);
-		fontDesc.pParentObject = Find_RootUI(L"UI_Interact");
-		pFont->Set_UIDesc(fontDesc);
-	}
-	else
-	{	// 있다 -> 기존 폰트의 텍스트만 변경
+	if (pRootUI == nullptr || pRootUI->IsActivate() == false)
+		return false; // 없는데!
 
-		CCustom_UI* pFont = attacher->Find_ChildObject(L"UI_Text_Interact");
-
-		auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
-		textDesc.strText = strText;
-		static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
-	}
+	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
 }
 
 CUI_ControlHelper* CUI_ControlHelper::Create()

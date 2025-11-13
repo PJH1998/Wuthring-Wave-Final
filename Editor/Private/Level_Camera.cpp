@@ -12,6 +12,8 @@
 
 #include "Sequencer.h"
 
+#include "SQ_Camera_Edit.h"
+
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -80,6 +82,11 @@ void CLevel_Camera::Ready_Prototype()
 	{
 		CRASH("Failed Load AnimMesh Shader");
 	}
+
+	// Sequence Item
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"),
+		CSQ_Camera_Edit::Create(m_pDevice, m_pContext))))
+		CRASH("Camera");
 }
 
 void CLevel_Camera::Ready_Light()

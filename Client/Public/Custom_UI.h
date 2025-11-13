@@ -122,6 +122,7 @@ public:
 	_bool					Check_OnInteract(_wstring strChildName, _uint iEventInteractType, _uint iInstanceIndex = 0);
 	
 public:
+	_float4x4&				Get_CombinedMatrix() { return m_CombinedWorldMatrix; }
 	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
 	void					Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom = nullptr);
 private:

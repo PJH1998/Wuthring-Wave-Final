@@ -373,6 +373,7 @@ struct VS_OUT_OUTLINE
 {
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
 };
 
 VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
@@ -407,8 +408,8 @@ VS_OUT_OUTLINE VS_OUTLINE(VS_IN In)
     vector vOutLinePos = vViewPos + (vViewNormal * g_fOutLineRadius);
     
     Out.vPosition = mul(float4(vOutLinePos), g_ProjMatrix);
-    
     Out.IsDraw = true;
+    Out.vProjPos = Out.vPosition;
     
     return Out;
 }
@@ -417,11 +418,13 @@ struct PS_IN_OUTLINE
 {
     float4 vPosition : SV_POSITION;
     bool IsDraw : TEXCOORD0;
+    float4 vProjPos : TEXCOORD1;
 };
 
 struct PS_OUT_OUTLINE
 {
     float4 vColor : SV_TARGET0;
+    float4 vDepth : SV_TARGET1;
 };
 
 PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
@@ -429,7 +432,11 @@ PS_OUT_OUTLINE PS_OUTLINE(PS_IN_OUTLINE In)
     PS_OUT_OUTLINE Out = (PS_OUT_OUTLINE) 0;
 
     if (In.IsDraw)
+    {
         Out.vColor = g_vOutLineColor;
+        Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+        Out.vDepth.y = In.vProjPos.w;
+    }
     else
         discard;
         
