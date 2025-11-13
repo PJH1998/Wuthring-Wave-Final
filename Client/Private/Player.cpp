@@ -691,7 +691,16 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 		break;
         case CHARACTERTYPE::GALBRENA:
 		{
-			
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::GALBRENA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
+
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
 		}
             break;
 	

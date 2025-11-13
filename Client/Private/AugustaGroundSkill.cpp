@@ -347,8 +347,6 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 				return;
 			}
 		}
-
-  
     }
 
 
@@ -397,7 +395,7 @@ void CAugustaGroundSkill::Check_StateTransition(_float fTimeDelta)
 }
 void CAugustaGroundSkill::SetUp_Animations()
 {
-    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 65.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_HACK), "Skill_Hack", 1.f, 45.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_STRIKE), "Skill_Strike", 1.f, 30.f);
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.2f, 15.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.2f, 25.f, 1.2f);

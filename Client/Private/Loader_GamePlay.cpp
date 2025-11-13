@@ -55,6 +55,9 @@
 #include "RoverDarkScythe.h"
 #include "Rover.h"
 
+// Galbrena
+#include "Galbrena.h"
+
 // Player
 #include "Player.h"
 #pragma endregion
@@ -76,6 +79,7 @@ HRESULT CLoader_GamePlay::Initialize()
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
@@ -366,6 +370,96 @@ HRESULT CLoader_GamePlay::Load_Rover()
 		, wstrDarkScytheTag
 		, CRoverDarkScythe::Create(m_pDevice, m_pContext))))
 		CRASH("Prototype Create Failed");
+#pragma endregion
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Galbrena()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Galbrena";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CGalbrena::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+#pragma region Parts
+	//wStrModelTag = L"Prototype_Component_Model_Rover_Sword";
+	//strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/Sword/Sword.dat";
+	//fSize = 0.01f;
+	////fSize = 0.0001f;
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	//// 1. 모델 초기화.
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+	//	CRASH("Prototype Create Failed");
+
+	//// 2. 객체 초기화.
+	//_wstring wstrSwordTag = TEXT("Prototype_GameObject_Rover_Sword");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+	//	, wstrSwordTag
+	//	, CRoverSword::Create(m_pDevice, m_pContext))))
+	//	CRASH("Prototype Create Failed");
+
+	//wStrModelTag = L"Prototype_Component_Model_Rover_DarkWing";
+	//strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkWing/DarkRoverWing.dat";
+	//fSize = 0.01f;
+	////fSize = 0.0001f;
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	//// 1. 모델 초기화.
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+	//	CRASH("Prototype Create Failed");
+
+	//// 2. 객체 초기화.
+	//_wstring wstrDrakWingTag = TEXT("Prototype_GameObject_Rover_DarkWing");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+	//	, wstrDrakWingTag
+	//	, CRoverDarkWing::Create(m_pDevice, m_pContext))))
+	//	CRASH("Prototype Create Failed");
+
+	//wStrModelTag = L"Prototype_Component_Model_Rover_DarkScythe";
+	//strFilePath = "../../Client/Bin/Resource/Model/Player/Rover/Weapon/DarkScythe/DarkScythe.dat";
+	//fSize = 0.01f;
+	////fSize = 0.0001f;
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	//// 1. 모델 초기화.
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+	//	CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+	//	CRASH("Prototype Create Failed");
+
+	//// 2. 객체 초기화.
+	//_wstring wstrDarkScytheTag = TEXT("Prototype_GameObject_Rover_DarkScythe");
+	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+	//	, wstrDarkScytheTag
+	//	, CRoverDarkScythe::Create(m_pDevice, m_pContext))))
+	//	CRASH("Prototype Create Failed");
+
 #pragma endregion
 
 	return S_OK;

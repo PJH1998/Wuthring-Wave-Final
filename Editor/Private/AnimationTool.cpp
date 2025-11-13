@@ -800,8 +800,12 @@ void CAnimationTool::RenderUI_ModelPrototype()
 
     ImGui::SameLine();
 
-    if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
-        Render_Model_Detail();
+#ifdef _DEBUG
+	if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
+		Render_Model_Detail();
+#endif // _DEBUG
+
+
 
     
 }
@@ -897,6 +901,7 @@ void CAnimationTool::RenderUI_AnimationList()
 
 
 
+#ifdef _DEBUG
 
 void CAnimationTool::Render_Model_Detail()
 {
@@ -962,6 +967,8 @@ void CAnimationTool::Render_Model_Detail()
 				return;
 			}
 			Desc.pParentActor = pActor;
+
+
 			Desc.pParentTransform = pActor->Get_Transform();
 			Desc.strBoneName = textBone;
 		}
@@ -1012,6 +1019,8 @@ void CAnimationTool::Render_Model_Detail()
 
     ImGui::EndChild();
 }
+
+#endif // _DEBUG
 
 void CAnimationTool::Render_Animation_Detail()
 {

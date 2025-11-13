@@ -27,7 +27,7 @@ public:
 		function<void(_uint, void*, const ContactManifold&)> CollisionCallback;
 		function<void(_uint, void*, const ContactManifold&, COLLISIONLAYER)> test;
 		TEXT_COLOR_TYPE		eDamageType;
-		_uint*				pCondition { nullptr };
+		ATTACKVOULME_DIR	eDir{};
 		_string				strEffectTag{};
 	}ATKVOLUME_DESC;
 

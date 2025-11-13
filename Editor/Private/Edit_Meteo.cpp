@@ -43,8 +43,12 @@ HRESULT CEdit_Meteo::Initialize_Clone(void* pArg)
 		event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
 		event.File.write(m_ModelName, Length);
 
+#ifdef _DEBUG
 		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
 			m_iShaderPassIndex = 0;
+#endif // _DEBUG
+
+		
 
 		event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
 		event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
@@ -112,9 +116,14 @@ void CEdit_Meteo::Update(_float fTimeDelta)
 #endif
 		//m_pModelCom = m_pModelComArray[m_iLODIndex];
 	}
+
+#ifdef _DEBUG
 	if (m_Test)
 		LerpPos(fTimeDelta);
 }
+#endif // _DEBUG
+
+
 
 void CEdit_Meteo::Late_Update(_float fTimeDelta)
 {

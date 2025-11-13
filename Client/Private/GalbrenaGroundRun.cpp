@@ -1,0 +1,327 @@
+﻿#include "ClientPch.h"
+#include "GalbrenaGroundRun.h"
+#include "Galbrena.h"
+#include "StateMachine.h"
+#include "GalbrenaState_Enum.h"
+
+HRESULT CGalbrenaGroundRun::Initialize(class CGameObject* pOwner)
+{
+    if (FAILED(CGroundState::Initialize(pOwner)))
+        return E_FAIL;
+
+    m_pGalbrena = dynamic_cast<CGalbrena*>(pOwner);
+    ASSERT_CRASH(m_pGalbrena);
+
+    Setup_Animations();
+    return S_OK;
+}
+
+
+
+void CGalbrenaGroundRun::OnEnter(void* pArg)
+{
+    CGroundState::OnEnter(pArg);
+
+    // 1. 복사본 context 받아오기.
+    const auto context = m_pGalbrena->TakeStateContext();
+
+    // 2. 복사본에서 필요한 값 읽기
+    EGalbrenaRunType eRunType = context.m_eRunType;
+
+    // 3. 값에 따른 상태 변경.
+    m_iCurrentAnimIdx = static_cast<_uint>(context.m_eRunType);
+
+    // 4. 현재 상태 초기화
+    State_Reset();
+
+    m_pGalbrena->Set_Gravity(true);
+
+	// 5. SFX Motion 시작.
+	m_pGalbrena->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+}
+
+void CGalbrenaGroundRun::OnUpdate(_float fTimeDelta)
+{
+    
+    CGroundState::OnUpdate(fTimeDelta);
+
+    // 0. 키입력 감지.
+    Handle_Input();
+
+    // 1. 애니메이션 갱신.
+    Update_RunAnimation(fTimeDelta);
+
+    // 2. 물리 체크.
+    Check_Physics(fTimeDelta);
+
+    // 3. 전환 제어
+    Check_StateTransition(fTimeDelta);
+
+    // 4. 현재  상태 초기화
+    State_Reset();
+    
+}
+
+void CGalbrenaGroundRun::OnExit()
+{
+    CGroundState::OnExit();
+    m_pGalbrena->Set_Gravity(true);
+	m_fFallTime = 0.f;
+
+	m_pGalbrena->End_SFX();
+}
+
+void CGalbrenaGroundRun::Handle_Input()
+{
+    // 1. 방향 계산
+    m_eDir = m_pGalbrena->Calculate_Direction();
+
+	// Dash 키입력 체크.
+	m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+
+	m_States[HIT] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // HIT 상태인가?
+	m_States[DODGEABLE] = m_pGalbrena->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::DODGEABLE));
+
+	m_States[DODGE] = m_States[DODGEABLE] && m_States[DASH]; // Dodge 가능하면서 Dash 키 누르면?
+
+	if (m_States[DODGE] || m_States[HIT]) // 모든 조건 상위 조건
+		return;
+	m_States[FLY] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::T));
+
+    // 키 입력.
+    m_States[JUMP] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::SPACE));
+    m_States[MOVE] = m_pGalbrena->Check_AnyInput(m_iMoveKey); // WASD 키입력 체크.
+    m_States[DASH] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::RB));
+
+    m_States[RUN_U] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::W));
+    m_States[RUN_D] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::S));
+    m_States[RUN_L] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::A));
+    m_States[RUN_R] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::D));
+    
+
+    m_States[SKILL_E] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::E));
+    m_States[SKILL_Q] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::Q));
+    m_States[SKILL_R] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::R));
+
+
+    // DASH보다 우선순위 높음.
+    m_States[SPRINT_F] = m_States[MOVE] && m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LSHIFT));
+
+    // 공격 상태가 아니라 공격 판정 상태로 전달.
+    m_States[ATTACK] = m_pGalbrena->Check_AnyInput(ENUM_CLASS(KEYINPUT::LB));
+
+    // 상태에 따라 속도 다르게.
+    m_fSpeed = m_States[SPRINT_F] ? 1.2f : 0.7f;
+
+	// Burst인지 체크
+	m_States[BURST] = m_pGalbrena->Check_AnyConidtion_FromAbility(ENUM_CLASS(UI_GALBRENA_CONDITION::BURST_ACTIVE));
+
+	/*if (m_States[BURST])
+		m_States[BURST_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Ex_Skill02"));
+	else
+		m_States[DEFAULT_E] = m_States[SKILL_E] && (SKILL_STATE::READY == m_pGalbrena->Check_Skill("Skill02"));*/
+
+	// 궁 상태 확인하기.
+	m_States[ULTI] = m_States[SKILL_R] && (m_pGalbrena->Get_Cost(COST_TYPE::COST2) >= m_pGalbrena->Get_MaxCost());
+}
+
+
+void CGalbrenaGroundRun::Update_RunAnimation(_float fTimeDelta)
+{
+    // 0. 애니메이션 실행부터
+    CCharacterState::Play_Animation(m_pGalbrena, fTimeDelta);
+
+
+    EGalbrenaRunType eRunType = static_cast<EGalbrenaRunType>(m_iCurrentAnimIdx);
+    // 1. 회전 및 이동.
+    if (m_pGalbrena->Is_LockOn())
+    {
+        if (eRunType == EGalbrenaRunType::SPRINT_F || eRunType == EGalbrenaRunType::STOP_SPRINT_L)
+            m_pGalbrena->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
+        else 
+            // 1. WASD 입력에 따른 8방향 이동
+            m_pGalbrena->Move_LockOn_8Way(m_eDir, fTimeDelta, m_fSpeed);
+    }
+    else 
+        m_pGalbrena->Move_By_Camera_Direction_8Way(m_eDir, fTimeDelta, m_fSpeed);
+
+
+}
+
+void CGalbrenaGroundRun::Check_Physics(_float fTimeDelta)
+{
+    // Wall인지?
+    m_States[WALL] = m_pGalbrena->Check_ClimbableWall(&m_vWallNormal);
+
+	// 1. Jolt의 IsSupported()를 호출하여 땅의 Normal 벡터(m_vLandNormal)를 갱신합니다.
+	m_States[LAND] = m_pGalbrena->Is_LandCollider(&m_vLandNormal);
+	
+	if (m_States[LAND])
+	{
+		m_fFallTime = 0.f;
+	}
+	else if (!m_States[LAND])
+	{
+		m_fFallTime += fTimeDelta;
+
+		if (m_fFallTime >= 0.2f)
+			m_States[FALL] = true;
+	}
+}
+
+
+void CGalbrenaGroundRun::Check_StateTransition(_float fTimeDelta)
+{
+ 
+    EGalbrenaRunType eRunType = static_cast<EGalbrenaRunType>(m_iCurrentAnimIdx);
+    _float3 vNormal = {}; // 벽타기 전환 용도 Normal
+    // 이 조건은 추후 디테일 잡아보기.
+
+
+	// 뛰다가 Dash
+	//if (m_States[DASH])
+	//{
+	//	if (m_States[RUN_D])
+	//	{
+	//		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_B;
+	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//	else
+	//	{
+	//		m_pGalbrena->GetStateContextForWrite().m_eDashType = EGalbrenaDashType::MOVE_F;
+	//		m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::DASH)); // 상위, 하위 상태
+	//		return;
+	//	}
+	//}
+
+    // Dash 보다 우선순위 높음.
+    if (m_States[SPRINT_F])
+    {
+        m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::SPRINT_F);
+        return;
+    }
+
+   
+
+    if (m_States[MOVE])
+    {
+        // 만약에 현재 상태가 Sprint 였으면? => 애니메이션 변경을 하지 않음.
+        if (m_pGalbrena->Is_LockOn())
+        {
+            if (m_States[RUN_U])
+            {
+                if (m_States[RUN_L])
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_LF);
+                else if (m_States[RUN_R])
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_RF);
+                else
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
+            }
+            else if (m_States[RUN_D])
+            {
+                if (m_States[RUN_L])
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_LB);
+                else if (m_States[RUN_R])
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_RB);
+                else
+                    m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_B);
+            }
+            else if (m_States[RUN_L])
+                m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_LF);
+            else if (m_States[RUN_R])
+                m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_RF);
+
+            return;
+        }
+        // 이동 값이 들어왔는데 Stop Run 상태라면?
+        if (eRunType == EGalbrenaRunType::STOP_RUN_L || eRunType == EGalbrenaRunType::SPRINT_F)
+        {
+            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
+            return;
+        }
+		else
+		{
+			m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::RUN_F);
+			return;
+		}
+    }
+
+    // 이동 입력 값이 안들어왔다면?
+    if (!m_States[MOVE])
+    {
+        // 현재 상태가 Sprint 였다면?
+        if (eRunType == EGalbrenaRunType::SPRINT_F)
+        {
+            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::STOP_SPRINT_L);
+            return;
+        }
+
+        // 현재 상태가 STOP_RUN이 아니라면? => STOP RUN
+        if (eRunType != EGalbrenaRunType::STOP_RUN_L)
+        {
+			m_fTrackPosition = 0.f;
+            m_iCurrentAnimIdx = ENUM_CLASS(EGalbrenaRunType::STOP_RUN_L);
+            return;
+        }
+        // Stop Run 이면서 애니메이션 재생이 끝났다면?.
+        if ((eRunType == EGalbrenaRunType::STOP_RUN_L || eRunType == EGalbrenaRunType::STOP_SPRINT_L) && m_IsAnimationEnd)
+        {
+			
+            m_pGalbrena->GetStateContextForWrite().m_eIdleType = EGalbrenaIdleType::STAND1;
+            m_pGalbrena->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EGalbrenaGroundState::IDLE));
+            return;
+        }
+    }
+
+    
+}
+
+
+
+void CGalbrenaGroundRun::Setup_Animations()
+{
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_B), "Run_B", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_F), "Run_F", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LB), "Run_LB", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_LF), "Run_LF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RB), "Run_RB", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_RF), "Run_RF", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_BASEPOSE), "Run_BasePose", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_POSE_F), "Run_Pose_F", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_POSE_L), "Run_Pose_L", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_POSE_R), "Run_Pose_R", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::RUN_TURNBACK), "Run_Turnback", 1.f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::SPRINT_F), "Sprint_F", 1.35f, 0.f);
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::STOP_RUN_L), "Stop_Run_L", 1.f, 0.f); // 왼발로 멈추기.
+    CState::Add_Animations(ENUM_CLASS(EGalbrenaRunType::STOP_SPRINT_L), "Stop_Sprint_L", 1.f, 0.f); // 왼발로 멈추기
+}
+
+void CGalbrenaGroundRun::State_Reset()
+{
+    for (_uint i = 0; i < RUNSTATE::END; ++i)
+    {
+        m_States[i] = false;
+    }
+}
+
+
+
+CGalbrenaGroundRun* CGalbrenaGroundRun::Create(class CGameObject* pOwner)
+{
+    CGalbrenaGroundRun* pInstance = new CGalbrenaGroundRun();
+
+    if (FAILED(pInstance->Initialize(pOwner)))
+    {
+        Safe_Release(pInstance);
+        MSG_BOX("Failed to Create : CGalbrenaGroundRun");
+        return nullptr;
+    }
+
+    return pInstance;
+}
+
+void CGalbrenaGroundRun::Free()
+{
+    CGroundState::Free();
+}
