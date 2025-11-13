@@ -50,8 +50,9 @@ private:
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
 	_float				m_fLifeTime{};
+	_float				m_fDelay{};
 	// Effect?
-
+	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};
 
 private:

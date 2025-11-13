@@ -71,10 +71,10 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Dummy();
 	//Ready_MonsterTest();
 
-	//Ready_HavocWarrior();
-	//Ready_ElectroPredator();
-	Ready_CoroSaurus();
-	//Ready_Spawner();
+	Ready_HavocWarrior();
+	Ready_ElectroPredator();
+	//Ready_CoroSaurus();
+	Ready_Spawner();
 
 
     Ready_Effect();
@@ -378,7 +378,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
 	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
-	//Projectile.wstrEffectTag = ;
+	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_Electro"), 15, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");

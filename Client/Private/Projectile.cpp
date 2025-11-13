@@ -24,6 +24,8 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
+	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_fDelay = 0.1f;
     return S_OK;
 }
 
@@ -40,6 +42,13 @@ void CProjectile::Update(_float fTimeDelta)
 	m_pTransformCom->Go_Straight(fTimeDelta);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (m_fDelay <= 0.f)
+	{
+		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
+		m_fDelay = 2.f;
+	}
+	else
+		m_fDelay -= fTimeDelta;
 }
 
 void CProjectile::Late_Update(_float fTimeDelta)
