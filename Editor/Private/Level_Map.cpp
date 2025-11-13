@@ -15,6 +15,7 @@
 #include"Mesh_Instance.h"
 #include"Edit_MonsterSpawnor.h"
 #include"Edit_Meteo.h"
+#include"Model_Streaming.h"
 
 _float3 CLevel_Map::m_vWorldPos = {};
 _float3 CLevel_Map:: m_vWorldDir = {};
@@ -371,16 +372,16 @@ void CLevel_Map::Menu_Model_Load()
 				}
 				else
 				{
-					CEdit_MapObject::MAP_LOAD Desc{};
-					_float4x4 DefaultMatrix{};
-					XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
-					Desc.WorldMatrix = &DefaultMatrix;
-					strcpy_s(Desc.ModelName, FileName);
-					Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
-					Desc.iLevel = m_iLevel;
+					//CEdit_MapObject::MAP_LOAD Desc{};
+					//_float4x4 DefaultMatrix{};
+					//XMStoreFloat4x4(&DefaultMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&m_vPickedPos)));
+					//Desc.WorldMatrix = &DefaultMatrix;
+					//strcpy_s(Desc.ModelName, FileName);
+					//Desc.eObjectType = static_cast<OBJECTTYPE>(m_eObjectType);
+					//Desc.iLevel = m_iLevel;
 
-					m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
-						, m_iLevel, TEXT("Layer_MapObject"), &Desc);
+					//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_MapObject")
+					//	, m_iLevel, TEXT("Layer_MapObject"), &Desc);
 				}
 			}
 
@@ -792,10 +793,10 @@ void CLevel_Map::Load_Objects()
     m_ModelPaths.clear();
 
     m_pPreViewObject = CEdit_PreViewModel::Create(m_pDevice, m_pContext);
-	m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
+	//m_FolderPath = "../../Client/Bin/Resource/Map/Asphodel_Barrens/";
 	//m_FolderPath = "../../Client/Bin/Resource/Map/Test/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/Logo/";
-	//m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
+	m_FolderPath = "../../Client/Bin/Resource/Map/The_False_Sovereign/";
 	//m_FolderPath= "../../Client/Bin/Resource/Map/";
 
     vector<_wstring> m_PrototypeNames;

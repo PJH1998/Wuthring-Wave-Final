@@ -68,7 +68,6 @@ void CModel_Manager::Update(_float fTimeDelta)
 			if (IndexOffSet == -1)
 				CRASH("Failed");
 
-			D3D11_MAPPED_SUBRESOURCE StagingDesc{};
 			m_pContext->Map(m_pStagingBuffer, 0, D3D11_MAP_WRITE, 0, &StagingDesc);
 			memcpy(StagingDesc.pData, Data.LoadData[i].IndexData.data(), IndexSize);
 			m_pContext->Unmap(m_pStagingBuffer, 0);
@@ -78,7 +77,6 @@ void CModel_Manager::Update(_float fTimeDelta)
 				0, IndexOffSet, 0, 0, m_pStagingBuffer, 0, &PoolBox);
 
 			SHARED_DATA_DESC Desc{};
-			Desc.eState = LOADED;
 			Desc.IndexOffset = IndexOffSet;
 			Desc.IndexSize = IndexSize;
 			Desc.NumIndices = Data.LoadData[i].iNumIndices;
@@ -179,7 +177,7 @@ void CModel_Manager::LoadData(CModel_Streaming* pModel,const _string& pFilePath,
 		//여기서 스테이징 버퍼에 올리고 버퍼풀에 올려야함.
 	{
 		lock_guard<mutex> lock(m_Mutex);
-		m_StagingData.push_back(Datas);
+		m_StagingData.push_back(move(Datas));
 	}
 
 }

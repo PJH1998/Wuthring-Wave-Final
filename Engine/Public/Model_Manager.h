@@ -9,7 +9,6 @@ public:
 	enum ModelLoadState { NOTLOADED, LOADING, LOADED };
 	
 	typedef struct tagModelDataDesc {
-		atomic<ModelLoadState> eState = { NOTLOADED };
 		_uint VertexOffset = {};
 		_uint IndexOffset = {};
 
