@@ -71,10 +71,10 @@ HRESULT CLevel_Test::Initialize()
 	//Ready_Dummy();
 	//Ready_MonsterTest();
 
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
+	Ready_CoroSaurus();
+	//Ready_Spawner();4
 
 
     Ready_Effect();
@@ -621,16 +621,21 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		switch (iInteractIndex)
 		{
 		case TEST_INTERACT0:
-			m_pGameSystem->Render_InteractUI(L"테스트하나");
+			m_pGameSystem->Show_InteractUI(L"테스트하나");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		case TEST_INTERACT1:
-			m_pGameSystem->Render_InteractUI(L"테스트둘");
+			m_pGameSystem->Show_InteractUI(L"테스트둘");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		}
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+		(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	{
+		m_pGameSystem->Hide_InteractUI(true);
 	}
 
 

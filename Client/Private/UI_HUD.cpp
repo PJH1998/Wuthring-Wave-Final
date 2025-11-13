@@ -1104,7 +1104,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     }
 
 
-	if (fTmpBossHP != fBossHP || fTmpBossSA != fBossSA)
+	if (fTmpBossHP > fBossHP || fTmpBossSA > fBossSA)
 	{
 		//isHit = true;
 		fHPReduceLeftTime = fHPReduceTime;
@@ -1112,7 +1112,9 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	}
 
 	if (!(fHPReduceLeftTime <= 0.01f))
-		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : "<< fHPReduceLeftTime << endl;
+	{
+		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+	}
 
 
     //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
