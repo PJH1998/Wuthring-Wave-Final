@@ -300,6 +300,7 @@ namespace Engine
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
+		ITEM_TYPE	eType = {};
 		_wstring	strItemTag;
 	}SEQUENCE_ITEM_INFO;
 

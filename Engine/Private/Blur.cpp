@@ -10,8 +10,6 @@ CBlur::CBlur(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 HRESULT CBlur::Initialize()
 {
 	m_iNumWeights = 5;
-	m_fIntensity = 0.25f;
-
 	if (FAILED(Ready_BlurWeights()))
 		return E_FAIL;
 
