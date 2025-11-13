@@ -72,20 +72,14 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 			pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
 }
 
-void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
+_bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 {
 	//처음 실행하면 True가 들어옴.
-	
+	if (m_IsUpdate)
+		return false;
+
 	//버튼을 누르고 딜레이시간 이후에 슬금슬금 올라가게.
 	m_SonoroRigidActive = !m_SonoroRigidActive;
-	
-	//이런 느낌으로 카메라 이벤트 실행.
-
-	//m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
-
-
-	//for (auto& pObject : m_NonSonoroObjects)
-	//	pObject-> Change_Collision_Layer(m_SonoroRigidActive);
 
 	for (auto& pObject : m_SonoroObjects)
 		pObject->Change_Collision_Layer(m_SonoroRigidActive);
@@ -108,6 +102,7 @@ void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 		m_SonoroRender = !m_SonoroRender;
 	}
 
+	return true;
 	//if (m_LastSonoroMode != IsSonoro)
 	//{
 	//	_float4 vCamPos = *m_pGameInstance->Get_CamPos();

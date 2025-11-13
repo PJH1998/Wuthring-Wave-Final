@@ -33,7 +33,7 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 	if (m_iTriggerIndex == 22)
 		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
-		m_Temp = true;
+		m_IsTriggered = true;
 			});
 	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 23)
 	{
@@ -56,10 +56,20 @@ void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
 	if (m_iTriggerIndex > 20)
 	{
-		if(m_Temp)
+		if(m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
-			m_Temp = !m_Temp;
+			m_IsTriggered = !m_IsTriggered;
+			m_bOnCoolDown = true;
+		}
+	}
+	if (m_bOnCoolDown)
+	{
+		m_fCoolDown += fTimeDelta;
+		if (m_fCoolDown >= 6.f)
+		{
+			m_bOnCoolDown = !m_bOnCoolDown;
+			m_fCoolDown = 0.f;
 		}
 	}
 }
@@ -101,7 +111,7 @@ void CTrigger_Box::Collision_Enter()
 
 void CTrigger_Box::Collision_During()
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN)
+	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
 		if (!m_pGameSystem->IsSonoro())
 		{
@@ -143,10 +153,10 @@ void CTrigger_Box::Register_Trigger()
 
 		case 21:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_Temp = true;
+			m_IsTriggered = true;
 			break;
 		case 121:
-			m_Temp = true;
+			m_IsTriggered = true;
 			break;
 		case 22:
 			break;

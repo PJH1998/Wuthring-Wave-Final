@@ -46,7 +46,9 @@ private:
 private:
 	vector< TriggerCallback> m_Functions;
 	_uint m_iTriggerIndex = {};
-	_bool m_Temp = { false };
+	_bool m_IsTriggered = { false };
+	_bool   m_bOnCoolDown = { false }; 
+	_float  m_fCoolDown = { 0.f };     
 public:
 	static CTrigger_Box* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;
