@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "SQ_Item_Edit.h"
+#include "Camera.h"
 
 NS_BEGIN(Editor)
 
-class CSQ_Camera_Edit final : public CSQ_Item_Edit
+class CSQ_Camera_Edit final : public CCamera
 {
 private:
 	explicit CSQ_Camera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

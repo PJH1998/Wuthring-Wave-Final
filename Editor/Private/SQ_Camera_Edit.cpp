@@ -2,12 +2,12 @@
 #include "SQ_Camera_Edit.h"
 
 CSQ_Camera_Edit::CSQ_Camera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CSQ_Item_Edit { pDevice, pContext }
+	: CCamera{ pDevice, pContext }
 {
 }
 
 CSQ_Camera_Edit::CSQ_Camera_Edit(const CSQ_Camera_Edit& Prototype)
-	: CSQ_Item_Edit { Prototype }
+	: CCamera{ Prototype }
 {
 }
 

@@ -61,7 +61,7 @@ struct RampEdit : public ImCurveEdit::Delegate
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::ACTOR) == iType)
 		{
-			SQ_ACTOR_DATA ActorData = {};
+			//SQ_ACTOR_DATA ActorData = {};
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::SCENE) == iType)
 		{
@@ -306,10 +306,19 @@ private:
 	_float								m_fTrackPerSec = {};
 	_float								m_fTrackAcc = {};
 
+	_bool								m_isSaveSequence = { false };
+	_bool								m_isLoadSequence = { false };
+
 private:
 	// Sequence
 	void								Play(_float fTimeDelta);
 	void								Sequence_System(_float fTimeDelta);
+	void								Save_Sequence();
+	void								Load_Sequence();
+
+	void								Save_Scene(json& Output, SEQUENCE_ITEM& item);
+	void								Load_Scene();
+
 	// Selectable Item
 	void								Selectable_Item();
 	void								Sorting_Item();

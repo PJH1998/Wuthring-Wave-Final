@@ -309,6 +309,10 @@ namespace Engine
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
+		tagSequenceItemData(_float _fStartFrame, _float _fEndFrame)
+			: fStartFrame { _fStartFrame }, fEndFrame { _fEndFrame }
+		{ }
+		virtual ~tagSequenceItemData() {}
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
 

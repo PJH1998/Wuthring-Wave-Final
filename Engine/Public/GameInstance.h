@@ -164,6 +164,7 @@ public:
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, class CCamera* pCamera);
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
+	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
 	void				Set_CurrentCamera_Far(_float fFar);
@@ -171,7 +172,7 @@ public:
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc);
 	void				Play_Sequence(const _wstring& strSequenceTag);
 #pragma endregion
 

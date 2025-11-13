@@ -51,6 +51,20 @@ HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCa
     return S_OK;
 }
 
+HRESULT CCamera_Manager::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg)
+{
+	CCamera* pCamera = Find_Camera(iLevelID, strCameraTag);
+	if (nullptr == pCamera)
+		return E_FAIL;
+
+	Safe_Release(m_pMainCamera);
+	m_pMainCamera = pCamera;
+	m_pMainCamera->Reset(XMMatrixIdentity(), pArg);
+	Safe_AddRef(m_pMainCamera);
+
+	return S_OK;
+}
+
 _float CCamera_Manager::Get_CurrentCamera_Near()
 {
     if (nullptr == m_pMainCamera || true == m_isFree)

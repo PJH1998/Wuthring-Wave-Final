@@ -169,6 +169,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	
 	m_pDecal_Manager->Update(fTimeDelta);
 
+	m_pSequence_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 
@@ -577,6 +578,10 @@ HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCame
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
 }
+HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg)
+{
+    return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag, pArg);
+}
 _float CGameInstance::Get_CurrentCamera_Near()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Near();
@@ -596,7 +601,7 @@ void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }
