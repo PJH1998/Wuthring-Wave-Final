@@ -222,7 +222,7 @@ PS_OUT PS_MAIN(PS_IN In)
     float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
     Out.vDiffuse *= g_vColor;
-       
+    
     Out.vDiffuse.a *= Alpha;
     
     if (Out.vDiffuse.a < 0.2f)
