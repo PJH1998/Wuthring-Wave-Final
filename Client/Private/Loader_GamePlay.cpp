@@ -35,6 +35,7 @@
 #include "UI_HUD.h"
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
+#include "Mouse.h"
 #pragma endregion
 
 
@@ -480,6 +481,11 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"),
+		CMouse::Create(m_pDevice, m_pContext))))
+		CRASH("Mouse");
 
 	return S_OK;
 }

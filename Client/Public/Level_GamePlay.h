@@ -25,6 +25,7 @@ private:
 	void			Ready_Effect();
 	void			Ready_Skybox();
 	void			Ready_UI();
+	void			Ready_Mouse();
 
 #ifdef _DEBUG
 private:
