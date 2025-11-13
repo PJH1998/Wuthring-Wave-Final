@@ -43,34 +43,73 @@ CCustom_UI* CUI_ControlHelper::Find_ChildUI(_wstring strRootUIName, _wstring str
 
 HRESULT CUI_ControlHelper::HUD_FadeOut()
 {
-	vector<HRESULT> vecHr;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0));
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
 
-	for (auto hr : vecHr)
-		if (hr == E_FAIL) return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
+
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+		return E_FAIL;
+
+	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(0)))
+	//	return E_FAIL;
 
 	return S_OK;
 }
 
 HRESULT CUI_ControlHelper::HUD_FadeIn()
 {
-	vector<HRESULT> vecHr;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
 
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorR_PartyFrame")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
-	vecHr.push_back(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1));
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorB_Status")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
 
-	for (auto hr : vecHr)
-		if (hr == E_FAIL) return E_FAIL;
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorA")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
+
+	if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorRB_SkillIcons")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+		return E_FAIL;
+
+	//if (FAILED (static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(1)))
+	//	return E_FAIL;
 
 	return S_OK;
+}
+
+HRESULT CUI_ControlHelper::HUD_FadeOut_BossHPBar()
+{
+	if (FAILED(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeOut")))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+HRESULT CUI_ControlHelper::HUD_FadeIn_BossHPBar()
+{
+	if (FAILED(static_cast<CAnimator_UI*>(Find_ChildUI(L"UI_HUD", L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_FadeIn")))
+		return E_FAIL;
+
+	return S_OK;
+}
+
+void CUI_ControlHelper::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	CUI_HUD* pTargetUI = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_HUD"));
+	pTargetUI->Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
+}
+
+void CUI_ControlHelper::HUD_Toggle_BossStatusUI(_bool isOn)
+{
+	if (isOn)	HUD_FadeIn_BossHPBar();
+	else		HUD_FadeOut_BossHPBar();
+
+	CUI_HUD* pTargetUI = dynamic_cast<CUI_HUD*>(Find_RootUI(L"UI_HUD"));
+	pTargetUI->Toggle_BossStatusUI(isOn);
 }
 
 void CUI_ControlHelper::Render_InteractUI(_wstring strText)

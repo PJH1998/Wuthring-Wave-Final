@@ -280,6 +280,9 @@
     <Filter Include="03. GameObject\Camera\Scene">
       <UniqueIdentifier>{7828bcb1-9620-4f71-a71f-17f6ecc3a739}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Mouse">
+      <UniqueIdentifier>{4ed26a0d-1dc4-40c2-9cae-cc31a19574eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -716,6 +719,9 @@
     <ClInclude Include="..\Public\SceneCamera.h">
       <Filter>03. GameObject\Camera\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Mouse.h">
+      <Filter>03. GameObject\Mouse</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1123,6 +1129,9 @@
     <ClCompile Include="..\Private\SceneCamera.cpp">
       <Filter>03. GameObject\Camera\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\Mouse.cpp">
+      <Filter>03. GameObject\Mouse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1170,6 +1179,9 @@
       <Filter>03. GameObject\UI\_Shader</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

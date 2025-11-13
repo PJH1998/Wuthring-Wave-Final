@@ -24,7 +24,7 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
-	m_fIntensityBoost = 2.f;
+	m_fDefaultIntensityBoost = 2.f;
 
 	if (FAILED(Ready_SFX()))
 		return E_FAIL;
@@ -37,10 +37,11 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 void CSFX_Hub::Update_SFX(_float fTimeDelta)
 {
+	Update_Toggle(fTimeDelta);
 	Update_ToggleIntensity(fTimeDelta);
 }
 
-HRESULT CSFX_Hub::Begin_SFX_Toggle(SFX_TOGGLE eType)
+HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
 	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
 	if (nullptr == pSFX)
@@ -48,16 +49,15 @@ HRESULT CSFX_Hub::Begin_SFX_Toggle(SFX_TOGGLE eType)
 
 	m_IsToggleOff = false;
 	
+	m_fToggleDuration = fDuration;
+
+	m_fIntensityBoost = m_fToggleDuration == 0.f ? m_fDefaultIntensityBoost : min((1.f / (m_fToggleDuration * 0.2f)), m_fDefaultIntensityBoost);
+
 	m_fToggleIntensity = 0.f;
 
 	m_pCurrentSFX = pSFX;
 
 	return S_OK;
-}
-
-HRESULT CSFX_Hub::Begin_SFX_Time(SFX_TOGGLE eType, _float fTime)
-{
-	return E_NOTIMPL;
 }
 
 HRESULT CSFX_Hub::End_SFX()
@@ -66,6 +66,8 @@ HRESULT CSFX_Hub::End_SFX()
 		return S_OK;
 
 	m_IsToggleOff = true;
+	m_fToggleDuration = 0.f;
+	m_fCurrentToggleDuration = 0.f;
 
 	return S_OK;
 }
@@ -90,6 +92,14 @@ HRESULT CSFX_Hub::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader*
 
 	return pSFX->Render(pVIBuffer, pShader);
 }
+
+#ifdef _DEBUG
+void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
+{
+	CMotionBlur* pSFX = static_cast<CMotionBlur*>(Find_SFX(SFX_TYPE::MOTION));
+	pSFX->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
+}
+#endif
 
 CSFX* CSFX_Hub::Find_SFX(SFX_TYPE eType)
 {
@@ -234,6 +244,16 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 #pragma endregion
 
 	return S_OK;
+}
+
+void CSFX_Hub::Update_Toggle(_float fTimeDelta)
+{
+	if (m_fToggleDuration == 0.f)
+		return;
+
+	m_fCurrentToggleDuration += fTimeDelta;
+	if (m_fCurrentToggleDuration >= m_fToggleDuration)
+		End_SFX();
 }
 
 void CSFX_Hub::Update_ToggleIntensity(_float fTimeDleta)

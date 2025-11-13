@@ -174,6 +174,25 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
+//HRESULT CGameSystem::HUD_FadeOut_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeOut_BossHPBar();
+//}
+//HRESULT CGameSystem::HUD_FadeIn_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeIn_BossHPBar();
+//}
+
+void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	return m_pUI_ControlHelper->HUD_Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
+}
+
+void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
+{
+	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
+}
+
 void CGameSystem::Render_InteractUI(_wstring strText)
 {
 	m_pUI_ControlHelper->Render_InteractUI(strText);

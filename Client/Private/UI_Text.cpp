@@ -272,7 +272,7 @@ void CUI_Text::Update_Description(_float fTimeDelta)
 				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
 
 
-			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y										+ m_CombinedWorldMatrix._42
+			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y										- m_CombinedWorldMatrix._42
 				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
 				+ penY;
 		}

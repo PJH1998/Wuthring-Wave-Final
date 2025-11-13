@@ -24,6 +24,10 @@ public:
 	virtual HRESULT		Initialize(_uint iWinSizeX, _uint iWinSizeY);
 	virtual HRESULT		Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) override;
 
+#ifdef _DEBUG
+	void				Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale) { m_fLimitVelocity = fLimitVelocity, m_fLimitDepth = fLimitDepth, m_fLengthScale = fLengthScale; }
+#endif
+
 private:
 	_uint				m_iWinSizeX = {};
 	_uint				m_iWinSizeY = {};

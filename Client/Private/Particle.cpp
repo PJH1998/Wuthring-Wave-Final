@@ -33,6 +33,8 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_vColor = m_tDesc.vColor;
     m_vLifeTime = m_tDesc.vLifeTime;
 
+	m_iMaskFlag = m_tDesc.iMaskFlag;
+
     _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
@@ -151,6 +153,9 @@ HRESULT CParticle::Bind_ShaderResources()
         return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
 
 

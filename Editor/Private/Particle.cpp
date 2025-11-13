@@ -29,6 +29,7 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_iShaderPass = pDesc->fShaderPass;
     m_vColor = pDesc->vColor;
     m_vLifeTime = pDesc->vLifeTime;
+	m_iMaskFlag = pDesc->iMaskFlag;
 
     _vector Pos = XMVectorSet(pDesc->vPos.x, pDesc->vPos.y, pDesc->vPos.z, 1.f);
 
@@ -91,12 +92,33 @@ void CParticle::Render()
 
 void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+    //if(_bool* IsActivate = static_cast<_bool*>(pArg))
+    //    m_isActivate = *IsActivate;
 
-     m_vLifeTime.x = 0.f;
-     Root_Transform(WorldMatrix);
-     m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+    // m_vLifeTime.x = 0.f;
+    // Root_Transform(WorldMatrix);
+    // m_pVIBufferCom->Reset_UAV(m_pComputeShader);
+
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	m_isActivate = pDesc->IsActive;
+
+	//if (pDesc->pBoneMatrixPtr != nullptr)
+	//{
+	//	//뼈에 붙여야한다는 것. 근데 파티클은 뼈에 안붙여도 될듯?
+	//	m_pBoneMatrixPtr = &pDesc->pBoneMatrixPtr;
+	//	m_pObjectMatrixPtr = &pDesc->pObjectMatrixPtr;
+	//	m_IsRoot = true;
+	//}
+	//else if (pDesc->pBoneMatrixPtr == nullptr)
+	//{
+		//기존처리
+		m_vLifeTime.x = 0.f;
+		Root_Transform(WorldMatrix);
+		m_IsRoot = false;
+//	}
+
+	m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 }
 
 void CParticle::Root_Transform(_fmatrix WorldMatrix)
@@ -150,6 +172,9 @@ HRESULT CParticle::Bind_ShaderResources()
         return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
 		return E_FAIL;
 
     if (m_IsSprite)

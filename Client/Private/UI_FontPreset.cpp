@@ -60,10 +60,14 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.718f, 0.729f, 0.757f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_NORMAL)] = tDesc;
-	// - Progredss (로딩 창 진행률 숫자용 색상)
+	// - Progress (로딩 창 진행률 숫자용 색상)
 	tDesc.vColor			= { 0.961f, 0.957f, 0.937f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_PROGRESS)] = tDesc;
+	// - BossName (보스 이름용 색상)
+	tDesc.vColor			= { 0.827f, 0.364f, 0.435f, 1.0f };
+	tDesc.vOutlineColor		= { 0.203f, 0.188f, 0.192f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_BOSSNAME)] = tDesc;
 
 
 	// 필요한 색상이 있다면 ENUM 및 여기에 프리셋 추가..

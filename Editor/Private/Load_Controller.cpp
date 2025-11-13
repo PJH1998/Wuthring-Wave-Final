@@ -461,6 +461,9 @@ void CLoad_Controller::Load_Particle_OB_FromJson(const _string& strFilePath, con
     if (ParticleJson.contains("ShaderPass"))
         Desc.fShaderPass = ParticleJson["ShaderPass"].get<_int>();
 
+	if (ParticleJson.contains("MaskFlag"))
+		Desc.iMaskFlag = ParticleJson["MaskFlag"].get<_int>();
+
     if (ParticleJson.contains("Size") && ParticleJson["Size"].is_array())
     {
         json SizeJson = ParticleJson["Size"];

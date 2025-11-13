@@ -13,6 +13,8 @@
 #include "AttackVolume.h"
 #include "Wing.h"
 
+#include "GameSystem.h"
+
 
 CAugusta::CAugusta(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CCharacter{ pDevice, pContext }
@@ -676,10 +678,8 @@ void CAugusta::Process_DelayedActions(_float fTimeDelta)
 			{
 				//m_IsHit = true;
 				Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::HIT)); // Condition 추가.
-				//m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
-				m_pAbillityCom->Add_Hp(-10.f);
-
-				cout << "Hp Decrease Augusta " << endl; // 공격 도중에 맞는지?
+				m_pAbillityCom->Add_Hp(-m_PendingHitDesc.fAttack);
+				//m_pAbillityCom->Add_Hp(-10.f);
 				break;
 			}
 			case DELAYED_ACTION::TYPE::PARRY:
@@ -709,6 +709,13 @@ void CAugusta::Calc_ChangeTimer(_float fTimeDelta)
 void CAugusta::Bind_ChangeEffect()
 {
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Common_SwapEffect"), m_pTransformCom->Get_WorldMatrix(), m_pModelCom);
+}
+void CAugusta::Render_Damage(const HIT_DESC* pDesc)
+{
+	_float4 vTextPosition = {};
+	XMStoreFloat4(&vTextPosition, m_pTransformCom->Get_State(STATE::POSITION));
+	//m_pGameSystem->Render_Damage(vTextPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::TT_PROGRESS);
+	m_pGameSystem->Render_Damage(vTextPosition, static_cast<_int>(pDesc->fAttack), TEXT_COLOR_TYPE::ELEC);
 }
 #pragma endregion
 

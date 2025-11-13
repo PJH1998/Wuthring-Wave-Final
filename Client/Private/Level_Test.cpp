@@ -68,7 +68,7 @@ HRESULT CLevel_Test::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 
     Ready_Layer_Player();
-	Ready_Dummy();
+	//Ready_Dummy();
 	//Ready_MonsterTest();
 
 	Ready_HavocWarrior();
@@ -299,6 +299,8 @@ void CLevel_Test::Ready_MonsterTest()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::DARK;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_ShinWang"), 15, &Projectile)))
@@ -374,7 +376,9 @@ void CLevel_Test::Ready_ElectroPredator()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
-	//Projectile.wstrEffectTag = ;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
+	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Projectile"), TEXT("Pool_Projectile_Electro"), 15, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
@@ -655,6 +659,7 @@ void CLevel_Test::Shader_Gui()
 void CLevel_Test::Toggle_HUD()
 {
 	static _bool isToggled_HUD = false;
+	static _bool isToggled_BOSSHP = false;
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
@@ -668,6 +673,12 @@ void CLevel_Test::Toggle_HUD()
 		{
 			CGameSystem::GetInstance()->HUD_FadeIn();
 		}
+	}
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADENTER) == KEYSTATE::DOWN)
+	{
+		isToggled_BOSSHP = !isToggled_BOSSHP;
+		CGameSystem::GetInstance()->HUD_Toggle_BossStatusUI(isToggled_BOSSHP);
 	}
 }
 

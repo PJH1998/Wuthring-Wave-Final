@@ -35,6 +35,7 @@
 #include "UI_HUD.h"
 #include "UI_Text_Damage.h"
 #include "UI_Button_Interact.h"
+#include "Mouse.h"
 #pragma endregion
 
 
@@ -481,6 +482,11 @@ HRESULT CLoader_GamePlay::Load_UI()
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
 
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"),
+		CMouse::Create(m_pDevice, m_pContext))))
+		CRASH("Mouse");
+
 	return S_OK;
 }
 
@@ -635,6 +641,12 @@ HRESULT CLoader_GamePlay::Load_Monster()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		CAoEDoT::Create(m_pDevice, m_pContext))))
 		CRASH("AoEDoT Prototype Create Failed");
+
+	// Prototype_Component_Model_Arrow
+	_fmatrix PreArrowMatrix = XMMatrixScaling(0.00008f, 0.00008f, 0.00008f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Arrow"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreArrowMatrix, "../../Client/Bin/Resource/Model/Arrow/Arrow.dat"))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
 
 #pragma region CORROSAURUS

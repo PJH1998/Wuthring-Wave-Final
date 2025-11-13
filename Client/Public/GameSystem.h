@@ -62,9 +62,18 @@ public:
 #pragma region [UI] CONTROL_HELPER
 	class CCustom_UI*	Find_RootUI(_wstring strName);
 	class CCustom_UI*	Find_ChildUI(_wstring strRootUIName, _wstring strChildUIName);
+	
+	HRESULT		HUD_FadeOut();	// 보스 체력바를 제외한 HUD를 FadeOut 합니다.
+	HRESULT		HUD_FadeIn();	// 보스 체력바를 제외한 HUD를 FadeIn  합니다.
 
-	HRESULT		HUD_FadeOut();
-	HRESULT		HUD_FadeIn();
+	//HRESULT		HUD_FadeOut_BossHPBar();	// 보스 체력바 UI를 FadeOut 합니다.	// HUD_Toggle_BossStatusUI 에 통합.
+	//HRESULT		HUD_FadeIn_BossHPBar();		// 보스 체력바 UI를 FadeIn  합니다.	// HUD_Toggle_BossStatusUI 에 통합.
+
+	// 보스 체력바에 필요한 정보를 할당합니다.
+	void		HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
+	// 보스 체력바를 토글합니다.
+	void		HUD_Toggle_BossStatusUI(_bool isOn);
+
 
 	// 상호작용 UI를 생성합니다. 인자는 들어갈 글자.
 	void		Render_InteractUI(_wstring strText);

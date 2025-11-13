@@ -144,6 +144,8 @@ public:
 	virtual void Process_DelayedActions() {};
 	virtual void Calc_ChangeTimer(_float fTimeDelta) {}; // Timer 계산
 	virtual void Bind_ChangeEffect() {}; // ChaneEffect 실행.
+
+	virtual void Render_Damage(const HIT_DESC* pDesc);
 #pragma endregion
 
 #pragma region STATE
