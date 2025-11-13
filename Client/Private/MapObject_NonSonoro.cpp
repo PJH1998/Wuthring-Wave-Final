@@ -149,7 +149,7 @@ void CMapObject_NonSonoro::Compute_DelayTime(_float4 vCamPos)
 	float minDistance = 0.0f;
 	float maxDistance = 600.0f;
 
-	float maxDelay = 1.7f;
+	float maxDelay = 3.7f;
 	float minDelay = 0.0f;
 
 	float t = (fDistance - minDistance) / (maxDistance - minDistance);
@@ -163,20 +163,23 @@ void CMapObject_NonSonoro::Turn_Sonoro(_fvector vUpSpeed,_float fTriggerdTime)
 		return;
 
 	if (m_fDlayTime <= fTriggerdTime)
+	{
 		m_pTransformCom->Set_State(STATE::POSITION, m_pTransformCom->Get_State(STATE::POSITION) + vUpSpeed);
+
+
+	}
 }
 
 void CMapObject_NonSonoro::ReturnPos()
 {
 	m_pTransformCom->Set_WorldMatrix(XMLoadFloat4x4(&m_DefaultMatrix));
+	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
 	
 }
 
 void CMapObject_NonSonoro::Change_Collision_Layer(_bool SonoroMode)
 {
-	!*m_SonoroMode ?
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP)) :
-		m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::NONE));
+	m_pRigidbodyCom->Change_Layer(ENUM_CLASS(COLLISIONLAYER::MAP));
 }
 
 void CMapObject_NonSonoro::Ready_Component(void* pArg)

@@ -84,8 +84,11 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
 	{
-		if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-			m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
+		//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
+		//{
+		//	m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
+		//	m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f+3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+		//}
 
 		m_pGameSystem->Update(fTimeDelta);
 	}
