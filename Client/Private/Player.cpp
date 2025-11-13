@@ -623,7 +623,6 @@ void CPlayer::Toggle_LockOn()
 	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
 	 */
 
-
     //m_pTargetTransform = nullptr;
 }
 #ifdef _DEBUG

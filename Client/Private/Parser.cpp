@@ -900,6 +900,9 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
     if (ParticleJson.contains("ShaderPass"))
         Desc.iShaderPass = ParticleJson["ShaderPass"].get<_int>();
 
+	if (ParticleJson.contains("MaskFlag"))
+		Desc.iMaskFlag = ParticleJson["MaskFlag"].get<_int>();
+
     if (ParticleJson.contains("Size") && ParticleJson["Size"].is_array())
     {
         json SizeJson = ParticleJson["Size"];
@@ -1117,6 +1120,15 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 
 	if (RectJson.contains("SizeY"))
 		Desc.fYSize = RectJson["SizeY"].get<_float>();
+
+	if (RectJson.contains("Row"))
+		Desc.iRows = RectJson["Row"].get<_int>();
+
+	if (RectJson.contains("Col"))
+		Desc.iCols = RectJson["Col"].get<_int>();
+
+	if (RectJson.contains("Sprite"))
+		Desc.IsSprite = RectJson["Sprite"].get<_bool>();
 
 	if (RectJson.contains("Position") && RectJson["Position"].is_array())
 	{

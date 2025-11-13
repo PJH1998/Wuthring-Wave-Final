@@ -83,6 +83,22 @@ void CRect_Controller::Rect_Tab()
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedRectDesc->iShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
 
+					ImGui::Separator();
+
+					ImGui::Checkbox("Sprite", &(m_pSelectedRectDesc->IsSprite));
+
+					if (m_pSelectedRectDesc->IsSprite)
+					{
+						ImGui::Text("Row / Col");
+						ImGui::PushItemWidth(60);
+						ImGui::InputInt("##Row", &(m_pSelectedRectDesc->iRows));
+						ImGui::SameLine();
+						ImGui::InputInt("##Col", &(m_pSelectedRectDesc->iCols));
+						ImGui::PopItemWidth();
+					}
+
+					ImGui::Separator();
+
 					ImGui::Text("Mask");
 					ImGui::PushItemWidth(100);
 					if (ImGui::Button("R Cut"))

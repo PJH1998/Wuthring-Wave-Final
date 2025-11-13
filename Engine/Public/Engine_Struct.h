@@ -376,6 +376,19 @@ namespace Engine
 
 	// Default 초기화 용도.
 	inline const GPU_BLEND_INFO G_DefaultBlendInfo = {};
+
+	typedef struct tagPrefabInfo
+	{
+		class CModel*		 pModelPtr = nullptr;
+		const _float4x4*	 pMatrixPtr = nullptr;
+	}PREFAB_INFO;
+
+	typedef struct tagEffectInfo
+	{
+		const _float4x4* pBoneMatrixPtr = nullptr;
+		const _float4x4* pObjectMatrixPtr = nullptr;
+		_bool			 IsActive = false;
+	}EFFECT_INFO;
 }
 
 

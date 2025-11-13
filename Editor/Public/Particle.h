@@ -25,6 +25,8 @@ public:
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f};
 
+		_int	iMaskFlag = 0;
+
 		_bool	IsSprite = false;
 		_int    iRows = 0;
 		_int	iCols = 0;
@@ -67,6 +69,13 @@ private:
 	_bool						m_IsSprite = false;
 	_int						m_iRow = {};
 	_int						m_iCol = {};
+
+	_int						m_iMaskFlag = 0;
+
+	_bool						m_IsRoot = false;
+
+	const _float4x4** m_pBoneMatrixPtr = nullptr;
+	const _float4x4** m_pObjectMatrixPtr = nullptr;
 
 private:
 	HRESULT Ready_Components(PARTICLE_DESC& Desc);

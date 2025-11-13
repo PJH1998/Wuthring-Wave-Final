@@ -271,8 +271,6 @@ void CShader_Interface::Set_SSAO()
 
 	ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
 
-	m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
-
 	ImGui::End();
 }
 

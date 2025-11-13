@@ -65,8 +65,9 @@ void CEffect_Decal::Late_Update(_float fTimeDelta)
 
 void CEffect_Decal::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	m_isActivate = pDesc->IsActive;
 
      Root_Transform(WorldMatrix);
 }

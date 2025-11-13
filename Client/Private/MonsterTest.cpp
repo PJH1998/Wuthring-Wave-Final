@@ -97,7 +97,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
-		_float temp = clamp(m_fDistance - 1.3f, 0.f,1.f);
+		_float temp = clamp(m_fDistanceNonY - 1.3f, 0.f,1.f);
 		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 		//m_isDist_Interp_Enable = false;
 	}
@@ -541,6 +541,7 @@ void CMonsterTest::Calculate_PosAndDir()
 	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 	_vector vDir = vTargetPos - vPosition;
 	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	m_fDistanceNonY = XMVectorGetX(XMVector3Length(XMVectorSetY(vTargetPos, 0.f) - XMVectorSetY(vPosition, 0.f)));
 	vDir = XMVector3Normalize(vDir);
 	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
 	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
@@ -580,6 +581,10 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	if(m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
+
+#pragma region UI_BIND
+	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
 
 	if(m_isParalysis)
 	{
@@ -630,6 +635,18 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 }
 
+void CMonsterTest::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		if (m_isAggro)
+			return;
+		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("거짓된 신왕"), "FalseSovereign", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+	}
+}
+
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
@@ -645,7 +662,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -661,7 +681,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -677,7 +700,10 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
-		
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -746,6 +772,10 @@ void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold&
 void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+#ifdef _DEBUG
+	cout << "Parry! Shim Wang)" << endl;
+#endif // _DEBUG
 }
 
 void CMonsterTest::TurnFix()
@@ -804,7 +834,7 @@ _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 
 	//else
 	//	return false;
-	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if(bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];

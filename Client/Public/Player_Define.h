@@ -38,7 +38,6 @@ namespace PlayerData
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
         Desc.vPosition = vPosition;
-        Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
         // Parts
         Desc.PartPrototypes = {
@@ -128,7 +127,7 @@ namespace PlayerData
         Desc.vScale = vScale;
         Desc.vRotation = vRotation;
         Desc.vPosition = vPosition;
-        Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
+        //Desc.eStat = { 100.f, 100.f, 0.f, 100.f, 0.f, 100.f, 0.f, 100.f };
 
         Desc.PartPrototypes = {
             make_pair(L"Sword", L"Prototype_GameObject_Rover_Sword"),

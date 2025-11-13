@@ -68,6 +68,7 @@ public:
 
 private:
 	void Root_Transform(_fmatrix WorldMatrix);
+	void Update_Transform();
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
@@ -113,6 +114,10 @@ private:
 
 	_bool						m_IsRoot = false;
 	_float4x4					m_ComBindMatrix = {  };
+
+	const _float4x4*			m_pBoneMatrixPtr = nullptr;
+	const _float4x4*			m_pObjectMatrixPtr = nullptr;
+	_matrix						m_OffsetMatrix = {};
 
 private:
 	HRESULT Ready_Components(TRAILMESH_DESC& Desc);
