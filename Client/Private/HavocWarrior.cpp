@@ -217,6 +217,8 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
+	m_isDeadTrigger = false;
+	m_iState = ENUM_CLASS(TEST_STATE::NONE);
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
