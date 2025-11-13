@@ -36,10 +36,10 @@ HRESULT CCorosaurus::Initialize_Clone(void* pArg)
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 6.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 45.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK3] = 25.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK4] = 40.f;
 	m_fAttackCoolTime[ATK_PATTERN::BURST] = m_fAttackAcc[ATK_PATTERN::BURST] = 70.f;
-	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = 50.f;
+	m_fAttackCoolTime[ATK_PATTERN::ATTACK8] = m_fAttackAcc[ATK_PATTERN::ATTACK8] = 50.f;
 #pragma endregion
 	m_fStamina = m_fMaxStamina = pDesc->fMaxStamina;
 	m_fHP = pDesc->fHP;
@@ -63,8 +63,8 @@ void CCorosaurus::Update(_float fTimeDelta)
 
 	if(m_isDist_Interp_Enable)
 	{
-		m_pColliderCom->Update(vVelocity / fTimeDelta * m_fDistance);
-		m_isDist_Interp_Enable = false;
+		_float temp = clamp(m_fDistanceNonY - 1.5f, 0.f, 1.f);
+		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 	}
 	else
 		m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -149,6 +149,10 @@ void CCorosaurus::Collider_Active(const _wstring& wStrColliderTag, _bool isActiv
 	{
 		m_isTurnLerp = isActive;
 	}
+	else if (wstrTypeTag == TEXT("Distance"))
+	{
+		m_isDist_Interp_Enable = isActive;
+	}
 }
 
 void CCorosaurus::Effect_Active(const _wstring& wStrEffectTag)
@@ -173,10 +177,7 @@ void CCorosaurus::Object_Func(const _wstring& wStrObjectTag)
 	{
 			m_pTransformCom->LookDir(XMLoadFloat3(&m_vTargetDir) * -1.f);
 	}
-	else if (wstrTypeTag == TEXT("Distance"))
-	{
-			m_isDist_Interp_Enable = true;
-	}
+
 }
 
 HRESULT CCorosaurus::Bind_Resources()
@@ -206,8 +207,11 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnDetect_Enter(iLayer, pDesc, Manifold);
+		});
 	// 숙면하는 짱룡
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -264,9 +268,9 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 	pBlackBoard->Add_Condition("isAttackEnable", [this]() ->_bool { return isAttackEnable(); });
 	pBlackBoard->Add_Condition("ATKArrange", [this]() ->_bool { return AttackArrange(); });
 	pBlackBoard->Add_Condition("Attack1", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK1, 4.f); });
-	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 4.f); });
+	pBlackBoard->Add_Condition("Attack2", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK2, 5.f); });
 	pBlackBoard->Add_Condition("Attack3", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK3, 15.f); });
-	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 15.f); });
+	pBlackBoard->Add_Condition("Attack4", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK4, 11.5f); });
 	pBlackBoard->Add_Condition("Attack7", [this]() ->_bool { return Attack(ATK_PATTERN::BURST, 50.f); });
 	pBlackBoard->Add_Condition("Attack8", [this]() ->_bool { return Attack(ATK_PATTERN::ATTACK8, 15.f); });
 	pBlackBoard->Add_Condition("BeHit", [this]() ->_bool { return CheckHit(); });
@@ -309,7 +313,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	m_pAtkVolumes[ATK_SOCKET::HEAD0]->TriggerActivate(false);
 
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr("Bone_Tail006_M");
-	TriggerDesc.vExtent = _float3(2.f, 0.5f, 0.5f);
+	TriggerDesc.vExtent = _float3(3.f, 0.55f, 0.55f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	m_pAtkVolumes[ATK_SOCKET::TAIL] = dynamic_cast<CAttackVolume*>(m_pGameInstance->Clone_Prototype(m_pGameInstance->Get_CurrentLevel(), TEXT("Prototype_GameObject_AttackVolume"), PROTOTYPE::GAMEOBJECT, &TriggerDesc));
@@ -387,6 +391,11 @@ void CCorosaurus::Reset_Condition(_float fTimeDelta)
 		if (m_fAttackAcc[i] > 0.f)
 			m_fAttackAcc[i] -= fTimeDelta;
 	}
+#pragma region UI_BIND
+
+	m_isParalysis = (m_iState & ENUM_CLASS(TEST_STATE::PARALYSIS));
+	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
 }
 
 void CCorosaurus::After_Condition(_float fTimeDelta)
@@ -422,6 +431,7 @@ void CCorosaurus::Calculate_PosAndDir()
 	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 	_vector vDir = vTargetPos - vPosition;
 	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	m_fDistanceNonY = XMVectorGetX(XMVector3Length(XMVectorSetY(vTargetPos, 0.f) - XMVectorSetY(vPosition, 0.f)));
 	vDir = XMVector3Normalize(vDir);
 	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
 	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
@@ -437,6 +447,18 @@ void CCorosaurus::OnCollide_During(_uint iLayer, void* pOther, const ContactMani
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		CTransform* pTransform = static_cast<CTransform*>(pDesc->pTransform);
 		XMStoreFloat3(&m_vTargetPosition, pTransform->Get_State(STATE::POSITION));
+	}
+}
+
+void CCorosaurus::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		if (m_isAggro)
+			return;
+		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("코로사우로스"), "CoroSaurus", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
 	}
 }
 
@@ -459,11 +481,17 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! (Corro)" << endl;
 		//cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -474,11 +502,17 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (Corro)" << endl;
 #endif // _DEBUG
@@ -487,12 +521,18 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 	{
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		if (!m_isParalysis && m_fStamina >= 0.f)
+			m_fStamina -= 1.f;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_beHit = true;
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Knock Back! (Corro)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -502,7 +542,12 @@ void CCorosaurus::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manif
 
 void CCorosaurus::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
+	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
 	m_isBlocked = true;
+#ifdef _DEBUG
+	cout << "Parry! (Corro)" << endl;
+	cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
+#endif // _DEBUG
 }
 
 _bool CCorosaurus::isKnockDown()
@@ -610,7 +655,7 @@ _bool CCorosaurus::Attack(_uint iIndex, _float fInterval)
 {
 	if (iIndex == ATK_PATTERN::BURST)
 		return false;
-	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if (bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];

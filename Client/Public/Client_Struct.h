@@ -88,6 +88,7 @@ namespace Client
 	typedef struct tagMonsterInfo
 	{
 		_wstring wstrPoolTag;
+		_wstring wstrUIText;
 		_string strName;
 		_uint	iMonsterID;			//참조용 몬스터ID
 		_float	fMaxHp;
