@@ -19,7 +19,15 @@ public:
 	HRESULT				HUD_FadeOut();
 	HRESULT				HUD_FadeIn();
 
+	HRESULT				HUD_FadeOut_BossHPBar();
+	HRESULT				HUD_FadeIn_BossHPBar();
+
+	void				HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio);
+	void				HUD_Toggle_BossStatusUI(_bool isOn);
+
+
 	void				Render_InteractUI(_wstring strText);
+	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };

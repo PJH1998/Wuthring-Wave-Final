@@ -149,6 +149,11 @@ CUI_Text* CGameSystem::Create_FontToScreen(_float2 vScreenPos, _wstring strText,
 	return m_pUI_FontPreset->Create_FontToScreen(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
+CUI_Text* CGameSystem::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	return m_pUI_FontPreset->Create_FontToScreen_Alpha(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
+}
+
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
 {
 	return m_pUI_ControlHelper->Find_RootUI(strName);
@@ -169,9 +174,33 @@ HRESULT CGameSystem::HUD_FadeIn()
 	return m_pUI_ControlHelper->HUD_FadeIn();
 }
 
+//HRESULT CGameSystem::HUD_FadeOut_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeOut_BossHPBar();
+//}
+//HRESULT CGameSystem::HUD_FadeIn_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeIn_BossHPBar();
+//}
+
+void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	return m_pUI_ControlHelper->HUD_Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
+}
+
+void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
+{
+	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
+}
+
 void CGameSystem::Render_InteractUI(_wstring strText)
 {
 	m_pUI_ControlHelper->Render_InteractUI(strText);
+}
+
+_bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
+{
+	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)

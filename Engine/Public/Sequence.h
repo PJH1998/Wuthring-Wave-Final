@@ -3,7 +3,7 @@
 
 NS_BEGIN(Engine)
 
-class CSequence final : public CBase
+class ENGINE_DLL CSequence final : public CBase
 {
 public:
 	typedef struct tagSequenceDesc

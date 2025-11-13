@@ -59,7 +59,9 @@ void CCustom_UI::Update(_float fTimeDelta)
         m_pAnimator_UICom->Update(fTimeDelta);
 
     Update_InputState();
-    Update_CacheTransform(fTimeDelta);
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	Update_CacheTransform(fTimeDelta);
+#endif // KSTA_ON_TRANSFORM_CACHING
 
     for (auto& child : m_vecChildObjects)
         child->Update(fTimeDelta);
@@ -216,23 +218,53 @@ _bool CCustom_UI::Check_IsInSpace()
     tCursorPos.y = (1080.f - tCursorPos.y) - 1080.f / 2.f;
 
 
-    if (!m_tUIDesc.isInstance)
-    {
-        if (ISINSPACE(tCursorPos, m_vecCachedUITransform[0][POS], m_vecCachedUITransform[0][SCA]))
-            isIn_InteractableSpace = true;
-    }
-    else
-    {
-        for (_uint i = 0 ; i < m_vecCachedUITransform.size(); i++)
-        {
-            if (ISINSPACE(tCursorPos, m_vecCachedUITransform[i][POS], m_vecCachedUITransform[i][SCA]))
-            {
-                isIn_InteractableSpace = true;
-                m_iInputInstanceIndex = i;
-                break;
-            }
-        }
-    }
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	if (!m_tUIDesc.isInstance)
+	{
+		if (ISINSPACE(tCursorPos, m_vecCachedUITransform[0][POS], m_vecCachedUITransform[0][SCA]))
+			isIn_InteractableSpace = true;
+	}
+	else
+	{
+		for (_uint i = 0; i < m_vecCachedUITransform.size(); i++)
+		{
+			if (ISINSPACE(tCursorPos, m_vecCachedUITransform[i][POS], m_vecCachedUITransform[i][SCA]))
+			{
+				isIn_InteractableSpace = true;
+				m_iInputInstanceIndex = i;
+				break;
+			}
+		}
+	}
+#endif // KSTA_ON_TRANSFORM_CACHING
+
+
+#ifndef KSTA_ON_TRANSFORM_CACHING
+	if (!m_tUIDesc.isInstance)
+	{
+		_float2 vPos = _float2{ m_CombinedWorldMatrix._41, m_CombinedWorldMatrix._42 };
+		_float2 vSca = _float2{ m_CombinedWorldMatrix._11, m_CombinedWorldMatrix._22 };
+
+		if (ISINSPACE(tCursorPos, vPos, vSca))
+			isIn_InteractableSpace = true;
+	}
+	else
+	{
+		for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+		{
+			_float2 vPos = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstTrans.x, m_tUIDesc.vecInstanceDescs[i].vSInstTrans.y };
+			_float2 vSca = _float2{ m_tUIDesc.vecInstanceDescs[i].vSInstRight.x, m_tUIDesc.vecInstanceDescs[i].vSInstUp.y };
+
+			if (ISINSPACE(tCursorPos, vPos, vSca))
+			{
+				isIn_InteractableSpace = true;
+				m_iInputInstanceIndex = i;
+				break;
+			}
+		}
+	}
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 
     //if (!isIn_InteractableSpace)
     //    m_iInputInstanceIndex = UINT_MAX;
@@ -240,47 +272,50 @@ _bool CCustom_UI::Check_IsInSpace()
     return isIn_InteractableSpace;
 }
 
+#ifdef KSTA_ON_TRANSFORM_CACHING
 void  CCustom_UI::Update_CacheTransform(_float fTimeDelta)   // Caching Calculated Transform Martix. for Optimizing.
 {
-    // Calculating Time Rate. Const.
-    const _float fCachingTimeRate = 0.1f;
-    m_cachingTimeElapsed += fTimeDelta;
-    if (m_cachingTimeElapsed >= fCachingTimeRate)
-        m_cachingTimeElapsed = 0.f;
-    else
-        return;
+	// Calculating Time Rate. Const.
+	const _float fCachingTimeRate = 0.1f;
+	m_cachingTimeElapsed += fTimeDelta;
+	if (m_cachingTimeElapsed >= fCachingTimeRate)
+		m_cachingTimeElapsed = 0.f;
+	else
+		return;
 
-    if (!m_tUIDesc.isInstance)
-    {
-        _vector vPos, vQuat, vSca;
-        XMMatrixDecompose(&vSca, &vQuat, &vPos, XMLoadFloat4x4(&m_CombinedWorldMatrix));
-        XMStoreFloat4(&m_vecCachedUITransform[0][POS], vPos);
-        XMStoreFloat4(&m_vecCachedUITransform[0][ROT], vQuat);
-        XMStoreFloat4(&m_vecCachedUITransform[0][SCA], vSca);
-    }
-    else
-    {
-        for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
-        {
-            auto& instDesc = m_tUIDesc.vecInstanceDescs[i];
+	if (!m_tUIDesc.isInstance)
+	{
+		_vector vPos, vQuat, vSca;
+		XMMatrixDecompose(&vSca, &vQuat, &vPos, XMLoadFloat4x4(&m_CombinedWorldMatrix));
+		XMStoreFloat4(&m_vecCachedUITransform[0][POS], vPos);
+		XMStoreFloat4(&m_vecCachedUITransform[0][ROT], vQuat);
+		XMStoreFloat4(&m_vecCachedUITransform[0][SCA], vSca);
+	}
+	else
+	{
+		for (_uint i = 0; i < m_tUIDesc.vecInstanceDescs.size(); i++)
+		{
+			auto& instDesc = m_tUIDesc.vecInstanceDescs[i];
 
-            _float4 instMat[4] = { instDesc.vSInstRight, instDesc.vSInstUp, instDesc.vSInstLook, instDesc.vSInstTrans };
-            _matrix instRelativeMat = XMMatrixSet(
-                instMat[0].x, instMat[0].y, instMat[0].z, instMat[0].w,
-                instMat[1].x, instMat[1].y, instMat[1].z, instMat[1].w,
-                instMat[2].x, instMat[2].y, instMat[2].z, instMat[2].w,
-                instMat[3].x, instMat[3].y, instMat[3].z, instMat[3].w
-            );
-            _matrix combinedInstanceMatrix = instRelativeMat * XMLoadFloat4x4(&m_CombinedWorldMatrix);
+			_float4 instMat[4] = { instDesc.vSInstRight, instDesc.vSInstUp, instDesc.vSInstLook, instDesc.vSInstTrans };
+			_matrix instRelativeMat = XMMatrixSet(
+				instMat[0].x, instMat[0].y, instMat[0].z, instMat[0].w,
+				instMat[1].x, instMat[1].y, instMat[1].z, instMat[1].w,
+				instMat[2].x, instMat[2].y, instMat[2].z, instMat[2].w,
+				instMat[3].x, instMat[3].y, instMat[3].z, instMat[3].w
+			);
+			_matrix combinedInstanceMatrix = instRelativeMat * XMLoadFloat4x4(&m_CombinedWorldMatrix);
 
-            _vector vPos, vQuat, vSca;
-            XMMatrixDecompose(&vSca, &vQuat, &vPos, combinedInstanceMatrix);
-            XMStoreFloat4(&m_vecCachedUITransform[i][POS], vPos);
-            XMStoreFloat4(&m_vecCachedUITransform[i][ROT], vQuat);
-            XMStoreFloat4(&m_vecCachedUITransform[i][SCA], vSca);
-        }
-    }
+			_vector vPos, vQuat, vSca;
+			XMMatrixDecompose(&vSca, &vQuat, &vPos, combinedInstanceMatrix);
+			XMStoreFloat4(&m_vecCachedUITransform[i][POS], vPos);
+			XMStoreFloat4(&m_vecCachedUITransform[i][ROT], vQuat);
+			XMStoreFloat4(&m_vecCachedUITransform[i][SCA], vSca);
+		}
+	}
 }
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 
 /*
 HRESULT CCustom_UI::Ready_Prototypes(void* pArg)
@@ -450,9 +485,11 @@ HRESULT CCustom_UI::Bind_Description(void* pArg)
     m_tUIDesc.fUIScale      = pDesc->fUIScale;
     m_tUIDesc.isInstance    = pDesc->isInstance;
 
-    _uint iCacheTransformAmount = (m_tUIDesc.isInstance)? pDesc->vecInstanceDescs.size() : 1;
-    m_vecCachedUITransform.resize(iCacheTransformAmount);
-    
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	_uint iCacheTransformAmount = (m_tUIDesc.isInstance) ? pDesc->vecInstanceDescs.size() : 1;
+	m_vecCachedUITransform.resize(iCacheTransformAmount);
+#endif // KSTA_ON_TRANSFORM_CACHING
+
     m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
     return S_OK;
@@ -515,7 +552,8 @@ void CCustom_UI::Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom)
 
 void CCustom_UI::Update_InputState()
 {
-    if (!m_isActivate)
+    if (!m_isActivate ||
+		m_tUIDesc.iUIType != ENUM_CLASS(UI_TYPE::BUTTON))
     {
         m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
         return;

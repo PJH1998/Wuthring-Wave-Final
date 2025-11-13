@@ -28,7 +28,6 @@ protected:
 	BLUR_WEIGHTS						m_Weights;
 	vector<ID3D11Buffer*>				m_WeightBuffers;
 	vector<ID3D11ShaderResourceView*>	m_WeightSRVs;
-	_float								m_fIntensity = {};
 
 protected:
 	HRESULT								Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight = 1);

@@ -3,6 +3,10 @@
 
 #include "Event_Scene_Edit.h"
 
+#include "Sequence.h"
+
+#include "SQ_Camera_Edit.h"
+
 CSequencer::CSequencer()
 	: m_pGameInstance { CGameInstance::GetInstance() }
 {
@@ -158,6 +162,8 @@ HRESULT CSequencer::Initialize()
 
 	m_iSequenceOption = ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE | ImSequencer::SEQUENCER_CHANGE_FRAME;
 
+	//m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"), TEXT("Layer_Camera"))
+
 	return S_OK;
 }
 
@@ -179,6 +185,10 @@ void CSequencer::Update(_float fTimeDelta)
 
 	ImGui::End();
 
+	// Sequence System (Register / Play)
+	Sequence_System(fTimeDelta);
+
+	// Select Item Setting
 	Selectable_Item();
 
 	if(m_pGameInstance->Get_DIKeyState(DIK_N) == KEYSTATE::DOWN)
@@ -190,9 +200,6 @@ void CSequencer::Update(_float fTimeDelta)
 			m_fTrackAcc = static_cast<_float>(m_iCurrentFrame);
 		m_isPlay = !m_isPlay;
 	}
-
-	if (true == m_isPlay)
-		Play(fTimeDelta);
 }
 
 void CSequencer::Play(_float fTimeDelta)
@@ -206,6 +213,62 @@ void CSequencer::Play(_float fTimeDelta)
 
 	m_fTrackAcc += fTimeDelta * m_fTrackPerSec;
 	m_iCurrentFrame = m_fTrackAcc;
+}
+
+void CSequencer::Sequence_System(_float fTimeDelta)
+{
+	ImGui::Begin("[Sequence System]");
+
+	ImGui::Text("Tag :"); ImGui::SameLine();
+	ImGui::InputText("##", m_szSequenceTag, MAX_PATH);
+
+	if (ImGui::Button("Register"))
+	{
+		vector<SEQUENCE_ITEM_INFO> ItemInfos;
+		vector<SEQUENCE_ITEM_DATA> ItemDatas;
+
+		for (size_t i = 0; i < m_Items.size(); ++i)
+		{
+			SEQUENCE_ITEM_INFO Info = {};
+			Info.fStartFrame = static_cast<_float>(m_Items[i].iFrameStart);
+			Info.fEndFrame = static_cast<_float>(m_Items[i].iFrameEnd);
+			Info.strItemTag = StringToWString(m_Items[i].szItemLabel);
+			ItemInfos.push_back(Info);
+
+			switch (m_Items[i].eType)
+			{
+			case ITEM_TYPE::SCENE:
+				{
+					SQ_CAMERA_DATA SceneData = {};
+					SceneData.fStartFrame = Info.fStartFrame;
+					SceneData.fEndFrame = Info.fEndFrame;
+					memcpy(&SceneData.Frames, &m_Items[i].mRampEdit.mSQCameraDatas, sizeof(m_Items[i].mRampEdit.mSQCameraDatas));
+					ItemDatas.push_back(SceneData);
+				}
+				break;
+			case ITEM_TYPE::ACTOR:
+				break;
+			case ITEM_TYPE::SFX:
+				break;
+			case ITEM_TYPE::EFFECT:
+				break;
+			case ITEM_TYPE::SOUND:
+				break;
+			}
+		}
+
+		CSequence::SEQUENCE_DESC SequenceDesc = {};
+		SequenceDesc.fTrackPerSec = m_fTrackPerSec;
+		SequenceDesc.fDuration = m_iFrameMax;
+
+		m_pGameInstance->Register_Sequence(StringToWString(m_szSequenceTag), ItemInfos, ItemDatas, &SequenceDesc);
+
+	}
+
+	ImGui::End();
+
+	if (true == m_isPlay)
+		Play(fTimeDelta);
 }
 
 void CSequencer::Selectable_Item()
@@ -252,7 +315,7 @@ void CSequencer::Selectable_Item()
 				SetUp_Camera_Point(item);
 				break;
 			case ITEM_TYPE::SCENE:
-				SetUp_Camera_Point(item);
+				SetUp_Scene_Point(item);
 				break;
 			}
 		}
@@ -321,7 +384,58 @@ void CSequencer::SetUp_Camera_Point(SEQUENCE_ITEM& item)
 
 void CSequencer::SetUp_Scene_Point(SEQUENCE_ITEM& item)
 {
+	ImGui::Begin("Point Setting");
 
+	// Translation
+	_int iSelectIndex = item.mRampEdit.miSelectPoint;
+	iSelectIndex = min(iSelectIndex, static_cast<_int>(item.mRampEdit.GetPointCount(0)));
+
+	SCENE_CAMERA_FRAME& CameraFrame = item.mRampEdit.mSQCameraDatas[iSelectIndex];
+
+	_char szFrame[MAX_PATH] = {};
+	sprintf_s(szFrame, MAX_PATH, "[Frame] : %.2f", CameraFrame.fStartFrame);
+	ImGui::Text(szFrame);
+
+	ImGui::Text("[Rotation]");
+	_char szQuat[MAX_PATH] = {};
+	sprintf_s(szQuat, MAX_PATH, "X : %.4f\nY : %.4f\nZ : %.4f\bW : %.4f", CameraFrame.vQuaternion.x, CameraFrame.vQuaternion.y, CameraFrame.vQuaternion.z, CameraFrame.vQuaternion.w);
+	ImGui::Text(szQuat);
+	if (ImGui::Button("Rotation Sync"))
+	{
+		_matrix CameraWoldMatrx = m_pGameInstance->Get_TransformState_Matrix_Inv(D3DTS::VIEW);
+		_vector vScale{}, vQuat{}, vTrans{};
+		XMMatrixDecompose(&vScale, &vQuat, &vTrans, CameraWoldMatrx);
+		XMStoreFloat4(&CameraFrame.vQuaternion, vQuat);
+	}
+
+	ImGui::Text("[Translation]");
+	ImGui::PushID(102);
+	ImGui::InputFloat3("##", reinterpret_cast<_float*>(&CameraFrame.vPosition));
+	ImGui::PopID();
+
+	ImGui::Text("[Fov]");
+	ImGui::PushID(103);
+	ImGui::InputFloat("##", &CameraFrame.fFovy);
+	ImGui::PopID();
+
+	ImGui::Text("[Speed]");
+	ImGui::PushID(104);
+	ImGui::InputFloat("##", &CameraFrame.fSpeedRate);
+	ImGui::PopID();
+
+	if (ImGui::RadioButton("[Lerp]", CameraFrame.isLerp))
+		CameraFrame.isLerp = !CameraFrame.isLerp;
+
+	ImGui::SameLine();
+	if (ImGui::Button("Delete"))
+	{
+		item.mRampEdit.mPoints.erase(item.mRampEdit.mPoints.begin() + iSelectIndex);
+		item.mRampEdit.mTargetCameraFrames.erase(item.mRampEdit.mTargetCameraFrames.begin() + iSelectIndex);
+		if (item.mRampEdit.miSelectPoint >= item.mRampEdit.GetPointCount(0))
+			item.mRampEdit.miSelectPoint = -1;
+	}
+
+	ImGui::End();
 }
 
 void CSequencer::SetUp_Camera(SEQUENCE_ITEM& item)

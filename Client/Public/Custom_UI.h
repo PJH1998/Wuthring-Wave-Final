@@ -122,10 +122,14 @@ public:
 	_bool					Check_OnInteract(_wstring strChildName, _uint iEventInteractType, _uint iInstanceIndex = 0);
 	
 public:
+	_float4x4&				Get_CombinedMatrix() { return m_CombinedWorldMatrix; }
 	void					Update_CombinedMatrix(_matrix* pParentMatrix = nullptr);
 	void					Update_CombinedDesc(CAnimator_UI* pParentAnimatorCom = nullptr);
 private:
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	void					Update_CacheTransform(_float fTimeDelta);
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 	void					Update_InputState()						override;
 
 protected:
@@ -170,9 +174,12 @@ protected:
 
 
 protected:	// UI 인식의 기준이 되는 좌표를 낮은 프레임으로 캐싱하여 그것을 사용. HOVER 등의 비용을 낮추기 위함
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	_float					m_cachingTimeElapsed = {};
-	enum CACHED_TRANSFORM {POS, ROT, SCA, END};
+	enum CACHED_TRANSFORM { POS, ROT, SCA, END };
 	vector<array<_float4, CACHED_TRANSFORM::END>>	m_vecCachedUITransform = {};
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 
 	_uint					m_iInputState = ENUM_CLASS(UI_EVENT_TYPE::NONE);
 	_uint					m_iInputInstanceIndex = 0;
