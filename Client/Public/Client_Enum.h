@@ -17,6 +17,14 @@ namespace Client
 	enum class ATTACKRANGE : unsigned int 
 	{ RANGE_CLOSE = 0, RANGE_MID, RANGE_FAR, END } ;
 
+	enum class ATTACKVOULME_DIR : unsigned int
+	{
+		DEFAULT = 0, // 기본 값.
+		UPPER,
+
+		END
+	};
+
 	enum class CHARACTER_CONDITION : unsigned int {
 		HIT = 1 << 0,
 		DODGE =     1 << 1, // Dodge 상태면 Hit 안되게.

@@ -38,6 +38,9 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 
     m_eCurLevel = pDesc->eCurLevel;
 
+
+	return S_OK;
+
     Ready_Components(pDesc);
     Ready_Variables(pDesc);
     Ready_Positions(pDesc);
@@ -794,7 +797,6 @@ void CGalbrena::Free()
 		if (nullptr != pAttackVolume)
 			Safe_Release(pAttackVolume);
 	}
-
 	m_AttackVolumes.clear();
 	Safe_Release(m_pWing);
 }
