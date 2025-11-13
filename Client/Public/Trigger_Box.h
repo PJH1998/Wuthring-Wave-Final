@@ -39,6 +39,8 @@ private:
 	void Collision_During();
 	void Collision_End();
 	void Register_Trigger();
+
+	void UI_Set(_bool B);
 private:
 	CRigidbody* m_pRigidbodyCom = { nullptr };
 	class CGameSystem* m_pGameSystem = { nullptr };

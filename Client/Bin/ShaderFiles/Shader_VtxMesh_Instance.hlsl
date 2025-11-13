@@ -30,7 +30,7 @@ int g_iIndex = 0;
 
 int g_iShadowMapLayer = 0;
 float4 g_vDiffuseColor = float4(0.f, 0.f, 0.f, 0.f);
-
+float g_fRaidan;
 struct VS_IN
 {
     
@@ -61,6 +61,13 @@ VS_OUT VS_MAIN(VS_IN In)
     matVP = mul(g_ViewMatrix, g_ProjMatrix);
     float4 vPos = mul(float4(In.vPosition, 1.f), In.TransformMatrix);
     
+    float swayFactor = In.vPosition.y;
+    float InstancePhase = (vPos.x + vPos.z) * 0.4f;
+    
+    float WaveRate = sin(g_fRaidan + InstancePhase);
+    
+    float3 WavedPos = vector(1.f, 0.f, 1.f, 0.f) * WaveRate * 0.2f * swayFactor;
+    vPos.xyz += WavedPos;
     Out.vPosition = mul(vPos, matVP);
     Out.vNormal = normalize(mul(float4(In.vNormal, 0.f), In.TransformMatrix));
     Out.vTangent = normalize(mul(float4(In.vTangent, 0.f), In.TransformMatrix));
@@ -390,7 +397,7 @@ technique11 DefaultTechnique
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_MAIN_TEST();
     }
-    pass ChangeColor // 1
+    pass ChangeColor // 2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
