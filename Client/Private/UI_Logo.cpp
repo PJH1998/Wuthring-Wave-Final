@@ -147,7 +147,7 @@ void CUI_Logo::Create_ChildText()
 	pFont->Set_UIDesc(fontDesc);
 	pFont->Update_Description(0.f);
 
-	pFont->Update_Alignment(TEXT_ALIGN_TYPE::LEFT);
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 }
 
 CUI_Logo* CUI_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
