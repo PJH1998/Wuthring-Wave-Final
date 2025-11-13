@@ -187,6 +187,8 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	m_fAttackAcc[1] = 10.f;
+	m_fAttackAcc[2] = 20.f;
 }
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
@@ -535,6 +537,13 @@ void CElectroPredator::Patrol()
 	}
 }
 
+_bool CElectroPredator::isAnimationRunning()
+{
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD) && !m_isDeadTrigger)
+		return true;
+	return !m_isAnimationFinished;
+}
+
 _bool CElectroPredator::isKnockDown()
 {
 	if (m_beHit)
@@ -545,6 +554,8 @@ _bool CElectroPredator::isKnockDown()
 
 _bool CElectroPredator::isAttackEnable()
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return false;
 	if (!m_isDetecting)
 		return false;
 	_bool bResult{};
@@ -571,7 +582,7 @@ _bool CElectroPredator::Attack(_uint iIndex, _float fInterval)
 
 _bool CElectroPredator::isChase()
 {
-	if (m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+	if (m_iState & (ENUM_CLASS(TEST_STATE::SPAWN) | ENUM_CLASS(TEST_STATE::DEAD)))
 		return false;
 
 	_bool bResult{};

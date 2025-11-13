@@ -82,7 +82,7 @@ private:
 	_float					m_fAttackDmg{};
 	_float					m_fImpluseRate{};
 	_float					m_fHitStopRatio{};
-	_bool					m_fHitAcc{};
+	_float					m_fHitAcc{};
 	_bool					m_isSonoro{};
 #pragma endregion
 
@@ -90,6 +90,7 @@ private:
 	_float3					m_vBeHit_Normal{};
 	_float					m_fTimeDelta{};
 	_bool					m_isTurnLerp{};
+	_bool					m_isHover{};
 #pragma endregion
 private:
 	HRESULT						Bind_Resources();
@@ -109,7 +110,7 @@ private:
 #pragma endregion
 
 #pragma region BEHAVIOR_TREE_CONDITION
-	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
+	_bool						isAnimationRunning();
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
 	_bool						Attack(_uint iIndex, _float fInterval);
