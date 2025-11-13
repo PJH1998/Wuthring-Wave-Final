@@ -90,6 +90,9 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 		m_pGameSystem->Update(fTimeDelta);
 	}
 
+#ifdef _DEBUG
+	DEBUG_FUNCTION();
+#endif
 
 	// UI Test. Delete it.
 	//static _float fElapsedTime_TestSpawn = 0.f;
@@ -114,9 +117,7 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 void CLevel_GamePlay::Render()
 {
-#ifdef _DEBUG
-	Shader_Gui();
-#endif
+
 }
 
 void CLevel_GamePlay::Ready_Layer_Player()
@@ -371,9 +372,27 @@ void CLevel_GamePlay::Ready_UI()
 }
 
 #ifdef _DEBUG
-void CLevel_GamePlay::Shader_Gui()
+void CLevel_GamePlay::DEBUG_FUNCTION()
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+		m_pGameInstance->End_SFX();
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+		ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
+
+		m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+	}
 }
 #endif
 

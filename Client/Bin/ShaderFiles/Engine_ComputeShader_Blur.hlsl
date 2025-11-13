@@ -240,9 +240,9 @@ cbuffer MOTION_DATA : register(b1)
     float PaddingMotion;
 }
 
-float3 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
+float4 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
 {
-    float3 vVelocity = 0.f;
+    float4 vVelocity = 0.f;
     
     int iSampleX0 = min(vIndex.x, vVelocitySize.x - 1);
     int iSampleX1 = min(vIndex.x + 1, vVelocitySize.x - 1);
@@ -250,12 +250,12 @@ float3 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
     int iSampleY0 = min(vIndex.y, vVelocitySize.y - 1);
     int iSampleY1 = min(vIndex.y + 1, vVelocitySize.y - 1);
     
-    float3 Vector[4];
+    float4 Vector[4];
     
-    Vector[0] = VelocityMap.Load(int3(iSampleX0, iSampleY0, 0)).xyz;
-    Vector[1] = VelocityMap.Load(int3(iSampleX1, iSampleY0, 0)).xyz;
-    Vector[2] = VelocityMap.Load(int3(iSampleX0, iSampleY1, 0)).xyz;
-    Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0)).xyz;
+    Vector[0] = VelocityMap.Load(int3(iSampleX0, iSampleY0, 0));
+    Vector[1] = VelocityMap.Load(int3(iSampleX1, iSampleY0, 0));
+    Vector[2] = VelocityMap.Load(int3(iSampleX0, iSampleY1, 0));
+    Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0));
    
     float fMaxLength = 0.f;
     
@@ -280,18 +280,18 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
 {
     int2 iIndex = DTID.xy * 2;
     
-    float3 vVelocity = Compute_Velocity(iIndex, vOutSize);
+    float4 vVelocity = Compute_Velocity(iIndex, vOutSize);
     
-    float2 vDir = normalize(vVelocity.xy) * - 1.f;
+    float2 vDir = normalize(vVelocity.xy);// * -1.f;
     
     float fVelocityLength = length(vVelocity.xy) * fLengthScale;
 
-    fVelocityLength *= smoothstep(fLimitDepth, 0.f, vVelocity.z);
+    //fVelocityLength *= smoothstep(fLimitDepth, 0.f, vVelocity.z);
     
     float2 vTexcoord = (float2) DTID.xy / (float2) vInSize;
     
-    //if (fVelocityLength <= fLimitVelocity)
-    //    return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
+    if (fVelocityLength == 0.f || vVelocity.w != 0.f)
+        return InputTexture.SampleLevel(CS_DefaultSampler, vTexcoord, 0);
     
     float2 vTexelSize = 1.f / (float2) vInSize;
     float2 vMotionScale = vDir * fVelocityLength * vTexelSize;

@@ -82,8 +82,6 @@ void CCamera::Update_Matrix()
 {
 	m_pGameInstance->Set_PrevTransformState(D3DTS::VIEW, m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::VIEW)]);
 	m_pGameInstance->Set_PrevTransformState(D3DTS::PROJ, m_PrevTransformMatrixes[ENUM_CLASS(D3DTS::PROJ)]);
-	
-	
 
 	_matrix CurViewMatrix = m_pTransformCom->Get_WorldMatrix_Inv();
 	_matrix CurProjMatrix = XMMatrixPerspectiveFovLH(m_fFovy, m_fAspect, m_fNear, m_fFar);

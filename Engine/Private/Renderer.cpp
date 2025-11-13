@@ -644,17 +644,6 @@ void CRenderer::Render_Distortion()
 
 void CRenderer::Render_ScreenEffect()
 {
-#ifdef _DEBUG
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
-		m_pGameInstance->End_SFX();
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::BLUR);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::DOF);
-	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
-		m_pGameInstance->Begin_SFX_Toggle(SFX_TOGGLE::MOTION);
-#endif
-	
 	if(FAILED(m_pGameInstance->Render_SFX_Toggle(m_pVIBuffer, m_pShader)))
 	{
 		if (FAILED(m_pShader->Bind_Texture("g_Texture", m_pGameInstance->Get_RT_SRV(TEXT("RT_Combine")))))
@@ -859,6 +848,8 @@ HRESULT CRenderer::Ready_MRT()
 	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_BackBuffer"))))
 		ASSERT_CRASH(false);
 	if(FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_Depth"))))
+		ASSERT_CRASH(false);
+	if (FAILED(m_pGameInstance->Add_MRT(TEXT("MRT_OUTLINE"), TEXT("RT_PBR"))))
 		ASSERT_CRASH(false);
 #pragma endregion
 

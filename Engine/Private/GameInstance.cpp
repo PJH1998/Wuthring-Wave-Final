@@ -996,13 +996,9 @@ HRESULT CGameInstance::Bind_VF_Resource(CShader* pShader, const _char* pTextureN
 #pragma endregion
 
 #pragma region SFX_HUB
-HRESULT CGameInstance::Begin_SFX_Toggle(SFX_TOGGLE eType)
+HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
-	return m_pSFX_Hub->Begin_SFX_Toggle(eType);
-}
-HRESULT CGameInstance::Begin_SFX_Time(SFX_TOGGLE eType, _float fTime)
-{
-	return m_pSFX_Hub->Begin_SFX_Time(eType, fTime);
+	return m_pSFX_Hub->Begin_Toggle_SFX(eType, fDuration);
 }
 HRESULT CGameInstance::End_SFX()
 {
@@ -1016,6 +1012,12 @@ HRESULT CGameInstance::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CSh
 {
 	return m_pSFX_Hub->Render_SFX(eType, pVIBuffer, pShader);
 }
+#ifdef _DEBUG
+void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
+{
+	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
+}
+#endif
 #pragma endregion
 
 HRESULT CGameInstance::SetUp_CameraNF()

@@ -61,6 +61,7 @@ Texture2D g_BlurTexture;
 //Motion
 Texture2D g_VelocityMap;
 float g_fLimitVelocity;
+float g_fLimitDepth;
 
 //Light
 vector  g_vLightDirection = 0.f;
@@ -522,28 +523,38 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     bool IsDyanmic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;       // Dynamic Discard;
     
     if(IsDyanmic)
+    {
+        Out.vColor.w = 1.f;
         return Out;
+    }
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
     Out.vColor.z = vViewPos.z;          // Depth ���
+    if (vViewPos.z == 0.f || vViewPos.z >= g_fLimitDepth)
+    {
+        Out.vColor.xy = 0.f;
+    }
+    else
+    {                         
+        float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+        float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
     
-    float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
+        float4 vPrevProjPos = mul(vWorldPos, PrevVP);
+        vPrevProjPos /= vPrevProjPos.w;
     
-    float4 vPrevProjPos = mul(vWorldPos, PrevVP);
-    vPrevProjPos /= vPrevProjPos.w;
+        float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
     
-    float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
+        float2 vCurTexcoord = float2(In.vTexcoord.x * 1920.f, In.vTexcoord.y * 1080.f); // �ȼ� �Ÿ��� ����
+        vPrevTexcoord = float2(vPrevTexcoord.x * 1920.f, vPrevTexcoord.y * 1080.f);
     
-    float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);    // �ȼ� �Ÿ��� ����
-    vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
+        float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
     
-    float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
+        Out.vColor.xy = vMotionVector;
+    }
     
-    Out.vColor.xy = vMotionVector;
-    Out.vColor.a = 1.f;
+//    Out.vColor.a = 1.f;
     
     return Out;
 }
