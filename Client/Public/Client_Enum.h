@@ -247,6 +247,8 @@ namespace Client
 		TT_NORMAL,
 		TT_PROGRESS,
 
+		TT_BOSSNAME,
+
 		END
 	};
 }
