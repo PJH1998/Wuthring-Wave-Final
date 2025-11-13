@@ -80,7 +80,6 @@ private:
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
 	_bool					m_isBlocked{};
-	_bool					m_isParalysis{};
 	_bool					m_isKnockDownTrig{};
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
@@ -101,6 +100,12 @@ private:
 	_bool					m_isTurnLerp{};
 #pragma endregion
 
+	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
+#pragma region UI_BIND
+	_bool					m_isParalysis{};
+	_float					m_fParalysisRatio{}; //0.f ~ 1.f
+#pragma endregion
+
 private:
 	HRESULT						Bind_Resources();
 	void						Ready_Component(MONSTERTEST_DESC* pDesc);
@@ -109,6 +114,7 @@ private:
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
 	void						After_Condition(_float fTimeDelta);
+	void						OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);

@@ -69,6 +69,7 @@ private:
 	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
 	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
+	_float					m_fDistanceNonY{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
 	_float2					m_vDistanceRange{};
@@ -84,12 +85,19 @@ private:
 	_float					m_fHitStopRatio{};
 	_bool					m_fHitAcc{};
 
+
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
 	_bool					m_isBlocked{};
 	_bool					m_isKnockDown{};
 	_bool					m_isDist_Interp_Enable{};
 	_bool					m_isTurnLerp{};
+
+//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
+#pragma region UI_BIND
+	_bool					m_isParalysis{};
+	_float					m_fParalysisRatio{}; //0.f ~ 1.f
+#pragma endregion
 
 private:
 	HRESULT						Bind_Resources();
@@ -101,6 +109,7 @@ private:
 	void						Calculate_PosAndDir();
 
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
+	void						OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);

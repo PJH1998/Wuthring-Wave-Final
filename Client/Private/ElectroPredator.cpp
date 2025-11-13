@@ -60,6 +60,7 @@ void CElectroPredator::Priority_Update(_float fTimeDelta)
 		return;
 	}
 	m_pTransformCom->Save_PreviousPosition();
+	m_fAttackAcc[2] = m_fAttackCoolTime[2];
 }
 
 void CElectroPredator::Update(_float fTimeDelta)

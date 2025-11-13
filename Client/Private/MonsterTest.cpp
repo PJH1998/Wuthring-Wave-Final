@@ -581,6 +581,10 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	if(m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
 
+#pragma region UI_BIND
+	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
+
 	if(m_isParalysis)
 	{
 		m_fParalysisAcc -= fTimeDelta;
@@ -628,6 +632,17 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 	}
 	else
 		m_isKnockDownTrig = m_isParalysis;
+}
+
+void CMonsterTest::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		if (m_isAggro)
+			return;
+		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
+
+	}
 }
 
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
