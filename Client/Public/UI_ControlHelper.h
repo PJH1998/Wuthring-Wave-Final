@@ -20,6 +20,7 @@ public:
 	HRESULT				HUD_FadeIn();
 
 	void				Render_InteractUI(_wstring strText);
+	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 private:
 	class CGameInstance*	m_pGameInstance = { nullptr };

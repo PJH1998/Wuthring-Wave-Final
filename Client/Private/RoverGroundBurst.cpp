@@ -84,7 +84,7 @@ void CRoverGroundBurst::OnExit()
     m_iPartType = CRover::PARTTYPE::TYPE_END;
 
 
-	m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 
 	if (m_strPrevInfo.empty())
 	{

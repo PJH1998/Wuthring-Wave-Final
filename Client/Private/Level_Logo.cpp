@@ -34,7 +34,7 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
-	m_pGameInstance->SettingFog(false);
+	m_pGameInstance->SettingFog(true);
 	m_pGameInstance->Set_LUT_Index(1);
     return S_OK;
 }

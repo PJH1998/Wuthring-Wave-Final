@@ -1,7 +1,10 @@
 ﻿
 #include "ClientPch.h"
 #include "UI_Button_Interact.h"
+
 #include "Animator_UI.h"
+#include "GameSystem.h"
+#include "UI_Text.h"
 
 CUI_Button_Interact::CUI_Button_Interact(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CUI_Button(pDevice, pContext)
@@ -10,6 +13,7 @@ CUI_Button_Interact::CUI_Button_Interact(ID3D11Device* pDevice, ID3D11DeviceCont
 
 CUI_Button_Interact::CUI_Button_Interact(const CUI_Button_Interact& Prototype)
 	: CUI_Button(Prototype)
+	, m_pGameSystem(CGameSystem::GetInstance())
 {
 }
 
@@ -24,7 +28,10 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 	//__super::Initialize_Clone(pArg);
 
 	CGameObject::Initialize_Clone(pArg);
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(1);
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 	Ready_Components(pArg);
 	__super::Ready_Events();
 
@@ -49,6 +56,7 @@ HRESULT CUI_Button_Interact::Initialize_Clone(void* pArg)
 	Reset(_fmatrix(), nullptr);
 	m_isActivate = false;
 
+	Create_ChildText();
 
 
 	return S_OK;
@@ -193,6 +201,34 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 		m_iAnimOrder = 2;
 	}
 	 
+}
+
+void CUI_Button_Interact::Create_ChildText()
+{
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f - 120.f, g_iWinSizeY / 2.f - 7.f },
+		L"",	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_NORMAL,
+		0.33f,
+		L"UI_Text_Interact"
+	);
+
+	CCustom_UI* pAttacher = this->Find_ChildObject(L"Root_Interact_Multiplier");
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
 }
 
 CUI_Button_Interact* CUI_Button_Interact::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

@@ -445,6 +445,7 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
         return;
 	
 	{
+		
 		lock_guard<mutex> lock(m_Mutex);
 		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
 		// Vector 컨테이너에 넣어줄 거면 
@@ -464,6 +465,12 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
+
+#ifdef _DEBUG
+	cout << "Player Crash" << endl;
+#endif // _DEBUG
+
+
 
 	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);

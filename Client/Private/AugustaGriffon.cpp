@@ -46,9 +46,15 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 		m_isActivate = false;
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Priority_Update(fTimeDelta);
+	}
 }
+
 
 void CAugustaGriffon::Update(_float fTimeDelta)
 {
@@ -60,8 +66,13 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pParentTransform->Get_WorldMatrix());
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -69,8 +80,13 @@ void CAugustaGriffon::Late_Update(_float fTimeDelta)
     CProp::Late_Update(fTimeDelta);
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Late_Update(fTimeDelta);
+	}
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     /*if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))

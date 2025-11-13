@@ -40,23 +40,23 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
 	{ 
 	case ERoverSpecialType::EX_ATTACK01:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
-		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		break;
 	case ERoverSpecialType::EX_ATTACK02:
 		m_iPartType = CRover::PARTTYPE::PART_SWORD;
-		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+		m_pRover->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		break;
 	case ERoverSpecialType::EX_ATTACK03:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
-		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 		break;
 	case ERoverSpecialType::EX_ATTACK04:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
-		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 		break;
 	case ERoverSpecialType::EX_ATTACK05:
 		m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
-		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+		m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 		break;
 	}
     
@@ -70,7 +70,7 @@ void CRoverGroundSpecial::OnEnter(void* pArg)
     m_pRover->Set_Gravity(true);
 	
 
-	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName; // 진입할때 한번 현재 스킬이름 저장.
+	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName; // 진입할때 한번 현재 스킬이름 저장.
 }
 
 void CRoverGroundSpecial::OnUpdate(_float fTimeDelta)
@@ -103,7 +103,7 @@ void CRoverGroundSpecial::OnExit()
 	// DarkSythe의 경우 애니메이션 Clear
 	if (m_iPartType == CRover::PARTTYPE::PART_DARKSCYTHE)
 	{
-		_string strPartAnimName = m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName];
+		_string strPartAnimName = m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 		m_pRover->Clear_PartAnimation(m_iPartType, strPartAnimName);
 	}
 	
@@ -122,7 +122,7 @@ void CRoverGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 	
 	// 1. 애니메이션 실행
     CCharacterState::Play_Animation(m_pRover, fTimeDelta, m_fAnimationScale);
@@ -134,16 +134,16 @@ void CRoverGroundSpecial::Update_SkillAnimations(_float fTimeDelta)
 		// 3. 자동으로 Animation 종료시 Activate 종료.
 		m_pRover->Play_PartAnimation(
 			m_iPartType,
-			m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-			(m_Animations[m_iCurrentAnimIdx].fSpeed)* fTimeDelta, nullptr
+			m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+			(m_Animations.at(m_iCurrentAnimIdx).fSpeed)* fTimeDelta, nullptr
 		);
 	}
 	else
 	{
 		m_pRover->Play_PartAnimation(
 			m_iPartType,
-			m_Animations[m_iCurrentAnimIdx].strAnimName,
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 		);
 	}
 	
