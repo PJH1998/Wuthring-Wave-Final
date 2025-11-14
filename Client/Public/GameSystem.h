@@ -95,6 +95,7 @@ public:
 	void OnTriggerActivate(_uint iNumTriggerMapIndex, void* pArg = nullptr);
 	//레벨 전환시 초기화 고려.
 	void Clear_TriggerCallBack();
+	const _tchar* Get_SonoroText();
 #pragma endregion
 
 #pragma region SONORO_MANAGER

@@ -38,21 +38,22 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
 			});
 
-		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-			//if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-				//m_pGameSystem->Show_InteractUI(TEXT("TEST"));
-			});
 	}
 	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 23)
 	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(m_pGameSystem->Get_SonoroText());
+			});
+
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
 				Collision_During();
 			});
 
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-			//if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-				//m_pGameSystem->Hide_InteractUI(false);
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
 			});
 	}
 	else
@@ -130,6 +131,8 @@ void CTrigger_Box::Collision_During()
 		}
 		else
 			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
+
+		m_pGameSystem->Hide_InteractUI(false);
 	}
 }
 

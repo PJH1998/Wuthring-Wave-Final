@@ -124,6 +124,13 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 	return true;
 }
 
+const _tchar* CSonoro_Manager::Get_SonoroText()
+{
+	return m_SonoroRender ?
+		TEXT("소노라 떠나기") :
+		TEXT("소노라 진입하기");
+}
+
 
 CSonoro_Manager* CSonoro_Manager::Create()
 {

@@ -91,7 +91,7 @@ void CMapObject_Meteo::Render()
 
 void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
-	if(m_iEffectFrame>=5)
+	if (m_iEffectFrame >= 3)
 	{
 		m_pGameInstance->Spawn_PoolingObject(TEXT("Smoke"), m_pTransformCom->Get_WorldMatrix());
 		m_iEffectFrame = 0;
