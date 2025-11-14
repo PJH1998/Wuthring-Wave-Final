@@ -283,6 +283,12 @@
     <Filter Include="03. GameObject\Mouse">
       <UniqueIdentifier>{4ed26a0d-1dc4-40c2-9cae-cc31a19574eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect">
+      <UniqueIdentifier>{b5df649a-e4d1-43c6-b342-18893db5d4eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\SonoraChange">
+      <UniqueIdentifier>{24de9e9e-5f87-4471-aa01-33e4aeb85975}</UniqueIdentifier>
+    </Filter>
     <Filter Include="03. GameObject\Actor\Player\Galbrena">
       <UniqueIdentifier>{37f8d84d-0c30-4aa8-8b5f-cbba31abfb3d}</UniqueIdentifier>
     </Filter>
@@ -737,6 +743,12 @@
     <ClInclude Include="..\Public\Mouse.h">
       <Filter>03. GameObject\Mouse</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\ScreenEffect.h">
+      <Filter>03. GameObject\ScreenEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SonoraChange.h">
+      <Filter>03. GameObject\ScreenEffect\SonoraChange</Filter>
+    </ClInclude>
     <ClInclude Include="..\Public\Galbrena.h">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClInclude>
@@ -1186,6 +1198,12 @@
     <ClCompile Include="..\Private\Mouse.cpp">
       <Filter>03. GameObject\Mouse</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\ScreenEffect.cpp">
+      <Filter>03. GameObject\ScreenEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SonoraChange.cpp">
+      <Filter>03. GameObject\ScreenEffect\SonoraChange</Filter>
+    </ClCompile>
     <ClCompile Include="..\Private\Galbrena.cpp">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClCompile>
@@ -1273,6 +1291,12 @@
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
       <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl">
+          <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
