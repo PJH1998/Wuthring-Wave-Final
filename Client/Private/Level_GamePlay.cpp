@@ -313,7 +313,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 50, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
@@ -325,7 +325,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	AoEDesc.eType = TEXT_COLOR_TYPE::ELEC;
 	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 5, &AoEDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 15, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
 }
 
