@@ -725,6 +725,9 @@
     <ClInclude Include="..\public\ScreenBlur.h">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\RadialBlur.h">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Private\Animation.cpp">
@@ -1067,6 +1070,9 @@
     <ClCompile Include="..\private\ScreenBlur.cpp">
       <Filter>01. Utility\99. Renderer\SFX\Blur\ScreenBlur</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\RadialBlur.cpp">
+      <Filter>01. Utility\99. Renderer\SFX\Blur\Radial</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Engine_Shader_Defines.hlsli">
@@ -1120,6 +1126,15 @@
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_Noise.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_MotionBlur.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_DOF.hlsl">
+      <Filter>97. ShaderFiles</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Engine_ComputeShader_RadialBlur.hlsl">
       <Filter>97. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>

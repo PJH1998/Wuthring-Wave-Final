@@ -16,7 +16,7 @@ private:
 	virtual ~CSequence() = default;
 
 public:
-	HRESULT						Initialize(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pArg);
+	HRESULT						Initialize(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pArg);
 	_bool							Update(_float fTimeDelta);
 
 private:
@@ -25,13 +25,13 @@ private:
 	_float										m_fStartFrame{}, m_fEndFrame{};
 	_int										m_iItemIndex = {};
 	vector<SEQUENCE_ITEM_INFO>	m_Items;
-	vector<SEQUENCE_ITEM_DATA>	m_ItemDatas;
+	vector<SEQUENCE_ITEM_DATA*>	m_ItemDatas;
 
 	_float										m_fTrackPerSec = {};
 	_float										m_fTrackPosition = {};
 
 public:
-	static		CSequence*		Create(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	static		CSequence*		Create(const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc);
 	virtual		void				Free() override;
 };
 

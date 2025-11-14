@@ -786,6 +786,9 @@ void CCharacter::Rotate_HitTarget(CTransform* pTransform)
 
 
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
+
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;

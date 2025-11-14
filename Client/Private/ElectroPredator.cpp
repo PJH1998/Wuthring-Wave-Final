@@ -227,7 +227,9 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
+
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
+		vTranslate += XMVectorSet(-0.01f, 0.f, -0.01f, 0.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
 
 		CAoEDoT::AOEDOT_RESET AoEDesc{};
