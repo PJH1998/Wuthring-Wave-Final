@@ -57,19 +57,41 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 
 	m_fTriggerdTime += fTimeDelta;
 
-	if (m_fTriggerdTime >= 5.f)
+	if (m_SonoroRigidActive)
 	{
-		m_SonoroRender = !m_SonoroRender;
-		m_IsUpdate = !m_IsUpdate;
-		m_fTriggerdTime = 0.f;
+		if (m_fTriggerdTime >= 5.f)
+		{
+			m_SonoroRender = !m_SonoroRender;
+			m_IsUpdate = !m_IsUpdate;
+			m_fTriggerdTime = 0.f;
 
-		//코드 변경 가능성 高
-		for (auto& pObject : m_NonSonoroObjects)
-			pObject->ReturnPos();
+			for (auto& pObject : m_SonoroObjects)
+				pObject->Change_Collision_Layer(m_SonoroRigidActive);
+
+			//코드 변경 가능성 高
+
+			for (auto& pObject : m_NonSonoroObjects)
+				pObject->ReturnPos();
+		}
+		else
+			for (auto& pObject : m_NonSonoroObjects)
+				pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
 	}
 	else
-		for (auto& pObject : m_NonSonoroObjects)
-			pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
+	{
+
+		if (m_fTriggerdTime >= 4.f)
+		{
+			for (auto& pObject : m_NonSonoroObjects)
+				pObject->Change_Collision_Layer(m_SonoroRigidActive);
+
+			for (auto& pObject : m_SonoroObjects)
+				pObject->Change_Collision_Layer(m_SonoroRigidActive);
+			m_SonoroRender = !m_SonoroRender;
+			m_IsUpdate = !m_IsUpdate;
+			m_fTriggerdTime = 0.f;
+		}
+	}
 }
 
 _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
@@ -81,9 +103,6 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 	//버튼을 누르고 딜레이시간 이후에 슬금슬금 올라가게.
 	m_SonoroRigidActive = !m_SonoroRigidActive;
 
-	for (auto& pObject : m_SonoroObjects)
-		pObject->Change_Collision_Layer(m_SonoroRigidActive);
-
 	if (m_SonoroRigidActive)
 	{
 		_float4 vCamPos = *m_pGameInstance->Get_CamPos();
@@ -92,31 +111,24 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 		{
 			pObject->Compute_DelayTime(vCamPos);
 		}
-		m_IsUpdate = !m_IsUpdate;
 	}
-	else
-	{
-		for (auto& pObject : m_NonSonoroObjects)
-			pObject->Change_Collision_Layer(m_SonoroRigidActive);
-
-		m_SonoroRender = !m_SonoroRender;
-	}
-
-	return true;
-	//if (m_LastSonoroMode != IsSonoro)
-	//{
-	//	_float4 vCamPos = *m_pGameInstance->Get_CamPos();
-
+	//else
+	//{	
 	//	for (auto& pObject : m_NonSonoroObjects)
-	//	{
-	//		pObject->Compute_DelayTime(vCamPos);
-	//	}
-	//	m_IsUpdate = !m_IsUpdate;
-	//}
-	//else if (m_LastSonoroMode == IsSonoro)
-	//{
+	//		pObject->Change_Collision_Layer(m_SonoroRigidActive);
+
 	//	m_SonoroRender = !m_SonoroRender;
 	//}
+
+	m_IsUpdate = !m_IsUpdate;
+	return true;
+}
+
+const _tchar* CSonoro_Manager::Get_SonoroText()
+{
+	return m_SonoroRender ?
+		TEXT("소노라 떠나기") :
+		TEXT("소노라 진입하기");
 }
 
 
