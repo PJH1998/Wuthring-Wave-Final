@@ -56,6 +56,8 @@ void CAoEDoT::Update(_float fTimeDelta)
 	if (m_fLifeTimeAcc >= m_fLifeTime)
 	{
 		m_fLifeTimeAcc = 0.f;
+		m_pRigidBodyCom->Change_Layer(0);
+		m_pRigidBodyCom->IsActivate(false);
 		m_isActivate = false;
 	}
 	else
@@ -86,7 +88,7 @@ void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fDelayAcc = m_fDelayTime;
 	m_fLifeTimeAcc = 0.f;
 	m_isActivate = true;
-	//m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
+	m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), nullptr);
 }
 
 void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
