@@ -2,6 +2,7 @@
 #include "Sonoro_Manager.h"
 #include"MapObject_Sonoro.h"
 #include"MapObject_NonSonoro.h"
+#include "SonoraChange.h"
 
 CSonoro_Manager::CSonoro_Manager()
 	:m_pGameInstance(CGameInstance::GetInstance())
@@ -102,6 +103,13 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 
 	//버튼을 누르고 딜레이시간 이후에 슬금슬금 올라가게.
 	m_SonoroRigidActive = !m_SonoroRigidActive;
+	
+	CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+	Desc.fEffectTime = m_SonoroRigidActive == true ? 5.f : 4.f;
+	Desc.fRadialTime = m_SonoroRigidActive == true ? 2.f : 1.f;
+	Desc.fFadeTime = m_SonoroRigidActive == true ? 2.f : 1.f;
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 
 	if (m_SonoroRigidActive)
 	{

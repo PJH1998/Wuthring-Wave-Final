@@ -53,9 +53,9 @@ private:
 	_float				m_fLimitDepth = { 300.f};
 	_float				m_fBlurDistanceScale = {2.f};
 
-	_float				m_vCenterUV[2] = {};
-	_float				m_vRange[2] = {};
-	_float				m_fRadialScale = {};
+	_float				m_vCenterUV[2] = {0.5f, 0.5f};
+	_float				m_vRange[2] = {0.f, 0.2f};
+	_float				m_fRadialScale = {-0.3f};
 
 private:
 	void				Setting_Bias(const _char* pName, _float* pFloat);

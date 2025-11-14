@@ -67,6 +67,10 @@ void CAugustaGroundDodge::OnEnter(void* pArg)
 	
 	pGameInstance->OnShake(Desc);
 
+
+	// 8. Effect
+	m_pAugusta->Spawn_Effect(TEXT("Common_Limit"));
+	
 }
 
 void CAugustaGroundDodge::OnUpdate(_float fTimeDelta)
@@ -152,7 +156,7 @@ void CAugustaGroundDodge::Check_StateTransition(_float fTimeDelta)
 	// 애니메이션 끝나면?
 	if (m_IsAnimationEnd)
 	{
-		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+		m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE)); // 상위, 하위 상태
 		return;
 	}
