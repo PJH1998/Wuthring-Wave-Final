@@ -47,11 +47,11 @@ float4 Compute_Velocity(int2 vIndex, int2 vVelocitySize)
     Vector[3] = VelocityMap.Load(int3(iSampleX1, iSampleY1, 0));
    
     float fMaxLength = 0.f;
-    
+
     for (int i = 0; i < 4; ++i)
     {
         float fLength = length(Vector[i].xy);
-        
+
         if(fLength == 0.f)
             return 0.f;
             
@@ -115,9 +115,9 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     float4 vColor = 0.f;
     float fTotalWeight = 0.f;
     
-    for (int i = 1; i <= iSampleCount; ++i)
+    for (int i = 0; i < iSampleCount; ++i)
     {
-        float fRatio = (i) / (float) iSampleCount;
+        float fRatio = ((int) i + 0.5f) / (float) iSampleCount;
 
         float2 vOffsetTex = vTexcoord + (vMotionScale * fRatio);
 
@@ -128,7 +128,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
        
         float4 vSampleColor = InputTexture.SampleLevel(ClampSampler, vOffsetTex, 0);
         
-        float fWeight = exp2(-(float) i / (float) iSampleCount * 3.f);
+        float fWeight = exp2(fRatio * 3.f); //-(float) i / (float) iSampleCount * 3.f);
         
         vColor += vSampleColor * fWeight;
         fTotalWeight += fWeight;
@@ -197,20 +197,21 @@ void Motion_Blur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, u
     for (int i = 0; i < 4; i++)
     {   
         int2 OutIndex = DTID.xy * 2;
-        float2 vTexcoord = float2(GTID.xy);
+ //       float2 vTexcoord = float2(GTID.xy);
         
         int2 Offset = int2(i % 2, clamp(i - 1, 0, 1));
         
         OutIndex += Offset;
         
-        vTexcoord += Offset;
-    
+//        vTexcoord += Offset;
         float2 vLowPos = (OutIndex + 0.5f) * ((float2) vInSize / (float2) vOutSize) - 0.5f;
-    
+        
         int2 iLowID = (int2) floor(vLowPos);
         float2 fFrac = vLowPos - (float2) iLowID;
         
         float4 vColor = 0.f;
+        
+        int2 vTexcoord = iLowID - (GroupID.xy * int2(THREAD_X, THREAD_Y));
        
         int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X); //min(iLowID.x, THREAD_X + 1);
         int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X); //min(iLowID.x + 1, THREAD_X + 1);
