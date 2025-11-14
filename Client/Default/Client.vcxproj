@@ -293,8 +293,10 @@
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
+    <ClInclude Include="..\public\SonoraChange.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
+    <ClInclude Include="..\public\ScreenEffect.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
@@ -455,8 +457,10 @@
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
+    <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
+    <ClCompile Include="..\private\ScreenEffect.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
@@ -528,6 +532,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>

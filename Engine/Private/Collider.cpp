@@ -135,7 +135,7 @@ void CCollider::Update(const _fvector& vVelocity)
 
 	// Ground Check Error
 	CharacterVirtual::EGroundState GS = m_pCharacterVirtual->GetGroundState();
-	if (false == m_isLand && CharacterVirtual::EGroundState::OnGround == GS)
+	if ((false == m_isLand && CharacterVirtual::EGroundState::OnGround == GS) || (true == m_isLand && CharacterVirtual::EGroundState::OnGround != GS))
 		Velocity += XMVectorSet(0.f, -0.01f, 0.f, 0.f);
 
 	m_pCharacterVirtual->SetLinearVelocity(Velocity);

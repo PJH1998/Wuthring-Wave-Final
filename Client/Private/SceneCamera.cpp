@@ -30,24 +30,39 @@ void CSceneCamera::Priority_Update(_float fTimeDelta)
 
 void CSceneCamera::Update(_float fTimeDelta)
 {
-	m_fTrackPosition += fTimeDelta * m_fVelocity;
+	if (false == m_isActivate)
+		return;
+
+	m_fTrackPosition += fTimeDelta * m_fTrackPerSec;
 	if (m_fTrackPosition >= m_fEndFrame || m_iFrameIndex == m_Frames.size() - 1)
 	{
 		m_isActivate = false;
 		return;
 	}
 
-	m_fRatio = (m_fTrackPosition - m_Frames[m_iFrameIndex].fStartFrame) / (m_Frames[m_iFrameIndex + 1].fStartFrame - m_Frames[m_iFrameIndex].fStartFrame);
-	// 0. Default SetUp
-	Default_SetUp();
-	// 1. Quat SLerp
-	Lerp_Quat();
-	// 2. Spline (Catmull-Rom)
-	Spline();
+	if (-1 == m_iFrameIndex)
+		m_fRatio = m_fTrackPosition / m_Frames[m_iFrameIndex + 1].fStartFrame;
+	else
+		m_fRatio = (m_fTrackPosition - m_Frames[m_iFrameIndex].fStartFrame) / (m_Frames[m_iFrameIndex + 1].fStartFrame - m_Frames[m_iFrameIndex].fStartFrame);
+
+	if (0 <= m_iFrameIndex && m_Frames[m_iFrameIndex + 1].isLerp == true)
+	{
+		// 1. Quat SLerp
+		Lerp_Quat();
+		// 2. Spline (Catmull-Rom)
+		Spline();
+	}
 
 	// Frame Check
 	if (m_fTrackPosition >= m_Frames[m_iFrameIndex + 1].fStartFrame)
+	{
 		++m_iFrameIndex;
+		if (false == m_Frames[m_iFrameIndex].isLerp)
+		{
+			m_pTransformCom->Rotation_Quaternion(XMLoadFloat4(&m_Frames[m_iFrameIndex].vQuaternion));
+			m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_Frames[m_iFrameIndex].vPosition), 1.f));
+		}
+	}
 }
 
 void CSceneCamera::Late_Update(_float fTimeDelta)
@@ -70,12 +85,7 @@ void CSceneCamera::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fStartFrame = pData->fStartFrame;
 	m_fEndFrame = pData->fEndFrame;
 	m_fTrackPosition = m_fStartFrame;
-}
-
-void CSceneCamera::Default_SetUp()
-{
-	_float fLerpSpeedRate = m_Frames[m_iFrameIndex].fSpeedRate * (1.f - m_fRatio) + m_Frames[m_iFrameIndex + 1].fSpeedRate * m_fRatio;
-	m_fVelocity = m_fSpeed * fLerpSpeedRate;
+	m_fTrackPerSec = pData->fTrackPerSec;
 }
 
 void CSceneCamera::Lerp_Quat()
@@ -119,7 +129,7 @@ CSceneCamera* CSceneCamera::Create(ID3D11Device* pDevice, ID3D11DeviceContext* p
 	CSceneCamera* pInstance = new CSceneCamera(pDevice, pContext);
 
 	if (FAILED(pInstance->Initialize_Prototype()))
-		CRASH("Logo Camera");
+		CRASH("Scene Camera");
 
     return pInstance;
 }
@@ -129,7 +139,7 @@ CGameObject* CSceneCamera::Clone(void* pArg)
 	CSceneCamera* pClone = new CSceneCamera(*this);
 
 	if (FAILED(pClone->Initialize_Clone(pArg)))
-		CRASH("Logo Camera");
+		CRASH("Scene Camera");
 
 	return pClone;
 }

@@ -2,12 +2,12 @@
 #include "SQ_Camera_Edit.h"
 
 CSQ_Camera_Edit::CSQ_Camera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CSQ_Item_Edit { pDevice, pContext }
+	: CCamera{ pDevice, pContext }
 {
 }
 
 CSQ_Camera_Edit::CSQ_Camera_Edit(const CSQ_Camera_Edit& Prototype)
-	: CSQ_Item_Edit { Prototype }
+	: CCamera{ Prototype }
 {
 }
 
@@ -18,8 +18,8 @@ HRESULT CSQ_Camera_Edit::Initialize_Prototype()
 
 HRESULT CSQ_Camera_Edit::Initialize_Clone(void* pArg)
 {
-	if(FAILED(__super::Initialize_Clone(pArg)))
-		CRASH("SQ_Camera_Edit")
+	if (FAILED(__super::Initialize_Clone(pArg)))
+		CRASH("SQ_Camera_Edit");
 
     return S_OK;
 }
@@ -30,24 +30,39 @@ void CSQ_Camera_Edit::Priority_Update(_float fTimeDelta)
 
 void CSQ_Camera_Edit::Update(_float fTimeDelta)
 {
-	m_fTrackPosition += fTimeDelta * m_fVelocity;
+	if (false == m_isActivate)
+		return;
+
+	m_fTrackPosition += fTimeDelta * m_fTrackPerSec;
 	if (m_fTrackPosition >= m_fEndFrame || m_iFrameIndex == m_Frames.size() - 1)
 	{
 		m_isActivate = false;
 		return;
 	}
 
-	m_fRatio = (m_fTrackPosition - m_Frames[m_iFrameIndex].fStartFrame) / (m_Frames[m_iFrameIndex + 1].fStartFrame - m_Frames[m_iFrameIndex].fStartFrame);
-	// 0. Default SetUp
-	Default_SetUp();
-	// 1. Quat SLerp
-	Lerp_Quat();
-	// 2. Spline (Catmull-Rom)
-	Spline();
+	if(-1 == m_iFrameIndex)
+		m_fRatio = m_fTrackPosition / m_Frames[m_iFrameIndex + 1].fStartFrame;
+	else	
+		m_fRatio = (m_fTrackPosition - m_Frames[m_iFrameIndex].fStartFrame) / (m_Frames[m_iFrameIndex + 1].fStartFrame - m_Frames[m_iFrameIndex].fStartFrame);
+
+	if (0 <= m_iFrameIndex && m_Frames[m_iFrameIndex + 1].isLerp == true)
+	{
+		// 1. Quat SLerp
+		Lerp_Quat();
+		// 2. Spline (Catmull-Rom)
+		Spline();
+	}
 
 	// Frame Check
 	if (m_fTrackPosition >= m_Frames[m_iFrameIndex + 1].fStartFrame)
+	{
 		++m_iFrameIndex;
+		if (false == m_Frames[m_iFrameIndex].isLerp)
+		{
+			m_pTransformCom->Rotation_Quaternion(XMLoadFloat4(&m_Frames[m_iFrameIndex].vQuaternion));
+			m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&m_Frames[m_iFrameIndex].vPosition), 1.f));
+		}
+	}
 }
 
 void CSQ_Camera_Edit::Late_Update(_float fTimeDelta)
@@ -61,17 +76,12 @@ void CSQ_Camera_Edit::Reset(const _fmatrix& WorldMatrix, void* pArg)
 		return;
 	m_isActivate = true;
 
-	m_iFrameIndex = 0;
+	m_iFrameIndex = -1;
 	m_Frames = pData->Frames;
 	m_fStartFrame = pData->fStartFrame;
 	m_fEndFrame = pData->fEndFrame;
 	m_fTrackPosition = m_fStartFrame;
-}
-
-void CSQ_Camera_Edit::Default_SetUp()
-{
-	_float fLerpSpeedRate = m_Frames[m_iFrameIndex].fSpeedRate * (1.f - m_fRatio) + m_Frames[m_iFrameIndex + 1].fSpeedRate * m_fRatio;
-	m_fVelocity = m_fSpeed * fLerpSpeedRate;
+	m_fTrackPerSec = pData->fTrackPerSec;
 }
 
 void CSQ_Camera_Edit::Lerp_Quat()

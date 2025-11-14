@@ -86,7 +86,7 @@ HRESULT CLevel_Shader::Ready_Interface()
 HRESULT CLevel_Shader::Ready_TestObjects()
 {
     CEditDummy_Augusta::DUMMY_AUGU_DESC AuguDesc = {};
-    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
+    _matrix PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.0001f, 0.0001f, 0.0001f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f));
     AuguDesc.PreTransformMatrix = PreTransformationMatrix;
 
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Augu"),
@@ -99,8 +99,8 @@ HRESULT CLevel_Shader::Ready_TestObjects()
     //    CRASH("Failed Clone Dummy Wolf");
 
     CEditDummy_Map::DUMMY_MAP_DESC MapDesc = {};
-    PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
-        * XMMatrixTranslationFromVector(XMVectorSet(0.f, -100.f, 0.f, 1.f));
+    PreTransformationMatrix = XMMatrixScalingFromVector(XMVectorSet(0.01f, 0.01f, 0.01f, 1.f)) * XMMatrixRotationQuaternion(XMQuaternionRotationRollPitchYaw(0.f, XMConvertToRadians(180.f), 0.f))
+        * XMMatrixTranslationFromVector(XMVectorSet(0.f, -10.f, 0.f, 1.f));
     MapDesc.PreTransformMatrix = PreTransformationMatrix;
 
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Dummy_Map"),
