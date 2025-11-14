@@ -535,7 +535,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_fHP -= pDesc->fAttack;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #pragma region HIT_EFFECT
 		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
@@ -554,7 +554,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 #pragma region UI_BIND
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 #pragma endregion
 
@@ -582,7 +582,7 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_fHP -= pDesc->fAttack;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.35f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_isPushed = true;
 		//m_isAir = true;
