@@ -23,6 +23,8 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_MotionBlurData.fLengthScale = 0.5f;
 	m_MotionBlurData.fSampleDepthBias = 10.f;
 
+	m_fTargetLength = m_MotionBlurData.fLengthScale;
+
 	D3D11_SAMPLER_DESC ClampSamplerDesc = {};
 	ClampSamplerDesc.Filter = D3D11_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
 	ClampSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -36,6 +38,13 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	ASSERT_CRASH(m_pClampSampler);
 
 	return S_OK;
+}
+
+void CMotionBlur::Update(_float fTimeDelta)
+{
+	m_fCurLength = lerp(0.f, m_fTargetLength, m_fIntensity);
+
+	m_MotionBlurData.fLengthScale = m_fCurLength;
 }
 
 HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
@@ -124,6 +133,14 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	pVIBuffer->Render();
 
 	return S_OK;
+}
+
+void CMotionBlur::Enter()
+{
+}
+
+void CMotionBlur::Exit()
+{
 }
 
 CMotionBlur* CMotionBlur::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)

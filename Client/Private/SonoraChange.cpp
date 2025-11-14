@@ -24,6 +24,12 @@ HRESULT CSonoraChange::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_vRadialCenter = _float2(0.5f, 0.5f);
+
+	m_vRadialDistanceRange = _float2(1.f, 0.2f);
+
+	m_vRadialIntensityRange = _float2(0.f, -0.2f);
+
 	return S_OK;
 }
 
@@ -35,15 +41,29 @@ void CSonoraChange::Update(_float fTimeDelta)
 {
 	m_fCurrentTime += fTimeDelta;
 
-	_float fRadialRatio = SmoothStep(0.f, m_fRadialTime, m_fCurrentTime);
+	_float fRadialRatio = SmoothStep(m_fRadialTime, m_fEffectTime, m_fCurrentTime);
 
-	_float fRadialDistance = floatlerp(m_vRadialDistanceRange.x, m_vRadialDistanceRange.y, fRadialRatio);
-	_float fRadialIntensity = floatlerp(m_vRadialIntensityRange.x, m_vRadialIntensityRange.y, fRadialRatio);
+	if(fRadialRatio > 0.f)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+
+	_float fRadialDistance = lerp(m_vRadialDistanceRange.x, m_vRadialDistanceRange.y, fRadialRatio);
+	_float fRadialIntensity = lerp(m_vRadialIntensityRange.x, m_vRadialIntensityRange.y, fRadialRatio);
+
+	_float fFadeRatio = SmoothStep(m_fFadeTime, m_fEffectTime, m_fCurrentTime);
+
+	m_pGameInstance->Setting_Radial(m_vRadialCenter, _float2(0.f, fRadialDistance), fRadialIntensity);
+
+	if (m_fCurrentTime >= m_fEffectTime)
+	{
+		m_isActivate = false;
+		m_pGameInstance->End_SFX();
+	}
 
 }
 
 void CSonoraChange::Late_Update(_float fTimeDelta)
 {
+
 }
 
 void CSonoraChange::Render()
@@ -66,6 +86,8 @@ void CSonoraChange::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_fEffectTime = pDesc->fEffectTime;
 	m_fRadialTime = pDesc->fRadialTime;
 	m_fFadeTime = pDesc->fFadeTime;
+
+//	m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 }
 
 HRESULT CSonoraChange::Bind_ShaderResources()

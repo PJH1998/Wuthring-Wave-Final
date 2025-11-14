@@ -29,6 +29,8 @@ HRESULT CScreenEffect::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_isActivate = false;
+
 	if (FAILED(Ready_Components()))
 		return E_FAIL;
 
