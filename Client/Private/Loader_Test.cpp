@@ -77,7 +77,7 @@ HRESULT CLoader_Test::Initialize()
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
-	return S_OK;
+
 	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	
