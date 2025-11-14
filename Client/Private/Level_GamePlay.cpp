@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+#include "SonoraChange.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -75,6 +76,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Effect();
 	Ready_Skybox();
 	Ready_Mouse();
+	Ready_SFX();
 
 	return S_OK;
 }
@@ -410,6 +412,13 @@ void CLevel_GamePlay::Ready_Mouse()
 		CRASH("Mosue");
 }
 
+void CLevel_GamePlay::Ready_SFX()
+{
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
+		CRASH("h");
+}
+
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
@@ -423,6 +432,16 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+		Desc.fEffectTime = 3.f;
+		Desc.fRadialTime = 2.f;
+		Desc.fFadeTime = 2.f;
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+	}
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{

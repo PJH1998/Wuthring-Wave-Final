@@ -15,7 +15,7 @@ protected:
 
 public:
 	virtual HRESULT			Initialize() { return S_OK; }
-	virtual void			Update(_float fTimeDelta, _bool IsOn) {}
+	virtual void			Update(_float fTimeDelta) {}
 	virtual HRESULT			Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) { return S_OK; }
 	virtual void			Enter() {}
 	virtual void			Exit() {}

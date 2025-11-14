@@ -39,9 +39,9 @@ void CShader_Interface::Setting_Shader()
 	{
 		ImGui::InputFloat2("CENTER", m_vCenterUV);
 
-		ImGui::InputFloat("MIN_RANGE", &m_vRange[0], 0.01f, 0.1f);
+		ImGui::DragFloat("MIN_RANGE", &m_vRange[0], 0.01f, 0.1f);
 		ImGui::SameLine();
-		ImGui::InputFloat("MAX_RANGE", &m_vRange[1], 0.01f, 0.1f);
+		ImGui::DragFloat("MAX_RANGE", &m_vRange[1], 0.01f, 0.1f, 1.f);
 
 		ImGui::InputFloat("SCALE", &m_fRadialScale);
 		m_pGameInstance->Setting_Radial(_float2(m_vCenterUV[0], m_vCenterUV[1]), _float2(m_vRange[0], m_vRange[1]), m_fRadialScale);

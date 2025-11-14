@@ -39,7 +39,6 @@ HRESULT CBloom::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 			CRASH("Failed RCS_DOWNSAMPLE");
 	}
 
-
 	for (_int j = 2; j >= 0; --j)
 	{
 		// BLUR_X

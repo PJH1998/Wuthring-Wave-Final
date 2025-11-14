@@ -22,7 +22,7 @@ private:
 
 public:
 	virtual HRESULT		Initialize(_uint iWinSizeX, _uint iWinSizeY);
-	virtual void		Update(_float fTimeDelta, _bool IsOn);
+	virtual void		Update(_float fTimeDelta);
 	virtual HRESULT		Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) override;
 
 	virtual void		Enter();
@@ -34,18 +34,13 @@ public:
 private:
 	_uint				m_iWinSizeX = {};
 	_uint				m_iWinSizeY = {};
-	
-	_float				m_fMaxDistance = {};
-	_float				m_fCurDistance = {};
-	_float				m_fTargetDistance = {};
+
+	_float				m_fCurLength = {};
+	_float				m_fTargetLength = {};
 
 	RADIAL_DATA			m_RadialData = {};
 
 	ID3D11SamplerState* m_pClampSampler = { nullptr };
-
-private:
-	void				Update_On(_float fTimeDelta);
-	void				Update_Off(_float fTimeDelta);
 
 public:
 	static CRadialBlur* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY);
