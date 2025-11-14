@@ -141,6 +141,7 @@ void CPlayer::Update(_float fTimeDelta)
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
+	
 	// 4. Target Sorting
 	Sorting_Target();
     
@@ -148,6 +149,7 @@ void CPlayer::Update(_float fTimeDelta)
     Toggle_LockOn();
 
 	m_TargetTransforms.clear();
+
 #ifdef _DEBUG
 	GUI_Teleport();
 #endif
@@ -450,6 +452,7 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
 		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
 		// Vector 컨테이너에 넣어줄 거면 
 		m_TargetTransforms.push_back(pTargetTransform);
+		m_pTargetTransform = nullptr; 
 	}
 }
 
