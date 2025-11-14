@@ -66,7 +66,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 2.0f;
+	m_fLockOnOffsetY = 3.5f;
 	Ready_Event();
     return S_OK;
 }
