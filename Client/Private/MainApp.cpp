@@ -115,14 +115,14 @@ void CMainApp::Update(_float fTimeDelta)
 {
 	m_pGameInstance->Update_Engine(fTimeDelta);
 
-	/*ImGuiID DockingID = ImGui::GetID("Dock");
+	ImGuiID DockingID = ImGui::GetID("Dock");
 	ImGui::DockSpaceOverViewport(DockingID, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
 	ImGui::Begin("Frame");
 	_char szFrame[MAX_PATH] = {};
 	sprintf_s(szFrame, MAX_PATH, "Frame : %d", m_iFrame);
 	ImGui::Text(szFrame);
-	ImGui::End();*/
+	ImGui::End();
 
 	m_fTimeAcc += fTimeDelta;
 	++m_iCnt;

@@ -47,7 +47,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
 	if (eIdleType == EAugustaIdleType::STAND2)
 	{
-		_string strBoneName = "Root";
+		_string strBoneName = "WeaponProp05";
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
 		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
@@ -320,8 +320,8 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // Sprint => 빠르게 달리기.
     if (m_States[SPRINT])
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::SPRINT_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
+        m_pAugusta->GetStateContextForWrite().m_eSprintType = EAugustaSprintType::SPRINT_F;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT)); // 상위, 하위 상태
         return;
     }
 
