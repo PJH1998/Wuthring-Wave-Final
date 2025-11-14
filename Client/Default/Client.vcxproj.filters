@@ -304,6 +304,12 @@
     <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
       <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\UI\Props">
+      <UniqueIdentifier>{8c9a1f14-85fc-4d35-a23b-1f3f8c1f59d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\UI\Props\LockOn">
+      <UniqueIdentifier>{22797b79-8c21-4ea5-9d22-9a9802b9e0f7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -791,6 +797,9 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\UI_LockOn.h">
+      <Filter>03. GameObject\UI\Props\LockOn</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1245,6 +1254,9 @@
     </ClCompile>
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\UI_LockOn.cpp">
+      <Filter>03. GameObject\UI\Props\LockOn</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
