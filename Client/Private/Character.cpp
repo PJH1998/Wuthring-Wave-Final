@@ -352,6 +352,12 @@ void CCharacter::End_SFX()
 	m_pGameInstance->End_SFX();
 }
 
+void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, m_pModelCom);
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {

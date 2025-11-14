@@ -148,6 +148,9 @@ public:
 	virtual void Render_Damage(const HIT_DESC* pDesc);
 	virtual void Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
 	virtual void End_SFX();
+
+
+	virtual void Spawn_Effect(const _wstring& wStrEffectTag);
 #pragma endregion
 
 #pragma region STATE
