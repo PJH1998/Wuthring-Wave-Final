@@ -78,7 +78,7 @@ public:
 	//void		Toggle_InteractUI(_bool isOn, _wstring strText = L"");
 	// 상호작용 UI를 켭니다. / strText : 출력될 글자.
 	void		Show_InteractUI(_wstring strText);
-	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 떄처럼 사라질 것인지 여부
+	// 상호작용 UI를 끕니다. / isPressedAs : 클릭으로 눌렸을 때처럼 사라질 것인지 여부
 	void		Hide_InteractUI(_bool isPressedAs = false);
 	// 상호작용 UI가 마우스를 통해 상호작용되었는지를 반환합니다. 비활성 시 기본 false.
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);

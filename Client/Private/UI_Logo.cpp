@@ -123,10 +123,11 @@ void CUI_Logo::Create_ChildText()
 
 
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
-		_float2{ g_iWinSizeX / 2.f- 200.f, g_iWinSizeY / 2.f + 450.f },
+		_float2{ g_iWinSizeX / 2.f - 32.f, g_iWinSizeY / 2.f + 450.f },
 		strText,	// 상호작용 글씨
 		TEXT_COLOR_TYPE::TT_NORMAL,
-		0.33f,
+		
+		0.35f,
 		L"UI_Text_Interact"
 	);
 

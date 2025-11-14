@@ -317,6 +317,9 @@ void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 	// 인자가 기본값이라면 현재 타입으로,
 	// 임의값이라면 해당 타입으로 정렬합니다.
 
+	if (m_tUIDesc.strUIName == L"UI_Text_HUD_BossName")
+		int i = 10;
+
 	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
 		m_eTextAlignmentType = eAlignmentType;
 
@@ -324,7 +327,7 @@ void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
 	_float fOriginPosX = m_tTextDesc.vScreenPos.x;
 
 	for (auto& textInstDesc : m_tTextDesc.vecInstanceDescs)
-		fAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
+		fAlignmentPixel += (static_cast<_uint>(textInstDesc.vSInstRight.x) + 4.f);
 
 	_float fOffsetX = fAlignmentPixel * m_tTextDesc.fScale;
 
