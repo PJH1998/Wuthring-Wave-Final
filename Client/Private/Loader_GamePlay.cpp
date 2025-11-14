@@ -446,6 +446,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
 
+	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
+
 	for (auto& treeDesc : vecDescs)
 	{
 		for (auto& infoDesc : treeDesc.vecUIInfoDescs)

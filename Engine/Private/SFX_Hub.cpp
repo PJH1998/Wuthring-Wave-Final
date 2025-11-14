@@ -8,6 +8,7 @@
 #include "DOF.h"
 #include "MotionBlur.h"
 #include "ScreenBlur.h"
+#include "RadialBlur.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -37,6 +38,9 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 void CSFX_Hub::Update_SFX(_float fTimeDelta)
 {
+	if (nullptr != m_pCurrentSFX)
+		m_pCurrentSFX->Update(fTimeDelta, m_IsToggleOff);
+
 	Update_Toggle(fTimeDelta);
 	Update_ToggleIntensity(fTimeDelta);
 }
@@ -48,7 +52,10 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 		return E_FAIL;
 
 	if (nullptr != m_pCurrentSFX)
+	{
+		m_pCurrentSFX->Exit();
 		Safe_Release(m_pCurrentSFX);
+	}
 
 	m_IsToggleOff = false;
 	
@@ -59,6 +66,7 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 	m_fToggleIntensity = 0.f;
 
 	m_pCurrentSFX = pSFX;
+	m_pCurrentSFX->Enter();
 	Safe_AddRef(m_pCurrentSFX);
 
 	return S_OK;
@@ -108,6 +116,28 @@ HRESULT CSFX_Hub::Setting_DOF(_float3 vCenterPos, _float fRange)
 	return S_OK;
 }
 
+HRESULT CSFX_Hub::Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::RADIAL);
+	ASSERT_CRASH(pSFX);
+
+	CRadialBlur* pRadial = static_cast<CRadialBlur*>(pSFX);
+	pRadial->Setting_Radial(vCenterUV, vDistanceRange, fRadialIntensity);
+
+	return S_OK;
+}
+
+HRESULT CSFX_Hub::Setting_Radial(_fvector vCenterPos, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::RADIAL);
+	ASSERT_CRASH(pSFX);
+
+	CRadialBlur* pRadial = static_cast<CRadialBlur*>(pSFX);
+	pRadial->Setting_Radial(vCenterPos, vDistanceRange, fRadialIntensity);
+
+	return S_OK;
+}
+
 #ifdef _DEBUG
 void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
 {
@@ -145,6 +175,10 @@ HRESULT CSFX_Hub::Ready_SFX()
 	CScreenBlur* pScreenBlur = CScreenBlur::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
 	ASSERT_CRASH(pScreenBlur);
 	m_SFXs.emplace(SFX_TYPE::BLUR, pScreenBlur);
+
+	CRadialBlur* pRadialBlur = CRadialBlur::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
+	ASSERT_CRASH(pRadialBlur);
+	m_SFXs.emplace(SFX_TYPE::RADIAL, pRadialBlur);
 
 	return S_OK;
 }
@@ -189,12 +223,13 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &BlurRCS)))
 		CRASH("Failed Add G_BlurX");
-
+	 
 	BlurRCS.strEntryPoint = "GaussianBlur_Y";
-
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), &BlurRCS)))
 		CRASH("Failed Add G_BlurY");
 
+#pragma region DOF
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_DOF.hlsl");
 	BlurRCS.strEntryPoint = "DOF_X";
 	BlurRCS.iMipLevels = 2;
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_X"), &BlurRCS)))
@@ -203,13 +238,28 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurRCS.strEntryPoint = "DOF_Y";
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_Y"), &BlurRCS)))
 		CRASH("Failed Add DOF_Y");
+#pragma endregion
 
+#pragma region MOTION_BLUR
+	// Blur + UpSample
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_MotionBlur.hlsl");
 	BlurRCS.strEntryPoint = "Motion_Blur";
 	BlurRCS.iWidth = m_iWinSizeX;
 	BlurRCS.iHeight = m_iWinSizeY;
 	BlurRCS.iMipLevels = 1;
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_MotionBlur"), &BlurRCS)))
 		CRASH("Failed Add RCS_MotionBlur");
+#pragma endregion
+
+#pragma region RADIAL_BLUR
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_RadialBlur.hlsl");
+	BlurRCS.strEntryPoint = "RadialBlur";
+	BlurRCS.iWidth = m_iWinSizeX;
+	BlurRCS.iHeight = m_iWinSizeY;
+	BlurRCS.iMipLevels = 1;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_RadialBlur"), &BlurRCS)))
+		CRASH("Failed Add RCS_MotionBlur");
+#pragma endregion
 #pragma endregion
 
 #pragma region DOWNSAMPLE

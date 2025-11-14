@@ -14,6 +14,7 @@ HRESULT CBloom::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
+
 	m_iBloomWeight = 1;
 
 	m_fBoolIntensity = 0.25f;

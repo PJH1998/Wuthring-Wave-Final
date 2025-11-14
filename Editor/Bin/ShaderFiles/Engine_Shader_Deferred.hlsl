@@ -536,7 +536,7 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
         Out.vColor.xy = 0.f;
     }
     else
-    {                         
+    {
         float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
         float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
@@ -545,13 +545,12 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
         vPrevProjPos /= vPrevProjPos.w;
     
         float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
-        vPrevTexcoord = clamp(vPrevTexcoord, 0.f, 1.f);
     
         float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight); // 버퍼 안먹음 임시
         vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
         
         float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
-    
+        
         Out.vColor.xy = vMotionVector;
     }
     

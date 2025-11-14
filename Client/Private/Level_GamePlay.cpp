@@ -101,23 +101,43 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 	
 
 	// UI Test. Delete it.
-	//static _float fElapsedTime_TestSpawn = 0.f;
-	//fElapsedTime_TestSpawn += fTimeDelta;
-	//const _float fTestSpawnSpace = 5.f;
-	//if (fElapsedTime_TestSpawn >= fTestSpawnSpace)
+#pragma region UI TEST (INTERACTION)
+
+	//static _uint iInteractIndex = 0;
+	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
 	//{
-	//	fElapsedTime_TestSpawn = 0.f;
-	//
-	//	const _float fOffsetY = 5.f;
-	//	m_pGameSystem->Render_Damage(
-	//		_float4{ 2.42f, -10.19f + fOffsetY, -3.56f, 1.0f },
-	//		static_cast<_uint>(m_pGameInstance->Rand(100.f, 50000.f)),
-	//		static_cast<TEXT_COLOR_TYPE>(m_pGameInstance->Rand(1.f, 4.999f)),
-	//		3.f
-	//	);
-	//
-	//	//m_pGameInstance->Spawn_PoolingObject(L"Pool_Text_Damage", _fmatrix(), &tDesc);
+	//	switch (iInteractIndex)
+	//	{
+	//	case TEST_INTERACT0:
+	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	case TEST_INTERACT1:
+	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	}
 	//}
+	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	//{
+	//	m_pGameSystem->Hide_InteractUI(true);
+	//}
+	//
+	//
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+#pragma endregion
 
 }
 
@@ -291,7 +311,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	Projectile.fSpeedPerSec = 15.f;
 	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
 	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
-	//Projectile.wstrEffectTag = ;
+	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
@@ -302,7 +322,8 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
-	//AoEDesc.wstrEffectTag
+	AoEDesc.eType = TEXT_COLOR_TYPE::ELEC;
+	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 5, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
@@ -375,9 +396,9 @@ void CLevel_GamePlay::Ready_UI()
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
-	//if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
-	//	ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
-	//	CRASH("Failed Ready Button_Interact");
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+		CRASH("Failed Ready Button_Interact");
 
 	// _UI
 }
@@ -400,6 +421,8 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{

@@ -14,6 +14,7 @@ public:
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
 
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
+	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg);
 
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();

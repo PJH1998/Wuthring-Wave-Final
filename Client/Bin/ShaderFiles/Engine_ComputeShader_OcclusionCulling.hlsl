@@ -125,6 +125,9 @@ bool CheckOC2(BoxPoint Box)
     float2 vUVMin = float2(1.f, 1.f);
     float2 vUVMax = float2(0.f, 0.f);
     float fMinDepth = INF;
+    
+    // Phase01
+    
     // Corner
     for (int i = 0; i < 8; ++i)
     {
@@ -136,8 +139,14 @@ bool CheckOC2(BoxPoint Box)
     
     float2 vExtent = (vUVMax - vUVMin) * float2(g_fMip0SizeX, g_fMip0SizeY);
     
-    int iMipLevel = clamp(floor(log2(max(vExtent.x, vExtent.y))) - 2, 0, MAX_DEPTH - 1);
+    // Scale Skip
+    float fExtent = max(vExtent.x, vExtent.y);
+    if (fExtent < 8.f || fExtent > g_fMip0SizeX * 0.25f)
+        return true;
     
+    int iMipLevel = clamp(floor(log2(fExtent)) - 2, 0, MAX_DEPTH - 1);
+    
+    // OC
     int iSizeX = 0;
     int iSizeY = 0;
     int iNumOfLevel = 0;
@@ -171,6 +180,31 @@ bool CheckOC2(BoxPoint Box)
     float eps = max(10.f, fCenterDepth * 0.03f);
     if (fCenterDepth < fHZBDepth + Box.fRadius + eps)
         return true;
+    
+    // Phase02 (MipLevel - 1)
+    if(iMipLevel > 0)
+    {
+        iMipLevel -= 1;
+        InputTexture.GetDimensions(iMipLevel, iSizeX, iSizeY, iNumOfLevel);
+        for (int i = 0; i < 4; ++i)
+        {
+            float fOffsetX = i & 1 ? 0.5f / iSizeX : -0.5f / iSizeX;
+            float fOffsetY = i & 2 ? 0.5f / iSizeY : -0.5f / iSizeY;
+            float2 vTex = vUV[i] + float2(fOffsetX, fOffsetY);
+        
+            int2 px = int2(saturate(vTex) * int2(iSizeX - 1, iSizeY - 1));
+            float fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+        
+            float eps = max(10.f, fMinDepth * 0.03f);
+            if (fMinDepth < fHZBDepth + eps)
+                return true;
+        }
+        px = int2(saturate(vCenterTexcoord) * int2(iSizeX - 1, iSizeY - 1));
+        fHZBDepth = InputTexture.Load(int3(px, iMipLevel));
+        float eps = max(10.f, fCenterDepth * 0.03f);
+        if (fCenterDepth < fHZBDepth + Box.fRadius + eps)
+            return true;
+    }
     
     return false;
 }

@@ -31,7 +31,7 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
 	m_fAttackCoolTime[1] = 20.f;
-	m_fAttackCoolTime[2] = 30.f;
+	m_fAttackCoolTime[2] = 10.f;
 #pragma endregion
 
 	Ready_Component(pDesc);
@@ -60,7 +60,7 @@ void CElectroPredator::Priority_Update(_float fTimeDelta)
 		return;
 	}
 	m_pTransformCom->Save_PreviousPosition();
-	m_fAttackAcc[2] = m_fAttackCoolTime[2];
+	//m_fAttackAcc[2] = m_fAttackCoolTime[2];
 }
 
 void CElectroPredator::Update(_float fTimeDelta)
@@ -227,6 +227,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
+
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
 
@@ -234,7 +235,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		AoEDesc.fLifeTime = 3.f;
 		AoEDesc.iTickCount = 8;
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, &AoEDesc);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AOEDOT_Electro"), WorldMat, &AoEDesc);
 	}
 	else if (wStrObjectTag == TEXT("Look"))
 	{

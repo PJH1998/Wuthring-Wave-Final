@@ -239,11 +239,11 @@ void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isAct
 
 void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 {
-	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
-	//	return;
-	//
-	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+	
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
 }
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
