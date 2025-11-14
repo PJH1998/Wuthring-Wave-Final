@@ -246,6 +246,10 @@ void CGameSystem::Clear_TriggerCallBack()
 		TriggerVector.second.clear();
 	m_TriggerEvents.clear();
 }
+const _tchar* CGameSystem::Get_SonoroText()
+{
+	return m_pSonoro_Manager->Get_SonoroText();
+}
 #pragma endregion
 
 

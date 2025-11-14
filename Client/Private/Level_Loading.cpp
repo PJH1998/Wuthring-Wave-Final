@@ -221,14 +221,6 @@ void CLevel_Loading::Ready_LoadingScreen()
 
 
 	// Create Text..
-	_wstring strTitleText = L"이건테스트용제목글자에요";
-	CUI_Text* pTitleText = m_pGameSystem->Create_FontToScreen(_float2{150.f, 880.f}, strTitleText, TEXT_COLOR_TYPE::TT_TITLE, 0.5f, L"UI_Text_TitleTest");
-	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pTitleText);
-
-	_wstring strDescriptionText = L"이건테스트용설명글자에요\n줄바꿈도가능해요\n하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷하나둘셋넷";
-	CUI_Text* pDescriptionText = m_pGameSystem->Create_FontToScreen(_float2{150.f, 920.f}, strDescriptionText, TEXT_COLOR_TYPE::TT_NORMAL, 0.3f, L"UI_Text_DescriptionTest");
-	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pDescriptionText);
-
 	_wstring strLoadingText = L"";
 	CUI_Text* pLoadingText = m_pGameSystem->Create_FontToScreen(_float2{1760.f, 920.f}, strLoadingText, TEXT_COLOR_TYPE::TT_PROGRESS, 0.35f, L"UI_Text_ProgressTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pLoadingText);
@@ -237,9 +229,6 @@ void CLevel_Loading::Ready_LoadingScreen()
 	CUI_Text* pPercentText = m_pGameSystem->Create_FontToScreen(_float2{1780.f, 920.f}, strPercentText, TEXT_COLOR_TYPE::TT_NORMAL, 0.4f, L"UI_Text_PercentTest");
 	m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, L"Layer_UI_Text", pPercentText);
 
-	
-	m_pGameInstance->Add_RootUI(L"UI_Text_TitleTest", pTitleText);
-	m_pGameInstance->Add_RootUI(L"UI_Text_DescriptionTest", pDescriptionText);
 	m_pGameInstance->Add_RootUI(L"UI_Text_LoadingTest", pLoadingText);
 	m_pGameInstance->Add_RootUI(L"UI_Text_PercentTest", pPercentText);
 }
@@ -324,8 +313,6 @@ void CLevel_Loading::Free()
 
 	//m_pGameInstance->Clear_RootUI();	// 이러니까 비동기 로드로 인하여 "다음 레벨에서 추가된 RootUI"도 로딩 중 컨테이너 내부에서 제거되어 문제 발생함. 개별로 직접 컨테이너로부터 제거.
 	m_pGameInstance->Remove_RootUI(L"UI_Loading");
-	m_pGameInstance->Remove_RootUI(L"UI_Text_TitleTest");
-	m_pGameInstance->Remove_RootUI(L"UI_Text_DescriptionTest");
 	m_pGameInstance->Remove_RootUI(L"UI_Text_LoadingTest");
 	m_pGameInstance->Remove_RootUI(L"UI_Text_PercentTest");
 

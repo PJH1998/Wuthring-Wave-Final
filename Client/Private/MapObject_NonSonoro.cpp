@@ -149,7 +149,7 @@ void CMapObject_NonSonoro::Compute_DelayTime(_float4 vCamPos)
 	float minDistance = 0.0f;
 	float maxDistance = 600.0f;
 
-	float maxDelay = 3.7f;
+	float maxDelay = 4.7f;
 	float minDelay = 0.0f;
 
 	float t = (fDistance - minDistance) / (maxDistance - minDistance);
