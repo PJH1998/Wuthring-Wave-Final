@@ -25,6 +25,11 @@ public:
 
 	_bool						Initialize_ModelPath(_uint iLevel, _fmatrix PreTransformMatrix);
 	void						Add_MapObject(_fvector vPos = XMVectorSet(0.f, 0.f, 0.f, 0.f));
+	void						Load_Map_GUI();
+	void						Load_Map(const _char* pFilePath);
+	void						Ready_Map_Prototype(const _char* pFilePath);
+
+	void						SetPrototypes(_uint iLevel);
 private:
 	_bool m_IsCreateProto = { false };
 	vector<_string> m_ModelPaths;
