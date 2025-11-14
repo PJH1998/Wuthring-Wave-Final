@@ -171,11 +171,11 @@ void RadialBlur(uint3 GroupID : SV_GroupID, uint3 DTID : SV_DispatchThreadID, ui
         
         float4 vColor = 0.f;
        
-        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X); 
-        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X);
+        int iSampleX0 = clamp(vTexcoord.x, 0, THREAD_X + 1);
+        int iSampleX1 = clamp(vTexcoord.x + 1, 0, THREAD_X + 1);
     
-        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y); 
-        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y); 
+        int iSampleY0 = clamp(vTexcoord.y, 0, THREAD_Y + 1);
+        int iSampleY1 = clamp(vTexcoord.y + 1, 0, THREAD_Y + 1);
        
         float4 vLT = vSharedRadialColor[iSampleY0][iSampleX0];
         float4 vRT = vSharedRadialColor[iSampleY0][iSampleX1];
