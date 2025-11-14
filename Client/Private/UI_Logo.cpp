@@ -38,8 +38,19 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 
 
 	vector<_wstring> vecAnimFilePaths = {
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_InitialShow.json",
-		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_Initialize.json",
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_InitialShow.json",		// [SectorA_Main]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_Initialize.json",		// [SectorA_Main]
+
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_LT_Initialize.json",	// [SectorLT_SmallLogo]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_LT_FadeIn.json",		// [SectorLT_SmallLogo]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_LT_FadeOut.json",		// [SectorLT_SmallLogo]
+
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_B_Initialize.json",	// [SectorB_Button]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_B_FadeIn.json",		// [SectorB_Button]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_B_FadeOut.json",		// [SectorB_Button]
+
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_AB_Initialize.json",	// [SectorA_MainBack]
+		L"../../Client/Bin/Resource/UI/FJson/UIAnim/Logo_AB_FadeIn.json",		// [SectorA_MainBack]
 	};
 	Load_Animations(vecAnimFilePaths);
 
@@ -51,9 +62,19 @@ HRESULT CUI_Logo::Initialize_Clone(void* pArg)
 
 	Create_ChildText();
 
+
 	CCustom_UI* pMainLogoUI = Find_ChildObject(L"SectorA_Main");
 	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(pMainLogoUI->Get_Component(L"Com_Animator_UI"));
 	pAnimator_MainLogo->Change_Animation(L"Logo_Initialize");
+	CCustom_UI* pSmallLogoUI = Find_ChildObject(L"SectorLT_SmallLogo");
+	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(pSmallLogoUI->Get_Component(L"Com_Animator_UI"));
+	pAnimator_SmallLogo->Change_Animation(L"Logo_LT_Initialize");
+	CCustom_UI* pButtonLogoUI = Find_ChildObject(L"SectorB_Button");
+	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(pButtonLogoUI->Get_Component(L"Com_Animator_UI"));
+	pAnimator_ButtonLogo->Change_Animation(L"Logo_B_Initialize");
+	CCustom_UI* pBackLogoUI = Find_ChildObject(L"SectorA_MainBack");
+	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(pBackLogoUI->Get_Component(L"Com_Animator_UI"));
+	pAnimator_BackLogo->Change_Animation(L"Logo_AB_Initialize");
 
 	return S_OK;
 }
@@ -100,12 +121,26 @@ void CUI_Logo::Update_AnimControl(_float fTimeDelta)
 
 	CCustom_UI* pMainLogoUI = Find_ChildObject(L"SectorA_Main");
 	CAnimator_UI* pAnimator_MainLogo = static_cast<CAnimator_UI*>(pMainLogoUI->Get_Component(L"Com_Animator_UI"));
+	CCustom_UI* pSmallLogoUI = Find_ChildObject(L"SectorLT_SmallLogo");
+	CAnimator_UI* pAnimator_SmallLogo = static_cast<CAnimator_UI*>(pSmallLogoUI->Get_Component(L"Com_Animator_UI"));
+	CCustom_UI* pButtonLogoUI = Find_ChildObject(L"SectorB_Button");
+	CAnimator_UI* pAnimator_ButtonLogo = static_cast<CAnimator_UI*>(pButtonLogoUI->Get_Component(L"Com_Animator_UI"));
+	CCustom_UI* pBackLogoUI = Find_ChildObject(L"SectorA_MainBack");
+	CAnimator_UI* pAnimator_BackLogo = static_cast<CAnimator_UI*>(pBackLogoUI->Get_Component(L"Com_Animator_UI"));
 
 	if		(m_fTimeElapsed >= 1.f &&
 			m_iAnimOrder == 0)
 	{
 		pAnimator_MainLogo->Change_Animation(L"Logo_InitialShow");
 		m_iAnimOrder = 1;
+	}
+	else if	(m_fTimeElapsed >= 7.f &&
+			m_iAnimOrder == 1)
+	{
+		pAnimator_SmallLogo	->Change_Animation(L"Logo_LT_FadeIn");
+		pAnimator_ButtonLogo->Change_Animation(L"Logo_B_FadeIn");
+		pAnimator_BackLogo->Change_Animation(L"Logo_AB_FadeIn");
+		m_iAnimOrder = 2;
 	}
 
 
@@ -123,7 +158,7 @@ void CUI_Logo::Create_ChildText()
 
 
 	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
-		_float2{ g_iWinSizeX / 2.f - 32.f, g_iWinSizeY / 2.f + 450.f },
+		_float2{ g_iWinSizeX / 2.f - 32.f, g_iWinSizeY / 2.f + 450.f - 28.f },
 		strText,	// 상호작용 글씨
 		TEXT_COLOR_TYPE::TT_NORMAL,
 		

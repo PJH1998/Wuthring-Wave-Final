@@ -788,6 +788,9 @@
     <ClInclude Include="..\Public\GalbrenaAirFly.h">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\AugustaGroundSprint.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1240,6 +1243,9 @@
     <ClCompile Include="..\Private\GalbrenaAirFly.cpp">
       <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
+    <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">
@@ -1296,7 +1302,7 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl">
-          <Filter>96. ShaderFiles</Filter>
+      <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
