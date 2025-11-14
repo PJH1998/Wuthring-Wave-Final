@@ -295,6 +295,9 @@
     <Filter Include="03. GameObject\Weapon\Galbrena">
       <UniqueIdentifier>{726ea30f-46d1-4dac-b968-f1537c56aad6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
+      <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -743,7 +746,7 @@
     <ClInclude Include="..\public\GalbrenaFactory.h">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClInclude>
-    <ClInclude Include="..\Public\GalbrenaGun.h">
+    <ClInclude Include="..\Public\GalbrenaShotGun.h">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundRun.h">
@@ -751,6 +754,27 @@
     </ClInclude>
     <ClInclude Include="..\Public\GalbrenaGroundIdle.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaHit.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1168,7 +1192,7 @@
     <ClCompile Include="..\Private\GalbrenaFactory.cpp">
       <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
     </ClCompile>
-    <ClCompile Include="..\Private\GalbrenaGun.cpp">
+    <ClCompile Include="..\Private\GalbrenaShotGun.cpp">
       <Filter>03. GameObject\Weapon\Galbrena</Filter>
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundRun.cpp">
@@ -1176,6 +1200,27 @@
     </ClCompile>
     <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaHit.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1229,6 +1274,9 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
+      <Filter>96. ShaderFiles</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl">
@@ -1238,9 +1286,6 @@
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxFXMesh_Instance.hlsl">
-      <Filter>96. ShaderFiles</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
       <Filter>96. ShaderFiles</Filter>
     </FxCompile>
   </ItemGroup>
