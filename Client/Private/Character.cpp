@@ -784,10 +784,26 @@ void CCharacter::Rotate_HitTarget(CTransform* pTransform)
     _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 
+	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
 
+	_float4 DebugTarget = {};
+	_float4 DebugPos = {};
+	XMStoreFloat4(&DebugTarget, vToTarget);
+	XMStoreFloat4(&DebugPos, m_pTransformCom->Get_State(STATE::POSITION));
+
+	OutPutDebugFloat4(TEXT("Target"), DebugTarget);
+	OutPutDebugFloat4(TEXT("MyPos"), DebugPos);
+
+	_float fLengthSq = XMVectorGetX(XMVector3LengthSq(vToTarget));
+	if (fLengthSq < 1e-6f) // Epsilon으로 판단.
+	{
+		return;  // 곂침시 그냥 기본 Forward로 판단.
+	}
+
+	
     vToTarget = XMVectorSetY(vToTarget, 0.f);
 
-	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
+	
 
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
