@@ -105,9 +105,9 @@ _bool CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 	m_SonoroRigidActive = !m_SonoroRigidActive;
 	
 	CSonoraChange::SONORA_CHANGE_DESC Desc = {};
-	Desc.fEffectTime = 5.f;
-	Desc.fRadialTime = 2.f;
-	Desc.fFadeTime = 2.f;
+	Desc.fEffectTime = m_SonoroRigidActive == true ? 5.f : 4.f;
+	Desc.fRadialTime = m_SonoroRigidActive == true ? 2.f : 1.f;
+	Desc.fFadeTime = m_SonoroRigidActive == true ? 2.f : 1.f;
 
 	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 
