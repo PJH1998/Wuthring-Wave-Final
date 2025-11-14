@@ -70,31 +70,12 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
 	//Ready_CoroSaurus();
 	Ready_Spawner();
 
-
     Ready_Effect();
-	//CGameObject::GAMEOBJECT_DESC DummyDesc = {};
-	//DummyDesc.fSpeedPerSec = 10.f;
-	//if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Dummy"), ENUM_CLASS(LEVEL::LOGO), TEXT("Layer_Dummy"), &DummyDesc)))
-	//	CRASH("Dummy");
-
-	//CMonsterTest::MONSTERTEST_DESC MobDesc = {};
-	//MobDesc.szPrototypeModelTag = TEXT("Prototype_Component_Model_FalseSoverign");
-    //MobDesc.fSpeedPerSec = 5.f;
-    //if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_MonsterTest"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Monster"), &MobDesc)))
-	//	CRASH("FalseSoverign");
-	//
-	//if(FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"), nullptr)))
-	//	CRASH("Dummy");
-
-    /*if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::TEST), TEXT("Prototype_GameObject_Test"), ENUM_CLASS(LEVEL::TEST), TEXT("Layer_Test"))))
-        CRASH("Dummy");*/
-
     LIGHT_DESC LightDesc{};
     LightDesc.eType = LIGHT_DESC::DIRECTION;
     LightDesc.vAmbient = _float4(0.2f, 0.2f, 0.2f, 1.f);
@@ -166,17 +147,21 @@ void CLevel_Test::Ready_Layer_Player()
     // 0. vector 크기 정의
     Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
 
-    // 1. Augusta 정의.
+	// 1. Rover(주인공) 캐릭터 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
+
+    // 2. Augusta 정의.
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
     Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
-    //Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
+
+	// 3. Galbrena 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].CharacterDesc = PlayerData::GetGalbrenaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].strActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+
+
+
     
-
-    // 2. Galbrena 정의
-
-    // 3. Rover(주인공) 캐릭터 정의
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-    Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
     // 4. Player(Character 모음) 생성.
     if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
@@ -389,7 +374,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
-	//AoEDesc.wstrEffectTag
+	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_AOEDOT"), TEXT("Pool_AOEDOT_Electro"), 7, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
@@ -421,8 +406,8 @@ void CLevel_Test::Ready_CoroSaurus()
 
 void CLevel_Test::Ready_Effect()
 {
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 15);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 
 	m_pGameSystem->Load_EffectDecalData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Decal");
 }
@@ -621,16 +606,21 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		switch (iInteractIndex)
 		{
 		case TEST_INTERACT0:
-			m_pGameSystem->Render_InteractUI(L"테스트하나");
+			m_pGameSystem->Show_InteractUI(L"테스트하나");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		case TEST_INTERACT1:
-			m_pGameSystem->Render_InteractUI(L"테스트둘");
+			m_pGameSystem->Show_InteractUI(L"테스트둘");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		}
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+		(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	{
+		m_pGameSystem->Hide_InteractUI(true);
 	}
 
 

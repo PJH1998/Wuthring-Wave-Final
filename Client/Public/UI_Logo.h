@@ -24,6 +24,7 @@ public:
 
 private:
 	HRESULT					Ready_Components(void* pArg);
+	void					Create_ChildText();
 
 private:
 	void					Update_AnimControl(_float fTimeDelta);
@@ -31,6 +32,8 @@ private:
 private:
 	_float					m_fTimeElapsed = 0.f;
 	_uint					m_iAnimOrder = 0;
+
+	class CGameSystem*		m_pGameSystem = { nullptr };
 
 public:
 	static CUI_Logo*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

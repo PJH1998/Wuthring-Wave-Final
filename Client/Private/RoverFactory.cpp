@@ -27,12 +27,11 @@
 
 void CRoverFactory::Register_States(CStateMachine* pStateMachineCom, CRover* pCharacter)
 {
-	// === HSM enum 기반 State 등록 ===
+   // enum 기반 State 등록
    // enum 값을 index로 사용하여 타입 안정성 확보
 
    // Ground 카테고리 하위 State들
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::IDLE), CRoverGroundIdle::Create(pCharacter));
-	//pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::WALK), CRoverGroundWalk::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN), CRoverGroundRun::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::LAND), CRoverGroundLand::Create(pCharacter));
 	pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::DASH), CRoverGroundDash::Create(pCharacter));

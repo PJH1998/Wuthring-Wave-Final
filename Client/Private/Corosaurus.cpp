@@ -211,7 +211,7 @@ void CCorosaurus::Ready_Component(CORROSAURUS_DESC* pDesc)
 		OnDetect_Enter(iLayer, pDesc, Manifold);
 		});
 	// 숙면하는 짱룡
-	m_pRigidBodyCom->IsActivate(false);
+	//m_pRigidBodyCom->IsActivate(false);
 
 	// Com_Collider (Body)
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -302,7 +302,7 @@ void CCorosaurus::Ready_PartObjects(CORROSAURUS_DESC* pDesc)
 	TriggerDesc.vOffsetPos = _float3(-0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::FUSI;
-	TriggerDesc.pCondition = &m_iState;
+	//TriggerDesc.pCondition = &m_iState;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

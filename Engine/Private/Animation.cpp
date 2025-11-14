@@ -106,7 +106,7 @@ HRESULT CAnimation::Initialize(ifstream& InputFile, const vector<class CBone*>& 
 
 	InputFile.read(reinterpret_cast<_char*>(&m_iNumChannels), sizeof(_uint));
 
-	for (size_t i = 0; i < m_iNumChannels; ++i)
+	for (_uint i = 0; i < m_iNumChannels; ++i)
 	{
 		CChannel* pChannel = CChannel::Create(InputFile, Bones);
 		if (nullptr == pChannel)

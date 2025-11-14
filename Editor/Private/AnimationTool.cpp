@@ -708,8 +708,52 @@ void CAnimationTool::LoadDat()
 
     CModel* pModelCom = { nullptr };
 
+	_matrix		PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 1.f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f)); // Default
+
 	static bool isPart = { false };
 	ImGui::Checkbox("Part", &isPart);
+
+	static _float fRadians[3] = { -90.f, 0.f, 0.f };
+	static _bool IsRotation[3] = { true, false, false };
+
+	if (isPart)
+	{
+		ImGui::Checkbox("IsRotX", &IsRotation[0]);
+		ImGui::SameLine();
+		ImGui::Checkbox("IsRotY", &IsRotation[1]);
+		ImGui::SameLine();
+		ImGui::Checkbox("IsRotZ", &IsRotation[2]);
+
+		
+		PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f);
+		if (IsRotation[0])
+		{
+			ImGui::SetNextItemWidth(70.0f);
+			ImGui::InputFloat("fRadianX", &fRadians[0]);
+			
+			PreTransformMatrix *= XMMatrixRotationX(XMConvertToRadians(fRadians[0]));
+
+		}
+		if (IsRotation[1])
+		{
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(70.0f);
+			ImGui::InputFloat("fRadianY", &fRadians[1]);
+			PreTransformMatrix *= XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationY(XMConvertToRadians(fRadians[1]));
+		}
+		if (IsRotation[2])
+		{
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(70.0f);
+			ImGui::InputFloat("fRadianZ", &fRadians[2]);
+			PreTransformMatrix *= XMMatrixRotationZ(XMConvertToRadians(fRadians[2]));
+		}
+			
+	}
+
 
     if (ImGui::Button("Load DAT File"))
     {
@@ -744,15 +788,12 @@ void CAnimationTool::LoadDat()
                 return;
             }
 
-            _matrix		PreTransformMatrix = XMMatrixIdentity();
-            //_float fSize = 1.f;
-            _float fSize = 0.0001f;
-            PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+            //_matrix		PreTransformMatrix = XMMatrixIdentity();
+            ////_float fSize = 1.f;
+            //_float fSize = 0.0001f;
+            //PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
 
-			if (isPart)
-			{
-				PreTransformMatrix = XMMatrixScaling(0.01f, 0.01f, 0.01f) * XMMatrixRotationX(XMConvertToRadians(-90.f));
-			}
+			
 
             wStrModelName = StringToWString(strModelName);
 
@@ -800,8 +841,12 @@ void CAnimationTool::RenderUI_ModelPrototype()
 
     ImGui::SameLine();
 
-    if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
-        Render_Model_Detail();
+#ifdef _DEBUG
+	if (iSelectedIndex >= 0 && iSelectedIndex < m_ModelNames.size())
+		Render_Model_Detail();
+#endif // _DEBUG
+
+
 
     
 }
@@ -880,6 +925,32 @@ void CAnimationTool::RenderUI_AnimationList()
 
     ImGui::BeginChild("State pane", ImVec2(400, 0.f), true);
 
+	// 여기에 회전 가능하게?
+	CTransform* pTransfrom = m_AnimationActors[m_wSelected_AnimActorTag]->Get_Transform();
+
+	static _float fRadians[3] = {0.f, 0.f, 0.f};
+	static _float fTranslation[3] = {0.f, 0.f, 0.f};
+	if (nullptr != pTransfrom)
+	{
+		ImGui::InputFloat3("Set Quaternion", fRadians);
+
+		if (ImGui::Button("Apply Quaternion"))
+		{
+			_fvector vQuaternion = XMQuaternionRotationRollPitchYaw(fRadians[0], fRadians[1], fRadians[2]);
+			pTransfrom->Rotation_Quaternion(vQuaternion);
+		}
+
+		ImGui::InputFloat3("Set Translation", fTranslation);
+
+		_float3 vPos = {};
+		memcpy(&vPos, fTranslation, sizeof(_float3));
+		
+		if (ImGui::Button("Apply Translation"))
+		{
+			pTransfrom->Set_State(STATE::POSITION, XMLoadFloat3(&vPos));
+		}
+
+	}
 
     // 현재 State 목록을 .csv로 내보냅니다.
     Export_StateAnimationMap_ToCSV();
@@ -897,6 +968,7 @@ void CAnimationTool::RenderUI_AnimationList()
 
 
 
+#ifdef _DEBUG
 
 void CAnimationTool::Render_Model_Detail()
 {
@@ -962,6 +1034,8 @@ void CAnimationTool::Render_Model_Detail()
 				return;
 			}
 			Desc.pParentActor = pActor;
+
+
 			Desc.pParentTransform = pActor->Get_Transform();
 			Desc.strBoneName = textBone;
 		}
@@ -1012,6 +1086,8 @@ void CAnimationTool::Render_Model_Detail()
 
     ImGui::EndChild();
 }
+
+#endif // _DEBUG
 
 void CAnimationTool::Render_Animation_Detail()
 {

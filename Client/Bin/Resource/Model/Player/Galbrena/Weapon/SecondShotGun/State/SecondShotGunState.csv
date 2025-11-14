@@ -1,0 +1,12 @@
+StateName,AnimName,Duration
+Attack04,Attack04,313.000000
+Attack_H_01,Attack_H_01,167.000000
+Attack_H_0201,Attack_H_0201,182.000000
+Attack_H_0202,Attack_H_0202,153.000000
+Attack_H_0203,Attack_H_0203,157.000000
+Burst01,Burst01,182.000000
+Gun01,Gun01,30.000000
+R01,R01,120.000000
+Stand01,Stand01,80.000000
+Stand1_Action01,Stand1_Action01,363.000000
+StandChange01,StandChange01,372.000000

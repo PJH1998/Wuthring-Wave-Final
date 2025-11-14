@@ -92,23 +92,27 @@ void CHavocWarrior::Update(_float fTimeDelta)
 	{
 		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
 		m_isPushed = false;
+		m_isHover = true;
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
 		vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
 	}
 	else if ((m_iState & ENUM_CLASS(TEST_STATE::AIR)) && (m_iState & ENUM_CLASS(TEST_STATE::BEHIT)))
 	{
-		//if (m_isPushed)
-		//{
-		//	_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
-		//	m_isPushed = false;
-		//	ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
-		//	vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
-		//}
-		//else if (m_iState & ENUM_CLASS(TEST_STATE::BEHIT))
-		//{
-			_vector vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+		_vector vBeHitDir{};
+		if (m_isHover)
+		{
+			vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f) * 0.1f;
 			ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
 			vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+		}
+		else
+		{
+			vBeHitDir = XMVectorSet(0.f, 1.f, 0.f, 0.f);
+			ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
+			vVelocity += vBeHitDir * m_fImpluseRate; //임펄스 수치
+			m_isHover = true;
+		}
+
 		//}
 	}
 	m_pColliderCom->Update(vVelocity / fTimeDelta);
@@ -166,6 +170,7 @@ void CHavocWarrior::Late_Update(_float fTimeDelta)
 			{
 				m_iState &= ~ENUM_CLASS(TEST_STATE::AIR);
 				m_fAirAcc = 0.f;
+				m_isHover = false;
 			}
 		}
 		else
@@ -219,6 +224,7 @@ void CHavocWarrior::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isDeadTrigger = false;
 	m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	m_fAttackAcc[1] = 15.f;
 }
 
 void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isActive)
@@ -233,11 +239,11 @@ void CHavocWarrior::Collider_Active(const _wstring& wStrColliderTag, _bool isAct
 
 void CHavocWarrior::Effect_Active(const _wstring& wStrEffectTag)
 {
-	//if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
-	//	return;
-	//
-	//_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	//m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
+		return;
+	
+	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
 }
 
 void CHavocWarrior::Object_Func(const _wstring& wStrObjectTag)
@@ -265,7 +271,7 @@ void CHavocWarrior::Ready_Component(HAVOCWARRIOR_DESC* pDesc)
 	RigidbodyDesc.eShape = SHAPE::BOX;
 	RigidbodyDesc.eType = EMotionType::Kinematic;
 	RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-	RigidbodyDesc.vExtent = _float3(13.f, 9.f, 13.f);
+	RigidbodyDesc.vExtent = _float3(16.f, 9.f, 16.f);
 	XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
 	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -541,10 +547,21 @@ void CHavocWarrior::BeHit(_uint iLayer, void* pOther, const ContactManifold& Man
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+#pragma region UI_BIND
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
 		vPosition.y += 0.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+#pragma endregion
+
+#pragma region PHYSICS
+		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+		_vector vCollisionNormal = XMLoadFloat3(&m_vBeHit_Normal);
+		if (XMVectorGetX(XMVector3Dot(vCollisionNormal, XMVectorSet(0.f, 1.f, 0.f, 0.f))) >= 0.525f)
+		{
+			m_iState |= ENUM_CLASS(TEST_STATE::AIR);
+		}
+#pragma endregion
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -582,6 +599,13 @@ void CHavocWarrior::Patrol()
 	}
 }
 
+_bool CHavocWarrior::isAnimationRunning()
+{
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD) && !m_isDeadTrigger)
+		return true;
+	return !m_isAnimationFinished;
+}
+
 _bool CHavocWarrior::isKnockDown()
 {
 	if (m_beHit)
@@ -592,6 +616,8 @@ _bool CHavocWarrior::isKnockDown()
 
 _bool CHavocWarrior::isAttackEnable()
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return false;
 	if (!m_isDetecting)
 		return false;
 	_bool bResult{};
@@ -618,7 +644,7 @@ _bool CHavocWarrior::Attack(_uint iIndex, _float fInterval)
 
 _bool CHavocWarrior::isChase()
 {
-	if (m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+	if (m_iState & (ENUM_CLASS(TEST_STATE::SPAWN) | ENUM_CLASS(TEST_STATE::DEAD)))
 		return false;
 
 	_bool bResult{};

@@ -33,8 +33,12 @@ void CEffect_Controller::Update()
 {
     Prefab_Tab();
 
-    if (m_AnimActorDesc.pAnimActor != nullptr && m_pSelectedPrefab != nullptr)
-        PrefabBinding_Tab();
+#ifdef _DEBUG
+	if (m_AnimActorDesc.pAnimActor != nullptr && m_pSelectedPrefab != nullptr)
+		PrefabBinding_Tab();
+#endif // _DEBUG
+
+    
 }
 
 void CEffect_Controller::Render()
@@ -195,7 +199,7 @@ void CEffect_Controller::Prefab_Tab()
                             m_ChildrenTag[0] = _T('\0');
                             m_bChildrenCreatFlag = false;
                             m_bChildrenTagFlag = false;
-                            m_eChildrenType == EFFECT_TYPE::END;
+                            m_eChildrenType = EFFECT_TYPE::END;
                         }
                     }
 
@@ -219,7 +223,7 @@ void CEffect_Controller::Prefab_Tab()
                             m_ChildrenTag[0] = _T('\0');
                             m_bChildrenCreatFlag = false;
                             m_bChildrenTagFlag = false;
-                            m_eChildrenType == EFFECT_TYPE::END;
+                            m_eChildrenType = EFFECT_TYPE::END;
                         }
                     }
 
@@ -243,7 +247,7 @@ void CEffect_Controller::Prefab_Tab()
                             m_ChildrenTag[0] = _T('\0');
                             m_bChildrenCreatFlag = false;
                             m_bChildrenTagFlag = false;
-                            m_eChildrenType == EFFECT_TYPE::END;
+                            m_eChildrenType = EFFECT_TYPE::END;
                         }
 
                     }
@@ -268,7 +272,7 @@ void CEffect_Controller::Prefab_Tab()
 							m_ChildrenTag[0] = _T('\0');
 							m_bChildrenCreatFlag = false;
 							m_bChildrenTagFlag = false;
-							m_eChildrenType == EFFECT_TYPE::END;
+							m_eChildrenType = EFFECT_TYPE::END;
 						}
 					}
 
@@ -292,7 +296,7 @@ void CEffect_Controller::Prefab_Tab()
 							m_ChildrenTag[0] = _T('\0');
 							m_bChildrenCreatFlag = false;
 							m_bChildrenTagFlag = false;
-							m_eChildrenType == EFFECT_TYPE::END;
+							m_eChildrenType = EFFECT_TYPE::END;
 						}
 					}
                 }
@@ -1766,59 +1770,61 @@ void CEffect_Controller::Import_AnimationData(const EFFECTACTOR_DESC& effectActo
 
 }
 
+#ifdef _DEBUG
 void CEffect_Controller::PrefabBinding_Tab()
 {
-    if (ImGui::Begin("Prefab_Binding"))
-    {
-        if (ImGui::InputText("Bone Name", m_BoneName, IM_ARRAYSIZE(m_BoneName), ImGuiInputTextFlags_EnterReturnsTrue))
-            m_bBoneFlag = true;
- 
-        if(ImGui::DragFloat("TrackPosition", &m_fTrackPosition, 0.1f, 0.f, m_AnimActorDesc.fDuration));
+	if (ImGui::Begin("Prefab_Binding"))
+	{
+		if (ImGui::InputText("Bone Name", m_BoneName, IM_ARRAYSIZE(m_BoneName), ImGuiInputTextFlags_EnterReturnsTrue))
+			m_bBoneFlag = true;
+
+		if (ImGui::DragFloat("TrackPosition", &m_fTrackPosition, 0.1f, 0.f, m_AnimActorDesc.fDuration));
 
 		if (ImGui::Checkbox("Basic", &m_IsBone));
 
-        if (m_bBoneFlag)
-        {
-            if (ImGui::Button("Binding"))
-            {;
-                _string BoneName = m_BoneName;
-                m_pSelectedPrefabDesc->strBoneTag = m_BoneName;
-                m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
+		if (m_bBoneFlag)
+		{
+			if (ImGui::Button("Binding"))
+			{
+				;
+				_string BoneName = m_BoneName;
+				m_pSelectedPrefabDesc->strBoneTag = m_BoneName;
+				m_AnimActorDesc.pBoneMatrix = m_AnimActorDesc.pAnimActor->Get_BoneMatrix(BoneName);
 				m_pSelectedPrefab->Set_BoneTag(m_BoneName);
 
-                m_bBoneFlag = false;
-                m_BoneName[0] = _T('\0');
-            }
-        }
+				m_bBoneFlag = false;
+				m_BoneName[0] = _T('\0');
+			}
+		}
 
-        if (ImGui::Button("Reset"))
-        {
-            //초기화
-            m_AnimActorDesc.fDuration = 0.f;
-            m_AnimActorDesc.pAnimActor = nullptr;
-            m_AnimActorDesc.pModelCom = nullptr;
-            m_AnimActorDesc.strAnimName = "";
-            m_AnimActorDesc.pBoneMatrix = nullptr;
-            m_bBoneFlag = false;
-            m_BoneName[0] = _T('\0');
+		if (ImGui::Button("Reset"))
+		{
+			//초기화
+			m_AnimActorDesc.fDuration = 0.f;
+			m_AnimActorDesc.pAnimActor = nullptr;
+			m_AnimActorDesc.pModelCom = nullptr;
+			m_AnimActorDesc.strAnimName = "";
+			m_AnimActorDesc.pBoneMatrix = nullptr;
+			m_bBoneFlag = false;
+			m_BoneName[0] = _T('\0');
 
-            m_pSelectedPrefab->SetActivate(false);
-            m_pSelectedPrefab->Reset_SpawnMatrix();
-        }
-    
-        ImGui::SameLine(0.f, 20.f);
+			m_pSelectedPrefab->SetActivate(false);
+			m_pSelectedPrefab->Reset_SpawnMatrix();
+		}
 
-        if (ImGui::Button("Action"))
-            m_bTest = true;
+		ImGui::SameLine(0.f, 20.f);
 
-        if (m_bTest)
-        {
-            if (m_fTrackPosition > -1.f)
-            {
-                _float fCurrentTrackPos = *m_AnimActorDesc.pAnimActor->Get_TrackPositionPtr(m_AnimActorDesc.strAnimName);
+		if (ImGui::Button("Action"))
+			m_bTest = true;
 
-                if (m_fTrackPosition <= fCurrentTrackPos)
-                {
+		if (m_bTest)
+		{
+			if (m_fTrackPosition > -1.f)
+			{
+				_float fCurrentTrackPos = *m_AnimActorDesc.pAnimActor->Get_TrackPositionPtr(m_AnimActorDesc.strAnimName);
+
+				if (m_fTrackPosition <= fCurrentTrackPos)
+				{
 					_float4x4 SpawnMatrix = {};
 					PREFAB_INFO Info = {};
 					_float4x4 Defualt = {};
@@ -1828,11 +1834,11 @@ void CEffect_Controller::PrefabBinding_Tab()
 						if (m_AnimActorDesc.pBoneMatrix == nullptr)
 						{
 							SpawnMatrix = *m_AnimActorDesc.pAnimActor->Get_WorldMatrixPtr();
-	
+
 							XMStoreFloat4x4(&Defualt, XMMatrixIdentity());
 
 							m_pSelectedPrefab->Set_SpawnMatrix(SpawnMatrix, Defualt);
-				
+
 						}
 						else
 						{
@@ -1853,16 +1859,20 @@ void CEffect_Controller::PrefabBinding_Tab()
 
 						m_pSelectedPrefab->Reset_Prefab_Info();
 						m_pSelectedPrefab->Reset(XMLoadFloat4x4(&Defualt), &Info);
+						m_pSelectedPrefab->Reset(XMLoadFloat4x4(&Defualt), &Info);
 					}
 
-                    m_bTest = false;
-                }
-            }
-        }
+					m_bTest = false;
+				}
+			}
+		}
 
-        ImGui::End();
-    }
+		ImGui::End();
+	}
 }
+#endif // _DEBUG
+
+
 
 CEffect_Controller* CEffect_Controller::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

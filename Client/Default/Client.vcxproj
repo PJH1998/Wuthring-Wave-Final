@@ -206,6 +206,19 @@
     <ClInclude Include="..\Public\ElectroPredator.h" />
     <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\FS_Scythe.h" />
+    <ClInclude Include="..\Public\Galbrena.h" />
+    <ClInclude Include="..\Public\GalbrenaAirFall.h" />
+    <ClInclude Include="..\Public\GalbrenaAirFly.h" />
+    <ClInclude Include="..\Public\GalbrenaAirJump.h" />
+    <ClInclude Include="..\public\GalbrenaFactory.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
+    <ClInclude Include="..\Public\GalbrenaShotGun.h" />
+    <ClInclude Include="..\Public\GalbrenaHit.h" />
+    <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
     <ClInclude Include="..\public\Ggobul.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
@@ -378,6 +391,18 @@
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp" />
+    <ClCompile Include="..\Private\Galbrena.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirFly.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
+    <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\private\Ggobul.cpp" />
     <ClCompile Include="..\Private\GroundState.cpp" />
@@ -524,7 +549,6 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
@@ -537,6 +561,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
+      <FileType>Document</FileType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -17,19 +17,34 @@
 #include "Spawner.h"
 #include "PatternDummy.h"
 
+
+
+#pragma region PLAYER
 #include "Wing.h"
 
-#include "AugustaBayonet.h"
-#include "AugustaSkillWeapon.h"
-#include "AugustaGriffon.h"
-#include "Augusta.h"
-
+// Rover
 #include "RoverSword.h"
 #include "RoverDarkWing.h"
 #include "RoverDarkScythe.h"
 #include "Rover.h"
 
+// Augusta
+#include "AugustaBayonet.h"
+#include "AugustaSkillWeapon.h"
+#include "AugustaGriffon.h"
+#include "Augusta.h"
+
+// Galbrena
+#include "Galbrena.h"
+#include "GalbrenaShotGun.h"
+
+// Player
 #include "Player.h"
+#pragma endregion
+
+
+
+
 
 
 #pragma region UI
@@ -53,6 +68,8 @@ CLoader_Test::CLoader_Test(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 
 HRESULT CLoader_Test::Initialize()
 {
+
+
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
@@ -60,9 +77,17 @@ HRESULT CLoader_Test::Initialize()
 
     m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
+	
     m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
+	
+	
+	
     m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
+
+	
     m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
+	
     m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
     m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
     
@@ -527,6 +552,60 @@ HRESULT CLoader_Test::Load_Rover()
 #pragma endregion
 
     return S_OK;
+}
+
+HRESULT CLoader_Test::Load_Galbrena()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Galbrena";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CGalbrena::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+#pragma region Parts
+	wStrModelTag = L"Prototype_Component_Model_Galbrena_ShotGun";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/ShotGun/ShotGun.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+	//PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize);
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_FirstGun");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+#pragma endregion
+	return S_OK;
 }
 
 HRESULT CLoader_Test::Load_Action()

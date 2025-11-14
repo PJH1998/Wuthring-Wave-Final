@@ -103,7 +103,7 @@ private:
 	void						OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						Patrol();
-	_bool						isAnimationRunning() { return !m_isAnimationFinished; }
+	_bool						isAnimationRunning();
 	_bool						isKnockDown();
 	_bool						isAttackEnable();
 	_bool						Attack(_uint iIndex, _float fInterval);

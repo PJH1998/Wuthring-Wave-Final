@@ -69,8 +69,10 @@ public:
 	const _float4x4* Get_BoneMatrix(const _string& strBoneName);
 	const _float4x4* Get_WorldMatrixPtr();
 
-	void Set_ChildActor(CAnimationActor* pChildActor) { m_pChildActor = pChildActor; }
-	_bool Is_ChildActor() { return m_pChildActor != nullptr; }
+	void Set_ChildActor(CAnimationActor* pChildActor);
+	void Set_ChildActors(CAnimationActor* pChildActor);
+	//_bool Is_ChildActor() { return m_pChildActor != nullptr; }
+	_bool Is_ChildActor();
 	class CTransform* Get_Transform() { return m_pTransformCom; }
 
 	
@@ -91,6 +93,8 @@ private:
 	class CTransform* m_pParentTransform = { nullptr };
 	const _float4x4* m_pSocketMatrix = { nullptr };
 	CAnimationActor* m_pParentActor = { nullptr };
+
+	vector<CAnimationActor*> m_ChildActors = { nullptr };
 	CAnimationActor* m_pChildActor = { nullptr };
 	_float4x4 m_CombinedMatrix = {};
 	_float4 m_vInitPosition = {};

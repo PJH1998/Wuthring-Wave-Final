@@ -31,15 +31,27 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 	m_iTriggerIndex = pDesc->iTriggerIndex;
 	Register_Trigger();
 
-	if (m_iTriggerIndex == 22)
+	if (m_iTriggerIndex == 22 || m_iTriggerIndex == 23)
+	{
 		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
-		m_Temp = true;
+			m_IsTriggered = true;
 			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				UI_Set(false);
+			});
+	}
 	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 23)
 	{
 		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
 				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				UI_Set(true);
 			});
 	}
 	else
@@ -56,18 +68,26 @@ void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
 	if (m_iTriggerIndex > 20)
 	{
-		if(m_Temp)
+		if(m_IsTriggered)
 		{
 			m_pGameSystem->Change_Sonoro(true);
-			m_Temp = !m_Temp;
+			m_IsTriggered = !m_IsTriggered;
+			m_bOnCoolDown = true;
+		}
+	}
+	if (m_bOnCoolDown)
+	{
+		m_fCoolDown += fTimeDelta;
+		if (m_fCoolDown >= 6.f)
+		{
+			m_bOnCoolDown = !m_bOnCoolDown;
+			m_fCoolDown = 0.f;
 		}
 	}
 }
 
 void CTrigger_Box::Update(_float fTimeDelta)
 {
-	const ContactManifold Manifold{};
-	//m_pRigidbodyCom->OnCollide_Enter(ENUM_CLASS(LEVEL::MAP), nullptr, Manifold);
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
@@ -101,7 +121,7 @@ void CTrigger_Box::Collision_Enter()
 
 void CTrigger_Box::Collision_During()
 {
-	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN)
+	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
 	{
 		if (!m_pGameSystem->IsSonoro())
 		{
@@ -143,17 +163,26 @@ void CTrigger_Box::Register_Trigger()
 
 		case 21:
 			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
-			m_Temp = true;
+			m_IsTriggered = true;
 			break;
-		case 121:
-			m_Temp = true;
-			break;
+
 		case 22:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
 			break;
 		case 23:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
 			break;
 		}
 		});
+}
+
+void CTrigger_Box::UI_Set(_bool B)
+{
+	B ?
+		true :
+		false;
 }
 
 

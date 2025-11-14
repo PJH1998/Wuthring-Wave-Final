@@ -365,6 +365,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
 
 			File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
 			File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
@@ -376,7 +377,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
 
 			File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
-			XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
+			//XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Meteo")
 				, ENUM_CLASS(eLevel), TEXT("Layer_Meteo"), &Desc);
 		}
@@ -604,7 +605,7 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
 }
 
-void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
 {
     //프리팹 폴더 경로 까지 지정해주면 내부에있는 프리팹들 다 읽어줌.
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -622,13 +623,13 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
             {
                 _string strPrefabTag = entry.path().stem().string();
 
-                Load_Prefab_FromJson(filePath, strPrefabTag, eLevel);
+                Load_Prefab_FromJson(filePath, strPrefabTag, eLevel, PoolingNum);
             }
         }
     }
 }
 
-void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel)
+void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum)
 {
     ifstream JsonStream(strFilePath.c_str());
 
@@ -713,12 +714,11 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
     //아니면 json으로 저장할 때 이름으로 할지 == strPrefabTag ex)Dash_Test
 
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
-        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 10, &PrefabDesc)))
+        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, PoolingNum, &PrefabDesc)))
     {
         MSG_BOX("Prefab Load Fail");
         return;
     }
-    //개수 설정은 몇개로 ?
 }
 
 void CParser::Load_Particle_VB_FromJson(const _string& strFilePath, const _string& VBTag, LEVEL eLevel)

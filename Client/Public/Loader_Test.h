@@ -25,6 +25,7 @@ private:
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();	
 	HRESULT				Load_Rover();
+	HRESULT				Load_Galbrena();
 	HRESULT				Load_Action();
 
 	HRESULT				Load_UI();

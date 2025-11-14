@@ -43,11 +43,18 @@ HRESULT CEdit_Meteo::Initialize_Clone(void* pArg)
 		event.File.write(reinterpret_cast<const char*>(&Length), sizeof(_uint));
 		event.File.write(m_ModelName, Length);
 
+#ifdef _DEBUG
 		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "SelectedObject"))
 			m_iShaderPassIndex = 0;
+#endif // _DEBUG
+
+		
 
 		event.File.write(reinterpret_cast<const char*>(&m_iShaderPassIndex), sizeof(_uint));
 		event.File.write(reinterpret_cast<const char*>(&m_eObjectType), sizeof(OBJECTTYPE));
+		_float4x4 Mat;
+		XMStoreFloat4x4(&Mat, m_pTransformCom->Get_WorldMatrix());
+		event.File.write(reinterpret_cast<const char*>(&Mat), sizeof(_float4x4));
 
 		event.File.write(reinterpret_cast<const _char*>(&m_vSourPos), sizeof(_float4));
 		event.File.write(reinterpret_cast<const _char*>(&m_vDestPos), sizeof(_float4));
@@ -109,9 +116,14 @@ void CEdit_Meteo::Update(_float fTimeDelta)
 #endif
 		//m_pModelCom = m_pModelComArray[m_iLODIndex];
 	}
+
+#ifdef _DEBUG
 	if (m_Test)
 		LerpPos(fTimeDelta);
 }
+#endif // _DEBUG
+
+
 
 void CEdit_Meteo::Late_Update(_float fTimeDelta)
 {
@@ -197,11 +209,15 @@ void CEdit_Meteo::Set_ImGuiOption()
 	if (ImGui::Button("Start"))
 		XMStoreFloat4(&m_vSourPos.float4, m_pTransformCom->Get_State(STATE::POSITION));
 
+	ImGui::SameLine();
+	if (ImGui::Button("Move To Start"))
+		m_pTransformCom->Set_State(STATE::POSITION, m_vSourPos.Vec);
 	ImGui::InputFloat4(" - Dest Pos", m_vDestPos.arr, "%.2f");
 	if (ImGui::Button("Dest"))
-
 		XMStoreFloat4(&m_vDestPos.float4, m_pTransformCom->Get_State(STATE::POSITION));
-
+	ImGui::SameLine();
+	if (ImGui::Button("Move To Dest"))
+		m_pTransformCom->Set_State(STATE::POSITION, m_vDestPos.Vec);
 	ImGui::InputFloat(" - Duration", &m_fDuration, 0.1f, 0.1f, "%.1f");
 	ImGui::InputFloat("- Arch Y", &m_farchY, 10.f, 10.f, "%.2f");
 	ImGui::InputScalar("TriggerIndex : ", ImGuiDataType_U32, &m_iTriggerIndex);
