@@ -132,7 +132,7 @@ void CTrigger_Box::Collision_During()
 		else
 			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
 
-		m_pGameSystem->Hide_InteractUI(false);
+		m_pGameSystem->Hide_InteractUI(true);
 	}
 }
 
