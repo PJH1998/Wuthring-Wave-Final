@@ -50,7 +50,7 @@ HRESULT CGalbrena::Initialize_Clone(void* pArg)
 	
 	// 비활성화. 
 	//PartActivate(PART_FIRSTGUN, false);
-	PartActivate(PART_FIRSTGUN, true);
+	PartActivate(PART_FIRSTGUN, false);
 	PartActivate(PART_SECONDGUN, false);
 	PartActivate(PART_LION, false);
 	PartActivate(PART_WING, false);

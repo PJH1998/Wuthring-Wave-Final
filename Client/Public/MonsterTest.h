@@ -43,6 +43,7 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
+	virtual		void			Render_Shadow() override;
 
 	//virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	void			OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);

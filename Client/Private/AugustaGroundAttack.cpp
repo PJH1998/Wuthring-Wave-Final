@@ -266,7 +266,9 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     //공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+        //m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+        //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         m_IsNextAttackInput = false;
         return;

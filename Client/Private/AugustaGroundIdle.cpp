@@ -37,8 +37,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
 
-    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
-        || eIdleType == EAugustaIdleType::STAND2)
+    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02)
     {
         _string strBoneName = "Root";
         m_pAugusta->PartActivate(m_iPartType, true);

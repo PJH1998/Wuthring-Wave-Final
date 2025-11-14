@@ -329,6 +329,7 @@ void CAugusta::PartActivate(_uint iPartType, _bool IsActive)
     {
     case PART_BAYONET:
         m_pBayonet->Activate(IsActive);
+		
         break;
     case PART_SKILLWEAPON:
         m_pSkillWeapon->Activate(IsActive);

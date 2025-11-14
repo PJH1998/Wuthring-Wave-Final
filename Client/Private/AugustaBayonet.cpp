@@ -116,6 +116,14 @@ void CAugustaBayonet::Render()
 void CAugustaBayonet::Activate(_bool IsActivate)
 {
 	CProp::Activate(IsActivate);
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, nullptr);
+	}
+		
+	
 }
 
 void CAugustaBayonet::Change_Volume(_uint iVolumeIdx)
