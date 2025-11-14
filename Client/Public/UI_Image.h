@@ -7,7 +7,7 @@ NS_END
 
 NS_BEGIN(Client)
 
-class CUI_Image final : public CCustom_UI
+class CUI_Image : public CCustom_UI
 {
 private:
 	explicit				CUI_Image(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

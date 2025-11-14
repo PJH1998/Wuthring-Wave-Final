@@ -67,8 +67,8 @@ public:
 	HRESULT					Remove_Animation(_wstring strAnimName);
 	HRESULT					Clear_Animation();
 
-	HRESULT					Change_Animation(_wstring strAnimName);
-	HRESULT					Change_Animation(_uint iAnimIndex);
+	HRESULT					Change_Animation(_wstring strAnimName, _bool isForceRestart = false);
+	HRESULT					Change_Animation(_uint iAnimIndex, _bool isForceRestart = false);
 	HRESULT					Deselect_Animation();
 
 	UI_ANIM_DESC*			Find_Animation(_wstring strAnimName);

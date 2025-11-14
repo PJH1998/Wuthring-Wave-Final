@@ -139,11 +139,11 @@ void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
 		{
 			pInteractBtn->Find_ChildObject(L"Interact_Pressed")->SetActivate(true);
 			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Pressed")->Get_Component(L"Com_Animator_UI"))
-				->Change_Animation(L"Interact_Pressed_Trigger");
+				->Change_Animation(L"Interact_Pressed_Trigger", true);
 
 			pInteractBtn->Find_ChildObject(L"Interact_Focused")->SetActivate(true);
 			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Focused")->Get_Component(L"Com_Animator_UI"))
-				->Change_Animation(L"Interact_Focused_On");
+				->Change_Animation(L"Interact_Focused_On", true);
 		}
 
 		pInteractBtn->Req_OffInteract();

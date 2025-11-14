@@ -96,25 +96,30 @@ HRESULT CAnimator_UI::Clear_Animation()
     return S_OK;
 }
 
-HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName)
+HRESULT CAnimator_UI::Change_Animation(_wstring strAnimName, _bool isForceRestart)
 {
     UI_ANIM_DESC* pDesc = Find_Animation(strAnimName);
 
     if (!pDesc)
         return E_FAIL;
 
+	if (!(pDesc == m_pCurAnimDesc && !isForceRestart))
+		m_fElapsedTime = 0;
+		
     m_pCurAnimDesc = pDesc;
-    m_fElapsedTime = 0;
 
     return S_OK;
 }
 
-HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex)
+HRESULT CAnimator_UI::Change_Animation(_uint iAnimIndex, _bool isForceRestart)
 {
     UI_ANIM_DESC* pDesc = Find_Animation(iAnimIndex);
 
     if (!pDesc)
         return E_FAIL;
+
+	if (!(pDesc == m_pCurAnimDesc && !isForceRestart))
+		m_fElapsedTime = 0;
 
     m_pCurAnimDesc = pDesc;
     m_fElapsedTime = 0;
