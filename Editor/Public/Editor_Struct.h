@@ -23,7 +23,6 @@ namespace Editor
 	}SQ_ACTOR_DATA;
 
 	typedef struct tagSceneCameraFrame {
-		_float				fSpeedRate{};
 		_float4			vQuaternion{};
 		_float3			vPosition{};
 		_float				fStartFrame{};
@@ -33,6 +32,14 @@ namespace Editor
 
 	typedef struct tagSQCameraData : public SEQUENCE_ITEM_DATA {
 		vector<SCENE_CAMERA_FRAME> Frames;
+		tagSQCameraData(_float _fStartFrame, _float _fEndFrame, _float _fTrackPerSec, const vector<SCENE_CAMERA_FRAME> _Frames)
+			: SEQUENCE_ITEM_DATA { _fStartFrame, _fEndFrame, _fTrackPerSec }
+		{
+			for (auto& pData : _Frames)
+				Frames.push_back(pData);
+			//memcpy(Frames.data(), _Frames.data(), sizeof(SCENE_CAMERA_FRAME) * _Frames.size());
+		}
+		virtual ~tagSQCameraData() {};
 	}SQ_CAMERA_DATA;
 
 	typedef struct tagSQAudioData : public SEQUENCE_ITEM_DATA {

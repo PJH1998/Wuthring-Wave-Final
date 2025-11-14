@@ -16,6 +16,8 @@
 #include "Effect_Decal.h"
 #include<unordered_set>
 
+#include "Sequence.h"
+
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
 	m_pDevice { pDevice }, m_pContext { pContext }
@@ -1371,6 +1373,66 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 	InputFile.close();
 
 	return m_Data;
+}
+
+void CParser::Load_Sequence(const _char* pFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().filename().string();
+
+			ifstream InputFile(filePath);
+			json SequeceJson;
+			InputFile >> SequeceJson;
+
+			CSequence::SEQUENCE_DESC SequenceDesc = {};
+			SequenceDesc.fTrackPerSec = SequeceJson["TrackPerSec"];
+			SequenceDesc.fDuration = SequeceJson["Duration"];
+
+			vector<SEQUENCE_ITEM_INFO> ItemInfos;
+			vector<SEQUENCE_ITEM_DATA*> ItemDatas;
+
+			for (auto& ItemJson : SequeceJson["Item"])
+			{
+				SEQUENCE_ITEM_INFO Info = {};
+			}
+
+			//for (size_t i = 0; i < m_Items.size(); ++i)
+			//{
+			//	SEQUENCE_ITEM_INFO Info = {};
+			//	Info.fStartFrame = static_cast<_float>(m_Items[i].iFrameStart);
+			//	Info.fEndFrame = static_cast<_float>(m_Items[i].iFrameEnd);
+			//	Info.strItemTag = StringToWString(m_Items[i].szItemLabel);
+			//	Info.eType = m_Items[i].eType;
+			//	ItemInfos.push_back(Info);
+			//
+			//	switch (m_Items[i].eType)
+			//	{
+			//	case ITEM_TYPE::SCENE:
+			//	{
+			//		SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(Info.fStartFrame, Info.fEndFrame, m_fTrackPerSec, m_Items[i].mRampEdit.mSQCameraDatas);
+			//		ItemDatas.push_back(SceneData);
+			//	}
+			//	break;
+			//	case ITEM_TYPE::ACTOR:
+			//		break;
+			//	case ITEM_TYPE::SFX:
+			//		break;
+			//	case ITEM_TYPE::EFFECT:
+			//		break;
+			//	case ITEM_TYPE::SOUND:
+			//		break;
+			//	}
+			//}
+			//
+			//m_pGameInstance->Register_Sequence(StringToWString(m_szSequenceTag), ItemInfos, ItemDatas, &SequenceDesc);
+
+			InputFile.close();
+		}
+	}
 }
 
 HRESULT CParser::Initialize()
