@@ -25,15 +25,25 @@ private:
 	virtual ~CParser() = default;
 
 public:
+#pragma region MAP
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel);
+#pragma endregion
 
 #pragma region SPAWNER
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
+
+#pragma region CSV
 	// Load CSV File (Excel)
-	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+#pragma endregion
+
+#pragma region SEQUENCE
+	void							Load_Sequence(const _char* pFolderPath);
+#pragma endregion
+
 
 private:
 	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);

@@ -150,6 +150,7 @@ public:
 		_bool				isExpanded{};						// Can Expand
 		_char				szItemLabel[MAX_PATH] = {};
 		RampEdit		mRampEdit;
+		tagSequenceItem() {};
 		tagSequenceItem(_int iType , _int _iFrameStart, _int _iFrameEnd, _bool _isExpanded, const _char* pLabel)
 			: iFrameStart {_iFrameStart}, iFrameEnd {_iFrameEnd}, isExpanded {_isExpanded}
 		{
@@ -317,7 +318,7 @@ private:
 	void								Load_Sequence();
 
 	void								Save_Scene(json& Output, SEQUENCE_ITEM& item);
-	void								Load_Scene();
+	void								Load_Scene(json& Input);
 
 	// Selectable Item
 	void								Selectable_Item();

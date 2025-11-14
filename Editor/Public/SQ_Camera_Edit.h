@@ -29,13 +29,9 @@ private:
 	_float											m_fStartFrame = {};
 	_float											m_fEndFrame = {};
 
-	_float											m_fVelocity = {};
-	_float											m_fSpeed = {};
-
 	_float											m_fRatio = {};
 
 private:
-	void							Default_SetUp();
 	void							Lerp_Quat();
 	void							Spline();
 

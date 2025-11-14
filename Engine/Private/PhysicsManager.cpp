@@ -184,6 +184,8 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	if (nullptr != pOut)
 	{
 		_float fDistanceOffset = 0.8f;
+		if (result.mFraction < 0.1f)
+			return false;
 		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
 	}
 

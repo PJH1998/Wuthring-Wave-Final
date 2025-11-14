@@ -13,8 +13,14 @@ HRESULT CSequence::Initialize(const vector<SEQUENCE_ITEM_INFO>& Items, const vec
 {
 	ASSERT_CRASH(Items.size() == ItemDatas.size());
 
-	memcpy(m_Items.data(), Items.data(), sizeof(Items));
-	memcpy(m_ItemDatas.data(), ItemDatas.data(), sizeof(ItemDatas));
+	for (auto& Item : Items)
+		m_Items.push_back(Item);
+	//memcpy(m_Items.data(), Items.data(), sizeof(SEQUENCE_ITEM_INFO) * Items.size());
+
+	for (auto& Data : ItemDatas)
+		m_ItemDatas.push_back(Data);
+
+	//memcpy(m_ItemDatas.data(), ItemDatas.data(), sizeof(ItemDatas));
 
 	SEQUENCE_DESC* pDesc = static_cast<SEQUENCE_DESC*>(pArg);
 	m_fEndFrame = pDesc->fDuration;
@@ -42,7 +48,7 @@ _bool CSequence::Update(_float fTimeDelta)
 	if (m_fTrackPosition > m_Items[m_iItemIndex].fStartFrame)
 	{
 		if (ITEM_TYPE::SCENE == m_Items[m_iItemIndex].eType)
-			m_pGameInstance->Change_MainCamera(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), m_Items[m_iItemIndex].strItemTag, &m_ItemDatas[m_iItemIndex]);
+			m_pGameInstance->Change_MainCamera(ENUM_CLASS(m_pGameInstance->Get_CurrentLevel()), m_Items[m_iItemIndex].strItemTag, m_ItemDatas[m_iItemIndex]);
 		else
 			m_pGameInstance->Spawn_PoolingObject(m_Items[m_iItemIndex].strItemTag, XMMatrixIdentity(), &m_ItemDatas[m_iItemIndex]);
 

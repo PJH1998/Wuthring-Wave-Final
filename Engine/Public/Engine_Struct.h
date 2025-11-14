@@ -309,8 +309,9 @@ namespace Engine
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
-		tagSequenceItemData(_float _fStartFrame, _float _fEndFrame)
-			: fStartFrame { _fStartFrame }, fEndFrame { _fEndFrame }
+		_float		fTrackPerSec = {};
+		tagSequenceItemData(_float _fStartFrame, _float _fEndFrame, _float _fTrackPerSec)
+			: fStartFrame { _fStartFrame }, fEndFrame { _fEndFrame }, fTrackPerSec { _fTrackPerSec }
 		{ }
 		virtual ~tagSequenceItemData() {}
 	}SEQUENCE_ITEM_DATA;

@@ -172,7 +172,7 @@ HRESULT CSequencer::Initialize()
 	CameraDesc.fSpeedPerSec = 10.f;
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
-	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Camera_Scene"), ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::CAMERA), TEXT("Scene"), ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
 		CRASH("SceneCamera");
 
 	return S_OK;
@@ -254,7 +254,7 @@ void CSequencer::Sequence_System(_float fTimeDelta)
 			{
 			case ITEM_TYPE::SCENE:
 				{
-					SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(Info.fStartFrame, Info.fEndFrame, m_Items[i].mRampEdit.mSQCameraDatas);
+					SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(Info.fStartFrame, Info.fEndFrame, m_fTrackPerSec, m_Items[i].mRampEdit.mSQCameraDatas);
 					ItemDatas.push_back(SceneData);
 				}
 				break;
@@ -343,6 +343,41 @@ void CSequencer::Save_Sequence()
 
 void CSequencer::Load_Sequence()
 {
+	IGFD::FileDialogConfig config;
+
+	config.path = "../../Client/Bin/Resource/Sequence/Scene/";
+	config.flags = ImGuiFileDialogFlags_ReadOnlyFileNameField;
+
+	ImGuiFileDialog::Instance()->OpenDialog("SequenceLoad", "Load File", ".json", config);
+
+	if (ImGuiFileDialog::Instance()->Display("SequenceLoad")) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			_string strFilePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			ifstream InputFile(strFilePath);
+
+			json SequenceJson;
+
+			InputFile >> SequenceJson;
+
+			m_iFrameMax = SequenceJson["Duration"];
+			m_fTrackPerSec = SequenceJson["TrackPerSec"];
+
+			for (auto& Item : SequenceJson["Item"])
+			{
+				_string strType = Item["Type"];
+
+				if ("Actor" == strType)
+				{
+
+				}
+				else if ("Scene" == strType)
+					Load_Scene(Item);
+			}
+		}
+		m_isLoadSequence = false;
+		ImGuiFileDialog::Instance()->Close();
+	}
 }
 
 void CSequencer::Save_Scene(json& Output, SEQUENCE_ITEM& item)
@@ -353,6 +388,7 @@ void CSequencer::Save_Scene(json& Output, SEQUENCE_ITEM& item)
 	SceneJson["Tag"] = item.szItemLabel;
 	SceneJson["FrameStart"] = item.iFrameStart;
 	SceneJson["FrameEnd"] = item.iFrameEnd;
+	SceneJson["TrackPerSec"] = m_fTrackPerSec;
 
 	SceneJson["Frame"] = json::array();
 
@@ -375,8 +411,6 @@ void CSequencer::Save_Scene(json& Output, SEQUENCE_ITEM& item)
 
 		FrameJson["FOV"] = Frames[i].fFovy;
 
-		FrameJson["Speed"] = Frames[i].fSpeedRate;
-
 		FrameJson["Lerp"] = Frames[i].isLerp;
 
 		SceneJson["Frame"].push_back(FrameJson);
@@ -385,8 +419,35 @@ void CSequencer::Save_Scene(json& Output, SEQUENCE_ITEM& item)
 	Output["Item"].push_back(SceneJson);
 }
 
-void CSequencer::Load_Scene()
+void CSequencer::Load_Scene(json& Input)
 {
+	SEQUENCE_ITEM Item = {};
+
+	Item.eType = ITEM_TYPE::SCENE;
+	Item.isExpanded = true;
+
+	_string strTag = Input["Tag"];
+	strcpy_s(Item.szItemLabel, strTag.c_str());
+	Item.iFrameStart = Input["FrameStart"];
+	Item.iFrameEnd = Input["FrameEnd"];
+
+	for (auto& FrameJson : Input["Frame"])
+	{
+		SCENE_CAMERA_FRAME Frame = {};
+		Frame.fStartFrame = FrameJson["Start"];
+
+		Frame.vQuaternion = _float4(FrameJson["Quaternion"][0], FrameJson["Quaternion"][1], FrameJson["Quaternion"][2], FrameJson["Quaternion"][3]);
+		Frame.vPosition = _float3(FrameJson["Position"][0], FrameJson["Position"][1], FrameJson["Position"][2]);
+
+		Frame.fFovy = FrameJson["FOV"];
+
+		Frame.isLerp = FrameJson["Lerp"];
+
+		Item.mRampEdit.mPoints.push_back(ImVec2(Frame.fStartFrame, 0.5f));
+		Item.mRampEdit.mSQCameraDatas.push_back(Frame);
+	}
+
+	m_Items.push_back(Item);
 }
 
 void CSequencer::Selectable_Item()
@@ -534,11 +595,6 @@ void CSequencer::SetUp_Scene_Point(SEQUENCE_ITEM& item)
 	ImGui::Text("[Fov]");
 	ImGui::PushID(103);
 	ImGui::InputFloat("##", &CameraFrame.fFovy);
-	ImGui::PopID();
-
-	ImGui::Text("[Speed]");
-	ImGui::PushID(104);
-	ImGui::InputFloat("##", &CameraFrame.fSpeedRate);
 	ImGui::PopID();
 
 	if (ImGui::RadioButton("[Lerp]", CameraFrame.isLerp))
