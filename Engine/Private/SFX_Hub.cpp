@@ -38,15 +38,19 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 void CSFX_Hub::Update_SFX(_float fTimeDelta)
 {
-	if (nullptr != m_pCurrentSFX)
-		m_pCurrentSFX->Update(fTimeDelta, m_IsToggleOff);
+	if (nullptr == m_pCurrentSFX)
+		return;
 
+	m_pCurrentSFX->Update(fTimeDelta);
 	Update_Toggle(fTimeDelta);
 	Update_ToggleIntensity(fTimeDelta);
 }
 
 HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
+	if (m_eCurrentToggle == eType)
+		return S_OK;
+
 	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
 	if (nullptr == pSFX)
 		return E_FAIL;
@@ -57,7 +61,7 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 		Safe_Release(m_pCurrentSFX);
 	}
 
-	m_IsToggleOff = false;
+	m_IsToggleOn = true;
 	
 	m_fToggleDuration = fDuration;
 
@@ -67,6 +71,8 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 
 	m_pCurrentSFX = pSFX;
 	m_pCurrentSFX->Enter();
+	m_eCurrentToggle = eType;
+
 	Safe_AddRef(m_pCurrentSFX);
 
 	return S_OK;
@@ -77,7 +83,7 @@ HRESULT CSFX_Hub::End_SFX()
 	if (nullptr == m_pCurrentSFX)
 		return S_OK;
 
-	m_IsToggleOff = true;
+	m_IsToggleOn = false;
 	m_fToggleDuration = 0.f;
 	m_fCurrentToggleDuration = 0.f;
 
@@ -325,15 +331,16 @@ void CSFX_Hub::Update_ToggleIntensity(_float fTimeDleta)
 {
 	_float fFluctuate = fTimeDleta * m_fIntensityBoost;
 
-	if (m_IsToggleOff)
+	if (false == m_IsToggleOn)
 	{
 		fFluctuate *= -1.f;
 		if (m_fToggleIntensity <= 0.f)
 		{
+			m_pCurrentSFX->Exit();
 			Safe_Release(m_pCurrentSFX);
 			m_pCurrentSFX = nullptr;
+			m_eCurrentToggle = SFX_TOGGLE::END;
 		}
-
 	}
 
 	m_fToggleIntensity = clamp(m_fToggleIntensity + fFluctuate, 0.f, 1.f);

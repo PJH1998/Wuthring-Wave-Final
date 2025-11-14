@@ -6,6 +6,8 @@
 #define THREAD_Y 16
 #define THREAD_Z 1
 
+#define EPSILON 1e-05
+
 #define MAX_RADIUS 32
 
 Texture2D<float4> InputTexture : register(t0);

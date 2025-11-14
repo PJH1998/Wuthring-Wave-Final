@@ -46,7 +46,7 @@ private:
 	SFX						m_SFXs;
 
 
-	_bool					m_IsToggleOff = { false };
+	_bool					m_IsToggleOn = { false };
 	
 	_float					m_fCurrentToggleDuration = {};
 	_float					m_fToggleDuration = {};
@@ -55,6 +55,7 @@ private:
 	_float					m_fIntensityBoost = {};
 	_float					m_fIntensityBoostToTime = {};
 	
+	SFX_TOGGLE				m_eCurrentToggle = { SFX_TOGGLE::END };
 	CSFX*					m_pCurrentSFX = { nullptr };
 
 private:

@@ -128,8 +128,8 @@ PS_OUT_LIGHT PS_MAIN_NORMAL(PS_IN In)
             vector vDefaultNormal = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0);
             
             float4 vNormal1 = normalize(vDefaultNormal * 2.f - 1.f);
-            if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
-                vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
+            //if (vDefaultNormal.x > vDefaultNormal.z && vDefaultNormal.y > vDefaultNormal.z)
+            vNormal1.z = sqrt(1.f - saturate(dot(vDefaultNormal.xy, vDefaultNormal.xy)));
 
             vector vMaskNormal = g_NormalTexture[1].Sample(DefaultSampler, In.vTexcoord);
         

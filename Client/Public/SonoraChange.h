@@ -43,6 +43,7 @@ private:
 	_float2					m_vRadialDistanceRange = {};
 	_float2					m_vRadialIntensityRange = {};
 	
+
 	_float4					m_vFadeColor = {};
 
 private:
