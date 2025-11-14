@@ -38,6 +38,9 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 void CSFX_Hub::Update_SFX(_float fTimeDelta)
 {
+	if (nullptr != m_pCurrentSFX)
+		m_pCurrentSFX->Update(fTimeDelta, m_IsToggleOff);
+
 	Update_Toggle(fTimeDelta);
 	Update_ToggleIntensity(fTimeDelta);
 }
@@ -49,7 +52,10 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 		return E_FAIL;
 
 	if (nullptr != m_pCurrentSFX)
+	{
+		m_pCurrentSFX->Exit();
 		Safe_Release(m_pCurrentSFX);
+	}
 
 	m_IsToggleOff = false;
 	
@@ -60,6 +66,7 @@ HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 	m_fToggleIntensity = 0.f;
 
 	m_pCurrentSFX = pSFX;
+	m_pCurrentSFX->Enter();
 	Safe_AddRef(m_pCurrentSFX);
 
 	return S_OK;

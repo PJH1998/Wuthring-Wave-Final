@@ -16,9 +16,12 @@ HRESULT CRadialBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeY = iWinSizeY;
 	
 	m_RadialData.vPivot = _float2(0.5f, 0.5f);
-	m_RadialData.fMinDistance = 0.1f;
-	m_RadialData.fMaxDistance = 0.5f;
+	m_RadialData.fMinDistance = 0.0f;
+	m_RadialData.fMaxDistance = 0.1f;
 	m_RadialData.fLengthScale = -0.2f;
+
+	m_fTargetDistance = m_RadialData.fMaxDistance;
+	m_fMaxDistance = 1.f;
 
 	D3D11_SAMPLER_DESC ClampSamplerDesc = {};
 	ClampSamplerDesc.Filter = D3D11_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
@@ -33,6 +36,12 @@ HRESULT CRadialBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	ASSERT_CRASH(m_pClampSampler);
 
 	return S_OK;
+}
+
+void CRadialBlur::Update(_float fTimeDelta, _bool IsOn)
+{
+
+
 }
 
 HRESULT CRadialBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
@@ -76,6 +85,15 @@ HRESULT CRadialBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	return S_OK;
 }
 
+void CRadialBlur::Enter()
+{
+	m_fCurDistance = m_fMaxDistance;
+}
+
+void CRadialBlur::Exit()
+{
+}
+
 void CRadialBlur::Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity)
 {
 	m_RadialData.vPivot = vCenterUV;
@@ -100,6 +118,18 @@ void CRadialBlur::Setting_Radial(_fvector vCenterPos, _float2 vDistanceRange, _f
 	m_RadialData.fMinDistance = vDistanceRange.x;
 	m_RadialData.fMaxDistance = vDistanceRange.y;
 	m_RadialData.fLengthScale = fRadialIntensity;
+}
+
+void CRadialBlur::Update_On(_float fTimeDelta)
+{
+	m_fCurDistance = clamp(m_fCurDistance - fTimeDelta, m_RadialData.fMaxDistance, 1.f);
+
+	if (m_fTargetDistance <= m_fCurDistance)
+		m_RadialData.fMaxDistance = max(m_fCurDistance, m_RadialData.fMinDistance);
+}
+
+void CRadialBlur::Update_Off(_float fTimeDelta)
+{
 }
 
 CRadialBlur* CRadialBlur::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
