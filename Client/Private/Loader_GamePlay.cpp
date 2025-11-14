@@ -59,6 +59,11 @@
 #include "Player.h"
 #pragma endregion
 
+#pragma region SFX
+#include "SonoraChange.h"
+
+#pragma endregion
+
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -86,6 +91,9 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	Load_ScreenEffect();
+
     return S_OK;
 }
 
@@ -518,6 +526,16 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_ScreenEffect()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		CSonoraChange::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 
 	return S_OK;
 }

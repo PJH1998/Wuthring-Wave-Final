@@ -99,6 +99,11 @@ namespace Engine
 		return Clamp((fCur * (1 - fRatio) + fMax * fRatio), 0.f, 1.f);
 	}
 
+	inline _float lerp(_float fSrc, _float fDst, _float fRatio)
+	{
+		return (fSrc * (1.f - fRatio)) + (fDst * fRatio);
+	}
+
 	inline _float SmoothStep(_float fMin, _float fMax, _float fValue)
 	{
 		_float t = Clamp((fValue - fMin) / (fMax - fMin), 0.f, 1.f);

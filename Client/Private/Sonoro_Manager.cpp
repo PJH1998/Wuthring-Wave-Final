@@ -2,6 +2,7 @@
 #include "Sonoro_Manager.h"
 #include"MapObject_Sonoro.h"
 #include"MapObject_NonSonoro.h"
+#include "SonoraChange.h"
 
 CSonoro_Manager::CSonoro_Manager()
 	:m_pGameInstance(CGameInstance::GetInstance())
@@ -68,8 +69,10 @@ void CSonoro_Manager::Update(_float fTimeDelta)
 			pObject->ReturnPos();
 	}
 	else
+	{
 		for (auto& pObject : m_NonSonoroObjects)
 			pObject->Turn_Sonoro(XMLoadFloat4(&m_vUpSpeed), m_fTriggerdTime);
+	}
 }
 
 void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
@@ -86,6 +89,13 @@ void CSonoro_Manager::Change_Sonoro(_bool IsSonoro)
 
 	//for (auto& pObject : m_NonSonoroObjects)
 	//	pObject-> Change_Collision_Layer(m_SonoroRigidActive);
+
+	CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+	Desc.fEffectTime = 5.f;
+	Desc.fRadialTime = 2.f;
+	Desc.fFadeTime = 2.f;
+
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 
 	for (auto& pObject : m_SonoroObjects)
 		pObject->Change_Collision_Layer(m_SonoroRigidActive);
