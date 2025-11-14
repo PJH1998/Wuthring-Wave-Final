@@ -24,9 +24,12 @@ public:
 
 private:
 	HRESULT					Ready_Components(void* pArg);
+	HRESULT					Ready_Texts();
 
 private:
 	_uint					m_iRandomBGIndex = 0;
+
+	class CGameSystem*		m_pGameSystem =  { nullptr };
 
 public:
 	static CUI_Loading*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
