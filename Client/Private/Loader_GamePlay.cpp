@@ -91,6 +91,7 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
     return S_OK;
 }
 

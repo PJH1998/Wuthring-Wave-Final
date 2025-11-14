@@ -18,6 +18,7 @@ public:
 
 #pragma region PARSER
 	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+	void							Load_Sequence(const _char* pFolderPath);
 	
 	//============================Effect
 	void							Create_Map_Model(const _char* pFilePath, LEVEL eLevel);
