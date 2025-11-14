@@ -38,8 +38,8 @@ HRESULT CLevel_Map::Initialize()
 {
 	Ready_Event();
 
-	if (FAILED(Ready_Static_Component()))
-		return E_FAIL;
+	/*if (FAILED(Ready_Static_Component()))
+		return E_FAIL;*/
 
 	//m_pGameInstance->SetUp_OctoTree(_float3(0.f, 0.f, 0.f), _float3(4096, 4096, 4096));
 
@@ -116,6 +116,8 @@ HRESULT CLevel_Map::Initialize()
 	//XMStoreFloat4x4(&TT, Mat);
 	//Tri.WorldMatrix = &TT;
 	//m_pGameInstance->Add_GameObject_ToLayer(m_iLevel, TEXT("Prototype_GameObject_TriggerBox"), m_iLevel, TEXT("Layer_Trigger"), &Tri);
+
+	CModel_Streaming::Create(m_pDevice, m_pContext, "../../Client/Bin/Resource/Map/Asphodel_Barrens/Tetragon_Hnuter's_Den/SM_Sev_Bui_01NL");
 	return S_OK;
 }
 

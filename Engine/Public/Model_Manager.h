@@ -3,7 +3,7 @@
 #include"BufferPool.h"
 
 NS_BEGIN(Engine)
-class CModel_Manager final : public CBase
+class ENGINE_DLL CModel_Manager final : public CBase
 {
 public:
 	enum ModelLoadState { NOTLOADED, LOADING, LOADED };

@@ -3,7 +3,7 @@
 #include"Mesh_Streaming.h"
 
 NS_BEGIN(Engine)
-class CModel_Streaming final : public CComponent
+class ENGINE_DLL CModel_Streaming final : public CComponent
 {
 private:
 	explicit CModel_Streaming(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
