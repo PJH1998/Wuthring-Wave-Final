@@ -187,6 +187,7 @@
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
     <ClInclude Include="..\Public\AugustaGroundSpecial.h" />
+    <ClInclude Include="..\Public\AugustaGroundSprint.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaHit.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
@@ -369,6 +370,7 @@
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSpecial.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
