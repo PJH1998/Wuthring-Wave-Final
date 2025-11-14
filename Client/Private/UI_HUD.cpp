@@ -140,20 +140,6 @@ void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey,
 
 		bossNameDesc.strText = strUIBosssName;
 		pTargetText->Set_TextUIDesc(bossNameDesc);
-
-
-
-
-		_uint iAlignmentPixel = 0;
-
-		_uint iOriginPosX = bossNameDesc.vScreenPos.x;
-
-		for (auto& textInstDesc : bossNameDesc.vecInstanceDescs)
-			iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstUp.x);
-
-		bossNameDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * bossNameDesc.fScale;
-		pTargetText->Set_TextUIDesc(bossNameDesc);
-
 	}
 }
 
@@ -227,15 +213,8 @@ HRESULT CUI_HUD::Ready_BossUINameText()
 	// 중앙 정렬
 
 	auto& bossNameDesc = pFont->Get_TextUIDesc();
-	_uint iAlignmentPixel = 0;
 
-	_uint iOriginPosX = bossNameDesc.vScreenPos.x;
-
-	for (auto& textInstDesc : bossNameDesc.vecInstanceDescs)
-		iAlignmentPixel += static_cast<_uint>(textInstDesc.vSInstRight.x);
-
-	bossNameDesc.vScreenPos.x = iOriginPosX - iAlignmentPixel * bossNameDesc.fScale / 2.f;
-	pFont->Set_TextUIDesc(bossNameDesc);
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
 
 	return S_OK;
 }
@@ -1104,7 +1083,7 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     }
 
 
-	if (fTmpBossHP != fBossHP || fTmpBossSA != fBossSA)
+	if (fTmpBossHP > fBossHP || fTmpBossSA > fBossSA)
 	{
 		//isHit = true;
 		fHPReduceLeftTime = fHPReduceTime;
@@ -1112,7 +1091,9 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 	}
 
 	if (!(fHPReduceLeftTime <= 0.01f))
-		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : "<< fHPReduceLeftTime << endl;
+	{
+		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+	}
 
 
     //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]

@@ -19,6 +19,8 @@ public: // 생성/복제
 	virtual void    Render()										override;
 
 	virtual	void	Reset(const _fmatrix& WorldMatrix, void* pArg)	override;
+public:
+	void			Req_OffInteract()	{ m_IsGoindDisabled = true; }
 
 private:
 	void			Update_MouseFeedback(_float fTimeDelta);
