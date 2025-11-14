@@ -83,9 +83,9 @@ void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 	return m_pParser->Create_Effect(strFolderPath, eLevel);
 }
 
-void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
 {
-	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+	return m_pParser->Create_Prefab(strFolderPath, eLevel, PoolingNum);
 }
 
 void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
@@ -193,9 +193,19 @@ void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
 	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
 }
 
-void CGameSystem::Render_InteractUI(_wstring strText)
+//void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)
+//{
+//	m_pUI_ControlHelper->Toggle_InteractUI(isOn, strText);++
+//}
+
+void CGameSystem::Show_InteractUI(_wstring strText)
 {
-	m_pUI_ControlHelper->Render_InteractUI(strText);
+	m_pUI_ControlHelper->Show_InteractUI(strText);
+}
+
+void CGameSystem::Hide_InteractUI(_bool isPressedAs)
+{
+	m_pUI_ControlHelper->Hide_InteractUI(isPressedAs);
 }
 
 _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)

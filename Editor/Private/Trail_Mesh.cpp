@@ -82,8 +82,8 @@ void CTrail_Mesh::Update(_float fTimeDelta)
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
 
-	if (m_IsRoot)
-		Update_Transform();
+	//if (m_IsRoot)
+	//	Update_Transform();
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
@@ -150,6 +150,10 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 			m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
 			m_IsRoot = true;
 			m_OffsetMatrix = WorldMatrix;
+			m_fSweep = 0.f;
+			m_fColorSweep = 0.f;
+			m_vLifeTime.x = 0.f;
+			m_fMaskSweep = 0.f;
 		}
 		else if (pDesc->pBoneMatrixPtr == nullptr)
 		{
@@ -157,6 +161,10 @@ void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 			m_vLifeTime.x = 0.f;
 			Root_Transform(WorldMatrix);
 			m_IsRoot = false;
+			m_fSweep = 0.f;
+			m_fColorSweep = 0.f;
+			m_vLifeTime.x = 0.f;
+			m_fMaskSweep = 0.f;
 		}
 	}
 }
@@ -277,6 +285,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSweep", &m_fMaskSweep, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSpeed", &m_fMaskSpeed, sizeof(_float))))
 		return E_FAIL;
 
     if(FAILED(m_pShaderCom->Bind_Value("g_SweepWitdh", &m_fSweepWitdh, sizeof(_float))))

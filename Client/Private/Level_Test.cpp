@@ -374,7 +374,7 @@ void CLevel_Test::Ready_ElectroPredator()
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
-	//AoEDesc.wstrEffectTag
+	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_AOEDOT"), TEXT("Pool_AOEDOT_Electro"), 7, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
@@ -406,8 +406,8 @@ void CLevel_Test::Ready_CoroSaurus()
 
 void CLevel_Test::Ready_Effect()
 {
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 15);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 
 	m_pGameSystem->Load_EffectDecalData_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Decal");
 }
@@ -606,16 +606,21 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 		switch (iInteractIndex)
 		{
 		case TEST_INTERACT0:
-			m_pGameSystem->Render_InteractUI(L"테스트하나");
+			m_pGameSystem->Show_InteractUI(L"테스트하나");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		case TEST_INTERACT1:
-			m_pGameSystem->Render_InteractUI(L"테스트둘");
+			m_pGameSystem->Show_InteractUI(L"테스트둘");
 			iInteractIndex++;
 			if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
 			break;
 		}
+	}
+	else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+		(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	{
+		m_pGameSystem->Hide_InteractUI(true);
 	}
 
 

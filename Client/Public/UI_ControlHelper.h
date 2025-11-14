@@ -26,7 +26,11 @@ public:
 	void				HUD_Toggle_BossStatusUI(_bool isOn);
 
 
-	void				Render_InteractUI(_wstring strText);
+	//void				Toggle_InteractUI(_bool isOn, _wstring strText);
+
+	void				Show_InteractUI(_wstring strText);
+	void				Hide_InteractUI(_bool isPressedAs = false);
+
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 private:

@@ -91,7 +91,7 @@ void CMapObject_Meteo::Render()
 
 void CMapObject_Meteo::LerpPos(_float fTimeDelta)
 {
-	//m_pGameInstance->Spawn_PoolingObject(TEXT("Projectile_Effect"), m_pTransformCom->Get_WorldMatrix());
+	m_pGameInstance->Spawn_PoolingObject(TEXT("Projectile_Effect"), m_pTransformCom->Get_WorldMatrix());
 	m_fFall += fTimeDelta;
 	_float Time = m_fFall / m_fDuration;
 	_vector current_xz = XMVectorLerp(XMLoadFloat4(&m_vSourPos), XMLoadFloat4(&m_vDestPos), Time);
