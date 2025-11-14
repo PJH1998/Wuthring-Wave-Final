@@ -61,6 +61,7 @@ public:
 	virtual		void				Render() override;
 
 private:
+	class CGameSystem*		m_pGameSystem = { nullptr };
 	CAMERA_STATE			m_eCameraState = { CAMERA_STATE::TARGET };
 	_float4						m_vLookPosition = {};
 

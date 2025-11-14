@@ -296,6 +296,12 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 					return;
 				}
 
+				if (!m_States[MOVE])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
 				/*if (!m_States[MOVE])
 				{
 					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
@@ -411,7 +417,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 }
                 else
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                     return;
                 }
@@ -442,7 +448,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 }
                 else
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                     return;
                 }
@@ -452,7 +458,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
         else
         {
             // 모든 조건이 아닌 경우 Idle로
-            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND2;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
             return;
         }

@@ -75,6 +75,7 @@ public:
 	UI_ANIM_DESC*			Find_Animation(_uint iAnimIndex);
 
 	UI_ANIM_DESC*			Get_CurAnimation() { return m_pCurAnimDesc; }
+	//_bool					Get_IsLastFrame() { return m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex == (static_cast<_uint>(m_fElapsedTime / fSingleFrameTime);) }
 
 
 	UI_ANIM_KEYFRAME_DESC*	Get_CalcedAnimKeyframeDesc() { return &m_tCalcedKeyFrameDesc; }

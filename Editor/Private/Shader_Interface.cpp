@@ -14,6 +14,7 @@ HRESULT CShader_Interface::Initialize()
 
 void CShader_Interface::Update_Shadow()
 {
+
 	Set_ShadowBias();
 	Setting_LUT();
 #ifdef _DEBUG
@@ -25,8 +26,32 @@ void CShader_Interface::Update_Shadow()
 
 void CShader_Interface::Setting_Shader()
 {
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+		m_pGameInstance->End_SFX();
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+
+
 	ImGui::Begin("SHADER SETTING");
 
+	if(ImGui::CollapsingHeader("SET_RADIAL"))
+	{
+		ImGui::InputFloat2("CENTER", m_vCenterUV);
+
+		ImGui::DragFloat("MIN_RANGE", &m_vRange[0], 0.01f, 0.1f);
+		ImGui::SameLine();
+		ImGui::DragFloat("MAX_RANGE", &m_vRange[1], 0.01f, 0.1f, 1.f);
+
+		ImGui::InputFloat("SCALE", &m_fRadialScale);
+		m_pGameInstance->Setting_Radial(_float2(m_vCenterUV[0], m_vCenterUV[1]), _float2(m_vRange[0], m_vRange[1]), m_fRadialScale);
+	}
+
+	ImGui::End();
+
+
+
+	/*
 #pragma region CASCADE
 	if (ImGui::CollapsingHeader("CASCADE"))
 	{

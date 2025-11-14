@@ -232,16 +232,15 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements, TEXT("Shader_Map_Instance")))))
 		CRASH("DeferredShader_Map");
 
-
 	// Shader_VtxAnimMesh
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Shader_VtxAnimMesh");
 
 	// Shader_UI_VtxPosTex ..Shader for UI
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
-	//	CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-	//	CRASH("Shader_UI_VtxPosTex");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_UI_VtxPosTex");
 	
 	// Shader_VtxSkyBox
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
@@ -252,6 +251,12 @@ void CMainApp::Ready_Prototype_ForStatic()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxArrow"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Arrow.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxMesh");
+
+	// Shader_Sonora
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ScreenEffect.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_UI_VtxPosTex");
+
 
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
@@ -317,6 +322,8 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxTrailMesh");
 
+
+
 	//Shader_ComputeShader_Particle
 	SHADER_MACRO eShaderMacroParticle = {
 		{"THREAD_X", "64" }
@@ -333,6 +340,10 @@ void CMainApp::Ready_Prototype_ForStatic()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
 		CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
+
 	// Ability 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),
 		CAbility::Create(m_pDevice, m_pContext))))

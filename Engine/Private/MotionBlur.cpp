@@ -18,23 +18,33 @@ HRESULT CMotionBlur::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_fWinSizeX = static_cast<_float>(iWinSizeX);
 	m_fWinSizeY = static_cast<_float>(iWinSizeY);
 
-	m_fLimitVelocity = 1.f;
-	m_fLimitDepth = 150.f;
-	m_fLengthScale = 45.f;
+	m_MotionBlurData.fLimitVelocity = 5.f;
+	m_MotionBlurData.fLimitDepth = 150.f;
+	m_MotionBlurData.fLengthScale = 0.5f;
+	m_MotionBlurData.fSampleDepthBias = 10.f;
 
-	D3D11_SAMPLER_DESC DefaultSamplerDesc = {};
-	DefaultSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-	DefaultSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	DefaultSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	DefaultSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	DefaultSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-	DefaultSamplerDesc.MinLOD = 0;
-	DefaultSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	m_fTargetLength = m_MotionBlurData.fLengthScale;
 
-	m_pDevice->CreateSamplerState(&DefaultSamplerDesc, &m_pClampSampler);
+	D3D11_SAMPLER_DESC ClampSamplerDesc = {};
+	ClampSamplerDesc.Filter = D3D11_FILTER_MINIMUM_MIN_MAG_MIP_POINT;
+	ClampSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ClampSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ClampSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	ClampSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	ClampSamplerDesc.MinLOD = 0;
+	ClampSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	m_pDevice->CreateSamplerState(&ClampSamplerDesc, &m_pClampSampler);
 	ASSERT_CRASH(m_pClampSampler);
 
 	return S_OK;
+}
+
+void CMotionBlur::Update(_float fTimeDelta)
+{
+	m_fCurLength = lerp(0.f, m_fTargetLength, m_fIntensity);
+
+	m_MotionBlurData.fLengthScale = m_fCurLength;
 }
 
 HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
@@ -54,7 +64,7 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 		CRASH("Failed Bind ProjMatrixInv");
 
 
-	if (FAILED(pShader->Bind_Value("g_fLimitDepth", &m_fLimitDepth, sizeof(_float))))
+	if (FAILED(pShader->Bind_Value("g_fLimitDepth", &m_MotionBlurData.fLimitDepth, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
 
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::VELOCITY_MAP));
@@ -92,19 +102,12 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(m_pGameInstance->Add_SRVData(TEXT("RCS_MotionBlur"), "VelocityMap", m_pGameInstance->Get_RT_SRV(TEXT("RT_VelocityMap")))))
 		CRASH("Failed Add_SRVData");
 
-	MOTION_BLUR_DATA Data = {};
-	Data.fLimitVelocity = m_fLimitVelocity;
-	Data.fLimitDepth = m_fLimitDepth;
-	Data.fLengthScale = m_fLengthScale;
 
-	if (FAILED(m_pGameInstance->Add_BufferData(TEXT("RCS_MotionBlur"), "MOTION_DATA", reinterpret_cast<void*>(&Data), sizeof(MOTION_BLUR_DATA))))
+	if (FAILED(m_pGameInstance->Add_BufferData(TEXT("RCS_MotionBlur"), "MOTION_DATA", reinterpret_cast<void*>(&m_MotionBlurData), sizeof(MOTION_BLUR_DATA))))
 		return E_FAIL;
 
 	if (FAILED(m_pGameInstance->Add_SamplerState(TEXT("RCS_MotionBlur"), 0, m_pClampSampler)))
 		return E_FAIL;
-
-	//if (FAILED(m_pSubResource->Set_DefalutSampler(TEXT("RCS_MotionBlur"), 0)))
-	//	CRASH("Failed Set_DefalutSampler");
 
 	if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_MotionBlur"), iDownSizeX, iDownSizeY)))
 		CRASH("Failed RCS_MotionBlur");
@@ -118,7 +121,7 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Texture("g_VelocityMap", m_pGameInstance->Get_RT_SRV(TEXT("RT_VelocityMap")))))
 		CRASH("Failed Bind VelocityMap");
 
-	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_fLimitVelocity, sizeof(_float))))
+	if (FAILED(pShader->Bind_Value("g_fLimitVelocity", &m_MotionBlurData.fLimitVelocity, sizeof(_float))))
 		CRASH("Failed Bind g_fLimitVelocity");
 
 	if (FAILED(pShader->Bind_Value("g_fEffectIntensity", &m_fIntensity, sizeof(_float))))
@@ -130,6 +133,14 @@ HRESULT CMotionBlur::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	pVIBuffer->Render();
 
 	return S_OK;
+}
+
+void CMotionBlur::Enter()
+{
+}
+
+void CMotionBlur::Exit()
+{
 }
 
 CMotionBlur* CMotionBlur::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)

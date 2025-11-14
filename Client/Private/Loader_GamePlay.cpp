@@ -63,6 +63,11 @@
 #include "Player.h"
 #pragma endregion
 
+#pragma region SFX
+#include "SonoraChange.h"
+
+#pragma endregion
+
 
 CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     : CLoader { pDevice, pContext }
@@ -71,12 +76,12 @@ CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLoader_GamePlay::Initialize()
 {
-	m_iNumLoadingThread = 12;
+	m_iNumLoadingThread = 13;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });w
+	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
@@ -91,6 +96,8 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	Load_ScreenEffect();
 
     return S_OK;
 }
@@ -107,8 +114,8 @@ HRESULT CLoader_GamePlay::Load_Model()
 
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1113_third_size/", m_eCurLevel);
-	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1113/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
 
 
 	// SkyBox
@@ -581,6 +588,16 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_ScreenEffect()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		CSonoraChange::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 
 	return S_OK;
 }

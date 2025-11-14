@@ -352,6 +352,12 @@ void CCharacter::End_SFX()
 	m_pGameInstance->End_SFX();
 }
 
+void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, m_pModelCom);
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {
@@ -784,10 +790,18 @@ void CCharacter::Rotate_HitTarget(CTransform* pTransform)
     _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 
+	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
 
+	_float fLengthSq = XMVectorGetX(XMVector3LengthSq(vToTarget));
+	if (fLengthSq < 1e-6f) // Epsilon으로 판단.
+	{
+		return;  // 곂침시 그냥 기본 Forward로 판단.
+	}
+
+	
     vToTarget = XMVectorSetY(vToTarget, 0.f);
 
-	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
+	
 
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 

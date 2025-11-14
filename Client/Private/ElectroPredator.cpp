@@ -229,7 +229,6 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
 
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
-		vTranslate += XMVectorSet(-0.01f, 0.f, -0.01f, 0.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
 
 		CAoEDoT::AOEDOT_RESET AoEDesc{};
@@ -280,7 +279,7 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 1.5f;
 	ColliderDesc.fRadius = 0.4f;
-	ColliderDesc.fRayOffset = -0.11f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -481,8 +480,14 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_fHP -= pDesc->fAttack;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
 		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
@@ -495,8 +500,14 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_fHP -= pDesc->fAttack;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -508,11 +519,17 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_fHP -= pDesc->fAttack;
 		_float4 vPosition{};
 		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
-		vPosition.y += 0.5f;
+		vPosition.y += 1.5f;
 		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_isPushed = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Knock Back! (Electro Predator)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;

@@ -1,16 +1,22 @@
 ﻿#include "ClientPch.h"
 #include "SpringCamera.h"
 
+#include "GameSystem.h"
+
 #include "Event_Camera.h"
 
 CSpringCamera::CSpringCamera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
-	: CCamera { pDevice, pContext }
+	: CCamera { pDevice, pContext },
+	m_pGameSystem { CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 CSpringCamera::CSpringCamera(const CSpringCamera& Prototype)
-	: CCamera { Prototype }
+	: CCamera { Prototype },
+	m_pGameSystem{ CGameSystem::GetInstance() }
 {
+	Safe_AddRef(m_pGameSystem);
 }
 
 void CSpringCamera::Update_Target(const _fvector & TargetPos, _float fOffsetY)
@@ -60,7 +66,7 @@ HRESULT CSpringCamera::Initialize_Clone(void* pArg)
 
 	m_fStiffness = 0.3f;
 
-	m_fLockOnOffsetY = 2.0f;
+	m_fLockOnOffsetY = 3.5f;
 	Ready_Event();
     return S_OK;
 }
@@ -273,7 +279,10 @@ void CSpringCamera::Action(_float fTimeDelta)
 	if (m_iFrameIndex >= static_cast<_int>(m_Frames.size() - 1))
 	{
 		if (false == m_isMaintain)
+		{
+			m_pGameSystem->HUD_FadeIn();
 			SetUp_Recovery();
+		}
 		return;
 	}
 
@@ -396,6 +405,8 @@ void CSpringCamera::Ready_Event()
 			m_fPreFixedDistance = m_fFixedDistance;
 			m_fDuration = static_cast<_float>(event.iEnd - event.iStart);
 			m_isMaintain = event.isMaintain;
+			if(false == m_isMaintain)
+				m_pGameSystem->HUD_FadeOut();
 		}
 		else
 		{
@@ -436,4 +447,6 @@ void CSpringCamera::Free()
 
 	//m_TargetTransforms.clear();
 	m_pTargetTransform = nullptr;
+
+	Safe_Release(m_pGameSystem);
 }

@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "UI_Text_Damage.h"
+#include "SonoraChange.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -75,6 +76,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_Effect();
 	Ready_Skybox();
 	Ready_Mouse();
+	Ready_SFX();
 
 	return S_OK;
 }
@@ -313,7 +315,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 50, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
@@ -325,7 +327,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	AoEDesc.eType = TEXT_COLOR_TYPE::ELEC;
 	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 5, &AoEDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 15, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
 }
 
@@ -357,7 +359,7 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 void CLevel_GamePlay::Ready_Effect()
 {
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 20);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 100);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
 	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 }
 
@@ -393,7 +395,7 @@ void CLevel_GamePlay::Ready_UI()
 
 	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 50, &tDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
 		CRASH("Failed Ready Text_Damage");
 
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
@@ -410,6 +412,13 @@ void CLevel_GamePlay::Ready_Mouse()
 		CRASH("Mosue");
 }
 
+void CLevel_GamePlay::Ready_SFX()
+{
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
+		CRASH("h");
+}
+
 #ifdef _DEBUG
 void CLevel_GamePlay::DEBUG_FUNCTION()
 {
@@ -421,6 +430,18 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
+	{
+		CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+		Desc.fEffectTime = 3.f;
+		Desc.fRadialTime = 2.f;
+		Desc.fFadeTime = 2.f;
+
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
+	}
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{

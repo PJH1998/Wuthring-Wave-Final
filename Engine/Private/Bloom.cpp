@@ -14,6 +14,7 @@ HRESULT CBloom::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
+
 	m_iBloomWeight = 1;
 
 	m_fBoolIntensity = 0.25f;
@@ -37,7 +38,6 @@ HRESULT CBloom::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY, i)))
 			CRASH("Failed RCS_DOWNSAMPLE");
 	}
-
 
 	for (_int j = 2; j >= 0; --j)
 	{

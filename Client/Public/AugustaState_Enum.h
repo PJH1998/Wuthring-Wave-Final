@@ -11,8 +11,9 @@ enum class EAugustaGroundState : _uint
 {
 	IDLE = 0,		// 대기 (Stand1, Stand2, Stand1_Action01~03, StandChange)
 	WALK,			// 걷기 (Walk_F/B/LF/RF/LB/RB, Stop_Walk_L/R)
-	RUN,			// 달리기 (Run_F/B/LF/RF/LB/RB, Stop_Run_L/R, Run_Turnback)
-	DASH,			// 전력질주 (Sprint_F, Super_Sprint_*, SpWalk_*, Stop_Sprint_L/R)
+	RUN,			// 달리기 (Run_F/B/LF/RF/LB/RB)
+	SPRINT,			// 전력질주 (Sprint_F, Super_Sprint_*)
+	DASH,			// 대쉬 (Dash)
 	ATTACK,			// 공격 (Attack01~04, Attack_*, SpAttack*)
 	SKILL,			// 스킬 (Skill)
 	BURST,			// Burst 상태
@@ -88,6 +89,16 @@ enum class EAugustaRunType : _uint
 	RUN_POSE_R,
 	RUN_TURNBACK,
 	SPRINT_F,
+	STOP_RUN_L,
+	STOP_RUN_R,
+	STOP_SPRINT_L,
+	STOP_SPRINT_R,
+	END
+};
+
+enum class EAugustaSprintType : _uint
+{
+	SPRINT_F = 0,
 	STOP_RUN_L,
 	STOP_RUN_R,
 	STOP_SPRINT_L,
