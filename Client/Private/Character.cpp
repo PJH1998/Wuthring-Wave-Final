@@ -786,14 +786,6 @@ void CCharacter::Rotate_HitTarget(CTransform* pTransform)
 
 	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
 
-	_float4 DebugTarget = {};
-	_float4 DebugPos = {};
-	XMStoreFloat4(&DebugTarget, vToTarget);
-	XMStoreFloat4(&DebugPos, m_pTransformCom->Get_State(STATE::POSITION));
-
-	OutPutDebugFloat4(TEXT("Target"), DebugTarget);
-	OutPutDebugFloat4(TEXT("MyPos"), DebugPos);
-
 	_float fLengthSq = XMVectorGetX(XMVector3LengthSq(vToTarget));
 	if (fLengthSq < 1e-6f) // Epsilon으로 판단.
 	{
