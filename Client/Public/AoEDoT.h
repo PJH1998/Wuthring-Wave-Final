@@ -52,7 +52,7 @@ private:
 	_float				m_fDelayAcc{};
 	_bool				m_isAttack{};
 	// Effect?
-
+	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};
 
 private:

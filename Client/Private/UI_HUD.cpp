@@ -990,8 +990,8 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
 		}
 		
-		fBossSA		= *m_pCurBossSA;
-		fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
+		//fBossSA		= *m_pCurBossSA;
+		//fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
 
 
 		// fBossHP = { 10000.f };            // boss hitpoint
