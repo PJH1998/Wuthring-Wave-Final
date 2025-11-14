@@ -251,4 +251,6 @@ namespace Client
 
 		END
 	};
+
+	enum class SHADER_SCREENEFFECT { SONORA_CHANGE};
 }

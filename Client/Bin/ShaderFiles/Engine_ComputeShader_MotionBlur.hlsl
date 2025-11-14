@@ -73,10 +73,8 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     
     float2 vDir = normalize(vVelocity.xy);
     
-    float fVelocityLength = length(vVelocity.xy) * fLengthScale;
+    float fVelocityLength = length(vVelocity.xy);
 
- //   fVelocityLength *= smoothstep(fLimitDepth, 0.f, vVelocity.z);
-    
     float2 vTexcoord = (float2) DTID.xy / (float2) vInSize;
     
     if (fVelocityLength == 0.f || vVelocity.w != 0.f)
@@ -84,7 +82,7 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     
     float2 vTexelSize = 1.f / (float2) vInSize;
     
-    float2 vMotionScale = vDir * fVelocityLength * vTexelSize;
+    float2 vMotionScale = ((vVelocity.xy) * vTexelSize) * fLengthScale;
     
     int iSampleCount = MAX_RADIUS;
     
@@ -92,23 +90,23 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     
     if (vMotionScale.x > 0.f)
     {
-        float fX = (1.f - vTexcoord.x) / (vMotionScale.x * (MAX_RADIUS * vTexelSize.x));
+        float fX = (1.f - vTexcoord.x) / (vMotionScale.x);
         fMax = min(fMax, fX);
     }
-    else if(vMotionScale.x < 0.f)
+    else if (vMotionScale.x < 0.f)
     {
-        float fX = (vTexcoord.x) / ((vMotionScale.x * (MAX_RADIUS * vTexelSize.x)) * -1.f);
+        float fX = (vTexcoord.x) / (vMotionScale.x * -1.f);
         fMax = min(fMax, fX);
     }
-    
+
     if (vMotionScale.y > 0.f)
     {
-        float fY = (1.f - vTexcoord.y) / (vMotionScale.y * (MAX_RADIUS * vTexelSize.y));
+        float fY = (1.f - vTexcoord.y) / (vMotionScale.y);
         fMax = min(fMax, fY);
     }
     else if (vMotionScale.y < 0.f)
     {
-        float fY = (vTexcoord.y) / ((vMotionScale.y * (MAX_RADIUS * vTexelSize.y)) * -1.f);
+        float fY = (vTexcoord.y) / (vMotionScale.y * -1.f);
         fMax = min(fMax, fY);
     }
     
@@ -119,10 +117,9 @@ float4 ComputeMotionBlur(uint3 DTID, int2 vInSize, int2 vOutSize)
     
     for (int i = 1; i <= iSampleCount; ++i)
     {
-        float2 vDistance = (float) i * vTexelSize;
-        float2 vOffset = vMotionScale * vDistance;
-        
-        float2 vOffsetTex = vTexcoord + vOffset;
+        float fRatio = (i) / (float) iSampleCount;
+
+        float2 vOffsetTex = vTexcoord + (vMotionScale * fRatio);
 
         float4 vSampleDepth = DepthTexture.SampleLevel(ClampSampler, vOffsetTex, 0);
             

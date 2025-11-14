@@ -1016,6 +1016,14 @@ HRESULT CGameInstance::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CSh
 {
 	return m_pSFX_Hub->Render_SFX(eType, pVIBuffer, pShader);
 }
+HRESULT CGameInstance::Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	return m_pSFX_Hub->Setting_Radial(vCenterUV, vDistanceRange, fRadialIntensity);
+}
+HRESULT CGameInstance::Setting_Radial(_fvector vCenterPos, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	return m_pSFX_Hub->Setting_Radial(vCenterPos, vDistanceRange, fRadialIntensity);
+}
 #ifdef _DEBUG
 void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
 {

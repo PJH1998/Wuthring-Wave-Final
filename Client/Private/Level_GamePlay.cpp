@@ -399,6 +399,8 @@ void CLevel_GamePlay::DEBUG_FUNCTION()
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
 	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
 		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
 
 	if (ImGui::CollapsingHeader("MOTION_BLUR"))
 	{
