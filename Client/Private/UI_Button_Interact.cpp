@@ -186,14 +186,14 @@ void CUI_Button_Interact::Update_MouseFeedback(_float fTimeDelta)
 	if (m_IsGoindDisabled)
 		m_fDisableTimer += fTimeDelta;;
 
-	const _float fDisableTime = 0.5f;
+	const _float fDisableTime = 0.3f;
 	if (m_fDisableTimer >= fDisableTime &&
 		m_iAnimOrder == 0)
 	{
 		static_cast<CAnimator_UI*>(pRootUI->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"Interact_FadeOut");
 		m_iAnimOrder = 1;
 	}
-	else if (m_fDisableTimer >= fDisableTime * 2.f &&
+	else if (m_fDisableTimer >= fDisableTime + 0.5f &&
 		m_iAnimOrder == 1)
 	{
 		m_isActivate = false;

@@ -259,4 +259,12 @@ namespace Client
 
 		END
 	};
+
+	enum class TEXT_ALIGN_TYPE {
+		LEFT, 
+		CENTER, 
+		RIGHT, 
+
+		END 
+	};
 }

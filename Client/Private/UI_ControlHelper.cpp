@@ -112,10 +112,10 @@ void CUI_ControlHelper::HUD_Toggle_BossStatusUI(_bool isOn)
 	pTargetUI->Toggle_BossStatusUI(isOn);
 }
 
-void CUI_ControlHelper::Render_InteractUI(_wstring strText)
+void CUI_ControlHelper::Show_InteractUI(_wstring strText)
 {
+	// 상호작용을 생성하며, 해당 상호작용의 텍스트 자식을 찾아 출력할 텍스트를 변경함
 	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
-	CUI_Button_Interact* pInteractBtn = nullptr;
 
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_Interact", _fmatrix());
 
@@ -127,6 +127,27 @@ void CUI_ControlHelper::Render_InteractUI(_wstring strText)
 	auto& textDesc = static_cast<CUI_Text*>(pFont)->Get_TextUIDesc();
 	textDesc.strText = strText;
 	static_cast<CUI_Text*>(pFont)->Set_TextUIDesc(textDesc);
+}
+
+void CUI_ControlHelper::Hide_InteractUI(_bool isPressedAs)
+{
+	// 즉시 제거되는 것이 아닌, 끄도록 요청함. 내부적으로 사라지는 애니메이션 거친 뒤 비활성화됨.
+	CUI_Button_Interact* pInteractBtn = dynamic_cast<CUI_Button_Interact*>(Find_RootUI(L"UI_Interact"));
+	if (pInteractBtn)
+	{
+		if (isPressedAs)
+		{
+			pInteractBtn->Find_ChildObject(L"Interact_Pressed")->SetActivate(true);
+			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Pressed")->Get_Component(L"Com_Animator_UI"))
+				->Change_Animation(L"Interact_Pressed_Trigger");
+
+			pInteractBtn->Find_ChildObject(L"Interact_Focused")->SetActivate(true);
+			static_cast<CAnimator_UI*>(pInteractBtn->Find_ChildObject(L"Interact_Focused")->Get_Component(L"Com_Animator_UI"))
+				->Change_Animation(L"Interact_Focused_On");
+		}
+
+		pInteractBtn->Req_OffInteract();
+	}
 }
 
 _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
