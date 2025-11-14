@@ -79,6 +79,9 @@ void CEdit_MapObject_Instance::Update(_float fTimeDelta)
 {
 	if (!m_isActivate)
 		return;
+	m_fTotalTime += fTimeDelta;
+	if (m_fTotalTime >= 3.f)
+		m_fTotalTime -= 3.f;
 }
 
 void CEdit_MapObject_Instance::Late_Update(_float fTimeDelta)
@@ -126,9 +129,14 @@ void CEdit_MapObject_Instance::Render()
 		}
 		m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool));
 		m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool));
+		m_pShaderCom->Bind_Value("g_fRaidan", &m_fTotalTime, sizeof(_float));
 
+#ifdef _DEBUG
 		if (!strcmp(m_pShaderCom->Get_PassName(m_iShaderPassIndex), "ChangeColor"))
 			m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4));
+#endif // _DEBUG
+
+		
 
 		m_pShaderCom->Begin(m_iShaderPassIndex);
 

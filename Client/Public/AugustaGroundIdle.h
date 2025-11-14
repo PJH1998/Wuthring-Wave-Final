@@ -18,6 +18,7 @@ private:
         SPRINT,
         MOVE,
 		FLY,
+		FALL,
         ATTACK,
         MOVE_U,
         MOVE_D,
@@ -53,6 +54,7 @@ private:
     vector<ANIM_DATA> m_IdleStates = {};
 
     _bool m_States[IDLESTATE::END] = {};
+	_float m_fFallTime = {};
 
 private:
     virtual void Handle_Input() override;

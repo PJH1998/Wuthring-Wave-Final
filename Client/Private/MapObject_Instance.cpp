@@ -37,6 +37,9 @@ void CMapObject_Instance::Priority_Update(_float fTimeDelta)
 
 void CMapObject_Instance::Update(_float fTimeDelta)
 {
+	m_fTotalTime += fTimeDelta;
+	if (m_fTotalTime >= XM_2PI)
+		m_fTotalTime -= XM_2PI;
 }
 
 void CMapObject_Instance::Late_Update(_float fTimeDelta)
@@ -85,6 +88,7 @@ void CMapObject_Instance::Render(ID3D11DeviceContext* pDeferredContext, _uint iI
 		//m_pShaderCom->Bind_Value("g_HasNormal", &HasNormal, sizeof(_bool), pEffect);
 		//m_pShaderCom->Bind_Value("g_HasMask", &HasMask, sizeof(_bool), pEffect);
 		m_pShaderCom->Bind_Value("g_vDiffuseColor", &m_vDiffuseColor, sizeof(_float4), pEffect);
+		m_pShaderCom->Bind_Value("g_fRaidan", &m_fTotalTime, sizeof(_float), pEffect);
 		m_pShaderCom->Begin(0, pDeferredContext, pEffect);
 		
 		m_pModelComArray[iLODIndex]->Render(i, pDeferredContext);

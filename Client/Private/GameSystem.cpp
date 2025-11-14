@@ -255,9 +255,9 @@ void CGameSystem::Update(_float fTimeDelta)
 	m_pSonoro_Manager->Update(fTimeDelta);
 }
 
-void CGameSystem::Change_Sonoro(_bool IsSonoro)
+_bool  CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
-	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+	return m_pSonoro_Manager->Change_Sonoro(IsSonoro);
 }
 _bool CGameSystem::IsSonoro()
 {

@@ -283,6 +283,21 @@
     <Filter Include="03. GameObject\Mouse">
       <UniqueIdentifier>{4ed26a0d-1dc4-40c2-9cae-cc31a19574eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\Actor\Player\Galbrena">
+      <UniqueIdentifier>{37f8d84d-0c30-4aa8-8b5f-cbba31abfb3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Air\Galbrena">
+      <UniqueIdentifier>{0b58677a-1cd7-4b9f-8678-bd33dd975f42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Ground\Galbrena">
+      <UniqueIdentifier>{c317b327-a8e5-43f1-b5c1-8bf9dc234ca1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Weapon\Galbrena">
+      <UniqueIdentifier>{726ea30f-46d1-4dac-b968-f1537c56aad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
+      <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -722,6 +737,45 @@
     <ClInclude Include="..\Public\Mouse.h">
       <Filter>03. GameObject\Mouse</Filter>
     </ClInclude>
+    <ClInclude Include="..\Public\Galbrena.h">
+      <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaState_Enum.h">
+      <Filter>03. GameObject\Actor\Player\State\Define</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\GalbrenaFactory.h">
+      <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaShotGun.h">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundRun.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundIdle.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirJump.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFall.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaHit.h">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Public\GalbrenaAirFly.h">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1131,6 +1185,42 @@
     </ClCompile>
     <ClCompile Include="..\Private\Mouse.cpp">
       <Filter>03. GameObject\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\Galbrena.cpp">
+      <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaFactory.cpp">
+      <Filter>03. GameObject\Actor\Player\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaShotGun.cpp">
+      <Filter>03. GameObject\Weapon\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundRun.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaHit.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Hit\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Ground\Galbrena</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Private\GalbrenaAirFly.cpp">
+      <Filter>03. GameObject\Actor\Player\State\Air\Galbrena</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -363,6 +363,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
 
 			File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
 			File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
@@ -374,7 +375,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
 
 			File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
-			XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
+			//XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Meteo")
 				, ENUM_CLASS(eLevel), TEXT("Layer_Meteo"), &Desc);
 		}

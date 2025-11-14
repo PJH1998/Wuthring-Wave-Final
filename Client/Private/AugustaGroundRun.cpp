@@ -243,8 +243,6 @@ void CAugustaGroundRun::Check_StateTransition(_float fTimeDelta)
 		return;
     }
 
-	// Land가 아닌 판정이면 0 초기화.
-	m_iNotLandFrames = 0;
 	if (m_States[FLY])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eAirFlyType = EAugustaAirFlyType::XA_START;

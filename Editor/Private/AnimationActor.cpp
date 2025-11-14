@@ -51,7 +51,8 @@ HRESULT CAnimationActor::Initialize_Clone(void* pArg)
 		m_pParentActor = pDesc->pParentActor;
 		m_pSocketMatrix = m_pParentActor->Get_BoneMatrix(pDesc->strBoneName);
 
-		m_pParentActor->Set_ChildActor(this);
+		//m_pParentActor->Set_ChildActor(this);
+		m_pParentActor->Set_ChildActors(this);
 	}
 #endif // _DEBUG
 
@@ -145,10 +146,10 @@ void CAnimationActor::Update(_float fTimeDelta)
     if (m_IsPlayAnimation)
     {
         //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
-        //IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, true, true, true, 1.f);
+        IsAnimationEnd = m_pModelCom->Play_Animation_GPU(m_pComputeShaderCom, m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, true, true, true, 1.f);
 
-
-        IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
+		 
+        //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta * m_fAnimationSpeed, &m_fTrackPosition, false, true, false, true, 1.f);
 
         //IsAnimationEnd = m_pModelCom->Play_Animation_CPU(m_strCurrentAnimation, fTimeDelta, &m_fTrackPosition, false, true, false, false, 1.f);
 
@@ -341,10 +342,10 @@ void CAnimationActor::Set_TrackPosition(_float fTrackPosition)
 void CAnimationActor::Set_PlayAnimation(_bool IsPlay)
 {
     m_IsPlayAnimation = IsPlay;
-	if (nullptr != m_pChildActor)
+	for (auto& pChildActor : m_ChildActors)
 	{
-		/*m_pChildActor->Set_A*/
-		m_pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
+		if (nullptr != pChildActor)
+			pChildActor->Set_PlayAnimation(m_IsPlayAnimation);
 	}
 		
 }
@@ -401,11 +402,35 @@ const _float4x4* CAnimationActor::Get_WorldMatrixPtr()
     return m_pTransformCom->Get_WorldMatrixPtr();
 }
 
+void CAnimationActor::Set_ChildActor(CAnimationActor* pChildActor)
+{
+	m_pChildActor = pChildActor;;
+}
+
+void CAnimationActor::Set_ChildActors(CAnimationActor* pChildActor)
+{
+	m_ChildActors.emplace_back(pChildActor);
+}
+
+_bool CAnimationActor::Is_ChildActor()
+{
+	return m_ChildActors.size() > 0;
+}
+
+//void CAnimationActor::Child_Render()
+//{
+//	ASSERT_CRASH(m_pChildActor);
+//	m_pChildActor->Render_Detail();
+//
+//}
 void CAnimationActor::Child_Render()
 {
-	ASSERT_CRASH(m_pChildActor);
-	m_pChildActor->Render_Detail();
 
+	for (auto& pChildActor : m_ChildActors)
+	{
+		if (nullptr != pChildActor)
+			pChildActor->Render_Detail();
+	}
 }
 void CAnimationActor::Render_Detail()
 {
@@ -420,10 +445,21 @@ void CAnimationActor::Render_Detail()
 	ImVec2 windowPos = ImVec2(0.f, g_iWinSizeY - 200.f);
 	ImVec2 windowSize = ImVec2(600.f, 170.f);
 
+	static int instanceCount = 0;
+	windowPos.y -= instanceCount * (windowSize.y + 10.f);
+	instanceCount++;
+
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
 	ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
 
-	ImGui::Begin("Child Animation Detail", nullptr, ImGuiWindowFlags_NoCollapse);
+	//ImGui::SetNextWindowPos(windowPos, ImGuiCond_Once);
+	//ImGui::SetNextWindowSize(windowSize, ImGuiCond_Once);
+
+	ImGui::PushID(this);  // 고유 ID 푸시
+
+	char uniqueTitle[128];
+	sprintf_s(uniqueTitle, "Child Animation Detail [%p]", this);
+	ImGui::Begin(uniqueTitle, nullptr, ImGuiWindowFlags_NoCollapse);
 
 	ImGui::Text("Child Animation Name : %s", m_strCurrentAnimation.c_str());
 
@@ -465,6 +501,7 @@ void CAnimationActor::Render_Detail()
 	}
 
 	ImGui::End();
+	ImGui::PopID();  // ID 팝
 }
 #endif
 
@@ -575,5 +612,8 @@ void CAnimationActor::Free()
     Safe_Release(m_pShaderCom);
     Safe_Release(m_pComputeShaderCom);
 	Safe_Release(m_pSpringCamera);
+
+	m_ChildActors.clear();
+	m_pChildActor == nullptr;
 
 }
