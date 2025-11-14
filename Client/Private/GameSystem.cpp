@@ -83,9 +83,9 @@ void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 	return m_pParser->Create_Effect(strFolderPath, eLevel);
 }
 
-void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
 {
-	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+	return m_pParser->Create_Prefab(strFolderPath, eLevel, PoolingNum);
 }
 
 void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
