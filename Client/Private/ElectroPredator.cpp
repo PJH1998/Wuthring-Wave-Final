@@ -278,7 +278,7 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 1.5f;
 	ColliderDesc.fRadius = 0.4f;
-	ColliderDesc.fRayOffset = -0.11f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
