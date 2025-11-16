@@ -61,6 +61,9 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	//	CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	//	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	//}
+
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
 }
 
 void CLevel_Logo::Render()
