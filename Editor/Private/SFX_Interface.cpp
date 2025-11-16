@@ -18,4 +18,6 @@ CSFX_Interface* CSFX_Interface::Create(ID3D11Device* pDevice, ID3D11DeviceContex
 
 void CSFX_Interface::Free()
 {
+	__super::Free();
+
 }

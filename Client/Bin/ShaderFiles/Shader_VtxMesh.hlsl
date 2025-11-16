@@ -2,8 +2,8 @@
 
 matrix g_WorldMatrix, g_ViewMatrix, g_ProjMatrix;
 
-Texture2D   g_DiffuseTexture[2];
-Texture2D   g_NormalTexture[2];
+Texture2D   g_DiffuseTexture[4];
+Texture2D   g_NormalTexture[4];
 Texture2D   g_MaskDiffuseTexture;
 Texture2D   g_MetallicTexture;
 vector      g_vMatrlAmbient = vector(1.0f, 1.0f, 1.0f, 1.0f);
@@ -454,6 +454,58 @@ PS_OUT_EMISSIVE PS_EMISSIVE(PS_IN In)
     return Out;
 }
 
+PS_OUT_LIGHT PS_TEST(PS_IN In)
+{
+    PS_OUT_LIGHT Out = (PS_OUT_LIGHT) 0;
+    
+    float4 vGrasDiffuse = g_DiffuseTexture[0].SampleLevel(DefaultSampler, (In.vTexcoord * 3.f), 0.f);
+    float4 vRockDiffuse = g_DiffuseTexture[1].SampleLevel(DefaultSampler, (In.vTexcoord * 10.f), 0.f);
+    float4 vRockSecDiffuse = g_DiffuseTexture[2].SampleLevel(DefaultSampler, (In.vTexcoord * 10.f), 0.f);
+    
+    float4 vMainNomral = g_NormalTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vGrasNoraml = g_NormalTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vDetailNormal = g_NormalTexture[2].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vDetailSecNormal = g_NormalTexture[3].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    
+    float4 vNormalMask = g_MaskTexture[0].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    float4 vDetailMask = g_MaskTexture[1].SampleLevel(DefaultSampler, In.vTexcoord, 0.f);
+    
+    vDetailMask.xyz = normalize(vDetailMask.xyz);
+    
+    float4 vDiffuse = (vGrasDiffuse * vDetailMask.r) + (vRockSecDiffuse * vDetailMask.g) + (vRockDiffuse * vDetailMask.b);
+    float4 vNormalDesc = (vGrasNoraml * vDetailMask.r) + (vDetailSecNormal * vDetailMask.g) + (vDetailNormal * vDetailMask.b) + (vMainNomral * (1.f - vDetailMask.a));
+    
+    float4 vNormal;
+	        
+    vNormal = vNormalDesc * 2.f - 1.f;
+    
+    vNormal.z = sqrt(1.f - saturate(dot(vNormalDesc.xy, vNormalDesc.xy)));
+    
+    float3 vTangent = In.vTangent.xyz;
+    float3 vBinormal = In.vBinormal.xyz * -1.f;
+    float3 vInNormal = In.vNormal.xyz;
+
+    float3x3 WorldMatrix;
+    WorldMatrix = float3x3(vTangent, vBinormal, vInNormal);
+        
+    vNormal.xyz = normalize(mul(vNormal.xyz, WorldMatrix));
+    vNormal.xyz = vNormal.xyz * 0.5f + 0.5f;
+    
+    Out.vDiffuse.xyz = vDiffuse.xyz;
+    Out.vDiffuse.w = 1.f;
+    
+    Out.vNormal = float4(vNormal.xyz, 1.f);
+    
+    Out.vDepth.x = In.vProjPos.z / In.vProjPos.w;
+    Out.vDepth.y = In.vProjPos.w;
+    
+    Out.vPBR.y = g_fGlobalStaticRoughness;
+    Out.vPBR.x = g_fGlobalStaticMetallic;
+    
+    return Out;
+    
+}
+
 technique11 DefaultTechnique
 {
     pass DefaultPass // 0
@@ -550,5 +602,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_SHADOW_MAP();
         GeometryShader = NULL;
         PixelShader = compile ps_5_0 PS_SHADOW_MAP();
+    }
+    
+    pass Test
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_Default, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = NULL;
+        PixelShader = compile ps_5_0 PS_TEST();
     }
 }

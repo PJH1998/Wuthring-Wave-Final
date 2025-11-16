@@ -57,21 +57,21 @@ HRESULT CLevel_Shader::Ready_Light()
     m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
     m_pGameInstance->SetUp_CameraNF();
 
-	LIGHT_DESC PointLight = {};
-	PointLight.eType = LIGHT_DESC::POINT;
-	PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
-	PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
-	PointLight.fRange = 1500.f;
-	PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
+	//LIGHT_DESC PointLight = {};
+	//PointLight.eType = LIGHT_DESC::POINT;
+	//PointLight.vAmbient = _float4(0.8f, 0.8f, 0.8f, 1.f);
+	//PointLight.vDiffuse = _float4(0.f, 0.f, 0.7f, 1.f);
+	//PointLight.fRange = 1500.f;
+	//PointLight.vPosition = _float4(340.f, 230.f, 500.f, 1.f);
 
-	LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
-	PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
+	//LightDesc.vDirection = _float4(1.f, -0.5f, -1.f, 0.f);
+	//PointLight.vSpecular = _float4(1.f, 1.f, 1.f, 1.f);
 
-	m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);
+	//m_pGameInstance->Add_Light(TEXT("Test1"), PointLight);
 
-	PointLight.vDiffuse = _float4(0.f, 0.7f, 0.f, 1.f);
-	PointLight.vPosition = _float4(-340.f, 230.f, 500.f, 1.f);
-	m_pGameInstance->Add_Light(TEXT("Test2"), PointLight);
+	//PointLight.vDiffuse = _float4(0.f, 0.7f, 0.f, 1.f);
+	//PointLight.vPosition = _float4(-340.f, 230.f, 500.f, 1.f);
+	//m_pGameInstance->Add_Light(TEXT("Test2"), PointLight);
     return S_OK;
 }
 

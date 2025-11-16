@@ -304,6 +304,9 @@
     <Filter Include="03. GameObject\Actor\Player\State\Hit\Galbrena">
       <UniqueIdentifier>{532ff2ad-7e0c-4c70-8290-0023b49fe165}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. GameObject\ScreenEffect\AugustaSFX">
+      <UniqueIdentifier>{b0b25107-220e-493b-8a97-3a501fcbf036}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -791,6 +794,7 @@
     <ClInclude Include="..\Public\AugustaGroundSprint.h">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClInclude>
+    <ClInclude Include="..\public\AugustaSFX.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Client.ico">
@@ -1246,6 +1250,7 @@
     <ClCompile Include="..\Private\AugustaGroundSprint.cpp">
       <Filter>03. GameObject\Actor\Player\State\Ground\Augusta</Filter>
     </ClCompile>
+    <ClCompile Include="..\private\AugustaSFX.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Client.rc">

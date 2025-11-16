@@ -1,5 +1,6 @@
 ﻿#include "EditorPch.h"
 #include "Level_SFX.h"
+#include "SFX_Interface.h"
 
 CLevel_SFX::CLevel_SFX(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel{ pDevice, pContext }
@@ -62,5 +63,5 @@ void CLevel_SFX::Free()
 {
 	__super::Free();
 
-	Safe_Release(m_pSFX_Interface);
+//	Safe_Release(m_pSFX_Interface);
 }

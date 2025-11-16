@@ -48,7 +48,7 @@ void CSFX_Hub::Update_SFX(_float fTimeDelta)
 
 HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
 {
-	if (m_eCurrentToggle == eType)
+	if (m_eCurrentToggle == eType && true == m_IsToggleOn)
 		return S_OK;
 
 	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
