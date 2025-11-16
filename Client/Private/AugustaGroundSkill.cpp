@@ -400,8 +400,8 @@ void CAugustaGroundSkill::SetUp_Animations()
 	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE_ZERO), "Skill_Rise_Zero", 1.2f, 15.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILL_RISE), "Skill_Rise", 1.2f, 25.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::SKILLQTE), "SkillQTE", 1.f, 0.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_PULL), "Attack_Pull", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_SPEEDDRIVE), "Attack_SpeedDrive", 1.f, 30.f);
+	CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_PULL), "Attack_Pull", 1.f, 30.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaSkillType::ATTACK_SPSKILL), "Attack_SpSkill", 1.f, 60.f);
 
     m_PartsAnimations.emplace("Skill_Strike", "SA1Shouwangjiu_Skill_Strike");
