@@ -15,9 +15,11 @@ public:
 	virtual		HRESULT				Initialize_Clone(void* pArg);
 
 	atomic<LOADSTATE>&  IsLoaded() { return m_LoadState; }
-	HRESULT Render(_uint iNumMeshIndex);
+
 	void Load_LastLODIndex(_string LastModelPath);
 	void Set_Buffers(ID3D11Buffer* pSharedVB, ID3D11Buffer* pSharedIB);
+	HRESULT Render(_uint iMeshIndex);
+	HRESULT Render(_uint iMeshIndex, ID3D11DeviceContext* pDC);
 public:
 	vector<CModel_Manager::SHARED_DATA_DESC>* Get_MeshDesc() { return m_Desc; }
 

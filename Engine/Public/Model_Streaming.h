@@ -16,7 +16,7 @@ public:
 	virtual		HRESULT				Initialize_Prototype(const _char* pFilePath);
 	virtual		HRESULT				Initialize_Clone(void* pArg);
 	HRESULT							Render(_uint iLODIndex, _uint iMeshIndex);
-	HRESULT							Render(_uint iMeshIndex, ID3D11DeviceContext* pDC);
+	HRESULT							Render(_uint iLODIndex, _uint iMeshIndex, ID3D11DeviceContext* pDC);
 
 public:
 	HRESULT							Bind_Materials(class CShader* pShader, const _char* pConstantName, _uint iMeshIndex, TEXTURETYPE eTextureType, _uint iTextureIndex);

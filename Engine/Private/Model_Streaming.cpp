@@ -84,14 +84,26 @@ HRESULT CModel_Streaming::Bind_Materials(CDeferredShader* pShader, const _char* 
 	return S_OK;
 }
 
-HRESULT CModel_Streaming::Render(_uint iMeshIndex, ID3D11DeviceContext* pDC)
+HRESULT CModel_Streaming::Render(_uint iLODIndex, _uint iMeshIndex, ID3D11DeviceContext* pDC)
 {
-	m_pGameInstance->RequestData(this, m_ModelPath, 0);
+		iLODIndex = 0;
+	m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
 
-	if (m_Meshes[0]->IsLoaded() == LOADSTATE::LOADED)
-		m_Meshes[0]->Render(iMeshIndex);
-	else
-		m_Meshes[m_iMaxLOD]->Render(iMeshIndex);
+	if (m_Meshes[iLODIndex]->IsLoaded() == LOADSTATE::LOADED)
+	{
+		m_Meshes[iLODIndex]->Render(iMeshIndex,pDC);
+		return S_OK;
+	}
+	else if (m_Meshes[iLODIndex]->IsLoaded() == LOADSTATE::LOADING)
+	{
+		//m_pGameInstance->RequestData(this, m_ModelPath, iLODIndex);
+		//요청
+	}
+	//모델 매니저에 해당하는 LOD단계 요청할것.
+	//m_pGameInstance
+	//제일 높은 LOD 단계 렌더시키기.
+
+	m_Meshes[m_iMaxLOD]->Render(iMeshIndex,pDC);
 	return S_OK;
 }
 
