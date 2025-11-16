@@ -13,7 +13,7 @@ private:
 		_float fLimitVelocity;
 		_float fLimitDepth;
 		_float fLengthScale;
-		_float PaddingMotion;
+		_float fSampleDepthBias;
 	}MOTION_BLUR_DATA;
 
 private:
@@ -22,19 +22,29 @@ private:
 
 public:
 	virtual HRESULT		Initialize(_uint iWinSizeX, _uint iWinSizeY);
+	virtual void		Update(_float fTimeDelta);
 	virtual HRESULT		Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader) override;
+
+	virtual void		Enter();
+	virtual void		Exit();
+
+#ifdef _DEBUG
+	void				Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale) { m_MotionBlurData.fLimitVelocity = fLimitVelocity, m_MotionBlurData.fLimitDepth = fLimitDepth, 
+		m_MotionBlurData.fLengthScale = fLengthScale; }
+#endif
 
 private:
 	_uint				m_iWinSizeX = {};
 	_uint				m_iWinSizeY = {};
-	_uint				m_fWinSizeX = {};
-	_uint				m_fWinSizeY = {};
+	_float				m_fWinSizeX = {};
+	_float				m_fWinSizeY = {};
 	
-	_float				m_fLimitVelocity = {};
-	_float				m_fLimitDepth = {};
-	_float				m_fLengthScale = {};
+	_float				m_fTargetLength = {};
+	_float				m_fCurLength = {};
 
-	ID3D11SamplerState* m_pDefaultSampler = { nullptr };
+	MOTION_BLUR_DATA	m_MotionBlurData = {};
+
+	ID3D11SamplerState* m_pClampSampler = { nullptr };
 
 public:
 	static CMotionBlur* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY);

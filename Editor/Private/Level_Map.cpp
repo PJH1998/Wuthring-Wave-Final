@@ -560,6 +560,8 @@ void CLevel_Map::Menu_Save_Load()
 								File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 								File.read(reinterpret_cast<char*>(&Desc.eObjectType), sizeof(OBJECTTYPE));
 								_float4x4 Matrix = {};
+								File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
+
 								File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
 								File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
 

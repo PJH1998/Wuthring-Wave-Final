@@ -18,6 +18,7 @@ public:
 		_float3				vExtent;
 		_float3				vOffset;
 		_float				fAttackDamage;
+		TEXT_COLOR_TYPE		eType;
 	}AOEDOT_DESC;
 
 	typedef struct tagAoEDoTReset
@@ -51,7 +52,7 @@ private:
 	_float				m_fDelayAcc{};
 	_bool				m_isAttack{};
 	// Effect?
-
+	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};
 
 private:

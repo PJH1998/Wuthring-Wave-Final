@@ -25,15 +25,28 @@ private:
 	virtual ~CParser() = default;
 
 public:
+#pragma region MAP
 	// File Model
 	void							Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel);
 	void							Clone_MapObjects(LEVEL eLevel);
+#pragma endregion
 
 #pragma region SPAWNER
 	void							Clone_Spawners(LEVEL eLevel);
 #pragma endregion
+
+#pragma region CSV
 	// Load CSV File (Excel)
-	const vector<vector<_string>>&	Load_CSV(const _char* pFilePath);
+	const vector<vector<_string>>& Load_CSV(const _char* pFilePath);
+#pragma endregion
+
+#pragma region SEQUENCE
+public:
+	void							Load_Sequence(const _char* pFolderPath);
+private:
+	void							Load_Scene(json& ItemJson, vector<SEQUENCE_ITEM_DATA*>& ItemDatas);
+#pragma endregion
+
 
 private:
 	void							Read_Map_Prototype(const _string pFilePath, LEVEL eLevel);
@@ -47,7 +60,7 @@ public:
 	//자식들 원형 만들어놨으면 프리팹 읽어서 프리팹 생성. 풀링 매니저에 넣어줘야함.
 	//폴더째로 프리팹 읽을거면 개수를 여기서 지정해줘야됨.
 	//폴더째로 읽고, 폴더로 나눠두면 좋을거 같은데 ex) 보스, 아우구스타, 공용, 등등.
-	void						Create_Prefab(const string& strFolderPath, LEVEL eLevel); 
+	void						Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum); 
 
 	//텍스처랑 Dat 먼저 읽어놔야 위에 이펙트 문제없이 클론가능.
 	void						Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel);
@@ -55,7 +68,7 @@ public:
 	void						Load_FXDecal_Data_FromFolder(const string& strFolderPath);
 private:
 	//원형 있어야 클론가능.
-	void						Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel);
+	void						Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum);
 
 	//원형 만들어놓기
 	void						Load_Particle_VB_FromJson(const _string& strFilePath, const _string& VBTag, LEVEL eLevel);

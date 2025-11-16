@@ -15,7 +15,7 @@
 #include "SkyBox.h"
 #include "Effect_Prefab.h"
 #include "Ability.h"
-
+#include "SceneCamera.h"
 
 #include "CustomFont.h"
 
@@ -24,6 +24,7 @@ CMainApp::CMainApp()
 	m_pGameSystem{ CGameSystem::GetInstance() }
 {
 	Safe_AddRef(m_pGameInstance);
+	Safe_AddRef(m_pGameSystem);
 }
 
 HRESULT CMainApp::Initialize()
@@ -55,6 +56,8 @@ HRESULT CMainApp::Initialize()
 	m_pGameSystem->Ready_GameSystem(m_pDevice, m_pContext);
 
 	Ready_Prototype_ForStatic();
+	Ready_Sequence();
+	Ready_Sequence_Item();
 	Ready_Event();
 	Start_Level();
 
@@ -232,22 +235,38 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CDeferredShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Instance.hlsl"), VTXMESHINSTANCE::Elements, VTXMESHINSTANCE::iNumElements, TEXT("Shader_Map_Instance")))))
 		CRASH("DeferredShader_Map");
 
-
 	// Shader_VtxAnimMesh
-	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
-		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPropAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxPropAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
 		CRASH("Shader_VtxAnimMesh");
 
+
+	// Shader_VtxPropAnimMesh
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxAnimMesh"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxAnimMesh.hlsl"), VTXANIMMESH::Elements, VTXANIMMESH::iNumElements))))
+		CRASH("Shader_VtxPropAnimMesh");
+
 	// Shader_UI_VtxPosTex ..Shader for UI
-	//if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_UI_VtxPosTex"),
-	//	CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
-	//	CRASH("Shader_UI_VtxPosTex");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxPosTex"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxPosTex.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_UI_VtxPosTex");
 	
 	// Shader_VtxSkyBox
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxSkyBox"),
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxSkyBox.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxSkyBox");
 		
+	// Shader_VtxArrow
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxArrow"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxMesh_Arrow.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
+		CRASH("Shader_VtxMesh");
+
+	// Shader_Sonora
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ScreenEffect"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_ScreenEffect.hlsl"), VTXPOSTEX::Elements, VTXPOSTEX::iNumElements))))
+		CRASH("Shader_UI_VtxPosTex");
+
+
 	SHADER_MACRO eShaderMacro = {
 		{"THREAD_X", "64" }
 		,{"THREAD_Y", "1" }
@@ -266,6 +285,11 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshFly.hlsl")
 			, eShaderMacro, strEntryPoint))))
 		CRASH("Compute FlyAnimMesh Shader");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"),
+		CComputeShader::Create(m_pDevice, m_pContext, TEXT("../../Client/Bin/ShaderFiles/Shader_ComputeVtxAnimMeshNonRib.hlsl")
+			, eShaderMacro, strEntryPoint))))
+		CRASH("Compute NonRibAnimMesh Shader");
 
 	// Rigidbody
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),
@@ -312,6 +336,8 @@ void CMainApp::Ready_Prototype_ForStatic()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_VtxTrailMesh.hlsl"), VTXMESH::Elements, VTXMESH::iNumElements))))
 		CRASH("Shader_VtxTrailMesh");
 
+
+
 	//Shader_ComputeShader_Particle
 	SHADER_MACRO eShaderMacroParticle = {
 		{"THREAD_X", "64" }
@@ -328,11 +354,31 @@ void CMainApp::Ready_Prototype_ForStatic()
 
 	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_FXRect"),
 		CVIBuffer_Point::Create(m_pDevice, m_pContext));
+
+	m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Componnent_VIBuffer_Rect"),
+		CVIBuffer_Rect::Create(m_pDevice, m_pContext));
+
 	// Ability 
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Ability"),
 		CAbility::Create(m_pDevice, m_pContext))))
 		CRASH("Ability");
 
+	//Decal
+	m_pGameSystem->Load_EffectDecalData_FromFolder("../Bin/Resource/Effect/Prefabs/Common/Decal");
+
+}
+
+void CMainApp::Ready_Sequence_Item()
+{
+	// Sequence Item
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"),
+		CSceneCamera::Create(m_pDevice, m_pContext))))
+		CRASH("Camera");
+}
+
+void CMainApp::Ready_Sequence()
+{
+	m_pGameSystem->Load_Sequence("../Bin/Resource/Sequence/Scene/");
 }
 
 void CMainApp::Start_Level()
@@ -362,10 +408,11 @@ void CMainApp::Free()
 {
 	__super::Free();
 
+	m_pGameSystem->Release_System();
+	Safe_Release(m_pGameSystem);
+
 	Safe_Release(m_pDevice);
 	Safe_Release(m_pContext);
 	m_pGameInstance->Release_Engine();
 	Safe_Release(m_pGameInstance);
-
-	Safe_Release(m_pGameSystem);
 }

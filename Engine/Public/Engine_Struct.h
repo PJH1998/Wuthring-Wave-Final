@@ -300,6 +300,7 @@ namespace Engine
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
+		ITEM_TYPE	eType = {};
 		_wstring	strItemTag;
 	}SEQUENCE_ITEM_INFO;
 
@@ -308,6 +309,11 @@ namespace Engine
 	{
 		_float		fStartFrame = {};
 		_float		fEndFrame = {};
+		_float		fTrackPerSec = {};
+		tagSequenceItemData(_float _fStartFrame, _float _fEndFrame, _float _fTrackPerSec)
+			: fStartFrame { _fStartFrame }, fEndFrame { _fEndFrame }, fTrackPerSec { _fTrackPerSec }
+		{ }
+		virtual ~tagSequenceItemData() {}
 	}SEQUENCE_ITEM_DATA;
 #pragma endregion
 
@@ -375,6 +381,20 @@ namespace Engine
 
 	// Default 초기화 용도.
 	inline const GPU_BLEND_INFO G_DefaultBlendInfo = {};
+
+	typedef struct tagPrefabInfo
+	{
+		class CModel*		 pModelPtr = nullptr;
+		const _float4x4*	 pMatrixPtr = nullptr;
+	}PREFAB_INFO;
+
+	typedef struct tagEffectInfo
+	{
+		const _float4x4* pBoneMatrixPtr = nullptr;
+		const _float4x4* pObjectMatrixPtr = nullptr;
+		_bool			 IsActive = false;
+		_matrix			OffsetMatrix = {};
+	}EFFECT_INFO;
 }
 
 

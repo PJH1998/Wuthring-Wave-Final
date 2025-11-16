@@ -27,6 +27,8 @@ HRESULT CAoEDoT::Initialize_Clone(void* pArg)
 	m_iLayer = pDesc->iLayer;
 	m_vOffset = pDesc->vOffset;
 	m_iTargetLayers = pDesc->iTargetLayers;
+	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -35,6 +37,7 @@ void CAoEDoT::Priority_Update(_float fTimeDelta)
 	if(m_isAttack)
 	{
 		m_pRigidBodyCom->IsActivate(false);
+		m_pRigidBodyCom->Change_Layer(0);
 		m_isAttack = false;
 	}
 }
@@ -44,6 +47,7 @@ void CAoEDoT::Update(_float fTimeDelta)
 	if (m_fDelayAcc >= m_fDelayTime)
 	{
 		m_fDelayAcc = 0.f;
+		m_pRigidBodyCom->Change_Layer(m_iLayer);
 		m_pRigidBodyCom->IsActivate(true);
 		m_isAttack = true;
 	}
@@ -53,12 +57,14 @@ void CAoEDoT::Update(_float fTimeDelta)
 	if (m_fLifeTimeAcc >= m_fLifeTime)
 	{
 		m_fLifeTimeAcc = 0.f;
+		m_pRigidBodyCom->Change_Layer(0);
+		m_pRigidBodyCom->IsActivate(false);
 		m_isActivate = false;
 	}
 	else
 		m_fLifeTimeAcc += fTimeDelta;
 
-	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix() * XMMatrixTranslation(m_vOffset.x, m_vOffset.y, m_vOffset.z), fTimeDelta);
 }
 
 void CAoEDoT::Late_Update(_float fTimeDelta)
@@ -78,12 +84,16 @@ void CAoEDoT::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
 	AOEDOT_RESET* pDesc = static_cast<AOEDOT_RESET*>(pArg);
 	m_pTransformCom->Set_WorldMatrix(WorldMatrix);
-	//m_pTransformCom->LookAt(XMLoadFloat3(&pDesc->vTargetPos));
 	m_fLifeTime = pDesc->fLifeTime;
 	m_fDelayTime = m_fLifeTime / (pDesc->iTickCount);
 	m_fDelayAcc = m_fDelayTime;
 	m_fLifeTimeAcc = 0.f;
 	m_isActivate = true;
+
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = nullptr;
+	EffectDesc.pModelPtr = nullptr;
+	m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
 }
 
 void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
@@ -106,6 +116,9 @@ void CAoEDoT::Ready_Component(AOEDOT_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = pDesc->fAttackDamage;
+	//m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType =pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
 }
 

@@ -46,8 +46,13 @@ void CAugustaSkillWeapon::Priority_Update(_float fTimeDelta)
 	if (m_IsAnimationEnd)
 		m_isActivate = false;
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Priority_Update(fTimeDelta);*/
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Priority_Update(fTimeDelta);
+	}
 }
 
 void CAugustaSkillWeapon::Update(_float fTimeDelta)
@@ -63,18 +68,30 @@ void CAugustaSkillWeapon::Update(_float fTimeDelta)
 		m_pParentTransform->Get_WorldMatrix());
 
     _matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Update(fTimeDelta);*/
     //m_pRigidbodyCom->Update_Rigidbody(mat, fTimeDelta);
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 
 void CAugustaSkillWeapon::Late_Update(_float fTimeDelta)
 {
     CProp::Late_Update(fTimeDelta);
 
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Late_Update(fTimeDelta);
 
+
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Late_Update(fTimeDelta);
+	}
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
@@ -110,9 +127,19 @@ void CAugustaSkillWeapon::Render()
 #endif // _DEBUG
 }
 
-void CAugustaSkillWeapon::Activate(_bool IsActive)
+void CAugustaSkillWeapon::Activate(_bool IsActivate)
 {
-    SetActivate(IsActive);
+    SetActivate(IsActivate);
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	}
 }
 
 void CAugustaSkillWeapon::Change_Volume(_uint iVolumeIdx)
@@ -177,8 +204,8 @@ void CAugustaSkillWeapon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CAugustaSkillWeapon::Ready_Positions(const PROP_DESC* pDesc)
@@ -204,6 +231,8 @@ void CAugustaSkillWeapon::Ready_AttackVolumes()
 	TriggerDesc.vOffsetPos = _float3(0.5f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 200.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
+	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

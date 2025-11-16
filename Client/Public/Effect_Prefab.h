@@ -46,7 +46,7 @@ public:
 private:
 	CGameObject* Get_Children(_wstring ChildrenTag);
 	void Add_Children(const _wstring& ChildrenTag, EFFECT_TYPE eType, _uint CurrentLevel);
-	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix);
+	void Children_Offset(const FRAME_DESC& Desc, _matrix& OutMatrix, EFFECT_INFO& Info);
 
 public:
 	_wstring	Get_MyTag() {
@@ -57,16 +57,20 @@ public:
 	void Set_SpawnMatrix(_float4x4 PlayerMatrix, _float4x4 BoneMatrix);
 	void Reset_SpawnMatrix();
 
-public:
-	void Reset_Prefab_Info();			//툴에서도 소환해줘야해서 일단 Public
+private:
+	void Reset_Prefab_Info();		
 
 private:
 
 	_wstring							 m_strMyTag;	 
 	_string								 m_strBoneTag;
 	
-	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해주기. 
+	//이펙트 소환했을 때 그 시점 뼈 위치기준 행렬 세팅 한 번만 해줄때 사용할 정보.
 	_float4x4							 m_SpawnMatrix = {};
+
+	//이펙트 소환했을 때 뼈에 붙여줄때 사용할 정보.
+	const _float4x4*					 m_pBoneMatrixPtr = nullptr;
+	const _float4x4*					 m_pObjectMatrixPtr = nullptr;
 
 	_float								 m_fCurrentTime = 0.f;
 	_float2								 m_vLifeTime = {};

@@ -46,9 +46,15 @@ void CAugustaGriffon::Priority_Update(_float fTimeDelta)
 		m_isActivate = false;
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Priority_Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Priority_Update(fTimeDelta);
+	}
 }
+
 
 void CAugustaGriffon::Update(_float fTimeDelta)
 {
@@ -60,8 +66,13 @@ void CAugustaGriffon::Update(_float fTimeDelta)
         m_pParentTransform->Get_WorldMatrix());
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Update(fTimeDelta);
+	//if (nullptr != m_pMainAttackVolume)
+	//	m_pMainAttackVolume->Update(fTimeDelta);
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Update(fTimeDelta);
+	}
 }
 
 void CAugustaGriffon::Late_Update(_float fTimeDelta)
@@ -69,8 +80,13 @@ void CAugustaGriffon::Late_Update(_float fTimeDelta)
     CProp::Late_Update(fTimeDelta);
 
 	// MainAttackVolume 설정
-	if (nullptr != m_pMainAttackVolume)
-		m_pMainAttackVolume->Late_Update(fTimeDelta);
+	/*if (nullptr != m_pMainAttackVolume)
+		m_pMainAttackVolume->Late_Update(fTimeDelta);*/
+	for (auto& pAttackVolume : m_AttackVolumes)
+	{
+		if (nullptr != pAttackVolume)
+			pAttackVolume->Late_Update(fTimeDelta);
+	}
     //m_pRigidbodyCom->Sync_Rigidbody(m_pTransformCom);
 
     /*if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
@@ -110,11 +126,21 @@ void CAugustaGriffon::Render()
 #endif // _DEBUG
 }
 
-void CAugustaGriffon::Activate(_bool IsActive)
+void CAugustaGriffon::Activate(_bool IsActivate)
 {
-	CProp::Activate(IsActive);
+	CProp::Activate(IsActivate);
 	// 한번 실행시킨다. => 1Frame 위에서 놀고있게
-	CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+	//CProp::Play_Animation("SA1Shouwangjiu_Fly_Loop", 0.f, nullptr);
+
+	PREFAB_INFO effecInfo{};
+	effecInfo.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	effecInfo.pModelPtr = m_pModelCom;
+
+	if (false == IsActivate)
+	{
+		_matrix mat = XMLoadFloat4x4(&m_CombinedMatrix);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Common_Weapon"), mat, &effecInfo);
+	}
   
 }
 
@@ -171,8 +197,8 @@ void CAugustaGriffon::Ready_Variables(const PROP_DESC* pDesc)
     m_pSocketMatrix = pDesc->pSocketMatrix;
     m_pParentTransform = pDesc->pParentTransform;
 
-    for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
-        m_ShaderPaths[i] = ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX);
+	for (_uint i = 0; i < m_ShaderPaths.size(); ++i)
+		m_ShaderPaths[i] = ENUM_CLASS(SHADER_PROPANIMMESH::DEFAULT_WEAPON);
 }
 
 void CAugustaGriffon::Ready_Positions(const PROP_DESC* pDesc)
@@ -198,6 +224,8 @@ void CAugustaGriffon::Ready_AttackVolumes()
 	TriggerDesc.vOffsetPos = _float3(0.5f, -1.5f, 0.f); // 조금 앞으로?
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = 300.f;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
+	TriggerDesc.eDir = ATTACKVOULME_DIR::DEFAULT;
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
 		this->OnHitEnter(iLayer, pOther, Manifold);
 		};

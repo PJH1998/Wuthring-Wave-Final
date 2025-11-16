@@ -6,6 +6,7 @@
 #include "GameSystem.h"
 #include "Player.h"
 #include "PlayerStatus.h"
+#include "UI_Text.h"
 
 //#define KSTA_UI_COOLDOWNTEST
 //#define KSTA_UI_HPBARTEST
@@ -35,7 +36,10 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
     //__super::Initialize_Clone(pArg);
 
     CGameObject::Initialize_Clone(pArg);
-    m_vecCachedUITransform.resize(1);
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	m_vecCachedUITransform.resize(1);
+#endif // KSTA_ON_TRANSFORM_CACHING
+
     Ready_Components(pArg);
     __super::Ready_Events();
 
@@ -55,14 +59,19 @@ HRESULT CUI_HUD::Initialize_Clone(void* pArg)
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeOut.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/SkillIcons_FadeIn.json",
         L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeOut.json",
-        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeIn.json"
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_FadeIn.json",
+
+        L"../../Client/Bin/Resource/UI/FJson/UIAnim/BossStatus_Initialize.json",
     };
     Load_Animations(vecAnimFilePaths);
 
-
+	// 보스 UI는, 최초에 투명하게.
 	m_pPlayerStatus = m_pGameSystem->Get_PlayerStatus();
-	
+	static_cast<CAnimator_UI*>(Find_ChildObject(L"SectorT_BossStatus")->Get_Component(L"Com_Animator_UI"))->Change_Animation(L"BossStatus_Initialize");
 
+	// 보스 UI용 텍스트 객체 생성 및 부모연결
+	Ready_BossUINameText();
+	
     return S_OK;
 }
 
@@ -114,103 +123,24 @@ void CUI_HUD::Render()
     //__super::Render();                      // Nothing. �����׷� �߰��� �� ���� ���������� �˾Ƽ� �ڽĵ���� Render ����
 }
 
-HRESULT CUI_HUD::Load_ChildObjects(_wstring strFilePath)
+void CUI_HUD::Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
 {
-    const   _uint       iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	// 단순히, 보스 정보를 1회성으로 할당함.
+	m_pCurBossHP		= pCurBossHP;
+	m_pCurBossSA		= pCurBossSA;
+	m_pGroggyLeftRatio	= pGroggyLeftRatio;
+	m_pIsGroggy			= pIsGroggy;
+	m_strMonsterKey		= pMonsterKey;
 
-    // parse json
-    ifstream file(strFilePath);
-    json jUITreeData = {};
-    if (file.is_open()) { file >> jUITreeData; }
-    CUSTOM_UITREE_DESC tLoadTreeDesc = {};
-    from_json(jUITreeData, tLoadTreeDesc);
+	// 텍스트 객체에, 출력될 텍스트를 변경
+	CUI_Text* pTargetText = static_cast<CUI_Text*>(Find_ChildObject(L"UI_Text_HUD_BossName"));
+	if (nullptr != pTargetText)
+	{
+		auto& bossNameDesc = pTargetText->Get_TextUIDesc();
 
-    // load objects
-    vector<CGameObject*> vecLoadObjects = {};
-    for (auto& loadDesc : tLoadTreeDesc.vecUIInfoDescs)
-    {
-        UI_INFO_DESC tLoadUIInfoDesc = loadDesc;
-
-        // Transform ���� ������ ��, ���ȭ�Ͽ� �ݿ��ϰ�, (�ӽ÷�) �ڽ� ������Ʈ�ν� �߰��Ѵ�.
-        _float3 vCurObjPos = tLoadUIInfoDesc.vPos;
-        _float3 vCurObjRot = tLoadUIInfoDesc.vRot;
-        _float3 vCurObjSca = tLoadUIInfoDesc.vSca;
-
-        CGameObject* pCustomObj = nullptr;
-        switch (tLoadUIInfoDesc.tUIDesc.iUIType)
-        {
-        case ENUM_CLASS(UI_TYPE::NONE):   pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Image", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc));  break;
-        case ENUM_CLASS(UI_TYPE::BUTTON): pCustomObj = static_cast<CGameObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button", PROTOTYPE::GAMEOBJECT, &tLoadUIInfoDesc)); break;
-        default:            break;
-        }
-        m_vecChildObjects.push_back(static_cast<CCustom_UI*>(pCustomObj)); // ���ÿ� ����.. 
-
-
-        HIERARCHY_OBJ_DESC tObjDesc = { };
-        tObjDesc.pCustomUI = static_cast<CCustom_UI*>(pCustomObj);
-        tObjDesc.strObjName = tLoadUIInfoDesc.tUIDesc.strUIName;
-
-        _matrix matScale = XMMatrixScaling(vCurObjSca.x, vCurObjSca.y, vCurObjSca.z);
-        _matrix matRotX = XMMatrixRotationX(DegreesToRadians(vCurObjRot.x));
-        _matrix matRotY = XMMatrixRotationY(DegreesToRadians(vCurObjRot.y));
-        _matrix matRotZ = XMMatrixRotationZ(DegreesToRadians(vCurObjRot.z));
-        _matrix matRot = matRotZ * matRotY * matRotX;
-        _matrix matTrans = XMMatrixTranslation(vCurObjPos.x, vCurObjPos.y, vCurObjPos.z);
-
-        _matrix matWorld = matScale * matRot * matTrans;
-        static_cast<CTransform*>(pCustomObj->Get_Component(L"Com_Transform"))->Set_WorldMatrix(matWorld);
-    }
-    
-    // re-define childs of objects
-    for (auto& child : m_vecChildObjects)
-    {
-        CUSTOM_UI_DESC tChildDesc = child->Get_UIDesc();
-        for (auto& otherChild : m_vecChildObjects)
-        {
-            CUSTOM_UI_DESC tOtherChildDesc = otherChild->Get_UIDesc();
-
-            for (auto& childName : tChildDesc.vecChildNames)
-            {
-                if (childName == tOtherChildDesc.strUIName)
-                    child->Add_Child(otherChild);
-            }
-        }
-    }
-
-    // re-define childs of this(container)
-    vector<CCustom_UI*> vecTrueChildObjects = {};
-    for (auto& child : m_vecChildObjects)
-    {
-        if (child->Get_UIDesc().strParentName.empty())
-            vecTrueChildObjects.push_back(child);
-    }
-    
-    m_vecChildObjects = move(vecTrueChildObjects);
-
-    return S_OK;
-}
-
-HRESULT CUI_HUD::Load_Animations(vector<_wstring> vecAnimFilePath)
-{
-    for (auto& animPath : vecAnimFilePath)
-    {
-        // parse json
-        ifstream file(animPath);
-        json jUIAnimData = {};
-        if (file.is_open()) { file >> jUIAnimData; }
-        CAnimator_UI::UI_ANIM_DESC tLoadAnimDesc = {};
-        from_json(jUIAnimData, tLoadAnimDesc);
-
-        CCustom_UI* pTargetObject = Find_ChildObject(tLoadAnimDesc.tUIDesc.strUIName);
-        
-        if (!pTargetObject)
-            CRASH("Cannot find targetobject");
-        CAnimator_UI* pTargetAnimator = dynamic_cast<CAnimator_UI*>(pTargetObject->Get_Component(L"Com_Animator_UI"));
-
-        pTargetAnimator->Insert_Animation(tLoadAnimDesc);
-    }
-
-    return S_OK;
+		bossNameDesc.strText = strUIBosssName;
+		pTargetText->Set_TextUIDesc(bossNameDesc);
+	}
 }
 
 HRESULT CUI_HUD::Ready_Components(void* pArg)
@@ -250,8 +180,50 @@ HRESULT CUI_HUD::Ready_Presets()
 	return S_OK;
 }
 
+HRESULT CUI_HUD::Ready_BossUINameText()
+{
+	CUI_Text* pFont = m_pGameSystem->Create_FontToScreen_Alpha(
+		_float2{ g_iWinSizeX / 2.f, g_iWinSizeY / 2.f - 477.f},
+		L"테스트용 이름입니다.",	// 상호작용 글씨
+		TEXT_COLOR_TYPE::TT_BOSSNAME,
+		0.4f,
+		L"UI_Text_HUD_BossName"
+	);
+
+	CCustom_UI* pAttacher = this->Find_ChildObject(L"SectorT_BossStatus");
+	auto fontDesc = pFont->Get_UIDesc();
+	auto attacherDesc = pAttacher->Get_UIDesc(); // 사본 가져오기
+
+	attacherDesc.vecChildNames.push_back(fontDesc.strUIName);
+	//pAttacher->Set_UIDesc(attacherDesc); // 변경된 Desc 설정 (필요한 경우)
+	pAttacher->Add_Child(pFont);
+
+	for (auto& inst : fontDesc.vecInstanceDescs)
+		inst.matExtraData._11 = 1.f;
+
+	fontDesc.strParentName = pAttacher->Get_UIDesc().strUIName;
+	fontDesc.pParentObject = pAttacher;
+
+	pFont->Set_UIDesc(fontDesc);
+	pFont->Update_Description(0.f);
+
+
+
+
+	// 중앙 정렬
+
+	auto& bossNameDesc = pFont->Get_TextUIDesc();
+
+	pFont->Update_Alignment(TEXT_ALIGN_TYPE::CENTER);
+
+	return S_OK;
+}
+
 void CUI_HUD::Update_UI_SkillSection(_float fTimeDelta)
 {
+	auto test = this->Find_ChildObject(L"SectorT_BossStatus");
+
+
 	// Temp assumed Value
 	_float fMaxChangeCD[3] = { 2.f, 2.f, 2.f};
 
@@ -984,25 +956,75 @@ void CUI_HUD::Update_UI_PlayerHPBar(_float fTimeDelta)
 
 void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 {
-    //if (pBoss == nullptr)
-    //    return;
-    
+	// boss hitpoint & superarmor
+	_float	fBossHP		= 0.f;
+	_float	fBossBackHP = 0.f;
+	_float	fBossMaxHP	= 1.f;
+	
+	_float	fBossSA		= 0.f;
+    _float	fBossBackSA = 0.f;
+    _float	fBossMaxSA	= 1.f;
+    _bool	isSABreak	= false;
+
+	static _float	fTmpBossHP = 0.f;
+	static _float	fTmpBossSA = 0.f;
+
+	if (m_isOn_BossStatus)
+	{
+		fBossHP		= *m_pCurBossHP;
+		fBossMaxHP	= m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxHp;
+		fBossBackHP = (fBossHP == fBossMaxHP)? fBossHP : m_fBackBossHP;
+		
+		isSABreak	= *m_pIsGroggy;
+		
+		if (!isSABreak)
+		{
+			fBossSA = *m_pCurBossSA;
+			fBossMaxSA = m_pGameSystem->Get_MonsterInfo(m_strMonsterKey.c_str())->fMaxStamina;
+			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		}
+		else
+		{
+			fBossSA = *m_pGroggyLeftRatio;
+			fBossMaxSA = 1.f;
+			fBossBackSA = (fBossSA == fBossMaxSA) ? fBossSA : m_fBackBossSA;
+		}
+		
+		//fBossSA		= *m_pCurBossSA;
+		//fBossBackSA = (fBossSA == fBossMaxSA)? fBossSA : m_fBackBossSA;
 
 
-    // ksta : ���߿� ���� ���� ���յǸ� �ű��κ��� �޾ƿ� ����
-    static _float fBossHP = { 10000.f };            // boss hitpoint
-    static _float fBossBackHP = fBossBackHP;
-    const _float fBossMaxHP = { 10000.f };
-    
-    static _float fBossSA = { 4000.f };             // boss superarmor
-    static _float fBossBackSA = fBossSA;
-    const _float fBossMaxSA = { 4000.f };
-    static _bool isSABreak = false;
+		// fBossHP = { 10000.f };            // boss hitpoint
+		// fBossBackHP = fBossBackHP;
+		//fBossMaxHP = { 10000.f };
+		//
+		// fBossSA = { 4000.f };             // boss superarmor
+		// fBossBackSA = fBossSA;
+		//fBossMaxSA = { 4000.f };
+		//isSABreak = false;
+
+	}
+
+#pragma region old 
+
+	//if (pBoss == nullptr)
+	//    return;
 
 
+	//static _float fBossHP = { 10000.f };            // boss hitpoint
+	//static _float fBossBackHP = fBossBackHP;
+	//const _float fBossMaxHP = { 10000.f };
+	//
+	//static _float fBossSA = { 4000.f };             // boss superarmor
+	//static _float fBossBackSA = fBossSA;
+	//const _float fBossMaxSA = { 4000.f };
+	//static _bool isSABreak = false;
 
+#pragma endregion
 
-    static _bool isHit = false;
+	
+	
+	//static _bool isHit = false;
     static _float fHPReduceLeftTime = 0.f;
 
     _float fBossHPRatio = fBossHP / fBossMaxHP;
@@ -1010,6 +1032,8 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     static _float fBossHPBackRatio = fBossHPRatio;
     static _float fBossSABackRatio = fBossSARatio;
 
+
+	// Colors
     const _float4 vHPColor1         = { 1.f, .7f, .1f, 1.f };
     const _float4 vHPColor2         = { 1.f, .2f, .0f, 1.f };
     const _float4 vHPBackColor1     = { .8f, .8f, .8f, 1.f };
@@ -1021,10 +1045,11 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
 
     const _float fHPReduceTime = 0.5f;          // �پ��� �ҿ�ð��� 0.5������?
 
-    const auto targetUI = Find_ChildObject(L"Inst_BossHPBar");
-    const auto targetSAUI = Find_ChildObject(L"Inst_BossSABar");
+    const auto targetUI		= Find_ChildObject(L"Inst_BossHPBar");
+    const auto targetSAUI	= Find_ChildObject(L"Inst_BossSABar");
 
 
+	// Back Guage
     if (fHPReduceLeftTime > 0)
     {
         _float fHPDiff = fBossHPBackRatio - fBossHPRatio;              // ü�� ���� ����
@@ -1058,27 +1083,40 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     }
 
 
-    if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
-    {
-        if (fBossHP == 0) fBossHP = fBossMaxHP;
-        if (fBossSA == 0) fBossSA = fBossMaxSA;
-        isHit = true;
-    }
+	if (fTmpBossHP > fBossHP || fTmpBossSA > fBossSA)
+	{
+		//isHit = true;
+		fHPReduceLeftTime = fHPReduceTime;
+		cout << "[UI_HUD::Update_UI_BossHPBar] Triggered!" << endl;
+	}
 
-    if (isHit == true)
-    {
-        _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
-        _float fRandSADamage = fRandDamage * 0.8f;
+	if (!(fHPReduceLeftTime <= 0.01f))
+	{
+		cout << "[UI_HUD::Update_UI_BossHPBar] [LeftTime] : " << fHPReduceLeftTime << endl;
+	}
 
-        // HP�� ��� ����
-        fBossHP -= fRandDamage;
-        fBossSA -= fRandSADamage;
 
-        if (fBossHP < 0) fBossHP = 0;
-        if (fBossSA < 0) fBossSA = 0;
-
-        fHPReduceLeftTime = fHPReduceTime;
-    }
+    //if (m_pGameInstance->Get_DIKeyState(DIK_O) == KEYSTATE::DOWN)       // [Test]
+    //{
+    //    if (fBossHP == 0) fBossHP = fBossMaxHP;
+    //    if (fBossSA == 0) fBossSA = fBossMaxSA;
+    //    isHit = true;
+    //}
+	//
+    //if (isHit == true)
+    //{
+    //    _float fRandDamage = m_pGameInstance->Rand(100.f, 500.f);       // [Test] External Value
+    //    _float fRandSADamage = fRandDamage * 0.8f;
+	//
+    //    // HP�� ��� ����
+    //    fBossHP -= fRandDamage;
+    //    fBossSA -= fRandSADamage;
+	//
+    //    if (fBossHP < 0) fBossHP = 0;
+    //    if (fBossSA < 0) fBossSA = 0;
+	//
+    //    fHPReduceLeftTime = fHPReduceTime;
+    //}
 
     // change
     vector<_float4x4> vecVariantMat = { _float4x4() , _float4x4() };
@@ -1113,8 +1151,9 @@ void CUI_HUD::Update_UI_BossHPBar(_float fTimeDelta)
     targetUI->Set_VariantUIDesc(tVariantDesc);
     targetSAUI->Set_VariantUIDesc(tVariantDescSA);
 
-    isHit = false;
-
+    //isHit = false;
+	fTmpBossHP = fBossHP;
+	fTmpBossSA = fBossSA;
 
 
 #ifdef KSTA_UI_HPBARBOSSTEST

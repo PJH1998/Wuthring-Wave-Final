@@ -51,7 +51,7 @@ private:
 private:
 	_uint m_iTriggerIndex = {};
 	_int m_iTriggerActiveIndex = {};
-
+	_uint m_iEffectFrame = {};
 private:
 	CShader* m_pShaderCom = { nullptr };
 

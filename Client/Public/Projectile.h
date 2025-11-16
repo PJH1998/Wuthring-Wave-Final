@@ -4,6 +4,8 @@
 
 NS_BEGIN(Engine)
 class CRigidbody;
+class CShader;
+class CModel;
 NS_END
 
 NS_BEGIN(Client)
@@ -13,10 +15,12 @@ public:
 	typedef struct tagProjectileDesc : public CGameObject::GAMEOBJECT_DESC
 	{
 		_wstring			wstrEffectTag;
+		_wstring			wstrModelTag;
 		_uint				iLayer;
 		vector<_uint>		iTargetLayers;
 		_float				fRadius;
 		_float				fAttackDamage;
+		TEXT_COLOR_TYPE		eType;
 	}PROJECTILEDESC;
 
 	typedef struct tagProjectileReset
@@ -40,17 +44,21 @@ public:
 
 private:
 	CRigidbody*			m_pRigidBodyCom = { nullptr };
+	CModel*				m_pModelCom = { nullptr };
+	CShader*			m_pShaderCom = { nullptr };
 	_uint				m_iLayer{};
 	vector<_uint>		m_iTargetLayers;
 	_bool				m_isCollision{};
 	_float				m_fLifeTime{};
+	_float				m_fDelay{};
 	// Effect?
-
+	_wstring			m_wstrEffectTag;
 	CALLBACK_CLIENT m_CallBack{};
 
 private:
-	void Ready_Component(PROJECTILEDESC* pDesc);
-	void OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
+	HRESULT		Bind_Resources();
+	void		Ready_Component(PROJECTILEDESC* pDesc);
+	void		OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold);
 
 public:
 	static		CProjectile* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

@@ -29,27 +29,67 @@ HRESULT CTrigger_Box::Initialize_Clone(void* pArg)
 
 	Ready_Components(pArg);
 	m_iTriggerIndex = pDesc->iTriggerIndex;
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
-			Collision();
-		});
+	Register_Trigger();
 
-	m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
-		iLayer = ENUM_CLASS(LEVEL::TEST);
-		int a = 0;
-		});
-	
+	if (m_iTriggerIndex == 22 || m_iTriggerIndex == 23)
+	{
+		m_pGameSystem->TriggerRegister(m_iTriggerIndex + 100, [this](void* pArg) {
+			m_IsTriggered = true;
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			});
+
+	}
+	if (pDesc->iTriggerIndex >= 21 && pDesc->iTriggerIndex <= 23)
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Show_InteractUI(m_pGameSystem->Get_SonoroText());
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_During();
+			});
+
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::REMOVE, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				m_pGameSystem->Hide_InteractUI(false);
+			});
+	}
+	else
+	{
+		m_pRigidbodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+			if (ENUM_CLASS(COLLISIONLAYER::PLAYER) == iLayer)
+				Collision_Enter();
+			});
+	}
 	return S_OK;
 }
 
 void CTrigger_Box::Priority_Update(_float fTimeDelta)
 {
+	if (m_iTriggerIndex > 20)
+	{
+		if(m_IsTriggered)
+		{
+			m_pGameSystem->Change_Sonoro(true);
+			m_IsTriggered = !m_IsTriggered;
+			m_bOnCoolDown = true;
+		}
+	}
+	if (m_bOnCoolDown)
+	{
+		m_fCoolDown += fTimeDelta;
+		if (m_fCoolDown >= 6.f)
+		{
+			m_bOnCoolDown = !m_bOnCoolDown;
+			m_fCoolDown = 0.f;
+		}
+	}
 }
 
 void CTrigger_Box::Update(_float fTimeDelta)
 {
-	const ContactManifold Manifold{};
-	//m_pRigidbodyCom->OnCollide_Enter(ENUM_CLASS(LEVEL::MAP), nullptr, Manifold);
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 }
 
@@ -76,26 +116,79 @@ void CTrigger_Box::Ready_Components(void* pArg)
 
 }
 
-void CTrigger_Box::Collision()
+void CTrigger_Box::Collision_Enter()
 {
 	m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
-	if (m_iTriggerIndex == 0)
-		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
-	else if (m_iTriggerIndex == 4)
-		m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
-	else if (m_iTriggerIndex == 7)
-		m_pGameSystem->Stop_Action();
-	else if (m_iTriggerIndex == 20)
-		m_pGameInstance->Set_CurrentCamera_Far(500.f);
 }
 
-void CTrigger_Box::CallBack(_uint iFuncIndex, void* pArg)
+void CTrigger_Box::Collision_During()
 {
-	if (iFuncIndex >= m_Functions.size())
-		CRASH("Failed");
+	if(m_pGameInstance->Get_DIKeyState(DIK_F) ==KEYSTATE::DOWN && !m_bOnCoolDown)
+	{
+		if (!m_pGameSystem->IsSonoro())
+		{
+			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex);
+		}
+		else
+			m_pGameSystem->OnTriggerActivate(m_iTriggerIndex + 100);
 
-	m_Functions[iFuncIndex](pArg);
+		m_pGameSystem->Hide_InteractUI(true);
+	}
 }
+
+void CTrigger_Box::Collision_End()
+{
+}
+
+void CTrigger_Box::Register_Trigger()
+{
+	m_pGameSystem->TriggerRegister(m_iTriggerIndex, [this](void* pArg) {
+		switch (m_iTriggerIndex)
+		{
+		case 0:
+			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Start"), m_pTransformCom->Get_WorldMatrix(), false);
+			break;
+
+		case 2:
+			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Meteo"), m_pTransformCom->Get_WorldMatrix(), false);
+			break;
+
+		case 4:
+			m_pGameSystem->Play_Action(TEXT("Action_Asphodel_Barrens_Horizon"), m_pTransformCom->Get_WorldMatrix(), true);
+			break;
+
+		case 7:
+			m_pGameSystem->Stop_Action();
+			break;
+
+		case 20:
+			m_pGameInstance->Set_CurrentCamera_Far(500.f);
+			break;
+
+		case 21:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
+			break;
+
+		case 22:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
+			break;
+		case 23:
+			m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f + 3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+			m_IsTriggered = true;
+			break;
+		}
+		});
+}
+
+void CTrigger_Box::UI_Set(_bool B)
+{
+	B ?
+		true :
+		false;
+}
+
 
 CTrigger_Box* CTrigger_Box::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

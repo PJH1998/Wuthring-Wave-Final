@@ -17,7 +17,7 @@ HRESULT CSSAO::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	//SSAO
 	m_iNumKernel = 16;
-	m_fRadius = 1.f;
+	m_fRadius = 2.f;
 	m_fMaxDistance = 0.5f;
 	m_fOutDistance = 500.f;
 

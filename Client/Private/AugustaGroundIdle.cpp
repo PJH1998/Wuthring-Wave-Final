@@ -37,8 +37,7 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
 
     m_iPartType = CAugusta::PARTTYPE::PART_BAYONET;
 
-    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02
-        || eIdleType == EAugustaIdleType::STAND2)
+    if (eIdleType == EAugustaIdleType::STAND1_ACTION01 || eIdleType == EAugustaIdleType::STAND1_ACTION02)
     {
         _string strBoneName = "Root";
         m_pAugusta->PartActivate(m_iPartType, true);
@@ -46,15 +45,16 @@ void CAugustaGroundIdle::OnEnter(void* pArg)
         m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
     }
 
+	if (eIdleType == EAugustaIdleType::STAND2)
+	{
+		_string strBoneName = "WeaponProp05";
+		m_pAugusta->PartActivate(m_iPartType, true);
+		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+		m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
+	}
+
 	if (eIdleType == EAugustaIdleType::STANDCHANGE)
 	{
-		// 한바퀴 돌려준다.
-		/*_vector vLook = m_pAugusta->Get_LookVector_NoPitch();
-		m_pAugusta->Rotate_Direction(vLook * -1.f);*/
-
-		//_vector vLook = m_pAugusta->Get_LookVector() * -1.f;
-		//m_pAugusta->Set_LookVector(vLook);
-
 		_string strBoneName = "WeaponProp05";
 		m_pAugusta->PartActivate(m_iPartType, true);
 		m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
@@ -94,8 +94,9 @@ void CAugustaGroundIdle::OnUpdate(_float fTimeDelta)
 void CAugustaGroundIdle::OnExit()
 {
     CGroundState::OnExit();
-
     m_pAugusta->PartActivate(m_iPartType, false);
+	m_iPartType = CAugusta::PARTTYPE::TYPE_END;
+	m_fFallTime = 0.f;
 }
 
 void CAugustaGroundIdle::Handle_Input()
@@ -144,8 +145,6 @@ void CAugustaGroundIdle::Handle_Input()
 void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 {
     // 1. 현재 애니메이션 재생
-
-		
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta);
 
     EAugustaIdleType eIdleType = static_cast<EAugustaIdleType>(m_iCurrentAnimIdx);
@@ -156,8 +155,8 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
     {
 		m_pAugusta->Play_PartAnimation(
 			m_iPartType,
-			m_Animations[m_iCurrentAnimIdx].strAnimName,
-			m_Animations[m_iCurrentAnimIdx].fSpeed * fTimeDelta, nullptr
+			m_Animations.at(m_iCurrentAnimIdx).strAnimName,
+			m_Animations.at(m_iCurrentAnimIdx).fSpeed * fTimeDelta, nullptr
 		);
     }
     
@@ -166,6 +165,17 @@ void CAugustaGroundIdle::Update_IdleAnimations(_float fTimeDelta)
 void CAugustaGroundIdle::Check_Physics(_float fTimeDelta)
 {
 	m_States[LAND] = m_pAugusta->Is_LandCollider(&m_vLandNormal);
+	if (m_States[LAND])
+	{
+		m_fFallTime = 0.f;
+	}
+	else if (!m_States[LAND])
+	{
+		m_fFallTime += fTimeDelta;
+
+		if (m_fFallTime >= 0.2f)
+			m_States[FALL] = true;
+	}
 }
 
 // Idles 조건이 아닌 것들.
@@ -193,7 +203,7 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
 
 
     // 우선순위 순으로 전환조건 진행.
-	if (!m_States[LAND])
+	if (m_States[FALL])
 	{
 		m_pAugusta->GetStateContextForWrite().m_eFallType = EAugustaFallType::FALL_LOOP;
 		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(EAugustaAirState::FALL)); // 상위, 하위 상태
@@ -310,8 +320,8 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // Sprint => 빠르게 달리기.
     if (m_States[SPRINT])
     {
-        m_pAugusta->GetStateContextForWrite().m_eRunType = EAugustaRunType::SPRINT_F;
-        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN)); // 상위, 하위 상태
+        m_pAugusta->GetStateContextForWrite().m_eSprintType = EAugustaSprintType::SPRINT_F;
+        m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT)); // 상위, 하위 상태
         return;
     }
 
@@ -358,28 +368,26 @@ void CAugustaGroundIdle::Check_StateTransition(_float fTimeDelta)
     // 자동 변환.
     if (m_IsAnimationEnd)
     {
-        EAugustaIdleType nextIdle = EAugustaIdleType::STAND1;
-
         switch (static_cast<EAugustaIdleType>(m_iCurrentAnimIdx))
         {
-        case EAugustaIdleType::STAND1:
-            nextIdle = EAugustaIdleType::STAND1_ACTION01;
-            break;
+		case EAugustaIdleType::STANDCHANGE:
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
+			break;
         case EAugustaIdleType::STAND1_ACTION01:
-            nextIdle = EAugustaIdleType::STAND1_ACTION02;
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION02; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         case EAugustaIdleType::STAND1_ACTION02:
-            nextIdle = EAugustaIdleType::STAND1_ACTION03;
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION03; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         case EAugustaIdleType::STAND1_ACTION03:
-            nextIdle = EAugustaIdleType::STAND1_ACTION01;  // 다시 처음으로
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         default:
-            nextIdle = EAugustaIdleType::STAND1_ACTION01;
+			m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // 애니메이션 상태 => 블랙보드에 기입.      
             break;
         }
 
-        m_iCurrentAnimIdx = ENUM_CLASS(nextIdle);
+		m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         return;
     }
 

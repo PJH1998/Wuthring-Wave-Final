@@ -15,7 +15,6 @@ HRESULT CDOF::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
-	m_fDofDepth = 50.f;
 	m_fDofRange = 100.f;
 	m_fDofScale = 0.3f;
 
@@ -91,6 +90,9 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	if (FAILED(pShader->Bind_Texture("g_BlurTexture", m_pGameInstance->Get_RCS_SRV(TEXT("RCS_UPSAMPLE")))))
 		CRASH("Failed Bind Blur Texture");
 
+	if (FAILED(pShader->Bind_Value("g_fEffectIntensity", &m_fIntensity, sizeof(_float))))
+		CRASH("Failed Bind g_fEffectIntensity");
+
 	pShader->Begin(ENUM_CLASS(SHADER_DEFFERED::DOF));
 
 	pVIBuffer->Bind_Resources();
@@ -99,9 +101,15 @@ HRESULT CDOF::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 	return S_OK;
 }
 
+void CDOF::Setting_DOF(_float3 vCenterPos, _float fRange)
+{
+	m_vCenterPos = vCenterPos;
+	m_fDofRange = fRange;
+}
+
 HRESULT CDOF::Bind_Resources(CShader* pShader)
 {
-	if (FAILED(pShader->Bind_Value("g_fFocusDepth", &m_fDofDepth, sizeof(_float))))
+	if (FAILED(pShader->Bind_Value("g_vFocusPos", &m_vCenterPos, sizeof(_float3))))
 		CRASH("Failed Bind Fog Distance");
 	if (FAILED(pShader->Bind_Value("g_fFocusRange", &m_fDofRange, sizeof(_float))))
 		CRASH("Failed Bind Fog Distance");

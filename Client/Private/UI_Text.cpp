@@ -31,6 +31,10 @@ HRESULT CUI_Text::Initialize_Clone(void* pArg)
 	Ready_Events();
 	Bind_Description(pArg);
 
+	TEXT_UI_DESC* tDesc = static_cast<TEXT_UI_DESC*>(pArg);
+	m_eTextAlignmentType = tDesc->eTextAlignmentType;
+	Update_Alignment();
+
 	m_tTextDesc = *static_cast<TEXT_UI_DESC*>(pArg);
 
     return S_OK;
@@ -43,14 +47,14 @@ void CUI_Text::Priority_Update(_float fTimeDelta)
 
 void CUI_Text::Update(_float fTimeDelta)
 {
-	Update_Description();
-
     __super::Update(fTimeDelta);            // Update Animator_UI Component
+	// Update_Description(fTimeDelta);
 }
 
 void CUI_Text::Late_Update(_float fTimeDelta)
 {
     __super::Late_Update(fTimeDelta);       // Add RenderGroup to UI
+	Update_Description(0.f);
 }
 
 void CUI_Text::Render()
@@ -58,7 +62,6 @@ void CUI_Text::Render()
     //__super::Render();                      // Binding Shader Variables Continuously.
 	if (!m_isActivate || !m_pShaderCom)
 		return;
-
 
 	if (m_tUIDesc.isInstance && m_cachedVariantUIDesc.isVariant)        // 짬통 UI용. 어떤 유형의 UI에 쓸 건지의 Flag를 전역으로 던진다.
 		if (FAILED(m_pShaderCom->Bind_Value("g_iVariantFlag", &m_cachedVariantUIDesc.iShaderFlag, sizeof(m_cachedVariantUIDesc.iShaderFlag))))
@@ -190,10 +193,11 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_tUIDesc.fUIScale		= pDesc->fUIScale;
 	m_tUIDesc.isInstance	= pDesc->isInstance;
 
+	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
+#ifdef KSTA_ON_TRANSFORM_CACHING
 	m_vecCachedUITransform.resize(pDesc->vecInstanceDescs.size());
 
-	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
 
 
 
@@ -201,11 +205,13 @@ HRESULT	CUI_Text::Bind_Description(void* pArg)
 	m_vecCachedUITransform.resize(iCacheTransformAmount);
 
 	m_tUIDesc.vecInstanceDescs = pDesc->vecInstanceDescs;
+#endif // KSTA_ON_TRANSFORM_CACHING
+
 
 	return S_OK;
 }
 
-void CUI_Text::Update_Description()
+void CUI_Text::Update_Description(_float fTimeDelta)
 {
 
 	// m_tTextDesc 갱신
@@ -257,15 +263,20 @@ void CUI_Text::Update_Description()
 		inst.vSInstUp		=	{ 0.f, m_tTextDesc.fScale * pGlyph->sHeight, 0.f ,0.f };
 		inst.vSInstLook		=	{ 0.f, 0.f, 1.f ,0.f };
 
+		inst.matExtraData._11 = m_pAnimator_UICom->Get_CurCombinedAnimKeyframeDesc()->fAlpha;			// << 기존 UI와 Text UI Alpha 호환
+			//static_cast<CAnimator_UI*>(m_tUIDesc.pParentObject->Get_Component(L"Com_Animator_UI"))->Get_CurCombinedAnimKeyframeDesc()->fAlpha;
+
+
+
 		// 화면 좌표 (기준 위치 + bearing + 현재 pen 이동량)
 		if (!m_tTextDesc.isTargetExist)
 		{
-			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x
+			inst.vSInstTrans.x = m_tTextDesc.vScreenPos.x										+ m_CombinedWorldMatrix._41 // << 기존 UI와 Text UI Pos 호환
 				+ penX
 				+ (_float)pGlyph->sOffsetX * m_tTextDesc.fScale - iPadding * m_tTextDesc.fScale;
 
 
-			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y
+			inst.vSInstTrans.y = m_tTextDesc.vScreenPos.y										- m_CombinedWorldMatrix._42
 				- (_float)pGlyph->sOffsetY * m_tTextDesc.fScale + iPadding * m_tTextDesc.fScale
 				+ penY;
 		}
@@ -290,14 +301,44 @@ void CUI_Text::Update_Description()
 		prevCode = ch;
 	}
 
-
-	// m_tUIDesc 갱신 (부모에서 사용)
-
 	m_tUIDesc.vecInstanceDescs = m_tTextDesc.vecInstanceDescs;
+
+#ifdef KSTA_ON_TRANSFORM_CACHING
+	// m_tUIDesc 갱신 (부모에서 사용)
 
 	if (m_tTextDesc.vecInstanceDescs.size() != m_vecCachedUITransform.size())
 		m_vecCachedUITransform.resize(m_tTextDesc.vecInstanceDescs.size());
+#endif // KSTA_ON_TRANSFORM_CACHING
 
+}
+
+void CUI_Text::Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType)
+{
+	// 인자가 기본값이라면 현재 타입으로,
+	// 임의값이라면 해당 타입으로 정렬합니다.
+
+	if (m_tUIDesc.strUIName == L"UI_Text_HUD_BossName")
+		int i = 10;
+
+	if (eAlignmentType != TEXT_ALIGN_TYPE::END)
+		m_eTextAlignmentType = eAlignmentType;
+
+	_float fAlignmentPixel = 0;
+	_float fOriginPosX = m_tTextDesc.vScreenPos.x;
+
+	for (auto& textInstDesc : m_tTextDesc.vecInstanceDescs)
+		fAlignmentPixel += (static_cast<_uint>(textInstDesc.vSInstRight.x) + 4.f);
+
+	_float fOffsetX = fAlignmentPixel * m_tTextDesc.fScale;
+
+	switch (m_eTextAlignmentType)
+	{
+	case Client::TEXT_ALIGN_TYPE::LEFT:		fOffsetX *= 0.f;		break;
+	case Client::TEXT_ALIGN_TYPE::CENTER:	fOffsetX *= 0.5f;		break;
+	case Client::TEXT_ALIGN_TYPE::RIGHT:	fOffsetX *= 1.f;		break;
+	}
+
+	m_tTextDesc.vScreenPos.x = fOriginPosX - fOffsetX;
 }
 
 CUI_Text* CUI_Text::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)

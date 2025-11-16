@@ -8,6 +8,7 @@ class CUI_Text : public CCustom_UI
 public:
 	typedef struct tagUITextDesc : public CUSTOM_UI_DESC, FONT_SINGLEDESC {// 근데 당장에 Font_SingleDesc 반영하는 코드가 있긴함?
 
+		TEXT_ALIGN_TYPE eTextAlignmentType = {};
 
 	} TEXT_UI_DESC;
 	// 그러면.. 셰이더 내에서 패스나 분기는 따로 받아 사용하고
@@ -34,12 +35,13 @@ public:
 	void					Set_TextUIDesc(TEXT_UI_DESC& tDesc) { m_tTextDesc = tDesc; }
 	TEXT_UI_DESC&			Get_TextUIDesc() { return m_tTextDesc; }
 
+	void					Update_Description(_float fTimeDelta);
+	void					Update_Alignment(TEXT_ALIGN_TYPE eAlignmentType = TEXT_ALIGN_TYPE::END);
+
 protected:
 	HRESULT					Bind_Description(void* pArg);
 	HRESULT					Ready_Components(void* pArg);
-
-	void					Update_Description();
-
+	
 
 protected:
 
@@ -47,6 +49,8 @@ protected:
 	_uint								m_iNumTextures = {};
 
 	TEXT_UI_DESC						m_tTextDesc = {};
+
+	TEXT_ALIGN_TYPE						m_eTextAlignmentType = TEXT_ALIGN_TYPE::LEFT;
 
 
 public:

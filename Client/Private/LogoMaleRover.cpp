@@ -38,7 +38,6 @@ HRESULT CLogoMaleRover::Initialize_Clone(void* pArg)
     Ready_Positions(pDesc);
 	
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSet(1.5f, 0.f, -0.7f, 1.f));
-
     XMStoreFloat4x4(&m_MatrixIdentity, XMMatrixIdentity());
 
 

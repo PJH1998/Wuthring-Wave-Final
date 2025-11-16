@@ -24,6 +24,9 @@ HRESULT CProjectile::Initialize_Clone(void* pArg)
 	PROJECTILEDESC* pDesc = static_cast<PROJECTILEDESC*>(pArg);
 	Ready_Component(pDesc);
 	m_iTargetLayers = pDesc->iTargetLayers;
+	m_wstrEffectTag = pDesc->wstrEffectTag;
+	m_fDelay = 0.2f;
+	m_isActivate = false;
     return S_OK;
 }
 
@@ -40,6 +43,16 @@ void CProjectile::Update(_float fTimeDelta)
 	m_pTransformCom->Go_Straight(fTimeDelta);
 
 	m_pRigidBodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
+	if (m_fDelay <= 0.f)
+	{
+		PREFAB_INFO EffectDesc{};
+		EffectDesc.pMatrixPtr = nullptr;
+		EffectDesc.pModelPtr = nullptr;
+		m_pGameInstance->Spawn_PoolingObject(m_wstrEffectTag, m_pTransformCom->Get_WorldMatrix(), &EffectDesc);
+		m_fDelay = 1.f;
+	}
+	else
+		m_fDelay -= fTimeDelta;
 }
 
 void CProjectile::Late_Update(_float fTimeDelta)
@@ -50,12 +63,30 @@ void CProjectile::Late_Update(_float fTimeDelta)
 		m_pRigidBodyCom->IsActivate(false);
 		return;
 	}
-	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this)))
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::NONBLEND, this)))
 		return;
 }
 
 void CProjectile::Render()
 {
+	if (FAILED(Bind_Resources()))
+		CRASH("Falied to Bind Resources");
+
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+	ID3D11ShaderResourceView* pNullSRV[16] = { nullptr };
+	m_pContext->VSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->PSSetShaderResources(0, 16, pNullSRV);
+	m_pContext->CSSetShaderResources(0, 16, pNullSRV);
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		m_pModelCom->Bind_Materials(m_pShaderCom, "g_DiffuseTexture", i, TEXTURETYPE::DIFFUSE);
+		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+		m_pShaderCom->Begin(0);
+
+		m_pModelCom->Render(i);
+	}
 #ifdef _DEBUG
 	m_pRigidBodyCom->Render();
 #endif
@@ -70,6 +101,16 @@ void CProjectile::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pRigidBodyCom->IsActivate(true);
 	m_isActivate = true;
 	m_fLifeTime = 0.f;
+	m_fDelay = 0.2f;
+}
+
+HRESULT CProjectile::Bind_Resources()
+{
+	m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix");
+	m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW));
+	m_pShaderCom->Bind_Matrix("g_ProjMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::PROJ));
+
+	return S_OK;
 }
 
 void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
@@ -92,7 +133,20 @@ void CProjectile::Ready_Component(PROJECTILEDESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = pDesc->fAttackDamage;
+	//m_CallBack.pCondition = &m_iState;
+	//m_tCallDesc.strEffectTag = ;
+	m_CallBack.eType = pDesc->eType;
 	m_pRigidBodyCom->Set_Desc(&m_CallBack);
+
+	// Com_Shader 
+	if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Shader_VtxArrow"),
+		TEXT("Com_Shader"), reinterpret_cast<CComponent**>(&m_pShaderCom), nullptr)))
+		CRASH("Arrow/Com_Shader");
+
+	// Com_Model
+	if (FAILED(Add_Component(m_pGameInstance->Get_CurrentLevel(), pDesc->wstrModelTag,
+		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
+		CRASH("Arrow/Com_Model");
 }
 
 void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifold& Manifold)
@@ -102,14 +156,6 @@ void CProjectile::OnCollide_Enter(_uint iLayer, void* pDesc, const ContactManifo
 		if (iLayer == iTarget)
 		{
 			m_isCollision = true;
-			CAMERA_SHAKE ShakeDesc{};
-			ShakeDesc.fAmplitude = 1.f;
-			ShakeDesc.fDuration = 0.1f;
-			ShakeDesc.fFovKick = 0.f;
-			ShakeDesc.fFrequency = 60.f;
-			ShakeDesc.vRotation = _float3(0.05f, 0.05f, 0.f);
-			ShakeDesc.vTranslation;
-			m_pGameInstance->OnShake(ShakeDesc);
 #ifdef _DEBUG
 			cout << "On Hit! (Projectile)" << endl;
 #endif // _DEBUG
@@ -150,4 +196,6 @@ void CProjectile::Free()
 	__super::Free();
 
 	Safe_Release(m_pRigidBodyCom);
+	Safe_Release(m_pModelCom);
+	Safe_Release(m_pShaderCom);
 }

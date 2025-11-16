@@ -44,7 +44,7 @@ void CRoverGroundSkill::OnEnter(void* pArg)
 			m_iPartType = CRover::PARTTYPE::PART_DARKWING;
 			m_pRover->PartActivate(m_iPartType, true);
 			m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+			m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 			m_pRover->Rotate_Target(); // 진입 시 한번만
 			break;
 		}
@@ -55,14 +55,14 @@ void CRoverGroundSkill::OnEnter(void* pArg)
 			m_iPartType = CRover::PARTTYPE::PART_DARKSCYTHE;
 			m_pRover->PartActivate(m_iPartType, true);
 			m_pRover->Set_SocketMatrixToParts(m_iPartType, strBoneName);
-			m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName]);
+			m_pRover->Clear_PartAnimation(m_iPartType, m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName));
 			m_pRover->Rotate_Target(); // 진입 시 한번만
 			break;
 		}
     }
 
 	m_pRover->Set_Gravity(true);
-	m_strSkillName = m_Animations[m_iCurrentAnimIdx].strAnimName;
+	m_strSkillName = m_Animations.at(m_iCurrentAnimIdx).strAnimName;
 }
 
 void CRoverGroundSkill::OnUpdate(_float fTimeDelta)
@@ -111,7 +111,7 @@ void CRoverGroundSkill::Update_SkillAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선) // 거리 계산에 따른 Animation Scale 조절.
 	m_fRootMotionScale = m_pRover->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; 
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; 
 
 	ERoverSkillType eSkillType = static_cast<ERoverSkillType>(m_iCurrentAnimIdx);
 
@@ -122,8 +122,8 @@ void CRoverGroundSkill::Update_SkillAnimations(_float fTimeDelta)
     {
         m_pRover->Play_PartAnimation(
             m_iPartType,
-            m_PartsAnimations[m_Animations[m_iCurrentAnimIdx].strAnimName],
-            fTimeDelta * m_Animations[m_iCurrentAnimIdx].fSpeed, nullptr, 1.f, true, false
+            m_PartsAnimations.at(m_Animations.at(m_iCurrentAnimIdx).strAnimName),
+            fTimeDelta * m_Animations.at(m_iCurrentAnimIdx).fSpeed, nullptr, 1.f, true, false
         );
     }
 

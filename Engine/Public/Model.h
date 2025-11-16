@@ -49,6 +49,7 @@ public:
 	const vector<_uint>&				Get_Indices(_uint iIndex);
 	void Set_TrackPosition(const _string& strAnimName, const _float fTrackPosition);
 
+	
 #ifdef _DEBUG
 	const vector<_string>&		Get_AnimationNames() const { return m_AnimationNames; }
 	_float*								Get_TrackPositionPtr(const _string& strAnimName);
@@ -85,7 +86,11 @@ public:
 	//_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true, _float fRootMotionRate = 0.1f);
 	_bool								Play_Animation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true , _bool isRootMotionTranslate = true
-										, _float fRootMotionRate = 0.1f, const GPU_BLEND_INFO& gpuBlendInfo = G_DefaultBlendInfo);
+										, _float fRootMotionRate = 0.1f);
+
+	_bool								Play_NonRibAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
+										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
+										, _float fRootMotionRate = 0.1f);
 
 	_bool								Play_FlyAnimation_GPU(class CComputeShader* pComputeShaderCom, const _string& strAnimationName, _float fTimeDelta, _float* pTrackPosition
 										, _bool isRootMotion = true, _bool isRootMotionRotate = true, _bool isRootMotionTranslate = true
@@ -151,6 +156,7 @@ private:
 	void ApplyComputeResults_ToBones();
 	void FetchLocalMatrices_FromCompute(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 	void FetchLocalMatrices_FromComputeFly(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName, const GPU_BLEND_INFO& gpuBlendInfo);
+	void FetchLocalMatrices_FromComputeNonRib(class CComputeShader* pComputeShaderCom, _float fTrackPosition, const _string& strAnimationName);
 
 private:
 	vector<ID3D11Buffer*> m_Buffers = {};

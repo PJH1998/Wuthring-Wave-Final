@@ -61,6 +61,7 @@ Texture2D g_BlurTexture;
 //Motion
 Texture2D g_VelocityMap;
 float g_fLimitVelocity;
+float g_fLimitDepth;
 
 //Light
 vector  g_vLightDirection = 0.f;
@@ -184,11 +185,11 @@ PS_OUT_LIGHT PS_LIGHT_DIRECTIONAL(PS_IN In)
     vector vNormal = g_NormalTexture.Sample(DefaultSampler, In.vTexcoord);
     vNormal = normalize(vector(vNormal.xyz * 2.f - 1.f, 0.f));
     
-    //vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
-    //
-    //vector vLook = normalize(g_vCamPosition - vWorldPos);
-    vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
-    vector vLook = normalize(vViewPos * -1.f);
+    vector vWorldPos = Compute_WorldPos(In.vTexcoord, g_DepthTexture);
+    
+    vector vLook = normalize(g_vCamPosition - vWorldPos);
+    //vector vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
+    //vector vLook = normalize(vViewPos * -1.f);
     
     float3 vLightDir = g_vLightDirection.xyz * -1.f;
     
@@ -456,9 +457,9 @@ PS_OUT_BACKBUFFER PS_SSAO(PS_IN In)
     float AO = (Occlusion / g_iSampleSize);
     
     if(AO >= 0.8f)
-        AO = 1.f;
+        AO = 1.f;                            
     
-    AO = pow(AO, 2.f);
+ //   AO = pow(AO, 2.f);
     
     Out.vColor.xyz = AO;
     Out.vColor.w = 1.f;
@@ -522,28 +523,36 @@ PS_OUT_BACKBUFFER PS_VELOCITY_MAP(PS_IN In)
     bool IsDyanmic = g_PBRTexture.Sample(DefaultSampler, In.vTexcoord).z;       // Dynamic Discard;
     
     if(IsDyanmic)
+    {
+        Out.vColor.w = 1.f;
         return Out;
+    }
     
     float4 vViewPos = Compute_ViewPos(In.vTexcoord, g_DepthTexture);
     
     Out.vColor.z = vViewPos.z;          // Depth ���
+    if (vViewPos.z == 0.f || vViewPos.z >= g_fLimitDepth)
+    {
+        Out.vColor.xy = 0.f;
+    }
+    else
+    {
+        float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
     
-    float4 vWorldPos = mul(vViewPos, g_ViewMatrixInv);
+        float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
     
-    float4x4 PrevVP = mul(g_PrevCamViewMatrix, g_PrevCamProjMatrix);
+        float4 vPrevProjPos = mul(vWorldPos, PrevVP);
+        vPrevProjPos /= vPrevProjPos.w;
     
-    float4 vPrevProjPos = mul(vWorldPos, PrevVP);
-    vPrevProjPos /= vPrevProjPos.w;
+        float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
     
-    float2 vPrevTexcoord = Compute_Texcoord(vPrevProjPos.xy);
-    
-    float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight);    // �ȼ� �Ÿ��� ����
-    vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
-    
-    float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
-    
-    Out.vColor.xy = vMotionVector;
-    Out.vColor.a = 1.f;
+        float2 vCurTexcoord = float2(In.vTexcoord.x * g_fWidth, In.vTexcoord.y * g_fHeight); // 버퍼 안먹음 임시
+        vPrevTexcoord = float2(vPrevTexcoord.x * g_fWidth, vPrevTexcoord.y * g_fHeight);
+        
+        float2 vMotionVector = vPrevTexcoord - vCurTexcoord;
+        
+        Out.vColor.xy = vMotionVector;
+    }
     
     return Out;
 }

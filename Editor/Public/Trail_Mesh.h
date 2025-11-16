@@ -43,7 +43,6 @@ public:
 		_float fColorGain = 0.f;
 		_float fColorGamma = 1.f;
 
-
 		_float3	vSize = { 1.f, 1.f, 1.f };
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float3 vColor = { 0.f, 0.f, 0.f };
@@ -67,7 +66,8 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform(_fmatrix WorldMatrix);
+	void Default_Transform(_fmatrix WorldMatrix);
+	void Update_Transform();
 
 private:
 	CShader*					m_pShaderCom = { nullptr };
@@ -76,7 +76,6 @@ private:
 	CTexture*					m_pDissolveTextureCom = { nullptr };
 	CTexture*					m_pDistortionTextureCom = { nullptr };
 	CVIBuffer_Mesh*				m_pVIBufferCom = { nullptr };
-	//CComputeShader*				m_pComputeShaderCom = { nullptr };
 
 	_int						m_iShaderPass = 0;
 		
@@ -113,6 +112,10 @@ private:
 
 	_bool						m_IsRoot = false;
 	_float4x4					m_ComBindMatrix = {  };
+
+	const _float4x4*			m_pBoneMatrixPtr = nullptr;
+	const _float4x4*			m_pObjectMatrixPtr = nullptr;
+	_matrix						m_OffsetMatrix = {};
 
 private:
 	HRESULT Ready_Components(TRAILMESH_DESC& Desc);

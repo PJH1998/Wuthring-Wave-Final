@@ -5,12 +5,14 @@ CSequence_Manager::CSequence_Manager()
 {
 }
 
-void CSequence_Manager::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CSequence_Manager::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc)
 {
 	CSequence* pSequence = Find_Sequence(strSequenceTag);
 	if (nullptr != pSequence)
-		CRASH("Sequence 이미 있음");
-
+	{
+		MSG_BOX("Sequence 이미 있음");
+		return;
+	}
 
 	pSequence = CSequence::Create(Items, ItemDatas, pDesc);
 	ASSERT_CRASH(pSequence);

@@ -29,7 +29,9 @@
 #include "Decal_Manager.h"
 #include "VolumetricFog.h"
 #include "HZB.h"
+
 #include"Model_Manager.h"
+#include "SFX_Hub.h"
 
 #define KSTA_DEBUG_ENABLEFONTMGR
 
@@ -132,6 +134,10 @@ HRESULT CGameInstance::Ready_Engine(const ENGINE_DESC& EngineDesc, ID3D11Device*
 
 	m_pModel_Manager = CModel_Manager::Create(*ppDevice, *ppContext);
 	ASSERT_CRASH(m_pModel_Manager);
+
+	m_pSFX_Hub = CSFX_Hub::Create(*ppDevice, *ppContext, EngineDesc.iSizeX, EngineDesc.iSizeY);
+	ASSERT_CRASH(m_pSFX_Hub);
+
 	return S_OK;
 }
 
@@ -168,6 +174,7 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	
 	m_pDecal_Manager->Update(fTimeDelta);
 
+	m_pSequence_Manager->Update(fTimeDelta);
 	m_pCamera_Manager->Late_Update(fTimeDelta);
 	m_pPipeLine->Update();
 
@@ -182,7 +189,11 @@ void CGameInstance::Update_Engine(_float fTimeDelta)
 	m_pLevel_Manager->Update_Level(fTimeDelta);
 
 	m_pVF->Update_VF(fTimeDelta);
+<<<<<<< HEAD
 	m_pModel_Manager->Update(fTimeDelta);
+=======
+	m_pSFX_Hub->Update_SFX(fTimeDelta);
+>>>>>>> dev
 }
 
 _float CGameInstance::Rand_Normal()
@@ -498,14 +509,6 @@ HRESULT CGameInstance::Add_Render_ShadowMapObject(CGameObject* pRenderObject)
 {
 	return m_pRenderer->Add_Render_ShadowMapObject(pRenderObject);
 }
-void CGameInstance::Begin_ScreenEffect(SFX_TYPE eType)
-{
-	m_pRenderer->Begin_ScreenEffect(eType);
-}
-void CGameInstance::End_ScreenEffect()
-{
-	m_pRenderer->End_ScreenEffect();
-}
 void CGameInstance::Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects)
 {
 	m_pRenderer->Add_Effects(strEffectTag, Effects);
@@ -542,42 +545,6 @@ void CGameInstance::IsSSAO(_bool IsSSAO)
 void CGameInstance::IsSSAO_Blur(_bool IsBlur)
 {
 	m_pRenderer->IsSSAO_Blur(IsBlur);
-}
-void CGameInstance::Setting_SSAO(_float fRadius, _float fMaxDistance)
-{
-	m_pRenderer->Setting_SSAO(fRadius, fMaxDistance);
-}
-void CGameInstance::SetBloomIntensity(_float fIntensity)
-{
-	m_pRenderer->SetBloomIntensity(fIntensity);
-}
-void CGameInstance::SetBloomWeight(_int iWeight)
-{
-	m_pRenderer->SetBloomWeight(iWeight);
-}
-void CGameInstance::SetDof(_float fDepth, _float fRange, _float fScale)
-{
-	m_pRenderer->SetDof(fDepth, fRange, fScale);
-}
-void CGameInstance::SetMaxEffectIntensity(_float fMaxIntensity)
-{
-	m_pRenderer->SetMaxEffectIntensity(fMaxIntensity);
-}
-void CGameInstance::SetPBR(_bool IsStylized)
-{
-	m_pRenderer->SetPBR(IsStylized);
-}
-void CGameInstance::Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic)
-{
-	m_pRenderer->Set_Metallic(fDynamicMetallic, fStaticMetallic);
-}
-void CGameInstance::Set_Roughness(_float fRoughness, _float fStaticRoughness)
-{
-	m_pRenderer->Set_Roughness(fRoughness, fStaticRoughness);
-}
-void CGameInstance::SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance)
-{
-	m_pRenderer->SetMotionBlur(fLimitVelocity, fLimitDepth, fDistance);
 }
 #endif
 #pragma endregion
@@ -620,6 +587,10 @@ HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCame
 {
 	return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag);
 }
+HRESULT CGameInstance::Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg)
+{
+    return m_pCamera_Manager->Change_MainCamera(iLevelID, strCameraTag, pArg);
+}
 _float CGameInstance::Get_CurrentCamera_Near()
 {
 	return m_pCamera_Manager->Get_CurrentCamera_Near();
@@ -639,7 +610,7 @@ void CGameInstance::OnShake(const CAMERA_SHAKE& tData)
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc)
+void CGameInstance::Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc)
 {
 	m_pSequence_Manager->Register_Sequence(strSequenceTag, Items, ItemDatas, pDesc);
 }
@@ -886,6 +857,11 @@ HRESULT	CGameInstance::Add_RootUI(const _wstring& strName_UI, class CUIObject* p
 	return m_pUI_Manager->Add_RootUI(strName_UI, pRootUI);
 }
 
+HRESULT	CGameInstance::Remove_RootUI(const _wstring& strName_UI)
+{
+	return m_pUI_Manager->Remove_RootUI(strName_UI);
+}
+
 CUIObject* CGameInstance::Find_UIObject(const _wstring& strName_UI)
 {
 	return m_pUI_Manager->Find_UIObject(strName_UI);
@@ -1057,6 +1033,43 @@ void CGameInstance::RenderBufferPool(_uint iLODIndex)
 	m_pModel_Manager->RenderBufferPool(iLODIndex);
 }
 
+#pragma region SFX_HUB
+HRESULT CGameInstance::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
+{
+	return m_pSFX_Hub->Begin_Toggle_SFX(eType, fDuration);
+}
+HRESULT CGameInstance::End_SFX()
+{
+	return m_pSFX_Hub->End_SFX();
+}
+HRESULT CGameInstance::Setting_DOF(_float3 vCenterPos, _float fRange)
+{
+	return m_pSFX_Hub->Setting_DOF(vCenterPos, fRange);
+}
+HRESULT CGameInstance::Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
+{
+	return m_pSFX_Hub->Render_SFX_Toggle(pVIBuffer, pShader);
+}
+HRESULT CGameInstance::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader)
+{
+	return m_pSFX_Hub->Render_SFX(eType, pVIBuffer, pShader);
+}
+HRESULT CGameInstance::Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	return m_pSFX_Hub->Setting_Radial(vCenterUV, vDistanceRange, fRadialIntensity);
+}
+HRESULT CGameInstance::Setting_Radial(_fvector vCenterPos, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	return m_pSFX_Hub->Setting_Radial(vCenterPos, vDistanceRange, fRadialIntensity);
+}
+#ifdef _DEBUG
+void CGameInstance::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
+{
+	m_pSFX_Hub->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
+}
+#endif
+#pragma endregion
+
 HRESULT CGameInstance::SetUp_CameraNF()
 {
 	m_pVF->SetUp_FogNF();
@@ -1129,6 +1142,7 @@ void CGameInstance::Release_Engine()
 	Safe_Release(m_pCSM);
 	Safe_Release(m_pHZB);
 	Safe_Release(m_pRCS_Manager);
+	Safe_Release(m_pSFX_Hub);
 	Safe_Release(m_pUI_Manager);
 	Safe_Release(m_pPhysicsManager);																									
 	Safe_Release(m_pPrototype_Manager);

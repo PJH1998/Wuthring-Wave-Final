@@ -21,6 +21,9 @@ HRESULT CTrail_Mesh::Initialize_Prototype()
 HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 {
     TRAILMESH_DESC* pDesc = static_cast<TRAILMESH_DESC*>(pArg);
+	
+	m_IsDissolve = pDesc->IsDissolve;
+	m_IsDistortion = pDesc->IsDistortion;
 
     if (FAILED(__super::Initialize_Clone(pArg)))
         return E_FAIL;
@@ -52,9 +55,6 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 	m_iDirFalg = pDesc->iDirFlag;
 	m_iMaskFlag = pDesc->iMaskFlag;
 
-	m_IsDissolve = pDesc->IsDissolve;
-
-	m_IsDistortion = pDesc->IsDistortion;
 	m_fDistortionWeight = pDesc->fDistortionWeight;
 
     //임시처리
@@ -62,7 +62,7 @@ HRESULT CTrail_Mesh::Initialize_Clone(void* pArg)
 
 
     XMStoreFloat4x4(&m_ComBindMatrix, XMMatrixIdentity());
-    Root_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
+	Default_Transform(XMLoadFloat4x4(&m_ComBindMatrix));
 
     return S_OK;
 }
@@ -76,11 +76,14 @@ void CTrail_Mesh::Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함.
+    //여기서 Sweep 계산 후 셰이더에 바인딩 해줘야 함. 
     m_fSweep += fTimeDelta * m_fSweepSpeed;
     m_fColorSweep += fTimeDelta * m_fColorSpeed;
 	m_fMaskSweep += fTimeDelta * m_fMaskSpeed;
     m_vLifeTime.x += fTimeDelta;
+
+	if (m_IsRoot)
+		Update_Transform();
 
     if (m_vLifeTime.x >= m_vLifeTime.y)
     {
@@ -106,7 +109,10 @@ void CTrail_Mesh::Late_Update(_float fTimeDelta)
     if (!m_isActivate)
         return;
 
-    m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
+	if(m_IsDistortion)
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::DISTORTION, this);
+	else
+		m_pGameInstance->Add_Render_Object(RENDERGROUP::EFFECT, this);
 }
 
 void CTrail_Mesh::Render()
@@ -123,47 +129,98 @@ void CTrail_Mesh::Render()
 
 void CTrail_Mesh::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if (_bool* IsActivate = static_cast<_bool*>(pArg))
+    /*if (_bool* IsActivate = static_cast<_bool*>(pArg))
         m_isActivate = *IsActivate;
 
     m_fSweep = 0.f;
     m_fColorSweep = 0.f;
     m_vLifeTime.x = 0.f;
-    Root_Transform(WorldMatrix);
+    Root_Transform(WorldMatrix);*/
+
+	//EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	//m_isActivate = pDesc->IsActive;
+
+	//if (m_isActivate)
+	//{
+	//	if (pDesc->pBoneMatrixPtr != nullptr)
+	//	{
+	//		//뼈에 붙여야한다는 것. 근데 파티클은 뼈에 안붙여도 될듯?
+	//		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+	//		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+	//		m_IsRoot = true;
+	//		m_OffsetMatrix = WorldMatrix;
+	//		m_fSweep = 0.f;
+	//		m_fColorSweep = 0.f;
+	//		m_vLifeTime.x = 0.f;
+	//		m_fMaskSweep = 0.f;
+	//	}
+	//	else if (pDesc->pBoneMatrixPtr == nullptr)
+	//	{
+	//		//기존처리
+	//		m_vLifeTime.x = 0.f;
+	//		Root_Transform(WorldMatrix);
+	//		m_IsRoot = false;
+	//		m_fSweep = 0.f;
+	//		m_fColorSweep = 0.f;
+	//		m_vLifeTime.x = 0.f;
+	//		m_fMaskSweep = 0.f;
+	//	}
+	//}
+
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
+
+	m_isActivate = pDesc->IsActive;
+
+	//기본 초기화
+	m_fSweep = 0.f;
+	m_fColorSweep = 0.f;
+	m_fMaskSweep = 0.f;
+	m_vLifeTime.x = 0.f;
+
+	if (m_isActivate && !m_IsRoot)
+	{
+		//뼈에 안붙을 얘면 프리팹이 계산해서 던져준 월드매트릭스 그대로 사용해도 됨.
+		Default_Transform(WorldMatrix);
+	}
+	else if (m_isActivate && m_IsRoot)
+	{
+		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+		m_OffsetMatrix = WorldMatrix;
+	}
 }
 
-void CTrail_Mesh::Root_Transform(_fmatrix WorldMatrix)
+void CTrail_Mesh::Default_Transform(_fmatrix WorldMatrix)
 {
-     //if (m_IsRoot)
-     //{
-     //    _matrix SpawnMatrix = WorldMatrix;
-     //    _float4x4 SpawnW = {};
-     //    XMStoreFloat4x4(&SpawnW, SpawnMatrix);
-
-     //    _float fYaw = atan2f(SpawnW._31, SpawnW._33);
-     //    XMMATRIX RotationMatrix = XMMatrixRotationY(fYaw) * XMMatrixRotationX(-90.f);      //나중에 설정값 줄수 있게?
-
-     //    XMVECTOR vPos = XMVectorSet(SpawnW._41, SpawnW._42, SpawnW._43, 1.f);
-     //    XMMATRIX PosMatrix = XMMatrixTranslationFromVector(vPos);
-
-     //    SpawnMatrix = RotationMatrix * PosMatrix;
-
-     //    XMStoreFloat4x4(&m_ComBindMatrix,
-     //        m_pTransformCom->Get_WorldMatrix() *
-     //        SpawnMatrix);
-     //}
-     //else
-     //{
-     //    _vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
-     //    m_pTransformCom->Set_State(STATE::POSITION, vPos);
-
-     //    XMStoreFloat4x4(&m_ComBindMatrix,
-     //        m_pTransformCom->Get_WorldMatrix());
-     //}
-
     XMStoreFloat4x4(&m_ComBindMatrix,
         m_pTransformCom->Get_WorldMatrix()
         * WorldMatrix);
+}
+
+void CTrail_Mesh::Update_Transform()
+{
+	if (m_pBoneMatrixPtr == nullptr)
+		return;
+
+	_matrix OffsetMatrix = m_OffsetMatrix;
+	
+	_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+	_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+	
+	_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+	
+	_vector vScale = {};
+	_vector vPos = {};
+	_vector vRot = {};
+	XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+	
+	_matrix OffsetSpawnMatrix = XMMatrixRotationQuaternion(vRot) * XMMatrixTranslationFromVector(vPos);
+	
+	XMStoreFloat4x4(&m_ComBindMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		OffsetMatrix * OffsetSpawnMatrix);
 }
 
 HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
@@ -176,7 +233,6 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
         TEXT("Com_VIBuffer"), reinterpret_cast<CComponent**>(&m_pVIBufferCom), nullptr)))
         return E_FAIL;
 
-    //텍스처 여러개 써야하는데 어떻게 할지 고민해보자
     if (FAILED(CGameObject::Add_Component(ENUM_CLASS(LEVEL::EFFECT), Desc.strTextureTag,
         TEXT("Com_Texture"), reinterpret_cast<CComponent**>(&m_pTextureCom), nullptr)))
         return E_FAIL;
@@ -203,16 +259,8 @@ HRESULT CTrail_Mesh::Ready_Components(TRAILMESH_DESC& Desc)
 
 HRESULT CTrail_Mesh::Bind_ShaderResources()
 {
-    //if (!m_IsRoot)
-    //{
-    //    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-    //        return E_FAIL;
-    //}
-    //else
-    //{
-        if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+    if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
             return E_FAIL;
-   /* }*/
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
@@ -259,6 +307,9 @@ HRESULT CTrail_Mesh::Bind_ShaderResources()
 		return E_FAIL;
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSweep", &m_fMaskSweep, sizeof(_float))))
+		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskSpeed", &m_fMaskSpeed, sizeof(_float))))
 		return E_FAIL;
 
     if(FAILED(m_pShaderCom->Bind_Value("g_SweepWitdh", &m_fSweepWitdh, sizeof(_float))))

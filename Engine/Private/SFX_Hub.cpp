@@ -8,6 +8,7 @@
 #include "DOF.h"
 #include "MotionBlur.h"
 #include "ScreenBlur.h"
+#include "RadialBlur.h"
 
 CSFX_Hub::CSFX_Hub(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pDevice { pDevice}
@@ -24,6 +25,8 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
 
+	m_fDefaultIntensityBoost = 2.f;
+
 	if (FAILED(Ready_SFX()))
 		return E_FAIL;
 
@@ -33,8 +36,45 @@ HRESULT CSFX_Hub::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 	return S_OK;
 }
 
-HRESULT CSFX_Hub::Begin_SFX(SFX_TYPE eType)
+void CSFX_Hub::Update_SFX(_float fTimeDelta)
 {
+	if (nullptr == m_pCurrentSFX)
+		return;
+
+	m_pCurrentSFX->Update(fTimeDelta);
+	Update_Toggle(fTimeDelta);
+	Update_ToggleIntensity(fTimeDelta);
+}
+
+HRESULT CSFX_Hub::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
+{
+	if (m_eCurrentToggle == eType)
+		return S_OK;
+
+	CSFX* pSFX = Find_SFX(static_cast<SFX_TYPE>(eType));
+	if (nullptr == pSFX)
+		return E_FAIL;
+
+	if (nullptr != m_pCurrentSFX)
+	{
+		m_pCurrentSFX->Exit();
+		Safe_Release(m_pCurrentSFX);
+	}
+
+	m_IsToggleOn = true;
+	
+	m_fToggleDuration = fDuration;
+
+	m_fIntensityBoost = m_fToggleDuration == 0.f ? m_fDefaultIntensityBoost : min((1.f / (m_fToggleDuration * 0.2f)), m_fDefaultIntensityBoost);
+
+	m_fToggleIntensity = 0.f;
+
+	m_pCurrentSFX = pSFX;
+	m_pCurrentSFX->Enter();
+	m_eCurrentToggle = eType;
+
+	Safe_AddRef(m_pCurrentSFX);
+
 	return S_OK;
 }
 
@@ -43,7 +83,23 @@ HRESULT CSFX_Hub::End_SFX()
 	if (nullptr == m_pCurrentSFX)
 		return S_OK;
 
-	return E_NOTIMPL;
+	m_IsToggleOn = false;
+	m_fToggleDuration = 0.f;
+	m_fCurrentToggleDuration = 0.f;
+
+	return S_OK;
+}
+
+HRESULT CSFX_Hub::Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
+{
+	if (nullptr == m_pCurrentSFX)
+		return E_FAIL;
+
+	m_pCurrentSFX->Set_Intensity(m_fToggleIntensity);
+
+	m_pCurrentSFX->Render(pVIBuffer, pShader);
+
+	return S_OK;
 }
 
 HRESULT CSFX_Hub::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader)
@@ -54,6 +110,47 @@ HRESULT CSFX_Hub::Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader*
 
 	return pSFX->Render(pVIBuffer, pShader);
 }
+
+HRESULT CSFX_Hub::Setting_DOF(_float3 vCenterPos, _float fRange)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::DOF);
+	ASSERT_CRASH(pSFX);
+
+	CDOF* pDOF = static_cast<CDOF*>(pSFX);
+	pDOF->Setting_DOF(vCenterPos, fRange);
+
+	return S_OK;
+}
+
+HRESULT CSFX_Hub::Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::RADIAL);
+	ASSERT_CRASH(pSFX);
+
+	CRadialBlur* pRadial = static_cast<CRadialBlur*>(pSFX);
+	pRadial->Setting_Radial(vCenterUV, vDistanceRange, fRadialIntensity);
+
+	return S_OK;
+}
+
+HRESULT CSFX_Hub::Setting_Radial(_fvector vCenterPos, _float2 vDistanceRange, _float fRadialIntensity)
+{
+	CSFX* pSFX = Find_SFX(SFX_TYPE::RADIAL);
+	ASSERT_CRASH(pSFX);
+
+	CRadialBlur* pRadial = static_cast<CRadialBlur*>(pSFX);
+	pRadial->Setting_Radial(vCenterPos, vDistanceRange, fRadialIntensity);
+
+	return S_OK;
+}
+
+#ifdef _DEBUG
+void CSFX_Hub::Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale)
+{
+	CMotionBlur* pSFX = static_cast<CMotionBlur*>(Find_SFX(SFX_TYPE::MOTION));
+	pSFX->Set_Motion(fLimitVelocity, fLimitDepth, fLengthScale);
+}
+#endif
 
 CSFX* CSFX_Hub::Find_SFX(SFX_TYPE eType)
 {
@@ -84,6 +181,10 @@ HRESULT CSFX_Hub::Ready_SFX()
 	CScreenBlur* pScreenBlur = CScreenBlur::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
 	ASSERT_CRASH(pScreenBlur);
 	m_SFXs.emplace(SFX_TYPE::BLUR, pScreenBlur);
+
+	CRadialBlur* pRadialBlur = CRadialBlur::Create(m_pDevice, m_pContext, m_iWinSizeX, m_iWinSizeY);
+	ASSERT_CRASH(pRadialBlur);
+	m_SFXs.emplace(SFX_TYPE::RADIAL, pRadialBlur);
 
 	return S_OK;
 }
@@ -128,12 +229,13 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_X"), &BlurRCS)))
 		CRASH("Failed Add G_BlurX");
-
+	 
 	BlurRCS.strEntryPoint = "GaussianBlur_Y";
-
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_GAUSSIAN_BLUR_Y"), &BlurRCS)))
 		CRASH("Failed Add G_BlurY");
 
+#pragma region DOF
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_DOF.hlsl");
 	BlurRCS.strEntryPoint = "DOF_X";
 	BlurRCS.iMipLevels = 2;
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_X"), &BlurRCS)))
@@ -142,13 +244,28 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	BlurRCS.strEntryPoint = "DOF_Y";
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_DOF_Y"), &BlurRCS)))
 		CRASH("Failed Add DOF_Y");
+#pragma endregion
 
+#pragma region MOTION_BLUR
+	// Blur + UpSample
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_MotionBlur.hlsl");
 	BlurRCS.strEntryPoint = "Motion_Blur";
 	BlurRCS.iWidth = m_iWinSizeX;
 	BlurRCS.iHeight = m_iWinSizeY;
 	BlurRCS.iMipLevels = 1;
 	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_MotionBlur"), &BlurRCS)))
 		CRASH("Failed Add RCS_MotionBlur");
+#pragma endregion
+
+#pragma region RADIAL_BLUR
+	BlurRCS.pFilePath = TEXT("../../Engine/Bin/ShaderFiles/Engine_ComputeShader_RadialBlur.hlsl");
+	BlurRCS.strEntryPoint = "RadialBlur";
+	BlurRCS.iWidth = m_iWinSizeX;
+	BlurRCS.iHeight = m_iWinSizeY;
+	BlurRCS.iMipLevels = 1;
+	if (FAILED(m_pGameInstance->Add_RCS(TEXT("RCS_RadialBlur"), &BlurRCS)))
+		CRASH("Failed Add RCS_MotionBlur");
+#pragma endregion
 #pragma endregion
 
 #pragma region DOWNSAMPLE
@@ -200,6 +317,35 @@ HRESULT CSFX_Hub::Ready_SFX_CS()
 	return S_OK;
 }
 
+void CSFX_Hub::Update_Toggle(_float fTimeDelta)
+{
+	if (m_fToggleDuration == 0.f)
+		return;
+
+	m_fCurrentToggleDuration += fTimeDelta;
+	if (m_fCurrentToggleDuration >= m_fToggleDuration)
+		End_SFX();
+}
+
+void CSFX_Hub::Update_ToggleIntensity(_float fTimeDleta)
+{
+	_float fFluctuate = fTimeDleta * m_fIntensityBoost;
+
+	if (false == m_IsToggleOn)
+	{
+		fFluctuate *= -1.f;
+		if (m_fToggleIntensity <= 0.f)
+		{
+			m_pCurrentSFX->Exit();
+			Safe_Release(m_pCurrentSFX);
+			m_pCurrentSFX = nullptr;
+			m_eCurrentToggle = SFX_TOGGLE::END;
+		}
+	}
+
+	m_fToggleIntensity = clamp(m_fToggleIntensity + fFluctuate, 0.f, 1.f);
+}
+
 CSFX_Hub* CSFX_Hub::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext, _uint iWinSizeX, _uint iWinSizeY)
 {
 	CSFX_Hub* pInstance = new CSFX_Hub(pDevice, pContext);
@@ -219,9 +365,10 @@ void CSFX_Hub::Free()
 	Safe_Release(m_pContext);
 	Safe_Release(m_pGameInstance);
 	
+	Safe_Release(m_pCurrentSFX);
+
 	for (auto& Pair : m_SFXs)
 		Safe_Release(Pair.second);
 	m_SFXs.clear();
 
-	Safe_Release(m_pCurrentSFX);
 }

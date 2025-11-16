@@ -27,6 +27,10 @@ public:
 		_int	iMaskFlag = 0;
 		_int	iShaderPass = 0;
 
+		_bool	IsSprite = false;
+		_int    iRows = 0;
+		_int	iCols = 0;
+
 		_float3 vPos = { 0.f, 0.f, 0.f };
 		_float4 vColor = { 1.f, 1.f, 1.f, 1.f };
 		_float2	vLifeTime = { 0.f, 10.f };
@@ -50,8 +54,9 @@ public:
 	virtual		void	Reset(const _fmatrix& WorldMatrix, void* pArg) override;
 
 private:
-	void Root_Transform(_fmatrix WorldMatrix);
-	void Bind_CS_SpriteInfo();
+	void Default_Transform(_fmatrix WorldMatrix);
+	void Sprite_Update(_float fTimeDelta);
+	void Update_Root_Transform();
 
 
 private:
@@ -74,6 +79,19 @@ private:
 	_float						m_fSweep = 0.f;
 	_float						m_fSweepSpeed = {};
 	_float						m_fSoft = {};
+
+	_bool						m_IsSprite = false;
+	_int						m_iRow = {};
+	_int						m_iCol = {};
+	_float						m_fPhase = 0.f;
+
+	_bool						m_IsRoot = false;
+	_float4x4					m_ComBindMatrix = {  };
+
+	const _float4x4*			m_pBoneMatrixPtr = nullptr;
+	const _float4x4*			m_pObjectMatrixPtr = nullptr;
+	_matrix						m_OffsetMatrix = {};
+
 
 private:
 	HRESULT Ready_Components(FXRECT_DESC& Desc);

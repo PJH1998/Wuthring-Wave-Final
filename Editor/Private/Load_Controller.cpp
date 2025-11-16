@@ -452,6 +452,9 @@ void CLoad_Controller::Load_Particle_OB_FromJson(const _string& strFilePath, con
     if (ParticleJson.contains("Root"))
         Desc.IsRootOn = ParticleJson["Root"].get<_bool>();
 
+	if (ParticleJson.contains("Pivot"))
+		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
 
@@ -460,6 +463,9 @@ void CLoad_Controller::Load_Particle_OB_FromJson(const _string& strFilePath, con
 
     if (ParticleJson.contains("ShaderPass"))
         Desc.fShaderPass = ParticleJson["ShaderPass"].get<_int>();
+
+	if (ParticleJson.contains("MaskFlag"))
+		Desc.iMaskFlag = ParticleJson["MaskFlag"].get<_int>();
 
     if (ParticleJson.contains("Size") && ParticleJson["Size"].is_array())
     {
@@ -705,8 +711,8 @@ void CLoad_Controller::Load_TrailMesh_FromJson(const _string& strFilePath, const
     if (TrailMeshJson.contains("ColorTextureTag"))
         Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
 
-	if (TrailMeshJson.contains("DissolveTextureTag"))
-		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DissolveTextureTag"].get<_string>());
+	if (TrailMeshJson.contains("DlssolveTextureTag"))
+		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DlssolveTextureTag"].get<_string>());
 
 	if (TrailMeshJson.contains("DistortionTextureTag"))
 		Desc.strDistortionTextureTag = StringToWString(TrailMeshJson["DistortionTextureTag"].get<_string>());

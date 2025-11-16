@@ -2,6 +2,7 @@
 #include "ElectroPredator.h"
 #include "Projectile.h"
 #include "AoEDoT.h"
+#include "GameSystem.h"
 
 CElectroPredator::CElectroPredator(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor{ pDevice, pContext }
@@ -23,14 +24,15 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
 
+	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	ELECTROPREDATOR_DESC* pDesc = static_cast<ELECTROPREDATOR_DESC*>(pArg);
-
 
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[0] = 8.f;
 	m_fAttackCoolTime[1] = 20.f;
-	m_fAttackCoolTime[2] = 30.f;
+	m_fAttackCoolTime[2] = 10.f;
 #pragma endregion
 
 	Ready_Component(pDesc);
@@ -54,11 +56,20 @@ HRESULT CElectroPredator::Initialize_Clone(void* pArg)
 
 void CElectroPredator::Priority_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
 	m_pTransformCom->Save_PreviousPosition();
+	//m_fAttackAcc[2] = m_fAttackCoolTime[2];
 }
 
 void CElectroPredator::Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		return;
+	}
 	Reset_Condition(fTimeDelta);
 
 	// 1. Update Current State
@@ -67,7 +78,8 @@ void CElectroPredator::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 
 	// 2. Setting Animation & Run
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //gpu
 	//_float temp;
 	//m_pModelCom->Play_Animation_CPU("Stand2", fTimeDelta, &temp, false, true, false, true, 1.f);
 	//m_pModelCom->Sync_RootNode(m_pTransformCom, fTimeDelta);
@@ -75,7 +87,7 @@ void CElectroPredator::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if (m_isPushed)
 	{
-		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
+		_vector vBeHitDir = XMVector3Normalize(XMLoadFloat3(&m_vBeHit_Normal) * 2.5f + XMVectorSet(0.f, 1.f, 0.f, 0.f));
 		m_isPushed = false;
 		m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
 		ZeroMemory(&m_vBeHit_Normal, sizeof(_float3));
@@ -94,6 +106,27 @@ void CElectroPredator::Update(_float fTimeDelta)
 
 void CElectroPredator::Late_Update(_float fTimeDelta)
 {
+	if (m_pGameSystem->IsSonoro())
+	{
+		if (!m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(false);
+			m_pRigidBodyCom->IsActivate(false);
+			m_isSonoro = true;
+		}
+		return;
+	}
+	else
+	{
+		if (m_isSonoro)
+		{
+			m_pColliderCom->IsActivate(true);
+			m_pRigidBodyCom->IsActivate(true);
+			m_isSonoro = false;
+			return;
+		}
+	}
+
 	//m_pRigidBodyCom->Sync_Rigidbody(m_pTransformCom);
 	m_pColliderCom->Sync_Position(m_pTransformCom);
 	if (m_iState & ENUM_CLASS(TEST_STATE::AIR))
@@ -154,6 +187,10 @@ void CElectroPredator::Reset(const _fmatrix& WorldMatrix, void* pArg)
 	m_pColliderCom->Set_Position(m_pTransformCom->Get_State(STATE::POSITION));
 	//m_pColliderCom->IsActivate(true);
 	m_pRigidBodyCom->IsActivate(true);
+	m_isDeadTrigger = false;
+	m_iState = ENUM_CLASS(TEST_STATE::NONE);
+	m_fAttackAcc[1] = 10.f;
+	m_fAttackAcc[2] = 20.f;
 }
 
 void CElectroPredator::Collider_Active(const _wstring& wStrColliderTag, _bool Isactive)
@@ -192,6 +229,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 	{
 		_vector vScale{}, vQuat{}, vTranslate{};
 		XMMatrixDecompose(&vScale, &vQuat, &vTranslate, m_pTransformCom->Get_WorldMatrix());
+
 		vTranslate = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 		_matrix WorldMat = XMMatrixAffineTransformation(vScale, XMVectorSet(0.f, 0.f, 0.f, 1.f), vQuat, vTranslate);
 
@@ -199,7 +237,7 @@ void CElectroPredator::Object_Func(const _wstring& wStrObjectTag)
 		AoEDesc.fLifeTime = 3.f;
 		AoEDesc.iTickCount = 8;
 
-		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AoEDot_Electro"), WorldMat, &AoEDesc);
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pool_AOEDOT_Electro"), WorldMat, &AoEDesc);
 	}
 	else if (wStrObjectTag == TEXT("Look"))
 	{
@@ -243,7 +281,7 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 	ColliderDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::ENEMY);
 	ColliderDesc.fHeight = 1.5f;
 	ColliderDesc.fRadius = 0.4f;
-	ColliderDesc.fRayOffset = -0.11f;
+	ColliderDesc.fRayOffset = -0.15f;
 	Add_Component(ENUM_CLASS(pDesc->colliderData.first), pDesc->colliderData.second,
 		TEXT("Com_Collider"), reinterpret_cast<CComponent**>(&m_pColliderCom), &ColliderDesc);
 	ASSERT_CRASH(m_pColliderCom);
@@ -254,6 +292,9 @@ void CElectroPredator::Ready_Component(ELECTROPREDATOR_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
+	m_CallBack.pCondition = &m_iState;
+	//m_CallBack.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
@@ -439,6 +480,16 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Be Hit! (Electro Predator)" << endl;
 		//m_iState |= ENUM_CLASS(TEST_STATE::BEHIT);
@@ -449,6 +500,16 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -458,9 +519,19 @@ void CElectroPredator::BeHit(_uint iLayer, void* pOther, const ContactManifold& 
 		m_beHit = true;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 1.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
 		m_isPushed = true;
 		m_iState |= ENUM_CLASS(TEST_STATE::AIR);
 		memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+
+#pragma region HIT_EFFECT
+		m_pGameInstance->Spawn_PoolingObject(TEXT("A_Attack_Effect"), m_pTransformCom->Get_WorldMatrix()
+			* XMMatrixTranslation(0.f, 1.5f, 0.f));
+#pragma endregion
+
 #ifdef _DEBUG
 		cout << "Knock Back! (Electro Predator)" << endl;
 		cout << "Nomal- x: " << m_vBeHit_Normal.x << ", y: " << m_vBeHit_Normal.y << ", z: " << m_vBeHit_Normal.z << endl;
@@ -487,6 +558,13 @@ void CElectroPredator::Patrol()
 	}
 }
 
+_bool CElectroPredator::isAnimationRunning()
+{
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD) && !m_isDeadTrigger)
+		return true;
+	return !m_isAnimationFinished;
+}
+
 _bool CElectroPredator::isKnockDown()
 {
 	if (m_beHit)
@@ -497,6 +575,8 @@ _bool CElectroPredator::isKnockDown()
 
 _bool CElectroPredator::isAttackEnable()
 {
+	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
+		return false;
 	if (!m_isDetecting)
 		return false;
 	_bool bResult{};
@@ -523,7 +603,7 @@ _bool CElectroPredator::Attack(_uint iIndex, _float fInterval)
 
 _bool CElectroPredator::isChase()
 {
-	if (m_iState & ENUM_CLASS(TEST_STATE::SPAWN))
+	if (m_iState & (ENUM_CLASS(TEST_STATE::SPAWN) | ENUM_CLASS(TEST_STATE::DEAD)))
 		return false;
 
 	_bool bResult{};
@@ -604,6 +684,7 @@ void CElectroPredator::Free()
 {
 	__super::Free();
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);
 }

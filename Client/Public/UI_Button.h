@@ -7,9 +7,9 @@ NS_END
 
 NS_BEGIN(Client)
 
-class CUI_Button final : public CCustom_UI
+class CUI_Button : public CCustom_UI
 {
-private:
+protected:
 	explicit				CUI_Button(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	explicit				CUI_Button(const CUI_Button& Prototype);
 	virtual					~CUI_Button() = default;
@@ -22,10 +22,10 @@ public:
 	virtual void			Late_Update(_float fTimeDelta)			override;
 	virtual void			Render()								override;
 
-private:
+protected:
 	HRESULT					Ready_Components(void* pArg);
 
-private:
+protected:
 
 public:
 	static CUI_Button*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

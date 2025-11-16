@@ -16,6 +16,8 @@
 #include "Effect_Decal.h"
 #include<unordered_set>
 
+#include "Sequence.h"
+
 CParser::CParser(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: m_pGameInstance{ CGameInstance::GetInstance() },
 	m_pDevice { pDevice }, m_pContext { pContext }
@@ -363,6 +365,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			OBJECTTYPE Type;
 			File.read(reinterpret_cast<char*>(&Desc.iShaderPassIndex), sizeof(_uint));
 			File.read(reinterpret_cast<char*>(&Type), sizeof(OBJECTTYPE));
+			File.read(reinterpret_cast<char*>(&Desc.WorldMatrix), sizeof(_float4x4));
 
 			File.read(reinterpret_cast<char*>(&Desc.vSourPos), sizeof(_float4));
 			File.read(reinterpret_cast<char*>(&Desc.vDestPos), sizeof(_float4));
@@ -374,7 +377,7 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			File.read(reinterpret_cast<char*>(&Desc.TriggerIndex), sizeof(_uint));
 
 			File.read(reinterpret_cast<char*>(&Desc.TriggerActiveIndex), sizeof(_int));
-			XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
+			//XMStoreFloat4x4(&Desc.WorldMatrix, XMMatrixTranslationFromVector(XMLoadFloat4(&Desc.vSourPos)));
 			m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(eLevel), TEXT("Prototype_GameObject_MapObject_Meteo")
 				, ENUM_CLASS(eLevel), TEXT("Layer_Meteo"), &Desc);
 		}
@@ -415,67 +418,67 @@ void CParser::Read_Map_Dat(LEVEL eLevel, const _string pFilePath)
 			//프로토타입은 제일 큰 놈으로 들어옴. => 0번까지 계속 생성.
 			_wstring ModelName = StringToWString(Desc.ModelName);
 
-			Desc.iLevel = ENUM_CLASS(eLevel);
-
-			switch (Desc.eObjectType)
-			{
-			case OBJECTTYPE::SONORA:
-				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-					, Desc.iLevel, TEXT("Layer_Sonoro"), &Desc);
-				break;
-
-			case OBJECTTYPE::NONSONORA:
-				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-					, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-				break;
-
-			case OBJECTTYPE::NONSONORA_FLOOR:
-				m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-					, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
-				break;
-
-			default:
-				m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject")
-					, PROTOTYPE::GAMEOBJECT, &Desc);
-				break;
-			}
-
-			//m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
-			//	Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
-			//		CMapObject::MAP_LOAD pDesc{};
-			//		strcpy_s(pDesc.ModelName, ModelName.c_str());
-			//		pDesc.iShaderPassIndex = ShaderPass;
-			//		pDesc.eObjectType = eObjectType;
-			//		pDesc.WorldMatrix = &Matrix;
-			//		pDesc.iLevel = ENUM_CLASS(eLevel);
-			//		pDesc.vBoundingPos = BoundingPos;
-			//		pDesc.vBoundingExtends = BoundingExtends;
+			//Desc.iLevel = ENUM_CLASS(eLevel);
 			//
-			//		switch (pDesc.eObjectType)
-			//		{
-			//		case OBJECTTYPE::SONORA:
-			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
-			//				, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
-			//			break;
+			//switch (Desc.eObjectType)
+			//{
+			//case OBJECTTYPE::SONORA:
+			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+			//		, Desc.iLevel, TEXT("Layer_Sonoro"), &Desc);
+			//	break;
 			//
-			//		case OBJECTTYPE::NONSONORA:
-			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//				, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
-			//			break;
+			//case OBJECTTYPE::NONSONORA:
+			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
+			//	break;
 			//
-			//		case OBJECTTYPE::NONSONORA_FLOOR:
-			//			m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
-			//				, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
-			//			break;
+			//case OBJECTTYPE::NONSONORA_FLOOR:
+			//	m_pGameInstance->Add_GameObject_ToLayer(Desc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+			//		, Desc.iLevel, TEXT("Layer_NonSonoro"), &Desc);
+			//	break;
 			//
-			//		default:
-			//			m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
-			//				, PROTOTYPE::GAMEOBJECT, &pDesc);
-			//			break;
-			//		}
-			//	});
+			//default:
+			//	m_pGameInstance->Clone_Prototype(Desc.iLevel, TEXT("Prototype_GameObject_MapObject")
+			//		, PROTOTYPE::GAMEOBJECT, &Desc);
+			//	break;
+			//}
+
+			m_pGameInstance->Add_Work([&, ModelName = string(Desc.ModelName), ShaderPass = Desc.iShaderPassIndex, eObjectType = Desc.eObjectType,
+				Matrix = *Desc.WorldMatrix, BoundingPos = Desc.vBoundingPos, BoundingExtends = Desc.vBoundingExtends]() mutable {
+					CMapObject::MAP_LOAD pDesc{};
+					strcpy_s(pDesc.ModelName, ModelName.c_str());
+					pDesc.iShaderPassIndex = ShaderPass;
+					pDesc.eObjectType = eObjectType;
+					pDesc.WorldMatrix = &Matrix;
+					pDesc.iLevel = ENUM_CLASS(eLevel);
+					pDesc.vBoundingPos = BoundingPos;
+					pDesc.vBoundingExtends = BoundingExtends;
+			
+					switch (pDesc.eObjectType)
+					{
+					case OBJECTTYPE::SONORA:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_Sonoro")
+							, pDesc.iLevel, TEXT("Layer_Sonoro"), &pDesc);
+						break;
+			
+					case OBJECTTYPE::NONSONORA:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						break;
+			
+					case OBJECTTYPE::NONSONORA_FLOOR:
+						m_pGameInstance->Add_GameObject_ToLayer(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject_NonSonoro")
+							, pDesc.iLevel, TEXT("Layer_NonSonoro"), &pDesc);
+						break;
+			
+					default:
+						m_pGameInstance->Clone_Prototype(pDesc.iLevel, TEXT("Prototype_GameObject_MapObject")
+							, PROTOTYPE::GAMEOBJECT, &pDesc);
+						break;
+					}
+				});
 		}
-		//m_pGameInstance->Wait_Thread_End();
+		m_pGameInstance->Wait_Thread_End();
 	}
 	File.close();
 }
@@ -602,7 +605,7 @@ void CParser::Create_Effect(const string& strFolderPath, LEVEL eLevel)
     //추후 추가 될 이펙트들 더 있음. 나머진 추후 추가 예정.
 }
 
-void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
 {
     //프리팹 폴더 경로 까지 지정해주면 내부에있는 프리팹들 다 읽어줌.
     for (const auto& entry : filesystem::directory_iterator(strFolderPath))
@@ -620,13 +623,13 @@ void CParser::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
             {
                 _string strPrefabTag = entry.path().stem().string();
 
-                Load_Prefab_FromJson(filePath, strPrefabTag, eLevel);
+                Load_Prefab_FromJson(filePath, strPrefabTag, eLevel, PoolingNum);
             }
         }
     }
 }
 
-void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel)
+void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& strPrefabTag, LEVEL eLevel, _int PoolingNum)
 {
     ifstream JsonStream(strFilePath.c_str());
 
@@ -711,12 +714,11 @@ void CParser::Load_Prefab_FromJson(const _string& strFilePath, const _string& st
     //아니면 json으로 저장할 때 이름으로 할지 == strPrefabTag ex)Dash_Test
 
     if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_Prefab"),
-        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, 10, &PrefabDesc)))
+        ENUM_CLASS(eLevel), TEXT("Layer_Effect"), PrefabDesc.strPrefabTag, PoolingNum, &PrefabDesc)))
     {
         MSG_BOX("Prefab Load Fail");
         return;
     }
-    //개수 설정은 몇개로 ?
 }
 
 void CParser::Load_Particle_VB_FromJson(const _string& strFilePath, const _string& VBTag, LEVEL eLevel)
@@ -891,6 +893,9 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
     if (ParticleJson.contains("Root"))
         Desc.IsRootOn = ParticleJson["Root"].get<_bool>();
 
+	if (ParticleJson.contains("Pivot"))
+		Desc.IsPivot = ParticleJson["Pivot"].get<_bool>();
+
     if (ParticleJson.contains("TextureTag"))
         Desc.strTextureTag = StringToWString(ParticleJson["TextureTag"].get<_string>());
 
@@ -899,6 +904,9 @@ void CParser::Load_Particle_OB_FromJson(const _string& strFilePath, const _strin
 
     if (ParticleJson.contains("ShaderPass"))
         Desc.iShaderPass = ParticleJson["ShaderPass"].get<_int>();
+
+	if (ParticleJson.contains("MaskFlag"))
+		Desc.iMaskFlag = ParticleJson["MaskFlag"].get<_int>();
 
     if (ParticleJson.contains("Size") && ParticleJson["Size"].is_array())
     {
@@ -978,15 +986,14 @@ void CParser::Load_TrailMesh_FromJson(const _string& strFilePath, const _string&
 	if (TrailMeshJson.contains("Root"))
 		Desc.IsRootOn = TrailMeshJson["Root"].get<_bool>();
 
-
 	if (TrailMeshJson.contains("TextureTag"))
 		Desc.strTextureTag = StringToWString(TrailMeshJson["TextureTag"].get<_string>());
 
 	if (TrailMeshJson.contains("ColorTextureTag"))
 		Desc.strColorTextureTag = StringToWString(TrailMeshJson["ColorTextureTag"].get<_string>());
 
-	if (TrailMeshJson.contains("DissolveTextureTag"))
-		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DissolveTextureTag"].get<_string>());
+	if (TrailMeshJson.contains("DlssolveTextureTag"))
+		Desc.strDissolveTextureTag = StringToWString(TrailMeshJson["DlssolveTextureTag"].get<_string>());
 
 	if (TrailMeshJson.contains("DistortionTextureTag"))
 		Desc.strDistortionTextureTag = StringToWString(TrailMeshJson["DistortionTextureTag"].get<_string>());
@@ -1117,6 +1124,15 @@ void CParser::Load_FXRect_FromJson(const _string& strFilePath, const _string& Re
 
 	if (RectJson.contains("SizeY"))
 		Desc.fYSize = RectJson["SizeY"].get<_float>();
+
+	if (RectJson.contains("Row"))
+		Desc.iRows = RectJson["Row"].get<_int>();
+
+	if (RectJson.contains("Col"))
+		Desc.iCols = RectJson["Col"].get<_int>();
+
+	if (RectJson.contains("Sprite"))
+		Desc.IsSprite = RectJson["Sprite"].get<_bool>();
 
 	if (RectJson.contains("Position") && RectJson["Position"].is_array())
 	{
@@ -1359,6 +1375,78 @@ const vector<vector<_string>>& CParser::Load_CSV(const _char* pFilePath)
 	InputFile.close();
 
 	return m_Data;
+}
+
+void CParser::Load_Sequence(const _char* pFolderPath)
+{
+	for (const auto& entry : filesystem::directory_iterator(pFolderPath))
+	{
+		if (entry.is_regular_file())
+		{
+			_string filePath = entry.path().string();
+			_string fileName = entry.path().stem().string();
+			
+
+			ifstream InputFile(filePath);
+			json SequeceJson;
+			InputFile >> SequeceJson;
+
+			CSequence::SEQUENCE_DESC SequenceDesc = {};
+			SequenceDesc.fTrackPerSec = SequeceJson["TrackPerSec"];
+			SequenceDesc.fDuration = SequeceJson["Duration"];
+
+			vector<SEQUENCE_ITEM_INFO> ItemInfos;
+			vector<SEQUENCE_ITEM_DATA*> ItemDatas;
+
+			for (auto& ItemJson : SequeceJson["Item"])
+			{
+				// Info
+				SEQUENCE_ITEM_INFO Info = {};
+				Info.fStartFrame = ItemJson["FrameStart"];
+				Info.fEndFrame = ItemJson["FrameEnd"];
+				Info.strItemTag = StringToWString(ItemJson["Tag"]);
+
+				// Data
+				_string strItemType = ItemJson["Type"];
+				if ("Actor" == strItemType)
+				{
+
+				}
+				else if ("Scene" == strItemType)
+				{
+					Info.eType = ITEM_TYPE::SCENE;
+					Load_Scene(ItemJson, ItemDatas);
+				}
+
+				ItemInfos.push_back(Info);
+			}
+
+			m_pGameInstance->Register_Sequence(StringToWString(fileName), ItemInfos, ItemDatas, &SequenceDesc);
+
+			InputFile.close();
+		}
+	}
+}
+
+void CParser::Load_Scene(json& ItemJson, vector<SEQUENCE_ITEM_DATA*>& ItemDatas)
+{
+	vector<SCENE_CAMERA_FRAME> Frames;
+
+	for (auto& FrameJson : ItemJson["Frame"])
+	{
+		SCENE_CAMERA_FRAME Frame = {};
+		Frame.fStartFrame = FrameJson["Start"];
+		Frame.fFovy = FrameJson["FOV"];
+		Frame.isLerp = FrameJson["Lerp"];
+
+		Frame.vQuaternion = _float4(FrameJson["Quaternion"][0], FrameJson["Quaternion"][1], FrameJson["Quaternion"][2], FrameJson["Quaternion"][3]);
+		Frame.vPosition = _float3(FrameJson["Position"][0], FrameJson["Position"][1], FrameJson["Position"][2]);
+
+		Frames.push_back(Frame);
+	}
+
+	SQ_CAMERA_DATA* SceneData = new SQ_CAMERA_DATA(ItemJson["FrameStart"], ItemJson["FrameEnd"], ItemJson["TrackPerSec"], Frames);
+	ItemDatas.push_back(SceneData);
 }
 
 HRESULT CParser::Initialize()

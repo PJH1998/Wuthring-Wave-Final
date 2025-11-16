@@ -62,6 +62,8 @@ void CAugustaAirFly::OnEnter(void* pArg)
 	m_vGravity = { 0.f, -9.8f, 0.f };   // '활공용 중력'
 	m_fDrag = 0.98f;					// '공기 저항' (속도 감쇄)
 	
+	// 10. SFX 설정.
+	m_pAugusta->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
 }
 
 void CAugustaAirFly::OnUpdate(_float fTimeDelta)
@@ -101,6 +103,8 @@ void CAugustaAirFly::OnExit()
 
 	// Blending 정보 초기화
 	m_GpuBlendInfo = {};
+
+	m_pAugusta->End_SFX();
 }
 
 void CAugustaAirFly::Handle_Input()

@@ -38,7 +38,7 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
     _string strBoneName = "WeaponProp02";
     m_iPartType = CAugusta::PARTTYPE::PART_SKILLWEAPON;
     m_pAugusta->PartActivate(m_iPartType, true);
-    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+    m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
     m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 
 	m_pAugusta->Set_Gravity(false);
@@ -52,6 +52,7 @@ void CAugustaGroundBurst::OnEnter(void* pArg)
 	CGameInstance::GetInstance()->Change_TimeRate(TEXT("Timer_60"), 1.f, 0.1f); // Dodge 시간 동안 느리게하기?
 	m_pAugusta->Play_Action(TEXT("Action_Augusta_Burst01"));
 	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 	
 }
 
@@ -82,7 +83,7 @@ void CAugustaGroundBurst::OnExit()
     m_pAugusta->PartActivate(m_iPartType, false);
     m_iPartType = CAugusta::PARTTYPE::TYPE_END;
 	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
-
+	m_pAugusta->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE));
 }
 
 void CAugustaGroundBurst::Handle_Input()
@@ -152,7 +153,7 @@ void CAugustaGroundBurst::Check_StateTransition(_float fTimeDelta)
         if (eBurstType == EAugustaBurstType::BURST01)
         {
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaBurstType::BURST_STAND);
-			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
             //m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaBurstType::BURST_STAND));
             return;
         }

@@ -39,8 +39,6 @@ void CAugustaHit::OnEnter(void* pArg)
     m_pAugusta->Set_Gravity(true);
 
 	// 7. Hit State에 진입했을때만? 피를 깎아야하나?
-
-	
 }
 
 void CAugustaHit::OnUpdate(_float fTimeDelta)
@@ -207,7 +205,7 @@ void CAugustaHit::Check_StateTransition(_float fTimeDelta)
 				}
 				else
 				{
-					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1; // Idle 전용 일어나는 모션.
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01; // Idle 전용 일어나는 모션.
 					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
 					return;
 				}

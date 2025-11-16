@@ -75,6 +75,7 @@ public:
 	UI_ANIM_DESC*			Find_Animation(_uint iAnimIndex);
 
 	UI_ANIM_DESC*			Get_CurAnimation() { return m_pCurAnimDesc; }
+	//_bool					Get_IsLastFrame() { return m_pCurAnimDesc->vecKeyFrames.back().iKeyframeIndex == (static_cast<_uint>(m_fElapsedTime / fSingleFrameTime);) }
 
 
 	UI_ANIM_KEYFRAME_DESC*	Get_CalcedAnimKeyframeDesc() { return &m_tCalcedKeyFrameDesc; }
@@ -87,7 +88,8 @@ private:
 
 	_float3					Calc_Lerp_Position_CMR(_uint iKeyframeIndex);				// Ű�������� ������ ���� �ִϸ��̼��� ���� position�� �´� ���� ��ȯ (catmull-rom ����)
 
-	void					Update_Animation();
+	void					Update_Animation_Calculate(); 
+	void					Update_Animation_BindShader();
 
 private:
 	const _uint				m_iKeyFrameRate = 60;

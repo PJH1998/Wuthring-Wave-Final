@@ -251,5 +251,4 @@ void CMapObject::Free()
 		Safe_Release(pModel);
 
 	m_pModelComArray.clear();
-
 }

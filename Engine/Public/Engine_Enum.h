@@ -31,6 +31,8 @@ namespace Engine
 
 	enum class SFX_TYPE { SSAO, BLOOM, BLUR, DOF, RADIAL, MOTION, END};
 
+	enum class SFX_TOGGLE { BLUR = SFX_TYPE::BLUR, DOF = SFX_TYPE::DOF, RADIAL = SFX_TYPE::RADIAL, MOTION = SFX_TYPE::MOTION, END };
+
 	// BroadPhase Layer
 	enum class BPLAYER { NONE, NON_MOVE, MOVE, DEBRIS, SENSOR, END };
 	// Body Shape
@@ -39,5 +41,8 @@ namespace Engine
 	enum class COLLIDE_STATE { ENTER, DURING, REMOVE, END};
 
 	enum class EFFECT_TYPE { PARTICLE, MESH, TRAIL, RECT, DECAL, END };
+
+	// Sequence
+	enum class ITEM_TYPE { ACTION, SCENE, SOUND, SFX, ACTOR, EFFECT, END };
 }
 #endif // Engine_Enum_h__

@@ -63,6 +63,11 @@ const vector<vector<_string>>& CGameSystem::Load_CSV(const _char* pFilePath)
 	return m_pParser->Load_CSV(pFilePath);
 }
 
+void CGameSystem::Load_Sequence(const _char* pFolderPath)
+{
+	m_pParser->Load_Sequence(pFolderPath);
+}
+
 void CGameSystem::Ready_Prototype_Map(const _char* pFilePath, LEVEL eLevel)
 {
 	return m_pParser->Ready_Prototype_Map(pFilePath, eLevel);
@@ -83,9 +88,9 @@ void CGameSystem::Create_Effect(const string& strFolderPath, LEVEL eLevel)
 	return m_pParser->Create_Effect(strFolderPath, eLevel);
 }
 
-void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel)
+void CGameSystem::Create_Prefab(const string& strFolderPath, LEVEL eLevel, _int PoolingNum)
 {
-	return m_pParser->Create_Prefab(strFolderPath, eLevel);
+	return m_pParser->Create_Prefab(strFolderPath, eLevel, PoolingNum);
 }
 
 void CGameSystem::Load_EffectTexture_FromFolder(const string& strFolderPath, LEVEL eLevel)
@@ -149,6 +154,11 @@ CUI_Text* CGameSystem::Create_FontToScreen(_float2 vScreenPos, _wstring strText,
 	return m_pUI_FontPreset->Create_FontToScreen(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
 }
 
+CUI_Text* CGameSystem::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	return m_pUI_FontPreset->Create_FontToScreen_Alpha(vScreenPos, strText, eColorType, fFontScale, strUIName, strFontTag);
+}
+
 CCustom_UI* CGameSystem::Find_RootUI(_wstring strName)
 {
 	return m_pUI_ControlHelper->Find_RootUI(strName);
@@ -167,6 +177,45 @@ HRESULT CGameSystem::HUD_FadeOut()
 HRESULT CGameSystem::HUD_FadeIn()
 {
 	return m_pUI_ControlHelper->HUD_FadeIn();
+}
+
+//HRESULT CGameSystem::HUD_FadeOut_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeOut_BossHPBar();
+//}
+//HRESULT CGameSystem::HUD_FadeIn_BossHPBar()
+//{
+//	return m_pUI_ControlHelper->HUD_FadeIn_BossHPBar();
+//}
+
+void CGameSystem::HUD_Bind_BossStatus(_wstring strUIBosssName, const _char* pMonsterKey, _float* pCurBossHP, _float* pCurBossSA, _bool* pIsGroggy, _float* pGroggyLeftRatio)
+{
+	return m_pUI_ControlHelper->HUD_Bind_BossStatus(strUIBosssName, pMonsterKey, pCurBossHP, pCurBossSA, pIsGroggy, pGroggyLeftRatio);
+}
+
+void CGameSystem::HUD_Toggle_BossStatusUI(_bool isOn)
+{
+	return m_pUI_ControlHelper->HUD_Toggle_BossStatusUI(isOn);
+}
+
+//void CGameSystem::Toggle_InteractUI(_bool isOn, _wstring strText)
+//{
+//	m_pUI_ControlHelper->Toggle_InteractUI(isOn, strText);++
+//}
+
+void CGameSystem::Show_InteractUI(_wstring strText)
+{
+	m_pUI_ControlHelper->Show_InteractUI(strText);
+}
+
+void CGameSystem::Hide_InteractUI(_bool isPressedAs)
+{
+	m_pUI_ControlHelper->Hide_InteractUI(isPressedAs);
+}
+
+_bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
+{
+	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
@@ -202,6 +251,10 @@ void CGameSystem::Clear_TriggerCallBack()
 		TriggerVector.second.clear();
 	m_TriggerEvents.clear();
 }
+const _tchar* CGameSystem::Get_SonoroText()
+{
+	return m_pSonoro_Manager->Get_SonoroText();
+}
 #pragma endregion
 
 
@@ -221,9 +274,13 @@ void CGameSystem::Update(_float fTimeDelta)
 	m_pSonoro_Manager->Update(fTimeDelta);
 }
 
-void CGameSystem::Change_Sonoro(_bool IsSonoro)
+_bool  CGameSystem::Change_Sonoro(_bool IsSonoro)
 {
-	m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+	return m_pSonoro_Manager->Change_Sonoro(IsSonoro);
+}
+_bool CGameSystem::IsSonoro()
+{
+	return m_pSonoro_Manager->IsSonoro();
 }
 #pragma endregion
 
@@ -238,10 +295,8 @@ MONSTER_INFO* CGameSystem::Get_MonsterInfo(const _char* pMonsterKey) const
 }
 #pragma endregion
 
-void CGameSystem::Free()
+void CGameSystem::Release_System()
 {
-	__super::Free();
-
 	Safe_Release(m_pParser);
 	Safe_Release(m_pFactory);
 
@@ -252,4 +307,11 @@ void CGameSystem::Free()
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
 	Safe_Release(m_pMonsterTable);
+
+	Release();
+}
+
+void CGameSystem::Free()
+{
+	__super::Free();
 }

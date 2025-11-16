@@ -74,6 +74,7 @@ private:
 	MAP_LOAD InstanceDesc = {};
 	_uint m_iSaveIndex = {};
 	_float4 m_vDiffuseColor = {};
+	_float m_fTotalTime = {};
 public:
 	static CEdit_MapObject_Instance* Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual CGameObject* Clone(void* pArg)override;

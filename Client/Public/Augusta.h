@@ -33,6 +33,7 @@ private:
 		EAugustaDashType m_eDashType = EAugustaDashType::END;
 		EAugustaIdleType  m_eIdleType = EAugustaIdleType::END;
 		EAugustaRunType m_eRunType = EAugustaRunType::END;
+		EAugustaSprintType m_eSprintType = EAugustaSprintType::END;
 		EAugustaLandType m_eLandType = EAugustaLandType::END;
 
 		EAugustaAttackType m_eAttackType = EAugustaAttackType::END;
@@ -67,6 +68,7 @@ private:
 			// Land
 			m_eIdleType = EAugustaIdleType::END;
 			m_eRunType = EAugustaRunType::END;
+			m_eSprintType = EAugustaSprintType::END;
 			m_eDashType = EAugustaDashType::END;
 			m_eLandType = EAugustaLandType::END;
 			m_eDodgeType = EAugustaDodgeType::END;
@@ -179,6 +181,9 @@ public:
 #pragma region 4. EVENT
 public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
+	virtual void Calc_ChangeTimer(_float fTimeDelta) override; // Timer 계산
+	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
+	virtual void Render_Damage(const HIT_DESC* pDesc) override; 
 #pragma endregion
 
 

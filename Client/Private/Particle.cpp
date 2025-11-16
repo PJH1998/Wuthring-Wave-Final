@@ -33,6 +33,10 @@ HRESULT CParticle::Initialize_Clone(void* pArg)
     m_vColor = m_tDesc.vColor;
     m_vLifeTime = m_tDesc.vLifeTime;
 
+	m_iMaskFlag = m_tDesc.iMaskFlag;
+	m_IsRoot = m_tDesc.IsRootOn;
+	m_IsPivot = m_tDesc.IsPivot;
+
     _vector Pos = XMVectorSet(m_tDesc.vPos.x, m_tDesc.vPos.y, m_tDesc.vPos.z, 1.f);
 
     m_pTransformCom->Set_State(STATE::POSITION, Pos);
@@ -63,6 +67,9 @@ void CParticle::Update(_float fTimeDelta)
 
    m_vLifeTime.x += fTimeDelta;
 
+   if (m_IsRoot)
+	   Update_Root_Transform();
+
    if (m_vLifeTime.x >= m_vLifeTime.y)
    {
        m_isActivate = false;
@@ -92,23 +99,79 @@ void CParticle::Render()
 
 void CParticle::Reset(const _fmatrix& WorldMatrix, void* pArg)
 {
-    if(_bool* IsActivate = static_cast<_bool*>(pArg))
-        m_isActivate = *IsActivate;
+	EFFECT_INFO* pDesc = static_cast<EFFECT_INFO*>(pArg);
 
-     m_vLifeTime.x = 0.f;
-     Root_Transform(WorldMatrix);
+	m_isActivate = pDesc->IsActive;
+
+	//기본 초기화
+	m_vLifeTime.x = 0.f;
+
+	if (m_isActivate && !m_IsRoot)
+	{
+		//뼈에 안붙을 얘면 프리팹이 계산해서 던져준 월드매트릭스 그대로 사용해도 됨.
+		Default_Transform(WorldMatrix);
+	}
+	else if (m_isActivate && m_IsRoot)
+	{
+		//뼈에 붙을 얘면 프리팹이 넘겨준 정보 토대로 업데이트에서 갱신해주는 작업이 필요.
+		m_pBoneMatrixPtr = pDesc->pBoneMatrixPtr;
+		m_pObjectMatrixPtr = pDesc->pObjectMatrixPtr;
+		m_OffsetMatrix = WorldMatrix;
+	}
+
      m_pVIBufferCom->Reset_UAV(m_pComputeShader);
 }
 
-void CParticle::Root_Transform(_fmatrix WorldMatrix)
+void CParticle::Default_Transform(_fmatrix WorldMatrix)
 {
-    _vector vPos =  XMVectorSetW(WorldMatrix.r[3], 1.f);
+	if (!m_IsRoot)
+	{
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
 
-    m_pTransformCom->Set_State(STATE::POSITION, vPos);
+		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+	}
+	else if(m_IsPivot)
+	{
+		_vector vLook = XMVectorSetW(WorldMatrix.r[2], 0.f);
+		_vector vPos = XMVectorSetW(WorldMatrix.r[3], 1.f);
+
+		m_pTransformCom->Set_State(STATE::POSITION, vPos);
+
+		PARTICLE_DefaultCB Desc = {};
+		XMStoreFloat3(&Desc.vPivot, vLook);
+		m_pVIBufferCom->Bind_CS_Option(&Desc);
+	}
+
+	//계속 붙으면서 Pivot 갱신도 필요하다면..?허허
 }
 
 void CParticle::Bind_CS_SpriteInfo()
 {
+}
+
+void CParticle::Update_Root_Transform()
+{
+	if (m_pBoneMatrixPtr == nullptr)
+		return;
+
+	_matrix OffsetMatrix = m_OffsetMatrix;
+
+	_float4x4 ObjectMatrix = *m_pObjectMatrixPtr;
+	_float4x4 BoneMatrix = *m_pBoneMatrixPtr;
+
+	_matrix SpawnMatrix = XMLoadFloat4x4(&BoneMatrix) * XMLoadFloat4x4(&ObjectMatrix);
+
+	_vector vScale = {};
+	_vector vPos = {};
+	_vector vRot = {};
+	XMMatrixDecompose(&vScale, &vRot, &vPos, SpawnMatrix);
+
+	//뼈 회전 안먹어도 될거 같음.
+	_matrix OffsetSpawnMatrix =/* XMMatrixRotationQuaternion(vRot) * */XMMatrixTranslationFromVector(vPos);
+
+	XMStoreFloat4x4(&m_ComBindMatrix,
+		m_pTransformCom->Get_WorldMatrix() *
+		OffsetMatrix * OffsetSpawnMatrix);
 }
 
 HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
@@ -134,9 +197,16 @@ HRESULT CParticle::Ready_Components(PARTICLE_DESC& Desc)
 
 HRESULT CParticle::Bind_ShaderResources()
 {
-
-    if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
-        return E_FAIL;
+	if (!m_IsRoot)
+	{
+		if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+			return E_FAIL;
+	}
+	else
+	{
+		if (FAILED(m_pShaderCom->Bind_Matrix("g_WorldMatrix", &m_ComBindMatrix)))
+			return E_FAIL;
+	}
 
     if (FAILED(m_pShaderCom->Bind_Matrix("g_ViewMatrix", m_pGameInstance->Get_TransformState_Float4x4(D3DTS::VIEW))))
         return E_FAIL;
@@ -152,6 +222,10 @@ HRESULT CParticle::Bind_ShaderResources()
 
 	if (FAILED(m_pShaderCom->Bind_Value("g_vColor", &m_vColor, sizeof(_float4))))
 		return E_FAIL;
+
+	if (FAILED(m_pShaderCom->Bind_Value("g_MaskFlag", &m_iMaskFlag, sizeof(_int))))
+		return E_FAIL;
+
 
     if (m_IsSprite)
     {

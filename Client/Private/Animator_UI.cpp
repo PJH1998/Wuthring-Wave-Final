@@ -39,6 +39,8 @@ void CAnimator_UI::Update(_float fTimeDelta)
         m_fElapsedTime += fTimeDelta;
     else
         m_fElapsedTime = 0.f;
+
+	Update_Animation_Calculate();
 }
 
 void CAnimator_UI::Late_Update(_float fTimeDelta)
@@ -48,7 +50,7 @@ void CAnimator_UI::Late_Update(_float fTimeDelta)
 
 HRESULT CAnimator_UI::Render()
 {
-    Update_Animation();
+	Update_Animation_BindShader();
     return S_OK;
 }
 
@@ -227,12 +229,15 @@ _float3 CAnimator_UI::Calc_Lerp_Position_CMR(_uint iKeyframe)
     XMStoreFloat3(&vResult, vResultPos);
 
     return vResult;
-}
+}	
 
-void CAnimator_UI::Update_Animation()
+void CAnimator_UI::Update_Animation_Calculate()
 {
     // if target doesnt have selected animation, binds default value to shader.
     // if not, it will be affected by pre-played animations.
+	if (m_pOwner->Get_UIDesc().strUIName == L"Interact_Normal")
+		int i = 10;
+
 
     if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
         return;
@@ -257,13 +262,15 @@ void CAnimator_UI::Update_Animation()
     if (m_pCurAnimDesc == nullptr)
     {
 		//_float fCombinedAlpha = (pParentAnimator)? pParentCombinedDesc->fAlpha * tDesc.fAlpha : tDesc.fAlpha;
-		_float fCombinedAlpha = m_tCombinedKeyFrameDesc.fAlpha;
-        pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
-        pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
-        pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
-        pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
 
-        return;
+		//_float fCombinedAlpha = m_tCombinedKeyFrameDesc.fAlpha;
+        //pTargetShader->Bind_Value("g_AlphaStrength", &fCombinedAlpha, sizeof(fCombinedAlpha));
+        //pTargetShader->Bind_Value("g_ScreenLT", &tDesc.vScreenLT, sizeof(tDesc.vScreenLT));
+        //pTargetShader->Bind_Value("g_ScreenRB", &tDesc.vScreenRB, sizeof(tDesc.vScreenRB));
+        //pTargetShader->Bind_Value("g_BlendToOuterWidth", &tDesc.vBlendToOuterWidth, sizeof(tDesc.vBlendToOuterWidth));
+
+		m_tCalcedKeyFrameDesc = UI_ANIM_KEYFRAME_DESC{};
+		return; // 셰이더 바인딩 코드 제거
     }
 
 
@@ -397,13 +404,29 @@ void CAnimator_UI::Update_Animation()
 	if (m_pOwner->Get_UIDesc().strUIName == L"Icon_Rover")
 		int i = 10;
 
-	pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
-	pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
-	pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
-	pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 
+	//pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));	//
+	//pTargetShader->Bind_Value("g_ScreenLT", &vResultScreenLT, sizeof(vResultScreenLT));
+	//pTargetShader->Bind_Value("g_ScreenRB", &vResultScreenRB, sizeof(vResultScreenRB));
+	//pTargetShader->Bind_Value("g_BlendToOuterWidth", &vResultOuterWidth, sizeof(vResultOuterWidth));
 	pOwnerTransformCom->Set_WorldMatrix(matTransform);
 }
+
+void CAnimator_UI::Update_Animation_BindShader()
+{
+	if (!(m_pOwner && m_pOwner->Get_Component(L"Com_Shader")))		// rootUI doesnt need animator.
+		return;
+
+	CShader* pTargetShader = dynamic_cast<CShader*>(m_pOwner->Get_Component(L"Com_Shader"));
+	if (!pTargetShader)
+		return;
+
+	pTargetShader->Bind_Value("g_AlphaStrength", &m_tCombinedKeyFrameDesc.fAlpha, sizeof(m_tCombinedKeyFrameDesc.fAlpha));
+	pTargetShader->Bind_Value("g_ScreenLT", &m_tCalcedKeyFrameDesc.vScreenLT, sizeof(m_tCalcedKeyFrameDesc.vScreenLT));
+	pTargetShader->Bind_Value("g_ScreenRB", &m_tCalcedKeyFrameDesc.vScreenRB, sizeof(m_tCalcedKeyFrameDesc.vScreenRB));
+	pTargetShader->Bind_Value("g_BlendToOuterWidth", &m_tCalcedKeyFrameDesc.vBlendToOuterWidth, sizeof(m_tCalcedKeyFrameDesc.vBlendToOuterWidth));
+}
+
 
 CAnimator_UI* CAnimator_UI::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {

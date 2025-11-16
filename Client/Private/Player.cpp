@@ -141,6 +141,7 @@ void CPlayer::Update(_float fTimeDelta)
 	// 3. Rigidbody Update => Camera 
 	m_pRigidbodyCom->Update_Rigidbody(m_pTransformCom->Get_WorldMatrix(), fTimeDelta);
 
+	
 	// 4. Target Sorting
 	Sorting_Target();
     
@@ -148,6 +149,7 @@ void CPlayer::Update(_float fTimeDelta)
     Toggle_LockOn();
 
 	m_TargetTransforms.clear();
+
 #ifdef _DEBUG
 	GUI_Teleport();
 #endif
@@ -359,14 +361,21 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	{
 		// 이전 캐릭터 비활성화
 		m_Characters[m_iCurrentCharacterIdx]->SetActivate(false);
-		m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
+		m_Characters[m_iCurrentCharacterIdx]->Remove_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE)); // 혹시 모르니.
+		//m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), false); // 끄기.
 		m_iPrevCharacterIdx = m_iCurrentCharacterIdx;
 	}
 
 	// 2. 새 캐릭터 활성화
 	m_iCurrentCharacterIdx = eNextCharacter;
 	m_Characters[m_iCurrentCharacterIdx]->SetActivate(true);
-	m_Characters[m_iCurrentCharacterIdx]->Collider_Active(TEXT("Body"), true); // 콜라이더 활성화
+	
+	// Change Time 부여를 위한 Condition 추가
+	m_Characters[m_iCurrentCharacterIdx]->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::CHANGE));
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeTimer();
+	
+	
+
 
 	// 3. 새 캐릭터의 위치를 Player의 현재 위치로 동기화 (Character.cpp의 Sync_Transform_FromPlayer 사용)
 	//    - Player의 WorldMatrix는 이전 캐릭터로부터 이미 동기화되어 있음 (Sync_Transform_FromCharacter에서).
@@ -384,7 +393,7 @@ void CPlayer::Change_Character(CHARACTERTYPE eNextCharacter, _float fTimeDelta)
 	m_Characters[m_iCurrentCharacterIdx]->TransitionState_FromPlayer(CHARACTER_TRANSITIONTYPE::IDLE);
 	
 
-	
+	m_Characters[m_iCurrentCharacterIdx]->Bind_ChangeEffect();
 
 	// 6. 협주 확인. Ensemble
 	// 이전 캐릭터의 협주게이지 확인 => Get_HarmonyGauge
@@ -438,10 +447,12 @@ void CPlayer::OnCollider_During(_uint iLayer, void* pDesc, const ContactManifold
         return;
 	
 	{
+		
 		lock_guard<mutex> lock(m_Mutex);
 		// 캐스팅 타입이 안맞아서 터질 수 있으므로 정확한 Rule을 지켜서 Desc을 설정해야함.
 		// Vector 컨테이너에 넣어줄 거면 
 		m_TargetTransforms.push_back(pTargetTransform);
+		m_pTargetTransform = nullptr; 
 	}
 }
 
@@ -457,6 +468,12 @@ void CPlayer::OnCollider_Enter(_uint iLayer, void* pDesc, const ContactManifold&
 
 	if (nullptr == m_Characters[m_iCurrentCharacterIdx])
 		return;
+
+#ifdef _DEBUG
+	cout << "Player Crash" << endl;
+#endif // _DEBUG
+
+
 
 	// 1. Parry일경우 우선순위 높음
 	CALLBACK_CLIENT pClientDesc = *static_cast<CALLBACK_CLIENT*>(pDesc);
@@ -524,6 +541,7 @@ void CPlayer::Sorting_Target()
 
 void CPlayer::Toggle_LockOn()
 {
+
 	// 1. 락온 키 입력 (상태 전환)
 	if (m_pInputControllerCom->Check_AnyInput(ENUM_CLASS(KEYINPUT::WB), KEYSTATE::DOWN))
 	{
@@ -556,7 +574,18 @@ void CPlayer::Toggle_LockOn()
 		m_Characters[m_iCurrentCharacterIdx] : nullptr;
 
 
-	// 4. 락온상태라면?
+	// 4. 락온 해제.
+	if (nullptr != m_Characters[m_iCurrentCharacterIdx])
+	{
+		if (m_Characters[m_iCurrentCharacterIdx]->Check_AnyCondition(ENUM_CLASS(CHARACTER_CONDITION::CUTSCENE)))
+		{
+			// 락온을 해제해라.
+			m_IsLockOn = false;
+			m_pLockOnTargetTransform = nullptr;
+		}
+	}
+
+	// 5. 락온상태라면?
 	if (m_IsLockOn)
 	{
 		// 하드 락온
@@ -573,11 +602,11 @@ void CPlayer::Toggle_LockOn()
 	}
 
 
-
-
 	// 6. 카메라 업데이트.
 	m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
 
+	// 7. LockOn 초기화?
+	m_pTargetTransform = nullptr;
 	/* if (nullptr == m_pTargetTransform)
 	 {
 		 if (m_IsLockOn)
@@ -597,7 +626,6 @@ void CPlayer::Toggle_LockOn()
 	 }
 	 m_pSpringCamera->Lock_On(pFinalTarget, m_IsLockOn);
 	 */
-
 
     //m_pTargetTransform = nullptr;
 }
@@ -667,7 +695,16 @@ HRESULT CPlayer::Ready_Players(const PLAYER_DESC* pDesc)
 		break;
         case CHARACTERTYPE::GALBRENA:
 		{
-			
+			CharacterDesc = pDesc->PlayerSpecs[CHARACTERTYPE::GALBRENA].CharacterDesc;
+			CharacterDesc.pOwner = this;
+			pPlayer = dynamic_cast<CCharacter*>(m_pGameInstance->Clone_Prototype(
+				ENUM_CLASS(m_eCurLevel),
+				pDesc->PlayerSpecs[i].strActorTag,
+				PROTOTYPE::GAMEOBJECT,
+				&CharacterDesc));
+
+			ASSERT_CRASH(pPlayer);
+			m_Characters[i] = pPlayer;
 		}
             break;
 	
@@ -694,7 +731,7 @@ HRESULT CPlayer::Ready_Components(const PLAYER_DESC* pDesc)
     RigidbodyDesc.eShape = SHAPE::BOX;
     RigidbodyDesc.eType = EMotionType::Kinematic;
     RigidbodyDesc.iLayer = ENUM_CLASS(COLLISIONLAYER::DETECT);
-    RigidbodyDesc.vExtent = _float3(200.f, 100.f, 200.f);
+    RigidbodyDesc.vExtent = _float3(30.f, 10.f, 30.f);
     XMStoreFloat3(&RigidbodyDesc.vPos, m_pTransformCom->Get_State(STATE::POSITION));
 
     if (FAILED(Add_Component(ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_Component_Rigidbody"),

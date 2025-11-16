@@ -14,7 +14,10 @@ HRESULT CBloom::Initialize(_uint iWinSizeX, _uint iWinSizeY)
 
 	m_iWinSizeX = iWinSizeX;
 	m_iWinSizeY = iWinSizeY;
+
 	m_iBloomWeight = 1;
+
+	m_fBoolIntensity = 0.25f;
 
     return S_OK;
 }
@@ -35,7 +38,6 @@ HRESULT CBloom::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 		if (FAILED(m_pGameInstance->Begin_RCS(TEXT("RCS_DOWNSAMPLE"), iDownSizeX, iDownSizeY, i)))
 			CRASH("Failed RCS_DOWNSAMPLE");
 	}
-
 
 	for (_int j = 2; j >= 0; --j)
 	{
@@ -70,7 +72,7 @@ HRESULT CBloom::Render(CVIBuffer_Rect* pVIBuffer, CShader* pShader)
 
 		BLOOM_UP_DATA Data = {};
 		Data.vSize = _float2(iUpSizeX, iUpSizeY);
-		Data.fIntensity = (1.f - static_cast<_float>((j + 1)) * m_fIntensity);
+		Data.fIntensity = (1.f - static_cast<_float>((j + 1)) * m_fBoolIntensity);
 
 		if (FAILED(m_pGameInstance->Add_BufferData(TEXT("RCS_UPSAMPLE_BLOOM"), "BLOOM_DATA", reinterpret_cast<void*>(&Data), sizeof(BLOOM_UP_DATA))))
 			return E_FAIL;

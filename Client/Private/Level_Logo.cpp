@@ -21,6 +21,7 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameSystem->Clone_MapObjects(m_eCurLevel);
 	Ready_Layer_LogoMaleRover();
 	Ready_Layer_LogoFemaleRover();
+	Ready_UI();
 	Ready_Camera();
 
 	LIGHT_DESC LightDesc{};
@@ -33,8 +34,11 @@ HRESULT CLevel_Logo::Initialize()
 	m_pGameInstance->SetUp_ShadowLight(TEXT("Test"));
 	m_pGameInstance->SetUp_CameraNF();
 
-	m_pGameInstance->SettingFog(false);
+	m_pGameInstance->SettingFog(true);
 	m_pGameInstance->Set_LUT_Index(1);
+
+	m_pGameInstance->Play_Sequence(TEXT("Logo_Start"));
+
     return S_OK;
 }
 
@@ -57,6 +61,9 @@ void CLevel_Logo::Update(_float fTimeDelta)
 	//	CHANGE_LEVEL_EVENT event{ LEVEL::TEST_UI, true };
 	//	m_pGameInstance->Publish(ENUM_CLASS(STATIC::STATIC), TEXT("Event_Change_Level"), event);
 	//}
+
+	if (m_pGameInstance->Get_DIMouseState(MOUSEKEYSTATE::LB) == KEYSTATE::DOWN)
+		m_pGameInstance->Play_Sequence(TEXT("Logo_Enter"));
 }
 
 void CLevel_Logo::Render()
@@ -76,11 +83,11 @@ void CLevel_Logo::Ready_Camera()
 	CameraDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CameraDesc.fMouseSensor = 0.004f;
 	
-	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"), ENUM_CLASS(LEVEL::LOGO), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
+	if (FAILED(m_pGameInstance->Add_Camera(ENUM_CLASS(LEVEL::LOGO), TEXT("Scene"), ENUM_CLASS(LEVEL::STATIC), TEXT("Prototype_GameObject_SceneCamera"), &CameraDesc)))
 		CRASH("Add Camera");
 
-	if (FAILED(m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"))))
-		CRASH("Change Camera");
+	//if (FAILED(m_pGameInstance->Change_MainCamera(ENUM_CLASS(LEVEL::LOGO), TEXT("Camera_Scene"))))
+	//	CRASH("Change Camera");
 }
 
 void CLevel_Logo::Ready_Layer_LogoMaleRover()
@@ -117,6 +124,28 @@ void CLevel_Logo::Ready_Layer_LogoFemaleRover()
 	cout << "Level Female Rover" << endl;
 }
 
+void CLevel_Logo::Ready_UI()
+{
+	// UI
+	const   _uint       iDestLevel = ENUM_CLASS(m_eCurLevel);
+	const _wstring		strLayertag_UI = L"Layer_Custom_UI";
+	const _wstring		strPrototypeTag_UI[] = {
+		 L"Prototype_GameObject_Custom_UI_Container_Logo"
+	};
+	for (auto& strPrototypeTag : strPrototypeTag_UI)
+	{
+		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_Logo", pTargetUI)))
+			CRASH("Failed to Add RootUI to UI_Manager.");
+		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
+			CRASH("Failed to Add RootUI to Object_Manager.");
+	}
+
+	cout << "[Level_Logo::Ready_UI] Logo UI Loaded!" << endl;
+	// _UI
+}
+
+
 CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
     CLevel_Logo* pInstance = new CLevel_Logo(pDevice, pContext);
@@ -132,6 +161,8 @@ CLevel_Logo* CLevel_Logo::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pCo
 
 void CLevel_Logo::Free()
 {
+	//m_pGameInstance->Clear_RootUI();
+
     __super::Free();
 
 	Safe_Release(m_pGameSystem);

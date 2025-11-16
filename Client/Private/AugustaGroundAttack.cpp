@@ -41,7 +41,7 @@ void CAugustaGroundAttack::OnEnter(void* pArg)
 
 	_string strBoneName = "WeaponProp02";
 	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
-	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
 
@@ -144,7 +144,7 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
     // 1. 현재 애니메이션 재생
     CCharacterState::Play_Animation(m_pAugusta, fTimeDelta, m_fAnimationScale);
@@ -160,7 +160,7 @@ void CAugustaGroundAttack::Update_AttackAnimations(_float fTimeDelta)
     // Attack State에 해당하는 경우 모두 Animation이 존재.
     m_pAugusta->Play_PartAnimation(
         m_iPartType,
-        m_Animations[m_iCurrentAnimIdx].strAnimName,
+        m_Animations.at(m_iCurrentAnimIdx).strAnimName,
         fTimeDelta, nullptr
     );
 }
@@ -196,19 +196,12 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
 		if (SKILL_STATE::READY == m_pAugusta->Use_Skill("Attack_HeavyHack"))
 		{
 			m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
-			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 			m_fAttackPressTime = 0.f;
 			return;
 		}
     }
 
-    /*if (m_States[HEAVY_ATTACK_PENDING] && IsEscapePossible)
-    {
-        m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK_HEAVYHACK);
-        m_fAttackPressTime = 0.f;
-        return;
-    }*/
-    
     // 1. 기본 공상태에서 Heavy_Attack_Pending이 아닌 경우?
     if (eAttackType >= EAugustaAttackType::ATTACK01 && eAttackType < EAugustaAttackType::ATTACK04)
     {
@@ -221,7 +214,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
         if (m_IsNextAttackInput && IsEscapePossible)
         {
             m_iComboCount++;
-			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName); // 애니메이션 초기화
+			m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName); // 애니메이션 초기화
             m_iCurrentAnimIdx = ENUM_CLASS(EAugustaAttackType::ATTACK01) + m_iComboCount;
             m_IsNextAttackInput = false;
             m_fAttackPressTime = 0.f; // Attack02나 03으로 전환되므로 PressTime 초기화
@@ -266,7 +259,7 @@ void CAugustaGroundAttack::Check_StateTransition(_float fTimeDelta)
     //공격 애니메이션 끝나고 추가 입력 없으면 Idle로 => 가장 우선순위 낮음.
     if (m_IsAnimationEnd)
     {
-        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+        m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
         m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
         m_IsNextAttackInput = false;
         return;

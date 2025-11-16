@@ -41,7 +41,7 @@ void CAugustaGroundQTE::OnEnter(void* pArg)
 
 	_string strBoneName = "WeaponProp02";
 	m_pAugusta->PartActivate(m_iPartType, true); // 파츠 변경. // Volume Activate는 Notify로..
-	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations[m_iCurrentAnimIdx].strAnimName);
+	m_pAugusta->Clear_PartAnimation(m_iPartType, m_Animations.at(m_iCurrentAnimIdx).strAnimName);
 	m_pAugusta->Set_SocketMatrixToParts(m_iPartType, strBoneName);
 	m_pAugusta->Set_Gravity(true);
 
@@ -85,7 +85,7 @@ void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 {
 	// 0. 몬스터와의 거리 계산 (최우선)
 	m_fRootMotionScale = m_pAugusta->Calculate_RootMotionScale();
-	m_fAnimationScale = m_Animations[m_iCurrentAnimIdx].fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
+	m_fAnimationScale = m_Animations.at(m_iCurrentAnimIdx).fRootMotionRate * m_fRootMotionScale; // 거리 계산에 따른 Animation Scale 조절.
 
 	if (m_fAnimationScale > 1.f)
 		m_fAnimationScale = 1.f;
@@ -97,7 +97,7 @@ void CAugustaGroundQTE::Update_QTEAnimation(_float fTimeDelta)
 	// 2. 파츠 애니메이션 실행.
 	m_pAugusta->Play_PartAnimation(
 		m_iPartType,
-		m_Animations[m_iCurrentAnimIdx].strAnimName,
+		m_Animations.at(m_iCurrentAnimIdx).strAnimName,
 		fTimeDelta, nullptr
 	);
 

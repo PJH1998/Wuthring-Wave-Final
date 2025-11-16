@@ -187,6 +187,7 @@
     <ClInclude Include="..\Public\AugustaGroundSkill.h" />
     <ClInclude Include="..\Public\AugustaGroundDash.h" />
     <ClInclude Include="..\Public\AugustaGroundSpecial.h" />
+    <ClInclude Include="..\Public\AugustaGroundSprint.h" />
     <ClInclude Include="..\Public\AugustaGroundWalk.h" />
     <ClInclude Include="..\Public\AugustaHit.h" />
     <ClInclude Include="..\Public\AugustaSkillWeapon.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="..\Public\AttackVolume.h" />
     <ClInclude Include="..\Public\Character.h" />
     <ClInclude Include="..\Public\CharacterState.h" />
+    <ClInclude Include="..\Public\Client_CharacterEnum.h" />
     <ClInclude Include="..\Public\Client_Debug.h" />
     <ClInclude Include="..\Public\Client_Struct.h" />
     <ClInclude Include="..\Public\ClimbState.h" />
@@ -206,6 +208,22 @@
     <ClInclude Include="..\Public\ElectroPredator.h" />
     <ClInclude Include="..\Public\Event_Camera.h" />
     <ClInclude Include="..\Public\FS_Scythe.h" />
+    <ClInclude Include="..\Public\Galbrena.h" />
+    <ClInclude Include="..\Public\GalbrenaAirFall.h" />
+    <ClInclude Include="..\Public\GalbrenaAirFly.h" />
+    <ClInclude Include="..\Public\GalbrenaAirJump.h" />
+    <ClInclude Include="..\public\GalbrenaFactory.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundAttack.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDash.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundDodge.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundIdle.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundLand.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundRun.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSkill.h" />
+    <ClInclude Include="..\Public\GalbrenaGroundSprint.h" />
+    <ClInclude Include="..\Public\GalbrenaShotGun.h" />
+    <ClInclude Include="..\Public\GalbrenaHit.h" />
+    <ClInclude Include="..\Public\GalbrenaState_Enum.h" />
     <ClInclude Include="..\public\Ggobul.h" />
     <ClInclude Include="..\Public\GroundState.h" />
     <ClInclude Include="..\public\HavocWarrior.h" />
@@ -220,6 +238,7 @@
     <ClInclude Include="..\Public\MapObject_NonSonoro.h" />
     <ClInclude Include="..\Public\MapObject_Sonoro.h" />
     <ClInclude Include="..\public\MonsterTable.h" />
+    <ClInclude Include="..\Public\Mouse.h" />
     <ClInclude Include="..\Public\Particle.h" />
     <ClInclude Include="..\Public\PatternDummy.h" />
     <ClInclude Include="..\Public\PlayerFactory.h" />
@@ -274,13 +293,16 @@
     <ClInclude Include="..\Public\RoverGroundRun.h" />
     <ClInclude Include="..\Public\RoverGroundSkill.h" />
     <ClInclude Include="..\Public\RoverGroundSpecial.h" />
+    <ClInclude Include="..\Public\RoverGroundSprint.h" />
     <ClInclude Include="..\Public\RoverHit.h" />
     <ClInclude Include="..\Public\RoverState_Enum.h" />
     <ClInclude Include="..\Public\RoverSword.h" />
     <ClInclude Include="..\Public\SceneCamera.h" />
     <ClInclude Include="..\Public\SkyBox.h" />
+    <ClInclude Include="..\public\SonoraChange.h" />
     <ClInclude Include="..\Public\Sonoro_Manager.h" />
     <ClInclude Include="..\public\Spawner.h" />
+    <ClInclude Include="..\public\ScreenEffect.h" />
     <ClInclude Include="..\Public\StateCategory_Enum.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
     <ClInclude Include="..\Public\Trigger_Box.h" />
@@ -288,6 +310,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\public\UI_Button_Interact.h" />
     <ClInclude Include="..\public\UI_ControlHelper.h" />
     <ClInclude Include="..\public\UI_FontPreset.h" />
     <ClInclude Include="..\public\UI_HUD.h">
@@ -303,6 +326,7 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\public\UI_Loading.h" />
+    <ClInclude Include="..\public\UI_Logo.h" />
     <ClInclude Include="..\public\UI_StatusSyncer.h" />
     <ClInclude Include="..\public\UI_Text.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -351,6 +375,7 @@
     <ClCompile Include="..\Private\AugustaGroundSkill.cpp" />
     <ClCompile Include="..\Private\AugustaGroundDash.cpp" />
     <ClCompile Include="..\Private\AugustaGroundSpecial.cpp" />
+    <ClCompile Include="..\Private\AugustaGroundSprint.cpp" />
     <ClCompile Include="..\Private\AugustaGroundWalk.cpp" />
     <ClCompile Include="..\Private\AugustaHit.cpp" />
     <ClCompile Include="..\Private\AugustaSkillWeapon.cpp" />
@@ -375,6 +400,21 @@
     <ClCompile Include="..\Private\ElectroPredator.cpp" />
     <ClCompile Include="..\Private\Factory.cpp" />
     <ClCompile Include="..\Private\FS_Scythe.cpp" />
+    <ClCompile Include="..\Private\Galbrena.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirFall.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirFly.cpp" />
+    <ClCompile Include="..\Private\GalbrenaAirJump.cpp" />
+    <ClCompile Include="..\Private\GalbrenaFactory.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundAttack.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDash.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundDodge.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundIdle.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundLand.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundRun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSkill.cpp" />
+    <ClCompile Include="..\Private\GalbrenaGroundSprint.cpp" />
+    <ClCompile Include="..\Private\GalbrenaShotGun.cpp" />
+    <ClCompile Include="..\Private\GalbrenaHit.cpp" />
     <ClCompile Include="..\Private\GameSystem.cpp" />
     <ClCompile Include="..\private\Ggobul.cpp" />
     <ClCompile Include="..\Private\GroundState.cpp" />
@@ -408,6 +448,7 @@
     <ClCompile Include="..\Private\MonsterDummy.cpp" />
     <ClCompile Include="..\private\MonsterTable.cpp" />
     <ClCompile Include="..\Private\MonsterTest.cpp" />
+    <ClCompile Include="..\Private\Mouse.cpp" />
     <ClCompile Include="..\Private\Parser.cpp" />
     <ClCompile Include="..\Private\Particle.cpp" />
     <ClCompile Include="..\Private\PatternDummy.cpp" />
@@ -424,10 +465,13 @@
     <ClCompile Include="..\Private\RoverGroundQTE.cpp" />
     <ClCompile Include="..\Private\RoverGroundSkill.cpp" />
     <ClCompile Include="..\Private\RoverGroundSpecial.cpp" />
+    <ClCompile Include="..\Private\RoverGroundSprint.cpp" />
     <ClCompile Include="..\Private\RoverHit.cpp" />
     <ClCompile Include="..\Private\SceneCamera.cpp" />
+    <ClCompile Include="..\private\SonoraChange.cpp" />
     <ClCompile Include="..\Private\Sonoro_Manager.cpp" />
     <ClCompile Include="..\private\Spawner.cpp" />
+    <ClCompile Include="..\private\ScreenEffect.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
     <ClCompile Include="..\Private\Rover.cpp" />
     <ClCompile Include="..\Private\RoverAirFall.cpp" />
@@ -444,6 +488,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\private\UI_Button_Interact.cpp" />
     <ClCompile Include="..\private\UI_ControlHelper.cpp" />
     <ClCompile Include="..\private\UI_FontPreset.cpp" />
     <ClCompile Include="..\private\UI_HUD.cpp">
@@ -459,6 +504,7 @@
       </ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\private\UI_Loading.cpp" />
+    <ClCompile Include="..\private\UI_Logo.cpp" />
     <ClCompile Include="..\private\UI_StatusSyncer.cpp" />
     <ClCompile Include="..\private\UI_Text.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -490,6 +536,7 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshFly.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMeshNonRib.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_FXMeshUpdate_CS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>
@@ -497,6 +544,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
     </FxCompile>
     <FxCompile Include="..\Bin\ShaderFiles\Shader_ComputeVtxAnimMesh.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_ScreenEffect.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_UIText.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -517,14 +565,23 @@
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Instance.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPoint.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPosTex.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxPropAnimMesh.hlsl" />
     <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxSkyBox.hlsl" />
-    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl" />
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxMesh_Arrow.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Bin\ShaderFiles\Shader_UI_State.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
     </None>
+    <FxCompile Include="..\Bin\ShaderFiles\Shader_VtxTrailMesh.hlsl">
+      <FileType>Document</FileType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -132,7 +132,7 @@ public:
 	HRESULT				Add_Render_StaticObject(class CStaticObject* pObject);
 	HRESULT				Add_Render_StaticObject(const vector<class CStaticObject*>& Container);
 	HRESULT				Add_Render_ShadowMapObject(CGameObject* pRenderObject);
-	void				Begin_ScreenEffect(SFX_TYPE eType);
+	void				Begin_ScreenEffect(SFX_TOGGLE eType);
 	void				End_ScreenEffect();
 	void				Add_Effects(const _wstring& strEffectTag, const vector<ID3DX11Effect*> Effects);
 	ID3DX11Effect*		Get_Shader_Effect(const _wstring& strEffectTag, _uint iIndex);
@@ -144,15 +144,9 @@ public:
 	HRESULT		Bind_RawValue_Renderer(const _char* pConstantName, void* pValue, _uint iLength);
 	void		IsSSAO(_bool IsSSAO);
 	void		IsSSAO_Blur(_bool IsBlur);
-	void		Setting_SSAO(_float fRadius, _float fMaxDistance);
-	void		SetBloomIntensity(_float fIntensity);
-	void		SetBloomWeight(_int iWeight);
-	void		SetDof(_float fDepth, _float fRange, _float fScale);
-	void		SetMaxEffectIntensity(_float fMaxIntensity);
 	void		SetPBR(_bool IsStylized);
 	void		Set_Metallic(_float fDynamicMetallic, _float fStaticMetallic);
 	void		Set_Roughness(_float fRoughness, _float fStaticRoughness);
-	void		SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance);
 #endif
 #pragma endregion
 
@@ -170,6 +164,7 @@ public:
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, class CCamera* pCamera);
 	HRESULT			Add_Camera(_uint iLevelID, const _wstring& strCameraTag, _uint iPrototypeLevelID, const _wstring& strPrototypeTag, void* pArg);
 	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag);
+	HRESULT			Change_MainCamera(_uint iLevelID, const _wstring& strCameraTag, void* pArg);
 	_float				Get_CurrentCamera_Near();
 	_float				Get_CurrentCamera_Far();
 	void				Set_CurrentCamera_Far(_float fFar);
@@ -177,7 +172,7 @@ public:
 #pragma endregion
 
 #pragma region SEQUENCE_MANAGER
-	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA>& ItemDatas, void* pDesc);
+	void				Register_Sequence(const _wstring& strSequenceTag, const vector<SEQUENCE_ITEM_INFO>& Items, const vector<SEQUENCE_ITEM_DATA*>& ItemDatas, void* pDesc);
 	void				Play_Sequence(const _wstring& strSequenceTag);
 #pragma endregion
 
@@ -283,6 +278,7 @@ public:
 #pragma region UI_MANAGER
 public:
 	HRESULT				Add_RootUI(const _wstring& strName_UI, class CUIObject* pRootUI);
+	HRESULT				Remove_RootUI(const _wstring& strName_UI);
 	class CUIObject*	Find_UIObject(const _wstring& strName_UI);
 	void				Clear_RootUI();
 #pragma endregion
@@ -335,6 +331,7 @@ public:
 	HRESULT						Bind_VF_Resource(CShader* pShader, const _char* pTextureName, const _char* pFogRangeName);
 #pragma endregion
 
+<<<<<<< HEAD
 #pragma region MODEL_STREAMING
 public:
 	HRESULT RegisterPrototype(const _char* pFilePath, class CModel_Streaming* pModel);
@@ -345,6 +342,24 @@ public:
 #pragma endregion
 
 
+=======
+#pragma region SFX_HUB
+	HRESULT						Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration = 0.f);
+	HRESULT						End_SFX();
+	HRESULT						Setting_DOF(_float3 vCenterPos, _float fRange);
+
+	HRESULT						Render_SFX_Toggle(CVIBuffer_Rect* pVIBuffer, CShader* pShader);
+	HRESULT						Render_SFX(SFX_TYPE eType, CVIBuffer_Rect* pVIBuffer, CShader* pShader);
+	HRESULT						Setting_Radial(_float2 vCenterUV, _float2 vDistanceRange, _float fRadialIntensity);
+	HRESULT						Setting_Radial(_fvector  vCenterPos, _float2 vDistanceRange, _float fRadialIntensity);
+
+
+#ifdef _DEBUG
+	void					Set_Motion(_float fLimitVelocity, _float fLimitDepth, _float fLengthScale);
+#endif
+#pragma endregion
+
+>>>>>>> dev
 public:
 	HRESULT					SetUp_CameraNF();
 	HRESULT					Clear_Resource(_uint iLevelID);
@@ -380,7 +395,12 @@ private:
 	class CShadowMap*			m_pShadowMap = { nullptr };
 	class CDecal_Manager*		m_pDecal_Manager = { nullptr };
 	class CVolumetricFog*		m_pVF = { nullptr };
+<<<<<<< HEAD
 	class CModel_Manager*		m_pModel_Manager = { nullptr };
+=======
+	class CSFX_Hub*				m_pSFX_Hub = { nullptr };
+
+>>>>>>> dev
 	_uint						m_iNumLevel = {};
 
 public:

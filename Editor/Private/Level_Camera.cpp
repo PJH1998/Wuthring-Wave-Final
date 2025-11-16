@@ -12,6 +12,8 @@
 
 #include "Sequencer.h"
 
+#include "SQ_Camera_Edit.h"
+
 CLevel_Camera::CLevel_Camera(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CLevel { pDevice, pContext }
 {
@@ -28,7 +30,7 @@ HRESULT CLevel_Camera::Initialize()
 	m_pMapInterface = CMap_Interface::Create(m_pDevice, m_pContext);
 	m_pCameraInterface = CCamera_Interface::Create(m_pDevice, m_pContext);
 	m_pAnimationTool = CAnimationTool::Create(m_pDevice, m_pContext, LEVEL::CAMERA);
-	
+	m_pMapInterface->SetPrototypes(m_pGameInstance->Get_CurrentLevel());
 	m_pSequencer = CSequencer::Create();
 
     return S_OK;
@@ -37,6 +39,7 @@ HRESULT CLevel_Camera::Initialize()
 void CLevel_Camera::Update(_float fTimeDelta)
 {
 	SetWindowText(g_hWnd, TEXT("Camera"));
+	m_pMapInterface->Load_Map_GUI();
 
 	ImGui::Begin("Camera Edit");
 
@@ -44,8 +47,13 @@ void CLevel_Camera::Update(_float fTimeDelta)
 		m_isMapInterface = !m_isMapInterface;
 
 	if(true == m_isMapInterface)
+	{
 		if (m_pMapInterface->Initialize_ModelPath(ENUM_CLASS(LEVEL::CAMERA), XMMatrixScalingFromVector(XMVectorSet(0.1f, 0.1f, 0.1f, 1.f))))
 			m_pMapInterface->Add_MapObject();
+		//임시로 여기 추가. 버튼 누르면 다른 맵 부르거나, 맵 안부르고 바로 끌 수 있음.(그냥 맵 선택 창 키고 끄는 용도)
+		if (ImGui::Button("Change Map Mode? "))
+			m_pMapInterface->Load_Another_Map();
+	}
 
 	ImGui::End();
 
@@ -80,6 +88,11 @@ void CLevel_Camera::Ready_Prototype()
 	{
 		CRASH("Failed Load AnimMesh Shader");
 	}
+
+	// Sequence Item
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::CAMERA), TEXT("Prototype_GameObject_SceneCamera"),
+		CSQ_Camera_Edit::Create(m_pDevice, m_pContext))))
+		CRASH("Camera");
 }
 
 void CLevel_Camera::Ready_Light()

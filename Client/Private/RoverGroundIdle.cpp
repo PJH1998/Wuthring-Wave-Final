@@ -163,15 +163,11 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 		return;
 	}
 
-	if (!m_States[LAND])
+	if (m_States[FALL])
 	{
-		m_iNotLandFrames++;
-		if (m_iNotLandFrames >= MAX_NOT_LAND_FRAMES)
-		{
-			m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
-			m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
-			return;
-		}
+		m_pRover->GetStateContextForWrite().m_eFallType = ERoverFallType::FALL_LOOP;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::AIR), ENUM_CLASS(ERoverAirState::FALL)); // 상위, 하위 상태
+		return;
 	}
 	
 	if (m_States[FLY])
@@ -256,13 +252,13 @@ void CRoverGroundIdle::Check_StateTransition(_float fTimeDelta)
 		}
 	}
 
-    // Sprint => 빠르게 달리기.
-    if (m_States[SPRINT])
-    {
-        m_pRover->GetStateContextForWrite().m_eRunType = ERoverRunType::SPRINT_F;
-        m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::RUN)); // 상위, 하위 상태
-        return;
-    }
+	// SPRINT
+	if (m_States[SPRINT])
+	{
+		m_pRover->GetStateContextForWrite().m_eSprintType = ERoverSprintType::SPRINT_F;
+		m_pRover->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(ERoverGroundState::SPRINT)); // 상위, 하위 상태
+		return;
+	}
 
 
     

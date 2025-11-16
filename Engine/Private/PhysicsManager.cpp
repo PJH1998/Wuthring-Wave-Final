@@ -115,8 +115,8 @@ HRESULT CPhysicsManager::Initialize(_uint iNumObjectLayer)
 	m_ExtendedUpdateSetting.mWalkStairsStepUp = Vec3{ 0.f, 1.37f, 0.f };				// 계단 허용 높이
 	m_ExtendedUpdateSetting.mWalkStairsStepDownExtra = Vec3{ 0.f, 0.6f, 0.f };		// 아래로 내려갈 때 여유 (붕 뜨는 느낌 방지)
 	m_ExtendedUpdateSetting.mWalkStairsMinStepForward = 0.02f;					// 단차 이동 시, 최소 필요 이동 거리
-	m_ExtendedUpdateSetting.mWalkStairsStepForwardTest = 0.35f;						// 단차 이동 시, 앞으로 Ray 쏴서 올라갈 수 있는가 Test
-	m_ExtendedUpdateSetting.mWalkStairsCosAngleForwardContact = XMConvertToRadians(30.f);			// 각도 허용치
+	m_ExtendedUpdateSetting.mWalkStairsStepForwardTest = 0.15f;						// 단차 이동 시, 앞으로 Ray 쏴서 올라갈 수 있는가 Test
+	m_ExtendedUpdateSetting.mWalkStairsCosAngleForwardContact = XMConvertToRadians(8.f);			// 각도 허용치
 	
 	return S_OK;
 }
@@ -184,6 +184,8 @@ _bool CPhysicsManager::Ray_Cast(const _fvector& vStartPos, const _fvector& vEndP
 	if (nullptr != pOut)
 	{
 		_float fDistanceOffset = 0.8f;
+		if (result.mFraction < 0.1f)
+			return false;
 		XMStoreFloat4(pOut, vStartPos + result.mFraction * vDir * fDistanceOffset);
 	}
 

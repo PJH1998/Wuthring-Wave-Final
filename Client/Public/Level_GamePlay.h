@@ -16,19 +16,21 @@ public:
 	virtual		void			Render() override;
 
 private:
-	void 			Ready_Layer_Player();
-	void			Ready_Dummy();
-	void			Ready_MonsterTest();
-	void			Ready_HavocWarrior();
-	void			Ready_ElectroPredator();
-	void			Ready_CoroSaurus();
-	void			Ready_Effect();
-	void			Ready_Skybox();
-	void			Ready_UI();
+	void 						Ready_Layer_Player();
+	void						Ready_Dummy();
+	void						Ready_MonsterTest();
+	void						Ready_HavocWarrior();
+	void						Ready_ElectroPredator();
+	void						Ready_CoroSaurus();
+	void						Ready_Effect();
+	void						Ready_Skybox();
+	void						Ready_UI();
+	void						Ready_Mouse();
+	void						Ready_SFX();
 
 #ifdef _DEBUG
 private:
-	void Shader_Gui();
+	void DEBUG_FUNCTION();
 	_float m_fRadius = {1.f};
 	_float m_fMaxDistance = { 5.f };
 	_float m_fBias[4] = {0.01f, 0.01f , 0.01f , 0.01f };
@@ -38,8 +40,9 @@ private:
 	_int m_iLUT_Index = { 0 };
 	_float m_fLUT_Intensity = {};
 
-	_float		m_fDebugRoughness[2] = { 0.f, 0.4f };
-	_float		m_fDebugMetallic[2] = { 0.8f, 0.3f };
+	_float  m_fLimitVelocity = {15.f};
+	_float	m_fLimitDepth = {150.f};
+	_float	m_fLengthScale = {5.f};
 #endif
 
 private:

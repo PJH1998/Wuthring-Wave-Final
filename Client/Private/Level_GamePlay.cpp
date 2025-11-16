@@ -12,6 +12,8 @@
 
 #include "Player.h"
 #include "SkyBox.h"
+#include "UI_Text_Damage.h"
+#include "SonoraChange.h"
 
 CLevel_GamePlay::CLevel_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
     :CLevel(pDevice,pContext), m_pGameSystem{ CGameSystem::GetInstance() }
@@ -65,7 +67,7 @@ HRESULT CLevel_GamePlay::Initialize()
 	Ready_MonsterTest();
 	Ready_HavocWarrior();
 	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
+	Ready_CoroSaurus();
 
 	m_pGameSystem->Clone_Spawners(m_eCurLevel);
 	// Test
@@ -73,6 +75,8 @@ HRESULT CLevel_GamePlay::Initialize()
 
 	Ready_Effect();
 	Ready_Skybox();
+	Ready_Mouse();
+	Ready_SFX();
 
 	return S_OK;
 }
@@ -83,18 +87,65 @@ void CLevel_GamePlay::Update(_float fTimeDelta)
 
 	//소노라 올라가는 거 테스트. 추후 시스템의 업데이트 방식과 UI연동 후 삭제함.
 	{
-		if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
-			m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
+		//if (m_pGameInstance->Get_DIKeyState(DIK_F) == KEYSTATE::DOWN)
+		//{
+		//	m_pGameSystem->Change_Sonoro(m_SonoroTest = !m_SonoroTest);
+		//	m_pGameSystem->Play_Action(TEXT("Action_False_Sonora"), XMMatrixRotationY(1.6736f+3.14f) * XMMatrixTranslation(3546.f, 173.f, 2931.f), false);
+		//}
 
 		m_pGameSystem->Update(fTimeDelta);
 	}
+
+#ifdef _DEBUG
+	DEBUG_FUNCTION();
+#endif
+	// 임시 Mouse 고정
+	
+
+	// UI Test. Delete it.
+#pragma region UI TEST (INTERACTION)
+
+	//static _uint iInteractIndex = 0;
+	//enum INTERACT_INDEX { TEST_INTERACT0, TEST_INTERACT1, TEST_INTERACTEND };
+	//
+	//
+	//if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") == nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == false))
+	//{
+	//	switch (iInteractIndex)
+	//	{
+	//	case TEST_INTERACT0:
+	//		m_pGameSystem->Show_InteractUI(L"테스트하나");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	case TEST_INTERACT1:
+	//		m_pGameSystem->Show_InteractUI(L"테스트둘");
+	//		iInteractIndex++;
+	//		if (iInteractIndex >= TEST_INTERACTEND) iInteractIndex = 0;
+	//		break;
+	//	}
+	//}
+	//else if (m_pGameInstance->Get_DIKeyState(DIK_NUMPADPLUS) == KEYSTATE::DOWN &&
+	//	(m_pGameInstance->Find_UIObject(L"UI_Interact") != nullptr || m_pGameInstance->Find_UIObject(L"UI_Interact")->IsActivate() == true))
+	//{
+	//	m_pGameSystem->Hide_InteractUI(true);
+	//}
+	//
+	//
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::CLICK_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 눌렸음!!" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_ENTER))
+	//	cout << "[Level_Test::Testing_UI] 마우스올라감" << endl;
+	//if (m_pGameSystem->Get_InteractUI_Feedback(UI_EVENT_TYPE::HOVER_EXIT))
+	//	cout << "[Level_Test::Testing_UI] 마우스내려감" << endl;
+#pragma endregion
+
 }
 
 void CLevel_GamePlay::Render()
 {
-#ifdef _DEBUG
-	Shader_Gui();
-#endif
+
 }
 
 void CLevel_GamePlay::Ready_Layer_Player()
@@ -104,7 +155,7 @@ void CLevel_GamePlay::Ready_Layer_Player()
 	vRotation = { 0.f, 0.f, 0.f };
 	//vPosition = { 0.f, -10.f, 50.f };
 	//vPosition = { 3455.f, 160.f, 2951.f }; => 신왕 광장 정중앙 좌표
-	vPosition = { 2787.4f, 320.f, 1647.f };
+	vPosition = { 2375.42f, 317.92f, 1645.60f };
 	
 
 	CPlayer::PLAYER_DESC Desc{};
@@ -118,18 +169,18 @@ void CLevel_GamePlay::Ready_Layer_Player()
 	// 0. vector 크기 정의
 	Desc.PlayerSpecs.resize(CPlayer::CHARACTERTYPE::TYPE_END);
 
-	// 1. Augusta 정의.
-	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
-	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
-	//Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = PlayerData::AUGUSTA_ACTOR_TAG;
-
-
-	// 2. Galbrena 정의
-
-	// 3. Rover(주인공) 캐릭터 정의
+	// 1. Rover(주인공) 캐릭터 정의
 	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].CharacterDesc = PlayerData::GetRoverCloneData(vScale, vRotation, vPosition, m_eCurLevel);
 	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::ROVER].strActorTag = TEXT("Prototype_GameObject_Actor_Rover");
 
+	// 2. Augusta 정의.
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].CharacterDesc = PlayerData::GetAugustaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::AUGUSTA].strActorTag = TEXT("Prototype_GameObject_Actor_Augusta");
+
+	// 3. Galbrena 정의
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].CharacterDesc = PlayerData::GetGalbrenaCloneData(vScale, vRotation, vPosition, m_eCurLevel);
+	Desc.PlayerSpecs[CPlayer::CHARACTERTYPE::GALBRENA].strActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+	
 	// 4. Player(Character 모음) 생성.
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Player"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Players"), &Desc)))
@@ -146,12 +197,13 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	CMonsterTest::MONSTERTEST_DESC MobDesc{};
 	MobDesc.eCurLevel = m_eCurLevel;
 	MobDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	MobDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	MobDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_FalseSovereign"));
 	MobDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	MobDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	MobDesc.fSpeedPerSec = 10.f;
 	MobDesc.vInitPosition = _float3(3497.f, 147.84f, 3267.5f);
+	MobDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	MobDesc.pAnimationTag = "Born1";
 	MobDesc.strFolderPath = "../Bin/Resource/Model/FalseSovereign/Notify";
 	MobDesc.fHP = pInfo->fMaxHp;
@@ -166,7 +218,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	CGgobul::GGOBUL_DESC Ggobul{};
 	Ggobul.eCurLevel = m_eCurLevel;
 	Ggobul.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Ggobul.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Ggobul.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Ggobul"));
 	Ggobul.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Ggobul.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -182,7 +234,7 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	CFS_Scythe::SCYTHE_DESC Tantacle{};
 	Tantacle.eCurLevel = m_eCurLevel;
 	Tantacle.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	Tantacle.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	Tantacle.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_Scythe"));
 	Tantacle.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	Tantacle.rigidBodyData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Rigidbody"));
@@ -200,6 +252,8 @@ void CLevel_GamePlay::Ready_MonsterTest()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
 	//Projectile.wstrEffectTag = ;
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
 		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_ShinWang"), 9, &Projectile)))
@@ -213,7 +267,7 @@ void CLevel_GamePlay::Ready_HavocWarrior()
 	CHavocWarrior::HAVOCWARRIOR_DESC tDesc{};
 	tDesc.eCurLevel = m_eCurLevel;
 	tDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	tDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	tDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_HavocWarrior"));
 	tDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	tDesc.strFolderPath = "../Bin/Resource/Model/HavocWarrior/Notify";
@@ -236,7 +290,7 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	CElectroPredator::ELECTROPREDATOR_DESC ADesc{};
 	ADesc.eCurLevel = m_eCurLevel;
 	ADesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	ADesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	ADesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_ElectroPredator"));
 	ADesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	ADesc.strFolderPath = "../Bin/Resource/Model/ElectroPredator/Notify";
@@ -257,9 +311,11 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	Projectile.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER),ENUM_CLASS(COLLISIONLAYER::MAP) };
 	Projectile.fRadius = 0.7f;
 	Projectile.fSpeedPerSec = 15.f;
-	//Projectile.wstrEffectTag = ;
+	Projectile.wstrModelTag = TEXT("Prototype_Component_Model_Arrow");
+	Projectile.eType = TEXT_COLOR_TYPE::ELEC;
+	Projectile.wstrEffectTag = TEXT("Projectile_Effect");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Projectile"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 10, &Projectile)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_Projectile_Electro"), 50, &Projectile)))
 		CRASH("Failed Ready Projectile (Electro Predatror)");
 
 	CAoEDoT::AOEDOT_DESC AoEDesc{};
@@ -268,9 +324,10 @@ void CLevel_GamePlay::Ready_ElectroPredator()
 	AoEDesc.iTargetLayers = { ENUM_CLASS(COLLISIONLAYER::PLAYER) };
 	AoEDesc.vExtent = _float3(1.f, 1.f, 1.f);
 	AoEDesc.vOffset = _float3(0.f, 1.f, 0.f);
-	//AoEDesc.wstrEffectTag
+	AoEDesc.eType = TEXT_COLOR_TYPE::ELEC;
+	AoEDesc.wstrEffectTag = TEXT("Electro_GroundAttack");
 	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 5, &AoEDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_EnemyAD"), TEXT("Pool_AOEDOT_Electro"), 15, &AoEDesc)))
 		CRASH("Failed Ready AoEDot (Electro Predatror)");
 }
 
@@ -281,12 +338,13 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 	CCorosaurus::CORROSAURUS_DESC CoroDesc{};
 	CoroDesc.eCurLevel = m_eCurLevel;
 	CoroDesc.shaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_VtxAnimMesh"));
-	CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMesh"));
+	CoroDesc.computeShaderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Shader_ComputeVtxAnimMeshNonRib"));
 	CoroDesc.modelData = make_pair(m_eCurLevel, TEXT("Prototype_Component_Model_CoroSaurus"));
 	CoroDesc.colliderData = make_pair(LEVEL::STATIC, TEXT("Prototype_Component_Collider"));
 	CoroDesc.fRotationPerSec = XMConvertToRadians(90.f);
 	CoroDesc.fSpeedPerSec = 10.f;
-	CoroDesc.vInitPosition = _float3(0.f, -8.f, 4.f);
+	CoroDesc.vInitPosition = _float3(3479.2f, 268.6f, 2098.8f);
+	CoroDesc.vInitRotate = _float3(0.f, 180.f, 0.f);
 	CoroDesc.pAnimationTag = "Idle1";
 	CoroDesc.strFolderPath = "../Bin/Resource/Model/Corrosaurus/Notify";
 	CoroDesc.fHP = pInfo->fMaxHp;
@@ -300,8 +358,9 @@ void CLevel_GamePlay::Ready_CoroSaurus()
 
 void CLevel_GamePlay::Ready_Effect()
 {
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel);
-	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common", m_eCurLevel, 20);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/Common_Plus", m_eCurLevel, 200);
+	m_pGameSystem->Create_Prefab("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel, 15);
 }
 
 void CLevel_GamePlay::Ready_Skybox()
@@ -328,98 +387,72 @@ void CLevel_GamePlay::Ready_UI()
 	for (auto& strPrototypeTag : strPrototypeTag_UI)
 	{
 		CUIObject* pTargetUI = static_cast<CUIObject*>(m_pGameInstance->Clone_Prototype(iDestLevel, strPrototypeTag, PROTOTYPE::GAMEOBJECT));
-		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_UHD", pTargetUI)))
+		if (FAILED(m_pGameInstance->Add_RootUI(L"UI_HUD", pTargetUI)))
 			CRASH("Failed to Add RootUI to UI_Manager.");
 		if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(iDestLevel, strLayertag_UI, pTargetUI)))
 			CRASH("Failed to Add RootUI to Object_Manager.");
 	}
 
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = {};
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Text_Damage"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Text_Damage"), TEXT("Pool_Text_Damage"), 100, &tDesc)))
+		CRASH("Failed Ready Text_Damage");
+
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_Custom_UI_Button_Interact"),
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Custom_UI_Button_Interact"), TEXT("Pool_Button_Interact"), 1, &tDesc)))
+		CRASH("Failed Ready Button_Interact");
+
 	// _UI
 }
 
-#ifdef _DEBUG
-void CLevel_GamePlay::Shader_Gui()
+void CLevel_GamePlay::Ready_Mouse()
 {
-//	ImGui::Begin("Test");
-//	
-//	
-//	if (ImGui::CollapsingHeader("SSAO"))
-//	{
-//				ImGui::InputFloat("RADIUS", &m_fRadius);
-//		
-//				ImGui::DragFloat("MAX_DISTANCE", &m_fMaxDistance, 1.f, 1.f, 50.f, "%.1f");
-//		
-//		#ifdef _DEBUG
-//				m_pGameInstance->Setting_SSAO(m_fRadius, m_fMaxDistance);
-//		#endif // _DEBUG
-//	}
-//
-////	if (ImGui::CollapsingHeader("LUT"))
-////	{
-////		ImGui::InputInt("INDEX", &m_iLUT_Index, 1, 1);
-////		if (m_iLUT_Index < 0)
-////			m_iLUT_Index = 0;
-////		if (m_iLUT_Index >= 5)
-////			m_iLUT_Index = 4;
-////
-////		ImGui::DragFloat("LUT_INTENSITY", &m_fLUT_Intensity, 0.01f, 0.f, 1.f);
-////#ifdef _DEBUG
-////		m_pGameInstance->Set_LUT_Index(m_iLUT_Index);
-////		m_pGameInstance->Bind_RawValue_Renderer("g_fLutLerpIntensity", &m_fLUT_Intensity, sizeof(_float));
-////#endif // _DEBUG
-////	}
-//
-//		if (ImGui::CollapsingHeader("PBR"))
-//	{
-//
-//		ImGui::DragFloat("DYNAMIC_ROUGHNESS", &m_fDebugRoughness[0], 0.01f, 0.f, 1.f);
-//		ImGui::DragFloat("STATIC_ROUGHNESS", &m_fDebugRoughness[1], 0.01f, 0.f, 1.f);
-//
-//		ImGui::DragFloat("DYNAMIC_METALLIC", &m_fDebugMetallic[0], 0.01f, 0.f, 1.f);
-//		ImGui::DragFloat("STATIC_METALLIC", &m_fDebugMetallic[1], 0.01f, 0.f, 1.f);
-//#ifdef _DEBUG
-//		m_pGameInstance->Set_Metallic(m_fDebugMetallic[0], m_fDebugMetallic[1]);
-//		m_pGameInstance->Set_Roughness(m_fDebugRoughness[0], m_fDebugRoughness[1]);
-//#endif // _DEBUG		 
-//	}
-//
-//	ImGui::End();
-	/*
-	if (ImGui::CollapsingHeader("CASCADE"))
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"), ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_Mouse"))))
+		CRASH("Mosue");
+}
+
+void CLevel_GamePlay::Ready_SFX()
+{
+	if (FAILED(m_pGameInstance->Add_PoolingObject(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Layer_SFX"), TEXT("Pooling_SFX_SonoraChange"), 1)))
+		CRASH("h");
+}
+
+#ifdef _DEBUG
+void CLevel_GamePlay::DEBUG_FUNCTION()
+{
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD0) == KEYSTATE::DOWN)
+		m_pGameInstance->End_SFX();
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD1) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::BLUR, 2.f);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD2) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::DOF, 5.f);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD3) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::MOTION);
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD4) == KEYSTATE::DOWN)
+		m_pGameInstance->Begin_Toggle_SFX(SFX_TOGGLE::RADIAL);
+
+	if (m_pGameInstance->Get_DIKeyState(DIK_NUMPAD9) == KEYSTATE::DOWN)
 	{
-		if (ImGui::CollapsingHeader("Base Bias"))
-		{
-			ImGui::InputFloat("CASCADE[0]", &m_fBias[0], 0.001f, 0.001f);
-			ImGui::InputFloat("CASCADE[1]", &m_fBias[1], 0.001f, 0.001f);
-			ImGui::InputFloat("CASCADE[2]", &m_fBias[2], 0.001f, 0.001f);
-			ImGui::InputFloat("CASCADE[3]", &m_fBias[3], 0.001f, 0.001f);
-		}
+		CSonoraChange::SONORA_CHANGE_DESC Desc = {};
+		Desc.fEffectTime = 3.f;
+		Desc.fRadialTime = 2.f;
+		Desc.fFadeTime = 2.f;
 
-		if (ImGui::CollapsingHeader("Min Bias"))
-		{
-
-			ImGui::InputFloat("MIN_BIAS_CASCADE[0]", &m_fMinBias[0], 0.001f, 0.001f);
-			ImGui::InputFloat("MIN_BIAS_CASCADE[1]", &m_fMinBias[1], 0.001f, 0.001f);
-			ImGui::InputFloat("MIN_BIAS_CASCADE[2]", &m_fMinBias[2], 0.001f, 0.001f);
-			ImGui::InputFloat("MIN_BIAS_CASCADE[3]", &m_fMinBias[3], 0.001f, 0.001f);
-		}
-
-		if (ImGui::CollapsingHeader("Map Bias"))
-		{
-			ImGui::InputFloat("MAP", &m_fMapBias, 0.001f, 0.001f);
-		}
-
-		if (ImGui::CollapsingHeader("SLOPE_SCALE"))
-		{
-			ImGui::InputFloat("SCALE", &m_fSlopeScale);
-		}
-
-		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowBais", &m_fBias, sizeof(_float4));
-		m_pGameInstance->Bind_RawValue_Renderer("g_fMinShadowBias", &m_fMinBias, sizeof(_float4));
-		m_pGameInstance->Bind_RawValue_Renderer("g_DebugSlopeScale", &m_fSlopeScale, sizeof(_float));
-		m_pGameInstance->Bind_RawValue_Renderer("g_fShadowMapBais", &m_fMapBias, sizeof(_float));
+		m_pGameInstance->Spawn_PoolingObject(TEXT("Pooling_SFX_SonoraChange"), XMMatrixIdentity(), &Desc);
 	}
-	*/
+
+	if (ImGui::CollapsingHeader("MOTION_BLUR"))
+	{
+		ImGui::InputFloat("LIMIT_VELOCITY", &m_fLimitVelocity);
+
+		ImGui::InputFloat("LIMIT_DEPTH", &m_fLimitDepth);
+
+		ImGui::InputFloat("DISTANCE_SCALE", &m_fLengthScale);
+
+		m_pGameInstance->Set_Motion(m_fLimitVelocity, m_fLimitDepth, m_fLengthScale);
+	}
 }
 #endif
 

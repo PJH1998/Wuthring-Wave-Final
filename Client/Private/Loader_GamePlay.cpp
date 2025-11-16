@@ -33,6 +33,9 @@
 #include "UI_Text.h"
 #include "Animator_UI.h"
 #include "UI_HUD.h"
+#include "UI_Text_Damage.h"
+#include "UI_Button_Interact.h"
+#include "Mouse.h"
 #pragma endregion
 
 
@@ -52,8 +55,17 @@
 #include "RoverDarkScythe.h"
 #include "Rover.h"
 
+// Galbrena
+#include "Galbrena.h"
+#include "GalbrenaShotGun.h"
+
 // Player
 #include "Player.h"
+#pragma endregion
+
+#pragma region SFX
+#include "SonoraChange.h"
+
 #pragma endregion
 
 
@@ -64,15 +76,16 @@ CLoader_GamePlay::CLoader_GamePlay(ID3D11Device* pDevice, ID3D11DeviceContext* p
 
 HRESULT CLoader_GamePlay::Initialize()
 {
-	m_iNumLoadingThread = 11;
+	m_iNumLoadingThread = 13;
 	m_pGameInstance->Add_Work([this]() {Load_Texture(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Model(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Shader(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Object(); Complete_Load(); });
-	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });w
+	//m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_Augusta(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Rover(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Galbrena(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Player(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_MonsterTest(); Complete_Load(); });
 	m_pGameInstance->Add_Work([this]() {Load_Monster(); Complete_Load(); });
@@ -80,8 +93,12 @@ HRESULT CLoader_GamePlay::Initialize()
 	m_pGameInstance->Add_Work([this]() {Load_Effect(); Complete_Load(); });
 
 	m_pGameInstance->Add_Work([this]() {Load_UI(); Complete_Load(); });
+	m_pGameInstance->Add_Work([this]() {Load_Font(); Complete_Load(); });
 
 	m_pGameSystem->Add_Action("../Bin/Resource/Sequence/Action/");
+
+	Load_ScreenEffect();
+
     return S_OK;
 }
 
@@ -94,9 +111,12 @@ HRESULT CLoader_GamePlay::Load_Texture()
 
 HRESULT CLoader_GamePlay::Load_Model()
 {
+
 	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1111_dest_Fix/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
-	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1112_first/", m_eCurLevel);
+	//m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1112_no_deco/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/Asphodel_Barrens_1114_first/", m_eCurLevel);
+	m_pGameSystem->Ready_Prototype_Map("../Bin/Resource/Map/MapData/The_False_Soerveign_1114_first/", m_eCurLevel);
+
 
 	// SkyBox
 	_matrix PreTransformMatrix = XMMatrixScaling(0.001f, 0.001f, 0.001f);
@@ -364,6 +384,66 @@ HRESULT CLoader_GamePlay::Load_Rover()
 	return S_OK;
 }
 
+HRESULT CLoader_GamePlay::Load_Galbrena()
+{
+	_wstring wStrModelTag = L"Prototype_Component_Model_Galbrena";
+	_string strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Galbrena.dat";
+	_matrix	PreTransformMatrix = XMMatrixIdentity();
+	//_float fSize = 0.01f;
+	_float fSize = 0.0001f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationY(XMConvertToRadians(180.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+
+	// 2. StateMachine 초기화
+	_wstring wStrStateMachineTag = L"Prototype_Component_StateMachine_Galbrena";
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrStateMachineTag,
+		CStateMachine::Create(m_pDevice, m_pContext))))
+		CRASH("PlayerState Machine");
+
+
+	// 3. 객체 초기화
+	_wstring wStrActorTag = TEXT("Prototype_GameObject_Actor_Galbrena");
+
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wStrActorTag
+		, CGalbrena::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+
+#pragma region Parts
+	wStrModelTag = L"Prototype_Component_Model_Galbrena_ShotGun";
+	strFilePath = "../../Client/Bin/Resource/Model/Player/Galbrena/Weapon/ShotGun/ShotGun.dat";
+	fSize = 0.01f;
+	PreTransformMatrix = XMMatrixScaling(fSize, fSize, fSize) * XMMatrixRotationX(XMConvertToRadians(-90.f));
+
+	// 1. 모델 초기화.
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), wStrModelTag,
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::ANIM, PreTransformMatrix, strFilePath.c_str()))))
+		CRASH("Prototype Create Failed");
+
+	// 2. 객체 초기화.
+	_wstring wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_FirstGun");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+	// 3. 객체 초기화.
+	wstrObjectTag = TEXT("Prototype_GameObject_Galbrena_SecondGun");
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel)
+		, wstrObjectTag
+		, CGalbrenaShotGun::Create(m_pDevice, m_pContext))))
+		CRASH("Prototype Create Failed");
+
+#pragma endregion
+	return S_OK;
+}
+
 HRESULT CLoader_GamePlay::Load_UI()
 {
 	const   _uint       iDestLevel = ENUM_CLASS(LEVEL::GAMEPLAY);
@@ -380,6 +460,9 @@ HRESULT CLoader_GamePlay::Load_UI()
 	//_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/TestHUD.json"; // ksta
 	_string strFilePath_UI_HUD = "../../Client/Bin/Resource/UI/FJson/UITree/Root_HUD_251030_2037.json"; // ksta
 	vecDescs.push_back(Load_UITree(strFilePath_UI_HUD));
+
+	_string strFilePath_UI_Interact = "../../Client/Bin/Resource/UI/FJson/UITree/Root_Interact.json"; // ksta
+	vecDescs.push_back(Load_UITree(strFilePath_UI_Interact));
 
 	for (auto& treeDesc : vecDescs)
 	{
@@ -430,6 +513,12 @@ HRESULT CLoader_GamePlay::Load_UI()
 		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_VtxInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Shader] Shader_Instance Load Failed. The Shader_Instance may have already been loaded.\n");
 
+	// Shader_Font
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, TEXT("Prototype_Component_Shader_Text_Instance"),
+		CShader::Create(m_pDevice, m_pContext, TEXT("../Bin/ShaderFiles/Shader_UI_TextInstance.hlsl"), VTXUIINSTANCE::Elements, VTXUIINSTANCE::iNumElements))))
+		OutputDebugString(L"[Loader_Test::Load_Shader] Shader_TextInstance Load Failed. The Shader_TextInstance may have already been loaded.\n");
+
+
 	// ==============================
 	cout << "[CLoader_Test_UI] Object" << endl;
 	// ==============================
@@ -439,8 +528,6 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_Component_Animator_UI",
 		CAnimator_UI::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[CCustom_UI::Load_Shader] Animator_UI Load Failed. The Animator_UI may have already been loaded.\n");
-
-
 
 	// * Objects Load
 	// Custom UI
@@ -454,6 +541,15 @@ HRESULT CLoader_GamePlay::Load_UI()
 		CUI_Text::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Object] UI_Text Load Failed. The CUI_Text may have already been loaded.\n");
 
+	// Custom Text
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text_Damage",
+		CUI_Text_Damage::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Text_Damage Load Failed. The UI_Text_Damage may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Button_Interact",
+		CUI_Button_Interact::Create(m_pDevice, m_pContext))))
+		OutputDebugString(L"[Loader_Test::Load_Object] UI_Button_Interact Load Failed. The UI_Text_Damage may have already been loaded.\n");
+
+
 
 	// ==============================
 	cout << "[CLoader_Test_UI][UI Custom] Prototype" << endl;
@@ -462,6 +558,32 @@ HRESULT CLoader_GamePlay::Load_UI()
 	if (FAILED(m_pGameInstance->Add_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Container_HUD",
 		CUI_HUD::Create(m_pDevice, m_pContext))))
 		OutputDebugString(L"[Loader_Test_UI::Load_Prototype] UI_HUD Load Failed. The UI_HUD may have already been loaded.\n");
+
+	// Mouse
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_GameObject_Mouse"),
+		CMouse::Create(m_pDevice, m_pContext))))
+		CRASH("Mouse");
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_Font()
+{
+	// ==============================
+	cout << "[Loader_Test] Font " << endl;
+	// ==============================
+	_uint iPixelHeight = 64U;
+
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Medium", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Medium.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_SemiBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-SemiBold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Bold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Bold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_ExtraBold", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-ExtraBold.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
+	if (FAILED(m_pGameInstance->Add_Font(L"WW_Heavy", "../../Client/Bin/Resource/Font/Font_SUITE/SUITE-Heavy.ttf", iPixelHeight)))
+		OutputDebugString(L"[Loader_Test::Load_Font] Font Load Failed. The Font may have already been loaded.\n");
 
 	return S_OK;
 }
@@ -473,6 +595,16 @@ HRESULT CLoader_GamePlay::Load_Effect()
 	m_pGameSystem->Load_EffectMeshDat_FromFolder("../../Client/Bin/Resource/Effect/Prefabs/Common/Dat", m_eCurLevel);
 
 	m_pGameSystem->Create_Effect("../../Client/Bin/Resource/Effect/Prefabs/WeiZuoShenWang", m_eCurLevel);
+
+
+	return S_OK;
+}
+
+HRESULT CLoader_GamePlay::Load_ScreenEffect()
+{
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(LEVEL::GAMEPLAY), TEXT("Prototype_SFX_SonoraChange"),
+		CSonoraChange::Create(m_pDevice, m_pContext))))
+		return E_FAIL;
 
 	return S_OK;
 }
@@ -596,6 +728,12 @@ HRESULT CLoader_GamePlay::Load_Monster()
 	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_AOEDOT"),
 		CAoEDoT::Create(m_pDevice, m_pContext))))
 		CRASH("AoEDoT Prototype Create Failed");
+
+	// Prototype_Component_Model_Arrow
+	_fmatrix PreArrowMatrix = XMMatrixScaling(0.00008f, 0.00008f, 0.00008f) * XMMatrixRotationX(XMConvertToRadians(90.f));
+	if (FAILED(m_pGameInstance->Add_Prototype(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_Component_Model_Arrow"),
+		CModel::Create(m_pDevice, m_pContext, MODELTYPE::NONANIM, PreArrowMatrix, "../../Client/Bin/Resource/Model/Arrow/Arrow.dat"))))
+		CRASH("Prototype Create Failed");
 #pragma endregion
 
 #pragma region CORROSAURUS

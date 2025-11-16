@@ -60,10 +60,14 @@ HRESULT CUI_FontPreset::Initialize()
 	tDesc.vColor			= { 0.718f, 0.729f, 0.757f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_NORMAL)] = tDesc;
-	// - Progredss (로딩 창 진행률 숫자용 색상)
+	// - Progress (로딩 창 진행률 숫자용 색상)
 	tDesc.vColor			= { 0.961f, 0.957f, 0.937f, 1.0f };
 	tDesc.vOutlineColor		= { 0.035f, 0.027f, 0.016f, 1.0f };
 	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_PROGRESS)] = tDesc;
+	// - BossName (보스 이름용 색상)
+	tDesc.vColor			= { 0.827f, 0.364f, 0.435f, 1.0f };
+	tDesc.vOutlineColor		= { 0.203f, 0.188f, 0.192f, 1.0f };
+	m_FontTypeDesc[ENUM_CLASS(TEXT_COLOR_TYPE::TT_BOSSNAME)] = tDesc;
 
 
 	// 필요한 색상이 있다면 ENUM 및 여기에 프리셋 추가..
@@ -119,6 +123,38 @@ CUI_Text* CUI_FontPreset::Create_FontToScreen(_float2 vScreenPos, _wstring strTe
 	//tDesc.vLifeTime = { 0.0f, /*10.0f*/ 1.f };
 	tDesc.fFontOutlineWidth = 2.f;
 	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE);
+	tDesc.isTargetExist = false;
+	tDesc.isInstance = true;
+	tDesc.vScreenPos = vScreenPos;
+	tDesc.strUIName = strUIName;
+	tDesc.iPassType = 0;
+
+	tDesc.strText = strText;
+
+	tDesc.vecInstanceDescs.resize(tDesc.strText.size());
+	for (_uint i = 0; i < tDesc.vecInstanceDescs.size(); i++)
+		tDesc.vecInstanceDescs[i].matExtraData.m[0][0] = 1.f;
+
+	// 인스턴스별 Transform 행렬 지정해주어야 함
+
+
+	_uint iDestLevel = m_pGameInstance->Get_CurrentLevel();
+	CUI_Text* pTextObj = dynamic_cast<CUI_Text*>(m_pGameInstance->Clone_Prototype(iDestLevel, L"Prototype_GameObject_Custom_UI_Text", PROTOTYPE::GAMEOBJECT, &tDesc));
+
+	ASSERT_CRASH(pTextObj); // test
+
+	return pTextObj;
+}
+
+CUI_Text* CUI_FontPreset::Create_FontToScreen_Alpha(_float2 vScreenPos, _wstring strText, TEXT_COLOR_TYPE eColorType, _float fFontScale, _wstring strUIName, _wstring strFontTag)
+{
+	CUI_Text_Damage::TEXT_UI_TIMED_DESC tDesc = m_FontTypeDesc[ENUM_CLASS(eColorType)];
+
+	tDesc.strFontTag = strFontTag;
+	tDesc.fScale = fFontScale;
+	//tDesc.vLifeTime = { 0.0f, /*10.0f*/ 1.f };
+	tDesc.fFontOutlineWidth = 2.f;
+	tDesc.iShaderFlag = ENUM_CLASS(FONT_FLAG::FL_OUTLINE) | ENUM_CLASS(FONT_FLAG::FL_ALPHA_EDITABLE);
 	tDesc.isTargetExist = false;
 	tDesc.isInstance = true;
 	tDesc.vScreenPos = vScreenPos;

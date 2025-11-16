@@ -30,6 +30,7 @@ private:
 		ERoverDashType m_eDashType = ERoverDashType::END;
 		ERoverIdleType  m_eIdleType = ERoverIdleType::END;
 		ERoverRunType m_eRunType = ERoverRunType::END;
+		ERoverSprintType m_eSprintType = ERoverSprintType::END;
 		ERoverLandType m_eLandType = ERoverLandType::END;
 		ERoverDodgeType m_eDodgeType = ERoverDodgeType::END;
 
@@ -164,6 +165,7 @@ public:
 #pragma region 4. EVENT
 public:
 	virtual void Process_DelayedActions(_float fTimeDelta);
+	virtual void Bind_ChangeEffect() override; // ChaneEffect 실행.
 #pragma endregion
 
 #pragma endregion

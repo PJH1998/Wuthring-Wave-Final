@@ -218,6 +218,7 @@
     <ClInclude Include="..\Public\Rect_Controller.h" />
     <ClInclude Include="..\Public\EditorProp.h" />
     <ClInclude Include="..\Public\Sequencer.h" />
+    <ClInclude Include="..\public\SFX_Interface.h" />
     <ClInclude Include="..\Public\SQ_Actor_Edit.h" />
     <ClInclude Include="..\Public\SQ_Audio_Edit.h" />
     <ClInclude Include="..\Public\SQ_Camera_Edit.h" />
@@ -230,6 +231,7 @@
     <ClInclude Include="..\Public\SpringCamera_Edit.h" />
     <ClInclude Include="..\Public\TrailMesh_Controller.h" />
     <ClInclude Include="..\Public\Trail_Mesh.h" />
+    <ClInclude Include="Level_SFX.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Resource.h" />
@@ -291,6 +293,7 @@
     <ClCompile Include="..\Private\Rect_Controller.cpp" />
     <ClCompile Include="..\Private\EditorProp.cpp" />
     <ClCompile Include="..\Private\Sequencer.cpp" />
+    <ClCompile Include="..\private\SFX_Interface.cpp" />
     <ClCompile Include="..\Private\SQ_Actor_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_Audio_Edit.cpp" />
     <ClCompile Include="..\Private\SQ_Camera_Edit.cpp" />
@@ -303,6 +306,7 @@
     <ClCompile Include="..\Private\SpringCamera_Edit.cpp" />
     <ClCompile Include="..\Private\TrailMesh_Controller.cpp" />
     <ClCompile Include="..\Private\Trail_Mesh.cpp" />
+    <ClCompile Include="Level_SFX.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>

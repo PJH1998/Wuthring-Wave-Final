@@ -4,6 +4,7 @@
 #include "FS_Scythe.h"
 #include "AttackVolume.h"
 #include "Projectile.h"
+#include "GameSystem.h"
 
 CMonsterTest::CMonsterTest(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 	: CActor { pDevice, pContext }
@@ -24,11 +25,14 @@ HRESULT CMonsterTest::Initialize_Clone(void* pArg)
 {
 	if (FAILED(__super::Initialize_Clone(pArg)))
 		return E_FAIL;
-	
+	m_pGameSystem = CGameSystem::GetInstance();
+	Safe_AddRef(m_pGameSystem);
 	MONSTERTEST_DESC* pDesc = static_cast<MONSTERTEST_DESC*>(pArg);
 
 	//m_pTransformCom->Scale({ 1.f, 1.f, 1.f});
 	m_pTransformCom->Set_State(STATE::POSITION, XMVectorSetW(XMLoadFloat3(&pDesc->vInitPosition), 1.f));
+	_vector vQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(pDesc->vInitRotate.x), XMConvertToRadians(pDesc->vInitRotate.y), XMConvertToRadians(pDesc->vInitRotate.z));
+	m_pTransformCom->Rotation_Quaternion(vQuat);
 #pragma region ATTACK_STATE
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK1] = 3.f;
 	m_fAttackCoolTime[ATK_PATTERN::ATTACK2] = 7.f;
@@ -85,8 +89,8 @@ void CMonsterTest::Update(_float fTimeDelta)
 	After_Condition(fTimeDelta);
 
 	// 2. 상태 플래그에 맞는 애니메이션 변경	3. 애니메이션 재생
-	//m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
-	m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
+	m_pAnimMachineCom->Update(m_pModelCom, m_pComputeShaderCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta); // gpu
+	//m_pAnimMachineCom->Update(m_pModelCom, m_pTransformCom, &m_iState, m_isAnimationFinished, fTimeDelta * m_fHitStopRatio); //cpu
 	//_float temp{};
 	//m_pModelCom->Play_Animation_CPU("Attack04", fTimeDelta, &temp);
 	if (m_iState & ENUM_CLASS(TEST_STATE::BLOCK))
@@ -94,7 +98,7 @@ void CMonsterTest::Update(_float fTimeDelta)
 	_vector vVelocity = m_pTransformCom->Get_Velocity();
 	if(m_isDist_Interp_Enable)
 	{
-		_float temp = clamp(m_fDistance - 1.3f, 0.f,1.f);
+		_float temp = clamp(m_fDistanceNonY - 1.3f, 0.f,1.f);
 		m_pColliderCom->Update(vVelocity / fTimeDelta * temp);
 		//m_isDist_Interp_Enable = false;
 	}
@@ -127,6 +131,9 @@ void CMonsterTest::Late_Update(_float fTimeDelta)
 
 	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::DYNAMIC, this)))
 		return;
+
+	if (FAILED(m_pGameInstance->Add_Render_Object(RENDERGROUP::SHADOW, this)))
+		return;
 }
 
 void CMonsterTest::Render()
@@ -147,6 +154,7 @@ void CMonsterTest::Render()
 		m_pModelCom->Bind_Materials(m_pShaderCom, "g_NormalTexture", i, TEXTURETYPE::NORMAL);
 		m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i);
 		//m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::DEFAULT_NORMAL));
+
 		m_pShaderCom->Begin(m_ShaderIndices[i]);
 
 		m_pModelCom->Render(i);
@@ -166,6 +174,26 @@ void CMonsterTest::Render()
 	_float4 temp{};
 	m_pGameInstance->Ray_Cast(m_pTransformCom->Get_State(STATE::POSITION), m_pTransformCom->Get_State(STATE::POSITION) + XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK)), &temp);
 #endif
+}
+
+void CMonsterTest::Render_Shadow()
+{
+	if (FAILED(m_pTransformCom->Bind_Matrix(m_pShaderCom, "g_WorldMatrix")))
+		CRASH("Failed Bind Matrix");
+
+	m_pGameInstance->Bind_CSM_Resources(m_pShaderCom, "g_ShadowViewMatrix", "g_ShadowProjMatrix");
+
+	_uint iNumMesh = m_pModelCom->Get_NumMesh();
+
+	for (_uint i = 0; i < iNumMesh; ++i)
+	{
+		if (FAILED(m_pModelCom->Bind_BoneMatrices(m_pShaderCom, "g_BoneMatrices", i)))
+			CRASH("Ready Bone Matrices Failed");
+
+		m_pShaderCom->Begin(ENUM_CLASS(SHADER_ANIMMESH::SHADOW));
+
+		m_pModelCom->Render(i);
+	}
 }
 
 void CMonsterTest::OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold)
@@ -233,8 +261,12 @@ void CMonsterTest::Effect_Active(const _wstring& wStrEffectTag)
 	if (nullptr == m_pModelCom || nullptr == m_pTransformCom)
 		return;
 	
+	PREFAB_INFO EffectDesc{};
+	EffectDesc.pMatrixPtr = m_pTransformCom->Get_WorldMatrixPtr();
+	EffectDesc.pModelPtr = m_pModelCom;
+
 	_matrix matWorld = m_pTransformCom->Get_WorldMatrix();
-	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, m_pModelCom);
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, matWorld, &EffectDesc);
 }
 
 void CMonsterTest::Object_Func(const _wstring& wStrObjectTag)
@@ -364,6 +396,9 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::DURING, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
 		OnCollide_During(iLayer, pDesc, Manifold);
 		});
+	m_pRigidBodyCom->SetUp_CallBack(COLLIDE_STATE::ENTER, [this](_uint iLayer, void* pDesc, const ContactManifold& Manifold) {
+		OnDetect_Enter(iLayer, pDesc, Manifold);
+		});
 
 	// Com_Collider
 	CCollider::COLLIDER_DESC ColliderDesc = {};
@@ -382,7 +417,9 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 
 	m_CallBack.pTransform = m_pTransformCom;
 	m_CallBack.fAttack = m_fAttackDmg;
-
+	m_CallBack.pCondition = &m_iState;
+	//m_tCallDesc.strEffectTag = ;
+	m_CallBack.eType = TEXT_COLOR_TYPE::ELEC;
 	m_pColliderCom->Set_Desc(&m_CallBack);
 	m_pColliderCom->Set_Gravity(true);
 
@@ -401,7 +438,8 @@ void CMonsterTest::Ready_Component(MONSTERTEST_DESC* pDesc)
 	if(FAILED(Add_Component(ENUM_CLASS(pDesc->modelData.first), pDesc->modelData.second,
 		TEXT("Com_Model"), reinterpret_cast<CComponent**>(&m_pModelCom), nullptr)))
 		CRASH("MonsterTest/Com_Model");
-	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	//m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::NORMAL_TEX));
+	m_ShaderIndices.resize(m_pModelCom->Get_NumMesh(), ENUM_CLASS(SHADER_ANIMMESH::AUGUSTA));
 
 	CAnimMachine::ANIMMACNINE_DESC AnimMachineDesc = {};
 	AnimMachineDesc.pAnimationTag.assign(pDesc->pAnimationTag);
@@ -450,6 +488,8 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	TriggerDesc.vOffsetPos = _float3(1.2f, 0.f, 0.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.fAttackDmg = m_fAttackDmg;
+	TriggerDesc.eDamageType = TEXT_COLOR_TYPE::ELEC;
+	//TriggerDesc.pCondition = &m_iState;
 	TriggerDesc.test = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eLayer) {
 		this->OnHitEnter(iLayer, pOther, Manifold, eLayer); 
 		};
@@ -515,7 +555,7 @@ void CMonsterTest::Ready_PartObjects(MONSTERTEST_DESC* pDesc)
 	vector<COLLISIONLAYER> Targets = { COLLISIONLAYER::ATTACK, COLLISIONLAYER::SKILL, COLLISIONLAYER::KNOCKBACK };
 	TriggerDesc.eTargetLayers = Targets;
 	TriggerDesc.pSocketMatrix = m_pModelCom->Get_BoneMatrixPtr(2); // Root
-	TriggerDesc.vExtent = _float3(2.f, 2.f, 2.f);
+	TriggerDesc.vExtent = _float3(2.f, 2.f, 6.f);
 	TriggerDesc.vOffsetPos = _float3(0.f, 0.f, -2.f);
 	TriggerDesc.vOffsetRadian = _float3(XMConvertToRadians(0.f), XMConvertToRadians(0.f), XMConvertToRadians(0.f));
 	TriggerDesc.CollisionCallback = [this](_uint iLayer, void* pOther, const ContactManifold& Manifold) {
@@ -534,6 +574,7 @@ void CMonsterTest::Calculate_PosAndDir()
 	_vector vTargetPos = XMVectorSetW(XMLoadFloat3(&m_vTargetPosition), 1.f);
 	_vector vDir = vTargetPos - vPosition;
 	m_fDistance = XMVectorGetX(XMVector3Length(vDir));
+	m_fDistanceNonY = XMVectorGetX(XMVector3Length(XMVectorSetY(vTargetPos, 0.f) - XMVectorSetY(vPosition, 0.f)));
 	vDir = XMVector3Normalize(vDir);
 	m_fFrontDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::LOOK))));
 	m_fRightDot = XMVectorGetX(XMVector3Dot(vDir, XMVector3Normalize(m_pTransformCom->Get_State(STATE::RIGHT))));
@@ -573,6 +614,10 @@ void CMonsterTest::Reset_Condition(_float fTimeDelta)
 	}
 	if(m_fDodgeCoolTime > 0.f)
 		m_fDodgeCoolTime -= fTimeDelta;
+
+#pragma region UI_BIND
+	m_fParalysisRatio = m_fParalysisAcc * 0.2f;
+#pragma endregion
 
 	if(m_isParalysis)
 	{
@@ -623,6 +668,18 @@ void CMonsterTest::After_Condition(_float fTimeDelta)
 		m_isKnockDownTrig = m_isParalysis;
 }
 
+void CMonsterTest::OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
+{
+	if (iLayer == ENUM_CLASS(COLLISIONLAYER::PLAYER))
+	{
+		if (m_isAggro)
+			return;
+		//UI Binding (몬스터 데이터 찾기용 키값, 현재 체력 변수 주소, 현재 무력화게이지 변수 주소, 텍스트 출력용 한글 wtring)
+		m_pGameSystem->HUD_Bind_BossStatus(TEXT("거짓된 신왕"), "FalseSovereign", &m_fHP, &m_fStamina, &m_isParalysis, &m_fParalysisRatio);
+		m_pGameSystem->HUD_Toggle_BossStatusUI(true);
+	}
+}
+
 void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	if (m_iState & ENUM_CLASS(TEST_STATE::DEAD))
@@ -634,7 +691,14 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -646,7 +710,14 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! SKILL (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -658,7 +729,14 @@ void CMonsterTest::BeHit(_uint iLayer, void* pOther, const ContactManifold& Mani
 			m_fStamina -= 1.f;
 		CALLBACK_CLIENT* pDesc = static_cast<CALLBACK_CLIENT*>(pOther);
 		m_fHP -= pDesc->fAttack;
-		
+		_float4 vPosition{};
+		XMStoreFloat4(&vPosition, m_pTransformCom->Get_State(STATE::POSITION));
+		vPosition.y += 0.5f;
+		m_pGameSystem->Render_Damage(vPosition, static_cast<_int>(pDesc->fAttack), pDesc->eType, 0.4f);
+		if (m_fHP <= 0.f)
+		{
+			m_pGameSystem->HUD_Toggle_BossStatusUI(false);
+		}
 #ifdef _DEBUG
 		cout << "Be Hit! KNOCKBACK (False Sovereign)" << endl;
 #endif // _DEBUG
@@ -727,6 +805,10 @@ void CMonsterTest::OnHitEnter(_uint iLayer, void* pOther, const ContactManifold&
 void CMonsterTest::ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold)
 {
 	m_iState |= ENUM_CLASS(TEST_STATE::BLOCK);
+	memcpy(&m_vBeHit_Normal, &Manifold.mWorldSpaceNormal, sizeof(_float3));
+#ifdef _DEBUG
+	cout << "Parry! Shim Wang)" << endl;
+#endif // _DEBUG
 }
 
 void CMonsterTest::TurnFix()
@@ -779,11 +861,13 @@ _bool CMonsterTest::DodgeCooldown()
 
 _bool CMonsterTest::Attack(_uint iIndex, _float fInterval)
 {
-	//if (iIndex != ATK_PATTERN::ATTACK4)
-	//	return false;
+
+	if (iIndex == ATK_PATTERN::ATTACK7)
+		return false;
+
 	//else
 	//	return false;
-	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistance < fInterval;
+	_bool bResult = (m_fAttackAcc[iIndex] <= 0.f) && m_fDistanceNonY < fInterval;
 	if(bResult)
 	{
 		m_fAttackAcc[iIndex] = m_fAttackCoolTime[iIndex];
@@ -852,6 +936,7 @@ void CMonsterTest::Free()
 	for(_uint i = 0; i < ATK_SOCKET::END; ++i)
 		Safe_Release(m_pAtkVolumes[i]);
 
+	Safe_Release(m_pGameSystem);
 	Safe_Release(m_pParryVolume);
 	Safe_Release(m_pBehaviorTreeCom);
 	Safe_Release(m_pAnimMachineCom);

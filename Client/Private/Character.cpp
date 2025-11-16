@@ -338,6 +338,26 @@ void CCharacter::Print_LookRay()
 
 #pragma region STATE
 
+void CCharacter::Render_Damage(const HIT_DESC* pDesc)
+{
+}
+
+void CCharacter::Begin_Toggle_SFX(SFX_TOGGLE eType, _float fDuration)
+{
+	m_pGameInstance->Begin_Toggle_SFX(eType, fDuration);
+}
+
+void CCharacter::End_SFX()
+{
+	m_pGameInstance->End_SFX();
+}
+
+void CCharacter::Spawn_Effect(const _wstring& wStrEffectTag)
+{
+	_matrix mat = m_pTransformCom->Get_WorldMatrix();
+	m_pGameInstance->Spawn_PoolingObject(wStrEffectTag, mat, m_pModelCom);
+}
+
 // 내 Velocity 고정.
 void CCharacter::Camera_Shake(_float fIntensity)
 {
@@ -449,26 +469,30 @@ _vector CCharacter::Get_RightVector_NoPitch()
 
 void CCharacter::Set_AutoLockOn(CTransform* pTargetTransform, _bool IsLockOn)
 {
+	// 1. TargetTransform은 항상 가져옵니다.
+	m_pTargetTransform = pTargetTransform;
+
 	if (nullptr == pTargetTransform)
 	{
-		m_IsLockOn = false;
-		m_pTargetTransform = nullptr;
+		//m_pTargetTransform = pTargetTransform; // 매프레임 TargetTransform 제거.
 
-		// LockOn 해제 시: 카메라 Look_NoPitch으로 즉시 회전 (반대 방향 착시 완전 해결)
-		if (m_pSpringCamera)
-		{
-			_vector vCamLook = m_pSpringCamera->Get_LookVector();
-			vCamLook = XMVectorSetY(vCamLook, 0.f);
-			vCamLook = XMVector3Normalize(vCamLook);
-			m_pTransformCom->LookDir(vCamLook);
+		if (m_IsLockOn) {
+			m_IsLockOn = false;
+			/*m_pTargetTransform = nullptr;*/
+
+			// LockOn 해제 시 한 번만
+			if (m_pSpringCamera)
+			{
+				_vector vCamLook = m_pSpringCamera->Get_LookVector();
+				vCamLook = XMVectorSetY(vCamLook, 0.f);
+				vCamLook = XMVector3Normalize(vCamLook);
+				m_pTransformCom->LookLerp(vCamLook, 0.1f, 30.f);
+			}
 		}
 		return;
 	}
 	else
 	{
-		
-		// 1. TargetTransform은 항상 가져옵니다.
-		m_pTargetTransform = pTargetTransform;
 		// 2. LockOn은 상황따라
 		m_IsLockOn = IsLockOn;
 	}
@@ -766,8 +790,19 @@ void CCharacter::Rotate_HitTarget(CTransform* pTransform)
     _vector vMyPos = m_pTransformCom->Get_State(STATE::POSITION);
     _vector vToTarget = XMVector3Normalize(vTarget - vMyPos);
 
+	// 3. 타겟이랑 나랑 곂쳤을때 안전코드
 
+	_float fLengthSq = XMVectorGetX(XMVector3LengthSq(vToTarget));
+	if (fLengthSq < 1e-6f) // Epsilon으로 판단.
+	{
+		return;  // 곂침시 그냥 기본 Forward로 판단.
+	}
+
+	
     vToTarget = XMVectorSetY(vToTarget, 0.f);
+
+	
+
     m_pTransformCom->LookDir(vToTarget); // 이동은 바로 회전. => Idle 되면 Lerp로
 
     return;
@@ -873,17 +908,6 @@ _bool CCharacter::Check_AllCondition(_uint iConditionFlag)
 {
 	return (m_iCondition & iConditionFlag) == iConditionFlag;
 }
-
-//_bool CCharacter::Check_AnyCondition(CHARACTER_CONDITION eConditionFlag)
-//{
-//	_uint iFlag = static_cast<_uint>(eConditionFlag);
-//	return (m_iCondition & iFlag) != 0;
-//}
-//_bool CCharacter::Check_AllCondition(CHARACTER_CONDITION eConditionFlag)
-//{
-//	_uint iFlag = static_cast<_uint>(eConditionFlag);
-//	return (m_iCondition & iFlag) == iFlag;
-//}
 
 
 void CCharacter::Remove_Condition(_uint iConditionFlag)

@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "SQ_Item_Edit.h"
+#include "Camera.h"
 
 NS_BEGIN(Editor)
 
-class CSQ_Camera_Edit final : public CSQ_Item_Edit
+class CSQ_Camera_Edit final : public CCamera
 {
 private:
 	explicit CSQ_Camera_Edit(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
@@ -29,13 +29,9 @@ private:
 	_float											m_fStartFrame = {};
 	_float											m_fEndFrame = {};
 
-	_float											m_fVelocity = {};
-	_float											m_fSpeed = {};
-
 	_float											m_fRatio = {};
 
 private:
-	void							Default_SetUp();
 	void							Lerp_Quat();
 	void							Spline();
 

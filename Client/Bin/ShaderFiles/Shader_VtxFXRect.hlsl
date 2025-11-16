@@ -16,6 +16,11 @@ float g_Sweep;      // 0 -> 1
 float g_Soft;       //
 int g_MaskFlag;
 
+int g_iCol;         //qt
+int g_iRow;
+float g_fPhase;
+float2 g_vLifeTime;
+
 
 struct VS_IN
 {
@@ -106,22 +111,27 @@ PS_OUT PS_MAIN(PS_IN In)
     {
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-        if(Out.vDiffuse.a < 0.3f)
-            discard;
-    }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
+    //    if(Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
     }
     
 
     Out.vDiffuse *= g_vColor;
     
-    float fWeight = Luminance(Out.vDiffuse.xyz);
+   if (Out.vDiffuse.a <= 0.f)
+       discard;
     
+ 
+    float fWeight = Luminance(Out.vDiffuse.xyz);
+ 
     if (fWeight >= g_fEmissiveThreshold)
         Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+ 
     
     return Out;
 }
@@ -137,14 +147,14 @@ PS_OUT PS_TEST(PS_IN In)
    
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-       if (Out.vDiffuse.a < 0.3f)
-           discard;
+       //if (Out.vDiffuse.a < 0.3f)
+       //    discard;
     }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
-    }
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
     
@@ -152,18 +162,21 @@ PS_OUT PS_TEST(PS_IN In)
     
     float fVisible = smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
     
-    Out.vDiffuse *= fVisible;
+    Out.vDiffuse.a *= fVisible;
     
-    if (Out.vDiffuse.a < 0.3f)
-        discard;
+    //if (Out.vDiffuse.a < 0.3f)
+    //    discard;
     
     Out.vDiffuse *= g_vColor;
-    
-    float fWeight = Luminance(Out.vDiffuse.xyz);
-    
-    if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
-    
+   
+   if (Out.vDiffuse.a <= 0.0f)
+        discard;
+   
+   float fWeight = Luminance(Out.vDiffuse.xyz);
+   
+   if (fWeight >= g_fEmissiveThreshold)
+       Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+   
     return Out;
 }
 
@@ -177,13 +190,13 @@ PS_OUT PS_TESTA(PS_IN In)
     {
         Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
         
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
-    }
-    else
-    {
-        if (Out.vDiffuse.a < 0.3f)
-            discard;
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
+    //}
+    //else
+    //{
+    //    if (Out.vDiffuse.a < 0.3f)
+    //        discard;
     }
     
     float fCenter = In.vTexcoord - (0.5, 0.5);
@@ -192,18 +205,75 @@ PS_OUT PS_TESTA(PS_IN In)
     
     float fVisible = 1 - smoothstep(g_Sweep - g_Soft, g_Sweep, fCircle);
     
-    Out.vDiffuse *= fVisible;
+    Out.vDiffuse.a *= fVisible;
     
-    if (Out.vDiffuse.a < 0.3f)
-    discard;
+    //Å×½ºÆ®
     
-    Out.vDiffuse *= g_vColor;
+    Out.vDiffuse.rgb *= g_vColor;
     
-    float fWeight = Luminance(Out.vDiffuse.xyz);
+    float2 LifeTime = g_vLifeTime;
     
-    if (fWeight >= g_fEmissiveThreshold)
-        Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
     
+    Out.vDiffuse.a *= Alpha;
+    //Out.vDiffuse.a = max(max(Out.vDiffuse.r, Out.vDiffuse.g), Out.vDiffuse.b);
+    
+   //if (Out.vDiffuse.a < 0.1f)
+   //    discard;
+    if (Out.vDiffuse.a <= 0.0f)
+        discard;
+   
+    if(Out.vDiffuse.a > 0.15f)
+    {
+        float fWeight = Luminance(Out.vDiffuse.xyz);
+   
+        if (fWeight >= g_fEmissiveThreshold)
+            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    }
+    //Out.vDiffuse.rgb = pow(saturate(Out.vDiffuse.rgb), 2.2f);
+    
+    return Out;
+}
+
+PS_OUT PS_SPRITE(PS_IN In)
+{
+    PS_OUT Out = (PS_OUT) 0;
+    
+    int CellCount = g_iRow * g_iCol;
+    
+    int fFrame = floor(frac(g_fPhase) * CellCount);
+    
+    int Col = fFrame % g_iCol;
+    int Row = fFrame / g_iCol;
+    
+    float2 CellSize = float2(1.0 / (float) g_iCol, 1.0 / (float) g_iRow);
+    
+    float2 OffSet = float2(Col * CellSize.x, Row * CellSize.y);
+    
+    float2 Texcoord = In.vTexcoord * CellSize + OffSet;
+    
+    Out.vDiffuse = g_DiffuseTexture.Sample(DefaultSampler, Texcoord);
+    
+    if (Out.vDiffuse.a < 0.1f)
+        discard;
+    
+    Out.vDiffuse.a = 1.f;
+    
+    Out.vDiffuse = g_vColor * Out.vDiffuse;
+    
+    float2 LifeTime = g_vLifeTime;
+    
+    float Alpha = 1 - saturate(LifeTime.x / LifeTime.y);
+    
+    Out.vDiffuse.a *= Alpha;
+    
+    if(Out.vDiffuse.a > 0.1f)
+    {
+        float fWeight = Luminance(Out.vDiffuse.xyz);
+    
+        if (fWeight >= g_fEmissiveThreshold)
+            Out.vEmissive = float4(Out.vDiffuse.xyz, 1.f);
+    }
     return Out;
 }
 
@@ -221,7 +291,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_MAIN();
     }
  
-    pass OutPass
+    pass OutPass //1
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -232,7 +302,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TEST();
     }
 
-    pass InPass
+    pass InPass //2
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -243,7 +313,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TESTA();
     }
     
-    pass BlendOut
+    pass BlendOut //3
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -254,7 +324,7 @@ technique11 DefaultTechnique
         PixelShader = compile ps_5_0 PS_TEST();
     }
 
-    pass BlendIn
+    pass BlendIn //4
     {
         SetRasterizerState(RS_Default);
         SetDepthStencilState(DSS_Default, 0);
@@ -263,5 +333,16 @@ technique11 DefaultTechnique
         VertexShader = compile vs_5_0 VS_MAIN();
         GeometryShader = compile gs_5_0 GS_MAIN();
         PixelShader = compile ps_5_0 PS_TESTA();
+    }
+
+    pass Sprite //5
+    {
+        SetRasterizerState(RS_Default);
+        SetDepthStencilState(DSS_Default, 0);
+        SetBlendState(BS_AlphaBlend, float4(0.f, 0.f, 0.f, 0.f), 0xFFFFFFFF);
+
+        VertexShader = compile vs_5_0 VS_MAIN();
+        GeometryShader = compile gs_5_0 GS_MAIN();
+        PixelShader = compile ps_5_0 PS_SPRITE();
     }
 }

@@ -193,6 +193,12 @@
     <Filter Include="03. GameObject\MapObject\Trigger">
       <UniqueIdentifier>{5912a73b-0563-44d9-874f-2b25f496dd7b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Level\ScreenEffect">
+      <UniqueIdentifier>{d893448c-109b-43ed-b408-c4ea11350da9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="96. Interface\SFX">
+      <UniqueIdentifier>{091e099d-8ebc-4cbc-8569-af0394daa544}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor.h">
@@ -418,6 +424,12 @@
     </ClInclude>
     <ClInclude Include="..\Public\Edit_Meteo.h" />
     <ClInclude Include="..\Public\Edit_MapObject_Test.h" />
+    <ClInclude Include="Level_SFX.h">
+      <Filter>01. Level\ScreenEffect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\SFX_Interface.h">
+      <Filter>96. Interface\SFX</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico">
@@ -616,6 +628,12 @@
     </ClCompile>
     <ClCompile Include="..\Private\Edit_Meteo.cpp" />
     <ClCompile Include="..\Private\Edit_MapObject_Test.cpp" />
+    <ClCompile Include="Level_SFX.cpp">
+      <Filter>01. Level\ScreenEffect</Filter>
+    </ClCompile>
+    <ClCompile Include="..\private\SFX_Interface.cpp">
+      <Filter>96. Interface\SFX</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Bin\ShaderFiles\Editor_Shader_VtxPosTex.hlsl">

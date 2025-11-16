@@ -25,10 +25,13 @@ private:
 	HRESULT				Load_Player();
 	HRESULT				Load_Augusta();
 	HRESULT				Load_Rover();
+	HRESULT				Load_Galbrena();
+
 
 	HRESULT				Load_UI();
+	HRESULT				Load_Font();
 	HRESULT				Load_Effect();
-
+	HRESULT				Load_ScreenEffect();
 
 private:
 	CCustom_UI::CUSTOM_UITREE_DESC Load_UITree(_string strFilePath);

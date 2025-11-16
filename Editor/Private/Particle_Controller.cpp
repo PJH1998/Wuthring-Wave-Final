@@ -138,8 +138,7 @@ void CParticle_Controller::Particle_Tab()
      
                     ImGui::PopItemWidth();
 
-                    ImGui::Separator();
-
+					ImGui::Separator();
                     ////////////////////////////////// 스트레치 빌보드 설정
                     if (m_pSelectedVBDesc->IsStretch)
                     {
@@ -239,10 +238,22 @@ void CParticle_Controller::Particle_Tab()
                 {
                     ImGui::Checkbox("Root", &(m_pSelectedParticleDesc->IsRootOn));
 
+					ImGui::Checkbox("Pivot", &(m_pSelectedParticleDesc->IsPivot));
+
                     ImGui::Text("ShaderPass");
                     ImGui::PushItemWidth(100);
                     ImGui::DragInt("##ShaderPass", &(m_pSelectedParticleDesc->fShaderPass), 1.f, 0, 6);
                     ImGui::PopItemWidth();
+
+					ImGui::Text("Mask");
+					ImGui::PushItemWidth(100);
+					if (ImGui::Button("A Cut"))
+						m_pSelectedParticleDesc->iMaskFlag = 1;
+					ImGui::SameLine();
+					if (ImGui::Button("RGB Cut"))
+						m_pSelectedParticleDesc->iMaskFlag = 0;
+					ImGui::PopItemWidth();
+
 
                     ImGui::Text("Size");
                     ImGui::PushItemWidth(60);

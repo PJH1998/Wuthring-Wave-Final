@@ -61,7 +61,7 @@ struct RampEdit : public ImCurveEdit::Delegate
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::ACTOR) == iType)
 		{
-			SQ_ACTOR_DATA ActorData = {};
+			//SQ_ACTOR_DATA ActorData = {};
 		}
 		else if (ENUM_CLASS(ITEM_TYPE::SCENE) == iType)
 		{
@@ -150,6 +150,7 @@ public:
 		_bool				isExpanded{};						// Can Expand
 		_char				szItemLabel[MAX_PATH] = {};
 		RampEdit		mRampEdit;
+		tagSequenceItem() {};
 		tagSequenceItem(_int iType , _int _iFrameStart, _int _iFrameEnd, _bool _isExpanded, const _char* pLabel)
 			: iFrameStart {_iFrameStart}, iFrameEnd {_iFrameEnd}, isExpanded {_isExpanded}
 		{
@@ -300,13 +301,24 @@ private:
 	_bool								m_isSave = { false };
 	_bool								m_isLoad = { false };
 
+	// Sequence System Variable
+	_char								m_szSequenceTag[MAX_PATH] = {};
 	_bool								m_isPlay = { false };
 	_float								m_fTrackPerSec = {};
 	_float								m_fTrackAcc = {};
 
+	_bool								m_isSaveSequence = { false };
+	_bool								m_isLoadSequence = { false };
+
 private:
-	// Play
+	// Sequence
 	void								Play(_float fTimeDelta);
+	void								Sequence_System(_float fTimeDelta);
+	void								Save_Sequence();
+	void								Load_Sequence();
+
+	void								Save_Scene(json& Output, SEQUENCE_ITEM& item);
+	void								Load_Scene(json& Input);
 
 	// Selectable Item
 	void								Selectable_Item();

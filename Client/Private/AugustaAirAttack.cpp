@@ -43,6 +43,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
     // 6. 무기에 Bone 붙이기. + Offset 추가.
     _string strBoneName = "";
 
+	m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 
     // 7. 다른 애니메이션당 필요한 상태 재정의
     switch (eAirAttackType)
@@ -64,7 +65,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			m_pAugusta->Rotate_Target();
 
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
 		case EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP:
@@ -80,7 +80,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 				m_pAugusta->PartActivate(m_iSubPartType, true);
 			}
 
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
 			break;
 		}
 
@@ -99,7 +98,6 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 
 			// Enter에 들어오면 한번 회전. => 애니메이션 따라 다르게?
 			//m_pAugusta->Rotate_Target();
-			m_pAugusta->Add_Condition(ENUM_CLASS(CHARACTER_CONDITION::INVINCIBLE));
             break;
         }
         case EAugustaAirAttackType::AIRATTACK_START:
@@ -127,6 +125,7 @@ void CAugustaAirAttack::OnEnter(void* pArg)
 			m_iPartType = CAugusta::PARTTYPE::PART_BAYONET; // 추후 애니메이션에 따른. 분기문 필요.
             strBoneName = "WeaponProp02";
             m_pAugusta->Set_Gravity(false);
+
             break;
         }
     }
@@ -297,6 +296,12 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 					return;
 				}
 
+				if (!m_States[MOVE])
+				{
+					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
+					m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
+					return;
+				}
 				/*if (!m_States[MOVE])
 				{
 					m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
@@ -412,7 +417,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 }
                 else
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                     return;
                 }
@@ -443,7 +448,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
                 }
                 else
                 {
-                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+                    m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
                     m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
                     return;
                 }
@@ -453,7 +458,7 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
         else
         {
             // 모든 조건이 아닌 경우 Idle로
-            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STAND1_ACTION01;
+            m_pAugusta->GetStateContextForWrite().m_eIdleType = EAugustaIdleType::STANDCHANGE;
             m_pAugusta->Change_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE));
             return;
         }
@@ -465,12 +470,12 @@ void CAugustaAirAttack::Check_StateTransition(_float fTimeDelta)
 void CAugustaAirAttack::SetUp_Animations()
 {
     
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 1.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.5f, 0.f, 1.5f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 1.5f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_START),"AirAttack_HackDown_Start", 1.5f, 20.f, 1.2f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_LOOP),"AirAttack_HackDown_Loop", 1.5f, 0.f, 1.2f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_HACKDOWN_SP_END),"AirAttack_HackDown_Sp_End", 1.5f, 65.f, 1.2f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_START),"AirAttack_Start", 1.f, 10.f, 1.f);
     CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_LOOP),"AirAttack_Loop", 1.f, 0.f, 1.f);
-    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 50.f, 1.f);
+    CState::Add_Animations(ENUM_CLASS(EAugustaAirAttackType::AIRATTACK_END),"AirAttack_End", 1.3f, 40.f, 1.f);
 
 	// Griffon 전용 애니메이션 맵 등록.
 	m_PartsAnimations.emplace("AirAttack_HackDown_Start", "SA1Shouwangjiu_AirAttack_Start");

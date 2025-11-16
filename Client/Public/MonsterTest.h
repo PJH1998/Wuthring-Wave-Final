@@ -9,7 +9,7 @@ class CBehavior_Tree;
 NS_END
 
 NS_BEGIN(Client)
-
+class CGameSystem;
 class CAttackVolume;
 
 class CMonsterTest final : public CActor
@@ -18,6 +18,7 @@ public:
 	typedef struct tagMonsterTestDesc : public CActor::ACTOR_DESC
 	{
 		_float3 vInitPosition;
+		_float3 vInitRotate;
 		_float	fAxisY;
 		const _char* pAnimationTag;
 		_float		fHP;
@@ -42,6 +43,7 @@ public:
 	virtual		void			Update(_float fTimeDelta) override;
 	virtual		void			Late_Update(_float fTimeDelta) override;
 	virtual		void			Render() override;
+	virtual		void			Render_Shadow() override;
 
 	//virtual		void			OnCollide_Enter(_uint iLayer, CGameObject* pOther, const ContactManifold& Manifold) {}
 	void			OnCollide_During(_uint iLayer, void* pOther, const ContactManifold& Manifold);
@@ -56,6 +58,7 @@ public:
 private:
 	CAnimMachine*			m_pAnimMachineCom = {nullptr};
 	CBehavior_Tree*			m_pBehaviorTreeCom = { nullptr };
+	CGameSystem*			m_pGameSystem = { nullptr };
 	const _float4x4*		m_pToeMatrix = { nullptr };
 
 	CAttackVolume*			m_pAtkVolumes[ATK_SOCKET::END] = {nullptr,};
@@ -71,6 +74,7 @@ private:
 	_float					m_fAttackCoolTime[ATK_PATTERN::ATK_END]{};
 	_float					m_fAttackAcc[ATK_PATTERN::ATK_END]{};
 	_float					m_fDistance{};
+	_float					m_fDistanceNonY{};
 	_float					m_fDodgeCoolTime{};
 	_float					m_fRightDot{};
 	_float					m_fFrontDot{};
@@ -78,7 +82,6 @@ private:
 	_bool					m_isAnimationFinished{};
 	_bool					m_isDeadTrigger{};
 	_bool					m_isBlocked{};
-	_bool					m_isParalysis{};
 	_bool					m_isKnockDownTrig{};
 	_float					m_fParalysisAcc{};
 	_bool					m_beHit{};
@@ -97,6 +100,13 @@ private:
 
 #pragma region PHYSICS
 	_bool					m_isTurnLerp{};
+	_float3					m_vBeHit_Normal{};
+#pragma endregion
+
+	//그로기 상태인지 bool값, 그로기 최대시간, 현재시간 비율
+#pragma region UI_BIND
+	_bool					m_isParalysis{};
+	_float					m_fParalysisRatio{}; //0.f ~ 1.f
 #pragma endregion
 
 private:
@@ -107,6 +117,7 @@ private:
 	void						Calculate_PosAndDir();
 	void						Reset_Condition(_float fTimeDelta);
 	void						After_Condition(_float fTimeDelta);
+	void						OnDetect_Enter(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						BeHit(_uint iLayer, void* pOther, const ContactManifold& Manifold);
 	void						OnHitEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold, COLLISIONLAYER eVolumeLayer);
 	void						ParryEnter(_uint iLayer, void* pOther, const ContactManifold& Manifold);

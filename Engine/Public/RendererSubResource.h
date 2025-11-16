@@ -43,27 +43,10 @@ private:
 	explicit CRendererSubResource(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);
 	virtual ~CRendererSubResource() = default;
 
-#ifdef _DEBUG
-public:
-	void Setting_SSAO(_float fRadius, _float fMaxDistance) { m_fRadius = fRadius, m_fMaxDistance = fMaxDistance; }
-	void SetBloomIntensity(_float fIntensity) { m_fIntensity = fIntensity; }
-	void SetDof(_float fDepth, _float fRange, _float fScale) { m_fDofDepth = fDepth, m_fDofRange = fRange, m_fDofScale = fScale; }
-	void SetMotionBlur(_float fLimitVelocity, _float fLimitDepth, _float fDistance) { m_fLimitVelocity = fLimitVelocity, m_fLimitDepth = fLimitDepth, m_fLengthScale = fDistance; }
-#endif
-
 public:
 	HRESULT						Initialize();
 	HRESULT						Bind_Ramp_Texture(CShader* pShader, const _char* pConstantName, _uint iTextureIndex);
 	HRESULT						Bind_LUT_Texture(CShader* pShader, _uint iLUT_Index);
-	HRESULT						Bind_SSAO_Resources(CShader* pShader);
-	HRESULT						Bind_LimitVelocity(CShader* pShader);
-
-	HRESULT						Bind_Dof_Resource(CShader* pShader);
-
-	HRESULT						Add_SSAO_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight);
-	HRESULT						Add_Blur_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iBlurWeight = 1);
-	HRESULT						Add_Bloom_BufferData(const _wstring& strRCSTag, _float fWidth, _float fHeight, _uint iUpIndex);
-	HRESULT						Add_MotionBlur_BufferData(const _wstring& strRCSTag);
 	HRESULT						Set_DefalutSampler(const _wstring& strRCSTag, _uint iSlot);
 
 private:
@@ -81,49 +64,16 @@ private:
 	_uint						m_iNumLUT_Textures = {};
 #pragma endregion
 
-#pragma region SSAO
-	CTexture*					m_pNoiseTexture = { nullptr };
-	vector<_vector>				m_SSAO_SampleVector;
-	_uint						m_iNumKernel = {};
-	_float						m_fRadius = {};
-	_float						m_fMaxDistance = {};
-	_float						m_fOutDistance = {};
-	_float						m_fSSAO_MinDepthDistance = {};
-#pragma endregion
-
 #pragma region Sampler
 	ID3D11SamplerState*			m_pDefaultSampler = { nullptr };
 	ID3D11SamplerState*			m_pPointClampSampler = { nullptr };
 	ID3D11SamplerState*			m_pNoiseSampler = { nullptr };
 #pragma endregion
 
-#pragma region BLUR
-	_uint								m_iNumWeights = {};
-	BLUR_WEIGHTS						m_Weights;
-	vector<ID3D11Buffer*>				m_WeightBuffers;
-	vector<ID3D11ShaderResourceView*>	m_WeightSRVs;
-	_float								m_fIntensity;
-#pragma endregion
-
-#pragma region DOF
-	_float						m_fDofDepth = {};
-	_float						m_fDofRange = {};
-	_float						m_fDofScale = {};
-#pragma endregion
-
-#pragma region MOTION_BLUR		
-	_float						m_fLimitVelocity = {};
-	_float						m_fLimitDepth = {};
-	_float						m_fLengthScale = {};
-#pragma endregion
-
 private:
 	HRESULT						Ready_Shader_Filters();
 	HRESULT						Ready_LUT_SRV();
-	HRESULT						Ready_SSAO_SampleVector();
 	HRESULT						Ready_CS_Sampler();
-	HRESULT						Ready_BlurWeights();
-	HRESULT						Create_BlurBuffer(const vector<_float>& Weights, _uint iRadius);
 
 public:
 	static CRendererSubResource*		Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext);

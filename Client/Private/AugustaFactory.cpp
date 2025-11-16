@@ -12,6 +12,7 @@
 #include "AugustaGroundIdle.h"
 #include "AugustaGroundWalk.h"
 #include "AugustaGroundRun.h"
+#include "AugustaGroundSprint.h"
 #include "AugustaGroundLand.h"
 #include "AugustaGroundDash.h"
 #include "AugustaGroundAttack.h"
@@ -39,13 +40,14 @@
 
 void CAugustaFactory::Register_States(CStateMachine* pStateMachineCom, CAugusta* pCharacter)
 {
-    // === HSM enum 기반 State 등록 ===
+    // HSM enum 기반 State 등록
     // enum 값을 index로 사용하여 타입 안정성 확보
 
     // Ground 카테고리 하위 State들
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::IDLE), CAugustaGroundIdle::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::WALK), CAugustaGroundWalk::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::RUN), CAugustaGroundRun::Create(pCharacter));
+    pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::SPRINT), CAugustaGroundSprint::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::LAND), CAugustaGroundLand::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::DASH), CAugustaGroundDash::Create(pCharacter));
     pStateMachineCom->Add_State(ENUM_CLASS(EStateCategory::GROUND), ENUM_CLASS(EAugustaGroundState::ATTACK), CAugustaGroundAttack::Create(pCharacter));
