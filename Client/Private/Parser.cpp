@@ -1237,7 +1237,7 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 	if (DecalDataJson.contains("TextureCount"))
 		iTextureCount = DecalDataJson["TextureCount"].get<_int>();
 
-	const _tchar* DecalTexturePath[3] = {};
+	const _tchar* DecalTexturePath[ENUM_CLASS(TEXTURETYPE::END)] = {};
 
 	if (DecalDataJson.contains("Textures") && DecalDataJson["Textures"].is_array())
 	{
@@ -1259,7 +1259,6 @@ void CParser::Load_FXDecal_Data_FromJson(const _string& strFilePath)
 			wcscpy_s(TextPath, strTexturePath.c_str());
 
 			DecalTexturePath[iType] = TextPath;
-
 		}
 	}
 
