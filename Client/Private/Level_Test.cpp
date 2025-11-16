@@ -70,10 +70,10 @@ HRESULT CLevel_Test::Initialize()
     Ready_Layer_Player();
 	//Ready_Dummy();
 	//Ready_MonsterTest();
-	Ready_HavocWarrior();
-	Ready_ElectroPredator();
-	//Ready_CoroSaurus();
-	Ready_Spawner();
+	//Ready_HavocWarrior();
+	//Ready_ElectroPredator();
+	Ready_CoroSaurus();
+	//sReady_Spawner();
 
     Ready_Effect();
     LIGHT_DESC LightDesc{};
@@ -400,7 +400,7 @@ void CLevel_Test::Ready_CoroSaurus()
 	CoroDesc.fMaxStamina = pInfo->fMaxStamina;
 	CoroDesc.vDetectRange = _float3(25.f, 13.f, 25.f);
 	if (FAILED(m_pGameInstance->Add_GameObject_ToLayer(ENUM_CLASS(m_eCurLevel), TEXT("Prototype_GameObject_CoroSaurus"),
-		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Monster"), &CoroDesc)))
+		ENUM_CLASS(m_eCurLevel), TEXT("Layer_Enemy"), &CoroDesc)))
 		CRASH("Failed Ready Monster");
 }
 
