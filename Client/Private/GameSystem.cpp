@@ -218,14 +218,14 @@ _bool CGameSystem::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType)
 	return m_pUI_ControlHelper->Get_InteractUI_Feedback(eEventInteractType);
 }
 
-void CGameSystem::Show_LockOnUI(CTransform* pTargetTransform)
+void CGameSystem::Attach_LockOnUI(CTransform* pTargetTransform)
 {
-	m_pUI_ControlHelper->Show_LockOnUI(pTargetTransform);
+	m_pUI_ControlHelper->Attach_LockOnUI(pTargetTransform);
 }
 
-void CGameSystem::Hide_LockOnUI()
+void CGameSystem::Detach_LockOnUI()
 {
-	m_pUI_ControlHelper->Hide_LockOnUI();
+	m_pUI_ControlHelper->Detach_LockOnUI();
 }
 
 //HRESULT	CGameSystem::Sync_Status_toHUD(CHARACTER_STAT& eStat)
@@ -315,7 +315,7 @@ void CGameSystem::Release_System()
 	Safe_Release(m_pDirector);
 	Safe_Release(m_pPlayerStatus);
 	Safe_Release(m_pSonoro_Manager);
-	Safe_Release(m_pUI_StatusSyncer);
+	//Safe_Release(m_pUI_StatusSyncer);
 	Safe_Release(m_pMonsterTable);
 
 	Release();

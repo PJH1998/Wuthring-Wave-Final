@@ -34,8 +34,8 @@ public:
 	_bool				Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 
-	void				Show_LockOnUI(CTransform* pTargetTransform);
-	void				Hide_LockOnUI();
+	void				Attach_LockOnUI(CTransform* pTargetTransform);
+	void				Detach_LockOnUI();
 
 
 private:

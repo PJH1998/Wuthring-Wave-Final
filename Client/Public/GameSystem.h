@@ -85,9 +85,9 @@ public:
 	_bool		Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractType);
 
 	// 락온 UI를 생성합니다. / pTargetTransform : 락온 대상의 Transform 컴포넌트.
-	void		Show_LockOnUI(CTransform* pTargetTransform);
+	void		Attach_LockOnUI(CTransform* pTargetTransform);
 	// 락온 UI를 해제합니다.
-	void		Hide_LockOnUI();
+	void		Detach_LockOnUI();
 	
 #pragma endregion
 

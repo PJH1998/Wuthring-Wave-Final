@@ -110,7 +110,7 @@ void CLevel_Test::Update(_float fTimeDelta)
 
 	Toggle_HUD();
 
-	//Testing_UI(fTimeDelta);
+	Testing_UI(fTimeDelta);
 
 	if (m_pGameInstance->Get_DIKeyState(DIK_I) == KEYSTATE::DOWN)
 		m_pGameInstance->Play_Sequence(TEXT("Test"));
@@ -649,10 +649,10 @@ void CLevel_Test::Testing_UI(_float fTimeDelta)
 
 	if		(m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
 			!pRootUI->IsActivate())
-		m_pGameSystem->Show_LockOnUI(nullptr);
+		m_pGameSystem->Attach_LockOnUI(nullptr);
 	else if (m_pGameInstance->Get_DIKeyState(DIK_DECIMAL) == KEYSTATE::DOWN &&
 			pRootUI->IsActivate())
-		m_pGameSystem->Hide_LockOnUI();
+		m_pGameSystem->Detach_LockOnUI();
 
 
 #endif // KSTA_UITEST_ONLEVEL

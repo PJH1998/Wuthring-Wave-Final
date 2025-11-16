@@ -73,7 +73,7 @@ void CUI_LockOn::Update(_float fTimeDelta)
 	if (!m_isActivate)
 		return;
 	
-
+	
 	// 타겟 위치 반영
 	CCustom_UI* pLockOnUI = Find_ChildObject(L"SectorA_LockOn");
 
@@ -82,8 +82,10 @@ void CUI_LockOn::Update(_float fTimeDelta)
 	_matrix matCamProj = m_pGameInstance->Get_TransformState_Matrix(D3DTS::PROJ);
 
 	const _float2 vScreenSize = { g_iWinSizeX, g_iWinSizeY };
-	_vector vTargetWorldPos = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	vTargetWorldPos = XMVectorSetW(vTargetWorldPos, 1.f);
+	_vector vTargetWorldPos = (m_pTargetTransform)? 
+		m_pTargetTransform->Get_State(STATE::POSITION) : 
+		//XMVectorSet(0.f, 0.f, 0.f, 1.f);
+		XMVectorSet(-2000.f, -2000.f, 0.f, 1.f);
 
 	_matrix matViewProj = matCamView * matCamProj;
 	_vector vTargetClipRaw = XMVector3Transform(vTargetWorldPos, matViewProj);
@@ -101,7 +103,7 @@ void CUI_LockOn::Update(_float fTimeDelta)
 		vScreenPos.y = (1.0f - XMVectorGetY(vTargetNDC)) * 0.5f * vScreenSize.y - vScreenSize.y * 0.5f;
 	}
 	else
-		vScreenPos = { -2000.f, -2000.f };
+		vScreenPos = { -2000.f, -2000.f }; // 밖으로 쫒아냄
 
 	_vector vPos = XMVectorSet(vScreenPos.x, -vScreenPos.y, 0.f, 1.f);
 	static_cast<CTransform*>(pLockOnUI->Get_Component(L"Com_Transform"))->Set_State(STATE::POSITION, vPos);
@@ -111,10 +113,6 @@ void CUI_LockOn::Update(_float fTimeDelta)
 
 	Update_CombinedMatrix();
 	Update_CombinedDesc();
-	
-
-
-
 }
 
 void CUI_LockOn::Late_Update(_float fTimeDelta)
@@ -129,8 +127,6 @@ void CUI_LockOn::Render()
 {
 	if (!m_isActivate)
 		return;
-
-
 }
 
 void CUI_LockOn::Reset(const _fmatrix& WorldMatrix, void* pArg)
@@ -150,6 +146,7 @@ void CUI_LockOn::Ready_Presets()
 {
 
 }
+
 CUI_LockOn* CUI_LockOn::Create(ID3D11Device* pDevice, ID3D11DeviceContext* pContext)
 {
 	CUI_LockOn* pInstance = new CUI_LockOn(pDevice, pContext);

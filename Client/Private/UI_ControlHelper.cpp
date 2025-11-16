@@ -162,7 +162,7 @@ _bool CUI_ControlHelper::Get_InteractUI_Feedback(UI_EVENT_TYPE eEventInteractTyp
 	return pRootUI->Check_OnInteract(L"Interact_Normal", ENUM_CLASS(eEventInteractType), 0);
 }
 
-void CUI_ControlHelper::Show_LockOnUI(CTransform* pTargetTransform)
+void CUI_ControlHelper::Attach_LockOnUI(CTransform* pTargetTransform)
 {
 	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
 
@@ -173,7 +173,7 @@ void CUI_ControlHelper::Show_LockOnUI(CTransform* pTargetTransform)
 	CUI_LockOn::UI_LOCKON_DESC tDesc = { pTargetTransform };
 	m_pGameInstance->Spawn_PoolingObject(L"Pool_Button_LockOn", _fmatrix(), &tDesc);
 }
-void CUI_ControlHelper::Hide_LockOnUI()
+void CUI_ControlHelper::Detach_LockOnUI()
 {
 	CCustom_UI* pRootUI = Find_RootUI(L"UI_LockOn");
 
