@@ -80,6 +80,9 @@ HRESULT CDecal::Add_DecalTexture(const _tchar* pFilePath[ENUM_CLASS(TEXTURETYPE:
 		if (nullptr == pFilePath[i])
 			continue;
 
+		if (m_pDecalTexture[i] != nullptr)
+			ASSERT_CRASH("TEST");
+
 		CTexture* pTexture = CTexture::Create(m_pDevice, m_pContext, pFilePath[i], 1);
 		ASSERT_CRASH(pTexture);
 
